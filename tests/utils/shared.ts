@@ -705,6 +705,17 @@ const dragElementAboveWebKit = async (
 };
 
 /**
+ * Box the Chromium drag aims at (35 % of its height). When the target has a heading (the header of
+ * a dynamic zone component), aim at it: 35 % of a whole open component can land among its fields,
+ * where the drop is not delivered and the drag never ends.
+ */
+const getChromiumDropBox = (target: Locator) =>
+  target.evaluate((el) => {
+    const r = (el.querySelector('h3, [role="heading"]') ?? el).getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+
+/**
  * Chromium-only path for {@link dragElementAbove}. Do not change when fixing other browsers.
  */
 const dragElementAboveChromium = async (page: Page, options: DragElementAboveOptions) => {
@@ -726,10 +737,7 @@ const dragElementAboveChromium = async (page: Page, options: DragElementAboveOpt
 
     await page.waitForTimeout(100);
     await waitForLayoutFrames(page, 6);
-    const freshTargetBox = await target.evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return { x: r.x, y: r.y, width: r.width, height: r.height };
-    });
+    const freshTargetBox = await getChromiumDropBox(target);
     if (!freshTargetBox || freshTargetBox.width === 0) {
       await page.mouse.up();
       throw new Error(
@@ -749,10 +757,7 @@ const dragElementAboveChromium = async (page: Page, options: DragElementAboveOpt
       await page.mouse.move(x, y);
       await page.waitForTimeout(stepDelay);
     }
-    const finalBox = await target.evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return { x: r.x, y: r.y, width: r.width, height: r.height };
-    });
+    const finalBox = await getChromiumDropBox(target);
     if (finalBox && finalBox.width > 0) {
       endX = finalBox.x + finalBox.width / 2;
       endY = finalBox.y + finalBox.height * 0.35;
