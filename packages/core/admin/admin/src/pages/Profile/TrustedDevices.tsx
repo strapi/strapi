@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
-import { useToMessage } from '../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import {
   useGetTrustedDevicesQuery,
   useRevokeAllTrustedDevicesMutation,
@@ -39,7 +39,7 @@ import type { TrustedDevice } from '../../../../shared/contracts/mfa';
 const TrustedDevices = () => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const { data: devices = [], isLoading, error } = useGetTrustedDevicesQuery();
   const [revokeDevice] = useRevokeTrustedDeviceMutation();
   const [revokeAll] = useRevokeAllTrustedDevicesMutation();

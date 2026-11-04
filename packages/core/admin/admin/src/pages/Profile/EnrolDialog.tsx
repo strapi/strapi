@@ -8,7 +8,7 @@ import { styled } from 'styled-components';
 import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
-import { useToMessage } from '../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import {
   useAcknowledgeRecoveryCodesMutation,
   useEnrolMfaMutation,
@@ -67,7 +67,7 @@ type Step =
 const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   const isReplace = mode === 'replace';
   const { formatMessage } = useIntl();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const [step, setStep] = React.useState<Step>({ name: 'password' });
   /** The codes are shown exactly once and are the only way back into a locked-out account, so a
    * dismissal must not silently destroy them. Refused with an explanation instead. */

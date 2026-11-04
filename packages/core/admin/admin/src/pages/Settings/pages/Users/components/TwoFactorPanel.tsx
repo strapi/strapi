@@ -7,8 +7,8 @@ import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { Panel } from '../../../../../components/Panel';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useNotification } from '../../../../../features/Notifications';
+import { useMfaErrorMessage } from '../../../../../hooks/useMfaErrorMessage';
 import { useRBAC } from '../../../../../hooks/useRBAC';
-import { useToMessage } from '../../../../../hooks/useToMessage';
 import { selectAdminPermissions } from '../../../../../selectors';
 import {
   useDeleteUserPasskeysMutation,
@@ -67,7 +67,7 @@ interface TwoFactorPanelProps {
 const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const [unlock, { isLoading }] = useUnlockUserMfaMutation();
   const [resetMfa, { isLoading: isResetting }] = useResetUserMfaMutation();
   const [resetOpen, setResetOpen] = React.useState(false);

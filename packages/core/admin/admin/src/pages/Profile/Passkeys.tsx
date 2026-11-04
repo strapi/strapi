@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 
 import { MAX_PASSKEYS_PER_USER, type Passkey } from '../../../../shared/contracts/mfa';
 import { ErrorMessage } from '../../components/ErrorMessage';
-import { useToMessage } from '../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import { useGetPasskeysQuery } from '../../services/mfa';
 import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
 import { passkeyAvailability } from '../../utils/webauthn';
@@ -49,7 +49,7 @@ import { RemovePasskeyDialog } from './RemovePasskeyDialog';
  */
 const Passkeys = () => {
   const { formatMessage, formatDate } = useIntl();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const { data: passkeys = [], isLoading, error } = useGetPasskeysQuery();
   const [addOpen, setAddOpen] = React.useState(false);
   const [pendingRemoval, setPendingRemoval] = React.useState<Passkey | undefined>();

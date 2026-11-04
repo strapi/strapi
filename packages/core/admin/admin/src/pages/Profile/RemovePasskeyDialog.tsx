@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 
 import { type Passkey } from '../../../../shared/contracts/mfa';
 import { useNotification } from '../../features/Notifications';
-import { useToMessage } from '../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import { useDeletePasskeyMutation } from '../../services/mfa';
 
 import { CredentialFields } from './CredentialFields';
@@ -27,7 +27,7 @@ interface RemovePasskeyDialogProps {
 const RemovePasskeyDialog = ({ passkey, onClose }: RemovePasskeyDialogProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
 
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');

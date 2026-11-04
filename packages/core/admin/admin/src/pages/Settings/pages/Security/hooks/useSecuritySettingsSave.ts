@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
 import { useNotification } from '../../../../../features/Notifications';
-import { useToMessage } from '../../../../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../../../../hooks/useMfaErrorMessage';
 import {
   useLazyGetMfaImpactQuery,
   useLazyGetPasskeysImpactQuery,
@@ -102,7 +102,7 @@ const useSecuritySettingsSave = ({
 }: UseSecuritySettingsSaveOptions): UseSecuritySettingsSaveResult => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const [updateSettings, { isLoading: isSaving }] = useUpdateSecuritySettingsMutation();
   const [fetchImpact, { isFetching: isFetchingImpact }] = useLazyGetMfaImpactQuery();
   const [fetchPasskeysImpact] = useLazyGetPasskeysImpactQuery();

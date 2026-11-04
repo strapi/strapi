@@ -2,7 +2,7 @@
  * Stable codes carried in `error.details.code` by the two-factor errors a user can actually hit.
  *
  * The server's message stays English and stays the fallback, but the admin panel maps each code to
- * a translated string (`hooks/useToMessage.ts`), so copy can change on either side without breaking
+ * a translated string (`hooks/useMfaErrorMessage.ts`), so copy can change on either side without breaking
  * the other and a non-English panel stops showing English errors. Keyed on a code rather than on
  * the message text.
  */

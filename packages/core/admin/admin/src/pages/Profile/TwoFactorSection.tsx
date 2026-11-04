@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { Panel } from '../../components/Panel';
 import { formatMfaNotice } from '../../features/MfaNotices';
 import { useNotification } from '../../features/Notifications';
-import { useToMessage } from '../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import {
   useGetMfaNoticesQuery,
   useGetMfaStatusQuery,
@@ -132,7 +132,7 @@ const TwoFactorSection = () => {
   const { formatMessage } = useIntl();
   const { data: status, error, isLoading } = useGetMfaStatusQuery();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   // Skipped until the status says the feature exists, as `MfaNotices` does: otherwise every profile
   // view with the kill switch on fires one request that can only 404.
   const { data: notices } = useGetMfaNoticesQuery(undefined, {

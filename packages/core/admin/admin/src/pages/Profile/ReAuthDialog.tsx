@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
-import { useToMessage } from '../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import {
   useAcknowledgeRecoveryCodesMutation,
   useDisableMfaMutation,
@@ -78,7 +78,7 @@ const COPY = {
 const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const [step, setStep] = React.useState<Step>({ name: 'form' });
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');

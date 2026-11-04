@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
-import { useToMessage } from '../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
 import {
   usePasskeyRegistrationOptionsMutation,
   useRegisterPasskeyMutation,
@@ -46,7 +46,7 @@ const NAME_MAX = 50;
 const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const [name, setName] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');

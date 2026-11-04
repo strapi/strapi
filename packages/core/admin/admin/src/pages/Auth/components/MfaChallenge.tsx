@@ -10,7 +10,7 @@ import { Form, type FormHelpers, useForm } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
-import { useToMessage } from '../../../hooks/useToMessage';
+import { useMfaErrorMessage } from '../../../hooks/useMfaErrorMessage';
 import {
   UnauthenticatedLayout,
   Column,
@@ -73,7 +73,7 @@ const PasskeyButton = ({
 };
 
 const MfaChallenge = () => {
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const { formatMessage } = useIntl();
   const location = useLocation();
   const navigate = useNavigate();

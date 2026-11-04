@@ -87,7 +87,7 @@ type CodeMessageOverrides = Partial<Record<MfaErrorCode, MessageDescriptor>>;
 /** A `SerializedError` (a thrown exception, not a server response) carries nothing safe to show
  * verbatim, so it falls back to a generic message. `overrides` lets one call site word a code
  * for its own context, such as the setup step where a recovery code is no use. */
-const useToMessage = () => {
+const useMfaErrorMessage = () => {
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
@@ -100,4 +100,4 @@ const useToMessage = () => {
   };
 };
 
-export { useToMessage };
+export { useMfaErrorMessage };

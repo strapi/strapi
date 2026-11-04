@@ -8,8 +8,8 @@ import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useAuth } from '../../../../../features/Auth';
 import { useNotification } from '../../../../../features/Notifications';
+import { useMfaErrorMessage } from '../../../../../hooks/useMfaErrorMessage';
 import { useRBAC } from '../../../../../hooks/useRBAC';
-import { useToMessage } from '../../../../../hooks/useToMessage';
 import { selectAdminPermissions } from '../../../../../selectors';
 import { useGetMfaStatusQuery } from '../../../../../services/mfa';
 import {
@@ -54,7 +54,7 @@ const RoleTwoFactorRequirement = ({ roleId, roleName }: RoleTwoFactorRequirement
   const hintId = React.useId();
   const explanationId = React.useId();
   const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
+  const toMessage = useMfaErrorMessage();
   const permissions = useTypedSelector(selectAdminPermissions);
   const {
     isLoading: isLoadingRBAC,
