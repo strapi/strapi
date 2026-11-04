@@ -477,7 +477,7 @@ describe('Admin MFA passkeys', () => {
 
     const noCredentials = await putSettings({ passkeys: { enabled: false } });
     expect(noCredentials.statusCode).toBe(400);
-    expect(JSON.stringify(noCredentials.body)).toContain('change two-factor settings');
+    expect(noCredentials.body.error.details.code).toBe('MFA_REAUTH_REQUIRED');
     // And it must not say the operator is lowering two-factor requirements.
     expect(JSON.stringify(noCredentials.body)).not.toContain('lower two-factor');
 
