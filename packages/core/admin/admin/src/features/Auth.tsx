@@ -186,7 +186,7 @@ const LOGOUT_PROMPTS = {
 const REPLACED_SESSION_UNSAVED = {
   id: 'app.session.replaced.unsaved',
   defaultMessage:
-    'You were signed in as another admin in a different tab. Unsaved changes were discarded.',
+    'You logged in as another admin in a different tab. Unsaved changes were discarded.',
 } satisfies MessageDescriptor;
 
 const AuthProvider = ({

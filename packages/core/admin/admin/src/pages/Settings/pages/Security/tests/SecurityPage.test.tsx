@@ -171,7 +171,7 @@ describe('SecurityPage', () => {
     render(<SecurityPage />);
 
     expect(
-      await screen.findByText(/Two-factor authentication is turned off on this instance/)
+      await screen.findByText(/Two-factor authentication is disabled on this instance/)
     ).toBeInTheDocument();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
@@ -193,7 +193,7 @@ describe('SecurityPage', () => {
       await screen.findByText('Whoops! Something went wrong. Please, try again.')
     ).toBeInTheDocument();
     expect(
-      screen.queryByText(/Two-factor authentication is turned off on this instance/)
+      screen.queryByText(/Two-factor authentication is disabled on this instance/)
     ).not.toBeInTheDocument();
   });
 

@@ -29,7 +29,7 @@ jest.mock('../../hooks/useSessionKeepalive');
 const TOKEN_A = 'token-user-a';
 const TOKEN_B = 'token-user-b';
 const REPLACED_SESSION_NOTICE =
-  'You were signed in as another admin in a different tab. Unsaved changes were discarded.';
+  'You logged in as another admin in a different tab. Unsaved changes were discarded.';
 
 const USER_A = {
   id: 1,

@@ -37,8 +37,8 @@ interface TwoFactorPanelProps {
  * "Two-factor authentication" on the user edit page. The server appends the three mfa fields to
  * `GET /admin/users/:id` only for callers with `admin::users.update` and only while the feature
  * is on, and `EditPage` renders this panel only when they are present. One of four states, in
- * priority order: locked, enrolled, in grace, not enrolled. A lock stops *password* login only --
- * an SSO session on the same account survives until its next token refresh, and the copy says so.
+ * priority order: locked, enrolled, in grace, not enrolled. A lock stops *password* login only:
+ * SSO logins are exempt from enforcement, and the copy says so.
  *
  * Reset, unlock and removing passkeys each lower this user's protection, so the server asks the
  * acting administrator for their own password, plus a code when they have a second factor
@@ -231,7 +231,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
           {formatMessage({
             id: 'Settings.permissions.users.mfa.state.locked.hint',
             defaultMessage:
-              'Two-factor authentication was not set up before the deadline. If this account also logs in through single sign-on, that session stays valid until its next refresh.',
+              'Two-factor authentication was not set up before the deadline. Single sign-on logins are not affected.',
           })}
         </Typography>
       </Flex>

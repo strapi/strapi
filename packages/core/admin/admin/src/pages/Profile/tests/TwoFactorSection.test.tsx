@@ -387,7 +387,7 @@ describe('TwoFactorSection', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        'Two-factor authentication is required for your account and cannot be turned off.'
+        'Two-factor authentication is required for your account and cannot be disabled.'
       )
     ).toBeInTheDocument();
   });

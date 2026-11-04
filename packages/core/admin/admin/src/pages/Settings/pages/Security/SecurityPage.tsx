@@ -587,7 +587,7 @@ const SecurityPage = () => {
                 content={formatMessage({
                   id: 'Settings.security.mfa.disabled',
                   defaultMessage:
-                    'Two-factor authentication is turned off on this instance (admin.auth.mfa.enabled in the admin configuration). Turn it on to manage its requirements here.',
+                    'Two-factor authentication is disabled on this instance (admin.auth.mfa.enabled in the admin configuration). Enable it to manage its requirements here.',
                 })}
               />
             </Box>

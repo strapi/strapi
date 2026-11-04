@@ -235,7 +235,7 @@ const TwoFactorSection = () => {
           {formatMessage({
             id: 'Settings.profile.form.section.mfa.warning.ack.body',
             defaultMessage:
-              'You have not confirmed that you saved your recovery codes. They cannot be shown again. Regenerate them and store the new set somewhere safe.',
+              'You have not confirmed that you saved your recovery codes. They cannot be shown again. Generate new ones and store them somewhere safe.',
           })}
         </Alert>
       ) : null}
@@ -253,7 +253,7 @@ const TwoFactorSection = () => {
             {
               id: 'Settings.profile.form.section.mfa.warning.low.body',
               defaultMessage:
-                'You have only {count, plural, one {# recovery code} other {# recovery codes}} left. Regenerate them before you run out.',
+                'You have only {count, plural, one {# recovery code} other {# recovery codes}} left. Generate new ones before you run out.',
             },
             { count: status.recoveryCodesRemaining }
           )}
@@ -309,7 +309,7 @@ const TwoFactorSection = () => {
                 {formatMessage({
                   id: 'Settings.profile.form.section.mfa.disable.required',
                   defaultMessage:
-                    'Two-factor authentication is required for your account and cannot be turned off.',
+                    'Two-factor authentication is required for your account and cannot be disabled.',
                 })}
               </Typography>
             ) : null}

@@ -63,7 +63,7 @@ const CODE_MESSAGES: Record<MfaErrorCode, MessageDescriptor> = {
   [MFA_ERROR_CODES.SETTINGS_CONFLICT]: {
     id: 'Settings.security.mfa.error.conflict',
     defaultMessage:
-      'Two-factor settings changed while this save was in flight. Review the current settings and try again.',
+      'Someone else changed the two-factor settings while you were saving. Review the current settings and try again.',
   },
 };
 

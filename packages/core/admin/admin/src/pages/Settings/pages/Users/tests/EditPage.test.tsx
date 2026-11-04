@@ -142,7 +142,7 @@ describe('Users | EditPage', () => {
       const { user } = renderEdit();
 
       expect(await screen.findByText(/^Locked for password login since/)).toBeInTheDocument();
-      expect(screen.getByText(/single sign-on.*until its next refresh/i)).toBeInTheDocument();
+      expect(screen.getByText(/Single sign-on logins are not affected/)).toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: 'Unlock' }));
       expect(screen.getByRole('dialog', { name: 'Unlock this account?' })).toBeInTheDocument();
