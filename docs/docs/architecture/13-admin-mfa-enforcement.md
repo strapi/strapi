@@ -231,12 +231,14 @@ a dialog they cannot complete.
   days. Without the settings, it says so without the number only after an unlock made on that page
   (it cannot tell an exempt SSO-only account from a required one either way)
 - **Settings > Roles**, per role (`pages/Settings/pages/Roles/components/RoleTwoFactorRequirement.tsx`):
-  a "Require two-factor authentication" toggle on `admin::role.mfaRequired`, shown to holders of
-  `admin::security-settings.read` and `.update` while the feature is on. It saves on its own through
-  `PUT /admin/security-settings` (`mfa.requiredRoles`), with the Security page's impact dialog on a
-  raise and `ConfirmDowngradeDialog` on a drop. Under "Not required", turning it on saves
-  "Required for selected roles" with this role alone; turning off the last selected role saves
-  "Not required". It is disabled, with a hint, only while everyone is required
+  a "Require two-factor authentication for this role" checkbox on `admin::role.mfaRequired`, shown
+  to holders of `admin::security-settings.read` and `.update` while the feature is on. It saves on
+  its own through `PUT /admin/security-settings` (`mfa.requiredRoles`), with the Security page's
+  impact dialog on a raise and `ConfirmDowngradeDialog` on a drop. Under "Not required", checking it
+  saves "Required for selected roles" with this role alone; unchecking the last selected role saves
+  "Not required". It is disabled only while everyone is required. The grace-period hint shows only
+  while the role requires it, and a line under the checkbox says how this relates to the Security
+  page and links to it. The Security page's role picker links back to Settings > Roles
 - **A grace banner** (`components/MfaGraceBanner.tsx`) for a user inside their grace period
 
 `GET /admin/users` and `GET /admin/users/:id` append `mfaEnabledAt`, `mfaGraceUntil` and

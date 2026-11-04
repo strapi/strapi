@@ -150,10 +150,20 @@ const TwoFactorEnforcementCard = ({
               name="mfaRequiredRoles"
               required
               error={errors.requiredRoles}
-              hint={formatMessage({
-                id: 'Settings.security.mfa.roles.hint',
-                defaultMessage: 'Members of these roles must set up two-factor authentication.',
-              })}
+              hint={formatMessage(
+                {
+                  id: 'Settings.security.mfa.roles.hint',
+                  defaultMessage:
+                    "Members of these roles must set up two-factor authentication. You can also set this on each role's page in <link>Settings > Roles</link>.",
+                },
+                {
+                  link: (chunks: React.ReactNode) => (
+                    <Link tag={NavLink} to="/settings/roles" isExternal={false}>
+                      {chunks}
+                    </Link>
+                  ),
+                }
+              )}
             >
               <Field.Label>
                 {formatMessage({

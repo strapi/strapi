@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { Box, Button, Dialog, Field, Flex, Toggle, Typography } from '@strapi/design-system';
+import { Box, Button, Checkbox, Dialog, Flex, Link, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { useTypedSelector } from '../../../../../core/store/hooks';
@@ -29,9 +30,11 @@ interface RoleTwoFactorRequirementProps {
 }
 
 /**
- * "Require two-factor authentication" on the role edit page: the role's `admin::role.mfaRequired`
- * flag, which is owned by the security settings and written through `PUT /admin/security-settings`
- * (`mfa.requiredRoles`), never through the role endpoints. The toggle saves on its own, apart from
+ * "Require two-factor authentication for this role" on the role edit page: the role's
+ * `admin::role.mfaRequired` flag, which is owned by the security settings and written through
+ * `PUT /admin/security-settings` (`mfa.requiredRoles`), never through the role endpoints. The same
+ * setting is the Security page's "Required for selected roles", so each page says so and links to
+ * the other. The checkbox saves on its own, apart from
  * the role form's Save, and with the Security page's confirmations: requiring it shows how many
  * users it puts on the clock, and dropping it asks for the caller's password (and a code when the
  * caller is enrolled), because the server refuses a lowered requirement without them.
@@ -40,7 +43,7 @@ interface RoleTwoFactorRequirementProps {
  * is on: a 404 from `GET /admin/security-settings` is the feature-off signal, as on the Security
  * page. While nothing is required, turning it on moves the mode to "Required for selected roles"
  * with this role alone, and turning off the last required role moves it back to "Not required".
- * While everyone is required the toggle shows the effective state, disabled, and says where it is
+ * While everyone is required the checkbox shows the effective state, disabled, and says where it is
  * set.
  */
 const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => {
@@ -120,8 +123,8 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
     return undefined;
   };
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const next = nextFor(event.target.checked);
+  const handleChange = async (required: boolean) => {
+    const next = nextFor(required);
 
     if (isSecurityDowngrade(mfa, next)) {
       setLowering(true);
@@ -156,32 +159,46 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
     return message;
   };
 
-  let hint: string;
+  const securityLink = (chunks: React.ReactNode) => (
+    <Link tag={NavLink} to="/settings/security" isExternal={false}>
+      {chunks}
+    </Link>
+  );
+
+  // What happens on the Security page when this is checked, or why it cannot be unchecked here.
+  let explanation: React.ReactNode;
   if (everyone) {
-    hint = formatMessage({
-      id: 'Settings.roles.form.mfa.hint.everyone',
-      defaultMessage: 'Required for everyone in Settings > Security.',
-    });
+    explanation = formatMessage(
+      {
+        id: 'Settings.roles.form.mfa.everyone',
+        defaultMessage:
+          'Required for everyone in <link>Settings > Security</link>. Change it there to set it per role.',
+      },
+      { link: securityLink }
+    );
   } else if (mustEnrolFirst) {
-    hint = formatMessage({
+    explanation = formatMessage({
       id: 'Settings.security.mfa.enrolFirst',
       defaultMessage:
         'Set up two-factor authentication on your own account before requiring it for others.',
     });
   } else if (mfa.mode === 'off') {
-    hint = formatMessage({
-      id: 'Settings.roles.form.mfa.hint.off',
-      defaultMessage:
-        'Not required for any role yet. Turn this on to require it for users with this role.',
-    });
-  } else {
-    hint = formatMessage(
+    explanation = formatMessage(
       {
-        id: 'Settings.roles.form.mfa.hint',
+        id: 'Settings.roles.form.mfa.off',
         defaultMessage:
-          'Users with this role must set up two-factor authentication within {days, plural, one {# day} other {# days}} of their next login.',
+          'Not required for any role yet. Checking this sets <link>Settings > Security</link> to "Required for selected roles", with this role.',
       },
-      { days: mfa.graceDays }
+      { link: securityLink }
+    );
+  } else {
+    explanation = formatMessage(
+      {
+        id: 'Settings.roles.form.mfa.selected',
+        defaultMessage:
+          'This is the "Required for selected roles" setting in <link>Settings > Security</link>, where all required roles are listed.',
+      },
+      { link: securityLink }
     );
   }
 
@@ -202,28 +219,34 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
             defaultMessage: 'Two-factor authentication',
           })}
         </Typography>
-        <Field.Root name="mfaRequired" hint={hint} maxWidth="320px">
-          <Field.Label>
-            {formatMessage({
-              id: 'Settings.roles.form.mfa.label',
-              defaultMessage: 'Require two-factor authentication',
-            })}
-          </Field.Label>
-          <Toggle
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          <Checkbox
+            name="mfaRequired"
             checked={checked}
             disabled={everyone || mustEnrolFirst || isSaving || isFetching || isFetchingImpact}
-            onLabel={formatMessage({
-              id: 'app.components.ToggleCheckbox.enabled-label',
-              defaultMessage: 'Enabled',
+            onCheckedChange={(value) => handleChange(value === true)}
+          >
+            {formatMessage({
+              id: 'Settings.roles.form.mfa.label',
+              defaultMessage: 'Require two-factor authentication for this role',
             })}
-            offLabel={formatMessage({
-              id: 'app.components.ToggleCheckbox.disabled-label',
-              defaultMessage: 'Disabled',
-            })}
-            onChange={handleChange}
-          />
-          <Field.Hint />
-        </Field.Root>
+          </Checkbox>
+          {checked && !everyone ? (
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage(
+                {
+                  id: 'Settings.roles.form.mfa.hint',
+                  defaultMessage:
+                    'Users with this role must set up two-factor authentication within {days, plural, one {# day} other {# days}} of their next login.',
+                },
+                { days: mfa.graceDays }
+              )}
+            </Typography>
+          ) : null}
+          <Typography variant="pi" textColor="neutral600">
+            {explanation}
+          </Typography>
+        </Flex>
       </Flex>
 
       <Dialog.Root open={impact !== null} onOpenChange={(open) => !open && setImpact(null)}>

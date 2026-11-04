@@ -83,7 +83,8 @@ const renderToggle = (onRoleSubmit = jest.fn()) =>
     { providerOptions: withSecurityPermissions() }
   );
 
-const toggle = () => screen.findByRole('checkbox', { name: 'Require two-factor authentication' });
+const toggle = () =>
+  screen.findByRole('checkbox', { name: 'Require two-factor authentication for this role' });
 
 describe('RoleTwoFactorRequirement', () => {
   it('is not shown to a caller who cannot manage the security settings', async () => {
@@ -93,7 +94,7 @@ describe('RoleTwoFactorRequirement', () => {
     // Give the permission check and any request a chance to run.
     await waitFor(() =>
       expect(
-        screen.queryByRole('checkbox', { name: 'Require two-factor authentication' })
+        screen.queryByRole('checkbox', { name: 'Require two-factor authentication for this role' })
       ).not.toBeInTheDocument()
     );
     expect(puts).toHaveLength(0);
@@ -182,7 +183,39 @@ describe('RoleTwoFactorRequirement', () => {
     const input = await toggle();
     expect(input).toBeChecked();
     expect(input).toBeDisabled();
-    expect(screen.getByText('Required for everyone in Settings > Security.')).toBeInTheDocument();
+    expect(screen.getByText(/Required for everyone in/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Settings > Security' })).toHaveAttribute(
+      'href',
+      '/settings/security'
+    );
+    // The per-role hint describes a requirement this role does not set.
+    expect(screen.queryByText(/Users with this role must set up/)).not.toBeInTheDocument();
+  });
+
+  it('hides the grace hint while the role does not require it, and links to the Security page', async () => {
+    handlers({ mode: 'optional', graceDays: 7, requiredRoles: ['1'] });
+    renderToggle();
+
+    const input = await toggle();
+    expect(input).not.toBeChecked();
+    expect(screen.queryByText(/Users with this role must set up/)).not.toBeInTheDocument();
+    expect(screen.getByText(/"Required for selected roles" setting in/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Settings > Security' })).toHaveAttribute(
+      'href',
+      '/settings/security'
+    );
+  });
+
+  it('shows the grace hint when the role requires it', async () => {
+    handlers({ mode: 'optional', graceDays: 7, requiredRoles: ['3'] });
+    renderToggle();
+
+    expect(await toggle()).toBeChecked();
+    expect(
+      screen.getByText(
+        'Users with this role must set up two-factor authentication within 7 days of their next login.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('while nothing is required, turning it on requires it for this role alone', async () => {
@@ -194,11 +227,10 @@ describe('RoleTwoFactorRequirement', () => {
     const input = await toggle();
     expect(input).not.toBeChecked();
     await waitFor(() => expect(input).toBeEnabled());
-    expect(
-      screen.getByText(
-        'Not required for any role yet. Turn this on to require it for users with this role.'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Not required for any role yet. Checking this sets/)).toHaveTextContent(
+      'Not required for any role yet. Checking this sets Settings > Security to "Required for selected roles", with this role.'
+    );
+    expect(screen.queryByText(/Users with this role must set up/)).not.toBeInTheDocument();
     fireEvent.click(input);
 
     const dialog = await screen.findByRole('alertdialog', {

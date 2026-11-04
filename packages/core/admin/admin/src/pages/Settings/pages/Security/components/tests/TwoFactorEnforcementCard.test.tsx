@@ -69,6 +69,16 @@ describe('TwoFactorEnforcementCard', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('says the roles can also be set on each role page, with a link to the roles', () => {
+    render(<Harness />);
+
+    expect(screen.getByText(/You can also set this on each role's page in/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Settings > Roles' })).toHaveAttribute(
+      'href',
+      '/settings/roles'
+    );
+  });
+
   it('lists every role with its user count and adds the one picked', async () => {
     const onChange = jest.fn();
     const { user } = render(<Harness onChange={onChange} />);
