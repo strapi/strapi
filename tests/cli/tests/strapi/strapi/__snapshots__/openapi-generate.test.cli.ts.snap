@@ -15672,9 +15672,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "application/json": {
               "schema": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "additionalProperties": {
-                  "type": "string",
-                },
+                "additionalProperties": {},
                 "properties": {
                   "bcc": {
                     "type": "string",
