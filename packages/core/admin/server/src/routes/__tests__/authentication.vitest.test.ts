@@ -56,8 +56,8 @@ describe('authentication routes', () => {
   });
 
   /**
-   * `/reset-password` exists with the feature off and behaved differently before this branch, so
-   * its limiter has to disappear with the flag. The `/login/mfa*` routes are new and 404 behind
+   * `/reset-password` exists with the feature off and must behave as on develop then, so its
+   * limiter has to disappear with the flag. The `/login/mfa*` routes are new and 404 behind
    * `admin::isMfaEnabled`, so the plain limiter is right for them.
    */
   test('only /reset-password uses the flag-gated limiter', () => {

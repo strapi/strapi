@@ -4,9 +4,8 @@ import { http, HttpResponse } from 'msw';
 import { MfaBanners } from '../MfaBanners';
 
 /**
- * Pins item 31 of the round-2 review: the security notice must never cover the "Two-factor
- * authentication required" banner. It once did, as a toast floating at the top of the page, and the
- * fix regressed once. Both are now inline in one container, banner first, notice under it.
+ * The security notice must never cover the "Two-factor authentication required" banner: both are
+ * inline in one container, banner first, notice under it.
  */
 describe('MfaBanners', () => {
   const originalFuture = window.strapi.future;

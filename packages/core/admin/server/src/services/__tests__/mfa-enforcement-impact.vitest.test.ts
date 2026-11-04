@@ -98,8 +98,7 @@ describe('enforcementImpact', () => {
   });
 
   /**
-   * Review item 32: with Editor already required, requiring Author (no users) reported Editor's
-   * enrolled user as "1 user will be asked ... and 1 of them already has it". The count is of the
+   * With Editor already required, requiring Author (no users) adds nobody: the count is of the
    * accounts the change adds, not of everyone the proposal covers.
    */
   test('reads the SSO-locked roles once, not once per user', async () => {

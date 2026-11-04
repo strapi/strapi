@@ -45,19 +45,13 @@ export default {
   'project-settings': projectSettings,
   encryption,
   homepage: homepageService,
-  // Registered as a factory (`{ strapi } => service`) rather than a pre-built object like its
-  // neighbours above: the services registry (`packages/core/core/src/registries/services.ts`)
-  // already supports this — it instantiates lazily on first `getService('mfa')` and calls the
-  // function with `{ strapi }` if it finds one. `createMfaService` takes its collaborators as
-  // explicit arguments instead of reading the `strapi` global, so this is the only shape that
-  // gets it a real `strapi` instance without reaching for `global.strapi`.
+  // Factories, so they receive `strapi` instead of reading the global
   mfa: ({ strapi }: { strapi: Core.Strapi }) =>
     createMfaService({
       strapi,
       encryption,
       auth: { validatePassword: auth.validatePassword, hashPassword: auth.hashPassword },
     }),
-  // Factory, same reasoning as `mfa` above: it takes `strapi` explicitly.
   'security-settings': ({ strapi }: { strapi: Core.Strapi }) =>
     createSecuritySettingsService({ strapi }),
   'debug-dump': debugDump,

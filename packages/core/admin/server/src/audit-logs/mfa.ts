@@ -106,8 +106,8 @@ export const diffSecuritySettings = (
  * The actor follows develop's model rather than guessing. When a session exists it is the actor --
  * an administrator resetting a colleague's factor, or a user enabling their own. When none does,
  * as on `/login/mfa` before the session is issued, the actor is `unknown` and the account the event
- * concerns is the `resource`. Attributing those rows to the account holder, as this branch used to,
- * would put a failed guess by an attacker on the victim's name.
+ * concerns is the `resource`. Attributing those rows to the account holder would put a failed
+ * guess by an attacker on the victim's name.
  *
  * Takes `strapi` because the notices carry only the account id, and an audit reader recognises an
  * email, not a row number. Looked up at audit time, inside the subscriber, so it costs nothing on

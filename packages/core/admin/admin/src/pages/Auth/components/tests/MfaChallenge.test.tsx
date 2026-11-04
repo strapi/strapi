@@ -602,7 +602,7 @@ describe('MfaChallenge', () => {
 
   /**
    * `browserSupportsWebAuthn()` is false on a plain-http panel in a perfectly capable browser, and
-   * that is the likelier cause self-hosted. The button used to vanish with no explanation.
+   * that is the likelier cause self-hosted.
    */
   it('explains a missing passkey button on a panel not served over HTTPS', () => {
     jest.mocked(browserSupportsWebAuthn).mockReturnValue(false);

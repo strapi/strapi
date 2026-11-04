@@ -529,9 +529,8 @@ describe('EnrolDialog', () => {
   });
 
   /**
-   * `TwoFactorSection` mounts one instance for enrol *and* replace, for the whole page visit. A
-   * warning earned by an Escape in the first run used to still be on screen the moment the second
-   * run's codes appeared, scolding the user for a dismissal they had not attempted.
+   * `TwoFactorSection` mounts one instance for enrol *and* replace, for the whole page visit, so a
+   * warning earned by an Escape in one run must not show in the next.
    */
   it('does not carry a dismissal warning into the next run of the same dialog', async () => {
     const onClose = jest.fn();

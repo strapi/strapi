@@ -534,8 +534,8 @@ describe('mfa controller', () => {
     expect(invalidateRefreshToken).toHaveBeenCalledWith('7', 'device-1');
     expect(invalidateRefreshToken).toHaveBeenCalledWith('7', 'device-2');
     // The property that matters: the device making this very request must survive, and eviction
-    // is never done "for everyone" (a call with no deviceId) in this branch -- that would take
-    // the caller's own device down too.
+    // is never done "for everyone" (a call with no deviceId), which would take the caller's own
+    // device down too.
     expect(invalidateRefreshToken).not.toHaveBeenCalledWith('7', 'device-current');
     expect(invalidateRefreshToken).not.toHaveBeenCalledWith('7');
     expect(ctx.status).toBe(204);

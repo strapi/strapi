@@ -22,19 +22,11 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
 
-/**
- * Enforcement state is for the people who can act on it (unlock, reset). Gated on the feature
- * being enabled too, not just the ability: with the flag off the user endpoints must read exactly
- * as they did on develop, for every caller.
- */
+/** For those who can act on it (unlock, reset), and only while the feature is on. */
 const canSeeMfaState = (ctx: Context): boolean =>
   getService('mfa').isEnabled() && Boolean(ctx.state.userAbility?.can('admin::users.update'));
 
-/**
- * Appended after sanitising, as a fresh object rather than a mutation of the sanitizer's return,
- * like `registrationToken` in `create`, so the shared sanitizer keeps these out of every other
- * user-bearing response. Never the secrets: `mfaSecret` and `mfaPendingSecret` stay out.
- */
+/** Appended after sanitising, like `registrationToken` in `create`; never the secrets. */
 const withMfaState = <T extends object>(
   sanitized: T,
   user: AdminUser,
@@ -105,8 +97,6 @@ export default {
 
     ctx.body = {
       data: {
-        // Enforcement state per row, so an administrator watching grace periods run out can see
-        // every account on one page instead of opening each user in turn.
         results: results.map((user: AdminUser, index: number) =>
           withMfaState(userService.sanitizeUser(user), user, includeMfa, required[index])
         ),

@@ -24,8 +24,6 @@ describe('Users | ListPage', () => {
 
   /**
    * The server appends enforcement state for callers who can act on it, while the feature is on.
-   * Watching grace periods run out is the whole job of the administrator who enabled enforcement,
-   * and before this it meant opening every user in turn.
    */
   it('shows each account’s two-factor state when the rows carry it', async () => {
     server.use(

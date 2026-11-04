@@ -136,8 +136,7 @@ describe('Admin MFA enforcement', () => {
       superAdminRecoveryCodes = verify.body.data.recoveryCodes;
     });
 
-    // Round-2 review item 32: requiring a role with no users said "1 user will be asked ... and 1 of
-    // them already has it". The query is sent the way the admin client sends it (qs indices).
+    // The query is sent the way the admin client sends it (qs indices).
     test('the impact of requiring a role with no users is zero', async () => {
       const emptyRole = await utils.createRole({ name: 'mfa_enforcement_empty', description: 't' });
       try {
@@ -178,8 +177,7 @@ describe('Admin MFA enforcement', () => {
       expect(new Date(row.mfaGraceUntil).getTime()).toBe(graceUntil);
     });
 
-    // Item 32 as reported: with the editor role already required, requiring a role with no users
-    // counted the editor again. Only the accounts the change adds are counted.
+    // Only the accounts the change adds are counted.
     test('with the editor role required, adding a role with no users adds nobody', async () => {
       const emptyRole = await utils.createRole({ name: 'mfa_enforcement_empty', description: 't' });
       try {

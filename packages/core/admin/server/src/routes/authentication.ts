@@ -19,10 +19,8 @@ export default [
     config: {
       policies: ['admin::isMfaEnabled'],
       auth: false,
-      // The body carries a challenge token, not an email, so `admin::rateLimit`'s key degrades to the
-      // source IP -- and the token must never become the key. Left at the default this is stricter than
-      // the `/login` before it, which keys per-account. A coarse abuse backstop only: the real limits
-      // are the per-challenge cap and the account-scoped window, both keyed on the user.
+      // Keyed on the address (the body has no email), so a coarse backstop; the real limits are
+      // the per-challenge cap and the per-account window
       middlewares: [{ name: 'admin::rateLimit', config: { max: MFA_LOGIN_RATE_LIMIT } }],
     },
   },
@@ -92,11 +90,8 @@ export default [
     handler: 'authentication.resetPassword',
     config: {
       auth: false,
-      // Only while the feature is on: the limiter is here because a reset can now answer with a
-      // second-factor challenge, and with the flag off this route must be what it was before.
-      // A reset body carries a token, not an email, and there is no session, so every reset in
-      // the deployment shares one `unknownEmail:<path>:<ip>` bucket -- five between a whole org
-      // behind NAT, hence the higher ceiling.
+      // Only while the feature is on, when a reset can answer with a second-factor challenge.
+      // Keyed on the address alone, hence the higher ceiling.
       middlewares: [{ name: 'admin::mfa-rate-limit', config: { max: 20 } }],
     },
   },

@@ -27,13 +27,7 @@ const defaultAdminAuthSettings = {
   },
 };
 
-/**
- * Actions that exist only while the two-factor feature does. Registered unconditionally, the role
- * editor offered a Security permission for a page that is not there, on every install, flag or
- * no flag. Gated the way EE actions are gated on their licence: switching the feature off and
- * restarting drops these grants from custom roles, as `cleanPermissionsInDatabase` does for any
- * action that is no longer registered; the super admin gets them back when it is switched on.
- */
+/** Registered only while the two-factor feature is on, as EE actions are gated on their licence. */
 const MFA_ACTION_UIDS = new Set(['security-settings.read', 'security-settings.update']);
 
 const registerPermissionActions = async () => {
@@ -277,11 +271,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // The audit-log content type is registered in every edition: persist its table with it
   await persistTablesWithPrefix('strapi_audit_logs');
-  // Same for the two-factor tables, and in every state of `unstableAdminMfa`: a rollback to a
-  // version without them would otherwise drop every enrolment, recovery code, passkey and notice
-  // at its first boot. Only whole tables can be kept this way. The `mfa*` columns on
-  // `admin_users` and `mfaRequired` on `admin_roles` are still dropped by such a rollback, so a
-  // roll forward again finds the tables intact but every user unenrolled.
+  // Same for the two-factor tables, whatever the state of `unstableAdminMfa`
   await persistTablesWithPrefix('strapi_admin_mfa');
 
   await registerAdminConditions();
