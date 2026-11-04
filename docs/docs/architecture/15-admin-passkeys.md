@@ -85,7 +85,9 @@ meant to serve.
 ### What `resolveWebauthnRp` refuses
 
 Each refusal has two messages. The server log gets the specific cause and the config key that
-fixes it, once per cause. The caller gets one generic message (`PASSKEY_RP_NOT_CONFIGURED`),
+fixes it, once per process. It is logged as an error, except for an IP literal, which is a
+warning: that is the default production shape, so it is every deployment that has not set up
+passkeys, most of which never will. The caller gets one generic message (`PASSKEY_RP_NOT_CONFIGURED`),
 whatever the cause: on the two unauthenticated login routes the caller holds only a challenge
 token, so deployment details are not theirs to learn.
 

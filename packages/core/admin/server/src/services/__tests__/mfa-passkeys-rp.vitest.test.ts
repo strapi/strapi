@@ -181,10 +181,10 @@ describe('resolveWebauthnRp', () => {
     (adminUrl) => {
       // The `http://` rows above are each refused by a different guard, so none tests isIP alone.
       // These use `https:` and assert the IP-literal message, which catches isIP being disabled.
-      const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': adminUrl });
+      const { strapi, warn } = buildStrapi({ 'admin.absoluteUrl': adminUrl });
 
       expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
-      expect(error).toHaveBeenCalledWith(expect.stringContaining('is an IP literal'));
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('is an IP literal'));
     }
   );
 
@@ -225,10 +225,12 @@ describe('resolveWebauthnRp', () => {
   ])('an IP literal (%s) is refused, naming the config key', (adminUrl) => {
     // The default production shape: an unset `server.url` plus the template's `HOST=0.0.0.0`.
     // 127.0.0.1 is a secure context but still not a valid RP ID.
-    const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': adminUrl });
+    // Logged as a warning: it is the shape of every deployment that never set passkeys up.
+    const { strapi, error, warn } = buildStrapi({ 'admin.absoluteUrl': adminUrl });
 
     expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
-    expect(error).toHaveBeenCalledWith(expect.stringContaining('admin.auth.mfa.webauthn.rpId'));
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('admin.auth.mfa.webauthn.rpId'));
+    expect(error).not.toHaveBeenCalled();
   });
 
   test('a plain-http origin that is not localhost is refused', () => {
@@ -316,7 +318,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('the refusal logs under [admin.auth.mfa], not [security-settings], and the trailing sentence is level-aware', () => {
-    const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' });
+    const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': 'http://cms.example.com/admin' });
 
     expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
 
@@ -340,13 +342,13 @@ describe('resolveWebauthnRp', () => {
   );
 
   test('the cause is logged once per process, not once per ceremony', () => {
-    const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' });
+    const { strapi, warn } = buildStrapi({ 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' });
 
     for (let i = 0; i < 3; i += 1) {
       expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
     }
 
-    expect(error).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 
   test('the refusal never leaks the cause into the error a caller sees', () => {
@@ -385,16 +387,17 @@ describe('warnIfPasskeysMisconfigured', () => {
 
   test('logs the cause and the config key that fixes it when the relying party cannot resolve', async () => {
     // The shape a production deployment that never set `server.url` actually lands in.
-    const { passkeys, error } = buildService(
+    // A warning: that is every deployment that never set passkeys up, not an outage.
+    const { passkeys, warn } = buildService(
       { 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' },
       true
     );
 
     await passkeys.warnIfPasskeysMisconfigured();
 
-    expect(error).toHaveBeenCalledTimes(1);
-    expect(error).toHaveBeenCalledWith(expect.stringContaining('admin.auth.mfa.webauthn.rpId'));
-    expect(error).toHaveBeenCalledWith(expect.stringContaining('IP literal'));
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('admin.auth.mfa.webauthn.rpId'));
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('IP literal'));
   });
 
   test('resolves without throwing, so a misconfiguration can never stop the admin booting', async () => {
@@ -428,7 +431,7 @@ describe('warnIfPasskeysMisconfigured', () => {
 
   test('spends the once-per-process budget at boot, so the lazy callers stay quiet afterwards', async () => {
     // Deliberate: the operator has already been told, and `warnOnce` keys this to `webauthn.rp`.
-    const { passkeys, error } = buildService(
+    const { passkeys, warn } = buildService(
       { 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' },
       true
     );
@@ -437,6 +440,6 @@ describe('warnIfPasskeysMisconfigured', () => {
     expect(passkeys.passkeysConfigured()).toBe(false);
     expect(passkeys.passkeysConfigured()).toBe(false);
 
-    expect(error).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 });

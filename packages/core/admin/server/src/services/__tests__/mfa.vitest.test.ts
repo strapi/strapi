@@ -2368,6 +2368,9 @@ describe('mfa service: challenge lifecycle', () => {
 
     expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    // The operator's log names the account, or a fleet-wide key rotation is one line per login with
+    // nothing to tell which user still needs recovering.
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('admin user 1 '));
 
     // Not swallowed silently: an operator needs to know why TOTP stopped working. And the warning
     // must not carry the thing it is about.
@@ -4206,7 +4209,7 @@ describe('mfa service: passkey registration', () => {
       expect(service.passkeysConfigured()).toBe(false);
       // The cause is still logged where the refusal actually happens; the wrapper only swallows
       // it from the caller's point of view.
-      expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('IP literal'));
+      expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('IP literal'));
     });
   });
 
@@ -4281,7 +4284,7 @@ describe('mfa service: passkey registration', () => {
       'Passkeys are not configured for this deployment. Set admin.auth.mfa.webauthn.rpId.'
     );
     expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
-    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
   });
 
   test('options refuses at the cap, naming the limit, before the browser is ever prompted', async () => {
@@ -4807,7 +4810,7 @@ describe('mfa service: passkey login', () => {
     await expect(service.authenticationOptions(token)).rejects.toThrow(
       'Could not verify that passkey.'
     );
-    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
   });
 
   test('options skips a stored credentialId that is not valid base64url, logs it, and keeps the well-formed one', async () => {
@@ -5118,7 +5121,7 @@ describe('mfa service: passkey login', () => {
 
     expect(challenges[0].attempts).toBe(1);
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
-    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
   });
 
   test('a throttled account is a RateLimitError, before any attempt is charged', async () => {

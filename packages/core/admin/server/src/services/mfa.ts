@@ -437,7 +437,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /** Both calls must sit inside the guard: `encryption.decrypt` and `base32Decode` throw rather than
    * returning null, so a malformed stored value otherwise becomes an unhandled 500. */
-  const readSecret = (ciphertext: string | null | undefined): Buffer => {
+  const readSecret = (userId: string, ciphertext: string | null | undefined): Buffer => {
     if (!ciphertext) {
       throw new ValidationError('Two-factor authentication is not set up for this account');
     }
@@ -456,7 +456,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       // The operator gets the diagnosis; the user gets what they can do about it. A Cloud customer
       // has no shell to run a CLI command in, and backticks render literally in the panel.
       strapi.log.error(
-        'An admin two-factor secret could not be decrypted. This usually means the admin encryption key changed. Recover the account with `strapi admin:reset-user-mfa`, or have the user sign in with a recovery code.'
+        `The two-factor secret of admin user ${userId} could not be decrypted. This usually means the admin encryption key changed. Recover the account with \`strapi admin:reset-user-mfa\`, or have the user sign in with a recovery code.`
       );
       throw new ApplicationError(
         'Your two-factor secret could not be read. Use a recovery code to sign in, or ask an administrator to reset two-factor authentication for your account.',
@@ -530,7 +530,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   const verifyTotpForUser = async (userId: string, code: string) => {
     const user = await loadUser(userId);
-    const secret = readSecret(user.mfaSecret);
+    const secret = readSecret(userId, user.mfaSecret);
     const { digits, step, window } = config();
 
     return verifyTotp({ secret, code, digits, step, window });
@@ -575,7 +575,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       throw new ValidationError('No enrolment in progress', { code: MFA_ERROR_CODES.NO_ENROLMENT });
     }
 
-    const pending = readSecret(user.mfaPendingSecret);
+    const pending = readSecret(userId, user.mfaPendingSecret);
     const { digits, step, window } = config();
     const result = verifyTotp({
       secret: pending,

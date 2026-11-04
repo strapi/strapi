@@ -248,8 +248,10 @@ const isSecureOrigin = (url: URL): boolean =>
 export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
   // `[admin.auth.mfa]`, not the helper's `[security-settings]` default: an operator greps for the
   // config key, not the store.
-  const refuse = (cause: string): never => {
-    warnOnce(strapi, 'webauthn.rp', cause, 'error', '[admin.auth.mfa]');
+  // An IP literal is the default production shape (see above), so it is every deployment that has
+  // not set up passkeys, most of which never will: a warning, not an error, there.
+  const refuse = (cause: string, level: 'warn' | 'error' = 'error'): never => {
+    warnOnce(strapi, 'webauthn.rp', cause, level, '[admin.auth.mfa]');
     throw new ValidationError(PASSKEY_RP_NOT_CONFIGURED);
   };
 
@@ -291,7 +293,8 @@ export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
 
   if (isIP(stripBrackets(rpId)) !== 0) {
     return refuse(
-      `rpId "${rpId}" is an IP literal, which no browser accepts as a relying-party id -- only "localhost" works without a domain. Set admin.auth.mfa.webauthn.rpId.`
+      `rpId "${rpId}" is an IP literal, which no browser accepts as a relying-party id -- only "localhost" works without a domain. Set admin.auth.mfa.webauthn.rpId.`,
+      'warn'
     );
   }
 
