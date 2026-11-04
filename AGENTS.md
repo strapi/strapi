@@ -17,6 +17,9 @@ packages/cli/        # CLI tools: create-strapi-app, cloud-cli
 examples/            # Dev sandboxes only — not published, not for production fixes
 docs/                # Contributor docs site (contributor.strapi.io); package docs mirror packages/ under docs/docs/packages/
 tests/               # Integration, E2E, and CLI test infrastructure
+tests-next/          # New test suites being built (Test Infrastructure Overhaul), renamed tests/ at cutover:
+                     #   shared/ (@strapi/tests-shared), ui/ (@strapi/tests-e2e, *.ui-test.ts),
+                     #   api/ (@strapi/tests-api, *.api-test.ts), cli/ (@strapi/tests-cli, *.cli-test.ts)
 ```
 
 The following are the most important packages (not exhaustive — run `yarn workspaces list` for the full set):
