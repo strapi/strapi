@@ -80,4 +80,35 @@ describeMysql('MySQL document lock rows', () => {
     );
     expect(await lockRows(note.documentId)).toEqual([]);
   });
+
+  test('delete locks the document before it touches its rows, like update', async () => {
+    const note = await strapi.documents(NOTE_UID).create({
+      locale: 'en',
+      data: { title: 'Order note' },
+    });
+    await strapi.documents(NOTE_UID).update({
+      documentId: note.documentId,
+      locale: 'fr',
+      data: { title: 'Note ordre' },
+    });
+
+    const contentTable = strapi.db.metadata.get(NOTE_UID).tableName;
+    const statements = [];
+    const record = (query) => statements.push(query.sql);
+    strapi.db.connection.on('query', record);
+    try {
+      await strapi.documents(NOTE_UID).delete({ documentId: note.documentId, locale: '*' });
+    } finally {
+      strapi.db.connection.off('query', record);
+    }
+
+    const lockIndex = statements.findIndex(
+      (sql) => sql.includes(LOCK_TABLE) && sql.startsWith('insert')
+    );
+    const firstContentIndex = statements.findIndex((sql) => sql.includes(`\`${contentTable}\``));
+
+    expect(lockIndex).toBeGreaterThanOrEqual(0);
+    expect(firstContentIndex).toBeGreaterThan(lockIndex);
+    expect(await lockRows(note.documentId)).toEqual([]);
+  });
 });

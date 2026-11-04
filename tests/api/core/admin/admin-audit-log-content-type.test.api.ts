@@ -19,7 +19,7 @@ describe('Audit log content type', () => {
   });
 
   test('creates and persists the strapi_audit_logs table', async () => {
-    expect(await strapi.db.getConnection().schema.hasTable('strapi_audit_logs')).toBe(true);
+    expect(await strapi.db.connection.schema.hasTable('strapi_audit_logs')).toBe(true);
 
     const persistedTables = (await strapi.store.get({
       type: 'core',
