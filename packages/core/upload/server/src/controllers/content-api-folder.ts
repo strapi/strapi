@@ -1,9 +1,10 @@
 import type { Context } from 'koa';
 import { omit } from 'lodash';
+import { errors, traverse } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
-import { FOLDER_MODEL_UID } from '../constants';
+import { FILE_MODEL_UID, FOLDER_MODEL_UID } from '../constants';
 import { findAndCountRestPage } from '../utils/rest-pagination';
 
 const FIELDS = ['documentId', 'name', 'path', 'createdAt', 'updatedAt'];
@@ -26,10 +27,25 @@ const omitShapeParams = (query: Record<string, unknown>) => omit(query, ['fields
 
 const isNumericId = (id: unknown) => /^\d+$/.test(String(id)) && Number(id) <= MAX_INTEGER_ID;
 
+// `file.folder` is private, so a folder can't be looked up through its files either.
+const throwFileRelations: Parameters<typeof traverse.traverseQueryFilters>[0] = ({
+  key,
+  attribute,
+  path,
+}) => {
+  if (attribute?.type === 'relation' && attribute.target === FILE_MODEL_UID) {
+    throw new errors.ValidationError(`Invalid key ${key}`, { key, path: path.attribute });
+  }
+};
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const validateQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FOLDER_MODEL_UID);
     const { auth, route } = ctx.state;
+    const options = { schema, getModel: strapi.getModel.bind(strapi) };
+
+    await traverse.traverseQueryFilters(throwFileRelations, options, data.filters);
+    await traverse.traverseQuerySort(throwFileRelations, options, data.sort);
 
     return strapi.contentAPI.validate.query(data, schema, { auth, route });
   };
