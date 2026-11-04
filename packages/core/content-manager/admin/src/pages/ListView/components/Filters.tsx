@@ -47,7 +47,11 @@ const USER_FILTER_ATTRIBUTES = new Set([...CREATOR_FIELDS, 'strapi_assignee']);
 interface FiltersProps {
   disabled?: boolean;
   schema: Schema;
-  layout: ListLayout;
+  /**
+   * From `useListViewFilterOptions`. The list page computes them once: its API query reads them
+   * too (`toApiFilters`).
+   */
+  options: Filters.Filter[];
   children: React.ReactNode;
 }
 
@@ -303,9 +307,8 @@ const useListViewFilterOptions = (schema: Schema | undefined, layout: ListLayout
   return displayedFilters;
 };
 
-const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
+const Root = ({ disabled, schema, options, children }: FiltersProps) => {
   const { trackUsage } = useTracking();
-  const displayedFilters = useListViewFilterOptions(schema, layout);
 
   const onOpenChange = (isOpen: boolean) => {
     if (isOpen) {
@@ -326,7 +329,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
   return (
     <Filters.Root
       disabled={disabled}
-      options={displayedFilters}
+      options={options}
       onOpenChange={onOpenChange}
       onChange={handleFilterChange}
     >

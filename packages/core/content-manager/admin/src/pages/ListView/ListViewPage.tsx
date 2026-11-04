@@ -607,7 +607,7 @@ const ListViewPage = () => {
 
   const actions =
     list.settings.filterable && schema ? (
-      <Filters.Root schema={schema} layout={list}>
+      <Filters.Root schema={schema} options={filterOptions}>
         <Layouts.Action
           endActions={endActions}
           startActions={startActions}

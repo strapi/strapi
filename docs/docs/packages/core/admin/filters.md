@@ -37,6 +37,6 @@ Stored dates have seconds and milliseconds, so the API can't read these values a
 
 `$null` and `$notNull`, other filters and values that aren't dates are sent as they are. An ISO value with seconds, for example from an older link, is read as its minute.
 
-A page with a `datetime` filter must pass the URL filters and the same `options` through `toApiFilters` before each API call. The Content Manager list view does it in `ListViewPage`, with the options of `useListViewFilterOptions`. The audit logs do it for the list and for the CSV export.
+A page with a `datetime` filter must pass the URL filters and the same `options` through `toApiFilters` before each API call. The Content Manager list view does it in `ListViewPage`: it computes the options once with `useListViewFilterOptions` and passes them to both `toApiFilters` and its `Filters.Root`. The audit logs do it for the list and for the CSV export.
 
 Days and minutes are the viewer's: the bounds are computed in the browser's time zone. The same link can match different entries for viewers in different time zones. A day with a daylight saving time change runs from midnight to midnight, not 24 hours.
