@@ -240,6 +240,30 @@ describe('ComponentInput', () => {
     expect(screen.getByText('Copied')).toBeInTheDocument();
   });
 
+  it('should offer to replace the content of a saved component that only holds relations', async () => {
+    // the form holds no saved relation, the document sent by the server counts them
+    useDocumentMock.mockReturnValue({
+      ...useDocumentMock(),
+      document: {
+        documentId: 'article-1',
+        id: 1,
+        [FIELD_NAME]: { id: 5, title: null, indexable: false, categories: { count: 2 } },
+      },
+    });
+    const { user } = render({
+      [FIELD_NAME]: {
+        id: 5,
+        title: null,
+        indexable: false,
+        categories: { connect: [], disconnect: [] },
+      },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Replace content…' }));
+
+    expect(mockModalProps).toHaveBeenCalledWith(expect.objectContaining({ replacesContent: true }));
+  });
+
   it('should only show the relations of the copy once the content is replaced', async () => {
     const { user } = render({
       [FIELD_NAME]: { id: 5, title: 'Old title', indexable: true, categories: { count: 3 } },

@@ -372,16 +372,68 @@ const getComponentPreview = (
 };
 
 /**
+ * The stored version of a component of the form: only a component that kept its id is one,
+ * a component put in the place of a saved one (a copy, a reset then re-added one) is new.
+ */
+const getSavedCounterpart = (saved: unknown, value: unknown): AnyData | undefined => {
+  if (!isObject(value) || value.id === undefined || value.id === null) {
+    return undefined;
+  }
+
+  const candidates = Array.isArray(saved) ? saved : [saved];
+
+  return candidates.find(
+    (candidate): candidate is AnyData =>
+      isObject(candidate) &&
+      candidate.id === value.id &&
+      (value.__component === undefined || candidate.__component === value.__component)
+  );
+};
+
+/**
+ * @description Finds the stored version of the component at `name` in the document as the server
+ * sent it, following the ids of the rows on the way rather than their indexes (rows are
+ * reordered in the form). Returns `undefined` when the component, or a row holding it, isn't
+ * stored yet.
+ */
+const getSavedComponent = (
+  document: unknown,
+  values: unknown,
+  name: string
+): AnyData | undefined => {
+  const segments = toPath(name);
+  let saved: unknown = document;
+
+  for (const [position, segment] of segments.entries()) {
+    saved = isInteger(segment)
+      ? getSavedCounterpart(saved, getIn(values, segments.slice(0, position + 1)))
+      : isObject(saved)
+        ? saved[segment]
+        : undefined;
+
+    if (saved === undefined || saved === null) {
+      return undefined;
+    }
+  }
+
+  return getSavedCounterpart(saved, getIn(values, name));
+};
+
+/**
  * @description Tells whether a component holds any content, i.e. whether copying into it would
  * replace something. A value still equal to the default of its attribute isn't content: a
  * component that was just added is filled with its defaults. Nested components are looked into,
- * relations count whether they're loaded (`count`) or being edited (`connect`), a boolean set to
- * `false` is content when its attribute defaults to `true`.
+ * a boolean set to `false` is content when its attribute defaults to `true`.
+ *
+ * The form doesn't hold the saved relations of a component, only the ones being connected or
+ * disconnected: pass the stored version of the component (`saved`, see `getSavedComponent`)
+ * so that they're counted.
  */
 const isComponentBlank = (
   value: unknown,
   componentUid: string,
-  components: ComponentsDictionary
+  components: ComponentsDictionary,
+  saved?: AnyData
 ): boolean => {
   if (!isObject(value)) {
     return true;
@@ -398,6 +450,10 @@ const isComponentBlank = (
   return Object.entries(schema.attributes).every(([name, attribute]) => {
     const attributeValue = value[name];
 
+    if (attribute.type === 'relation') {
+      return isRelationValueBlank(attributeValue, saved?.[name]);
+    }
+
     if (
       COMPONENT_META_ATTRIBUTES.has(name) ||
       attributeValue === undefined ||
@@ -408,23 +464,27 @@ const isComponentBlank = (
       return true;
     }
 
-    return isAttributeValueBlank(attribute, attributeValue, components);
+    return isAttributeValueBlank(attribute, attributeValue, components, saved?.[name]);
   });
 };
 
+const getRelationCount = (value: unknown, key: 'connect' | 'disconnect') =>
+  isObject(value) && Array.isArray(value[key]) ? value[key].length : 0;
+
 /**
- * A relation is blank when nothing is connected: loaded relations come as a `count`, relations
- * being edited as `connect` entries.
+ * A relation is blank when nothing is connected to it: what the form connects, plus what's
+ * stored (the `count` the server sends) minus what the form disconnects.
  */
-const isRelationValueBlank = (value: unknown) => {
+const isRelationValueBlank = (value: unknown, saved: unknown) => {
   if (Array.isArray(value)) {
     return value.length === 0;
   }
 
+  const savedCount = isObject(saved) && typeof saved.count === 'number' ? saved.count : 0;
+  const count = isObject(value) && typeof value.count === 'number' ? value.count : savedCount;
+
   return (
-    isObject(value) &&
-    (!Array.isArray(value.connect) || value.connect.length === 0) &&
-    (value.count === undefined || value.count === 0)
+    getRelationCount(value, 'connect') === 0 && count - getRelationCount(value, 'disconnect') <= 0
   );
 };
 
@@ -435,23 +495,34 @@ const isRelationValueBlank = (value: unknown) => {
 const isAttributeValueBlank = (
   attribute: StrapiSchema.Attribute.AnyAttribute,
   value: unknown,
-  components: ComponentsDictionary
+  components: ComponentsDictionary,
+  saved: unknown
 ): boolean => {
   switch (attribute.type) {
     case 'component':
       if (attribute.repeatable) {
         return (
           !Array.isArray(value) ||
-          value.every((item) => isComponentBlank(item, attribute.component, components))
+          value.every((item) =>
+            isComponentBlank(
+              item,
+              attribute.component,
+              components,
+              getSavedCounterpart(saved, item)
+            )
+          )
         );
       }
 
-      return isComponentBlank(value, attribute.component, components);
+      return isComponentBlank(
+        value,
+        attribute.component,
+        components,
+        getSavedCounterpart(saved, value)
+      );
     case 'dynamiczone':
     case 'media':
       return Array.isArray(value) && value.length === 0;
-    case 'relation':
-      return isRelationValueBlank(value);
     case 'boolean':
       // `false` is content when the attribute defaults to `true`
       return value === false && attribute.default !== true;
@@ -547,6 +618,7 @@ export {
   getComponentInstances,
   getComponentPreview,
   getRelationsToCopy,
+  getSavedComponent,
   isComponentBlank,
 };
 export type { ComponentCopyMode, ComponentInstance, ComponentPreviewField, RelationToCopy };

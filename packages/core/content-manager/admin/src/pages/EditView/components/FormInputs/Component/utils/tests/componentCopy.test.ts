@@ -4,6 +4,7 @@ import {
   getComponentInstances,
   getComponentPreview,
   getRelationsToCopy,
+  getSavedComponent,
   isComponentBlank,
 } from '../componentCopy';
 
@@ -359,6 +360,80 @@ describe('componentCopy', () => {
         false
       );
       expect(isComponentBlank({ slug: 'home' }, 'shared.seo', components)).toBe(false);
+    });
+  });
+
+  describe('saved relations', () => {
+    const empty = { connect: [], disconnect: [] };
+    // what the server sends: relations come as a count
+    const document = {
+      id: 1,
+      card: { id: 5, title: '', author: { count: 1 }, links: [] },
+      blocks: [
+        {
+          id: 7,
+          __component: 'blocks.cards',
+          cards: [{ id: 9, author: { count: 0 }, links: [{ id: 11, pages: { count: 2 } }] }],
+        },
+      ],
+    };
+    // what the form holds: saved relations come as an empty `connect`
+    const values = {
+      card: { id: 5, title: '', author: empty, links: [] },
+      blocks: [
+        { __temp_key__: 'a0', __component: 'blocks.hero', cards: [] },
+        {
+          id: 7,
+          __temp_key__: 'a1',
+          __component: 'blocks.cards',
+          cards: [
+            {
+              id: 9,
+              __temp_key__: 'a0',
+              author: empty,
+              links: [{ id: 11, __temp_key__: 'a0', pages: empty }],
+            },
+          ],
+        },
+      ],
+    };
+
+    it('should find the stored version of a component by the ids leading to it', () => {
+      expect(getSavedComponent(document, values, 'card')).toBe(document.card);
+      // the block moved from index 0 to 1 in the form
+      expect(getSavedComponent(document, values, 'blocks.1.cards.0')).toBe(
+        document.blocks[0].cards[0]
+      );
+    });
+
+    it('should not find a stored version for a component that replaced the saved one', () => {
+      const replaced = { ...values, card: { title: 'Copy', author: empty, links: [] } };
+
+      expect(getSavedComponent(document, replaced, 'card')).toBeUndefined();
+      expect(getSavedComponent(document, values, 'blocks.0.cards.0')).toBeUndefined();
+      expect(getSavedComponent(document, values, 'missing')).toBeUndefined();
+    });
+
+    it('should hold content when only saved relations are connected', () => {
+      const saved = getSavedComponent(document, values, 'card');
+
+      expect(isComponentBlank(values.card, 'shared.card', components)).toBe(true);
+      expect(isComponentBlank(values.card, 'shared.card', components, saved)).toBe(false);
+      // the relation of a nested row
+      expect(
+        isComponentBlank(
+          values.blocks[1].cards[0],
+          'shared.card',
+          components,
+          getSavedComponent(document, values, 'blocks.1.cards.0')
+        )
+      ).toBe(false);
+    });
+
+    it('should be blank once every saved relation is disconnected', () => {
+      const card = { ...values.card, author: { connect: [], disconnect: [{ id: 3 }] } };
+
+      expect(isComponentBlank(card, 'shared.card', components, document.card)).toBe(true);
     });
   });
 

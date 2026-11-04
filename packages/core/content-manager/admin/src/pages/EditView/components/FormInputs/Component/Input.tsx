@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { InputProps, useField } from '@strapi/admin/strapi-admin';
+import { InputProps, useField, useForm } from '@strapi/admin/strapi-admin';
 import { Badge, Button, Field, Flex, IconButton } from '@strapi/design-system';
 import { Duplicate, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -18,7 +18,7 @@ import { useCopiedComponent } from './CopiedComponents';
 import { Initializer } from './Initializer';
 import { NonRepeatableComponent } from './NonRepeatable';
 import { RepeatableComponent } from './Repeatable';
-import { isComponentBlank } from './utils/componentCopy';
+import { getSavedComponent, isComponentBlank } from './utils/componentCopy';
 
 interface ComponentInputProps
   extends
@@ -49,8 +49,12 @@ const ComponentInput = ({
 
   const {
     currentDocumentMeta,
-    currentDocument: { components },
+    currentDocument: { components, document },
   } = useDocumentContext('ComponentInput');
+  // A reference into the document: it only changes when the document is refetched
+  const savedComponent = useForm('ComponentInput', (state) =>
+    getSavedComponent(document, state.values, name)
+  );
   const canCopyFromExisting = currentDocumentMeta.collectionType === COLLECTION_TYPES;
 
   const hasComponent = !attribute.repeatable && field.value !== undefined && field.value !== null;
@@ -60,7 +64,7 @@ const ComponentInput = ({
    * copying into it replaces that content and the user is warned.
    */
   const hasContent =
-    hasComponent && !isComponentBlank(field.value, attribute.component, components);
+    hasComponent && !isComponentBlank(field.value, attribute.component, components, savedComponent);
 
   const handleInitialisationClick = () => {
     const schema = components[attribute.component];
