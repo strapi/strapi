@@ -176,7 +176,7 @@ describe('mfa service', () => {
     expect(calls).toBe(2);
   });
 
-  it('POSTs /admin/mfa/users/:id/unlock with no body', async () => {
+  it("POSTs /admin/mfa/users/:id/unlock with the actor's credentials", async () => {
     let hit = false;
     let body: string | undefined;
     server.use(
@@ -190,12 +190,13 @@ describe('mfa service', () => {
     const { result } = renderHook(() => useUnlockUserMfaMutation());
 
     await act(async () => {
-      const res = await result.current[0]({ id: 42 });
+      const res = await result.current[0]({ id: 42, password: 'pw', code: '123456' });
       expect('error' in res).toBe(false);
     });
 
     expect(hit).toBe(true);
-    expect(body).toBe('');
+    // The id goes in the path, never the body.
+    expect(JSON.parse(body!)).toEqual({ password: 'pw', code: '123456' });
   });
 
   describe('passkeys', () => {
@@ -383,11 +384,11 @@ describe('mfa service', () => {
       expect(result.current.data).toEqual({ count: 3 });
     });
 
-    it('DELETEs /admin/mfa/users/:id/passkeys with no body, and returns 204 with no body', async () => {
+    it("POSTs /admin/mfa/users/:id/passkeys/remove with the actor's credentials, and returns 204 with no body", async () => {
       let method: string | undefined;
       let bodyText: string | undefined;
       server.use(
-        http.delete('/admin/mfa/users/42/passkeys', async ({ request }) => {
+        http.post('/admin/mfa/users/42/passkeys/remove', async ({ request }) => {
           method = request.method;
           bodyText = await request.text();
           return new HttpResponse(null, { status: 204 });
@@ -397,14 +398,14 @@ describe('mfa service', () => {
       const { result } = renderHook(() => useDeleteUserPasskeysMutation());
 
       await act(async () => {
-        const res = await result.current[0]({ id: 42 });
+        const res = await result.current[0]({ id: 42, password: 'pw', code: '123456' });
         expect('error' in res).toBe(false);
         // Same 204-with-no-body pin as `deletePasskey` above.
         expect('data' in res && res.data).toEqual({});
       });
 
-      expect(method).toBe('DELETE');
-      expect(bodyText).toBe('');
+      expect(method).toBe('POST');
+      expect(JSON.parse(bodyText!)).toEqual({ password: 'pw', code: '123456' });
     });
 
     it("removing a user's passkeys invalidates that user's count, the caller's own list, and notices", async () => {
