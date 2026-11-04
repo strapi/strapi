@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { MFA_ERROR_CODES } from '../../../../../shared/utils/mfa-error-codes';
 import { Form, type FormHelpers } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
@@ -25,15 +26,9 @@ interface LoginProps {
   children?: React.ReactNode;
 }
 
-/**
- * The server refuses a password login for an account whose enrolment grace period expired with
- * `MfaLockedError` (403). Keyed on the runtime `name`, not the message, so copy changes on the
- * server never break the screen. Typed loosely on purpose: `ApiError['name']` is a closed union
- * of the `@strapi/utils` error class names, and this class sets its `name` at runtime, so a
- * direct comparison against the union would not typecheck.
- */
-export const isMfaLockedError = (error: { name?: string }): boolean =>
-  error.name === 'MfaLockedError';
+/** A password login refused because the enrolment grace period expired (403 `MFA_LOCKED`). */
+export const isMfaLockedError = (error: { details?: unknown }): boolean =>
+  (error.details as { code?: unknown } | undefined)?.code === MFA_ERROR_CODES.LOCKED;
 
 const LOGIN_SCHEMA = yup.object().shape({
   email: yup

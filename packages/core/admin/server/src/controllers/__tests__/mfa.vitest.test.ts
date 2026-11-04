@@ -4,7 +4,6 @@ import { errors } from '@strapi/utils';
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../tests/helpers/create-context';
 import mfaController from '../mfa';
-import { MfaRequiredError } from '../../services/mfa-errors';
 import { MFA_TRUST_COOKIE_NAME } from '../../../../shared/utils/session-auth';
 
 const setStrapi = (value: object) => {
@@ -623,7 +622,7 @@ describe('mfa controller', () => {
     expect(ctx.status).toBe(204);
   });
 
-  test('disable is refused with MfaRequiredError while the caller is required, before any attempt is spent', async () => {
+  test('disable is refused with MFA_REQUIRED while the caller is required, before any attempt is spent', async () => {
     const assertPasswordAndFactor = vi.fn();
     // `buildStrapiWithSessionManager` calls `setStrapi` itself -- see its definition above.
     buildStrapiWithSessionManager({
@@ -633,7 +632,9 @@ describe('mfa controller', () => {
     });
     const { ctx } = buildCtx({ password: 'pw', code: '123456' });
 
-    await expect(mfaController.disable(ctx)).rejects.toBeInstanceOf(MfaRequiredError);
+    await expect(mfaController.disable(ctx)).rejects.toMatchObject({
+      details: { code: 'MFA_REQUIRED' },
+    });
     expect(assertPasswordAndFactor).not.toHaveBeenCalled();
   });
 

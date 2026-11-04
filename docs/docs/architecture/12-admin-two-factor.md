@@ -93,7 +93,7 @@ the mailbox can neither change the password nor sign the holder out. An abandone
 expires with its challenge; the link is spent either way.
 
 An account that is not enrolled has no challenge to pass, so its reset commits the password at
-once and then meets `enforce`. When that account is locked, the reset answers `MfaLockedError`
+once and then meets `enforce`. When that account is locked, the reset answers `MFA_LOCKED`
 (403) with the new password already in place. The reset page (`ResetPassword.tsx`) then says the
 password changed and the account is locked, and drops the form, whose link is spent.
 
@@ -128,7 +128,7 @@ reads both from that request body, so omitting them loses the user's "remember m
 `POST /admin/mfa/disable` takes `{ password, code }`, the same gate as regenerating recovery codes:
 the session may be the thing an attacker holds. In order:
 
-- It is refused with 403 `MfaRequiredError` while the policy requires the account, before any
+- It is refused with 403 `MFA_REQUIRED` while the policy requires the account, before any
   attempt is spent.
 - It needs the session manager, and answers 500 without it.
 - On success it removes the secret, the recovery codes, every trusted device and every passkey,
@@ -136,7 +136,7 @@ the session may be the thing an attacker holds. In order:
 
 An administrator resets somebody else's factor through `POST /admin/mfa/users/:id/reset`. That
 route refuses the caller's own id: on yourself it would be a cheaper `/mfa/disable`, with no
-password, no code and no `MfaRequiredError` check.
+password, no code and no `MFA_REQUIRED` check.
 
 ## Recovery codes
 

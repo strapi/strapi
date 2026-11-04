@@ -17,7 +17,6 @@ import {
   MFA_TRUST_COOKIE_NAME,
   clearTrustCookie,
 } from '../../../shared/utils/session-auth';
-import { MfaRequiredError } from '../services/mfa-errors';
 import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
 import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 import { PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from '../services/mfa-passkeys';
@@ -187,7 +186,10 @@ export default {
 
     // The profile hides the button; this refusal is what makes that more than cosmetic.
     if (await mfa.isMfaRequiredFor(ctx.state.user as AdminUser)) {
-      throw new MfaRequiredError();
+      throw new errors.PolicyError(
+        'Two-factor authentication is required for your account and cannot be disabled.',
+        { code: MFA_ERROR_CODES.REQUIRED }
+      );
     }
 
     await validateMfaPasswordAndCodeInput(ctx.request.body ?? {});

@@ -214,13 +214,13 @@ describe('Admin MFA enforcement', () => {
       expect(res.body.data).not.toHaveProperty('mfaPendingSecret');
     });
 
-    test('an expired grace locks the editor at login with MfaLockedError (403) and kills sessions', async () => {
+    test('an expired grace locks the editor at login with MFA_LOCKED (403) and kills sessions', async () => {
       const { token } = await utils.login({ email: editor.email });
       await setGrace(editor.id, new Date(Date.now() - 1000));
 
       const res = await login(editor.email, editorPassword);
       expect(res.statusCode).toBe(403);
-      expect(res.body.error.name).toBe('MfaLockedError');
+      expect(res.body.error.details.code).toBe('MFA_LOCKED');
 
       const me = await createRequest({ strapi }).get('/admin/users/me', {
         headers: { Authorization: `Bearer ${token}` },
@@ -412,7 +412,7 @@ describe('Admin MFA enforcement', () => {
         body: { password: superAdmin.loginInfo.password, code: totpFor(superAdminSecret) },
       });
       expect(res.statusCode).toBe(403);
-      expect(res.body.error.name).toBe('MfaRequiredError');
+      expect(res.body.error.details.code).toBe('MFA_REQUIRED');
     });
   });
 });

@@ -159,17 +159,17 @@ describe('ResetPassword', () => {
       expect(await findByText(/"passkeyAvailable":true/)).toBeInTheDocument();
     });
 
-    it('shows the locked-account message when login answers 403 MfaLockedError', async () => {
+    it('shows the locked-account message when login answers 403 MFA_LOCKED', async () => {
       server.use(
         http.post('/admin/login', () =>
           HttpResponse.json(
             {
               error: {
                 status: 403,
-                name: 'MfaLockedError',
+                name: 'PolicyError',
                 message:
                   'Two-factor authentication was not set up in time; this account is locked.',
-                details: {},
+                details: { code: 'MFA_LOCKED' },
               },
             },
             { status: 403 }

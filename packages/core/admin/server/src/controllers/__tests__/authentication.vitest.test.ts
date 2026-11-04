@@ -6,7 +6,6 @@ import { emitAudit, errors } from '@strapi/utils';
 import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME, MFA_TRUST_COOKIE_NAME } from '../../../../shared/utils/session-auth';
-import { MfaLockedError } from '../../services/mfa-errors';
 // The real implementation, not a canned mock: used wherever a test needs to prove that a field
 // `sanitizeUser` is supposed to strip (e.g. the MFA columns) actually never reaches an
 // `admin.auth.*` event payload. A mock that always returns the same fixed object would make
@@ -526,7 +525,7 @@ describe('authentication controller', () => {
         );
       });
 
-      test('a locked user is refused with MfaLockedError, no session, admin.auth.error emitted', async () => {
+      test('a locked user is refused with MFA_LOCKED, no session, admin.auth.error emitted', async () => {
         mockPassportUser(user);
         const { generateRefreshToken, emit } = buildIssuingStrapi({
           isEnabled: () => true,
@@ -535,14 +534,14 @@ describe('authentication controller', () => {
         });
         const { ctx, cookiesSet } = buildCtx({ email: user.email, password: 'pw' });
 
-        await expect(authenticationController.login(ctx, vi.fn())).rejects.toBeInstanceOf(
-          MfaLockedError
-        );
+        await expect(authenticationController.login(ctx, vi.fn())).rejects.toMatchObject({
+          details: { code: 'MFA_LOCKED' },
+        });
 
         expect(generateRefreshToken).not.toHaveBeenCalled();
         expect(cookiesSet).not.toHaveBeenCalled();
         expect(emitAudit).toHaveBeenCalledWith({ strapi }, 'admin.auth.error', {
-          error: expect.any(MfaLockedError),
+          error: expect.objectContaining({ details: { code: 'MFA_LOCKED' } }),
           provider: 'local',
           reason: 'mfa_locked',
           user: { id: user.id, email: user.email },
@@ -683,9 +682,9 @@ describe('authentication controller', () => {
           { [MFA_TRUST_COOKIE_NAME]: 'trust-token' }
         );
 
-        await expect(authenticationController.login(ctx, vi.fn())).rejects.toBeInstanceOf(
-          MfaLockedError
-        );
+        await expect(authenticationController.login(ctx, vi.fn())).rejects.toMatchObject({
+          details: { code: 'MFA_LOCKED' },
+        });
         expect(consumeTrustedDevice).not.toHaveBeenCalled();
       });
 

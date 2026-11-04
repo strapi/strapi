@@ -7,7 +7,6 @@ import path from 'node:path';
 import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
-import { MfaLockedError } from '../../services/mfa-errors';
 // The real implementation, for the reason `authentication.vitest.test.ts` gives: a canned mock would
 // make every "this field never leaks" assertion vacuous.
 import userService from '../../services/user';
@@ -462,7 +461,9 @@ describe('session issuing paths', () => {
         {
           const enforce = vi.fn(() => Promise.resolve({ outcome: 'refused' }));
           const { ctx, generateRefreshToken } = buildPath(path, { enforce });
-          await expect(invokePath(path, ctx)).rejects.toBeInstanceOf(MfaLockedError);
+          await expect(invokePath(path, ctx)).rejects.toMatchObject({
+            details: { code: 'MFA_LOCKED' },
+          });
           expect(generateRefreshToken).not.toHaveBeenCalled();
         }
         // Graced

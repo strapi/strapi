@@ -69,11 +69,11 @@ actually enforces would exempt a password-holding user from MFA they should be s
 register, register-admin, reset-password) and again on the refresh path (`enforce` calls in
 `controllers/authentication.ts`). Outcomes:
 
-| Outcome   | When                                                 | Effect                                                                             |
-| --------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `none`    | Feature off, mode `off`, exempt, or already enrolled | Session issued normally                                                            |
-| `grace`   | Required, not enrolled, deadline in the future       | Session issued, carrying `mfaEnrolmentRequired: true` and `mfaGraceUntil`          |
-| `refused` | Locked, or the grace deadline has passed             | `MfaLockedError` (403), after emitting `admin.auth.error` with reason `mfa_locked` |
+| Outcome   | When                                                 | Effect                                                                                        |
+| --------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `none`    | Feature off, mode `off`, exempt, or already enrolled | Session issued normally                                                                       |
+| `grace`   | Required, not enrolled, deadline in the future       | Session issued, carrying `mfaEnrolmentRequired: true` and `mfaGraceUntil`                     |
+| `refused` | Locked, or the grace deadline has passed             | `MFA_LOCKED` (403, `PolicyError`), after emitting `admin.auth.error` with reason `mfa_locked` |
 
 On the refresh path a refusal is not an error page: the refresh answers 401 `Invalid refresh
 token`, the cookie is cleared, and the user lands on the login screen, where the next attempt
@@ -312,7 +312,7 @@ applied, reading the settings and the SSO-locked roles once per page.
 - Service: `packages/core/admin/server/src/services/security-settings.ts` (policy read/write, the
   guard, the downgrade gate) and `services/mfa.ts` (`isExemptFromMfa`, `isMfaRequiredFor`,
   `enforce`, `unlock`)
-- Error: `packages/core/admin/server/src/services/mfa-errors.ts`
+- Error codes: `packages/core/admin/shared/utils/mfa-error-codes.ts`
 - Routes: `packages/core/admin/server/src/routes/security-settings.ts`
 - Actions: `packages/core/admin/server/src/config/admin-actions.ts`
 - Contracts: `packages/core/admin/shared/contracts/security-settings.ts`

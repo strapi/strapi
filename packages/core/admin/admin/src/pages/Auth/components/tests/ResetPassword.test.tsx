@@ -158,9 +158,9 @@ describe('ResetPassword', () => {
             {
               error: {
                 status: 403,
-                name: 'MfaLockedError',
+                name: 'PolicyError',
                 message: 'Account locked: two-factor enrolment deadline passed',
-                details: {},
+                details: { code: 'MFA_LOCKED' },
               },
             },
             { status: 403 }

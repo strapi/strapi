@@ -4,7 +4,7 @@
  * The server's message stays English and stays the fallback, but the admin panel maps each code to
  * a translated string (`hooks/useToMessage.ts`), so copy can change on either side without breaking
  * the other and a non-English panel stops showing English errors. Keyed on a code rather than on
- * the message text for the same reason `Login.tsx` keys `MfaLockedError` on its `name`.
+ * the message text.
  */
 export const MFA_ERROR_CODES = {
   /** Wrong, expired, skewed or already-spent code. Deliberately one code, not several. */
@@ -30,6 +30,10 @@ export const MFA_ERROR_CODES = {
   SUPER_ADMIN_TARGET: 'MFA_SUPER_ADMIN_TARGET',
   /** A concurrent save changed what this one would relax. */
   SETTINGS_CONFLICT: 'SECURITY_SETTINGS_CONFLICT',
+  /** The enrolment grace period ran out: password login is refused until an administrator unlocks. */
+  LOCKED: 'MFA_LOCKED',
+  /** The account must keep two-factor authentication, so it cannot be disabled. */
+  REQUIRED: 'MFA_REQUIRED',
 } as const;
 
 export type MfaErrorCode = (typeof MFA_ERROR_CODES)[keyof typeof MFA_ERROR_CODES];

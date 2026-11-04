@@ -65,6 +65,16 @@ const CODE_MESSAGES: Record<MfaErrorCode, MessageDescriptor> = {
     defaultMessage:
       'Someone else changed the two-factor settings while you were saving. Review the current settings and try again.',
   },
+  [MFA_ERROR_CODES.LOCKED]: {
+    id: 'Auth.form.mfa.locked.message',
+    defaultMessage:
+      'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
+  },
+  [MFA_ERROR_CODES.REQUIRED]: {
+    id: 'Settings.profile.form.section.mfa.disable.required',
+    defaultMessage:
+      'Two-factor authentication is required for your account and cannot be disabled.',
+  },
 };
 
 const codeOf = (err: BaseQueryError): MfaErrorCode | undefined => {

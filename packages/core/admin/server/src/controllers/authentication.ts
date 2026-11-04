@@ -5,7 +5,6 @@ import '@strapi/types';
 import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
-import { MfaLockedError } from '../services/mfa-errors';
 import { PASSKEY_VERIFY_FAILED } from '../services/mfa-passkeys';
 import { emitLoginFailure, type LoginFailureReason } from '../audit-logs/auth';
 import { USER_NOT_ACTIVE_MESSAGE } from '../services/auth';
@@ -63,7 +62,7 @@ const issueAdminSession = async (...args: Parameters<typeof issueSession>): Prom
   }
 };
 
-/** Throws `MfaLockedError` on refusal, after emitting `admin.auth.error` like any other failed
+/** Throws a 403 `MFA_LOCKED` `PolicyError` on refusal, after emitting `admin.auth.error` like any other failed
  * login; otherwise returns the `issueSession` options carrying the grace deadline. */
 const enforceMfaOrThrow = async (
   user: AdminUser
@@ -71,7 +70,11 @@ const enforceMfaOrThrow = async (
   const result = await getService('mfa').enforce(user);
 
   if (result.outcome === 'refused') {
-    const error = new MfaLockedError();
+    // `PolicyError`: the authorize middleware turns other 403s into a bare `ctx.forbidden()`
+    const error = new errors.PolicyError(
+      'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
+      { code: MFA_ERROR_CODES.LOCKED }
+    );
     // `email` is optional on the shared `AdminUser` shape, but a row that reached password
     // verification always has one; the guard only keeps the type honest.
     emitLoginFailure(
