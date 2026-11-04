@@ -247,7 +247,7 @@ code set, so nothing from an earlier enrolment survives into the new one. A repl
 authenticator keeps the passkeys and clears only the trusted devices.
 
 Expired challenge and trusted-device rows are swept at bootstrap and again daily at 03:30
-(`server/src/bootstrap.ts`, through `strapi.cron.add`). The sweep is wrapped in a `try`/`catch` so
+(`bootstrap` in `server/src/services/mfa.ts`, called from the admin bootstrap, through `strapi.cron.add`). The sweep is wrapped in a `try`/`catch` so
 cleanup can never stop the admin booting. Nothing about the security of the flow depends on the
 sweep having run: expired rows are rejected, and deleted, on read. Both tables index `expires_at`,
 so the sweep does not read the whole table to find the expired set.

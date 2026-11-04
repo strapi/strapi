@@ -3597,6 +3597,32 @@ describe('mfa service: stale grace stamps', () => {
     expect(set).toHaveBeenCalledWith({ key: 'mfa-feature-state', value: { enabled: false } });
   });
 
+  test('bootstrap with the feature off records the state and schedules nothing', async () => {
+    const { service, strapi, set } = setup({ enabled: false, marker: { enabled: true } });
+    const add = vi.fn();
+    (strapi as unknown as { cron: unknown }).cron = { add };
+
+    await service.bootstrap();
+
+    expect(set).toHaveBeenCalledWith({ key: 'mfa-feature-state', value: { enabled: false } });
+    expect(add).not.toHaveBeenCalled();
+  });
+
+  test('bootstrap with the feature on schedules the daily sweep, and a failure only warns', async () => {
+    const { service, strapi } = setup({ marker: { enabled: true } });
+    const add = vi.fn();
+    (strapi as unknown as { cron: unknown }).cron = { add };
+    (strapi.db.query as Mock).mockImplementationOnce(() => {
+      throw new Error('db down');
+    });
+
+    await expect(service.bootstrap()).resolves.toBeUndefined();
+
+    expect(add).toHaveBeenCalledWith({
+      sweepExpiredMfaRows: { task: expect.any(Function), options: '0 30 3 * * *' },
+    });
+  });
+
   test('clearGraceIfStale clears the stamp of an account that was not required', async () => {
     const { service, users } = setup({ mode: 'optional' });
 

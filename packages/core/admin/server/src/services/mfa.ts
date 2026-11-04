@@ -1621,10 +1621,65 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return result?.count ?? 0;
   };
 
+  const warnOnFailure = async (what: string, run: () => Promise<unknown>) => {
+    try {
+      await run();
+    } catch (error) {
+      strapi.log.warn(
+        `Could not ${what}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  };
+
+  /**
+   * Boot-time housekeeping, called from the admin bootstrap. None of it may stop the admin from
+   * booting: expired and orphaned rows are already refused on read.
+   */
+  const bootstrap = async (): Promise<void> => {
+    // In every state of the flag: the boot that turns it back on needs to know it was off
+    await warnOnFailure('record the two-factor feature state', syncFeatureState);
+
+    if (!isEnabled()) {
+      return;
+    }
+
+    if (!canEncryptSecrets()) {
+      strapi.log.error(
+        'Admin two-factor authentication is enabled but the admin encryption key (admin.secrets.encryptionKey, usually ENCRYPTION_KEY) is not configured, so nobody can set it up. Set the key and restart.'
+      );
+    }
+
+    const sweep = () =>
+      warnOnFailure('sweep expired two-factor challenges or trusted devices', async () => {
+        await sweepExpiredChallenges();
+        await trustedDevices.sweepExpiredTrustedDevices();
+      });
+
+    await sweep();
+    strapi.cron.add({ sweepExpiredMfaRows: { task: sweep, options: '0 30 3 * * *' } });
+
+    // Boot only: rows lose their owner's enrolment only through a schema change, which restarts
+    await warnOnFailure('reconcile two-factor rows with admin users', async () => {
+      const removed = await reconcileOrphanedRows();
+      if (removed > 0) {
+        strapi.log.warn(
+          `Removed ${removed} two-factor rows belonging to deleted or unenrolled admin users.`
+        );
+      }
+    });
+
+    // In the startup log, where an operator looks, rather than as silently hidden passkey surfaces
+    await warnOnFailure(
+      'check the passkey relying-party configuration',
+      passkeys.warnIfPasskeysMisconfigured
+    );
+  };
+
   /** The TOTP step the server is on now, for diagnosing clock drift (`admin:mfa-state`). */
   const currentStep = (): number => currentTotpStep({ step: config().step });
 
   return {
+    bootstrap,
     isEnabled,
     canEncryptSecrets,
     config,
