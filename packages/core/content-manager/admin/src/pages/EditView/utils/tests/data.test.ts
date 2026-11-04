@@ -385,6 +385,37 @@ describe('data', () => {
           { id: 1, __temp_key__: 'a0', name: 'Edited', category: noRelation },
         ]);
       });
+
+      it('should not give the components filled in from another locale the ids of the saved ones', () => {
+        // "Fill in from another locale" sends the source locale's components without ids and with
+        // temp keys regenerated from a0, so they reuse the keys of the saved rows of this locale.
+        const { data } = handleInvisibleAttributes(
+          {
+            single: { name: 'Plat (en)', category: relation(3) },
+            list: [
+              { __temp_key__: 'a0', name: 'Dish 1 (en)', category: relation(4) },
+              { __temp_key__: 'a1', name: 'Dish 2 (en)', category: noRelation },
+            ],
+          },
+          {
+            schema,
+            components,
+            initialValues: {
+              single: { id: 1, name: 'Plat', category: noRelation },
+              list: [
+                { id: 10, __temp_key__: 'a0', name: 'Plat 1', category: noRelation },
+                { id: 11, __temp_key__: 'a1', name: 'Plat 2', category: noRelation },
+              ],
+            },
+          }
+        );
+
+        expect(data.single).toEqual({ name: 'Plat (en)', category: relation(3) });
+        expect(data.list).toEqual([
+          { __temp_key__: 'a0', name: 'Dish 1 (en)', category: relation(4) },
+          { __temp_key__: 'a1', name: 'Dish 2 (en)', category: noRelation },
+        ]);
+      });
     });
 
     it('should preserve fields with visible: false when they have initialValues', () => {
