@@ -2,6 +2,7 @@ import type { Schema } from '@strapi/types';
 import { isEqual } from 'lodash';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { registerAuditEvents } from './audit-logs';
+import { localeForOriginalLookup } from './services/original-locale';
 import { getService } from './utils';
 import { getOriginalNonLocalizedLookup } from './utils/non-localized-original-data';
 
@@ -50,12 +51,27 @@ const registerModelsHooks = () => {
       defaultLocale,
     });
 
-    const originalData = originalWhere
+    let originalData = originalWhere
       ? await strapi.db.query(schema.uid).findOne({
           where: originalWhere,
           populate: attributesToPopulate,
         })
       : null;
+
+    // A new locale has no row yet. Compare a sibling in the same publication
+    // status so copied non-localized values do not count as a change and
+    // rewrite every locale. `*` is not a stored locale, so a wildcard stays on
+    // the default-locale lookup above.
+    const locale = localeForOriginalLookup(localeParam);
+    if (!originalData && originalWhere && locale) {
+      originalData = await strapi.db.query(schema.uid).findOne({
+        where: {
+          ...originalWhere,
+          locale: { $ne: locale },
+        },
+        populate: attributesToPopulate,
+      });
+    }
 
     // Get the result of the document service action
     const result = (await next()) as any;
