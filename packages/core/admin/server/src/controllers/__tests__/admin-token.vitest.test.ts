@@ -51,9 +51,92 @@ describe('Admin Token Controller', () => {
       expect(exists).toHaveBeenCalledWith({ name: createBody.name });
       expect(create).toHaveBeenCalledWith(
         expect.objectContaining({ kind: 'admin', name: createBody.name }),
-        ownerUser
+        ownerUser,
+        undefined
       );
       expect(created).toHaveBeenCalled();
+    });
+
+    test('Passes the calling token permissions when the request is made with an admin token', async () => {
+      const adminPermissions = [{ action: 'admin::admin-tokens.create', subject: null }];
+      const create = vi.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
+      const exists = vi.fn(() => false);
+      const created = vi.fn();
+      const ctx = createContext(
+        { body: createBody },
+        {
+          created,
+          state: {
+            user: ownerUser,
+            auth: { strategy: { name: 'admin-token' }, credentials: { id: 7, adminPermissions } },
+          },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { exists, create },
+          },
+        },
+      } as any;
+
+      await adminTokenController.create(ctx as any);
+
+      expect(create).toHaveBeenCalledWith(expect.anything(), ownerUser, adminPermissions);
+    });
+
+    test('Passes no permissions as an empty ceiling for a token without loaded permissions', async () => {
+      const create = vi.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
+      const exists = vi.fn(() => false);
+      const created = vi.fn();
+      const ctx = createContext(
+        { body: createBody },
+        {
+          created,
+          state: {
+            user: ownerUser,
+            auth: { strategy: { name: 'admin-token' }, credentials: { id: 7 } },
+          },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { exists, create },
+          },
+        },
+      } as any;
+
+      await adminTokenController.create(ctx as any);
+
+      expect(create).toHaveBeenCalledWith(expect.anything(), ownerUser, []);
+    });
+
+    test('Passes no calling token for an admin user session', async () => {
+      const create = vi.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
+      const exists = vi.fn(() => false);
+      const created = vi.fn();
+      const ctx = createContext(
+        { body: createBody },
+        {
+          created,
+          state: { user: ownerUser, auth: { strategy: { name: 'admin' }, credentials: ownerUser } },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { exists, create },
+          },
+        },
+      } as any;
+
+      await adminTokenController.create(ctx as any);
+
+      expect(create).toHaveBeenCalledWith(expect.anything(), ownerUser, undefined);
     });
 
     test('Throws when name is already taken', async () => {
@@ -99,7 +182,11 @@ describe('Admin Token Controller', () => {
 
       await adminTokenController.create(ctx as any);
 
-      expect(create).toHaveBeenCalledWith(expect.objectContaining({ lifespan }), ownerUser);
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ lifespan }),
+        ownerUser,
+        undefined
+      );
       expect(created).toHaveBeenCalled();
     });
 
@@ -313,6 +400,65 @@ describe('Admin Token Controller', () => {
       expect(regenerate).not.toHaveBeenCalled();
     });
 
+    test('Forbids regenerating a sibling token with an admin token of the same owner', async () => {
+      const regenerate = vi.fn();
+      const getById = vi.fn().mockResolvedValue(baseAdminToken);
+      const forbidden = vi.fn();
+      const ctx = createContext(
+        { params: { id: baseAdminToken.id } },
+        {
+          forbidden,
+          state: {
+            user: ownerUser,
+            auth: { strategy: { name: 'admin-token' }, credentials: { id: 2 } },
+          },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { regenerate, getById },
+          },
+        },
+      } as any;
+
+      await adminTokenController.regenerate(ctx as any);
+
+      expect(forbidden).toHaveBeenCalled();
+      expect(regenerate).not.toHaveBeenCalled();
+    });
+
+    test('Regenerates the admin token the request is made with', async () => {
+      const tokenWithKey = { ...baseAdminToken, accessKey: 'new-key' };
+      const regenerate = vi.fn().mockResolvedValue(tokenWithKey);
+      const getById = vi.fn().mockResolvedValue(baseAdminToken);
+      const created = vi.fn();
+      const ctx = createContext(
+        { params: { id: String(baseAdminToken.id) } },
+        {
+          created,
+          state: {
+            user: ownerUser,
+            auth: { strategy: { name: 'admin-token' }, credentials: { id: baseAdminToken.id } },
+          },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { regenerate, getById },
+          },
+        },
+      } as any;
+
+      await adminTokenController.regenerate(ctx as any);
+
+      expect(regenerate).toHaveBeenCalled();
+      expect(created).toHaveBeenCalledWith({ data: tokenWithKey });
+    });
+
     test('Super-admin does NOT bypass owner restriction', async () => {
       const regenerate = vi.fn();
       const getById = vi.fn().mockResolvedValue(baseAdminToken);
@@ -387,6 +533,65 @@ describe('Admin Token Controller', () => {
       await adminTokenController.get(ctx as any);
 
       expect(getById).toHaveBeenCalledTimes(2);
+      expect(send).toHaveBeenCalledWith({ data: tokenWithKey });
+    });
+
+    test('Gets a sibling token without accessKey with an admin token of the same owner', async () => {
+      const getById = vi.fn().mockResolvedValue(baseAdminToken);
+      const send = vi.fn();
+      const ctx = createContext(
+        { params: { id: baseAdminToken.id } },
+        {
+          send,
+          state: {
+            user: ownerUser,
+            auth: { strategy: { name: 'admin-token' }, credentials: { id: 2 } },
+          },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { getById },
+          },
+        },
+      } as any;
+
+      await adminTokenController.get(ctx as any);
+
+      expect(getById).toHaveBeenCalledTimes(1);
+      expect(send).toHaveBeenCalledWith({ data: baseAdminToken });
+    });
+
+    test('Gets the admin token the request is made with, with its accessKey', async () => {
+      const tokenWithKey = { ...baseAdminToken, accessKey: 'plaintext-key' };
+      const getById = vi
+        .fn()
+        .mockResolvedValueOnce(baseAdminToken)
+        .mockResolvedValueOnce(tokenWithKey);
+      const send = vi.fn();
+      const ctx = createContext(
+        { params: { id: baseAdminToken.id } },
+        {
+          send,
+          state: {
+            user: ownerUser,
+            auth: { strategy: { name: 'admin-token' }, credentials: { id: baseAdminToken.id } },
+          },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { getById },
+          },
+        },
+      } as any;
+
+      await adminTokenController.get(ctx as any);
+
       expect(send).toHaveBeenCalledWith({ data: tokenWithKey });
     });
 
@@ -490,7 +695,7 @@ describe('Admin Token Controller', () => {
 
       await adminTokenController.update(ctx as any);
 
-      expect(update).toHaveBeenCalledWith(id, updateBody);
+      expect(update).toHaveBeenCalledWith(id, updateBody, undefined);
       expect(send).toHaveBeenCalled();
     });
 
@@ -514,8 +719,38 @@ describe('Admin Token Controller', () => {
 
       await adminTokenController.update(ctx as any);
 
-      expect(update).toHaveBeenCalledWith(id, updateBody);
+      expect(update).toHaveBeenCalledWith(id, updateBody, undefined);
       expect(send).toHaveBeenCalled();
+    });
+
+    test('Passes the calling token permissions when the request is made with an admin token', async () => {
+      const adminPermissions = [{ action: 'admin::admin-tokens.update', subject: null }];
+      const update = vi.fn().mockResolvedValue({ ...baseAdminToken, ...updateBody });
+      const getById = vi.fn(() => baseAdminToken);
+      const getByName = vi.fn(() => null);
+      const send = vi.fn();
+      const ctx = createContext(
+        { body: updateBody, params: { id } },
+        {
+          send,
+          state: {
+            user: ownerUser,
+            auth: { strategy: { name: 'admin-token' }, credentials: { id: 7, adminPermissions } },
+          },
+        }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { getById, getByName, update },
+          },
+        },
+      } as any;
+
+      await adminTokenController.update(ctx as any);
+
+      expect(update).toHaveBeenCalledWith(id, updateBody, adminPermissions);
     });
 
     test('Forbids update when caller is not owner and not super-admin', async () => {

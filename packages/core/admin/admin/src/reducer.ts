@@ -76,8 +76,12 @@ const adminSlice = createSlice({
 
       if (!persist) {
         setCookie(AUTH_COOKIE_NAME, token);
+        // Drop a previous "remember me" token so getToken() cannot keep
+        // authenticating as the last persisted user after a new session.
+        window.localStorage.removeItem(STORAGE_KEYS.TOKEN);
       } else {
         window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+        deleteCookie(AUTH_COOKIE_NAME);
       }
       window.localStorage.setItem(STORAGE_KEYS.STATUS, 'true');
       state.token = token;
