@@ -147,7 +147,9 @@ const getComponents = async <TUID extends UID.Schema>(
     return {} as LoadedComponents<TUID>;
   }
 
-  return strapi.db.query(uid).load(entity, componentAttributes) as Promise<LoadedComponents<TUID>>;
+  return await (strapi.db.query(uid).load(entity, componentAttributes) as Promise<
+    LoadedComponents<TUID>
+  >);
 };
 
 /*
@@ -907,7 +909,7 @@ const createComponent = async <TUID extends UID.Component>(
   // Make sure we don't save the component with a pre-defined ID.
   const entryData = assignComponentData(schema, componentData, omit(data, 'id'));
 
-  return strapi.db.query(uid).create({ data: entryData });
+  return await strapi.db.query(uid).create({ data: entryData });
 };
 
 // components can have nested compos so this must be recursive
@@ -955,7 +957,7 @@ const updateOrCreateComponent = async <TUID extends UID.Component>(
   // update
   if ('id' in value && typeof value.id !== 'undefined') {
     // TODO: verify the compo is associated with the entity
-    return updateComponent(componentUID, { id: value.id }, value, previous);
+    return await updateComponent(componentUID, { id: value.id }, value, previous);
   }
 
   // create

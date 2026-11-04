@@ -133,6 +133,27 @@ describe('licenseLimitInformation (extended fields)', () => {
     process.env = OLD_ENV;
   });
 
+  it('sends license feature options and limits as numbers', async () => {
+    createStrapiMock({
+      ee: {
+        // `features.list()` reads numeric string options as numbers (see core ee feature-options).
+        features: {
+          list: () => [{ name: 'cms-content-releases', options: { maximumReleases: 90 } }],
+          isEnabled: () => true,
+        },
+      },
+    });
+    stubUserServices();
+
+    const data = JSON.parse(JSON.stringify((await adminController.licenseLimitInformation()).data));
+
+    expect(data.features).toEqual([
+      { name: 'cms-content-releases', options: { maximumReleases: 90 } },
+    ]);
+    expect(typeof data.features[0].options.maximumReleases).toBe('number');
+    expect(typeof data.entitlements[0].limits[0].value).toBe('number');
+  });
+
   it('reports online mode with registry sync metadata from ee_information', async () => {
     createStrapiMock({
       stored: {
