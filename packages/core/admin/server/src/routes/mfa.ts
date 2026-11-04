@@ -28,6 +28,27 @@ const credentialGuarded = (method: string, path: string, handler: string) => ({
   },
 });
 
+/** `withPermission` plus the limiter: an administrator action on another user that verifies the
+ * acting administrator's own password and code (see `assertActorReauth`). */
+const credentialGuardedWithPermission = (
+  method: string,
+  path: string,
+  handler: string,
+  action: string
+) => ({
+  method,
+  path,
+  handler,
+  config: {
+    policies: [
+      'admin::isMfaEnabled',
+      'admin::isAuthenticatedAdmin',
+      { name: 'admin::hasPermissions', config: { actions: [action] } },
+    ],
+    middlewares: ['admin::rateLimit'],
+  },
+});
+
 const withPermission = (method: string, path: string, handler: string, action: string) => ({
   method,
   path,
@@ -54,8 +75,19 @@ export default [
   authenticated('DELETE', '/mfa/trusted-devices', 'mfa.revokeAllTrustedDevices'),
   authenticated('DELETE', '/mfa/trusted-devices/:id', 'mfa.revokeTrustedDevice'),
   // Administrator actions on another user, gated like the users API itself.
-  withPermission('POST', '/mfa/users/:id/unlock', 'mfa.unlockUser', 'admin::users.update'),
-  withPermission('POST', '/mfa/users/:id/reset', 'mfa.resetUser', 'admin::users.update'),
+  // These three lower another user's protection, so the acting administrator re-authenticates.
+  credentialGuardedWithPermission(
+    'POST',
+    '/mfa/users/:id/unlock',
+    'mfa.unlockUser',
+    'admin::users.update'
+  ),
+  credentialGuardedWithPermission(
+    'POST',
+    '/mfa/users/:id/reset',
+    'mfa.resetUser',
+    'admin::users.update'
+  ),
   withPermission(
     'GET',
     '/mfa/users/:id/trusted-devices',
@@ -79,9 +111,10 @@ export default [
   // the password is checked before ownership is known, that is no bound at all.
   credentialGuarded('POST', '/mfa/passkeys/remove', 'mfa.deletePasskey'),
   withPermission('GET', '/mfa/users/:id/passkeys', 'mfa.listUserPasskeys', 'admin::users.read'),
-  withPermission(
-    'DELETE',
-    '/mfa/users/:id/passkeys',
+  // POST, not DELETE, for the reason `/mfa/passkeys/remove` gives: it carries credentials.
+  credentialGuardedWithPermission(
+    'POST',
+    '/mfa/users/:id/passkeys/remove',
     'mfa.deleteUserPasskeys',
     'admin::users.update'
   ),

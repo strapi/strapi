@@ -1515,6 +1515,40 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * Re-authentication for an administrator acting on *another* user's second factor (reset, unlock,
+   * removing their passkeys): each lowers someone else's protection, so a stolen administrator
+   * session alone must not be enough. The same rule the security settings apply to a downgrade:
+   *  - an actor with no local password (SSO only) has nothing to present and is let through on
+   *    session authority, as for the passkeys toggle;
+   *  - otherwise the password, and a live code too when the actor has a second factor.
+   * A wrong password charges no throttle; a wrong code charges both tiers, through `assertFactor`.
+   */
+  const assertActorReauth = async (
+    actorId: string,
+    credentials: { password?: string; code?: string }
+  ): Promise<void> => {
+    const actor = await loadUser(actorId);
+    if (!actor.password) {
+      return;
+    }
+    if (!credentials.password) {
+      throw new ValidationError('Your password is required for this action', {
+        code: MFA_ERROR_CODES.REAUTH_REQUIRED,
+      });
+    }
+    if (isEnrolledRow(actor)) {
+      if (!credentials.code) {
+        throw new ValidationError('A two-factor code is required for this action', {
+          code: MFA_ERROR_CODES.REAUTH_REQUIRED,
+        });
+      }
+      await assertPasswordAndFactor(actorId, credentials.password, credentials.code.trim());
+      return;
+    }
+    await assertPassword(actor, credentials.password);
+  };
+
+  /**
    * One transaction, all of it: a failure on the user `update` alone leaves `mfaEnabledAt` set with
    * the recovery codes already deleted -- a permanent lockout with no way back but the CLI reset.
    */
@@ -1620,6 +1654,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     verifyChallenge,
     assertFactor,
     assertPasswordAndFactor,
+    assertActorReauth,
     disable,
     sweepExpiredChallenges,
     reconcileOrphanedRows,

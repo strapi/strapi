@@ -6,6 +6,7 @@ import {
   validateMfaCodeInput,
   validateMfaPasswordAndCodeInput,
   validateMfaNoticesSeenInput,
+  validateMfaActorReauthInput,
   validatePasskeyOptionsInput,
   validateRegisterPasskeyInput,
   validateRemovePasskeyInput,
@@ -17,6 +18,8 @@ import {
   clearTrustCookie,
 } from '../../../shared/utils/session-auth';
 import { MfaRequiredError } from '../services/mfa-errors';
+import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
+import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 import { PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from '../services/mfa-passkeys';
 
 import type { AdminUser } from '../../../shared/contracts/shared';
@@ -36,12 +39,13 @@ import type {
   RegisterPasskey,
   DeletePasskey,
   ListUserPasskeys,
+  ActorReauth,
 } from '../../../shared/contracts/mfa';
 
 /** Every route carries `admin::isMfaEnabled`, which 404s before any handler runs. */
 const mfaService = () => getService('mfa');
 
-const { ValidationError } = errors;
+const { ForbiddenError, ValidationError } = errors;
 
 type MfaService = ReturnType<typeof mfaService>;
 
@@ -57,6 +61,40 @@ const assertPasskeyRegistrationAllowed = async (mfa: MfaService, userId: string)
 };
 
 const currentSessionIdOf = (ctx: Context) => (ctx.state.session as { id?: string } | undefined)?.id;
+
+/**
+ * The gate every administrator action that lowers *another* user's protection shares (reset,
+ * unlock, removing their passkeys). Run after the target is known and before anything is spent:
+ *
+ * - Only a super admin may do it to a super admin. `admin::users.update` alone would otherwise
+ *   let a lesser administrator strip a super admin's second factor and hand that account a fresh,
+ *   password-only grace window.
+ * - The acting administrator re-authenticates (`assertActorReauth`), so a stolen administrator
+ *   session is not enough on its own.
+ */
+/** Tolerates a row loaded without roles, which then reads as holding none. */
+const isSuperAdmin = (user: { roles?: Array<{ code?: string }> | null }) =>
+  (user.roles ?? []).some((role) => role.code === SUPER_ADMIN_CODE);
+
+const authorizeActionOnUser = async (
+  ctx: Context,
+  mfa: MfaService,
+  target: AdminUser
+): Promise<void> => {
+  const actor = ctx.state.user as AdminUser;
+  if (isSuperAdmin(target) && !isSuperAdmin(actor)) {
+    throw new ForbiddenError(
+      'Only a super admin can change the two-factor settings of a super admin',
+      {
+        code: MFA_ERROR_CODES.SUPER_ADMIN_TARGET,
+      }
+    );
+  }
+
+  await validateMfaActorReauthInput(ctx.request.body ?? {});
+  const { password, code } = (ctx.request.body ?? {}) as ActorReauth.Request['body'];
+  await mfa.assertActorReauth(String(actor.id), { password, code });
+};
 
 export default {
   async me(ctx: Context) {
@@ -221,6 +259,8 @@ export default {
       return ctx.notFound('User does not exist');
     }
 
+    await authorizeActionOnUser(ctx, mfa, target);
+
     const unlocked = await mfa.unlock(String(target.id), { byUserId: String(ctx.state.user.id) });
     if (!unlocked) {
       return ctx.badRequest('This account is not locked');
@@ -256,6 +296,8 @@ export default {
         'Use the two-factor settings in your profile to remove your own authenticator.'
       );
     }
+
+    await authorizeActionOnUser(ctx, mfa, target);
 
     await mfa.resetUser(String(target.id), { byUserId: String(ctx.state.user.id) });
 
@@ -454,6 +496,8 @@ export default {
     if (!target) {
       return ctx.notFound('User does not exist');
     }
+
+    await authorizeActionOnUser(ctx, mfa, target);
 
     const targetId = String(target.id);
     const byUserId = String(ctx.state.user.id);

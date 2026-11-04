@@ -100,10 +100,13 @@ test.describe('Two-factor enforcement', () => {
     await expect(page.getByRole('heading', { name: /^Edit / })).toBeVisible();
     await expect(page.getByText(/^Locked for password login since/)).toBeVisible();
     await page.getByRole('button', { name: 'Unlock' }).click();
-    await page
-      .getByRole('alertdialog', { name: 'Unlock this account?' })
-      .getByRole('button', { name: 'Unlock' })
-      .click();
+    // Unlocking lowers someone else's protection, so the administrator confirms it is them: their
+    // own password, and a fresh code (the login above spent the current step).
+    const unlockDialog = page.getByRole('dialog', { name: 'Unlock this account?' });
+    await unlockDialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
+    await waitForNextTotpStep();
+    await unlockDialog.getByLabel('Authentication code*').fill(totpFor(admin.secret));
+    await unlockDialog.getByRole('button', { name: 'Unlock' }).click();
     await expect(page.getByText('Account unlocked.')).toBeVisible();
     await expect(
       page.getByText(/^Not set up\. A new \d+-day grace period starts at their next login\.$/)

@@ -118,10 +118,29 @@ Sessions are invalidated through `strapi.sessionManager('admin')`. If the admin 
 registered, the lock and its event still land and a warning is logged, rather than the lock
 silently failing.
 
+## Acting on another user's factor
+
+Unlocking, resetting and removing another user's passkeys each lower that user's protection, so
+all three routes share one gate (`authorizeActionOnUser` in `controllers/mfa.ts`), applied after
+the target is found and before anything is spent:
+
+- **Only a super admin may do it to a super admin**, or `admin::users.update` alone would let a
+  lesser administrator strip a super admin's factor and hand that account a fresh, password-only
+  grace window. Otherwise 403 with code `MFA_SUPER_ADMIN_TARGET`, before any credential is checked.
+- **The acting administrator re-authenticates** (`assertActorReauth` in `services/mfa.ts`), with
+  their own `password` and `code` in the body: the password, plus a TOTP or recovery code when they
+  have a second factor. An administrator with no local password (SSO only) has nothing to present
+  and acts on session authority, as for the passkeys toggle. A missing credential is 400 with code
+  `MFA_REAUTH_REQUIRED`. A wrong password charges no throttle; a wrong code charges both tiers.
+
+The three routes carry `admin::rateLimit`, keyed per account and route pattern. In the panel,
+`TwoFactorPanel` collects what `/mfa/me` says the viewer owes through `ConfirmDowngradeDialog`.
+The CLI commands need none of this: whoever runs them already has the server.
+
 ## Unlocking
 
 ```
-POST /admin/mfa/users/:id/unlock     # requires admin::users.update
+POST /admin/mfa/users/:id/unlock     # requires admin::users.update, body { password?, code? }
 ```
 
 204 on success, 404 for an unknown user, 400 when the account is not locked. It clears both the
@@ -140,7 +159,7 @@ deliberately separate operations.
 ## Resetting another user's factor
 
 ```
-POST /admin/mfa/users/:id/reset      # requires admin::users.update
+POST /admin/mfa/users/:id/reset      # requires admin::users.update, body { password?, code? }
 ```
 
 Strips the account's second factor entirely (authenticator, recovery codes, passkeys and

@@ -710,8 +710,14 @@ describe('mfa controller', () => {
     const build = (unlockResult: boolean, userExists = true) => {
       const unlock = vi.fn(() => Promise.resolve(unlockResult));
       const findOne = vi.fn(() => Promise.resolve(userExists ? { id: 3 } : null));
+      const assertActorReauth = vi.fn(() => Promise.resolve());
       setStrapi({
-        admin: { services: { mfa: { isEnabled: () => true, unlock }, user: { findOne } } },
+        admin: {
+          services: {
+            mfa: { isEnabled: () => true, unlock, assertActorReauth },
+            user: { findOne },
+          },
+        },
       });
       const notFound = vi.fn();
       const badRequest = vi.fn();
@@ -751,12 +757,114 @@ describe('mfa controller', () => {
     });
   });
 
+  /** Decision A: an administrator lowering *another* user's protection re-authenticates, and only a
+   * super admin may do it to a super admin. Shared by unlock, reset and removing passkeys. */
+  describe('administrator actions on another user', () => {
+    const SUPER = { id: 1, code: 'strapi-super-admin' };
+    const EDITOR = { id: 2, code: 'strapi-editor' };
+
+    const build = (options: {
+      actorRoles: unknown[];
+      targetRoles: unknown[];
+      reauthFails?: boolean;
+    }) => {
+      const unlock = vi.fn(() => Promise.resolve(true));
+      const resetUser = vi.fn(() => Promise.resolve());
+      const clearPasskeys = vi.fn(() => Promise.resolve(0));
+      const assertActorReauth = vi.fn(() =>
+        options.reauthFails ? Promise.reject(new Error('Invalid credentials')) : Promise.resolve()
+      );
+      const findOne = vi.fn(() => Promise.resolve({ id: 3, roles: options.targetRoles }));
+      setStrapi({
+        admin: {
+          services: {
+            mfa: { isEnabled: () => true, unlock, resetUser, clearPasskeys, assertActorReauth },
+            user: { findOne },
+          },
+        },
+      });
+      const ctx = createContext(
+        {},
+        {
+          state: { user: { id: 7, roles: options.actorRoles } },
+          params: { id: '3' },
+          notFound: vi.fn(),
+          badRequest: vi.fn(),
+          request: { query: {}, body: { password: 'pw', code: '123456' } },
+        }
+      ) as any;
+      return { ctx, unlock, resetUser, clearPasskeys, assertActorReauth };
+    };
+
+    const actions = [
+      ['unlockUser', 'unlock'],
+      ['resetUser', 'resetUser'],
+      ['deleteUserPasskeys', 'clearPasskeys'],
+    ] as const;
+
+    test.each(actions)(
+      '%s checks the acting administrator’s own credentials first',
+      async (handler, effect) => {
+        const doubles = build({ actorRoles: [EDITOR], targetRoles: [EDITOR] });
+
+        await mfaController[handler](doubles.ctx);
+
+        expect(doubles.assertActorReauth).toHaveBeenCalledWith('7', {
+          password: 'pw',
+          code: '123456',
+        });
+        expect(doubles.assertActorReauth.mock.invocationCallOrder[0]).toBeLessThan(
+          doubles[effect].mock.invocationCallOrder[0]
+        );
+      }
+    );
+
+    test.each(actions)(
+      '%s does nothing when the re-authentication fails',
+      async (handler, effect) => {
+        const doubles = build({ actorRoles: [EDITOR], targetRoles: [EDITOR], reauthFails: true });
+
+        await expect(mfaController[handler](doubles.ctx)).rejects.toThrow('Invalid credentials');
+        expect(doubles[effect]).not.toHaveBeenCalled();
+      }
+    );
+
+    test.each(actions)(
+      '%s is 403 for a non-super-admin acting on a super admin',
+      async (handler, effect) => {
+        const doubles = build({ actorRoles: [EDITOR], targetRoles: [SUPER] });
+
+        await expect(mfaController[handler](doubles.ctx)).rejects.toMatchObject({
+          name: 'ForbiddenError',
+          details: { code: 'MFA_SUPER_ADMIN_TARGET' },
+        });
+        // Refused before any credential is checked, so no attempt is spent on it.
+        expect(doubles.assertActorReauth).not.toHaveBeenCalled();
+        expect(doubles[effect]).not.toHaveBeenCalled();
+      }
+    );
+
+    test.each(actions)('%s lets a super admin act on a super admin', async (handler, effect) => {
+      const doubles = build({ actorRoles: [SUPER], targetRoles: [SUPER] });
+
+      await mfaController[handler](doubles.ctx);
+
+      expect(doubles[effect]).toHaveBeenCalled();
+    });
+  });
+
   describe('resetUser', () => {
     const build = (userExists = true, targetId = '3') => {
       const resetUser = vi.fn(() => Promise.resolve());
       const findOne = vi.fn(() => Promise.resolve(userExists ? { id: Number(targetId) } : null));
+      const assertActorReauth = vi.fn(() => Promise.resolve());
       setStrapi({
-        admin: { services: { mfa: { isEnabled: () => true, resetUser }, user: { findOne } } },
+        admin: {
+          services: {
+            mfa: { isEnabled: () => true, resetUser, assertActorReauth },
+            user: { findOne },
+          },
+        },
       });
       const notFound = vi.fn();
       const ctx = createContext(
@@ -1007,6 +1115,7 @@ describe('mfa controller', () => {
         clearPasskeys,
         recordEvent,
         notify,
+        assertActorReauth: vi.fn(() => Promise.resolve()),
         ...overrides,
       };
 
@@ -1028,6 +1137,7 @@ describe('mfa controller', () => {
         clearPasskeys: mfa.clearPasskeys,
         recordEvent: mfa.recordEvent,
         notify: mfa.notify,
+        assertActorReauth: mfa.assertActorReauth,
         findOne,
       };
     };

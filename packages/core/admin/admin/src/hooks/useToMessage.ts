@@ -52,6 +52,14 @@ const CODE_MESSAGES: Record<MfaErrorCode, MessageDescriptor> = {
     defaultMessage:
       'Two-factor authentication cannot be required yet: nobody could set it up, because the server has no encryption key. Set ENCRYPTION_KEY and restart the server.',
   },
+  [MFA_ERROR_CODES.REAUTH_REQUIRED]: {
+    id: 'Settings.permissions.users.mfa.reauth.required',
+    defaultMessage: 'Confirm your own password, and a code if you use two-factor authentication.',
+  },
+  [MFA_ERROR_CODES.SUPER_ADMIN_TARGET]: {
+    id: 'Settings.permissions.users.mfa.superAdminOnly',
+    defaultMessage: 'Only a super admin can change the two-factor settings of a super admin.',
+  },
   [MFA_ERROR_CODES.SETTINGS_CONFLICT]: {
     id: 'Settings.security.mfa.error.conflict',
     defaultMessage:

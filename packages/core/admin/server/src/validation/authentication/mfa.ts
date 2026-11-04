@@ -69,6 +69,17 @@ const passwordAndCodeSchema = yup
   .required()
   .noUnknown();
 
+/** An administrator acting on another user. Both optional here: an SSO-only administrator has no
+ * password to give, and one without a second factor has no code. The service decides which the
+ * actor owes (`assertActorReauth`). */
+const actorReauthSchema = yup
+  .object()
+  .shape({
+    password: yup.string().optional(),
+    code: yup.string().min(6).max(32).optional(),
+  })
+  .noUnknown();
+
 /** `name` is bounded 1..50 *after* trimming, hence a `test` rather than `.max(50)`; the `.max(200)`
  * only stops the test running over something absurd. `registration` is left to the library, as
  * `assertion` is above. */
@@ -113,6 +124,7 @@ export const validateMfaEnrolInput = validateYupSchema(enrolSchema);
 export const validateMfaCodeInput = validateYupSchema(codeOnlySchema);
 export const validateMfaPasswordAndCodeInput = validateYupSchema(passwordAndCodeSchema);
 export const validateMfaNoticesSeenInput = validateYupSchema(noticesSeenSchema);
+export const validateMfaActorReauthInput = validateYupSchema(actorReauthSchema);
 // Its own export, so the passkey route can diverge from the two TOTP ones.
 export const validatePasskeyOptionsInput = validateYupSchema(passwordAndCodeSchema);
 export const validateRemovePasskeyInput = validateYupSchema(removePasskeySchema);

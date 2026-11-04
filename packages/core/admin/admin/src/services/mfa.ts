@@ -95,13 +95,21 @@ const mfaService = adminApi
         invalidatesTags: ['MfaNotices'],
       }),
       /** The `User` tag makes the edit page re-read `mfaLockedAt`/`mfaGraceUntil` without a reload. */
-      unlockUserMfa: builder.mutation<void, UnlockUser.Params>({
-        query: ({ id }) => ({ method: 'POST', url: `/admin/mfa/users/${id}/unlock` }),
+      unlockUserMfa: builder.mutation<void, UnlockUser.Params & UnlockUser.Request['body']>({
+        query: ({ id, ...credentials }) => ({
+          method: 'POST',
+          url: `/admin/mfa/users/${id}/unlock`,
+          data: credentials,
+        }),
         invalidatesTags: (_res, _err, { id }) => [{ type: 'User', id }],
       }),
       /** Both device tags too, because the reset clears trusted devices and passkeys with the factor. */
-      resetUserMfa: builder.mutation<void, ResetUser.Params>({
-        query: ({ id }) => ({ method: 'POST', url: `/admin/mfa/users/${id}/reset` }),
+      resetUserMfa: builder.mutation<void, ResetUser.Params & ResetUser.Request['body']>({
+        query: ({ id, ...credentials }) => ({
+          method: 'POST',
+          url: `/admin/mfa/users/${id}/reset`,
+          data: credentials,
+        }),
         invalidatesTags: (_res, _err, { id }) => [
           { type: 'User', id },
           { type: 'UserTrustedDevices', id },
@@ -193,8 +201,16 @@ const mfaService = adminApi
       }),
       /** Both passkey tags, as `revokeUserTrustedDevices` does: an administrator may be on their own
        * user page. */
-      deleteUserPasskeys: builder.mutation<void, DeleteUserPasskeys.Params>({
-        query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/users/${id}/passkeys` }),
+      /** POST with a body, not DELETE: it carries the administrator's own credentials. */
+      deleteUserPasskeys: builder.mutation<
+        void,
+        DeleteUserPasskeys.Params & DeleteUserPasskeys.Request['body']
+      >({
+        query: ({ id, ...credentials }) => ({
+          method: 'POST',
+          url: `/admin/mfa/users/${id}/passkeys/remove`,
+          data: credentials,
+        }),
         invalidatesTags: (_res, _err, { id }) => [
           { type: 'UserPasskeys', id },
           'Passkeys',

@@ -108,6 +108,15 @@ describe('Admin MFA enforcement', () => {
 
   describe('once the super admin is enrolled', () => {
     let superAdminSecret: string;
+    let superAdminRecoveryCodes: string[] = [];
+
+    /** An administrator acting on another user's factor re-authenticates (Decision A). A recovery
+     * code each time, so no test waits for a fresh TOTP step. */
+    const actorCredentials = () => {
+      const code = superAdminRecoveryCodes.shift();
+      if (!code) throw new Error('test budget of recovery codes exhausted');
+      return { password: superAdmin.loginInfo.password, code };
+    };
 
     beforeAll(async () => {
       const enrol = await rq({
@@ -124,6 +133,7 @@ describe('Admin MFA enforcement', () => {
       });
       expect(verify.statusCode).toBe(200);
       expect(verify.body.data.replaced).toBe(false);
+      superAdminRecoveryCodes = verify.body.data.recoveryCodes;
     });
 
     // Round-2 review item 32: requiring a role with no users said "1 user will be asked ... and 1 of
@@ -217,11 +227,43 @@ describe('Admin MFA enforcement', () => {
       expect(me.statusCode).toBe(401);
     });
 
+    test('unlocking needs the acting administrator’s own password and code', async () => {
+      const bare = await rq({ url: `/admin/mfa/users/${editor.id}/unlock`, method: 'POST' });
+      expect(bare.statusCode).toBe(400);
+      expect(bare.body.error.details.code).toBe('MFA_REAUTH_REQUIRED');
+
+      const passwordOnly = await rq({
+        url: `/admin/mfa/users/${editor.id}/unlock`,
+        method: 'POST',
+        body: { password: superAdmin.loginInfo.password },
+      });
+      expect(passwordOnly.statusCode).toBe(400);
+      expect(passwordOnly.body.error.details.code).toBe('MFA_REAUTH_REQUIRED');
+
+      const wrongPassword = await rq({
+        url: `/admin/mfa/users/${editor.id}/unlock`,
+        method: 'POST',
+        body: { password: 'not-it', code: '000000' },
+      });
+      expect(wrongPassword.statusCode).toBe(400);
+
+      // Still locked: none of those did anything.
+      expect((await login(editor.email, editorPassword)).statusCode).toBe(403);
+    });
+
     test('unlocking from the users API lets the editor in again with a fresh grace', async () => {
-      const twice = await rq({ url: `/admin/mfa/users/${editor.id}/unlock`, method: 'POST' });
+      const twice = await rq({
+        url: `/admin/mfa/users/${editor.id}/unlock`,
+        method: 'POST',
+        body: actorCredentials(),
+      });
       expect(twice.statusCode).toBe(204);
 
-      const again = await rq({ url: `/admin/mfa/users/${editor.id}/unlock`, method: 'POST' });
+      const again = await rq({
+        url: `/admin/mfa/users/${editor.id}/unlock`,
+        method: 'POST',
+        body: actorCredentials(),
+      });
       expect(again.statusCode).toBe(400);
       expect(again.body.error.message).toBe('This account is not locked');
 
@@ -249,7 +291,11 @@ describe('Admin MFA enforcement', () => {
       expect(cleared).toBeDefined();
 
       // Recover for the following tests.
-      const unlock = await rq({ url: `/admin/mfa/users/${editor.id}/unlock`, method: 'POST' });
+      const unlock = await rq({
+        url: `/admin/mfa/users/${editor.id}/unlock`,
+        method: 'POST',
+        body: actorCredentials(),
+      });
       expect(unlock.statusCode).toBe(204);
     });
 

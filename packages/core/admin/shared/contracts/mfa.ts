@@ -93,17 +93,36 @@ export declare namespace Disable {
   }
 }
 
+/**
+ * The acting administrator's own credentials, for the actions that lower another user's protection
+ * (unlock, reset, removing their passkeys). `password` is required of an administrator who has one;
+ * `code` (TOTP or recovery) too when they have a second factor. An SSO-only administrator sends
+ * neither. A non-super-admin acting on a super admin gets 403 `MFA_SUPER_ADMIN_TARGET`.
+ */
+export declare namespace ActorReauth {
+  export interface Request {
+    body: { password?: string; code?: string };
+  }
+}
+
 /** POST /mfa/users/:id/unlock - 204; 404 unknown user; 400 when not locked. No grace is stamped:
- * the user's next session starts a fresh window. */
+ * the user's next session starts a fresh window. Body: `ActorReauth`. */
 export declare namespace UnlockUser {
+  export interface Request {
+    body: ActorReauth.Request['body'];
+  }
   export interface Params {
     id: Data.ID;
   }
 }
 
 /** POST /mfa/users/:id/reset - 204 even for an account that was not enrolled; 404 unknown user.
- * `admin:reset-user-mfa` on the CLI does the same for when nobody can sign in at all. */
+ * `admin:reset-user-mfa` on the CLI does the same for when nobody can sign in at all. Body:
+ * `ActorReauth`. */
 export declare namespace ResetUser {
+  export interface Request {
+    body: ActorReauth.Request['body'];
+  }
   export interface Params {
     id: Data.ID;
   }
@@ -238,8 +257,11 @@ export declare namespace ListUserPasskeys {
   }
 }
 
-/** Works while the policy is off. */
+/** POST /mfa/users/:id/passkeys/remove - 204. Works while the policy is off. Body: `ActorReauth`. */
 export declare namespace DeleteUserPasskeys {
+  export interface Request {
+    body: ActorReauth.Request['body'];
+  }
   export interface Params {
     id: Data.ID;
   }

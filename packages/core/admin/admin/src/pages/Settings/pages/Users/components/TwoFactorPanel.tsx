@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
-import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
@@ -13,6 +12,7 @@ import { useToMessage } from '../../../../../hooks/useToMessage';
 import { selectAdminPermissions } from '../../../../../selectors';
 import {
   useDeleteUserPasskeysMutation,
+  useGetMfaStatusQuery,
   useGetUserPasskeysQuery,
   useGetUserTrustedDevicesQuery,
   useResetUserMfaMutation,
@@ -20,6 +20,10 @@ import {
   useUnlockUserMfaMutation,
 } from '../../../../../services/mfa';
 import { useGetSecuritySettingsQuery } from '../../../../../services/securitySettings';
+import {
+  ConfirmDowngradeDialog,
+  type DowngradeCredentials,
+} from '../../Security/components/ConfirmDowngradeDialog';
 
 import type { AdminUserListItem } from '../../../../../services/users';
 
@@ -35,13 +39,18 @@ interface TwoFactorPanelProps {
  * priority order: locked, enrolled, in grace, not enrolled. A lock stops *password* login only --
  * an SSO session on the same account survives until its next token refresh, and the copy says so.
  *
- * Three of the four actions are security-positive and need no re-authentication: unlock restores
- * password login without starting a new grace period (the user's next login does that, so an
- * unlock while they are away cannot re-lock them unseen), and revoking trust or removing passkeys
- * only forces the second factor back on.
+ * Reset, unlock and removing passkeys each lower this user's protection, so the server asks the
+ * acting administrator for their own password, plus a code when they have a second factor
+ * (`assertActorReauth`), and only a super admin may do them to a super admin. They use
+ * `ConfirmDowngradeDialog`, which collects exactly what `/mfa/me` says the viewer owes: nothing for
+ * an SSO-only administrator, the password alone for one without a second factor. Revoking trusted
+ * devices only forces the second factor back on, so it stays a plain confirmation.
  *
- * Reset is the exception and the only destructive one: it strips the factor entirely and logs
- * the user out everywhere. Offered for any enrolled account rather than only a locked one,
+ * Unlock restores password login without starting a new grace period (the user's next login does
+ * that, so an unlock while they are away cannot re-lock them unseen).
+ *
+ * Reset is the only destructive one: it strips the factor entirely and logs the user out
+ * everywhere. Offered for any enrolled account rather than only a locked one,
  * because the user it serves has no lock to clear -- they know their password but have lost their
  * authenticator and spent their recovery codes, and the alternative is a shell the customer may
  * not have.
@@ -60,6 +69,26 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const [resetOpen, setResetOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [justUnlocked, setJustUnlocked] = React.useState(false);
+
+  // What the viewer owes to re-authenticate (see the component comment). Until it loads, the
+  // dialogs ask for both, which is what most administrators owe; the server decides either way.
+  const { data: viewerMfa } = useGetMfaStatusQuery();
+  const requiresPassword = viewerMfa?.hasLocalPassword ?? true;
+  const requiresCode = viewerMfa?.enabled ?? true;
+
+  /** Runs one re-authenticated action; resolves a message to show in the dialog, or nothing. */
+  const runWithCredentials = async (
+    action: (credentials: DowngradeCredentials | Record<string, never>) => Promise<unknown>,
+    credentials: DowngradeCredentials | undefined,
+    onSuccess: () => void
+  ): Promise<string | undefined> => {
+    const res = (await action(credentials ?? {})) as { error?: unknown };
+    if (res && 'error' in res && res.error) {
+      return toMessage(res.error as Parameters<typeof toMessage>[0]);
+    }
+    onSuccess();
+    return undefined;
+  };
 
   const permissions = useTypedSelector(selectAdminPermissions);
   const {
@@ -102,44 +131,38 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const dateTime = (value: string | Date) =>
     formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
 
-  const handleUnlock = async () => {
-    const res = await unlock({ id: user.id });
-    setConfirmOpen(false);
-    if ('error' in res) {
-      toggleNotification({
-        type: 'danger',
-        message: toMessage(res.error),
-      });
-      return;
-    }
-    setJustUnlocked(true);
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'Settings.permissions.users.mfa.unlock.success',
-        defaultMessage: 'Account unlocked.',
-      }),
-    });
-  };
+  const handleUnlock = (credentials?: DowngradeCredentials) =>
+    runWithCredentials(
+      (body) => unlock({ id: user.id, ...body }),
+      credentials,
+      () => {
+        setConfirmOpen(false);
+        setJustUnlocked(true);
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'Settings.permissions.users.mfa.unlock.success',
+            defaultMessage: 'Account unlocked.',
+          }),
+        });
+      }
+    );
 
-  const handleReset = async () => {
-    const res = await resetMfa({ id: user.id });
-    setResetOpen(false);
-    if ('error' in res) {
-      toggleNotification({
-        type: 'danger',
-        message: toMessage(res.error),
-      });
-      return;
-    }
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'Settings.permissions.users.mfa.reset.success',
-        defaultMessage: 'Two-factor authentication reset.',
-      }),
-    });
-  };
+  const handleReset = (credentials?: DowngradeCredentials) =>
+    runWithCredentials(
+      (body) => resetMfa({ id: user.id, ...body }),
+      credentials,
+      () => {
+        setResetOpen(false);
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'Settings.permissions.users.mfa.reset.success',
+            defaultMessage: 'Two-factor authentication reset.',
+          }),
+        });
+      }
+    );
 
   const handleRevokeTrustedDevices = async () => {
     const res = await revokeTrustedDevices({ id: user.id });
@@ -160,24 +183,33 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
     });
   };
 
-  const handleRemovePasskeys = async () => {
-    const res = await deletePasskeys({ id: user.id });
-    setRemovePasskeysOpen(false);
-    if ('error' in res) {
-      toggleNotification({
-        type: 'danger',
-        message: toMessage(res.error),
-      });
-      return;
-    }
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'Settings.permissions.users.mfa.passkeys.remove.success',
-        defaultMessage: 'Passkeys removed.',
-      }),
-    });
-  };
+  const handleRemovePasskeys = (credentials?: DowngradeCredentials) =>
+    runWithCredentials(
+      (body) => deletePasskeys({ id: user.id, ...body }),
+      credentials,
+      () => {
+        setRemovePasskeysOpen(false);
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'Settings.permissions.users.mfa.passkeys.remove.success',
+            defaultMessage: 'Passkeys removed.',
+          }),
+        });
+      }
+    );
+
+  const reauthDescription = (body: string) => (
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Typography>{body}</Typography>
+      <Typography textColor="neutral600">
+        {formatMessage({
+          id: 'Settings.permissions.users.mfa.reauth.description',
+          defaultMessage: "This lowers another user's protection, so confirm it is you.",
+        })}
+      </Typography>
+    </Flex>
+  );
 
   let state: React.ReactNode;
   if (user.mfaLockedAt) {
@@ -275,74 +307,73 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
           customer does not have.
         */}
         {user.mfaEnabledAt && canUpdate ? (
-          <Dialog.Root open={resetOpen} onOpenChange={setResetOpen}>
-            <Dialog.Trigger>
-              <Button variant="danger-light" loading={isResetting}>
-                {formatMessage({
-                  id: 'Settings.permissions.users.mfa.reset',
-                  defaultMessage: 'Reset',
-                })}
-              </Button>
-            </Dialog.Trigger>
-            <ConfirmDialog
+          <>
+            <Button variant="danger-light" loading={isResetting} onClick={() => setResetOpen(true)}>
+              {formatMessage({
+                id: 'Settings.permissions.users.mfa.reset',
+                defaultMessage: 'Reset',
+              })}
+            </Button>
+            <ConfirmDowngradeDialog
+              open={resetOpen}
+              onClose={() => setResetOpen(false)}
+              onConfirm={handleReset}
+              requiresPassword={requiresPassword}
+              requiresCode={requiresCode}
               title={formatMessage({
                 id: 'Settings.permissions.users.mfa.reset.title',
                 defaultMessage: "Reset this user's two-factor authentication?",
               })}
-              endAction={
-                <Dialog.Action>
-                  <Button fullWidth variant="danger-light" onClick={handleReset}>
-                    {formatMessage({
-                      id: 'Settings.permissions.users.mfa.reset',
-                      defaultMessage: 'Reset',
-                    })}
-                  </Button>
-                </Dialog.Action>
-              }
-            >
-              {formatMessage({
-                id: 'Settings.permissions.users.mfa.reset.body',
-                defaultMessage:
-                  'Their authenticator app, recovery codes, passkeys and trusted devices are all removed, and they are logged out everywhere. They log in with their password alone until they set up two-factor authentication again. Use this when a user has lost their authenticator and their recovery codes.',
+              confirmLabel={formatMessage({
+                id: 'Settings.permissions.users.mfa.reset',
+                defaultMessage: 'Reset',
               })}
-            </ConfirmDialog>
-          </Dialog.Root>
+              description={reauthDescription(
+                formatMessage({
+                  id: 'Settings.permissions.users.mfa.reset.body',
+                  defaultMessage:
+                    'Their authenticator app, recovery codes, passkeys and trusted devices are all removed, and they are logged out everywhere. They log in with their password alone until they set up two-factor authentication again. Use this when a user has lost their authenticator and their recovery codes.',
+                })
+              )}
+            />
+          </>
         ) : null}
         {user.mfaLockedAt ? (
-          <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
-            <Dialog.Trigger>
-              <Button variant="secondary" disabled={!canUpdate} loading={isLoading}>
-                {formatMessage({
-                  id: 'Settings.permissions.users.mfa.unlock',
-                  defaultMessage: 'Unlock',
-                })}
-              </Button>
-            </Dialog.Trigger>
-            {/* Unlocking restores access rather than removing anything, so no danger styling. */}
-            <ConfirmDialog
-              icon={<Information fill="neutral500" />}
+          <>
+            <Button
+              variant="secondary"
+              disabled={!canUpdate}
+              loading={isLoading}
+              onClick={() => setConfirmOpen(true)}
+            >
+              {formatMessage({
+                id: 'Settings.permissions.users.mfa.unlock',
+                defaultMessage: 'Unlock',
+              })}
+            </Button>
+            <ConfirmDowngradeDialog
+              open={confirmOpen}
+              onClose={() => setConfirmOpen(false)}
+              onConfirm={handleUnlock}
+              requiresPassword={requiresPassword}
+              requiresCode={requiresCode}
               title={formatMessage({
                 id: 'Settings.permissions.users.mfa.unlock.title',
                 defaultMessage: 'Unlock this account?',
               })}
-              endAction={
-                <Dialog.Action>
-                  <Button fullWidth variant="default" onClick={handleUnlock}>
-                    {formatMessage({
-                      id: 'Settings.permissions.users.mfa.unlock',
-                      defaultMessage: 'Unlock',
-                    })}
-                  </Button>
-                </Dialog.Action>
-              }
-            >
-              {formatMessage({
-                id: 'Settings.permissions.users.mfa.unlock.body',
-                defaultMessage:
-                  'The user can log in with their password again. A new grace period to set up two-factor authentication starts at their next login.',
+              confirmLabel={formatMessage({
+                id: 'Settings.permissions.users.mfa.unlock',
+                defaultMessage: 'Unlock',
               })}
-            </ConfirmDialog>
-          </Dialog.Root>
+              description={reauthDescription(
+                formatMessage({
+                  id: 'Settings.permissions.users.mfa.unlock.body',
+                  defaultMessage:
+                    'The user can log in with their password again. A new grace period to set up two-factor authentication starts at their next login.',
+                })
+              )}
+            />
+          </>
         ) : null}
       </Flex>
       {user.mfaEnabledAt && trustedDevicesLoaded && !trustedDevicesFailed ? (
@@ -406,38 +437,40 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
             )}
           </Typography>
           {(passkeys?.count ?? 0) > 0 && canUpdate ? (
-            <Dialog.Root open={removePasskeysOpen} onOpenChange={setRemovePasskeysOpen}>
-              <Dialog.Trigger>
-                <Button variant="danger-light" loading={isRemovingPasskeys}>
-                  {formatMessage({
-                    id: 'Settings.permissions.users.mfa.passkeys.remove',
-                    defaultMessage: 'Remove passkeys',
-                  })}
-                </Button>
-              </Dialog.Trigger>
-              <ConfirmDialog
+            <>
+              <Button
+                variant="danger-light"
+                loading={isRemovingPasskeys}
+                onClick={() => setRemovePasskeysOpen(true)}
+              >
+                {formatMessage({
+                  id: 'Settings.permissions.users.mfa.passkeys.remove',
+                  defaultMessage: 'Remove passkeys',
+                })}
+              </Button>
+              <ConfirmDowngradeDialog
+                open={removePasskeysOpen}
+                onClose={() => setRemovePasskeysOpen(false)}
+                onConfirm={handleRemovePasskeys}
+                requiresPassword={requiresPassword}
+                requiresCode={requiresCode}
                 title={formatMessage({
                   id: 'Settings.permissions.users.mfa.passkeys.remove.title',
                   defaultMessage: "Remove this user's passkeys?",
                 })}
-                endAction={
-                  <Dialog.Action>
-                    <Button fullWidth variant="danger-light" onClick={handleRemovePasskeys}>
-                      {formatMessage({
-                        id: 'Settings.permissions.users.mfa.passkeys.remove.confirm',
-                        defaultMessage: 'Remove',
-                      })}
-                    </Button>
-                  </Dialog.Action>
-                }
-              >
-                {formatMessage({
-                  id: 'Settings.permissions.users.mfa.passkeys.remove.body',
-                  defaultMessage:
-                    'Every passkey this user registered will stop working. They keep their authenticator app and recovery codes.',
+                confirmLabel={formatMessage({
+                  id: 'Settings.permissions.users.mfa.passkeys.remove.confirm',
+                  defaultMessage: 'Remove',
                 })}
-              </ConfirmDialog>
-            </Dialog.Root>
+                description={reauthDescription(
+                  formatMessage({
+                    id: 'Settings.permissions.users.mfa.passkeys.remove.body',
+                    defaultMessage:
+                      'Every passkey this user registered will stop working. They keep their authenticator app and recovery codes.',
+                  })
+                )}
+              />
+            </>
           ) : null}
         </Flex>
       ) : null}

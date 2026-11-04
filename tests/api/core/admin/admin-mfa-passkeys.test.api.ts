@@ -155,11 +155,17 @@ describe('Admin MFA passkeys', () => {
         expect(res.statusCode).toBe(404);
       }
 
-      // Both administrator routes for this resource share the one path, distinguished only by
-      // method -- so there is exactly one URL to cover here, not a loop over it.
       const administratorPasskeysUrl = `/admin/mfa/users/${editor.id}/passkeys`;
       expect((await rq({ url: administratorPasskeysUrl, method: 'GET' })).statusCode).toBe(404);
-      expect((await rq({ url: administratorPasskeysUrl, method: 'DELETE' })).statusCode).toBe(404);
+      expect(
+        (
+          await rq({
+            url: `${administratorPasskeysUrl}/remove`,
+            method: 'POST',
+            body: { password: superAdmin.loginInfo.password },
+          })
+        ).statusCode
+      ).toBe(404);
 
       const options = await createRequest({ strapi }).post('/admin/login/mfa/webauthn/options', {
         body: { nonsense: true },
@@ -377,15 +383,29 @@ describe('Admin MFA passkeys', () => {
     // The editor's role holds neither users.read nor users.update.
     const readAsEditor = await editorRq(`/mfa/users/${editor.id}/passkeys`, 'GET');
     expect(readAsEditor.statusCode).toBe(403);
-    const deleteAsEditor = await editorRq(`/mfa/users/${superAdminId}/passkeys`, 'DELETE');
+    const deleteAsEditor = await editorRq(`/mfa/users/${superAdminId}/passkeys/remove`, 'POST', {
+      password: editorPassword,
+    });
     expect(deleteAsEditor.statusCode).toBe(403);
 
-    const unknownDelete = await rq({ url: '/admin/mfa/users/999999/passkeys', method: 'DELETE' });
+    const unknownDelete = await rq({
+      url: '/admin/mfa/users/999999/passkeys/remove',
+      method: 'POST',
+      body: { password: superAdmin.loginInfo.password },
+    });
     expect(unknownDelete.statusCode).toBe(404);
 
+    // The acting administrator re-authenticates: the super admin here has no second factor, so the
+    // password alone, and nothing is removed without it.
+    const bare = await rq({ url: `/admin/mfa/users/${editor.id}/passkeys/remove`, method: 'POST' });
+    expect(bare.statusCode).toBe(400);
+    expect(bare.body.error.details.code).toBe('MFA_REAUTH_REQUIRED');
+    expect(await passkeyRows(editor.id)).not.toHaveLength(0);
+
     const removed = await rq({
-      url: `/admin/mfa/users/${editor.id}/passkeys`,
-      method: 'DELETE',
+      url: `/admin/mfa/users/${editor.id}/passkeys/remove`,
+      method: 'POST',
+      body: { password: superAdmin.loginInfo.password },
     });
     expect(removed.statusCode).toBe(204);
     expect(removed.body).toEqual({});
@@ -510,8 +530,9 @@ describe('Admin MFA passkeys', () => {
 
     await seedPasskey(editor.id, 801);
     const adminDeleteWhileOff = await rq({
-      url: `/admin/mfa/users/${editor.id}/passkeys`,
-      method: 'DELETE',
+      url: `/admin/mfa/users/${editor.id}/passkeys/remove`,
+      method: 'POST',
+      body: { password: superAdmin.loginInfo.password },
     });
     expect(adminDeleteWhileOff.statusCode).toBe(204);
     expect(adminDeleteWhileOff.body).toEqual({});

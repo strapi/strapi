@@ -33,8 +33,8 @@ describe('mfa routes (passkeys)', () => {
     ]);
   });
 
-  test('DELETE /mfa/users/:id/passkeys carries admin::users.update', () => {
-    expect(route('DELETE', '/mfa/users/:id/passkeys').config.policies).toEqual([
+  test('POST /mfa/users/:id/passkeys/remove carries admin::users.update', () => {
+    expect(route('POST', '/mfa/users/:id/passkeys/remove').config.policies).toEqual([
       'admin::isMfaEnabled',
       'admin::isAuthenticatedAdmin',
       { name: 'admin::hasPermissions', config: { actions: ['admin::users.update'] } },
@@ -89,6 +89,10 @@ describe('mfa routes (rate limiting)', () => {
     ['POST', '/mfa/disable'],
     ['POST', '/mfa/passkeys/options'],
     ['POST', '/mfa/passkeys/remove'],
+    // The acting administrator re-authenticates on these (`assertActorReauth`).
+    ['POST', '/mfa/users/:id/unlock'],
+    ['POST', '/mfa/users/:id/reset'],
+    ['POST', '/mfa/users/:id/passkeys/remove'],
   ] as const;
 
   test.each(CREDENTIAL_ROUTES)('%s %s is rate limited at the default ceiling', (method, path) => {

@@ -10,6 +10,7 @@ import {
 } from '@strapi/utils';
 import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { verifyRegistrationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
+import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
 import { hashTrustToken, MAX_TRUSTED_DEVICES_PER_USER } from '../mfa-trusted-devices';
 import { PASSKEY_UID, PASSKEY_CAP_MESSAGE, MAX_PASSKEYS_PER_USER } from '../mfa-passkeys';
@@ -3069,6 +3070,47 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       validCode: () => generateTotp({ secret }),
     };
   };
+
+  describe('assertActorReauth', () => {
+    test('an enrolled actor owes the password and a live code', async () => {
+      const { service, validCode } = setup();
+
+      await expect(
+        service.assertActorReauth('1', { password: CORRECT_PASSWORD })
+      ).rejects.toMatchObject({
+        details: { code: MFA_ERROR_CODES.REAUTH_REQUIRED },
+      });
+      await expect(
+        service.assertActorReauth('1', { password: 'wrong', code: validCode() })
+      ).rejects.toThrow(/invalid credentials/i);
+      await expect(
+        service.assertActorReauth('1', { password: CORRECT_PASSWORD, code: validCode() })
+      ).resolves.toBeUndefined();
+    });
+
+    test('an actor without a second factor owes the password only', async () => {
+      const { service, users } = setup();
+      users.get('1')!.mfaEnabledAt = null;
+      users.get('1')!.mfaSecret = null;
+
+      await expect(service.assertActorReauth('1', {})).rejects.toMatchObject({
+        details: { code: MFA_ERROR_CODES.REAUTH_REQUIRED },
+      });
+      await expect(service.assertActorReauth('1', { password: 'wrong' })).rejects.toThrow(
+        /invalid credentials/i
+      );
+      await expect(
+        service.assertActorReauth('1', { password: CORRECT_PASSWORD })
+      ).resolves.toBeUndefined();
+    });
+
+    test('an SSO-only actor has nothing to present and acts on session authority', async () => {
+      const { service, users } = setup();
+      users.get('1')!.password = null;
+
+      await expect(service.assertActorReauth('1', {})).resolves.toBeUndefined();
+    });
+  });
 
   describe('assertPasswordAndFactor', () => {
     test('rejects a wrong password before evaluating any factor, and records nothing', async () => {

@@ -96,19 +96,65 @@ const failWith = (message: string) =>
     { status: 500 }
   );
 
+/** The request bodies of the latest `captureReset`: the viewer's own credentials. */
+let resetBodies: unknown[] = [];
+
 const captureReset = () => {
   const calls: string[] = [];
+  const bodies: unknown[] = [];
+  resetBodies = bodies;
   server.use(
-    http.post('/admin/mfa/users/:id/reset', ({ params }) => {
+    http.post('/admin/mfa/users/:id/reset', async ({ params, request }) => {
       calls.push(String(params.id));
+      bodies.push(await request.json());
       return new HttpResponse(null, { status: 204 });
     })
   );
   return calls;
 };
 
+/** What `/mfa/me` says about the *viewer*: whether they owe a password and a code. */
+const viewer = ({ enabled = true, hasLocalPassword = true } = {}) =>
+  server.use(
+    http.get('/admin/mfa/me', () =>
+      HttpResponse.json({
+        data: {
+          enabled,
+          enabledAt: null,
+          recoveryCodesRemaining: 10,
+          codesAcknowledged: true,
+          required: false,
+          graceUntil: null,
+          trustedDevicesEnabled: true,
+          passkeysEnabled: false,
+          hasLocalPassword,
+        },
+      })
+    )
+  );
+
+/**
+ * Reset, unlock and removing passkeys lower another user's protection, so the dialog asks the
+ * viewer for their own password and code (Decision A). Fills what is shown and confirms.
+ */
+const confirmWithCredentials = async (
+  user: ReturnType<typeof renderPanel>['user'],
+  confirm: string,
+  { password = 'Password123', code = '123456' } = {}
+) => {
+  const dialog = await screen.findByRole('dialog');
+  const passwordField = within(dialog).queryByLabelText(/Current password/);
+  if (passwordField) await user.type(passwordField, password);
+  const codeField = within(dialog).queryByLabelText(/Authentication code/);
+  if (codeField) await user.type(codeField, code);
+  await user.click(within(dialog).getByRole('button', { name: confirm }));
+};
+
 describe('TwoFactorPanel', () => {
-  beforeEach(() => counts());
+  beforeEach(() => {
+    counts();
+    viewer();
+  });
 
   // The case this action exists for is not a lock: the user still knows their password but has
   // lost the authenticator and spent their recovery codes. Offering Reset only for a locked
@@ -157,12 +203,71 @@ describe('TwoFactorPanel', () => {
     ).toBeInTheDocument();
     expect(calls).toHaveLength(0);
 
-    await user.click(
-      within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Reset' })
-    );
+    await confirmWithCredentials(user, 'Reset');
 
     await waitFor(() => expect(calls).toEqual(['3']));
+    // The viewer's own credentials, not the target's: the server re-authenticates the actor.
+    expect(resetBodies).toEqual([{ password: 'Password123', code: '123456' }]);
     expect(await screen.findByText('Two-factor authentication reset.')).toBeInTheDocument();
+  });
+
+  it('asks a viewer without a second factor for the password alone', async () => {
+    viewer({ enabled: false });
+    const { user } = renderPanel();
+    captureReset();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() =>
+      expect(within(dialog).queryByLabelText(/Authentication code/)).not.toBeInTheDocument()
+    );
+    await confirmWithCredentials(user, 'Reset');
+
+    await waitFor(() => expect(resetBodies).toEqual([{ password: 'Password123' }]));
+  });
+
+  it('asks an SSO-only viewer for nothing: they act on their session', async () => {
+    viewer({ enabled: false, hasLocalPassword: false });
+    const { user } = renderPanel();
+    captureReset();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() =>
+      expect(within(dialog).queryByLabelText(/Current password/)).not.toBeInTheDocument()
+    );
+    await confirmWithCredentials(user, 'Reset');
+
+    await waitFor(() => expect(resetBodies).toEqual([{}]));
+  });
+
+  it('keeps the dialog open with the reason when the viewer is not a super admin', async () => {
+    server.use(
+      http.post('/admin/mfa/users/:id/reset', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 403,
+              name: 'ForbiddenError',
+              message: 'Only a super admin can change the two-factor settings of a super admin',
+              details: { code: 'MFA_SUPER_ADMIN_TARGET' },
+            },
+          },
+          { status: 403 }
+        )
+      )
+    );
+    const { user } = renderPanel();
+
+    await user.click(await screen.findByRole('button', { name: 'Reset' }));
+    await confirmWithCredentials(user, 'Reset');
+
+    expect(
+      await screen.findByText(
+        'Only a super admin can change the two-factor settings of a super admin.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('leaves the account alone when the confirmation is cancelled', async () => {
@@ -187,13 +292,10 @@ describe('TwoFactorPanel', () => {
     const { user } = renderPanel();
 
     await user.click(await screen.findByRole('button', { name: 'Reset' }));
-    await user.click(
-      within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Reset' })
-    );
+    await confirmWithCredentials(user, 'Reset');
 
     expect(await screen.findByText('Nope')).toBeInTheDocument();
     expect(screen.queryByText('Two-factor authentication reset.')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reset' })).toBeEnabled();
   });
 
   describe('unlock', () => {
@@ -212,9 +314,7 @@ describe('TwoFactorPanel', () => {
       await user.click(await screen.findByRole('button', { name: 'Unlock' }));
       expect(await screen.findByText('Unlock this account?')).toBeInTheDocument();
       expect(calls).toHaveLength(0);
-      await user.click(
-        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
-      );
+      await confirmWithCredentials(user, 'Unlock');
 
       await waitFor(() => expect(calls).toEqual(['3']));
       expect(await screen.findByText('Account unlocked.')).toBeInTheDocument();
@@ -225,9 +325,7 @@ describe('TwoFactorPanel', () => {
       const { user } = renderPanel(locked);
 
       await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      await user.click(
-        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
-      );
+      await confirmWithCredentials(user, 'Unlock');
 
       expect(await screen.findByText('Unlock refused')).toBeInTheDocument();
       expect(screen.queryByText('Account unlocked.')).not.toBeInTheDocument();
@@ -287,7 +385,7 @@ describe('TwoFactorPanel', () => {
       counts({ passkeys: 3 });
       const calls: string[] = [];
       server.use(
-        http.delete('/admin/mfa/users/:id/passkeys', ({ params }) => {
+        http.post('/admin/mfa/users/:id/passkeys/remove', ({ params }) => {
           calls.push(String(params.id));
           return HttpResponse.json({ data: { count: 3 } });
         })
@@ -296,9 +394,7 @@ describe('TwoFactorPanel', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Remove passkeys' }));
       expect(await screen.findByText("Remove this user's passkeys?")).toBeInTheDocument();
-      await user.click(
-        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
-      );
+      await confirmWithCredentials(user, 'Remove');
 
       await waitFor(() => expect(calls).toEqual(['3']));
       expect(await screen.findByText('Passkeys removed.')).toBeInTheDocument();
@@ -306,13 +402,13 @@ describe('TwoFactorPanel', () => {
 
     it('says why a removal failed', async () => {
       counts({ passkeys: 1 });
-      server.use(http.delete('/admin/mfa/users/:id/passkeys', () => failWith('Remove refused')));
+      server.use(
+        http.post('/admin/mfa/users/:id/passkeys/remove', () => failWith('Remove refused'))
+      );
       const { user } = renderPanel();
 
       await user.click(await screen.findByRole('button', { name: 'Remove passkeys' }));
-      await user.click(
-        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
-      );
+      await confirmWithCredentials(user, 'Remove');
 
       expect(await screen.findByText('Remove refused')).toBeInTheDocument();
       expect(screen.queryByText('Passkeys removed.')).not.toBeInTheDocument();
@@ -352,9 +448,7 @@ describe('TwoFactorPanel', () => {
       const { user, rerender } = render(<TwoFactorPanel user={locked} canUpdate />);
 
       await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      await user.click(
-        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
-      );
+      await confirmWithCredentials(user, 'Unlock');
       await screen.findByText('Account unlocked.');
       // What the refetched user looks like after the unlock.
       rerender(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />);

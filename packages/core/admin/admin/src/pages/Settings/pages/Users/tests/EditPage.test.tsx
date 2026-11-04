@@ -33,6 +33,18 @@ describe('Users | EditPage', () => {
   });
 
   describe('two-factor panel', () => {
+    /** Unlock and removing passkeys lower another user's protection, so the dialog asks the viewer
+     * for their own password and a code (Decision A). `/mfa/me` is a 404 here, so both are shown. */
+    const confirmWithCredentials = async (
+      user: ReturnType<typeof renderEdit>['user'],
+      confirm: string
+    ) => {
+      const dialog = screen.getByRole('dialog');
+      await user.type(within(dialog).getByLabelText(/Current password/), 'Password123');
+      await user.type(within(dialog).getByLabelText(/Authentication code/), '123456');
+      await user.click(within(dialog).getByRole('button', { name: confirm }));
+    };
+
     const userWith = (mfa: Record<string, string | null>) =>
       http.get('/admin/users/1', () =>
         HttpResponse.json({
@@ -123,10 +135,8 @@ describe('Users | EditPage', () => {
       expect(screen.getByText(/single sign-on.*until its next refresh/i)).toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: 'Unlock' }));
-      expect(screen.getByRole('alertdialog', { name: 'Unlock this account?' })).toBeInTheDocument();
-      fireEvent.click(
-        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
-      );
+      expect(screen.getByRole('dialog', { name: 'Unlock this account?' })).toBeInTheDocument();
+      await confirmWithCredentials(user, 'Unlock');
 
       expect(await screen.findByText('Account unlocked.')).toBeInTheDocument();
       expect(
@@ -135,7 +145,7 @@ describe('Users | EditPage', () => {
       expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
     });
 
-    it('toasts the server message when the unlock is refused', async () => {
+    it('shows the server message when the unlock is refused', async () => {
       server.use(
         userWith({
           mfaEnabledAt: null,
@@ -158,9 +168,7 @@ describe('Users | EditPage', () => {
       const { user } = renderEdit();
 
       await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      fireEvent.click(
-        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
-      );
+      await confirmWithCredentials(user, 'Unlock');
 
       expect(await screen.findByText('This account is not locked')).toBeInTheDocument();
     });
@@ -297,7 +305,7 @@ describe('Users | EditPage', () => {
         enrolled(),
         http.get('/admin/mfa/users/1/passkeys', () => HttpResponse.json({ data: { count } })),
         http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [] })),
-        http.delete('/admin/mfa/users/1/passkeys', () => {
+        http.post('/admin/mfa/users/1/passkeys/remove', () => {
           count = 0;
           return new HttpResponse(null, { status: 204 });
         })
@@ -307,11 +315,9 @@ describe('Users | EditPage', () => {
       expect(await screen.findByText('2 passkeys')).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Remove passkeys' }));
       expect(
-        screen.getByRole('alertdialog', { name: "Remove this user's passkeys?" })
+        screen.getByRole('dialog', { name: "Remove this user's passkeys?" })
       ).toBeInTheDocument();
-      fireEvent.click(
-        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' })
-      );
+      await confirmWithCredentials(user, 'Remove');
 
       expect(await screen.findByText('Passkeys removed.')).toBeInTheDocument();
       expect(await screen.findByText('No passkeys')).toBeInTheDocument();
@@ -380,12 +386,12 @@ describe('Users | EditPage', () => {
       expect(screen.queryByText(/passkey/)).not.toBeInTheDocument();
     });
 
-    it('toasts the server message when the removal is refused', async () => {
+    it('shows the server message when the removal is refused', async () => {
       server.use(
         enrolled(),
         http.get('/admin/mfa/users/1/passkeys', () => HttpResponse.json({ data: { count: 1 } })),
         http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [] })),
-        http.delete('/admin/mfa/users/1/passkeys', () =>
+        http.post('/admin/mfa/users/1/passkeys/remove', () =>
           HttpResponse.json(
             { error: { status: 404, name: 'NotFoundError', message: 'User does not exist' } },
             { status: 404 }
@@ -396,16 +402,17 @@ describe('Users | EditPage', () => {
 
       await screen.findByText('1 passkey');
       await user.click(screen.getByRole('button', { name: 'Remove passkeys' }));
-      fireEvent.click(
-        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' })
-      );
+      await confirmWithCredentials(user, 'Remove');
 
       expect(await screen.findByText('User does not exist')).toBeInTheDocument();
       // A refused removal must leave the panel truthful: the count is unchanged and the action is
       // still offered, because nothing was deleted. Asserting only the toast would pass even if the
-      // count had optimistically zeroed itself.
+      // count had optimistically zeroed itself. The dialog stays open with the reason, so the panel
+      // behind it is hidden from the accessibility tree.
       expect(screen.getByText('1 passkey')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Remove passkeys' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Remove passkeys', hidden: true })
+      ).toBeInTheDocument();
     });
   });
 });

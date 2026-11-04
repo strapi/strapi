@@ -23,6 +23,11 @@ export const MFA_ERROR_CODES = {
   UNKNOWN_ROLE: 'SECURITY_SETTINGS_UNKNOWN_ROLE',
   /** Raising enforcement while no one could enrol: the admin encryption key is not configured. */
   NO_ENCRYPTION_KEY: 'SECURITY_SETTINGS_NO_ENCRYPTION_KEY',
+  /** An administrator acting on another user's second factor did not present their own
+   * password (and code, when they have a second factor). */
+  REAUTH_REQUIRED: 'MFA_REAUTH_REQUIRED',
+  /** A non-super-admin tried to reset, unlock or strip the passkeys of a super admin. */
+  SUPER_ADMIN_TARGET: 'MFA_SUPER_ADMIN_TARGET',
   /** A concurrent save changed what this one would relax. */
   SETTINGS_CONFLICT: 'SECURITY_SETTINGS_CONFLICT',
 } as const;

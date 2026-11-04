@@ -228,10 +228,10 @@ there is no lockout path.
 
 An administrator's view of another user:
 
-| Endpoint                               | Permission            | Returns                                             |
-| -------------------------------------- | --------------------- | --------------------------------------------------- |
-| `GET /admin/mfa/users/:id/passkeys`    | `admin::users.read`   | `{ count }`, `{ count: 0 }` while the policy is off |
-| `DELETE /admin/mfa/users/:id/passkeys` | `admin::users.update` | 204                                                 |
+| Endpoint                                    | Permission            | Returns                                                                                                                                                          |
+| ------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /admin/mfa/users/:id/passkeys`         | `admin::users.read`   | `{ count }`, `{ count: 0 }` while the policy is off                                                                                                              |
+| `POST /admin/mfa/users/:id/passkeys/remove` | `admin::users.update` | 204. Body: the acting administrator's `{ password?, code? }`, and only a super admin may act on a super admin (see [Enforcement](./13-admin-mfa-enforcement.md)) |
 
 A count, not an inventory of somebody's hardware.
 
