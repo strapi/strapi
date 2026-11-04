@@ -15,16 +15,16 @@ const build = (
   { ssoLockedRoles = [] as string[], storedMode = undefined as string | undefined } = {}
 ) => {
   const findMany = vi.fn(async () => rows.map((row) => ({ ...row, roles: [...row.roles] })));
+  const storeGet = vi.fn(async ({ key }: { key: string }) =>
+    key === 'security-settings'
+      ? { mfa: storedMode ? { mode: storedMode } : {} }
+      : { providers: { ssoLockedRoles } }
+  );
 
   const strapi = {
     db: { query: () => ({ findMany }) },
     ee: { features: { isEnabled: (name: string) => name === 'sso' && ssoLockedRoles.length > 0 } },
-    store: () => ({
-      get: async ({ key }: { key: string }) =>
-        key === 'security-settings'
-          ? { mfa: storedMode ? { mode: storedMode } : {} }
-          : { providers: { ssoLockedRoles } },
-    }),
+    store: () => ({ get: storeGet }),
     config: { get: (_key: string, fallback: unknown) => fallback },
     log: { warn: vi.fn(), error: vi.fn() },
     features: { future: { isEnabled: () => true } },
@@ -36,7 +36,7 @@ const build = (
     auth: { validatePassword: vi.fn(), hashPassword: vi.fn() } as any,
   });
 
-  return { service, findMany };
+  return { service, findMany, storeGet };
 };
 
 const enrolled = { mfaEnabledAt: '2026-09-01T00:00:00.000Z', mfaSecret: 'enc:x' };
@@ -102,6 +102,14 @@ describe('enforcementImpact', () => {
    * enrolled user as "1 user will be asked ... and 1 of them already has it". The count is of the
    * accounts the change adds, not of everyone the proposal covers.
    */
+  test('reads the SSO-locked roles once, not once per user', async () => {
+    const { service, storeGet } = build(rows, { ssoLockedRoles: ['2'] });
+
+    await service.enforcementImpact({ mode: 'required', requiredRoles: [] });
+
+    expect(storeGet.mock.calls.filter(([{ key }]) => key === 'auth')).toHaveLength(1);
+  });
+
   test('counts only the accounts the change adds, not those already required', async () => {
     const withFlags: Row[] = [
       { id: 1, password: 'hash', ...enrolled, roles: [{ id: 2, mfaRequired: true }] },

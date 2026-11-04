@@ -155,22 +155,29 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return roles;
   };
 
-  /** Mirrors `ee/server/src/utils/sso-lock.ts` (CE cannot import from `ee/`) **including its
-   * uncoerced `lockedId === String(role.id)` comparison**: widening it would exempt from MFA a
-   * password-holding user EE never actually locked out of local login. */
-  const isExemptFromMfa = async (user: AdminUserRow): Promise<boolean> => {
-    if (!user.password) {
-      return true;
-    }
-
+  /** The EE SSO-locked role ids, or none when SSO is not licensed. Read once per decision batch:
+   * `enforcementImpact` walks every user, and a store read each was an N+1 on `core_store`. */
+  const readSsoLockedRoles = async (): Promise<Array<string | number>> => {
     if (!strapi.ee.features.isEnabled('sso')) {
-      return false;
+      return [];
     }
 
     const adminStore = strapi.store({ type: 'core', name: 'admin' });
     const auth = (await adminStore.get({ key: 'auth' })) as
       { providers?: { ssoLockedRoles?: Array<string | number> } } | null | undefined;
-    const lockedRoles = auth?.providers?.ssoLockedRoles ?? [];
+    return auth?.providers?.ssoLockedRoles ?? [];
+  };
+
+  /** Mirrors `ee/server/src/utils/sso-lock.ts` (CE cannot import from `ee/`) **including its
+   * uncoerced `lockedId === String(role.id)` comparison**: widening it would exempt from MFA a
+   * password-holding user EE never actually locked out of local login. */
+  const isExemptGiven = async (
+    user: AdminUserRow,
+    lockedRoles: Array<string | number>
+  ): Promise<boolean> => {
+    if (!user.password) {
+      return true;
+    }
     if (lockedRoles.length === 0) {
       return false;
     }
@@ -178,6 +185,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     const roles = await loadRoles(user);
     return lockedRoles.some((lockedId) => roles.some((role) => lockedId === String(role.id)));
   };
+
+  const isExemptFromMfa = async (user: AdminUserRow): Promise<boolean> =>
+    // No store read for a password-less account: it is exempt whatever SSO says.
+    !user.password || isExemptGiven(user, await readSsoLockedRoles());
 
   const isMfaRequiredFor = async (
     user: AdminUserRow,
@@ -243,12 +254,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     })) as AdminUserRow[];
 
     const required = new Set(proposal.requiredRoles.map(String));
+    const lockedRoles = await readSsoLockedRoles();
     let affected = 0;
     let enrolled = 0;
 
     for (const user of users) {
-      // eslint-disable-next-line no-await-in-loop -- the SSO lookup is store-cached per call
-      if (await isExemptFromMfa(user)) {
+      // eslint-disable-next-line no-await-in-loop -- roles are populated above, so this reads nothing
+      if (await isExemptGiven(user, lockedRoles)) {
         continue;
       }
       const roles = Array.isArray(user.roles) ? user.roles : [];
