@@ -10,7 +10,13 @@ const setStrapi = (value: object) => {
   (globalThis as any).strapi = value;
 };
 
-const DEFAULT_USER = { id: 7, mfaEnabledAt: null, mfaSecret: null, mfaLastUsedStep: null };
+const DEFAULT_USER = {
+  id: 7,
+  roles: [],
+  mfaEnabledAt: null,
+  mfaSecret: null,
+  mfaLastUsedStep: null,
+};
 
 /**
  * Mirrors `buildCtx` in `authentication.vitest.test.ts` / `session-issuing-paths.vitest.test.ts`: a real
@@ -710,7 +716,7 @@ describe('mfa controller', () => {
   describe('unlockUser', () => {
     const build = (unlockResult: boolean, userExists = true) => {
       const unlock = vi.fn(() => Promise.resolve(unlockResult));
-      const findOne = vi.fn(() => Promise.resolve(userExists ? { id: 3 } : null));
+      const findOne = vi.fn(() => Promise.resolve(userExists ? { id: 3, roles: [] } : null));
       const assertActorReauth = vi.fn(() => Promise.resolve());
       setStrapi({
         admin: {
@@ -725,7 +731,7 @@ describe('mfa controller', () => {
       const ctx = createContext(
         {},
         {
-          state: { user: { id: 7 } },
+          state: { user: { id: 7, roles: [] } },
           params: { id: '3' },
           notFound,
           badRequest,
@@ -787,7 +793,7 @@ describe('mfa controller', () => {
       const ctx = createContext(
         {},
         {
-          state: { user: { id: 7, roles: options.actorRoles } },
+          state: { user: { id: 7, roles: options.actorRoles ?? [] } },
           params: { id: '3' },
           notFound: vi.fn(),
           badRequest: vi.fn(),
@@ -857,7 +863,9 @@ describe('mfa controller', () => {
   describe('resetUser', () => {
     const build = (userExists = true, targetId = '3') => {
       const resetUser = vi.fn(() => Promise.resolve());
-      const findOne = vi.fn(() => Promise.resolve(userExists ? { id: Number(targetId) } : null));
+      const findOne = vi.fn(() =>
+        Promise.resolve(userExists ? { id: Number(targetId), roles: [] } : null)
+      );
       const assertActorReauth = vi.fn(() => Promise.resolve());
       setStrapi({
         admin: {
@@ -871,7 +879,7 @@ describe('mfa controller', () => {
       const ctx = createContext(
         {},
         {
-          state: { user: { id: 7 } },
+          state: { user: { id: 7, roles: [] } },
           params: { id: targetId },
           notFound,
           request: { query: {}, body: {} },
@@ -1100,7 +1108,7 @@ describe('mfa controller', () => {
       const recordEvent = vi.fn(() => Promise.resolve());
       const notify = vi.fn(() => Promise.resolve());
       const findOne = vi.fn((id: string) =>
-        Promise.resolve(id === '404' ? null : { id: Number(id) })
+        Promise.resolve(id === '404' ? null : { id: Number(id), roles: [] })
       );
 
       const mfa = {

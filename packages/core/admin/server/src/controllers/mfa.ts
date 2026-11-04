@@ -17,7 +17,7 @@ import {
   MFA_TRUST_COOKIE_NAME,
   clearTrustCookie,
 } from '../../../shared/utils/session-auth';
-import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
+import { hasSuperAdminRole } from '../domain/user';
 import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 import { PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from '../services/mfa-passkeys';
 
@@ -71,17 +71,13 @@ const currentSessionIdOf = (ctx: Context) => (ctx.state.session as { id?: string
  * - The acting administrator re-authenticates (`assertActorReauth`), so a stolen administrator
  *   session is not enough on its own.
  */
-/** Tolerates a row loaded without roles, which then reads as holding none. */
-const isSuperAdmin = (user: { roles?: Array<{ code?: string }> | null }) =>
-  (user.roles ?? []).some((role) => role.code === SUPER_ADMIN_CODE);
-
 const authorizeActionOnUser = async (
   ctx: Context,
   mfa: MfaService,
   target: AdminUser
 ): Promise<void> => {
   const actor = ctx.state.user as AdminUser;
-  if (isSuperAdmin(target) && !isSuperAdmin(actor)) {
+  if (hasSuperAdminRole(target) && !hasSuperAdminRole(actor)) {
     throw new ForbiddenError(
       'Only a super admin can change the two-factor settings of a super admin',
       {
