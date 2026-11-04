@@ -177,6 +177,14 @@ yargs
 
         const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
+        // Locally, e2e runs Chromium only unless a --project is passed. CI passes one per job.
+        if (type === 'e2e' && !process.env.CI && !extractShardArgs(forwardedRunnerArgs).project) {
+          console.log(
+            'Running e2e tests on Chromium only. Pass `-- --project=webkit` to run another browser.'
+          );
+          forwardedRunnerArgs.push('--project=chromium');
+        }
+
         /**
          * Publishing all packages to the yalc store
          */

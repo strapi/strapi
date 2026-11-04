@@ -70,10 +70,11 @@ For **CI, scripts, or automation**, prefer `--reporter=line` after the inner `--
 
 ### Running specific browsers
 
-To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium` or `webkit`
+Locally, `yarn test:e2e` runs Chromium only. To run another browser, pass `--project` to Playwright with the value(s) `chromium` or `webkit`; pass it twice to run both. CI always passes `--project`, so every CI job keeps its browser.
 
 ```shell
-yarn test:e2e --domains=admin -- login.spec.ts --project=chromium
+yarn test:e2e --domains=admin -- login.spec.ts --project=webkit
+yarn test:e2e --domains=admin -- --project=chromium --project=webkit
 ```
 
 To debug your tests with a browser instance and the playwright debugger, you can pass the
