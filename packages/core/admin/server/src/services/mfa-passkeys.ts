@@ -20,6 +20,7 @@ import type { PasskeySettings } from '../../../shared/contracts/security-setting
 import type { MfaConfig } from '../config/mfa';
 import type { AttemptReservation, MfaEventMetadata, MfaEventType } from './mfa';
 import { warnOnce } from './security-settings';
+import { hashTrustToken } from './mfa-trusted-devices';
 
 const { RateLimitError, ValidationError } = errors;
 
@@ -481,7 +482,9 @@ export const createPasskeys = ({
     webauthnChallenge?: string | null;
     pendingPasswordHash?: string | null;
   } | null> => {
-    const challenge = await challengeQuery().findOne({ where: { token: challengeToken } });
+    const challenge = await challengeQuery().findOne({
+      where: { token: hashTrustToken(challengeToken) },
+    });
     if (!challenge || challenge.consumedAt) {
       return null;
     }

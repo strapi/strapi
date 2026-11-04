@@ -28,7 +28,7 @@ import type {
   MfaEnforcement,
   MfaEnforcementMode,
 } from '../../../shared/contracts/security-settings';
-import { createTrustedDevices } from './mfa-trusted-devices';
+import { createTrustedDevices, hashTrustToken } from './mfa-trusted-devices';
 import { createPasskeys, PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from './mfa-passkeys';
 import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 import { sessionFamilyOf, type AdminSessionFamily } from '../../../shared/utils/session-auth';
@@ -1339,7 +1339,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     await challengeQuery().create({
       data: {
-        token,
+        token: hashTrustToken(token),
         userId: String(userId),
         // Not `'totp'`: nothing reads this column to dispatch, and either factor may satisfy the row.
         factorType: 'any',
@@ -1397,7 +1397,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /** No client-supplied factor selector: letting the caller pick which check runs is the classic
    * factor-switching bypass. */
   const verifyChallenge = async (token: string, code: string): Promise<VerifyChallengeResult> => {
-    const challenge = await challengeQuery().findOne({ where: { token } });
+    const challenge = await challengeQuery().findOne({ where: { token: hashTrustToken(token) } });
 
     if (!challenge || challenge.consumedAt) {
       return { ok: false as const, reason: 'unusable' as const };

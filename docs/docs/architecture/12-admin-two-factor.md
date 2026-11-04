@@ -118,7 +118,8 @@ The caller then completes the challenge:
 | `POST /admin/login/mfa/webauthn`         | `{ challengeToken, assertion, trustDevice?, deviceId?, rememberMe? }` | Passkey assertion                            |
 
 All four routes are `auth: false` and carry `admin::rateLimit`. The challenge token is the only
-credential on the follow-up call, and it is single-use.
+credential on the follow-up call, and it is single-use. The row stores its sha256 (`hashTrustToken`),
+as trusted devices do, so a database read does not yield a usable token.
 
 `deviceId` and `rememberMe` matter on the follow-up call, not just on `/login`: `issueSession`
 reads both from that request body, so omitting them loses the user's "remember me" choice.

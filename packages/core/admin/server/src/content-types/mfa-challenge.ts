@@ -16,7 +16,8 @@ export default {
     i18n: { localized: false },
   },
   attributes: {
-    // Looked up by this alone on every second-factor login. `column.unique` is what creates the
+    // The sha256 of the challenge token, as for trusted devices. Looked up by this alone on every
+    // second-factor login. `column.unique` is what creates the
     // index (see `mfa-passkey.ts`): the attribute-level `unique` alone made each lookup a full scan.
     token: {
       type: 'string',

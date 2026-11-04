@@ -2008,7 +2008,9 @@ describe('mfa service: challenge lifecycle', () => {
     expect(token).toMatch(TOKEN_PATTERN);
     expect(expiresIn).toBe(MFA_DEFAULTS.challengeTtl);
 
-    const row = challenges.find((c) => c.token === token)!;
+    // Stored as its hash, like every other bearer token in admin
+    expect(challenges.some((c) => c.token === token)).toBe(false);
+    const row = challenges.find((c) => c.token === hashTrustToken(token))!;
     expect(row).toBeDefined();
     // Unconsumed and unattempted: creating a challenge must not be, or imply, a passed factor.
     expect(row.consumedAt).toBeNull();
@@ -2026,14 +2028,16 @@ describe('mfa service: challenge lifecycle', () => {
       ok: false,
       reason: 'invalid',
     });
-    expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
+    expect(challenges.find((c) => c.token === hashTrustToken(token))!.attempts).toBe(1);
   });
 
   test('an expired challenge is unusable', async () => {
     const { service, challenges, users, events, validCode } = setup();
 
     const { token } = await service.createChallenge('1');
-    challenges.find((c) => c.token === token)!.expiresAt = new Date(Date.now() - 1000);
+    challenges.find((c) => c.token === hashTrustToken(token))!.expiresAt = new Date(
+      Date.now() - 1000
+    );
 
     // Rejected on read, so expiry does not depend on the sweep having run. A correct code cannot
     // revive it either — expiry is checked before anything is judged.
@@ -2046,19 +2050,19 @@ describe('mfa service: challenge lifecycle', () => {
     // TOTP step burned (so the code still works on a fresh challenge), no failure recorded
     // against the account. Checking the code first would have consumed the step and handed an
     // attacker a way to burn a legitimate user's codes through dead challenges.
-    expect(challenges.find((c) => c.token === token)!.attempts).toBe(0);
+    expect(challenges.find((c) => c.token === hashTrustToken(token))!.attempts).toBe(0);
     expect(users.get('1')!.mfaLastUsedStep).toBeNull();
     expect(events).toHaveLength(0);
 
     // An unparseable expiry fails closed too. `new Date('nonsense') <= new Date()` is false, so a
     // naive comparison would read a malformed `expiresAt` as "never expires" — a challenge that
     // outlives its window forever is the same finding as no window at all.
-    challenges.find((c) => c.token === token)!.expiresAt = new Date('nonsense');
+    challenges.find((c) => c.token === hashTrustToken(token))!.expiresAt = new Date('nonsense');
     await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
       ok: false,
       reason: 'unusable',
     });
-    expect(challenges.find((c) => c.token === token)!.attempts).toBe(0);
+    expect(challenges.find((c) => c.token === hashTrustToken(token))!.attempts).toBe(0);
   });
 
   test('a consumed challenge cannot be reused', async () => {
@@ -2071,7 +2075,7 @@ describe('mfa service: challenge lifecycle', () => {
     });
 
     // Success destroys the row, so the token cannot be presented again at all.
-    expect(challenges.some((c) => c.token === token)).toBe(false);
+    expect(challenges.some((c) => c.token === hashTrustToken(token))).toBe(false);
     await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
       ok: false,
       reason: 'unusable',
@@ -2093,7 +2097,7 @@ describe('mfa service: challenge lifecycle', () => {
     ]);
 
     expect(outcomes.filter((outcome) => outcome.ok)).toHaveLength(1);
-    expect(challenges.some((c) => c.token === token)).toBe(false);
+    expect(challenges.some((c) => c.token === hashTrustToken(token))).toBe(false);
   });
 
   test('the challenge is destroyed once its attempt cap is exhausted', async () => {
@@ -2112,7 +2116,7 @@ describe('mfa service: challenge lifecycle', () => {
 
     // Exactly `cap` guesses were evaluated, no more and no fewer: an off-by-one here is a free
     // extra guess per challenge, forever.
-    expect(challenges.find((c) => c.token === token)!.attempts).toBe(cap);
+    expect(challenges.find((c) => c.token === hashTrustToken(token))!.attempts).toBe(cap);
 
     await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
       ok: false,
@@ -2120,7 +2124,7 @@ describe('mfa service: challenge lifecycle', () => {
     });
     // Destroyed, not merely refused: leaving the row behind would make the cap depend on a
     // counter that some other path might reset.
-    expect(challenges.some((c) => c.token === token)).toBe(false);
+    expect(challenges.some((c) => c.token === hashTrustToken(token))).toBe(false);
 
     // And a correct code cannot rescue an exhausted challenge — the user must start again from
     // their password, which is the point of the per-challenge tier.
@@ -2155,7 +2159,7 @@ describe('mfa service: challenge lifecycle', () => {
     expect(evaluated.length + refused.length).toBe(cap + 3);
 
     // The counter itself never ran past the cap either (the row is normally gone by now).
-    const row = challenges.find((c) => c.token === token);
+    const row = challenges.find((c) => c.token === hashTrustToken(token));
     expect(row === undefined || Number(row.attempts) <= cap).toBe(true);
   });
 
@@ -2178,7 +2182,7 @@ describe('mfa service: challenge lifecycle', () => {
 
     // And the already-held challenge is refused too. Throttling only createChallenge would let
     // anyone who grabbed a challenge first keep guessing straight through the account cap.
-    const attemptsBefore = challenges.find((c) => c.token === held)!.attempts;
+    const attemptsBefore = challenges.find((c) => c.token === hashTrustToken(held))!.attempts;
     await expect(service.verifyChallenge(held, validCode())).resolves.toEqual({
       ok: false,
       reason: 'throttled',
@@ -2187,7 +2191,7 @@ describe('mfa service: challenge lifecycle', () => {
     // Refused before anything was spent: a throttled request must not cost an attempt, and must
     // not consume the legitimate user's TOTP step — otherwise the throttle becomes a way to burn
     // the codes of the account it is supposed to protect.
-    expect(challenges.find((c) => c.token === held)!.attempts).toBe(attemptsBefore);
+    expect(challenges.find((c) => c.token === hashTrustToken(held))!.attempts).toBe(attemptsBefore);
     expect(users.get('1')!.mfaLastUsedStep).toBeNull();
   });
 
@@ -2228,7 +2232,7 @@ describe('mfa service: challenge lifecycle', () => {
     });
 
     expect(recoveryRows.find((r) => r.codeHash === `h:${codes[0]}`)!.usedAt).toBeInstanceOf(Date);
-    expect(challenges.some((c) => c.token === token)).toBe(false);
+    expect(challenges.some((c) => c.token === hashTrustToken(token))).toBe(false);
 
     const recorded = events.filter((e) => e.type === 'recovery_code_used');
     expect(recorded).toHaveLength(1);
@@ -2276,7 +2280,7 @@ describe('mfa service: challenge lifecycle', () => {
     // The replayed presentation was charged as a failure at both tiers, and the recorded step is
     // unchanged (nothing rewound it to let the code work again).
     expect(Number(users.get('1')!.mfaLastUsedStep)).toBe(consumedStep);
-    expect(challenges.find((c) => c.token === second)!.attempts).toBe(1);
+    expect(challenges.find((c) => c.token === hashTrustToken(second))!.attempts).toBe(1);
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
   });
 
@@ -2292,7 +2296,7 @@ describe('mfa service: challenge lifecycle', () => {
     });
 
     expect(metadataGet).toHaveBeenCalledWith(CHALLENGE_UID);
-    expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
+    expect(challenges.find((c) => c.token === hashTrustToken(token))!.attempts).toBe(1);
   });
 
   test('a recovery code still works when the stored totp secret cannot be read', async () => {
@@ -2312,7 +2316,7 @@ describe('mfa service: challenge lifecycle', () => {
     });
 
     expect(recoveryRows.find((r) => r.codeHash === `h:${codes[0]}`)!.usedAt).toBeInstanceOf(Date);
-    expect(challenges.some((c) => c.token === token)).toBe(false);
+    expect(challenges.some((c) => c.token === hashTrustToken(token))).toBe(false);
     expect(events.filter((e) => e.type === 'recovery_code_used')).toHaveLength(1);
 
     // With the length routing a recovery-shaped code never reaches the TOTP branch at all, so the
@@ -2334,7 +2338,7 @@ describe('mfa service: challenge lifecycle', () => {
       reason: 'invalid',
     });
 
-    expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
+    expect(challenges.find((c) => c.token === hashTrustToken(token))!.attempts).toBe(1);
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
     // The operator's log names the account, or a fleet-wide key rotation is one line per login with
     // nothing to tell which user still needs recovering.
@@ -2409,14 +2413,16 @@ describe('mfa service: challenge lifecycle', () => {
 
     const { token: live } = await service.createChallenge('1');
     const { token: dead } = await service.createChallenge('1');
-    challenges.find((c) => c.token === dead)!.expiresAt = new Date(Date.now() - 1000);
+    challenges.find((c) => c.token === hashTrustToken(dead))!.expiresAt = new Date(
+      Date.now() - 1000
+    );
 
     await expect(service.sweepExpiredChallenges()).resolves.toBe(1);
-    expect(challenges.map((c) => c.token)).toEqual([live]);
+    expect(challenges.map((c) => c.token)).toEqual([hashTrustToken(live)]);
 
     // Housekeeping only: nothing to do a second time, and it never touches a usable challenge.
     await expect(service.sweepExpiredChallenges()).resolves.toBe(0);
-    expect(challenges.map((c) => c.token)).toEqual([live]);
+    expect(challenges.map((c) => c.token)).toEqual([hashTrustToken(live)]);
   });
 });
 
