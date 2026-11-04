@@ -50,6 +50,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [NPS](https://contributor.strapi.io/packages/core/admin/features/nps): Net Promoter Score survey that collects user feedback about Strapi.
 - [Admin telemetry (frontend)](https://contributor.strapi.io/packages/core/admin/features/telemetry): How the admin panel sends usage events from the browser — useTracking, event types, and plugin patterns.
 - [Unsaved changes](https://contributor.strapi.io/packages/core/admin/features/unsaved-changes): How the admin panel warns before navigation, tab close, session expiry or a modal close discards unsaved edits.
+- [Filters](https://contributor.strapi.io/packages/core/admin/filters): How the admin Filters component stores filter values in the URL, and how date-time filters reach the API.
 - [Guided Tour](https://contributor.strapi.io/packages/core/admin/guided-tour): Interactive onboarding system that guides new users through key features and workflows.
 - [createContext](https://contributor.strapi.io/packages/core/admin/hooks/create-context): API reference for the createContext helper of the admin, and how its consumers re-render
 - [useContentTypes](https://contributor.strapi.io/packages/core/admin/hooks/use-content-types): API reference for the useContentTypes hook in Strapi's Content Manager
