@@ -38,7 +38,8 @@ const canSeeMfaState = (ctx: Context): boolean =>
 const withMfaState = <T extends object>(
   sanitized: T,
   user: AdminUser,
-  include: boolean
+  include: boolean,
+  required = false
 ): T & AdminUserMfaState =>
   include
     ? {
@@ -46,6 +47,7 @@ const withMfaState = <T extends object>(
         mfaEnabledAt: user.mfaEnabledAt ?? null,
         mfaGraceUntil: user.mfaGraceUntil ?? null,
         mfaLockedAt: user.mfaLockedAt ?? null,
+        mfaRequired: required,
       }
     : sanitized;
 
@@ -99,13 +101,14 @@ export default {
     const { results, pagination } = await userService.findPage(sanitizedQuery);
 
     const includeMfa = canSeeMfaState(ctx);
+    const required: boolean[] = includeMfa ? await getService('mfa').requiredForUsers(results) : [];
 
     ctx.body = {
       data: {
         // Enforcement state per row, so an administrator watching grace periods run out can see
         // every account on one page instead of opening each user in turn.
-        results: results.map((user: AdminUser) =>
-          withMfaState(userService.sanitizeUser(user), user, includeMfa)
+        results: results.map((user: AdminUser, index: number) =>
+          withMfaState(userService.sanitizeUser(user), user, includeMfa, required[index])
         ),
         pagination,
       },
@@ -122,10 +125,13 @@ export default {
     }
 
     const sanitized = getService('user').sanitizeUser(user as AdminUser);
+    const includeMfa = canSeeMfaState(ctx);
+    const [required] = includeMfa ? await getService('mfa').requiredForUsers([user]) : [false];
     const data: FindOne.Response['data'] = withMfaState(
       sanitized,
       user as AdminUser,
-      canSeeMfaState(ctx)
+      includeMfa,
+      required
     );
 
     ctx.body = { data } satisfies FindOne.Response;

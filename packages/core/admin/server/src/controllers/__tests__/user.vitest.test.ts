@@ -173,7 +173,7 @@ describe('User Controller', () => {
         admin: {
           services: {
             user: { findOne, sanitizeUser },
-            mfa: { isEnabled: () => true },
+            mfa: { isEnabled: () => true, requiredForUsers: vi.fn(async () => [true]) },
           },
         },
       } as any;
@@ -193,6 +193,7 @@ describe('User Controller', () => {
           mfaEnabledAt: null,
           mfaGraceUntil: '2026-09-11T10:00:00.000Z',
           mfaLockedAt: null,
+          mfaRequired: true,
         },
       });
     });
@@ -394,7 +395,7 @@ describe('User Controller', () => {
               findPage: vi.fn(() => ({ results: rows, pagination })),
               sanitizeUser: vi.fn(({ id, email }) => ({ id, email })),
             },
-            mfa: { isEnabled: () => enabled },
+            mfa: { isEnabled: () => enabled, requiredForUsers: vi.fn(async () => [false, true]) },
             permission: {
               createPermissionsManager: vi.fn(() => ({
                 ability: state.userAbility,
@@ -418,6 +419,7 @@ describe('User Controller', () => {
           mfaEnabledAt: '2026-09-01T10:00:00.000Z',
           mfaGraceUntil: null,
           mfaLockedAt: null,
+          mfaRequired: false,
         },
         {
           id: 2,
@@ -425,6 +427,7 @@ describe('User Controller', () => {
           mfaEnabledAt: null,
           mfaGraceUntil: '2026-09-11T10:00:00.000Z',
           mfaLockedAt: null,
+          mfaRequired: true,
         },
       ]);
     });

@@ -67,6 +67,10 @@ export interface AdminUserMfaState {
   mfaEnabledAt?: string | Date | null;
   mfaGraceUntil?: string | Date | null;
   mfaLockedAt?: string | Date | null;
+  /** Whether the enforcement settings require two-factor authentication of this account now,
+   * exemptions applied. Tells a required account that has not started its grace period yet from
+   * one that is not required at all. */
+  mfaRequired?: boolean;
 }
 
 /**

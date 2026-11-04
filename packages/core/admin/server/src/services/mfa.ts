@@ -232,6 +232,36 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return roles.some((role) => role.mfaRequired === true);
   };
 
+  /**
+   * `isMfaRequiredFor` for a page of users, with the enforcement settings and the SSO-locked roles
+   * read once rather than once per row. For the users list, which shows a required account that has
+   * not started its grace period yet, and must not cost two store reads a row to do it.
+   */
+  const requiredForUsers = async (users: AdminUserRow[]): Promise<boolean[]> => {
+    if (!isEnabled() || users.length === 0) {
+      return users.map(() => false);
+    }
+
+    const { mode } = await readMfaEnforcement(strapi);
+    if (mode === 'off') {
+      return users.map(() => false);
+    }
+
+    const lockedRoles = await readSsoLockedRoles();
+    return Promise.all(
+      users.map(async (user) => {
+        if (await isExemptGiven(user, lockedRoles)) {
+          return false;
+        }
+        if (mode === 'required') {
+          return true;
+        }
+        const roles = await loadRoles(user);
+        return roles.some((role) => role.mfaRequired === true);
+      })
+    );
+  };
+
   const DAY_MS = 24 * 60 * 60 * 1000;
 
   const isEnrolledRow = (user: AdminUserRow): boolean =>
@@ -1602,6 +1632,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isEnrolled,
     isExemptFromMfa,
     isMfaRequiredFor,
+    requiredForUsers,
     enforce,
     clearGraceIfStale,
     syncFeatureState,

@@ -105,12 +105,24 @@ describe('Admin MFA with the feature off', () => {
     const list = await rq({ method: 'GET', url: '/admin/users' });
 
     expect(one.statusCode).toBe(200);
-    for (const field of ['mfaEnabledAt', 'mfaGraceUntil', 'mfaLockedAt', 'mfaSecret']) {
+    for (const field of [
+      'mfaEnabledAt',
+      'mfaGraceUntil',
+      'mfaLockedAt',
+      'mfaRequired',
+      'mfaSecret',
+    ]) {
       expect(one.body.data).not.toHaveProperty(field);
     }
     const row = list.body.data.results.find((user: any) => user.id === enrolled.id);
     expect(row).toBeDefined();
-    for (const field of ['mfaEnabledAt', 'mfaGraceUntil', 'mfaLockedAt', 'mfaSecret']) {
+    for (const field of [
+      'mfaEnabledAt',
+      'mfaGraceUntil',
+      'mfaLockedAt',
+      'mfaRequired',
+      'mfaSecret',
+    ]) {
       expect(row).not.toHaveProperty(field);
     }
   });

@@ -209,6 +209,7 @@ describe('Admin MFA enforcement', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.data).toHaveProperty('mfaGraceUntil');
       expect(res.body.data).toHaveProperty('mfaLockedAt', null);
+      expect(res.body.data).toHaveProperty('mfaRequired', true);
       expect(res.body.data).not.toHaveProperty('mfaSecret');
       expect(res.body.data).not.toHaveProperty('mfaPendingSecret');
     });

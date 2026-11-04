@@ -3432,6 +3432,38 @@ describe('mfa service: enforcement policy', () => {
     expect(userMocks.load).toHaveBeenCalledTimes(1);
   });
 
+  /** The users list asks for a whole page at once: same answers as `isMfaRequiredFor`, with the
+   * settings and the SSO-locked roles read once for the page rather than once per row. */
+  test('requiredForUsers answers per row like isMfaRequiredFor, reading the store once each', async () => {
+    const { service, storeGet } = setup({
+      stored: { mfa: { mode: 'optional' } },
+      ssoEnabled: true,
+      ssoLockedRoles: ['9'],
+    });
+
+    await expect(
+      service.requiredForUsers([
+        user({ roles: [{ id: 2, mfaRequired: true }] }),
+        user({ id: 2, roles: [{ id: 1, mfaRequired: null }] }),
+        user({ id: 3, password: null, roles: [{ id: 2, mfaRequired: true }] }),
+        user({ id: 4, roles: [{ id: 9, mfaRequired: true }] }),
+      ])
+    ).resolves.toEqual([true, false, false, false]);
+    expect(storeGet.mock.calls.filter(([{ key }]) => key === 'security-settings')).toHaveLength(1);
+    expect(storeGet.mock.calls.filter(([{ key }]) => key === 'auth')).toHaveLength(1);
+  });
+
+  test('requiredForUsers requires nobody while the feature or the mode is off', async () => {
+    await expect(
+      setup({ stored: { mfa: { mode: 'required' } }, enabled: false }).service.requiredForUsers([
+        user(),
+      ])
+    ).resolves.toEqual([false]);
+    await expect(
+      setup({ stored: { mfa: { mode: 'off' } } }).service.requiredForUsers([user()])
+    ).resolves.toEqual([false]);
+  });
+
   test('a user with no local password is exempt in every mode', async () => {
     const { service } = setup({ stored: { mfa: { mode: 'required' } } });
     await expect(service.isMfaRequiredFor(user({ password: null }))).resolves.toBe(false);

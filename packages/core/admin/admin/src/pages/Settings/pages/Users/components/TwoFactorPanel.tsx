@@ -100,11 +100,14 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { data: settings } = useGetSecuritySettingsQuery(undefined, {
     skip: !canReadSecuritySettings,
   });
-  const requiredBySettings = settings
-    ? settings.mfa.mode === 'required' ||
-      (settings.mfa.mode === 'optional' &&
-        (user.roles ?? []).some((role) => settings.mfa.requiredRoles.includes(String(role.id))))
-    : undefined;
+  // The server's answer when it sent one (exemptions applied); the settings otherwise.
+  const requiredBySettings =
+    user.mfaRequired ??
+    (settings
+      ? settings.mfa.mode === 'required' ||
+        (settings.mfa.mode === 'optional' &&
+          (user.roles ?? []).some((role) => settings.mfa.requiredRoles.includes(String(role.id))))
+      : undefined);
 
   // Only an enrolled user can hold trusted browsers (disable and reset clear them), so the query
   // is skipped otherwise. Gating on `isSuccess` rather than defaulting `data` to `[]` keeps the
@@ -257,27 +260,41 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
         )}
       </Typography>
     );
-  } else if (requiredBySettings && settings) {
-    state = (
-      <Typography>
-        {formatMessage(
-          {
-            id: 'Settings.permissions.users.mfa.state.pending',
-            defaultMessage: 'Not set up. A new {days}-day grace period starts at their next login.',
-          },
-          { days: settings.mfa.graceDays }
-        )}
-      </Typography>
-    );
-  } else if (justUnlocked && requiredBySettings === undefined) {
-    state = (
-      <Typography>
-        {formatMessage({
-          id: 'Settings.permissions.users.mfa.state.pending.unknownDays',
-          defaultMessage: 'Not set up. A new grace period starts at their next login.',
-        })}
-      </Typography>
-    );
+  } else if (requiredBySettings || (justUnlocked && requiredBySettings === undefined)) {
+    // "A new" grace period only after an unlock made here: a required user who never had one is
+    // starting their first.
+    const days = settings?.mfa.graceDays;
+    let message: string;
+    if (days === undefined) {
+      message = justUnlocked
+        ? formatMessage({
+            id: 'Settings.permissions.users.mfa.state.pending.unknownDays',
+            defaultMessage: 'Not set up. A new grace period starts at their next login.',
+          })
+        : formatMessage({
+            id: 'Settings.permissions.users.mfa.state.required.unknownDays',
+            defaultMessage: 'Required, not set up. A grace period starts at their next login.',
+          });
+    } else {
+      message = justUnlocked
+        ? formatMessage(
+            {
+              id: 'Settings.permissions.users.mfa.state.pending',
+              defaultMessage:
+                'Not set up. A new {days}-day grace period starts at their next login.',
+            },
+            { days }
+          )
+        : formatMessage(
+            {
+              id: 'Settings.permissions.users.mfa.state.required',
+              defaultMessage:
+                'Required, not set up. A {days}-day grace period starts at their next login.',
+            },
+            { days }
+          );
+    }
+    state = <Typography>{message}</Typography>;
   } else {
     state = (
       <Typography textColor="neutral600">

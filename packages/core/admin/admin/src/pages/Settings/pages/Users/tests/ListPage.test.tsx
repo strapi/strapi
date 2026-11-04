@@ -69,6 +69,16 @@ describe('Users | ListPage', () => {
                 mfaGraceUntil: null,
                 mfaLockedAt: null,
               },
+              {
+                id: 5,
+                firstname: 'Not',
+                lastname: 'Started',
+                roles: [],
+                mfaEnabledAt: null,
+                mfaGraceUntil: null,
+                mfaLockedAt: null,
+                mfaRequired: true,
+              },
             ],
             pagination: { page: 1 },
           },
@@ -83,5 +93,7 @@ describe('Users | ListPage', () => {
     expect(screen.getByText(/^Set up by .+\d{1,2}:\d{2}/)).toBeInTheDocument();
     expect(screen.getByText('Locked')).toBeInTheDocument();
     expect(screen.getByText('Not enabled')).toBeInTheDocument();
+    // Required, but the grace period has not started: it starts at their next login.
+    expect(screen.getByText('Required, not set up')).toBeInTheDocument();
   });
 });

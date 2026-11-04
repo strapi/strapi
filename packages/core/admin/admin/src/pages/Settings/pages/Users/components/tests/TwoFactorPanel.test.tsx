@@ -415,13 +415,54 @@ describe('TwoFactorPanel', () => {
     });
   });
   describe('required but not set up', () => {
-    // An unlock clears the lock and the grace period; the next login starts a new one. The page
+    // A required user who never had a grace period is starting their first, not a new one. The page
     // says so, with the configured length, whenever the settings require it of this user.
-    it('says a new grace period of the configured length starts at the next login', async () => {
+    it('says a grace period of the configured length starts at the next login', async () => {
       settings({ mode: 'optional', requiredRoles: ['2'] });
       render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />, {
         providerOptions: withSecurityRead(),
       });
+
+      expect(
+        await screen.findByText(
+          'Required, not set up. A 5-day grace period starts at their next login.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it("trusts the server's mfaRequired over the settings, so an exempt account is not called required", async () => {
+      const reads = settings({ mode: 'required', requiredRoles: [] });
+      render(<TwoFactorPanel user={{ ...NOT_ENROLLED, mfaRequired: false }} canUpdate />, {
+        providerOptions: withSecurityRead(),
+      });
+
+      await waitFor(() => expect(reads.count).toBe(1));
+      expect(await screen.findByText('Not enabled')).toBeInTheDocument();
+    });
+
+    it('says the required account starts a grace period even without settings to read', async () => {
+      render(<TwoFactorPanel user={{ ...NOT_ENROLLED, mfaRequired: true }} canUpdate />);
+
+      expect(
+        await screen.findByText('Required, not set up. A grace period starts at their next login.')
+      ).toBeInTheDocument();
+    });
+
+    // An unlock clears the lock and the grace period; the next login starts a new one.
+    it('says a new grace period of the configured length starts after an unlock made here', async () => {
+      settings({ mode: 'optional', requiredRoles: ['2'] });
+      server.use(
+        http.post('/admin/mfa/users/:id/unlock', () => new HttpResponse(null, { status: 204 }))
+      );
+      const locked = { ...NOT_ENROLLED, mfaLockedAt: '2026-02-01T00:00:00.000Z' };
+      const { user, rerender } = render(<TwoFactorPanel user={locked} canUpdate />, {
+        providerOptions: withSecurityRead(),
+      });
+
+      await user.click(await screen.findByRole('button', { name: 'Unlock' }));
+      await confirmWithCredentials(user, 'Unlock');
+      await screen.findByText('Account unlocked.');
+      rerender(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />);
 
       expect(
         await screen.findByText('Not set up. A new 5-day grace period starts at their next login.')

@@ -61,6 +61,22 @@ const TwoFactorStatus = ({ user }: { user: AdminUserMfaState }) => {
     );
   }
 
+  // Required but not yet on the clock: the grace period starts at their next login.
+  if (user.mfaRequired) {
+    return (
+      <Flex>
+        <Status size="S" variant="neutral">
+          <Typography tag="span" variant="omega" fontWeight="bold">
+            {formatMessage({
+              id: 'Settings.permissions.users.mfa.status.required',
+              defaultMessage: 'Required, not set up',
+            })}
+          </Typography>
+        </Status>
+      </Flex>
+    );
+  }
+
   return (
     <Typography textColor="neutral600">
       {formatMessage({
