@@ -198,12 +198,36 @@ describe('getWebhookChanges', () => {
     const custom = { ...webhook, body: { ref: 'main', token: 's3cret' } };
 
     expect(getWebhookChanges(webhook, custom)).toEqual({
-      body: { added: ['ref', 'token'], removed: [], changed: [] },
+      body: {
+        added: ['ref', 'token'],
+        removed: [],
+        changed: [],
+        before: null,
+        after: ['ref', 'token'],
+      },
     });
     expect(getWebhookChanges(custom, webhook)).toEqual({
-      body: { added: [], removed: ['ref', 'token'], changed: [] },
+      body: {
+        added: [],
+        removed: ['ref', 'token'],
+        changed: [],
+        before: ['ref', 'token'],
+        after: null,
+      },
     });
     expect(JSON.stringify(getWebhookChanges(webhook, custom))).not.toMatch(/s3cret|main/);
+  });
+
+  test('records a switch between the default payload and an empty body template', () => {
+    const empty = { ...webhook, body: {} };
+
+    expect(getWebhookChanges(webhook, empty)).toEqual({
+      body: { added: [], removed: [], changed: [], before: null, after: [] },
+    });
+    expect(getWebhookChanges(empty, webhook)).toEqual({
+      body: { added: [], removed: [], changed: [], before: [], after: null },
+    });
+    expect(getWebhookChanges(empty, { ...webhook, body: {} })).toEqual({});
   });
 
   test('records a rotated body value by key, without the values', () => {

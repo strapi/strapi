@@ -227,7 +227,7 @@ describe('Webhooks controller body template', () => {
 
     expect(store.updateWebhook).toHaveBeenCalledWith('4', expect.objectContaining({ body: null }));
     expect(emitAuditMock.mock.calls[0][2].changes).toEqual({
-      body: { added: [], removed: ['ref'], changed: [] },
+      body: { added: [], removed: ['ref'], changed: [], before: ['ref'], after: null },
     });
   });
 

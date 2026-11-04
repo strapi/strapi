@@ -132,6 +132,13 @@ export const renderWebhookBody = (
 
 const listPlaceholders = (value: unknown): string[] => {
   if (typeof value === 'string') {
+    // An unterminated `{{ entry.title` is not a placeholder: it would be sent as text, unnoticed
+    if (/\{\{|\}\}/.test(value.replace(ANY_PLACEHOLDER, ''))) {
+      throw new ValidationError(
+        'Webhook body has a "{{" or "}}" that is not part of a {{ variable }} placeholder'
+      );
+    }
+
     return Array.from(value.matchAll(ANY_PLACEHOLDER), (match) => match[1].trim());
   }
 

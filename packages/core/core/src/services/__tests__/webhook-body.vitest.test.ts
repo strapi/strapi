@@ -206,6 +206,18 @@ describe('validateWebhookBody', () => {
     expect(() => validate({ text: `value: {{ ${variable} }}` })).toThrow();
   });
 
+  test.each(['{{ entry.title', 'Title: {{ event }} {{ uid', 'event }}', '{{ event }} }}', '{{'])(
+    'Rejects %j, a "{{" or "}}" outside of a placeholder',
+    (value) => {
+      expect(() => validate({ text: value })).toThrow('not part of a {{ variable }} placeholder');
+      expect(() => validate({ nested: [{ text: value }] })).toThrow('not part of a {{ variable }}');
+    }
+  );
+
+  test('Rejects an unterminated placeholder in a key', () => {
+    expect(() => validate({ '{{ event': 'x' })).toThrow('not part of a {{ variable }}');
+  });
+
   test('Rejects a variable in a key', () => {
     expect(() => validate({ '{{ event }}': 'x' })).toThrow("keys can't hold a variable");
   });

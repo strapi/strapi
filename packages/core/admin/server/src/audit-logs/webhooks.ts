@@ -41,13 +41,23 @@ export interface KeyChanges {
   changed: string[];
 }
 
+/**
+ * `before` and `after` are only set on a switch between the default payload (`null`) and a body
+ * template (its sorted keys), as recorded on create: an empty template has no keys to diff, but
+ * still replaces the default payload.
+ */
+export interface BodyChanges extends KeyChanges {
+  before?: string[] | null;
+  after?: string[] | null;
+}
+
 export type WebhookChanges = Partial<{
   name: Modules.AuditLogs.FieldChange<string>;
   url: Modules.AuditLogs.FieldChange<string>;
   events: Modules.AuditLogs.FieldChange<string[]>;
   contentTypeEvents: Modules.AuditLogs.FieldChange<Record<string, string[]>>;
   headers: KeyChanges;
-  body: KeyChanges;
+  body: BodyChanges;
   isEnabled: Modules.AuditLogs.FieldChange<boolean>;
 }>;
 
@@ -139,7 +149,13 @@ export const getWebhookChanges = (previous: Webhook, next: Webhook): WebhookChan
     changes.headers = headers;
   }
 
-  if (body) {
+  if ((before.body === null) !== (after.body === null)) {
+    changes.body = {
+      ...(body ?? { added: [], removed: [], changed: [] }),
+      before: before.body,
+      after: after.body,
+    };
+  } else if (body) {
     changes.body = body;
   }
 
