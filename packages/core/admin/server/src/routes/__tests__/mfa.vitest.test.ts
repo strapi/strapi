@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import routes from '../mfa';
+import { accountRateLimitKey } from '../../middlewares/mfa-rate-limit';
 
 type RouteEntry = {
   method: string;
@@ -96,9 +97,10 @@ describe('mfa routes (rate limiting)', () => {
   ] as const;
 
   test.each(CREDENTIAL_ROUTES)('%s %s is rate limited at the default ceiling', (method, path) => {
-    // Per account and route pattern, so the `/login` default is the right bound -- see
-    // `rateLimitKey`.
-    expect(route(method, path).config.middlewares).toEqual(['admin::rateLimit']);
+    // Per account and route pattern, so the `/login` default is the right bound
+    expect(route(method, path).config.middlewares).toEqual([
+      { name: 'admin::rateLimit', config: { keyGenerator: accountRateLimitKey } },
+    ]);
   });
 
   const isCredentialRoute = (method: string, path: string) =>

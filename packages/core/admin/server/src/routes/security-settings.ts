@@ -1,3 +1,5 @@
+import { accountRateLimitKey } from '../middlewares/mfa-rate-limit';
+
 export default [
   {
     method: 'GET',
@@ -46,7 +48,7 @@ export default [
         { name: 'admin::hasPermissions', config: { actions: ['admin::security-settings.update'] } },
       ],
       // The body may carry a password and a code.
-      middlewares: ['admin::rateLimit'],
+      middlewares: [{ name: 'admin::rateLimit', config: { keyGenerator: accountRateLimitKey } }],
     },
   },
 ];

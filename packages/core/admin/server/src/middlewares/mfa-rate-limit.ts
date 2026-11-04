@@ -4,6 +4,17 @@ import type { Core } from '@strapi/types';
 import rateLimit from './rateLimit';
 
 /**
+ * `keyGenerator` for `admin::rateLimit` on authenticated two-factor routes: one bucket per account
+ * and route pattern, whatever the address or path parameters. An address key would let colleagues
+ * behind one NAT lock each other out, and a concrete-path key would give a fresh bucket per `:id`.
+ */
+export const accountRateLimitKey = (ctx: Context): string => {
+  const route = ctx.state.route as { method?: string; path?: string } | undefined;
+  const pattern = `${route?.method ?? ctx.method}:${route?.path ?? ''}`.toLowerCase();
+  return `user:${String(ctx.state.user?.id)}:${pattern}`;
+};
+
+/**
  * `admin::rateLimit`, applied only while the MFA feature is on.
  *
  * `/reset-password` needs a limiter because it can now answer with a second-factor challenge, so

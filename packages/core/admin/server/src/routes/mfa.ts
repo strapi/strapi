@@ -1,3 +1,5 @@
+import { accountRateLimitKey } from '../middlewares/mfa-rate-limit';
+
 const authenticated = (method: string, path: string, handler: string) => ({
   method,
   path,
@@ -14,7 +16,7 @@ const authenticated = (method: string, path: string, handler: string) => ({
  * several `/mfa/me` calls, so a limited read turns an ordinary visit into a 429.
  *
  * The middleware default, five per five minutes, the same as `/login`. With a session the limiter
- * keys on the account and the route pattern (`rateLimitKey`), so colleagues behind one address do
+ * keys on the account and the route pattern (`accountRateLimitKey`), so colleagues behind one address do
  * not share a bucket and a parameter in the path does not buy a fresh one.
  */
 const credentialGuarded = (method: string, path: string, handler: string) => ({
@@ -23,7 +25,7 @@ const credentialGuarded = (method: string, path: string, handler: string) => ({
   handler,
   config: {
     policies: ['admin::isMfaEnabled', 'admin::isAuthenticatedAdmin'],
-    middlewares: ['admin::rateLimit'],
+    middlewares: [{ name: 'admin::rateLimit', config: { keyGenerator: accountRateLimitKey } }],
   },
 });
 
@@ -44,7 +46,7 @@ const credentialGuardedWithPermission = (
       'admin::isAuthenticatedAdmin',
       { name: 'admin::hasPermissions', config: { actions: [action] } },
     ],
-    middlewares: ['admin::rateLimit'],
+    middlewares: [{ name: 'admin::rateLimit', config: { keyGenerator: accountRateLimitKey } }],
   },
 });
 

@@ -7,37 +7,6 @@ import type { Core } from '@strapi/types';
 
 const { RateLimitError } = errors;
 
-/**
- * The bucket a request is counted against.
- *
- * Unauthenticated, the only identity on offer is the email in the body, so the key is
- * `<email>:<path>:<ip>` -- and a body without one degrades to `unknownEmail`, one bucket per path
- * and address. That is acceptable on `/login`, which always carries an email.
- *
- * An authenticated request is keyed on the account and the route *pattern* instead: every attempt
- * against one account on one route lands in one bucket, from any address, whatever the
- * parameters. An address key would let colleagues behind one NAT lock each other out, and a
- * concrete-path key would hand the caller a fresh bucket per `:id` value.
- */
-export const rateLimitKey = (ctx: Context): string => {
-  const sessionUserId: unknown = ctx.state?.user?.id;
-
-  if (sessionUserId !== undefined && sessionUserId !== null) {
-    const route = ctx.state?.route as { method?: string; path?: string } | undefined;
-    const pattern = route?.path ? `${route.method ?? ctx.method}:${route.path}` : ctx.method;
-    return `user:${String(sessionUserId)}:${pattern.toLowerCase()}`;
-  }
-
-  const requestEmail = get(ctx, 'request.body.email');
-  const userEmail = isString(requestEmail) ? requestEmail.toLowerCase() : 'unknownEmail';
-
-  const requestPath = isString(ctx.request.path)
-    ? path.normalize(ctx.request.path).toLowerCase().replace(/\/$/, '')
-    : 'invalidPath';
-
-  return `${userEmail}:${requestPath}:${ctx.request.ip}`;
-};
-
 export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
     let rateLimitConfig = strapi.config.get('admin.rateLimit') as any;
@@ -57,10 +26,17 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const rateLimit = require('koa2-ratelimit').RateLimit;
 
+      const requestEmail = get(ctx, 'request.body.email');
+      const userEmail = isString(requestEmail) ? requestEmail.toLowerCase() : 'unknownEmail';
+
+      const requestPath = isString(ctx.request.path)
+        ? path.normalize(ctx.request.path).toLowerCase().replace(/\/$/, '')
+        : 'invalidPath';
+
       const loadConfig = {
         interval: { min: 5 },
         max: 5,
-        prefixKey: rateLimitKey(ctx),
+        prefixKey: `${userEmail}:${requestPath}:${ctx.request.ip}`,
         handler() {
           throw new RateLimitError();
         },

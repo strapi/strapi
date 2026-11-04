@@ -174,11 +174,11 @@ sends the notice. Any other outcome (a success, an exhausted challenge, an error
 only wrong codes count. `isAccountThrottled` is still the check on paths that verify nothing, such
 as creating a challenge.
 
-The routes that verify a password or a code also carry `admin::rateLimit`. With a session, the
-limiter keys on the account and the route pattern (`rateLimitKey` in
-`server/src/middlewares/rateLimit.ts`), so administrators behind one address do not share a bucket
-and a parameter in the path does not buy a fresh one. Without a session it keys on the email in the
-body, the path and the address, as on `/login`. `/reset-password` uses `admin::mfa-rate-limit`,
+The routes that verify a password or a code also carry `admin::rateLimit`. On the authenticated
+ones the route config passes `keyGenerator: accountRateLimitKey` (`server/src/middlewares/mfa-rate-limit.ts`),
+so the limiter keys on the account and the route pattern: administrators behind one address do not
+share a bucket and a parameter in the path does not buy a fresh one. Without a session it keys on
+the email in the body, the path and the address, as on `/login`. `/reset-password` uses `admin::mfa-rate-limit`,
 the same limiter applied only while the feature is on, because that route exists without it.
 
 ## Configuration
