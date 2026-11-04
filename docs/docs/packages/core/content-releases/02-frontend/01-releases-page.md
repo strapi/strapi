@@ -34,7 +34,7 @@ A "Sort" menu on the right of the filter bar sets the `sort` URL param: schedule
 
 #### New Release Creation:
 
-If a user has the `plugin::content-releases.create` permission, a 'New release' button will be visible in the header. Clicking the button opens a side panel with the release name, its schedule (date, time and timezone, or "I don't have a release date yet") and its release mode. The date and time start empty, also after ticking and unticking "I don't have a release date yet"; the release modes list the default, "Require every entry to be ready", first (the order of `RELEASE_CONDITIONS`). The name of a pending release must be unique. Once created, the user is taken to the new release. If the API refuses it, e.g. for a name already in use, its error message shows in the notification.
+If a user has the `plugin::content-releases.create` permission, a 'New release' button will be visible in the header. Clicking the button opens a side panel with the release name, its schedule (date, time and timezone, or "I don't have a release date yet") and its release mode. The date and time start empty. Ticking "I don't have a release date yet" only hides the schedule: unticking it brings back what was picked, and while it's ticked the schedule is neither validated nor submitted. The release modes list the default, "Require every entry to be ready", first (the order of `RELEASE_CONDITIONS`). The name of a pending release must be unique. Once created, the user is taken to the new release. If the API refuses it, e.g. for a name already in use, its error message shows in the notification.
 
 #### License limits
 

@@ -33,7 +33,7 @@ import {
   Tabs,
   Divider,
 } from '@strapi/design-system';
-import { More, Pencil, Trash } from '@strapi/icons';
+import { Download, More, Pencil, Trash, Upload } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl, type IntlShape, type MessageDescriptor } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
@@ -1111,11 +1111,16 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         <Tabs.Root
           variant="simple"
           value={activeTab}
+          // Tabs and grouping are views of the page: replace, so Back leaves the page
           onValueChange={(value) =>
-            setQuery({
-              filter: value === 'all' ? undefined : (value as ReleaseActionFilter),
-              page: 1,
-            })
+            setQuery(
+              {
+                filter: value === 'all' ? undefined : (value as ReleaseActionFilter),
+                page: 1,
+              },
+              'push',
+              true
+            )
           }
         >
           <Tabs.List
@@ -1168,7 +1173,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               )
             }
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
-            onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
+            onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy }, 'push', true)}
           >
             {options.map((option) => (
               <SingleSelectOption key={option} value={option}>
@@ -1262,16 +1267,23 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                           </Td>
                           <Td width="20%">
                             {release.releasedAt ? (
-                              <Typography textColor={textColor}>
-                                {formatMessage(
-                                  {
-                                    id: 'content-releases.pages.ReleaseDetails.table.action-type',
-                                    defaultMessage:
-                                      '{isPublish, select, true {Publish} other {Unpublish}}',
-                                  },
-                                  { isPublish: type === 'publish' }
+                              <Flex gap={2}>
+                                {type === 'publish' ? (
+                                  <Upload aria-hidden fill={textColor ?? 'neutral800'} />
+                                ) : (
+                                  <Download aria-hidden fill={textColor ?? 'neutral800'} />
                                 )}
-                              </Typography>
+                                <Typography textColor={textColor}>
+                                  {formatMessage(
+                                    {
+                                      id: 'content-releases.pages.ReleaseDetails.table.action-type',
+                                      defaultMessage:
+                                        '{isPublish, select, true {Publish} other {Unpublish}}',
+                                    },
+                                    { isPublish: type === 'publish' }
+                                  )}
+                                </Typography>
+                              </Flex>
                             ) : (
                               <ReleaseActionOptions
                                 selected={type}

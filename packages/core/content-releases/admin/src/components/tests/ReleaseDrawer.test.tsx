@@ -110,6 +110,44 @@ describe('ReleaseDrawer', () => {
     expect(await screen.findByRole('combobox', { name: 'Date' })).toHaveValue('');
   });
 
+  it('keeps the schedule picked by the user after ticking and unticking no date', async () => {
+    const onSubmit = jest.fn();
+    const { user } = renderDrawer({ onSubmit });
+    const time = screen.getByRole('combobox', { name: 'Time' });
+
+    await user.click(time);
+    await user.click(await screen.findByRole('option', { name: '10:00', hidden: true }));
+    const noDate = screen.getByRole('checkbox', { name: "I don't have a release date yet" });
+    await user.click(noDate);
+    await user.click(noDate);
+
+    expect(await screen.findByRole('combobox', { name: 'Time' })).toHaveValue('10:00');
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    // 10:00 in Paris
+    expect(onSubmit.mock.calls[0][0].scheduledAt).toEqual(new Date('2099-08-20T08:00:00.000Z'));
+  });
+
+  it('submits without a date when a past schedule is hidden behind no date', async () => {
+    const onSubmit = jest.fn();
+    const { user } = renderDrawer({
+      onSubmit,
+      initialValues: { ...SCHEDULED_RELEASE, scheduledAt: '2020-08-20T07:30:00.000Z' },
+    });
+
+    await user.click(screen.getByRole('checkbox', { name: "I don't have a release date yet" }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(onSubmit).toHaveBeenCalledWith({
+      name: 'Autumn campaign',
+      scheduledAt: null,
+      timezone: null,
+      releaseCondition: 'allow_partial',
+    });
+  });
+
   it('lists the default release mode first', async () => {
     renderDrawer({ initialValues: NEW_RELEASE });
 

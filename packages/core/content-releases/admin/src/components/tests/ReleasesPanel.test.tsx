@@ -1,3 +1,4 @@
+import { lightTheme } from '@strapi/design-system';
 import { render, screen } from '@tests/utils';
 
 import { useGetReleasesForEntryQuery } from '../../services/release';
@@ -56,6 +57,21 @@ describe('ReleasesPanel', () => {
     renderPanel({ type: 'publish', isEntryValid: true });
 
     expect(screen.getByText('Will be published in')).toBeInTheDocument();
+  });
+
+  // Green would read as "fine" while the copy says it will be skipped
+  it('shows a not-ready entry in warning colours', () => {
+    renderPanel({ type: 'publish', isEntryValid: false });
+
+    const header = screen.getByText('Not ready to be published in').parentElement;
+    expect(header).toHaveStyle({ background: lightTheme.colors.warning100 });
+  });
+
+  it('shows a ready entry in success colours', () => {
+    renderPanel({ type: 'publish', isEntryValid: true });
+
+    const header = screen.getByText('Will be published in').parentElement;
+    expect(header).toHaveStyle({ background: lightTheme.colors.success100 });
   });
 
   it.each([false, null])('keeps the unpublish copy with validity %s', (v) => {
