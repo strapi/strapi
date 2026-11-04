@@ -1,20 +1,14 @@
 import { cloneDeep } from 'lodash';
+import type { Modules } from '@strapi/types';
 import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';
 import { attributeNaming } from './attribute-naming';
 import type { Attribute, Model } from '../types';
-import type { ForeignKey, Index } from '../schema/types';
-import type { Action, SubscriberFn } from '../lifecycles';
 
-export interface Meta extends Model {
-  columnToAttribute: Record<string, string>;
-  indexes: Index[];
-  foreignKeys: ForeignKey[];
-  lifecycles: Partial<Record<Action, SubscriberFn>>;
-}
+export type Meta = Modules.Database.Meta;
 
-export class Metadata extends Map<string, Meta> {
+export class Metadata extends Map<string, Meta> implements Modules.Database.Metadata {
   // TODO: we expose the global identifiers in this way so that in the future we can instantiate our own
   // However, it should NOT be done until all the methods used by metadata can be part of this metadata object
   // and access this one; currently they all access the global identifiers directly.

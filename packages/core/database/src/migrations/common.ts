@@ -1,7 +1,6 @@
-import type { Knex } from 'knex';
+import type { Modules } from '@strapi/types';
 
 import type { Database } from '..';
-import type { MigrationFileBuilder } from './file-builder';
 
 export interface UserMigrationProvider {
   shouldRun(): Promise<boolean>;
@@ -9,19 +8,8 @@ export interface UserMigrationProvider {
   down(): Promise<void>;
 }
 
-export interface InternalMigrationProvider {
-  register(migration: Migration): void;
-  shouldRun(): Promise<boolean>;
-  up(): Promise<void>;
-  down(): Promise<void>;
-}
-export interface MigrationProvider {
-  providers: { internal: InternalMigrationProvider };
-  createFileBuilder(): MigrationFileBuilder;
-  shouldRun(): Promise<boolean>;
-  up(): Promise<void>;
-  down(): Promise<void>;
-}
+export type InternalMigrationProvider = Modules.Database.InternalMigrationProvider;
+export type MigrationProvider = Modules.Database.MigrationProvider;
 
 export type Context = { db: Database };
 
@@ -40,13 +28,8 @@ export type MigrationResolver = (params: MigrationResolverParams) => {
   down: MigrationRunnerFn;
 };
 
-export type MigrationFn = (knex: Knex.Transaction, db: Database) => Promise<void>;
-
-export type Migration = {
-  name: string;
-  up: MigrationFn;
-  down: MigrationFn;
-};
+export type MigrationFn = Modules.Database.MigrationFn;
+export type Migration = Modules.Database.Migration;
 
 export const wrapTransaction = (db: Database) => (fn: MigrationFn) => () => {
   return db.transaction(({ trx }) => Promise.resolve(fn(trx, db)));

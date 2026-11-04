@@ -1,16 +1,11 @@
 import type { Knex } from 'knex';
+import type { Modules } from '@strapi/types';
 
 import type { Database } from '..';
-import type { ForeignKey, Index, Schema } from '../schema';
 
-export interface SchemaInspector {
-  getSchema(): Promise<Schema>;
-  getIndexes(tableName: string): Promise<Index[]>;
-  getForeignKeys(tableName: string): Promise<ForeignKey[]>;
-  getTables(): Promise<string[]>;
-}
+export type SchemaInspector = Modules.Database.SchemaInspector;
 
-export default class Dialect {
+export default class Dialect implements Modules.Database.Dialect {
   db: Database;
 
   schemaInspector: SchemaInspector = {} as SchemaInspector;

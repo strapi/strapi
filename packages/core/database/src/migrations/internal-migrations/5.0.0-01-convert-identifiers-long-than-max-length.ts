@@ -1,7 +1,6 @@
 import type { Knex } from 'knex';
 import createDebug from 'debug';
 import type { Migration } from '../common';
-import type { Metadata } from '../../metadata';
 import { type Database } from '../..';
 import { identifiers } from '../../utils/identifiers';
 
@@ -116,7 +115,7 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
   }
 };
 
-const findDiffs = (shortMap: Metadata) => {
+const findDiffs = (shortMap: Database['metadata']) => {
   const diffs = {
     tables: [],
     columns: [],

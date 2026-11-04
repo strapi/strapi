@@ -1,4 +1,5 @@
 import { snakeCase } from 'lodash';
+import type { Modules } from '@strapi/types';
 
 import { identifiers } from '../utils/identifiers';
 
@@ -15,7 +16,7 @@ import { identifiers } from '../utils/identifiers';
  * the attribute name: the name itself is stored as a value in the link table's
  * `field` column (`identifiers.FIELD_COLUMN`).
  */
-export const attributeNaming = {
+export const attributeNaming: AttributeNaming = {
   /**
    * Column on the model's own table for a scalar attribute.
    */
@@ -40,4 +41,4 @@ export const attributeNaming = {
   },
 };
 
-export type AttributeNaming = typeof attributeNaming;
+export type AttributeNaming = Modules.Database.AttributeNaming;

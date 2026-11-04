@@ -1,4 +1,5 @@
 import createDebug from 'debug';
+import type { Modules } from '@strapi/types';
 
 import createSchemaBuilder from './builder';
 import createSchemaDiff from './diff';
@@ -7,7 +8,6 @@ import { metadataToSchema } from './schema';
 import { createRenameHelpers } from './rename-helpers';
 
 import type { Schema, SchemaDiff } from './types';
-import type { RenameHelpers } from './rename-helpers';
 import type { Database } from '..';
 
 export type * from './types';
@@ -15,17 +15,7 @@ export type { AttributeRenameHandler, AttributeRenames, RenameHelpers } from './
 
 const debug = createDebug('strapi::database');
 
-export interface SchemaProvider extends RenameHelpers {
-  builder: ReturnType<typeof createSchemaBuilder>;
-  schemaDiff: ReturnType<typeof createSchemaDiff>;
-  schemaStorage: ReturnType<typeof createSchemaStorage>;
-  sync(): Promise<SchemaDiff['status']>;
-  syncSchema(): Promise<SchemaDiff['status']>;
-  reset(): Promise<void>;
-  create(): Promise<void>;
-  drop(): Promise<void>;
-  schema: Schema;
-}
+export type SchemaProvider = Modules.Database.SchemaProvider;
 
 interface State {
   schema?: Schema;

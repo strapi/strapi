@@ -1,8 +1,9 @@
 import * as types from '../utils/types';
 import { identifiers } from '../utils/identifiers';
-import type { Metadata, Meta } from '../metadata';
+import type { Meta } from '../metadata';
 import type { Column, Schema, Table } from './types';
 import type { Attribute } from '../types';
+import type { Database } from '..';
 
 /**
  * TODO: This needs to be refactored to support incoming names such as
@@ -219,7 +220,7 @@ const getColumnType = (attribute: Attribute) => {
   }
 };
 
-export const metadataToSchema = (metadata: Metadata): Schema => {
+export const metadataToSchema = (metadata: Database['metadata']): Schema => {
   const schema: Schema = {
     tables: [],
   };

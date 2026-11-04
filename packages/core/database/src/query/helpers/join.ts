@@ -1,16 +1,8 @@
 import type { Knex } from 'knex';
+import type { Modules } from '@strapi/types';
 import type { Ctx } from '../types';
 
-export interface Join {
-  method?: 'leftJoin' | 'innerJoin';
-  alias: string;
-  referencedTable: string;
-  referencedColumn: string;
-  rootColumn: string;
-  rootTable?: string;
-  on?: Record<string, any>;
-  orderBy?: Record<string, 'asc' | 'desc'>;
-}
+export type Join = Modules.Database.Join;
 
 interface JoinOptions {
   alias: string;

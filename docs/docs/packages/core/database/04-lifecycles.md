@@ -20,4 +20,4 @@ export default {
 };
 ```
 
-The `Event` type includes `action`, `model`, `params`, `state`, and optional `result`. It is defined in `@strapi/database` alongside the lifecycle subscriber implementation.
+The `Event` type includes `action`, `model`, `params`, `state`, and optional `result`. It is declared in `@strapi/types` as `Modules.Database.Event`, and `@strapi/database` re-exports it under its own name. Import it from `@strapi/database`: the `@strapi/types` declaration is internal.

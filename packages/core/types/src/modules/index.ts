@@ -2,6 +2,7 @@
 export type * as EntityService from './entity-service';
 export type * as Documents from './documents';
 export type * as AI from './ai';
+export type * as Database from './database';
 
 // individual files
 export type * as AuditLogs from './audit-logs';

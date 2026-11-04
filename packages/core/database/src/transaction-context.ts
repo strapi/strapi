@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { Knex } from 'knex';
+import type { Modules } from '@strapi/types';
 
 /**
  * After the user calls the Knex transactor’s `commit` or `rollback` (e.g. via
@@ -13,13 +14,9 @@ const isTransactorComplete = (trx: Knex.Transaction) => {
   return typeof t.isCompleted === 'function' && t.isCompleted();
 };
 
-export type Callback = (...args: any[]) => Promise<any> | any;
+export type Callback = Modules.Database.TransactionCallback;
+export type TransactionObject = Modules.Database.TransactionObject;
 
-export interface TransactionObject {
-  commit: () => Promise<void>;
-  rollback: () => Promise<void>;
-  get: () => Knex.Transaction;
-}
 export interface Store {
   trx: Knex.Transaction | null;
   commitCallbacks: Callback[];

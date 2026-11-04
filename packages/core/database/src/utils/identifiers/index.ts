@@ -9,6 +9,7 @@
  * could be disabled and stay compatible with v4 database structure.
  */
 import { partition, snakeCase, sumBy } from 'lodash';
+import type { Modules } from '@strapi/types';
 import { createHash } from './hash';
 import {
   IdentifiersOptions,
@@ -20,7 +21,7 @@ import {
 
 const IDENTIFIER_MAX_LENGTH = 55 as const;
 
-export class Identifiers {
+export class Identifiers implements Modules.Database.Identifiers {
   ID_COLUMN = 'id' as const;
 
   ORDER_COLUMN = 'order' as const;

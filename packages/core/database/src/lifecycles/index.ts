@@ -1,29 +1,18 @@
 import { strict as assert } from 'assert';
 
+import type { Modules } from '@strapi/types';
+
 import * as subscriberUtils from './subscribers';
 
-import type { Action, Event, Params, Subscriber } from './types';
+import type { Event } from './types';
 import type { Database } from '..';
 
 export type * from './types';
 
-export type State = Record<string, unknown>;
-export type States = Map<Subscriber, State>;
-
-export interface Properties {
-  params: Params;
-  result?: unknown;
-}
-
-export interface LifecycleProvider {
-  subscribe(subscriber: Subscriber): () => void;
-  clear(): void;
-  run(action: Action, uid: string, properties: Properties, states?: States): Promise<States>;
-  hasSubscribers(action: Action, uid: string): boolean;
-  createEvent(action: Action, uid: string, properties: Properties, state: State): Event;
-  disable(): void;
-  enable(): void;
-}
+export type State = Modules.Database.LifecycleState;
+export type States = Modules.Database.LifecycleStates;
+export type Properties = Modules.Database.LifecycleProperties;
+export type LifecycleProvider = Modules.Database.LifecycleProvider;
 
 export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
   let subscribers = [
