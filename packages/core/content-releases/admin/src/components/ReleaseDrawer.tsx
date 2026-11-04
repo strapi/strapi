@@ -3,14 +3,10 @@ import * as React from 'react';
 import {
   Button,
   Checkbox,
-  Combobox,
-  ComboboxOption,
-  DatePicker,
   Field,
   IconButton,
   Radio,
   TextInput,
-  TimePicker,
 } from '@strapi/design-system';
 import {
   Drawer,
@@ -19,10 +15,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@strapi/design-system/next';
+
+import { ReleaseDateTimePicker } from './ReleaseDateTimePicker';
+import { ReleaseTimezoneSelect } from './ReleaseTimezoneSelect';
 import { Cross } from '@strapi/icons';
 import { format, formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
-import { Form, Formik, useFormikContext, type FormikHelpers } from 'formik';
+import { Form, Formik, useFormikContext } from 'formik';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { RELEASE_CONDITIONS } from '../../../shared/constants';
@@ -52,7 +51,6 @@ const FALLBACK_TIMEZONE = 'UTC+00:00&Africa/Abidjan';
 
 // The timezone list's values are `${offset}&${IANA name}`
 const getTimezoneName = (timezone: string) => timezone.split('&')[1];
-const formatTimezoneLabel = (timezone: string) => timezone.replaceAll('&', ' ');
 
 export interface ReleaseDrawerValues {
   name: string;
@@ -141,11 +139,11 @@ export const ReleaseDrawer = ({
 
   const formInitialValues: FormValues = {
     name: initialValues.name,
-    isScheduled: initialValues.isScheduled,
+    isScheduled: true,
     date:
       initialValues.isScheduled && zonedScheduledAt ? format(zonedScheduledAt, 'yyyy-MM-dd') : null,
     time: initialValues.isScheduled && zonedScheduledAt ? format(zonedScheduledAt, 'HH:mm') : '',
-    timezone: initialValues.isScheduled ? timezone : null,
+    timezone,
     releaseCondition: initialValues.releaseCondition,
   };
 
@@ -222,6 +220,8 @@ export const ReleaseDrawer = ({
                     })}
                   </h3>
                   <NameField />
+                </div>
+                <div className="flex flex-col gap-4 p-4">
                   <ScheduleFields timezoneList={timezoneList} defaultTimezone={defaultTimezone} />
                 </div>
                 <div className="border-t border-border" />
@@ -324,74 +324,69 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold">
-        {formatMessage({
-          id: 'content-releases.release-drawer.form.schedule.label',
-          defaultMessage: 'Schedule',
-        })}
-      </span>
-      {values.isScheduled && (
-        <>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-            <div className="flex-1">
-              <Field.Root name="date" error={dateError} required>
-                <DatePicker
-                  aria-label={formatMessage({
-                    id: 'content-releases.modal.form.input.label.date',
-                    defaultMessage: 'Date',
-                  })}
-                  onChange={(date) => {
-                    setFieldValue(
-                      'date',
-                      date ? formatISO(date, { representation: 'date' }) : null
-                    );
-                  }}
-                  clearLabel={formatMessage({
-                    id: 'content-releases.modal.form.input.clearLabel',
-                    defaultMessage: 'Clear',
-                  })}
-                  onClear={() => setFieldValue('date', null)}
-                  value={values.date ? new Date(values.date) : undefined}
-                  minDate={utcToZonedTime(
-                    new Date(),
-                    // A cleared timezone is '': fall back to the default
-                    getTimezoneName(values.timezone || defaultTimezone)
-                  )}
-                />
-                <Field.Error />
-              </Field.Root>
-            </div>
-            <div className="flex-1">
-              <Field.Root name="time" error={timeError} required>
-                <TimePicker
-                  aria-label={formatMessage({
-                    id: 'content-releases.modal.form.input.label.time',
-                    defaultMessage: 'Time',
-                  })}
-                  onChange={(time) => setFieldValue('time', time ?? '')}
-                  clearLabel={formatMessage({
-                    id: 'content-releases.modal.form.input.clearLabel',
-                    defaultMessage: 'Clear',
-                  })}
-                  onClear={() => setFieldValue('time', '')}
-                  // Always controlled: left without a value, the picker would keep its own, and a
-                  // cleared time could come back, or a time typed again never reach the form
-                  value={values.time}
-                />
-                <Field.Error />
-              </Field.Root>
-            </div>
-          </div>
-          <TimezoneField
-            timezoneOptions={timezoneList}
-            value={values.timezone}
-            date={values.date}
-            error={timezoneError}
-            setFieldValue={setFieldValue}
-          />
-        </>
-      )}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+          <Field.Root
+            name="date"
+            error={values.isScheduled ? dateError || timeError : undefined}
+          >
+            <Field.Label>
+              {formatMessage({
+                id: 'content-releases.release-drawer.form.date-time.label',
+                defaultMessage: 'Release date',
+              })}
+            </Field.Label>
+            <ReleaseDateTimePicker
+              aria-label={formatMessage({
+                id: 'content-releases.modal.form.input.label.date-time',
+                defaultMessage: 'Release date and time',
+              })}
+              placeholder={formatMessage({
+                id: 'content-releases.release-drawer.form.date-time.placeholder',
+                defaultMessage: 'Pick a date and time',
+              })}
+              value={
+                values.date ? new Date(`${values.date}T${values.time || '00:00'}`) : undefined
+              }
+              onChange={(date) => {
+                if (date) {
+                  setFieldValue('date', formatISO(date, { representation: 'date' }));
+                  setFieldValue('time', format(date, 'HH:mm'));
+                } else {
+                  setFieldValue('date', null);
+                  setFieldValue('time', '');
+                }
+              }}
+              onClear={() => {
+                setFieldValue('date', null);
+                setFieldValue('time', '');
+              }}
+              clearLabel={formatMessage({
+                id: 'content-releases.modal.form.input.clearLabel',
+                defaultMessage: 'Clear',
+              })}
+              minDate={utcToZonedTime(
+                new Date(),
+                getTimezoneName(values.timezone || defaultTimezone)
+              )}
+              disabled={!values.isScheduled}
+              timezoneOffset={
+                values.timezone ? values.timezone.split('&')[0] : undefined
+              }
+              timezoneSlot={
+            <ReleaseTimezoneSelect
+              timezoneOptions={timezoneList}
+              value={values.timezone}
+              date={values.date}
+              error={timezoneError}
+              setFieldValue={setFieldValue}
+              disabled={!values.isScheduled}
+            />
+              }
+            />
+            <Field.Error />
+          </Field.Root>
+      </div>
       <Checkbox
         checked={!values.isScheduled}
         onCheckedChange={(checked) => handleNoScheduleChange(checked === true)}
@@ -406,7 +401,7 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TimezoneField
+ * Timezone
  * -----------------------------------------------------------------------------------------------*/
 
 interface TimezoneOption {
@@ -414,71 +409,6 @@ interface TimezoneOption {
   value: string;
 }
 
-interface TimezoneFieldProps {
-  timezoneOptions: TimezoneOption[];
-  value: FormValues['timezone'];
-  date: FormValues['date'];
-  error: string | undefined;
-  setFieldValue: FormikHelpers<FormValues>['setFieldValue'];
-}
-
-// Memoized with its own props: its hundreds of options would otherwise render again with every
-// change anywhere in the form, which made typing in the other fields lag
-const TimezoneField = React.memo(
-  ({ timezoneOptions, value, date, error, setFieldValue }: TimezoneFieldProps) => {
-    const { formatMessage } = useIntl();
-    const [timezoneList, setTimezoneList] = React.useState<TimezoneOption[]>(timezoneOptions);
-
-    React.useEffect(() => {
-      if (date) {
-        // Update the timezone offset which varies with DST based on the date selected
-        const { timezoneList } = getTimezones(new Date(date));
-        setTimezoneList(timezoneList);
-
-        const selectedName = value && getTimezoneName(value);
-        const updatedTimezone = timezoneList.find(
-          (timezone) => getTimezoneName(timezone.value) === selectedName
-        );
-        if (updatedTimezone) {
-          setFieldValue('timezone', updatedTimezone.value);
-        }
-      }
-    }, [setFieldValue, date, value]);
-
-    return (
-      <Field.Root name="timezone" error={error} required>
-        <Field.Label>
-          {formatMessage({
-            id: 'content-releases.modal.form.input.label.timezone',
-            defaultMessage: 'Timezone',
-          })}
-        </Field.Label>
-        <Combobox
-          autocomplete={{ type: 'list', filter: 'contains' }}
-          value={value || undefined}
-          // Without `textValue`, the input keeps showing the offset from before the date changed
-          textValue={value ? formatTimezoneLabel(value) : undefined}
-          onChange={(timezone) => {
-            setFieldValue('timezone', timezone);
-          }}
-          onTextValueChange={(timezone) => {
-            setFieldValue('timezone', timezone);
-          }}
-          onClear={() => {
-            setFieldValue('timezone', '');
-          }}
-        >
-          {timezoneList.map((timezone) => (
-            <ComboboxOption key={timezone.value} value={timezone.value}>
-              {formatTimezoneLabel(timezone.value)}
-            </ComboboxOption>
-          ))}
-        </Combobox>
-        <Field.Error />
-      </Field.Root>
-    );
-  }
-);
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseModeField
@@ -515,7 +445,7 @@ const ReleaseModeField = () => {
         onValueChange={(value) => setFieldValue('releaseCondition', value)}
       >
         <div className="flex flex-col gap-4">
-          {RELEASE_CONDITIONS.map((condition) => (
+          {[...RELEASE_CONDITIONS].reverse().map((condition) => (
             <div key={condition} className="flex flex-col gap-1">
               <Radio.Item
                 value={condition}
@@ -528,7 +458,7 @@ const ReleaseModeField = () => {
               >
                 {formatMessage(RELEASE_CONDITION_MESSAGES[condition].label)}
               </Radio.Item>
-              <p className="pl-6 text-xs text-muted-foreground">
+              <p className="pl-7 text-xs text-muted-foreground">
                 {formatMessage(RELEASE_CONDITION_MESSAGES[condition].description)}
               </p>
             </div>

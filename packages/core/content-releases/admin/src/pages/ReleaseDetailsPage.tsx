@@ -46,7 +46,7 @@ import {
   getSkippedEntriesQuery,
 } from '../components/CreateReleaseFromSkippedDrawer';
 import { EntryLinkButton } from '../components/EntryLinkButton';
-import { EntryReasonDrawer, type EntryReasonDetails } from '../components/EntryReasonDrawer';
+import { EntryReasonDrawer, getReasonTitle, type EntryReasonDetails } from '../components/EntryReasonDrawer';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -731,6 +731,25 @@ const ReleaseSubtitle = ({ release, dateText, numberOfEntriesText }: ReleaseSubt
   );
 };
 
+// Row actions (open entry, remove) stay out of the way until the row is hovered or focused; opacity
+// keeps their space reserved so nothing shifts, and touch devices (no hover) always show them.
+const RowActions = styled(Flex)`
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+
+  tr:hover &,
+  tr:focus-within & {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (hover: none) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+`;
+
 const SimpleMenuButton = styled(SimpleMenu)`
   & > span {
     display: flex;
@@ -1231,6 +1250,17 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                       );
                       const textColor = isDeleted ? 'neutral500' : undefined;
                       const openReason = () => setReasonActionId(id);
+                      const reasonTitle = getReasonTitle({
+                        outcome: release.releasedAt ? outcome : null,
+                        reason,
+                        missingReason:
+                          !release.releasedAt && !reason
+                            ? isEntryValid === false
+                              ? 'unrecorded'
+                              : 'unchecked'
+                            : undefined,
+                      });
+                      const reasonLabel = reasonTitle ? formatMessage(reasonTitle) : null;
                       const entryLink = !isDeleted && (
                         <EntryLinkButton
                           contentTypeUid={contentType.uid}
@@ -1267,11 +1297,11 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                           </Td>
                           <Td width="20%">
                             {release.releasedAt ? (
-                              <Flex gap={2}>
+                              <Flex gap={2} alignItems="center">
                                 {type === 'publish' ? (
-                                  <Upload aria-hidden fill={textColor ?? 'neutral800'} />
+                                  <Upload aria-hidden fill={textColor ?? 'neutral800'} width="1.6rem" height="1.6rem" />
                                 ) : (
-                                  <Download aria-hidden fill={textColor ?? 'neutral800'} />
+                                  <Download aria-hidden fill={textColor ?? 'neutral800'} width="1.6rem" height="1.6rem" />
                                 )}
                                 <Typography textColor={textColor}>
                                   {formatMessage(
@@ -1297,6 +1327,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                             <>
                               <Td width="20%" minWidth="200px">
                                 <ReleasedActionStatus
+                                  reasonLabel={reasonLabel}
                                   outcome={outcome}
                                   isOutcomeUnknown={isOutcomeUnknown}
                                   entryName={entryName}
@@ -1305,7 +1336,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                               </Td>
                               <Td>
                                 {/* A ran release has nothing to remove: the pencil is its only action */}
-                                <Flex justifyContent="flex-end">{entryLink}</Flex>
+                                <RowActions justifyContent="flex-end">{entryLink}</RowActions>
                               </Td>
                             </>
                           ) : (
@@ -1313,6 +1344,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                               <Td width="20%" minWidth="200px">
                                 {entry && (
                                   <PlannedActionStatus
+                                    reasonLabel={reasonLabel}
                                     action={type}
                                     isEntryValid={isEntryValid}
                                     entryName={entryName}
@@ -1321,20 +1353,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                                 )}
                               </Td>
                               <Td>
-                                {/* The menu's "Edit entry" opens the entry: no pencil next to it */}
-                                <Flex justifyContent="flex-end">
-                                  <ReleaseActionMenu.Root>
-                                    <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                      contentTypeUid={contentType.uid}
-                                      documentId={entryDocumentId}
-                                      locale={locale?.code}
-                                    />
-                                    <ReleaseActionMenu.DeleteReleaseActionItem
-                                      releaseId={release.id}
-                                      actionId={id}
-                                    />
-                                  </ReleaseActionMenu.Root>
-                                </Flex>
+                                {/* Inline actions, aligned with a ran release: edit (pencil) + remove */}
+                                <RowActions justifyContent="flex-end" gap={1}>
+                                  {entryLink}
+                                  <ReleaseActionMenu.DeleteReleaseActionButton
+                                    releaseId={release.id}
+                                    actionId={id}
+                                  />
+                                </RowActions>
                               </Td>
                             </>
                           )}

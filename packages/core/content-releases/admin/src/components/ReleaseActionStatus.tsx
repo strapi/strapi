@@ -1,7 +1,6 @@
 import { Badge, Flex, type BadgeProps } from '@strapi/design-system';
-import { ChevronRight } from '@strapi/icons';
+import { Button } from '@strapi/design-system/next';
 import { useIntl, type MessageDescriptor } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { getBadgeColorProps } from './ReleaseStatusBadge';
 
@@ -68,39 +67,56 @@ const hasSkipReason = (outcome: ReleaseActionOutcome | null, isOutcomeUnknown: b
 
 const InlineBadge = (props: BadgeProps) => <Badge {...props} tag={'span' as 'div'} />;
 
-const PillButton = styled.button`
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: ${({ theme }) => theme.borderRadius};
-
-  svg {
-    fill: currentColor;
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.primary600};
-    outline-offset: 2px;
-  }
-`;
-
-interface ReasonPillProps {
+interface ReasonCellProps {
   label: string;
+  reasonLabel: string | null;
   ariaLabel: string;
   onOpenReason: () => void;
 }
 
-const ReasonPill = ({ label, ariaLabel, onOpenReason }: ReasonPillProps) => (
-  <PillButton type="button" aria-label={ariaLabel} aria-haspopup="dialog" onClick={onOpenReason}>
-    <InlineBadge {...getBadgeColorProps('danger')}>
-      <Flex gap={1} tag="span">
-        {label}
-        <ChevronRight width="0.8rem" height="0.8rem" aria-hidden />
-      </Flex>
-    </InlineBadge>
-  </PillButton>
-);
+const ReasonCell = ({ label, reasonLabel, ariaLabel, onOpenReason }: ReasonCellProps) => {
+  const { formatMessage } = useIntl();
+  const buttonLabel =
+    reasonLabel ??
+    formatMessage({
+      id: 'content-releases.pages.ReleaseDetails.reason.see-reason',
+      defaultMessage: 'View details',
+    });
+
+  return (
+    <Flex gap={4} alignItems="center" tag="span">
+      <InlineBadge {...getBadgeColorProps('danger')}>{label}</InlineBadge>
+      <Button
+        // TEMP: /next Button has no ghost-destructive variant yet — override a ghost button to
+        // red text + light-red hover bg. Replace with variant="ghostDestructive" once added to
+        // @strapi/design-system/next (EE-274-style DS task).
+        variant="ghost"
+        size="xs"
+        className="text-destructive hover:bg-destructive/5 hover:text-destructive"
+        aria-label={`${buttonLabel} — ${ariaLabel}`}
+        aria-haspopup="dialog"
+        onClick={onOpenReason}
+      >
+        {buttonLabel}
+        {/* TEMP: 1.4px stroked chevron — /regular CaretRightIcon renders too thin at this size */}
+        <svg
+          viewBox="0 0 16 16"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+          data-icon="inline-end"
+        >
+          <polyline points="6 4 10 8 6 12" />
+        </svg>
+      </Button>
+    </Flex>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * PlannedActionStatus
@@ -110,6 +126,7 @@ interface PlannedActionStatusProps {
   action: ReleaseAction['type'];
   isEntryValid: ReleaseAction['isEntryValid'] | null;
   entryName: string;
+  reasonLabel: string | null;
   onOpenReason: () => void;
 }
 
@@ -120,6 +137,7 @@ export const PlannedActionStatus = ({
   action,
   isEntryValid,
   entryName,
+  reasonLabel,
   onOpenReason,
 }: PlannedActionStatusProps) => {
   const { formatMessage } = useIntl();
@@ -136,7 +154,8 @@ export const PlannedActionStatus = ({
   }
 
   return (
-    <ReasonPill
+    <ReasonCell
+      reasonLabel={reasonLabel}
       label={formatMessage({
         id: 'content-releases.pages.ReleaseDetails.entry-validation.not-ready-short',
         defaultMessage: 'Not ready',
@@ -163,6 +182,7 @@ interface ReleasedActionStatusProps {
   // upgrade sweep stored is a guess
   isOutcomeUnknown: boolean;
   entryName: string;
+  reasonLabel: string | null;
   onOpenReason: () => void;
 }
 
@@ -174,6 +194,7 @@ export const ReleasedActionStatus = ({
   outcome,
   isOutcomeUnknown,
   entryName,
+  reasonLabel,
   onOpenReason,
 }: ReleasedActionStatusProps) => {
   const { formatMessage } = useIntl();
@@ -197,7 +218,8 @@ export const ReleasedActionStatus = ({
   }
 
   return (
-    <ReasonPill
+    <ReasonCell
+      reasonLabel={reasonLabel}
       label={formatMessage({
         id: 'content-releases.pages.ReleaseDetails.outcome.skipped',
         defaultMessage: 'Skipped',

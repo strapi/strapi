@@ -27,8 +27,9 @@ import {
   Typography,
   Link,
 } from '@strapi/design-system';
-import { Calendar, Clock, Plus, WarningCircle } from '@strapi/icons';
-import { CircleHalfIcon, ClockCountdownIcon } from '@strapi/icons/regular';
+import { Plus, WarningCircle } from '@strapi/icons';
+import { CircleHalfIcon, ClockCountdownIcon, MinusIcon } from '@strapi/icons/regular';
+import { CalendarBlank, PaperPlaneTilt } from '../components/ScheduleIcons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -96,17 +97,24 @@ const RELEASE_CONDITION_BADGES = {
  * The date is the schedule, the one the sort and the "Scheduled for" filter use: a release
  * published by hand without one stays "Not scheduled".
  */
+const isReleasePast = (release: ReleaseRow) =>
+  release.scheduledAt != null &&
+  (Boolean(release.releasedAt) || new Date(release.scheduledAt).getTime() <= Date.now());
+
 const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
 
   if (!release.scheduledAt) {
     return (
-      <Typography textColor="neutral600">
-        {formatMessage({
-          id: 'content-releases.pages.Releases.not-scheduled',
-          defaultMessage: 'Not scheduled',
-        })}
-      </Typography>
+      <Flex gap={2} alignItems="center" color="neutral600">
+        <MinusIcon width="1.6rem" height="1.6rem" aria-hidden />
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'content-releases.pages.Releases.not-scheduled',
+            defaultMessage: 'Not scheduled',
+          })}
+        </Typography>
+      </Flex>
     );
   }
 
@@ -116,22 +124,18 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   // A release that ran is past, even when it ran before its schedule
   const isUpcoming = !release.releasedAt && scheduledAt.getTime() > Date.now();
 
-  const Icon = isUpcoming ? Clock : Calendar;
+  const Icon = isUpcoming ? CalendarBlank : PaperPlaneTilt;
 
   return (
-    <Flex gap={2} alignItems="flex-start">
-      <Flex paddingTop={1} color="neutral500">
-        <Icon width="1.2rem" height="1.2rem" aria-hidden />
+    <Flex gap={2} alignItems="center">
+      <Flex color={isUpcoming ? 'neutral800' : 'neutral600'}>
+        <Icon width="1.6rem" height="1.6rem" aria-hidden />
       </Flex>
-      <Flex direction="column" alignItems="flex-start">
-        <SentenceCase textColor={isUpcoming ? 'neutral800' : 'neutral600'}>
-          {/* The browser-zone default title would contradict the release-zone line below */}
-          <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
-        </SentenceCase>
-        <Typography variant="pi" textColor="neutral600">
-          {absoluteTime}
-        </Typography>
-      </Flex>
+      <SentenceCase textColor={isUpcoming ? 'neutral800' : 'neutral600'}>
+        {/* Browser-zone default title would contradict the release-zone text */}
+        <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
+        {` • ${absoluteTime}`}
+      </SentenceCase>
     </Flex>
   );
 };
@@ -149,10 +153,11 @@ const EntriesCell = ({ release }: { release: ReleaseRow }) => {
   const { formatMessage } = useIntl();
   const isFrozen = Boolean(release.releasedAt);
   const { count, notReadyCount = 0 } = release.actions.meta;
+  const isMuted = isReleasePast(release);
 
   return (
     <Flex direction="column" alignItems="flex-start">
-      <Typography textColor={isFrozen ? 'neutral600' : 'neutral800'}>
+      <Typography textColor={isMuted ? 'neutral600' : 'neutral800'}>
         {formatMessage(
           {
             id: 'content-releases.pages.Releases.table.entries',
@@ -181,16 +186,18 @@ const EntriesCell = ({ release }: { release: ReleaseRow }) => {
 
 const ReleaseConditionBadge = ({
   releaseCondition,
+  isMuted = false,
 }: {
   releaseCondition: ReleaseRow['releaseCondition'];
+  isMuted?: boolean;
 }) => {
   const { formatMessage } = useIntl();
   const { icon: Icon, message } = RELEASE_CONDITION_BADGES[releaseCondition];
 
   return (
-    <Flex gap={2} color="neutral800">
-      <Icon width="1.2rem" height="1.2rem" aria-hidden />
-      <Typography textColor="neutral800">{formatMessage(message)}</Typography>
+    <Flex gap={2} color={isMuted ? 'neutral600' : 'neutral800'}>
+      <Icon width="1.6rem" height="1.6rem" aria-hidden />
+      <Typography textColor={isMuted ? 'neutral600' : 'neutral800'}>{formatMessage(message)}</Typography>
     </Flex>
   );
 };
@@ -519,7 +526,7 @@ const ReleasesTable = ({
                   isExternal={false}
                   onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 >
-                  <Typography textColor="neutral800" ellipsis>
+                  <Typography textColor={isReleasePast(release) ? 'neutral600' : 'neutral800'} ellipsis>
                     {release.name}
                   </Typography>
                 </Link>
@@ -534,7 +541,7 @@ const ReleasesTable = ({
                 <EntriesCell release={release} />
               </Table.Cell>
               <Table.Cell>
-                <ReleaseConditionBadge releaseCondition={release.releaseCondition} />
+                <ReleaseConditionBadge releaseCondition={release.releaseCondition} isMuted={isReleasePast(release)} />
               </Table.Cell>
             </Table.Row>
           ))}

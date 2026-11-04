@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Badge, Button, IconButton, LinkButton } from '@strapi/design-system';
+import { getBadgeColorProps } from './ReleaseStatusBadge';
 import {
   Drawer,
   DrawerContent,
@@ -83,11 +84,11 @@ const REVIEW_STAGE_TITLE = {
  * The reason the badge names. An entry with several kinds of issue gets none: naming the first
  * would hide the others, which the issue box lists.
  */
-const getReasonTitle = ({
+export const getReasonTitle = ({
   outcome,
   reason,
   missingReason,
-}: EntryReasonDetails): MessageDescriptor | null => {
+}: Pick<EntryReasonDetails, 'outcome' | 'reason' | 'missingReason'>): MessageDescriptor | null => {
   const skippedReason: { title: MessageDescriptor; description?: MessageDescriptor } | null =
     outcome && isSkippedOutcome(outcome) ? SKIPPED_REASONS[outcome] : null;
 
@@ -365,20 +366,22 @@ const ReasonBody = ({
             .filter(Boolean)
             .join(' · ')}
         </span>
-        <Badge textColor="danger600" backgroundColor="danger100" borderColor="danger200">
-          {formatMessage(
-            {
-              id: 'content-releases.reason-drawer.status',
-              defaultMessage:
-                '{isFrozen, select, true {Skipped} other {Not ready}}{hasReason, select, true {: {reason}} other {}}',
-            },
-            {
-              isFrozen,
-              hasReason: Boolean(reasonTitle),
-              reason: reasonTitle ? formatMessage(reasonTitle) : '',
-            }
+        <div className="flex items-center gap-4">
+          <Badge {...getBadgeColorProps('danger')}>
+            {formatMessage(
+              {
+                id: 'content-releases.reason-drawer.status',
+                defaultMessage: '{isFrozen, select, true {Skipped} other {Not ready}}',
+              },
+              { isFrozen }
+            )}
+          </Badge>
+          {reasonTitle && (
+            <span className="text-sm font-medium text-destructive">
+              {formatMessage(reasonTitle)}
+            </span>
           )}
-        </Badge>
+        </div>
       </div>
 
       {issueCount > 0 && (

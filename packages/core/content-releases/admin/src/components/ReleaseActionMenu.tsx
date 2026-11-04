@@ -98,6 +98,70 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * DeleteReleaseActionButton
+ * -----------------------------------------------------------------------------------------------*/
+// Same "Remove from release" action as DeleteReleaseActionItem, rendered as a direct icon button for
+// rows that show their actions inline (next to the edit pencil) instead of inside the "..." menu.
+const DeleteReleaseActionButton = ({ releaseId, actionId }: DeleteReleaseActionItemProps) => {
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
+  const [deleteReleaseAction] = useDeleteReleaseActionMutation();
+  const {
+    allowedActions: { canDeleteAction },
+  } = useRBAC(PERMISSIONS);
+
+  const handleDeleteAction = async () => {
+    const response = await deleteReleaseAction({
+      params: { releaseId, actionId },
+    });
+
+    if ('data' in response) {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-releases.content-manager-edit-view.remove-from-release.notification.success',
+          defaultMessage: 'Entry removed from release',
+        }),
+      });
+
+      return;
+    }
+
+    if ('error' in response) {
+      if (isFetchError(response.error)) {
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(response.error),
+        });
+      } else {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        });
+      }
+    }
+  };
+
+  if (!canDeleteAction) {
+    return null;
+  }
+
+  return (
+    <IconButton
+      variant="ghost"
+      onClick={handleDeleteAction}
+      label={formatMessage({
+        id: 'content-releases.content-manager-edit-view.remove-from-release',
+        defaultMessage: 'Remove from release',
+      })}
+    >
+      <Cross />
+    </IconButton>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * ReleaseActionEntryLinkItem
  * -----------------------------------------------------------------------------------------------*/
 interface ReleaseActionEntryLinkItemProps {
@@ -240,5 +304,6 @@ export const ReleaseActionMenu = {
   Root,
   EditReleaseItem,
   DeleteReleaseActionItem,
+  DeleteReleaseActionButton,
   ReleaseActionEntryLinkItem,
 };

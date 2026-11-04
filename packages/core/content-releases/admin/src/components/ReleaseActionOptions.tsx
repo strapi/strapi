@@ -1,70 +1,22 @@
 import * as React from 'react';
 
-import { VisuallyHidden, Field, Flex } from '@strapi/design-system';
-import { styled } from 'styled-components';
+import { Radio } from '@base-ui/react/radio';
+import { RadioGroup } from '@base-ui/react/radio-group';
+import { cn } from '@strapi/design-system/next';
+import { Download, Upload } from '@strapi/icons';
 
-interface FieldWrapperProps extends Field.Props {
-  actionType: 'publish' | 'unpublish';
-}
-
-const getBorderLeftRadiusValue = (actionType: FieldWrapperProps['actionType']) => {
-  return actionType === 'publish' ? 1 : 0;
-};
-
-const getBorderRightRadiusValue = (actionType: FieldWrapperProps['actionType']) => {
-  return actionType === 'publish' ? 0 : 1;
-};
-
-const FieldWrapper = styled(Field.Root)<{
-  $actionType: 'publish' | 'unpublish';
-}>`
-  border-top-left-radius: ${({ $actionType, theme }) =>
-    theme.spaces[getBorderLeftRadiusValue($actionType)]};
-  border-bottom-left-radius: ${({ $actionType, theme }) =>
-    theme.spaces[getBorderLeftRadiusValue($actionType)]};
-  border-top-right-radius: ${({ $actionType, theme }) =>
-    theme.spaces[getBorderRightRadiusValue($actionType)]};
-  border-bottom-right-radius: ${({ $actionType, theme }) =>
-    theme.spaces[getBorderRightRadiusValue($actionType)]};
-
-  label {
-    color: inherit;
-    padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`};
-    text-align: center;
-    vertical-align: middle;
-    text-transform: capitalize;
-  }
-
-  &[data-checked='true'] {
-    color: ${({ theme, $actionType }) =>
-      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
-    background-color: ${({ theme, $actionType }) =>
-      $actionType === 'publish' ? theme.colors.primary100 : theme.colors.danger100};
-    border-color: ${({ theme, $actionType }) =>
-      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
-  }
-
-  &[data-checked='false'] {
-    border-left: ${({ $actionType }) => $actionType === 'unpublish' && 'none'};
-    border-right: ${({ $actionType }) => $actionType === 'publish' && 'none'};
-  }
-
-  &[data-checked='false'][data-disabled='false']:hover {
-    color: ${({ theme }) => theme.colors.neutral700};
-    background-color: ${({ theme }) => theme.colors.neutral100};
-    border-color: ${({ theme }) => theme.colors.neutral200};
-
-    & > label {
-      cursor: pointer;
-    }
-  }
-
-  &[data-disabled='true'] {
-    color: ${({ theme }) => theme.colors.neutral600};
-    background-color: ${({ theme }) => theme.colors.neutral150};
-    border-color: ${({ theme }) => theme.colors.neutral300};
-  }
-`;
+/**
+ * Per-entry release action selector (publish / unpublish), as a segmented control.
+ *
+ * Local `/next`-style component on @base-ui RadioGroup + Tailwind, mirroring the `SegmentedControl`
+ * proposed for the design system (strapi/design-system#2083). Swap this for
+ * `import { SegmentedControl, SegmentedControlItem } from '@strapi/design-system/next'` once that PR
+ * merges and publishes.
+ *
+ * Radio, not toggle: exactly one option is always selected and it never clears to empty. The icon +
+ * label carry the meaning, so neither option is tinted with an action colour (an earlier version
+ * painted unpublish danger-red, which read as a warning for a perfectly normal choice).
+ */
 
 interface ActionOptionProps {
   selected: 'publish' | 'unpublish';
@@ -73,44 +25,14 @@ interface ActionOptionProps {
   disabled?: boolean;
 }
 
-interface OptionProps extends ActionOptionProps {
-  actionType: 'publish' | 'unpublish';
-}
-
-const ActionOption = ({
-  selected,
-  actionType,
-  handleChange,
-  name,
-  disabled = false,
-}: OptionProps) => {
-  return (
-    <FieldWrapper
-      $actionType={actionType}
-      background="primary0"
-      borderColor="neutral200"
-      color={selected === actionType ? 'primary600' : 'neutral600'}
-      position="relative"
-      cursor="pointer"
-      data-checked={selected === actionType}
-      data-disabled={disabled && selected !== actionType}
-    >
-      <Field.Label>
-        <VisuallyHidden>
-          <Field.Input
-            type="radio"
-            name={name}
-            checked={selected === actionType}
-            onChange={handleChange}
-            value={actionType}
-            disabled={disabled}
-          />
-        </VisuallyHidden>
-        {actionType}
-      </Field.Label>
-    </FieldWrapper>
-  );
-};
+const itemClassName = cn(
+  'inline-flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-sm px-2.5 text-sm font-medium whitespace-nowrap capitalize',
+  'text-muted-foreground outline-none transition-colors select-none',
+  'hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
+  'data-[checked]:cursor-default data-[checked]:bg-background data-[checked]:text-foreground data-[checked]:shadow-xs',
+  'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+);
 
 export const ReleaseActionOptions = ({
   selected,
@@ -118,22 +40,31 @@ export const ReleaseActionOptions = ({
   name,
   disabled = false,
 }: ActionOptionProps) => {
+  const handleValueChange = (value: unknown) => {
+    const next = value as 'publish' | 'unpublish';
+    // Radio semantics: clicking the selected item keeps it, so only react to a real change. The
+    // upstream handler reads e.target.value, which RadioGroup gives us directly.
+    if (next && next !== selected) {
+      handleChange({ target: { value: next } } as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
+
   return (
-    <Flex>
-      <ActionOption
-        actionType="publish"
-        selected={selected}
-        handleChange={handleChange}
-        name={name}
-        disabled={disabled}
-      />
-      <ActionOption
-        actionType="unpublish"
-        selected={selected}
-        handleChange={handleChange}
-        name={name}
-        disabled={disabled}
-      />
-    </Flex>
+    <RadioGroup
+      name={name}
+      value={selected}
+      onValueChange={handleValueChange}
+      disabled={disabled}
+      className="inline-flex w-fit items-center gap-0.5 rounded-md border border-border bg-muted p-0.5"
+    >
+      <Radio.Root value="publish" className={itemClassName}>
+        <Upload />
+        publish
+      </Radio.Root>
+      <Radio.Root value="unpublish" className={itemClassName}>
+        <Download />
+        unpublish
+      </Radio.Root>
+    </RadioGroup>
   );
 };
