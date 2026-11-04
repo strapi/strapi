@@ -28942,6 +28942,9 @@ __metadata:
     vitest: "catalog:"
     yalc: "npm:1.0.0-pre.53"
     yargs: "npm:17.7.2"
+  dependenciesMeta:
+    better-sqlite3:
+      built: false
   languageName: unknown
   linkType: soft
 
