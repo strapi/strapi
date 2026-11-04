@@ -1,0 +1,9 @@
+{
+  "name": "strapi-plugin-tests",
+  "private": true,
+  "strapi": {
+    "kind": "plugin",
+    "name": "tests",
+    "displayName": "Tests"
+  }
+}
