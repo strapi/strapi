@@ -27,10 +27,12 @@ export default {
     // sha256 hex of the 32 random bytes the browser holds in the trust cookie. The raw token is
     // never stored anywhere. `unique` because `consumeTrustedDevice` looks a row up by this alone,
     // before it knows whose row it is -- the ownership check comes after, so the index is what
-    // makes "the row for this token" a single answer.
+    // makes "the row for this token" a single answer. `column.unique` is what creates the index
+    // (see `mfa-passkey.ts`); without it every trusted login scanned the table.
     tokenHash: {
       type: 'string',
       unique: true,
+      column: { unique: true },
       required: true,
       configurable: false,
       private: true,
