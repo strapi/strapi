@@ -1,5 +1,8 @@
 import { Form } from '@strapi/admin/strapi-admin';
-import { screen, fireEvent, render as renderRTL } from '@tests/utils';
+import { mockData } from '@tests/mockData';
+import { screen, fireEvent, render as renderRTL, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
+import { IntlProvider } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
 import { DynamicComponent, DynamicComponentProps } from '../DynamicComponent';
@@ -54,7 +57,7 @@ describe('DynamicComponent', () => {
     </>
   );
 
-  const render = (props?: TestComponentProps) =>
+  const render = (props?: TestComponentProps, messages: Record<string, string> = {}) =>
     renderRTL(<TestComponent {...props} />, {
       renderOptions: {
         wrapper: ({ children }) => (
@@ -73,7 +76,9 @@ describe('DynamicComponent', () => {
                   method="POST"
                   onSubmit={jest.fn()}
                 >
-                  {children}
+                  <IntlProvider locale="en" textComponent="span" messages={messages}>
+                    {children}
+                  </IntlProvider>
                 </Form>
               }
             />
@@ -87,6 +92,29 @@ describe('DynamicComponent', () => {
     render();
 
     await screen.findByRole('button', { name: 'component - test' });
+  });
+
+  it('should translate an enumeration entry title using the value as the message id', async () => {
+    server.use(
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: mockData.contentManager.components.map((component) => ({
+              ...component,
+              attributes: {
+                ...component.attributes,
+                name: { type: 'enumeration', enum: ['test'] },
+              },
+            })),
+            contentTypes: mockData.contentManager.contentTypes,
+          },
+        })
+      )
+    );
+
+    render(undefined, { test: 'Translated' });
+
+    await screen.findByRole('button', { name: 'component - Translated' });
   });
 
   it('should not crash when the component uid is missing from a malformed dynamic-zone entry', async () => {

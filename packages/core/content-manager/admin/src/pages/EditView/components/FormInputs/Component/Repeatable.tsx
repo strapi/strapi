@@ -452,9 +452,13 @@ const Component = ({
   const { formatMessage } = useIntl();
   const isDesktop = useIsDesktop();
 
-  const displayValue = useForm<string | undefined>('RepeatableComponent', (state) => {
+  const mainFieldValue = useForm<string | undefined>('RepeatableComponent', (state) => {
     return getIn<string>(state.values, [...name.split('.'), mainField.name]);
   });
+  const displayValue =
+    mainField.type === 'enumeration' && mainFieldValue
+      ? formatMessage({ id: mainFieldValue, defaultMessage: mainFieldValue })
+      : mainFieldValue;
   const displayedValue = typeof displayValue === 'string' ? displayValue : '';
 
   const accordionRef = React.useRef<HTMLButtonElement>(null!);
