@@ -346,7 +346,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params || {});
 
-    return strapi.db.query(uid).findMany(query);
+    return await strapi.db.query(uid).findMany(query);
   }
 
   async function findFirst(params = {} as any) {
@@ -361,7 +361,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
@@ -380,7 +380,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   async function deleteDocument(opts = {} as any) {
@@ -444,7 +444,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     emitEvent('entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId: doc.documentId,
       }).then((doc) => doc.entries[0]);
@@ -543,7 +543,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           return doc;
         }
 
-        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+        return await strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
       }
     );
 
@@ -611,10 +611,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
-          ...queryParams.data,
+        const mergedData = await copyNonLocalizedFields(
+          contentType,
           documentId,
-        });
+          {
+            ...queryParams.data,
+            documentId,
+          },
+          { status: 'draft', strategy: 'fill' }
+        );
 
         updatedDraft = await entries.create({
           ...queryParams,
@@ -629,7 +634,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     }
 
     if (hasDraftAndPublish && updatedDraft && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId,
       }).then((doc) => doc.entries[0]);
@@ -649,7 +654,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).count(query);
+    return await strapi.db.query(uid).count(query);
   }
 
   async function publish(opts = {} as any) {
@@ -662,8 +667,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    // Deep populate issues its own queries. Run it before the published-row
-    // lookup so both stay on this transaction's single connection.
+    // Deep populate issues its own queries. Run these lookups one after another
+    // so they stay on this transaction's single connection.
     const draftsToPublish = await strapi.db.query(uid).findMany({
       where: {
         ...queryParams?.lookup,
@@ -680,6 +685,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         publishedAt: { $ne: null },
       },
       select: ['id', 'locale'],
+    });
+    // All published locales of this document (not scoped to the publish lookup).
+    // Used so a first publish of FR can inherit EN published shared fields.
+    const publishedVersions = await strapi.db.query(uid).findMany({
+      where: {
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      select: ['locale'],
     });
 
     // Load any unidirectional relation targetting the old published entries
@@ -717,10 +731,39 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       updatedDraft.push(await addFirstPublishedAtToDraft(draft, entries.update, contentType));
     }
 
-    // Transform draft entry data and create published versions
+    // First publish of a locale must inherit shared fields from an existing
+    // published sibling. Copying the draft would publish unpublished shared
+    // edits and i18n sync would then overwrite every published locale.
+    const publishedLocales = new Set(
+      (publishedVersions as Array<{ locale?: string }>).map((entry) => entry.locale)
+    );
+    // Republishing a locale in the same call publishes its draft shared values,
+    // and its old published row (an inheritance source) was deleted above.
+    const republishesALocale = updatedDraft.some((draft: any) =>
+      publishedLocales.has(draft.locale)
+    );
+
+    // Transform draft entry data and create published versions. One at a time:
+    // each publish loads components on this transaction's connection.
     const publishedEntries: any[] = [];
     for (const draft of updatedDraft) {
-      publishedEntries.push(await entries.publish(draft, queryParams));
+      const isFirstPublishForLocale = !publishedLocales.has(draft.locale);
+      const hasPublishedSibling = [...publishedLocales].some((locale) => locale !== draft.locale);
+
+      let entryToPublish = draft;
+      if (
+        hasDraftAndPublish &&
+        isFirstPublishForLocale &&
+        hasPublishedSibling &&
+        !republishesALocale
+      ) {
+        entryToPublish = await copyNonLocalizedFields(contentType, documentId, draft, {
+          status: 'published',
+          strategy: 'replace',
+        });
+      }
+
+      publishedEntries.push(await entries.publish(entryToPublish, queryParams));
     }
 
     // Sync unidirectional relations with the new published entries
@@ -853,7 +896,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function updateComponents(entry: any, data: any) {
-    return components.updateComponents(uid, entry, data);
+    return await components.updateComponents(uid, entry, data);
   }
 
   function omitComponentData(data: any) {

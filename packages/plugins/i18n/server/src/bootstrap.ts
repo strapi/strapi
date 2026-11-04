@@ -1,8 +1,10 @@
 import type { Schema } from '@strapi/types';
 import { isEqual } from 'lodash';
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { registerAuditEvents } from './audit-logs';
 import { localeForOriginalLookup } from './services/original-locale';
 import { getService } from './utils';
+import { getOriginalNonLocalizedLookup } from './utils/non-localized-original-data';
 
 const registerModelsHooks = () => {
   strapi.db.lifecycles.subscribe({
@@ -33,36 +35,39 @@ const registerModelsHooks = () => {
       getService('content-types');
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
-    // Compare the draft of the locale being changed. An unscoped findOne can
-    // return the published row or another locale; Postgres does not keep
-    // SQLite's insertion order, so discard then looked unchanged and skipped
-    // syncing non-localized fields. `*` is not a stored locale, so a wildcard
-    // discard stays unscoped and still limited to the draft row.
-    const locale = localeForOriginalLookup(context.params.locale);
-    const documentId =
-      'documentId' in context.params && context.params.documentId
-        ? context.params.documentId
-        : undefined;
-    const draftOnly = schema.options?.draftAndPublish ? { publishedAt: { $null: true } } : {};
-    let originalData = documentId
+    // Compare against this locale + status, not an arbitrary row of the document.
+    // Unscoped findOne can pick a published sibling while we write a draft (or
+    // the reverse), which makes i18n sync overwrite the other tree.
+    const localeParam = 'locale' in context.params ? context.params.locale : undefined;
+    const defaultLocale = await getService('locales').getDefaultLocale();
+    const originalWhere = getOriginalNonLocalizedLookup({
+      documentId:
+        'documentId' in context.params && typeof context.params.documentId === 'string'
+          ? context.params.documentId
+          : undefined,
+      locale: localeParam,
+      action: context.action,
+      hasDraftAndPublish: contentTypesUtils.hasDraftAndPublish(schema),
+      defaultLocale,
+    });
+
+    let originalData = originalWhere
       ? await strapi.db.query(schema.uid).findOne({
-          where: {
-            documentId,
-            ...(locale ? { locale } : {}),
-            ...draftOnly,
-          },
+          where: originalWhere,
           populate: attributesToPopulate,
         })
       : null;
 
-    // A new locale has no row yet. Compare a sibling draft so copied
-    // non-localized values do not count as a change and rewrite every locale.
-    if (!originalData && documentId && locale) {
+    // A new locale has no row yet. Compare a sibling in the same publication
+    // status so copied non-localized values do not count as a change and
+    // rewrite every locale. `*` is not a stored locale, so a wildcard stays on
+    // the default-locale lookup above.
+    const locale = localeForOriginalLookup(localeParam);
+    if (!originalData && originalWhere && locale) {
       originalData = await strapi.db.query(schema.uid).findOne({
         where: {
-          documentId,
+          ...originalWhere,
           locale: { $ne: locale },
-          ...draftOnly,
         },
         populate: attributesToPopulate,
       });
