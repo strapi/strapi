@@ -1095,6 +1095,18 @@ const defaultDeps = (strapi: unknown) => ({
 });
 
 describe('mfa service: enrolment', () => {
+  test('canEncryptSecrets reports whether a secret could be stored at all', () => {
+    const { strapi } = buildStrapi();
+    const withKey = createMfaService(defaultDeps(strapi));
+    const withoutKey = createMfaService({
+      ...defaultDeps(strapi),
+      encryption: { encrypt: () => null, decrypt: () => null },
+    });
+
+    expect(withKey.canEncryptSecrets()).toBe(true);
+    expect(withoutKey.canEncryptSecrets()).toBe(false);
+  });
+
   test('refuses to issue a secret when the encryption key is missing', async () => {
     const { strapi } = buildStrapi();
     const service = createMfaService({

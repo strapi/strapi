@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import type { Core } from '@strapi/types';
+import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import {
   DEFAULT_MFA_ENFORCEMENT,
   DEFAULT_TRUSTED_DEVICES,
@@ -193,6 +194,8 @@ describe('security-settings: service', () => {
       exempt?: boolean;
       passwordOk?: boolean;
       transactionFails?: 'open' | 'commit';
+      /** `false` stands in for a deployment with no `ENCRYPTION_KEY`. */
+      canEncrypt?: boolean;
       /**
        * Runs after the transaction opens and before its body, so a test can stand in for a
        * concurrent save committing between the read at the top of `updateSettings` and its write.
@@ -312,6 +315,7 @@ describe('security-settings: service', () => {
           return {
             isExemptFromMfa: vi.fn(() => Promise.resolve(options.exempt ?? false)),
             isEnrolled: vi.fn(() => Promise.resolve(options.enrolled ?? false)),
+            canEncryptSecrets: vi.fn(() => options.canEncrypt ?? true),
             assertPasswordAndFactor,
             clearAllTrustedDevices,
             clearAllPasskeys,
@@ -505,6 +509,41 @@ describe('security-settings: service', () => {
       )
     ).rejects.toThrow(/no local password/i);
     expect(storeSet).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['required', { mode: 'required', graceDays: 7, requiredRoles: [] }],
+    ['a newly flagged role', { mode: 'optional', graceDays: 7, requiredRoles: ['1'] }],
+  ])(
+    'without an encryption key, raising to %s is refused and nothing is written',
+    async (_, mfa) => {
+      // Nobody could enrol, so the raise would only start clocks towards locks.
+      const { service, storeSet } = setup({ enrolled: true, canEncrypt: false });
+
+      await expect(service.updateSettings({ mfa } as never, actor)).rejects.toMatchObject({
+        details: { code: MFA_ERROR_CODES.NO_ENCRYPTION_KEY },
+      });
+      expect(storeSet).not.toHaveBeenCalled();
+    }
+  );
+
+  test('without an encryption key, lowering or leaving enforcement alone still saves', async () => {
+    const { service, storeSet } = setup({
+      stored: { mfa: { mode: 'required' } },
+      enrolled: true,
+      canEncrypt: false,
+    });
+
+    await service.updateSettings(
+      {
+        mfa: { mode: 'off', graceDays: 7, requiredRoles: [] },
+        password: 'pw',
+        code: '123456',
+      },
+      actor
+    );
+
+    expect(storeSet).toHaveBeenCalled();
   });
 
   test('an enrolled caller raises to required and the store and role flags are written together', async () => {

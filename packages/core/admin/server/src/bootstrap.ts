@@ -247,6 +247,13 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   await createDefaultAPITokensIfNeeded();
 
   const mfaService = getService('mfa');
+  if (mfaService.isEnabled() && !mfaService.canEncryptSecrets()) {
+    // Enrolment cannot work at all without the key, and enforcement would lock users who could
+    // never comply. The settings refuse a raise in this state; this is for the operator.
+    strapi.log.error(
+      'Admin two-factor authentication is enabled but the admin encryption key (admin.secrets.encryptionKey, usually ENCRYPTION_KEY) is not configured, so nobody can set it up. Set the key and restart.'
+    );
+  }
   if (mfaService.isEnabled()) {
     // Table hygiene only: an expired challenge and a dead trust are both refused, and deleted, on
     // read. That is why the whole thing is wrapped -- a cleanup nothing depends on must never be

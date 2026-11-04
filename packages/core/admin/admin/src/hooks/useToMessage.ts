@@ -47,6 +47,11 @@ const CODE_MESSAGES: Record<MfaErrorCode, MessageDescriptor> = {
     id: 'Settings.security.mfa.error.unknownRole',
     defaultMessage: 'One of the selected roles no longer exists. Reload the page and try again.',
   },
+  [MFA_ERROR_CODES.NO_ENCRYPTION_KEY]: {
+    id: 'Settings.security.mfa.error.noEncryptionKey',
+    defaultMessage:
+      'Two-factor authentication cannot be required yet: nobody could set it up, because the server has no encryption key. Set ENCRYPTION_KEY and restart the server.',
+  },
   [MFA_ERROR_CODES.SETTINGS_CONFLICT]: {
     id: 'Settings.security.mfa.error.conflict',
     defaultMessage:

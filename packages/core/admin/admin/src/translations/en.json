@@ -1240,6 +1240,7 @@
   "Settings.security.mfa.error.noPasswordDowngrade": "Your account has no password, so it cannot lower two-factor requirements. Ask an administrator who logs in with a password.",
   "Settings.security.mfa.enrolFirst": "Set up two-factor authentication on your own account before requiring it for others.",
   "Settings.security.mfa.error.unknownRole": "One of the selected roles no longer exists. Reload the page and try again.",
+  "Settings.security.mfa.error.noEncryptionKey": "Two-factor authentication cannot be required yet: nobody could set it up, because the server has no encryption key. Set ENCRYPTION_KEY and restart the server.",
   "Settings.security.mfa.error.conflict": "Two-factor settings changed while this save was in flight. Review the current settings and try again.",
   "Settings.security.mfa.enrolFirst.hint": "Set up two-factor authentication on your own account before requiring it for others. <link>Go to your profile</link>.",
   "Auth.form.mfa.lost": "Lost your authenticator and your recovery codes? An administrator can reset two-factor authentication for your account.",

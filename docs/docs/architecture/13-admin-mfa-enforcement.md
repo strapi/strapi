@@ -178,6 +178,15 @@ A caller who is neither exempt nor enrolled is refused when the save either rais
 could lock themselves out with a single save. The refusal carries code `ENROL_FIRST`, and the UI
 shows a link to the profile page before the save is attempted.
 
+### No raise without an encryption key
+
+TOTP secrets are stored encrypted, so without `admin.secrets.encryptionKey` (usually
+`ENCRYPTION_KEY`) nobody can enrol. Requiring a factor then only starts every affected user's
+clock towards a lock. So any save that puts someone newly on the clock (a raise to `required`, or
+an added role under `optional`) is refused with code `NO_ENCRYPTION_KEY` while
+`canEncryptSecrets()` is false. Lowering enforcement still works. Bootstrap also logs an error when
+the feature is on and the key is missing.
+
 ### Downgrades need re-authentication
 
 Session authority alone is not enough when the session may be the thing an attacker holds, so any

@@ -21,6 +21,8 @@ export const MFA_ERROR_CODES = {
   ENROL_FIRST: 'MFA_ENROL_FIRST',
   /** A selected role was deleted while the settings page was open. */
   UNKNOWN_ROLE: 'SECURITY_SETTINGS_UNKNOWN_ROLE',
+  /** Raising enforcement while no one could enrol: the admin encryption key is not configured. */
+  NO_ENCRYPTION_KEY: 'SECURITY_SETTINGS_NO_ENCRYPTION_KEY',
   /** A concurrent save changed what this one would relax. */
   SETTINGS_CONFLICT: 'SECURITY_SETTINGS_CONFLICT',
 } as const;

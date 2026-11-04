@@ -238,6 +238,7 @@ interface MfaServiceLike {
     roles?: unknown;
   }): Promise<boolean>;
   isEnrolled(userId: string): Promise<boolean>;
+  canEncryptSecrets(): boolean;
   assertPasswordAndFactor(userId: string, password: string, code: string): Promise<void>;
   clearAllTrustedDevices(): Promise<number>;
   /** Every passkey row, every user. Called on the transition to `enabled: false`. */
@@ -335,6 +336,16 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       nextMfa.mode === 'optional' && addedRoles.some((id) => actorRoleIds.has(id));
     if (!actorExempt && !actorEnrolled && (raisesToRequired || addsHeldRole)) {
       throw new ValidationError(GUARD_MESSAGE, { code: MFA_ERROR_CODES.ENROL_FIRST });
+    }
+
+    // Requiring a factor nobody can enrol in only starts every affected user's clock towards a
+    // lock. Any change that puts someone newly on the clock is refused until the key is set.
+    const raises = raisesToRequired || (nextMfa.mode === 'optional' && addedRoles.length > 0);
+    if (input.mfa && raises && !mfa().canEncryptSecrets()) {
+      throw new ValidationError(
+        'Two-factor authentication cannot be required while the admin encryption key is not configured. Set ENCRYPTION_KEY and restart.',
+        { code: MFA_ERROR_CODES.NO_ENCRYPTION_KEY }
+      );
     }
 
     // Security downgrades need re-authentication, exactly like `/mfa/disable`: session authority

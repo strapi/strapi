@@ -122,6 +122,16 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return cachedConfig;
   };
 
+  /** Whether a secret could be stored at all. Without `ENCRYPTION_KEY` nobody can enrol, so
+   * requiring a second factor would only start every user's clock towards a lock. */
+  const canEncryptSecrets = (): boolean => {
+    try {
+      return encryption.encrypt('probe') !== null;
+    } catch {
+      return false;
+    }
+  };
+
   /** Enrolment data is left intact when off, so re-enabling restores the previous state. */
   const isEnabled = (): boolean =>
     strapi.features.future.isEnabled(FUTURE_FLAG) && config().enabled;
@@ -1448,6 +1458,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   return {
     isEnabled,
+    canEncryptSecrets,
     config,
     isEnrolled,
     isExemptFromMfa,
