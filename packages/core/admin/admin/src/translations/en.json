@@ -510,7 +510,7 @@
   "Settings.profile.form.section.mfa.trustedDevices.revokeAll": "Revoke all",
   "Settings.profile.form.section.mfa.trustedDevices.revokeAll.body": "Every browser, including this one, will ask for a code at its next login.",
   "Settings.profile.form.section.mfa.trustedDevices.revokeAll.bodyOthers": "Every trusted browser will ask for a code at its next login.",
-  "Settings.profile.form.section.mfa.trustedDevices.revokeAll.success": "All devices revoked.",
+  "Settings.profile.form.section.mfa.trustedDevices.revokeAll.success": "Trusted devices revoked.",
   "Settings.profile.form.section.mfa.trustedDevices.revokeAll.title": "Revoke every trusted device?",
   "Settings.profile.form.section.mfa.trustedDevices.since": "Trusted since",
   "Settings.profile.form.section.mfa.trustedDevices.title": "Trusted devices",
