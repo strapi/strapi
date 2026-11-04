@@ -19,6 +19,8 @@ Entries in a release can be grouped by the following options:
 - Locales: Group all entries with the same locale together.
 - Actions: Group all entries with the same action (publish/unpublish) together.
 
+The tabs (All, Ready / Not ready or Released / Skipped) and the grouping live in the URL (`filter`, `groupBy`). Changing them replaces the current history entry, so Back leaves the page instead of stepping through the tabs.
+
 #### Edit a release:
 
 Until a release has run, a "three dot" button in the header gives access to a menu with an "Edit" option, enabled if the user has the `plugin::content-releases.update` permissions.
@@ -38,6 +40,8 @@ Each entry within a release shows a status badge (`components/ReleaseActionStatu
 
 - In a planned release, "Ready" or "Not ready". An unpublish is always ready: nothing is checked.
 - In a release that ran, "Done", "Skipped", or "Unknown" for a release that failed before the upgrade.
+
+In a release that ran, the action column shows the action as text, with an upload icon for a publish and a download icon for an unpublish, instead of the publish/unpublish switch.
 
 "Not ready" and "Skipped" open the reason drawer (`components/EntryReasonDrawer.tsx`). Its badge names the reason ("Skipped: Validation error"), or only "Not ready" / "Skipped" when the entry has several kinds of issue (a failed field and a missing review stage, say). It lists the reason stored with the action (`reason`) in one box, under the number of issues, one card per issue: each field that failed, by a name built from its path and what's wrong in plain words (`utils/fieldErrors.ts`), the review stage the entry is missing, or the name of the error a run failed on, with its message when the server kept it (an `ApplicationError`'s). A held or missed entry's card is the sentence that explains it. A held entry also lists, under "Held back by", the entries that held back its `all_or_nothing` run (the `blocking` filter, the first 5, then a count of the rest); each opens its own reason in the drawer. For a release that ran, a note dates the reasons: by the run, or by the schedule for one that froze without running (`failureReason`), with no date when that one had no schedule. The date reads as in the page header (`getReleaseDateParts` in `utils/time.ts`: the release's timezone, a 24-hour time and the UTC offset). A planned release's reasons are live, so it has no note. Previous and Next step through the entries that have a reason, in the table's order. The first 100 load, then twice as many each time more are needed: when Next is pressed on the last one loaded, or when the opened row isn't among them, up to 500. An opened row past the first 500 steps through the table's rows only. "Go to entry" opens the entry in the Content Manager with its validation errors shown, for a user allowed to read it.
 

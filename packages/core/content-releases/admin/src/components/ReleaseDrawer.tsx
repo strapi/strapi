@@ -222,11 +222,7 @@ export const ReleaseDrawer = ({
                     })}
                   </h3>
                   <NameField />
-                  <ScheduleFields
-                    timezoneList={timezoneList}
-                    defaultTimezone={defaultTimezone}
-                    initialSchedule={formInitialValues}
-                  />
+                  <ScheduleFields timezoneList={timezoneList} defaultTimezone={defaultTimezone} />
                 </div>
                 <div className="border-t border-border" />
                 <ReleaseModeField />
@@ -306,14 +302,9 @@ const NameField = () => {
 interface ScheduleFieldsProps {
   timezoneList: TimezoneOption[];
   defaultTimezone: string;
-  initialSchedule: Pick<FormValues, 'date' | 'time' | 'timezone'>;
 }
 
-const ScheduleFields = ({
-  timezoneList,
-  defaultTimezone,
-  initialSchedule,
-}: ScheduleFieldsProps) => {
+const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) => {
   const { formatMessage } = useIntl();
   const { values, setFieldValue, setValues } = useFormikContext<FormValues>();
   const dateError = useFieldError('date');
@@ -321,18 +312,14 @@ const ScheduleFields = ({
   const timezoneError = useFieldError('timezone');
 
   const handleNoScheduleChange = (hasNoSchedule: boolean) => {
+    // The schedule is only hidden, so unticking brings back what was picked. Submitting without a
+    // schedule still removes it from the release: the submit ignores it while `isScheduled` is false.
     // At once, so the form is validated once, with every change
     setValues({
       ...values,
       isScheduled: !hasNoSchedule,
-      // Submitting without a schedule also removes it from the release
-      ...(hasNoSchedule
-        ? { date: null, time: '', timezone: null }
-        : {
-            date: initialSchedule.date,
-            time: initialSchedule.time,
-            timezone: initialSchedule.timezone ?? defaultTimezone,
-          }),
+      // A release opened without a date has no timezone yet
+      timezone: values.timezone ?? defaultTimezone,
     });
   };
 

@@ -2,7 +2,7 @@ import { useRBAC } from '@strapi/admin/strapi-admin';
 import { within } from '@testing-library/react';
 import { fireEvent, render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 
 import { getSkippedEntriesQuery } from '../../components/CreateReleaseFromSkippedDrawer';
 import { useGetReleaseActionsQuery } from '../../services/release';
@@ -509,6 +509,33 @@ describe('Release details tabs, header and rows', () => {
     await user.click(screen.getByRole('tab', { name: /^Not ready/ }));
 
     await waitFor(() => expect(actionsRequest).toHaveBeenLastCalledWith('notReady'));
+  });
+
+  // Tabs are views of one page: going back leaves the page instead of replaying the tabs
+  it('goes back to the previous page after switching tabs', async () => {
+    mockRelease(plannedRelease, [action(1)]);
+    const BrowserBack = () => {
+      const navigate = useNavigate();
+
+      return <button onClick={() => navigate(-1)}>Browser back</button>;
+    };
+
+    const { user } = render(
+      <>
+        <Routes>
+          <Route path="/content-releases" element={<p>Releases list</p>} />
+          <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+        </Routes>
+        <BrowserBack />
+      </>,
+      { initialEntries: ['/content-releases', '/content-releases/3'] }
+    );
+
+    await user.click(await screen.findByRole('tab', { name: /^Not ready/ }));
+    await user.click(screen.getByRole('tab', { name: /^Ready/ }));
+    await user.click(screen.getByRole('button', { name: 'Browser back' }));
+
+    expect(await screen.findByText('Releases list')).toBeInTheDocument();
   });
 
   it('shows only the empty state for a tab without entries', async () => {

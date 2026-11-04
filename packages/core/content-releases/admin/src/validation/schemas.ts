@@ -24,13 +24,14 @@ export const RELEASE_SCHEMA = yup
         'time-in-future-if-today',
         'content-releases.modal.form.time.has-passed',
         function (time) {
-          const { date, timezone } = this.parent;
+          const { date, timezone, isScheduled } = this.parent;
 
           // Timezone is in format "UTC&Europe/Paris", so we get the region part for the dates functions
           const region = timezone?.split('&')[1];
 
-          // An invalid timezone is reported by the timezone field
-          if (!date || !region || !time) {
+          // An invalid timezone is reported by the timezone field. Without a schedule, the hidden
+          // date and time are not submitted
+          if (!isScheduled || !date || !region || !time) {
             return true;
           }
 
