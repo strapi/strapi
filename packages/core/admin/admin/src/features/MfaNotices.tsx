@@ -124,8 +124,7 @@ const PROFILE_PATH = '/me';
 
 /**
  * Unseen notice rows become one inline warning, rendered by the authenticated layout directly
- * under the two-factor grace banner (see `MfaBanners`), so the two can never overlap. It used to be
- * a persistent toast centred at the top of the page, which sat on top of the banner. Closing it
+ * under the two-factor grace banner (see `MfaBanners`), so the two can never overlap. Closing it
  * marks the announced notices seen. "profile page" in the message links to the profile.
  *
  * Never on the profile page itself, which lists the same events in its two-factor section with its

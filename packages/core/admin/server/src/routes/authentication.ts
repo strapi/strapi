@@ -94,9 +94,9 @@ export default [
       auth: false,
       // Only while the feature is on: the limiter is here because a reset can now answer with a
       // second-factor challenge, and with the flag off this route must be what it was before.
-      // Same collapse as the mfa routes: a reset body carries a token, not an email, so every
-      // reset in the deployment shares one `unknownEmail:<path>:<ip>` bucket -- five between a
-      // whole org behind NAT.
+      // A reset body carries a token, not an email, and there is no session, so every reset in
+      // the deployment shares one `unknownEmail:<path>:<ip>` bucket -- five between a whole org
+      // behind NAT, hence the higher ceiling.
       middlewares: [{ name: 'admin::mfa-rate-limit', config: { max: 20 } }],
     },
   },

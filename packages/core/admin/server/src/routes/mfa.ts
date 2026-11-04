@@ -14,9 +14,8 @@ const authenticated = (method: string, path: string, handler: string) => ({
  * several `/mfa/me` calls, so a limited read turns an ordinary visit into a 429.
  *
  * The middleware default, five per five minutes, the same as `/login`. With a session the limiter
- * keys on the account and the route pattern (`rateLimitKey`), so colleagues behind one address no
- * longer share a bucket and a parameter in the path no longer buys a fresh one; the higher ceiling
- * these routes once had existed only to paper over the first of those.
+ * keys on the account and the route pattern (`rateLimitKey`), so colleagues behind one address do
+ * not share a bucket and a parameter in the path does not buy a fresh one.
  */
 const credentialGuarded = (method: string, path: string, handler: string) => ({
   method,
@@ -106,9 +105,7 @@ export default [
   authenticated('POST', '/mfa/passkeys', 'mfa.registerPasskey'),
   authenticated('GET', '/mfa/passkeys', 'mfa.listPasskeys'),
   // POST, not DELETE: it carries a password and a code, and the admin fetch client sends no body
-  // on a DELETE. The id is in that body and not in the path, because `admin::rateLimit` keys on
-  // `ctx.request.path` -- a `:id` segment would hand the caller a fresh bucket per id, and since
-  // the password is checked before ownership is known, that is no bound at all.
+  // on a DELETE.
   credentialGuarded('POST', '/mfa/passkeys/remove', 'mfa.deletePasskey'),
   withPermission('GET', '/mfa/users/:id/passkeys', 'mfa.listUserPasskeys', 'admin::users.read'),
   // POST, not DELETE, for the reason `/mfa/passkeys/remove` gives: it carries credentials.

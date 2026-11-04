@@ -638,9 +638,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   const completeEnrolment = async (userId: string, code: string) => {
-    // The one credential-verifying path that used to have no account tier. The route limiter keys
-    // on `unknownEmail:<path>:<ip>`, so it is one bucket for everyone behind an address, not a
-    // bound on guesses against *this* account's in-progress enrolment.
+    // Charged at the account tier like every other code check, so the bound on guesses against
+    // this account does not depend on how the route limiter happens to key the request.
     const attempt = await reserveAttempt(userId);
     if (!attempt) {
       throw new RateLimitError();

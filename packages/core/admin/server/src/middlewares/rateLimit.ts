@@ -14,12 +14,10 @@ const { RateLimitError } = errors;
  * `<email>:<path>:<ip>` -- and a body without one degrades to `unknownEmail`, one bucket per path
  * and address. That is acceptable on `/login`, which always carries an email.
  *
- * With a session it is wrong twice over. The key collapses to one bucket for every administrator
- * behind an address, so colleagues lock each other out; and it varies with the concrete path, so
- * a route with a parameter hands the caller a fresh bucket per value -- an unbounded password
- * oracle wherever the handler checks a credential before it knows whether the id is theirs. So an
- * authenticated request is keyed on the account and the route *pattern*: every attempt against
- * one account on one route lands in one bucket, from any address, whatever the parameters.
+ * An authenticated request is keyed on the account and the route *pattern* instead: every attempt
+ * against one account on one route lands in one bucket, from any address, whatever the
+ * parameters. An address key would let colleagues behind one NAT lock each other out, and a
+ * concrete-path key would hand the caller a fresh bucket per `:id` value.
  */
 export const rateLimitKey = (ctx: Context): string => {
   const sessionUserId: unknown = ctx.state?.user?.id;
