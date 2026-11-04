@@ -54,8 +54,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const response = { ...folder };
 
       // `parent` is left out when the sanitizer removed it, so it never looks like a root folder.
-      if (!folders[index].parent) {
-        response.parent = null;
+      if ('parent' in folder) {
+        response.parent = folder.parent ?? null;
       }
 
       if ('name' in folder) {
