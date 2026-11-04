@@ -271,11 +271,17 @@ const EditPage = () => {
         data.stages.some((newStage) => newStage.id === stage.id)
       );
 
-    if (meta && numberOfWorkflows && meta?.workflowCount > parseInt(numberOfWorkflows, 10)) {
+    if (
+      isCreatingWorkflow &&
+      meta &&
+      numberOfWorkflows &&
+      meta?.workflowCount >= parseInt(numberOfWorkflows, 10)
+    ) {
       /**
-       * If the current license has a limit, check if the total count of workflows
-       * exceeds that limit and display the limits modal instead of sending the
-       * update, because it would throw an API error.
+       * If the current license has a limit, check if creating a workflow would exceed it and
+       * display the limits modal instead of sending the request, because it would throw an API
+       * error. The workflow limit is enforced only on creation, so an existing workflow can still
+       * be updated above it.
        */
       setShowLimitModal('workflow');
 
@@ -307,8 +313,8 @@ const EditPage = () => {
    * If the current license has a limit:
    * check if the total count of workflows or stages exceeds that limit and display
    * the limits modal on page load. It can be closed by the user, but the
-   * API will throw an error in case they try to create a new workflow or update the
-   * stages.
+   * API will throw an error in case they try to create a new workflow or set more
+   * stages than the limit.
    *
    * If the current license does not have a limit (e.g. offline license):
    * do nothing (for now). In case they are trying to create the 201st workflow/ stage
