@@ -18,6 +18,18 @@ describe('translateRoutePath', () => {
     ['/files/:path*', '/files{/*path}'],
     ['/files/:path+', '/files/*path'],
     ['/literal[bar]!', '/literal\\[bar\\]\\!'],
+    ['/items/(a|b)', '/items/:splat'],
+    ['/content-manager/(collection|single)-types/:id', '/content-manager/:splat-types/:id'],
+    ['/files/:path(\\d+)+', '/files/*path'],
+    ['/files/:path(\\d+)*', '/files{/*path}'],
+    ['/users/:404', '/users/:"404"'],
+    ['/files/:id$name', '/files/:"id"$name'],
+    ['/users/:café', '/users/:"caf"é'],
+    ['/:attr1?{-:attr2}?{-:attr3}?', '{/:attr1}{-:attr2}{-:attr3}'],
+    ['/users{/:id(\\d+)}?', '/users{/:id}'],
+    ['{:id(\\d+)}', ':id'],
+    ['{ab}?', '{ab}'],
+    ['/x{ab}+', '/x:v6Literal0'],
   ])('translates %s to %s', (path, expectedPath) => {
     expect(translateRoutePath(path)).toMatchObject({ path: expectedPath, changed: true });
   });
@@ -43,6 +55,29 @@ describe('translateRoutePath', () => {
     expect(constraints[0].pattern.test('abc')).toBe(false);
   });
 
+  it('keeps an unnamed alternation as a constraint', () => {
+    const { constraints, positionalParams } = translateRoutePath('/items/(collection|single)');
+
+    expect(positionalParams).toEqual(['splat']);
+    expect(constraints[0].pattern.test('collection')).toBe(true);
+    expect(constraints[0].pattern.test('other')).toBe(false);
+  });
+
+  it('checks every segment of a repeated custom pattern', () => {
+    const { constraints } = translateRoutePath('/files/:path(\\d+)+');
+
+    expect(constraints[0].pattern.test('12')).toBe(true);
+    expect(constraints[0].pattern.test('12/34')).toBe(true);
+    expect(constraints[0].pattern.test('12/ab')).toBe(false);
+  });
+
+  it('hides the parameter used to test a repeated literal', () => {
+    expect(translateRoutePath('/x{ab}+')).toMatchObject({
+      hiddenParams: ['v6Literal0'],
+      constraints: [expect.objectContaining({ name: 'v6Literal0' })],
+    });
+  });
+
   it('names unnamed groups in order, as v6 numbered them', () => {
     expect(translateRoutePath('/files/(.*)')).toMatchObject({ positionalParams: ['splat'] });
     expect(translateRoutePath('/(\\d+)/(.*)')).toMatchObject({
@@ -62,6 +97,14 @@ describe('translateRoutePath', () => {
     '/files/:path*',
     '/files/:path+',
     '/literal[bar]!',
+    '/items/(a|b)',
+    '/files/:path(\\d+)+',
+    '/files/:path(\\d+)*',
+    '/users/:404',
+    '/files/:id$name',
+    '/:attr1?{-:attr2}?',
+    '/x{ab}+',
+    '{ab}?',
   ])('produces a path accepted by @koa/router for %s', (path) => {
     const router = new Router();
 
@@ -69,9 +112,9 @@ describe('translateRoutePath', () => {
   });
 
   it.each([
-    ['/items/(a|b)', 'the group "(a|b)" has no v8 equivalent'],
     ['/(?!uploads/).+', 'the group "(?!uploads/)" has no v8 equivalent'],
-    ['/files/:path(\\d+)+', 'the repeated parameter ":path" has a custom pattern'],
+    ['{:id(\\d+).html}+', 'the repeated parameter ":id" has a suffix'],
+    ['n:id(\\d+)+', 'the repeated parameter ":id" has no prefix'],
     ['/users/:id(\\d+', 'is unclosed'],
     ['/users/:id(\\d{2,1})', 'the custom pattern for ":id" is invalid'],
   ])('fails for %s instead of changing what it matches', (path, reason) => {

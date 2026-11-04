@@ -2,15 +2,15 @@ import { castArray, property, toLower, trim } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
+import type Koa from 'koa';
 
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
 import {
   RoutePathMigrationError,
-  type RoutePathConstraint,
-  type TranslatedRoutePath,
   translateRoutePath,
+  withTranslatedPathMatching,
 } from './route-path';
 
 const getMethod = (route: Core.Route) => {
@@ -30,39 +30,6 @@ const getPath = (route: Core.Route, strapi: Core.Strapi) => {
   return translated;
 };
 
-/**
- * Applies what v8 paths cannot express. A value its pattern rejects means the route did not
- * match, so the request goes on to the next matching route, as it did in v6.
- */
-const withTranslatedPathMatching = (
-  { constraints, positionalParams, paramNames, emptyParams }: TranslatedRoutePath,
-  routeHandler: Core.MiddlewareHandler
-): Core.MiddlewareHandler => {
-  if (constraints.length === 0 && positionalParams.length === 0 && emptyParams.length === 0) {
-    return routeHandler;
-  }
-
-  return (ctx, next) => {
-    emptyParams.forEach((name) => {
-      ctx.params[name] ??= '';
-    });
-
-    const fails = ({ name, pattern }: RoutePathConstraint) =>
-      ctx.params[name] !== undefined && !pattern.test(ctx.params[name]);
-
-    if (constraints.some(fails)) {
-      paramNames.forEach((name) => delete ctx.params[name]);
-      return next();
-    }
-
-    positionalParams.forEach((name, index) => {
-      ctx.params[index] = ctx.params[name];
-    });
-
-    return routeHandler(ctx, next);
-  };
-};
-
 const createRouteInfoMiddleware =
   (routeInfo: Core.Route): Core.MiddlewareHandler =>
   (ctx, next) => {
@@ -79,7 +46,7 @@ const getAuthConfig = property('config.auth');
 
 const createAuthorizeMiddleware =
   (strapi: Core.Strapi): Core.MiddlewareHandler =>
-  async (ctx, next) => {
+  async (ctx, next: Koa.Next) => {
     const { auth, route } = ctx.state;
 
     const authService = strapi.get('auth');
