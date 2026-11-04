@@ -147,7 +147,7 @@ yarn test:ts                 # all packages + front + back
 
 ### API integration tests
 
-Integration tests live in `tests/api/`. Test apps are generated automatically — always regenerate with `yarn test:generate-app` rather than reusing a stale one (stale apps cause misleading failures).
+Integration tests live in `tests/api/`. `yarn test:api` regenerates its test app (`test-apps/api`) on every run, so never reuse a stale one with `--no-generate-app` (stale apps cause misleading failures). `yarn test:generate-app` generates `test-apps/base`, which the API tests don't use.
 
 ```bash
 yarn test:api                # SQLite
