@@ -201,6 +201,12 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // The audit-log content type is registered in every edition: persist its table with it
   await persistTablesWithPrefix('strapi_audit_logs');
+  // Same for the two-factor tables, and in every state of `unstableAdminMfa`: a rollback to a
+  // version without them would otherwise drop every enrolment, recovery code, passkey and notice
+  // at its first boot. Only whole tables can be kept this way. The `mfa*` columns on
+  // `admin_users` and `mfaRequired` on `admin_roles` are still dropped by such a rollback, so a
+  // roll forward again finds the tables intact but every user unenrolled.
+  await persistTablesWithPrefix('strapi_admin_mfa');
 
   await registerAdminConditions();
   await registerPermissionActions();

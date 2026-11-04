@@ -205,6 +205,12 @@ On `admin::user`:
 | `mfaGraceUntil`, `mfaLockedAt`                        | Enforcement stamps, see [Enforcement](./13-admin-mfa-enforcement.md) |
 | `mfaPasskeyChallenge`, `mfaPasskeyChallengeExpiresAt` | The one pending passkey registration ceremony                        |
 
+Bootstrap adds every `strapi_admin_mfa*` table to the persisted tables, whatever the state of the
+flag, the way it does for `strapi_audit_logs`. A rollback to a version without this feature then
+keeps the tables instead of dropping them at its first boot. Persisting works on whole tables only:
+the columns above and `mfaRequired` on `admin::role` are still dropped by such a rollback, so a later
+roll forward finds every user unenrolled and the role flags cleared.
+
 Expired challenge and trusted-device rows are swept at bootstrap and again daily at 03:30
 (`server/src/bootstrap.ts`, through `strapi.cron.add`). The sweep is wrapped in a `try`/`catch` so
 cleanup can never stop the admin booting. Nothing about the security of the flow depends on the
