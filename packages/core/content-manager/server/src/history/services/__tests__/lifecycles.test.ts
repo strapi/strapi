@@ -2,6 +2,10 @@ import type { UID } from '@strapi/types';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createLifecyclesService } from '../lifecycles';
 
+jest.mock('../../utils', () => ({
+  getService: () => ({ createVersion: mockCreateVersion }),
+}));
+
 const mockGetRequestContext = jest.fn(() => {
   return {
     state: {
@@ -16,6 +20,15 @@ const mockGetRequestContext = jest.fn(() => {
 });
 
 const mockHistoryVersionCreate = jest.fn();
+const mockCreateVersion = jest.fn();
+const mockFindEntries = jest.fn().mockResolvedValue([]);
+const mockLogError = jest.fn();
+const commitCallbacks: Promise<unknown>[] = [];
+
+const mockDocumentMetadata = {
+  getMetadata: jest.fn().mockResolvedValue([]),
+  getStatus: jest.fn(),
+};
 
 const mockStrapi = {
   admin: {
@@ -31,10 +44,7 @@ const mockStrapi = {
   plugins: {
     'content-manager': {
       services: {
-        'document-metadata': {
-          getMetadata: jest.fn().mockResolvedValue([]),
-          getStatus: jest.fn(),
-        },
+        'document-metadata': mockDocumentMetadata,
       },
     },
   },
@@ -52,12 +62,12 @@ const mockStrapi = {
           create: mockHistoryVersionCreate,
         };
       }
-      return { findMany: jest.fn().mockResolvedValue([]) };
+      return { findMany: mockFindEntries };
     },
     transaction(cb: any) {
       const opt = {
         onCommit(func: any) {
-          return func();
+          commitCallbacks.push(func());
         },
       };
       return cb(opt);
@@ -84,6 +94,9 @@ const mockStrapi = {
   },
   cron: {
     add: jest.fn(),
+  },
+  log: {
+    error: mockLogError,
   },
 };
 // @ts-expect-error - ignore
@@ -166,6 +179,73 @@ describe('history lifecycles service', () => {
         '/content-manager/collection-types/api::article.article/doc-1/actions/publish?locale=en'
       );
       expect(mockHistoryVersionCreate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('fail-open on the version insert', () => {
+    let useMiddleware: (context: any, next: () => Promise<any>) => Promise<any>;
+
+    beforeAll(async () => {
+      await lifecyclesService.bootstrap();
+      // @ts-expect-error - mock
+      useMiddleware = mockStrapi.documents.use.mock.calls[0][0];
+    });
+
+    beforeEach(() => {
+      commitCallbacks.length = 0;
+      mockLogError.mockClear();
+      mockCreateVersion.mockReset();
+      mockGetRequestContext.mockReturnValue({
+        state: { user: { id: '123' } },
+        request: { url: '/content-manager/collection-types/api::article.article/doc-1' },
+      });
+    });
+
+    const updateArticle = () =>
+      useMiddleware(
+        {
+          action: 'update',
+          contentType: { uid: 'api::article.article' },
+          params: { documentId: 'doc-1', locale: ['en', 'fr'] },
+        },
+        async () => ({ documentId: 'doc-1' })
+      );
+
+    it('logs the error and does not reject when the history version fails to save', async () => {
+      const error = new Error('insert failed');
+      mockFindEntries.mockResolvedValueOnce([{ id: 1, documentId: 'doc-1', locale: 'en' }]);
+      mockCreateVersion.mockRejectedValueOnce(error);
+
+      const result = await updateArticle();
+
+      expect(result).toEqual({ documentId: 'doc-1' });
+      expect(commitCallbacks).toHaveLength(1);
+      await expect(commitCallbacks[0]).resolves.toBeUndefined();
+      expect(mockCreateVersion).toHaveBeenCalledTimes(1);
+      expect(mockLogError).toHaveBeenCalledWith(
+        'Failed to create a history version for api::article.article',
+        { documentId: 'doc-1', locale: 'en', error }
+      );
+    });
+
+    it('still saves the versions of the other locales when one fails', async () => {
+      const error = new Error('insert failed');
+      mockFindEntries.mockResolvedValueOnce([
+        { id: 1, documentId: 'doc-1', locale: 'en' },
+        { id: 2, documentId: 'doc-1', locale: 'fr' },
+      ]);
+      mockCreateVersion.mockRejectedValueOnce(error).mockResolvedValueOnce(undefined);
+
+      await updateArticle();
+      await commitCallbacks[0];
+
+      expect(mockCreateVersion).toHaveBeenCalledTimes(2);
+      expect(mockCreateVersion).toHaveBeenLastCalledWith(expect.objectContaining({ locale: 'fr' }));
+      expect(mockLogError).toHaveBeenCalledTimes(1);
+      expect(mockLogError).toHaveBeenCalledWith(
+        'Failed to create a history version for api::article.article',
+        { documentId: 'doc-1', locale: 'en', error }
+      );
     });
   });
 });
