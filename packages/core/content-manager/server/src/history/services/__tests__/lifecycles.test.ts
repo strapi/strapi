@@ -6,20 +6,7 @@ jest.mock('../../utils', () => ({
   getService: () => ({ createVersion: mockCreateVersion }),
 }));
 
-const mockGetRequestContext = jest.fn(() => {
-  return {
-    state: {
-      user: {
-        id: '123',
-      },
-    },
-    request: {
-      url: '/content-manager/test',
-    },
-  };
-});
-
-const mockHistoryVersionCreate = jest.fn();
+const mockGetRequestContext = jest.fn<unknown, []>();
 const mockCreateVersion = jest.fn();
 const mockFindEntries = jest.fn().mockResolvedValue([]);
 const mockLogError = jest.fn();
@@ -59,7 +46,7 @@ const mockStrapi = {
     query(uid: UID.ContentType) {
       if (uid === HISTORY_VERSION_UID) {
         return {
-          create: mockHistoryVersionCreate,
+          create: jest.fn(),
         };
       }
       return { findMany: mockFindEntries };
@@ -134,56 +121,37 @@ describe('history lifecycles service', () => {
     );
   });
 
-  describe('publish dedup guard', () => {
-    // The middleware suppresses the `update` history version that the publish
-    // action emits as a side-effect on the draft, so users see one version per
-    // publish. The guard checks the request URL — query strings (e.g. `?locale=en`
-    // for i18n) must not break it. Issue #25724.
+  describe('version middleware', () => {
     let useMiddleware: (context: any, next: () => Promise<any>) => Promise<any>;
 
-    beforeAll(async () => {
-      await lifecyclesService.bootstrap();
-      // @ts-expect-error - mock
-      useMiddleware = mockStrapi.documents.use.mock.calls[0][0];
-    });
-
-    beforeEach(() => {
-      mockHistoryVersionCreate.mockClear();
-    });
-
-    const callMiddleware = async (url: string) => {
+    const mockRequest = ({
+      url = '/content-manager/collection-types/api::article.article/doc-1',
+      pluginName = 'content-manager',
+      strategyName = 'admin',
+    } = {}) => {
       mockGetRequestContext.mockReturnValue({
-        state: { user: { id: '123' } },
+        state: {
+          user: { id: '123' },
+          route: { info: { pluginName, type: 'admin' } },
+          auth: { strategy: { name: strategyName } },
+        },
         request: { url },
       });
+    };
 
-      await useMiddleware(
+    const updateArticle = async (locale: string | string[] = 'en') => {
+      const result = await useMiddleware(
         {
           action: 'update',
           contentType: { uid: 'api::article.article' },
-          params: { documentId: 'doc-1', locale: 'en' },
+          params: { documentId: 'doc-1', locale },
         },
         async () => ({ documentId: 'doc-1' })
       );
+      await Promise.all(commitCallbacks);
+
+      return result;
     };
-
-    it('skips creating a history version when URL ends with /actions/publish', async () => {
-      await callMiddleware(
-        '/content-manager/collection-types/api::article.article/doc-1/actions/publish'
-      );
-      expect(mockHistoryVersionCreate).not.toHaveBeenCalled();
-    });
-
-    it('skips creating a history version when URL has /actions/publish followed by query params', async () => {
-      await callMiddleware(
-        '/content-manager/collection-types/api::article.article/doc-1/actions/publish?locale=en'
-      );
-      expect(mockHistoryVersionCreate).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('fail-open on the version insert', () => {
-    let useMiddleware: (context: any, next: () => Promise<any>) => Promise<any>;
 
     beforeAll(async () => {
       await lifecyclesService.bootstrap();
@@ -195,57 +163,91 @@ describe('history lifecycles service', () => {
       commitCallbacks.length = 0;
       mockLogError.mockClear();
       mockCreateVersion.mockReset();
-      mockGetRequestContext.mockReturnValue({
-        state: { user: { id: '123' } },
-        request: { url: '/content-manager/collection-types/api::article.article/doc-1' },
+      mockFindEntries.mockReset().mockResolvedValue([{ id: 1, documentId: 'doc-1', locale: 'en' }]);
+      mockRequest();
+    });
+
+    describe('recording gate', () => {
+      it('records the write with the source of its origin', async () => {
+        mockRequest({ strategyName: 'admin-token' });
+
+        await updateArticle();
+
+        expect(mockCreateVersion).toHaveBeenCalledWith(
+          expect.objectContaining({ locale: 'en', source: 'admin-api' })
+        );
+      });
+
+      it('records nothing when the write has no origin', async () => {
+        mockRequest({ pluginName: 'admin' });
+
+        await updateArticle();
+
+        expect(mockCreateVersion).not.toHaveBeenCalled();
       });
     });
 
-    const updateArticle = () =>
-      useMiddleware(
-        {
-          action: 'update',
-          contentType: { uid: 'api::article.article' },
-          params: { documentId: 'doc-1', locale: ['en', 'fr'] },
-        },
-        async () => ({ documentId: 'doc-1' })
-      );
+    describe('publish dedup guard', () => {
+      // The middleware suppresses the `update` history version that the publish
+      // action emits as a side-effect on the draft, so users see one version per
+      // publish. The guard checks the request URL — query strings (e.g. `?locale=en`
+      // for i18n) must not break it. Issue #25724.
+      it('skips creating a history version when URL ends with /actions/publish', async () => {
+        mockRequest({
+          url: '/content-manager/collection-types/api::article.article/doc-1/actions/publish',
+        });
 
-    it('logs the error and does not reject when the history version fails to save', async () => {
-      const error = new Error('insert failed');
-      mockFindEntries.mockResolvedValueOnce([{ id: 1, documentId: 'doc-1', locale: 'en' }]);
-      mockCreateVersion.mockRejectedValueOnce(error);
+        await updateArticle();
 
-      const result = await updateArticle();
+        expect(mockCreateVersion).not.toHaveBeenCalled();
+      });
 
-      expect(result).toEqual({ documentId: 'doc-1' });
-      expect(commitCallbacks).toHaveLength(1);
-      await expect(commitCallbacks[0]).resolves.toBeUndefined();
-      expect(mockCreateVersion).toHaveBeenCalledTimes(1);
-      expect(mockLogError).toHaveBeenCalledWith(
-        'Failed to create a history version for api::article.article',
-        { documentId: 'doc-1', locale: 'en', error }
-      );
+      it('skips creating a history version when URL has /actions/publish followed by query params', async () => {
+        mockRequest({
+          url: '/content-manager/collection-types/api::article.article/doc-1/actions/publish?locale=en',
+        });
+
+        await updateArticle();
+
+        expect(mockCreateVersion).not.toHaveBeenCalled();
+      });
     });
 
-    it('still saves the versions of the other locales when one fails', async () => {
-      const error = new Error('insert failed');
-      mockFindEntries.mockResolvedValueOnce([
-        { id: 1, documentId: 'doc-1', locale: 'en' },
-        { id: 2, documentId: 'doc-1', locale: 'fr' },
-      ]);
-      mockCreateVersion.mockRejectedValueOnce(error).mockResolvedValueOnce(undefined);
+    describe('fail-open on the version insert', () => {
+      it('logs the error and does not reject when the history version fails to save', async () => {
+        const error = new Error('insert failed');
+        mockCreateVersion.mockRejectedValueOnce(error);
 
-      await updateArticle();
-      await commitCallbacks[0];
+        const result = await updateArticle();
 
-      expect(mockCreateVersion).toHaveBeenCalledTimes(2);
-      expect(mockCreateVersion).toHaveBeenLastCalledWith(expect.objectContaining({ locale: 'fr' }));
-      expect(mockLogError).toHaveBeenCalledTimes(1);
-      expect(mockLogError).toHaveBeenCalledWith(
-        'Failed to create a history version for api::article.article',
-        { documentId: 'doc-1', locale: 'en', error }
-      );
+        expect(result).toEqual({ documentId: 'doc-1' });
+        expect(mockCreateVersion).toHaveBeenCalledTimes(1);
+        expect(mockLogError).toHaveBeenCalledWith(
+          'Failed to create a history version for api::article.article',
+          { documentId: 'doc-1', locale: 'en', error }
+        );
+      });
+
+      it('still saves the versions of the other locales when one fails', async () => {
+        const error = new Error('insert failed');
+        mockFindEntries.mockResolvedValue([
+          { id: 1, documentId: 'doc-1', locale: 'en' },
+          { id: 2, documentId: 'doc-1', locale: 'fr' },
+        ]);
+        mockCreateVersion.mockRejectedValueOnce(error).mockResolvedValueOnce(undefined);
+
+        await updateArticle(['en', 'fr']);
+
+        expect(mockCreateVersion).toHaveBeenCalledTimes(2);
+        expect(mockCreateVersion).toHaveBeenLastCalledWith(
+          expect.objectContaining({ locale: 'fr' })
+        );
+        expect(mockLogError).toHaveBeenCalledTimes(1);
+        expect(mockLogError).toHaveBeenCalledWith(
+          'Failed to create a history version for api::article.article',
+          { documentId: 'doc-1', locale: 'en', error }
+        );
+      });
     });
   });
 });

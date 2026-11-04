@@ -1,5 +1,5 @@
 import type { Model } from '@strapi/database';
-import { HISTORY_VERSION_UID } from '../constants';
+import { HISTORY_VERSION_SOURCES, HISTORY_VERSION_UID } from '../constants';
 
 const historyVersion: Model = {
   uid: HISTORY_VERSION_UID,
@@ -30,6 +30,10 @@ const historyVersion: Model = {
     },
     schema: {
       type: 'json',
+    },
+    source: {
+      type: 'enumeration',
+      enum: [...HISTORY_VERSION_SOURCES],
     },
     createdAt: {
       type: 'datetime',
