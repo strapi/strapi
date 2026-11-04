@@ -119,6 +119,21 @@ describe('Upload content API - read-only folders routes', () => {
       expect(findOneRoot.body.data).not.toHaveProperty('parent');
     });
 
+    test.each([
+      ['full-access', { filters: { files: { id: 1 } } }],
+      ['full-access', { filters: { children: { files: { name: 'logo.png' } } } }],
+      ['full-access', { filters: { $or: [{ files: { hash: 'logo' } }] } }],
+      ['full-access', { sort: 'files.name:asc' }],
+      ['read-only', { filters: { files: { id: 1 } } }],
+      ['read-only', { sort: { parent: { files: { name: 'asc' } } } }],
+    ])('refuses to find folders through their files with a %s token', async (type, qs) => {
+      const rqToken = await createTokenRequest({ type });
+
+      const res = await rqToken({ method: 'GET', url: '/upload/folders', qs });
+
+      expect(res.statusCode).toBe(400);
+    });
+
     test('lists folders with a read-only token', async () => {
       const rqReadOnly = await createTokenRequest({ type: 'read-only' });
 
