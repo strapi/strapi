@@ -185,7 +185,11 @@ describe('Admin MFA: the TOTP factor end to end', () => {
 
   test('a failed code reaches the account holder as a notice, and can be marked seen', async () => {
     // Signed in before the failure, as the holder would be: a login that began after an event may
-    // not dismiss it while an older one is live (the next tests cover that rule).
+    // not dismiss it while an older one is live (the next tests cover that rule), and the earlier
+    // tests' logins are still live, so their notices are cleared first.
+    await strapi.db
+      .query('admin::mfa-event')
+      .updateMany({ where: { userId: String(user.id) }, data: { seenAt: new Date() } });
     const headers = await bearer();
     const challenge = await login();
     await completeChallenge(challenge.body.data.challengeToken, '000000');
@@ -324,7 +328,9 @@ describe('Admin MFA: the TOTP factor end to end', () => {
     ).toBe(200);
 
     // The factor commits it: the new password works, the old one does not, sessions are gone.
-    const done = await completeChallenge(staged.body.data.challengeToken, nextRecoveryCode());
+    // TOTP codes here, not recovery codes: the suite's budget of those is spoken for.
+    await waitForNextTotpStep();
+    const done = await completeChallenge(staged.body.data.challengeToken, totpFor(secret));
     expect(done.statusCode).toBe(200);
     expect((await loginWith('Changed456')).body.data.mfaRequired).toBe(true);
     expect((await loginWith(password)).statusCode).toBe(400);
@@ -334,10 +340,11 @@ describe('Admin MFA: the TOTP factor end to end', () => {
 
     // Put the suite's password back the same way, so the tests after this one are unaffected.
     const back = await stageReset('totp-reset-two', password);
+    await waitForNextTotpStep();
     expect(
-      (await completeChallenge(back.body.data.challengeToken, nextRecoveryCode())).statusCode
+      (await completeChallenge(back.body.data.challengeToken, totpFor(secret))).statusCode
     ).toBe(200);
-  });
+  }, 120_000);
 
   test('disabling needs the password and a code, then login stops asking', async () => {
     const headers = await bearer();
