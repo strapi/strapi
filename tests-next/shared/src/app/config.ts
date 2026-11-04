@@ -34,7 +34,6 @@ export const strapiBin = () =>
 /** Env every test app runs with, on top of the caller's env. */
 export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
-  BROWSER: 'none',
   STRAPI_TELEMETRY_DISABLED: 'true',
   NODE_ENV: 'development',
 });
