@@ -122,10 +122,10 @@ Configuration keys:
 
 Key files:
 
-- Plugin bootstrap/config: `packages/plugins/users-permissions/server/src/bootstrap/index.js`, `packages/plugins/users-permissions/server/src/config.js`
-- Controller: `packages/plugins/users-permissions/server/src/controllers/auth.js`
-- Routes: `packages/plugins/users-permissions/server/src/routes/content-api/auth.js`
-- JWT service: `packages/plugins/users-permissions/server/src/services/jwt.js`
+- Plugin bootstrap/config: `packages/plugins/users-permissions/server/src/bootstrap/index.ts`, `packages/plugins/users-permissions/server/src/config.ts`
+- Controller: `packages/plugins/users-permissions/server/src/controllers/auth.ts`
+- Routes: `packages/plugins/users-permissions/server/src/routes/content-api/auth.ts`
+- JWT service: `packages/plugins/users-permissions/server/src/services/jwt.ts`
 
 ## Session Revocation on Credential Changes
 
