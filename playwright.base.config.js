@@ -101,6 +101,11 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
               {
                 serverUrl: process.env.PIWI_DASHBOARD_URL,
                 projectName: getEnvString(process.env.PIWI_PROJECT_NAME, 'strapi'),
+                // The reporter's default is 15 minutes, once per domain run. A slow dashboard
+                // must not hold the job that long: past this budget the results are kept
+                // locally and the run continues. A config option wins over the env var, so
+                // PIWI_SUBMIT_TIMEOUT is read here.
+                submitTimeout: getEnvNum(process.env.PIWI_SUBMIT_TIMEOUT, 60_000),
               },
             ],
           ])
