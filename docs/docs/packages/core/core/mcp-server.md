@@ -11,16 +11,16 @@ Source: `packages/core/core/src/services/mcp/`, `packages/core/core/src/provider
 
 ## Summary
 
-| Concern       | Answer                                                                                                         |
-| ------------- | -------------------------------------------------------------------------------------------------------------- |
-| Enable        | `server.mcp.enabled` (default `false`)                                                                         |
-| Endpoint      | `POST /mcp` (fixed path, not configurable)                                                                     |
-| Transport     | MCP SDK `NodeStreamableHTTPServerTransport`, stateless (one server instance per request)                       |
-| Auth          | Admin API token (`Authorization: Bearer <token>`) — same store as Settings → API Tokens (admin)                |
-| Authorization | Two layers: coarse session capability gate (CASL ability vs `auth.policies`) + fine-grained handler checks     |
-| Extensibility | Any plugin or app can register tools/prompts/resources via `strapi.ai.mcp.register*` during the register phase |
-| Built-in      | One dev-only `log` tool (core) + one CRUD tool set per displayed content type (content-manager)                |
-| SDK           | `@modelcontextprotocol/server@2.0.0` + `@modelcontextprotocol/node@2.0.0`                                      |
+| Concern       | Answer                                                                                                                                                                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enable        | `server.mcp.enabled` (default `false`)                                                                                                                                                                                                                                      |
+| Endpoint      | `POST /mcp` (fixed path, not configurable)                                                                                                                                                                                                                                  |
+| Transport     | MCP SDK `NodeStreamableHTTPServerTransport`, stateless (one server instance per request)                                                                                                                                                                                    |
+| Auth          | Admin API token (`Authorization: Bearer <token>`) — same store as Settings → API Tokens (admin). With `server.mcp.oauth.enabled`, additionally OAuth 2.1 access tokens issued by the built-in authorization server (see [OAuth 2.1 authorization](#oauth-21-authorization)) |
+| Authorization | Two layers: coarse session capability gate (CASL ability vs `auth.policies`) + fine-grained handler checks                                                                                                                                                                  |
+| Extensibility | Any plugin or app can register tools/prompts/resources via `strapi.ai.mcp.register*` during the register phase                                                                                                                                                              |
+| Built-in      | One dev-only `log` tool (core) + one CRUD tool set per displayed content type (content-manager)                                                                                                                                                                             |
+| SDK           | `@modelcontextprotocol/server@2.0.0` + `@modelcontextprotocol/node@2.0.0`                                                                                                                                                                                                   |
 
 ## Architecture
 
@@ -83,19 +83,79 @@ Each tool call permits at most `server.mcp.maxToolInputElements` (default 10,000
 
 Every tool is registered on each per-request server, but only some tools resolve their Zod schemas, because `resolveInputSchema`/`resolveOutputSchema` is the main per-request cost. `resolveToolSchemaScope` (`internal/resolveToolSchemaScope.ts`) reads the JSON-RPC body before the server is built: `tools/list` needs every tool, `tools/call` needs only the called tool, and other messages (`initialize`, notifications) need none. A tool resolves its schemas only when it is in that scope **and** the token may use it (`canUseMcpCapability`). The other tools are registered without schemas and with a handler that only returns an error, so a call to a tool the token cannot use still gets the SDK's `Tool <name> disabled` error.
 
-An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) intercepts `/.well-known/oauth-*` and `/register` with a plain JSON 404, since some MCP clients probe these paths and would otherwise hit Strapi's default HTML 404 page.
+An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) intercepts `/.well-known/oauth-*` and `/register` with a plain JSON 404, since some MCP clients probe these paths and would otherwise hit Strapi's default HTML 404 page. It only fires when downstream already answered 404/405, so when OAuth is enabled the real discovery routes shadow it.
 
 ## Authentication
 
-`packages/core/core/src/services/mcp/authentication.ts`:
+`packages/core/core/src/services/mcp/authentication.ts` is a dispatcher (`createMcpAuthenticationStrategy`):
 
 1. Extract `Authorization: Bearer <token>` — missing/malformed header → `missing_token`.
-2. Validate through `strapi.admin.services['api-token-admin'].authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
-3. On success, the handler receives the token's CASL `ability` and owning `user`.
+2. If the token is JWT-shaped (contains two `.`) **and** `server.mcp.oauth.enabled` is on, it is treated as an MCP OAuth access token (`oauth/accessTokenAuthenticator.ts`): validated against the `mcp` session-manager origin, requiring an active session row, an active non-blocked admin user, and a freshly computed `generateUserAbility`. Admin API tokens are long random hex strings that can never contain a dot, so the dispatch is unambiguous.
+3. Otherwise it validates through `strapi.admin.services['api-token-admin'].authenticateAdminToken(token)` — the **same admin API token store** used by Settings → API Tokens. Invalid/expired token → `invalid_token`.
+4. On success, the handler receives the caller's CASL `ability` and owning `user`.
 
-There is no separate "MCP token" type and no admin-panel screen dedicated to MCP — an admin creates a regular admin API token and uses it as the bearer credential for `/mcp`.
+There is no separate "MCP token" type — an admin creates a regular admin API token and uses it as the bearer credential for `/mcp`, or an MCP client obtains an OAuth token through the flow below.
 
-Both failure reasons are reported through telemetry (`didNotAuthenticateMcpRequest`) but returned to the client as a single generic JSON-RPC `AUTHENTICATION_REQUIRED` error — the distinction is for observability, not client-facing signaling.
+Both failure reasons are reported through telemetry (`didNotAuthenticateMcpRequest`) but returned to the client as a single generic JSON-RPC `AUTHENTICATION_REQUIRED` error — the distinction is for observability, not client-facing signaling. When OAuth is enabled, the 401 additionally carries `WWW-Authenticate: Bearer resource_metadata="<url>"` (RFC 9728) so OAuth-capable clients can discover the authorization server.
+
+## OAuth 2.1 authorization
+
+Opt-in OAuth 2.1 authorization server for MCP clients (Claude, Cursor, …), implemented in `packages/core/core/src/services/mcp/oauth/` and mounted from the MCP service's `start()` when `server.mcp.oauth.enabled` is `true`. It implements the MCP authorization spec: protected resource metadata (RFC 9728), authorization server metadata (RFC 8414), the authorization code grant with mandatory PKCE S256, refresh token rotation with reuse detection, dynamic client registration (RFC 7591), revocation (RFC 7009), and the `resource` parameter (RFC 8707).
+
+### Configuration
+
+| Key                                          | Default       | Notes                                                             |
+| -------------------------------------------- | ------------- | ----------------------------------------------------------------- |
+| `server.mcp.oauth.enabled`                   | `false`       | Must be `true` (with `server.mcp.enabled`) to mount the endpoints |
+| `server.mcp.oauth.dynamicClientRegistration` | `true`        | `false` removes `POST /mcp/oauth/register` and the metadata entry |
+| `server.mcp.oauth.accessTokenLifespan`       | `1800` (30 m) | Seconds                                                           |
+| `server.mcp.oauth.idleRefreshTokenLifespan`  | 14 days       | Seconds                                                           |
+| `server.mcp.oauth.maxRefreshTokenLifespan`   | 30 days       | Seconds                                                           |
+| `server.mcp.oauth.authorizationCodeLifespan` | `120`         | Seconds, single-use codes                                         |
+| `server.mcp.oauth.consentTicketLifespan`     | `300`         | Seconds, signed consent handoff ticket                            |
+
+### Endpoints
+
+Public endpoints (unprefixed, `auth: false`, OAuth semantics inside the handlers — `oauth/routes.ts`):
+
+| Method/Path                                         | Purpose                                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `GET /.well-known/oauth-protected-resource[/mcp]`   | RFC 9728 resource metadata                                                      |
+| `GET /.well-known/oauth-authorization-server[/mcp]` | RFC 8414 authorization server metadata                                          |
+| `GET /mcp/oauth/authorize`                          | Validates the request, redirects to the admin consent page with a signed ticket |
+| `POST /mcp/oauth/token`                             | `authorization_code` (PKCE required) + `refresh_token` grants                   |
+| `POST /mcp/oauth/register`                          | RFC 7591 dynamic client registration (rate limited)                             |
+| `POST /mcp/oauth/revoke`                            | RFC 7009 revocation                                                             |
+
+Consent endpoints, mounted on the **admin router** so the admin session strategy (including SSO) applies:
+
+| Method/Path                                  | Purpose                                                                |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `GET /admin/mcp/oauth/authorization-request` | Returns display data for a pending request (consent screen)            |
+| `POST /admin/mcp/oauth/consent`              | Records approve/deny; issues the code; returns the client redirect URL |
+
+The consent POST additionally requires `ctx.state.session` (set only by the human session strategy), so admin API tokens cannot approve grants.
+
+### Flow
+
+1. The MCP client gets a 401 from `/mcp` with `WWW-Authenticate: Bearer resource_metadata=...`, discovers the metadata, and (usually) self-registers.
+2. `GET /mcp/oauth/authorize` validates `client_id`, exact `redirect_uri` match, `response_type=code`, PKCE S256 and the optional `resource`, signs a short-lived **consent ticket** (JWT, derived secret, aud `strapi-mcp-oauth-consent`), and 302-redirects the browser to the admin panel page `/admin/mcp/oauth/consent?ticket=…` (`packages/core/admin/admin/src/pages/OAuthConsentPage.tsx`). Unauthenticated admins pass through the normal login (the `redirectTo` mechanism, persisted across the SSO round trip via `sessionStorage`).
+3. On approval, the server issues a single-use authorization code (stored hashed in `admin::mcp-oauth-authorization-code`) bound to the client, redirect URI, PKCE challenge, approving admin user, and a fresh `grantId`; the browser is sent back to the client's redirect URI with `code`, `state`, and `iss` (RFC 9207).
+4. `POST /mcp/oauth/token` authenticates the client (`none`, `client_secret_basic`, or `client_secret_post`), consumes the code atomically, verifies PKCE, and issues tokens through `strapi.sessionManager('mcp')`: the JWT access token and a rotating refresh token persisted in `strapi_sessions` with `deviceId = grantId` and `{clientId, scope, resource}` in the session `metadata`.
+
+### Grant model and revocation
+
+A grant acts **as the approving admin user**: every `/mcp` request recomputes `generateUserAbility(user)`, so RBAC changes apply immediately and deactivating/blocking the user cuts access on the next request. Revocation paths all delete the grant's session family (`invalidateRefreshToken(userId, grantId)`):
+
+- `POST /mcp/oauth/revoke` with either token of the grant.
+- Replay of a consumed authorization code (consumed rows are kept until expiry for detection).
+- Replay of a rotated-out refresh token, or presentation of a refresh token by the wrong client.
+
+Access tokens die with their session because the authenticator checks `isSessionActive` per request. Caveat (same as admin panel sessions): after a normal rotation, the _previous_ access token stays valid until its own `exp` (≤ `accessTokenLifespan`).
+
+### Storage
+
+Two hidden `admin::` content-types (`packages/core/admin/server/src/content-types/`): `mcp-oauth-client` (`strapi_mcp_oauth_clients`, secrets stored as HMAC-SHA512 hashes keyed with `admin.apiToken.salt`) and `mcp-oauth-authorization-code` (`strapi_mcp_oauth_codes`, hashed single-use codes). Tokens live in the existing session store under the `mcp` origin; the origin's JWT secret is derived from `admin.auth.secret` (HMAC-SHA256 with a fixed label) so MCP JWTs are not interchangeable with admin panel JWTs, on top of the session-origin check.
 
 ## Authorization
 
