@@ -10,7 +10,7 @@ import type {
   RepositoryCoords,
 } from './types.ts';
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 export const BLOCK_START = '<!-- STRAPI_RELEASE_CANDIDATE_START -->';
 export const BLOCK_END = '<!-- STRAPI_RELEASE_CANDIDATE_END -->';
 
@@ -84,25 +84,18 @@ export function renderMergeDate(mergedAt: string): string {
   return /^(\d{4}-\d{2}-\d{2})/u.exec(mergedAt)?.[1] ?? '—';
 }
 
-/**
- * The shipping table, one row per attributed pull request.
- *
- * The milestone column is the one the author picked, read when the range was attributed. The run
- * then corrects it to the shipping milestone, so a value that disagrees with the release is the
- * interesting case rather than a mistake in the report.
- */
+/** The shipping table, one row per attributed pull request. */
 export function renderPullRequestTable(pullRequests: readonly AttributedPull[]): string {
   if (pullRequests.length === 0) {
     return '_No pull request resolved in this range._';
   }
 
   return table(
-    ['PR', 'Title', 'Author', 'Merged', 'Milestone at merge', 'Basis'],
+    ['PR', 'Title', 'Author', 'Merged', 'Basis'],
     pullRequests.map(
       (pull) =>
         `| [#${pull.number}](${pull.url}) | ${cell(pull.title)} | ${renderAuthor(pull.author)} | ` +
-        `${renderMergeDate(pull.mergedAt)} | ${cell(pull.milestone ?? '—')} | ` +
-        `${cell(pull.basis)} |`
+        `${renderMergeDate(pull.mergedAt)} | ${cell(pull.basis)} |`
     )
   );
 }
@@ -152,7 +145,7 @@ export function renderJournalTable(entries: readonly JournalEntry[]): string {
  * Builds the machine-readable payload embedded in the pull request body.
  *
  * Everything the plan decided is read from the plan; the outcome only adds what the writes
- * produced. Deriving the milestone section here keeps the payload shape the concern of one module.
+ * produced.
  */
 export function buildPayload(input: {
   plan: ReleasePlan;
@@ -162,7 +155,6 @@ export function buildPayload(input: {
   dryRun: boolean;
 }): ReleasePayload {
   const { plan, outcome } = input;
-  const { shipping, next } = plan.milestones;
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -193,20 +185,6 @@ export function buildPayload(input: {
     },
     pullRequests: plan.pullRequests,
     attention: plan.attention,
-    milestones: {
-      shipping: {
-        number: outcome.shippingNumber,
-        title: shipping.title,
-        renamedFrom: shipping.action === 'rename' ? shipping.currentTitle : null,
-        state: 'closed',
-      },
-      next: {
-        number: outcome.nextNumber,
-        title: next.title,
-        created: next.action === 'create',
-      },
-    },
-    reconciliation: outcome.reconciliation,
   };
 }
 
@@ -270,10 +248,6 @@ const MODE_LINES: Record<ReleaseMode, string> = {
     'one drafted before it.',
 };
 
-function formatNumbers(numbers: readonly number[]): string {
-  return numbers.length === 0 ? '_none_' : numbers.map((number) => `#${number}`).join(', ');
-}
-
 export type BodyInput = {
   payload: ReleasePayload;
   pullRequests: readonly AttributedPull[];
@@ -315,8 +289,6 @@ export function renderBody(input: BodyInput): string {
         `| **Pull requests** | ${pullRequests.length} |`,
         `| **Branch** | \`${payload.candidate.branch}\`, ` +
           `${payload.candidate.branchAdvanced === true ? 'advanced to the pinned head' : 'already at the pinned head'} |`,
-        `| **Milestone** | ${payload.milestones.shipping.title} (closed) → ` +
-          `${payload.milestones.next.title} |`,
       ]
     ),
     '',
@@ -339,71 +311,41 @@ export function renderBody(input: BodyInput): string {
           ),
         ];
 
-  const { inHistoryNotInMilestone, inMilestoneNotInHistory } = payload.reconciliation;
-  const drift =
-    inHistoryNotInMilestone.length === 0 && inMilestoneNotInHistory.length === 0
-      ? []
-      : [
-          '',
-          '## Milestone reconciliation',
-          '',
-          `- In history, not in the milestone: ${formatNumbers(inHistoryNotInMilestone)}`,
-          `- Merged in the milestone, not in this range: ${formatNumbers(inMilestoneNotInHistory)}`,
-        ];
-
   const needsHuman = attention.length === 0 ? [] : ['', renderAttentionTable(attention)];
   const warned =
     warnings.length === 0
       ? []
       : ['', '### Warnings', '', ...warnings.map((warning) => `- ${warning}`)];
 
-  return [
-    ...summary,
-    ...evidence,
-    ...drift,
-    ...needsHuman,
-    ...warned,
-    '',
-    renderJsonBlock(payload),
-    '',
-  ].join('\n');
+  return [...summary, ...evidence, ...needsHuman, ...warned, '', renderJsonBlock(payload), ''].join(
+    '\n'
+  );
 }
 
 /**
- * The comment posted on the release pull request after the milestone work.
+ * The comment posted on the release pull request at the end of every run.
  *
  * One comment per run, never rewritten. The body of the pull request is the current truth and gets
  * replaced wholesale; these comments are the only record of which run pulled which work in.
  */
-export function renderMilestoneComment(input: {
-  version: string;
-  nextTitle: string;
-  mode: ReleaseMode;
+export function renderRunComment(input: {
+  payload: ReleasePayload;
   entries: readonly JournalEntry[];
-  dryRun: boolean;
 }): string {
-  const milestoneEntries = input.entries.filter(
-    (entry) => entry.op.startsWith('milestone.') === true || entry.op.startsWith('issue.') === true
-  );
-
-  const applied = {
-    draft: `\`${input.version}\` is closed. Work now collects in \`${input.nextTitle}\`.`,
-    refresh:
-      `\`${input.version}\` stays closed and now carries everything that landed since the last ` +
-      `run. Work continues to collect in \`${input.nextTitle}\`.`,
-    redraft:
-      `The candidate is now \`${input.version}\`, and its milestone is closed. Work collects in ` +
-      `\`${input.nextTitle}\`.`,
-  }[input.mode];
+  const { payload } = input;
+  const writes = input.entries.filter((entry) => entry.op !== 'pr.comment');
 
   return [
-    `## Milestone reconciliation for ${input.version}`,
+    `## ${payload.dryRun === true ? 'Dry run' : 'Run'} for ${payload.release.version}`,
     '',
-    input.dryRun === true
-      ? `Dry run. Nothing below was applied. Work now collects in \`${input.nextTitle}\`.`
-      : applied,
+    payload.dryRun === true
+      ? 'Dry run. Nothing below was applied.'
+      : MODE_LINES[payload.release.mode],
     '',
-    renderJournalTable(milestoneEntries),
+    `Range \`${payload.range.fromRef}\` → \`${short(payload.range.toSha)}\`, ` +
+      `${payload.range.integrationCount} integrations, ${payload.pullRequests.length} pull requests.`,
+    '',
+    renderJournalTable(writes),
   ].join('\n');
 }
 

@@ -1,11 +1,4 @@
-import type {
-  Integration,
-  MergedPull,
-  MilestoneItem,
-  PullCommit,
-  PullPayload,
-  ReleasePlan,
-} from '../types.ts';
+import type { Integration, MergedPull, PullCommit, PullPayload, ReleasePlan } from '../types.ts';
 
 /**
  * Fixtures modelled on the real `v5.52.3..develop` range, including the cases that proved the
@@ -49,7 +42,6 @@ export function pull(overrides: Partial<MergedPull> = {}): MergedPull {
     base: { ref: 'develop' },
     head: { ref: 'fix/ctb-private-searchable', sha: '2222222222222222222222222222222222222222' },
     user: { login: 'someone' },
-    milestone: { number: 430, title: '5.52.4' },
     ...overrides,
   };
 }
@@ -80,18 +72,6 @@ export function pullCommits(messages: readonly string[]): PullCommit[] {
   return messages.map((message) => ({ commit: { message } }));
 }
 
-export function milestoneItem(overrides: Partial<MilestoneItem> = {}): MilestoneItem {
-  return { number: 100, title: 'Some work', state: 'open', ...overrides };
-}
-
-export function pullRequestItem(
-  number: number,
-  state: string,
-  mergedAt: string | null
-): MilestoneItem {
-  return milestoneItem({ number, state, pull_request: { merged_at: mergedAt } });
-}
-
 /** The repository the pipeline fixtures run against, as `head.repo.full_name` spells it. */
 export const OWN_REPOSITORY = 'strapi/strapi';
 
@@ -116,12 +96,11 @@ export function candidatePull(overrides: Partial<PullPayload> = {}): PullPayload
     base: { ref: 'main' },
     head: candidateHead(version),
     user: { login: 'strapi-release-bot' },
-    milestone: null,
     ...overrides,
   };
 }
 
-/** A fresh draft, decided: `5.52.3` → `5.53.0` off one `feat`, the open `5.52.4` milestone renamed. */
+/** A fresh draft, decided: `5.52.3` → `5.53.0` off one `feat`. */
 export function releasePlan(overrides: Partial<ReleasePlan> = {}): ReleasePlan {
   return {
     mode: 'draft',
@@ -158,8 +137,6 @@ export function releasePlan(overrides: Partial<ReleasePlan> = {}): ReleasePlan {
         url: 'https://github.com/strapi/strapi/pull/27436',
         baseRef: 'develop',
         headRef: 'feat/audit-logs',
-        milestone: '5.52.4',
-        milestoneNumber: 430,
         mergedAt: '2026-09-05T09:59:00Z',
         status: 'resolved',
         basis: 'exact-merge-sha',
@@ -168,20 +145,9 @@ export function releasePlan(overrides: Partial<ReleasePlan> = {}): ReleasePlan {
     ],
     attention: [],
     warnings: [],
-    milestones: {
-      shipping: {
-        action: 'rename',
-        number: 430,
-        currentTitle: '5.52.4',
-        title: '5.53.0',
-        close: true,
-      },
-      next: { action: 'create', number: null, currentTitle: null, title: '5.53.1' },
-    },
     branch: 'releases/5.53.0',
     branchAdvances: true,
     candidateHeadSha: null,
-    realignment: [],
     ...overrides,
   };
 }

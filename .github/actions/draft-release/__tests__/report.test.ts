@@ -11,8 +11,8 @@ import {
   renderAuthor,
   renderBody,
   renderJournalTable,
-  renderMilestoneComment,
   renderPullRequestTable,
+  renderRunComment,
   renderStepSummary,
   withoutTrailingReference,
 } from '../lib/report.ts';
@@ -29,11 +29,8 @@ import type {
 
 function releaseOutcome(overrides: Partial<ReleaseOutcome> = {}): ReleaseOutcome {
   return {
-    shippingNumber: 430,
-    nextNumber: 431,
     pullNumber: 27700,
     pullUrl: 'https://github.com/strapi/strapi/pull/27700',
-    reconciliation: { inHistoryNotInMilestone: [], inMilestoneNotInHistory: [] },
     ...overrides,
   };
 }
@@ -57,10 +54,10 @@ function payload(
 
 function journalEntry(overrides: Partial<JournalEntry> = {}): JournalEntry {
   return {
-    op: 'milestone.rename',
-    target: 'milestone/430',
-    before: '5.52.4',
-    after: '5.53.0',
+    op: 'branch.push',
+    target: 'refs/heads/releases/5.53.0',
+    before: null,
+    after: 'b'.repeat(40),
     detail: null,
     at: '2026-09-06T17:57:00Z',
     state: 'applied',
@@ -127,8 +124,6 @@ describe('renderPullRequestTable', () => {
       url: 'u',
       baseRef: 'develop',
       headRef: 'fix/x',
-      milestone: null,
-      milestoneNumber: null,
       mergedAt: '2026-09-05T09:59:00Z',
       status: 'resolved',
       basis: 'none',
@@ -139,7 +134,7 @@ describe('renderPullRequestTable', () => {
 
     assert.match(table, /handle a \\\\\\\| b/u);
     assert.equal(table.split('\n').length, 3);
-    assert.equal(table.split('\n')[2]?.split(/(?<!\\)\|/u).length, 8);
+    assert.equal(table.split('\n')[2]?.split(/(?<!\\)\|/u).length, 7);
   });
 
   it('escapes a pipe so a title cannot break the table', () => {
@@ -150,8 +145,6 @@ describe('renderPullRequestTable', () => {
       url: 'u',
       baseRef: 'develop',
       headRef: 'fix/x',
-      milestone: null,
-      milestoneNumber: null,
       mergedAt: '2026-09-05T09:59:00Z',
       status: 'resolved',
       basis: 'none',
@@ -187,7 +180,7 @@ describe('renderJournalTable', () => {
 
 describe('buildPayload', () => {
   it('carries the schema version later automation reads', () => {
-    assert.equal(payload().schemaVersion, 5);
+    assert.equal(payload().schemaVersion, 6);
   });
 
   it('identifies the candidate by its branch, its pinned head and its pull request', () => {
@@ -220,31 +213,12 @@ describe('buildPayload', () => {
     );
   });
 
-  it('derives the milestone section from the plan and the numbers the writes produced', () => {
-    assert.deepEqual(payload().milestones, {
-      shipping: { number: 430, title: '5.53.0', renamedFrom: '5.52.4', state: 'closed' },
-      next: { number: 431, title: '5.53.1', created: true },
-    });
-  });
+  it('carries no milestone data, because commits alone decide a release', () => {
+    const built = payload();
 
-  it('reports no rename when both milestones were kept', () => {
-    const built = payload({
-      plan: {
-        milestones: {
-          shipping: {
-            action: 'keep',
-            number: 430,
-            currentTitle: '5.53.0',
-            title: '5.53.0',
-            close: false,
-          },
-          next: { action: 'keep', number: 431, currentTitle: '5.53.1', title: '5.53.1' },
-        },
-      },
-    });
-
-    assert.equal(built.milestones.shipping.renamedFrom, null);
-    assert.equal(built.milestones.next.created, false);
+    assert.equal('milestones' in built, false);
+    assert.equal('reconciliation' in built, false);
+    assert.equal('milestone' in (built.pullRequests[0] ?? {}), false);
   });
 });
 
@@ -281,25 +255,10 @@ describe('renderBody', () => {
     assert.match(body, /decided from the `version` input/u);
   });
 
-  it('surfaces reconciliation differences only when there are any', () => {
-    const clean = renderBody({ payload: built, pullRequests: built.pullRequests, attention: [] });
+  it('says nothing about milestones', () => {
+    const body = renderBody({ payload: built, pullRequests: built.pullRequests, attention: [] });
 
-    assert.equal(clean.includes('## Milestone reconciliation'), false);
-
-    const drifted = payload({
-      outcome: {
-        reconciliation: { inHistoryNotInMilestone: [27509], inMilestoneNotInHistory: [27123] },
-      },
-    });
-
-    const body = renderBody({
-      payload: drifted,
-      pullRequests: drifted.pullRequests,
-      attention: [],
-    });
-
-    assert.match(body, /In history, not in the milestone: #27509/u);
-    assert.match(body, /not in this range: #27123/u);
+    assert.equal(/milestone/iu.test(body), false);
   });
 
   it('lists the records a human still has to settle', () => {
@@ -351,36 +310,30 @@ describe('extractJsonBlock', () => {
   });
 });
 
-describe('renderMilestoneComment', () => {
-  it('reports only the milestone writes, and says when nothing was applied', () => {
-    const comment = renderMilestoneComment({
-      version: '5.53.0',
-      nextTitle: '5.53.1',
-      mode: 'draft',
-      dryRun: true,
+describe('renderRunComment', () => {
+  it('lists the writes of the run, and says when nothing was applied', () => {
+    const comment = renderRunComment({
+      payload: payload({ dryRun: true }),
       entries: [
-        journalEntry(),
-        journalEntry({ op: 'branch.push', target: 'refs/heads/releases/5.53.0' }),
-        journalEntry({ op: 'issue.milestone.set', target: 'issues/27600' }),
+        journalEntry({ state: 'planned' }),
+        journalEntry({ op: 'pr.label', target: 'pulls/<new>', state: 'planned' }),
+        journalEntry({ op: 'pr.comment', target: 'pulls/<new>', state: 'planned' }),
       ],
     });
 
+    assert.match(comment, /^## Dry run for 5\.53\.0/u);
     assert.match(comment, /Dry run\. Nothing below was applied\./u);
-    assert.match(comment, /milestone\.rename/u);
-    assert.match(comment, /issue\.milestone\.set/u);
-    assert.equal(comment.includes('branch.push'), false);
+    assert.match(comment, /branch\.push/u);
+    assert.match(comment, /pr\.label/u);
+    assert.equal(comment.includes('pr.comment'), false);
   });
 
-  it('states the closed milestone when the run applied', () => {
-    const comment = renderMilestoneComment({
-      version: '5.53.0',
-      nextTitle: '5.53.1',
-      mode: 'draft',
-      dryRun: false,
-      entries: [],
-    });
+  it('states what the run did to the candidate when it applied', () => {
+    const comment = renderRunComment({ payload: payload(), entries: [] });
 
-    assert.match(comment, /`5\.53\.0` is closed/u);
+    assert.match(comment, /^## Run for 5\.53\.0/u);
+    assert.match(comment, /Drafted from `develop`\./u);
+    assert.match(comment, /12 integrations, 1 pull requests\./u);
   });
 });
 

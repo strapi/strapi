@@ -21,8 +21,7 @@ import type {
  *
  * Nothing else is a usable key. A release branch outlives its candidate, because the ruleset over
  * `releases/*` forbids deletion without a bypass, so a leftover branch says nothing about what is
- * in flight. A milestone is renamed by this very action. The pull request is the one artifact whose
- * lifecycle is the candidate's own.
+ * in flight. The pull request is the one artifact whose lifecycle is the candidate's own.
  */
 
 const RELEASE_BRANCH_PATTERN = /^releases\/(\d+\.\d+\.\d+)$/u;
@@ -117,8 +116,8 @@ export function assertCandidateUnpublished(candidate: Candidate, baselineVersion
  *
  * @throws When the recomputed version is below the candidate's. The range only ever grows between
  * runs, and a revert lands as a `revert` commit rather than removing the `feat` it undoes, so a
- * lower version means an assumption this action rests on is broken. Renaming a milestone backwards
- * is not a guess worth making.
+ * lower version means an assumption this action rests on is broken. Re-keying the candidate
+ * backwards is not a guess worth making.
  */
 export function decideMode(candidate: Candidate | null, version: string): ReleaseMode {
   if (candidate === null) {
