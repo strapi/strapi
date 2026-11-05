@@ -44,10 +44,10 @@ The file read for a source (`typesFileOf`):
 
 - a `.ts` source: the source itself;
 - a `.js` source: a sibling `<name>.d.ts`, which the import resolves to first, with or without `allowJs`;
-- else the `.js` source itself, parsed as JavaScript, when the application's tsconfig enables `allowJs`: TypeScript infers the type of its module, JSDoc included;
+- else the `.js` source itself, parsed as JavaScript, when the application's tsconfig, else its jsconfig, enables `allowJs`: TypeScript infers the type of its module, JSDoc included;
 - else none: the import does not resolve (an error type, which no conditional type maps to `unknown`), and the source registers `unknown` without an import.
 
-`generate()` reads `allowJs` once, with `ts.getParsedCommandLineOfConfigFile` on `getConfigPath(appDir)`, and only when one of the four application module artifacts is enabled. It is `false` without a tsconfig (a JavaScript application) and when the tsconfig has errors. It does not use `resolveConfigOptions`, which exits the process on tsconfig errors. In a TypeScript application, a JS source only reaches `dist`, and so the registries the generators filter on, with `allowJs`.
+`generate()` reads `allowJs` once, with `ts.getParsedCommandLineOfConfigFile` on the application's `tsconfig.json`, else its `jsconfig.json` (`getConfigPath(appDir)`, then with `filename: 'jsconfig.json'`), the order of the TypeScript language service, and only when one of the four application module artifacts is enabled. A JavaScript application has a jsconfig and no tsconfig: the `create-strapi-app` JavaScript templates ship one with `allowJs` and `checkJs`, and TypeScript enables `allowJs` by default in a jsconfig. It is `false` without either file and when the file has errors. Only this lookup reads the jsconfig: `isUsingTypeScript` and the compilation still look for a tsconfig alone, so a JavaScript application is not compiled. It does not use `resolveConfigOptions`, which exits the process on tsconfig errors. In a TypeScript application, a JS source only reaches `dist`, and so the registries the generators filter on, with `allowJs`.
 
 The scan gives each source a module shape (`ModuleShape`), which decides how the services, controllers, policies and middlewares generators import it (`moduleTypeOf`):
 

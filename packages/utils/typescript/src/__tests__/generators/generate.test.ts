@@ -267,16 +267,16 @@ describe('generate', () => {
     expect(await pathExists(path.join(root, 'types', 'generated'))).toBe(false);
   });
 
-  describe('reads `allowJs` from the application tsconfig', () => {
+  describe('reads `allowJs` from the application tsconfig, else its jsconfig', () => {
     // A JS service is typed from the JS file itself only with `allowJs`
-    const generateWithTsconfig = async (tsconfig: string | undefined) => {
+    const generateWithConfigs = async (configs: Record<string, string>) => {
       const { root, strapi, generated } = await createApp();
       await outputFile(
         path.join(root, 'src', 'api', 'legacy', 'services', 'legacy.js'),
         'module.exports = () => ({ ping: () => "pong" });'
       );
-      if (tsconfig !== undefined) {
-        await outputFile(path.join(root, 'tsconfig.json'), tsconfig);
+      for (const [file, content] of Object.entries(configs)) {
+        await outputFile(path.join(root, file), content);
       }
       strapi.services = { 'api::legacy.legacy': {} };
 
@@ -290,14 +290,40 @@ describe('generate', () => {
       return fs.readFile(generated('services.ts'), 'utf8');
     };
 
-    test('types a JS source from the JS file when the tsconfig enables it', async () => {
-      const output = await generateWithTsconfig(
-        JSON.stringify({ compilerOptions: { allowJs: true }, include: ['src'] })
-      );
+    const typedFromJs =
+      "'api::legacy.legacy': ServiceInstance<{ default: typeof import('../../src/api/legacy/services/legacy.js') }>";
+    const normalize = (output: string) => output.replace(/\s+/g, ' ').replace(/;/g, '');
 
-      expect(output.replace(/\s+/g, ' ').replace(/;/g, '')).toContain(
-        "'api::legacy.legacy': ServiceInstance<{ default: typeof import('../../src/api/legacy/services/legacy.js') }>"
-      );
+    test('types a JS source from the JS file when the tsconfig enables it', async () => {
+      const output = await generateWithConfigs({
+        'tsconfig.json': JSON.stringify({ compilerOptions: { allowJs: true }, include: ['src'] }),
+      });
+
+      expect(normalize(output)).toContain(typedFromJs);
+    });
+
+    // A JavaScript application has a jsconfig and no tsconfig (create-strapi-app JS templates)
+    test.each([
+      ['enables it', JSON.stringify({ compilerOptions: { allowJs: true, checkJs: true } })],
+      // TypeScript enables `allowJs` by default in a jsconfig
+      ['does not set it', JSON.stringify({ compilerOptions: { checkJs: true } })],
+    ])(
+      'types a JS source from the JS file when there is no tsconfig and the jsconfig %s',
+      async (_, jsconfig) => {
+        const output = await generateWithConfigs({ 'jsconfig.json': jsconfig });
+
+        expect(normalize(output)).toContain(typedFromJs);
+      }
+    );
+
+    test('reads the tsconfig rather than the jsconfig when the application has both', async () => {
+      const output = await generateWithConfigs({
+        'tsconfig.json': JSON.stringify({ include: ['src'] }),
+        'jsconfig.json': JSON.stringify({ compilerOptions: { allowJs: true } }),
+      });
+
+      expect(output).toContain("'api::legacy.legacy': unknown");
+      expect(output).not.toContain('legacy.js');
     });
 
     test('also reads it from an extended tsconfig', async () => {
@@ -329,15 +355,28 @@ describe('generate', () => {
     });
 
     test.each([
-      ['the tsconfig does not enable it', JSON.stringify({ include: ['src'] })],
-      ['there is no tsconfig', undefined],
-      ['the tsconfig cannot be parsed', '{ "compilerOptions": '],
+      [
+        'the tsconfig does not enable it',
+        { 'tsconfig.json': JSON.stringify({ include: ['src'] }) },
+      ],
+      ['there is no tsconfig nor jsconfig', {}],
+      ['the tsconfig cannot be parsed', { 'tsconfig.json': '{ "compilerOptions": ' }],
       [
         'the tsconfig has errors',
-        JSON.stringify({ compilerOptions: { allowJs: true, module: 'unknown' }, include: ['src'] }),
+        {
+          'tsconfig.json': JSON.stringify({
+            compilerOptions: { allowJs: true, module: 'unknown' },
+            include: ['src'],
+          }),
+        },
       ],
-    ])('registers a JS source as unknown when %s', async (_, tsconfig) => {
-      const output = await generateWithTsconfig(tsconfig);
+      [
+        'the jsconfig disables it',
+        { 'jsconfig.json': JSON.stringify({ compilerOptions: { allowJs: false } }) },
+      ],
+      ['the jsconfig cannot be parsed', { 'jsconfig.json': '{ "compilerOptions": ' }],
+    ])('registers a JS source as unknown when %s', async (_, configs) => {
+      const output = await generateWithConfigs(configs);
 
       expect(output).toContain("'api::legacy.legacy': unknown");
       expect(output).not.toContain('legacy.js');

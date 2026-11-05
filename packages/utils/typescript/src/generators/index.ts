@@ -43,14 +43,22 @@ const LINT_DISABLE_HEADER = '/* eslint-disable */\n/* oxlint-disable */\n';
 const isSourceArtifact = (artifact: string) => SOURCE_ARTIFACTS.has(artifact);
 
 /**
- * Whether the application's tsconfig enables `allowJs`, which lets the generators of application
- * modules type a JS source from the JS file itself. `false` without a tsconfig (a JavaScript
- * application) and when the tsconfig has errors, which the compilation reports.
+ * The config TypeScript reads for the application directory: its tsconfig, else its jsconfig (a
+ * JavaScript application), the order of the TypeScript language service.
+ */
+const getAppConfigPath = (appDir: string) =>
+  getConfigPath(appDir) ?? getConfigPath(appDir, { filename: 'jsconfig.json' });
+
+/**
+ * Whether the application's tsconfig, else its jsconfig, enables `allowJs`, which lets the
+ * generators of application modules type a JS source from the JS file itself. TypeScript enables it
+ * by default in a jsconfig. `false` without either file and when the file has errors, which the
+ * compilation or the editor reports.
  *
  * Not `resolveConfigOptions`, which exits the process on tsconfig errors.
  */
 const readAllowJs = (appDir: string, logger: Logger) => {
-  const configPath = getConfigPath(appDir);
+  const configPath = getAppConfigPath(appDir);
 
   if (configPath === undefined) {
     return false;
