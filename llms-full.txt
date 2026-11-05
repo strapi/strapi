@@ -13242,7 +13242,7 @@ by the super-admin unless the roles are set.
 
 #### Edit view
 
-Displays a license-limits modal in case the user is above the license limit on page load. Upon form submission, the modal is shown only when the stages exceed the stage limit: the workflow limit does not block saving an existing workflow.
+Displays the stage-limit modal on page load in case the workflow has more stages than the license limit. The workflow-limit modal is not shown on the edit view: the workflow limit does not block saving an existing workflow, so the workflows refetched after a save do not reopen it. Upon form submission, the modal is shown only when the stages exceed the stage limit.
 
 ##### Deletion of a stage
 
