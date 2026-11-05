@@ -24,7 +24,7 @@ import {
   isContentTypeVisible,
 } from './content-types';
 import type { CoreContentStructureService } from './content-structure';
-import type { SchemaService } from '../types/services';
+import type { FormattedAttribute, SchemaService } from '../types/services';
 
 type ContentTypeKind = 'collectionType' | 'singleType';
 
@@ -514,7 +514,25 @@ export const renameAttribute = (async (
   await updateSchema(data as CTBSchema);
 }) satisfies Core.Implements<SchemaService['renameAttribute']>;
 
-const formatAttributes = (model: any) => {
+// Develop's inferred results of `formatAttribute` and `formatAttributes`, written as named types so
+// the published declarations reference them instead of inlining every attribute shape (and the
+// `json-logic-js` types of `conditions`). Spreading drops the index signature of the attribute.
+type LegacyAttribute = Schema.Attribute.AnyAttribute & Record<string, any>;
+type WithoutIndexSignature<T> = { [K in keyof T as string extends K ? never : K]: T[K] };
+type LegacyFormattedRelation<T> = T extends unknown
+  ? WithoutIndexSignature<T & { targetAttribute: any }>
+  : never;
+type LegacyFormattedAttribute =
+  | Exclude<LegacyAttribute, { type: 'relation' }>
+  | LegacyFormattedRelation<Extract<LegacyAttribute, { type: 'relation' }>>;
+type LegacyNamed<T> = T extends unknown ? WithoutIndexSignature<T & { name: string }> : never;
+type LegacyNamedAttribute = LegacyNamed<LegacyFormattedAttribute>;
+
+const formatAttributes = (
+  model: any
+): Core.IsStrict extends true
+  ? Array<FormattedAttribute & { name: string }>
+  : LegacyNamedAttribute[] => {
   const { getVisibleAttributes } = contentTypesUtils;
 
   // only get attributes that can be seen in the CTB
@@ -529,7 +547,7 @@ export const formatAttribute = ((
   attribute: Core.IsStrict extends true
     ? Parameters<SchemaService['formatAttribute']>[0] & { inversedBy?: string; mappedBy?: string }
     : Schema.Attribute.AnyAttribute & Record<string, any>
-) => {
+): Core.IsStrict extends true ? FormattedAttribute : LegacyFormattedAttribute => {
   if (attribute.type === 'relation') {
     return {
       ...attribute,
