@@ -17,9 +17,7 @@ type RegisteredNames = keyof Core.RegisteredFor<
 
 export default {
   'content-types': contentTypes satisfies Services['content-types'],
-  // `editComponent` keeps its published develop types (see `./components`), so the check leaves it
-  // out.
-  components: components satisfies Omit<Services['components'], 'editComponent'>,
+  components: components satisfies Core.Implements<Services['components']>,
   'component-categories': componentCategories satisfies Services['component-categories'],
   builder: builder satisfies Services['builder'],
   'api-handler': apiHandler satisfies Services['api-handler'],

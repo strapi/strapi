@@ -18,6 +18,12 @@ export type Assertions = [
   >,
   Expect<
     Equal<
+      Parameters<typeof components.editComponent>,
+      Parameters<ComponentsService['editComponent']>
+    >
+  >,
+  Expect<
+    Equal<
       Parameters<typeof components.deleteComponent>,
       Parameters<ComponentsService['deleteComponent']>
     >

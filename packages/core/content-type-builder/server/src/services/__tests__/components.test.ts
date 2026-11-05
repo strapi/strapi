@@ -53,6 +53,28 @@ describe('Content Type Builder - Components service', () => {
       'A component.delete listener failed: listener failed'
     );
   });
+
+  it('edits a component from the admin payload', async () => {
+    // The body of `PUT /content-type-builder/components/:uid` in
+    // tests/api/core/content-type-builder/components.test.api.js
+    const payload = {
+      component: {
+        category: 'default',
+        icon: 'calendar',
+        displayName: 'New Component',
+        attributes: { name: { type: 'string' as const } },
+        pluginOptions: { pluginName: { option: false } },
+      },
+    };
+
+    await editComponent('default.some-component', payload);
+
+    expect(builder.editComponent).toHaveBeenCalledTimes(1);
+    expect(builder.editComponent).toHaveBeenCalledWith({
+      uid: 'default.some-component',
+      ...payload.component,
+    });
+  });
 });
 
 // The component schema files of the getstarted example app, the way `strapi.components` holds them.
