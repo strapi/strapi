@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fse from 'fs-extra';
+import type { Internal } from '@strapi/types';
 
 import createSchemaHandler from '../schema-handler';
 import createComponentBuilder from '../component-builder';
@@ -15,11 +16,10 @@ vi.mock('fs-extra', () => ({
 }));
 
 const COMPONENTS_DIR = '/app/src/components';
-// The schema handler is typed for content types; components share it.
-const HERO_UID = 'default.hero' as Parameters<typeof createSchemaHandler>[0]['uid'];
+const HERO_UID: Internal.UID.Component = 'default.hero';
 
 const createBuilder = () => {
-  const hero = createSchemaHandler({
+  const hero = createSchemaHandler<Internal.UID.Component>({
     uid: HERO_UID,
     category: 'default',
     dir: path.join(COMPONENTS_DIR, 'default'),
