@@ -74,4 +74,27 @@ describe('field sizes service', () => {
     expect(fieldSizes['plugin::mycustomfields.smallColor']?.default).toBe(4);
     expect(fieldSizes['plugin::mycustomfields.smallColor']?.isResizable).toBe(false);
   });
+
+  it('should only hold defined sizes after registering custom fields with and without a size', () => {
+    const { setCustomFieldInputSizes, getAllFieldSizes } = createFieldSizesService({ strapi });
+    setCustomFieldInputSizes();
+    const fieldSizes = getAllFieldSizes();
+
+    expect(Object.keys(fieldSizes).length).toBeGreaterThan(0);
+    Object.values(fieldSizes).forEach((fieldSize) => {
+      expect(fieldSize).toEqual({
+        default: expect.any(Number),
+        isResizable: expect.any(Boolean),
+      });
+    });
+  });
+
+  it('should refuse to store a missing size', () => {
+    const { setFieldSize, getAllFieldSizes } = createFieldSizesService({ strapi });
+
+    expect(() => setFieldSize('plugin::mycustomfields.noSize', undefined)).toThrow(
+      new ApplicationError('The size is required')
+    );
+    expect(getAllFieldSizes()).not.toHaveProperty('plugin::mycustomfields.noSize');
+  });
 });

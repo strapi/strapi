@@ -1,5 +1,6 @@
 import { errors } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
+import type { FieldSizesService } from '../types/services';
 
 const { ApplicationError } = errors;
 
@@ -20,7 +21,9 @@ const defaultSize: FieldSize = {
   isResizable: true,
 };
 
-const fieldSizes: Record<string, FieldSize> = {
+const fieldSizes: Core.IsStrict extends true
+  ? ReturnType<FieldSizesService['getAllFieldSizes']>
+  : Record<string, FieldSize> = {
   // Full row and not resizable
   dynamiczone: needsFullSize,
   component: needsFullSize,
@@ -50,7 +53,7 @@ const fieldSizes: Record<string, FieldSize> = {
   uid: defaultSize,
 };
 
-const createFieldSizesService = ({ strapi }: { strapi: Core.Strapi }) => {
+const createFieldSizesService = (({ strapi }: { strapi: Core.Strapi }) => {
   const fieldSizesService = {
     getAllFieldSizes() {
       return fieldSizes;
@@ -100,6 +103,6 @@ const createFieldSizesService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   return fieldSizesService;
-};
+}) satisfies Core.ServiceImplementation<'plugin::content-manager.field-sizes'>;
 
 export default createFieldSizesService;
