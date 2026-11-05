@@ -2,6 +2,7 @@ import { map, sortBy } from 'lodash';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
+import { isIntegerId } from '../utils/integer-id';
 import { AUDITED_EVENTS } from '../audit-logs';
 
 import type { File, Folder } from '../types';
@@ -293,7 +294,7 @@ const exists = async (params = {}) => {
  */
 const getNamePaths = async (paths: string[]): Promise<Record<string, string>> => {
   const segmentsByPath = paths.map((path) => path.split('/').filter(Boolean));
-  const pathIds = [...new Set(segmentsByPath.flat())].map(Number).filter(Number.isInteger);
+  const pathIds = [...new Set(segmentsByPath.flat())].filter(isIntegerId).map(Number);
 
   const ancestors: Pick<Folder, 'pathId' | 'name'>[] = pathIds.length
     ? await strapi.db
