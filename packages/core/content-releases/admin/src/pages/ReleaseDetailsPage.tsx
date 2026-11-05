@@ -539,21 +539,7 @@ const ReleaseDetailsLayout = ({
           primaryAction={
             release.releasedAt ? (
               <Flex gap={2}>
-                {/* A failed run released nothing, so its release can go. One that ran stays */}
-                {release.status === 'failed' && (
-                  <Button
-                    size="S"
-                    variant="danger-light"
-                    startIcon={<Trash />}
-                    disabled={!canDelete}
-                    onClick={toggleWarningSubmit}
-                  >
-                    {formatMessage({
-                      id: 'content-releases.header.actions.delete',
-                      defaultMessage: 'Delete',
-                    })}
-                  </Button>
-                )}
+                {/* A release that ran, failed included, can't be deleted: only a planned one can */}
                 {showCreateFromSkipped && (
                   <Button
                     size="S"

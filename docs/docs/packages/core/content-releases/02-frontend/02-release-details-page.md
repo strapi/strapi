@@ -28,7 +28,7 @@ The Edit option opens a side panel, enabling users to modify the release name, s
 
 #### Delete a release:
 
-The same menu has a "Delete" option, enabled if the user has the `plugin::content-releases.delete` permissions. Selecting it opens a confirmation modal. A release whose run failed (status `failed`) released nothing, so the header shows a "Delete" button for it instead, with the same permission and modal. A release that ran (`done`, `partial`) can't be deleted.
+The same menu has a "Delete" option, enabled if the user has the `plugin::content-releases.delete` permissions. Selecting it opens a confirmation modal. The menu only shows until the release runs: a release that ran, "Failed" included, can't be deleted.
 
 #### Create a release from skipped entries:
 
