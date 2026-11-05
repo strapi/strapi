@@ -3,6 +3,7 @@ import * as React from 'react';
 import sortBy from 'lodash/sortBy';
 import { useSelector } from 'react-redux';
 
+import { useIsAuditLogsDisabledByConfig } from '../../../ee/admin/src/hooks/useIsAuditLogsDisabledByConfig';
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { useAppInfo } from '../features/AppInfo';
 import { getAdminUserId, useAuth } from '../features/Auth';
@@ -102,6 +103,8 @@ const useSettingsMenu = (): {
     }
   );
 
+  const { isDisabledByConfig: isAuditLogsDisabledByConfig } = useIsAuditLogsDisabledByConfig();
+
   const addPermissions = React.useCallback(
     (link: SettingsMenuLink) => {
       if (!link.id) {
@@ -185,7 +188,9 @@ const useSettingsMenu = (): {
       {
         id: 'permissions',
         intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
-        links: adminLinks.map(addPermissions),
+        links: adminLinks
+          .filter((link) => isAuditLogsDisabledByConfig === false || link.id !== 'auditLogs')
+          .map(addPermissions),
       },
       ...Object.values(otherSections),
     ]);
@@ -198,6 +203,7 @@ const useSettingsMenu = (): {
   }, [
     adminLinks,
     globalLinks,
+    isAuditLogsDisabledByConfig,
     settings,
     shouldUpdateStrapi,
     addPermissions,
