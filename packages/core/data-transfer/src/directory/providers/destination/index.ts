@@ -137,9 +137,39 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       this.options.file.maxSizeJsonl
     );
 
+    // chain() finishes when its first stream finishes, so putting the file writer
+    // inside the chain lets the transfer resolve before the last JSONL file is
+    // flushed. Wait for the writer's finish instead.
     return deferWritable(async () => {
-      const { chain, stringer } = await loadStreamDeps();
-      return chain([stringer(), entryStream]);
+      const { stringer } = await loadStreamDeps();
+      const jsonl = stringer();
+      jsonl.pipe(entryStream);
+
+      return new Writable({
+        objectMode: true,
+        write(chunk, encoding, callback) {
+          jsonl.write(chunk, encoding, callback);
+        },
+        final(callback) {
+          let settled = false;
+          const settle = (error?: Error | null) => {
+            if (settled) {
+              return;
+            }
+            settled = true;
+            callback(error ?? undefined);
+          };
+
+          entryStream.once('error', settle);
+          entryStream.once('finish', () => settle());
+          jsonl.end();
+        },
+        destroy(error, callback) {
+          jsonl.destroy();
+          entryStream.destroy();
+          callback(error);
+        },
+      });
     });
   }
 

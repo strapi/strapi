@@ -68,14 +68,7 @@ describe('Directory destination provider', () => {
     const items = [{ id: 1 }, { id: 2, title: 'two' }];
     await pipeline(Readable.from(items), provider[method]());
 
-    // chain() finishes once its first stream ends; the JSONL writer flushes to disk after that.
     const filePath = path.join(dir, stage, `${stage}_00001.jsonl`);
-    for (let i = 0; i < 50 && !(await fs.pathExists(filePath)); i += 1) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 10);
-      });
-    }
-
     const content = await fs.readFile(filePath, 'utf8');
     const lines = content
       .split('\n')

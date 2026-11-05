@@ -221,32 +221,30 @@ class TransferEngine<
     const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
-    let stream: PassThrough | Duplex = new PassThrough({ objectMode: true });
+    // One chain, in order. Piping each group onto the previous stream and returning
+    // only the last one dropped the earlier groups: pipeline() writes into the
+    // returned stream, so global filters never saw data when a stage transform
+    // was also set.
+    const steps: StreamItem[] = [];
 
-    const applyTransforms = <U>(transforms: TransferTransform<U>[] = []) => {
-      const chainTransforms: StreamItem[] = [];
+    const pushTransforms = (transforms: TransferTransform<unknown>[] = []) => {
       for (const transform of transforms) {
         if ('filter' in transform) {
-          chainTransforms.push(utils.stream.filter(transform.filter));
+          steps.push(utils.stream.filter(transform.filter));
         }
 
         if ('map' in transform) {
-          chainTransforms.push(utils.stream.map(transform.map));
+          steps.push(utils.stream.map(transform.map));
         }
-      }
-      if (chainTransforms.length) {
-        const next = chain(chainTransforms);
-        stream.pipe(next);
-        stream = next;
       }
     };
 
     if (includeGlobal) {
-      applyTransforms(globalTransforms);
+      pushTransforms(globalTransforms as TransferTransform<unknown>[]);
     }
 
     if (isNumber(throttle) && throttle > 0) {
-      stream = stream.pipe(
+      steps.push(
         new PassThrough({
           objectMode: true,
           async transform(data, _encoding, callback) {
@@ -259,9 +257,13 @@ class TransferEngine<
       );
     }
 
-    applyTransforms(stageTransforms as TransferTransform<unknown>[]);
+    pushTransforms(stageTransforms as TransferTransform<unknown>[]);
 
-    return stream;
+    if (!steps.length) {
+      return new PassThrough({ objectMode: true });
+    }
+
+    return chain(steps);
   }
 
   /**
