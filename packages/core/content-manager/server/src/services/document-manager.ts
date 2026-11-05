@@ -7,7 +7,10 @@ import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from '.
 import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
 import { sumDraftCounts } from './utils/draft';
 
-type DocService = Modules.Documents.ServiceInstance;
+// `ServiceInstance` drops the draft-and-publish methods when one registered content type disables
+// draft and publish. The methods below check it at runtime, so they type their options from the
+// draft-and-publish methods of every content type.
+type DocService = Modules.Documents.ServiceInstance & Modules.Documents.DraftAndPublishExtension;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 

@@ -1433,6 +1433,32 @@ test('package and generated schemas of the same UID do not conflict with skipLib
   }
 });
 
+// One registered content type without `draftAndPublish: true` makes the default service instance
+// drop `publish`, `unpublish` and `discardDraft`. The content-manager document manager still types
+// the options of its draft-and-publish methods from them.
+test('the content-manager document manager declaration checks in a strict application', () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler, skipLibCheck: false });
+  const documentManager = path.join(
+    repository,
+    'packages/core/content-manager/dist/server/src/services/document-manager.d.ts'
+  );
+  const program = compile(['strapi-strict.d.ts', 'generated-strict.d.ts', 'common.ts']);
+  assert.ok(
+    program.getSourceFile(documentManager) !== undefined,
+    'The strict entry loads the document manager declaration'
+  );
+  const errors = diagnostics(program).filter(
+    (diagnostic) => diagnostic.file?.fileName === documentManager
+  );
+  assert.deepEqual(
+    errors.map(
+      (diagnostic) =>
+        `TS${diagnostic.code}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, ' ')}`
+    ),
+    []
+  );
+});
+
 test('a factory checked against its own inferred uid fails with TS2344 in every check order', async () => {
   const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
   try {
