@@ -1,7 +1,8 @@
 import { PassThrough } from 'node:stream';
 
-import { promptChecklist, type ChecklistChoice } from '../checklist-prompt';
+import { promptChecklist, type ChecklistChoice, type ChecklistFooter } from '../checklist-prompt';
 import { PromptCancelledError } from '../errors';
+import { CONTACT_SALES_URL, NOT_LICENSED_MESSAGE } from './test-helpers';
 
 const KEYS = { enter: '\r', down: '\u001B[B', up: '\u001B[A', space: ' ', ctrlC: '\u0003' };
 
@@ -20,7 +21,16 @@ const choices: ChecklistChoice[] = [
   },
 ];
 
-const startPrompt = (promptChoices: ChecklistChoice[] = choices, columns = 120) => {
+const footer: ChecklistFooter = {
+  heading: 'Not in your license. Contact Sales.',
+  lines: ['  ✕ Plugin D  Does things.'],
+};
+
+const startPrompt = (
+  promptChoices: ChecklistChoice[] = choices,
+  columns = 120,
+  promptFooter?: ChecklistFooter
+) => {
   const input = new PassThrough() as unknown as NodeJS.ReadStream;
   const output = new PassThrough() as unknown as NodeJS.WriteStream;
   Object.assign(output, { columns });
@@ -32,6 +42,7 @@ const startPrompt = (promptChoices: ChecklistChoice[] = choices, columns = 120) 
   const answer = promptChecklist({
     message: 'Which plugins?',
     choices: promptChoices,
+    footer: promptFooter,
     input,
     output,
   });
@@ -117,6 +128,84 @@ describe('promptChecklist', () => {
     const choiceLine = prompt.screen().split('\n')[2];
     expect(choiceLine).toHaveLength(39);
     expect(choiceLine.endsWith('…')).toBe(true);
+    await prompt.cancel();
+  });
+
+  it('shows the footer under its heading, after the choices and before Submit', async () => {
+    const prompt = startPrompt(choices, 120, footer);
+
+    expect(prompt.screen()).toBe(
+      [
+        '',
+        'Which plugins?',
+        '❯ ◯ Plugin A  1.0.0',
+        '  - Plugin B (not in your license)',
+        '  ◉ Plugin C  1.0.0 → 1.1.0 [upgrade]',
+        '',
+        '  Not in your license. Contact Sales.',
+        '  ✕ Plugin D  Does things.',
+        '',
+        '  Submit',
+        '',
+      ].join('\n')
+    );
+    await prompt.cancel();
+  });
+
+  it('never lands on a footer line', async () => {
+    const prompt = startPrompt(choices, 120, footer);
+
+    prompt.press(KEYS.down, KEYS.down);
+    expect(prompt.screen()).toContain('❯ Submit');
+
+    prompt.press(KEYS.up);
+    expect(prompt.screen()).toContain('❯ ◉ Plugin C');
+
+    prompt.press(KEYS.up, KEYS.up);
+    expect(prompt.screen()).toContain('❯ Submit');
+
+    prompt.press(KEYS.enter);
+    await expect(prompt.answer).resolves.toEqual(['plugin-c@1.1.0']);
+  });
+
+  it('wraps a long heading on words, so the link is never cut', async () => {
+    const prompt = startPrompt(choices, 40, {
+      ...footer,
+      heading: NOT_LICENSED_MESSAGE,
+    });
+
+    const lines = prompt.screen().split('\n');
+    expect(lines).toContain(`  ${CONTACT_SALES_URL}`);
+    expect(lines.every((line) => line.length <= 39)).toBe(true);
+    await prompt.cancel();
+  });
+
+  it('splits a word longer than a narrow terminal, so no line wraps', async () => {
+    const prompt = startPrompt(choices, 25, {
+      ...footer,
+      heading: NOT_LICENSED_MESSAGE,
+    });
+
+    const lines = prompt.screen().split('\n');
+    const linkIndex = lines.indexOf('  https://strapi.io/cont');
+    expect(linkIndex).toBeGreaterThan(-1);
+    expect(lines[linkIndex + 1]).toBe('  act-sales');
+    expect(lines.every((line) => line.length <= 24)).toBe(true);
+    await prompt.cancel();
+  });
+
+  it('never splits an emoji in two when it splits a long word', async () => {
+    const prompt = startPrompt(choices, 25, {
+      ...footer,
+      heading: `Not in your license. ${'😀'.repeat(30)}`,
+    });
+
+    const emojiLines = prompt
+      .screen()
+      .split('\n')
+      .filter((line) => line.includes('😀'));
+    expect(emojiLines).toEqual([`  ${'😀'.repeat(22)}`, `  ${'😀'.repeat(8)}`]);
+    expect(prompt.screen()).not.toMatch(/\uFFFD/);
     await prompt.cancel();
   });
 
