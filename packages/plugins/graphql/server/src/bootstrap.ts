@@ -145,8 +145,6 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     return;
   }
 
-  abortFieldsOnClientDisconnect(schema);
-
   const { config } = strapi.plugin('graphql');
 
   const path: string = config('endpoint');
@@ -234,6 +232,10 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       return undefined;
     }
   ) as ApolloServerOptions<StrapiGraphQLContext> & CustomOptions;
+
+  if (serverConfig.schema) {
+    abortFieldsOnClientDisconnect(serverConfig.schema);
+  }
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
