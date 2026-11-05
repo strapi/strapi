@@ -6,6 +6,7 @@ import type { PermissionChecker } from './services';
 type Implementation = ReturnType<ReturnType<typeof createPermissionCheckerService>['create']>;
 
 // With strict types, validateInput takes the parameters of the contract.
+// can, cannot and requiresEntity are the contract's, action shortcuts included.
 export type PermissionCheckerImplementationAssertions = [
   Expect<
     Equal<
@@ -13,4 +14,7 @@ export type PermissionCheckerImplementationAssertions = [
       Parameters<PermissionChecker['validateInput']>
     >
   >,
+  Expect<Equal<Implementation['can'], PermissionChecker['can']>>,
+  Expect<Equal<Implementation['cannot'], PermissionChecker['cannot']>>,
+  Expect<Equal<Implementation['requiresEntity'], PermissionChecker['requiresEntity']>>,
 ];

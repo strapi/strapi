@@ -43,7 +43,7 @@ const createPermissionChecker =
       return entity ? permissionsManager.toSubject(entity, model) : model;
     };
 
-    const can = (action: string, entity?: Entity, field?: string) => {
+    const can = (action: string, entity?: CheckedEntity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -55,7 +55,7 @@ const createPermissionChecker =
       );
     };
 
-    const cannot = (action: string, entity?: Entity, field?: string) => {
+    const cannot = (action: string, entity?: CheckedEntity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -159,33 +159,40 @@ const createPermissionChecker =
       return shortcuts;
     };
 
-    // Permission utils shortcuts
-    Object.assign(
+    // Permission utils shortcuts. `Object.assign` returns the function it extends, so with
+    // strict types its result carries the shortcuts; without, the published type stays develop's.
+    const canWithShortcuts: Core.IsStrict extends true
+      ? PermissionChecker['can']
+      : (action: string, entity?: Entity, field?: string) => boolean = Object.assign(
       can,
       actionShortcuts(
         (action) =>
-          (...args: [entity: Entity | undefined, field: string]) =>
+          (...args: [entity?: CheckedEntity, field?: string]) =>
             can(action, ...args)
       )
     );
-    Object.assign(
+    const cannotWithShortcuts: Core.IsStrict extends true
+      ? PermissionChecker['cannot']
+      : (action: string, entity?: Entity, field?: string) => boolean = Object.assign(
       cannot,
       actionShortcuts(
         (action) =>
-          (...args: [entity: Entity | undefined, field: string]) =>
+          (...args: [entity?: CheckedEntity, field?: string]) =>
             cannot(action, ...args)
       )
     );
-    Object.assign(
+    const requiresEntityWithShortcuts: Core.IsStrict extends true
+      ? PermissionChecker['requiresEntity']
+      : (action: string) => boolean = Object.assign(
       requiresEntity,
       actionShortcuts((action) => () => requiresEntity(action))
     );
 
     return {
       // Permission utils
-      can, // check if you have the permission
-      cannot, // check if you don't have the permission
-      requiresEntity, // check if entity data is needed for permission evaluation
+      can: canWithShortcuts, // check if you have the permission
+      cannot: cannotWithShortcuts, // check if you don't have the permission
+      requiresEntity: requiresEntityWithShortcuts, // check if entity data is needed for permission evaluation
       // Sanitizers
       sanitizeOutput,
       sanitizeQuery,
@@ -199,8 +206,10 @@ const createPermissionChecker =
     };
   };
 
-// The published type stays the inferred one, as on develop. The registered contract
-// (`PermissionCheckerService`) also describes the action shortcuts attached at runtime.
+// The published type stays the inferred one, as on develop. The factory is not checked against
+// `PermissionCheckerService` yet: the admin permissions manager resolves its sanitizers to
+// `unknown`, so `sanitizeOutput`, `sanitizeQuery`, `sanitizeCreateInput` and `sanitizeUpdateInput`
+// cannot resolve to the contract's results, and `sanitizedQuery` takes a `Query`, not `unknown`.
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   create: createPermissionChecker(strapi),
 });
