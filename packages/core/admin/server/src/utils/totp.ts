@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 /**
  * TOTP (RFC 6238) and recovery-code primitives for admin two-factor authentication. Internal to the
  * admin server: not exported from any package entry point, so it can change without a breaking
- * release. The `admin:mfa-state` CLI reads the current step through the `admin::mfa` service.
+ * release.
  */
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -67,11 +67,6 @@ export const base32Decode = (input: string): Buffer => {
 
   return Buffer.from(bytes);
 };
-
-export const currentTotpStep = ({
-  step = DEFAULT_STEP,
-  timestamp = Math.floor(Date.now() / 1000),
-}: { step?: number; timestamp?: number } = {}): number => Math.floor(timestamp / step);
 
 const totpForStep = (secret: Buffer, counter: number, digits: number): string => {
   // 8-byte big-endian counter. Written in two 32-bit halves to stay safe above 2^32.

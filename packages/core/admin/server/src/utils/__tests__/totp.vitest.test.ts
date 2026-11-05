@@ -4,7 +4,6 @@ import {
   base32Decode,
   base32Encode,
   buildOtpauthUri,
-  currentTotpStep,
   generateTotp,
   generateTotpSecret,
   verifyTotp,
@@ -73,16 +72,6 @@ describe('generateTotpSecret', () => {
 
   test('does not repeat', () => {
     expect(generateTotpSecret().equals(generateTotpSecret())).toBe(false);
-  });
-});
-
-describe('currentTotpStep', () => {
-  test('floors the timestamp to the current step index', () => {
-    expect(currentTotpStep({ timestamp: 1234567905, step: 30 })).toBe(41152263);
-  });
-
-  test('defaults to a 30 second step', () => {
-    expect(currentTotpStep({ timestamp: 1234567905 })).toBe(41152263);
   });
 });
 

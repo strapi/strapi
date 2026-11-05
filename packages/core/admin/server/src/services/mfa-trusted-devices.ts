@@ -192,17 +192,6 @@ export const createTrustedDevices = ({
     );
   };
 
-  /** The live rows, for a diagnostic that must write nothing: dead ones are counted out, not
-   * deleted, unlike `listTrustedDevices`. */
-  const countLiveTrustedDevices = async (userId: string): Promise<number> => {
-    const current = await settings();
-    const rows = (await query().findMany({
-      where: { userId: String(userId) },
-    })) as TrustedDeviceRow[];
-    const now = new Date();
-    return rows.filter((row) => isLive(row, current, now)).length;
-  };
-
   /** Silent: the caller's own event covers it. */
   const clearTrustedDevices = async (userId: string): Promise<number> => {
     const result = await query().deleteMany({ where: { userId: String(userId) } });
@@ -271,7 +260,6 @@ export const createTrustedDevices = ({
     listTrustedDevices,
     revokeTrustedDevice,
     revokeAllTrustedDevices,
-    countLiveTrustedDevices,
     clearTrustedDevices,
     clearAllTrustedDevices,
     sweepExpiredTrustedDevices,

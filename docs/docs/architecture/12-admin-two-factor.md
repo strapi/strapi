@@ -317,12 +317,12 @@ the admin panel maps to a translated message. The English server message is the 
 
 ## CLI
 
-Three commands, for the case where an admin can no longer get in. Each takes `-e, --email`, which
-is trimmed and lowercased before the lookup, as admin emails are stored. `mfa-state` writes nothing:
-it counts live trusted devices without pruning the expired ones.
+Two commands, for the case where an admin can no longer get in. Each takes `-e, --email`, which is
+trimmed and lowercased before the lookup, as admin emails are stored. With the feature on,
+`admin:list-users` adds a 2FA column (`enrolled`, `required` with any grace deadline, `locked`, or
+`-`), from the same `requiredForUsers` call as the panel's user list.
 
 ```bash
-strapi admin:mfa-state -e user@example.com        # print a user's 2FA state
 strapi admin:reset-user-mfa -e user@example.com   # clear their second factor (alias: admin:reset-mfa)
 strapi admin:unlock-user-mfa -e user@example.com  # lift an enforcement lock (alias: admin:unlock-mfa)
 ```
@@ -365,14 +365,15 @@ Server:
 - Service: `packages/core/admin/server/src/services/mfa.ts` (the hub; the other three modules are
   composed into it so policy and enrolment invariants hold for every caller)
 - TOTP and recovery-code primitives: `packages/core/admin/server/src/utils/totp.ts`, internal to
-  the admin server; the CLI reads the current step through the service (`currentTotpStep`)
+  the admin server
 - Config validation: `packages/core/admin/server/src/config/mfa.ts`
 - Controllers: `packages/core/admin/server/src/controllers/mfa.ts`,
   `controllers/authentication.ts`
 - Routes: `packages/core/admin/server/src/routes/mfa.ts`, `routes/authentication.ts`
 - Validation: `packages/core/admin/server/src/validation/authentication/mfa.ts`
 - Contracts: `packages/core/admin/shared/contracts/mfa.ts`
-- CLI: `packages/core/strapi/src/cli/commands/admin/{mfa-state,reset-user-mfa,unlock-user-mfa}.ts`
+- CLI: `packages/core/strapi/src/cli/commands/admin/{reset-user-mfa,unlock-user-mfa}.ts`, plus the 2FA column in
+  `list-users.ts`
 
 Admin panel:
 

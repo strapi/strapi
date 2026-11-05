@@ -6,7 +6,6 @@ import {
   base32Decode,
   base32Encode,
   buildOtpauthUri,
-  currentTotpStep,
   generateRecoveryCodes,
   generateTotpSecret,
   normaliseRecoveryCode,
@@ -1675,15 +1674,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     );
   };
 
-  /** The TOTP step the server is on now, for diagnosing clock drift (`admin:mfa-state`). */
-  const currentStep = (): number => currentTotpStep({ step: config().step });
-
   return {
     bootstrap,
     isEnabled,
     canEncryptSecrets,
     config,
-    currentTotpStep: currentStep,
     isEnrolled,
     isExemptFromMfa,
     isMfaRequiredFor,
@@ -1725,7 +1720,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     trustDevice: trustedDevices.trustDevice,
     consumeTrustedDevice: trustedDevices.consumeTrustedDevice,
     listTrustedDevices: trustedDevices.listTrustedDevices,
-    countLiveTrustedDevices: trustedDevices.countLiveTrustedDevices,
     revokeTrustedDevice: trustedDevices.revokeTrustedDevice,
     revokeAllTrustedDevices: trustedDevices.revokeAllTrustedDevices,
     clearTrustedDevices: trustedDevices.clearTrustedDevices,

@@ -5,13 +5,7 @@ import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { verifyRegistrationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
-import {
-  base32Decode,
-  base32Encode,
-  currentTotpStep,
-  generateTotp,
-  generateTotpSecret,
-} from '../../utils/totp';
+import { base32Decode, base32Encode, generateTotp, generateTotpSecret } from '../../utils/totp';
 import { hashTrustToken, MAX_TRUSTED_DEVICES_PER_USER } from '../mfa-trusted-devices';
 import { PASSKEY_UID, PASSKEY_CAP_MESSAGE, MAX_PASSKEYS_PER_USER } from '../mfa-passkeys';
 import { MFA_DEFAULTS } from '../../config/mfa';
@@ -826,19 +820,6 @@ const defaultDeps = (strapi: unknown) => ({
 });
 
 describe('mfa service: enrolment', () => {
-  test("currentTotpStep is the server clock's step at the configured step length", () => {
-    const { strapi } = buildMfaFixture({ mfaConfig: { step: 60 } });
-    const service = createMfaService(defaultDeps(strapi));
-
-    vi.useFakeTimers({ now: new Date('2026-09-01T11:02:10.000Z') });
-    try {
-      expect(service.currentTotpStep()).toBe(currentTotpStep({ step: 60 }));
-      expect(service.currentTotpStep()).toBe(Math.floor(Date.now() / 1000 / 60));
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
   test('canEncryptSecrets reports whether a secret could be stored at all', () => {
     const { strapi } = buildStrapi();
     const withKey = createMfaService(defaultDeps(strapi));
@@ -4006,17 +3987,6 @@ describe('mfa service: trusted devices', () => {
 
   afterEach(() => {
     vi.useRealTimers();
-  });
-
-  test('countLiveTrustedDevices counts only live rows and deletes nothing', async () => {
-    const { service, trustedRows } = setup();
-    await service.trustDevice('1', {});
-    await service.trustDevice('1', {});
-    trustedRows[0].expiresAt = new Date(Date.now() - DAY);
-
-    await expect(service.countLiveTrustedDevices('1')).resolves.toBe(1);
-    // The CLI's `admin:mfa-state` reads through this: a diagnostic must not prune.
-    expect(trustedRows).toHaveLength(2);
   });
 
   test('trustDevice stores only a hash, with the label and an absolute expiry, and returns the token once', async () => {

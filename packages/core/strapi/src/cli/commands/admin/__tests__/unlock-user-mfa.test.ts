@@ -8,8 +8,8 @@ const mfaServiceInstance = {
   unlock,
 };
 
-// The raw, uninstantiated factory, exactly as `services/index.ts` registers it. See
-// `mfa-state.test.ts` for why a command must never reach it directly.
+// The raw, uninstantiated factory, exactly as `services/index.ts` registers it. A command reading
+// `app.admin.services.mfa.<method>` would call the method on this function, not on the service.
 const mfaFactory = jest.fn(() => mfaServiceInstance);
 
 const admin = {
