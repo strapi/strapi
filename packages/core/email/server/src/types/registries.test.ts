@@ -20,6 +20,25 @@ sent satisfies Promise<unknown>;
 sent satisfies Promise<object>;
 // @ts-expect-error An email has a subject.
 email.send({ to: 'to@example.com', text: 'Text' });
+// Other options reach the provider as they are: nodemailer forwards `headers` and `attachments`,
+// mailgun, sendgrid and sendmail every key they do not read.
+email.send({
+  to: 'to@example.com',
+  subject: 'Subject',
+  text: 'Text',
+  headers: { 'X-Mailgun-Track': 'no' },
+  attachments: [{ filename: 'report.txt', content: 'Report' }],
+}) satisfies Promise<unknown>;
+// An HTML body alone is an email: nodemailer sends it as the text body too.
+email.send({ to: 'to@example.com', subject: 'Subject', html: '<p>HTML</p>' });
+// @ts-expect-error An email has a text or an HTML body.
+email.send({ to: 'to@example.com', subject: 'Subject' });
+// @ts-expect-error The text body is a string.
+email.send({ to: 'to@example.com', subject: 'Subject', text: 1 });
+// @ts-expect-error The HTML body is a string.
+email.send({ to: 'to@example.com', subject: 'Subject', html: ['<p>HTML</p>'] });
+// @ts-expect-error The subject is a string.
+email.send({ to: 'to@example.com', subject: 1, text: 'Text' });
 
 email.sendTemplatedEmail(
   { to: 'to@example.com', from: undefined },
@@ -31,6 +50,18 @@ email.sendTemplatedEmail(
   { subject: 'Subject', text: 'Text', html: '' },
   // @ts-expect-error Template data is an object of values.
   'data'
+);
+// The options reach the provider as they are, next to the filled template.
+email.sendTemplatedEmail(
+  { to: 'to@example.com', headers: { 'X-Mailgun-Track': 'no' } },
+  { subject: 'Subject', text: 'Text' },
+  {}
+) satisfies Promise<unknown>;
+email.sendTemplatedEmail(
+  { to: 'to@example.com' },
+  // @ts-expect-error A template has a text: the service throws without a `text` key.
+  { subject: 'Subject', html: '<p>HTML</p>' },
+  {}
 );
 
 email.getProviderSettings().provider satisfies string;

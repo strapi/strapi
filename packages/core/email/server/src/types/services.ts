@@ -15,6 +15,10 @@ export type EmailPluginConfig = EmailConfig & {
  * The addresses of an email, as `EmailOptions` declares them, except that the optional ones also
  * accept `undefined`: callers pass unset settings as they read them, such as the admin's
  * `admin.forgotPassword.from` and `replyTo`.
+ *
+ * The service hands every other option to the provider as it is, such as the `headers` object and
+ * the `attachments` array that nodemailer forwards, or any key that mailgun, sendgrid and sendmail
+ * do not read.
  */
 export type EmailOptionsInput = {
   from?: string | undefined;
@@ -22,11 +26,20 @@ export type EmailOptionsInput = {
   cc?: string | undefined;
   bcc?: string | undefined;
   replyTo?: string | undefined;
-  [key: string]: string | undefined;
+  [key: string]: unknown;
 };
 
-/** An email to send: its addresses and its content. */
-export type SendOptionsInput = EmailOptionsInput & EmailTemplate;
+/**
+ * The content of an email to send: a subject, and a text body, an HTML body or both. The service
+ * hands them to the provider as they are; nodemailer sends either body as the other when only one
+ * is set.
+ */
+export type EmailContentInput = { subject: string } & (
+  { text: string; html?: string | undefined } | { text?: string | undefined; html: string }
+);
+
+/** An email to send: its addresses, its content and the provider options. */
+export type SendOptionsInput = EmailOptionsInput & EmailContentInput;
 
 /** The `email` service: sends emails through the configured provider. */
 export type EmailService = {
