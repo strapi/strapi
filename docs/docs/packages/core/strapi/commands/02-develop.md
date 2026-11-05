@@ -32,6 +32,8 @@ Options:
 
 The develop command sets itself up much like the [build](./01-build.md) command. Once we've injected our middlewares, we load the strapi instance and then generate the types based off the user's instance as well as potentially compiling any TS server code if we're in a TS project. The final step is to watch the project directory so we can restart the strapi instance in real-time as a user is developing their project & being the actual strapi instance.
 
+If a step fails after the strapi instance is loaded (for example the TS compile reports type errors), develop logs the errors, destroys the loaded instance so its cron jobs and other bootstrap work stop, and keeps watching. The next file change restarts the instance.
+
 ## Node Usage
 
 ```ts

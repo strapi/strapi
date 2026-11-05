@@ -221,11 +221,20 @@ const develop = async ({
     const generatingTsSpinner = logger.spinner(`Generating types`);
     const compilingTsSpinner = logger.spinner(`Compiling TS`);
 
+    let isDestroyed = false;
+    const destroyStrapi = async () => {
+      if (isDestroyed === true) {
+        return;
+      }
+      isDestroyed = true;
+      await strapiInstance.destroy();
+    };
+
     let watcherStarted = false;
     const ensureWatcher = () => {
       if (!watcherStarted) {
         watcherStarted = true;
-        startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
+        startWatcher(strapiInstance, cwd, polling ?? false, logger, destroyStrapi, bundleWatcher);
       }
     };
 
@@ -323,6 +332,20 @@ const develop = async ({
         generatingTsSpinner.fail();
       }
 
+      // The app was loaded (register, bootstrap, cron) but will not start.
+      // Shut it down so it does not keep running jobs while we wait for a fix.
+      // Destroy before starting the watcher: destroy removes every process listener.
+      try {
+        await destroyStrapi();
+      } catch (destroyError: unknown) {
+        const destroyMessage =
+          destroyError instanceof Error ? destroyError.message : String(destroyError);
+        logger.error(`Error while stopping Strapi: ${destroyMessage}`);
+      }
+      logger.warn(
+        'Strapi is stopped. Fix the errors above, it will restart on the next file change.'
+      );
+
       ensureWatcher();
     }
   }
@@ -333,6 +356,7 @@ function startWatcher(
   cwd: string,
   polling: boolean,
   logger: Logger,
+  destroyStrapi: () => Promise<void>,
   bundleWatcher?: WebpackWatcher | ViteWatcher
 ) {
   const restart = async () => {
@@ -400,7 +424,7 @@ function startWatcher(
         );
         await watcher.close();
 
-        await strapiInstance.destroy();
+        await destroyStrapi();
 
         if (bundleWatcher) {
           bundleWatcher.close();
