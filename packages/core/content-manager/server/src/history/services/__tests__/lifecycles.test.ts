@@ -131,7 +131,7 @@ describe('history lifecycles service', () => {
     } = {}) => {
       mockGetRequestContext.mockReturnValue({
         state: {
-          user: { id: '123' },
+          user: { id: '123', username: 'kai', email: 'kai@test.com' },
           route: { info: { pluginName, type: 'admin' } },
           auth: { strategy: { name: strategyName } },
         },
@@ -168,13 +168,17 @@ describe('history lifecycles service', () => {
     });
 
     describe('recording gate', () => {
-      it('records the write with the source of its origin', async () => {
+      it('records the write with its origin', async () => {
         mockRequest({ strategyName: 'admin-token' });
 
         await updateArticle();
 
         expect(mockCreateVersion).toHaveBeenCalledWith(
-          expect.objectContaining({ locale: 'en', source: 'admin-api' })
+          expect.objectContaining({
+            locale: 'en',
+            source: 'admin-api',
+            author: { type: 'person', name: 'kai', model: 'admin::user', id: '123' },
+          })
         );
       });
 

@@ -8,23 +8,25 @@ import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
-import { createServiceUtils } from './utils';
+import { type AuthorColumns, createServiceUtils, toAuthor, toAuthorColumns } from './utils';
 import { getService as getContentManagerService } from '../../utils';
 import { AUDITED_EVENTS, type HistoryRestoreEvent } from '../../audit-logs';
 
 // Needed because the query engine doesn't return any types yet
-type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
-  Pick<CreateHistoryVersion, 'locale'>;
+type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale' | 'author'> &
+  Pick<CreateHistoryVersion, 'locale'> &
+  AuthorColumns;
 
 const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
   const serviceUtils = createServiceUtils({ strapi });
 
   return {
-    async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {
+    async createVersion({ author, ...historyVersionData }: HistoryVersions.CreateHistoryVersion) {
       await query.create({
         data: {
           ...historyVersionData,
+          ...toAuthorColumns(author),
           createdAt: new Date(),
           createdBy: strapi.requestContext.get()?.state?.user.id,
         },
@@ -162,7 +164,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       const formattedResults: any[] = await Promise.all(
         (results as HistoryVersionQueryResult[]).map(async (result) => {
           return {
-            ...result,
+            ...omit(result, ['authorType', 'authorName', 'authorModel', 'authorId']),
+            author: toAuthor(result),
             data: await populateEntry(result),
             meta: {
               unknownAttributes: serviceUtils.getSchemaAttributesDiff(

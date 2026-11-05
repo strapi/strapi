@@ -52,6 +52,7 @@ describe('VersionHeader', () => {
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,
       source: 'admin-panel' as const,
+      author: null,
       schema: {},
       locale: null,
       data: {
@@ -137,6 +138,7 @@ describe('VersionHeader', () => {
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,
       source: 'admin-panel' as const,
+      author: null,
       schema: {},
       locale: null,
       data: {
