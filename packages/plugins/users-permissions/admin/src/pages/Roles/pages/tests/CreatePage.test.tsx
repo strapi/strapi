@@ -1,0 +1,149 @@
+import * as React from 'react';
+
+import { DesignSystemProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/strapi/admin';
+import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+import { server } from '../../../../../tests/server';
+import { CreatePage } from '../CreatePage';
+
+const render = () => ({
+  ...renderRTL(<Route path="/settings/users-permissions/roles/new" element={<CreatePage />} />, {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
+      return (
+        <IntlProvider locale="en" messages={{}} textComponent="span">
+          <DesignSystemProvider>
+            <QueryClientProvider client={client}>
+              <NotificationsProvider>
+                <MemoryRouter
+                  initialEntries={[`/settings/users-permissions/roles/new`]}
+                  future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+                >
+                  <Routes>{children}</Routes>
+                </MemoryRouter>
+              </NotificationsProvider>
+            </QueryClientProvider>
+          </DesignSystemProvider>
+        </IntlProvider>
+      );
+    },
+  }),
+  user: userEvent.setup(),
+});
+
+describe('Roles – CreatePage', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('renders correctly', async () => {
+    const { getByRole, user, findByRole } = render();
+
+    expect(getByRole('heading', { name: 'Create a role' })).toBeInTheDocument();
+    expect(getByRole('heading', { name: 'Role details' })).toBeInTheDocument();
+
+    /**
+     * This means the `usePlugins` hook has finished fetching
+     */
+    await findByRole('heading', { name: 'Permissions' });
+
+    expect(getByRole('heading', { name: 'Advanced settings' })).toBeInTheDocument();
+
+    expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
+
+    expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
+
+    expect(
+      getByRole('region', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    ).toBeInTheDocument();
+
+    expect(getByRole('checkbox', { name: 'Select all' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'create' })).toBeInTheDocument();
+  });
+
+  it('will show an error if the user does not fill the name or description field', async () => {
+    const { getByRole, findByRole } = render();
+
+    await findByRole('heading', { name: 'Permissions' });
+
+    fireEvent.click(getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-invalid', 'true')
+    );
+
+    expect(getByRole('textbox', { name: 'Description' })).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('can create a new role and show a notification', async () => {
+    const { getByRole, user, findByRole, findByText } = render();
+
+    await findByRole('heading', { name: 'Permissions' });
+
+    await user.type(getByRole('textbox', { name: 'Name' }), 'Test role');
+    await user.type(getByRole('textbox', { name: 'Description' }), 'This is a test role');
+
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
+    await user.click(getByRole('checkbox', { name: 'create' }));
+
+    fireEvent.click(getByRole('button', { name: 'Save' }));
+
+    await findByText('Role created');
+  });
+});
+
+it('creates the role with the toggled action enabled', async () => {
+  const save = vi.fn();
+  server.use(
+    http.post('*/users-permissions/roles', async ({ request }) => {
+      save(await request.json());
+
+      return HttpResponse.json({ ok: true });
+    })
+  );
+  const { getByRole, user, findByRole, findByText } = render();
+  await findByRole('heading', { name: 'Permissions' });
+  await user.type(getByRole('textbox', { name: 'Name' }), 'Test role');
+  await user.type(getByRole('textbox', { name: 'Description' }), 'This is a test role');
+  await user.click(
+    getByRole('button', {
+      name: 'Address Define all allowed actions for the api::address plugin.',
+    })
+  );
+  await user.click(getByRole('checkbox', { name: 'create' }));
+  fireEvent.click(getByRole('button', { name: 'Save' }));
+  await findByText('Role created');
+  expect(save).toHaveBeenCalledWith({
+    name: 'Test role',
+    description: 'This is a test role',
+    users: [],
+    permissions: {
+      'api::address': { controllers: { address: { create: { enabled: true, policy: '' } } } },
+    },
+  });
+});
