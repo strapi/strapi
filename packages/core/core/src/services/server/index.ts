@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import Router, { type Layer } from '@koa/router';
 import type { Core, Modules } from '@strapi/types';
 
 import { createHTTPServer } from './http-server';
@@ -96,7 +96,9 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     },
 
     listRoutes() {
-      return [...router.stack];
+      return router.stack.filter(
+        (route): route is Layer & { path: string } => typeof route.path === 'string'
+      );
     },
 
     listen(...args: any[]) {

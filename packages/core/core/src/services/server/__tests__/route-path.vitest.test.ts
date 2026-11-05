@@ -9,6 +9,7 @@ describe('translateRoutePath', () => {
     ['/files-:path(.*)', '/files-{*path}'],
     ['/files/:path(.*)?', '/files{/*path}'],
     ['/files/:path(.+)', '/files/*path'],
+    ['/files/:path([!-~]+)', '/files/*path'],
     ['/users/:id(\\d+)', '/users/:id'],
     ['/users/:id(\\d+)?', '/users{/:id}'],
     ['/posts/:slug([a-z-]+)', '/posts/:slug'],
@@ -34,17 +35,38 @@ describe('translateRoutePath', () => {
     expect(translateRoutePath(path)).toMatchObject({ path: expectedPath, changed: true });
   });
 
-  it.each(['/articles/:id', '/articles{/:id}', '/files/*path', '/admin{/*path}', '/a\\(b\\)'])(
-    'does not change the path-to-regexp v8 path %s',
-    (path) => {
-      expect(translateRoutePath(path)).toMatchObject({
-        path,
-        changed: false,
-        constraints: [],
-        positionalParams: [],
-      });
-    }
-  );
+  it.each([
+    '/articles/:id',
+    '/articles{/:id}',
+    '/files/*path',
+    '/admin{/*path}',
+    '/a\\(b\\)',
+    '/f/*"my path"',
+    '/f/*$rest',
+    '/f/{*"p"}',
+    '/users/:"my (name)"',
+  ])('does not change the path-to-regexp v8 path %s', (path) => {
+    expect(translateRoutePath(path)).toMatchObject({
+      path,
+      changed: false,
+      constraints: [],
+      positionalParams: [],
+    });
+  });
+
+  it('lists the parameter names of the translated path in order', () => {
+    expect(
+      translateRoutePath('/a/:id(\\d+)/*"x y"/:"my (name)"/*$rest/(.*)').parameterNames
+    ).toEqual(['id', 'x y', 'my (name)', '$rest', 'splat']);
+    expect(translateRoutePath('/files/:path(\\d+)+/:404').parameterNames).toEqual(['path', '404']);
+  });
+
+  it('keeps a v8 quoted name whole when a constraint is also translated', () => {
+    const translated = translateRoutePath('/a/:id(\\d+)/*"x (y)"');
+
+    expect(translated.path).toBe('/a/:id/*"x (y)"');
+    expect(translated.constraints.map(({ name }) => name)).toEqual(['id']);
+  });
 
   it('keeps custom parameter patterns as constraints', () => {
     const { constraints } = translateRoutePath('/users/:id(\\d+)');
@@ -60,6 +82,7 @@ describe('translateRoutePath', () => {
 
     expect(positionalParams).toEqual(['splat']);
     expect(constraints[0].pattern.test('collection')).toBe(true);
+    expect(constraints[0].pattern.test('Collection')).toBe(true);
     expect(constraints[0].pattern.test('other')).toBe(false);
   });
 

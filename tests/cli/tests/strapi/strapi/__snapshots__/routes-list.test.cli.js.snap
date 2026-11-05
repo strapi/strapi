@@ -4,8 +4,8 @@ exports[`routes:list should output list of routes 1`] = `
 "│ Method             │ Path                                                                            │
 │ HEAD|ACL|BIND|CHE… │ /_health                                                                        │
 │ HEAD|GET           │ /admin{/*path}                                                                  │
-│ HEAD|GET           │ /uploads/{*path}                                                                │
-│ HEAD|GET           │ /plugins/documentation/{*path}                                                  │
+│ HEAD|GET           │ /uploads/{*splat}                                                               │
+│ HEAD|GET           │ /plugins/documentation/{*splat}                                                 │
 │ HEAD|GET           │ /                                                                               │
 │ HEAD|GET           │ /*path                                                                          │
 │ HEAD|ACL|BIND|CHE… │ /graphql                                                                        │
@@ -99,7 +99,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /api/upload/files/:id                                                           │
 │ DELETE             │ /api/upload/files/:id                                                           │
 │ HEAD|GET           │ /api/i18n/locales                                                               │
-│ HEAD|GET           │ /api/connect/{*path}                                                            │
+│ HEAD|GET           │ /api/connect/{*splat}                                                           │
 │ POST               │ /api/auth/local                                                                 │
 │ POST               │ /api/auth/local/register                                                        │
 │ HEAD|GET           │ /api/auth/:provider/callback                                                    │

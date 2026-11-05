@@ -28,14 +28,17 @@ export const publicStatic: Core.MiddlewareFactory = (
       },
       config: { auth: false },
     },
-    // All other public GET-routes except /uploads/{*path} which is handled in upload middleware
+    // All other public GET-routes except /uploads/ which is handled in upload middleware
     {
       method: 'GET',
       path: '/*path',
       handler(ctx, next) {
-        if (ctx.path.startsWith('/uploads/')) {
+        if (ctx.path.toLowerCase().startsWith('/uploads/')) {
           return next();
         }
+
+        // v6 exposed the whole path as ctx.params[0]. Keep that for code written against it.
+        ctx.params[0] = ctx.params.path;
 
         return serveStatic(ctx, next);
       },

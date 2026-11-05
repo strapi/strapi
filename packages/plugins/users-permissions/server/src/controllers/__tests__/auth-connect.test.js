@@ -15,7 +15,11 @@ jest.mock('../../utils/oauth-connect', () => ({
 describe('Auth controller - connect', () => {
   const router = new Router();
   authRoutes({}).forEach(({ method, path, handler }) => {
-    router.register(path, [method], () => undefined, { name: handler });
+    // Strapi translates v6 paths such as `/connect/(.*)` before they reach @koa/router 15.
+    // This test registers the routes directly, so it writes the v8 form itself.
+    router.register(path.replace('/connect/(.*)', '/connect/*path'), [method], () => undefined, {
+      name: handler,
+    });
   });
 
   beforeEach(() => {

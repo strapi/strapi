@@ -5,7 +5,7 @@ import type { Core } from '@strapi/types';
 
 import createKoaApp from '../koa';
 import createEndpointComposer from '../compose-endpoint';
-import { installRoutePathTranslation } from '../route-path';
+import { RoutePathMigrationError, installRoutePathTranslation } from '../route-path';
 
 const createStrapi = () =>
   ({
@@ -91,6 +91,39 @@ describe('compose endpoint', () => {
         route: '/content-manager/:kind-types/:id',
         params: { kind: 'other', id: '1' },
       });
+  });
+
+  it('matches a custom letter pattern in either case', async () => {
+    const { server } = createServer('/posts/:slug([a-z0-9-]+)', '/posts/:slug');
+
+    await request(server)
+      .get('/posts/Hello')
+      .expect(200, { route: '/posts/:slug([a-z0-9-]+)', params: { slug: 'Hello' } });
+    await request(server)
+      .get('/posts/Hello_World')
+      .expect(200, { route: '/posts/:slug', params: { slug: 'Hello_World' } });
+  });
+
+  it('matches an alternation in either case', async () => {
+    const { server } = createServer(
+      '/content-manager/(collection|single)-types/:id',
+      '/content-manager/:kind-types/:id'
+    );
+
+    await request(server)
+      .get('/content-manager/Collection-types/1')
+      .expect(200, {
+        route: '/content-manager/(collection|single)-types/:id',
+        params: { splat: 'Collection', 0: 'Collection', id: '1' },
+      });
+  });
+
+  it('lets a character range that contains a slash span segments', async () => {
+    const { server } = createServer('/files/:path([!-~]+)');
+
+    await request(server)
+      .get('/files/a/b')
+      .expect(200, { route: '/files/:path([!-~]+)', params: { path: 'a/b' } });
   });
 
   it('does not match a value its custom pattern rejects', async () => {
@@ -179,6 +212,35 @@ describe('compose endpoint', () => {
     await request(server).get('/files').expect(404);
   });
 
+  it('tests a custom pattern against the raw, still-encoded segment, as v6 did', async () => {
+    const { server } = createServer('/files/:name([^/]+)');
+
+    await request(server)
+      .get('/files/a%2Fb')
+      .expect(200, { route: '/files/:name([^/]+)', params: { name: 'a/b' } });
+    await request(server).get('/files/a/b').expect(404);
+  });
+
+  it('matches a repeated alternation in a named parameter', async () => {
+    const { server } = createServer('/tags/:tag(red|blue)+');
+
+    await request(server)
+      .get('/tags/red/blue')
+      .expect(200, { route: '/tags/:tag(red|blue)+', params: { tag: 'red/blue' } });
+    await request(server).get('/tags/red/green').expect(404);
+  });
+
+  it('matches a v8 quoted wildcard and a $-named wildcard without rewriting them', async () => {
+    const { server } = createServer('/f/*"my path"', '/g/*$rest');
+
+    await request(server)
+      .get('/f/a/b')
+      .expect(200, { route: '/f/*"my path"', params: { 'my path': 'a/b' } });
+    await request(server)
+      .get('/g/x/y')
+      .expect(200, { route: '/g/*$rest', params: { $rest: 'x/y' } });
+  });
+
   it('matches zero or more segments of a repeated custom pattern', async () => {
     const { server } = createServer('/files/:path(\\d+)*');
 
@@ -227,6 +289,7 @@ describe('compose endpoint', () => {
     const { server } = createServer('/x{ab}+');
 
     await request(server).get('/xab').expect(200, { route: '/x{ab}+', params: {} });
+    await request(server).get('/xAB').expect(200, { route: '/x{ab}+', params: {} });
     await request(server).get('/xabab').expect(200, { route: '/x{ab}+', params: {} });
     await request(server).get('/xabc').expect(404);
   });
@@ -313,5 +376,141 @@ describe('router path registration', () => {
     expect(router.stack.at(-1)).toMatchObject({
       path: '/content-type-builder/content-types{/:uid}',
     });
+  });
+
+  it('mounts pathless middleware, including an API router', async () => {
+    const { router } = createRouterApp();
+    const api = new Router({ prefix: '/api' });
+    api.get('/x', (ctx) => {
+      ctx.body = 'x';
+    });
+
+    expect(() => router.use((_ctx, next) => next())).not.toThrow();
+    expect(() => router.use(api.routes(), api.allowedMethods())).not.toThrow();
+
+    const { createServer: createStrapiServer } = await import('../index');
+    const strapi = {
+      ...createStrapi(),
+      config: { get: (_key: string, fallback?: unknown) => fallback },
+    } as unknown as Core.Strapi;
+
+    expect(() => createStrapiServer(strapi).mount()).not.toThrow();
+  });
+
+  it('keeps routes on a nested router mounted under a v6 pattern', async () => {
+    const { router } = createRouterApp();
+    const nested = new Router();
+    nested.get('/child', (ctx) => {
+      ctx.body = { ok: true };
+    });
+    router.use('/v/:id(\\d+)', nested.routes());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+
+    await request(app.callback()).get('/v/1/child').expect(200, { ok: true });
+  });
+
+  it('answers 404 when another method fails the custom pattern', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/users/:id(\\d+)', (ctx) => {
+      ctx.body = ctx.params;
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    app.use(router.allowedMethods());
+    const server = app.callback();
+
+    await request(server).get('/users/12').expect(200, { id: '12' });
+    await request(server).get('/users/abc').expect(404);
+    await request(server).post('/users/abc').expect(404);
+  });
+
+  it('translates a v6 router prefix and checks its custom pattern on every route', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/pre/:v(\\d+)' });
+    installRoutePathTranslation(router, strapi);
+    router.get('/x', (ctx) => {
+      ctx.body = { v: ctx.params.v };
+    });
+
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      'Router prefix "/pre/:v(\\d+)" uses path-to-regexp v6 syntax and was migrated to "/pre/:v".'
+    );
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await request(server).get('/pre/1/x').expect(200, { v: '1' });
+    await request(server).get('/pre/abc/x').expect(404);
+  });
+
+  it('translates an optional parameter in a router prefix', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/opt/:v?' });
+    installRoutePathTranslation(router, strapi);
+    router.get('/x', (ctx) => {
+      ctx.body = { v: ctx.params.v ?? null };
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await request(server).get('/opt/x').expect(200, { v: null });
+    await request(server).get('/opt/7/x').expect(200, { v: '7' });
+  });
+
+  it('fails at boot for a router prefix v8 cannot express', () => {
+    const router = new Router({ prefix: '/a/(.*)' });
+
+    expect(() => installRoutePathTranslation(router, createStrapi())).toThrow(
+      RoutePathMigrationError
+    );
+  });
+
+  it('keeps a custom pattern on a mount path for the routes under it', async () => {
+    const { router } = createRouterApp();
+    const nested = new Router();
+    nested.get('/child', (ctx) => {
+      ctx.body = { ok: true };
+    });
+    router.use('/v/:id(\\d+)', nested.routes());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await request(server).get('/v/1/child').expect(200, { ok: true });
+    await request(server).get('/v/abc/child').expect(404);
+  });
+
+  it('answers 404 for a failed custom pattern on an API router mounted on the server', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    const api = new Router({ prefix: '/api' });
+    installRoutePathTranslation(api, strapi);
+    api.get('/users/:id(\\d+)', (ctx) => {
+      ctx.body = ctx.params;
+    });
+    api.get('/files/:name([^/]+)', (ctx) => {
+      ctx.body = { name: ctx.params.name };
+    });
+    router.use(api.routes(), api.allowedMethods());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    app.use(router.allowedMethods());
+    const server = app.callback();
+
+    await request(server).get('/api/users/12').expect(200, { id: '12' });
+    await request(server).get('/api/users/abc').expect(404);
+    await request(server).post('/api/users/abc').expect(404);
+    await request(server).get('/api/files/a%2Fb').expect(200, { name: 'a/b' });
   });
 });

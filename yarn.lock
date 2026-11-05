@@ -9888,7 +9888,6 @@ __metadata:
     "@types/koa-compress": "npm:4.0.3"
     "@types/koa-favicon": "npm:2.1.5"
     "@types/koa-static": "npm:4.0.2"
-    "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
     "@types/node": "npm:22.20.0"
@@ -10762,7 +10761,6 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
-    "@types/koa__router": "npm:12.0.0"
     "@types/node": "npm:22.20.0"
     commander: "npm:8.3.0"
     croner: "npm:10.0.1"
@@ -12240,15 +12238,6 @@ __metadata:
   dependencies:
     "@types/koa": "npm:*"
   checksum: 10c0/2392b4ad63b8f730fee49f5c2104602613e77cac8e5aaac42cd74c60107563ad6e1194422b565519462eb5358746f59f19f5e890896494f7e7de1ac71566bbb2
-  languageName: node
-  linkType: hard
-
-"@types/koa__router@npm:12.0.0":
-  version: 12.0.0
-  resolution: "@types/koa__router@npm:12.0.0"
-  dependencies:
-    "@types/koa": "npm:*"
-  checksum: 10c0/e5a924254b0416ec929b148d39505e3084cfedd5043003baaf76db6e3e9a172a3373e0093e4668375c0e59e81dc7686f4abb201160e8614d84ed40c68b9b5c56
   languageName: node
   linkType: hard
 

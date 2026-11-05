@@ -9,6 +9,7 @@ import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
 import {
   RoutePathMigrationError,
+  applyRouteConstraints,
   translateRoutePath,
   withTranslatedPathMatching,
 } from './route-path';
@@ -111,7 +112,9 @@ export default (strapi: Core.Strapi) => {
       ]);
 
       try {
+        const previousLength = router.stack.length;
         router[method](path, withTranslatedPathMatching(translated, routeHandler));
+        applyRouteConstraints(router, router.stack.slice(previousLength), translated.constraints);
       } catch (error) {
         if (error instanceof Error) {
           throw new RoutePathMigrationError(

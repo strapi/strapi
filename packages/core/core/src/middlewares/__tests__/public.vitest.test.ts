@@ -16,6 +16,8 @@ describe('public static middleware', () => {
   beforeAll(async () => {
     publicDir = await mkdtemp(join(tmpdir(), 'strapi-public-'));
     await writeFile(join(publicDir, 'robots.txt'), 'robots');
+    await mkdir(join(publicDir, 'css'));
+    await writeFile(join(publicDir, 'css', 'app.txt'), 'css');
     await mkdir(join(publicDir, 'uploads'));
     await writeFile(join(publicDir, 'uploads', 'file.txt'), 'upload');
 
@@ -45,8 +47,13 @@ describe('public static middleware', () => {
     await request(server).get('/robots.txt').expect(200, 'robots');
   });
 
+  it('serves nested files from the public folder', async () => {
+    await request(server).get('/css/app.txt').expect(200, 'css');
+  });
+
   it('leaves /uploads/ to the upload middleware', async () => {
     await request(server).get('/uploads/file.txt').expect(404);
+    await request(server).get('/UPLOADS/file.txt').expect(404);
   });
 
   it('redirects the root to the admin panel', async () => {
