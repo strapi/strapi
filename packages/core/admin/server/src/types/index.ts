@@ -37,6 +37,8 @@ import type { HomepageLayout } from '../controllers/validation/schema';
 export type * as Controllers from './controllers';
 export type * as Policies from './policies';
 export type { RateLimitOptions } from './rate-limit';
+// Also exported by `@strapi/admin/strapi-admin`, which loads the admin panel and its UI libraries.
+export type { Permission, SanitizedAdminUser };
 
 /**
  * A service that the EE edition deep-merges over its CE implementation when a license verifies at
