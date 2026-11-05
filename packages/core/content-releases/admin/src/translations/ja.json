@@ -36,6 +36,7 @@
   "header.actions.publish": "公開",
   "header.actions.refresh": "再読み込み",
   "modal.form.input.clearLabel": "クリア",
+  "modal.form.input.label.date": "日付",
   "modal.form.input.label.time": "時刻",
   "modal.form.input.label.timezone": "タイムゾーン",
   "modal.form.time.has-passed": "選択した時刻はすでに過ぎています。",

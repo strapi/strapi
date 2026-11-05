@@ -42,6 +42,7 @@
   "header.actions.created.description": "{hasCreatedByUser, select, true { автор: {createdBy}} other { автор: видалений користувач}}",
   "modal.release-created-notification-success": "Реліз створено",
   "modal.release-updated-notification-success": "Реліз оновлено",
+  "modal.form.input.label.date": "Дата",
   "modal.form.input.label.time": "Час",
   "modal.form.input.label.timezone": "Часовий пояс",
   "modal.form.input.clearLabel": "Очистити",

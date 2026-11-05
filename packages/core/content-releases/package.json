@@ -64,7 +64,6 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@base-ui/react": "1.7.0",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/database": "5.60.0",
     "@strapi/design-system": "2.3.0-alpha.1",

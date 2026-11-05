@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 /**
- * TEMPORARY local icons for the Releases schedule column and the release date picker. Decorative:
- * hidden from assistive tech unless a caller overrides `aria-hidden`.
+ * TEMPORARY local icons for the Releases schedule column. Decorative: hidden from assistive tech
+ * unless a caller overrides `aria-hidden`.
  *
  * `calendar-blank` and `paper-plane-tilt` (Phosphor regular) are not yet in
  * `@strapi/icons`. Replace with imports from `@strapi/icons/regular` once a dev

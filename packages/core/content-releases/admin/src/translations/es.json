@@ -42,6 +42,7 @@
   "header.actions.created.description": "{hasCreatedByUser, select, true { por {createdBy}} other { por usuario eliminado}}",
   "modal.release-created-notification-success": "Lanzamiento creado",
   "modal.release-updated-notification-success": "Lanzamiento actualizado",
+  "modal.form.input.label.date": "Fecha",
   "modal.form.input.label.time": "Hora",
   "modal.form.input.label.timezone": "Zona horaria",
   "modal.form.input.clearLabel": "Limpiar",

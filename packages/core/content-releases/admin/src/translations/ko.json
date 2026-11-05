@@ -46,6 +46,7 @@
   "header.actions.created.description": "{hasCreatedByUser, select, true { (작성자: {createdBy})} other { (작성자: 삭제된 사용자)}}",
   "modal.release-created-notification-success": "릴리스가 생성되었습니다",
   "modal.release-updated-notification-success": "릴리스가 수정되었습니다",
+  "modal.form.input.label.date": "날짜",
   "modal.form.input.label.time": "시간",
   "modal.form.input.label.timezone": "시간대",
   "modal.form.input.clearLabel": "지우기",

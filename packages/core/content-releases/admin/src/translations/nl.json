@@ -36,6 +36,7 @@
   "header.actions.publish": "Publiceren",
   "header.actions.refresh": "Vernieuwen",
   "modal.form.input.clearLabel": "Wissen",
+  "modal.form.input.label.date": "Datum",
   "modal.form.input.label.time": "Tijd",
   "modal.form.input.label.timezone": "Tijdzone",
   "modal.form.time.has-passed": "De geselecteerde tijd is al verstreken.",

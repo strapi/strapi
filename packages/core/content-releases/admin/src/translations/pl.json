@@ -46,6 +46,7 @@
   "header.actions.created.description": "{hasCreatedByUser, select, true { przez {createdBy}} other { przez usuniętego użytkownika}}",
   "modal.release-created-notification-success": "Wydanie utworzone",
   "modal.release-updated-notification-success": "Wydanie zaktualizowane",
+  "modal.form.input.label.date": "Data",
   "modal.form.input.label.time": "Czas",
   "modal.form.input.label.timezone": "Strefa czasowa",
   "modal.form.input.clearLabel": "Wyczyść",
