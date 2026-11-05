@@ -4,7 +4,10 @@ import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
 import { FIELDS_TO_IGNORE } from '../constants';
-import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
+import type {
+  CreateHistoryVersion,
+  HistoryVersionAuthor,
+} from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
 
@@ -33,6 +36,32 @@ export const computeRetentionDays = (
   // User didn't provide retention days value, use the license or fallback to default
   return Math.min(licenseDays, DEFAULT_RETENTION_DAYS);
 };
+
+export type AuthorColumns =
+  | {
+      authorType: HistoryVersionAuthor['type'];
+      authorName: HistoryVersionAuthor['name'];
+      authorModel: HistoryVersionAuthor['model'];
+      authorId: HistoryVersionAuthor['id'];
+    }
+  | { authorType: null; authorName: null; authorModel: null; authorId: null };
+
+export const toAuthorColumns = (author: HistoryVersionAuthor): AuthorColumns => ({
+  authorType: author.type,
+  authorName: author.name,
+  authorModel: author.model,
+  authorId: author.id,
+});
+
+export const toAuthor = (columns: AuthorColumns): HistoryVersionAuthor | null =>
+  columns.authorType === null
+    ? null
+    : {
+        type: columns.authorType,
+        name: columns.authorName,
+        model: columns.authorModel,
+        id: columns.authorId,
+      };
 
 type RelationResponse = {
   results: RelationResult[];

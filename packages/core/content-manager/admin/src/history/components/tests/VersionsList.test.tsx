@@ -52,11 +52,13 @@ describe('VersionsList', () => {
     // Displays the right info for each version
     const versions = screen.getAllByRole('link');
     expect(within(versions[0]).getByText(/current/i)).toBeInTheDocument();
+    expect(within(versions[0]).queryByText(/by/i)).not.toBeInTheDocument();
     expect(within(versions[1]).queryByText(/current/i)).not.toBeInTheDocument();
     expect(within(versions[1]).getByText(/draft/i)).toBeInTheDocument();
     expect(within(versions[1]).getByText(/by/i)).toBeInTheDocument();
     expect(within(versions[1]).getByText('1/31/2024, 03:58 PM')).toBeInTheDocument();
-    expect(within(versions[1]).getByText(/by Kai Doe/i)).toBeInTheDocument();
+    expect(within(versions[1]).getByText('Kai Doe')).toBeInTheDocument();
+    expect(within(versions[1]).getByText('Person')).toBeInTheDocument();
 
     // Displays the source of each version
     expect(within(versions[0]).getByText('Admin panel')).toBeInTheDocument();

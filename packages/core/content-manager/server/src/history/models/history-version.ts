@@ -1,5 +1,9 @@
 import type { Model } from '@strapi/database';
-import { HISTORY_VERSION_SOURCES, HISTORY_VERSION_UID } from '../constants';
+import {
+  HISTORY_VERSION_AUTHOR_TYPES,
+  HISTORY_VERSION_SOURCES,
+  HISTORY_VERSION_UID,
+} from '../constants';
 
 const historyVersion: Model = {
   uid: HISTORY_VERSION_UID,
@@ -35,6 +39,19 @@ const historyVersion: Model = {
       type: 'enumeration',
       enum: [...HISTORY_VERSION_SOURCES],
     },
+    authorType: {
+      type: 'enumeration',
+      enum: [...HISTORY_VERSION_AUTHOR_TYPES],
+    },
+    authorName: {
+      type: 'string',
+    },
+    authorModel: {
+      type: 'string',
+    },
+    authorId: {
+      type: 'string',
+    },
     createdAt: {
       type: 'datetime',
       default: () => new Date(),
@@ -48,6 +65,12 @@ const historyVersion: Model = {
       useJoinTable: false,
     },
   },
+  indexes: [
+    {
+      name: 'strapi_history_versions_author_index',
+      columns: ['author_model', 'author_id'],
+    },
+  ],
 };
 
 export { historyVersion };
