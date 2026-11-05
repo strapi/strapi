@@ -15,6 +15,8 @@ EE features documented so far:
 - [`useLicenseLimits` hook](../packages/core/admin/ee/hooks/use-license-limits.md)
 - [Content releases](../packages/core/content-releases/index.md)
 
+With strict types, an application lists the features it builds against in `typescript.licensedFeatures`. Read [License-gated contracts](../contributing/05-typescript.md#license-gated-contracts).
+
 ## Promoting EE features in CE projects
 
 Every time a new EE feature is added in Strapi, in the settings menu, you should add the following condition to ensure that the feature promotes itself in CE:
