@@ -328,6 +328,25 @@ const develop = async ({
   }
 };
 
+/**
+ * Matches paths inside the app's own `tmp` or `.tmp` folders.
+ * Paths are compared relative to the app directory, so an app that lives under a folder
+ * containing "tmp" (e.g. `/private/tmp/my-app`) is still watched.
+ */
+export const createAppTmpDirMatcher = (appDir: string) => {
+  return (filePath: string): boolean => {
+    const relativePath = path.relative(appDir, filePath);
+
+    if (relativePath === '' || relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+      return false;
+    }
+
+    const [firstSegment] = relativePath.split(/[/\\]/);
+
+    return firstSegment === 'tmp' || firstSegment === '.tmp';
+  };
+};
+
 function startWatcher(
   strapiInstance: Awaited<ReturnType<typeof CreateStrapi>>,
   cwd: string,
@@ -348,7 +367,7 @@ function startWatcher(
       usePolling: polling,
       ignored: [
         /(^|[/\\])\../, // dot files
-        /tmp/,
+        createAppTmpDirMatcher(cwd),
         '**/src/admin/**',
         '**/src/plugins/**/admin/**',
         '**/dist/src/plugins/test/admin/**',
