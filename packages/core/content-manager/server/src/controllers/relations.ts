@@ -85,7 +85,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
 
   const statusByDocumentId = indexByDocumentId(availableStatus);
 
-  return relations.map((relation: RelationEntity) => {
+  const withTimestampStatus = relations.map((relation: RelationEntity) => {
     const candidates = statusByDocumentId.get(relation.documentId as string) || [];
     const availableStatuses = relation.locale
       ? candidates.filter((c) => c.locale === relation.locale)
@@ -96,6 +96,20 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
       status: documentMetadata.getStatus(relation, availableStatuses),
     };
   });
+
+  if (!strapi.contentTypes[targetUid as UID.ContentType]) {
+    return withTimestampStatus;
+  }
+
+  const omittedKeys = await documentMetadata.findOmittedRelationKeys(
+    targetUid as UID.ContentType,
+    withTimestampStatus.filter((relation) => relation.status === 'published')
+  );
+
+  return withTimestampStatus.map((relation) => ({
+    ...relation,
+    status: documentMetadata.applyOmittedRelationStatus(relation.status, relation, omittedKeys),
+  }));
 };
 
 const getPublishedAtClause = (status: string | undefined, uid: UID.Schema) => {

@@ -4,6 +4,10 @@ import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
+import {
+  findDocumentKeysWithOmittedRelations,
+  statusWithOmittedRelations,
+} from './utils/omitted-relations';
 
 const { getScalarAttributes, getMediaAttributes } = contentTypes;
 
@@ -295,6 +299,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return isDraftModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
+  /**
+   * Documents whose draft still points at a relation the published version dropped, and whose
+   * target has since been published. Republishing copies the link back.
+   */
+  findOmittedRelationKeys(
+    uid: UID.ContentType,
+    versions: { documentId?: string; locale?: string | null }[]
+  ) {
+    return findDocumentKeysWithOmittedRelations(strapi, uid, versions);
+  },
+
+  applyOmittedRelationStatus<TStatus extends string | undefined>(
+    status: TStatus,
+    version: { documentId?: string; locale?: string | null },
+    omittedKeys: Set<string>
+  ) {
+    return statusWithOmittedRelations(status, version, omittedKeys) as TStatus;
+  },
+
   // TODO is it necessary to return metadata on every page of the CM
   // We could refactor this so the locales are only loaded when they're
   // needed. e.g. in the bulk locale action modal.
@@ -529,13 +552,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const { versions, ...meta } = await this.getMetadata(uid, document, opts);
 
+    const timestampStatus = hasDraftAndPublish
+      ? this.getStatus(document, meta.availableStatus as any)
+      : undefined;
+
+    type VersionWithStatus = DocumentVersion & { status?: string };
+    let localizations: VersionWithStatus[] | undefined;
+
     // Populate localization statuses
     if (document.localizations?.length) {
-      document.localizations = document.localizations.map((d) => {
+      localizations = document.localizations.map((d) => {
         // Find the counterpart version (same documentId + locale, opposite publishedAt) from
         // the already-fetched versions array, avoiding an extra DB query.
         const counterpart = versions.find(
-          (v) =>
+          (v: DocumentVersion) =>
             v.documentId === d.documentId &&
             v.locale === d.locale &&
             (d.publishedAt === null) !== (v.publishedAt === null)
@@ -547,15 +577,38 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       });
     }
 
+    const localeDocuments = (meta.availableLocales ?? []) as VersionWithStatus[];
+    const candidates: DocumentVersion[] = [
+      ...(timestampStatus === CONTENT_MANAGER_STATUS.PUBLISHED ? [document] : []),
+      ...(localizations ?? []).filter(
+        (localization) => localization.status === CONTENT_MANAGER_STATUS.PUBLISHED
+      ),
+      ...localeDocuments.filter(
+        (localeDocument) => localeDocument.status === CONTENT_MANAGER_STATUS.PUBLISHED
+      ),
+    ];
+    const omittedKeys = hasDraftAndPublish
+      ? await this.findOmittedRelationKeys(uid, candidates)
+      : new Set<string>();
+
+    const applyStatus = (version: VersionWithStatus) => ({
+      ...version,
+      status: this.applyOmittedRelationStatus(version.status, version, omittedKeys),
+    });
+
     return {
       data: {
         ...document,
+        localizations: localizations?.map((localization) => applyStatus(localization)),
         // Add status to the document only if draft and publish is enabled
         status: hasDraftAndPublish
-          ? this.getStatus(document, meta.availableStatus as any)
+          ? this.applyOmittedRelationStatus(timestampStatus, document, omittedKeys)
           : undefined,
       },
-      meta,
+      meta: {
+        ...meta,
+        availableLocales: localeDocuments.map((localeDocument) => applyStatus(localeDocument)),
+      },
     };
   },
 });
