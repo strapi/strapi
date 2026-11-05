@@ -202,6 +202,9 @@ jobs:
         run: yarn test:types:registries
       - name: Strict-off type generation and surface snapshot
         run: yarn test:types:strict-off
+      # nx ignores examples (.nxignore), so the affected targets above never run this one
+      - name: Strict types example application
+        run: yarn test:types:example
 
   unit_back:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'
