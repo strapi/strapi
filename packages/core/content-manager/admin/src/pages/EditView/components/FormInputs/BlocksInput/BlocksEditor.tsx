@@ -22,6 +22,7 @@ import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
+import { withHtmlPaste } from './plugins/withHtmlPaste';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 import { isNonNullable } from './utils/types';
 
@@ -255,7 +256,14 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       .filter(isNonNullable);
 
     const [editor] = React.useState(() =>
-      pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())
+      // Block plugins are applied last, so their paste handling (links, code) runs first
+      pipe(
+        withHistory,
+        withStrapiSchema,
+        withReact,
+        withHtmlPaste(blocks),
+        ...blockRegisteredPlugins
+      )(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();

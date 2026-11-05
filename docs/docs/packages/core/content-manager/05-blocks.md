@@ -217,3 +217,21 @@ const modifiers = {
   },
 };
 ```
+
+## Pasting rich text
+
+When the clipboard holds HTML (from Google Docs, Word, Notion or a web page), the [`withHtmlPaste`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/pages/EditView/components/FormInputs/BlocksInput/plugins/withHtmlPaste.ts) plugin converts it to blocks with [`deserializeHtml`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/pages/EditView/components/FormInputs/BlocksInput/utils/deserializeHtml.ts).
+
+- Only what the schema can store is kept: paragraphs, headings, lists, quotes, code blocks, links and modifiers. Images, tables, colors and fonts are dropped, but their text is kept.
+- Inline styles override tags. Google Docs wraps the whole clipboard in `<b style="font-weight:normal">`, so a tag alone does not make text bold.
+- Nested lists become nested `list` nodes with a higher `indentLevel`, the same shape the editor creates on Tab. Google Docs (`aria-level`) and Word (`mso-list` paragraphs) lists are supported.
+- Links keep their URL only if it passes the same protocol check as the server validator and is not protocol-relative (`//example.com`). Otherwise the text is kept without the link.
+- Blocks styled `white-space: pre` (code copied from an IDE such as VS Code) become code blocks that keep their indentation.
+- Word Online writes headings as `<p role="heading" aria-level="1">`. They become headings, and a bold mark covering a whole heading is dropped.
+- Word-specific parsing lives in `utils/officeHtml.ts`.
+- `utils/tests/fixtures` holds real clipboard captures (Google Docs, Word Online). Tests check that every word of the source survives the conversion.
+- Block types the project removed with `addRichTextBlocks` become paragraphs, and links become text when there is no link block.
+- Above 50,000 elements, the HTML is not converted and the paste falls back to plain text.
+- A single pasted paragraph is inserted at the caret. Several blocks split the current block and go between its two halves. The whole paste is one undo step.
+
+Block plugins wrap the editor after `withHtmlPaste`, so their own paste handling runs first: pasting a URL creates a link, and pasting into a code block inserts plain text. Content copied from another Blocks editor (`application/x-slate-fragment`) is left to Slate.
