@@ -170,3 +170,41 @@ describe('Admin Settings Controller - getSettings read-only echoes', () => {
     });
   });
 });
+
+describe('Admin Settings Controller - updateSettings defaults', () => {
+  const mockSetSettings = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetService.mockImplementation((name) => {
+      if (name === 'upload') {
+        return { setSettings: mockSetSettings } as never;
+      }
+      return {} as never;
+    });
+  });
+
+  test('defaults autoOrientation to false when omitted from update request body', async () => {
+    const ctx = buildContext([], {
+      sizeOptimization: true,
+      responsiveDimensions: true,
+    });
+
+    await adminSettingsController.updateSettings(ctx as Context);
+
+    expect(mockSetSettings).toHaveBeenCalledWith({
+      sizeOptimization: true,
+      responsiveDimensions: true,
+      autoOrientation: false,
+      aiMetadata: true,
+    });
+    expect(ctx.body).toEqual({
+      data: {
+        sizeOptimization: true,
+        responsiveDimensions: true,
+        autoOrientation: false,
+        aiMetadata: true,
+      },
+    });
+  });
+});
