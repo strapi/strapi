@@ -75,7 +75,23 @@ describe('<AuthResponse />', () => {
     expect(establishAdminSession).toHaveBeenCalledWith(dispatchMock, {
       token: 'fake-token',
     });
-    expect(navigateMock).toHaveBeenCalledWith('/auth/login');
+    expect(navigateMock).toHaveBeenCalledWith({ pathname: '/auth/login', search: '' });
+  });
+
+  it('restores the redirectTo persisted before the SSO round trip', () => {
+    (useMatch as jest.Mock).mockReturnValue({ params: { authResponse: 'success' } });
+    (useNavigate as jest.Mock).mockReturnValue(navigateMock);
+    (getCookieValue as jest.Mock).mockReturnValue('fake-token');
+    sessionStorage.setItem('strapi-sso-redirectTo', '/mcp/oauth/consent?ticket=abc');
+
+    render(<AuthResponse />);
+
+    expect(navigateMock).toHaveBeenCalledWith({
+      pathname: '/auth/login',
+      search: `?redirectTo=${encodeURIComponent('/mcp/oauth/consent?ticket=abc')}`,
+    });
+    // The stored value is single-use.
+    expect(sessionStorage.getItem('strapi-sso-redirectTo')).toBeNull();
   });
 
   it('redirects to /auth/oops on success with no token', () => {
