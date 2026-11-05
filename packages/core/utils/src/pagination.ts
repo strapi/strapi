@@ -37,6 +37,14 @@ const STRAPI_DEFAULTS = {
   },
 };
 
+/**
+ * Pagination arguments as they arrive from a query string: values are numbers or numeric strings
+ * (e.g. `?pagination[page]=2`). `withDefaultPagination` always returns numbers.
+ */
+type PaginationInput = {
+  [K in keyof PaginationArgs]?: PaginationArgs[K] | string;
+};
+
 const paginationAttributes = ['start', 'limit', 'page', 'pageSize'];
 
 const withMaxLimit = (limit: number, maxLimit = -1) => {
@@ -66,10 +74,10 @@ const withNoLimit = (pagination: Pagination, maxLimit = -1) => ({
   limit: pagination.limit === -1 ? maxLimit : pagination.limit,
 });
 
-const withDefaultPagination = <T extends Partial<PaginationArgs>>(
+const withDefaultPagination = <T extends PaginationInput>(
   args: T,
   { defaults = {}, maxLimit = -1 } = {}
-) => {
+): Omit<Partial<T>, keyof PaginationArgs> & Pagination => {
   const defaultValues = merge({}, STRAPI_DEFAULTS, defaults);
 
   const usePagePagination = args.page != null || args.pageSize != null;
@@ -104,7 +112,8 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
     const pageArgs =
       args.pageSize == null
         ? omit(args, ['pageSize'])
-        : { ...args, pageSize: Math.max(1, args.pageSize) };
+        : // Math.max converts a numeric string to a number
+          { ...args, pageSize: Math.max(1, args.pageSize as number) };
     const { page, pageSize } = merge({}, defaultValues.page, pageArgs);
     const pageLimit = ensureValidValues({ start: 0, limit: pageSize }).limit;
 
