@@ -20,6 +20,7 @@ import {
   tours,
   deepEncodeQueryValues,
   withEncodedUserParams,
+  toApiFilters,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -67,7 +68,7 @@ import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { CustomOrder, useCustomOrder } from './components/CustomOrder';
-import { listViewFilters as Filters } from './components/Filters';
+import { listViewFilters as Filters, useListViewFilterOptions } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
@@ -320,7 +321,7 @@ const ListViewPage = () => {
     setQuery,
   ]);
 
-  const params = React.useMemo(() => {
+  const queryParams = React.useMemo(() => {
     if (!configurationReady || !schema?.attributes || schema.uid !== model) {
       return buildValidParams(query);
     }
@@ -343,6 +344,15 @@ const ListViewPage = () => {
         : {}),
     });
   }, [attributeRenames, configurationReady, model, query, schema?.attributes, schema?.uid]);
+  const filterOptions = useListViewFilterOptions(schema, list);
+  // A date-time filter stores a day or a minute: the API reads it as the instants it covers
+  const params = React.useMemo(
+    () =>
+      queryParams.filters
+        ? { ...queryParams, filters: toApiFilters(queryParams.filters, filterOptions) }
+        : queryParams,
+    [queryParams, filterOptions]
+  );
   const hasAppliedFilters = (query.filters?.$and?.length ?? 0) > 0;
   const hasStatusFilter = Boolean(
     query.filters?.$and?.some(
@@ -597,7 +607,7 @@ const ListViewPage = () => {
 
   const actions =
     list.settings.filterable && schema ? (
-      <Filters.Root schema={schema} layout={list}>
+      <Filters.Root schema={schema} options={filterOptions}>
         <Layouts.Action
           endActions={endActions}
           startActions={startActions}
