@@ -48,6 +48,17 @@ interface NoteSchema extends Struct.CollectionTypeSchema {
   };
 }
 
+interface HomepageSchema extends Struct.SingleTypeSchema {
+  collectionName: 'homepages';
+  info: { singularName: 'homepage'; pluralName: 'homepages'; displayName: 'Homepage' };
+  options: { draftAndPublish: true };
+  pluginOptions: { i18n: { localized: true } };
+  attributes: {
+    title: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+  };
+}
+
 interface CategorySchema extends Struct.CollectionTypeSchema {
   collectionName: 'categories';
   info: { singularName: 'category'; pluralName: 'categories'; displayName: 'Category' };
@@ -70,6 +81,7 @@ declare global {
         'api::category.category': CategorySchema;
         'api::page.page': PageSchema;
         'api::note.note': NoteSchema;
+        'api::homepage.homepage': HomepageSchema;
       }
       interface ComponentSchemas {
         'shared.seo': SeoSchema;
@@ -249,6 +261,103 @@ declare const coreChecks: [
   Expect<Equal<keyof NonNullable<Awaited<typeof coreSelected>>, 'id' | 'documentId' | 'title'>>,
 ];
 coreChecks satisfies unknown;
+
+// The core service passes its other params to the Document Service as they are: `filters`, `sort`,
+// `locale`, and for `find` the REST `pagination`. `fields`, `populate` and `status` still narrow.
+declare const articleService: Core.CoreAPI.Service.ContentType<'api::article.article'>;
+const coreQuery = articleService.find({
+  fields: ['title'],
+  populate: ['category'],
+  filters: { title: { $eq: 'x' }, category: { name: { $contains: 'y' } } },
+  sort: ['title:asc'],
+  pagination: { page: 1, pageSize: 10, withCount: false },
+  locale: 'fr',
+});
+const coreQueryOne = articleService.findOne('a', {
+  fields: ['title'],
+  populate: ['category'],
+  filters: { views: { $gt: 1 } },
+  sort: 'title:desc',
+  locale: 'fr',
+});
+const coreQueryOnly = articleService.find({
+  filters: { title: { $eq: 'x' } },
+  sort: 'views:desc',
+  pagination: { start: 0, limit: 5, withCount: true },
+  locale: 'fr',
+});
+const coreQueryOnlyOne = articleService.findOne('a', { filters: { views: { $gt: 1 } } });
+const findParams = {
+  filters: { views: { $gt: 1 } },
+  sort: { title: 'asc' },
+  pagination: { start: 0, limit: 5 },
+  locale: 'fr',
+} as const;
+const findOneParams = { filters: { views: { $gt: 1 } }, sort: 'views', locale: 'fr' } as const;
+const coreFromVariable = articleService.find(findParams);
+const coreOneFromVariable = articleService.findOne('a', findOneParams);
+// A filter value from a variable, without `as const`.
+declare const title: string;
+void articleService.find({ filters: { title } });
+const mutableParams = { filters: { title }, pagination: { page: 1, pageSize: 10 } };
+void articleService.find(mutableParams);
+const coreDraftQuery = pageService.find({
+  status: 'draft',
+  filters: { title: { $eq: 'x' } },
+  pagination: { page: 2 },
+  locale: 'fr',
+});
+type CoreQueryEntry = NonNullable<Awaited<typeof coreQueryOne>>;
+declare const coreQueryChecks: [
+  Expect<
+    Equal<
+      keyof Awaited<typeof coreQuery>['results'][number],
+      'id' | 'documentId' | 'title' | 'category'
+    >
+  >,
+  Expect<Equal<keyof CoreQueryEntry, 'id' | 'documentId' | 'title' | 'category'>>,
+  Expect<Equal<CoreQueryEntry['category'], Category | null>>,
+  Expect<Equal<Awaited<typeof coreQueryOnly>['results'][number], Article>>,
+  Expect<Equal<Awaited<typeof coreQueryOnlyOne>, Article | null>>,
+  Expect<Equal<Awaited<typeof coreFromVariable>['results'][number], Article>>,
+  Expect<Equal<Awaited<typeof coreOneFromVariable>, Article | null>>,
+  Expect<Equal<Awaited<typeof coreDraftQuery>['results'][number]['publishedAt'], null>>,
+];
+coreQueryChecks satisfies unknown;
+// The single type's `find` reads with the Document Service's `findFirst`, which takes them too.
+declare const homepageService: Core.CoreAPI.Service.ContentType<'api::homepage.homepage'>;
+const homepage = homepageService.find({ locale: 'fr' });
+const homepageQuery = homepageService.find({
+  fields: ['title'],
+  status: 'draft',
+  filters: { title: { $eq: 'x' } },
+  sort: 'title',
+  locale: 'fr',
+});
+const homepageParams = { filters: { title: { $eq: 'x' } }, locale: 'fr' } as const;
+const homepageFromVariable = homepageService.find(homepageParams);
+type Homepage = NonNullable<Awaited<typeof homepage>>;
+declare const singleTypeQueryChecks: [
+  Expect<Equal<Homepage['publishedAt'], string>>,
+  Expect<Equal<keyof NonNullable<Awaited<typeof homepageQuery>>, 'id' | 'documentId' | 'title'>>,
+  Expect<Equal<NonNullable<Awaited<typeof homepageQuery>>['title'], string | null>>,
+  Expect<Equal<NonNullable<Awaited<typeof homepageFromVariable>>, Homepage>>,
+];
+singleTypeQueryChecks satisfies unknown;
+
+// The other params keep the Document Service checks. `fields` is passed so that each case fails on
+// the checked key, not on a params object without any known key.
+// @ts-expect-error `filters` lists attributes of the schema.
+void articleService.find({ fields: ['title'], filters: { missing: { $eq: 1 } } });
+// @ts-expect-error `sort` lists attributes of the schema.
+void articleService.findOne('a', { fields: ['title'], sort: 'missing' });
+// @ts-expect-error `pagination` takes one notation: pages or offsets.
+void articleService.find({ fields: ['title'], pagination: { page: 1, limit: 5 } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void articleService.find({ fields: ['title'], lookup: { locale: 'fr' } });
+// @ts-expect-error `findFirst` reads one entry: its `locale` is a single code.
+void homepageService.find({ fields: ['title'], locale: ['fr', 'en'] });
+
 // Known gap (filters): filter values are not checked against the attribute type. This compiles,
 // so it is not an `@ts-expect-error` case.
 void articles.findMany({ filters: { views: { $eq: 'not a number' } } });

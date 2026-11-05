@@ -3,7 +3,7 @@ import type * as Utils from '../../utils';
 
 import type { Documents } from '../../modules';
 import type { IsStrict } from '../strictness';
-import type { Pick as ParamsPick } from '../../modules/documents/params';
+import type { Pick as ParamsPick, Pagination } from '../../modules/documents/params';
 import type { StrictResult } from '../../modules/documents/result';
 import type { CreateInput, UpdateInput } from '../../modules/documents/params/write';
 
@@ -50,13 +50,57 @@ type StrictPaginatedEntities = {
 type FindResult = IsStrict extends false ? PaginatedEntities : StrictPaginatedEntities;
 
 /**
- * The params of a core service read, as far as its result depends on them: `fields`, `populate` and
- * `status`. Other params, such as `filters` or `pagination`, are accepted as they are.
+ * The params of a core service method that its result depends on: `fields`, `populate` and `status`.
+ * Each method adds the other params it passes to the Document Service as they are.
  */
 type ReadParams<TContentTypeUID extends UID.ContentType> = ParamsPick<
   TContentTypeUID,
   'fields' | 'populate' | 'status'
 >;
+
+/**
+ * `lookup` is typed `undefined`: the Document Service builds it itself and throws
+ * `ValidationError("Invalid params: 'lookup'")` on one from the caller.
+ */
+type NoLookup = { lookup?: undefined };
+
+/**
+ * The params of a collection type's `find`, with strict types. The core service passes them to the
+ * Document Service's `findMany` and `count`, so it takes their params, except `lookup` and the
+ * top-level `start`, `limit`, `page` and `pageSize`: the service sets those from `pagination`, the
+ * REST notation (`core-api/service/collection-type.ts` in `@strapi/core`). `pagination` takes pages
+ * or offsets, not both, and `withCount` decides whether the service counts the entries.
+ */
+type FindParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContentTypeUID> &
+  ParamsPick<
+    TContentTypeUID,
+    'filters' | '_q' | 'sort' | 'publicationFilter' | 'hasPublishedVersion' | 'locale' | 'plugin'
+  > & { pagination?: Pagination.Any & { withCount?: boolean } } & NoLookup;
+
+/**
+ * The params of a collection type's `findOne`, with strict types: those of the Document Service's
+ * `findOne`, except `documentId`, which the service sets, and `lookup`.
+ */
+type FindOneParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContentTypeUID> &
+  ParamsPick<TContentTypeUID, 'filters' | 'sort' | 'locale:string'> &
+  NoLookup;
+
+/**
+ * The params of a single type's `find`, with strict types: those of the Document Service's
+ * `findFirst`, except `lookup`.
+ */
+type FindFirstParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContentTypeUID> &
+  ParamsPick<
+    TContentTypeUID,
+    | 'filters'
+    | '_q'
+    | 'sort'
+    | 'publicationFilter'
+    | 'hasPublishedVersion'
+    | 'locale:string'
+    | 'plugin'
+  > &
+  NoLookup;
 
 /**
  * An entry the core service returns, with strict types. The core service calls the Document Service
@@ -152,13 +196,13 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
    * `results` holds the entries of the page; `pagination` keeps the notation of the request, with
    * `total` (and `pageCount` for pages) when the service counts the entries.
    */
-  find<const TParams extends ReadParams<TContentTypeUID>>(
+  find<const TParams extends FindParams<TContentTypeUID>>(
     params: TParams
   ): Promise<
     Omit<StrictPaginatedEntities, 'results'> & { results: Entry<TContentTypeUID, TParams>[] }
   >;
   /** `null` when no entry of the document matches. */
-  findOne<const TParams extends ReadParams<TContentTypeUID>>(
+  findOne<const TParams extends FindOneParams<TContentTypeUID>>(
     docId: Documents.ID,
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
@@ -191,7 +235,7 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
  */
 export interface StrictSingleType<TContentTypeUID extends UID.ContentType> extends Base {
   /** `null` when the single type has no entry. */
-  find<const TParams extends ReadParams<TContentTypeUID>>(
+  find<const TParams extends FindFirstParams<TContentTypeUID>>(
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
   /**
