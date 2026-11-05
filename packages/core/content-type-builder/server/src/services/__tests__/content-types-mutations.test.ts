@@ -149,6 +149,35 @@ describe('content type mutation compensation', () => {
     } as any;
   });
 
+  it('rejects a direct call without displayName before touching the schema or API files', async () => {
+    const { displayName, ...withoutDisplayName } = createInput.contentType;
+    const { generate } = jest.requireMock('@strapi/generators');
+
+    await expect(
+      createContentType({
+        ...createInput,
+        contentType: { ...withoutDisplayName, info: { displayName } },
+      })
+    ).rejects.toThrow('A content type requires a displayName');
+
+    expect(builder.createContentType).not.toHaveBeenCalled();
+    expect(generate).not.toHaveBeenCalled();
+    expect(builder.writeFiles).not.toHaveBeenCalled();
+  });
+
+  it('generates the API with the payload displayName', async () => {
+    const { generate } = jest.requireMock('@strapi/generators');
+
+    await createContentType(createInput);
+
+    expect(generate).toHaveBeenCalledWith(
+      'content-type',
+      expect.objectContaining({ displayName: 'Article' }),
+      expect.anything()
+    );
+    expect(builder.writeFiles).toHaveBeenCalledTimes(1);
+  });
+
   it('removes a generated API skeleton when standalone schema creation fails', async () => {
     files.schemas.delete(contentType.uid);
     files.apis.clear();
