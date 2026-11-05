@@ -403,6 +403,11 @@ const ComponentCopyModal = ({
    * Loads the entry components are copied from.
    */
   const handleSelectEntry = async (row: EntryRow) => {
+    // Picking the entry that's already selected keeps the components ticked in it.
+    if (selectedDocumentIdRef.current === row.documentId) {
+      return;
+    }
+
     selectedDocumentIdRef.current = row.documentId;
     setSelectedEntry({ documentId: row.documentId, title: row.title, isCurrent: row.isCurrent });
     setSelectedPaths([]);
@@ -438,7 +443,15 @@ const ComponentCopyModal = ({
       return;
     }
 
-    setSourceDocument(result.data?.data ?? null);
+    // Without its data the entry can't be previewed: unselect it, so it can be picked again.
+    if (!result.data?.data) {
+      selectedDocumentIdRef.current = null;
+      setSelectedEntry(null);
+
+      return;
+    }
+
+    setSourceDocument(result.data.data);
   };
 
   const isCurrentEntrySelected = selectedEntry?.isCurrent ?? false;

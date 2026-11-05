@@ -415,6 +415,18 @@ describe('ComponentCopyModal', () => {
       ).toBeInTheDocument();
     });
 
+    it('keeps the selected components when the picked entry is clicked again', async () => {
+      const { user } = render();
+
+      await user.click(screen.getByRole('button', { name: /Le Petit Bistro/ }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Weekdays' }));
+      await user.click(screen.getByRole('button', { name: /Le Petit Bistro/ }));
+
+      expect(screen.getByRole('checkbox', { name: 'Weekdays' })).toBeChecked();
+      expect(screen.getByRole('button', { name: 'Use content' })).toBeEnabled();
+      expect(mockGetDocument).toHaveBeenCalledTimes(1);
+    });
+
     it('closes without a success message when the field turns the copies down', async () => {
       const onClose = jest.fn();
       const onInsert = jest.fn(() => false);
@@ -444,6 +456,25 @@ describe('ComponentCopyModal', () => {
         'false'
       );
       expect(screen.getByText('Pick an entry to see its openingTimes.')).toBeInTheDocument();
+    });
+
+    it('unselects an entry that comes back without its data, so that it can be picked again', async () => {
+      mockGetDocument.mockImplementationOnce(() => Promise.resolve({ data: {} }));
+      const { user } = render();
+
+      await user.click(screen.getByRole('button', { name: /Le Petit Bistro/ }));
+
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: /Le Petit Bistro/ })).toHaveAttribute(
+          'aria-pressed',
+          'false'
+        )
+      );
+
+      await user.click(screen.getByRole('button', { name: /Le Petit Bistro/ }));
+
+      expect(await screen.findByText('Le Petit Bistro · openingTimes')).toBeInTheDocument();
+      expect(mockGetDocument).toHaveBeenCalledTimes(2);
     });
 
     it('keeps the focus on the picked entry while it loads', async () => {
