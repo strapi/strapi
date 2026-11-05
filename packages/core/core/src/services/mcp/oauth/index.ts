@@ -32,9 +32,8 @@ export const createMcpOAuthModule = (strapi: Core.Strapi, config: McpOAuthConfig
 
   let jwtSecret: string | null = null;
   const getJwtSecret = () => {
-    if (jwtSecret === null) {
-      jwtSecret = config.getJwtSecret();
-    }
+    jwtSecret ??= config.getJwtSecret();
+
     return jwtSecret;
   };
 

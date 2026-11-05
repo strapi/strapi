@@ -38,6 +38,103 @@ const getOptionalString = (
   return value;
 };
 
+type RegistrationMetadata = {
+  redirectUris: string[];
+  tokenEndpointAuthMethod: TokenEndpointAuthMethod;
+  name?: string;
+  clientUri?: string;
+  logoUri?: string;
+  scope?: string;
+};
+
+type MetadataResult =
+  | { ok: true; metadata: RegistrationMetadata }
+  | { ok: false; error: 'invalid_redirect_uri' | 'invalid_client_metadata'; description: string };
+
+const invalidMetadata = (description: string): MetadataResult => ({
+  ok: false,
+  error: 'invalid_client_metadata',
+  description,
+});
+
+const parseRedirectUris = (value: unknown): string[] | null => {
+  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_REDIRECT_URIS) {
+    return null;
+  }
+
+  return value.every((uri) => isAllowedRedirectUri(uri)) ? (value as string[]) : null;
+};
+
+const isSupportedGrantTypeList = (value: unknown): boolean =>
+  value === undefined ||
+  (Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((type) => (SUPPORTED_GRANT_TYPES as readonly string[]).includes(type)));
+
+const isSupportedResponseTypeList = (value: unknown): boolean =>
+  value === undefined ||
+  (Array.isArray(value) &&
+    value.every((type) => (SUPPORTED_RESPONSE_TYPES as readonly string[]).includes(type)));
+
+const parseClientMetadata = (body: Record<string, unknown>): MetadataResult => {
+  const redirectUris = parseRedirectUris(body.redirect_uris);
+
+  if (redirectUris === null) {
+    return {
+      ok: false,
+      error: 'invalid_redirect_uri',
+      description: `redirect_uris must contain 1-${MAX_REDIRECT_URIS} allowed redirect URIs (https, loopback http, or a safe custom scheme; no fragments)`,
+    };
+  }
+
+  const tokenEndpointAuthMethod = body.token_endpoint_auth_method ?? 'client_secret_basic';
+
+  if (
+    !SUPPORTED_TOKEN_ENDPOINT_AUTH_METHODS.includes(
+      tokenEndpointAuthMethod as TokenEndpointAuthMethod
+    )
+  ) {
+    return invalidMetadata('Unsupported token_endpoint_auth_method');
+  }
+
+  if (!isSupportedGrantTypeList(body.grant_types)) {
+    return invalidMetadata('grant_types may only contain authorization_code and refresh_token');
+  }
+
+  if (!isSupportedResponseTypeList(body.response_types)) {
+    return invalidMetadata('response_types may only contain code');
+  }
+
+  const name = getOptionalString(body, 'client_name', 256);
+  const clientUri = getOptionalString(body, 'client_uri', 2000);
+  const logoUri = getOptionalString(body, 'logo_uri', 2000);
+  const scope = getOptionalString(body, 'scope', 512);
+
+  if (name === null || clientUri === null || logoUri === null || scope === null) {
+    return invalidMetadata('Invalid client metadata value');
+  }
+
+  if (clientUri !== undefined && !isHttpUrl(clientUri)) {
+    return invalidMetadata('client_uri must be an http(s) URL');
+  }
+
+  if (logoUri !== undefined && !isHttpUrl(logoUri)) {
+    return invalidMetadata('logo_uri must be an http(s) URL');
+  }
+
+  return {
+    ok: true,
+    metadata: {
+      redirectUris,
+      tokenEndpointAuthMethod: tokenEndpointAuthMethod as TokenEndpointAuthMethod,
+      ...(name !== undefined ? { name } : {}),
+      ...(clientUri !== undefined ? { clientUri } : {}),
+      ...(logoUri !== undefined ? { logoUri } : {}),
+      ...(scope !== undefined ? { scope } : {}),
+    },
+  };
+};
+
 /**
  * POST /mcp/oauth/register — RFC 7591 dynamic client registration. Registration is open
  * (standard for MCP): a registered client grants nothing by itself, every grant still
@@ -61,99 +158,14 @@ export const createRegisterHandler =
       );
     }
 
-    const redirectUris = body.redirect_uris;
+    const parsed = parseClientMetadata(body);
 
-    if (
-      !Array.isArray(redirectUris) ||
-      redirectUris.length === 0 ||
-      redirectUris.length > MAX_REDIRECT_URIS ||
-      !redirectUris.every((uri) => isAllowedRedirectUri(uri))
-    ) {
-      return sendOAuthError(
-        ctx,
-        400,
-        'invalid_redirect_uri',
-        `redirect_uris must contain 1-${MAX_REDIRECT_URIS} allowed redirect URIs (https, loopback http, or a safe custom scheme; no fragments)`
-      );
-    }
-
-    const tokenEndpointAuthMethod = body.token_endpoint_auth_method ?? 'client_secret_basic';
-
-    if (
-      !SUPPORTED_TOKEN_ENDPOINT_AUTH_METHODS.includes(
-        tokenEndpointAuthMethod as TokenEndpointAuthMethod
-      )
-    ) {
-      return sendOAuthError(
-        ctx,
-        400,
-        'invalid_client_metadata',
-        'Unsupported token_endpoint_auth_method'
-      );
-    }
-
-    const grantTypes = body.grant_types;
-
-    if (
-      grantTypes !== undefined &&
-      (!Array.isArray(grantTypes) ||
-        grantTypes.length === 0 ||
-        !grantTypes.every((type) => (SUPPORTED_GRANT_TYPES as readonly string[]).includes(type)))
-    ) {
-      return sendOAuthError(
-        ctx,
-        400,
-        'invalid_client_metadata',
-        'grant_types may only contain authorization_code and refresh_token'
-      );
-    }
-
-    const responseTypes = body.response_types;
-
-    if (
-      responseTypes !== undefined &&
-      (!Array.isArray(responseTypes) ||
-        !responseTypes.every((type) =>
-          (SUPPORTED_RESPONSE_TYPES as readonly string[]).includes(type)
-        ))
-    ) {
-      return sendOAuthError(
-        ctx,
-        400,
-        'invalid_client_metadata',
-        'response_types may only contain code'
-      );
-    }
-
-    const clientName = getOptionalString(body, 'client_name', 256);
-    const clientUri = getOptionalString(body, 'client_uri', 2000);
-    const logoUri = getOptionalString(body, 'logo_uri', 2000);
-    const scope = getOptionalString(body, 'scope', 512);
-
-    if (clientName === null || clientUri === null || logoUri === null || scope === null) {
-      return sendOAuthError(ctx, 400, 'invalid_client_metadata', 'Invalid client metadata value');
-    }
-
-    if (clientUri !== undefined && !isHttpUrl(clientUri)) {
-      return sendOAuthError(
-        ctx,
-        400,
-        'invalid_client_metadata',
-        'client_uri must be an http(s) URL'
-      );
-    }
-
-    if (logoUri !== undefined && !isHttpUrl(logoUri)) {
-      return sendOAuthError(ctx, 400, 'invalid_client_metadata', 'logo_uri must be an http(s) URL');
+    if (!parsed.ok) {
+      return sendOAuthError(ctx, 400, parsed.error, parsed.description);
     }
 
     const { client, clientSecret } = await clientStore.register({
-      ...(clientName !== undefined ? { name: clientName } : {}),
-      redirectUris: redirectUris as string[],
-      tokenEndpointAuthMethod: tokenEndpointAuthMethod as TokenEndpointAuthMethod,
-      ...(scope !== undefined ? { scope } : {}),
-      ...(clientUri !== undefined ? { clientUri } : {}),
-      ...(logoUri !== undefined ? { logoUri } : {}),
+      ...parsed.metadata,
       registrationSource: 'dynamic',
     });
 

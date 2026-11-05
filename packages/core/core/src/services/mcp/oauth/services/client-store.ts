@@ -53,9 +53,9 @@ export const createClientStore = (strapi: Core.Strapi) => {
   return {
     hashSecret,
 
-    async findByClientId(clientId: string): Promise<McpOAuthClient | null> {
+    findByClientId(clientId: string): Promise<McpOAuthClient | null> {
       if (typeof clientId !== 'string' || clientId.length === 0) {
-        return null;
+        return Promise.resolve(null);
       }
 
       return strapi.db.query(MCP_OAUTH_CLIENT_UID).findOne({ where: { clientId } });

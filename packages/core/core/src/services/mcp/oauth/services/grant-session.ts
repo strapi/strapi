@@ -72,7 +72,7 @@ export const createGrantSessionService = (strapi: Core.Strapi, jwtSecret: string
     // store directly by UID (see session-manager.ts createDatabaseProvider).
     const row = await strapi.db.query(SESSION_UID).findOne({ where: { sessionId } });
 
-    if (!row || row.origin !== MCP_SESSION_ORIGIN) {
+    if (row?.origin !== MCP_SESSION_ORIGIN) {
       return null;
     }
 

@@ -1,14 +1,13 @@
 import { createHmac } from 'node:crypto';
 import type { Core } from '@strapi/types';
 import { CONSENT_PAGE_PATH, OAUTH_PATHS } from './constants';
+import { trimTrailingSlashes } from './utils/url';
 
 export const DEFAULT_ACCESS_TOKEN_LIFESPAN = 30 * 60; // 30 minutes
 export const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60; // 14 days
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60; // 30 days
 export const DEFAULT_AUTHORIZATION_CODE_LIFESPAN = 120; // 2 minutes
 export const DEFAULT_CONSENT_TICKET_LIFESPAN = 300; // 5 minutes
-
-const trimTrailingSlashes = (url: string): string => url.replace(/\/+$/, '');
 
 const resolvePositiveInteger = (strapi: Core.Strapi, key: string, fallback: number): number => {
   const raw = strapi.config.get<unknown>(key);
@@ -42,9 +41,9 @@ export class McpOAuthConfiguration {
 
   readonly consentTicketLifespan: number;
 
-  #strapi: Core.Strapi;
+  readonly #strapi: Core.Strapi;
 
-  #mcpPath: string;
+  readonly #mcpPath: string;
 
   constructor(strapi: Core.Strapi, mcpPath: string) {
     this.#strapi = strapi;

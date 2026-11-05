@@ -40,7 +40,7 @@ export const createMcpOAuthTokenAuthenticator = (strapi: Core.Strapi) => ({
       .query('admin::user')
       .findOne({ where: { id: userId }, populate: ['roles'] });
 
-    if (!user || user.isActive !== true || user.blocked === true) {
+    if (user?.isActive !== true || user.blocked === true) {
       return invalid;
     }
 

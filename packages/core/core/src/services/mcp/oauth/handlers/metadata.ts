@@ -7,7 +7,7 @@ import type { McpOAuthHandlerDependencies } from './types';
  */
 export const createProtectedResourceMetadataHandler =
   (deps: McpOAuthHandlerDependencies): Core.MiddlewareHandler =>
-  async (ctx) => {
+  (ctx) => {
     const { config } = deps;
 
     ctx.body = {
@@ -22,7 +22,7 @@ export const createProtectedResourceMetadataHandler =
  */
 export const createAuthorizationServerMetadataHandler =
   (deps: McpOAuthHandlerDependencies): Core.MiddlewareHandler =>
-  async (ctx) => {
+  (ctx) => {
     const { config } = deps;
 
     ctx.body = {

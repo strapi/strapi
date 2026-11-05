@@ -5,6 +5,7 @@ import { sendOAuthError } from '../utils/oauth-errors';
 import { authenticateClient } from '../utils/client-authentication';
 import type { McpOAuthClient } from '../services/client-store';
 import type { GrantTokens } from '../services/grant-session';
+import { trimTrailingSlashes } from '../utils/url';
 import type { McpOAuthHandlerDependencies } from './types';
 
 const getBodyParam = (ctx: Context, name: string): string | undefined => {
@@ -13,8 +14,6 @@ const getBodyParam = (ctx: Context, name: string): string | undefined => {
 
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 };
-
-const normalizeResource = (resource: string): string => resource.replace(/\/+$/, '');
 
 const sendTokens = (ctx: Context, tokens: GrantTokens, accessTokenLifespan: number): void => {
   ctx.status = 200;
@@ -79,7 +78,10 @@ const handleAuthorizationCodeGrant = async (
 
   const resource = getBodyParam(ctx, 'resource');
 
-  if (resource !== undefined && normalizeResource(resource) !== (row.resource ?? config.resource)) {
+  if (
+    resource !== undefined &&
+    trimTrailingSlashes(resource) !== (row.resource ?? config.resource)
+  ) {
     return sendOAuthError(ctx, 400, 'invalid_target', 'Unknown resource');
   }
 

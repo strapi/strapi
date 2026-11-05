@@ -3,6 +3,7 @@ import { isValidCodeChallenge } from '../utils/pkce';
 import { isRegisteredRedirectUri } from '../utils/redirect-uri';
 import { buildErrorRedirect, sendOAuthError } from '../utils/oauth-errors';
 import { signConsentTicket } from '../services/consent-ticket';
+import { trimTrailingSlashes } from '../utils/url';
 import type { McpOAuthHandlerDependencies } from './types';
 
 const getSingleQueryParam = (query: Record<string, unknown>, name: string): string | undefined => {
@@ -10,8 +11,6 @@ const getSingleQueryParam = (query: Record<string, unknown>, name: string): stri
 
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 };
-
-const normalizeResource = (resource: string): string => resource.replace(/\/+$/, '');
 
 /**
  * GET /mcp/oauth/authorize — validates the authorization request, then hands the browser
@@ -76,7 +75,7 @@ export const createAuthorizeHandler =
 
     const resource = getSingleQueryParam(query, 'resource');
 
-    if (resource !== undefined && normalizeResource(resource) !== config.resource) {
+    if (resource !== undefined && trimTrailingSlashes(resource) !== config.resource) {
       return redirectError('invalid_target', 'Unknown resource');
     }
 
@@ -90,7 +89,7 @@ export const createAuthorizeHandler =
         codeChallengeMethod: 'S256',
         ...(scope !== undefined ? { scope } : {}),
         ...(state !== undefined ? { state } : {}),
-        ...(resource !== undefined ? { resource: normalizeResource(resource) } : {}),
+        ...(resource !== undefined ? { resource: trimTrailingSlashes(resource) } : {}),
       },
       config.getJwtSecret(),
       config.consentTicketLifespan

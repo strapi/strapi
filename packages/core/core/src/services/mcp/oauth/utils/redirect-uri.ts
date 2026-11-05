@@ -62,5 +62,5 @@ export const isRegisteredRedirectUri = (registeredUris: unknown, requested: unkn
     return false;
   }
 
-  return registeredUris.some((registered) => registered === requested);
+  return registeredUris.includes(requested);
 };
