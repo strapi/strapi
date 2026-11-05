@@ -1,7 +1,7 @@
 import { omit, pick, defaults, isEmpty, intersection, get, isObject, cloneDeep } from 'lodash';
 import { subject as asSubject } from '@casl/ability';
 
-import type { UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import {
   contentTypes,
@@ -13,6 +13,10 @@ import {
 } from '@strapi/utils';
 import { createPermissionFieldsCache } from './permission-fields';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
+import type {
+  PermissionsManagerSanitizeOptions,
+  PermissionsManagerSanitizers,
+} from '../../../types';
 
 const {
   visitors: { removePassword, expandWildcardPopulate },
@@ -38,7 +42,24 @@ const {
 const COMPONENT_FIELDS = ['__component'];
 const STATIC_FIELDS = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
 
-export default ({ action, ability, model }: any) => {
+/**
+ * With strict types, one wrapped sanitizer serves the three sanitizers of the contract, and the
+ * factory's result gives each its own signature. Without, as on develop.
+ */
+type WrappedSanitize = Core.IsStrict extends true
+  ? PermissionsManagerSanitizers['sanitizeOutput'] & PermissionsManagerSanitizers['sanitizeQuery']
+  : (data: unknown, options?: any) => Promise<unknown>;
+
+/** With strict types, the sanitizers of the contract. Without, as on develop. */
+type SanitizeHelpers = Core.IsStrict extends true
+  ? PermissionsManagerSanitizers
+  : {
+      sanitizeOutput: (data: unknown, options?: any) => Promise<unknown>;
+      sanitizeInput: (data: unknown, options?: any) => Promise<unknown>;
+      sanitizeQuery: (data: unknown, options?: any) => Promise<unknown>;
+    };
+
+export default ({ action, ability, model }: any): SanitizeHelpers => {
   const schema = strapi.getModel(model);
 
   const { removeDisallowedFields } = sanitize.visitors;
@@ -190,7 +211,10 @@ export default ({ action, ability, model }: any) => {
   const wrapSanitize = (createSanitizeFunction: any) => {
     const { getPermissionFields } = createPermissionFieldsCache(ability);
 
-    const wrappedSanitize = async (data: unknown, options = {} as any): Promise<unknown> => {
+    const wrappedSanitize: WrappedSanitize = async (
+      data: unknown,
+      options: PermissionsManagerSanitizeOptions = {}
+    ) => {
       if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
       }

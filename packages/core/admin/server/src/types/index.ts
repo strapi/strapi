@@ -129,12 +129,37 @@ type StrictActionProvider = Omit<
   ): ReturnType<ActionProvider['unstable_aliases']>;
 };
 type PermissionsManager = ReturnType<(typeof PermissionService)['createPermissionsManager']>;
+
+/** The subject and action a sanitizer checks the data against; both default to the manager's. */
+export type PermissionsManagerSanitizeOptions = { subject?: unknown; action?: string };
+
+/**
+ * A copy of a query without the filters, sort, populate and fields the ability does not permit. A
+ * wildcard populate is expanded to the model's relations.
+ */
+type PermissionsManagerSanitizedQuery = Record<string, unknown>;
+
+/** The permissions manager sanitizers. An array is sanitized entity by entity. */
+export type PermissionsManagerSanitizers = {
+  /** Resolves to `data` without the fields the ability may not read. */
+  sanitizeOutput<TData>(data: TData, options?: PermissionsManagerSanitizeOptions): Promise<TData>;
+  /** Resolves to `data` without the fields the ability may not write. */
+  sanitizeInput<TData>(data: TData, options?: PermissionsManagerSanitizeOptions): Promise<TData>;
+  sanitizeQuery(
+    query: unknown,
+    options?: PermissionsManagerSanitizeOptions
+  ): Promise<PermissionsManagerSanitizedQuery>;
+};
+
+type PermissionsManagerSanitizerName = keyof PermissionsManagerSanitizers;
+
 type SectionsBuilder = (typeof PermissionService)['sectionsBuilder'];
 
 /**
  * The `admin::permission` service as runtime calls it. The implementation keeps its published
  * develop signatures: the action provider requires a category, permission queries take two
- * arguments, and section hooks receive no arguments.
+ * arguments, and section hooks receive no arguments. With strict types, the permissions manager
+ * sanitizers resolve to the data they were given.
  */
 type PermissionServiceContract = Omit<
   typeof PermissionService,
@@ -142,13 +167,15 @@ type PermissionServiceContract = Omit<
 > & {
   createPermissionsManager(
     ...args: Parameters<(typeof PermissionService)['createPermissionsManager']>
-  ): Omit<PermissionsManager, 'addPermissionsQueryTo'> & {
+  ): Omit<PermissionsManager, 'addPermissionsQueryTo' | PermissionsManagerSanitizerName> & {
     /** The query defaults to `{}`, the action to the manager's action. */
     addPermissionsQueryTo(
       query?: object,
       action?: unknown
     ): ReturnType<PermissionsManager['addPermissionsQueryTo']>;
-  };
+  } & (Core.IsStrict extends true
+      ? PermissionsManagerSanitizers
+      : Pick<PermissionsManager, PermissionsManagerSanitizerName>);
   sectionsBuilder: Omit<SectionsBuilder, 'addHandler' | 'addMatcher'> & {
     addHandler(
       sectionName: string,
