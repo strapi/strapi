@@ -25,6 +25,8 @@ Strapi’s polymorphic relation kinds are **`morphToOne`**, **`morphToMany`**, a
 
 **`{ set: null }` on media** — `toAssocs` drops a null `set`, so the morph branch sees an empty delta. A guard keeps the released behaviour: a bare `{ set: null }` clears a media field, and `{ set: null }` next to `connect` / `disconnect` applies the delta. Regular relations treat a bare `{ set: null }` as a no-op. The unified meaning is tracked in [#27432](https://github.com/strapi/strapi/issues/27432).
 
+When an inverse `morphOne` / `morphMany` targets a `morphToOne`, `attachRelations` writes the owner into the morph columns of the target rows (first entry for `morphOne`, every entry for `morphMany`) and skips an empty value. Each target row stores a single owner, so publish does not copy these links: they stay on the draft.
+
 **Reads (populate)** — `packages/core/database/src/query/helpers/populate/apply.ts` dispatches on `attribute.relation`. `morphToOne` and `morphToMany` load target rows per type; inverse `morphOne` / `morphMany` traverse the inverse. Polymorphic targets use `populate.on` in the query for per-UID options. The populated object for a morph item sets the type discriminator **after** target row fields so the target content-type UID (in `typeField`, default `__type`) is always authoritative if a name collides.
 
 ## Document service

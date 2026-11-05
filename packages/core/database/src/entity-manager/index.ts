@@ -652,11 +652,23 @@ export const createEntityManager = (db: Database): EntityManager => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
-            const relId = toId(cleanRelationData.set?.[0]);
+            // set happens before connect/disconnect
+            const dataset = cleanRelationData.set ?? cleanRelationData.connect ?? [];
+
+            // Copy flows (publish, discardDraft) pass the populated value, which can be empty
+            // TODO @Nico the document service drops these ids on publish (no `__type` on inverse
+            // morph items), so links stay on the draft. Moving them would empty the draft, since
+            // a target row stores a single owner: decide the copy semantics first.
+            if (dataset.length === 0) {
+              continue;
+            }
+
+            // morphOne links a single entry, morphMany links all of them
+            const relIds = attribute.relation === 'morphOne' ? [toId(dataset[0])] : toIds(dataset);
 
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: relId })
+              .where({ id: relIds })
               .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
