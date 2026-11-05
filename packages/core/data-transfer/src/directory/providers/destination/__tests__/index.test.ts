@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 
 import fs from 'fs-extra';
@@ -6,7 +6,18 @@ import { tmpdir } from 'os';
 import path from 'path';
 
 import { ProviderTransferError } from '../../../../errors/providers';
+import * as esmDeps from '../../../../utils/esm-deps';
 import { createLocalDirectoryDestinationProvider } from '..';
+
+jest.mock('../../../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 describe('Directory destination provider', () => {
   test('bootstrap creates root and sets results.file', async () => {
@@ -71,6 +82,38 @@ describe('Directory destination provider', () => {
       .filter((line) => line !== '')
       .map((line) => JSON.parse(line));
     expect(lines).toEqual(items);
+  });
+
+  test('entities write stream errors when stream packages fail to load', async () => {
+    const loadError = new Error("Cannot find module 'stream-chain'");
+    const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+      typeof esmDeps.loadStreamDeps
+    >;
+    loadStreamDeps.mockRejectedValueOnce(loadError);
+
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-load-fail-'));
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+
+    try {
+      await provider.bootstrap({ report: jest.fn() } as never);
+      const writeStream = provider.createEntitiesWriteStream();
+      expect(writeStream).toBeInstanceOf(Writable);
+
+      const streamError = new Promise((resolve) => {
+        writeStream.once('error', resolve);
+      });
+      writeStream.write({ id: 1 });
+
+      await expect(streamError).resolves.toBe(loadError);
+    } finally {
+      loadStreamDeps.mockReset();
+      loadStreamDeps.mockImplementation(() =>
+        jest.requireActual<typeof esmDeps>('../../../../utils/esm-deps').loadStreamDeps()
+      );
+    }
   });
 
   test('createAssetsWriteStream surfaces sync fs errors as ProviderTransferError (engine-reportable)', async () => {

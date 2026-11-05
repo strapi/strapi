@@ -320,7 +320,7 @@ describe('File source provider', () => {
       await expect(provider.validateStage('assets')).resolves.toBeUndefined();
 
       const assets = [];
-      const stream = await provider.createAssetsReadStream();
+      const stream = provider.createAssetsReadStream();
       for await (const asset of stream) {
         assets.push(asset);
         asset.stream.resume();
@@ -354,7 +354,7 @@ describe('File source provider', () => {
       await expect(provider.validateStage('assets')).resolves.toBeUndefined();
 
       const assets = [];
-      const stream = await provider.createAssetsReadStream();
+      const stream = provider.createAssetsReadStream();
       for await (const asset of stream) {
         assets.push(asset);
         asset.stream.resume();
@@ -445,6 +445,36 @@ describe('File source provider', () => {
     });
   });
 
+  test('rejects a malformed JSONL line', async () => {
+    const tarPath = await createTar([
+      {
+        name: 'metadata.json',
+        content: JSON.stringify({
+          createdAt: new Date().toISOString(),
+          strapi: { version: '1.0.0' },
+        }),
+      },
+      { name: 'entities/entities_00001.jsonl', content: '{not json\n' },
+    ]);
+    const provider = createLocalFileSourceProvider({
+      file: { path: tarPath },
+      compression: { enabled: false },
+      encryption: { enabled: false },
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createEntitiesReadStream();
+    const readAll = async () => {
+      for await (const chunk of stream) {
+        expect(chunk).toBeDefined();
+      }
+    };
+
+    await expect(readAll()).rejects.toThrow(/Error parsing backup files/);
+    await fs.remove(tarPath);
+  });
+
   describe('Backpressure', () => {
     test('entities read stream pauses under backpressure when reading from tar', async () => {
       const tmpDir = os.tmpdir();
@@ -475,7 +505,7 @@ describe('File source provider', () => {
       });
       await provider.bootstrap();
 
-      const stream = await provider.createEntitiesReadStream();
+      const stream = provider.createEntitiesReadStream();
       const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
         delayMs: 12,
         minChunksForBackpressure: 10,
