@@ -20,8 +20,21 @@ const config = {
     },
     {
       files: ['**/*'],
-      excludedFiles: ['admin/**/*'],
+      excludedFiles: ['admin/**/*', 'server/**/*', '*.ts'],
       extends: ['eslint-config-custom/back'],
+    },
+    {
+      files: ['*.ts'],
+      excludedFiles: ['admin/**/*', 'server/**/*'],
+      extends: ['eslint-config-custom/back/typescript'],
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        project: ['./tsconfig.eslint.json'],
+      },
+      rules: {
+        'node/no-unpublished-import': 'off',
+        'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+      },
     },
   ],
 };
