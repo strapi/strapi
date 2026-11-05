@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
-import { action as createAdminCommand } from '../create-user';
+import type { Command } from 'commander';
+import { action as createAdminCommand, command, PASSWORD_ENV_VAR } from '../create-user';
 
 const roleId = 1;
 const load = jest.fn(() => mock) as any;
@@ -274,6 +275,134 @@ describe('admin:create command', () => {
       exists.mockRestore();
       mockExit.mockRestore();
       mockInquiry.mockRestore();
+      consoleError.mockRestore();
+    });
+  });
+
+  describe('Password from the environment', () => {
+    const originalEnv = process.env.STRAPI_CLI_ADMIN_PASSWORD;
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.STRAPI_CLI_ADMIN_PASSWORD;
+      } else {
+        process.env.STRAPI_CLI_ADMIN_PASSWORD = originalEnv;
+      }
+    });
+
+    test('Reads the password from STRAPI_CLI_ADMIN_PASSWORD when --password is absent', async () => {
+      process.env.STRAPI_CLI_ADMIN_PASSWORD = 'envPassword1234';
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand({ email: 'email@email.fr', firstname: 'John' });
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ password: 'envPassword1234', registrationToken: null })
+      );
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+
+    test('Prefers --password over STRAPI_CLI_ADMIN_PASSWORD', async () => {
+      process.env.STRAPI_CLI_ADMIN_PASSWORD = 'envPassword1234';
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand({
+        email: 'email@email.fr',
+        firstname: 'John',
+        password: 'flagPassword1234',
+      });
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ password: 'flagPassword1234' })
+      );
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+    test('Still prompts on a TTY when only STRAPI_CLI_ADMIN_PASSWORD is set', async () => {
+      process.env.STRAPI_CLI_ADMIN_PASSWORD = 'envPassword1234';
+      const tmpTTY = process.stdin.isTTY;
+      process.stdin.isTTY = true;
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValue({
+        email: 'email@email.fr',
+        password: 'promptPassword1234',
+        firstname: 'John',
+        lastname: 'Doe',
+        confirm: true,
+      });
+
+      await createAdminCommand();
+
+      expect(mockInquiry).toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ password: 'promptPassword1234' })
+      );
+
+      process.stdin.isTTY = tmpTTY;
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+      mockInquiry.mockRestore();
+    });
+
+    // create-strapi-app duplicates the name and searches for it in the help output
+    test('Keeps the variable name that create-strapi-app expects in the help output', () => {
+      expect(PASSWORD_ENV_VAR).toBe('STRAPI_CLI_ADMIN_PASSWORD');
+      const cmd = command({} as Parameters<typeof command>[0]) as Command;
+
+      expect(cmd.helpInformation()).toContain(PASSWORD_ENV_VAR);
+    });
+  });
+
+  describe('Weak passwords', () => {
+    test('Rejects a weak password by default', async () => {
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+        throw new Error('exit');
+      });
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await createAdminCommand({
+        email: 'email@email.fr',
+        firstname: 'John',
+        password: 'password',
+      }).catch((err) => {
+        expect(err).toEqual(new Error('exit'));
+      });
+
+      expect(consoleError).toBeCalledWith('Password must contain at least one uppercase character');
+      expect(mockExit).toHaveBeenCalledWith(1);
+      expect(create).not.toHaveBeenCalled();
+
+      mockExit.mockRestore();
+      consoleError.mockRestore();
+    });
+
+    test('Rejects a password over 72 bytes', async () => {
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+        throw new Error('exit');
+      });
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await createAdminCommand({
+        email: 'email@email.fr',
+        firstname: 'John',
+        password: `Aa1${'é'.repeat(35)}`,
+      }).catch((err) => {
+        expect(err).toEqual(new Error('exit'));
+      });
+
+      expect(consoleError).toBeCalledWith('Password must be at most 72 bytes long');
+      expect(create).not.toHaveBeenCalled();
+
+      mockExit.mockRestore();
       consoleError.mockRestore();
     });
   });

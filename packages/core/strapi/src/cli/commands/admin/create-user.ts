@@ -15,11 +15,26 @@ interface CmdOptions {
   lastname?: string;
 }
 
+/**
+ * Environment variable read when `--password` is absent.
+ * Lets callers such as create-strapi-app pass the password without exposing it
+ * in the process arguments. It must not start with `STRAPI_ADMIN_`, because
+ * those variables are exposed to the admin panel bundle.
+ * create-strapi-app duplicates this name and searches for it in the `--help` output:
+ * keep both in sync (the tests pin them).
+ */
+const PASSWORD_ENV_VAR = 'STRAPI_CLI_ADMIN_PASSWORD';
+
 const emailValidator = yup.string().email('Invalid email address').lowercase();
 
 const passwordValidator = yup
   .string()
   .min(8, 'Password must be at least 8 characters long')
+  // bcrypt ignores the bytes after the 72nd, and the admin API rejects longer passwords
+  .test('max-bytes', 'Password must be at most 72 bytes long', (value) => {
+    if (!value) return true;
+    return new TextEncoder().encode(value).length <= 72;
+  })
   .test('lowercase', 'Password must contain at least one lowercase character', (value) => {
     if (!value) return true;
     return /[a-z]/.test(value);
@@ -128,6 +143,9 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     }
 
     ({ email, password, firstname, lastname } = inquiry);
+  } else if (_.isEmpty(password) && !_.isEmpty(process.env[PASSWORD_ENV_VAR])) {
+    // Read only without prompts, so a stray variable never disables the interactive mode
+    password = process.env[PASSWORD_ENV_VAR];
   }
 
   try {
@@ -151,10 +169,10 @@ const command: StrapiCommand = () => {
     .alias('admin:create')
     .description('Create a new admin')
     .option('-e, --email <email>', 'Email of the new admin')
-    .option('-p, --password <password>', 'Password of the new admin')
+    .option('-p, --password <password>', `Password of the new admin (or set ${PASSWORD_ENV_VAR})`)
     .option('-f, --firstname <first name>', 'First name of the new admin')
     .option('-l, --lastname <last name>', 'Last name of the new admin')
     .action(runAction('admin:create-user', action));
 };
 
-export { action, command };
+export { action, command, PASSWORD_ENV_VAR };

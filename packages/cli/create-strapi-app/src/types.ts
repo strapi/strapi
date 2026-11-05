@@ -26,6 +26,7 @@ export interface Options {
   nonInteractive?: boolean;
   templateBranch?: string;
   templatePath?: string;
+  adminEmail?: string;
 }
 
 export type DBClient = 'mysql' | 'postgres' | 'sqlite';

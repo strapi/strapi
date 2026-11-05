@@ -8,6 +8,8 @@ import fse from 'fs-extra';
 import * as prompts from './prompts';
 import { handleCloudLogin } from './cloud';
 import { createStrapi } from './create-strapi';
+import { AdminUserInputError, resolveAdminUser, validateEmail } from './utils/admin-user';
+import type { AdminUser } from './utils/admin-user';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
@@ -73,6 +75,12 @@ const command = new commander.Command('create-strapi-app')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--skip-db', 'Skip database configuration')
 
+  // Admin user options
+  .option(
+    '--admin-email <email>',
+    'Email of the first admin user (password: CREATE_STRAPI_APP_ADMIN_PASSWORD env variable)'
+  )
+
   .option('--template <template>', 'Specify a Strapi template')
   .option('--template-branch <templateBranch>', 'Specify a branch for the template')
   .option('--template-path <templatePath>', 'Specify a path to the template inside the repository')
@@ -128,6 +136,10 @@ async function run(args: string[]): Promise<void> {
     logger.fatal(
       `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--non-interactive')}`
     );
+  }
+
+  if (options.adminEmail !== undefined && validateEmail(options.adminEmail) !== true) {
+    logger.fatal(`Admin email ${chalk.bold(`"${options.adminEmail}"`)} is invalid`);
   }
 
   const skipPrompts = options.quickstart || options.nonInteractive;
@@ -222,10 +234,35 @@ async function run(args: string[]): Promise<void> {
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
 
+  // `strapi admin:create-user` needs the installed dependencies.
+  // Without them, the installer prints the command to run instead.
+  let adminUser: AdminUser | undefined;
+
+  if (scope.installDependencies) {
+    try {
+      adminUser = await resolveAdminUser({
+        email: options.adminEmail,
+        // Scripted runs (no TTY) must never block on a prompt
+        canPrompt: !skipPrompts && Boolean(process.stdin.isTTY),
+        prompts: { email: prompts.adminEmail, password: prompts.adminPassword },
+      });
+    } catch (error) {
+      if (error instanceof AdminUserInputError) {
+        logger.fatal(error.message);
+      }
+
+      throw error;
+    }
+  } else if (options.adminEmail !== undefined) {
+    logger.warn(
+      `${chalk.bold('--admin-email')} is ignored: the admin user can only be created after the dependency install`
+    );
+  }
+
   addDatabaseDependencies(scope);
 
   try {
-    await createStrapi(scope);
+    await createStrapi(scope, { adminUser });
   } catch (error: unknown) {
     if (!(error instanceof Error)) {
       throw error;

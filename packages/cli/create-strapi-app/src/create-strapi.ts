@@ -19,6 +19,13 @@ import type { Scope } from './types';
 import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
 import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-manager-args';
+import { createAdminUser, getManualAdminCommand } from './utils/admin-user';
+import type { AdminUser, CreateAdminUserResult } from './utils/admin-user';
+
+interface CreateStrapiOptions {
+  /** The first admin user. Created only when the dependencies are installed. */
+  adminUser?: AdminUser;
+}
 
 const yarnNodeModulesConfig = 'nodeLinker: node-modules\n';
 
@@ -73,11 +80,11 @@ const resolvePnpmVersion = async (packageManager: Scope['packageManager']) => {
   }
 };
 
-async function createStrapi(scope: Scope) {
+async function createStrapi(scope: Scope, options: CreateStrapiOptions = {}) {
   const { rootPath } = scope;
   try {
     await fse.ensureDir(rootPath);
-    await createApp(scope);
+    await createApp(scope, options);
   } catch (error) {
     await fse.remove(rootPath);
 
@@ -85,7 +92,7 @@ async function createStrapi(scope: Scope) {
   }
 }
 
-async function createApp(scope: Scope) {
+async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
   const {
     rootPath,
     useTypescript,
@@ -252,7 +259,14 @@ async function createApp(scope: Scope) {
     }
   }
 
+  let adminResult: CreateAdminUserResult | undefined;
+
+  if (installDependencies && adminUser) {
+    adminResult = await runCreateAdminUser({ scope, adminUser });
+  }
+
   const cmd = chalk.cyan(`${packageManager} run`);
+  const adminCmd = chalk.cyan(getManualAdminCommand(packageManager));
 
   logger.title('Strapi', `Your application was created!`);
 
@@ -276,11 +290,29 @@ async function createApp(scope: Scope) {
       '',
       `${chalk.cyan('cd')} ${projectFolder}`,
       `${chalk.cyan(packageManager)} install`,
+      adminCmd,
       !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
     ]);
   }
 
   logger.log(['', 'Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
+
+  if (adminResult && adminResult.status !== 'created') {
+    // The project is valid without the admin user (the first visitor can register one),
+    // so the installation still succeeds
+    logger.warn([
+      chalk.bold('Your project was created, but the admin user was not.'),
+      '',
+      adminResult.status === 'unsupported'
+        ? `The installed ${chalk.bold('@strapi/strapi')} version cannot create the admin user non-interactively.`
+        : adminResult.error.trim(),
+      '',
+      'Create the admin user with the following commands, or register it in the admin panel:',
+      '',
+      `${chalk.cyan('cd')} ${projectFolder}`,
+      adminCmd,
+    ]);
+  }
 
   if (runApp && installDependencies) {
     logger.title('Run', 'Running your Strapi application');
@@ -307,6 +339,27 @@ async function createApp(scope: Scope) {
       logger.fatal('Failed to start your Strapi application');
     }
   }
+}
+
+async function runCreateAdminUser({ scope, adminUser }: { scope: Scope; adminUser: AdminUser }) {
+  logger.title('Admin', `Creating the admin user ${chalk.green(adminUser.email)}`);
+
+  await trackUsage({ event: 'willCreateAdminUser', scope });
+
+  const result = await createAdminUser({ rootPath: scope.rootPath, adminUser });
+
+  if (result.status === 'created') {
+    await trackUsage({ event: 'didCreateAdminUser', scope });
+    logger.success('Admin user created');
+  } else {
+    await trackUsage({
+      event: 'didNotCreateAdminUser',
+      scope,
+      eventProperties: { reason: result.status },
+    });
+  }
+
+  return result;
 }
 
 // prefix child folders with ./ so names like -site or ~site are not read as an option or a home path
