@@ -1459,10 +1459,10 @@ test('the content-manager document manager declaration checks in a strict applic
   );
 });
 
-// The strict entry loads these declarations of the admin and content-releases. An application
-// installs neither `@types/passport-local` nor the admin panel types, so `paths`
+// The strict entry loads these declarations of the admin, content-manager and content-releases.
+// An application installs neither `@types/passport-local` nor the admin panel types, so `paths`
 // resolves `passport-local` to its untyped sources, as in an application.
-test('admin and content-releases declarations check in a strict application', () => {
+test('admin, content-manager and content-releases declarations check in a strict application', () => {
   const compile = compiler({
     ...baseOptions,
     ...resolutions.Node,
@@ -1474,6 +1474,7 @@ test('admin and content-releases declarations check in a strict application', ()
   const loaded = [
     'packages/core/admin/dist/server/src/index.d.ts',
     'packages/core/admin/dist/server/src/services/passport.d.ts',
+    'packages/core/content-manager/dist/shared/contracts/review-workflows.d.ts',
     'packages/core/content-releases/dist/shared/contracts/releases.d.ts',
   ].map((name) => path.join(repository, name));
   const program = compile(['strapi-strict.d.ts', 'generated-strict.d.ts', 'common.ts']);
