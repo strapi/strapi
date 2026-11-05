@@ -39,9 +39,8 @@ const transform: modules.runner.json.JSONTransform = (file, params) => {
     return tsconfig.root();
   }
 
-  // TODO @Nico without `"module": "CommonJS"`, removing the option makes TypeScript 5 fall back to
-  // `classic` resolution. Such tsconfigs (and values inherited through `extends`) are left for the
-  // user to migrate manually.
+  // Without a local `"module": "CommonJS"`, removing the option can make TypeScript 5 use `classic`
+  // resolution, so the user migrates these tsconfigs manually (see the migration guide).
   if (typeof module !== 'string' || module.toLowerCase() !== 'commonjs') {
     return tsconfig.root();
   }
