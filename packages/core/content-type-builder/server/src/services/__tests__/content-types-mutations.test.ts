@@ -74,7 +74,7 @@ const createInput = {
     displayName: 'Article',
     singularName: 'article',
     pluralName: 'articles',
-    kind: 'collectionType',
+    kind: 'collectionType' as const,
     attributes: {},
   },
   components: [],
@@ -181,6 +181,16 @@ describe('content type mutation compensation', () => {
       expect.objectContaining({ displayName: 'Article' }),
       expect.anything()
     );
+    expect(builder.writeFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips API generation when the created content type names a plugin', async () => {
+    await createContentType({
+      ...createInput,
+      contentType: { ...createInput.contentType, plugin: 'example' },
+    });
+
+    expect(jest.requireMock('@strapi/generators').generate).not.toHaveBeenCalled();
     expect(builder.writeFiles).toHaveBeenCalledTimes(1);
   });
 

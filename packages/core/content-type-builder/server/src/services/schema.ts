@@ -1,7 +1,7 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { mapValues } from 'lodash';
 
-import type { Schema } from '@strapi/types';
+import type { Core, Internal, Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
@@ -24,6 +24,7 @@ import {
   isContentTypeVisible,
 } from './content-types';
 import type { CoreContentStructureService } from './content-structure';
+import type { SchemaService } from '../types/services';
 
 type ContentTypeKind = 'collectionType' | 'singleType';
 
@@ -392,7 +393,7 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<string | nul
  * Unlike the admin, there is no one to confirm a data-losing rename, so it
  * refuses before touching the schema when the rename cannot be migrated.
  */
-export const renameAttribute = async (
+export const renameAttribute = (async (
   uid: string,
   oldName: string,
   newName: string
@@ -511,7 +512,7 @@ export const renameAttribute = async (
   const { data } = await validateUpdateSchema({ data: payload });
 
   await updateSchema(data as CTBSchema);
-};
+}) satisfies Core.Implements<SchemaService['renameAttribute']>;
 
 const formatAttributes = (model: any) => {
   const { getVisibleAttributes } = contentTypesUtils;
@@ -522,7 +523,13 @@ const formatAttributes = (model: any) => {
   });
 };
 
-export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Record<string, any>) => {
+// Morph relations have no `inversedBy` or `mappedBy`: they read `undefined`, so their
+// `targetAttribute` is `null`.
+export const formatAttribute = ((
+  attribute: Core.IsStrict extends true
+    ? Parameters<SchemaService['formatAttribute']>[0] & { inversedBy?: string; mappedBy?: string }
+    : Schema.Attribute.AnyAttribute & Record<string, any>
+) => {
   if (attribute.type === 'relation') {
     return {
       ...attribute,
@@ -533,10 +540,12 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
   }
 
   return attribute;
-};
+}) satisfies Core.Implements<SchemaService['formatAttribute']>;
 
-export const getSchema = async () => {
-  const contentTypes = mapValues(strapi.contentTypes, (contentType) => {
+export const getSchema = (async () => {
+  // Generic schemas: mapping every declared package schema exceeds the size limit (TS7056).
+  const allContentTypes: Internal.Registry.GenericContentTypeSchemas = strapi.contentTypes;
+  const contentTypes = mapValues(allContentTypes, (contentType) => {
     const {
       uid,
       options,
@@ -595,9 +604,9 @@ export const getSchema = async () => {
       },
     },
   };
-};
+}) satisfies Core.Implements<SchemaService['getSchema']>;
 
-export const updateSchema = async (schema: CTBSchema) => {
+export const updateSchema = (async (schema: CTBSchema) => {
   const builder = createBuilder();
   const apiHandler = getService('api-handler') as typeof import('./api-handler');
 
@@ -849,4 +858,4 @@ export const updateSchema = async (schema: CTBSchema) => {
       });
     }
   }
-};
+}) satisfies Core.Implements<SchemaService['updateSchema']>;
