@@ -157,8 +157,6 @@ jobs:
   lint_oxlint:
     name: 'lint_oxlint'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    needs: [conditions]
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

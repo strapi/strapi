@@ -45,7 +45,7 @@ cli:
   - 'tests/setup/jest-cli.setup.js'
   - 'jest.config.cli.js'
 # New test suites (Test Infrastructure Overhaul). Only type checked for now; their own CI job
-# comes with CMS-1946. Lint always runs (`lint` job has no filter).
+# comes with CMS-1946. Lint always runs (`lint` and `lint_oxlint` jobs have no filter).
 tests_next:
   - 'tests-next/**'
 # Umzug migration sources + v4→v5 integration harness (fixture app at examples/complex; runner at tests/migration/)
