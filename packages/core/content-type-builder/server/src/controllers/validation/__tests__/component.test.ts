@@ -87,5 +87,26 @@ describe('Component validator', () => {
 
       await expect(componentValidation[method](input)).rejects.toBeDefined();
     });
+
+    test('rejects a component in its loaded schema form', async () => {
+      // The keys a loaded component schema adds to the input: `info` instead of the top-level
+      // `displayName` and `icon`, and the model identity.
+      const input = {
+        component: {
+          category: 'default',
+          displayName: 'mycompo',
+          attributes: { title: { type: 'string' } },
+          info: { displayName: 'mycompo' },
+          uid: 'default.mycompo',
+          modelType: 'component',
+          modelName: 'mycompo',
+          globalId: 'ComponentDefaultMycompo',
+        },
+      } as any;
+
+      await expect(componentValidation[method](input)).rejects.toMatchObject({
+        name: 'ValidationError',
+      });
+    });
   });
 });

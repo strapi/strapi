@@ -5,7 +5,6 @@ import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import { emitSchemaEvent } from '../utils/events';
 import createBuilder from './schema-builder';
 import type { SchemaHandler } from './schema-builder/schema-handler';
-import type { ComponentHandler } from '../types';
 import type { ComponentsService } from '../types/services';
 
 /**
@@ -33,10 +32,10 @@ export const formatComponent = ((component) => {
 /**
  * Creates a component and handle the nested components sent with it
  */
-export const createComponent = async ({
+export const createComponent = (async ({
   component,
   components = [],
-}: any): Promise<SchemaHandler<Internal.UID.Component>> => {
+}): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -54,14 +53,10 @@ export const createComponent = async ({
 
   await builder.writeFiles();
 
-  // `SchemaHandler` types `uid` as a content type uid, so the component handler is cast to the
-  // event payload.
-  await emitSchemaEvent('component.create', {
-    component: newComponent as unknown as ComponentHandler,
-  });
+  await emitSchemaEvent('component.create', { component: newComponent });
 
   return newComponent;
-};
+}) satisfies Core.Implements<ComponentsService['createComponent']>;
 
 type ComponentToCreate = {
   component: Struct.ComponentSchema;
