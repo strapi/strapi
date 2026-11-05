@@ -1142,6 +1142,27 @@ describe('previewScript — stega decoding reads the page without rewriting it',
     expect(document.querySelectorAll('.strapi-highlight').length).toBe(before - 1);
   });
 
+  test('maps every encoded element added in one batch', async () => {
+    // A client-side re-render: several sections, each with encoded children, land in one mutation batch.
+    const sections = [0, 1, 2].map((i) => {
+      const section = document.createElement('section');
+      const heading = document.createElement('h3');
+      heading.textContent = encode(
+        `Heading ${i}`,
+        `documentId=doc1&type=string&path=items.${i}.title`
+      );
+      section.appendChild(heading);
+      return section;
+    });
+    sections.forEach((section) => document.body.appendChild(section));
+    await flush();
+
+    const paths = focusPaths();
+    [0, 1, 2].forEach((i) => {
+      expect(paths).toContainEqual(expect.stringContaining(`path=items.${i}.title`));
+    });
+  });
+
   describe('a decoded media field swapped to another media type while editing', () => {
     const COVER_SOURCE = 'documentId=doc1&type=media&path=cover.url';
 

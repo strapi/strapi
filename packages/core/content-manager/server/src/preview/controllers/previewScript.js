@@ -161,9 +161,6 @@ function previewScript(config) {
     return result;
   };
 
-  /** @param {Element} root */
-  const sourcedWithin = (root) =>
-    allSourcedElements().filter((element) => element !== root && root.contains(element));
   const OVERLAY_ID = 'strapi-preview-overlay';
 
   /* -----------------------------------------------------------------------------------------------
@@ -1593,6 +1590,15 @@ function previewScript(config) {
 
     // Create highlight observer to watch for new elements with source attributes
     const highlightObserver = new MutationObserver((mutations) => {
+      // Every sourced element on the page, read once for the whole batch and only if an element was
+      // added: reading it per added node made a large re-render cost added nodes x sourced elements.
+      /** @type {Element[] | null} */
+      let sourcedInBatch = null;
+      const sourcedNow = () => {
+        if (!sourcedInBatch) sourcedInBatch = allSourcedElements();
+        return sourcedInBatch;
+      };
+
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === SOURCE_ATTRIBUTE) {
           syncSourceChange(/** @type {Element} */ (mutation.target));
@@ -1608,8 +1614,10 @@ function previewScript(config) {
                 observeElementForResize(element);
               }
               // Check all child elements for source attributes
-              const elementsWithSource = sourcedWithin(element);
-              Array.from(elementsWithSource).forEach((childElement) => {
+              const elementsWithSource = sourcedNow().filter(
+                (sourced) => sourced !== element && element.contains(sourced)
+              );
+              elementsWithSource.forEach((childElement) => {
                 if (childElement instanceof HTMLElement) {
                   highlightManager.createHighlightForElement(childElement);
                   observeElementForResize(childElement);
@@ -1623,7 +1631,7 @@ function previewScript(config) {
               const element = /** @type {Element} */ (node);
               highlightManager.removeHighlightForElement(element);
               // The removed subtree is already detached, so walk the tracked elements:
-              // sourcedWithin() only sees elements that are still on the page.
+              // the page's sourced elements only include ones still attached.
               highlightManager.elements
                 .filter((tracked) => element.contains(tracked))
                 .forEach((childElement) => {
