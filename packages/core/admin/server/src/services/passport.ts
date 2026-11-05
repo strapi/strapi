@@ -16,7 +16,11 @@ const keyIsValidEventName = (
   return Object.keys(getService('passport').authEventsMapper).includes(entry[0]);
 };
 
-const getPassportStrategies = () => [createLocalStrategy(strapi)] as Strategy[];
+// The published declarations must not name `passport-local`: applications do not install
+// `@types/passport-local`, so they already resolve its `Strategy` to `any`, as the EE service
+// returns. `any[]` keeps that type and lets the declarations check with `skipLibCheck: false`.
+// TODO @Nico a strict strategy contract needs a strategy type that names no third-party module.
+const getPassportStrategies = (): any[] => [createLocalStrategy(strapi)];
 
 const registerAuthEvents = () => {
   // @ts-expect-error - TODO: migrate auth service to TS
