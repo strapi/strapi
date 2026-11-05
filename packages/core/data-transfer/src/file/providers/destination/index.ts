@@ -6,6 +6,7 @@ import tar from 'tar-stream';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
 import { deferWritable } from '../../../utils/defer-writable';
+import { errorFromUnknown } from '../../../utils/unknown-error';
 import { loadStreamDeps } from '../../../utils/esm-deps';
 import type {
   IAsset,
@@ -150,7 +151,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
         this.#archive.pipeline = chain([archiveStream, ...archiveTransforms, outStream]);
       })
       .catch((error: unknown) => {
-        this.#archiveError = error instanceof Error ? error : new Error(String(error));
+        this.#archiveError = errorFromUnknown(error);
       });
 
     this.results.file = { path: this.#archivePath };

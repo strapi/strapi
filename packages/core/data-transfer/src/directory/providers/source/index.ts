@@ -18,6 +18,7 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
 import { loadStreamDeps } from '../../../utils/esm-deps';
+import { errorMessageFromUnknown } from '../../../utils/unknown-error';
 import {
   ProviderInitializationError,
   ProviderTransferError,
@@ -165,7 +166,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
       try {
         metadata.set(name, await this.#readAssetMetadata(name));
       } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
+        const reason = errorMessageFromUnknown(error);
         throw new ProviderValidationError(
           `Asset metadata preflight failed for "${name}": ${reason}. The destination was not modified; re-export and try again.`,
           { error }

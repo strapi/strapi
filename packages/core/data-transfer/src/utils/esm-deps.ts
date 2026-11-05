@@ -16,7 +16,7 @@ let cached: Promise<StreamDeps> | undefined;
  * or under Jest without --experimental-vm-modules.
  */
 export const loadStreamDeps = (): Promise<StreamDeps> => {
-  if (cached) {
+  if (cached !== undefined) {
     return cached;
   }
 

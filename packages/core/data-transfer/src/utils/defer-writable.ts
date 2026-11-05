@@ -1,5 +1,7 @@
 import { Writable } from 'stream';
 
+import { errorFromUnknown } from './unknown-error';
+
 type WriteCallback = (error?: Error | null) => void;
 
 interface PendingWrite {
@@ -61,7 +63,7 @@ const deferWritable = (open: () => Promise<Writable>): Writable => {
       pump();
     })
     .catch((error: unknown) => {
-      fail(error instanceof Error ? error : new Error(String(error)));
+      fail(errorFromUnknown(error));
     });
 
   const proxy = new Writable({
@@ -97,7 +99,7 @@ const deferWritable = (open: () => Promise<Writable>): Writable => {
       }
 
       opening.then(endTarget).catch((error: unknown) => {
-        callback(error instanceof Error ? error : new Error(String(error)));
+        callback(errorFromUnknown(error));
       });
     },
 

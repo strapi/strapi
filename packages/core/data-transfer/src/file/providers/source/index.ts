@@ -23,6 +23,7 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
 import { loadStreamDeps } from '../../../utils/esm-deps';
+import { errorFromUnknown, errorMessageFromUnknown } from '../../../utils/unknown-error';
 import {
   ProviderInitializationError,
   ProviderTransferError,
@@ -249,7 +250,7 @@ class LocalFileSourceProvider implements ISourceProvider {
                   }
                 }
               } catch (error) {
-                const reason = error instanceof Error ? error.message : String(error);
+                const reason = errorMessageFromUnknown(error);
                 validationError = new ProviderValidationError(
                   `Asset metadata preflight failed for "${filename}": ${reason}`,
                   { error }
@@ -286,7 +287,7 @@ class LocalFileSourceProvider implements ISourceProvider {
           validateAssetMetadata(JSON.parse(sidecars.get(filename)!.toString()), filename)
         );
       } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
+        const reason = errorMessageFromUnknown(error);
         throw new ProviderValidationError(
           `Asset metadata preflight failed for "${filename}.json": ${reason}. The destination was not modified; re-export and try again.`,
           { error }
@@ -323,7 +324,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#reportInfo('creating assets read stream');
     this.#pipeAssets(outStream).catch((error: unknown) => {
       if (!outStream.destroyed) {
-        outStream.destroy(error instanceof Error ? error : new Error(String(error)));
+        outStream.destroy(errorFromUnknown(error));
       }
     });
     return outStream;
@@ -409,7 +410,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const outStream = new PassThrough({ objectMode: true });
     this.#pipeJsonlDirectory(outStream, directory).catch((error: unknown) => {
       if (!outStream.destroyed) {
-        outStream.destroy(error instanceof Error ? error : new Error(String(error)));
+        outStream.destroy(errorFromUnknown(error));
       }
     });
     return outStream;
