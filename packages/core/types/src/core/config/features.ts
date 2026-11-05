@@ -10,6 +10,9 @@ export interface FeaturesFutureFlags {
   [futureFlagName: string]: boolean | undefined;
 }
 
+/**
+ * Input of `config/features.ts`. Resolved contract: `ResolvedConfig.Features` in `@strapi/core`.
+ */
 export interface Features {
   future?: FeaturesFutureFlags;
   /**

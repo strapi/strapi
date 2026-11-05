@@ -1,6 +1,8 @@
 import { ExtendableContext } from 'koa';
 
 import type { Strapi } from '.';
+import type { SuggestedString } from '../utils/string';
+import type { IsStrict, RegisteredRecord } from './strictness';
 
 export type PolicyContext = Omit<ExtendableContext, 'is'> & {
   type: string;
@@ -13,10 +15,117 @@ export type PolicyHandler<TConfig = unknown> = (
   opts: { strapi: Strapi }
 ) => boolean | undefined;
 
+/**
+ * The handler of a policy with strict types: declared as a method, whose parameters TypeScript
+ * compares bivariantly, so a policy registered with a config contract (`Policy<{ role: string }>`)
+ * is assignable to `Policy` (`Policy<unknown>`). Calls still check the config.
+ */
+type StrictPolicyHandler<TConfig> = {
+  handler(ctx: PolicyContext, cfg: TConfig, opts: { strapi: Strapi }): boolean | undefined;
+}['handler'];
+
+/** The handler of a policy: develop's without strict types, {@link StrictPolicyHandler} with them. */
+type PolicyHandlerFor<TConfig> = IsStrict extends false
+  ? PolicyHandler<TConfig>
+  : StrictPolicyHandler<TConfig>;
+
+/**
+ * A policy: a handler, or an object with a name, an optional validator and a handler. Without strict
+ * types, develop's type: `cfg` is checked contravariantly, so a `Policy<{ role: string }>` is not
+ * assignable to `Policy`.
+ */
 export type Policy<TConfig = unknown> =
   | {
       name: string;
       validator?: (config: unknown) => boolean;
-      handler: PolicyHandler<TConfig>;
+      handler: PolicyHandlerFor<TConfig>;
     }
-  | PolicyHandler<TConfig>;
+  | PolicyHandlerFor<TConfig>;
+
+/** Policy UIDs that have a registered config contract. */
+export type RegisteredPolicyName =
+  keyof Strapi.Registries.AppPolicies | keyof Strapi.Registries.PackagePolicies;
+
+/** Resolves application overrides before package defaults. */
+export type PolicyConfigFor<TName extends RegisteredPolicyName> =
+  TName extends keyof Strapi.Registries.AppPolicies
+    ? Strapi.Registries.AppPolicies[TName]
+    : TName extends keyof Strapi.Registries.PackagePolicies
+      ? Strapi.Registries.PackagePolicies[TName]
+      : never;
+
+/**
+ * Policies keyed by UID, e.g. `strapi.policies`. With strict types enabled, registered UIDs resolve to a
+ * policy that receives their config contract. Other keys, literal or dynamic, resolve to the legacy policy.
+ */
+export type PolicyMap = IsStrict extends false
+  ? Record<string, Policy>
+  : RegisteredRecord<{ [TName in RegisteredPolicyName]: Policy<PolicyConfigFor<TName>> }, Policy>;
+
+/**
+ * A name accepted by `strapi.policy(name)`. Runtime resolves it as an exact name, so relative
+ * names are not accepted as registered names. Registered names are listed for completion.
+ */
+export type PolicyLookupName = SuggestedString<RegisteredPolicyName>;
+
+/**
+ * Return type of `strapi.policy<T>(name)`: `T` without strict types, and when the name kept its
+ * wide default, which happens when the caller passes an explicit type argument or a dynamic name.
+ * A registered name resolves to a policy that receives its config contract, like `strapi.policies`.
+ * Other literal names resolve to `T`, `unknown` by default.
+ */
+export type PolicyLookup<TName extends string, T> = IsStrict extends false
+  ? T
+  : PolicyLookupName extends TName
+    ? T
+    : TName extends RegisteredPolicyName
+      ? Policy<PolicyConfigFor<TName>>
+      : T;
+
+/** Runtime resolves exact names first, then relative plugin or API names. */
+type PolicyReferenceName<TName extends RegisteredPolicyName, TNamespace extends string> =
+  | TName
+  | (TNamespace extends `plugin::${string}` | `api::${string}`
+      ? TName extends `${TNamespace}.${infer TRelative}`
+        ? TRelative extends RegisteredPolicyName
+          ? never
+          : TRelative
+        : never
+      : never);
+
+/**
+ * The config a route reference passes, `unknown` when the registered config is `any`. A contract whose
+ * import does not resolve in the consumer is an error type: a conditional type over it is an error
+ * type too, which would accept any reference. Tuples keep the error type out of the checked and
+ * extends positions. Same guard as middleware references.
+ */
+type PolicyReferenceConfig<TConfig> = [0] extends [1 & TConfig] ? unknown : TConfig;
+
+/** A reference to a registered policy: its name alone only when its config is optional. */
+type RegisteredPolicyReference<
+  TName extends RegisteredPolicyName,
+  TNamespace extends string,
+  TConfig = PolicyReferenceConfig<PolicyConfigFor<TName>>,
+> = [undefined] extends [TConfig]
+  ? | PolicyReferenceName<TName, TNamespace>
+    | { name: PolicyReferenceName<TName, TNamespace>; config?: TConfig }
+  : { name: PolicyReferenceName<TName, TNamespace>; config: TConfig };
+
+/** Any policy name. Registered names, and their relative forms in `TNamespace`, are listed for completion. */
+type SuggestedPolicyName<TNamespace extends string> = SuggestedString<
+  PolicyReferenceName<RegisteredPolicyName, TNamespace>
+>;
+
+/**
+ * A policy reference in a typed route config.
+ * With strict types disabled, any policy name is accepted; registered names are listed for completion.
+ * With strict types enabled, only registered policies are accepted and their `config` is checked:
+ * a partial inventory cannot check the `{ name, config }` form for known names while accepting
+ * unknown ones. Without registered policies, no reference is accepted.
+ * A plugin or API namespace also accepts its relative policy names, with the same config checks.
+ */
+export type PolicyReference<TNamespace extends string = never> = IsStrict extends false
+  ? SuggestedPolicyName<TNamespace> | { name: SuggestedPolicyName<TNamespace>; config: unknown }
+  : {
+      [TName in RegisteredPolicyName]: RegisteredPolicyReference<TName, TNamespace>;
+    }[RegisteredPolicyName];
