@@ -61,9 +61,10 @@ const ensureMaxValues =
   });
 
 // Apply maxLimit as the limit when limit is -1
+// The limit can be the raw query string, e.g. '-1' from `?pagination[limit]=-1`
 const withNoLimit = (pagination: Pagination, maxLimit = -1) => ({
   ...pagination,
-  limit: pagination.limit === -1 ? maxLimit : pagination.limit,
+  limit: Number(pagination.limit) === -1 ? maxLimit : pagination.limit,
 });
 
 const withDefaultPagination = <T extends Partial<PaginationArgs>>(
