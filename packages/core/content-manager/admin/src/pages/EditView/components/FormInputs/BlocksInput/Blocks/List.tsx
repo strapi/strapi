@@ -106,14 +106,11 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
 
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty =
-    currentList.children.length === 1 &&
-    isText(currentListItem.children[0]) &&
-    currentListItem.children[0].text === '';
   const isListItemEmpty =
     currentListItem.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
+  const isListEmpty = currentList.children.length === 1 && isListItemEmpty;
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-2) === 0;
 
@@ -187,14 +184,11 @@ const handleEnterKeyOnList = (editor: Editor) => {
 
   const [currentListItem, currentListItemPath] = currentListItemEntry;
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty =
-    currentList.children.length === 1 &&
-    isText(currentListItem.children[0]) &&
-    currentListItem.children[0].text === '';
   const isListItemEmpty =
     currentListItem.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
+  const isListEmpty = currentList.children.length === 1 && isListItemEmpty;
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 
