@@ -29,6 +29,8 @@ type Query = {
   pageSize?: string;
   sort?: string;
 };
+/** The query the contract accepts with strict types. */
+type CheckedQuery = Core.IsStrict extends true ? unknown : Query;
 
 const createPermissionChecker =
   (strapi: Core.Strapi) =>
@@ -67,7 +69,12 @@ const createPermissionChecker =
       );
     };
 
-    const sanitizeOutput = (data: Entity, { action = ACTIONS.read }: { action?: string } = {}) => {
+    const sanitizeOutput: Core.IsStrict extends true
+      ? PermissionChecker['sanitizeOutput']
+      : (data: Entity, { action }?: { action?: string }) => any = (
+      data,
+      { action = ACTIONS.read } = {}
+    ) => {
       return permissionsManager.sanitizeOutput(data, { subject: toSubject(data), action });
     };
 
@@ -93,11 +100,14 @@ const createPermissionChecker =
       return rules.some((rule: any) => rule.conditions && !isEmpty(rule.conditions));
     };
 
-    const sanitizeQuery = (query: Query, { action = ACTIONS.read }: { action?: string } = {}) => {
+    const sanitizeQuery = (
+      query: CheckedQuery,
+      { action = ACTIONS.read }: { action?: string } = {}
+    ) => {
       return permissionsManager.sanitizeQuery(query, { subject: model, action });
     };
 
-    const sanitizeInput = (action: string, data: any, entity?: Entity) => {
+    const sanitizeInput = <TData>(action: string, data: TData, entity?: CheckedEntity) => {
       return permissionsManager.sanitizeInput(data, {
         subject: entity ? toSubject(entity) : model,
         action,
@@ -115,8 +125,13 @@ const createPermissionChecker =
       });
     }) satisfies Core.Implements<PermissionChecker['validateInput']>;
 
-    const sanitizeCreateInput = (data: any) => sanitizeInput(ACTIONS.create, data);
-    const sanitizeUpdateInput = (entity: Entity) => (data: any) =>
+    const sanitizeCreateInput = ((data) =>
+      sanitizeInput(ACTIONS.create, data)) satisfies Core.Implements<
+      PermissionChecker['sanitizeCreateInput']
+    >;
+    const sanitizeUpdateInput: Core.IsStrict extends true
+      ? PermissionChecker['sanitizeUpdateInput']
+      : (entity: Entity) => (data: any) => any = (entity) => (data) =>
       sanitizeInput(ACTIONS.update, data, entity);
 
     const buildPermissionQuery = (query: Query, action: string) => {
@@ -129,11 +144,11 @@ const createPermissionChecker =
      * The action can also be given as a plain string, the v4 signature
      * `sanitizedQuery(query, actionUID)`, which untyped plugin code may still use.
      */
-    const sanitizedQueryForAction = (query: Query, options: SanitizedQueryOptions = {}) => {
+    const sanitizedQueryForAction = (query: CheckedQuery, options: SanitizedQueryOptions = {}) => {
       const action = typeof options === 'string' ? options : (options.action ?? ACTIONS.read);
 
       return async.pipe(
-        (q: Query) => sanitizeQuery(q, { action }),
+        (q: CheckedQuery) => sanitizeQuery(q, { action }),
         (q: Query) => buildPermissionQuery(q, action)
       )(query);
     };
@@ -142,9 +157,9 @@ const createPermissionChecker =
     const sanitizedQueryShortcuts = Object.fromEntries(
       ACTION_NAMES.map((name) => [
         name,
-        (query: Query) => sanitizedQueryForAction(query, { action: ACTIONS[name] }),
+        (query: CheckedQuery) => sanitizedQueryForAction(query, { action: ACTIONS[name] }),
       ])
-    ) as Record<ActionName, (query: Query) => ReturnType<typeof sanitizedQueryForAction>>;
+    ) as Record<ActionName, (query: CheckedQuery) => ReturnType<typeof sanitizedQueryForAction>>;
 
     const sanitizedQuery = Object.assign(sanitizedQueryForAction, sanitizedQueryShortcuts);
 
@@ -206,10 +221,8 @@ const createPermissionChecker =
     };
   };
 
-// The published type stays the inferred one, as on develop. The factory is not checked against
-// `PermissionCheckerService` yet: the admin permissions manager resolves its sanitizers to
-// `unknown`, so `sanitizeOutput`, `sanitizeQuery`, `sanitizeCreateInput` and `sanitizeUpdateInput`
-// cannot resolve to the contract's results, and `sanitizedQuery` takes a `Query`, not `unknown`.
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
+// The published type stays the inferred one, as on develop. With strict types, the factory is
+// checked against `PermissionCheckerService`, the action shortcuts included.
+export default (({ strapi }: { strapi: Core.Strapi }) => ({
   create: createPermissionChecker(strapi),
-});
+})) satisfies Core.ServiceImplementation<'plugin::content-manager.permission-checker'>;
