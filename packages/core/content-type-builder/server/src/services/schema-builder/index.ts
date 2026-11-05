@@ -1,8 +1,9 @@
 import { join } from 'path';
 import _ from 'lodash';
+import type { Internal } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
-import createSchemaHandler from './schema-handler';
+import createSchemaHandler, { type SchemaHandler } from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
 
@@ -58,7 +59,7 @@ type SchemaBuilderOptions = {
 };
 
 function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions) {
-  const tmpComponents = new Map();
+  const tmpComponents = new Map<Internal.UID.Component, SchemaHandler<Internal.UID.Component>>();
   const tmpContentTypes = new Map();
 
   // init temporary ContentTypes
@@ -68,7 +69,10 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
 
   // init temporary components
   Object.keys(components).forEach((key) => {
-    tmpComponents.set(components[key].uid, createSchemaHandler(components[key]));
+    tmpComponents.set(
+      components[key].uid,
+      createSchemaHandler<Internal.UID.Component>(components[key])
+    );
   });
 
   return {
