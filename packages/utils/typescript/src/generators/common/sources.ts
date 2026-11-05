@@ -978,13 +978,14 @@ export const emitRegistryDefinitions = async <TSource extends AppModuleSource>(
 };
 
 /**
- * Leave out the policy or middleware sources whose module has no default export, with a warning for
- * each.
+ * Leave out the policy or middleware sources whose module has no default export, with an info message
+ * for each.
  *
  * A module without a default export (`no-default`, see `ModuleShape`) registers `undefined` at
  * runtime, and a route that references it fails at startup (`Policy <name> not found.`,
  * `Middleware <uid> not found.`). Left out of the registry, a strict reference to it is rejected like
- * an unregistered name. The warning names the file: such a module is likely a mistake.
+ * an unregistered name. The message names the file, at info level: such a module is most often a
+ * helper that a policy or middleware imports, which is not a mistake.
  *
  * Services and controllers keep such sources: their helpers resolve them to `unknown`, which a lookup
  * of an unregistered uid resolves to as well.
@@ -1003,9 +1004,8 @@ export const omitSourcesWithoutDefault = <TSource extends ScannedAppModuleSource
       return true;
     }
 
-    const label = kind === 'policies' ? 'policy' : 'middleware';
-    logger.warn(
-      `Skipped ${source.uid} in the generated ${kind} types: ${source.file} has no default export, so Strapi registers nothing under ${source.uid} and a route that references it fails at startup. Export the ${label} with \`export default\`, or move the file out of the ${kind} directory if it is not a ${label}.`
+    logger.info(
+      `Left ${source.uid} out of the generated ${kind} types: ${source.file} has no default export. Strapi only loads ${kind} exported with \`export default\`; ignore this if the file is a helper.`
     );
     return false;
   });

@@ -187,8 +187,8 @@ describe('generatePoliciesDefinitions', () => {
       'global::reexportDefault': '{ role: string; }',
       'global::legacy': 'unknown',
     });
-    // One per module without a default export
-    expect(logger.warnings).toBe(3);
+    // A module without a default export is reported at info level
+    expect(logger.warnings).toBe(0);
   });
 
   test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
@@ -395,7 +395,7 @@ describe('generatePoliciesDefinitions', () => {
     expect(output).not.toContain('PolicyConfig');
   });
 
-  test('leaves out a module without a default export, with one warning naming the file', async () => {
+  test('leaves out a module without a default export, with one info message naming the file', async () => {
     const { root, strapi, pwd } = await createApp(
       {
         'src/policies/isOwner.ts':
@@ -409,15 +409,19 @@ describe('generatePoliciesDefinitions', () => {
     roots.push(root);
 
     const logger = createLogger({ silent: true });
+    const info = jest.spyOn(logger, 'info');
     const warn = jest.spyOn(logger, 'warn');
     const { output } = await generatePoliciesDefinitions({ strapi, pwd, logger });
 
     expect(output).toContain("'global::isOwner'");
     expect(output).not.toContain('helpers');
     expect(output).not.toContain('unregistered');
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith(
-      `Skipped global::helpers in the generated policies types: ${path.join(root, 'src', 'policies', 'helpers.ts')} has no default export, so Strapi registers nothing under global::helpers and a route that references it fails at startup. Export the policy with \`export default\`, or move the file out of the policies directory if it is not a policy.`
+    // A helper file imported by a real policy is a normal case: not a warning
+    expect(warn).not.toHaveBeenCalled();
+    expect(logger.warnings).toBe(0);
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(info).toHaveBeenCalledWith(
+      `Left global::helpers out of the generated policies types: ${path.join(root, 'src', 'policies', 'helpers.ts')} has no default export. Strapi only loads policies exported with \`export default\`; ignore this if the file is a helper.`
     );
   });
 
@@ -428,7 +432,7 @@ describe('generatePoliciesDefinitions', () => {
     );
 
     expect(output).toContain("The app doesn't have any policies yet.");
-    expect(logger.warnings).toBe(1);
+    expect(logger.warnings).toBe(0);
   });
 
   test('only emits policies registered at runtime', async () => {

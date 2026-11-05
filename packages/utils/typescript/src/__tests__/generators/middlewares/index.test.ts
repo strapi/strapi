@@ -212,8 +212,8 @@ describe('generateMiddlewaresDefinitions', () => {
       'global::anyContext': 'unknown',
       'global::legacy': 'unknown',
     });
-    // One per module without a default export
-    expect(logger.warnings).toBe(3);
+    // A module without a default export is reported at info level
+    expect(logger.warnings).toBe(0);
   });
 
   test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
@@ -405,7 +405,7 @@ describe('generateMiddlewaresDefinitions', () => {
     expect(output).not.toContain('MiddlewareConfig');
   });
 
-  test('leaves out a module without a default export, with one warning naming the file', async () => {
+  test('leaves out a module without a default export, with one info message naming the file', async () => {
     const { root, strapi, pwd } = await createApp(
       {
         'src/middlewares/rateLimit.ts': 'export default (config: { max: number }) => undefined;',
@@ -418,15 +418,19 @@ describe('generateMiddlewaresDefinitions', () => {
     roots.push(root);
 
     const logger = createLogger({ silent: true });
+    const info = jest.spyOn(logger, 'info');
     const warn = jest.spyOn(logger, 'warn');
     const { output } = await generateMiddlewaresDefinitions({ strapi, pwd, logger });
 
     expect(output).toContain("'global::rateLimit'");
     expect(output).not.toContain('helpers');
     expect(output).not.toContain('unregistered');
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith(
-      `Skipped global::helpers in the generated middlewares types: ${path.join(root, 'src', 'middlewares', 'helpers.ts')} has no default export, so Strapi registers nothing under global::helpers and a route that references it fails at startup. Export the middleware with \`export default\`, or move the file out of the middlewares directory if it is not a middleware.`
+    // A helper file imported by a real middleware is a normal case: not a warning
+    expect(warn).not.toHaveBeenCalled();
+    expect(logger.warnings).toBe(0);
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(info).toHaveBeenCalledWith(
+      `Left global::helpers out of the generated middlewares types: ${path.join(root, 'src', 'middlewares', 'helpers.ts')} has no default export. Strapi only loads middlewares exported with \`export default\`; ignore this if the file is a helper.`
     );
   });
 
@@ -437,7 +441,7 @@ describe('generateMiddlewaresDefinitions', () => {
     );
 
     expect(output).toContain("The app doesn't have any middlewares yet.");
-    expect(logger.warnings).toBe(1);
+    expect(logger.warnings).toBe(0);
   });
 
   test('only emits middlewares registered at runtime', async () => {

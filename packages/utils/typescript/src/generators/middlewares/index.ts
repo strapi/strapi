@@ -207,8 +207,8 @@ const generateConfigHelpersDefinition = () => {
  * Like JS policies (see the policies generator), a JS middleware registers its config from its
  * sibling `<name>.d.ts`, else from the JS file itself (JSDoc included) with `allowJs`. A JS middleware
  * without either and a CommonJS-style TypeScript middleware (`module.exports = …`) are registered as
- * `unknown` without an import. A middleware without a default export is left out, with a warning
- * (see `omitSourcesWithoutDefault`).
+ * `unknown` without an import. A middleware without a default export is left out, with an info
+ * message (see `omitSourcesWithoutDefault`).
  */
 export const generateMiddlewaresDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions

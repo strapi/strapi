@@ -166,7 +166,7 @@ const generateConfigHelpersDefinition = () => {
  * `typesFileOf`). Without either, its import is an error type, and one such entry turns every policy
  * reference into `any`: the policy is registered as `unknown` without an import. So are
  * CommonJS-style TypeScript policies (`module.exports = …`), whose import fails (see
- * `moduleTypeOf`). A policy without a default export is left out, with a warning (see
+ * `moduleTypeOf`). A policy without a default export is left out, with an info message (see
  * `omitSourcesWithoutDefault`).
  */
 export const generatePoliciesDefinitions = async (
