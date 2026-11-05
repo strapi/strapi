@@ -49,7 +49,7 @@ export const findAndCountRestPage = async (
   uid: UID.Schema,
   query: any = {}
 ) => {
-  const { pagination = {} } = query;
+  const pagination = query.pagination ?? {};
 
   const defaultLimit = toNumber(strapi.config.get('api.rest.defaultLimit', 25));
   const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;

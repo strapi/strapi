@@ -248,6 +248,36 @@ describe('Upload content API - read-only folders routes', () => {
       ]);
     });
 
+    test('lists and reads a folder whose path has out-of-range segments', async () => {
+      const outOfRange = await strapi.db.query('plugin::upload.folder').create({
+        data: {
+          name: 'Out of range',
+          pathId: 999996,
+          path: `/${folders.clients.pathId}/99999999999/2147483648/1e21`,
+        },
+      });
+
+      const list = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { id: outOfRange.id } },
+      });
+      const one = await rq({ method: 'GET', url: `/upload/folders/${outOfRange.id}` });
+      await deleteFolders([outOfRange.id]);
+
+      expect(list.statusCode).toBe(200);
+      expect(list.body.data).toMatchObject([{ id: outOfRange.id, namePath: '/Clients' }]);
+      expect(one.statusCode).toBe(200);
+      expect(one.body.data).toMatchObject({ id: outOfRange.id, namePath: '/Clients' });
+    });
+
+    test('uses the default pagination for a bare pagination parameter', async () => {
+      const res = await rq({ method: 'GET', url: '/upload/folders?pagination' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.meta.pagination).toMatchObject({ page: 1, pageSize: 25 });
+    });
+
     test.each([
       ['/upload/folders', (body) => body.data],
       ['/upload/folders/:id', (body) => [body.data]],

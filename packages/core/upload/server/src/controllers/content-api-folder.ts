@@ -1,31 +1,29 @@
 import type { Context } from 'koa';
 import { omit } from 'lodash';
 import { errors, traverse } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { getService } from '../utils';
 import { FILE_MODEL_UID, FOLDER_MODEL_UID } from '../constants';
 import { findAndCountRestPage } from '../utils/rest-pagination';
+import { isIntegerId } from '../utils/integer-id';
 
 const FIELDS = ['documentId', 'name', 'path', 'createdAt', 'updatedAt'];
 const POPULATE = { parent: { fields: ['documentId'] } };
-const MAX_INTEGER_ID = 2147483647;
 
 type ContentApiFolder = {
-  id: number;
-  documentId: string;
+  id: Data.ID;
+  documentId: Data.DocumentID;
   name: string;
   path: string;
   createdAt: string;
   updatedAt: string;
-  parent?: { id: number; documentId: string } | null;
+  parent?: { id: Data.ID; documentId: Data.DocumentID } | null;
   namePath?: string;
 };
 
 // The response shape is fixed, so `fields` and `populate` are ignored on both routes.
 const omitShapeParams = (query: Record<string, unknown>) => omit(query, ['fields', 'populate']);
-
-const isNumericId = (id: unknown) => /^\d+$/.test(String(id)) && Number(id) <= MAX_INTEGER_ID;
 
 // `file.folder` is private, so a folder can't be looked up through its files either.
 const throwFileRelations: Parameters<typeof traverse.traverseQueryFilters>[0] = ({
@@ -102,7 +100,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await validateQuery(omitShapeParams(ctx.query), ctx);
 
       const { id } = ctx.params;
-      const filters = isNumericId(id) ? { id } : { documentId: id };
+      const filters = isIntegerId(id) ? { id } : { documentId: id };
 
       const folder = await strapi.db
         .query(FOLDER_MODEL_UID)
