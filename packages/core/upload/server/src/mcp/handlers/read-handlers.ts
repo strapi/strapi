@@ -10,6 +10,8 @@ import { sanitizeMediaAsset, sanitizeMediaFolderTree } from '../sanitizers/sanit
 import { MCP_NOT_FOUND_ASSET } from './constants';
 import { ok } from '../utils';
 
+type RawMediaAsset = Parameters<typeof sanitizeMediaAsset>[0];
+
 const DEFAULT_SORT = 'createdAt:DESC';
 
 // Arg types are type-level only: the MCP SDK validates `args` against the tool's Zod input
@@ -87,7 +89,7 @@ export const createMediaListAssetsHandler =
     const { results, pagination } = await getService('upload', strapi).findPage(query);
 
     return ok({
-      results: results.map(sanitizeMediaAsset),
+      results: (results as unknown as RawMediaAsset[]).map(sanitizeMediaAsset),
       pagination,
     });
   };
@@ -131,7 +133,7 @@ export const createMediaGetAssetHandler =
       throw error;
     }
 
-    return ok({ data: sanitizeMediaAsset(asset) });
+    return ok({ data: sanitizeMediaAsset(asset as unknown as RawMediaAsset) });
   };
 
 /**
