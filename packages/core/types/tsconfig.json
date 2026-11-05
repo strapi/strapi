@@ -4,6 +4,7 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src", "vitest.config.ts"],
+  // Fixtures compiled on their own by the tests, with their own registry augmentation
+  "exclude": ["node_modules", "src/**/__tests__/resources/**"]
 }
