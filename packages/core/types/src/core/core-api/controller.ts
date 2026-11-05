@@ -54,3 +54,14 @@ export type ContentType<T extends UID.ContentType> = MatchFirst<
 >;
 
 export type Extendable<T extends UID.ContentType> = Partial<ContentType<T>> & Generic;
+
+/**
+ * Configuration accepted by the core controller factory.
+ *
+ * Every action is optional, but `this` is the full controller: the base helpers
+ * (`sanitizeOutput`, `transformResponse`, ...) are always provided at runtime.
+ */
+export type FactoryConfig<
+  T extends UID.ContentType,
+  TController extends Extendable<T> = Extendable<T>,
+> = Partial<Extendable<T> & TController> & ThisType<ContentType<T> & TController>;
