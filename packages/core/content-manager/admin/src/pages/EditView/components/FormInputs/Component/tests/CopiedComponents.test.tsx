@@ -8,6 +8,7 @@ import {
   CopiedComponentsProvider,
   getFieldKeyPath,
   hasComponentAt,
+  useCopiedComponent,
   useCopiedComponents,
 } from '../CopiedComponents';
 
@@ -255,6 +256,114 @@ describe('CopiedComponents', () => {
 
       expect(screen.getByText('Copy (copied)')).toBeInTheDocument();
       expect(screen.getByText('First')).toBeInTheDocument();
+    });
+
+    it('should keep the flag of a copy whose fields are edited', () => {
+      const { result } = render('blocks', { blocks: [] });
+
+      act(() => {
+        result.current.insertCopies([{ heading: 'Copy' }]);
+      });
+      act(() => {
+        result.current.form.onChange('blocks.0.heading', 'Edited copy');
+      });
+
+      const [copy] = result.current.rows;
+
+      expect(copy.heading).toBe('Edited copy');
+      expect(result.current.isCopied(copy.__temp_key__)).toBe(true);
+    });
+
+    it('should keep the flag of a copy through the cloning of a nested edit and a move', () => {
+      const { result } = render('blocks', {
+        blocks: [{ __temp_key__: 'a0', __component: 'blocks.hero', heading: 'Hero' }],
+      });
+
+      act(() => {
+        result.current.insertCopies([
+          { __component: 'blocks.menu', dishes: [{ __temp_key__: 'a0', name: 'Soup' }] },
+        ]);
+      });
+      // the form clones every object on the path of the edited field, the copy included
+      act(() => {
+        result.current.form.onChange('blocks.1.dishes.0.name', 'Stew');
+      });
+      act(() => {
+        result.current.form.moveFieldRow('blocks', 1, 0);
+      });
+
+      const [copy, row] = result.current.rows;
+
+      expect(getIn(copy, 'dishes.0.name')).toBe('Stew');
+      expect(result.current.isCopied(copy.__temp_key__)).toBe(true);
+      expect(result.current.isCopied(row.__temp_key__)).toBe(false);
+    });
+
+    it('should drop the flags when the values are replaced by rows reusing the keys of the copies', () => {
+      const { result } = render('blocks', { blocks: [] });
+
+      act(() => {
+        result.current.insertCopies([{ heading: 'Copy' }]);
+      });
+
+      const [copy] = result.current.rows;
+
+      // "Fill in from another locale" sets the values of the other locale, keyed `a0`, `a1`…
+      act(() => {
+        result.current.form.setValues({
+          blocks: [{ __temp_key__: copy.__temp_key__, heading: 'From the other locale' }],
+        });
+      });
+
+      expect(result.current.form.modified).toBe(true);
+      expect(result.current.rows[0].heading).toBe('From the other locale');
+      expect(result.current.isCopied(copy.__temp_key__)).toBe(false);
+    });
+  });
+
+  describe('useCopiedComponent', () => {
+    const useHarness = (name: string) => {
+      const copied = useCopiedComponent(name);
+      const form = useForm('test', (state) => state);
+
+      return { ...copied, form };
+    };
+
+    const render = (name: string, initialValues: Record<string, unknown>) => {
+      const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+          <CopiedComponentsProvider>{children}</CopiedComponentsProvider>
+        </Form>
+      );
+
+      return renderHook(() => useHarness(name), { wrapper: Wrapper });
+    };
+
+    it('should keep the flag of the copy while its fields are edited', () => {
+      const { result } = render('seo', { seo: null });
+
+      act(() => {
+        result.current.insertCopy({ metaTitle: 'Copy' });
+      });
+      act(() => {
+        result.current.form.onChange('seo.metaTitle', 'Edited copy');
+      });
+
+      expect(result.current.isCopied).toBe(true);
+    });
+
+    it('should drop the flag when the values are replaced', () => {
+      const { result } = render('seo', { seo: null });
+
+      act(() => {
+        result.current.insertCopy({ metaTitle: 'Copy' });
+      });
+      act(() => {
+        result.current.form.setValues({ seo: { metaTitle: 'From the other locale' } });
+      });
+
+      expect(result.current.form.modified).toBe(true);
+      expect(result.current.isCopied).toBe(false);
     });
   });
 });

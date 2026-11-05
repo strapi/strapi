@@ -46,9 +46,9 @@ const getComponentKeyPath = (fieldKeyPath: string, tempKey: string) =>
   `${fieldKeyPath}.[${tempKey}]`;
 
 /**
- * @description Tells whether the form still holds the component at the given key path.
+ * @description Returns the component at the given key path, if the form still holds it.
  */
-const hasComponentAt = (values: unknown, keyPath: string): boolean => {
+const getComponentAt = (values: unknown, keyPath: string): unknown => {
   let current: unknown = values;
 
   for (const segment of keyPath.split('.')) {
@@ -63,11 +63,43 @@ const hasComponentAt = (values: unknown, keyPath: string): boolean => {
     }
 
     if (current === undefined || current === null) {
-      return false;
+      return undefined;
     }
   }
 
-  return true;
+  return current;
+};
+
+/**
+ * @description Tells whether the form still holds the component at the given key path.
+ */
+const hasComponentAt = (values: unknown, keyPath: string): boolean =>
+  getComponentAt(values, keyPath) !== undefined;
+
+/* -------------------------------------------------------------------------------------------------
+ * Copy marker
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * Set on the components put in the form by a copy. Key paths aren't enough to recognise them:
+ * "Fill in from another locale" replaces the values with rows that reuse the same temp keys
+ * (`a0`, `a1`…), so a copy's key path can point to a component that wasn't copied. Editing a field
+ * clones the objects on its path with `lodash/clone`, which keeps symbol keys, while values that
+ * replace the component don't carry the marker. Symbol keys aren't serialised, so the marker never
+ * reaches the API.
+ */
+const COPIED = Symbol('copied');
+
+const withCopyMarker = (item: AnyData): AnyData => ({ ...item, [COPIED]: true });
+
+/**
+ * @description Tells whether the form still holds, at the given key path, the component that was
+ * copied there.
+ */
+const hasCopyAt = (values: unknown, keyPath: string): boolean => {
+  const component = getComponentAt(values, keyPath);
+
+  return isObject(component) && (component as Record<symbol, unknown>)[COPIED] === true;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -106,11 +138,11 @@ const CopiedComponentsProvider = ({ children }: CopiedComponentsProviderProps) =
     }
   }, [isFormModified]);
 
-  // A copied component that's removed from the form drops its flag, so that a component added
-  // later with the same key can't inherit it.
+  // A copied component that's removed or replaced (e.g. by "Fill in from another locale") drops its
+  // flag, so that a component put at the same key path can't inherit it.
   React.useEffect(() => {
     setCopiedPaths((paths) => {
-      const kept = paths.filter((path) => hasComponentAt(values, path));
+      const kept = paths.filter((path) => hasCopyAt(values, path));
 
       return kept.length === paths.length ? paths : kept;
     });
@@ -178,7 +210,7 @@ const useCopiedComponents = (name: string) => {
 
       onChange(name, [
         ...rows,
-        ...items.map((item, index) => ({ ...item, __temp_key__: keys[index] })),
+        ...items.map((item, index) => withCopyMarker({ ...item, __temp_key__: keys[index] })),
       ]);
       markCopied?.(keys.map((key) => getComponentKeyPath(fieldKeyPath, key)));
     },
@@ -218,7 +250,7 @@ const useCopiedComponent = (name: string) => {
 
   const insertCopy = React.useCallback(
     (item: AnyData) => {
-      onChange(name, item);
+      onChange(name, withCopyMarker(item));
       markCopied?.([fieldKeyPath]);
     },
     [fieldKeyPath, markCopied, name, onChange]
