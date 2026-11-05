@@ -1622,9 +1622,13 @@ function previewScript(config) {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = /** @type {Element} */ (node);
               highlightManager.removeHighlightForElement(element);
-              sourcedWithin(element).forEach((childElement) => {
-                highlightManager.removeHighlightForElement(childElement);
-              });
+              // The removed subtree is already detached, so walk the tracked elements:
+              // sourcedWithin() only sees elements that are still on the page.
+              highlightManager.elements
+                .filter((tracked) => element.contains(tracked))
+                .forEach((childElement) => {
+                  highlightManager.removeHighlightForElement(childElement);
+                });
 
               // If a tracked media original (or its ancestor) was removed —
               // typically when the host framework re-renders after save and

@@ -1127,6 +1127,21 @@ describe('previewScript — stega decoding reads the page without rewriting it',
     expect(focusPaths()).toContainEqual(expect.stringContaining('path=subtitle'));
   });
 
+  test('drops the highlight of a decoded element removed with its parent', async () => {
+    const section = document.createElement('section');
+    const subtitle = document.createElement('h2');
+    subtitle.textContent = encode('Hello subtitle', SUBTITLE_SOURCE);
+    section.appendChild(subtitle);
+    document.body.appendChild(section);
+    await flush();
+    const before = document.querySelectorAll('.strapi-highlight').length;
+
+    section.remove();
+    await flush();
+
+    expect(document.querySelectorAll('.strapi-highlight').length).toBe(before - 1);
+  });
+
   describe('a decoded media field swapped to another media type while editing', () => {
     const COVER_SOURCE = 'documentId=doc1&type=media&path=cover.url';
 
