@@ -224,27 +224,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
               availableLocales: false,
             }
           );
-          const timestampStatus: RecentDocument['status'] = metadataService.getStatus(
+          const status: RecentDocument['status'] = metadataService.getStatus(
             recentDocument,
             availableStatus
           );
-          const omittedKeys =
-            hasDraftAndPublish && timestampStatus === 'published'
-              ? await metadataService.findOmittedRelationKeys(recentDocument.contentTypeUid, [
-                  recentDocument,
-                ])
-              : new Set<string>();
-          const status = hasDraftAndPublish
-            ? metadataService.applyOmittedRelationStatus(
-                timestampStatus,
-                recentDocument,
-                omittedKeys
-              )
-            : undefined;
 
           return {
             ...recentDocument,
-            status,
+            status: hasDraftAndPublish ? status : undefined,
           };
         })
       );

@@ -121,24 +121,9 @@ export const createCollectionListHandler =
       ? indexByDocumentId(await documentMetadata.getManyAvailableStatus(uid, documents))
       : new Map();
 
-    const timestampStatus = (document: any) => {
-      const availableStatuses = statusByDocumentId.get(document.documentId) || [];
-      return documentMetadata.getStatus(document, availableStatuses);
-    };
-    const omittedKeys = hasDraftAndPublish
-      ? await documentMetadata.findOmittedRelationKeys(
-          uid,
-          documents.filter((document: any) => timestampStatus(document) === 'published')
-        )
-      : new Set<string>();
-
     const setStatus = (document: any) => {
       const availableStatuses = statusByDocumentId.get(document.documentId) || [];
-      document.status = documentMetadata.applyOmittedRelationStatus(
-        documentMetadata.getStatus(document, availableStatuses),
-        document,
-        omittedKeys
-      );
+      document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
     };
 

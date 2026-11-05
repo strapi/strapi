@@ -25,6 +25,7 @@ import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import * as selfReferentialRelations from './utils/self-referential-relations';
+import * as droppedRelations from './utils/dropped-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
@@ -738,6 +739,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       publishedEntries,
       selfRelationsToSync
     );
+
+    await droppedRelations.restore(uid, updatedDraft, publishedEntries);
 
     publishedEntries.forEach(emitEvent('entry.publish'));
 

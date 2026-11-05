@@ -146,8 +146,6 @@ const makeDocumentManager = (
 const makeDocumentMetadata = () => ({
   getManyAvailableStatus: jest.fn(() => Promise.resolve([])),
   getStatus: jest.fn(() => 'draft'),
-  findOmittedRelationKeys: jest.fn(() => Promise.resolve(new Set<string>())),
-  applyOmittedRelationStatus: jest.fn((status: unknown) => status),
   formatDocumentWithMetadata: jest.fn((uid: string, doc: unknown) =>
     Promise.resolve({ ...(doc as object), meta: {} })
   ),

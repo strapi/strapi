@@ -57,38 +57,20 @@ const getDocumentIdsByDraftPublishRelation = async (
     publishedByKey.set(key, { updatedAt: p.updatedAt as string });
   }
 
-  const modifiedIds: string[] = [];
-  const unmodified: { documentId: string; locale?: string | null }[] = [];
-
+  const ids: string[] = [];
+  const wantModified = opts.type === 'modified';
   for (const d of drafts) {
     const key = `${d.documentId}\t${String(d?.locale ?? '')}`;
     const pub = publishedByKey.get(key);
     if (pub) {
       const dUpdated = d?.updatedAt ? new Date(d.updatedAt as string).getTime() : 0;
       const pUpdated = pub?.updatedAt ? new Date(pub.updatedAt).getTime() : 0;
-      if (dUpdated > pUpdated) {
-        modifiedIds.push(d.documentId as string);
-      } else {
-        unmodified.push({ documentId: d.documentId as string, locale: d.locale });
+      const isModified = dUpdated > pUpdated;
+      if (isModified === wantModified) {
+        ids.push(d.documentId as string);
       }
     }
   }
-
-  const omittedKeys = await strapi
-    .plugin('content-manager')
-    .service('document-metadata')
-    .findOmittedRelationKeys(uid, unmodified);
-  const omittedIds = unmodified
-    .filter((version) => omittedKeys.has(`${version.documentId}\t${version.locale ?? ''}`))
-    .map((version) => version.documentId);
-
-  const ids =
-    opts.type === 'modified'
-      ? [...modifiedIds, ...omittedIds]
-      : unmodified
-          .filter((version) => !omittedKeys.has(`${version.documentId}\t${version.locale ?? ''}`))
-          .map((version) => version.documentId);
-
   return [...new Set(ids)];
 };
 
@@ -439,26 +421,11 @@ export default {
       ? indexByDocumentId(await documentMetadata.getManyAvailableStatus(model, documents))
       : new Map();
 
-    const timestampStatus = (document: any) => {
-      const availableStatuses = statusByDocumentId.get(document.documentId) || [];
-      return documentMetadata.getStatus(document, availableStatuses);
-    };
-    const omittedKeys = hasDraftAndPublish
-      ? await documentMetadata.findOmittedRelationKeys(
-          model,
-          documents.filter((document: any) => timestampStatus(document) === 'published')
-        )
-      : new Set<string>();
-
     const setStatus = (document: any) => {
       // Available status of document
       const availableStatuses = statusByDocumentId.get(document.documentId) || [];
       // Compute document version status
-      document.status = documentMetadata.applyOmittedRelationStatus(
-        documentMetadata.getStatus(document, availableStatuses),
-        document,
-        omittedKeys
-      );
+      document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
     };
 

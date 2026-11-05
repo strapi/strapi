@@ -20,8 +20,6 @@ The admin part exports plugin APIs to change these forms and tables, and some un
 
 At the core of the CM is the concept of a document. The logic that creates a document lives in `@strapi/core`, but the CM needs to know what a document is to work with it. The CM gets documents with the [`useDocument`](./hooks/use-document.md) hook and changes them with the [`useDocumentActions`](./hooks/use-document-actions.md) hook. Read [Documents](./01-documents.md).
 
-A draft-and-publish document is **modified** when its draft `updatedAt` is newer than the published row. It is also **modified** when the draft still has a relation that publish left off the published version, and that related document now has a published version. Republishing copies the link. The published row is left unchanged until then. Relations that publish restores by itself, such as a bidirectional link whose target is published later, do not mark the document modified.
-
 ### Layouts
 
 A layout is a data structure that tells the CM how to render the list view and the edit view. Plugins can change the edit layout with the `Admin/CM/pages/EditView/mutate-edit-view-layout` hook. They can add columns to the list view. The list and edit settings of each content type and component live in the core store, and the `content-types` and `components` services reconcile them with the schemas at `bootstrap`. Read [Layouts](./02-layouts.md).
