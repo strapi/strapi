@@ -105,6 +105,11 @@ describe('content type mutation compensation', () => {
       return { uid };
     });
     builder.writeFiles.mockResolvedValue(true);
+    // Like the real builder: `beforeCommit` runs inside the row transaction, and its
+    // rejection propagates out of `renameComponentRows`.
+    builder.renameComponentRows.mockImplementation(
+      async ({ beforeCommit }: { beforeCommit?: () => Promise<unknown> } = {}) => beforeCommit?.()
+    );
     builder.rollback.mockImplementation(async () => {
       files.schemas = new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]);
     });
@@ -215,6 +220,32 @@ describe('content type mutation compensation', () => {
     );
     expect(files.apis).toEqual(new Set(['article']));
     expect(files.groups).toBe('before');
+    // The folder commit ran inside the row rewrite, so its failure rolled the rows back.
+    expect(builder.writeFiles).toHaveBeenCalledWith({ renameComponentRows: false });
+    await expect(builder.renameComponentRows.mock.results[0].value).rejects.toThrow(
+      'groups write failed'
+    );
+    expect(builder.rollback).toHaveBeenCalledTimes(1);
+  });
+
+  it('commits the folders inside the row rewrite when a kind switch succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, kind: 'singleType', attributes: {} },
+    });
+
+    expect(builder.writeFiles).toHaveBeenCalledWith({ renameComponentRows: false });
+    expect(builder.renameComponentRows).toHaveBeenCalledWith({
+      beforeCommit: expect.any(Function),
+    });
+    expect(contentStructure.commitFromUpdate).toHaveBeenCalledTimes(1);
+    expect(contentStructure.commitFromUpdate).toHaveBeenCalledWith({
+      deletedUids: new Set([contentType.uid]),
+    });
+
+    const [renameOrder] = builder.renameComponentRows.mock.invocationCallOrder;
+    const [commitOrder] = contentStructure.commitFromUpdate.mock.invocationCallOrder;
+    expect(renameOrder).toBeLessThan(commitOrder);
+    expect(builder.rollback).not.toHaveBeenCalled();
   });
 
   it('emits the update event when a kind switch succeeds', async () => {

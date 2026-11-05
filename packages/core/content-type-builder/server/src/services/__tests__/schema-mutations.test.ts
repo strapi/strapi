@@ -25,7 +25,11 @@ const builder = {
   editComponent: jest.fn(),
   deleteComponent: jest.fn(),
   writeFiles: jest.fn(),
-  renameComponentRows: jest.fn(),
+  // Like the real builder: `beforeCommit` runs inside the row transaction, and its
+  // rejection propagates out of `renameComponentRows`.
+  renameComponentRows: jest.fn(
+    async ({ beforeCommit }: { beforeCommit?: () => Promise<unknown> } = {}) => beforeCommit?.()
+  ),
   rollback: jest.fn(),
 };
 
@@ -145,7 +149,6 @@ describe('component uid change in a batch schema mutation', () => {
     jest.clearAllMocks();
     builder.writeFiles.mockResolvedValue(true);
     builder.rollback.mockResolvedValue(undefined);
-    builder.renameComponentRows.mockResolvedValue(undefined);
     apiHandler.backup.mockResolvedValue(undefined);
     apiHandler.clear.mockResolvedValue(undefined);
     apiHandler.rollback.mockResolvedValue(undefined);
@@ -163,11 +166,15 @@ describe('component uid change in a batch schema mutation', () => {
     } as any;
   });
 
-  it('writes the files without the rows, then rewrites the rows before the folder commit', async () => {
+  it('writes the files without the rows, then commits the folders inside the row rewrite', async () => {
     await updateSchema(moveCard);
 
     expect(builder.writeFiles).toHaveBeenCalledWith({ renameComponentRows: false });
     expect(builder.renameComponentRows).toHaveBeenCalledTimes(1);
+    expect(builder.renameComponentRows).toHaveBeenCalledWith({
+      beforeCommit: expect.any(Function),
+    });
+    expect(contentStructure.commitFromUpdate).toHaveBeenCalledTimes(1);
 
     const [clearOrder] = apiHandler.clear.mock.invocationCallOrder;
     const [renameOrder] = builder.renameComponentRows.mock.invocationCallOrder;
@@ -176,6 +183,17 @@ describe('component uid change in a batch schema mutation', () => {
     expect(clearOrder).toBeLessThan(renameOrder);
     expect(renameOrder).toBeLessThan(commitOrder);
     expect(builder.rollback).not.toHaveBeenCalled();
+  });
+
+  it('rolls the rows back with the files when the folder commit fails', async () => {
+    contentStructure.commitFromUpdate.mockRejectedValueOnce(new Error('EACCES'));
+
+    await expect(updateSchema(moveCard)).rejects.toThrow('EACCES');
+
+    // The rejection came out of `renameComponentRows`, i.e. out of the row transaction.
+    await expect(builder.renameComponentRows.mock.results[0].value).rejects.toThrow('EACCES');
+    expect(builder.rollback).toHaveBeenCalledTimes(1);
+    expect(apiHandler.rollback).toHaveBeenCalledWith('api::old.old');
   });
 
   it('leaves the rows on the old uid and restores the files when an API clear fails', async () => {

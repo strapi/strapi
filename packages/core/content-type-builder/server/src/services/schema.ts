@@ -775,16 +775,21 @@ export const updateSchema = async (schema: CTBSchema) => {
       await apiHandler.clear(uid, { preserveBackup: true });
     }
 
-    // Rewrite the rows that store a renamed component uid. This is the only database
-    // write, and it is transactional: if it fails, the rows are unchanged and the catch
-    // restores the files. It runs before `commitFromUpdate` because groups.json cannot be
-    // restored once written. The rows are not restored if `commitFromUpdate` itself fails.
-    await builder.renameComponentRows();
-
-    // Commit the single folder file last. Every preceding filesystem mutation can be restored.
-    await getService('content-structure').commitFromUpdate({
-      incomingStructure: contentStructure,
-      deletedUids,
+    // Rewrite the rows that store a renamed component uid, then commit the single folder
+    // file last: groups.json cannot be restored once written, and every preceding
+    // filesystem mutation can. The folder commit runs inside the row transaction, so if it
+    // fails the rows are rolled back and the catch restores the files: rows and files stay
+    // on the old uid. If the database COMMIT itself fails after groups.json is written,
+    // groups.json keeps the new folder layout; that is harmless, as unknown uids are
+    // dropped when groups.json is read.
+    await builder.renameComponentRows({
+      // Runs inside the row transaction: filesystem only, no database call in here (with
+      // a single-connection pool it would wait for the transaction forever).
+      beforeCommit: () =>
+        getService('content-structure').commitFromUpdate({
+          incomingStructure: contentStructure,
+          deletedUids,
+        }),
     });
   } catch (error) {
     await rollbackSchemaMutation({

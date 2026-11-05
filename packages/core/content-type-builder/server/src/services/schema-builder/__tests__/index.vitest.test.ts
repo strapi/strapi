@@ -178,6 +178,41 @@ describe('createBuilder', () => {
       expect(updates).toHaveLength(2);
     });
 
+    it('runs beforeCommit inside the row transaction, after the rewrite', async () => {
+      const { db, updates } = createDb();
+      (global as any).strapi.db = db;
+
+      const builder = createBuilder();
+      builder.editComponent({ ...cardInfos, category: 'blocks' });
+      await builder.writeFiles({ renameComponentRows: false });
+
+      const beforeCommit = vi.fn(async () => {
+        expect(updates).toHaveLength(2);
+      });
+
+      await builder.renameComponentRows({ beforeCommit });
+
+      expect(beforeCommit).toHaveBeenCalledTimes(1);
+      expect(db.transaction).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects with the error of beforeCommit', async () => {
+      const { db } = createDb();
+      (global as any).strapi.db = db;
+
+      const builder = createBuilder();
+      builder.editComponent({ ...cardInfos, category: 'blocks' });
+      await builder.writeFiles({ renameComponentRows: false });
+
+      await expect(
+        builder.renameComponentRows({
+          async beforeCommit() {
+            throw new Error('EISDIR');
+          },
+        })
+      ).rejects.toThrow('EISDIR');
+    });
+
     it('rolls the files back and rejects when the row rewrite fails', async () => {
       const { db } = createDb();
       db.transaction.mockRejectedValueOnce(new Error('SQLITE_BUSY'));

@@ -83,15 +83,35 @@ const getComponentUIDColumns = (db: Database): UIDColumn[] => {
   return Array.from(columns.values());
 };
 
+export interface RenameComponentUIDsOptions {
+  /**
+   * Runs after the rows are rewritten and before the transaction commits. If it
+   * rejects, the transaction rolls the rows back and `renameComponentUIDs` rejects
+   * with the same error. Use it for a later step that must succeed together with
+   * the rows (e.g. the `groups.json` folder commit).
+   *
+   * It runs while the transaction holds a connection, so it must not use `db`: with
+   * a pool of one connection (SQLite) a second query would wait forever. Without
+   * renames it still runs, without a transaction.
+   */
+  beforeCommit?: () => Promise<unknown>;
+}
+
 /**
  * Rewrites every stored reference to a renamed component uid (category move or
  * category rename): the `component_type` of the component join rows and the type
  * column of the polymorphic rows, so the entries and their media keep resolving
- * after the reload. Runs in one transaction. Must run while `db.metadata` still
- * describes the pre-rename schema: that is what locates the tables.
+ * after the reload. Runs in one transaction, which commits only after `beforeCommit`
+ * resolves. Must run while `db.metadata` still describes the pre-rename schema: that
+ * is what locates the tables.
  */
-export const renameComponentUIDs = async (db: Database, renames: ComponentUIDRename[]) => {
+export const renameComponentUIDs = async (
+  db: Database,
+  renames: ComponentUIDRename[],
+  { beforeCommit }: RenameComponentUIDsOptions = {}
+) => {
   if (renames.length === 0) {
+    await beforeCommit?.();
     return;
   }
 
@@ -107,5 +127,8 @@ export const renameComponentUIDs = async (db: Database, renames: ComponentUIDRen
           .transacting(trx);
       }
     }
+
+    // A rejection here rejects the callback, and `db.transaction` rolls the rows back.
+    await beforeCommit?.();
   });
 };

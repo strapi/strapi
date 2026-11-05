@@ -5,7 +5,7 @@ import { errors } from '@strapi/utils';
 import createSchemaHandler from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
-import { renameComponentUIDs } from './rename-component-uids';
+import { renameComponentUIDs, type RenameComponentUIDsOptions } from './rename-component-uids';
 
 /**
  * Creates a content type schema builder instance
@@ -151,7 +151,9 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
      *
      * Pass `{ renameComponentRows: false }` to only write the files. The caller must then
      * call `renameComponentRows` itself, before the reload, and roll the files back if it
-     * throws.
+     * throws. Do that when a later step must succeed together with the rows: run that
+     * step through `renameComponentRows({ beforeCommit })`, so that its failure rolls the
+     * rows back too.
      *
      * @returns boolean true if all files have been written correctly, false if an error
      * occurred while writing them (the files are rolled back)
@@ -214,14 +216,19 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
      * one transaction. Must run while the running process still holds the pre-rename
      * metadata that locates them, i.e. before the reload.
      *
-     * @throws if the rewrite failed; the transaction has then restored the rows
+     * `beforeCommit` runs inside that transaction, after the rewrite and before the
+     * commit (also when no uid changed). If it rejects, the rows are rolled back. It must
+     * not use the database (see `renameComponentUIDs`).
+     *
+     * @throws if the rewrite or `beforeCommit` failed; the transaction has then restored
+     * the rows
      */
-    async renameComponentRows() {
+    async renameComponentRows({ beforeCommit }: RenameComponentUIDsOptions = {}) {
       const componentUIDRenames = Array.from(tmpComponents.values())
         .filter((component) => component.initialUID && component.uid !== component.initialUID)
         .map((component) => ({ oldUID: component.initialUID, newUID: component.uid }));
 
-      await renameComponentUIDs(strapi.db, componentUIDRenames);
+      await renameComponentUIDs(strapi.db, componentUIDRenames, { beforeCommit });
     },
 
     /**

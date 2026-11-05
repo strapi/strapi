@@ -55,10 +55,14 @@ describe('component-categories editCategory', () => {
     await expect(editCategory('default', { name: 'sections2' })).resolves.toBe('sections2');
 
     expect(renameComponentUIDs).toHaveBeenCalledTimes(1);
-    expect(renameComponentUIDs).toHaveBeenCalledWith(db, [
-      { oldUID: 'default.card', newUID: 'sections2.card' },
-      { oldUID: 'default.wrapper', newUID: 'sections2.wrapper' },
-    ]);
+    expect(renameComponentUIDs).toHaveBeenCalledWith(
+      db,
+      [
+        { oldUID: 'default.card', newUID: 'sections2.card' },
+        { oldUID: 'default.wrapper', newUID: 'sections2.wrapper' },
+      ],
+      { beforeCommit: undefined }
+    );
   });
 
   it('does not touch the database when the name does not change', async () => {

@@ -32,15 +32,28 @@ const createDb = (
   const updates: RecordedUpdate[] = [];
   const trx = { id: 'trx' };
 
+  // Mirrors `db.transaction`: commit on a fulfilled callback, roll back on a rejected one.
+  const events: string[] = [];
+
   const db = {
     metadata: new Map(Object.entries(metadata)),
-    transaction: vi.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => run({ trx })),
+    transaction: vi.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => {
+      try {
+        const result = await run({ trx });
+        events.push('commit');
+        return result;
+      } catch (error) {
+        events.push('rollback');
+        throw error;
+      }
+    }),
     getConnection: vi.fn((table: string) => ({
       where: (column: string, oldUID: string) => ({
         update: (values: Record<string, string>) => ({
           transacting: vi.fn(async (usedTrx: unknown) => {
             expect(usedTrx).toBe(trx);
             updates.push({ table, column, oldUID, newUID: values[column] });
+            events.push(`update ${table}`);
             return 1;
           }),
         }),
@@ -48,7 +61,7 @@ const createDb = (
     })),
   };
 
-  return { db: db as any, updates };
+  return { db: db as any, updates, events };
 };
 
 const metadata = {
@@ -171,6 +184,54 @@ describe('renameComponentUIDs', () => {
       ['comments', 'target_type', 'default.card', 'blocks.card'],
       ['comments', 'target_type', 'default.wrapper', 'blocks.wrapper'],
     ]);
+  });
+
+  it('runs beforeCommit inside the transaction, after every update and before the commit', async () => {
+    const { db, events } = createDb(metadata);
+    const beforeCommit = vi.fn(async () => {
+      events.push('beforeCommit');
+    });
+
+    await renameComponentUIDs(db, [{ oldUID: 'default.card', newUID: 'blocks.card' }], {
+      beforeCommit,
+    });
+
+    expect(beforeCommit).toHaveBeenCalledTimes(1);
+    expect(events).toEqual([
+      'update pages_cmps',
+      'update components_default_wrappers_cmps',
+      'beforeCommit',
+      'commit',
+    ]);
+  });
+
+  it('rolls the transaction back and rejects with the error of beforeCommit', async () => {
+    const { db, events } = createDb(metadata);
+    const error = new Error('EACCES');
+
+    await expect(
+      renameComponentUIDs(db, [{ oldUID: 'default.card', newUID: 'blocks.card' }], {
+        async beforeCommit() {
+          throw error;
+        },
+      })
+    ).rejects.toBe(error);
+
+    expect(events).toEqual([
+      'update pages_cmps',
+      'update components_default_wrappers_cmps',
+      'rollback',
+    ]);
+  });
+
+  it('still runs beforeCommit without renames, outside a transaction', async () => {
+    const { db } = createDb(metadata);
+    const beforeCommit = vi.fn(async () => {});
+
+    await renameComponentUIDs(db, [], { beforeCommit });
+
+    expect(beforeCommit).toHaveBeenCalledTimes(1);
+    expect(db.transaction).not.toHaveBeenCalled();
   });
 
   it('does nothing without renames', async () => {
