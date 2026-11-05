@@ -407,13 +407,15 @@ declare global {
         /** EE: registered only when the `sso` feature is enabled. */
         'admin::provider-login.update': true;
         /**
-         * EE: registered only when the `audit-logs` feature is enabled. A planned fix will also
-         * require `admin.auditLogs.enabled`, as the audit logs routes already do.
+         * EE: registered when the license lists `audit-logs`. `admin.auditLogs.enabled: false` keeps
+         * it registered, so stored grants survive, and `GET /admin/permissions` marks it
+         * `disabledByConfig`.
          */
         'admin::audit-logs.read': true;
         /**
-         * EE: registered only when the `audit-logs` feature is enabled. A planned fix will also
-         * require `admin.auditLogs.enabled`, as the audit logs routes already do.
+         * EE: registered when the license lists `audit-logs`. `admin.auditLogs.enabled: false` keeps
+         * it registered, so stored grants survive, and `GET /admin/permissions` marks it
+         * `disabledByConfig`.
          */
         'admin::audit-logs.export': true;
       }
