@@ -34,7 +34,9 @@ The `admin::audit-log` content type is registered by the CE admin (`packages/cor
 
 The routes, controller and services use one condition, `isAuditLogsEnabled` in `packages/core/admin/ee/server/src/audit-logs/utils.ts`: the license includes the `audit-logs` feature and `admin.auditLogs.enabled` is not `false`.
 
-The `admin::audit-logs.read` / `admin::audit-logs.export` permission actions follow the license only (`packages/core/admin/ee/server/src/bootstrap.ts`), like the actions of review workflows, content releases and SSO. Turning `admin.auditLogs.enabled` off keeps the actions registered, so it keeps the audit-log grants of every role and admin token. While the config is off the routes are not mounted, and the role and admin token editors may still list the audit-log permissions. Turning the config back on makes the stored grants work again. `tests/api/core/admin/ee/audit-logs/config-disabled-permissions.test.api.ts` covers this behaviour.
+The `admin::audit-logs.read` / `admin::audit-logs.export` permission actions follow the license only (`packages/core/admin/ee/server/src/bootstrap.ts`), like the actions of review workflows, content releases and SSO. Turning `admin.auditLogs.enabled` off keeps the actions registered, so it keeps the audit-log grants of every role and admin token. While the config is off the routes are not mounted, but the role and admin token editors still list the audit-log permissions. Turning the config back on makes the stored grants work again. `tests/api/core/admin/ee/audit-logs/config-disabled-permissions.test.api.ts` covers this behaviour.
+
+While the license includes the `audit-logs` feature and the config is off, the EE `permission.getAll` controller (`packages/core/admin/ee/server/src/controllers/permission.ts`) adds `disabledByConfig: true` to the audit-log entries of the `settings` section of `GET /admin/permissions`. The role and admin token editors keep the section visible and editable, and show a "Disabled by configuration" badge on it. The section is not hidden on purpose: a role or admin token update replaces the full permission set, so hiding the section would delete its grants on the next save.
 
 When the license loses the `audit-logs` feature, the two actions are not registered on the next boot. The Super Admin reset (`resetSuperAdminPermissions`) drops them from the Super Admin, and the permission cleanup (`cleanPermissionsInDatabase`) deletes them from every other role and from admin tokens. When the feature comes back, the Super Admin reset restores them for the Super Admin only.
 
@@ -54,7 +56,7 @@ In both cases, if we want to set a custom retention days we can modify the Admin
 
 ### Export
 
-Audit logs can be exported as a single CSV file from the list view. The export honours the active filters and requires both the `admin::audit-logs.read` and `admin::audit-logs.export` permissions. Every export also records an `audit-log.export` event.
+Audit logs can be exported as a single CSV file from the list view. The export honours the active filters and requires both the `admin::audit-logs.read` and `admin::audit-logs.export` permissions. Every export also records an `audit-log.export` event. A date filter matches a day, or a minute when a time is picked: the list and the export send it as bounds. Read [Filters](../filters.md).
 
 By default, the export refuses to start when the matching set exceeds the maximum number of rows: 1,000,000. Self-hosted projects can change this limit with the `admin.auditLogs.exportMaxRows` configuration variable in the Admin Panel API config file (`./config/admin.js`).
 
