@@ -3,6 +3,7 @@ import { resolveHistoryOrigin, type RequestContext } from '..';
 const createCtx = (pluginName: string, strategyName: string) =>
   ({
     state: {
+      user: { id: 1, username: 'kai', email: 'kai@test.com' },
       route: { info: { pluginName, type: 'admin' } },
       auth: { strategy: { name: strategyName } },
     },
@@ -15,6 +16,7 @@ describe('resolveHistoryOrigin', () => {
   ])('resolves %s', (_, pluginName, strategyName, source) => {
     expect(resolveHistoryOrigin(createCtx(pluginName, strategyName))).toEqual({
       source,
+      author: { type: 'person', name: 'kai', model: 'admin::user', id: '1' },
     });
   });
 

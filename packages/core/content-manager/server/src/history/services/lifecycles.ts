@@ -144,6 +144,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
                   status,
                   ...schemas,
                   source: origin.source,
+                  author: origin.author,
                 });
               } catch (error) {
                 strapi.log.error(`Failed to create a history version for ${uid}`, {

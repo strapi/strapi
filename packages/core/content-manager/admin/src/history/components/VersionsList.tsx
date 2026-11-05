@@ -1,7 +1,8 @@
 import * as React from 'react';
 
 import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Status, Typography } from '@strapi/design-system';
+import { AccessibleIcon, Box, Flex, Status, Typography } from '@strapi/design-system';
+import { User } from '@strapi/icons';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -9,7 +10,6 @@ import { Link } from 'react-router-dom';
 import { ActionsDrawer, useActionsDrawer } from '../../components/ActionsDrawer';
 import { RelativeTime } from '../../components/RelativeTime';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
-import { getDisplayName } from '../../utils/users';
 import { useHistoryContext } from '../pages/History';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -25,6 +25,35 @@ const BlueText = (children: React.ReactNode) => (
 );
 
 /* -------------------------------------------------------------------------------------------------
+ * VersionAuthorName
+ * -----------------------------------------------------------------------------------------------*/
+
+const AUTHOR_TYPE_ICONS: Record<HistoryVersions.HistoryVersionAuthorType, React.ElementType> = {
+  person: User,
+};
+
+const AUTHOR_TYPE_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
+  person: {
+    id: 'content-manager.history.sidebar.version-card.author-type.person',
+    defaultMessage: 'Person',
+  },
+};
+
+const VersionAuthorName = ({ author }: { author: HistoryVersions.HistoryVersionAuthor }) => {
+  const { formatMessage } = useIntl();
+  const Icon = AUTHOR_TYPE_ICONS[author.type];
+
+  return (
+    <Flex tag="span" display="inline-flex" gap={1}>
+      <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
+        <Icon />
+      </AccessibleIcon>
+      {author.name}
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * VersionAuthor
  * -----------------------------------------------------------------------------------------------*/
 
@@ -36,7 +65,7 @@ const VersionAuthor = ({
   isCurrent: boolean;
 }) => {
   const { formatMessage } = useIntl();
-  const author = version.createdBy && getDisplayName(version.createdBy);
+
   return (
     <>
       {formatMessage(
@@ -47,8 +76,8 @@ const VersionAuthor = ({
         },
         {
           distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
-          author,
-          isAnonymous: !version.createdBy,
+          author: version.author && <VersionAuthorName author={version.author} />,
+          isAnonymous: !version.author,
           isCurrent,
           b: BlueText,
         }

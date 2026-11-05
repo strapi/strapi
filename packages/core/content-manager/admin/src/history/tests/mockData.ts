@@ -10,6 +10,7 @@ const HISTORY_VERSIONS_MOCK_DATA = {
       locale: null,
       status: 'draft' as const,
       source: 'admin-panel' as const,
+      author: null,
       data: {
         short_text: 'ktchnsnk',
         long_text:
@@ -445,6 +446,7 @@ const HISTORY_VERSIONS_MOCK_DATA = {
       locale: null,
       status: 'draft' as const,
       source: 'admin-api' as const,
+      author: { type: 'person' as const, name: 'Kai Doe', model: 'admin::user', id: '1' },
       data: {
         short_text: 'ktchnsnk',
         long_text:

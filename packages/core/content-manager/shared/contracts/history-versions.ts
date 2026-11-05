@@ -1,13 +1,22 @@
 import type { Data, Modules, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
+export type HistoryVersionSource = 'admin-panel' | 'admin-api';
+
+export type HistoryVersionAuthorType = 'person';
+
+export interface HistoryVersionAuthor {
+  type: HistoryVersionAuthorType;
+  name: string;
+  model: string;
+  id: string;
+}
+
 /**
  * Unlike other Content Manager contracts, history versions can't be created via
  * a dedicated API endpoint, but only by the history service listening to other actions.
  * That's why we directly export the create type here.
  */
-export type HistoryVersionSource = 'admin-panel' | 'admin-api';
-
 export interface CreateHistoryVersion {
   contentType: UID.ContentType;
   relatedDocumentId: Data.ID;
@@ -16,6 +25,7 @@ export interface CreateHistoryVersion {
   data: Modules.Documents.AnyDocument;
   schema: Struct.SchemaAttributes;
   source: HistoryVersionSource;
+  author: HistoryVersionAuthor;
 }
 
 export interface Locale {
@@ -23,9 +33,16 @@ export interface Locale {
   code: string;
 }
 
-export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, 'locale'> {
+export interface HistoryVersionDataResponse extends Omit<
+  CreateHistoryVersion,
+  'locale' | 'author'
+> {
   id: Data.ID;
   createdAt: string;
+  author: HistoryVersionAuthor | null;
+  /**
+   * @deprecated Use `author` instead.
+   */
   createdBy?: {
     id: Data.ID;
     firstname?: string;

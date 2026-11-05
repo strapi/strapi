@@ -938,7 +938,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
     });
   });
 
-  describe('Source of history versions', () => {
+  describe('Source and author of history versions', () => {
     const findVersions = async (documentId: string) => {
       const { body } = await rq({
         method: 'GET',
@@ -977,6 +977,34 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(versions.length).toBeGreaterThan(0);
       versions.forEach((version) => {
         expect(version.source).toBe('admin-panel');
+      });
+    });
+
+    test('Records an admin panel write with the admin as its author', async () => {
+      const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
+        body: { description: 'Updated in the admin panel' },
+        qs: { locale: 'en' },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(collectionTypeDocumentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: 'admin admin',
+        model: 'admin::user',
+        id: String(me.data.id),
+      });
+      expect(latestVersion.createdBy).toEqual({
+        id: me.data.id,
+        firstname: 'admin',
+        lastname: 'admin',
+        username: null,
+        email: 'admin@strapi.io',
       });
     });
 
