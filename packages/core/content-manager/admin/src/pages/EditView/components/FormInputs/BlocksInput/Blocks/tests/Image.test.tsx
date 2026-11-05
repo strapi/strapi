@@ -8,11 +8,9 @@ import { ReactEditor } from 'slate-react';
 
 import { withStrapiSchema } from '../../plugins/withStrapiSchema';
 import { mockImage } from '../../tests/mock-schema';
-import { createDroppedImagesInserter, imageBlocks } from '../Image';
+import { createDroppedImagesInserter, imageBlocks, type MediaAsset } from '../Image';
 
 import { Wrapper } from './Wrapper';
-
-import type { Schema } from '@strapi/types';
 
 type MediaLibraryProps = {
   onSelectAssets: (images: (typeof mockImage)[]) => void;
@@ -357,7 +355,7 @@ describe('createDroppedImagesInserter', () => {
       ...mockImage,
       name,
       url: `/uploads/${name}`,
-    }) as unknown as Schema.Attribute.MediaValue<true>[number];
+    }) as unknown as MediaAsset;
   const dropEvent = {} as React.DragEvent;
 
   /** What the editor holds, one entry per block: the image name or the paragraph text. */
