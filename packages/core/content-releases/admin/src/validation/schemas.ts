@@ -29,7 +29,7 @@ export const RELEASE_SCHEMA = yup
           // Timezone is in format "UTC&Europe/Paris", so we get the region part for the dates functions
           const region = timezone?.split('&')[1];
 
-          // An invalid timezone is reported by the timezone field. Without a schedule, the hidden
+          // A missing timezone is reported by the timezone field. Without a schedule, the disabled
           // date and time are not submitted
           if (!isScheduled || !date || !region || !time) {
             return true;
@@ -43,16 +43,8 @@ export const RELEASE_SCHEMA = yup
       ),
     timezone: yup.string().when('isScheduled', {
       is: true,
-      then: yup
-        .string()
-        .required(translatedErrors.required.id)
-        .nullable()
-        // A free-typed value that isn't one of the timezone options has no region part
-        .test(
-          'timezone-from-list',
-          'components.Input.error.validation.combobox.invalid',
-          (timezone) => Boolean(timezone?.split('&')[1])
-        ),
+      // The timezone combobox only sets a value of its list, or none
+      then: yup.string().required(translatedErrors.required.id).nullable(),
       otherwise: yup.string().nullable(),
     }),
     date: yup.string().when('isScheduled', {

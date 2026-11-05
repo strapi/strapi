@@ -9985,6 +9985,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
   dependencies:
+    "@base-ui/react": "npm:1.7.0"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.60.0"
     "@strapi/admin-test-utils": "npm:5.60.0"

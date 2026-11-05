@@ -1038,7 +1038,8 @@ describe('Release details tabs, header and rows', () => {
     const dialog = await screen.findByRole('dialog');
     await waitFor(() => expect(reasonRequests).toHaveBeenCalledWith('notReady'));
     expect(await within(dialog).findByText('1 of 3 entries not ready')).toBeInTheDocument();
-    expect(within(dialog).getByText('Not ready: Validation error')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText('Validation error')).toBeInTheDocument();
     expect(within(dialog).getByText('Title')).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('button', { name: 'Next' }));
@@ -1050,9 +1051,64 @@ describe('Release details tabs, header and rows', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Next' }));
 
     expect(await within(dialog).findByText('category 5')).toBeInTheDocument();
-    expect(within(dialog).getByText('Not ready: Not checked yet')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not checked yet')).toBeInTheDocument();
     expect(within(dialog).getByText(/hasn’t been checked yet/)).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Next' })).toBeDisabled();
+  });
+
+  it("keeps linking a single type's row to its edit view once the reasons have loaded", async () => {
+    const notReady = action(1, { isEntryValid: false });
+    const homepage = action(2, {
+      contentType: {
+        uid: 'api::homepage.homepage',
+        displayName: 'Homepage',
+        mainFieldValue: 'home',
+      },
+      locale: { code: 'en-GB', name: 'English (en-GB)' },
+    });
+    const reasonRequests = jest.fn();
+    server.use(
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json({
+          data: { ...plannedRelease, actions: { meta: { count: 2, notReadyCount: 1 } } },
+        })
+      ),
+      http.get('/content-releases/:releaseId/actions', ({ request }) => {
+        const filter = new URL(request.url).searchParams.get('filter');
+        const pagination = { page: 1, pageSize: 10, total: 2, pageCount: 1 };
+        const article = { 'api::article.article': { kind: 'collectionType' } };
+
+        if (filter === 'notReady') {
+          reasonRequests(filter);
+          // The reasons' meta only has the content types of the entries not ready
+          return HttpResponse.json({
+            data: { Article: [notReady] },
+            meta: { pagination, contentTypes: article, components: {} },
+          });
+        }
+
+        return HttpResponse.json({
+          data: { Article: [notReady], Homepage: [homepage] },
+          meta: {
+            pagination,
+            contentTypes: { ...article, 'api::homepage.homepage': { kind: 'singleType' } },
+            components: {},
+          },
+        });
+      })
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Why article 1 isn’t ready' }));
+    await waitFor(() => expect(reasonRequests).toHaveBeenCalled());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+
+    expect(screen.getByRole('link', { name: 'Open entry', hidden: true })).toHaveAttribute(
+      'href',
+      '/content-manager/single-types/api::homepage.homepage?plugins%5Bi18n%5D%5Blocale%5D=en-GB'
+    );
   });
 
   // `count` entries not ready, the table showing those from `tableStart`, by 10. The server pages
@@ -1151,7 +1207,8 @@ describe('Release details tabs, header and rows', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Next' }));
 
     expect(await within(dialog).findByText('article 3')).toBeInTheDocument();
-    expect(within(dialog).getByText('Skipped: Waiting on other entries')).toBeInTheDocument();
+    expect(within(dialog).getByText('Skipped')).toBeInTheDocument();
+    expect(within(dialog).getByText('Waiting on other entries')).toBeInTheDocument();
   });
 
   it('names the entry that held back an entry of a run that released nothing, and opens its reason', async () => {
@@ -1181,13 +1238,15 @@ describe('Release details tabs, header and rows', () => {
     await user.click(await screen.findByRole('button', { name: 'Why article 2 was skipped' }));
 
     const dialog = await screen.findByRole('dialog');
-    expect(await within(dialog).findByText('Skipped: Waiting on other entries')).toBeVisible();
+    expect(await within(dialog).findByText('Waiting on other entries')).toBeVisible();
+    expect(within(dialog).getByText('Skipped')).toBeVisible();
     const heldBackBy = await within(dialog).findByRole('region', { name: 'Held back by' });
 
     await user.click(within(heldBackBy).getByRole('button', { name: 'Why article 1 was skipped' }));
 
     expect(await within(dialog).findByText('Couldn’t be published: PartnerApiError')).toBeVisible();
-    expect(within(dialog).getByText('Skipped: Error')).toBeVisible();
+    expect(within(dialog).getByText('Skipped')).toBeVisible();
+    expect(within(dialog).getByText('Error')).toBeVisible();
   });
 
   it('names an entry with an empty main field "Untitled", not by its id', async () => {
@@ -1298,11 +1357,39 @@ describe('Release details tabs, header and rows', () => {
       mockApiError('put', '/content-releases/:releaseId/actions/:actionId', 'Release already ran')
     );
 
-    renderPage();
+    const { user } = renderPage();
 
-    // user-event's click doesn't change the visually hidden radio
-    fireEvent.click(await screen.findByRole('radio', { name: 'unpublish' }));
+    await user.click(await screen.findByRole('radio', { name: 'Unpublish' }));
 
     expect(await screen.findByText('Release already ran')).toBeVisible();
+  });
+
+  describe('removing an entry from its row', () => {
+    beforeEach(() => {
+      jest.mocked(useRBAC).mockReturnValue({
+        isLoading: false,
+        allowedActions: { canUpdate: true, canDeleteAction: true },
+      } as unknown as ReturnType<typeof useRBAC>);
+    });
+
+    it('removes an entry from the release from its row', async () => {
+      mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+      const removed = jest.fn();
+      server.use(
+        http.delete('/content-releases/:releaseId/actions/:actionId', ({ params }) => {
+          removed(params.actionId);
+          return HttpResponse.json({ data: { id: Number(params.actionId) } });
+        })
+      );
+
+      const { user } = renderPage();
+
+      // The row's actions only take the pointer once it hovers the row: reach them by keyboard
+      (await screen.findByRole('button', { name: 'Remove from release' })).focus();
+      await user.keyboard('{Enter}');
+
+      expect(await screen.findByText('Entry removed from release')).toBeVisible();
+      expect(removed).toHaveBeenCalledWith('1');
+    });
   });
 });

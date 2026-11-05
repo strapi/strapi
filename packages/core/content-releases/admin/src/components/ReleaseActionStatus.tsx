@@ -69,7 +69,8 @@ const InlineBadge = (props: BadgeProps) => <Badge {...props} tag={'span' as 'div
 
 interface ReasonCellProps {
   label: string;
-  reasonLabel: string | null;
+  // The reason the button names, when the entry has a single one: "View details" otherwise
+  reasonLabel?: string | null;
   ariaLabel: string;
   onOpenReason: () => void;
 }
@@ -89,11 +90,11 @@ const ReasonCell = ({ label, reasonLabel, ariaLabel, onOpenReason }: ReasonCellP
       <Button
         // TEMP: /next Button has no ghost-destructive variant yet — override a ghost button to
         // red text + light-red hover bg. Replace with variant="ghostDestructive" once added to
-        // @strapi/design-system/next (EE-274-style DS task).
+        // @strapi/design-system/next (EE-302).
         variant="ghost"
         size="xs"
         className="text-destructive hover:bg-destructive/5 hover:text-destructive"
-        aria-label={`${buttonLabel} — ${ariaLabel}`}
+        aria-label={ariaLabel}
         aria-haspopup="dialog"
         onClick={onOpenReason}
       >
@@ -126,7 +127,7 @@ interface PlannedActionStatusProps {
   action: ReleaseAction['type'];
   isEntryValid: ReleaseAction['isEntryValid'] | null;
   entryName: string;
-  reasonLabel: string | null;
+  reasonLabel?: string | null;
   onOpenReason: () => void;
 }
 
@@ -182,7 +183,7 @@ interface ReleasedActionStatusProps {
   // upgrade sweep stored is a guess
   isOutcomeUnknown: boolean;
   entryName: string;
-  reasonLabel: string | null;
+  reasonLabel?: string | null;
   onOpenReason: () => void;
 }
 

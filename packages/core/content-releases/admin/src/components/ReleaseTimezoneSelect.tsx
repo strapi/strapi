@@ -5,7 +5,7 @@ import { Field } from '@strapi/design-system';
 import { cn } from '@strapi/design-system/next';
 import { useIntl } from 'react-intl';
 
-import { getTimezones } from '../utils/time';
+import { getTimezoneName, getTimezones, type TimezoneOption } from '../utils/time';
 
 /**
  * PROTOTYPE: timezone picker rebuilt on the `/next` stack (@base-ui Combobox + Tailwind) so it
@@ -16,24 +16,18 @@ import { getTimezones } from '../utils/time';
 type IconProps = React.SVGProps<SVGSVGElement>;
 
 const CaretDown = (props: IconProps) => (
-  <svg viewBox="0 0 256 256" fill="currentColor" width="1em" height="1em" {...props}>
+  <svg viewBox="0 0 256 256" fill="currentColor" width="1em" height="1em" aria-hidden {...props}>
     <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" />
   </svg>
 );
 
 const XIcon = (props: IconProps) => (
-  <svg viewBox="0 0 256 256" fill="currentColor" width="1em" height="1em" {...props}>
+  <svg viewBox="0 0 256 256" fill="currentColor" width="1em" height="1em" aria-hidden {...props}>
     <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z" />
   </svg>
 );
 
-const getTimezoneName = (timezone: string) => timezone.split('&')[1];
 const formatTimezoneLabel = (timezone: string) => timezone.replaceAll('&', ' ');
-
-interface TimezoneOption {
-  offset: string;
-  value: string;
-}
 
 export interface ReleaseTimezoneSelectProps {
   timezoneOptions: TimezoneOption[];
@@ -45,7 +39,14 @@ export interface ReleaseTimezoneSelectProps {
 }
 
 export const ReleaseTimezoneSelect = React.memo(
-  ({ timezoneOptions, value, date, error, setFieldValue, disabled = false }: ReleaseTimezoneSelectProps) => {
+  ({
+    timezoneOptions,
+    value,
+    date,
+    error,
+    setFieldValue,
+    disabled = false,
+  }: ReleaseTimezoneSelectProps) => {
     const { formatMessage } = useIntl();
     const [timezoneList, setTimezoneList] = React.useState<TimezoneOption[]>(timezoneOptions);
 
@@ -65,7 +66,10 @@ export const ReleaseTimezoneSelect = React.memo(
       }
     }, [setFieldValue, date, value]);
 
-    const items = React.useMemo(() => timezoneList.map((timezone) => timezone.value), [timezoneList]);
+    const items = React.useMemo(
+      () => timezoneList.map((timezone) => timezone.value),
+      [timezoneList]
+    );
 
     return (
       <Field.Root name="timezone" error={error} required={!disabled}>
@@ -80,20 +84,10 @@ export const ReleaseTimezoneSelect = React.memo(
           items={items}
           value={value || null}
           onValueChange={(next) => setFieldValue('timezone', next ?? '')}
-          itemToStringLabel={(item) => formatTimezoneLabel(item)}
+          itemToStringLabel={formatTimezoneLabel}
         >
           <div className="relative">
-            <Combobox.Input
-              placeholder={formatMessage({
-                id: 'content-releases.modal.form.input.placeholder.timezone',
-                defaultMessage: 'Select or enter a value',
-              })}
-              className={cn(
-                'h-10 w-full rounded-md border border-border bg-background pl-3 pr-14 text-sm outline-none',
-                'focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
-                'disabled:cursor-not-allowed disabled:opacity-50'
-              )}
-            />
+            <TimezoneInput />
             <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
               <Combobox.Clear
                 aria-label={formatMessage({
@@ -105,7 +99,10 @@ export const ReleaseTimezoneSelect = React.memo(
                 <XIcon className="size-3.5" />
               </Combobox.Clear>
               <Combobox.Trigger
-                aria-label="Open"
+                aria-label={formatMessage({
+                  id: 'content-releases.modal.form.input.timezone.open',
+                  defaultMessage: 'Show timezones',
+                })}
                 className="flex size-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <Combobox.Icon>
@@ -151,3 +148,29 @@ export const ReleaseTimezoneSelect = React.memo(
     );
   }
 );
+
+/**
+ * The combobox's input, named by the field's label and described by its error
+ */
+const TimezoneInput = () => {
+  const { formatMessage } = useIntl();
+  const { id, error, required } = Field.useField('TimezoneInput');
+
+  return (
+    <Combobox.Input
+      id={id}
+      aria-describedby={error ? `${id}-error` : undefined}
+      aria-invalid={Boolean(error)}
+      aria-required={required}
+      placeholder={formatMessage({
+        id: 'content-releases.modal.form.input.placeholder.timezone',
+        defaultMessage: 'Select or enter a value',
+      })}
+      className={cn(
+        'h-10 w-full rounded-md border border-border bg-background pl-3 pr-14 text-sm outline-none',
+        'focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
+        'disabled:cursor-not-allowed disabled:opacity-50'
+      )}
+    />
+  );
+};

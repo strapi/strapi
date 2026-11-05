@@ -88,11 +88,15 @@ describe('CreateReleaseFromSkippedDrawer', () => {
   it('leaves the date empty for the user to pick', async () => {
     mockSkippedEntries([skippedAction(1, 'Spring sale')]);
 
-    renderDrawer();
+    const { user } = renderDrawer();
 
     await screen.findByText('1 entry carried over');
-    expect(screen.getByRole('combobox', { name: 'Date' })).toHaveValue('');
-    expect(screen.getByRole('combobox', { name: 'Time' })).toHaveValue('');
+    const trigger = screen.getByRole('combobox', { name: 'Release date' });
+    expect(trigger).toHaveTextContent('Pick a date and time');
+
+    await user.click(trigger);
+
+    expect(await screen.findByLabelText('Time')).toHaveValue('');
   });
 
   it('collapses long lists behind "Show more"', async () => {

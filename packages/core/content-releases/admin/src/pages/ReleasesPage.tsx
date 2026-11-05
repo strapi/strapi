@@ -29,7 +29,6 @@ import {
 } from '@strapi/design-system';
 import { Plus, WarningCircle } from '@strapi/icons';
 import { CircleHalfIcon, ClockCountdownIcon, MinusIcon } from '@strapi/icons/regular';
-import { CalendarBlank, PaperPlaneTilt } from '../components/ScheduleIcons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -45,6 +44,7 @@ import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
 import { ReleaseStatusBadge, STATUS_MESSAGES } from '../components/ReleaseStatusBadge';
 import { ScheduleFilterInput } from '../components/ScheduleFilterInput';
+import { CalendarBlank, PaperPlaneTilt } from '../components/ScheduleIcons';
 import { PERMISSIONS } from '../constants';
 import {
   useGetReleasesQuery,
@@ -89,19 +89,23 @@ const RELEASE_CONDITION_BADGES = {
 >;
 
 /**
- * The schedule reads as a relative time alone ("In 2 days", "3 days ago") over its date: the status
- * column already tells a run from a missed schedule. A clock marks a run to come and a calendar a
- * date that passed. Only an upcoming run keeps the table's text colour: the others are grey, so the
- * runs to come stand out.
+ * Whether a release is behind us: it ran, even before its schedule, or its schedule passed. Only a
+ * release still to come keeps the table's text colour: the others are grey, so the runs to come
+ * stand out.
+ */
+const isReleasePast = (release: ReleaseRow) =>
+  Boolean(release.releasedAt) ||
+  (release.scheduledAt != null && new Date(release.scheduledAt).getTime() <= Date.now());
+
+/**
+ * The schedule reads as a relative time ("In 2 days", "3 days ago") then its date, on one line: the
+ * status column already tells a run from a missed schedule. A calendar marks a run to come and a
+ * paper plane one behind us: it ran, or its date passed.
  *
  * The date is the schedule, the one the sort and the "Scheduled for" filter use: a release
  * published by hand without one stays "Not scheduled".
  */
-const isReleasePast = (release: ReleaseRow) =>
-  release.scheduledAt != null &&
-  (Boolean(release.releasedAt) || new Date(release.scheduledAt).getTime() <= Date.now());
-
-const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
+const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolean }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
 
   if (!release.scheduledAt) {
@@ -121,17 +125,14 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   const timeZone = release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   const scheduledAt = new Date(release.scheduledAt);
   const absoluteTime = `${formatDate(scheduledAt, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(scheduledAt, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, scheduledAt)}`;
-  // A release that ran is past, even when it ran before its schedule
-  const isUpcoming = !release.releasedAt && scheduledAt.getTime() > Date.now();
-
-  const Icon = isUpcoming ? CalendarBlank : PaperPlaneTilt;
+  const Icon = isPast ? PaperPlaneTilt : CalendarBlank;
 
   return (
     <Flex gap={2} alignItems="center">
-      <Flex color={isUpcoming ? 'neutral800' : 'neutral600'}>
+      <Flex color={isPast ? 'neutral600' : 'neutral800'}>
         <Icon width="1.6rem" height="1.6rem" aria-hidden />
       </Flex>
-      <SentenceCase textColor={isUpcoming ? 'neutral800' : 'neutral600'}>
+      <SentenceCase textColor={isPast ? 'neutral600' : 'neutral800'}>
         {/* Browser-zone default title would contradict the release-zone text */}
         <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
         {` • ${absoluteTime}`}
@@ -149,11 +150,10 @@ const SentenceCase = styled(Typography)`
   }
 `;
 
-const EntriesCell = ({ release }: { release: ReleaseRow }) => {
+const EntriesCell = ({ release, isMuted }: { release: ReleaseRow; isMuted: boolean }) => {
   const { formatMessage } = useIntl();
   const isFrozen = Boolean(release.releasedAt);
   const { count, notReadyCount = 0 } = release.actions.meta;
-  const isMuted = isReleasePast(release);
 
   return (
     <Flex direction="column" alignItems="flex-start">
@@ -197,7 +197,9 @@ const ReleaseConditionBadge = ({
   return (
     <Flex gap={2} color={isMuted ? 'neutral600' : 'neutral800'}>
       <Icon width="1.6rem" height="1.6rem" aria-hidden />
-      <Typography textColor={isMuted ? 'neutral600' : 'neutral800'}>{formatMessage(message)}</Typography>
+      <Typography textColor={isMuted ? 'neutral600' : 'neutral800'}>
+        {formatMessage(message)}
+      </Typography>
     </Flex>
   );
 };
@@ -517,34 +519,46 @@ const ReleasesTable = ({
         )}
         <Table.Loading />
         <Table.Body>
-          {releases.map((release) => (
-            <Table.Row key={release.id} cursor="pointer" onClick={() => navigate(`${release.id}`)}>
-              <Table.Cell width="30%" maxWidth="30rem">
-                <Link
-                  tag={NavLink}
-                  to={`${release.id}`}
-                  isExternal={false}
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                >
-                  <Typography textColor={isReleasePast(release) ? 'neutral600' : 'neutral800'} ellipsis>
-                    {release.name}
-                  </Typography>
-                </Link>
-              </Table.Cell>
-              <Table.Cell>
-                <ReleaseStatusBadge status={release.status} />
-              </Table.Cell>
-              <Table.Cell>
-                <ScheduleCell release={release} />
-              </Table.Cell>
-              <Table.Cell>
-                <EntriesCell release={release} />
-              </Table.Cell>
-              <Table.Cell>
-                <ReleaseConditionBadge releaseCondition={release.releaseCondition} isMuted={isReleasePast(release)} />
-              </Table.Cell>
-            </Table.Row>
-          ))}
+          {releases.map((release) => {
+            // Once per row, so every cell reads the same instant
+            const isPast = isReleasePast(release);
+
+            return (
+              <Table.Row
+                key={release.id}
+                cursor="pointer"
+                onClick={() => navigate(`${release.id}`)}
+              >
+                <Table.Cell width="30%" maxWidth="30rem">
+                  <Link
+                    tag={NavLink}
+                    to={`${release.id}`}
+                    isExternal={false}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  >
+                    <Typography textColor={isPast ? 'neutral600' : 'neutral800'} ellipsis>
+                      {release.name}
+                    </Typography>
+                  </Link>
+                </Table.Cell>
+                <Table.Cell>
+                  <ReleaseStatusBadge status={release.status} />
+                </Table.Cell>
+                <Table.Cell>
+                  <ScheduleCell release={release} isPast={isPast} />
+                </Table.Cell>
+                <Table.Cell>
+                  <EntriesCell release={release} isMuted={isPast} />
+                </Table.Cell>
+                <Table.Cell>
+                  <ReleaseConditionBadge
+                    releaseCondition={release.releaseCondition}
+                    isMuted={isPast}
+                  />
+                </Table.Cell>
+              </Table.Row>
+            );
+          })}
         </Table.Body>
       </Table.Content>
     </Table.Root>

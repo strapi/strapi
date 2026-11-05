@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Badge, Button, IconButton, LinkButton } from '@strapi/design-system';
-import { getBadgeColorProps } from './ReleaseStatusBadge';
 import {
   Drawer,
   DrawerContent,
@@ -20,6 +19,7 @@ import { getReleaseDateParts } from '../utils/time';
 import { getEntryLinkProps, useCanReadEntry, type EntryLocation } from './EntryLinkButton';
 import { SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
 import { RELEASE_DRAWER_CLASS_NAME } from './ReleaseDrawer';
+import { getBadgeColorProps } from './ReleaseStatusBadge';
 
 import type { ReleaseActionOutcome } from '../../../shared/constants';
 import type { ReleaseAction, ReleaseActionReason } from '../../../shared/contracts/release-actions';
