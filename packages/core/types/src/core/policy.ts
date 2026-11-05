@@ -2,7 +2,7 @@ import { ExtendableContext } from 'koa';
 
 import type { Strapi } from '.';
 import type { SuggestedString } from '../utils/string';
-import type { IsStrict, RegisteredRecord } from './strictness';
+import type { IsOptionalReferenceConfig, IsStrict, RegisteredRecord } from './strictness';
 
 export type PolicyContext = Omit<ExtendableContext, 'is'> & {
   type: string;
@@ -106,10 +106,11 @@ type RegisteredPolicyReference<
   TName extends RegisteredPolicyName,
   TNamespace extends string,
   TConfig = PolicyReferenceConfig<PolicyConfigFor<TName>>,
-> = [undefined] extends [TConfig]
-  ? | PolicyReferenceName<TName, TNamespace>
-    | { name: PolicyReferenceName<TName, TNamespace>; config?: TConfig }
-  : { name: PolicyReferenceName<TName, TNamespace>; config: TConfig };
+> =
+  IsOptionalReferenceConfig<TConfig> extends true
+    ? | PolicyReferenceName<TName, TNamespace>
+      | { name: PolicyReferenceName<TName, TNamespace>; config?: TConfig }
+    : { name: PolicyReferenceName<TName, TNamespace>; config: TConfig };
 
 /** Any policy name. Registered names, and their relative forms in `TNamespace`, are listed for completion. */
 type SuggestedPolicyName<TNamespace extends string> = SuggestedString<

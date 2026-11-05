@@ -16,6 +16,8 @@ true satisfies Equals<Config<'global::isOwner'>, { field: string }>;
 true satisfies Equals<Config<'api::article.has-role'>, { roles: string[] }>;
 // No config parameter takes no config; an untyped JS policy accepts any config.
 true satisfies Equals<Config<'global::isPublic'>, undefined>;
+// Every config field is optional: the contract is kept as declared.
+true satisfies Equals<Config<'global::hasHeader'>, { header?: string }>;
 declare const legacy: Config<'global::legacy'>;
 exactlyUnknown(legacy) satisfies true;
 
@@ -39,6 +41,10 @@ type Controllers = { article: { find: Core.ControllerHandler } };
         policies: [
           { name: 'global::isOwner', config: { field: 'author' } },
           'global::isPublic',
+          // Runtime passes `{}` to a policy named alone, so an all-optional config may be left out.
+          'global::hasHeader',
+          { name: 'global::hasHeader' },
+          { name: 'global::hasHeader', config: { header: 'x-api-key' } },
           'global::legacy',
           { name: 'global::legacy', config: { anything: true } },
           { name: 'has-role', config: { roles: ['editor'] } },
@@ -54,6 +60,18 @@ type Controllers = { article: { find: Core.ControllerHandler } };
 ({
   // @ts-expect-error A required config cannot be left out.
   policies: ['global::isOwner'],
+}) satisfies Core.RouteConfigFor<'api::article'>;
+({
+  // @ts-expect-error A required config cannot be left out of the `{ name }` form either.
+  policies: [{ name: 'global::isOwner' }],
+}) satisfies Core.RouteConfigFor<'api::article'>;
+({
+  // A name-only reference to an all-optional config, as in the QA report.
+  policies: ['global::hasHeader'],
+}) satisfies Core.RouteConfigFor<'api::article'>;
+({
+  // @ts-expect-error An optional config is still checked.
+  policies: [{ name: 'global::hasHeader', config: { header: 1 } }],
 }) satisfies Core.RouteConfigFor<'api::article'>;
 ({
   // @ts-expect-error The config is checked against the handler's second parameter.

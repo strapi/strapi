@@ -15,3 +15,14 @@ export type IsDynamicName<TName extends string> =
 export type RegisteredRecord<TEntries, TFallback> = [keyof TEntries] extends [never]
   ? Record<string, TFallback>
   : TEntries & Record<string, TFallback>;
+
+/**
+ * Whether a policy or middleware reference may omit the config. Runtime passes `{}` when it does, by
+ * name alone or as `{ name }`, so a config that accepts `undefined` or `{}` is optional: a config
+ * whose fields are all optional counts as optional.
+ */
+export type IsOptionalReferenceConfig<TConfig> = [undefined] extends [TConfig]
+  ? true
+  : [Record<never, never>] extends [TConfig]
+    ? true
+    : false;

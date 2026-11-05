@@ -4,7 +4,7 @@ import type * as UID from '../uid';
 import type { SuggestedString } from '../utils/string';
 
 import type { Strapi } from './strapi';
-import type { IsStrict, RegisteredRecord } from './strictness';
+import type { IsOptionalReferenceConfig, IsStrict, RegisteredRecord } from './strictness';
 
 export type MiddlewareFactory<T = any> = (
   config: T,
@@ -75,22 +75,12 @@ export type MiddlewareLookup<TName extends string, T> = IsStrict extends false
  */
 type ReferenceConfig<TConfig> = [0] extends [1 & TConfig] ? unknown : TConfig;
 
-/**
- * Whether a reference may omit the config. Runtime passes `{}` to the factory when it does, by name
- * alone or as `{ name }`, so a config that accepts `undefined` or `{}` is optional.
- */
-type IsOptionalMiddlewareConfig<TConfig> = [undefined] extends [TConfig]
-  ? true
-  : [Record<never, never>] extends [TConfig]
-    ? true
-    : false;
-
 /** A reference to a registered middleware: its name alone only when its config is optional. */
 type RegisteredMiddlewareReference<
   TName extends RegisteredMiddlewareName,
   TConfig = ReferenceConfig<MiddlewareConfigFor<TName>>,
 > =
-  IsOptionalMiddlewareConfig<TConfig> extends true
+  IsOptionalReferenceConfig<TConfig> extends true
     ? TName | { name: TName; config?: TConfig }
     : { name: TName; config: TConfig };
 

@@ -866,6 +866,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
         [
           'global::isOwner',
           'global::isPublic',
+          'global::hasHeader',
           'global::legacy',
           'api::article.has-role',
           'admin::isAuthenticatedAdmin',
@@ -1284,7 +1285,13 @@ for (const [setup, { type, ...resolutionOptions }] of Object.entries(moduleSetup
             {}
           ),
           policies: registered(
-            ['global::isOwner', 'global::isPublic', 'global::legacy', 'api::article.has-role'],
+            [
+              'global::isOwner',
+              'global::isPublic',
+              'global::hasHeader',
+              'global::legacy',
+              'api::article.has-role',
+            ],
             () => true
           ),
           middlewares: registered(

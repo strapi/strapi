@@ -370,8 +370,9 @@ accepts: the second parameter of a policy handler, the first parameter of a midd
 treat each registry as a complete inventory: once any entry is registered, they reject unregistered
 names. A package that registers policies or middlewares registers all of them.
 
-- A route references a middleware by name alone only when its config is optional. Runtime passes
-  `{}` when the config is omitted, so a config whose fields are all optional counts as optional.
+- A route references a policy or middleware by name alone only when its config is optional. Runtime
+  passes `{}` when the config is omitted, so a config whose fields are all optional counts as
+  optional.
 - `{ name, config }` checks `config` against the registered contract. Inline handlers and
   `{ resolve, config }` entries are not checked. `Core.RouteConfig` keeps its unchecked type.
 - `auth.strategies` accepts strategy names and strategy objects, as the runtime does (admin's
