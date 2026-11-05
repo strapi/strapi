@@ -60,10 +60,12 @@ An action can be registered in the backend during the `register` or `bootstrap` 
 
 Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions that have an unregistered action, a subject the action does not list, only properties that no longer exist (role permissions only), or neither a role nor an admin token. It logs one warning with the count, actions, subjects and owners of the deleted permissions. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions.
 
+With strict types, a package or application also declares the IDs it registers in `Strapi.Registries.PermissionActions`, so that typed `hasPermissions` configs and action provider calls accept them. See [Permission action contracts](../../../../contributing/05-typescript.md#permission-action-contracts).
+
 Example:
 
 ```ts
-// bootstrap.ts
+// a plugin's bootstrap.ts
 module.exports = async () => {
   const actions = [
     {
