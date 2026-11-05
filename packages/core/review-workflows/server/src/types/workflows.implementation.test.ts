@@ -52,7 +52,8 @@ export type WorkflowsImplementationAssertions = [
       Parameters<WorkflowsService['assertStageBelongsToWorkflow']>
     >
   >,
-  // `opts` is gated on the contract's parameter
+  // `opts` of `create` and `update` is gated on the contract's parameter
+  Expect<Equal<Parameters<Implementation['create']>, Parameters<WorkflowsService['create']>>>,
   Expect<Equal<Parameters<Implementation['update']>, Parameters<WorkflowsService['update']>>>,
   Expect<Equal<Parameters<Implementation['delete']>, Parameters<WorkflowsService['delete']>>>,
 ];

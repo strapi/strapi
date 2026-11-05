@@ -9,13 +9,19 @@ import {
   toWorkflowSnapshot,
 } from '../audit-logs';
 import type { Stage } from '../../../shared/contracts/review-workflows';
-import type { WorkflowUpdateInput, WorkflowsService } from '../types/services';
+import type { WorkflowCreateInput, WorkflowUpdateInput, WorkflowsService } from '../types/services';
 import { getService } from '../utils';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
 import workflowsContentTypesFactory, { type ContentTypeTransfer } from './workflow-content-types';
 
 // `replaceStages` returns the input stages with their ids filled in, not full stage entities
 type ReplacedStage = Pick<Stage, 'id' | 'name'>;
+
+// `create` writes the stage IDs and the stage required to publish over the received data
+type WorkflowCreateData = Omit<WorkflowCreateInput, 'stages'> & {
+  stages: WorkflowCreateInput['stages'] | Data.ID[];
+  stageRequiredToPublish?: Data.ID;
+};
 
 // `update` writes the stage IDs and the stage required to publish over the received changes
 type WorkflowUpdateData = Omit<WorkflowUpdateInput, 'stages'> & {
@@ -28,7 +34,11 @@ type WorkflowUpdateData = Omit<WorkflowUpdateInput, 'stages'> & {
  * so its registered contract is not loaded here.
  */
 type ReleaseActionService = {
-  validateActionsByContentTypes(contentTypeUids: string[]): Promise<void>;
+  /**
+   * `create` passes `undefined` when it assigns no content type: the query casts it to `''`, so no
+   * action matches and the call resolves.
+   */
+  validateActionsByContentTypes(contentTypeUids: string[] | undefined): Promise<void>;
 };
 
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
@@ -144,8 +154,13 @@ export default (({ strapi }: { strapi: Core.Strapi }) => {
      * @returns {Promise<object>} - Workflow object that was just created, populated with `WORKFLOW_POPULATE`.
      * @throws {ValidationError} - If the workflow has no stages or its name is already used.
      */
-    async create(opts: { data: any }) {
-      let createOpts = { ...opts, populate: WORKFLOW_POPULATE };
+    async create(
+      opts: Core.IsStrict extends true ? Parameters<WorkflowsService['create']>[0] : { data: any }
+    ) {
+      let createOpts: { data: WorkflowCreateData; populate: typeof WORKFLOW_POPULATE } = {
+        ...opts,
+        populate: WORKFLOW_POPULATE,
+      };
 
       workflowValidator.validateWorkflowStages(opts.data.stages);
       await workflowValidator.validateWorkflowCount(1);

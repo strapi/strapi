@@ -311,6 +311,20 @@ describe('review-workflows workflows service', () => {
   });
 
   describe('when release-action service is present', () => {
+    it('create passes absent content types to validateActionsByContentTypes as is', async () => {
+      const strapi = createStrapiMock({
+        releaseActionService: { validateActionsByContentTypes },
+      });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+      createMany.mockResolvedValue([{ id: 10, name: 'Todo' }]);
+
+      await service.create({
+        data: { name: 'Editorial', stages: [{ name: 'Todo' }], stageRequiredToPublishName: 'Todo' },
+      });
+
+      expect(validateActionsByContentTypes).toHaveBeenCalledWith(undefined);
+    });
+
     it('update should still call validateActionsByContentTypes', async () => {
       const strapi = createStrapiMock({
         releaseActionService: { validateActionsByContentTypes },
