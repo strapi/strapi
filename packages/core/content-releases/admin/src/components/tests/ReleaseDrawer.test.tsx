@@ -148,16 +148,16 @@ describe('ReleaseDrawer', () => {
     });
   });
 
-  it('lists the default release mode first', async () => {
+  it('lists release all ready items first and checks the default mode', async () => {
     renderDrawer({ initialValues: NEW_RELEASE });
 
     const modes = await screen.findAllByRole('radio');
 
     expect(modes).toEqual([
-      screen.getByRole('radio', { name: 'Require every entry to be ready' }),
       screen.getByRole('radio', { name: 'Release all ready items' }),
+      screen.getByRole('radio', { name: 'Require every entry to be ready' }),
     ]);
-    expect(modes[0]).toBeChecked();
+    expect(modes[1]).toBeChecked();
   });
 
   it('submits the schedule in UTC with the timezone name', async () => {

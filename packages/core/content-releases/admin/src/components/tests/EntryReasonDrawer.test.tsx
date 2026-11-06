@@ -103,7 +103,8 @@ describe('EntryReasonDrawer', () => {
     expect(within(dialog).getByText('Why this entry was skipped')).toBeInTheDocument();
     expect(within(dialog).getByText('Article 1')).toBeInTheDocument();
     expect(within(dialog).getByText('Article · Publish · en')).toBeInTheDocument();
-    expect(within(dialog).getByText('Skipped: Validation error')).toBeInTheDocument();
+    expect(within(dialog).getByText('Skipped')).toBeInTheDocument();
+    expect(within(dialog).getByText('Validation error')).toBeInTheDocument();
     expect(within(dialog).getByText('2 issues')).toBeInTheDocument();
 
     // Each field by a readable name, its key, and what's wrong
@@ -177,7 +178,9 @@ describe('EntryReasonDrawer', () => {
 
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('Why this entry isn’t ready')).toBeInTheDocument();
-    expect(within(dialog).getByText('Not ready: Review stage')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready')).toBeInTheDocument();
+    // Beside the status, and as the issue's title
+    expect(within(dialog).getAllByText('Review stage')).toHaveLength(2);
     expect(
       within(dialog).getByText('At To do, needs Approved to be published')
     ).toBeInTheDocument();
@@ -205,7 +208,8 @@ describe('EntryReasonDrawer', () => {
 
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('1 issue')).toBeInTheDocument();
-    expect(within(dialog).getByText('Not ready: Not checked yet')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not checked yet')).toBeInTheDocument();
     expect(within(dialog).getByText(/hasn’t been checked yet/)).toBeInTheDocument();
     expect(within(dialog).queryByText(/Validation error/)).not.toBeInTheDocument();
   });
@@ -216,7 +220,8 @@ describe('EntryReasonDrawer', () => {
     ]);
 
     const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByText('Skipped: Error')).toBeInTheDocument();
+    expect(within(dialog).getByText('Skipped')).toBeInTheDocument();
+    expect(within(dialog).getByText('Error')).toBeInTheDocument();
     expect(within(dialog).getByText('Couldn’t be published: KnexTimeoutError')).toBeInTheDocument();
   });
 
@@ -246,7 +251,8 @@ describe('EntryReasonDrawer', () => {
     renderDrawer([details(1, { outcome, reason: null })]);
 
     const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByText(`Skipped: ${title}`)).toBeInTheDocument();
+    expect(within(dialog).getByText('Skipped')).toBeInTheDocument();
+    expect(within(dialog).getByText(title)).toBeInTheDocument();
     const box = within(dialog).getByRole('region', { name: '1 issue' });
     expect(within(box).getByRole('listitem')).toHaveTextContent(text);
   });

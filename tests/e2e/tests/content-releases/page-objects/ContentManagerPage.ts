@@ -1,6 +1,9 @@
 import { expect, type Page, type Locator } from '@playwright/test';
 import { clickAndWait, findAndClose } from '../../../../utils/shared';
 
+// The labels of the add to release dialog's publish / unpublish options
+const ACTION_LABELS = { publish: 'Publish', unpublish: 'Unpublish' } as const;
+
 /**
  * Page Object Model for the Content Manager (list + edit views).
  */
@@ -52,7 +55,12 @@ export class ContentManagerPage {
 
     await this.page.getByRole('combobox', { name: 'Select a release' }).click();
     await this.page.getByRole('option', { name: releaseName }).click();
-    await this.page.getByText(action, { exact: true }).click();
+    // The list's own bulk actions, behind the dialog, are labelled the same: the options are the
+    // dialog's radio group
+    await this.page
+      .getByRole('radiogroup', { name: 'action' })
+      .getByText(ACTION_LABELS[action], { exact: true })
+      .click();
     await clickAndWait(this.page, this.page.getByText('continue'));
     await expect(this.page.getByText(/Successfully added to release./)).toBeVisible();
   }

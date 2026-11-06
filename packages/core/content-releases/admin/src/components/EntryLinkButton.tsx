@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useAuth } from '@strapi/admin/strapi-admin';
 import { IconButton } from '@strapi/design-system';
-import { Pencil } from '@strapi/icons';
+import { Eye } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -74,7 +74,7 @@ const EntryLinkButton = (props: EntryLocation) => {
       })}
       variant="ghost"
     >
-      <Pencil />
+      <Eye />
     </IconButton>
   );
 };

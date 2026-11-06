@@ -1908,7 +1908,7 @@ describe('Release service', () => {
       expect(queries.delete).not.toHaveBeenCalled();
     });
 
-    it.each(['done', 'partial'])(
+    it.each(['done', 'partial', 'failed'])(
       'throws an error, and deletes nothing, if the release ran as %s',
       async (status) => {
         const { releaseService, queries } = setup({ releasedAt: new Date(), status });
@@ -1918,18 +1918,6 @@ describe('Release service', () => {
         expect(queries.delete).not.toHaveBeenCalled();
       }
     );
-
-    it.each([
-      ['failed', { releasedAt: new Date(), status: 'failed' }],
-      ['failed before the upgrade', { releasedAt: null, status: 'failed' }],
-    ])('deletes a release that %s', async (_, locked) => {
-      const { releaseService, queries } = setup(locked, { actions: [{ id: 5 }] });
-
-      await releaseService.delete(1);
-
-      expect(queries.deleteMany).toHaveBeenCalledWith({ where: { id: { $in: [5] } } });
-      expect(queries.delete).toHaveBeenCalledWith({ where: { id: 1 } });
-    });
 
     it('removes the scheduling if the release is scheduled', async () => {
       const { releaseService } = setup({ releasedAt: null }, { scheduledAt: new Date() });

@@ -1,4 +1,4 @@
-// The default first: the forms and filters list the modes in this order
+// The default first: the filters list the modes in this order (the release drawer reverses it)
 export const RELEASE_CONDITIONS = ['all_or_nothing', 'allow_partial'] as const;
 export type ReleaseCondition = (typeof RELEASE_CONDITIONS)[number];
 export const DEFAULT_RELEASE_CONDITION = 'all_or_nothing' satisfies ReleaseCondition;
