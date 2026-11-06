@@ -93,6 +93,14 @@ export default {
       private: true,
       searchable: false,
     },
+    // When an admin last approved a grant for this client. Dynamically registered clients
+    // that never get a grant are cleaned up after a retention window.
+    lastGrantedAt: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
     metadata: {
       type: 'json',
       configurable: false,

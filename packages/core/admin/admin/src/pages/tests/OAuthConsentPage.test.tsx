@@ -87,13 +87,16 @@ describe('OAuthConsentPage', () => {
     await findByRole('heading', { name: 'Invalid authorization request' });
   });
 
-  it('renders the consent card with the client name, user, and redirect host', async () => {
+  it('renders the consent card with a fixed title, the self-reported client name, user, and redirect host', async () => {
     const { findByRole, getByText } = render(<OAuthConsentPage />, {
       initialEntries: ['/mcp/oauth/consent?ticket=abc'],
     });
 
-    await findByRole('heading', { name: 'Claude wants to access Strapi' });
+    // The title never contains the client-chosen name: it is self-reported, so it must not
+    // read as a verified heading.
+    await findByRole('heading', { name: 'Authorize MCP access to Strapi?' });
 
+    expect(getByText(/A client calling itself “Claude”/)).toBeInTheDocument();
     expect(getByText(/as Kai Doe/)).toBeInTheDocument();
     expect(getByText(/sent back to example.com/)).toBeInTheDocument();
     expect(await findByRole('button', { name: 'Approve' })).toBeInTheDocument();

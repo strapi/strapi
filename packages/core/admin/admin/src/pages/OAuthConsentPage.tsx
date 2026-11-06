@@ -103,33 +103,35 @@ const OAuthConsentPage = () => {
         {formatMessage(
           {
             id: 'mcp.oauth.consent.redirecting',
-            defaultMessage: 'Taking you back to {clientName}…',
+            defaultMessage: 'Taking you back to {host}…',
           },
-          { clientName: authorizationRequest.client.name }
+          { host: authorizationRequest.redirectHost }
         )}
       </Typography>
     );
   } else {
     content = (
       <Flex direction="column" alignItems="stretch" gap={6}>
+        {/* The title is fixed text: the client name is self-reported at registration, so it
+            must never masquerade as a verified heading. */}
         <Typography textAlign="center" variant="alpha" tag="h1" id="mcp-oauth-consent-title">
-          {formatMessage(
-            {
-              id: 'mcp.oauth.consent.title',
-              defaultMessage: '{clientName} wants to access Strapi',
-            },
-            { clientName: authorizationRequest.client.name }
-          )}
+          {formatMessage({
+            id: 'mcp.oauth.consent.title',
+            defaultMessage: 'Authorize MCP access to Strapi?',
+          })}
         </Typography>
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="epsilon" textColor="neutral600" tag="p">
             {formatMessage(
               {
-                id: 'mcp.oauth.consent.access',
+                id: 'mcp.oauth.consent.client',
                 defaultMessage:
-                  'It will be able to use the MCP server with your permissions, as {user}.',
+                  'A client calling itself “{clientName}” is asking to use the MCP server with your permissions, as {user}.',
               },
-              { user: displayName || user?.email || '' }
+              {
+                clientName: authorizationRequest.client.name,
+                user: displayName || user?.email || '',
+              }
             )}
           </Typography>
           <Typography variant="epsilon" textColor="neutral600" tag="p">
