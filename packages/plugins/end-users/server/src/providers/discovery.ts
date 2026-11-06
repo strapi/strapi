@@ -22,6 +22,50 @@ export class DiscoveryError extends Error {
 const NOT_REACHED = 'could not be reached';
 const NOT_DISCOVERY = 'is not an OpenID discovery document';
 
+/** Thrown inside the fetch when the document is over the size cap. */
+class TooLarge extends Error {}
+
+/**
+ * Reads the body as text, giving up as soon as more than `MAX_DOCUMENT_BYTES` have arrived. The
+ * fetch is aborted at that point, so a huge response is never held in memory whole.
+ */
+const readLimited = async (response: Response, controller: AbortController): Promise<string> => {
+  const declared = response.headers.get('content-length');
+
+  if (declared !== null && Number(declared) > MAX_DOCUMENT_BYTES) {
+    controller.abort();
+    throw new TooLarge();
+  }
+
+  if (!response.body) {
+    return '';
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+
+  for (;;) {
+    // eslint-disable-next-line no-await-in-loop
+    const { done, value } = await reader.read();
+
+    if (done) {
+      break;
+    }
+
+    total += value.byteLength;
+
+    if (total > MAX_DOCUMENT_BYTES) {
+      controller.abort();
+      throw new TooLarge();
+    }
+
+    chunks.push(value);
+  }
+
+  return Buffer.concat(chunks).toString('utf8');
+};
+
 /**
  * Fetches the discovery document at `url` and checks that it names an authorization and a token
  * endpoint. Throws `DiscoveryError` otherwise. There is no block on private addresses: a provider
@@ -42,9 +86,9 @@ export const checkDiscoveryDocument = async (url: string): Promise<void> => {
       throw new Error(`status ${response.status}`);
     }
 
-    text = await response.text();
-  } catch {
-    throw new DiscoveryError(NOT_REACHED);
+    text = await readLimited(response, controller);
+  } catch (error) {
+    throw new DiscoveryError(error instanceof TooLarge ? NOT_DISCOVERY : NOT_REACHED);
   } finally {
     clearTimeout(timer);
   }
@@ -52,10 +96,6 @@ export const checkDiscoveryDocument = async (url: string): Promise<void> => {
   let document: unknown;
 
   try {
-    if (text.length > MAX_DOCUMENT_BYTES) {
-      throw new Error('too large');
-    }
-
     document = JSON.parse(text);
   } catch {
     throw new DiscoveryError(NOT_DISCOVERY);
