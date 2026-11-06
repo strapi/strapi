@@ -10789,6 +10789,10 @@ __metadata:
     "@types/node": "npm:22.20.0"
     create-strapi-app: "workspace:*"
     eslint-config-custom: "workspace:*"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-router-dom: "npm:6.30.6"
+    styled-components: "npm:6.4.1"
     tsconfig: "workspace:*"
   languageName: unknown
   linkType: soft
