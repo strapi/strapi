@@ -101,6 +101,7 @@ const runDevelop = async ({ watchAdmin = false }: { watchAdmin?: boolean } = {})
 
 describe('develop worker', () => {
   let messageListenersBefore: ReturnType<typeof process.listeners>;
+  let disconnectListenersBefore: ReturnType<typeof process.listeners>;
 
   beforeEach(() => {
     strapiInstance = createStrapiInstance();
@@ -112,14 +113,20 @@ describe('develop worker', () => {
     mockBundleWatcher.close.mockReset();
     mockBundleWatcher.close.mockResolvedValue(undefined);
     messageListenersBefore = process.listeners('message');
+    disconnectListenersBefore = process.listeners('disconnect');
   });
 
   afterEach(() => {
     // Only remove the listeners develop added, the test runner owns the others.
+    // The disconnect listener calls process.exit(0): it must not outlive the test.
     process
       .listeners('message')
       .filter((listener) => messageListenersBefore.includes(listener) === false)
       .forEach((listener) => process.removeListener('message', listener as () => void));
+    process
+      .listeners('disconnect')
+      .filter((listener) => disconnectListenersBefore.includes(listener) === false)
+      .forEach((listener) => process.removeListener('disconnect', listener as () => void));
   });
 
   test('stops the loaded app and keeps watching when the TypeScript compile fails', async () => {
@@ -165,7 +172,6 @@ describe('develop worker', () => {
       process.removeAllListeners('disconnect');
     });
     const exit = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
-    const disconnectListenersBefore = process.listeners('disconnect');
 
     try {
       await runDevelop();
@@ -180,6 +186,64 @@ describe('develop worker', () => {
         process.on('disconnect', listener as () => void)
       );
     }
+  });
+
+  test('exits the worker when destroying the app fails after a failed compile', async () => {
+    mockCompile.mockRejectedValue(new Error('TypeScript compilation failed'));
+    // A destroy hook that throws stops destroy() before the providers (cron), the server and
+    // the database are closed: the app is still half running.
+    strapiInstance.destroy.mockRejectedValue(new Error('destroy hook failed'));
+    const exit = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    const send = jest.fn();
+    const originalSend = process.send;
+    process.send = send;
+
+    try {
+      const logger = await runDevelop();
+      process.emit('message', 'kill', undefined);
+      await new Promise(process.nextTick);
+      await new Promise(process.nextTick);
+
+      expect(logger.error).toHaveBeenCalledWith('Error while stopping Strapi: destroy hook failed');
+      expect(send).toHaveBeenCalledWith('stop');
+      expect(exit).toHaveBeenCalledWith(1);
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('Strapi is stopped'));
+      // The primary must not fork a new worker while this one still runs cron.
+      expect(send).not.toHaveBeenCalledWith('killed');
+      expect(mockWatch).not.toHaveBeenCalled();
+    } finally {
+      exit.mockRestore();
+      process.send = originalSend;
+    }
+  });
+
+  test('does not report the worker as killed when destroying the app fails', async () => {
+    mockCompile.mockResolvedValue(undefined);
+    const destroyError = new Error('destroy hook failed');
+    strapiInstance.destroy.mockRejectedValueOnce(destroyError);
+    const send = jest.fn();
+    const originalSend = process.send;
+    process.send = send;
+
+    try {
+      await runDevelop();
+      const [onMessage] = process
+        .listeners('message')
+        .filter((listener) => messageListenersBefore.includes(listener) === false);
+
+      await expect((onMessage as (message: string) => Promise<void>)('kill')).rejects.toBe(
+        destroyError
+      );
+      expect(send).not.toHaveBeenCalledWith('killed');
+
+      // The app was not stopped: the next kill destroys it again.
+      await (onMessage as (message: string) => Promise<void>)('kill');
+    } finally {
+      process.send = originalSend;
+    }
+
+    expect(strapiInstance.destroy).toHaveBeenCalledTimes(2);
+    expect(send).toHaveBeenCalledWith('killed');
   });
 
   test('exits on the next file change when the primary is gone', async () => {

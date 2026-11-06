@@ -222,13 +222,15 @@ const develop = async ({
     const compilingTsSpinner = logger.spinner(`Compiling TS`);
 
     // Stops the app once: the failed-compile path and the restart path can both call it.
+    // The flag is set only once destroy() resolves: a destroy() that throws leaves the app
+    // half running (cron, server, database), so it does not count as stopped.
     let isStopped = false;
     const stopApp = async () => {
       if (isStopped === true) {
         return;
       }
-      isStopped = true;
       await strapiInstance.destroy();
+      isStopped = true;
       // Not awaited: the restart does not wait for the admin bundler to close.
       bundleWatcher?.close().catch((closeError: unknown) => {
         const closeMessage = closeError instanceof Error ? closeError.message : String(closeError);
@@ -347,6 +349,12 @@ const develop = async ({
         const destroyMessage =
           destroyError instanceof Error ? destroyError.message : String(destroyError);
         logger.error(`Error while stopping Strapi: ${destroyMessage}`);
+        // destroy() stopped partway, so cron, the server or the database can still run.
+        // Exit instead of keeping a half-destroyed app next to the one the next restart forks.
+        // Like Strapi.stop(), tell the primary to exit too, or it would wait with no worker.
+        process.send?.('stop');
+        process.exit(1);
+        return;
       }
       // destroy() called process.removeAllListeners(), which also removed the listener the cluster
       // module adds so a worker exits when its primary goes away. Add it back, or the worker

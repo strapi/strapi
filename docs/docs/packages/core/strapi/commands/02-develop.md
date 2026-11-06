@@ -34,6 +34,8 @@ The develop command sets itself up much like the [build](./01-build.md) command.
 
 If a step fails after the strapi instance is loaded (for example the TS compile reports type errors), develop logs the errors, destroys the loaded instance so its cron jobs and other bootstrap work stop, closes the admin bundler when `--watch-admin` is on, and keeps watching. The next file change restarts the instance, and the new worker starts a new admin bundler. `destroy()` removes every process listener, so develop adds back an exit on `disconnect`: the worker exits when the primary exits or is killed. A file change also exits the worker when the IPC channel to the primary is closed.
 
+If `destroy()` throws during that stop, the instance is only partly destroyed: cron, the server or the database connection can still run. Develop then logs the error, sends `stop` to the primary and exits the worker, so `strapi develop` exits instead of forking a second worker next to it. On a restart, a `destroy()` that throws does not send `killed`, so the primary does not fork a new worker either.
+
 ## Node Usage
 
 ```ts
