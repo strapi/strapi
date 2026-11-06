@@ -7,7 +7,7 @@ const config = {
   parserOptions: {
     tsconfigRootDir: __dirname,
   },
-  ignorePatterns: ['node_modules/', '.eslintrc.cjs'],
+  ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'lint-staged.config.mjs'],
   overrides: [
     {
       // CommonJS run by plain Node or loaded by Strapi as is: the test plugin and
