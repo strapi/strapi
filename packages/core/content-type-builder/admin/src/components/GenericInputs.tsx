@@ -35,6 +35,10 @@ const EMPTY_OPTIONS: NonNullable<GenericInputProps['options']> = [];
 /**
  * Input types `GenericInput` renders itself, one per `case` of its `switch`.
  * Any other type needs an entry in `customInputs`, or renders as "Not supported".
+ *
+ * Both directions are checked: the `switch` runs on a `GenericInputType`, so a `case` missing
+ * from this list fails the type check, and `GenericInputs.test.tsx` renders every entry, so an
+ * entry without a `case` fails the test.
  */
 const GENERIC_INPUT_TYPES = [
   'json',
@@ -54,6 +58,9 @@ const GENERIC_INPUT_TYPES = [
 ] as const;
 
 type GenericInputType = (typeof GENERIC_INPUT_TYPES)[number];
+
+const isGenericInputType = (type: string): type is GenericInputType =>
+  (GENERIC_INPUT_TYPES as readonly string[]).includes(type);
 
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
@@ -312,7 +319,7 @@ const GenericInput = ({
     : '';
 
   const getComponent = () => {
-    switch (type) {
+    switch (isGenericInputType(type) ? type : undefined) {
       case 'json': {
         return (
           <JSONInput

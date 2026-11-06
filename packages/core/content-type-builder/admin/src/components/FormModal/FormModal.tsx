@@ -121,6 +121,11 @@ type AssertRendered<TInputType extends RenderedInputType> = TInputType;
  * Compile-time guard: every option input type `@strapi/admin` accepts for a custom field must
  * have a renderer, either in `CUSTOM_INPUTS` or built into `GenericInput`.
  * A type check error here names the option input type the form cannot render.
+ *
+ * `CustomFieldOptionInput` comes from the built `@strapi/admin` declarations (`dist`), not its
+ * source, because the package exports resolve types to `dist`. Rebuild the admin types
+ * (`yarn build:types:admin` in `packages/core/admin`) before you trust this check locally:
+ * a stale build makes it check old types. CI builds first.
  */
 type _AssertCustomFieldOptionInputsAreRendered = AssertRendered<CustomFieldOptionInput>;
 
