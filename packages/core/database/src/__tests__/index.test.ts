@@ -364,6 +364,39 @@ describe('Database', () => {
       });
     });
 
+    it('finishes in-flight commit hooks before it closes the pool', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let finished = false;
+      let closedBeforeHook = false;
+      const closePool = db.connection.destroy.bind(db.connection);
+      Object.defineProperty(db.connection, 'destroy', {
+        configurable: true,
+        value: async () => {
+          closedBeforeHook = !finished;
+          return closePool();
+        },
+      });
+
+      await db.transaction(async ({ onCommit }) => {
+        onCommit(
+          () =>
+            new Promise<void>((resolve) => {
+              setTimeout(() => {
+                finished = true;
+                resolve();
+              }, 30);
+            })
+        );
+      });
+
+      expect(finished).toBe(false);
+      await db.destroy();
+      expect(finished).toBe(true);
+      expect(closedBeforeHook).toBe(false);
+    });
+
     it('keeps the write error when a rollback hook throws and skips the hooks after it', async () => {
       const db = new Database(configConnectionObject);
       await db.init({ models });
