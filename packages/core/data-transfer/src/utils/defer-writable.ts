@@ -59,14 +59,18 @@ const deferWritable = (open: () => Promise<Writable>): Writable => {
     },
 
     final(callback) {
-      opening.then(() => {
-        if (!target) {
-          callback(new Error('Write stream ended before it was ready'));
-          return;
-        }
+      opening
+        .then(() => {
+          if (!target) {
+            callback(new Error('Write stream ended before it was ready'));
+            return;
+          }
 
-        target.end(callback);
-      });
+          target.end(callback);
+        })
+        .catch((error: unknown) => {
+          callback(errorFromUnknown(error));
+        });
     },
 
     destroy(error, callback) {
