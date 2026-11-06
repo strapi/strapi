@@ -6,7 +6,6 @@ import * as ts from 'typescript';
 import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
 import { saveDefinitionToFileSystem, createLogger, timer, pathExists } from './utils';
 import type { Logger } from './utils';
-import { getConfigPath } from '../utils';
 import { generateContentTypesDefinitions } from './content-types';
 import { generateComponentsDefinitions } from './components';
 import { generatePluginDefinitions } from './plugins';
@@ -15,6 +14,17 @@ import { generateControllersDefinitions } from './controllers';
 import { generatePoliciesDefinitions } from './policies';
 import { generateMiddlewaresDefinitions } from './middlewares';
 import { generateStrictDefinitions } from './strict';
+import {
+  findStrictArtifactsOutsideProgram,
+  formatStrictProgramWarning,
+  getAppConfigPath,
+} from './strict/program';
+
+export { findStrictArtifactsOutsideProgram, formatStrictProgramWarning } from './strict/program';
+export type {
+  FindStrictArtifactsOutsideProgramOptions,
+  StrictArtifactsOutsideProgram,
+} from './strict/program';
 
 const GENERATORS = {
   contentTypes: generateContentTypesDefinitions,
@@ -40,14 +50,12 @@ const SOURCE_ARTIFACTS = new Set(['services', 'controllers', 'policies', 'middle
  */
 const LINT_DISABLE_HEADER = '/* eslint-disable */\n/* oxlint-disable */\n';
 
-const isSourceArtifact = (artifact: string) => SOURCE_ARTIFACTS.has(artifact);
-
 /**
- * The config TypeScript reads for the application directory: its tsconfig, else its jsconfig (a
- * JavaScript application), the order of the TypeScript language service.
+ * Artifacts that a program needs for strict types: the opt-in and the registries it reads.
  */
-const getAppConfigPath = (appDir: string) =>
-  getConfigPath(appDir) ?? getConfigPath(appDir, { filename: 'jsconfig.json' });
+const STRICT_ARTIFACTS = new Set(['strict', 'plugins', ...SOURCE_ARTIFACTS]);
+
+const isSourceArtifact = (artifact: string) => SOURCE_ARTIFACTS.has(artifact);
 
 /**
  * Whether the application's tsconfig, else its jsconfig, enables `allowJs`, which lets the
@@ -215,6 +223,21 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
         }. Exiting`
       );
       return returnWithMessage();
+    }
+  }
+
+  // A program without the strict files silently type-checks without strict types
+  if (strict === true) {
+    const outsideProgram = findStrictArtifactsOutsideProgram({
+      appDir: pwd,
+      generatedDir: registryPwd,
+      filenames: Object.keys(reports)
+        .filter((artifact) => STRICT_ARTIFACTS.has(artifact))
+        .map(filenameOf),
+    });
+
+    if (outsideProgram !== undefined && outsideProgram.missing.length > 0) {
+      logger.warn(formatStrictProgramWarning(outsideProgram, pwd));
     }
   }
 

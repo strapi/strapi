@@ -268,6 +268,83 @@ describe('generate', () => {
     expect(await pathExists(path.join(root, 'types', 'generated'))).toBe(false);
   });
 
+  describe('warns when the application program leaves the strict files out', () => {
+    // `getTypeArtifacts` in @strapi/strapi with `typescript.strictTypes`
+    const strictArtifacts = (strict: boolean) => ({
+      contentTypes: true,
+      components: true,
+      plugins: strict,
+      services: strict,
+      controllers: strict,
+      policies: strict,
+      middlewares: strict,
+      strict,
+    });
+
+    const generateWithTsconfig = async (tsconfig: Record<string, unknown>, strict: boolean) => {
+      const { root, strapi } = await createApp();
+      await outputFile(path.join(root, 'src', 'index.ts'), 'export default {};\n');
+      await outputFile(path.join(root, 'tsconfig.json'), JSON.stringify(tsconfig));
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleInfo = jest.spyOn(console, 'info').mockImplementation(() => {});
+
+      try {
+        await generate({
+          strapi,
+          pwd: root,
+          artifacts: strictArtifacts(strict),
+          logger: { silent: false },
+        });
+
+        return {
+          root,
+          warnings: consoleWarn.mock.calls.map((call) => call.join(' ')),
+          files: (await fs.readdir(path.join(root, 'types', 'generated'))).sort(),
+        };
+      } finally {
+        consoleWarn.mockRestore();
+        consoleInfo.mockRestore();
+      }
+    };
+
+    const excluding = { include: ['./', './**/*.ts'], exclude: ['types/generated/**'] };
+
+    test('warns once with strict types and a tsconfig that excludes types/generated', async () => {
+      const { warnings, files } = await generateWithTsconfig(excluding, true);
+
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0]).toContain(
+        'typescript.strictTypes is on, but tsconfig.json leaves out types/generated/plugins.d.ts, ' +
+          'types/generated/services.ts, types/generated/controllers.ts, ' +
+          'types/generated/policies.ts, types/generated/middlewares.ts, ' +
+          'types/generated/strict.d.ts.'
+      );
+      // A warning, not a failure: every file is still written
+      expect(files).toEqual([
+        'components.d.ts',
+        'contentTypes.d.ts',
+        'controllers.ts',
+        'middlewares.ts',
+        'plugins.d.ts',
+        'policies.ts',
+        'services.ts',
+        'strict.d.ts',
+      ]);
+    });
+
+    test('does not warn with strict types off', async () => {
+      const { warnings } = await generateWithTsconfig(excluding, false);
+
+      expect(warnings).toEqual([]);
+    });
+
+    test('does not warn when the tsconfig includes the generated files', async () => {
+      const { warnings } = await generateWithTsconfig({ include: ['./', './**/*.ts'] }, true);
+
+      expect(warnings).toEqual([]);
+    });
+  });
+
   describe('reads `allowJs` from the application tsconfig, else its jsconfig', () => {
     // A JS service is typed from the JS file itself only with `allowJs`
     const generateWithConfigs = async (configs: Record<string, string>) => {
