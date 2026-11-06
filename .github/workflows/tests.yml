@@ -687,9 +687,6 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # The API test apps use the `myschema` schema (tests/scripts/run-api-tests.js).
-      - name: Create the Postgres test schema
-        run: docker exec ${{ job.services.postgres.id }} psql -U strapi -d strapi_test -c "CREATE SCHEMA IF NOT EXISTS myschema"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node }}
@@ -706,7 +703,7 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
-    name: '[CE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (mysql:9.3.0, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       fail-fast: false
       matrix:
@@ -799,9 +796,6 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # The API test apps use the `myschema` schema (tests/scripts/run-api-tests.js).
-      - name: Create the Postgres test schema
-        run: docker exec ${{ job.services.postgres.id }} psql -U strapi -d strapi_test -c "CREATE SCHEMA IF NOT EXISTS myschema"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node }}
@@ -818,7 +812,7 @@ jobs:
   api_ee_mysql:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
-    name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (mysql:9.3.0, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     # Needs the licence secret. On pull requests only local branches have it (is_local, which is
     # false on every other event), so pushes always run.
     if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
