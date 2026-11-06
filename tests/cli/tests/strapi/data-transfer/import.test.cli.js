@@ -131,6 +131,12 @@ describe('import', () => {
         }
       );
 
+      if (result.status !== 0) {
+        // The exit-code assertion alone hides why the CLI failed; surface its own output.
+        console.error('import stdout:', String(result.stdout || ''));
+        console.error('import stderr:', String(result.stderr || ''));
+        console.error('import spawn error:', result.error);
+      }
       expect(result.status).toBe(0);
       const stdout = String(result.stdout || '');
       expect(stdout).toMatch(/Import process has been completed successfully!?/);
