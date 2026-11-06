@@ -86,38 +86,40 @@ describe('createAuthorizeHandler', () => {
     expect(ctx.redirect).not.toHaveBeenCalled();
   });
 
-  test('redirects back with an error when response_type is not code', async () => {
+  // Registration is open, so every validation failure answers 400 in place: an automatic
+  // error redirect would make the endpoint an open redirector to any registered URI.
+  test('responds 400 without redirecting when response_type is not code', async () => {
     const ctx = makeCtx({ ...validQuery, response_type: 'token' });
 
     await handler(ctx, vi.fn());
 
-    const target = new URL(ctx.redirect.mock.calls[0][0]);
-    expect(`${target.origin}${target.pathname}`).toBe('https://example.com/cb');
-    expect(target.searchParams.get('error')).toBe('unsupported_response_type');
-    expect(target.searchParams.get('state')).toBe('xyz');
-    expect(target.searchParams.get('iss')).toBe('http://localhost:1337');
+    expect(ctx.status).toBe(400);
+    expect(ctx.body).toMatchObject({ error: 'unsupported_response_type' });
+    expect(ctx.redirect).not.toHaveBeenCalled();
   });
 
   test.each([
     ['missing code_challenge', { ...validQuery, code_challenge: undefined }],
     ['plain method', { ...validQuery, code_challenge_method: 'plain' }],
     ['missing method', { ...validQuery, code_challenge_method: undefined }],
-  ])('redirects back with invalid_request on %s (PKCE is mandatory)', async (_label, query) => {
+  ])('responds 400 with invalid_request on %s (PKCE is mandatory)', async (_label, query) => {
     const ctx = makeCtx(query);
 
     await handler(ctx, vi.fn());
 
-    const target = new URL(ctx.redirect.mock.calls[0][0]);
-    expect(target.searchParams.get('error')).toBe('invalid_request');
+    expect(ctx.status).toBe(400);
+    expect(ctx.body).toMatchObject({ error: 'invalid_request' });
+    expect(ctx.redirect).not.toHaveBeenCalled();
   });
 
-  test('redirects back with invalid_target for an unknown resource', async () => {
+  test('responds 400 with invalid_target for an unknown resource', async () => {
     const ctx = makeCtx({ ...validQuery, resource: 'https://other.example/mcp' });
 
     await handler(ctx, vi.fn());
 
-    const target = new URL(ctx.redirect.mock.calls[0][0]);
-    expect(target.searchParams.get('error')).toBe('invalid_target');
+    expect(ctx.status).toBe(400);
+    expect(ctx.body).toMatchObject({ error: 'invalid_target' });
+    expect(ctx.redirect).not.toHaveBeenCalled();
   });
 
   test('redirects to the admin consent page with a verifiable ticket', async () => {

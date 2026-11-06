@@ -54,7 +54,11 @@ describe('createMcpOAuthRoutes', () => {
     const routes = createMcpOAuthRoutes(config, '/mcp', makeHandlers());
 
     const register = routes.find(({ path }) => path === '/mcp/oauth/register');
-    expect(register?.config?.middlewares).toEqual(['admin::rateLimit']);
+    // The static prefixKey keys the limit on IP + endpoint: the default key starts with
+    // request.body.email, which an anonymous caller can vary to dodge the limit.
+    expect(register?.config?.middlewares).toEqual([
+      { name: 'admin::rateLimit', config: { prefixKey: 'mcp:oauth:register' } },
+    ]);
   });
 
   test('omits the registration endpoint when dynamic client registration is disabled', () => {

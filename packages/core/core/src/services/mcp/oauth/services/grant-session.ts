@@ -137,12 +137,18 @@ export const createGrantSessionService = (strapi: Core.Strapi, jwtSecret: string
       if (row.metadata?.clientId !== clientId) {
         // The refresh token was presented by a different client than the one it was
         // issued to: treat it as leaked and revoke the whole grant.
+        strapi.log.warn(
+          `[MCP] Refresh token for grant ${row.deviceId} presented by the wrong client; the grant was revoked`
+        );
         await revokeFamily(row.userId, row.deviceId);
         return { error: 'invalid_grant' };
       }
 
       if (row.status !== 'active' || row.childId !== null) {
         // The token was already rotated: this is a replay, revoke the family.
+        strapi.log.warn(
+          `[MCP] Rotated refresh token replayed for grant ${row.deviceId} (client ${clientId}); the grant was revoked`
+        );
         await revokeFamily(row.userId, row.deviceId);
         return { error: 'invalid_grant' };
       }
@@ -185,6 +191,7 @@ export const createGrantSessionService = (strapi: Core.Strapi, jwtSecret: string
         return false;
       }
 
+      strapi.log.info(`[MCP] OAuth grant ${row.deviceId} revoked by client ${clientId}`);
       await revokeFamily(row.userId, row.deviceId);
 
       return true;

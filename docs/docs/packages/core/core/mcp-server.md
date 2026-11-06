@@ -124,7 +124,7 @@ Public endpoints (unprefixed, `auth: false`, OAuth semantics inside the handlers
 | `GET /.well-known/oauth-authorization-server[/mcp]` | RFC 8414 authorization server metadata                                          |
 | `GET /mcp/oauth/authorize`                          | Validates the request, redirects to the admin consent page with a signed ticket |
 | `POST /mcp/oauth/token`                             | `authorization_code` (PKCE required) + `refresh_token` grants                   |
-| `POST /mcp/oauth/register`                          | RFC 7591 dynamic client registration (rate limited)                             |
+| `POST /mcp/oauth/register`                          | RFC 7591 dynamic client registration (rate limited per IP)                      |
 | `POST /mcp/oauth/revoke`                            | RFC 7009 revocation                                                             |
 
 Consent endpoints, mounted on the **admin router** so the admin session strategy (including SSO) applies:
@@ -139,7 +139,7 @@ The consent POST additionally requires `ctx.state.session` (set only by the huma
 ### Flow
 
 1. The MCP client gets a 401 from `/mcp` with `WWW-Authenticate: Bearer resource_metadata=...`, discovers the metadata, and (usually) self-registers.
-2. `GET /mcp/oauth/authorize` validates `client_id`, exact `redirect_uri` match, `response_type=code`, PKCE S256 and the optional `resource`, signs a short-lived **consent ticket** (JWT, derived secret, aud `strapi-mcp-oauth-consent`), and 302-redirects the browser to the admin panel page `/admin/mcp/oauth/consent?ticket=…` (`packages/core/admin/admin/src/pages/OAuthConsentPage.tsx`). Unauthenticated admins pass through the normal login (the `redirectTo` mechanism, persisted across the SSO round trip via `sessionStorage`).
+2. `GET /mcp/oauth/authorize` validates `client_id`, exact `redirect_uri` match, `response_type=code`, PKCE S256 and the optional `resource`, signs a short-lived **consent ticket** (JWT, derived secret, aud `strapi-mcp-oauth-consent`), and 302-redirects the browser to the admin panel page `/admin/mcp/oauth/consent?ticket=…` (`packages/core/admin/admin/src/pages/OAuthConsentPage.tsx`). Unauthenticated admins pass through the normal login (the `redirectTo` mechanism, persisted across the SSO round trip via `sessionStorage`). Every validation failure answers 400 JSON in place, never an error redirect: registration is open, so an automatic redirect to a registered URI would make the endpoint an open redirector. The browser only leaves the Strapi origin after the admin acts on the consent screen, and the consent screen never puts the self-reported client name in its heading.
 3. On approval, the server issues a single-use authorization code (stored hashed in `admin::mcp-oauth-authorization-code`) bound to the client, redirect URI, PKCE challenge, approving admin user, and a fresh `grantId`; the browser is sent back to the client's redirect URI with `code`, `state`, and `iss` (RFC 9207).
 4. `POST /mcp/oauth/token` authenticates the client (`none`, `client_secret_basic`, or `client_secret_post`), consumes the code atomically, verifies PKCE, and issues tokens through `strapi.sessionManager('mcp')`: the JWT access token and a rotating refresh token persisted in `strapi_sessions` with `deviceId = grantId` and `{clientId, scope, resource}` in the session `metadata`.
 
@@ -150,12 +150,13 @@ A grant acts **as the approving admin user**: every `/mcp` request recomputes `g
 - `POST /mcp/oauth/revoke` with either token of the grant.
 - Replay of a consumed authorization code (consumed rows are kept until expiry for detection).
 - Replay of a rotated-out refresh token, or presentation of a refresh token by the wrong client.
+- The user's password change, password reset, and "sign out of all devices" (`invalidateMcpSessions` in `packages/core/admin/shared/utils/session-auth.ts`).
 
-Access tokens die with their session because the authenticator checks `isSessionActive` per request. Caveat (same as admin panel sessions): after a normal rotation, the _previous_ access token stays valid until its own `exp` (≤ `accessTokenLifespan`).
+Grant approvals, denials, revocations, and replay detections are logged through `strapi.log` (`[MCP]` prefix). Access tokens die with their session because the authenticator checks `isSessionActive` per request. Caveat (same as admin panel sessions): after a normal rotation, the _previous_ access token stays valid until its own `exp` (≤ `accessTokenLifespan`).
 
 ### Storage
 
-Two hidden `admin::` content-types (`packages/core/admin/server/src/content-types/`): `mcp-oauth-client` (`strapi_mcp_oauth_clients`, secrets stored as HMAC-SHA512 hashes keyed with `admin.apiToken.salt`) and `mcp-oauth-authorization-code` (`strapi_mcp_oauth_codes`, hashed single-use codes). Tokens live in the existing session store under the `mcp` origin; the origin's JWT secret is derived from `admin.auth.secret` (HMAC-SHA256 with a fixed label) so MCP JWTs are not interchangeable with admin panel JWTs, on top of the session-origin check.
+Two hidden `admin::` content-types (`packages/core/admin/server/src/content-types/`): `mcp-oauth-client` (`strapi_mcp_oauth_clients`, secrets stored as HMAC-SHA512 hashes keyed with `admin.apiToken.salt`) and `mcp-oauth-authorization-code` (`strapi_mcp_oauth_codes`, hashed single-use codes). A dynamically registered client that never gets a grant (`lastGrantedAt` stays null) is deleted after 24 hours, lazily from the registration endpoint, so open registration cannot fill the table. Tokens live in the existing session store under the `mcp` origin; the origin's JWT secret is derived from `admin.auth.secret` (HMAC-SHA256 with a fixed label) so MCP JWTs are not interchangeable with admin panel JWTs, on top of the session-origin check.
 
 ## Authorization
 

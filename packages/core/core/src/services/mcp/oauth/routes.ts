@@ -80,7 +80,12 @@ export const createMcpOAuthRoutes = (
       handler: handlers.register,
       // Registration is the only unauthenticated endpoint that writes rows, so it is
       // rate limited. The other endpoints only deal in 256-bit random credentials.
-      config: { auth: false, middlewares: ['admin::rateLimit'] },
+      // The default rate-limit key starts with request.body.email, which an anonymous
+      // caller can vary to dodge the limit; a static prefixKey keys on IP alone.
+      config: {
+        auth: false,
+        middlewares: [{ name: 'admin::rateLimit', config: { prefixKey: 'mcp:oauth:register' } }],
+      },
     });
   }
 

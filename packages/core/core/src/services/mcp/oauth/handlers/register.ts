@@ -164,6 +164,9 @@ export const createRegisterHandler =
       return sendOAuthError(ctx, 400, parsed.error, parsed.description);
     }
 
+    // Lazy cleanup: open registration must not let abandoned registrations pile up.
+    await clientStore.cleanupUnusedDynamicClients();
+
     const { client, clientSecret } = await clientStore.register({
       ...parsed.metadata,
       registrationSource: 'dynamic',

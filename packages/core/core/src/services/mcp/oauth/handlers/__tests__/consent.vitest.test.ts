@@ -18,12 +18,13 @@ const makeStrapi = (): Core.Strapi =>
         return key in values ? values[key] : defaultValue;
       }),
     },
-    log: { warn: vi.fn() },
+    log: { warn: vi.fn(), info: vi.fn() },
   }) as unknown as Core.Strapi;
 
 describe('consent handlers', () => {
   let config: McpOAuthConfiguration;
   let findByClientId: Mock;
+  let markGranted: Mock;
   let issue: Mock;
   let deps: McpOAuthHandlerDependencies;
 
@@ -38,11 +39,12 @@ describe('consent handlers', () => {
   beforeEach(() => {
     config = new McpOAuthConfiguration(makeStrapi(), '/mcp');
     findByClientId = vi.fn().mockResolvedValue(client);
+    markGranted = vi.fn().mockResolvedValue(undefined);
     issue = vi.fn().mockResolvedValue('the-code');
     deps = {
       strapi: makeStrapi(),
       config,
-      clientStore: { findByClientId },
+      clientStore: { findByClientId, markGranted },
       codeStore: { issue },
       grantSessions: {},
     } as unknown as McpOAuthHandlerDependencies;
@@ -166,6 +168,9 @@ describe('consent handlers', () => {
       expect(redirectTo.searchParams.get('code')).toBe('the-code');
       expect(redirectTo.searchParams.get('state')).toBe('xyz');
       expect(redirectTo.searchParams.get('iss')).toBe('http://localhost:1337');
+
+      // Approval exempts the client from the unused-dynamic-client cleanup.
+      expect(markGranted).toHaveBeenCalledWith('client-1');
     });
 
     test('redirects with access_denied on deny without issuing a code', async () => {
@@ -175,6 +180,7 @@ describe('consent handlers', () => {
       await handler(ctx, vi.fn());
 
       expect(issue).not.toHaveBeenCalled();
+      expect(markGranted).not.toHaveBeenCalled();
 
       const redirectTo = new URL((ctx.body as any).data.redirectTo);
       expect(redirectTo.searchParams.get('error')).toBe('access_denied');

@@ -98,6 +98,9 @@ export const createSubmitConsentHandler =
     const iss = deps.config.issuer;
 
     if (decision === 'deny') {
+      deps.strapi.log.info(
+        `[MCP] OAuth authorization denied by user ${ctx.state.user.id} for client ${client.clientId}`
+      );
       ctx.body = {
         data: {
           redirectTo: buildErrorRedirect(payload.redirectUri, {
@@ -112,6 +115,13 @@ export const createSubmitConsentHandler =
     }
 
     const grantId = crypto.randomUUID();
+
+    deps.strapi.log.info(
+      `[MCP] OAuth authorization approved by user ${ctx.state.user.id} for client ${client.clientId} (grant ${grantId})`
+    );
+
+    // Marks the client as granted so the unused-client cleanup never removes it.
+    await deps.clientStore.markGranted(client.clientId);
 
     const code = await deps.codeStore.issue(
       {

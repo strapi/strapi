@@ -261,14 +261,13 @@ describe('MCP OAuth authentication (api)', () => {
       expect(res.body.error).toBe('invalid_request');
     });
 
-    test('redirects back with an error when PKCE is missing', async () => {
+    test('rejects a request without PKCE in place, never redirecting', async () => {
+      // Registration is open, so error redirects would make the endpoint an open redirector.
       const res = await authorize('', { code_challenge: undefined });
 
-      expect(res.statusCode).toBe(302);
-      const location = new URL(res.headers.location);
-      expect(`${location.origin}${location.pathname}`).toBe(REDIRECT_URI);
-      expect(location.searchParams.get('error')).toBe('invalid_request');
-      expect(location.searchParams.get('state')).toBe('test-state');
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('invalid_request');
+      expect(res.headers.location).toBeUndefined();
     });
   });
 

@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 import { isValidCodeChallenge } from '../utils/pkce';
 import { isRegisteredRedirectUri } from '../utils/redirect-uri';
-import { buildErrorRedirect, sendOAuthError } from '../utils/oauth-errors';
+import { sendOAuthError } from '../utils/oauth-errors';
 import { signConsentTicket } from '../services/consent-ticket';
 import { trimTrailingSlashes } from '../utils/url';
 import type { McpOAuthHandlerDependencies } from './types';
@@ -46,28 +46,25 @@ export const createAuthorizeHandler =
       );
     }
 
-    // From here on the client and redirect URI are trusted, so errors redirect back.
+    // Registration is open, so any redirect URI can belong to a registered client. Validation
+    // failures therefore never redirect (RFC 6749 §4.1.2.1 allows it, but that would make this
+    // endpoint an open redirector, usable as a trusted-looking phishing link). The browser only
+    // ever leaves this origin after an authenticated admin acts on the consent screen.
     const state = getSingleQueryParam(query, 'state');
-    const iss = config.issuer;
-
-    const redirectError = (
-      error: Parameters<typeof buildErrorRedirect>[1]['error'],
-      errorDescription: string
-    ) => {
-      ctx.redirect(buildErrorRedirect(redirectUri, { error, errorDescription, state, iss }));
-    };
 
     const responseType = getSingleQueryParam(query, 'response_type');
 
     if (responseType !== 'code') {
-      return redirectError('unsupported_response_type', 'response_type must be "code"');
+      return sendOAuthError(ctx, 400, 'unsupported_response_type', 'response_type must be "code"');
     }
 
     const codeChallenge = getSingleQueryParam(query, 'code_challenge');
     const codeChallengeMethod = getSingleQueryParam(query, 'code_challenge_method');
 
     if (!isValidCodeChallenge(codeChallenge) || codeChallengeMethod !== 'S256') {
-      return redirectError(
+      return sendOAuthError(
+        ctx,
+        400,
         'invalid_request',
         'PKCE is required: send code_challenge with code_challenge_method=S256'
       );
@@ -76,7 +73,7 @@ export const createAuthorizeHandler =
     const resource = getSingleQueryParam(query, 'resource');
 
     if (resource !== undefined && trimTrailingSlashes(resource) !== config.resource) {
-      return redirectError('invalid_target', 'Unknown resource');
+      return sendOAuthError(ctx, 400, 'invalid_target', 'Unknown resource');
     }
 
     const scope = getSingleQueryParam(query, 'scope');

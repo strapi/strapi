@@ -20,7 +20,14 @@ export interface McpOAuthClient {
   clientUri: string | null;
   logoUri: string | null;
   registrationSource: 'dynamic' | 'config';
+  lastGrantedAt: string | Date | null;
 }
+
+/**
+ * How long a dynamically registered client that never received a grant is kept. Registration
+ * is open, so abandoned registrations must not accumulate forever.
+ */
+export const UNUSED_DYNAMIC_CLIENT_LIFESPAN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface RegisterClientInput {
   name?: string;
@@ -83,10 +90,33 @@ export const createClientStore = (strapi: Core.Strapi) => {
           clientUri: input.clientUri ?? null,
           logoUri: input.logoUri ?? null,
           registrationSource: input.registrationSource,
+          lastGrantedAt: null,
         },
       });
 
       return { client, clientSecret };
+    },
+
+    async markGranted(clientId: string): Promise<void> {
+      await strapi.db
+        .query(MCP_OAUTH_CLIENT_UID)
+        .update({ where: { clientId }, data: { lastGrantedAt: new Date() } });
+    },
+
+    /**
+     * Deletes dynamically registered clients that never received a grant within the retention
+     * window. Called lazily from the registration endpoint, like the code store's cleanup.
+     */
+    async cleanupUnusedDynamicClients(): Promise<void> {
+      const cutoff = new Date(Date.now() - UNUSED_DYNAMIC_CLIENT_LIFESPAN_MS);
+
+      await strapi.db.query(MCP_OAUTH_CLIENT_UID).deleteMany({
+        where: {
+          registrationSource: 'dynamic',
+          lastGrantedAt: { $null: true },
+          createdAt: { $lt: cutoff },
+        },
+      });
     },
 
     verifySecret(client: McpOAuthClient, secret: unknown): boolean {
