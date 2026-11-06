@@ -37,6 +37,8 @@ const DropZoneWrapper = styled(Box)`
   position: relative;
   display: flex;
   flex-direction: column;
+  /* Flex child of the admin's scrolling column: fill the space left under the
+     top banners, not 100% of the column, or the sidebar ends off-screen. */
   flex: 1;
   min-height: 0;
 `;
