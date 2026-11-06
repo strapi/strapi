@@ -305,6 +305,11 @@ describeOnCondition(edition === 'EE')('History API', () => {
     return rq;
   };
 
+  // History rows are written from onCommit, and the document write awaits those
+  // callbacks before it responds. Read once. A poll would hide a return to
+  // fire-and-forget.
+  const readHistoryVersions = async (url: string) => rq({ method: 'GET', url });
+
   beforeAll(async () => {
     builder.addComponent(componentModel);
     builder.addComponent(seoComponentModel);
@@ -379,55 +384,66 @@ describeOnCondition(edition === 'EE')('History API', () => {
     collectionTypeDocumentId = collectionTypeEntry.data.documentId;
     singleTypeDocumentId = singleTypeEntry.data.documentId;
 
-    // Update to create history versions for entries in different locales
-    await Promise.all([
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        data: {
-          description: 'Hello',
-        },
-      }),
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        locale: 'fr',
-        data: {
-          name: 'Produit 1',
-        },
-      }),
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        locale: 'fr',
-        data: {
-          description: 'Coucou',
-        },
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          description: 'Wow, amazing!',
-        },
-        isCollectionType: false,
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          title: 'Bienvenue',
-        },
-        isCollectionType: false,
-        locale: 'fr',
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          description: 'Super',
-        },
-        isCollectionType: false,
-        locale: 'fr',
-      }),
-    ]);
+    // Create history versions in a fixed order. Parallel updates of one locale
+    // commit in any order on Postgres and MySQL, so the oldest version would
+    // not be stable.
+    const versionUpdates = [
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          data: {
+            description: 'Hello',
+          },
+        }),
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          locale: 'fr',
+          data: {
+            name: 'Produit 1',
+          },
+        }),
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          locale: 'fr',
+          data: {
+            description: 'Coucou',
+          },
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            description: 'Wow, amazing!',
+          },
+          isCollectionType: false,
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            title: 'Bienvenue',
+          },
+          isCollectionType: false,
+          locale: 'fr',
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            description: 'Super',
+          },
+          isCollectionType: false,
+          locale: 'fr',
+        }),
+    ];
+    for (const update of versionUpdates) {
+      await update();
+    }
   });
 
   afterAll(async () => {
@@ -614,10 +630,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
 
       // Get the history of the cloned entry
-      const cloneHistoryVersions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${cloneRes.body.data.documentId}&page=1`,
-      });
+      const cloneHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${cloneRes.body.data.documentId}&page=1`
+      );
 
       expect(cloneHistoryVersions.body.meta.pagination.total).toBe(1);
       expect(cloneHistoryVersions.body.data[0].relatedDocumentId).toBe(
@@ -844,11 +859,12 @@ describeOnCondition(edition === 'EE')('History API', () => {
         data: { name: 'Product with no more reviews' },
       });
 
-      // Find and restore the initial version that had the components data
-      const versions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`,
-      });
+      // Find and restore the initial version that had the components data.
+      // Each write awaits its history onCommit, so all three versions exist now.
+      const versions = await readHistoryVersions(
+        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`
+      );
+      expect(versions.body.data).toHaveLength(3);
       const res = await rq({
         method: 'PUT',
         url: `/content-manager/history-versions/${versions.body.data.at(2).id}/restore`,
@@ -933,15 +949,13 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       expect(bulkPublishResult.statusCode).toBe(200);
 
-      const enHistoryVersions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${enProduct.data.documentId}`,
-      });
+      const enHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${enProduct.data.documentId}`
+      );
 
-      const frHistoryVersions = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${frProduct.data.documentId}&locale=fr`,
-      });
+      const frHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${frProduct.data.documentId}&locale=fr`
+      );
 
       // Create + Publish = 2 versions
       expect(enHistoryVersions.body.data).toHaveLength(2);

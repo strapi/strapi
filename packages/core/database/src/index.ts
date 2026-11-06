@@ -254,10 +254,14 @@ class Database {
     const trx = notNestedTransaction
       ? await this.startTransaction()
       : (transactionCtx.get() as Knex.Transaction);
+    const logger = this.logger;
 
     async function commit() {
       if (notNestedTransaction) {
-        await transactionCtx.commit(trx);
+        await transactionCtx.commit(trx, (error) => {
+          const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
+          logger.error(`Commit hook failed after the transaction committed: ${detail}`);
+        });
       }
     }
 

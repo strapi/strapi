@@ -267,6 +267,193 @@ describe('Database', () => {
 
         await db.destroy();
       });
+
+      it(`resolves when a commit hook fails and still runs the later hooks with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+        const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+
+        let runs = 0;
+        let later = false;
+        const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+        await db.transaction(async ({ onCommit }) => {
+          runs += 1;
+          onCommit(() => Promise.reject(error));
+          onCommit(() => {
+            later = true;
+          });
+        });
+
+        expect(runs).toBe(1);
+        expect(later).toBe(true);
+        expect((db.connection as any).commit).toHaveBeenCalledTimes(1);
+        expect((db.connection as any).rollback).not.toHaveBeenCalled();
+        expect(
+          logged.mock.calls.some(([message]) => String(message).includes('deadlock detected'))
+        ).toBe(true);
+        await db.destroy();
+      });
+
+      it(`resolves when a commit hook throws synchronously with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+        const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+
+        let runs = 0;
+        const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+        await db.transaction(async ({ onCommit }) => {
+          runs += 1;
+          onCommit(() => {
+            throw error;
+          });
+        });
+
+        expect(runs).toBe(1);
+        expect(
+          logged.mock.calls.some(([message]) => String(message).includes('deadlock detected'))
+        ).toBe(true);
+        await db.destroy();
+      });
+
+      it(`rejects when a rollback hook fails with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        let runs = 0;
+        const hookError = new Error('rollback hook failed');
+        await expect(
+          db.transaction(async ({ onRollback }) => {
+            runs += 1;
+            onRollback(() => Promise.reject(hookError));
+            throw Object.assign(new Error('deadlock detected'), { code: '40P01' });
+          })
+        ).rejects.toBe(hookError);
+
+        expect(runs).toBe(1);
+        await db.destroy();
+      });
+
+      it(`waits for commit hooks before resolving with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        let finished = false;
+        await db.transaction(async ({ onCommit }) => {
+          onCommit(
+            () =>
+              new Promise<void>((resolve) => {
+                setTimeout(() => {
+                  finished = true;
+                  resolve();
+                }, 30);
+              })
+          );
+        });
+
+        expect(finished).toBe(true);
+        await db.destroy();
+      });
+    });
+
+    it('rejects with a throwing rollback hook and skips the hooks after it', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let runs = 0;
+      const later = jest.fn();
+      const hookError = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+
+      await expect(
+        db.transaction(async ({ onRollback }) => {
+          runs += 1;
+          onRollback(() => {
+            throw hookError;
+          });
+          onRollback(later);
+          throw new Error('write failed');
+        })
+      ).rejects.toBe(hookError);
+
+      expect(runs).toBe(1);
+      expect(later).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('logs every failed commit hook and still runs hooks registered by a failure', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+      const order: string[] = [];
+
+      await db.transaction(async ({ onCommit }) => {
+        onCommit(() => {
+          onCommit(() => {
+            order.push('registered-by-failure');
+          });
+          throw new Error('first hook');
+        });
+        onCommit(() => {
+          order.push('second');
+          return Promise.reject(new Error('second hook'));
+        });
+        onCommit(() => {
+          order.push('third');
+        });
+      });
+
+      expect(order).toEqual(['second', 'third', 'registered-by-failure']);
+      expect(logged.mock.calls.map(([message]) => String(message))).toEqual([
+        expect.stringContaining('first hook'),
+        expect.stringContaining('second hook'),
+      ]);
+      expect((db.connection as any).rollback).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('runs a nested commit hook when the outer transaction commits', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+      const order: string[] = [];
+
+      await expect(
+        db.transaction(async () => {
+          await db.transaction(async ({ onCommit }) => {
+            onCommit(() => {
+              throw new Error('nested hook');
+            });
+            onCommit(() => {
+              order.push('nested-later');
+            });
+          });
+          return 'kept';
+        })
+      ).resolves.toBe('kept');
+
+      expect(order).toEqual(['nested-later']);
+      expect(logged.mock.calls.some(([message]) => String(message).includes('nested hook'))).toBe(
+        true
+      );
+      expect((db.connection as any).rollback).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('discards a nested commit hook when the outer transaction rolls back', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const committed = jest.fn();
+
+      await expect(
+        db.transaction(async () => {
+          await db.transaction(async ({ onCommit }) => {
+            onCommit(committed);
+          });
+          throw new Error('nope');
+        })
+      ).rejects.toThrow('nope');
+
+      expect(committed).not.toHaveBeenCalled();
+      await db.destroy();
     });
   });
 });

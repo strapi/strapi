@@ -47,6 +47,9 @@ const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi:
  * Create a send function for event with all the necessary metadata
  */
 export default (strapi: Core.Strapi): Sender => {
+  // destroy() releases fetch, then export sends telemetry. Keep the function
+  // from startup so that send does not look the service up again.
+  const fetch = strapi.fetch;
   const { uuid, installId: installIdFromPackageJson } = strapi.config;
 
   const installId = generateInstallId(uuid, installIdFromPackageJson);
@@ -106,7 +109,7 @@ export default (strapi: Core.Strapi): Sender => {
 
     try {
       const analyticsUrl = env('STRAPI_ANALYTICS_URL', 'https://analytics.strapi.io');
-      const res = await strapi.fetch(`${analyticsUrl}/api/v2/track`, reqParams);
+      const res = await fetch(`${analyticsUrl}/api/v2/track`, reqParams);
       return res.ok;
     } catch {
       return false;

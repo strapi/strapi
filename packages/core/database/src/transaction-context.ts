@@ -20,6 +20,7 @@ export interface TransactionObject {
   rollback: () => Promise<void>;
   get: () => Knex.Transaction;
 }
+
 export interface Store {
   trx: Knex.Transaction | null;
   commitCallbacks: Callback[];
@@ -28,15 +29,95 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
+const isDeadlockError = (error: unknown) => {
+  const seen = new Set<unknown>();
+
+  const matches = (candidate: unknown): boolean => {
+    if (!candidate || typeof candidate !== 'object' || seen.has(candidate)) {
+      return false;
+    }
+
+    seen.add(candidate);
+    const current = candidate as {
+      code?: string;
+      errno?: number;
+      message?: string;
+      original?: unknown;
+      cause?: unknown;
+    };
+
+    if (current.code === '40P01' || current.code === 'ER_LOCK_DEADLOCK' || current.errno === 1213) {
+      return true;
+    }
+
+    // A driver error often keeps the SQL text after the code is stripped.
+    // A plain Error whose message happens to mention a deadlock is not one.
+    const message = current.message ?? '';
+    const driverError = 'sql' in current || 'sqlState' in current || 'sqlMessage' in current;
+    if (
+      driverError &&
+      (message.includes('deadlock detected') || message.includes('Deadlock found'))
+    ) {
+      return true;
+    }
+
+    return matches(current.original) || matches(current.cause);
+  };
+
+  return matches(error);
+};
+
+/** Short pause so two retried transactions do not collide again immediately. */
+const DEADLOCK_RETRY_DELAY_MS = 25;
+
+const waitForDeadlockRetry = (attempt: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, DEADLOCK_RETRY_DELAY_MS * attempt);
+  });
+
+const runCallbacks = async (
+  callbacks: Callback[] | undefined,
+  report?: (error: unknown) => void
+) => {
+  if (!callbacks) {
+    return;
+  }
+
+  // Hooks can register more hooks while they run.
+  while (callbacks.length > 0) {
+    const batch = callbacks.splice(0, callbacks.length);
+    for (const cb of batch) {
+      try {
+        await cb();
+      } catch (error) {
+        // A commit hook runs after the database has kept the write. Log it
+        // and keep going so one failure does not drop the hooks after it.
+        // A rollback hook still fails the call: the transaction did not commit.
+        if (report) {
+          report(error);
+          continue;
+        }
+
+        callbacks.length = 0;
+        throw error;
+      }
+    }
+  }
+};
+
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const store = storage.getStore();
+    // Share callback arrays only while the parent transaction is still open.
+    // Commit hooks run after that transaction is cleared. A transaction they
+    // open must not keep the parent's arrays, or its own onCommit callbacks
+    // run with the parent's instead of after its own commit.
+    const parent = store?.trx ? store : undefined;
     return storage.run<ReturnType<TCallback>, void[]>(
       {
         trx,
-        // Fill with existing callbacks if nesting transactions
-        commitCallbacks: store?.commitCallbacks || [],
-        rollbackCallbacks: store?.rollbackCallbacks || [],
+        commitCallbacks: parent ? parent.commitCallbacks : [],
+        rollbackCallbacks: parent ? parent.rollbackCallbacks : [],
       },
       cb
     );
@@ -47,7 +128,7 @@ const transactionCtx = {
     return store?.trx;
   },
 
-  async commit(trx: Knex.Transaction) {
+  async commit(trx: Knex.Transaction, reportCommitHookError?: (error: unknown) => void) {
     const store = storage.getStore();
     if (isTransactorComplete(trx)) {
       if (store?.trx) {
@@ -64,13 +145,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    if (!store?.commitCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.commitCallbacks.forEach((cb) => cb());
-    store.commitCallbacks = [];
+    await runCallbacks(store?.commitCallbacks, reportCommitHookError ?? (() => undefined));
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -90,13 +165,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    if (!store?.rollbackCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.rollbackCallbacks.forEach((cb) => cb());
-    store.rollbackCallbacks = [];
+    await runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {
@@ -114,4 +183,4 @@ const transactionCtx = {
   },
 };
 
-export { transactionCtx };
+export { isDeadlockError, transactionCtx, waitForDeadlockRetry };
