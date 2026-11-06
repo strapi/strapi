@@ -1215,6 +1215,12 @@ describe('Release Action service', () => {
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
       await releaseActionService.deletePlannedActions(entry);
 
+      // A released release is a record of what was published, its actions must stay
+      expect(actionFindMany.mock.calls[0][0].where).toStrictEqual({
+        ...entry,
+        outcome: null,
+        release: { id: { $notNull: true }, releasedAt: { $null: true } },
+      });
       expect(actionDeleteMany.mock.calls).toStrictEqual([[{ where: { id: { $in: [1, 2] } } }]]);
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[10]]);
     });

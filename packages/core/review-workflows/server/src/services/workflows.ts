@@ -206,8 +206,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       let updatedStages: ReplacedStage[] | undefined;
       let updatedStageIds: any;
 
-      await workflowValidator.validateWorkflowCount();
-
       if (opts.data.name !== undefined && opts.data.name !== workflow.name) {
         await assertWorkflowNameIsUnique(opts.data.name, workflow.id);
       }

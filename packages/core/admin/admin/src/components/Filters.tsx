@@ -19,8 +19,14 @@ import {
   useQueryParams,
   withEncodedUserParams,
 } from '../hooks/useQueryParams';
+import {
+  splitDateTimeFilterValue,
+  takesDateTimeValue,
+  toApiFilters,
+} from '../utils/dateTimeFilters';
 
 import { createContext } from './Context';
+import { DateTimeFilterInput } from './DateTimeFilterInput';
 import { Form, InputProps } from './Form';
 import { InputRenderer } from './FormInputs/Renderer';
 
@@ -271,7 +277,9 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
         >
           {({ values: formValues, modified, isSubmitting }) => {
             const filter = options.find((filter) => filter.name === formValues.name);
-            const Input = filter?.input || InputRenderer;
+            const Input =
+              filter?.input ??
+              (filter && takesDateTimeValue(filter) ? DateTimeFilterInput : InputRenderer);
             return (
               <Flex direction="column" alignItems="stretch" gap={2} style={{ minWidth: 184 }}>
                 {[
@@ -564,9 +572,16 @@ const AttributeTag = ({
     case 'date':
       formattedValue = formatDate(value, { dateStyle: 'full' });
       break;
-    case 'datetime':
-      formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
+    case 'datetime': {
+      // A date alone matches the day, a date and time the minute: the tag says which
+      const { date, time } = splitDateTimeFilterValue(value);
+      if (date) {
+        formattedValue = time
+          ? formatDate(new Date(value), { dateStyle: 'full', timeStyle: 'short' })
+          : formatDate(date, { dateStyle: 'full' });
+      }
       break;
+    }
     case 'time':
       const [hour, minute] = value.split(':');
       const date = new Date();
@@ -713,4 +728,4 @@ namespace Filters {
   }
 }
 
-export { Filters };
+export { Filters, toApiFilters };
