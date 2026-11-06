@@ -386,15 +386,9 @@ jobs:
   # default decides what runs here: the shared matrix sets neither suite, so it is
   # unaffected by both, and the two suites cannot collide in one app.
   #
-  # Chromium only, for two different reasons — this is the constraint to lift first if
-  # the Media Library suite should join the shared matrix.
-  #
-  # WebKit is a hard limitation: the upload drag-and-drop helper builds a DataTransfer,
-  # which WebKit does not implement.
-  #
-  # The folder drag & drop specs are skipped in the specs themselves rather than filtered
-  # out here — see `RUN_FOLDER_DRAG_SPECS` in `drag-drop-deep.spec.ts`. A grep filter only
-  # protects this job, and those specs must stay parked wherever they are run from.
+  # Chromium only: the upload drag-and-drop helper builds a DataTransfer, which WebKit does
+  # not implement. This is the constraint to lift first if the Media Library suite should
+  # join the shared matrix.
   e2e_media_library:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 45
@@ -676,7 +670,7 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
-        image: postgres
+        image: postgres:18
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -687,7 +681,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -709,7 +702,7 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
-    name: '[CE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (mysql:9.3.0, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       fail-fast: false
       matrix:
@@ -717,7 +710,7 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
-        image: bitnamilegacy/mysql:latest
+        image: bitnamilegacy/mysql:9.3.0
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -786,7 +779,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
-        image: postgres
+        image: postgres:18
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -797,7 +790,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -819,7 +811,7 @@ jobs:
   api_ee_mysql:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
-    name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (mysql:9.3.0, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     # Needs the licence secret. On pull requests only local branches have it (is_local, which is
     # false on every other event), so pushes always run.
     if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
@@ -832,7 +824,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnamilegacy/mysql:latest
+        image: bitnamilegacy/mysql:9.3.0
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
