@@ -25,7 +25,7 @@ const castValue = (value: unknown, attribute: Attribute | null) => {
   if (types.isScalar(attribute.type) && !isKnexQuery(value)) {
     const field = createField(attribute);
 
-    return value === null ? null : field.toDB(value);
+    return value === null ? null : field.toFilterValue(value);
   }
 
   return value;
