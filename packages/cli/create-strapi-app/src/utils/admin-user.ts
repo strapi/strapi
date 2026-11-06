@@ -1,3 +1,5 @@
+import { randomInt } from 'node:crypto';
+
 import chalk from 'chalk';
 import execa from 'execa';
 
@@ -16,6 +18,7 @@ export const ADMIN_PASSWORD_ENV_VAR = 'CREATE_STRAPI_APP_ADMIN_PASSWORD';
  */
 export const CHILD_PASSWORD_ENV_VAR = 'STRAPI_CLI_ADMIN_PASSWORD';
 
+export const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
 export const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
 
 /**
@@ -26,6 +29,8 @@ export interface AdminUser {
   email: string;
   password: string;
   firstname: string;
+  /** The CLI generated the password because it could not prompt. It prints it once, in the summary. */
+  passwordGenerated: boolean;
 }
 
 export interface AdminUserPrompts {
@@ -36,9 +41,10 @@ export interface AdminUserPrompts {
 export interface ResolveAdminUserOptions {
   /** Value of `--admin-email`, already checked with `validateEmail` */
   email?: string;
-  /** The installer can ask questions: no `--quickstart`, no `--non-interactive`, and a TTY */
+  /** The installer can ask questions: no `--non-interactive`, and a TTY */
   canPrompt: boolean;
-  env?: NodeJS.ProcessEnv;
+  /** Value of `CREATE_STRAPI_APP_ADMIN_PASSWORD`, taken with `takeAdminPasswordFromEnv` */
+  envPassword?: string;
   prompts: AdminUserPrompts;
 }
 
@@ -55,6 +61,36 @@ const EMAIL_REGEX = new RegExp(
 );
 
 const MAX_PASSWORD_BYTES = 72;
+
+const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
+const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const DIGITS = '0123456789';
+const GENERATED_PASSWORD_LENGTH = 24;
+
+const pick = (chars: string) => chars[randomInt(chars.length)];
+
+/**
+ * Generates a random password that passes `validatePassword`.
+ * 24 alphanumeric characters give about 142 bits of entropy, and the value needs no
+ * quoting in a shell. `randomInt` uses the cryptographically secure generator of Node.js.
+ */
+export const generateAdminPassword = (length = GENERATED_PASSWORD_LENGTH): string => {
+  const all = LOWERCASE + UPPERCASE + DIGITS;
+  // One character of each required class, then random characters from the full set
+  const chars = [pick(LOWERCASE), pick(UPPERCASE), pick(DIGITS)];
+
+  while (chars.length < length) {
+    chars.push(pick(all));
+  }
+
+  // Fisher-Yates shuffle, so the required characters are not always at the start
+  for (let i = chars.length - 1; i > 0; i -= 1) {
+    const j = randomInt(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+
+  return chars.join('');
+};
 
 export const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
@@ -97,18 +133,29 @@ export const validatePassword = (password: string): true | string => {
 export class AdminUserInputError extends Error {}
 
 /**
- * Resolves each value from the flag or the environment variable, then from the prompt.
- * Returns `undefined` when the installer cannot prompt and got no value: the user then
- * registers the first admin in the admin panel, as before this step existed.
+ * Reads `CREATE_STRAPI_APP_ADMIN_PASSWORD` and removes it from `process.env`.
+ * Call it before the installer starts any child process: the dependency install,
+ * its lifecycle scripts, the seed, and `develop` must never see the password.
+ */
+export function takeAdminPasswordFromEnv(env: NodeJS.ProcessEnv = process.env) {
+  const password = env[ADMIN_PASSWORD_ENV_VAR] || undefined;
+
+  delete env[ADMIN_PASSWORD_ENV_VAR];
+
+  return password;
+}
+
+/**
+ * The admin user is mandatory. Each value comes from the flag or the environment
+ * variable, then from the prompt. Without prompts, the email uses the default
+ * and the CLI generates a random password. There is no default password.
  */
 export async function resolveAdminUser({
   email: emailFlag,
   canPrompt,
-  env = process.env,
+  envPassword,
   prompts,
-}: ResolveAdminUserOptions): Promise<AdminUser | undefined> {
-  const envPassword = env[ADMIN_PASSWORD_ENV_VAR] || undefined;
-
+}: ResolveAdminUserOptions): Promise<AdminUser> {
   if (envPassword !== undefined) {
     const result = validatePassword(envPassword);
 
@@ -117,25 +164,29 @@ export async function resolveAdminUser({
     }
   }
 
-  if (!canPrompt) {
-    if (emailFlag === undefined && envPassword === undefined) {
-      return undefined;
-    }
+  let email = emailFlag;
 
-    if (emailFlag === undefined || envPassword === undefined) {
-      throw new AdminUserInputError(
-        `Without prompts, set both ${chalk.bold('--admin-email')} and ${chalk.bold(ADMIN_PASSWORD_ENV_VAR)}, or neither`
-      );
-    }
+  if (email === undefined) {
+    email = canPrompt ? await prompts.email() : DEFAULT_ADMIN_EMAIL;
   }
 
-  const email = emailFlag ?? (await prompts.email());
-  const password = envPassword ?? (await prompts.password());
+  let password = envPassword;
+  let passwordGenerated = false;
+
+  if (password === undefined) {
+    if (canPrompt) {
+      password = await prompts.password();
+    } else {
+      password = generateAdminPassword();
+      passwordGenerated = true;
+    }
+  }
 
   return {
     email: normalizeEmail(email),
     password,
     firstname: DEFAULT_ADMIN_FIRSTNAME,
+    passwordGenerated,
   };
 }
 
@@ -147,6 +198,17 @@ export const getManualAdminCommand = (packageManager: PackageManager) => {
 
   return `${packageManager} run strapi${separator} admin:create-user`;
 };
+
+/**
+ * Lines printed in the installation summary when the CLI generated the password.
+ * This is the only place where the CLI shows the password.
+ */
+export const getGeneratedPasswordSummary = (adminUser: AdminUser) => [
+  'Admin user:',
+  `  Email    : ${chalk.bold(adminUser.email)}`,
+  `  Password : ${chalk.bold(adminUser.password)}`,
+  'The CLI generated this password and does not show it again. Store it in a safe place.',
+];
 
 const getErrorOutput = (error: unknown) => {
   const stderr =
@@ -186,19 +248,23 @@ export async function createAdminUser({
       return { status: 'unsupported' };
     }
 
-    await execa(
-      'strapi',
-      ['admin:create-user', '--email', adminUser.email, '--firstname', adminUser.firstname],
-      {
-        ...execaOptions,
-        stdio: ['ignore', 'inherit', 'pipe'],
-        env: {
-          [CHILD_PASSWORD_ENV_VAR]: adminUser.password,
-          [ADMIN_PASSWORD_ENV_VAR]: undefined,
-          FORCE_COLOR: '1',
-        },
-      }
-    );
+    const args = [
+      'admin:create-user',
+      '--email',
+      adminUser.email,
+      '--firstname',
+      adminUser.firstname,
+    ];
+
+    await execa('strapi', args, {
+      ...execaOptions,
+      stdio: ['ignore', 'inherit', 'pipe'],
+      env: {
+        [CHILD_PASSWORD_ENV_VAR]: adminUser.password,
+        [ADMIN_PASSWORD_ENV_VAR]: undefined,
+        FORCE_COLOR: '1',
+      },
+    });
 
     return { status: 'created' };
   } catch (error) {

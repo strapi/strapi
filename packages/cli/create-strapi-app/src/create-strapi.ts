@@ -19,7 +19,11 @@ import type { Scope } from './types';
 import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
 import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-manager-args';
-import { createAdminUser, getManualAdminCommand } from './utils/admin-user';
+import {
+  createAdminUser,
+  getGeneratedPasswordSummary,
+  getManualAdminCommand,
+} from './utils/admin-user';
 import type { AdminUser, CreateAdminUserResult } from './utils/admin-user';
 
 interface CreateStrapiOptions {
@@ -297,17 +301,21 @@ async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
 
   logger.log(['', 'Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
 
+  if (adminUser?.passwordGenerated && adminResult?.status === 'created') {
+    logger.log(['', ...getGeneratedPasswordSummary(adminUser)]);
+  }
+
   if (adminResult && adminResult.status !== 'created') {
-    // The project is valid without the admin user (the first visitor can register one),
-    // so the installation still succeeds
-    logger.warn([
+    // The admin user is mandatory: keep the project, do not start it, and exit with code 1.
+    // logger.fatal exits instead of throwing, so createStrapi does not delete the project.
+    logger.fatal([
       chalk.bold('Your project was created, but the admin user was not.'),
       '',
       adminResult.status === 'unsupported'
         ? `The installed ${chalk.bold('@strapi/strapi')} version cannot create the admin user non-interactively.`
         : adminResult.error.trim(),
       '',
-      'Create the admin user with the following commands, or register it in the admin panel:',
+      'Create the admin user with the following commands:',
       '',
       `${chalk.cyan('cd')} ${projectFolder}`,
       adminCmd,
@@ -342,21 +350,20 @@ async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
 }
 
 async function runCreateAdminUser({ scope, adminUser }: { scope: Scope; adminUser: AdminUser }) {
+  // Never send the email or the password
+  const eventProperties = { passwordGenerated: adminUser.passwordGenerated };
+
   logger.title('Admin', `Creating the admin user ${chalk.green(adminUser.email)}`);
 
-  await trackUsage({ event: 'willCreateAdminUser', scope });
+  await trackUsage({ event: 'willCreateAdminUser', scope, eventProperties });
 
   const result = await createAdminUser({ rootPath: scope.rootPath, adminUser });
 
   if (result.status === 'created') {
-    await trackUsage({ event: 'didCreateAdminUser', scope });
+    await trackUsage({ event: 'didCreateAdminUser', scope, eventProperties });
     logger.success('Admin user created');
   } else {
-    await trackUsage({
-      event: 'didNotCreateAdminUser',
-      scope,
-      eventProperties: { reason: result.status },
-    });
+    await trackUsage({ event: 'didNotCreateAdminUser', scope, eventProperties });
   }
 
   return result;

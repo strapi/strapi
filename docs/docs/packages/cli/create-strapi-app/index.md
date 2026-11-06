@@ -20,30 +20,32 @@ Provides the official CLI for Strapi app developers to create new Strapi project
 
 ## Admin user
 
-When the CLI installs the dependencies, it can create one Super Admin user. The code is in `src/utils/admin-user.ts`.
+Every installation that installs the dependencies creates one Super Admin user. The step is mandatory. The CLI has no option to skip it. The code is in `src/utils/admin-user.ts`.
 
 The CLI asks for the email and the password together with the other prompts, before the dependency install. It asks for the password twice and applies the same rules as `strapi admin:create-user`: 8 characters minimum, 72 bytes maximum, one lowercase, one uppercase, one number. It does not ask for a name. It sends the first name `Admin`.
 
-Each value comes from the explicit input first, then from a prompt:
+Each value comes from the first source that has it:
 
-| Value    | Explicit input                                          |
-| -------- | ------------------------------------------------------- |
-| Email    | `--admin-email <email>`                                 |
-| Password | `CREATE_STRAPI_APP_ADMIN_PASSWORD` environment variable |
+| Value    | 1. Explicit input                                       | 2. Prompt | 3. Without prompts          |
+| -------- | ------------------------------------------------------- | --------- | --------------------------- |
+| Email    | `--admin-email <email>`                                 | Yes       | `admin@example.com`         |
+| Password | `CREATE_STRAPI_APP_ADMIN_PASSWORD` environment variable | Yes       | A generated random password |
 
-The CLI prompts only when it can: no `--quickstart`, no `--non-interactive`, and a TTY on stdin. If it cannot prompt and gets neither value, it skips the admin step, and the first visitor registers the admin in the admin panel. If it cannot prompt and gets only one of the two values, it stops with an error before it writes any file. The CLI has no default credentials.
+The CLI prompts if `--non-interactive` is absent and stdin is a TTY. `--quickstart` still prompts. Without prompts, the CLI uses `admin@example.com` if the email is missing. If the password is missing, the CLI generates one. The CLI has no default password.
 
-The CLI has no password flag, because a flag value goes into shell history and the process list. The environment variable does not start with `STRAPI_ADMIN_`, because Vite exposes those variables to the admin bundle.
+The CLI has no password flag, because a flag value goes into shell history and the process list. The environment variable does not start with `STRAPI_ADMIN_`, because Vite exposes those variables to the admin bundle. At startup, the CLI reads the variable and removes it from `process.env`. The dependency install, its lifecycle scripts, the seed, and `develop` never see it.
 
 After the dependency install and the seed, the CLI runs `strapi admin:create-user --email <email> --firstname Admin` in the new project. It passes the password through the `STRAPI_CLI_ADMIN_PASSWORD` environment variable of that child process, never through its arguments. `admin:create-user` reads that variable only when it does not prompt. The name is duplicated in both packages, and the `admin:create-user` unit tests pin it.
 
-Templates can pin an older `@strapi/strapi`. The CLI searches the `admin:create-user --help` output for `STRAPI_CLI_ADMIN_PASSWORD`. If the name is absent, the CLI skips the admin step. If the `--help` command fails, the CLI reports its error output.
+The generated password has 24 characters from `a-z`, `A-Z`, and `0-9`, with at least one of each class. The CLI picks each character with `crypto.randomInt`. The password passes the same strength rules as a typed password. The CLI shows the email and the generated password once, in the summary at the end of the installation. It does not store the password and does not show it again. The CLI shows the summary only if `admin:create-user` succeeded.
 
-If the admin step fails, for example because the database server is down, the CLI keeps the project and exits with code 0. It prints a warning with the error and `<package manager> run strapi admin:create-user`. With `--quickstart`, it still starts the app.
+Templates can pin an older `@strapi/strapi`. The CLI searches the `admin:create-user --help` output for `STRAPI_CLI_ADMIN_PASSWORD`. If the name is absent, the admin step fails.
+
+If the admin step fails, for example because the database server is down, the CLI keeps the project. It prints the error and `<package manager> run strapi admin:create-user`, does not start the app, and exits with code 1.
 
 With `--no-install`, the CLI cannot run the command. It skips the admin step and adds the command to the "To get started" text. If `--admin-email` is set, the CLI prints a warning that the flag is ignored. The programmatic `createStrapi(scope)` export, used by `tests/helpers/test-app.js`, creates no admin user.
 
-The CLI sends `willCreateAdminUser`, `didCreateAdminUser`, and `didNotCreateAdminUser` events. `didNotCreateAdminUser` carries the `reason`. The events never carry the email or the password.
+The CLI sends `willCreateAdminUser`, `didCreateAdminUser`, and `didNotCreateAdminUser` events. Each event carries `passwordGenerated` and nothing else about the admin user. The events never carry the email or the password.
 
 ## Telemetry
 

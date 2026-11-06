@@ -362,7 +362,7 @@ describe('admin:create command', () => {
     });
   });
 
-  describe('Weak passwords', () => {
+  describe('Password strength', () => {
     test('Rejects a weak password by default', async () => {
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('exit');
@@ -404,6 +404,14 @@ describe('admin:create command', () => {
 
       mockExit.mockRestore();
       consoleError.mockRestore();
+    });
+
+    test('Rejects an unknown --allow-weak-password option', () => {
+      const cmd = command({} as Parameters<typeof command>[0]) as Command;
+
+      cmd.exitOverride().configureOutput({ writeErr() {} });
+
+      expect(() => cmd.parse(['--allow-weak-password'], { from: 'user' })).toThrow();
     });
   });
 

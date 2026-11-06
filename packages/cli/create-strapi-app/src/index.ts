@@ -8,7 +8,12 @@ import fse from 'fs-extra';
 import * as prompts from './prompts';
 import { handleCloudLogin } from './cloud';
 import { createStrapi } from './create-strapi';
-import { AdminUserInputError, resolveAdminUser, validateEmail } from './utils/admin-user';
+import {
+  AdminUserInputError,
+  resolveAdminUser,
+  takeAdminPasswordFromEnv,
+  validateEmail,
+} from './utils/admin-user';
 import type { AdminUser } from './utils/admin-user';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
@@ -88,6 +93,9 @@ const command = new commander.Command('create-strapi-app')
   .description('create a new application');
 
 async function run(args: string[]): Promise<void> {
+  // Remove the password from process.env before any child process starts
+  const adminPasswordFromEnv = takeAdminPasswordFromEnv();
+
   const options = command.parse(args).opts<Options>();
   const directory = command.args[0];
 
@@ -234,16 +242,18 @@ async function run(args: string[]): Promise<void> {
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
 
-  // `strapi admin:create-user` needs the installed dependencies.
-  // Without them, the installer prints the command to run instead.
+  // The admin user is mandatory, but `strapi admin:create-user` needs the installed
+  // dependencies. Without them, the installer prints the command to run instead.
   let adminUser: AdminUser | undefined;
 
   if (scope.installDependencies) {
     try {
       adminUser = await resolveAdminUser({
         email: options.adminEmail,
-        // Scripted runs (no TTY) must never block on a prompt
-        canPrompt: !skipPrompts && Boolean(process.stdin.isTTY),
+        // `--quickstart` still asks. Scripted runs (no TTY) never block on a prompt:
+        // the email uses the default, and the password is generated
+        canPrompt: !options.nonInteractive && Boolean(process.stdin.isTTY),
+        envPassword: adminPasswordFromEnv,
         prompts: { email: prompts.adminEmail, password: prompts.adminPassword },
       });
     } catch (error) {

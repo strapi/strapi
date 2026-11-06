@@ -323,8 +323,8 @@ describe('create-strapi-app', () => {
         .end();
 
       expect(stdout).toContain('npm run strapi -- admin:create-user');
-      // No admin user was created, so no default-password warning
-      expect(stdout).not.toContain('default password');
+      // No admin user was created, so no generated password in the summary
+      expect(stdout).not.toContain('Password :');
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }

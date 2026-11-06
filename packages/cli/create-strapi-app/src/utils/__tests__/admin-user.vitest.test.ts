@@ -5,9 +5,13 @@ import {
   ADMIN_PASSWORD_ENV_VAR,
   AdminUserInputError,
   CHILD_PASSWORD_ENV_VAR,
+  DEFAULT_ADMIN_EMAIL,
   createAdminUser,
+  generateAdminPassword,
+  getGeneratedPasswordSummary,
   getManualAdminCommand,
   resolveAdminUser,
+  takeAdminPasswordFromEnv,
   validateEmail,
   validatePassword,
 } from '../admin-user';
@@ -42,6 +46,29 @@ describe('validatePassword', () => {
   });
 });
 
+describe('generateAdminPassword', () => {
+  it('generates 24 alphanumeric characters that pass the strength rules', () => {
+    for (let i = 0; i < 200; i += 1) {
+      const password = generateAdminPassword();
+
+      expect(password).toMatch(/^[a-zA-Z0-9]{24}$/);
+      expect(validatePassword(password)).toBe(true);
+    }
+  });
+
+  it('passes the strength rules at the minimum length', () => {
+    for (let i = 0; i < 200; i += 1) {
+      expect(validatePassword(generateAdminPassword(8))).toBe(true);
+    }
+  });
+
+  it('generates a different password each time', () => {
+    const passwords = new Set(Array.from({ length: 100 }, () => generateAdminPassword()));
+
+    expect(passwords.size).toBe(100);
+  });
+});
+
 describe('validateEmail', () => {
   it('accepts a valid email', () => {
     expect(validateEmail(' Admin@Example.com ')).toBe(true);
@@ -66,7 +93,7 @@ describe('resolveAdminUser', () => {
   it('prompts for the email and the password when it can prompt', async () => {
     const prompts = makePrompts();
 
-    const adminUser = await resolveAdminUser({ prompts, env: {}, canPrompt: true });
+    const adminUser = await resolveAdminUser({ prompts, canPrompt: true });
 
     expect(prompts.email).toHaveBeenCalled();
     expect(prompts.password).toHaveBeenCalled();
@@ -74,17 +101,45 @@ describe('resolveAdminUser', () => {
       email: 'prompted@example.com',
       password: 'PromptedPass1',
       firstname: 'Admin',
+      passwordGenerated: false,
     });
   });
 
-  it('skips the admin user when it cannot prompt and has no input', async () => {
+  it('uses the default email and generates a strong password when it cannot prompt', async () => {
     const prompts = makePrompts();
 
-    const adminUser = await resolveAdminUser({ prompts, env: {}, canPrompt: false });
+    const adminUser = await resolveAdminUser({ prompts, canPrompt: false });
 
-    expect(adminUser).toBeUndefined();
+    expect(adminUser).toEqual({
+      email: DEFAULT_ADMIN_EMAIL,
+      password: expect.stringMatching(/^[a-zA-Z0-9]{24}$/),
+      firstname: 'Admin',
+      passwordGenerated: true,
+    });
+    expect(validatePassword(adminUser.password)).toBe(true);
     expect(prompts.email).not.toHaveBeenCalled();
     expect(prompts.password).not.toHaveBeenCalled();
+  });
+
+  it('fills only the missing value when it cannot prompt', async () => {
+    const withEmail = await resolveAdminUser({
+      prompts: makePrompts(),
+      canPrompt: false,
+      email: 'flag@example.com',
+    });
+    expect(withEmail).toMatchObject({ email: 'flag@example.com', passwordGenerated: true });
+    expect(validatePassword(withEmail.password)).toBe(true);
+
+    const withPassword = await resolveAdminUser({
+      prompts: makePrompts(),
+      canPrompt: false,
+      envPassword: 'EnvPassword1',
+    });
+    expect(withPassword).toMatchObject({
+      email: DEFAULT_ADMIN_EMAIL,
+      password: 'EnvPassword1',
+      passwordGenerated: false,
+    });
   });
 
   it('prefers the flag and the environment variable over the prompts', async () => {
@@ -95,13 +150,14 @@ describe('resolveAdminUser', () => {
         prompts,
         canPrompt,
         email: 'flag@example.com',
-        env: { [ADMIN_PASSWORD_ENV_VAR]: 'EnvPassword1' },
+        envPassword: 'EnvPassword1',
       });
 
       expect(adminUser).toEqual({
         email: 'flag@example.com',
         password: 'EnvPassword1',
         firstname: 'Admin',
+        passwordGenerated: false,
       });
     }
 
@@ -116,7 +172,6 @@ describe('resolveAdminUser', () => {
       prompts,
       canPrompt: true,
       email: 'flag@example.com',
-      env: {},
     });
 
     expect(prompts.email).not.toHaveBeenCalled();
@@ -124,23 +179,37 @@ describe('resolveAdminUser', () => {
     expect(adminUser?.email).toBe('flag@example.com');
   });
 
-  it.each([
-    [{ email: 'flag@example.com', env: {} }],
-    [{ env: { [ADMIN_PASSWORD_ENV_VAR]: 'EnvPassword1' } }],
-  ])('rejects partial input when it cannot prompt', async (input) => {
-    await expect(
-      resolveAdminUser({ prompts: makePrompts(), canPrompt: false, ...input })
-    ).rejects.toBeInstanceOf(AdminUserInputError);
-  });
-
   it('rejects a weak password from the environment variable', async () => {
     await expect(
-      resolveAdminUser({
-        prompts: makePrompts(),
-        env: { [ADMIN_PASSWORD_ENV_VAR]: 'password' },
-        canPrompt: true,
-      })
-    ).rejects.toThrow('Password must contain at least one uppercase character');
+      resolveAdminUser({ prompts: makePrompts(), envPassword: 'password', canPrompt: false })
+    ).rejects.toThrow(AdminUserInputError);
+  });
+});
+
+describe('takeAdminPasswordFromEnv', () => {
+  it('returns the password and removes it from the environment', () => {
+    const env: NodeJS.ProcessEnv = { [ADMIN_PASSWORD_ENV_VAR]: 'EnvPassword1', OTHER: 'kept' };
+
+    expect(takeAdminPasswordFromEnv(env)).toBe('EnvPassword1');
+    expect(env).toEqual({ OTHER: 'kept' });
+  });
+
+  it('treats an empty value as absent', () => {
+    expect(takeAdminPasswordFromEnv({ [ADMIN_PASSWORD_ENV_VAR]: '' })).toBeUndefined();
+  });
+});
+
+describe('getGeneratedPasswordSummary', () => {
+  it('names the email and the generated password', () => {
+    const text = getGeneratedPasswordSummary({
+      email: DEFAULT_ADMIN_EMAIL,
+      password: 'Generated1Password',
+      firstname: 'Admin',
+      passwordGenerated: true,
+    }).join('\n');
+
+    expect(text).toContain(DEFAULT_ADMIN_EMAIL);
+    expect(text).toContain('Generated1Password');
   });
 });
 
@@ -157,6 +226,7 @@ describe('createAdminUser', () => {
     email: 'admin@example.com',
     password: 'Secret-Password1',
     firstname: 'Admin',
+    passwordGenerated: false,
   };
 
   beforeEach(() => {
@@ -191,6 +261,17 @@ describe('createAdminUser', () => {
     expect(JSON.stringify(args)).not.toContain(adminUser.password);
     expect(options.env[CHILD_PASSWORD_ENV_VAR]).toBe(adminUser.password);
     expect(options.cwd).toBe('/app');
+  });
+
+  it('sends a generated password like any other password', async () => {
+    mockHelp(CHILD_PASSWORD_ENV_VAR);
+
+    const generated = { ...adminUser, password: generateAdminPassword(), passwordGenerated: true };
+    await createAdminUser({ rootPath: '/app', adminUser: generated });
+
+    const createCall = mockedExeca.mock.calls.find(([, args]) => !args.includes('--help'));
+    expect(createCall![1]).not.toContain('--allow-weak-password');
+    expect(createCall![2].env[CHILD_PASSWORD_ENV_VAR]).toBe(generated.password);
   });
 
   it('reports an older Strapi version without running it interactively', async () => {
