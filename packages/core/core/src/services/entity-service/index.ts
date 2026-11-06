@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import delegate from 'delegates';
-import { errors as databaseErrors } from '@strapi/database';
 import {
   contentTypes as contentTypesUtils,
   errors,
@@ -8,6 +7,8 @@ import {
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 import type { Core, Modules, Utils } from '@strapi/types';
+
+import { isDatabaseInputError } from '../../utils/database-input-errors';
 
 type Decoratable<T> = T & {
   decorate(
@@ -34,14 +35,6 @@ const transformLoadParamsToQuery = (
 
   return res;
 };
-
-const databaseErrorsToTransform = [
-  databaseErrors.InvalidTimeError,
-  databaseErrors.InvalidDateTimeError,
-  databaseErrors.InvalidDateError,
-  databaseErrors.InvalidRelationError,
-  databaseErrors.InvalidBooleanError,
-];
 
 const createDefaultImplementation = ({
   strapi,
@@ -234,16 +227,8 @@ export default (ctx: {
           try {
             return await (oldService[methodName] as Utils.Function.AnyPromise).call(this, ...args);
           } catch (error) {
-            if (
-              databaseErrorsToTransform.some(
-                (errorToTransform) => error instanceof errorToTransform
-              )
-            ) {
-              if (error instanceof Error) {
-                throw new errors.ValidationError(error.message);
-              }
-
-              throw error;
+            if (isDatabaseInputError(error) === true) {
+              throw new errors.ValidationError(error.message);
             }
             throw error;
           }
