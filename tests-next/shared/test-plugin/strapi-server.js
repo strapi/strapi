@@ -27,6 +27,9 @@ const isEnabled = () => process.env[constants.envVar] === 'true';
 
 const fakeAi = createFakeAiTranslationsProvider();
 
+/** True once Strapi has accepted the fake AI translations provider. */
+let fakeAiRegistered = false;
+
 const route = (method, path, handler) => ({
   method,
   path,
@@ -43,10 +46,17 @@ module.exports = {
     }
 
     if (process.env[constants.aiProviderEnvVar] === 'fake') {
-      strapi
-        .plugin('i18n')
-        .service('ai-translations')
-        .registerProvider({ provider: fakeAi.provider });
+      const aiTranslations = strapi.plugin('i18n').service('ai-translations');
+      aiTranslations.registerProvider({ provider: fakeAi.provider });
+
+      // registerProvider() returns silently when the license doesn't allow a custom provider,
+      // and Strapi then disables every AI feature. Fail the boot rather than run tests on that.
+      if (!aiTranslations.hasProvider()) {
+        throw new Error(
+          `${constants.aiProviderEnvVar}=fake, but Strapi rejected the fake AI translations provider. It needs EE with the "cms-byok-ai" license feature and admin.ai.enabled.`
+        );
+      }
+      fakeAiRegistered = true;
     }
   },
 
@@ -115,7 +125,7 @@ module.exports = {
 
       aiCalls(ctx) {
         ctx.body = {
-          registered: process.env[constants.aiProviderEnvVar] === 'fake',
+          registered: fakeAiRegistered,
           calls: fakeAi.calls,
         };
       },
