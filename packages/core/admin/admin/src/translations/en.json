@@ -311,6 +311,7 @@
   "Settings.permissions.cannot-grant-unheld": "You can't grant a permission you don't have yourself",
   "Settings.permissions.cannot-grant-unheld.error": "Some permissions could not be saved because you don't have them yourself.",
   "Settings.permissions.category": "Permissions settings for the {category}",
+  "Settings.permissions.category.disabled-by-config": "Disabled by configuration",
   "Settings.permissions.category.plugins": "Permissions settings for the {category} plugin",
   "Settings.permissions.conditions.anytime": "Anytime",
   "Settings.permissions.conditions.apply": "Apply",

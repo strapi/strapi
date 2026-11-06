@@ -6,14 +6,15 @@ import { AUDITED_EVENTS } from '../audit-logs';
 
 import type { File, Folder } from '../types';
 
-type FolderMap = {
-  [key: string]: Partial<Folder> & {
-    children: FolderNode[];
-  };
+/**
+ * A node of the folder tree: `Folder.children` holds ids, a node's children hold nodes.
+ */
+type FolderNode = Partial<Omit<Folder, 'children'>> & {
+  children: FolderNode[];
 };
 
-type FolderNode = Partial<Folder> & {
-  children: FolderNode[];
+type FolderMap = {
+  [key: string]: FolderNode;
 };
 
 type DeleteByIdsOptions = {

@@ -8,6 +8,7 @@ import { styled } from 'styled-components';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 import { NEAR_VIEWPORT_MARGIN, getScrollParent } from '../../../hooks/useHasBeenNearViewport';
 
+import { CopiedComponentsProvider } from './FormInputs/Component/CopiedComponents';
 import { InputRenderer } from './InputRenderer';
 
 import type { UseDocument } from '../../../hooks/useDocument';
@@ -259,77 +260,79 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
   };
 
   return (
-    <IdleMountContext.Provider value={scheduleMount}>
-      <Flex direction="column" alignItems="stretch" gap={6}>
-        {layout.map((panel) => {
-          if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
-            const [row] = panel;
-            const [field] = row;
+    <CopiedComponentsProvider>
+      <IdleMountContext.Provider value={scheduleMount}>
+        <Flex direction="column" alignItems="stretch" gap={6}>
+          {layout.map((panel) => {
+            if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
+              const [row] = panel;
+              const [field] = row;
+
+              return (
+                <LazyFormRow
+                  key={field.name}
+                  fields={[field]}
+                  mountImmediately={hasMountSideEffects(field.attribute, document.components)}
+                >
+                  <Grid.Root gap={4}>
+                    <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
+                      <InputRenderer
+                        {...field}
+                        label={getLabel(field.name, field.label)}
+                        document={document}
+                      />
+                    </Grid.Item>
+                  </Grid.Root>
+                </LazyFormRow>
+              );
+            }
 
             return (
-              <LazyFormRow
-                key={field.name}
-                fields={[field]}
-                mountImmediately={hasMountSideEffects(field.attribute, document.components)}
+              <Box
+                key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
+                {...(hasBackground && panelStyles)}
               >
-                <Grid.Root gap={4}>
-                  <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                    <InputRenderer
-                      {...field}
-                      label={getLabel(field.name, field.label)}
-                      document={document}
-                    />
-                  </Grid.Item>
-                </Grid.Root>
-              </LazyFormRow>
+                <Flex direction="column" alignItems="stretch" gap={6}>
+                  {panel.map((row) => {
+                    return (
+                      <LazyFormRow
+                        key={row.map((field) => field.name).join('.')}
+                        fields={row}
+                        mountImmediately={row.some((field) =>
+                          hasMountSideEffects(field.attribute, document.components)
+                        )}
+                      >
+                        <ResponsiveGridRoot gap={{ initial: 6, medium: 4 }}>
+                          {row.map(({ size, ...field }) => {
+                            return (
+                              <ResponsiveGridItem
+                                col={size}
+                                key={field.name}
+                                s={12}
+                                xs={12}
+                                direction="column"
+                                alignItems="stretch"
+                              >
+                                <InputRenderer
+                                  {...field}
+                                  size={size}
+                                  label={getLabel(field.name, field.label)}
+                                  document={document}
+                                />
+                              </ResponsiveGridItem>
+                            );
+                          })}
+                        </ResponsiveGridRoot>
+                      </LazyFormRow>
+                    );
+                  })}
+                </Flex>
+              </Box>
             );
-          }
-
-          return (
-            <Box
-              key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
-              {...(hasBackground && panelStyles)}
-            >
-              <Flex direction="column" alignItems="stretch" gap={6}>
-                {panel.map((row) => {
-                  return (
-                    <LazyFormRow
-                      key={row.map((field) => field.name).join('.')}
-                      fields={row}
-                      mountImmediately={row.some((field) =>
-                        hasMountSideEffects(field.attribute, document.components)
-                      )}
-                    >
-                      <ResponsiveGridRoot gap={{ initial: 6, medium: 4 }}>
-                        {row.map(({ size, ...field }) => {
-                          return (
-                            <ResponsiveGridItem
-                              col={size}
-                              key={field.name}
-                              s={12}
-                              xs={12}
-                              direction="column"
-                              alignItems="stretch"
-                            >
-                              <InputRenderer
-                                {...field}
-                                size={size}
-                                label={getLabel(field.name, field.label)}
-                                document={document}
-                              />
-                            </ResponsiveGridItem>
-                          );
-                        })}
-                      </ResponsiveGridRoot>
-                    </LazyFormRow>
-                  );
-                })}
-              </Flex>
-            </Box>
-          );
-        })}
-      </Flex>
-    </IdleMountContext.Provider>
+          })}
+        </Flex>
+      </IdleMountContext.Provider>
+    </CopiedComponentsProvider>
   );
 });
 

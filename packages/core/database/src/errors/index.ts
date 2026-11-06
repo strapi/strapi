@@ -4,6 +4,7 @@ import InvalidTimeError from './invalid-time';
 import InvalidDateError from './invalid-date';
 import InvalidDateTimeError from './invalid-datetime';
 import InvalidRelationError from './invalid-relation';
+import InvalidBooleanError from './invalid-boolean';
 
 export {
   DatabaseError,
@@ -12,4 +13,5 @@ export {
   InvalidDateError,
   InvalidDateTimeError,
   InvalidRelationError,
+  InvalidBooleanError,
 };
