@@ -593,16 +593,19 @@ export const createEntityManager = (db: Database): EntityManager => {
             // set happens before connect/disconnect
             const dataset = cleanRelationData.set ?? cleanRelationData.connect ?? [];
 
-            // Copy flows (publish, discardDraft) pass the populated value, which can be empty:
+            // Copy flows (publish, discardDraft, clone) pass the populated value of a morphMany,
+            // which can be empty:
             // - the document service drops these ids, since inverse morph items carry no `__type`
             //   (document-service/transform/relations/transform/data-ids.ts)
             // - a populate with a field selection never selects the morph id column, so the
             //   relation comes back empty (query/helpers/populate/apply.ts)
-            // Publish omits an empty value and leaves the links on the draft. Every other caller,
-            // discardDraft and the draft & publish migration included, is rejected here: there,
-            // skipping it would commit and drop the links of the deleted version. What copying
-            // these links should mean (move them to the new version, or re-point the target rows)
-            // is an open question.
+            // An empty morphOne populates as null or undefined and is skipped above.
+            // Publish omits an empty value and leaves the links on the draft, unless the old
+            // published version owned links. Every other caller is rejected here: discardDraft,
+            // clone, and the draft & publish migration, which then fails at boot on every start.
+            // Skipping the value would commit and drop the links of the deleted version. What
+            // copying these links should mean (move them to the new version, or re-point the
+            // target rows) is an open question.
             if (dataset.length === 0) {
               throw new Error(
                 `Invalid ${uid}.${attributeName} value, expected at least one entry to link`

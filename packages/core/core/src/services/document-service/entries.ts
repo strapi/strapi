@@ -50,11 +50,14 @@ const isEmptyRelationValue = (value: unknown): boolean => {
 };
 
 /**
- * Publish leaves the links of an inverse `morphOne` / `morphMany` whose target is a
+ * Publish leaves the links of an inverse `morphMany` (or `morphOne`) whose target is a
  * `morphToOne` on the draft: they live in the morph columns of the target rows, and a row stores
- * a single owner. The draft value reaches publish empty, which the database layer rejects, so
- * omit it. Discard draft keeps rejecting it: there, skipping it would silently drop the links.
- * What copying these links should mean is not decided yet.
+ * a single owner. A `morphMany` value reaches publish empty, which the database layer rejects, so
+ * omit it. An empty `morphOne` value populates as `null` or `undefined` and is skipped already.
+ * The caller keeps the value, so the database layer still throws, when the old published version
+ * owns links: deleting it cleared them, and skipping the value would commit without them.
+ * Discard draft keeps rejecting it for the same reason. What copying these links should mean is
+ * not decided yet.
  */
 const omitEmptyInverseMorphToOneValues = (
   contentType: { attributes: Record<string, any> },
@@ -202,7 +205,11 @@ const createEntriesService = (
       .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
   }
 
-  async function publishEntry(entry: any, params = {} as any) {
+  async function publishEntry(
+    entry: any,
+    params = {} as any,
+    { omitEmptyInverseMorphValues = true }: { omitEmptyInverseMorphValues?: boolean } = {}
+  ) {
     clearTransformDataRequestCache();
     const publishedAt = new Date();
 
@@ -219,7 +226,10 @@ const createEntriesService = (
         };
         return transformData(draft, opts);
       },
-      (draft) => omitEmptyInverseMorphToOneValues(contentType, draft),
+      (draft) =>
+        omitEmptyInverseMorphValues === true
+          ? omitEmptyInverseMorphToOneValues(contentType, draft)
+          : draft,
       // Create the published entry
       (draft) => createEntry({ ...params, data: draft, locale: draft.locale, status: 'published' })
     )(entry);
