@@ -72,7 +72,6 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@koa/router": "15.7.0",
     "@strapi/admin": "5.60.0",
     "@strapi/strapi": "5.60.0",
     "@testing-library/dom": "10.4.1",

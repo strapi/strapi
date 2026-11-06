@@ -101,7 +101,7 @@ The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develo
 
 | Key                   | Meaning                                                                                                                     |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `method`, `path`      | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `ALL`) and Koa router path.                                           |
+| `method`, `path`      | HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `ALL`) and Koa router path. See [Route paths](#route-paths).          |
 | `handler`             | A string `'<controller>.<action>'`, a full UID such as `'api::article.article.find'`, a function, or an array of functions. |
 | `config.auth`         | `false` for a public route, or `{ scope?, strategies? }`.                                                                   |
 | `config.policies`     | Policy names or `{ name, config }` objects.                                                                                 |
@@ -109,6 +109,42 @@ The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develo
 | `request`, `response` | Zod schemas. See [Validation and sanitization](#validation-and-sanitization).                                               |
 
 For a string handler, the generated scope is the handler prefixed with the module namespace, unless the handler already starts with it. In `src/api/article`, `article.find` gets the scope `api::article.article.find`. In the admin package, `admin.init` gets `admin::admin.init`. A scope set in the route wins. The scope has the same format as a Content API permission action, which is how the permission check matches a route.
+
+## Route paths
+
+Strapi uses `@koa/router` 15, which matches paths with `path-to-regexp` v8. Strapi 5 routes were written for `path-to-regexp` v6 (`@koa/router` 12). [`route-path.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/route-path.ts) translates v6 syntax at boot, so those routes keep working. A v8 path is left unchanged. The translator is meant to go away in Strapi 6.
+
+Strapi translates:
+
+- every route object, in `compose-endpoint.ts`;
+- every path, router prefix and mount path given to the root router, the two API routers and the sub-router of a prefixed route group. `installRoutePathTranslation` wraps their `register`, `use`, `prefix` and `match` methods.
+
+A router that a plugin creates itself is not wrapped. A route object composed onto it still keeps the v6 behaviour, through a wrapper around its handler.
+
+| v6                                                | v8                                  | Kept from v6                                                                          |
+| ------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------- |
+| `/users/:id(\\d+)`                                | `/users/:id`                        | The pattern still decides whether the route matches.                                  |
+| `/users/:id?`                                     | `/users{/:id}`                      |                                                                                       |
+| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`    |                                                                                       |
+| `/uploads/(.*)`                                   | `/uploads/{*splat}`                 | The value is in `ctx.params[0]`, and also in `ctx.params.splat`.                      |
+| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:splat-types/:id` | The alternation is checked, and the value is in `ctx.params[0]`.                      |
+| `/x{-y}+`                                         | `/x:v6Literal0`                     | The repeated literal is checked. The internal parameter is removed from `ctx.params`. |
+
+What the translator keeps:
+
+- A custom pattern is tested against the raw captured text, before URI decoding, with the `i` flag, as v6 did. A value that fails is not a match: the router tries the next route, then answers 404, not 405.
+- Unnamed groups are numbered across the router prefix, the mount path and the route, in that order. With the prefix `/p/(\\d+)` and the route `/(.*)`, `/p/12/a/b` gives `ctx.params[0] = '12'` and `ctx.params[1] = 'a/b'`.
+- A required parameter whose pattern can match nothing, such as `(.*)`, is `''` instead of `undefined`.
+- `ctx._matchedRoute` is the path as written, prefix included. Sentry and OpenTelemetry read it.
+- `strapi routes:list` prints the path as written. The OpenAPI document uses `route.path`, which the translator does not change.
+
+Each layer stores its translation under a symbol. `@koa/router` copies the layers of a nested router with `Object.assign`, which keeps symbol properties, so the checks survive a mount.
+
+Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip the warning.
+
+Some paths cannot be translated. Boot fails with `RoutePathMigrationError` when a repeated parameter with a custom pattern has a suffix or no prefix, when a group starts with `?`, or when a pattern is not a valid regular expression.
+
+`layer.path` in `strapi.server.router.stack` and `listRoutes()` is the translated path, because `@koa/router` compiles and prefixes it. Code that looks for a layer by its path must compare with the v8 form.
 
 ## The route chain
 

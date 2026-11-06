@@ -58,7 +58,7 @@ export default {
        */
       const { major, minor, patch } = ctx.params;
 
-      // The route matcher no longer enforces numeric segments, and params are URI-decoded
+      // The version is part of a file path, and params are URI-decoded.
       if ([major, minor, patch].some((part) => part !== undefined && !/^\d+$/.test(part))) {
         return ctx.notFound();
       }

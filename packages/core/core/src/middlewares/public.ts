@@ -14,11 +14,6 @@ export const publicStatic: Core.MiddlewareFactory = (
 ) => {
   const { maxAge } = defaultsDeep({}, config, defaults);
 
-  const serveStatic = koaStatic(strapi.dirs.static.public, {
-    maxage: maxAge,
-    defer: true,
-  });
-
   strapi.server.routes([
     {
       method: 'GET',
@@ -28,20 +23,16 @@ export const publicStatic: Core.MiddlewareFactory = (
       },
       config: { auth: false },
     },
-    // All other public GET-routes except /uploads/ which is handled in upload middleware
+    // All other public GET-routes except /uploads/(.*) which is handled in upload middleware
     {
       method: 'GET',
-      path: '/*path',
-      handler(ctx, next) {
-        if (ctx.path.toLowerCase().startsWith('/uploads/')) {
-          return next();
-        }
-
-        // v6 exposed the whole path as ctx.params[0]. Keep that for code written against it.
-        ctx.params[0] = ctx.params.path;
-
-        return serveStatic(ctx, next);
-      },
+      path: '/((?!uploads/).+)',
+      // Kept in v6 syntax so ctx.params[0] and the route list stay as they were.
+      [Symbol.for('strapi.route.keepV6Path')]: true,
+      handler: koaStatic(strapi.dirs.static.public, {
+        maxage: maxAge,
+        defer: true,
+      }),
       config: { auth: false },
     },
   ]);

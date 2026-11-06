@@ -78,7 +78,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@koa/router": "15.7.0",
     "@strapi/admin": "5.60.0",
     "@strapi/content-manager": "5.60.0",
     "@strapi/types": "5.60.0",

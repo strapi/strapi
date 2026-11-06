@@ -1,22 +1,42 @@
 import { describe, expect, it } from 'vitest';
-import Router from '@koa/router';
 
 import reviewWorkflows from '../review-workflows';
 
-const router = new Router();
-reviewWorkflows.routes.forEach(({ method, path, handler }) => {
-  router.register(path, [method], () => undefined, { name: handler });
-});
-
-const matchedHandlers = (method: string, url: string) =>
-  router.match(url, method).pathAndMethod.map((layer) => layer.name);
+const KEEP_V6_ROUTE_PATH = Symbol.for('strapi.route.keepV6Path');
 
 describe('Review Workflows routes', () => {
-  it.each(['collection-types', 'single-types'])('routes %s entries to their handlers', (kind) => {
-    const entry = `/content-manager/${kind}/api::article.article/1`;
+  // The core router tests check these paths against both entry kinds.
+  it('serves collection and single type entries from one route each, kept in v6 syntax', () => {
+    const entryRoutes = reviewWorkflows.routes.filter(({ path }) =>
+      path.startsWith('/content-manager/')
+    );
 
-    expect(matchedHandlers('PUT', `${entry}/stage`)).toEqual(['stages.updateEntity']);
-    expect(matchedHandlers('GET', `${entry}/stages`)).toEqual(['stages.listAvailableStages']);
-    expect(matchedHandlers('PUT', `${entry}/assignee`)).toEqual(['assignees.updateEntity']);
+    expect(
+      entryRoutes.map((route) => ({
+        method: route.method,
+        path: route.path,
+        handler: route.handler,
+        keepsV6Path: (route as Record<symbol, unknown>)[KEEP_V6_ROUTE_PATH],
+      }))
+    ).toEqual([
+      {
+        method: 'PUT',
+        path: '/content-manager/(collection|single)-types/:model_uid/:id/stage',
+        handler: 'stages.updateEntity',
+        keepsV6Path: true,
+      },
+      {
+        method: 'GET',
+        path: '/content-manager/(collection|single)-types/:model_uid/:id/stages',
+        handler: 'stages.listAvailableStages',
+        keepsV6Path: true,
+      },
+      {
+        method: 'PUT',
+        path: '/content-manager/(collection|single)-types/:model_uid/:id/assignee',
+        handler: 'assignees.updateEntity',
+        keepsV6Path: true,
+      },
+    ]);
   });
 });

@@ -61,6 +61,14 @@ describe('translateRoutePath', () => {
     expect(translateRoutePath('/files/:path(\\d+)+/:404').parameterNames).toEqual(['path', '404']);
   });
 
+  it('namespaces the names of unnamed and literal groups when asked', () => {
+    const translated = translateRoutePath('/p/(\\d+)/(.*){ab}+', { namespace: 'v6Prefix1' });
+
+    expect(translated.path).toBe('/p/:v6Prefix1Splat1/{*v6Prefix1Splat2}:v6Prefix1Literal0');
+    expect(translated.positionalParams).toEqual(['v6Prefix1Splat1', 'v6Prefix1Splat2']);
+    expect(translated.hiddenParams).toEqual(['v6Prefix1Literal0']);
+  });
+
   it('keeps a v8 quoted name whole when a constraint is also translated', () => {
     const translated = translateRoutePath('/a/:id(\\d+)/*"x (y)"');
 

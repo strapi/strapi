@@ -5,7 +5,8 @@ import type { Core } from '@strapi/types';
 
 import createKoaApp from '../koa';
 import createEndpointComposer from '../compose-endpoint';
-import { RoutePathMigrationError, installRoutePathTranslation } from '../route-path';
+import { createRouteManager } from '../routing';
+import { getRouteSourcePath, installRoutePathTranslation } from '../route-path';
 
 const createStrapi = () =>
   ({
@@ -27,32 +28,42 @@ const createStrapi = () =>
   }) as unknown as Core.Strapi;
 
 /** Registers each path in order; a route answers with its path and the params it received. */
-const createServer = (...paths: string[]) => {
-  const strapi = createStrapi();
-  const router = new Router();
-  const composeEndpoint = createEndpointComposer(strapi);
+const createServerFactory =
+  (withTranslation: boolean) =>
+  (...paths: string[]) => {
+    const strapi = createStrapi();
+    const router = new Router();
+    if (withTranslation) {
+      installRoutePathTranslation(router, strapi);
+    }
+    const composeEndpoint = createEndpointComposer(strapi);
 
-  paths.forEach((path) => {
-    composeEndpoint(
-      {
-        method: 'GET',
-        path,
-        handler(ctx) {
-          ctx.body = { route: path, params: { ...ctx.params } };
+    paths.forEach((path) => {
+      composeEndpoint(
+        {
+          method: 'GET',
+          path,
+          handler(ctx) {
+            ctx.body = { route: path, params: { ...ctx.params } };
+          },
+          info: {},
         },
-        info: {},
-      },
-      { router }
-    );
-  });
+        { router }
+      );
+    });
 
-  const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
-  app.use(router.routes());
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
 
-  return { strapi, server: app.callback() };
-};
+    return { strapi, server: app.callback() };
+  };
 
-describe('compose endpoint', () => {
+describe.each([
+  ['a plain router', false],
+  ['a router with path translation installed', true],
+])('compose endpoint on %s', (_label, withTranslation) => {
+  const createServer = createServerFactory(withTranslation);
+
   it('warns when a route path uses path-to-regexp v6 syntax', () => {
     const { strapi } = createServer('/users/:id(\\d+)');
 
@@ -465,12 +476,67 @@ describe('router path registration', () => {
     await request(server).get('/opt/7/x').expect(200, { v: '7' });
   });
 
-  it('fails at boot for a router prefix v8 cannot express', () => {
-    const router = new Router({ prefix: '/a/(.*)' });
+  it('numbers unnamed groups across a router prefix and its routes, as v6 did', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/p/(\\d+)' });
+    installRoutePathTranslation(router, strapi);
+    router.get('/(.*)', (ctx) => {
+      ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+    });
 
-    expect(() => installRoutePathTranslation(router, createStrapi())).toThrow(
-      RoutePathMigrationError
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await request(server)
+      .get('/p/12/a/b')
+      .expect(200, {
+        params: { 0: '12', 1: 'a/b', splat: 'a/b' },
+        matchedRoute: '/p/(\\d+)/(.*)',
+      });
+    await request(server).get('/p/abc/a').expect(404);
+  });
+
+  it('fills an empty prefix group and hides a repeated prefix literal', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/h{-x}+/:v(a*)' });
+    installRoutePathTranslation(router, strapi);
+    router.get('/y', (ctx) => {
+      ctx.body = { ...ctx.params };
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await request(server).get('/h-x-x/aa/y').expect(200, { v: 'aa' });
+    await request(server).get('/h-x//y').expect(200, { v: '' });
+    await request(server).get('/h-y/aa/y').expect(404);
+  });
+
+  it('translates a prefix set later with router.prefix()', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/x', (ctx) => {
+      ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+    });
+    router.prefix('/old/:a(\\d+)');
+    router.prefix('/v/(\\d+)/');
+
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Router prefix "/v/(\\d+)" uses path-to-regexp v6 syntax')
     );
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await request(server)
+      .get('/v/3/x')
+      .expect(200, { params: { 0: '3' }, matchedRoute: '/v/(\\d+)/x' });
+    await request(server).get('/v/abc/x').expect(404);
+    await request(server).get('/old/1/x').expect(404);
   });
 
   it('keeps a custom pattern on a mount path for the routes under it', async () => {
@@ -512,5 +578,245 @@ describe('router path registration', () => {
     await request(server).get('/api/users/abc').expect(404);
     await request(server).post('/api/users/abc').expect(404);
     await request(server).get('/api/files/a%2Fb').expect(200, { name: 'a/b' });
+  });
+});
+
+describe('mount paths and matched routes', () => {
+  const createApp = (router: Router) => {
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    app.use(router.allowedMethods());
+    return app.callback();
+  };
+
+  it('numbers unnamed groups across a mount path and the nested routes, as v6 did', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    const nested = new Router();
+    installRoutePathTranslation(nested, strapi);
+    nested.get('/child/(.*)', (ctx) => {
+      ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+    });
+    router.use('/v/(\\d+)', nested.routes());
+
+    const server = createApp(router);
+
+    await request(server)
+      .get('/v/1/child/a/b')
+      .expect(200, {
+        params: { 0: '1', 1: 'a/b', splat: 'a/b' },
+        matchedRoute: '/v/(\\d+)/child/(.*)',
+      });
+    await request(server).get('/v/x/child/a').expect(404);
+  });
+
+  it('exposes an unnamed group on a middleware mount path as ctx.params[0]', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    const seen: unknown[] = [];
+    router.use('/files/(.*)', (ctx, next) => {
+      seen.push(ctx.params[0]);
+      return next();
+    });
+    router.get('/files/:name', (ctx) => {
+      ctx.body = { ok: true };
+    });
+
+    await request(createApp(router)).get('/files/a.txt').expect(200, { ok: true });
+    expect(seen).toEqual(['a.txt']);
+  });
+
+  it('sets ctx._matchedRoute to the path as written, under a prefix', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    const api = new Router({ prefix: '/api' });
+    installRoutePathTranslation(api, strapi);
+    createRouteManager(strapi).addRoutes(
+      [
+        {
+          method: 'GET',
+          path: '/users/:id(\\d+)',
+          handler(ctx) {
+            ctx.body = { matchedRoute: ctx._matchedRoute };
+          },
+        },
+        {
+          method: 'GET',
+          path: '/',
+          handler(ctx) {
+            ctx.body = { matchedRoute: ctx._matchedRoute };
+          },
+        },
+      ],
+      api
+    );
+    router.use(api.routes(), api.allowedMethods());
+
+    const server = createApp(router);
+
+    await request(server).get('/api/users/1').expect(200, { matchedRoute: '/api/users/:id(\\d+)' });
+    await request(server).get('/api').expect(200, { matchedRoute: '/api' });
+  });
+
+  it('reports the path as written for each layer', () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/api' });
+    installRoutePathTranslation(router, strapi);
+    createRouteManager(strapi).addRoutes(
+      [
+        { method: 'GET', path: '/uploads/(.*)', handler() {} },
+        { method: 'GET', path: '/users/:id', handler() {} },
+      ],
+      router
+    );
+
+    expect(router.stack.map((layer) => [layer.path, getRouteSourcePath(layer)])).toEqual([
+      ['/api/uploads/{*splat}', '/api/uploads/(.*)'],
+      ['/api/users/:id', '/api/users/:id'],
+    ]);
+  });
+
+  it('does not warn for a route marked to keep its v6 path', () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    createRouteManager(strapi).addRoutes(
+      [
+        {
+          method: 'GET',
+          path: '/uploads/(.*)',
+          handler() {},
+          [Symbol.for('strapi.route.keepV6Path')]: true,
+        },
+      ],
+      router
+    );
+
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe("Strapi's own v6 route paths", () => {
+  /** Wires routers the way the server does: a main router, an API router with a prefix, and plugin sub-routers. */
+  const createStrapiServer = (
+    routers: Array<{ api?: boolean; prefix?: string; paths: string[] }>
+  ) => {
+    const strapi = createStrapi();
+    const main = new Router();
+    installRoutePathTranslation(main, strapi);
+    const contentApi = new Router({ prefix: '/api' });
+    installRoutePathTranslation(contentApi, strapi);
+
+    routers.forEach(({ api, prefix, paths }) => {
+      const routes = paths.map((path) => ({
+        method: 'GET' as const,
+        path,
+        info: {},
+        handler(ctx: Parameters<Core.MiddlewareHandler>[0]) {
+          ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+        },
+        [Symbol.for('strapi.route.keepV6Path')]: true,
+      }));
+
+      createRouteManager(strapi).addRoutes(
+        prefix === undefined ? routes : { type: 'admin', prefix, routes },
+        api ? contentApi : main
+      );
+    });
+
+    main.use(contentApi.routes(), contentApi.allowedMethods());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(main.routes());
+    app.use(main.allowedMethods());
+
+    return { strapi, server: app.callback() };
+  };
+
+  it('serves uploads with the file path in ctx.params[0]', async () => {
+    const { server, strapi } = createStrapiServer([{ paths: ['/uploads/(.*)'] }]);
+
+    await request(server)
+      .get('/uploads/a/b.png')
+      .expect(200, {
+        params: { 0: 'a/b.png', splat: 'a/b.png' },
+        matchedRoute: '/uploads/(.*)',
+      });
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  it('serves documentation assets with the file path in ctx.params[0]', async () => {
+    const { server } = createStrapiServer([{ paths: ['/plugins/documentation/(.*)'] }]);
+
+    await request(server)
+      .get('/plugins/documentation/swagger/ui.css')
+      .expect(200, {
+        params: { 0: 'swagger/ui.css', splat: 'swagger/ui.css' },
+        matchedRoute: '/plugins/documentation/(.*)',
+      });
+  });
+
+  it('serves the provider connect route under the content API prefix', async () => {
+    const { server } = createStrapiServer([{ api: true, prefix: '', paths: ['/connect/(.*)'] }]);
+
+    await request(server)
+      .get('/api/connect/google/callback')
+      .expect(200, {
+        params: { 0: 'google/callback', splat: 'google/callback' },
+        matchedRoute: '/api/connect/(.*)',
+      });
+  });
+
+  it('serves the admin panel with the rest of the path in ctx.params.path', async () => {
+    const { server } = createStrapiServer([{ paths: ['/admin/:path*'] }]);
+
+    await request(server)
+      .get('/admin/content-manager/collection-types')
+      .expect(200, {
+        params: { path: 'content-manager/collection-types' },
+        matchedRoute: '/admin/:path*',
+      });
+    await request(server).get('/admin').expect(200, { params: {}, matchedRoute: '/admin/:path*' });
+  });
+
+  it('serves a documentation version only when every part is a number', async () => {
+    const { server } = createStrapiServer([
+      { prefix: '/documentation', paths: ['/v:major(\\d+).:minor(\\d+).:patch(\\d+)'] },
+    ]);
+
+    await request(server)
+      .get('/documentation/v1.2.3')
+      .expect(200, {
+        params: { major: '1', minor: '2', patch: '3' },
+        matchedRoute: '/documentation/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
+      });
+    await request(server).get('/documentation/v1.2.3foo').expect(404);
+    await request(server).get('/documentation/va.b.c').expect(404);
+  });
+
+  it('serves review workflow routes for both kinds with the kind in ctx.params[0]', async () => {
+    const { server } = createStrapiServer([
+      {
+        prefix: '/admin',
+        paths: ['/content-manager/(collection|single)-types/:model_uid/:id/stage'],
+      },
+    ]);
+
+    await request(server)
+      .get('/admin/content-manager/collection-types/api::a.a/1/stage')
+      .expect(200, {
+        params: { 0: 'collection', splat: 'collection', model_uid: 'api::a.a', id: '1' },
+        matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
+      });
+    await request(server)
+      .get('/admin/content-manager/single-types/api::a.a/1/stage')
+      .expect(200, {
+        params: { 0: 'single', splat: 'single', model_uid: 'api::a.a', id: '1' },
+        matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
+      });
+    await request(server).get('/admin/content-manager/other-types/api::a.a/1/stage').expect(404);
   });
 });

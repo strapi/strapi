@@ -8,10 +8,10 @@ import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
 import {
+  KEEP_V6_ROUTE_PATH,
   RoutePathMigrationError,
-  applyRouteConstraints,
+  registerTranslatedRoute,
   translateRoutePath,
-  withTranslatedPathMatching,
 } from './route-path';
 
 const getMethod = (route: Core.Route) => {
@@ -21,8 +21,9 @@ const getMethod = (route: Core.Route) => {
 const getPath = (route: Core.Route, strapi: Core.Strapi) => {
   const path = trim(route.path);
   const translated = translateRoutePath(path);
+  const keepsV6Path = (route as { [KEEP_V6_ROUTE_PATH]?: boolean })[KEEP_V6_ROUTE_PATH] === true;
 
-  if (translated.changed) {
+  if (translated.changed && !keepsV6Path) {
     strapi.log.warn(
       `Route "${route.method} ${path}" uses path-to-regexp v6 syntax and was migrated to "${translated.path}".`
     );
@@ -112,9 +113,9 @@ export default (strapi: Core.Strapi) => {
       ]);
 
       try {
-        const previousLength = router.stack.length;
-        router[method](path, withTranslatedPathMatching(translated, routeHandler));
-        applyRouteConstraints(router, router.stack.slice(previousLength), translated.constraints);
+        registerTranslatedRoute(router, trim(route.path), translated, routeHandler, (handler) => {
+          router[method](path, handler);
+        });
       } catch (error) {
         if (error instanceof Error) {
           throw new RoutePathMigrationError(

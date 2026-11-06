@@ -82,7 +82,6 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@koa/router": "15.7.0",
     "@strapi/admin-test-utils": "5.60.0",
     "@strapi/strapi": "5.60.0",
     "@strapi/types": "5.60.0",

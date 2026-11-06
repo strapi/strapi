@@ -1,27 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import Router from '@koa/router';
 
 import routes from '../index';
 
-const router = new Router({ prefix: '/documentation' });
-routes.forEach(({ method, path }) => {
-  router.register(path, [method], () => undefined, { name: path });
-});
-
-const matchedRoutes = (url: string) =>
-  router.match(url, 'GET').pathAndMethod.map((layer) => layer.name);
+const KEEP_V6_ROUTE_PATH = Symbol.for('strapi.route.keepV6Path');
 
 describe('Documentation routes', () => {
-  it('serves a versioned documentation', () => {
-    expect(matchedRoutes('/documentation/v1.2.3')).toEqual(['/v:major.:minor.:patch']);
-  });
+  // The core router tests check that this path only matches numeric versions.
+  it('serves a versioned documentation from a v6 path that checks each part is a number', () => {
+    const route = routes.find(
+      ({ handler, path }) => handler === 'documentation.index' && path !== '/'
+    );
 
-  it('does not serve a versioned documentation with extra segments', () => {
-    expect(matchedRoutes('/documentation/v1.2.3/extra')).toEqual([]);
-  });
-
-  // The controller rejects the non-numeric patch with a 404.
-  it('passes a non-numeric version to the controller', () => {
-    expect(matchedRoutes('/documentation/v1.2.3foo')).toEqual(['/v:major.:minor.:patch']);
+    expect(route?.path).toBe('/v:major(\\d+).:minor(\\d+).:patch(\\d+)');
+    expect((route as Record<symbol, unknown>)[KEEP_V6_ROUTE_PATH]).toBe(true);
   });
 });

@@ -10323,7 +10323,6 @@ __metadata:
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
     "@apidevtools/swagger-parser": "npm:^10.1.0"
-    "@koa/router": "npm:15.7.0"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.60.0"
     "@strapi/admin-test-utils": "npm:5.60.0"
@@ -10453,7 +10452,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
-    "@koa/router": "npm:15.7.0"
     "@strapi/admin": "npm:5.60.0"
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
@@ -10613,7 +10611,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/review-workflows@workspace:packages/core/review-workflows"
   dependencies:
-    "@koa/router": "npm:15.7.0"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.60.0"
     "@strapi/content-manager": "npm:5.60.0"

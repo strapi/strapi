@@ -3,7 +3,7 @@ import CLITable from 'cli-table3';
 import chalk from 'chalk';
 import { toUpper } from 'lodash';
 
-import { createStrapi, compileStrapi } from '@strapi/core';
+import { createStrapi, compileStrapi, getRouteSourcePath } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -22,7 +22,7 @@ const action = async () => {
   list
     .filter((route) => route.methods.length)
     .forEach((route) => {
-      infoTable.push([route.methods.map(toUpper).join('|'), String(route.path)]);
+      infoTable.push([route.methods.map(toUpper).join('|'), getRouteSourcePath(route)]);
     });
 
   console.log(infoTable.toString());

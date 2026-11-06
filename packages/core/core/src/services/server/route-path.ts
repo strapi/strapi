@@ -1,7 +1,5 @@
 import type Router from '@koa/router';
 import type { Core } from '@strapi/types';
-import compose from 'koa-compose';
-
 /**
  * Boots routes written for path-to-regexp v6 on v8.
  * Remove this translator in Strapi 6, when route paths are v8 only.
@@ -46,15 +44,6 @@ const OPTIONAL_PREFIXES = new Set(['/', '.']);
 const CONSTRAINT_FLAGS = 'i';
 
 type RouterLayer = Router['stack'][number];
-
-// Constraints live on the layer under a symbol. Koa copies a nested router's layers with
-// Object.assign, which keeps symbol properties, so a check survives being mounted under another router.
-const CONSTRAINTS = Symbol('strapi.routePath.constraints');
-
-type ConstrainedLayer = RouterLayer & { [CONSTRAINTS]?: RoutePathConstraint[] };
-
-// Constraints from a router prefix such as `/pre/:v(\\d+)`, applied to every route under that router.
-const prefixConstraintsByRouter = new WeakMap<Router, RoutePathConstraint[]>();
 
 // v8 parameter names are JavaScript identifiers. v6 names are `[A-Za-z0-9_]+`.
 const ID_START = /^[$_\p{ID_Start}]$/u;
@@ -205,15 +194,10 @@ type V6Group = {
   end: number;
 };
 
-const routeNeedsMatchShim = (translated: TranslatedRoutePath) =>
-  translated.constraints.length > 0 ||
-  translated.positionalParams.length > 0 ||
-  translated.emptyParams.length > 0 ||
-  translated.hiddenParams.length > 0;
-
 /**
- * Applies what v8 paths cannot express. A value its pattern rejects means the route did not
- * match, so the request goes on to the next matching route, as it did in v6.
+ * Applies what v8 paths cannot express, for a router without path translation installed. A value
+ * its pattern rejects means the route did not match, so the request goes on to the next matching
+ * route, as it did in v6.
  *
  * Patterns test the raw captured text, as v6 did. `ctx.params` is decoded, so it is only a fallback.
  */
@@ -276,7 +260,15 @@ export const withTranslatedPathMatching = (
   };
 };
 
-export const translateRoutePath = (path: string): TranslatedRoutePath => {
+type TranslateOptions = {
+  /** Prefixes the names of unnamed and literal groups, so a router prefix and its routes never share one. */
+  namespace?: string;
+};
+
+export const translateRoutePath = (
+  path: string,
+  { namespace }: TranslateOptions = {}
+): TranslatedRoutePath => {
   let translated = '';
   let changed = false;
   const constraints: RoutePathConstraint[] = [];
@@ -305,15 +297,25 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
   };
 
   const hiddenName = () => {
-    let name = `v6Literal${hiddenCount}`;
+    const base = `${namespace ?? 'v6'}Literal`;
+    let name = `${base}${hiddenCount}`;
     hiddenCount += 1;
 
     while (paramNames.includes(name)) {
-      name = `v6Literal${hiddenCount}`;
+      name = `${base}${hiddenCount}`;
       hiddenCount += 1;
     }
 
     return name;
+  };
+
+  const positionalName = () => {
+    const count = positionalParams.length;
+    if (namespace) {
+      return `${namespace}Splat${count + 1}`;
+    }
+
+    return count === 0 ? 'splat' : `splat${count + 1}`;
   };
 
   const detachOptionalPrefix = () => {
@@ -538,7 +540,7 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
 
     let name = group.name;
     if (!name) {
-      name = positionalParams.length === 0 ? 'splat' : `splat${positionalParams.length + 1}`;
+      name = positionalName();
       positionalParams.push(name);
     }
 
@@ -605,7 +607,7 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
           );
         }
 
-        name = positionalParams.length === 0 ? 'splat' : `splat${positionalParams.length + 1}`;
+        name = positionalName();
         positionalParams.push(name);
       }
 
@@ -664,12 +666,21 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
   };
 };
 
+type Logger = { log: { warn: (message: string) => void } };
+
+/**
+ * Set on a route object to keep its v6 path without a boot warning. For Strapi's own routes, whose
+ * v6 paths stay as they were so `ctx.params` and the API documentation do not change.
+ */
+export const KEEP_V6_ROUTE_PATH = Symbol.for('strapi.route.keepV6Path');
+
 const migrateRouterPath = (
   path: string,
   methods: string[],
-  strapi: { log: { warn: (message: string) => void } }
+  strapi: Logger,
+  options?: TranslateOptions
 ) => {
-  const translated = translateRoutePath(path);
+  const translated = translateRoutePath(path, options);
 
   if (translated.changed) {
     const method = methods.map((item) => item.toUpperCase()).join(',');
@@ -681,59 +692,133 @@ const migrateRouterPath = (
   return translated;
 };
 
-const wrapRouterHandlers = (middleware: unknown, translated: TranslatedRoutePath) => {
-  if (!routeNeedsMatchShim(translated)) {
-    return middleware;
-  }
-
-  const handlers = (Array.isArray(middleware) ? middleware : [middleware]).filter(
-    (handler): handler is Core.MiddlewareHandler => typeof handler === 'function'
-  );
-
-  if (handlers.length === 0) {
-    return middleware;
-  }
-
-  const composed = handlers.length === 1 ? handlers[0] : compose(handlers);
-  return withTranslatedPathMatching(translated, composed);
+/** One piece of a layer's path, as written and as translated: a router prefix, a mount path or a route. */
+type RoutePathPart = {
+  source: string;
+  path: string;
+  constraints: RoutePathConstraint[];
+  positionalParams: string[];
+  emptyParams: string[];
+  hiddenParams: string[];
 };
 
-const isNestedRouter = (middleware: unknown): middleware is { router: object } =>
-  typeof middleware === 'function' &&
-  'router' in middleware &&
-  (middleware as { router?: unknown }).router !== undefined;
+// Parts live on the layer under a symbol. Koa copies a nested router's layers with Object.assign,
+// which keeps symbol properties, so they survive being mounted under another router.
+const LAYER_PARTS = Symbol('strapi.routePath.parts');
+const LAYER_SHIM = Symbol('strapi.routePath.shim');
+
+type TranslatedLayer = RouterLayer & { [LAYER_PARTS]?: RoutePathPart[] };
+type LayerMiddleware = RouterLayer['stack'][number];
+type ShimContext = { params: Record<string | number, unknown>; _matchedRoute?: string };
 
 /**
- * Adds the constraints of a translated path to the layers it just registered. A router prefix's
- * constraints are added too, so every route under that router is checked the same way.
+ * A prefix or mount path names its unnamed groups only to read them, so it hides those names once
+ * they are copied to `ctx.params[0]`, `ctx.params[1]`… as v6 exposed them.
  */
-export const applyRouteConstraints = (
-  router: Router,
-  layers: RouterLayer[],
-  constraints: RoutePathConstraint[]
-) => {
-  const all = [...(prefixConstraintsByRouter.get(router) ?? []), ...constraints];
+const toPart = (
+  source: string,
+  translated: TranslatedRoutePath,
+  { hidePositional = false } = {}
+): RoutePathPart => ({
+  source,
+  path: translated.path,
+  constraints: translated.constraints,
+  positionalParams: translated.positionalParams,
+  emptyParams: translated.emptyParams,
+  hiddenParams: hidePositional
+    ? [...translated.hiddenParams, ...translated.positionalParams]
+    : translated.hiddenParams,
+});
 
-  if (all.length === 0) {
-    return;
+const partNeedsShim = (part: RoutePathPart) =>
+  part.source !== part.path ||
+  part.positionalParams.length > 0 ||
+  part.emptyParams.length > 0 ||
+  part.hiddenParams.length > 0;
+
+/**
+ * The path of a layer as it was written, before translation. Falls back to the layer's path when
+ * the router changed it in a way the parts do not describe.
+ */
+export const getRouteSourcePath = (layer: { path: string | RegExp }): string => {
+  const parts = (layer as { [LAYER_PARTS]?: RoutePathPart[] })[LAYER_PARTS];
+
+  if (!parts?.length || typeof layer.path !== 'string') {
+    return String(layer.path);
   }
 
-  layers.forEach((layer) => {
-    const constrained = layer as ConstrainedLayer;
-    const existing = constrained[CONSTRAINTS] ?? [];
-    // `use()` registers through `register()`, so the same constraint can arrive twice.
-    constrained[CONSTRAINTS] = [...existing, ...all.filter((item) => !existing.includes(item))];
-  });
+  let rest = layer.path;
+  let source = '';
+
+  for (const part of parts) {
+    if (rest.startsWith(part.path)) {
+      rest = rest.slice(part.path.length);
+      source += part.source;
+    } else if (rest !== '' || part.path !== '/') {
+      // Koa drops a route's own `/` under a prefix, so only that part may be missing.
+      return layer.path;
+    }
+  }
+
+  return rest === '' ? source : layer.path;
+};
+
+/**
+ * Runs first in a layer's stack. Restores what v6 exposed: `""` for a required parameter that
+ * matched nothing, unnamed groups as `ctx.params[0]`…, and the route as written in `_matchedRoute`.
+ */
+const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
+  const shim = (ctx: ShimContext, next: () => Promise<unknown>) => {
+    const parts = layer[LAYER_PARTS] ?? [];
+
+    parts.forEach((part) => {
+      part.emptyParams.forEach((name) => {
+        ctx.params[name] ??= '';
+      });
+    });
+
+    parts
+      .flatMap((part) => part.positionalParams)
+      .forEach((name, index) => {
+        ctx.params[index] = ctx.params[name];
+      });
+
+    parts.forEach((part) => {
+      part.hiddenParams.forEach((name) => {
+        delete ctx.params[name];
+      });
+    });
+
+    const source = getRouteSourcePath(layer);
+    if (source !== layer.path) {
+      ctx._matchedRoute = source;
+    }
+
+    return next();
+  };
+
+  return Object.assign(shim, { [LAYER_SHIM]: true }) as unknown as LayerMiddleware;
+};
+
+const isShim = (middleware: LayerMiddleware) =>
+  (middleware as unknown as { [LAYER_SHIM]?: boolean })[LAYER_SHIM] === true;
+
+const setLayerParts = (layer: TranslatedLayer, parts: RoutePathPart[]) => {
+  layer[LAYER_PARTS] = parts;
+
+  // A copied layer still holds the shim of the layer it was copied from, so it gets its own.
+  const stack = layer.stack.filter((middleware) => !isShim(middleware));
+  layer.stack = parts.some(partNeedsShim) ? [createLayerShim(layer), ...stack] : stack;
 };
 
 /**
  * Whether a layer accepts a request path. Its constraints are tested against the raw captured
  * text, as v6 did, so `%2F` is not decoded before a `[^/]+` pattern sees it.
  */
-const layerAcceptsPath = (layer: ConstrainedLayer, path: string) => {
-  const constraints = layer[CONSTRAINTS];
+const layerAcceptsPath = (layer: TranslatedLayer, path: string) => {
+  const constraints = (layer[LAYER_PARTS] ?? []).flatMap((part) => part.constraints);
 
-  if (!constraints?.length) {
+  if (constraints.length === 0) {
     return true;
   }
 
@@ -751,87 +836,167 @@ const layerAcceptsPath = (layer: ConstrainedLayer, path: string) => {
   }
 };
 
+const isNestedRouter = (middleware: unknown): middleware is { router: object } =>
+  typeof middleware === 'function' &&
+  'router' in middleware &&
+  (middleware as { router?: unknown }).router !== undefined;
+
+const translatedRouters = new WeakSet<Router>();
+const prefixParts = new WeakMap<Router, RoutePathPart>();
+
+// Names of unnamed groups in prefixes and mount paths, unique across every router.
+let namespaceCount = 0;
+const nextNamespace = (kind: string) => {
+  namespaceCount += 1;
+  return `v6${kind}${namespaceCount}`;
+};
+
+// A route object translated by the endpoint composer, handed to the `register` call it makes next.
+let pendingRoute: { source: string; translated: TranslatedRoutePath } | undefined;
+
 /**
- * Translates v6 paths registered on a Koa router (`use`, `get`/`post`/…, `register`), and a v6
- * router prefix. Route objects already pass through `translateRoutePath` before they reach the
- * router; a v8 path is left unchanged, so this does not translate those twice.
+ * Registers a translated route object. On a router with path translation installed, the layer
+ * records the path as written. Elsewhere, the handler applies the v6 behaviour itself.
  */
-export const installRoutePathTranslation = (
+export const registerTranslatedRoute = (
   router: Router,
-  strapi: { log: { warn: (message: string) => void } }
+  source: string,
+  translated: TranslatedRoutePath,
+  handler: Core.MiddlewareHandler,
+  register: (handler: Core.MiddlewareHandler) => void
 ) => {
+  if (!translatedRouters.has(router)) {
+    register(withTranslatedPathMatching(translated, handler));
+    return;
+  }
+
+  pendingRoute = { source, translated };
+  try {
+    register(handler);
+  } finally {
+    pendingRoute = undefined;
+  }
+};
+
+/**
+ * Translates v6 paths registered on a Koa router (`use`, `get`/`post`/…, `register`, `prefix`),
+ * and a v6 router prefix. Every layer records its path as written, so constraints, `ctx.params`
+ * and `ctx._matchedRoute` behave as they did in v6, including under prefixes and mount paths.
+ */
+export const installRoutePathTranslation = (router: Router, strapi: Logger) => {
   const originalRegister = router.register.bind(router);
   const originalUse = router.use.bind(router);
   const originalMatch = router.match.bind(router);
+  const originalPrefix = router.prefix.bind(router);
+
+  translatedRouters.add(router);
+
+  const translatePrefix = (prefix: string) => {
+    const translated = translateRoutePath(prefix, { namespace: nextNamespace('Prefix') });
+
+    if (translated.changed) {
+      strapi.log.warn(
+        `Router prefix "${prefix}" uses path-to-regexp v6 syntax and was migrated to "${translated.path}".`
+      );
+    }
+
+    return toPart(prefix, translated, { hidePositional: true });
+  };
+
+  const currentPrefixParts = () => {
+    const part = prefixParts.get(router);
+    return part ? [part] : [];
+  };
 
   const { prefix } = router.opts;
 
   if (prefix) {
-    const translatedPrefix = translateRoutePath(prefix);
-
-    if (translatedPrefix.changed) {
-      strapi.log.warn(
-        `Router prefix "${prefix}" uses path-to-regexp v6 syntax and was migrated to "${translatedPrefix.path}".`
-      );
-    }
-
-    if (
-      translatedPrefix.positionalParams.length > 0 ||
-      translatedPrefix.emptyParams.length > 0 ||
-      translatedPrefix.hiddenParams.length > 0
-    ) {
-      throw new RoutePathMigrationError(
-        prefix,
-        'a router prefix supports named parameters with custom patterns only; move the rest into the route paths'
-      );
-    }
-
-    router.opts.prefix = translatedPrefix.path;
-    prefixConstraintsByRouter.set(router, translatedPrefix.constraints);
+    const part = translatePrefix(prefix);
+    router.opts.prefix = part.path;
+    prefixParts.set(router, part);
   }
+
+  // `use()` registers its middleware through `register()`, and describes the layer itself.
+  let insideUse = 0;
 
   router.register = function register(path, methods, middleware, options) {
     // A pathless `use()` asks register for the regexp source `(?:\/|$)` and sets pathAsRegExp.
-    if (typeof path !== 'string' || options?.pathAsRegExp) {
-      return originalRegister(path, methods, middleware, options);
+    if (insideUse > 0 || typeof path !== 'string' || options?.pathAsRegExp) {
+      const result = originalRegister(path, methods, middleware, options);
+
+      if (insideUse === 0 && prefixParts.has(router)) {
+        setLayerParts(result as RouterLayer, currentPrefixParts());
+      }
+
+      return result;
     }
 
-    const translated = migrateRouterPath(path, methods, strapi);
-    const layer = originalRegister(
-      translated.path,
-      methods,
-      wrapRouterHandlers(middleware, translated) as typeof middleware,
-      options
-    );
+    const pending = pendingRoute?.translated.path === path ? pendingRoute : undefined;
+    pendingRoute = undefined;
+
+    const translated = pending?.translated ?? migrateRouterPath(path, methods, strapi);
+    const source = pending?.source ?? path;
 
     // For a string path, koa-router returns the layer it just added; the `Router` branch is for chaining.
-    applyRouteConstraints(router, [layer as RouterLayer], translated.constraints);
+    const layer = originalRegister(translated.path, methods, middleware, options) as RouterLayer;
+    setLayerParts(layer, [...currentPrefixParts(), toPart(source, translated)]);
 
     return layer;
   } as typeof router.register;
 
   router.use = function use(first: unknown, ...rest: unknown[]) {
-    const before = router.stack.length;
-
-    if (typeof first !== 'string') {
-      const result = originalUse(first as never, ...(rest as never[]));
-      applyRouteConstraints(router, router.stack.slice(before), []);
-      return result;
+    // Koa calls `use()` once per path, which describes each layer.
+    if (Array.isArray(first)) {
+      return originalUse(first as never, ...(rest as never[]));
     }
 
-    const translated = migrateRouterPath(first, ['use'], strapi);
+    const before = router.stack.length;
+    let mountParts: RoutePathPart[] = [];
+    let result: ReturnType<typeof originalUse>;
 
-    // Wrapping `routes()` drops `.router`, so koa-router never mounts the nested stack. Its layers
-    // are copied in below, and the mount path's constraints are added to them.
-    const mustWrap = routeNeedsMatchShim(translated) && !rest.some(isNestedRouter);
-    const result = mustWrap
-      ? originalUse(translated.path, wrapRouterHandlers(rest, translated) as Core.MiddlewareHandler)
-      : originalUse(translated.path, ...(rest as never[]));
+    insideUse += 1;
+    try {
+      if (typeof first === 'string') {
+        // A nested router's routes may have unnamed groups of their own, so its mount path's are namespaced.
+        const nested = rest.some(isNestedRouter);
+        const translated = migrateRouterPath(
+          first,
+          ['use'],
+          strapi,
+          nested ? { namespace: nextNamespace('Mount') } : undefined
+        );
 
-    applyRouteConstraints(router, router.stack.slice(before), translated.constraints);
+        mountParts = [toPart(first, translated, { hidePositional: nested })];
+        result = originalUse(translated.path, ...(rest as never[]));
+      } else {
+        result = originalUse(first as never, ...(rest as never[]));
+      }
+    } finally {
+      insideUse -= 1;
+    }
+
+    // A nested router's layers arrive with their own parts; the prefix and mount path come first.
+    (router.stack.slice(before) as TranslatedLayer[]).forEach((layer) => {
+      setLayerParts(layer, [...currentPrefixParts(), ...mountParts, ...(layer[LAYER_PARTS] ?? [])]);
+    });
 
     return result;
   } as typeof router.use;
+
+  router.prefix = function setPrefix(prefixPath: string) {
+    const previous = prefixParts.get(router);
+    const part = translatePrefix(prefixPath.replace(/\/$/, ''));
+
+    originalPrefix(part.path);
+    prefixParts.set(router, part);
+
+    (router.stack as TranslatedLayer[]).forEach((layer) => {
+      const parts = (layer[LAYER_PARTS] ?? []).filter((item) => item !== previous);
+      setLayerParts(layer, [part, ...parts]);
+    });
+
+    return router;
+  } as typeof router.prefix;
 
   // A rejected constraint is not a path match. Otherwise allowedMethods answers 405.
   router.match = function match(path, method) {

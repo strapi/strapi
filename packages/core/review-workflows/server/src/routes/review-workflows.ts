@@ -1,43 +1,5 @@
 import { enableFeatureMiddleware } from './utils';
 
-const entryRoutes = (kind: string) => [
-  {
-    method: 'PUT',
-    path: `/content-manager/${kind}/:model_uid/:id/stage`,
-    handler: 'stages.updateEntity',
-    config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
-      policies: ['admin::isAuthenticatedAdmin'],
-    },
-  },
-  {
-    method: 'GET',
-    path: `/content-manager/${kind}/:model_uid/:id/stages`,
-    handler: 'stages.listAvailableStages',
-    config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
-      policies: ['admin::isAuthenticatedAdmin'],
-    },
-  },
-  {
-    method: 'PUT',
-    path: `/content-manager/${kind}/:model_uid/:id/assignee`,
-    handler: 'assignees.updateEntity',
-    config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['admin::users.read'],
-          },
-        },
-      ],
-    },
-  },
-];
-
 export default {
   type: 'admin',
   routes: [
@@ -144,6 +106,46 @@ export default {
         ],
       },
     },
-    ...['collection-types', 'single-types'].flatMap(entryRoutes),
+    {
+      method: 'PUT',
+      // Kept in v6 syntax so ctx.params[0] and the API documentation stay as they were.
+      [Symbol.for('strapi.route.keepV6Path')]: true,
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/stage',
+      handler: 'stages.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      // Kept in v6 syntax so ctx.params[0] and the API documentation stay as they were.
+      [Symbol.for('strapi.route.keepV6Path')]: true,
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/stages',
+      handler: 'stages.listAvailableStages',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'PUT',
+      // Kept in v6 syntax so ctx.params[0] and the API documentation stay as they were.
+      [Symbol.for('strapi.route.keepV6Path')]: true,
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/assignee',
+      handler: 'assignees.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::users.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
