@@ -4,7 +4,11 @@
 const _ = require('lodash');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
-const { createContentAPIRequest, transformToRESTResource } = require('api-tests/request');
+const {
+  createAuthRequest,
+  createContentAPIRequest,
+  transformToRESTResource,
+} = require('api-tests/request');
 
 const builder = createTestBuilder();
 let strapi;
@@ -1793,6 +1797,68 @@ describe('Filtering API', () => {
           },
         });
         expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
+      });
+
+      test.each(['FALSE', 'False', 'F'])(
+        'Cast falsy booleans case-insensitively %s',
+        async (val) => {
+          const res = await rq({
+            method: 'GET',
+            url: '/products',
+            qs: {
+              filters: {
+                isChecked: {
+                  $eq: val,
+                },
+              },
+            },
+          });
+
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toHaveLength(2);
+          expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
+        }
+      );
+
+      test.each(['no', 'yes', 'on', 'off', '', ' true ', '2'])(
+        'Reject unrecognised boolean %j with a 400',
+        async (val) => {
+          const res = await rq({
+            method: 'GET',
+            url: '/products',
+            qs: {
+              filters: {
+                isChecked: {
+                  $eq: val,
+                },
+              },
+            },
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.error).toMatchObject({ status: 400, name: 'ValidationError' });
+        }
+      );
+
+      // The admin users list queries strapi.db.query directly, so the database error
+      // reaches the global error middleware instead of the document service.
+      test('Reject unrecognised boolean with a 400 on a route querying the database directly', async () => {
+        const adminRq = await createAuthRequest({ strapi });
+
+        const res = await adminRq({
+          method: 'GET',
+          url: '/admin/users',
+          qs: {
+            filters: {
+              isActive: {
+                $eq: 'no',
+              },
+            },
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toMatchObject({ status: 400, name: 'ValidationError' });
       });
     });
 

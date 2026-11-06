@@ -115,15 +115,17 @@ const Row = ({
           )} ${kind === 'plugins' ? 'plugin' : kind}`}
         >
           {isDisabledByConfig === true ? (
-            // Next to the title, not after the caret, so the caret stays aligned with other rows
-            <Flex tag="span" gap={2}>
+            // Next to the title, not after the caret, so the caret stays aligned with other rows.
+            // The trigger clips its single line without an ellipsis, so on narrow screens the
+            // badge moves under the title and, if still too wide, wraps its own text.
+            <Flex tag="span" gap={2} wrap="wrap">
               {categoryDisplayName}
-              <Badge shrink={0}>
+              <WrappingBadge>
                 {formatMessage({
                   id: 'Settings.permissions.category.disabled-by-config',
                   defaultMessage: 'Disabled by configuration',
                 })}
-              </Badge>
+              </WrappingBadge>
             </Flex>
           ) : (
             categoryDisplayName
@@ -308,6 +310,10 @@ const SubCategory = ({
     </>
   );
 };
+
+const WrappingBadge = styled(Badge)`
+  white-space: normal;
+`;
 
 const Border = styled<BoxComponent>(Box)`
   align-self: center;
