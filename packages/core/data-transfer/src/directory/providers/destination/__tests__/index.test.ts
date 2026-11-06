@@ -7,6 +7,7 @@ import path from 'path';
 
 import { ProviderTransferError } from '../../../../errors/providers';
 import * as esmDeps from '../../../../utils/esm-deps';
+import { oversizedLast, oversizedThenMore } from '../../../../__tests__/test-utils';
 import { createLocalDirectoryDestinationProvider } from '..';
 
 jest.mock('../../../../utils/esm-deps', () => {
@@ -75,6 +76,23 @@ describe('Directory destination provider', () => {
       .filter((line) => line !== '')
       .map((line) => JSON.parse(line));
     expect(lines).toEqual(items);
+  });
+
+  test.each([
+    ['is the last one', oversizedLast],
+    ['is followed by more entities', oversizedThenMore],
+  ])('an entity larger than maxSizeJsonl fails the write stream when it %s', async (_, source) => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-too-large-'));
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: { maxSizeJsonl: 10 },
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(
+      pipeline(Readable.from(source()), provider.createEntitiesWriteStream())
+    ).rejects.toThrow('payload too large');
   });
 
   test('entities write stream errors when stream packages fail to load', async () => {

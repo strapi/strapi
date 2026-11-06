@@ -22,6 +22,13 @@ fs.createWriteStream = jest.fn().mockImplementation(
 
 const filePath = './test-file';
 
+const createEntryStub = () =>
+  new stream.Writable({
+    write(_chunk, _encoding, callback) {
+      callback();
+    },
+  });
+
 jest.mock('../../../../utils/encryption', () => {
   return {
     __esModule: true,
@@ -39,7 +46,7 @@ describe('Local File Destination Provider', () => {
   });
 
   describe('Bootstrap', () => {
-    it('Throws an error if encryption is enabled and the key is not provided', async () => {
+    it('Throws an error if encryption is enabled and the key is not provided', () => {
       const providerOptions = {
         encryption: { enabled: true },
         compression: { enabled: false },
@@ -125,7 +132,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
@@ -152,7 +159,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream for schemas', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
@@ -180,7 +187,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream for links', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
@@ -208,7 +215,7 @@ describe('Local File Destination Provider', () => {
       compression: { enabled: false },
       file: { path: filePath },
     };
-    (createTarEntryStream as jest.Mock).mockImplementation(jest.fn());
+    (createTarEntryStream as jest.Mock).mockImplementation(createEntryStub);
 
     it('Creates a tar entry stream for configuration', async () => {
       const provider = createLocalFileDestinationProvider(providerOptions);

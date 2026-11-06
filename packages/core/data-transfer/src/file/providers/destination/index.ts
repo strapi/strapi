@@ -5,9 +5,9 @@ import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
-import { deferWritable } from '../../../utils/defer-writable';
 import { errorFromUnknown } from '../../../utils/unknown-error';
 import { loadStreamDeps } from '../../../utils/esm-deps';
+import { createJsonlWriteStream } from '../../../utils/jsonl-write-stream';
 import type {
   IAsset,
   IDestinationProvider,
@@ -152,6 +152,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       })
       .catch((error: unknown) => {
         this.#archiveError = errorFromUnknown(error);
+        archiveStream.destroy();
+        outStream.destroy();
       });
 
     this.results.file = { path: this.#archivePath };
@@ -247,10 +249,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       this.options.file.maxSizeJsonl
     );
 
-    return deferWritable(async () => {
-      const { chain, stringer } = await loadStreamDeps();
-      return chain([stringer(), entryStream]);
-    });
+    return createJsonlWriteStream(entryStream);
   }
 
   createAssetsWriteStream(): Writable {
