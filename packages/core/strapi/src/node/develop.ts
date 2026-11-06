@@ -10,7 +10,7 @@ import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
-import { getTypeArtifacts } from '../cli/utils/typescript-artifacts';
+import { generateTypesSilently } from '../cli/utils/typescript-artifacts';
 
 // Lazy: worker-only deps; primary cluster process should not pay for them
 const lazy = <T>(spec: string): (() => T) => {
@@ -292,17 +292,20 @@ const develop = async ({
         timer.start('generatingTS');
         generatingTsSpinner.start();
 
-        await tsUtils().generators.generate({
+        const strictProgramWarning = await generateTypesSilently({
           strapi: strapiInstance,
-          pwd: cwd,
-          rootDir: undefined,
-          logger: { silent: true, debug: false },
-          artifacts: getTypeArtifacts(strapiInstance),
+          cwd,
+          tsUtils: tsUtils(),
         });
 
         const generatingDuration = timer.end('generatingTS');
         generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
         generatingTsSpinner.succeed();
+
+        // The generation runs silently, so its strict program warning is printed here
+        if (strictProgramWarning !== undefined) {
+          logger.warn(strictProgramWarning);
+        }
       }
 
       if (tsconfig?.config) {

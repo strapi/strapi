@@ -43,3 +43,37 @@ export const getTypeArtifacts = (strapi: Core.Strapi) => {
     strict,
   };
 };
+
+type TypeGenerators = Pick<
+  (typeof import('@strapi/typescript-utils'))['generators'],
+  'generate' | 'getStrictProgramWarning'
+>;
+
+/**
+ * Generates the application types without the generator's own output, as `strapi develop` does
+ * behind its spinner, and returns the warning the generator would have printed when
+ * `typescript.strictTypes` is on and the application program leaves the strict files out, for the
+ * caller to print with its own logger. A warning, never a failure.
+ */
+export const generateTypesSilently = async ({
+  strapi,
+  cwd,
+  tsUtils,
+}: {
+  strapi: Core.Strapi;
+  cwd: string;
+  tsUtils: { generators: TypeGenerators };
+}): Promise<string | undefined> => {
+  const artifacts = getTypeArtifacts(strapi);
+
+  // TODO @Nico a failed generation also returns: the warning may then list files it did not write
+  await tsUtils.generators.generate({
+    strapi,
+    pwd: cwd,
+    rootDir: undefined,
+    logger: { silent: true, debug: false },
+    artifacts,
+  });
+
+  return tsUtils.generators.getStrictProgramWarning({ pwd: cwd, rootDir: undefined, artifacts });
+};

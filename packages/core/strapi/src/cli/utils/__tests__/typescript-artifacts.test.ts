@@ -1,4 +1,8 @@
-import { getTypeArtifacts, isStrictTypesEnabled } from '../typescript-artifacts';
+import {
+  generateTypesSilently,
+  getTypeArtifacts,
+  isStrictTypesEnabled,
+} from '../typescript-artifacts';
 
 const strapiWithConfig = (strictTypes: unknown) =>
   ({ config: { get: jest.fn(() => strictTypes) } }) as any;
@@ -42,5 +46,65 @@ describe('typescript.strictTypes', () => {
       middlewares: true,
       strict: true,
     });
+  });
+});
+
+describe('generateTypesSilently', () => {
+  const createTsUtils = (warning: string | undefined) => ({
+    generators: {
+      generate: jest.fn(async () => ({})),
+      getStrictProgramWarning: jest.fn(() => warning),
+    },
+  });
+
+  test('generates silently and returns the strict program warning for the caller to log', async () => {
+    const strapi = strapiWithConfig(true);
+    const tsUtils = createTsUtils('typescript.strictTypes is on, but tsconfig.json leaves out ...');
+
+    const warning = await generateTypesSilently({ strapi, cwd: '/app', tsUtils });
+
+    expect(tsUtils.generators.generate).toHaveBeenCalledWith({
+      strapi,
+      pwd: '/app',
+      rootDir: undefined,
+      logger: { silent: true, debug: false },
+      artifacts: getTypeArtifacts(strapi),
+    });
+    expect(tsUtils.generators.getStrictProgramWarning).toHaveBeenCalledWith({
+      pwd: '/app',
+      rootDir: undefined,
+      artifacts: getTypeArtifacts(strapi),
+    });
+    expect(warning).toBe('typescript.strictTypes is on, but tsconfig.json leaves out ...');
+  });
+
+  test('returns undefined when there is nothing to warn about', async () => {
+    const warning = await generateTypesSilently({
+      strapi: strapiWithConfig(undefined),
+      cwd: '/app',
+      tsUtils: createTsUtils(undefined),
+    });
+
+    expect(warning).toBeUndefined();
+  });
+
+  test('checks the program only after the generation', async () => {
+    const calls: string[] = [];
+    const tsUtils = {
+      generators: {
+        generate: jest.fn(async () => {
+          calls.push('generate');
+          return {};
+        }),
+        getStrictProgramWarning: jest.fn(() => {
+          calls.push('getStrictProgramWarning');
+          return undefined;
+        }),
+      },
+    };
+
+    await generateTypesSilently({ strapi: strapiWithConfig(true), cwd: '/app', tsUtils });
+
+    expect(calls).toEqual(['generate', 'getStrictProgramWarning']);
   });
 });
