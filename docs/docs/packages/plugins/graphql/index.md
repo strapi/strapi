@@ -25,9 +25,7 @@ The plugin has no `register` function. [`bootstrap.ts`](https://github.com/strap
 3. An auth step. It sets `ctx.state.route.info.type` to `content-api` and calls `strapi.auth.authenticate`. It skips authentication for a `GET` that loads the landing page.
 4. `koaMiddleware` from `@as-integrations/koa`.
 
-For a request whose HTTP peer disconnects before the response ends, the route stops entering
-subsequent GraphQL field resolvers. A resolver already running when the peer disconnects keeps
-running; this does not cancel database queries or other asynchronous work in progress.
+[`abort-disconnected-request.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/graphql/server/src/abort-disconnected-request.ts) stops a request whose HTTP client disconnected before the response ended from entering more resolvers: `bootstrap` wraps every field resolver of the final schema in place, including a custom `apolloServer.schema`, and a wrapped resolver that has not started returns a `CLIENT_DISCONNECTED` GraphQL error instead of running, which is not logged as a server error. Resolvers and database queries that are already running continue, and the later root mutation fields of the same operation are skipped, so a mutation with several root fields can be partly applied. This matches the `abortSignal` option of `execute` in graphql 17, which should replace the wrapper once the plugin moves to graphql 17.
 
 The plugin also sets `strapi.plugin('graphql').destroy` to stop Apollo Server on shutdown.
 
