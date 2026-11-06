@@ -1344,6 +1344,51 @@ describe('Release details tabs, header and rows', () => {
     expect(await screen.findByText('Release already ran')).toBeVisible();
   });
 
+  it("keeps the entries on screen while an action's change reloads them", async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, []);
+    let type = 'publish';
+    let releaseReload: () => void = () => {};
+    const reloaded = new Promise<void>((resolve) => {
+      releaseReload = resolve;
+    });
+    let actionsRequests = 0;
+    server.use(
+      http.put('/content-releases/:releaseId/actions/:actionId', async ({ request }) => {
+        const body = await request.json();
+        if (body && typeof body === 'object' && 'type' in body && typeof body.type === 'string') {
+          type = body.type;
+        }
+        return HttpResponse.json({ data: action(1, { type }) });
+      }),
+      http.get('/content-releases/:releaseId/actions', async () => {
+        actionsRequests += 1;
+        // The reload the change triggers waits, so the test sees the table while it's pending
+        if (actionsRequests > 1) {
+          await reloaded;
+        }
+
+        return HttpResponse.json({
+          data: { Article: [action(1, { type })] },
+          meta: {
+            pagination: { page: 1, pageSize: 10, total: 1, pageCount: 1 },
+            contentTypes: {},
+            components: {},
+          },
+        });
+      })
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('radio', { name: 'Unpublish' }));
+    await waitFor(() => expect(actionsRequests).toBeGreaterThan(1));
+
+    expect(screen.getByRole('radio', { name: 'Unpublish' })).toBeChecked();
+    expect(screen.queryByText('Loading content')).not.toBeInTheDocument();
+
+    releaseReload();
+  });
+
   describe('removing an entry from its row', () => {
     beforeEach(() => {
       jest.mocked(useRBAC).mockReturnValue({
