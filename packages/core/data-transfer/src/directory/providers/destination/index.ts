@@ -1,6 +1,7 @@
 import path from 'path';
 import { createWriteStream } from 'fs';
 import { Writable, pipeline } from 'stream';
+import { finished } from 'stream/promises';
 import fs from 'fs-extra';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
@@ -55,6 +56,8 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   #rolledBack = false;
 
+  #jsonlWriters: Writable[] = [];
+
   constructor(options: ILocalDirectoryDestinationProviderOptions) {
     this.options = options;
     this.#rootResolved = path.resolve(options.directory.path);
@@ -79,6 +82,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
   async bootstrap(diagnostics: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     this.#rolledBack = false;
+    this.#jsonlWriters = [];
     this.#reportInfo('preparing directory export');
     await fs.mkdir(this.#rootResolved, { recursive: true });
     this.results.file = { path: this.#rootResolved };
@@ -88,6 +92,11 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
     if (this.#rolledBack) {
       return;
     }
+
+    // The engine's stage pipeline can resolve before a writer's async `final` flush has hit
+    // the disk; the process may exit right after close(), which would truncate the file
+    // mid-write. Wait for every jsonl writer to fully finish (or be destroyed) first.
+    await Promise.all(this.#jsonlWriters.map((writer) => finished(writer).catch(() => undefined)));
 
     await this.#writeMetadata();
   }
@@ -112,48 +121,35 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
     }
   }
 
-  createSchemasWriteStream() {
-    this.#reportInfo('creating schemas write stream');
-    const filePathFactory = createFilePathFactory('schemas');
+  #createJsonlWriteStream(type: 'schemas' | 'entities' | 'links' | 'configuration'): Writable {
+    this.#reportInfo(`creating ${type} write stream`);
+    const filePathFactory = createFilePathFactory(type);
     const entryStream = createDirectoryJsonlWriter(
       this.#rootResolved,
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
+
+    // Tracked so close() can wait for the async final flush to reach the disk.
+    this.#jsonlWriters.push(entryStream);
+
     return chain([stringer(), entryStream]);
+  }
+
+  createSchemasWriteStream() {
+    return this.#createJsonlWriteStream('schemas');
   }
 
   createEntitiesWriteStream(): Writable {
-    this.#reportInfo('creating entities write stream');
-    const filePathFactory = createFilePathFactory('entities');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('entities');
   }
 
   createLinksWriteStream(): Writable {
-    this.#reportInfo('creating links write stream');
-    const filePathFactory = createFilePathFactory('links');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('links');
   }
 
   createConfigurationWriteStream(): Writable {
-    this.#reportInfo('creating configuration write stream');
-    const filePathFactory = createFilePathFactory('configuration');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('configuration');
   }
 
   createAssetsWriteStream(): Writable {
