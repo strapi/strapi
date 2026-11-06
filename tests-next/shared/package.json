@@ -1,0 +1,15 @@
+{
+  "name": "@strapi/tests-shared",
+  "private": true,
+  "description": "Shared foundation of the test suites: app lifecycle, scaffolders, seeders, DB reset and edition.",
+  "main": "./src/index.ts",
+  "scripts": {
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.0",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
+  }
+}

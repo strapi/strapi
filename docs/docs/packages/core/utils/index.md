@@ -21,7 +21,7 @@ The package runs on the server. The admin code imports only types from it, for e
 
 ### Provider factory
 
-`providerFactory` creates a keyed store with `register`, `get`, `delete`, `has`, `keys`, `values` and `clear`. Each provider has `hooks` (`willRegister`, `didRegister`, `willDelete`, `didDelete`). By default, `register` throws when the key already exists. The option `throwOnDuplicates: false` turns this off. The permission engine uses providers for its actions and conditions.
+`providerFactory` creates a keyed store with `register`, `get`, `delete`, `has`, `keys`, `values` and `clear`. Each provider has `hooks` (`willRegister`, `didRegister`, `willDelete`, `didDelete`). By default, `register` throws when the key already exists, or when another registration of the same key is still waiting on `willRegister`. The option `throwOnDuplicates: false` turns this off. The permission engine uses providers for its actions and conditions.
 
 ### Hooks
 
@@ -30,6 +30,8 @@ The `hooks` namespace creates hook objects: `createAsyncSeriesHook`, `createAsyn
 ### Errors
 
 The `errors` namespace defines `ApplicationError` and its subclasses, for example `ValidationError`, `NotFoundError`, `ForbiddenError`, `UnauthorizedError` and `PolicyError`. Each error has a `name`, a `message` and `details`. The errors middleware in `@strapi/core` formats these errors into the HTTP error response.
+
+An app can load two copies of `@strapi/utils` when its Strapi packages are on different versions. `instanceof` on these errors still matches across copies: each class marks its prototype with a `Symbol.for('strapi.errors.class:<Id>')` key, and `ApplicationError` looks for that key on the error's prototype chain in `Symbol.hasInstance`. Both copies need this check for it to work.
 
 ### Schema traversal
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { UnsavedChangesModal, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Field,
@@ -246,8 +246,10 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
   };
 
   return (
-    <Modal.Root
+    <UnsavedChangesModal
       open={open}
+      // Picking a destination is the only input; the default one is not a change.
+      hasUnsavedChanges={destination !== defaultDestination && !isMoving}
       onOpenChange={(nextOpen: boolean) => {
         // The modal must stay open while the request runs — the loader on the
         // Move button is the source of truth for the pending state.
@@ -268,9 +270,11 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
         <Modal.Body>{renderBody()}</Modal.Body>
         <Modal.Footer>
           <Flex gap={2} justifyContent="space-between" width="100%">
-            <Button variant="tertiary" onClick={onClose} disabled={isMoving} type="button">
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
+            <Modal.Close>
+              <Button variant="tertiary" disabled={isMoving} type="button">
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+            </Modal.Close>
             <Button
               onClick={handleMove}
               loading={isMoving}
@@ -284,6 +288,6 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
           </Flex>
         </Modal.Footer>
       </StyledModalContent>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

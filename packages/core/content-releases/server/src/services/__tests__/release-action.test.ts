@@ -218,6 +218,52 @@ describe('Release Action service', () => {
       );
     });
 
+    it('rejects invalid entry data before the uniqueness check', async () => {
+      const { validateEntryData, validateUniqueEntry } = serviceMock['release-validation'];
+      validateEntryData.mockClear();
+      validateUniqueEntry.mockClear();
+      validateEntryData.mockImplementationOnce(() => {
+        throw new Error('Invalid entry data');
+      });
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: baseStrapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      };
+
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+        'Invalid entry data'
+      );
+      expect(validateEntryData).toHaveBeenCalledWith('api::contentTypeA.contentTypeA', '1');
+      expect(validateUniqueEntry).not.toHaveBeenCalled();
+    });
+
+    it('runs the uniqueness check after valid entry data', async () => {
+      const { validateEntryData, validateUniqueEntry } = serviceMock['release-validation'];
+      validateEntryData.mockClear();
+      validateUniqueEntry.mockClear();
+      validateUniqueEntry.mockRejectedValueOnce(new Error('Entry already in release'));
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: baseStrapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      };
+
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+        'Entry already in release'
+      );
+      expect(validateEntryData).toHaveBeenCalledWith('api::contentTypeA.contentTypeA', '1');
+      expect(validateUniqueEntry).toHaveBeenCalledWith(1, mockActionArgs);
+    });
+
     it('throws an error if the release does not exist', () => {
       const strapiMock = {
         ...baseStrapiMock,
