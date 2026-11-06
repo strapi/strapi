@@ -322,8 +322,13 @@ const getStructure = async () => {
     }
 
     folderMap[parentId].children.push(folderMap[f.id]);
-    folderMap[parentId].children = sortBy(folderMap[parentId].children, 'name');
     delete folderMap[f.id].parent;
+  });
+
+  // Sort each children list once the tree is assembled. Re-sorting a parent's
+  // list on every insertion made the cost quadratic in its number of children.
+  Object.values(folderMap).forEach((node) => {
+    node.children = sortBy(node.children, 'name');
   });
 
   return folderMap.null.children;
