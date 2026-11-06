@@ -234,7 +234,8 @@ jobs:
           retention-days: 1
 
   unit_back_vitest:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'
+    # e2e: the vitest projects include the e2e helpers in tests/utils.
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.e2e == 'true'
     name: 'unit_back_vitest (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
@@ -308,6 +309,14 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      # The image has no zstd, so actions/cache falls back to gzip there. A gzip cache is a
+      # different cache version, so these jobs missed every cache the build job saves with
+      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd works in the image
+      # (both are Ubuntu 24.04); actions/cache also calls it as unzstd and zstdmt.
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
@@ -393,10 +402,15 @@ jobs:
     needs: [conditions, build]
     name: '[CE] e2e media library (browser: chromium)'
     runs-on: ubuntu-latest
-    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    # Browsers and system libraries come from the Playwright image, zstd from the runner (see
+    # `e2e_ce`).
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -449,10 +463,15 @@ jobs:
     needs: [conditions, build]
     name: '[CE] e2e media library (legacy) (browser: chromium)'
     runs-on: ubuntu-latest
-    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    # Browsers and system libraries come from the Playwright image, zstd from the runner (see
+    # `e2e_ce`).
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -500,15 +519,23 @@ jobs:
         run: exit 1
 
   e2e_ee:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run. A fork PR would otherwise run these
+    # jobs as the Community Edition.
+    if: (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true') && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true')
     timeout-minutes: 60
     needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    # Browsers and system libraries come from the Playwright image, zstd from the runner (see
+    # `e2e_ce`).
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -748,7 +775,9 @@ jobs:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run.
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -792,7 +821,9 @@ jobs:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run.
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -835,7 +866,9 @@ jobs:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
     name: '[EE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run.
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:

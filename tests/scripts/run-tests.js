@@ -6,14 +6,10 @@ const yargs = require('yargs');
 const chalk = require('chalk');
 const dotenv = require('dotenv');
 
-const {
-  publishYalc,
-  setupTestApps,
-  getCurrentTestApps,
-  setupTestEnvironment,
-} = require('../utils/runners/shared-setup');
+const { publishYalc, setupTestApps, getCurrentTestApps } = require('../utils/runners/shared-setup');
 const { buildAdmin, runPlaywright } = require('../utils/runners/browser-runner');
 const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
+const { selectRunnableDomains } = require('../utils/runners/e2e-domains');
 const {
   loadDomainConfigs,
   calculateTestAppsRequired,
@@ -176,6 +172,14 @@ yargs
 
         const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
+        // Locally, e2e runs Chromium only unless a --project is passed. CI passes one per job.
+        if (type === 'e2e' && !process.env.CI && !extractShardArgs(forwardedRunnerArgs).project) {
+          console.log(
+            'Running e2e tests on Chromium only. Pass `-- --project=webkit` to run another browser.'
+          );
+          forwardedRunnerArgs.push('--project=chromium');
+        }
+
         /**
          * Publishing all packages to the yalc store
          */
@@ -216,7 +220,6 @@ yargs
           templateDir,
           setup,
           currentTestApps: currentTestApps.map((appPath) => path.basename(appPath)),
-          setupTestEnvironment: type === 'e2e' ? setupTestEnvironment : null,
           commitE2eBaseline: type === 'e2e',
         });
 
@@ -244,6 +247,19 @@ yargs
           await Promise.all(testAppPaths.map((testAppPath) => buildAdmin({ testAppPath })));
 
           const failedDomains = [];
+
+          // A domain whose specs are all gated off for this run would start Strapi only to skip
+          // every test (see tests/utils/runners/e2e-domains.js).
+          const { runnable: runnableDomains, skipped: skippedDomains } = selectRunnableDomains(
+            selectedDomains,
+            {
+              isCE: process.env.STRAPI_DISABLE_EE === 'true',
+              mediaLibrarySuite: process.env.E2E_MEDIA_LIBRARY,
+            }
+          );
+          for (const { domain, reason } of skippedDomains) {
+            console.log(`Skipping ${domain} e2e tests: ${reason}`);
+          }
 
           const runDomain = async ({ domain, testAppPath, port, testArgs }) => {
             const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
@@ -303,7 +319,7 @@ module.exports = config
           if (shard && weights) {
             const lanePlans = planShard({
               weights,
-              units: await listSpecFiles(testDomainRoot, selectedDomains),
+              units: await listSpecFiles(testDomainRoot, runnableDomains),
               shard,
               lanes: testAppPaths.length,
             });
@@ -326,7 +342,7 @@ module.exports = config
               })
             );
           } else {
-            const pendingDomains = sortDomainsByExpectedDuration(selectedDomains);
+            const pendingDomains = sortDomainsByExpectedDuration(runnableDomains);
 
             await Promise.all(
               testAppPaths.map(async (testAppPath, j) => {

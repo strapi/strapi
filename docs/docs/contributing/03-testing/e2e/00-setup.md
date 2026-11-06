@@ -70,10 +70,11 @@ For **CI, scripts, or automation**, prefer `--reporter=line` after the inner `--
 
 ### Running specific browsers
 
-To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium` or `webkit`
+Locally, `yarn test:e2e` runs Chromium only. To run another browser, pass `--project` to Playwright with the value(s) `chromium` or `webkit`; pass it twice to run both. CI always passes `--project`, so every CI job keeps its browser.
 
 ```shell
-yarn test:e2e --domains=admin -- login.spec.ts --project=chromium
+yarn test:e2e --domains=admin -- login.spec.ts --project=webkit
+yarn test:e2e --domains=admin -- --project=chromium --project=webkit
 ```
 
 To debug your tests with a browser instance and the playwright debugger, you can pass the
@@ -87,6 +88,8 @@ yarn test:e2e --domains admin -- login.spec.ts --debug
 ### Concurrency / parallelization
 
 The runner uses `min(number of selected domains, concurrency)` **test apps** (`test-apps/e2e/test-app-*`), each bound to port `E2E_PORT_BASE + index`. `E2E_PORT_BASE` defaults to `8000`; set another base (for example `E2E_PORT_BASE=8300`) to run two e2e runs on one machine, such as from two worktrees. **`concurrency` defaults** to the number of domain folders under `tests/e2e/tests/` (not the count after `--domains`). The test apps run **in parallel**: each one takes the next domain as soon as it is free, heaviest domains first. A failing domain doesn't stop the others; the run fails at the end. CI runs two test apps per job (`--concurrency=2` in `.github/actions/run-e2e-tests/script.sh`). Spec files **inside** a domain are **serial** (`workers: 1`, `fullyParallel: false` in `playwright.base.config.js`).
+
+The runner skips a domain whose specs are all gated off for the run, so it doesn't start Strapi just to skip every test: `media-library` unless `E2E_MEDIA_LIBRARY` is set (only the dedicated Media Library jobs set it), and `content-releases` and `review-workflows` in the Community Edition. The list lives in `tests/utils/runners/e2e-domains.js`, and `tests/utils/__tests__/e2e-domains.test.ts` fails if a spec in those domains isn't gated the same way.
 
 ```shell
 # run at most one domain at a time (simplest logs; fully serial domains)
@@ -147,10 +150,11 @@ Optional: **`STRAPI_DISABLE_LICENSE_PING=true`** in the same file can match CI E
 3. **`STRAPI_E2E_EDITION`** set to **`ce`** or **`ee`** (after `tests/e2e/.env` is loaded, plus CI `script.sh` or your shell) — use that edition (`ee` without a license falls back to CE with a warning unless you used `test:e2e:ee`, which fails instead).
 4. Else **auto**: EE if `STRAPI_LICENSE` is non-empty, else CE.
 
-**CI:** `.github/workflows/tests.yml` defines two jobs:
+**CI:** `.github/workflows/tests.yml` defines four e2e jobs, 22 with the matrix:
 
-- **`e2e_ce`** — no `STRAPI_LICENSE` secret; composite action runs with `runEE: false` → `script.sh` sets `STRAPI_E2E_EDITION=ce`.
-- **`e2e_ee`** — `env STRAPI_LICENSE: ${{ secrets.strapiLicense }}` and `runEE: true` → `STRAPI_E2E_EDITION=ee` and `STRAPI_DISABLE_LICENSE_PING=true`.
+- **`e2e_ce`**: no `STRAPI_LICENSE` secret. The composite action runs with `runEE: false`, so `script.sh` sets `STRAPI_E2E_EDITION=ce`. Matrix: 4 Chromium shards and 6 WebKit shards.
+- **`e2e_ee`**: `env STRAPI_LICENSE: ${{ secrets.strapiLicense }}` and `runEE: true`, so `script.sh` sets `STRAPI_E2E_EDITION=ee` and `STRAPI_DISABLE_LICENSE_PING=true`. Same matrix as `e2e_ce`.
+- **`e2e_media_library`** and **`e2e_media_library_legacy`**: CE, Chromium only, `media-library` domain only. They run the current and the legacy Media Library (`mediaLibrarySuite: current` / `legacy`, `useLegacyMediaLibrary: false` / `true`).
 
 CI runs **`script.sh`**, which exports **`STRAPI_E2E_EDITION`** (`ce` vs `ee`) before `yarn test:e2e`. **`e2e-edition.ts`** reads that (and **`STRAPI_LICENSE`**, **`STRAPI_DISABLE_LICENSE_PING`**, etc.) so the runner matches the job. Locally, the same applies: if you **`export STRAPI_E2E_EDITION=ce`** (or `ee`), that explicit value is respected when you run `yarn test:e2e`. If you want **pure auto** (license only: EE when `STRAPI_LICENSE` is set, else CE), **`unset STRAPI_E2E_EDITION`** so it is not set in your shell.
 
@@ -168,7 +172,7 @@ Playwright’s `reuseExistingServer` is **off by default** (see **`PLAYWRIGHT_RE
 
 ## Running tests with future flags
 
-If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
+To test an unstable future feature, enable its flag in `tests/app-template/config/features.js`. The test app generator copies the whole template, `config/` included, into each generated app, so run the tests with `--setup` after you change it. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag).
 
 ## What is Playwright?
 
