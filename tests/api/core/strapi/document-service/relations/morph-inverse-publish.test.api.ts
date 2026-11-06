@@ -164,6 +164,51 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     ]);
   });
 
+  it('republishes a draft whose links are all on the draft', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const note = await strapi.documents(NOTE_UID).create({
+      data: { title: 'with remarks', remarks: [r1.id] } as any,
+    });
+    await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+
+    const result = await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+
+    expect(result.entries).toHaveLength(1);
+    const draft = await getNoteRow(note.documentId, 'draft');
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+    ]);
+  });
+
+  // A remark can point to the published row: data migrated from v4, where the existing rows
+  // became the published versions, or a subject set to the published id. Publish deletes the old
+  // published row, which clears these links: it must throw and roll back instead.
+  it('throws on republish when the published version owns links and keeps them', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
+    const note = await strapi.documents(NOTE_UID).create({
+      data: { title: 'with remarks', remarks: [r1.id] } as any,
+    });
+    await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+    const draft = await getNoteRow(note.documentId, 'draft');
+    const published = await getNoteRow(note.documentId, 'published');
+
+    await strapi.db.query(REMARK_UID).update({
+      where: { id: r2.id },
+      data: { subject: { id: published?.id, __type: NOTE_UID } },
+    });
+
+    await expect(
+      strapi.documents(NOTE_UID).publish({ documentId: note.documentId })
+    ).rejects.toThrow('expected at least one entry to link');
+
+    expect(await getNoteRow(note.documentId, 'published')).toMatchObject({ id: published?.id });
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+      { id: r2.id, subjectId: published?.id, subjectType: NOTE_UID },
+    ]);
+  });
+
   it('links every related entry passed with connect when an entry is created', async () => {
     const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
@@ -219,8 +264,25 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     ]);
   });
 
+  it('throws on clone and keeps the links on the draft', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const note = await strapi.documents(NOTE_UID).create({
+      data: { title: 'with remarks', remarks: [r1.id] } as any,
+    });
+    const draft = await getNoteRow(note.documentId, 'draft');
+
+    await expect(
+      strapi.documents(NOTE_UID).clone({ documentId: note.documentId } as any)
+    ).rejects.toThrow('expected at least one entry to link');
+
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+    ]);
+  });
+
   // Enabling draft & publish runs a migration that calls discardDraft on every published row
-  // without a draft (core/src/migrations/draft-publish.ts). Reproduce that state and call.
+  // without a draft (core/src/migrations/draft-publish.ts). Reproduce that state and call: it
+  // throws, so enabling draft & publish on such a type fails at boot on every start.
   it('throws when enabling draft & publish and keeps the links on the published row', async () => {
     const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const published = await strapi.db.query(NOTE_UID).create({
