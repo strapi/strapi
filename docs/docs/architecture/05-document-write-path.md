@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - 'Commit callbacks are awaited. A failing commit callback is logged and the call still resolves. A failing rollback callback rejects the call.'
+  - 'Commit callbacks run after the write returns. A failing commit callback is logged and later callbacks still run. A failing rollback callback is logged, skips the rest, and does not replace the write error.'
   - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release.ts`. The rest of this page was not re-verified.
 ---
 
@@ -137,7 +137,7 @@ Database lifecycles run inside the transaction. If the transaction rolls back la
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context awaits those callbacks before the outermost `strapi.db.transaction` resolves. A callback that throws is logged, and the callbacks after it still run. The call resolves, because the data is already committed. A rollback callback that throws still rejects the call. `emitEvent` catches and logs its own errors.
+The transaction context starts those callbacks after the commit and does not wait for them. `strapi.db.transaction` has already resolved. A callback that throws is logged, and the callbacks after it still run. The data is already committed. A rollback callback that throws is logged and skips the callbacks after it. It does not replace the error from the write. `db.destroy()` waits for callbacks that are still running before it closes the pool. `emitEvent` catches and logs its own errors.
 
 When the callback runs, the event manager:
 

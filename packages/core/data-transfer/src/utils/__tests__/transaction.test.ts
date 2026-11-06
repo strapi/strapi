@@ -1,4 +1,4 @@
-import { createTransaction } from '../transaction';
+import { createTransaction, transactionCommit } from '../transaction';
 
 describe('createTransaction', () => {
   test('end waits for the database transaction to settle', async () => {
@@ -21,7 +21,8 @@ describe('createTransaction', () => {
     await transaction.attach(async () => undefined);
 
     let ended = false;
-    const ending = transaction.end().then(() => {
+    expect(transaction.end()).toBe(true);
+    const ending = transaction[transactionCommit]().then(() => {
       ended = true;
     });
 
@@ -56,6 +57,7 @@ describe('createTransaction', () => {
 
     const transaction = createTransaction(strapi as any);
 
-    await expect(transaction.end()).rejects.toThrow('commit failed');
+    expect(transaction.end()).toBe(true);
+    await expect(transaction[transactionCommit]()).rejects.toThrow('commit failed');
   });
 });

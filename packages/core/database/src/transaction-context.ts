@@ -75,10 +75,19 @@ const waitForDeadlockRetry = (attempt: number) =>
     setTimeout(resolve, DEADLOCK_RETRY_DELAY_MS * attempt);
   });
 
-const runCallbacks = async (
-  callbacks: Callback[] | undefined,
-  report?: (error: unknown) => void
-) => {
+interface CallbackRunOptions {
+  report?: (error: unknown) => void;
+  /** Report the error, skip the remaining callbacks, and do not reject the caller. */
+  stopOnError?: boolean;
+}
+
+/**
+ * Hooks started by commit and rollback. `strapi.db.transaction` does not wait
+ * for them. `Database.destroy` does, before the pool closes.
+ */
+const pendingHooks = new Set<Promise<void>>();
+
+const runCallbacks = async (callbacks: Callback[] | undefined, options?: CallbackRunOptions) => {
   if (!callbacks) {
     return;
   }
@@ -90,18 +99,34 @@ const runCallbacks = async (
       try {
         await cb();
       } catch (error) {
+        options?.report?.(error);
         // A commit hook runs after the database has kept the write. Log it
         // and keep going so one failure does not drop the hooks after it.
-        // A rollback hook still fails the call: the transaction did not commit.
-        if (report) {
-          report(error);
-          continue;
+        // A rollback hook stops. The rest would observe a rolled-back write.
+        if (options?.stopOnError || !options?.report) {
+          callbacks.length = 0;
+          return;
         }
-
-        callbacks.length = 0;
-        throw error;
       }
     }
+  }
+};
+
+const scheduleCallbacks = (callbacks: Callback[] | undefined, options?: CallbackRunOptions) => {
+  if (!callbacks?.length) {
+    return;
+  }
+
+  const tracked = runCallbacks(callbacks, options).finally(() => {
+    pendingHooks.delete(tracked);
+  });
+  pendingHooks.add(tracked);
+};
+
+const settleHooks = async () => {
+  // A hook can open a transaction, which schedules more hooks.
+  while (pendingHooks.size > 0) {
+    await Promise.all([...pendingHooks]);
   }
 };
 
@@ -145,10 +170,12 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    await runCallbacks(store?.commitCallbacks, reportCommitHookError ?? (() => undefined));
+    scheduleCallbacks(store?.commitCallbacks, {
+      report: reportCommitHookError ?? (() => undefined),
+    });
   },
 
-  async rollback(trx: Knex.Transaction) {
+  async rollback(trx: Knex.Transaction, reportRollbackHookError?: (error: unknown) => void) {
     const store = storage.getStore();
     if (isTransactorComplete(trx)) {
       if (store?.trx) {
@@ -165,8 +192,17 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    await runCallbacks(store?.rollbackCallbacks);
+    scheduleCallbacks(store?.rollbackCallbacks, {
+      report: reportRollbackHookError,
+      stopOnError: true,
+    });
   },
+
+  /**
+   * Wait for commit and rollback hooks, including hooks those hooks start.
+   * `Database.destroy` calls this before closing the pool.
+   */
+  settleHooks,
 
   onCommit(cb: Callback) {
     const store = storage.getStore();

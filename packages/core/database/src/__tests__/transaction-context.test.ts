@@ -23,7 +23,7 @@ describe('isDeadlockError', () => {
 });
 
 describe('transaction hooks', () => {
-  test('commit waits for commit hooks, including hooks they register', async () => {
+  test('commit returns before commit hooks, and settleHooks waits for them', async () => {
     const order: string[] = [];
 
     await transactionCtx.run(fakeTrx(), async () => {
@@ -40,7 +40,9 @@ describe('transaction hooks', () => {
       order.push('after commit');
     });
 
-    expect(order).toEqual(['first', 'nested', 'after commit']);
+    expect(order).toEqual(['after commit']);
+    await transactionCtx.settleHooks();
+    expect(order).toEqual(['after commit', 'first', 'nested']);
   });
 
   test('a rejected commit hook is reported and the later hooks still run', async () => {
@@ -56,22 +58,28 @@ describe('transaction hooks', () => {
       });
     });
 
+    await transactionCtx.settleHooks();
     expect(later).toHaveBeenCalledTimes(1);
     expect(reported).toEqual([error]);
   });
 
-  test('a throwing rollback hook fails rollback and skips the hooks after it', async () => {
+  test('a throwing rollback hook is reported and skips the hooks after it', async () => {
     const error = Object.assign(new Error('rollback hook failed'), { code: '40P01' });
     const later = jest.fn();
+    const reported: unknown[] = [];
 
     await transactionCtx.run(fakeTrx(), async () => {
       transactionCtx.onRollback(() => {
         throw error;
       });
       transactionCtx.onRollback(later);
-      await expect(transactionCtx.rollback(fakeTrx())).rejects.toBe(error);
+      await transactionCtx.rollback(fakeTrx(), (hookError) => {
+        reported.push(hookError);
+      });
     });
 
+    await transactionCtx.settleHooks();
+    expect(reported).toEqual([error]);
     expect(later).not.toHaveBeenCalled();
   });
 
@@ -86,6 +94,7 @@ describe('transaction hooks', () => {
       await transactionCtx.commit(fakeTrx());
     });
 
+    await transactionCtx.settleHooks();
     expect(later).toHaveBeenCalledTimes(1);
   });
 
@@ -103,8 +112,11 @@ describe('transaction hooks', () => {
   test('a transaction opened from a commit hook does not run rolled-back commit hooks', async () => {
     const rolledBack = jest.fn();
 
+    const order: string[] = [];
+
     await transactionCtx.run(fakeTrx(), async () => {
       transactionCtx.onCommit(async () => {
+        order.push('hook');
         await transactionCtx.run(fakeTrx(), async () => {
           transactionCtx.onCommit(rolledBack);
           await transactionCtx.rollback(fakeTrx());
@@ -113,6 +125,8 @@ describe('transaction hooks', () => {
       await transactionCtx.commit(fakeTrx());
     });
 
+    await transactionCtx.settleHooks();
+    expect(order).toEqual(['hook']);
     expect(rolledBack).not.toHaveBeenCalled();
   });
 });

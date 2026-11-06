@@ -4,6 +4,13 @@ import type { Core } from '@strapi/types';
 
 import { Transaction, TransactionCallback } from '../types/utils';
 
+/** Settled database transaction. `end()` does not return it; `close()` awaits it. */
+export const transactionCommit = Symbol('transactionCommit');
+
+export type TransactionCommit = {
+  [transactionCommit]: () => Promise<void>;
+};
+
 export const createTransaction = (strapi: Core.Strapi): Transaction => {
   const fns: { fn: TransactionCallback; uuid: string }[] = [];
 
@@ -94,8 +101,7 @@ export const createTransaction = (strapi: Core.Strapi): Transaction => {
     }
   });
 
-  // end() awaits settled. This also rejects attach() when the transaction
-  // never starts, instead of leaving that caller waiting on an event.
+  // A commit failure must reject attach() as well. end() does not wait for it.
   settled.catch((error) => {
     failPending(error);
   });
@@ -124,9 +130,10 @@ export const createTransaction = (strapi: Core.Strapi): Transaction => {
     },
 
     end() {
-      // The transfer transaction commits only after this loop exits. Callers
-      // that read the database as soon as close() returns must wait for it.
-      e.emit('close');
+      return e.emit('close');
+    },
+
+    [transactionCommit]() {
       return Promise.resolve(settled).then(() => undefined);
     },
 

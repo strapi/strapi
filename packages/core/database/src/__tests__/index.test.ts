@@ -284,6 +284,7 @@ describe('Database', () => {
           });
         });
 
+        await db.settleTransactionHooks();
         expect(runs).toBe(1);
         expect(later).toBe(true);
         expect((db.connection as any).commit).toHaveBeenCalledTimes(1);
@@ -308,6 +309,7 @@ describe('Database', () => {
           });
         });
 
+        await db.settleTransactionHooks();
         expect(runs).toBe(1);
         expect(
           logged.mock.calls.some(([message]) => String(message).includes('deadlock detected'))
@@ -315,9 +317,10 @@ describe('Database', () => {
         await db.destroy();
       });
 
-      it(`rejects when a rollback hook fails with ${title}`, async () => {
+      it(`keeps the write error when a rollback hook fails with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
+        const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
 
         let runs = 0;
         const hookError = new Error('rollback hook failed');
@@ -327,13 +330,17 @@ describe('Database', () => {
             onRollback(() => Promise.reject(hookError));
             throw Object.assign(new Error('deadlock detected'), { code: '40P01' });
           })
-        ).rejects.toBe(hookError);
+        ).rejects.toThrow('deadlock detected');
 
+        await db.settleTransactionHooks();
         expect(runs).toBe(1);
+        expect(
+          logged.mock.calls.some(([message]) => String(message).includes('rollback hook failed'))
+        ).toBe(true);
         await db.destroy();
       });
 
-      it(`waits for commit hooks before resolving with ${title}`, async () => {
+      it(`resolves before a slow commit hook finishes with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
 
@@ -350,14 +357,17 @@ describe('Database', () => {
           );
         });
 
+        expect(finished).toBe(false);
+        await db.settleTransactionHooks();
         expect(finished).toBe(true);
         await db.destroy();
       });
     });
 
-    it('rejects with a throwing rollback hook and skips the hooks after it', async () => {
+    it('keeps the write error when a rollback hook throws and skips the hooks after it', async () => {
       const db = new Database(configConnectionObject);
       await db.init({ models });
+      jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
 
       let runs = 0;
       const later = jest.fn();
@@ -372,8 +382,9 @@ describe('Database', () => {
           onRollback(later);
           throw new Error('write failed');
         })
-      ).rejects.toBe(hookError);
+      ).rejects.toThrow('write failed');
 
+      await db.settleTransactionHooks();
       expect(runs).toBe(1);
       expect(later).not.toHaveBeenCalled();
       await db.destroy();
@@ -401,6 +412,7 @@ describe('Database', () => {
         });
       });
 
+      await db.settleTransactionHooks();
       expect(order).toEqual(['second', 'third', 'registered-by-failure']);
       expect(logged.mock.calls.map(([message]) => String(message))).toEqual([
         expect.stringContaining('first hook'),
@@ -430,6 +442,7 @@ describe('Database', () => {
         })
       ).resolves.toBe('kept');
 
+      await db.settleTransactionHooks();
       expect(order).toEqual(['nested-later']);
       expect(logged.mock.calls.some(([message]) => String(message).includes('nested hook'))).toBe(
         true

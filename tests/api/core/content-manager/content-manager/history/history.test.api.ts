@@ -305,10 +305,15 @@ describeOnCondition(edition === 'EE')('History API', () => {
     return rq;
   };
 
-  // History rows are written from onCommit, and the document write awaits those
-  // callbacks before it responds. Read once. A poll would hide a return to
-  // fire-and-forget.
-  const readHistoryVersions = async (url: string) => rq({ method: 'GET', url });
+  // History rows are written from onCommit after the document write responds.
+  // Wait for those hooks before reading, or the row is not there yet.
+  const settleHistory = () =>
+    (strapi.db as unknown as { settleTransactionHooks(): Promise<void> }).settleTransactionHooks();
+
+  const readHistoryVersions = async (url: string) => {
+    await settleHistory();
+    return rq({ method: 'GET', url });
+  };
 
   beforeAll(async () => {
     builder.addComponent(componentModel);
@@ -444,6 +449,10 @@ describeOnCondition(edition === 'EE')('History API', () => {
     for (const update of versionUpdates) {
       await update();
     }
+
+    await (
+      strapi.db as unknown as { settleTransactionHooks(): Promise<void> }
+    ).settleTransactionHooks();
   });
 
   afterAll(async () => {
@@ -860,7 +869,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
 
       // Find and restore the initial version that had the components data.
-      // Each write awaits its history onCommit, so all three versions exist now.
+      // readHistoryVersions waits for the onCommit hooks that write these rows.
       const versions = await readHistoryVersions(
         `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`
       );

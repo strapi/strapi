@@ -1,3 +1,4 @@
+import { transactionCommit } from '../../../../utils/transaction';
 import { createLocalStrapiDestinationProvider } from '../index';
 
 describe('local destination close', () => {
@@ -14,11 +15,18 @@ describe('local destination close', () => {
       db: { lifecycles: { enable } },
       destroy,
     } as any;
+    let rejectCommit: (error: Error) => void = () => undefined;
+    const commit = new Promise<void>((_resolve, reject) => {
+      rejectCommit = reject;
+    });
     provider.transaction = {
-      end: () => Promise.reject(new Error('commit failed')),
+      end: () => true,
+      [transactionCommit]: () => commit,
     } as any;
 
-    await expect(provider.close()).rejects.toThrow('commit failed');
+    const closing = provider.close();
+    rejectCommit(new Error('commit failed'));
+    await expect(closing).rejects.toThrow('commit failed');
     expect(enable).toHaveBeenCalledTimes(1);
     expect(destroy).toHaveBeenCalledTimes(1);
   });

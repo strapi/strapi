@@ -59,8 +59,17 @@ class Strapi extends Container implements Core.Strapi {
   /**
    * destroy() can run twice: a transfer provider closes the instance, then the
    * CLI calls destroy() again. The second call must not touch released services.
+   * A call that overlaps one in progress shares its promise. A call that failed
+   * can run again, from the step that did not finish.
    */
   private destroyed = false;
+
+  private destroyPromise?: Promise<void>;
+
+  private destroyStage?: number;
+
+  /** Captured before release() so a retry can register them again. */
+  private shutdownKeep?: { logger: Logger; telemetry?: unknown };
 
   internal_config: Record<string, unknown> = {};
 
@@ -575,42 +584,84 @@ class Strapi extends Container implements Core.Strapi {
       return;
     }
 
-    this.destroyed = true;
-    this.log.info('Shutting down Strapi');
-    await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
-
-    for (const provider of providers) {
-      await provider.destroy?.(this);
+    if (!this.destroyPromise) {
+      this.destroyPromise = this.shutdown().catch((error) => {
+        this.destroyPromise = undefined;
+        throw error;
+      });
     }
 
-    await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
+    return this.destroyPromise;
+  }
 
-    await this.server.destroy();
+  private async shutdown() {
+    if ((this.destroyStage ?? 0) < 1) {
+      this.log.info('Shutting down Strapi');
+      await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
+      this.destroyStage = 1;
+    }
 
-    this.eventHub.destroy();
+    if ((this.destroyStage ?? 0) < 2) {
+      for (const provider of providers) {
+        await provider.destroy?.(this);
+      }
+      this.destroyStage = 2;
+    }
 
-    await this.db?.destroy();
+    if ((this.destroyStage ?? 0) < 3) {
+      await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
+      this.destroyStage = 3;
+    }
 
-    process.removeAllListeners();
+    if ((this.destroyStage ?? 0) < 4) {
+      await this.server.destroy();
+      this.destroyStage = 4;
+    }
 
-    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
-    delete global.strapi;
+    if ((this.destroyStage ?? 0) < 5) {
+      this.eventHub.destroy();
+      this.destroyStage = 5;
+    }
 
-    const logger = this.log;
-    // Export destroys the instance inside the transfer, then sends telemetry.
-    // The sender already captured fetch. Re-registering telemetry is enough.
-    const telemetry = this.has('telemetry') ? this.telemetry : undefined;
+    if ((this.destroyStage ?? 0) < 6) {
+      await this.db?.destroy();
+      this.destroyStage = 6;
+    }
+
+    if ((this.destroyStage ?? 0) < 7) {
+      process.removeAllListeners();
+      this.destroyStage = 7;
+    }
+
+    if ((this.destroyStage ?? 0) < 8) {
+      // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
+      delete global.strapi;
+      this.destroyStage = 8;
+    }
+
     this.app = undefined;
     this.isLoaded = false;
-    // Callers such as API tests still hold this object. Release the service
-    // map or every booted app stays in memory until the process exits.
-    // In-flight audit listeners still log after the event hub is cleared.
-    this.release();
-    this.add('logger', logger);
-    if (telemetry) {
-      this.add('telemetry', telemetry);
+
+    if ((this.destroyStage ?? 0) < 9) {
+      // Export destroys the instance inside the transfer, then sends telemetry.
+      // The sender already captured fetch. Re-registering telemetry is enough.
+      // Callers such as API tests still hold this object. Release the service
+      // map or every booted app stays in memory until the process exits.
+      // In-flight audit listeners still log after the event hub is cleared.
+      this.shutdownKeep ??= {
+        logger: this.log,
+        telemetry: this.has('telemetry') ? this.telemetry : undefined,
+      };
+      this.release();
+      this.add('logger', this.shutdownKeep.logger);
+      if (this.shutdownKeep.telemetry) {
+        this.add('telemetry', this.shutdownKeep.telemetry);
+      }
+      this.shutdownKeep.logger.info('Strapi has been shut down');
+      this.destroyStage = 9;
     }
-    logger.info('Strapi has been shut down');
+
+    this.destroyed = true;
   }
 
   async runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {

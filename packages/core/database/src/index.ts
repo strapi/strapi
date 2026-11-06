@@ -267,7 +267,10 @@ class Database {
 
     async function rollback() {
       if (notNestedTransaction) {
-        await transactionCtx.rollback(trx);
+        await transactionCtx.rollback(trx, (error) => {
+          const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
+          logger.error(`Rollback hook failed after the transaction rolled back: ${detail}`);
+        });
       }
     }
 
@@ -356,6 +359,14 @@ class Database {
     return this.entityManager.createQueryBuilder(uid);
   }
 
+  /**
+   * Wait for `onCommit` and `onRollback` hooks still running. The transaction
+   * call itself does not wait, so a test that reads a hook's side effect does.
+   */
+  settleTransactionHooks() {
+    return transactionCtx.settleHooks();
+  }
+
   async destroy() {
     try {
       await this.lifecycles.clear();
@@ -363,7 +374,11 @@ class Database {
       this.poolDiagnostics?.dispose();
     }
 
-    await this.connection.destroy();
+    try {
+      await this.settleTransactionHooks();
+    } finally {
+      await this.connection.destroy();
+    }
   }
 }
 

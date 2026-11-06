@@ -108,6 +108,6 @@ export type IDestinationProviderTransferResults = {};
 export type TransactionCallback = (trx?: Knex.Transaction) => Promise<void>;
 export type Transaction = {
   attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined>;
-  end(): Promise<void>;
+  end(): boolean;
   rollback(): Promise<boolean>;
 };

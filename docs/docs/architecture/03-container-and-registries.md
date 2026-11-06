@@ -21,7 +21,7 @@ The `Strapi` instance is a container. The container holds core subsystems and re
 | `has(name)`           | Returns `true` if `name` is registered or resolved.                                                                                                                                                                                                                                        |
 | `release()`           | Clears every registered and resolved service. A later `get(name)` throws `Could not resolve service <name>`.                                                                                                                                                                               |
 
-`Strapi.destroy()` calls `release()` after the database closes, then registers `logger` and `telemetry` again. A second `destroy()` returns immediately. `get()` for any other service throws after the first destroy.
+`Strapi.destroy()` calls `release()` after the database closes, then registers `logger` and `telemetry` again. A second `destroy()` waits while that shutdown is still running, and returns immediately once it has succeeded. `get()` for any other service throws after the first successful destroy.
 
 The container has no `set` and no `remove`. After `add`, nothing can replace an entry. Every resolved value is a singleton. A `TODO` comment in `container.ts` notes that there is no per-call instantiation.
 

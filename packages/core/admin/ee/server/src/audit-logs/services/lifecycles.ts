@@ -251,8 +251,8 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
         await auditLogsService.saveEvent(processedEvent);
       }
     } catch (error) {
-      // Logged, not propagated. The document service awaits its onCommit callback
-      // and emitEvent catches event errors, but other emitters still fire and forget.
+      // Logged, not propagated. The document write does not wait for onCommit.
+      // emitEvent catches event errors, and other emitters still fire and forget.
       // A rejection with no one awaiting it takes the process down. Audit logging is
       // therefore fail-open: the entry is lost and only this line records it.
       strapi.log.error(`Failed to save the audit log entry for ${name}`, { error });
