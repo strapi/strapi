@@ -32,6 +32,29 @@ import type { Schema } from '@strapi/types';
 
 const EMPTY_OPTIONS: NonNullable<GenericInputProps['options']> = [];
 
+/**
+ * Input types `GenericInput` renders itself, one per `case` of its `switch`.
+ * Any other type needs an entry in `customInputs`, or renders as "Not supported".
+ */
+const GENERIC_INPUT_TYPES = [
+  'json',
+  'bool',
+  'checkbox',
+  'datetime',
+  'date',
+  'number',
+  'email',
+  'timestamp',
+  'text',
+  'string',
+  'password',
+  'select',
+  'textarea',
+  'time',
+] as const;
+
+type GenericInputType = (typeof GENERIC_INPUT_TYPES)[number];
+
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
 }
@@ -653,5 +676,5 @@ const getMinMax = (fieldSchema?: FieldSchema) => {
  */
 const MemoizedGenericInput = React.memo(GenericInput, isEqual);
 
-export type { GenericInputProps, CustomInputProps };
-export { MemoizedGenericInput as GenericInput };
+export type { GenericInputProps, CustomInputProps, GenericInputType };
+export { MemoizedGenericInput as GenericInput, GENERIC_INPUT_TYPES };

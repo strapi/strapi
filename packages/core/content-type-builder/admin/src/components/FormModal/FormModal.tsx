@@ -8,6 +8,7 @@ import {
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
   UnsavedChangesModal,
+  type StrapiApp,
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
 import get from 'lodash/get';
@@ -74,7 +75,54 @@ import type { AnyAttribute, ContentType } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
 import type { FolderSelection } from '../DataManager/utils/contentStructure';
 import type { Tab } from '../FormModalNavigation/FormModalNavigationProvider';
+import type { GenericInputType } from '../GenericInputs';
 import type { Internal, Struct } from '@strapi/types';
+
+/**
+ * Input renderers the Content-Type Builder form passes to `GenericInput` as `customInputs`,
+ * keyed by the input `type` they render. Plugins add theirs on top.
+ */
+const CUSTOM_INPUTS = {
+  'allowed-types-select': AllowedTypesSelect,
+  'boolean-radio-group': BooleanRadioGroup,
+  'checkbox-with-number-field': CheckboxWithNumberField,
+  'icon-picker': IconPicker,
+  'content-type-radio-group': ContentTypeRadioGroup,
+  'content-type-folder-select': FolderSelect,
+  'radio-group': CustomRadioGroup,
+  relation: Relation,
+  'select-category': SelectCategory,
+  'select-component': SelectComponent,
+  'select-components': SelectComponents,
+  'select-default-boolean': BooleanDefaultValueSelect,
+  'select-number': SelectNumber,
+  'select-date': SelectDateType,
+  'toggle-draft-publish': DraftAndPublishToggle,
+  'text-plural': PluralName,
+  'text-singular': SingularName,
+  'textarea-enum': TextareaEnum,
+  'condition-form': ConditionForm,
+};
+
+type RenderedInputType = keyof typeof CUSTOM_INPUTS | GenericInputType;
+
+type CustomField = NonNullable<ReturnType<StrapiApp['customFields']['get']>>;
+type CustomFieldOptionEntry = NonNullable<NonNullable<CustomField['options']>['base']>[number];
+type CustomFieldOption = Exclude<CustomFieldOptionEntry, { items: unknown }>;
+
+/**
+ * The option input types a custom field can declare (`CustomFieldOptionInput` in `@strapi/admin`).
+ */
+type CustomFieldOptionInput = CustomFieldOption['type'];
+
+type AssertRendered<TInputType extends RenderedInputType> = TInputType;
+
+/**
+ * Compile-time guard: every option input type `@strapi/admin` accepts for a custom field must
+ * have a renderer, either in `CUSTOM_INPUTS` or built into `GenericInput`.
+ * A type check error here names the option input type the form cannot render.
+ */
+type _AssertCustomFieldOptionInputsAreRendered = AssertRendered<CustomFieldOptionInput>;
 
 const FormComponent = styled.form`
   overflow: auto;
@@ -1166,25 +1214,7 @@ export const FormModal = () => {
 
   const genericInputProps = {
     customInputs: {
-      'allowed-types-select': AllowedTypesSelect,
-      'boolean-radio-group': BooleanRadioGroup,
-      'checkbox-with-number-field': CheckboxWithNumberField,
-      'icon-picker': IconPicker,
-      'content-type-radio-group': ContentTypeRadioGroup,
-      'content-type-folder-select': FolderSelect,
-      'radio-group': CustomRadioGroup,
-      relation: Relation,
-      'select-category': SelectCategory,
-      'select-component': SelectComponent,
-      'select-components': SelectComponents,
-      'select-default-boolean': BooleanDefaultValueSelect,
-      'select-number': SelectNumber,
-      'select-date': SelectDateType,
-      'toggle-draft-publish': DraftAndPublishToggle,
-      'text-plural': PluralName,
-      'text-singular': SingularName,
-      'textarea-enum': TextareaEnum,
-      'condition-form': ConditionForm,
+      ...CUSTOM_INPUTS,
       ...inputsFromPlugins,
     },
     componentToCreate,
