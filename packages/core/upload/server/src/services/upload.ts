@@ -809,7 +809,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * `api.rest.defaultLimit` / `api.rest.maxLimit` / `api.rest.withCount` config,
    * exactly like every other Strapi REST collection-type endpoint.
    */
-  async function findAndCountPage(query: any = {}) {
+  async function findAndCountPage(
+    query: Core.IsStrict extends true
+      ? NonNullable<Parameters<UploadService['findAndCountPage']>[0]>
+      : any = {}
+  ) {
     const { pagination = {} } = query;
 
     const defaultLimit = toNumber(strapi.config.get('api.rest.defaultLimit', 25));

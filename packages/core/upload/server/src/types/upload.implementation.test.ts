@@ -13,4 +13,10 @@ export type QueryParameters = [
   Expect<
     Equal<Parameters<UploadImplementation['findPage']>, Parameters<UploadService['findPage']>>
   >,
+  Expect<
+    Equal<
+      Parameters<UploadImplementation['findAndCountPage']>,
+      Parameters<UploadService['findAndCountPage']>
+    >
+  >,
 ];
