@@ -29,6 +29,11 @@ import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
 import {
+  lockDocumentBeforeRead,
+  lockDocumentForUpdate,
+  releaseDocumentLock,
+} from './document-update-lock';
+import {
   applyDeferredCloneRelationCopies,
   applyPostCloneRelationUpdates,
   prepareCloneData,
@@ -381,6 +386,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function deleteDocument(opts = {} as any) {
     const { documentId, ...params } = opts;
 
+    // Same order as update: the MySQL sentinel row first, then content rows.
+    // Deleting content first and the lock row afterwards deadlocks with an update.
+    if (documentId) {
+      await lockDocumentBeforeRead({ db: strapi.db, documentId });
+    }
+
     const lookupQuery = await async.pipe(
       validateParams,
       (value) => omit(value, 'status'),
@@ -411,6 +422,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     }
 
     entriesToDelete.forEach(emitEvent('entry.delete'));
+
+    // Deleting one locale keeps the document. Drop its MySQL lock row only
+    // once no locale or status of the document is left.
+    if (documentId) {
+      await releaseDocumentLock({
+        db: strapi.db,
+        documentId,
+        keepIf: async () => (await strapi.db.query(uid).count({ where: { documentId } })) > 0,
+      });
+    }
 
     return { documentId, entries: deletedEntries };
   }
@@ -543,6 +564,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function update(opts = {} as any) {
     const { documentId, ...params } = opts;
 
+    // On MySQL the lock must come before any read in this transaction,
+    // including the default locale lookup below. REPEATABLE READ keeps the
+    // snapshot of the first read, so a writer that read first and then waited
+    // would still miss the locale the other writer created.
+    if (documentId) {
+      await lockDocumentBeforeRead({ db: strapi.db, documentId });
+    }
+
     const queryParams = await async.pipe(
       validateParams,
       DP.filterDataPublishedAt,
@@ -555,6 +584,20 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToLookup(contentType),
       i18n.localeToData(contentType)
     )(params);
+
+    // Two requests can both observe "locale missing" and insert a second row.
+    // MySQL serializes writers with the sentinel row locked above. Postgres
+    // locks the draft row with FOR NO KEY UPDATE, which still lets a relation
+    // insert take the FOR KEY SHARE lock its foreign key needs.
+    if (documentId) {
+      await lockDocumentForUpdate({
+        db: strapi.db,
+        queryBuilder: (modelUid) => strapi.db.queryBuilder(modelUid),
+        uid,
+        documentId,
+        lookup: queryParams?.lookup,
+      });
+    }
 
     const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
@@ -592,6 +635,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           data: mergedData,
         });
         emitEvent('entry.create', updatedDraft);
+      } else if (documentId) {
+        // The lock above inserted a row for an id with no document. Remove it
+        // in this transaction so a 404 leaves nothing behind.
+        await releaseDocumentLock({ db: strapi.db, documentId });
       }
     }
 
