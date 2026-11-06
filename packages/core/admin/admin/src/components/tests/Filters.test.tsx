@@ -1,7 +1,10 @@
+import { useState } from 'react';
+
 import { fireEvent, render as renderRTL, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
 import { Filters } from '../Filters';
+import { useField } from '../Form';
 
 /**
  * Captures the current query string so tests can assert that the rendered chips and the
@@ -739,6 +742,158 @@ describe('Filters', () => {
       await user.click(await screen.findByText('Is Archived $eq false'));
 
       expect(await screen.findByRole('checkbox', { name: 'Is Archived' })).not.toBeChecked();
+    });
+  });
+
+  describe('controlled', () => {
+    type ControlledFilters = NonNullable<Filters.Query['filters']>;
+
+    const CONTROLLED_OPTIONS = [
+      { name: 'title', label: 'Title', type: 'string' },
+    ] satisfies Filters.Filter[];
+
+    /**
+     * A custom input writes its value through the form, as `AdminUsersFilter` does.
+     */
+    const OwnerInput = ({ name, ['aria-label']: label }: Filters.ValueInputProps) => {
+      const field = useField<string>(name);
+
+      return (
+        <input
+          aria-label={label}
+          value={field.value ?? ''}
+          onChange={(event) => field.onChange(name, event.target.value)}
+        />
+      );
+    };
+
+    const CUSTOM_OPTIONS = [
+      {
+        name: 'owner',
+        label: 'Owner',
+        input: OwnerInput,
+        operators: [
+          { label: 'is', value: '$eq' },
+          { label: 'is not', value: '$ne' },
+        ],
+        type: 'custom',
+      },
+    ] satisfies Filters.Filter[];
+
+    /**
+     * Keeps the filters the way a parent would and reports every change, so a test can assert both
+     * what was emitted and what the list shows afterwards.
+     */
+    const ControlledRoot = ({
+      initialFilters,
+      onFiltersChange,
+      options,
+    }: {
+      initialFilters: ControlledFilters;
+      onFiltersChange: (filters: ControlledFilters) => void;
+      options: Filters.Filter[];
+    }) => {
+      const [filters, setFilters] = useState(initialFilters);
+
+      return (
+        <Filters.Root
+          options={options}
+          filters={filters}
+          onFiltersChange={(nextFilters) => {
+            onFiltersChange(nextFilters);
+            setFilters(nextFilters);
+          }}
+        >
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+          <LocationSpy />
+        </Filters.Root>
+      );
+    };
+
+    const renderControlled = (
+      initialFilters: ControlledFilters,
+      options: Filters.Filter[] = CONTROLLED_OPTIONS,
+      search?: string
+    ) => {
+      const onFiltersChange = jest.fn();
+
+      return {
+        onFiltersChange,
+        ...renderRTL(
+          <ControlledRoot
+            initialFilters={initialFilters}
+            onFiltersChange={onFiltersChange}
+            options={options}
+          />,
+          search ? { initialEntries: [{ search }] } : undefined
+        ),
+      };
+    };
+
+    it('adds a filter through onFiltersChange and leaves the URL alone', async () => {
+      const { user, onFiltersChange } = renderControlled({ $and: [] });
+
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      await user.type(await screen.findByRole('textbox', { name: 'Title' }), 'x');
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Title $eq x');
+      expect(onFiltersChange).toHaveBeenCalledTimes(1);
+      expect(onFiltersChange).toHaveBeenCalledWith({ $and: [{ title: { $eq: 'x' } }] });
+      expect(currentSearch).toBe('');
+    });
+
+    it('lists and removes the given filters, ignoring the URL', async () => {
+      const search = '?filters[$and][0][title][$eq]=fromUrl';
+      const { onFiltersChange } = renderControlled(
+        { $and: [{ title: { $eq: 'x' } }] },
+        CONTROLLED_OPTIONS,
+        search
+      );
+
+      expect(await screen.findByText('Title $eq x')).toBeInTheDocument();
+      expect(screen.queryByText('Title $eq fromUrl')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Title $eq x' }));
+
+      expect(onFiltersChange).toHaveBeenCalledTimes(1);
+      expect(onFiltersChange).toHaveBeenCalledWith({ $and: [] });
+      await waitFor(() => expect(screen.queryByText('Title $eq x')).not.toBeInTheDocument());
+      expect(currentSearch).toBe(search);
+    });
+
+    it('replaces the edited entry in place', async () => {
+      const { user, onFiltersChange } = renderControlled({
+        $and: [{ title: { $eq: 'x' } }, { title: { $eq: 'y' } }],
+      });
+
+      await user.click(await screen.findByText('Title $eq x'));
+      const input = await screen.findByRole('textbox', { name: 'Title' });
+      await user.clear(input);
+      await user.type(input, 'z');
+      fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
+
+      await screen.findByText('Title $eq z');
+      expect(onFiltersChange).toHaveBeenCalledWith({
+        $and: [{ title: { $eq: 'z' } }, { title: { $eq: 'y' } }],
+      });
+      expect(currentSearch).toBe('');
+    });
+
+    it('keeps a custom input and its operators working', async () => {
+      const { user, onFiltersChange } = renderControlled({ $and: [] }, CUSTOM_OPTIONS);
+
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
+      await user.click(await screen.findByRole('option', { name: 'is not' }));
+      await user.type(await screen.findByRole('textbox', { name: 'Owner' }), 'ada');
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Owner $ne ada');
+      expect(onFiltersChange).toHaveBeenCalledWith({ $and: [{ owner: { $ne: 'ada' } }] });
+      expect(currentSearch).toBe('');
     });
   });
 });

@@ -234,6 +234,50 @@ describe('Content-API Token Auth Strategy', () => {
 
       expect(response).toStrictEqual({ authenticated: true, credentials: legacyToken });
     });
+
+    // The Content API permission engine (end-users) builds subject-aware abilities for its own
+    // callers. A token keeps the route ability from its actions alone, so nothing it is granted
+    // ever carries conditions, fields or a subject
+    test('Builds the ability of a custom token through the engine from rows of an action alone', async () => {
+      const customToken = {
+        ...apiToken,
+        type: 'custom',
+        permissions: ['api::note.note.find', 'api::note.note.create'],
+      };
+      const routeAbility = { can: jest.fn(() => true) };
+      const engineGenerateAbility = jest.fn(async () => routeAbility);
+      const subjectAwareGenerateAbility = jest.fn();
+      const ctx = createContext({}, { request, state: contentApiRouteState });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-content-api': { getByAccessKey: jest.fn(() => customToken), hash },
+          },
+        },
+        db: { query: () => ({ update: jest.fn() }) },
+        contentAPI: {
+          permissions: {
+            engine: { generateAbility: engineGenerateAbility },
+            generateAbility: subjectAwareGenerateAbility,
+          },
+        },
+      } as any;
+
+      const response = await contentApiTokenStrategy.authenticate(ctx);
+
+      expect(engineGenerateAbility).toHaveBeenCalledTimes(1);
+      expect(engineGenerateAbility).toHaveBeenCalledWith([
+        { action: 'api::note.note.find' },
+        { action: 'api::note.note.create' },
+      ]);
+      expect(subjectAwareGenerateAbility).not.toHaveBeenCalled();
+      expect(response).toStrictEqual({
+        authenticated: true,
+        ability: routeAbility,
+        credentials: customToken,
+      });
+    });
   });
 
   describe('Verify an access key', () => {

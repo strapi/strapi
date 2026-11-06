@@ -9,22 +9,29 @@ import {
   Typography,
   TypographyComponent,
 } from '@strapi/design-system';
-import { CaretDown } from '@strapi/icons';
+import { CaretDown, WarningCircle } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { styled, DefaultTheme, css } from 'styled-components';
 
-import { Action, SubjectProperty } from '../../../../../../../shared/contracts/permissions';
+import {
+  Action,
+  SubjectLockedRow,
+  SubjectProperty,
+} from '../../../../../../../shared/contracts/permissions';
 import {
   PermissionsDataManagerContextValue,
   usePermissionsDataManager,
 } from '../hooks/usePermissionsDataManager';
 import { cellWidth, firstRowWidth, rowHeight } from '../utils/constants';
+import { getMissingRequiredFields, isCellDisabledByLayout } from '../utils/fieldRules';
 import { getCheckboxState } from '../utils/getCheckboxState';
 import { getLocaleValidationErrorActionKeys } from '../utils/localePermissionValidation';
+import { fieldMatchesSearch, getSearchBelow, matchesSearch } from '../utils/search';
 
 import { CollapseLabel } from './CollapseLabel';
 import { HiddenAction } from './HiddenAction';
+import { LockedRows } from './LockedRows';
 import { RequiredSign } from './RequiredSign';
 import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithCheckbox';
 import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
@@ -34,6 +41,7 @@ const EMPTY_CHILDREN_FORM: NonNullable<CollapsePropertyMatrixProps['childrenForm
 const EMPTY_ACTION_ROW_CHILDREN_FORM: NonNullable<ActionRowProps['childrenForm']> = [];
 const EMPTY_SUB_ACTION_ROW_CHILDREN_FORM: NonNullable<SubActionRowProps['childrenForm']> = [];
 const EMPTY_HEADERS: NonNullable<HeaderProps['headers']> = [];
+const EMPTY_DISABLED_ACTIONS: string[] = [];
 
 /* -------------------------------------------------------------------------------------------------
  * CollapsePropertyMatrix
@@ -44,6 +52,21 @@ interface CollapsePropertyMatrixProps extends Pick<
   'childrenForm' | 'isFormDisabled' | 'label' | 'pathToData' | 'propertyName' | 'subject'
 > {
   availableActions?: Array<Action & { isDisplayed: boolean }>;
+  /**
+   * Rows without checkboxes, listed under the matrix.
+   */
+  lockedRows?: SubjectLockedRow[];
+  /**
+   * The id of the action that fails unless every required field is set (see
+   * `PermissionsProps.requiredFieldsAction`).
+   */
+  requiredFieldsAction?: string;
+  /**
+   * What is left to search for in this property (see `normalizeSearch`): only the fields that
+   * match are listed, and the property is left out when none does. Everything is listed when
+   * absent.
+   */
+  search?: string;
 }
 
 interface PropertyAction {
@@ -57,8 +80,11 @@ const CollapsePropertyMatrix = ({
   childrenForm = EMPTY_CHILDREN_FORM,
   isFormDisabled,
   label,
+  lockedRows,
   pathToData,
   propertyName,
+  requiredFieldsAction,
+  search,
   subject,
 }: CollapsePropertyMatrixProps) => {
   const { formatMessage, formatList } = useIntl();
@@ -88,8 +114,84 @@ const CollapsePropertyMatrix = ({
       .map(({ label }) => label);
   }, [propertyName, subject, modifiedData, contentTypeKind, propertyActions]);
 
+  const requiredFieldsActionLabel = propertyActions.find(
+    ({ actionId, isActionRelatedToCurrentProperty }) =>
+      actionId === requiredFieldsAction && isActionRelatedToCurrentProperty
+  )?.label;
+  const actionForm =
+    requiredFieldsAction === undefined
+      ? undefined
+      : get(modifiedData, [...pathToData.split('..'), requiredFieldsAction]);
+  const missingRequiredFields = React.useMemo(
+    () =>
+      requiredFieldsAction !== undefined && requiredFieldsActionLabel !== undefined
+        ? getMissingRequiredFields(childrenForm, propertyName, requiredFieldsAction, actionForm)
+        : [],
+    [childrenForm, propertyName, requiredFieldsAction, requiredFieldsActionLabel, actionForm]
+  );
+
+  // The warning above looks at every field: a search only decides which rows are listed
+  const listedChildren = React.useMemo(
+    () =>
+      search === undefined
+        ? childrenForm
+        : childrenForm.filter((field) => fieldMatchesSearch(field, search)),
+    [childrenForm, search]
+  );
+  const listedLockedRows = React.useMemo(
+    () =>
+      search === undefined
+        ? lockedRows
+        : lockedRows?.filter(({ label }) => matchesSearch(label, search)),
+    [lockedRows, search]
+  );
+
+  if (search !== undefined && listedChildren.length === 0 && !listedLockedRows?.length) {
+    return null;
+  }
+
   return (
     <Flex display="inline-flex" direction="column" alignItems="stretch" minWidth={0}>
+      {missingRequiredFields.length > 0 && requiredFieldsActionLabel !== undefined && (
+        <Box paddingLeft={6} paddingRight={6} paddingTop={4}>
+          <Flex
+            role="alert"
+            alignItems="flex-start"
+            gap={2}
+            padding={3}
+            background="warning100"
+            borderColor="warning200"
+            hasRadius
+          >
+            <WarningCircle width="1.6rem" height="1.6rem" fill="warning600" />
+            <Typography variant="pi" textColor="neutral800">
+              <Typography variant="pi" fontWeight="bold">
+                {formatMessage(
+                  {
+                    id: 'Settings.roles.form.permissions.required-fields.title',
+                    defaultMessage: '{action} requests will fail.',
+                  },
+                  { action: requiredFieldsActionLabel }
+                )}
+              </Typography>{' '}
+              {formatMessage(
+                {
+                  id: 'Settings.roles.form.permissions.required-fields.body',
+                  defaultMessage:
+                    "{count, plural, one {{fields} is} other {{fields} are}} required, but this role can't set {count, plural, one {it} other {them}}.",
+                },
+                {
+                  count: missingRequiredFields.length,
+                  fields: formatList(
+                    missingRequiredFields.map((field) => <code key={field}>{field}</code>),
+                    { type: 'conjunction' }
+                  ),
+                }
+              )}
+            </Typography>
+          </Flex>
+        </Box>
+      )}
       <Header label={label} headers={propertyActions} />
       {localeValidationErrorLabels.length > 0 && (
         <Box paddingLeft={6} paddingTop={2} paddingBottom={2}>
@@ -109,21 +211,28 @@ const CollapsePropertyMatrix = ({
         </Box>
       )}
       <Box>
-        {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (
-          <ActionRow
-            childrenForm={childrenForm}
-            key={value}
-            label={label}
-            isFormDisabled={isFormDisabled}
-            name={value}
-            required={required}
-            propertyActions={propertyActions}
-            pathToData={pathToData}
-            propertyName={propertyName}
-            isOdd={i % 2 === 0}
-            subject={subject}
-          />
-        ))}
+        {listedChildren.map(
+          ({ children: childrenForm, disabledActions, label, value, required }, i) => (
+            <ActionRow
+              childrenForm={childrenForm}
+              disabledActions={disabledActions}
+              key={value}
+              label={label}
+              isFormDisabled={isFormDisabled}
+              name={value}
+              required={required}
+              propertyActions={propertyActions}
+              pathToData={pathToData}
+              propertyName={propertyName}
+              isOdd={i % 2 === 0}
+              search={getSearchBelow(label, search)}
+              subject={subject}
+            />
+          )
+        )}
+        {listedLockedRows && (
+          <LockedRows rows={listedLockedRows} rowsBefore={listedChildren.length} />
+        )}
       </Box>
     </Flex>
   );
@@ -137,15 +246,26 @@ interface ActionRowProps extends Pick<
   SubActionRowProps,
   'childrenForm' | 'isFormDisabled' | 'propertyActions' | 'propertyName' | 'subject'
 > {
+  /**
+   * The actions whose cell is disabled for this field (`SubjectProperty.disabledActions`).
+   */
+  disabledActions?: string[];
   label: string;
   name: string;
   required?: boolean;
   pathToData: string;
   isOdd?: boolean;
+  /**
+   * What is left to search for below this row, when the row is listed because of what is in it:
+   * the group opens and lists the fields that match. Absent when its own label matches, or without
+   * a search.
+   */
+  search?: string;
 }
 
 const ActionRow = ({
   childrenForm = EMPTY_ACTION_ROW_CHILDREN_FORM,
+  disabledActions,
   label,
   isFormDisabled = false,
   name,
@@ -154,6 +274,7 @@ const ActionRow = ({
   propertyActions,
   propertyName,
   isOdd = false,
+  search,
   subject,
 }: ActionRowProps) => {
   const { formatMessage } = useIntl();
@@ -179,6 +300,13 @@ const ActionRow = ({
 
   const isCollapsable = recursiveChildren.length > 0;
 
+  // A group is listed because a field in it matches: open it, once for each search
+  React.useEffect(() => {
+    if (search !== undefined && isCollapsable) {
+      setRowToOpen(name);
+    }
+  }, [search, isCollapsable, name]);
+
   const handleClick = React.useCallback(() => {
     if (isCollapsable) {
       setRowToOpen((prev) => {
@@ -197,9 +325,34 @@ const ActionRow = ({
     onChangeCollectionTypeLeftActionRowCheckbox(pathToData, propertyName, name, value);
   };
 
+  // The cells the row checkbox can change: not the ones the layout disables
+  const editableActionIds = React.useMemo(
+    () =>
+      propertyActions
+        .filter(
+          ({ actionId, isActionRelatedToCurrentProperty }) =>
+            isActionRelatedToCurrentProperty &&
+            !isCellDisabledByLayout({ children: recursiveChildren, disabledActions }, actionId)
+        )
+        .map(({ actionId }) => actionId),
+    [propertyActions, recursiveChildren, disabledActions]
+  );
+  const hasCells = propertyActions.some(
+    ({ isActionRelatedToCurrentProperty }) => isActionRelatedToCurrentProperty
+  );
+
+  // Nothing for the row checkbox to change: the layout disables every cell
+  const hasNoEditableCell = hasCells && editableActionIds.length === 0;
+
   const { hasAllActionsSelected, hasSomeActionsSelected } = React.useMemo(() => {
-    return getRowLabelCheckboxState(propertyActions, modifiedData, pathToData, propertyName, name);
-  }, [propertyActions, modifiedData, pathToData, propertyName, name]);
+    return getRowLabelCheckboxState(
+      editableActionIds,
+      modifiedData,
+      pathToData,
+      propertyName,
+      name
+    );
+  }, [editableActionIds, modifiedData, pathToData, propertyName, name]);
 
   return (
     <>
@@ -214,7 +367,7 @@ const ActionRow = ({
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
             isCollapsable={isCollapsable}
-            isFormDisabled={isFormDisabled}
+            isFormDisabled={isFormDisabled || hasNoEditableCell}
             label={label}
             someChecked={hasSomeActionsSelected}
             value={hasAllActionsSelected}
@@ -236,6 +389,13 @@ const ActionRow = ({
                 propertyName,
                 name,
               ];
+
+              // Off by the layout. Not the user's ceiling, which has its own reason to show
+              // (`userHasPermission`)
+              const isCellLocked = isCellDisabledByLayout(
+                { children: recursiveChildren, disabledActions },
+                actionId
+              );
 
               if (!isCollapsable) {
                 const checkboxValue = get(modifiedData, checkboxName, false);
@@ -259,7 +419,7 @@ const ActionRow = ({
                       userHasPermission={userHasPermission}
                     >
                       <Checkbox
-                        disabled={isFormDisabled || !userHasPermission}
+                        disabled={isFormDisabled || !userHasPermission || isCellLocked}
                         name={checkboxName.join('..')}
                         aria-label={formatMessage(
                           {
@@ -306,7 +466,7 @@ const ActionRow = ({
                     userHasPermission={userHasPermission}
                   >
                     <Checkbox
-                      disabled={isFormDisabled || !userHasPermission}
+                      disabled={isFormDisabled || !userHasPermission || isCellLocked}
                       name={checkboxName.join('..')}
                       onCheckedChange={(value) => {
                         onChangeParentCheckbox({
@@ -335,12 +495,14 @@ const ActionRow = ({
       {isActive && (
         <SubActionRow
           childrenForm={recursiveChildren}
+          disabledActions={disabledActions}
           isFormDisabled={isFormDisabled}
           parentName={name}
           pathToDataFromActionRow={pathToData}
           propertyName={propertyName}
           propertyActions={propertyActions}
           recursiveLevel={0}
+          search={search}
           subject={subject}
         />
       )}
@@ -353,20 +515,12 @@ const ActionRow = ({
  * Returns the state of the left checkbox of a ActionRow main checkbox
  */
 const getRowLabelCheckboxState = (
-  propertyActions: PropertyAction[],
+  actionIds: string[],
   modifiedData: PermissionsDataManagerContextValue['modifiedData'],
   pathToContentType: string,
   propertyToCheck: string,
   targetKey: string
 ) => {
-  const actionIds = propertyActions.reduce<string[]>((acc, current) => {
-    if (current.isActionRelatedToCurrentProperty) {
-      acc.push(current.actionId);
-    }
-
-    return acc;
-  }, []);
-
   const data = actionIds.reduce<Record<string, boolean>>((acc, current) => {
     const mainData = get(
       modifiedData,
@@ -421,23 +575,35 @@ const CarretIcon = styled(CaretDown)<{ $isActive: boolean }>`
 
 interface SubActionRowProps {
   childrenForm: SubjectProperty['children'];
+  /**
+   * The actions the layout disables for the row this one opens from, which it passes on to every
+   * field under it.
+   */
+  disabledActions?: string[];
   isFormDisabled?: boolean;
   parentName: string;
   pathToDataFromActionRow: string;
   propertyActions: PropertyAction[];
   propertyName: string;
+  /**
+   * What is left to search for among `childrenForm`: only the fields that match are listed.
+   * Everything is listed when absent.
+   */
+  search?: string;
   subject?: string;
   recursiveLevel: number;
 }
 
 const SubActionRow = ({
   childrenForm = EMPTY_SUB_ACTION_ROW_CHILDREN_FORM,
+  disabledActions = EMPTY_DISABLED_ACTIONS,
   isFormDisabled,
   recursiveLevel,
   pathToDataFromActionRow,
   propertyActions,
   parentName,
   propertyName,
+  search,
   subject,
 }: SubActionRowProps) => {
   const { formatMessage } = useIntl();
@@ -468,11 +634,39 @@ const SubActionRow = ({
     return childrenForm.find(({ value }) => value === rowToOpen);
   }, [rowToOpen, childrenForm]);
 
+  const listedChildren = React.useMemo(
+    () =>
+      search === undefined
+        ? childrenForm
+        : childrenForm.filter((child) => fieldMatchesSearch(child, search)),
+    [childrenForm, search]
+  );
+
+  // A group is listed because a field in it matches: open the first one, once for each search
+  React.useEffect(() => {
+    if (search === undefined) {
+      return;
+    }
+
+    const group = childrenForm.find(
+      ({ label, children }) =>
+        Array.isArray(children) &&
+        getSearchBelow(label, search) !== undefined &&
+        children.some((child) => fieldMatchesSearch(child, search))
+    );
+
+    if (group) {
+      setRowToOpen(group.value);
+    }
+  }, [search, childrenForm]);
+
   return (
     <Box paddingLeft={`3.2rem`}>
       <TopTimeline />
-      {childrenForm.map(({ label, value, required, children: subChildrenForm }, index) => {
-        const isVisible = index + 1 < childrenForm.length;
+      {listedChildren.map((child, index) => {
+        const { label, value, required, children: subChildrenForm } = child;
+        const rowDisabledActions = [...disabledActions, ...(child.disabledActions ?? [])];
+        const isVisible = index + 1 < listedChildren.length;
         const isArrayType = Array.isArray(subChildrenForm);
         const isActive = rowToOpen === value;
 
@@ -539,6 +733,11 @@ const SubActionRow = ({
                       // `parentName` uses the '..' form-path separator; permission checks take a
                       // dot-separated field path (e.g. `seo.meta.robots`).
                       const fieldPath = [...parentName.split('..'), value].join('.');
+                      // Off by the layout
+                      const isCellLocked = isCellDisabledByLayout(
+                        { children: subChildrenForm, disabledActions: rowDisabledActions },
+                        actionId
+                      );
 
                       if (!subChildrenForm) {
                         const userHasPermission = checkUserHasPermission(
@@ -561,7 +760,7 @@ const SubActionRow = ({
                               userHasPermission={userHasPermission}
                             >
                               <Checkbox
-                                disabled={isFormDisabled || !userHasPermission}
+                                disabled={isFormDisabled || !userHasPermission || isCellLocked}
                                 name={checkboxName.join('..')}
                                 aria-label={formatMessage(
                                   {
@@ -608,7 +807,7 @@ const SubActionRow = ({
                           >
                             <Checkbox
                               key={propertyLabel}
-                              disabled={isFormDisabled || !userHasPermission}
+                              disabled={isFormDisabled || !userHasPermission || isCellLocked}
                               name={checkboxName.join('..')}
                               aria-label={formatMessage(
                                 {
@@ -641,6 +840,7 @@ const SubActionRow = ({
             {displayedRecursiveChildren && isActive && (
               <Box paddingBottom={2}>
                 <SubActionRow
+                  disabledActions={rowDisabledActions}
                   isFormDisabled={isFormDisabled}
                   parentName={`${parentName}..${value}`}
                   pathToDataFromActionRow={pathToDataFromActionRow}
@@ -648,6 +848,7 @@ const SubActionRow = ({
                   propertyName={propertyName}
                   recursiveLevel={recursiveLevel + 1}
                   childrenForm={displayedRecursiveChildren.children}
+                  search={getSearchBelow(displayedRecursiveChildren.label, search)}
                   subject={subject}
                 />
               </Box>

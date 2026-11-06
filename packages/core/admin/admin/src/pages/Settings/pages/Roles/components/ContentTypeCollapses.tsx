@@ -15,10 +15,12 @@ import {
   PermissionsDataManagerContextValue,
   usePermissionsDataManager,
 } from '../hooks/usePermissionsDataManager';
+import { useReportOpenSubject } from '../hooks/useReportOpenSubject';
 import { cellWidth, rowHeight } from '../utils/constants';
 import { createArrayOfValues } from '../utils/createArrayOfValues';
 import { ConditionForm } from '../utils/forms';
 import { getCheckboxState } from '../utils/getCheckboxState';
+import { getSearchBelow, subjectHasMatchingRow } from '../utils/search';
 
 import { CollapsePropertyMatrix } from './CollapsePropertyMatrix';
 import { ConditionsButton } from './ConditionsButton';
@@ -26,6 +28,8 @@ import { ConditionsModal } from './ConditionsModal';
 import { HiddenAction } from './HiddenAction';
 import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithCheckbox';
 import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
+
+import type { PermissionsProps } from './Permissions';
 
 const EMPTY_ACTIONS: NonNullable<ContentTypeCollapsesProps['actions']> = [];
 const EMPTY_SUBJECTS: NonNullable<ContentTypeCollapsesProps['subjects']> = [];
@@ -35,41 +39,88 @@ const EMPTY_AVAILABLE_ACTIONS: NonNullable<CollapseProps['availableActions']> = 
  * ContentTypeCollapses
  * -----------------------------------------------------------------------------------------------*/
 
-interface ContentTypeCollapsesProps extends Pick<CollapseProps, 'pathToData'> {
+interface ContentTypeCollapsesProps
+  extends
+    Pick<CollapseProps, 'pathToData'>,
+    Pick<
+      PermissionsProps,
+      | 'onOpenSubjectChange'
+      | 'renderActionIndicator'
+      | 'renderSubjectActions'
+      | 'renderSubjectDetails'
+      | 'requiredFieldsAction'
+    > {
   actions?: Action[];
   isFormDisabled?: boolean;
+  kind: 'collectionTypes' | 'singleTypes';
+  /**
+   * The search (see `normalizeSearch`) that limited `subjects`: an open content type lists the
+   * fields that match, or every field when the label of the content type matches.
+   */
+  search?: string;
   subjects?: Subject[];
 }
 
 const ContentTypeCollapses = ({
   actions = EMPTY_ACTIONS,
   isFormDisabled,
+  kind,
+  onOpenSubjectChange,
   pathToData,
+  renderActionIndicator,
+  renderSubjectActions,
+  renderSubjectDetails,
+  requiredFieldsAction,
+  search,
   subjects = EMPTY_SUBJECTS,
 }: ContentTypeCollapsesProps) => {
   const [collapseToOpen, setCollapseToOpen] = React.useState<string | null>(null);
+  const reportOpenSubject = useReportOpenSubject(kind, onOpenSubjectChange);
+
+  const openSubject = React.useCallback(
+    (uid: string | null) => {
+      setCollapseToOpen(uid);
+      reportOpenSubject(uid);
+    },
+    [reportOpenSubject]
+  );
 
   const handleClickToggleCollapse = (collapseName: string) => () => {
-    const nextCollapseToOpen = collapseToOpen === collapseName ? null : collapseName;
-
-    setCollapseToOpen(nextCollapseToOpen);
+    openSubject(collapseToOpen === collapseName ? null : collapseName);
   };
+
+  // The first content type with a row that matches the search: a content type that matches by its
+  // label alone does not count, as there is nothing in it to show
+  const firstMatchingSubject = React.useMemo(
+    () =>
+      search ? subjects.find((subject) => subjectHasMatchingRow(subject, search))?.uid : undefined,
+    [search, subjects]
+  );
+
+  // Each time the search changes it opens that content type, so the match is on screen. The admin
+  // can close it or open another afterwards, and clearing the search leaves the open one as it is.
+  React.useEffect(() => {
+    if (firstMatchingSubject !== undefined) {
+      openSubject(firstMatchingSubject);
+    }
+  }, [search, firstMatchingSubject, openSubject]);
 
   const subjectsWithActions = React.useMemo(
     () =>
-      subjects.map(({ uid, label, properties }) => {
+      subjects.map(({ uid, label, properties, locked }) => {
         const availableActions = actions.map((action) => ({
           ...action,
           isDisplayed: Array.isArray(action.subjects) && action.subjects.indexOf(uid) !== -1,
         }));
-        return { uid, label, properties, availableActions };
+        return { uid, label, properties, locked, availableActions };
       }),
     [subjects, actions]
   );
 
   return (
     <>
-      {subjectsWithActions.map(({ uid, label, properties, availableActions }, index) => {
+      {subjectsWithActions.map((subjectWithActions, index) => {
+        const { uid, label, properties, locked, availableActions } = subjectWithActions;
         const isActive = collapseToOpen === uid;
         return (
           <Flex
@@ -88,23 +139,34 @@ const ContentTypeCollapses = ({
               label={label}
               onClickToggle={handleClickToggleCollapse(uid)}
               pathToData={[pathToData, uid].join('..')}
+              renderActionIndicator={renderActionIndicator}
               subject={uid}
+              subjectActions={renderSubjectActions?.({
+                tab: kind,
+                subject: uid,
+                disabled: !!isFormDisabled,
+              })}
             />
             {isActive &&
-              properties.map(({ label: propertyLabel, value, children: childrenForm }) => {
+              properties.map(({ label: propertyLabel, value, children: childrenForm }, i) => {
                 return (
                   <CollapsePropertyMatrix
                     availableActions={availableActions}
                     childrenForm={childrenForm}
                     isFormDisabled={isFormDisabled}
                     label={propertyLabel}
+                    // The rows the role never sets go under the first matrix, the one of the fields
+                    lockedRows={i === 0 ? locked : undefined}
                     pathToData={[pathToData, uid].join('..')}
                     propertyName={value}
                     key={value}
+                    requiredFieldsAction={requiredFieldsAction}
+                    search={getSearchBelow(label, search)}
                     subject={uid}
                   />
                 );
               })}
+            {isActive && renderSubjectDetails?.({ tab: kind, subject: uid })}
           </Flex>
         );
       })}
@@ -124,7 +186,12 @@ interface CollapseProps extends Pick<
   isGrey?: boolean;
   onClickToggle: RowLabelWithCheckboxProps['onClick'];
   pathToData: string;
+  renderActionIndicator?: PermissionsProps['renderActionIndicator'];
   subject: string;
+  /**
+   * Rendered next to the conditions button.
+   */
+  subjectActions?: React.ReactNode;
 }
 
 const Collapse = ({
@@ -135,10 +202,13 @@ const Collapse = ({
   label,
   onClickToggle,
   pathToData,
+  renderActionIndicator,
   subject,
+  subjectActions,
 }: CollapseProps) => {
   const { formatMessage } = useIntl();
   const {
+    availableConditions,
     modifiedData,
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
@@ -173,7 +243,7 @@ const Collapse = ({
   const doesConditionButtonHasConditions = checkboxesActions.some((action) => action.hasConditions);
 
   return (
-    <BoxWrapper $isActive={isActive}>
+    <BoxWrapper $isActive={isActive} $hasTrailingCell={Boolean(subjectActions)}>
       <Wrapper
         height={rowHeight}
         flex={1}
@@ -210,10 +280,12 @@ const Collapse = ({
               } = restAction as VisibleCheckboxAction;
 
               const userHasPermission = checkUserHasPermission(actionId, subject);
+              const indicator = renderActionIndicator?.({ actionId, subject });
 
               if (isParentCheckbox) {
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
+                    {indicator && <IndicatorSlot>{indicator}</IndicatorSlot>}
                     <Box position="relative" zIndex={1}>
                       {hasConditions && (
                         <Box
@@ -260,6 +332,7 @@ const Collapse = ({
 
               return (
                 <Cell key={actionId} justifyContent="center" alignItems="center">
+                  {indicator && <IndicatorSlot>{indicator}</IndicatorSlot>}
                   {hasConditions && (
                     <Box
                       tag="span"
@@ -296,22 +369,31 @@ const Collapse = ({
             }
           )}
         </Flex>
+        {subjectActions && (
+          // The buttons below sit over the end of the row: this cell keeps them off the last action
+          <Flex data-testid="subject-actions-cell" width={cellWidth} shrink={0} />
+        )}
       </Wrapper>
       <Box bottom="10px" right="9px" position="absolute">
-        <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
-          <Modal.Trigger>
-            <ConditionsButton hasConditions={doesConditionButtonHasConditions} />
-          </Modal.Trigger>
-          <ConditionsModal
-            headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
-            actions={checkboxesActions}
-            isFormDisabled={isFormDisabled}
-            isReadOnly={inheritConditions}
-            onClose={() => {
-              setIsConditionModalOpen(false);
-            }}
-          />
-        </UnsavedChangesModal>
+        <Flex gap={2}>
+          {subjectActions}
+          {availableConditions.length > 0 && (
+            <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
+              <Modal.Trigger>
+                <ConditionsButton hasConditions={doesConditionButtonHasConditions} />
+              </Modal.Trigger>
+              <ConditionsModal
+                headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
+                actions={checkboxesActions}
+                isFormDisabled={isFormDisabled}
+                isReadOnly={inheritConditions}
+                onClose={() => {
+                  setIsConditionModalOpen(false);
+                }}
+              />
+            </UnsavedChangesModal>
+          )}
+        </Flex>
       </Box>
     </BoxWrapper>
   );
@@ -411,8 +493,10 @@ const Wrapper = styled<FlexComponent>(Flex)`
   border: 1px solid transparent;
 `;
 
-const BoxWrapper = styled.div<{ $isActive: boolean }>`
+const BoxWrapper = styled.div<{ $isActive: boolean; $hasTrailingCell: boolean }>`
   display: inline-flex;
+  /* With a trailing cell, as wide as the row's cells: the buttons are placed from its right edge */
+  ${({ $hasTrailingCell }) => ($hasTrailingCell ? 'width: max-content;' : '')}
   min-width: 100%;
   position: relative;
 
@@ -430,6 +514,15 @@ const BoxWrapper = styled.div<{ $isActive: boolean }>`
 const Cell = styled<FlexComponent>(Flex)`
   width: ${cellWidth};
   position: relative;
+`;
+
+/**
+ * Where `renderActionIndicator` draws, at the top left of the checkbox of the cell.
+ */
+const IndicatorSlot = styled.span`
+  position: absolute;
+  top: calc(50% - 13px);
+  left: calc(50% - 15px);
 `;
 
 const Chevron = styled<BoxComponent>(Box)`
