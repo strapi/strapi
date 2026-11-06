@@ -88,12 +88,13 @@ const ReasonCell = ({ label, reasonLabel, ariaLabel, onOpenReason }: ReasonCellP
     <Flex gap={4} alignItems="center" tag="span">
       <InlineBadge {...getBadgeColorProps('danger')}>{label}</InlineBadge>
       <Button
-        // TEMP: /next Button has no ghost-destructive variant yet — override a ghost button to
-        // red text + light-red hover bg. Replace with variant="ghostDestructive" once added to
-        // @strapi/design-system/next (EE-302).
+        // TEMP: `variant="ghost-destructive"` (strapi/design-system#2081, EE-302) is merged but not
+        // in a release yet: 2.3.0-alpha.1 doesn't have it. Until the next one, the ghost variant
+        // takes the same classes (tailwind-merge drops ghost's own hover and focus colours). Then
+        // swap to the variant and drop the className.
         variant="ghost"
         size="xs"
-        className="text-destructive hover:bg-destructive/5 hover:text-destructive"
+        className="text-destructive hover:bg-destructive/5 hover:text-destructive aria-expanded:bg-destructive/5 aria-expanded:text-destructive focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:hover:bg-destructive/10 dark:aria-expanded:bg-destructive/10 dark:focus-visible:ring-destructive/40"
         aria-label={ariaLabel}
         aria-haspopup="dialog"
         onClick={onOpenReason}
