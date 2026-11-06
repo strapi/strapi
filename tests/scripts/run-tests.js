@@ -6,12 +6,7 @@ const yargs = require('yargs');
 const chalk = require('chalk');
 const dotenv = require('dotenv');
 
-const {
-  publishYalc,
-  setupTestApps,
-  getCurrentTestApps,
-  setupTestEnvironment,
-} = require('../utils/runners/shared-setup');
+const { publishYalc, setupTestApps, getCurrentTestApps } = require('../utils/runners/shared-setup');
 const { buildAdmin, runPlaywright } = require('../utils/runners/browser-runner');
 const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
 const { selectRunnableDomains } = require('../utils/runners/e2e-domains');
@@ -177,6 +172,14 @@ yargs
 
         const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
+        // Locally, e2e runs Chromium only unless a --project is passed. CI passes one per job.
+        if (type === 'e2e' && !process.env.CI && !extractShardArgs(forwardedRunnerArgs).project) {
+          console.log(
+            'Running e2e tests on Chromium only. Pass `-- --project=webkit` to run another browser.'
+          );
+          forwardedRunnerArgs.push('--project=chromium');
+        }
+
         /**
          * Publishing all packages to the yalc store
          */
@@ -217,7 +220,6 @@ yargs
           templateDir,
           setup,
           currentTestApps: currentTestApps.map((appPath) => path.basename(appPath)),
-          setupTestEnvironment: type === 'e2e' ? setupTestEnvironment : null,
           commitE2eBaseline: type === 'e2e',
         });
 

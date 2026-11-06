@@ -3,6 +3,12 @@ import type { Core } from '@strapi/types';
 import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 import { AI_METADATA_JOB_UID } from '../models/ai-metadata-job';
 
+/**
+ * Fields a job update writes. Dates are written as `Date` instances; they are
+ * read back as ISO strings (see `AIMetadataJob`).
+ */
+type AIMetadataJobUpdate = Partial<Pick<AIMetadataJob, 'status'> & { completedAt: Date }>;
+
 export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => ({
   async createJob(): Promise<number> {
     const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
@@ -21,10 +27,7 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     });
   },
 
-  async updateJob(
-    jobId: number,
-    updates: Partial<Omit<AIMetadataJob, 'id' | 'createdAt'>>
-  ): Promise<void> {
+  async updateJob(jobId: number, updates: AIMetadataJobUpdate): Promise<void> {
     await strapi.db.query(AI_METADATA_JOB_UID).update({
       where: { id: jobId },
       data: updates,
