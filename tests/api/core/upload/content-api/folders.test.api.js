@@ -1,0 +1,365 @@
+'use strict';
+
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAgent } = require('api-tests/agent');
+const { createContentAPIRequest, createAuthRequest } = require('api-tests/request');
+
+const builder = createTestBuilder();
+let strapi;
+let rq;
+let rqAdmin;
+
+const folders = {};
+const tokenIds = [];
+
+const createFolder = async (name, parent = null) => {
+  const res = await rqAdmin({ method: 'POST', url: '/upload/folders', body: { name, parent } });
+
+  return res.body.data;
+};
+
+const deleteFolders = (folderIds) =>
+  rqAdmin({ method: 'POST', url: '/upload/actions/bulk-delete', body: { folderIds } });
+
+// Paths are made of unpadded pathIds, so `/1` alone would also match `/10`.
+const subtreeOf = (path) => ({
+  $or: [{ path: { $eq: path } }, { path: { $startsWith: `${path}/` } }],
+});
+
+const createTokenRequest = async (body) => {
+  const res = await rqAdmin({
+    method: 'POST',
+    url: '/admin/api-tokens',
+    body: { name: `folders-${tokenIds.length}`, lifespan: null, ...body },
+  });
+
+  tokenIds.push(res.body.data.id);
+
+  return createContentAPIRequest({ strapi, auth: { token: res.body.data.accessKey } });
+};
+
+describe('Upload content API - read-only folders routes', () => {
+  beforeAll(async () => {
+    await builder.build();
+    strapi = await createStrapiInstance({ bypassAuth: false });
+    rqAdmin = await createAuthRequest({ strapi });
+    rq = await createTokenRequest({ type: 'full-access' });
+
+    folders.clients = await createFolder('Clients');
+    folders.acme = await createFolder('Acme', folders.clients.id);
+    folders.year = await createFolder('2026', folders.acme.id);
+    folders.archive = await createFolder('Archive');
+  });
+
+  afterAll(async () => {
+    await deleteFolders([folders.clients.id, folders.archive.id]);
+    await Promise.all(
+      tokenIds.map((id) => rqAdmin({ method: 'DELETE', url: `/admin/api-tokens/${id}` }))
+    );
+
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  describe('Permissions', () => {
+    test('refuses a request without a token', async () => {
+      const rqPublic = createAgent(strapi, { urlPrefix: '/api' });
+
+      const res = await rqPublic({ method: 'GET', url: '/upload/folders' });
+
+      expect(res.statusCode).toBe(403);
+    });
+
+    test('refuses a custom token without the folder permissions', async () => {
+      const rqCustom = await createTokenRequest({
+        type: 'custom',
+        permissions: ['plugin::upload.content-api.find'],
+      });
+
+      const list = await rqCustom({ method: 'GET', url: '/upload/folders' });
+      const one = await rqCustom({ method: 'GET', url: `/upload/folders/${folders.acme.id}` });
+
+      expect(list.statusCode).toBe(403);
+      expect(one.statusCode).toBe(403);
+    });
+
+    test('grants listing and reading one folder separately', async () => {
+      const rqFind = await createTokenRequest({
+        type: 'custom',
+        permissions: ['plugin::upload.folder.find'],
+      });
+      const rqFindOne = await createTokenRequest({
+        type: 'custom',
+        permissions: ['plugin::upload.folder.findOne'],
+      });
+      const one = `/upload/folders/${folders.acme.id}`;
+
+      const findList = await rqFind({ method: 'GET', url: '/upload/folders' });
+      const findOne = await rqFind({ method: 'GET', url: one });
+      const findOneList = await rqFindOne({ method: 'GET', url: '/upload/folders' });
+      const findOneOne = await rqFindOne({ method: 'GET', url: one });
+
+      expect(findList.statusCode).toBe(200);
+      expect(findList.body.data.map((folder) => folder.id)).toEqual(
+        expect.arrayContaining([folders.clients.id, folders.acme.id])
+      );
+      expect(findOne.statusCode).toBe(403);
+      expect(findOneList.statusCode).toBe(403);
+      expect(findOneOne.statusCode).toBe(200);
+      expect(findOneOne.body.data.id).toBe(folders.acme.id);
+      // Listing the parent needs `folder.find`, so it is left out rather than shown as the root.
+      expect(findOneOne.body.data).not.toHaveProperty('parent');
+
+      const findOneRoot = await rqFindOne({
+        method: 'GET',
+        url: `/upload/folders/${folders.clients.id}`,
+      });
+      expect(findOneRoot.statusCode).toBe(200);
+      expect(findOneRoot.body.data).not.toHaveProperty('parent');
+    });
+
+    test.each([
+      ['full-access', { filters: { files: { id: 1 } } }],
+      ['full-access', { filters: { children: { files: { name: 'logo.png' } } } }],
+      ['full-access', { filters: { $or: [{ files: { hash: 'logo' } }] } }],
+      ['full-access', { sort: 'files.name:asc' }],
+      ['read-only', { filters: { files: { id: 1 } } }],
+      ['read-only', { sort: { parent: { files: { name: 'asc' } } } }],
+    ])('refuses to find folders through their files with a %s token', async (type, qs) => {
+      const rqToken = await createTokenRequest({ type });
+
+      const res = await rqToken({ method: 'GET', url: '/upload/folders', qs });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('lists folders with a read-only token', async () => {
+      const rqReadOnly = await createTokenRequest({ type: 'read-only' });
+
+      const res = await rqReadOnly({ method: 'GET', url: '/upload/folders' });
+
+      expect(res.statusCode).toBe(200);
+    });
+  });
+
+  describe('GET /upload/folders', () => {
+    test('returns a paginated flat list', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: {
+          filters: subtreeOf(folders.clients.path),
+          pagination: { page: 2, pageSize: 2 },
+          sort: 'id:asc',
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.map((folder) => folder.id)).toEqual([folders.year.id]);
+      expect(res.body.meta.pagination).toEqual({ page: 2, pageSize: 2, pageCount: 2, total: 3 });
+    });
+
+    test('returns the id, both paths and the parent of a nested folder', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { id: folders.year.id } },
+      });
+
+      expect(res.body.data).toEqual([
+        {
+          id: folders.year.id,
+          documentId: expect.any(String),
+          name: '2026',
+          path: folders.year.path,
+          namePath: '/Clients/Acme/2026',
+          parent: { id: folders.acme.id, documentId: expect.any(String) },
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        },
+      ]);
+    });
+
+    test('filters by parent, including the library root', async () => {
+      const children = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { parent: { id: folders.clients.id } } },
+      });
+      const roots = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { parent: { id: { $null: true } } } },
+      });
+
+      expect(children.body.data.map((folder) => folder.id)).toEqual(
+        expect.arrayContaining([folders.acme.id])
+      );
+      expect(children.body.data.every((folder) => folder.parent.id === folders.clients.id)).toBe(
+        true
+      );
+      expect(roots.body.data.map((folder) => folder.id)).toEqual(
+        expect.arrayContaining([folders.archive.id, folders.clients.id])
+      );
+      expect(roots.body.data.every((folder) => folder.parent === null)).toBe(true);
+    });
+
+    test('filters a whole subtree by path', async () => {
+      // A root folder whose path starts with the same digits, such as `/10` next to `/1`.
+      const lookalikePathId = Number(`${folders.clients.pathId}9999`);
+      const lookalike = await strapi.db.query('plugin::upload.folder').create({
+        data: { name: 'Lookalike', pathId: lookalikePathId, path: `/${lookalikePathId}` },
+      });
+
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: subtreeOf(folders.clients.path), sort: 'id:asc' },
+      });
+      await deleteFolders([lookalike.id]);
+
+      expect(res.body.data.map((folder) => folder.id)).toEqual([
+        folders.clients.id,
+        folders.acme.id,
+        folders.year.id,
+      ]);
+    });
+
+    test('lists folders whose path is not made of pathIds', async () => {
+      const imported = await strapi.db
+        .query('plugin::upload.folder')
+        .create({ data: { name: 'Imported', pathId: 999998, path: '/imported' } });
+      const nested = await strapi.db.query('plugin::upload.folder').create({
+        data: { name: 'Nested', pathId: 999997, path: `/${folders.clients.pathId}/legacy` },
+      });
+
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { id: { $in: [imported.id, nested.id] } }, sort: 'id:asc' },
+      });
+      await deleteFolders([imported.id, nested.id]);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toMatchObject([
+        { id: imported.id, namePath: '/' },
+        { id: nested.id, namePath: '/Clients' },
+      ]);
+    });
+
+    test('lists and reads a folder whose path has out-of-range segments', async () => {
+      const outOfRange = await strapi.db.query('plugin::upload.folder').create({
+        data: {
+          name: 'Out of range',
+          pathId: 999996,
+          path: `/${folders.clients.pathId}/99999999999/2147483648/1e21`,
+        },
+      });
+
+      const list = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { id: outOfRange.id } },
+      });
+      const one = await rq({ method: 'GET', url: `/upload/folders/${outOfRange.id}` });
+      await deleteFolders([outOfRange.id]);
+
+      expect(list.statusCode).toBe(200);
+      expect(list.body.data).toMatchObject([{ id: outOfRange.id, namePath: '/Clients' }]);
+      expect(one.statusCode).toBe(200);
+      expect(one.body.data).toMatchObject({ id: outOfRange.id, namePath: '/Clients' });
+    });
+
+    test('uses the default pagination for a bare pagination parameter', async () => {
+      const res = await rq({ method: 'GET', url: '/upload/folders?pagination' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.meta.pagination).toMatchObject({ page: 1, pageSize: 25 });
+    });
+
+    test.each([
+      ['/upload/folders', (body) => body.data],
+      ['/upload/folders/:id', (body) => [body.data]],
+    ])('ignores fields and populate on %s', async (url, getFolders) => {
+      const res = await rq({
+        method: 'GET',
+        url: url.replace(':id', folders.acme.id),
+        qs: { populate: ['files', 'children'], fields: ['pathId', 'bogus'] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      getFolders(res.body).forEach((folder) => {
+        expect(Object.keys(folder).sort()).toEqual(
+          [
+            'createdAt',
+            'documentId',
+            'id',
+            'name',
+            'namePath',
+            'parent',
+            'path',
+            'updatedAt',
+          ].sort()
+        );
+      });
+    });
+  });
+
+  describe('GET /upload/folders/:id', () => {
+    test('returns a folder by id or by documentId', async () => {
+      const byId = await rq({ method: 'GET', url: `/upload/folders/${folders.acme.id}` });
+      const byDocumentId = await rq({
+        method: 'GET',
+        url: `/upload/folders/${byId.body.data.documentId}`,
+      });
+
+      expect(byId.statusCode).toBe(200);
+      expect(byId.body.data).toMatchObject({
+        id: folders.acme.id,
+        namePath: '/Clients/Acme',
+        parent: { id: folders.clients.id },
+      });
+      expect(byDocumentId.body.data).toEqual(byId.body.data);
+    });
+
+    test.each(['999999', '99999999999999999999'])(
+      'returns 404 for an unknown folder %s',
+      async (id) => {
+        const res = await rq({ method: 'GET', url: `/upload/folders/${id}` });
+
+        expect(res.statusCode).toBe(404);
+      }
+    );
+  });
+
+  describe('Folder changes', () => {
+    test('reflects a renamed or moved folder in its paths and parent', async () => {
+      const brand = await createFolder('Brand', folders.clients.id);
+      const logo = await createFolder('Logo', brand.id);
+
+      await rqAdmin({
+        method: 'PUT',
+        url: `/upload/folders/${brand.id}`,
+        body: { name: 'Brands' },
+      });
+      const renamed = await rq({ method: 'GET', url: `/upload/folders/${logo.id}` });
+
+      await rqAdmin({
+        method: 'PUT',
+        url: `/upload/folders/${logo.id}`,
+        body: { parent: folders.archive.id },
+      });
+      const moved = await rq({ method: 'GET', url: `/upload/folders/${logo.id}` });
+
+      await deleteFolders([brand.id, logo.id]);
+
+      expect(renamed.body.data).toMatchObject({ namePath: '/Clients/Brands/Logo' });
+      expect(moved.body.data).toMatchObject({
+        path: `${folders.archive.path}/${logo.pathId}`,
+        namePath: '/Archive/Logo',
+        parent: { id: folders.archive.id },
+      });
+    });
+  });
+});

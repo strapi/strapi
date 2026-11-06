@@ -1,0 +1,122 @@
+import type { Context } from 'koa';
+import { omit } from 'lodash';
+import { errors, traverse } from '@strapi/utils';
+import type { Core, Data } from '@strapi/types';
+
+import { getService } from '../utils';
+import { FILE_MODEL_UID, FOLDER_MODEL_UID } from '../constants';
+import { findAndCountRestPage } from '../utils/rest-pagination';
+import { isIntegerId } from '../utils/integer-id';
+
+const FIELDS = ['documentId', 'name', 'path', 'createdAt', 'updatedAt'];
+const POPULATE = { parent: { fields: ['documentId'] } };
+
+type ContentApiFolder = {
+  id: Data.ID;
+  documentId: Data.DocumentID;
+  name: string;
+  path: string;
+  createdAt: string;
+  updatedAt: string;
+  parent?: { id: Data.ID; documentId: Data.DocumentID } | null;
+  namePath?: string;
+};
+
+// The response shape is fixed, so `fields` and `populate` are ignored on both routes.
+const omitShapeParams = (query: Record<string, unknown>) => omit(query, ['fields', 'populate']);
+
+// `file.folder` is private, so a folder can't be looked up through its files either.
+const throwFileRelations: Parameters<typeof traverse.traverseQueryFilters>[0] = ({
+  key,
+  attribute,
+  path,
+}) => {
+  if (attribute?.type === 'relation' && attribute.target === FILE_MODEL_UID) {
+    throw new errors.ValidationError(`Invalid key ${key}`, { key, path: path.attribute });
+  }
+};
+
+export default ({ strapi }: { strapi: Core.Strapi }) => {
+  const validateQuery = async (data: Record<string, unknown>, ctx: Context) => {
+    const schema = strapi.getModel(FOLDER_MODEL_UID);
+    const { auth, route } = ctx.state;
+    const options = { schema, getModel: strapi.getModel.bind(strapi) };
+
+    await traverse.traverseQueryFilters(throwFileRelations, options, data.filters);
+    await traverse.traverseQuerySort(throwFileRelations, options, data.sort);
+
+    return strapi.contentAPI.validate.query(data, schema, { auth, route });
+  };
+
+  const sanitizeQuery = async (data: Record<string, unknown>, ctx: Context) => {
+    const schema = strapi.getModel(FOLDER_MODEL_UID);
+    const { auth, route } = ctx.state;
+
+    return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
+  };
+
+  const toResponse = async (folders: ContentApiFolder[], ctx: Context) => {
+    const schema = strapi.getModel(FOLDER_MODEL_UID);
+    const { auth } = ctx.state;
+
+    const namePaths = await getService('folder').getNamePaths(folders.map(({ path }) => path));
+    const sanitized = (await strapi.contentAPI.sanitize.output(folders, schema, {
+      auth,
+    })) as ContentApiFolder[];
+
+    return sanitized.map((folder, index) => {
+      const response = { ...folder };
+
+      // `parent` is left out when the sanitizer removed it, so it never looks like a root folder.
+      if ('parent' in folder) {
+        response.parent = folder.parent ?? null;
+      }
+
+      if ('name' in folder) {
+        response.namePath = namePaths[folders[index].path];
+      }
+
+      return response;
+    });
+  };
+
+  return {
+    async find(ctx: Context) {
+      const query = omitShapeParams(ctx.query);
+
+      await validateQuery(query, ctx);
+      const { filters, sort, pagination } = await sanitizeQuery(query, ctx);
+
+      const { results, pagination: paginationInfo } = await findAndCountRestPage(
+        strapi,
+        FOLDER_MODEL_UID,
+        { filters, sort, pagination, fields: FIELDS, populate: POPULATE }
+      );
+
+      ctx.body = { data: await toResponse(results, ctx), meta: { pagination: paginationInfo } };
+    },
+
+    async findOne(ctx: Context) {
+      await validateQuery(omitShapeParams(ctx.query), ctx);
+
+      const { id } = ctx.params;
+      const filters = isIntegerId(id) ? { id } : { documentId: id };
+
+      const folder = await strapi.db
+        .query(FOLDER_MODEL_UID)
+        .findOne(
+          strapi
+            .get('query-params')
+            .transform(FOLDER_MODEL_UID, { filters, fields: FIELDS, populate: POPULATE })
+        );
+
+      if (!folder) {
+        return ctx.notFound('folder.notFound');
+      }
+
+      const [data] = await toResponse([folder], ctx);
+
+      ctx.body = { data };
+    },
+  };
+};

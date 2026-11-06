@@ -2,6 +2,7 @@ import { map, sortBy } from 'lodash';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
+import { isIntegerId } from '../utils/integer-id';
 import { AUDITED_EVENTS } from '../audit-logs';
 
 import type { File, Folder } from '../types';
@@ -287,6 +288,33 @@ const exists = async (params = {}) => {
 };
 
 /**
+ * Maps each folder `path` (made of `pathId`s, e.g. `/1/4/7`) to the same path made of
+ * folder names (e.g. `/Clients/Acme/2026`), with a single query for all the ancestors.
+ */
+const getNamePaths = async (paths: string[]): Promise<Record<string, string>> => {
+  const segmentsByPath = paths.map((path) => path.split('/').filter(Boolean));
+  const pathIds = [...new Set(segmentsByPath.flat())].filter(isIntegerId).map(Number);
+
+  const ancestors: Pick<Folder, 'pathId' | 'name'>[] = pathIds.length
+    ? await strapi.db
+        .query(FOLDER_MODEL_UID)
+        .findMany({ select: ['pathId', 'name'], where: { pathId: { $in: pathIds } } })
+    : [];
+
+  const nameByPathId = new Map(ancestors.map(({ pathId, name }) => [String(pathId), name]));
+
+  return Object.fromEntries(
+    paths.map((path, index) => [
+      path,
+      `/${segmentsByPath[index]
+        .map((pathId) => nameByPathId.get(pathId))
+        .filter((name) => name !== undefined)
+        .join('/')}`,
+    ])
+  );
+};
+
+/**
  * Returns the nested structure of folders
  * @returns {Promise<array>}
  */
@@ -336,4 +364,5 @@ export default {
   update,
   setPathIdAndPath,
   getStructure,
+  getNamePaths,
 };
