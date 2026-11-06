@@ -98,6 +98,15 @@ export interface McpOAuthConfig {
   authorizationCodeLifespan?: number;
   /** Consent ticket lifespan in seconds. Defaults to 300. */
   consentTicketLifespan?: number;
+  /**
+   * Overrides for the registration endpoint's rate limit (koa2-ratelimit options such as
+   * `max`, `interval` or `enabled`). Defaults to 5 requests per 5 minutes per IP.
+   */
+  registrationRateLimit?: {
+    enabled?: boolean;
+    max?: number;
+    interval?: number | { min?: number; sec?: number; hour?: number; day?: number };
+  };
 }
 
 export interface McpConfig {
