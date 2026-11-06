@@ -7,6 +7,7 @@ import { FIELDS_TO_IGNORE } from '../constants';
 import type {
   CreateHistoryVersion,
   HistoryVersionAuthor,
+  HistoryVersionAuthorReference,
 } from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
@@ -37,28 +38,27 @@ export const computeRetentionDays = (
   return Math.min(licenseDays, DEFAULT_RETENTION_DAYS);
 };
 
+export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
+
 export type AuthorColumns =
   | {
-      authorType: HistoryVersionAuthor['type'];
-      authorName: HistoryVersionAuthor['name'];
-      authorModel: HistoryVersionAuthor['model'];
-      authorId: HistoryVersionAuthor['id'];
+      authorType: StoredAuthorReference['type'];
+      authorModel: StoredAuthorReference['model'];
+      authorId: StoredAuthorReference['id'];
     }
-  | { authorType: null; authorName: null; authorModel: null; authorId: null };
+  | { authorType: null; authorModel: null; authorId: null };
 
-export const toAuthorColumns = (author: HistoryVersionAuthor): AuthorColumns => ({
+export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
   authorType: author.type,
-  authorName: author.name,
   authorModel: author.model,
   authorId: author.id,
 });
 
-export const toAuthor = (columns: AuthorColumns): HistoryVersionAuthor | null =>
+export const toAuthorReference = (columns: AuthorColumns): StoredAuthorReference | null =>
   columns.authorType === null
     ? null
     : {
         type: columns.authorType,
-        name: columns.authorName,
         model: columns.authorModel,
         id: columns.authorId,
       };

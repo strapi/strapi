@@ -996,6 +996,40 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(latestVersion.data.description).toBe('Updated with an admin token');
     });
 
+    test('Shows the current name of the author', async () => {
+      const utils = createUtils(strapi);
+      const superAdminRole = await utils.getSuperAdminRole();
+      const author = await utils.createUser({
+        firstname: 'renamed',
+        lastname: 'author',
+        email: 'renamed.author@strapi.io',
+        roles: [superAdminRole.id],
+      });
+      const authorRq = await createAuthRequest({ strapi, userInfo: author });
+      const { data: entry } = await createEntry({
+        uid: collectionTypeUid,
+        data: { name: 'Product of a renamed author' },
+      });
+
+      const res = await authorRq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${entry.documentId}`,
+        body: { description: 'Updated before the rename' },
+        qs: { locale: 'en' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      await strapi.service('admin::user').updateById(author.id, { firstname: 'Renamed' });
+
+      const [latestVersion] = await findVersions(entry.documentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: 'Renamed author',
+        model: 'admin::user',
+        id: String(author.id),
+      });
+    });
+
     describe('Versions saved before the source and the author', () => {
       let documentId: string;
 
@@ -1033,7 +1067,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
         });
       });
 
-      test('Shows no author when the admin was deleted', async () => {
+      test('Shows a deleted author when the admin was deleted', async () => {
         const utils = createUtils(strapi);
         const admin = await utils.createUser({
           firstname: 'deleted',
@@ -1047,7 +1081,12 @@ describeOnCondition(edition === 'EE')('History API', () => {
         const version = versions.find(({ id }) => id === legacyVersion.id);
 
         expect(version.source).toBe('admin-panel');
-        expect(version.author).toBeNull();
+        expect(version.author).toEqual({
+          type: 'person',
+          name: null,
+          model: 'admin::user',
+          id: null,
+        });
       });
     });
   });
