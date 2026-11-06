@@ -373,6 +373,53 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
     });
   });
 
+  describe('Orphaned content type', () => {
+    // A stored UID can outlive its model, e.g. a workflow imported from another project
+    const orphanUID = 'api::missing.missing';
+
+    const createWorkflowWithOrphan = async () => {
+      const workflow = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
+
+      // Write the UID directly, as the API rejects unknown content types
+      await strapi.db.query(WORKFLOW_MODEL_UID).update({
+        where: { id: workflow.id },
+        data: { contentTypes: [orphanUID] },
+      });
+
+      return workflow;
+    };
+
+    test('It should unassign an orphaned content type', async () => {
+      const workflow = await createWorkflowWithOrphan();
+
+      const res = await updateWorkflow(workflow.id, { contentTypes: [] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toMatchObject({ contentTypes: [] });
+    });
+
+    test('It should delete a workflow with an orphaned content type', async () => {
+      const workflow = await createWorkflowWithOrphan();
+
+      const res = await deleteWorkflow(workflow.id);
+
+      expect(res.status).toBe(200);
+      expect(await getWorkflow(workflow.id)).toBeUndefined();
+    });
+
+    test('It should delete a stage of a workflow with an orphaned content type', async () => {
+      const workflow = await createWorkflowWithOrphan();
+      const [firstStage] = workflow.stages;
+
+      const res = await updateWorkflow(workflow.id, {
+        stages: [{ id: firstStage.id, name: firstStage.name }],
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.stages).toMatchObject([{ id: firstStage.id }]);
+    });
+  });
+
   describe('Creating entity assigned to a workflow', () => {
     let workflow;
     test('When content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {
@@ -390,6 +437,39 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
 
       const entry = await createEntry(productUID, { name: 'Product' });
       expect(await entry[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
+    });
+  });
+
+  describe('Content manager configuration', () => {
+    const getConfigurationOptions = async (uid) => {
+      const { body } = await requests.admin.get(
+        `/content-manager/content-types/${uid}/configuration`
+      );
+      return body.data.contentType.options;
+    };
+
+    test('Assigning and unassigning a content type keeps its other configuration options', async () => {
+      const res = await requests.admin.put(
+        `/content-manager/content-types/${dogUID}/configuration`,
+        {
+          body: { options: { custom: 'value' } },
+        }
+      );
+      expect(res.status).toBe(200);
+
+      const workflow = await createWorkflow({ contentTypes: [dogUID] }).then(
+        (res) => res.body.data
+      );
+      expect(await getConfigurationOptions(dogUID)).toMatchObject({
+        custom: 'value',
+        reviewWorkflows: true,
+      });
+
+      await updateWorkflow(workflow.id, { contentTypes: [] });
+      expect(await getConfigurationOptions(dogUID)).toMatchObject({
+        custom: 'value',
+        reviewWorkflows: false,
+      });
     });
   });
 });

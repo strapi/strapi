@@ -8,6 +8,7 @@ import uid from './uid';
 import history from '../history';
 import preview from '../preview';
 import homepage from '../homepage';
+import customOrder from '../custom-order';
 
 export default {
   'collection-types': collectionTypes,
@@ -19,5 +20,6 @@ export default {
   uid,
   ...(history.controllers ? history.controllers : {}),
   ...(preview.controllers ? preview.controllers : {}),
+  ...(customOrder.controllers ? customOrder.controllers : {}),
   ...homepage.controllers,
 };

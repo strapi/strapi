@@ -5,12 +5,16 @@ import { Box, Flex, Popover } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { type UseDocument } from '../../hooks/useDocument';
+import { useShouldLockNonLocalizedField } from '../../hooks/useI18nFieldLock';
+import { ComponentProvider } from '../../pages/EditView/components/FormInputs/ComponentContext';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { usePreviewContext } from '../pages/Preview';
 import { INTERNAL_EVENTS, PREVIEW_ERROR_MESSAGES } from '../utils/constants';
 import {
   parseFieldMetaData,
   getAttributeSchemaFromPath,
+  getComponentLevelFromPath,
+  parsePathWithIndices,
   PreviewFieldError,
 } from '../utils/fieldUtils';
 
@@ -53,6 +57,15 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
 
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
+
+  // Nested fields have no parent component input in the popover to inherit a
+  // lock from, so lock them when their root attribute is shared.
+  const rootAttributeName = popoverField
+    ? parsePathWithIndices(popoverField.path)[0]?.name
+    : undefined;
+  const isRootAttributeLocked = useShouldLockNonLocalizedField(
+    rootAttributeName ? schema?.attributes[rootAttributeName] : undefined
+  );
 
   React.useEffect(() => {
     /**
@@ -180,16 +193,19 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
                 minHeight: 0,
               }}
             >
-              {/* @ts-expect-error the types of `attribute` clash for some reason */}
-              <InputRenderer
-                document={documentResponse}
-                attribute={popoverField.attribute}
-                // TODO: retrieve the proper label from the layout
-                label={popoverField.path}
-                name={popoverField.path}
-                type={popoverField.attribute.type}
-                visible={true}
-              />
+              <ComponentProvider level={getComponentLevelFromPath(popoverField.path)}>
+                {/* @ts-expect-error the types of `attribute` clash for some reason */}
+                <InputRenderer
+                  document={documentResponse}
+                  attribute={popoverField.attribute}
+                  // TODO: retrieve the proper label from the layout
+                  label={popoverField.path}
+                  name={popoverField.path}
+                  type={popoverField.attribute.type}
+                  disabled={isRootAttributeLocked}
+                  visible={true}
+                />
+              </ComponentProvider>
             </Flex>
           </Popover.Content>
         </Popover.Root>

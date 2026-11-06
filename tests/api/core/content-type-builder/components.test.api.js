@@ -1,6 +1,9 @@
 'use strict';
 
-const { createAuthRequest } = require('api-tests/request');
+const fs = require('fs');
+const path = require('path');
+
+const { createAuthRequest, createContentAPIRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 
 let strapi;
@@ -11,6 +14,202 @@ const restart = async () => {
   strapi = await createStrapiInstance();
   rq = await createAuthRequest({ strapi });
 };
+
+const CARD = {
+  displayName: 'Card',
+  icon: 'calendar',
+  attributes: {
+    title: { type: 'string' },
+    image: { type: 'media', multiple: false, allowedTypes: ['images'] },
+  },
+};
+
+const updateSchema = (data) =>
+  rq({ method: 'POST', url: '/content-type-builder/update-schema', body: { data } });
+
+const componentTypes = async (tableName) =>
+  strapi.db.getConnection(tableName).pluck('component_type');
+
+const uploadImage = async () => {
+  const res = await rq({
+    method: 'POST',
+    url: '/upload',
+    formData: {
+      files: fs.createReadStream(path.join(__dirname, '../upload/utils/rec.jpg')),
+    },
+  });
+  expect(res.statusCode).toBe(201);
+  return res.body[0];
+};
+
+const createAttributes = (attributes) =>
+  Object.entries(attributes).map(([name, properties]) => ({ action: 'create', name, properties }));
+
+/**
+ * Creates `<category>.card` (title + image), `<category>.wrapper` (nests a card) and a page
+ * collection type with a dynamic zone (card + wrapper) and a single `hero` card, then seeds
+ * one page through the content API with an image on every card. Each caller passes its own
+ * category and page names, so that fixtures never collide.
+ */
+const seedPageWithCard = async ({ category, singularName, pluralName }) => {
+  const fixture = {
+    pageUid: `api::${singularName}.${singularName}`,
+    pluralName,
+    cardUid: `${category}.card`,
+    wrapperUid: `${category}.wrapper`,
+  };
+
+  const res = await updateSchema({
+    components: [
+      {
+        action: 'create',
+        uid: fixture.cardUid,
+        category,
+        displayName: CARD.displayName,
+        icon: CARD.icon,
+        attributes: createAttributes(CARD.attributes),
+      },
+      {
+        action: 'create',
+        uid: fixture.wrapperUid,
+        category,
+        displayName: 'Wrapper',
+        icon: 'calendar',
+        attributes: createAttributes({
+          inner: { type: 'component', repeatable: false, component: fixture.cardUid },
+        }),
+      },
+    ],
+    contentTypes: [
+      {
+        action: 'create',
+        uid: fixture.pageUid,
+        displayName: singularName,
+        singularName,
+        pluralName,
+        kind: 'collectionType',
+        draftAndPublish: false,
+        attributes: createAttributes({
+          sections: {
+            type: 'dynamiczone',
+            components: [fixture.cardUid, fixture.wrapperUid],
+          },
+          hero: { type: 'component', repeatable: false, component: fixture.cardUid },
+        }),
+      },
+    ],
+  });
+  expect(res.statusCode).toBe(200);
+
+  await restart();
+
+  fixture.file = await uploadImage();
+
+  const created = await createContentAPIRequest({ strapi })({
+    method: 'POST',
+    url: `/${pluralName}`,
+    body: {
+      data: {
+        sections: [
+          { __component: fixture.cardUid, title: 'A', image: fixture.file.id },
+          { __component: fixture.wrapperUid, inner: { title: 'I', image: fixture.file.id } },
+        ],
+        hero: { title: 'H', image: fixture.file.id },
+      },
+    },
+  });
+  expect(created.statusCode).toBe(201);
+
+  return fixture;
+};
+
+/**
+ * Asserts on the real tables that every stored reference to the card and the wrapper uses
+ * `cardUid` / `wrapperUid`, that none uses `staleCardUid`, and that the page and every card
+ * image still resolve through the content API.
+ */
+const expectPageOn = async (
+  { pageUid, pluralName, file },
+  { cardUid, wrapperUid, staleCardUid }
+) => {
+  const pageTable = strapi.db.metadata.get(pageUid).attributes.sections.joinTable.name;
+  const wrapperTable = strapi.db.metadata.get(wrapperUid).attributes.inner.joinTable.name;
+
+  expect((await componentTypes(pageTable)).sort()).toEqual([cardUid, cardUid, wrapperUid].sort());
+  expect(await componentTypes(wrapperTable)).toEqual([cardUid]);
+
+  const morphTable = strapi.db.metadata.get('plugin::upload.file').attributes.related.joinTable;
+  const relatedTypes = await strapi.db
+    .getConnection(morphTable.name)
+    .pluck(morphTable.morphColumn.typeColumn.name);
+
+  expect(relatedTypes.filter((type) => type === cardUid)).toHaveLength(3);
+  expect(relatedTypes).not.toContain(staleCardUid);
+
+  const { statusCode, body } = await createContentAPIRequest({ strapi })({
+    method: 'GET',
+    url: `/${pluralName}`,
+    qs: {
+      populate: {
+        sections: {
+          on: {
+            [cardUid]: { populate: '*' },
+            [wrapperUid]: { populate: { inner: { populate: '*' } } },
+          },
+        },
+        hero: { populate: '*' },
+      },
+    },
+  });
+
+  expect(statusCode).toBe(200);
+  expect(body.data).toHaveLength(1);
+
+  const [page] = body.data;
+  const image = expect.objectContaining({ id: file.id });
+
+  expect(page.sections).toHaveLength(2);
+  expect(page.sections[0]).toMatchObject({ __component: cardUid, title: 'A' });
+  expect(page.sections[0].image).toEqual(image);
+  expect(page.sections[1]).toMatchObject({ __component: wrapperUid });
+  expect(page.sections[1].inner).toMatchObject({ title: 'I' });
+  expect(page.sections[1].inner.image).toEqual(image);
+  expect(page.hero).toMatchObject({ title: 'H' });
+  expect(page.hero.image).toEqual(image);
+};
+
+/**
+ * Deletes what `seedPageWithCard` created, under the uids the components ended with, then
+ * restarts so the next describe starts from a registry without them.
+ */
+const deleteFixture = async ({ pageUid, file }, componentUids) => {
+  await updateSchema({
+    contentTypes: [{ action: 'delete', uid: pageUid }],
+    components: componentUids.map((uid) => ({ action: 'delete', uid })),
+  });
+
+  if (file) {
+    await rq({ method: 'DELETE', url: `/upload/files/${file.id}` });
+  }
+
+  await restart();
+};
+
+/**
+ * The update-schema payload that moves `uid` to `category` and keeps its attributes.
+ */
+const moveComponentPayload = (uid, category, attributes) => ({
+  action: 'update',
+  uid,
+  category,
+  displayName: CARD.displayName,
+  icon: CARD.icon,
+  attributes: Object.entries(attributes).map(([name, properties]) => ({
+    action: 'update',
+    name,
+    properties,
+  })),
+});
 
 describe('Content Type Builder - Components', () => {
   beforeAll(async () => {
@@ -250,6 +449,27 @@ describe('Content Type Builder - Components', () => {
       });
     });
 
+    test('Returns the error message when the validation throws a native error', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/content-type-builder/components/default.some-component',
+        body: {
+          component: {
+            category: '',
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        error: {
+          name: 'TypeError',
+          message: expect.stringContaining('undefined'),
+          details: {},
+        },
+      });
+    });
+
     test('Updates a component properly', async () => {
       const res = await rq({
         method: 'PUT',
@@ -340,6 +560,365 @@ describe('Content Type Builder - Components', () => {
       expect(tryGet.statusCode).toBe(404);
       expect(tryGet.body).toEqual({
         error: 'component.notFound',
+      });
+    });
+  });
+
+  describe('Moving a component to another category keeps its entries', () => {
+    const PAGE_UID = 'api::page.page';
+
+    let contentApi;
+    let file;
+
+    beforeAll(async () => {
+      // card nested in a wrapper component, and used both in a dynamic zone and as a single component
+      const res = await updateSchema({
+        components: [
+          {
+            action: 'create',
+            uid: 'default.card',
+            category: 'default',
+            displayName: CARD.displayName,
+            icon: CARD.icon,
+            attributes: Object.entries(CARD.attributes).map(([name, properties]) => ({
+              action: 'create',
+              name,
+              properties,
+            })),
+          },
+          {
+            action: 'create',
+            uid: 'default.wrapper',
+            category: 'default',
+            displayName: 'Wrapper',
+            icon: 'calendar',
+            attributes: [
+              {
+                action: 'create',
+                name: 'inner',
+                properties: { type: 'component', repeatable: false, component: 'default.card' },
+              },
+            ],
+          },
+        ],
+        contentTypes: [
+          {
+            action: 'create',
+            uid: PAGE_UID,
+            displayName: 'Page',
+            singularName: 'page',
+            pluralName: 'pages',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            attributes: [
+              {
+                action: 'create',
+                name: 'sections',
+                properties: {
+                  type: 'dynamiczone',
+                  components: ['default.card', 'default.wrapper'],
+                },
+              },
+              {
+                action: 'create',
+                name: 'hero',
+                properties: { type: 'component', repeatable: false, component: 'default.card' },
+              },
+            ],
+          },
+        ],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+      contentApi = createContentAPIRequest({ strapi });
+
+      file = await uploadImage();
+
+      const created = await contentApi({
+        method: 'POST',
+        url: '/pages',
+        body: {
+          data: {
+            sections: [
+              { __component: 'default.card', title: 'A', image: file.id },
+              { __component: 'default.wrapper', inner: { title: 'I', image: file.id } },
+            ],
+            hero: { title: 'H', image: file.id },
+          },
+        },
+      });
+      expect(created.statusCode).toBe(201);
+    });
+
+    afterAll(async () => {
+      await updateSchema({
+        contentTypes: [{ action: 'delete', uid: PAGE_UID }],
+        components: [
+          { action: 'delete', uid: 'blocks.card' },
+          { action: 'delete', uid: 'default.wrapper' },
+        ],
+      });
+
+      if (file) {
+        await rq({ method: 'DELETE', url: `/upload/files/${file.id}` });
+      }
+
+      // the describes below build their schema from a registry without these
+      await restart();
+    });
+
+    test('the dynamic zone and component rows follow the new uid', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/content-type-builder/components/default.card',
+        body: { component: { ...CARD, category: 'blocks' } },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ data: { uid: 'blocks.card' } });
+
+      await restart();
+      contentApi = createContentAPIRequest({ strapi });
+
+      const pageTable = strapi.db.metadata.get(PAGE_UID).attributes.sections.joinTable.name;
+      const wrapperTable =
+        strapi.db.metadata.get('default.wrapper').attributes.inner.joinTable.name;
+
+      expect((await componentTypes(pageTable)).sort()).toEqual([
+        'blocks.card',
+        'blocks.card',
+        'default.wrapper',
+      ]);
+      expect(await componentTypes(wrapperTable)).toEqual(['blocks.card']);
+
+      const { statusCode, body } = await contentApi({
+        method: 'GET',
+        url: '/pages',
+        qs: { populate: '*' },
+      });
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0].sections).toEqual([
+        expect.objectContaining({ __component: 'blocks.card', title: 'A' }),
+        expect.objectContaining({ __component: 'default.wrapper' }),
+      ]);
+      expect(body.data[0].hero).toMatchObject({ title: 'H' });
+    });
+
+    test('the media links of the moved component follow the new uid', async () => {
+      // the previous test moved the card and restarted
+      const morphTable = strapi.db.metadata.get('plugin::upload.file').attributes.related.joinTable;
+      const typeColumn = morphTable.morphColumn.typeColumn.name;
+
+      const relatedTypes = await strapi.db.getConnection(morphTable.name).pluck(typeColumn);
+      expect(relatedTypes).not.toContain('default.card');
+      expect(relatedTypes.filter((type) => type === 'blocks.card')).toHaveLength(3);
+
+      const { statusCode, body } = await contentApi({
+        method: 'GET',
+        url: '/pages',
+        qs: {
+          populate: {
+            sections: {
+              on: {
+                'blocks.card': { populate: '*' },
+                'default.wrapper': { populate: { inner: { populate: '*' } } },
+              },
+            },
+            hero: { populate: '*' },
+          },
+        },
+      });
+
+      expect(statusCode).toBe(200);
+      const [page] = body.data;
+      const image = expect.objectContaining({ id: file.id });
+
+      expect(page.sections[0]).toMatchObject({ __component: 'blocks.card', title: 'A' });
+      expect(page.sections[0].image).toEqual(image);
+      expect(page.sections[1].inner).toMatchObject({ title: 'I' });
+      expect(page.sections[1].inner.image).toEqual(image);
+      expect(page.hero).toMatchObject({ title: 'H' });
+      expect(page.hero.image).toEqual(image);
+    });
+  });
+
+  describe('Moving a component through update-schema keeps its entries', () => {
+    let fixture;
+
+    beforeAll(async () => {
+      fixture = await seedPageWithCard({
+        category: 'schemamove',
+        singularName: 'schemamove-page',
+        pluralName: 'schemamove-pages',
+      });
+    });
+
+    afterAll(async () => {
+      await deleteFixture(fixture, ['schemamoved.card', fixture.wrapperUid]);
+    });
+
+    test('the rows and the media links follow the new uid', async () => {
+      const res = await updateSchema({
+        components: [moveComponentPayload(fixture.cardUid, 'schemamoved', CARD.attributes)],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      await expectPageOn(fixture, {
+        cardUid: 'schemamoved.card',
+        wrapperUid: fixture.wrapperUid,
+        staleCardUid: fixture.cardUid,
+      });
+    });
+  });
+
+  describe('Renaming a component category keeps the entries of its components', () => {
+    let fixture;
+
+    beforeAll(async () => {
+      fixture = await seedPageWithCard({
+        category: 'catold',
+        singularName: 'catrename-page',
+        pluralName: 'catrename-pages',
+      });
+    });
+
+    afterAll(async () => {
+      await deleteFixture(fixture, ['catnew.card', 'catnew.wrapper']);
+    });
+
+    test('the rows and the media links of every component of the category follow the new uids', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/content-type-builder/component-categories/catold',
+        body: { name: 'catnew' },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ name: 'catnew' });
+
+      await restart();
+
+      await expectPageOn(fixture, {
+        cardUid: 'catnew.card',
+        wrapperUid: 'catnew.wrapper',
+        staleCardUid: fixture.cardUid,
+      });
+
+      const wrapperTypes = await componentTypes(
+        strapi.db.metadata.get(fixture.pageUid).attributes.sections.joinTable.name
+      );
+      expect(wrapperTypes).not.toContain(fixture.wrapperUid);
+    });
+  });
+
+  describe('A save that fails after the row rewrite keeps rows and files on the old uid', () => {
+    const MOVED_CATEGORY = 'failmoved';
+    const EXTRA_UID = 'failsrc.extra';
+    let fixture;
+    let groupsPath;
+    let originalGroups;
+
+    // Replaces groups.json with a directory, so the folder commit fails with EISDIR. Does
+    // not depend on file modes, which root (CI) ignores.
+    const breakGroupsFile = async () => {
+      groupsPath = path.join(strapi.dirs.app.contentStructure, 'groups.json');
+      originalGroups = fs.existsSync(groupsPath) ? fs.readFileSync(groupsPath) : null;
+      fs.rmSync(groupsPath, { recursive: true, force: true });
+      fs.mkdirSync(groupsPath, { recursive: true });
+    };
+
+    const restoreGroupsFile = () => {
+      if (!groupsPath) {
+        return;
+      }
+
+      fs.rmSync(groupsPath, { recursive: true, force: true });
+
+      if (originalGroups) {
+        fs.writeFileSync(groupsPath, originalGroups);
+      }
+
+      groupsPath = undefined;
+    };
+
+    beforeAll(async () => {
+      fixture = await seedPageWithCard({
+        category: 'failsrc',
+        singularName: 'failed-page',
+        pluralName: 'failed-pages',
+      });
+    });
+
+    afterEach(() => {
+      restoreGroupsFile();
+    });
+
+    afterAll(async () => {
+      restoreGroupsFile();
+      await deleteFixture(fixture, [fixture.cardUid, fixture.wrapperUid, EXTRA_UID]);
+    });
+
+    test('a failed folder commit rolls the rows back with the files', async () => {
+      const schema = await rq({ method: 'GET', url: '/content-type-builder/schema' });
+      expect(schema.statusCode).toBe(200);
+
+      // Sending the folder structure makes `commitFromUpdate` write groups.json.
+      const contentStructure = schema.body.data.contentStructure ?? {
+        version: 1,
+        sections: { collectionTypes: { groups: [] }, singleTypes: { groups: [] } },
+      };
+
+      await breakGroupsFile();
+
+      const res = await updateSchema({
+        components: [moveComponentPayload(fixture.cardUid, MOVED_CATEGORY, CARD.attributes)],
+        contentStructure,
+      });
+      expect(res.statusCode).toBeGreaterThanOrEqual(400);
+
+      // No restart: the files were restored to the old category...
+      expect(fs.existsSync(path.join(strapi.dirs.app.components, 'failsrc', 'card.json'))).toBe(
+        true
+      );
+      expect(
+        fs.existsSync(path.join(strapi.dirs.app.components, MOVED_CATEGORY, 'card.json'))
+      ).toBe(false);
+
+      // ...and every row still holds the old uid.
+      await expectPageOn(fixture, {
+        cardUid: fixture.cardUid,
+        wrapperUid: fixture.wrapperUid,
+        staleCardUid: `${MOVED_CATEGORY}.card`,
+      });
+    });
+
+    test('the next boot that syncs a schema change keeps the entries', async () => {
+      // An unrelated schema change, so the next boot syncs the schema and removes orphan
+      // component and media rows.
+      const res = await updateSchema({
+        components: [
+          {
+            action: 'create',
+            uid: EXTRA_UID,
+            category: 'failsrc',
+            displayName: 'Extra',
+            icon: 'calendar',
+            attributes: createAttributes({ label: { type: 'string' } }),
+          },
+        ],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      await expectPageOn(fixture, {
+        cardUid: fixture.cardUid,
+        wrapperUid: fixture.wrapperUid,
+        staleCardUid: `${MOVED_CATEGORY}.card`,
       });
     });
   });

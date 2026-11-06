@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { FormikUnsavedChangesRegistrar, UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Modal,
@@ -51,9 +52,11 @@ export const ReleaseModal = ({
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
-  // Set default first timezone from the list if no system timezone detected
+  // Set default first timezone from the list if no system timezone detected.
+  // Offsets are computed from the same instant TimezoneComponent uses (UTC midnight of `date`),
+  // otherwise on a DST change day it rewrites the timezone on mount and the form looks dirty.
   const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
-    initialValues.scheduledAt ? new Date(initialValues.scheduledAt) : new Date()
+    initialValues.date ? new Date(initialValues.date) : new Date()
   );
 
   /**
@@ -77,7 +80,7 @@ export const ReleaseModal = ({
   };
 
   return (
-    <Modal.Root open={open} onOpenChange={handleClose}>
+    <UnsavedChangesModal open={open ?? false} onOpenChange={handleClose}>
       <Modal.Content>
         <Modal.Header>
           <Modal.Title>
@@ -109,6 +112,7 @@ export const ReleaseModal = ({
           {({ values, errors, handleChange, setFieldValue }) => {
             return (
               <Form>
+                <FormikUnsavedChangesRegistrar />
                 <Modal.Body>
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     <Field.Root
@@ -262,7 +266,7 @@ export const ReleaseModal = ({
           }}
         </Formik>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 
