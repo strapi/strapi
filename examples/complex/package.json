@@ -1,6 +1,7 @@
 {
   "name": "complex",
   "version": "0.0.0",
+  "type": "commonjs",
   "private": true,
   "description": "Migration test fixture: Strapi app with rich schemas, seeds, and validators for v4→v5 integration tests (see tests/migration/)",
   "scripts": {

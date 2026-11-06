@@ -1,6 +1,7 @@
 {
   "name": "@strapi/e2e-test-app",
   "version": "0.1.0",
+  "type": "commonjs",
   "private": true,
   "description": "E2E template application",
   "license": "MIT",

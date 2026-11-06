@@ -1,5 +1,6 @@
 {
   "name": "website",
+  "type": "commonjs",
   "private": true,
   "scripts": {
     "develop": "strapi develop",

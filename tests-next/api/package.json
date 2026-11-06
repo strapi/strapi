@@ -1,5 +1,6 @@
 {
   "name": "@strapi/tests-api",
+  "type": "commonjs",
   "private": true,
   "description": "API integration test suite, run with Jest.",
   "scripts": {
