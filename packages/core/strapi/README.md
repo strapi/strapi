@@ -121,7 +121,7 @@ Database driver packages often have their own minimum versions for each version 
 | 24           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
 | 26           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
 
-`better-sqlite3@13` needs Node >= 22.14.0 (Node-API 10). On Node 22.0–22.13 it crashes when the database opens. `create-strapi-app` pins `13.0.3` from Node 22.14 and `12.11.1` below that. An existing app can stay on 12.x.
+`better-sqlite3@13` needs Node >= 22.14.0 (Node-API 10). On Node 22.0–22.13 it crashes when the database opens. `create-strapi-app` pins `13.0.3` from Node 22.14 and `12.11.1` below that. An existing app can stay on 12.x. A new SQLite project created with Yarn 1 needs a C/C++ toolchain to install `13.0.3`, because Yarn 1 compiles that version. Yarn 2 and later install the prebuilt binary.
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 
