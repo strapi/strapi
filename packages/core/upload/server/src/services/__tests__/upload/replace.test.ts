@@ -437,4 +437,25 @@ describe('Upload service - replace()', () => {
     expect(providerMethods.upload).not.toHaveBeenCalled();
     expect(dbUpdate).not.toHaveBeenCalled();
   });
+
+  test('tells the audit log the file was replaced, although it keeps its hash', async () => {
+    currentDbFile = {
+      id: 10,
+      name: 'document.txt',
+      hash: 'document_keep',
+      ext: '.txt',
+      provider: PROVIDER,
+    };
+
+    await uploadService.replace(10, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    const audit = (global.strapi.eventHub.emit as jest.Mock).mock.calls.find(
+      ([event]) => event === 'media.update.audit'
+    );
+    expect(audit[1]).toMatchObject({ replaced: true });
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ hash: 'document_keep' });
+  });
 });
