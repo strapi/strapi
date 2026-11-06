@@ -122,6 +122,22 @@ export interface GenerateConfig {
 }
 
 /**
+ * The warning for the strict artifacts among `artifacts` that the application program leaves out,
+ * `undefined` when it includes them all or the config cannot be read.
+ */
+const findStrictProgramWarning = (appDir: string, generatedDir: string, artifacts: string[]) => {
+  const outsideProgram = findStrictArtifactsOutsideProgram({
+    appDir,
+    generatedDir,
+    filenames: artifacts.filter((artifact) => STRICT_ARTIFACTS.has(artifact)).map(filenameOf),
+  });
+
+  return outsideProgram !== undefined && outsideProgram.missing.length > 0
+    ? formatStrictProgramWarning(outsideProgram, appDir)
+    : undefined;
+};
+
+/**
  * Generate types definitions based on the given configuration
  */
 export const generate = async (config: GenerateConfig = {} as GenerateConfig) => {
@@ -228,16 +244,10 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
 
   // A program without the strict files silently type-checks without strict types
   if (strict === true) {
-    const outsideProgram = findStrictArtifactsOutsideProgram({
-      appDir: pwd,
-      generatedDir: registryPwd,
-      filenames: Object.keys(reports)
-        .filter((artifact) => STRICT_ARTIFACTS.has(artifact))
-        .map(filenameOf),
-    });
+    const warning = findStrictProgramWarning(pwd, registryPwd, Object.keys(reports));
 
-    if (outsideProgram !== undefined && outsideProgram.missing.length > 0) {
-      logger.warn(formatStrictProgramWarning(outsideProgram, pwd));
+    if (warning !== undefined) {
+      logger.warn(warning);
     }
   }
 
@@ -273,4 +283,30 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   }
 
   return returnWithMessage();
+};
+
+/**
+ * The warning `generate` prints when `typescript.strictTypes` is on and the application program
+ * leaves out the strict artifacts, for a caller that runs `generate` silently and prints it with its
+ * own logger (`strapi develop`). Takes the `generate` config. `undefined` with strict types off,
+ * and when the program includes the strict artifacts.
+ */
+export const getStrictProgramWarning = ({
+  pwd,
+  rootDir = TYPES_ROOT_DIR,
+  artifacts = {},
+}: Pick<GenerateConfig, 'pwd' | 'rootDir' | 'artifacts'>) => {
+  if (artifacts.strict !== true) {
+    return undefined;
+  }
+
+  const enabledArtifacts = Object.entries(artifacts)
+    .filter(([, enabled]) => enabled === true)
+    .map(([artifact]) => artifact);
+
+  return findStrictProgramWarning(
+    pwd,
+    path.join(pwd, rootDir, GENERATED_OUT_DIR),
+    enabledArtifacts
+  );
 };

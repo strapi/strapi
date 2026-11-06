@@ -2,7 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { generate } from '../../generators';
+import { generate, getStrictProgramWarning } from '../../generators';
 import { pathExists } from '../../generators/utils';
 
 // prettier is loaded through a dynamic import that jest cannot run; the formatting is not under test
@@ -342,6 +342,47 @@ describe('generate', () => {
       const { warnings } = await generateWithTsconfig({ include: ['./', './**/*.ts'] }, true);
 
       expect(warnings).toEqual([]);
+    });
+
+    // For callers that run `generate` silently, such as `strapi develop`
+    describe('getStrictProgramWarning', () => {
+      test('returns the warning that generate prints', async () => {
+        const { root, warnings } = await generateWithTsconfig(excluding, true);
+
+        const warning = getStrictProgramWarning({ pwd: root, artifacts: strictArtifacts(true) });
+
+        expect(warning).toBeDefined();
+        expect(warnings).toHaveLength(1);
+        expect(warnings[0]).toContain(warning);
+      });
+
+      test('reads the generated files under `rootDir`', async () => {
+        const { root } = await generateWithTsconfig(excluding, true);
+
+        expect(
+          getStrictProgramWarning({
+            pwd: root,
+            rootDir: 'other',
+            artifacts: strictArtifacts(true),
+          })
+        ).toContain('leaves out other/generated/plugins.d.ts');
+      });
+
+      test('returns undefined with strict types off', async () => {
+        const { root } = await generateWithTsconfig(excluding, false);
+
+        expect(
+          getStrictProgramWarning({ pwd: root, artifacts: strictArtifacts(false) })
+        ).toBeUndefined();
+      });
+
+      test('returns undefined when the tsconfig includes the generated files', async () => {
+        const { root } = await generateWithTsconfig({ include: ['./', './**/*.ts'] }, true);
+
+        expect(
+          getStrictProgramWarning({ pwd: root, artifacts: strictArtifacts(true) })
+        ).toBeUndefined();
+      });
     });
   });
 
