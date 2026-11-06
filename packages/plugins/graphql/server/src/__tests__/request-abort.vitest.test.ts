@@ -28,6 +28,7 @@ describe('GraphQL request disconnects', () => {
   const destroyers: Array<() => Promise<void>> = [];
 
   afterEach(async () => {
+    vi.unstubAllGlobals();
     await Promise.all(destroyers.splice(0).map((destroy) => destroy()));
     await Promise.all(
       servers.splice(0).map(async (server) => {
@@ -183,6 +184,9 @@ describe('GraphQL request disconnects', () => {
           return { playground: { setEnabled: vi.fn(), isEnabled: () => false } };
         },
       };
+      // formatGraphqlError reads the global strapi, not the one injected into bootstrap
+      const globalLogError = vi.fn();
+      vi.stubGlobal('strapi', { log: { error: globalLogError } });
       const strapi = {
         plugin: () => plugin,
         log: { warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
@@ -231,6 +235,7 @@ describe('GraphQL request disconnects', () => {
 
         await operationSettled.promise;
         expect(childResolver).not.toHaveBeenCalled();
+        expect(globalLogError).not.toHaveBeenCalled();
         // Plugins still see the skipped field and receive the abort error.
         expect(fieldErrors).toContainEqual({
           field: 'SlowResult.value',
@@ -255,6 +260,7 @@ describe('GraphQL request disconnects', () => {
 
         await mutationSettled.promise;
         expect(laterMutationResolver).not.toHaveBeenCalled();
+        expect(globalLogError).not.toHaveBeenCalled();
         expect(fieldErrors).toContainEqual({
           field: 'Mutation.laterMutation',
           error: 'GraphQL request was aborted because the client disconnected',

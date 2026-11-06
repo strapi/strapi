@@ -1,3 +1,4 @@
+import { GraphQLError } from 'graphql';
 import type {
   GraphQLFieldResolver,
   GraphQLNamedType,
@@ -30,6 +31,10 @@ const isClientDisconnected = (contextValue: unknown): boolean => {
  *
  * Fields without a resolver use the default resolver, which only reads a property of its parent,
  * so they are left as they are. The schema is changed in place.
+ *
+ * graphql 16 has no way to cancel an execution, so this wrapper does it by hand. graphql 17 adds an
+ * `abortSignal` option to `execute` that stops new fields, later root mutations included, the same
+ * way. Replace this wrapper with that option once the plugin moves to graphql 17.
  */
 export const abortFieldsOnClientDisconnect = (schema: GraphQLSchema) => {
   Object.values(schema.getTypeMap()).forEach((type) => {
@@ -51,7 +56,11 @@ export const abortFieldsOnClientDisconnect = (schema: GraphQLSchema) => {
         info
       ) => {
         if (isClientDisconnected(contextValue)) {
-          throw new Error('GraphQL request was aborted because the client disconnected');
+          // A GraphQLError passes through formatGraphqlError untouched. Any other error is treated as
+          // a server error and logged once per skipped field, which floods the log on large lists.
+          throw new GraphQLError('GraphQL request was aborted because the client disconnected', {
+            extensions: { code: 'CLIENT_DISCONNECTED' },
+          });
         }
 
         return resolve(source, args, contextValue, info);
