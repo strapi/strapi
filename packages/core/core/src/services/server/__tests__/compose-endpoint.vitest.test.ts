@@ -8,6 +8,21 @@ import createEndpointComposer from '../compose-endpoint';
 import { createRouteManager } from '../routing';
 import { getRouteSourcePath, installRoutePathTranslation } from '../route-path';
 
+// Handlers record what they received instead of writing it to the response.
+let lastReply: unknown;
+const reply = (ctx: { status: number }, data: unknown) => {
+  lastReply = data;
+  ctx.status = 200;
+};
+const expectReply = async (
+  test: { expect(status: number): PromiseLike<unknown> },
+  expected: unknown
+) => {
+  lastReply = undefined;
+  await test.expect(200);
+  expect(lastReply).toEqual(expected);
+};
+
 const createStrapi = () =>
   ({
     log: { warn: vi.fn() },
@@ -44,7 +59,7 @@ const createServerFactory =
           method: 'GET',
           path,
           handler(ctx) {
-            ctx.body = { route: path, params: { ...ctx.params } };
+            reply(ctx, { route: path, params: { ...ctx.params } });
           },
           info: {},
         },
@@ -84,35 +99,31 @@ describe.each([
       '/content-manager/:kind-types/:id'
     );
 
-    await request(server)
-      .get('/content-manager/collection-types/1')
-      .expect(200, {
-        route: '/content-manager/(collection|single)-types/:id',
-        params: { splat: 'collection', 0: 'collection', id: '1' },
-      });
-    await request(server)
-      .get('/content-manager/single-types/2')
-      .expect(200, {
-        route: '/content-manager/(collection|single)-types/:id',
-        params: { splat: 'single', 0: 'single', id: '2' },
-      });
-    await request(server)
-      .get('/content-manager/other-types/1')
-      .expect(200, {
-        route: '/content-manager/:kind-types/:id',
-        params: { kind: 'other', id: '1' },
-      });
+    await expectReply(request(server).get('/content-manager/collection-types/1'), {
+      route: '/content-manager/(collection|single)-types/:id',
+      params: { splat: 'collection', 0: 'collection', id: '1' },
+    });
+    await expectReply(request(server).get('/content-manager/single-types/2'), {
+      route: '/content-manager/(collection|single)-types/:id',
+      params: { splat: 'single', 0: 'single', id: '2' },
+    });
+    await expectReply(request(server).get('/content-manager/other-types/1'), {
+      route: '/content-manager/:kind-types/:id',
+      params: { kind: 'other', id: '1' },
+    });
   });
 
   it('matches a custom letter pattern in either case', async () => {
     const { server } = createServer('/posts/:slug([a-z0-9-]+)', '/posts/:slug');
 
-    await request(server)
-      .get('/posts/Hello')
-      .expect(200, { route: '/posts/:slug([a-z0-9-]+)', params: { slug: 'Hello' } });
-    await request(server)
-      .get('/posts/Hello_World')
-      .expect(200, { route: '/posts/:slug', params: { slug: 'Hello_World' } });
+    await expectReply(request(server).get('/posts/Hello'), {
+      route: '/posts/:slug([a-z0-9-]+)',
+      params: { slug: 'Hello' },
+    });
+    await expectReply(request(server).get('/posts/Hello_World'), {
+      route: '/posts/:slug',
+      params: { slug: 'Hello_World' },
+    });
   });
 
   it('matches an alternation in either case', async () => {
@@ -121,35 +132,35 @@ describe.each([
       '/content-manager/:kind-types/:id'
     );
 
-    await request(server)
-      .get('/content-manager/Collection-types/1')
-      .expect(200, {
-        route: '/content-manager/(collection|single)-types/:id',
-        params: { splat: 'Collection', 0: 'Collection', id: '1' },
-      });
+    await expectReply(request(server).get('/content-manager/Collection-types/1'), {
+      route: '/content-manager/(collection|single)-types/:id',
+      params: { splat: 'Collection', 0: 'Collection', id: '1' },
+    });
   });
 
   it('lets a character range that contains a slash span segments', async () => {
     const { server } = createServer('/files/:path([!-~]+)');
 
-    await request(server)
-      .get('/files/a/b')
-      .expect(200, { route: '/files/:path([!-~]+)', params: { path: 'a/b' } });
+    await expectReply(request(server).get('/files/a/b'), {
+      route: '/files/:path([!-~]+)',
+      params: { path: 'a/b' },
+    });
   });
 
   it('does not match a value its custom pattern rejects', async () => {
     const { server } = createServer('/users/:id(\\d+)');
 
-    await request(server)
-      .get('/users/12')
-      .expect(200, { route: '/users/:id(\\d+)', params: { id: '12' } });
+    await expectReply(request(server).get('/users/12'), {
+      route: '/users/:id(\\d+)',
+      params: { id: '12' },
+    });
     await request(server).get('/users/abc').expect(404);
   });
 
   it('lets the next route answer when a custom pattern rejects the value', async () => {
     const { server } = createServer('/users/:id(\\d+)', '/users/me');
 
-    await request(server).get('/users/me').expect(200, { route: '/users/me', params: {} });
+    await expectReply(request(server).get('/users/me'), { route: '/users/me', params: {} });
   });
 
   it('matches an omitted optional parameter that has a custom pattern', async () => {
@@ -163,35 +174,39 @@ describe.each([
   it('keeps the text before a named wildcard', async () => {
     const { server } = createServer('/files-:path(.*)');
 
-    await request(server)
-      .get('/files-a/b')
-      .expect(200, { route: '/files-:path(.*)', params: { path: 'a/b' } });
+    await expectReply(request(server).get('/files-a/b'), {
+      route: '/files-:path(.*)',
+      params: { path: 'a/b' },
+    });
     await request(server).get('/api/users').expect(404);
   });
 
   it('lets a pattern that can contain a slash span segments', async () => {
     const { server } = createServer('/files/:path(.+)');
 
-    await request(server)
-      .get('/files/a/b')
-      .expect(200, { route: '/files/:path(.+)', params: { path: 'a/b' } });
+    await expectReply(request(server).get('/files/a/b'), {
+      route: '/files/:path(.+)',
+      params: { path: 'a/b' },
+    });
   });
 
   it('matches an unnamed group and exposes it as ctx.params[0]', async () => {
     const { server } = createServer('/items/(\\d+)');
 
-    await request(server)
-      .get('/items/12')
-      .expect(200, { route: '/items/(\\d+)', params: { splat: '12', 0: '12' } });
+    await expectReply(request(server).get('/items/12'), {
+      route: '/items/(\\d+)',
+      params: { splat: '12', 0: '12' },
+    });
     await request(server).get('/items/ab').expect(404);
   });
 
   it('exposes an unnamed (.*) as both ctx.params.splat and ctx.params[0]', async () => {
     const { server } = createServer('/files/(.*)');
 
-    await request(server)
-      .get('/files/a/b')
-      .expect(200, { route: '/files/(.*)', params: { splat: 'a/b', 0: 'a/b' } });
+    await expectReply(request(server).get('/files/a/b'), {
+      route: '/files/(.*)',
+      params: { splat: 'a/b', 0: 'a/b' },
+    });
   });
 
   it.each([
@@ -201,24 +216,26 @@ describe.each([
   ])('sets %s to an empty string on an empty match', async (route, url, params) => {
     const { server } = createServer(route);
 
-    await request(server).get(url).expect(200, { route, params });
+    await expectReply(request(server).get(url), { route, params });
   });
 
   it('leaves an omitted optional parameter undefined', async () => {
     const { server } = createServer('/users/:id(\\d*)?');
 
-    await request(server).get('/users').expect(200, { route: '/users/:id(\\d*)?', params: {} });
+    await expectReply(request(server).get('/users'), { route: '/users/:id(\\d*)?', params: {} });
   });
 
   it('matches one or more segments of a repeated custom pattern', async () => {
     const { server } = createServer('/files/:path(\\d+)+');
 
-    await request(server)
-      .get('/files/12')
-      .expect(200, { route: '/files/:path(\\d+)+', params: { path: '12' } });
-    await request(server)
-      .get('/files/12/34')
-      .expect(200, { route: '/files/:path(\\d+)+', params: { path: '12/34' } });
+    await expectReply(request(server).get('/files/12'), {
+      route: '/files/:path(\\d+)+',
+      params: { path: '12' },
+    });
+    await expectReply(request(server).get('/files/12/34'), {
+      route: '/files/:path(\\d+)+',
+      params: { path: '12/34' },
+    });
     await request(server).get('/files/12/ab').expect(404);
     await request(server).get('/files').expect(404);
   });
@@ -226,82 +243,85 @@ describe.each([
   it('tests a custom pattern against the raw, still-encoded segment, as v6 did', async () => {
     const { server } = createServer('/files/:name([^/]+)');
 
-    await request(server)
-      .get('/files/a%2Fb')
-      .expect(200, { route: '/files/:name([^/]+)', params: { name: 'a/b' } });
+    await expectReply(request(server).get('/files/a%2Fb'), {
+      route: '/files/:name([^/]+)',
+      params: { name: 'a/b' },
+    });
     await request(server).get('/files/a/b').expect(404);
   });
 
   it('matches a repeated alternation in a named parameter', async () => {
     const { server } = createServer('/tags/:tag(red|blue)+');
 
-    await request(server)
-      .get('/tags/red/blue')
-      .expect(200, { route: '/tags/:tag(red|blue)+', params: { tag: 'red/blue' } });
+    await expectReply(request(server).get('/tags/red/blue'), {
+      route: '/tags/:tag(red|blue)+',
+      params: { tag: 'red/blue' },
+    });
     await request(server).get('/tags/red/green').expect(404);
   });
 
   it('matches a v8 quoted wildcard and a $-named wildcard without rewriting them', async () => {
     const { server } = createServer('/f/*"my path"', '/g/*$rest');
 
-    await request(server)
-      .get('/f/a/b')
-      .expect(200, { route: '/f/*"my path"', params: { 'my path': 'a/b' } });
-    await request(server)
-      .get('/g/x/y')
-      .expect(200, { route: '/g/*$rest', params: { $rest: 'x/y' } });
+    await expectReply(request(server).get('/f/a/b'), {
+      route: '/f/*"my path"',
+      params: { 'my path': 'a/b' },
+    });
+    await expectReply(request(server).get('/g/x/y'), {
+      route: '/g/*$rest',
+      params: { $rest: 'x/y' },
+    });
   });
 
   it('matches zero or more segments of a repeated custom pattern', async () => {
     const { server } = createServer('/files/:path(\\d+)*');
 
-    await request(server).get('/files').expect(200, { route: '/files/:path(\\d+)*', params: {} });
-    await request(server)
-      .get('/files/12/34')
-      .expect(200, { route: '/files/:path(\\d+)*', params: { path: '12/34' } });
+    await expectReply(request(server).get('/files'), { route: '/files/:path(\\d+)*', params: {} });
+    await expectReply(request(server).get('/files/12/34'), {
+      route: '/files/:path(\\d+)*',
+      params: { path: '12/34' },
+    });
     await request(server).get('/files/12/ab').expect(404);
   });
 
   it('keeps a v6 custom prefix optional only when the group is optional', async () => {
     const { server } = createServer('/:attr1?{-:attr2}?');
 
-    await request(server)
-      .get('/test')
-      .expect(200, {
-        route: '/:attr1?{-:attr2}?',
-        params: { attr1: 'test' },
-      });
-    await request(server)
-      .get('/test-test')
-      .expect(200, {
-        route: '/:attr1?{-:attr2}?',
-        params: { attr1: 'test', attr2: 'test' },
-      });
+    await expectReply(request(server).get('/test'), {
+      route: '/:attr1?{-:attr2}?',
+      params: { attr1: 'test' },
+    });
+    await expectReply(request(server).get('/test-test'), {
+      route: '/:attr1?{-:attr2}?',
+      params: { attr1: 'test', attr2: 'test' },
+    });
   });
 
   it('does not let v8 swallow a suffix that was literal in v6', async () => {
     const { server } = createServer('/files/:id$name');
 
-    await request(server)
-      .get('/files/abc$name')
-      .expect(200, { route: '/files/:id$name', params: { id: 'abc' } });
+    await expectReply(request(server).get('/files/abc$name'), {
+      route: '/files/:id$name',
+      params: { id: 'abc' },
+    });
     await request(server).get('/files/abc').expect(404);
   });
 
   it('keeps a parameter whose name starts with a digit', async () => {
     const { server } = createServer('/pages/:404');
 
-    await request(server)
-      .get('/pages/home')
-      .expect(200, { route: '/pages/:404', params: { 404: 'home' } });
+    await expectReply(request(server).get('/pages/home'), {
+      route: '/pages/:404',
+      params: { 404: 'home' },
+    });
   });
 
   it('matches a repeated literal without exposing the synthetic parameter', async () => {
     const { server } = createServer('/x{ab}+');
 
-    await request(server).get('/xab').expect(200, { route: '/x{ab}+', params: {} });
-    await request(server).get('/xAB').expect(200, { route: '/x{ab}+', params: {} });
-    await request(server).get('/xabab').expect(200, { route: '/x{ab}+', params: {} });
+    await expectReply(request(server).get('/xab'), { route: '/x{ab}+', params: {} });
+    await expectReply(request(server).get('/xAB'), { route: '/x{ab}+', params: {} });
+    await expectReply(request(server).get('/xabab'), { route: '/x{ab}+', params: {} });
     await request(server).get('/xabc').expect(404);
   });
 });
@@ -327,17 +347,18 @@ describe('router path registration', () => {
       return next();
     });
     router.get('/content-type-builder/content-types{/:uid}', (ctx) => {
-      ctx.body = { uid: ctx.params.uid ?? null };
+      reply(ctx, { uid: ctx.params.uid ?? null });
     });
 
     expect(strapi.log.warn).toHaveBeenCalledTimes(1);
     expect(strapi.log.warn).toHaveBeenCalledWith(
       'Route "USE /content-type-builder/content-types/:uid?" uses path-to-regexp v6 syntax and was migrated to "/content-type-builder/content-types{/:uid}".'
     );
-    await request(server).get('/content-type-builder/content-types').expect(200, { uid: null });
-    await request(server)
-      .get('/content-type-builder/content-types/api::article.article')
-      .expect(200, { uid: 'api::article.article' });
+    await expectReply(request(server).get('/content-type-builder/content-types'), { uid: null });
+    await expectReply(
+      request(server).get('/content-type-builder/content-types/api::article.article'),
+      { uid: 'api::article.article' }
+    );
     expect(seen).toEqual([undefined, 'api::article.article']);
   });
 
@@ -345,16 +366,16 @@ describe('router path registration', () => {
     const { strapi, server, router } = createRouterApp();
 
     router.get('user', '/users/:id(\\d+)', (ctx) => {
-      ctx.body = { ...ctx.params };
+      reply(ctx, { ...ctx.params });
     });
     router.get('/users/me', (ctx) => {
-      ctx.body = { me: true };
+      reply(ctx, { me: true });
     });
 
     expect(strapi.log.warn).toHaveBeenCalledTimes(1);
     expect(router.route('user')).toMatchObject({ path: '/users/:id' });
-    await request(server).get('/users/12').expect(200, { id: '12' });
-    await request(server).get('/users/me').expect(200, { me: true });
+    await expectReply(request(server).get('/users/12'), { id: '12' });
+    await expectReply(request(server).get('/users/me'), { me: true });
     await request(server).get('/users/abc').expect(404);
   });
 
@@ -368,7 +389,7 @@ describe('router path registration', () => {
         method: 'GET',
         path: '/users/:id(\\d+)',
         handler(ctx) {
-          ctx.body = { ok: true };
+          reply(ctx, { ok: true });
         },
         info: {},
       },
@@ -393,7 +414,7 @@ describe('router path registration', () => {
     const { router } = createRouterApp();
     const api = new Router({ prefix: '/api' });
     api.get('/x', (ctx) => {
-      ctx.body = 'x';
+      reply(ctx, 'x');
     });
 
     expect(() => router.use((_ctx, next) => next())).not.toThrow();
@@ -412,14 +433,14 @@ describe('router path registration', () => {
     const { router } = createRouterApp();
     const nested = new Router();
     nested.get('/child', (ctx) => {
-      ctx.body = { ok: true };
+      reply(ctx, { ok: true });
     });
     router.use('/v/:id(\\d+)', nested.routes());
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
     app.use(router.routes());
 
-    await request(app.callback()).get('/v/1/child').expect(200, { ok: true });
+    await expectReply(request(app.callback()).get('/v/1/child'), { ok: true });
   });
 
   it('answers 404 when another method fails the custom pattern', async () => {
@@ -429,7 +450,7 @@ describe('router path registration', () => {
     const seen: unknown[] = [];
     router.get('/users/:id(\\d+)', (ctx) => {
       seen.push(ctx.params.id);
-      ctx.body = { ok: true };
+      reply(ctx, { ok: true });
     });
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
@@ -437,7 +458,7 @@ describe('router path registration', () => {
     app.use(router.allowedMethods());
     const server = app.callback();
 
-    await request(server).get('/users/12').expect(200, { ok: true });
+    await expectReply(request(server).get('/users/12'), { ok: true });
     expect(seen).toEqual(['12']);
     await request(server).get('/users/abc').expect(404);
     await request(server).post('/users/abc').expect(404);
@@ -448,7 +469,7 @@ describe('router path registration', () => {
     const router = new Router({ prefix: '/pre/:v(\\d+)' });
     installRoutePathTranslation(router, strapi);
     router.get('/x', (ctx) => {
-      ctx.body = { v: ctx.params.v };
+      reply(ctx, { v: ctx.params.v });
     });
 
     expect(strapi.log.warn).toHaveBeenCalledWith(
@@ -459,7 +480,7 @@ describe('router path registration', () => {
     app.use(router.routes());
     const server = app.callback();
 
-    await request(server).get('/pre/1/x').expect(200, { v: '1' });
+    await expectReply(request(server).get('/pre/1/x'), { v: '1' });
     await request(server).get('/pre/abc/x').expect(404);
   });
 
@@ -468,15 +489,15 @@ describe('router path registration', () => {
     const router = new Router({ prefix: '/opt/:v?' });
     installRoutePathTranslation(router, strapi);
     router.get('/x', (ctx) => {
-      ctx.body = { v: ctx.params.v ?? null };
+      reply(ctx, { v: ctx.params.v ?? null });
     });
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
     app.use(router.routes());
     const server = app.callback();
 
-    await request(server).get('/opt/x').expect(200, { v: null });
-    await request(server).get('/opt/7/x').expect(200, { v: '7' });
+    await expectReply(request(server).get('/opt/x'), { v: null });
+    await expectReply(request(server).get('/opt/7/x'), { v: '7' });
   });
 
   it('numbers unnamed groups across a router prefix and its routes, as v6 did', async () => {
@@ -484,19 +505,17 @@ describe('router path registration', () => {
     const router = new Router({ prefix: '/p/(\\d+)' });
     installRoutePathTranslation(router, strapi);
     router.get('/(.*)', (ctx) => {
-      ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+      reply(ctx, { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute });
     });
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
     app.use(router.routes());
     const server = app.callback();
 
-    await request(server)
-      .get('/p/12/a/b')
-      .expect(200, {
-        params: { 0: '12', 1: 'a/b', splat: 'a/b' },
-        matchedRoute: '/p/(\\d+)/(.*)',
-      });
+    await expectReply(request(server).get('/p/12/a/b'), {
+      params: { 0: '12', 1: 'a/b', splat: 'a/b' },
+      matchedRoute: '/p/(\\d+)/(.*)',
+    });
     await request(server).get('/p/abc/a').expect(404);
   });
 
@@ -505,15 +524,15 @@ describe('router path registration', () => {
     const router = new Router({ prefix: '/h{-x}+/:v(a*)' });
     installRoutePathTranslation(router, strapi);
     router.get('/y', (ctx) => {
-      ctx.body = { ...ctx.params };
+      reply(ctx, { ...ctx.params });
     });
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
     app.use(router.routes());
     const server = app.callback();
 
-    await request(server).get('/h-x-x/aa/y').expect(200, { v: 'aa' });
-    await request(server).get('/h-x//y').expect(200, { v: '' });
+    await expectReply(request(server).get('/h-x-x/aa/y'), { v: 'aa' });
+    await expectReply(request(server).get('/h-x//y'), { v: '' });
     await request(server).get('/h-y/aa/y').expect(404);
   });
 
@@ -522,7 +541,7 @@ describe('router path registration', () => {
     const router = new Router();
     installRoutePathTranslation(router, strapi);
     router.get('/x', (ctx) => {
-      ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+      reply(ctx, { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute });
     });
     router.prefix('/old/:a(\\d+)');
     router.prefix('/v/(\\d+)/');
@@ -535,9 +554,10 @@ describe('router path registration', () => {
     app.use(router.routes());
     const server = app.callback();
 
-    await request(server)
-      .get('/v/3/x')
-      .expect(200, { params: { 0: '3' }, matchedRoute: '/v/(\\d+)/x' });
+    await expectReply(request(server).get('/v/3/x'), {
+      params: { 0: '3' },
+      matchedRoute: '/v/(\\d+)/x',
+    });
     await request(server).get('/v/abc/x').expect(404);
     await request(server).get('/old/1/x').expect(404);
   });
@@ -546,7 +566,7 @@ describe('router path registration', () => {
     const { router } = createRouterApp();
     const nested = new Router();
     nested.get('/child', (ctx) => {
-      ctx.body = { ok: true };
+      reply(ctx, { ok: true });
     });
     router.use('/v/:id(\\d+)', nested.routes());
 
@@ -554,7 +574,7 @@ describe('router path registration', () => {
     app.use(router.routes());
     const server = app.callback();
 
-    await request(server).get('/v/1/child').expect(200, { ok: true });
+    await expectReply(request(server).get('/v/1/child'), { ok: true });
     await request(server).get('/v/abc/child').expect(404);
   });
 
@@ -567,10 +587,10 @@ describe('router path registration', () => {
     const seen: unknown[] = [];
     api.get('/users/:id(\\d+)', (ctx) => {
       seen.push(ctx.params.id);
-      ctx.body = { ok: true };
+      reply(ctx, { ok: true });
     });
     api.get('/files/:name([^/]+)', (ctx) => {
-      ctx.body = { name: ctx.params.name };
+      reply(ctx, { name: ctx.params.name });
     });
     router.use(api.routes(), api.allowedMethods());
 
@@ -579,11 +599,11 @@ describe('router path registration', () => {
     app.use(router.allowedMethods());
     const server = app.callback();
 
-    await request(server).get('/api/users/12').expect(200, { ok: true });
+    await expectReply(request(server).get('/api/users/12'), { ok: true });
     expect(seen).toEqual(['12']);
     await request(server).get('/api/users/abc').expect(404);
     await request(server).post('/api/users/abc').expect(404);
-    await request(server).get('/api/files/a%2Fb').expect(200, { name: 'a/b' });
+    await expectReply(request(server).get('/api/files/a%2Fb'), { name: 'a/b' });
   });
 });
 
@@ -602,18 +622,16 @@ describe('mount paths and matched routes', () => {
     const nested = new Router();
     installRoutePathTranslation(nested, strapi);
     nested.get('/child/(.*)', (ctx) => {
-      ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+      reply(ctx, { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute });
     });
     router.use('/v/(\\d+)', nested.routes());
 
     const server = createApp(router);
 
-    await request(server)
-      .get('/v/1/child/a/b')
-      .expect(200, {
-        params: { 0: '1', 1: 'a/b', splat: 'a/b' },
-        matchedRoute: '/v/(\\d+)/child/(.*)',
-      });
+    await expectReply(request(server).get('/v/1/child/a/b'), {
+      params: { 0: '1', 1: 'a/b', splat: 'a/b' },
+      matchedRoute: '/v/(\\d+)/child/(.*)',
+    });
     await request(server).get('/v/x/child/a').expect(404);
   });
 
@@ -627,10 +645,10 @@ describe('mount paths and matched routes', () => {
       return next();
     });
     router.get('/files/:name', (ctx) => {
-      ctx.body = { ok: true };
+      reply(ctx, { ok: true });
     });
 
-    await request(createApp(router)).get('/files/a.txt').expect(200, { ok: true });
+    await expectReply(request(createApp(router)).get('/files/a.txt'), { ok: true });
     expect(seen).toEqual(['a.txt']);
   });
 
@@ -646,14 +664,14 @@ describe('mount paths and matched routes', () => {
           method: 'GET',
           path: '/users/:id(\\d+)',
           handler(ctx) {
-            ctx.body = { matchedRoute: ctx._matchedRoute };
+            reply(ctx, { matchedRoute: ctx._matchedRoute });
           },
         },
         {
           method: 'GET',
           path: '/',
           handler(ctx) {
-            ctx.body = { matchedRoute: ctx._matchedRoute };
+            reply(ctx, { matchedRoute: ctx._matchedRoute });
           },
         },
       ],
@@ -663,8 +681,10 @@ describe('mount paths and matched routes', () => {
 
     const server = createApp(router);
 
-    await request(server).get('/api/users/1').expect(200, { matchedRoute: '/api/users/:id(\\d+)' });
-    await request(server).get('/api').expect(200, { matchedRoute: '/api' });
+    await expectReply(request(server).get('/api/users/1'), {
+      matchedRoute: '/api/users/:id(\\d+)',
+    });
+    await expectReply(request(server).get('/api'), { matchedRoute: '/api' });
   });
 
   it('reports the path as written for each layer', () => {
@@ -722,7 +742,7 @@ describe("Strapi's own v6 route paths", () => {
         path,
         info: {},
         handler(ctx: Parameters<Core.MiddlewareHandler>[0]) {
-          ctx.body = { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute };
+          reply(ctx, { params: { ...ctx.params }, matchedRoute: ctx._matchedRoute });
         },
         [Symbol.for('strapi.route.keepV6Path')]: true,
       }));
@@ -745,47 +765,39 @@ describe("Strapi's own v6 route paths", () => {
   it('serves uploads with the file path in ctx.params[0]', async () => {
     const { server, strapi } = createStrapiServer([{ paths: ['/uploads/(.*)'] }]);
 
-    await request(server)
-      .get('/uploads/a/b.png')
-      .expect(200, {
-        params: { 0: 'a/b.png', splat: 'a/b.png' },
-        matchedRoute: '/uploads/(.*)',
-      });
+    await expectReply(request(server).get('/uploads/a/b.png'), {
+      params: { 0: 'a/b.png', splat: 'a/b.png' },
+      matchedRoute: '/uploads/(.*)',
+    });
     expect(strapi.log.warn).not.toHaveBeenCalled();
   });
 
   it('serves documentation assets with the file path in ctx.params[0]', async () => {
     const { server } = createStrapiServer([{ paths: ['/plugins/documentation/(.*)'] }]);
 
-    await request(server)
-      .get('/plugins/documentation/swagger/ui.css')
-      .expect(200, {
-        params: { 0: 'swagger/ui.css', splat: 'swagger/ui.css' },
-        matchedRoute: '/plugins/documentation/(.*)',
-      });
+    await expectReply(request(server).get('/plugins/documentation/swagger/ui.css'), {
+      params: { 0: 'swagger/ui.css', splat: 'swagger/ui.css' },
+      matchedRoute: '/plugins/documentation/(.*)',
+    });
   });
 
   it('serves the provider connect route under the content API prefix', async () => {
     const { server } = createStrapiServer([{ api: true, prefix: '', paths: ['/connect/(.*)'] }]);
 
-    await request(server)
-      .get('/api/connect/google/callback')
-      .expect(200, {
-        params: { 0: 'google/callback', splat: 'google/callback' },
-        matchedRoute: '/api/connect/(.*)',
-      });
+    await expectReply(request(server).get('/api/connect/google/callback'), {
+      params: { 0: 'google/callback', splat: 'google/callback' },
+      matchedRoute: '/api/connect/(.*)',
+    });
   });
 
   it('serves the admin panel with the rest of the path in ctx.params.path', async () => {
     const { server } = createStrapiServer([{ paths: ['/admin/:path*'] }]);
 
-    await request(server)
-      .get('/admin/content-manager/collection-types')
-      .expect(200, {
-        params: { path: 'content-manager/collection-types' },
-        matchedRoute: '/admin/:path*',
-      });
-    await request(server).get('/admin').expect(200, { params: {}, matchedRoute: '/admin/:path*' });
+    await expectReply(request(server).get('/admin/content-manager/collection-types'), {
+      params: { path: 'content-manager/collection-types' },
+      matchedRoute: '/admin/:path*',
+    });
+    await expectReply(request(server).get('/admin'), { params: {}, matchedRoute: '/admin/:path*' });
   });
 
   it('serves a documentation version only when every part is a number', async () => {
@@ -793,12 +805,10 @@ describe("Strapi's own v6 route paths", () => {
       { prefix: '/documentation', paths: ['/v:major(\\d+).:minor(\\d+).:patch(\\d+)'] },
     ]);
 
-    await request(server)
-      .get('/documentation/v1.2.3')
-      .expect(200, {
-        params: { major: '1', minor: '2', patch: '3' },
-        matchedRoute: '/documentation/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
-      });
+    await expectReply(request(server).get('/documentation/v1.2.3'), {
+      params: { major: '1', minor: '2', patch: '3' },
+      matchedRoute: '/documentation/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
+    });
     await request(server).get('/documentation/v1.2.3foo').expect(404);
     await request(server).get('/documentation/va.b.c').expect(404);
   });
@@ -811,18 +821,17 @@ describe("Strapi's own v6 route paths", () => {
       },
     ]);
 
-    await request(server)
-      .get('/admin/content-manager/collection-types/api::a.a/1/stage')
-      .expect(200, {
+    await expectReply(
+      request(server).get('/admin/content-manager/collection-types/api::a.a/1/stage'),
+      {
         params: { 0: 'collection', splat: 'collection', model_uid: 'api::a.a', id: '1' },
         matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
-      });
-    await request(server)
-      .get('/admin/content-manager/single-types/api::a.a/1/stage')
-      .expect(200, {
-        params: { 0: 'single', splat: 'single', model_uid: 'api::a.a', id: '1' },
-        matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
-      });
+      }
+    );
+    await expectReply(request(server).get('/admin/content-manager/single-types/api::a.a/1/stage'), {
+      params: { 0: 'single', splat: 'single', model_uid: 'api::a.a', id: '1' },
+      matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
+    });
     await request(server).get('/admin/content-manager/other-types/api::a.a/1/stage').expect(404);
   });
 });
