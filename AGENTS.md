@@ -257,7 +257,7 @@ yarn prettier:check # check only
 ## Notes for Agents
 
 - **`examples/`** apps are sandboxes only — use them to reproduce and test fixes, never commit changes to them unless specifically asked to do so. **Exception:** `examples/complex` is the **migration test fixture** (schemas, seeds, `validate-migration.js`, DB tooling); CI runs `migration_v5` against it via `tests/migration/`. It may relocate under `tests/migration/` in the future.
-- **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps and some root devDeps.
+- **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps, the private `tests-next/*` test workspaces (never published, so they follow the workspace instead of a release version), and some root devDeps.
 - **Entity Service is deprecated** — always use the Document Service (`strapi.documents`) for content operations.
 - **Lifecycle phases** — `strapi.isLoaded` must be `true` before accessing services. Plugins and DB are not available until after the `load()` phase.
 - **Contributor docs** — Knowledge about how internals work lives in `docs/docs/packages/<repo path>/` (one folder per package, mirrors `packages/`) and `docs/docs/architecture/` (topics that cross packages). Read the page of a package before you change it. When you change behavior that a page describes, update the page or set `status: needs-review` in its frontmatter with a `review_notes` item. See [docs/AGENTS.md](docs/AGENTS.md) and the `contributor-docs` skill.
