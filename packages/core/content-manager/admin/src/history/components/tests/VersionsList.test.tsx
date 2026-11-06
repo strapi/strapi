@@ -72,4 +72,21 @@ describe('VersionsList', () => {
     await user.click(versions[0]);
     expect(await screen.findByText('?id=26')).toBeInTheDocument();
   });
+
+  it('names a deleted author', async () => {
+    const [currentVersion, version] = mockHistoryVersionsData.historyVersions.data;
+    const versions = {
+      ...mockHistoryVersionsData.historyVersions,
+      data: [currentVersion, { ...version, author: { ...version.author, id: null, name: null } }],
+    };
+
+    render(
+      // @ts-expect-error we don't need all the context
+      <HistoryProvider page={1} versions={versions}>
+        <VersionsList />
+      </HistoryProvider>
+    );
+
+    expect(within(screen.getAllByRole('link')[1]).getByText('Deleted user')).toBeInTheDocument();
+  });
 });

@@ -1,6 +1,6 @@
 import type { Core, Schema } from '@strapi/types';
 
-import { createServiceUtils } from '../utils';
+import { createServiceUtils, toAuthor } from '../utils';
 
 const baseStrapiMock = {
   plugin: jest.fn(() => {}),
@@ -207,6 +207,55 @@ describe('History utils', () => {
         });
 
         await expect(getLocaleDictionary()).resolves.toEqual({});
+      });
+    });
+  });
+
+  describe('author helpers', () => {
+    const adminUser = (id: string | null) => ({
+      type: 'person' as const,
+      model: 'admin::user',
+      id,
+    });
+
+    it('getAuthorNameDictionary finds the display names of a model with one query', async () => {
+      const findMany = jest.fn().mockResolvedValue([
+        { id: 1, username: 'kai', firstname: 'Kai', lastname: 'Doe', email: 'kai@test.com' },
+        { id: 2, username: null, firstname: 'John', lastname: 'Doe', email: 'john@test.com' },
+        { id: 3, username: null, firstname: null, lastname: null, email: 'jane@test.com' },
+      ]);
+      const strapi = { db: { query: jest.fn(() => ({ findMany })) } } as unknown as Core.Strapi;
+      const { getAuthorNameDictionary } = createServiceUtils({ strapi });
+
+      await expect(
+        getAuthorNameDictionary([
+          adminUser('1'),
+          adminUser('2'),
+          adminUser('3'),
+          adminUser('1'),
+          adminUser(null),
+          null,
+        ])
+      ).resolves.toEqual({
+        'admin::user': { 1: 'kai', 2: 'John Doe', 3: 'jane@test.com' },
+      });
+      expect(findMany).toHaveBeenCalledTimes(1);
+      expect(findMany).toHaveBeenCalledWith({
+        select: ['id', 'username', 'firstname', 'lastname', 'email'],
+        where: { id: { $in: ['1', '2', '3'] } },
+      });
+    });
+
+    it('toAuthor gives no id and no name to a deleted author', () => {
+      const authorNameDictionary = { 'admin::user': { 1: 'kai' } };
+
+      expect(toAuthor(adminUser(null), authorNameDictionary)).toEqual({
+        ...adminUser(null),
+        name: null,
+      });
+      expect(toAuthor(adminUser('3'), authorNameDictionary)).toEqual({
+        ...adminUser(null),
+        name: null,
       });
     });
   });

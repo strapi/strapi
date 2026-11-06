@@ -6,6 +6,7 @@ import { User } from '@strapi/icons';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { ActionsDrawer, useActionsDrawer } from '../../components/ActionsDrawer';
 import { RelativeTime } from '../../components/RelativeTime';
@@ -39,6 +40,17 @@ const AUTHOR_TYPE_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, Messa
   },
 };
 
+const DELETED_AUTHOR_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
+  person: {
+    id: 'content-manager.history.sidebar.version-card.deleted-author.person',
+    defaultMessage: 'Deleted user',
+  },
+};
+
+const ItalicName = styled(Typography)`
+  font-style: italic;
+`;
+
 const VersionAuthorName = ({ author }: { author: HistoryVersions.HistoryVersionAuthor }) => {
   const { formatMessage } = useIntl();
   const Icon = AUTHOR_TYPE_ICONS[author.type];
@@ -48,7 +60,11 @@ const VersionAuthorName = ({ author }: { author: HistoryVersions.HistoryVersionA
       <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
         <Icon />
       </AccessibleIcon>
-      {author.name}
+      {author.name ?? (
+        <ItalicName tag="span" variant="pi" textColor="neutral500">
+          {formatMessage(DELETED_AUTHOR_LABELS[author.type])}
+        </ItalicName>
+      )}
     </Flex>
   );
 };
