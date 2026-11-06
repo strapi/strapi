@@ -405,7 +405,7 @@ Middlewares follow the same model in `Strapi.Registries.PackageMiddlewares` and 
 
 ###### Strict schema registries
 
-With `strictTypes: true`, `contentTypes.d.ts` and `components.d.ts` keep their names and their schema interfaces, but register the schemas in the global `Strapi.Registries.AppContentTypeSchemas` and `Strapi.Registries.ComponentSchemas` instead of `Public`:
+With `strictTypes: true`, `contentTypes.d.ts` and `components.d.ts` keep their names and their schema interfaces, and register the schemas twice: in the global `Strapi.Registries.AppContentTypeSchemas` and `Strapi.Registries.ComponentSchemas`, which strict programs read, then in the `Public` augmentation written without strict types, which strict programs ignore ([content-types generator](https://github.com/strapi/strapi/blob/develop/packages/utils/typescript/src/generators/content-types/index.ts), [components generator](https://github.com/strapi/strapi/blob/develop/packages/utils/typescript/src/generators/components/index.ts)):
 
 ```ts title="my-app/types/generated/contentTypes.d.ts"
 import type { Struct } from '@strapi/strapi';
@@ -423,7 +423,17 @@ declare global {
     }
   }
 }
+
+declare module '@strapi/strapi' {
+  export namespace Public {
+    export interface ContentTypeSchemas {
+      'api::article.article': ApiArticleArticle;
+    }
+  }
+}
 ```
+
+A program that loads these files without `strict.d.ts` reads the `Public` block, and types schemas, documents and values as with strict types off (`tests/types/registries/consumer.test.cjs`). `Public` is deprecated ([`public/registries.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/public/registries.ts)): strict generation writes it until the next major version, which removes the `Public` registries.
 
 A global augmentation reaches the one declaration every package reads, whatever module the application resolves and in whatever order declaration files load. Augmenting `Public` through `@strapi/strapi` and through `@strapi/types` creates two copies, and the load order decides which one wins.
 
@@ -435,12 +445,26 @@ The Document Service switches to precise types per UID (`Constants.IsSchemaRegis
 
 |                 | `UID.ContentType`, `Schema.ContentType`, … read                                                                                                                         | No generated schema                                           |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Strict mode off | `Public.ContentTypeSchemas`, `Public.ComponentSchemas`. Global entries are ignored.                                                                                     | Generic UIDs and schemas                                      |
+| Strict mode off | `Public.ContentTypeSchemas`, `Public.ComponentSchemas`. Global entries are ignored. Also a program that loads a strict app's schema files without `strict.d.ts`.        | Generic UIDs and schemas                                      |
 | Strict mode on  | `Strapi.Registries.AppContentTypeSchemas` over `Strapi.Registries.PackageContentTypeSchemas`, `Strapi.Registries.ComponentSchemas`. `Public` augmentations are ignored. | Package-declared UIDs precise, other UIDs and schemas generic |
 
-Toggling the flag rewrites both files in the other form on the next generation. A hand-written `Public` schema augmentation has no effect in strict mode: an application runs type generation instead of declaring its schemas by hand.
+Toggling the flag rewrites both files on the next generation: turning it off drops the global block and keeps the `Public` one. A hand-written `Public` schema augmentation has no effect in strict mode: an application runs type generation instead of declaring its schemas by hand.
 
 Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts`, `services.ts`, `controllers.ts`, `policies.ts` and `middlewares.ts` (and an older `.d.ts` of the last four) if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`.
+
+###### Frontends and types-only packages
+
+A frontend, or a types-only package that shares the content types with one, includes only `contentTypes.d.ts` and `components.d.ts` from `types/generated`. These files import types from `@strapi/strapi` only. The other generated files are server-only:
+
+- `strict.d.ts` imports `@strapi/strapi/strict-types`, which loads the server declarations of the bundled packages (`strapi-server` entries, [`strict-types.d.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/strapi/strict-types.d.ts)), and declares the application's license scope.
+- `plugins.d.ts` loads the server declarations of the installed plugins ([plugins generator](https://github.com/strapi/strapi/blob/develop/packages/utils/typescript/src/generators/plugins/index.ts)).
+- `services.ts`, `controllers.ts`, `policies.ts` and `middlewares.ts` import the application's server source by relative path (`typeof import('<relative path to the source>')`, [services generator](https://github.com/strapi/strapi/blob/develop/packages/utils/typescript/src/generators/services/index.ts)), so they compile only next to `src/`, with the server's dependencies.
+
+Without `strict.d.ts`, the program reads the `Public` block and is typed as without strict types. Strict frontend typing is not offered: the only existing route is a direct `@strapi/types` dependency that loads `@strapi/types/strict` ([`package.json` exports](https://github.com/strapi/strapi/blob/develop/packages/core/types/package.json)).
+
+Such a program never sees the review workflows licensed attributes `strapi_stage` and `strapi_assignee`. Strict type generation leaves them out of the schema interfaces, and `@strapi/types` adds them back only in strict mode, from the declaration of `@strapi/review-workflows/strapi-server` and the license scope of `strict.d.ts` ([`schema/registries.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/schema/registries.ts)). A frontend has neither.
+
+The application program, in turn, must load every generated file. With `strictTypes: true`, type generation warns when the application tsconfig leaves the strict files out, and still writes them ([typescript-utils, strict opt-in](../../../../utils/typescript/index.md#strict-opt-in)).
 
 :::caution
 Strict mode is closed: a lookup without a registered contract resolves to `unknown`, including services of plugins that publish no contracts. Pass an explicit type argument (`strapi.plugin('x').service<MyService>('y')`) for those.

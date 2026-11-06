@@ -32,6 +32,15 @@ export default config;
   `types/generated/strict.d.ts`, `plugins.d.ts`, and the application's service, controller, policy
   and middleware registries. Read
   [Strict service contracts](../packages/core/types/type-system/02-concepts/03-public-registry.mdx#strict-service-contracts-typescriptstricttypes).
+- Keep `types/generated` in the application program: without `strict.d.ts`, the program
+  type-checks without strict types and reports no error. Type generation warns when the
+  application tsconfig leaves the strict files out and still writes them, in every command that
+  generates types
+  ([typescript-utils, strict opt-in](../packages/utils/typescript/index.md#strict-opt-in),
+  [`strapi develop`](../packages/core/strapi/commands/02-develop.md#how-it-works)).
+- A frontend or a types-only package includes only `contentTypes.d.ts` and `components.d.ts`,
+  and is typed as without strict types. Read
+  [Frontends and types-only packages](../packages/core/types/type-system/02-concepts/03-public-registry.mdx#frontends-and-types-only-packages).
 - To opt out, set `strictTypes: false` or remove the key. The next type generation removes the
   strict files, and the types are those of the previous release. A value that is not a boolean
   fails type generation with a `ValidationError`.
