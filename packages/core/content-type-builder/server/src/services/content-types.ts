@@ -342,12 +342,16 @@ export const editContentType = async (
         });
       }
 
-      const schemaFilesWritten = await builder.writeFiles();
+      // The rows of renamed components are rewritten below, with the folder commit.
+      const schemaFilesWritten = await builder.writeFiles({ renameComponentRows: false });
       if (!schemaFilesWritten) {
         schemaAlreadyRolledBack = true;
         throw new ApplicationError('Invalid schema edition');
       }
-      await pruneFolderReferences([uid]);
+
+      // The folder commit runs inside the row transaction: if it fails, the rows are rolled
+      // back and the catch restores the files. Filesystem only, no database call in here.
+      await builder.renameComponentRows({ beforeCommit: () => pruneFolderReferences([uid]) });
     } catch (error) {
       await rollbackSchemaMutation({
         builder,
