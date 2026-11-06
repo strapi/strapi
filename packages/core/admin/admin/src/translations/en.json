@@ -914,6 +914,7 @@
   "mcp.oauth.consent.client": "A client calling itself “{clientName}” is asking to use the MCP server with your permissions, as {user}.",
   "mcp.oauth.consent.deny": "Deny",
   "mcp.oauth.consent.error": "The authorization could not be completed. Try again.",
+  "mcp.oauth.consent.insecure-redirect": "{redirectUri} is not a secure https address. Only approve if you recognize it.",
   "mcp.oauth.consent.invalid.home-link": "Go back to the homepage",
   "mcp.oauth.consent.invalid.message": "This authorization request is invalid or has expired. Return to your MCP client and try connecting again.",
   "mcp.oauth.consent.invalid.title": "Invalid authorization request",

@@ -661,9 +661,11 @@ describe('User', () => {
 
       const res = await deleteByIds([2, 3]);
 
-      expect(invalidateRefreshToken).toHaveBeenCalledTimes(2);
-      expect(invalidateRefreshToken).toHaveBeenNthCalledWith(1, '2');
-      expect(invalidateRefreshToken).toHaveBeenNthCalledWith(2, '3');
+      // Each deletion invalidates the admin sessions and the MCP OAuth grants.
+      expect(invalidateRefreshToken).toHaveBeenCalledTimes(4);
+      expect(invalidateRefreshToken.mock.calls).toEqual([['2'], ['2'], ['3'], ['3']]);
+      expect(hasOrigin).toHaveBeenCalledWith('admin');
+      expect(hasOrigin).toHaveBeenCalledWith('mcp');
       expect(res).toEqual(users);
     });
 
@@ -709,6 +711,8 @@ describe('User', () => {
         eventHub: { emit: vi.fn() },
         db: { query: () => ({ findOne, update, count, delete: deleteFn }) },
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        // Not under test here; without the reset the previous test's rejecting mock leaks in.
+        sessionManager: undefined,
       } as any;
 
       return { update, count, deleteFn };

@@ -45,8 +45,10 @@ export default {
       private: true,
       searchable: false,
     },
+    // `text`, not `string`: registered redirect URIs may be up to 2000 characters, which
+    // overflows the varchar(255) a `string` column gets on Postgres/MySQL.
     redirectUri: {
-      type: 'string',
+      type: 'text',
       required: true,
       configurable: false,
       private: true,
@@ -66,8 +68,9 @@ export default {
       private: true,
       searchable: false,
     },
+    // `text` so scopes up to the validated 512 characters fit on Postgres/MySQL.
     scope: {
-      type: 'string',
+      type: 'text',
       configurable: false,
       private: true,
       searchable: false,

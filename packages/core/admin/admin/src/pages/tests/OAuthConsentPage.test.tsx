@@ -88,7 +88,7 @@ describe('OAuthConsentPage', () => {
   });
 
   it('renders the consent card with a fixed title, the self-reported client name, user, and redirect host', async () => {
-    const { findByRole, getByText } = render(<OAuthConsentPage />, {
+    const { findByRole, getByText, queryByText } = render(<OAuthConsentPage />, {
       initialEntries: ['/mcp/oauth/consent?ticket=abc'],
     });
 
@@ -99,8 +99,34 @@ describe('OAuthConsentPage', () => {
     expect(getByText(/A client calling itself “Claude”/)).toBeInTheDocument();
     expect(getByText(/as Kai Doe/)).toBeInTheDocument();
     expect(getByText(/sent back to example.com/)).toBeInTheDocument();
+    expect(queryByText(/not a secure https address/)).not.toBeInTheDocument();
     expect(await findByRole('button', { name: 'Approve' })).toBeInTheDocument();
     expect(await findByRole('button', { name: 'Deny' })).toBeInTheDocument();
+  });
+
+  it('shows the full redirect URI and a warning for a non-https redirect', async () => {
+    server.use(
+      http.get('/admin/mcp/oauth/authorization-request', () =>
+        HttpResponse.json({
+          data: {
+            client: { name: 'Claude' },
+            // A custom scheme still parses a host, so showing the host alone would read
+            // as "claude.ai"; the full URI must be displayed instead.
+            redirectUri: 'evilapp://claude.ai/callback',
+            redirectHost: 'claude.ai',
+          },
+        })
+      )
+    );
+
+    const { findByRole, getByText } = render(<OAuthConsentPage />, {
+      initialEntries: ['/mcp/oauth/consent?ticket=abc'],
+    });
+
+    await findByRole('heading', { name: 'Authorize MCP access to Strapi?' });
+
+    expect(getByText(/sent back to evilapp:\/\/claude.ai\/callback/)).toBeInTheDocument();
+    expect(getByText(/not a secure https address/)).toBeInTheDocument();
   });
 
   it('submits the approval and navigates to the returned redirect target', async () => {

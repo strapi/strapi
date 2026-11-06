@@ -69,20 +69,22 @@ export default {
       private: true,
       searchable: false,
     },
+    // `text` columns: the validated maximums (512 for scope, 2000 for the URIs) overflow
+    // the varchar(255) a `string` column gets on Postgres/MySQL.
     scope: {
-      type: 'string',
+      type: 'text',
       configurable: false,
       private: true,
       searchable: false,
     },
     clientUri: {
-      type: 'string',
+      type: 'text',
       configurable: false,
       private: true,
       searchable: false,
     },
     logoUri: {
-      type: 'string',
+      type: 'text',
       configurable: false,
       private: true,
       searchable: false,

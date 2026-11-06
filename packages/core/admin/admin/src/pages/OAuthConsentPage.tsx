@@ -42,6 +42,25 @@ const InvalidRequest = () => {
   );
 };
 
+/**
+ * What the consent screen shows as the return destination. Only https URIs are reduced
+ * to their host: a custom scheme also parses a host (evilapp://claude.ai), so anything
+ * else displays the full URI and is flagged as not being a secure https address.
+ */
+const getRedirectDisplay = (redirectUri: string, fallbackHost: string) => {
+  try {
+    const url = new URL(redirectUri);
+
+    if (url.protocol === 'https:') {
+      return { isHttps: true, display: url.host || fallbackHost };
+    }
+
+    return { isHttps: false, display: redirectUri };
+  } catch {
+    return { isHttps: false, display: fallbackHost };
+  }
+};
+
 const OAuthConsentPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -98,6 +117,11 @@ const OAuthConsentPage = () => {
       </Typography>
     );
   } else if (isRedirecting) {
+    const { display } = getRedirectDisplay(
+      authorizationRequest.redirectUri,
+      authorizationRequest.redirectHost
+    );
+
     content = (
       <Typography textAlign="center" variant="epsilon" textColor="neutral600" tag="p">
         {formatMessage(
@@ -105,11 +129,16 @@ const OAuthConsentPage = () => {
             id: 'mcp.oauth.consent.redirecting',
             defaultMessage: 'Taking you back to {host}…',
           },
-          { host: authorizationRequest.redirectHost }
+          { host: display }
         )}
       </Typography>
     );
   } else {
+    const { isHttps, display } = getRedirectDisplay(
+      authorizationRequest.redirectUri,
+      authorizationRequest.redirectHost
+    );
+
     content = (
       <Flex direction="column" alignItems="stretch" gap={6}>
         {/* The title is fixed text: the client name is self-reported at registration, so it
@@ -140,10 +169,26 @@ const OAuthConsentPage = () => {
                 id: 'mcp.oauth.consent.redirect-notice',
                 defaultMessage: 'After approval you will be sent back to {host}.',
               },
-              { host: authorizationRequest.redirectHost }
+              { host: display }
             )}
           </Typography>
         </Flex>
+        {!isHttps ? (
+          <Alert
+            variant="danger"
+            closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+            onClose={() => {}}
+          >
+            {formatMessage(
+              {
+                id: 'mcp.oauth.consent.insecure-redirect',
+                defaultMessage:
+                  '{redirectUri} is not a secure https address. Only approve if you recognize it.',
+              },
+              { redirectUri: authorizationRequest.redirectUri }
+            )}
+          </Alert>
+        ) : null}
         <Alert
           variant="default"
           closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
