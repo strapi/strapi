@@ -7,7 +7,7 @@ import { promisify } from 'node:util';
 // dist/types.d.ts next to dist/index.d.ts.
 import type { Scope } from 'create-strapi-app/dist/types';
 
-import { APPS_DIR } from './config';
+import { APPS_DIR, baseEnv } from './config';
 
 export interface App {
   name: string;
@@ -30,7 +30,7 @@ const strapiVersion = (): string =>
  * Generate an empty Strapi app (no content types, no data). Content types, plugins and config
  * come from the scaffolders; data from the seeders.
  *
- * The app has no `node_modules`: `@strapi/*` resolves from the repo root (see `APPS_DIR`).
+ * No dependency is installed in the app: `@strapi/*` resolves from the repo root (see `APPS_DIR`).
  */
 export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions): Promise<App> => {
   const dir = path.join(APPS_DIR, name);
@@ -76,6 +76,9 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
     process.execPath,
     [path.join(__dirname, 'generate-app.cjs'), JSON.stringify(scope)],
     {
+      // Telemetry off: create-strapi-app tracks events unless NODE_ENV=test, which Jest sets
+      // but Playwright doesn't.
+      env: { ...process.env, ...baseEnv() },
       maxBuffer: 10 * 1024 * 1024,
     }
   );
@@ -94,9 +97,6 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
       'module.exports = ({ env }) => ({\n  autoOpen: false,'
     )
   );
-
-  // create-strapi-app leaves an empty node_modules; without it Node walks up to the repo root.
-  fs.rmSync(path.join(dir, 'node_modules'), { recursive: true, force: true });
 
   return app;
 };
