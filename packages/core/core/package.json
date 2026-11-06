@@ -106,6 +106,7 @@
     "open": "8.4.2",
     "ora": "5.4.1",
     "package-json": "10.0.1",
+    "path-to-regexp-v6": "npm:path-to-regexp@6.3.0",
     "pkg-up": "3.1.0",
     "qs": "6.16.2",
     "resolve.exports": "2.0.2",

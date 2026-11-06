@@ -71,7 +71,7 @@ describe('public static middleware', () => {
   it('exposes the requested path as ctx.params[0], as before', async () => {
     await request(server).get('/missing/file.txt').expect(404);
 
-    expect(lastParams).toEqual({ 0: 'missing/file.txt', splat: 'missing/file.txt' });
+    expect(lastParams).toEqual({ 0: 'missing/file.txt' });
   });
 
   it('leaves /uploads/ to the upload middleware', async () => {

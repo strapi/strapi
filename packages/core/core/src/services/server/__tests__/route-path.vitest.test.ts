@@ -4,7 +4,7 @@ import { RoutePathMigrationError, translateRoutePath } from '../route-path';
 
 describe('translateRoutePath', () => {
   it.each([
-    ['/files/(.*)', '/files/{*splat}'],
+    ['/files/(.*)', '/files/{*v6Group1}'],
     ['/files/:path(.*)', '/files/{*path}'],
     ['/files-:path(.*)', '/files-{*path}'],
     ['/files/:path(.*)?', '/files{/*path}'],
@@ -13,24 +13,29 @@ describe('translateRoutePath', () => {
     ['/users/:id(\\d+)', '/users/:id'],
     ['/users/:id(\\d+)?', '/users{/:id}'],
     ['/posts/:slug([a-z-]+)', '/posts/:slug'],
-    ['/items/(\\d+)', '/items/:splat'],
+    ['/items/(\\d+)', '/items/:v6Group1'],
     ['/users/:id?', '/users{/:id}'],
     ['/a-:id?', '/a-{:id}'],
     ['/files/:path*', '/files{/*path}'],
     ['/files/:path+', '/files/*path'],
     ['/literal[bar]!', '/literal\\[bar\\]\\!'],
-    ['/items/(a|b)', '/items/:splat'],
-    ['/content-manager/(collection|single)-types/:id', '/content-manager/:splat-types/:id'],
+    ['/items/(a|b)', '/items/:v6Group1'],
+    ['/content-manager/(collection|single)-types/:id', '/content-manager/:v6Group1-types/:id'],
     ['/files/:path(\\d+)+', '/files/*path'],
     ['/files/:path(\\d+)*', '/files{/*path}'],
+    ['{:id(\\d+).html}+', '*id.html'],
     ['/users/:404', '/users/:"404"'],
     ['/files/:id$name', '/files/:"id"$name'],
     ['/users/:café', '/users/:"caf"é'],
+    ['/a/:id(\\d+)suffix', '/a/:"id"suffix'],
+    ['/img/:w(\\d+)x:h(\\d+)', '/img/:"w"x:h'],
+    ['/:a([a-z]+):b(\\d*)', '{*v6Joined1}'],
+    ['/:v6Group1/(.*)', '/:v6Group1/{*v6Group2}'],
     ['/:attr1?{-:attr2}?{-:attr3}?', '{/:attr1}{-:attr2}{-:attr3}'],
     ['/users{/:id(\\d+)}?', '/users{/:id}'],
     ['{:id(\\d+)}', ':id'],
     ['{ab}?', '{ab}'],
-    ['/x{ab}+', '/x:v6Literal0'],
+    ['/x{ab}+', '/x:v6Literal1'],
   ])('translates %s to %s', (path, expectedPath) => {
     expect(translateRoutePath(path)).toMatchObject({ path: expectedPath, changed: true });
   });
@@ -46,75 +51,39 @@ describe('translateRoutePath', () => {
     '/f/{*"p"}',
     '/users/:"my (name)"',
   ])('does not change the path-to-regexp v8 path %s', (path) => {
-    expect(translateRoutePath(path)).toMatchObject({
-      path,
-      changed: false,
-      constraints: [],
-      positionalParams: [],
-    });
+    expect(translateRoutePath(path)).toEqual({ path, changed: false, generatedParams: [] });
   });
 
-  it('lists the parameter names of the translated path in order', () => {
-    expect(
-      translateRoutePath('/a/:id(\\d+)/*"x y"/:"my (name)"/*$rest/(.*)').parameterNames
-    ).toEqual(['id', 'x y', 'my (name)', '$rest', 'splat']);
-    expect(translateRoutePath('/files/:path([0-9])+/:404').parameterNames).toEqual(['path', '404']);
+  it.each([
+    ['.+\\.js', '*'],
+    ['\\d+/beta', '*'],
+    ['[!-~]+', '*'],
+    ['\\D+', '*'],
+    ['\\W+', '*'],
+    ['[^a]+', '*'],
+    ['a|.', '*'],
+    ['\\d+', ':'],
+    ['\\w+', ':'],
+    ['[a-z-]+', ':'],
+    ['a|b', ':'],
+    ['[0-9]{2}', ':'],
+    ['(?:a|b)+', ':'],
+  ])('matches %s across segments only when it may match "/"', (pattern, token) => {
+    expect(translateRoutePath(`/a/:x(${pattern})`).path).toBe(`/a/${token}x`);
   });
 
-  it('namespaces the names of unnamed and literal groups when asked', () => {
-    const translated = translateRoutePath('/p/(\\d+)/(.*){ab}+', { namespace: 'v6Prefix1' });
-
-    expect(translated.path).toBe('/p/:v6Prefix1Splat1/{*v6Prefix1Splat2}:v6Prefix1Literal0');
-    expect(translated.positionalParams).toEqual(['v6Prefix1Splat1', 'v6Prefix1Splat2']);
-    expect(translated.hiddenParams).toEqual(['v6Prefix1Literal0']);
+  it('lists the names it creates, which the v6 path does not have', () => {
+    expect(translateRoutePath('/f/(\\d+)/(.*)').generatedParams).toEqual(['v6Group1', 'v6Group2']);
+    expect(translateRoutePath('/f/:id(\\d+)').generatedParams).toEqual([]);
   });
 
-  it('keeps a v8 quoted name whole when a constraint is also translated', () => {
-    const translated = translateRoutePath('/a/:id(\\d+)/*"x (y)"');
-
-    expect(translated.path).toBe('/a/:id/*"x (y)"');
-    expect(translated.constraints.map(({ name }) => name)).toEqual(['id']);
-  });
-
-  it('keeps custom parameter patterns as constraints', () => {
-    const { constraints } = translateRoutePath('/users/:id(\\d+)');
-
-    expect(constraints).toHaveLength(1);
-    expect(constraints[0]).toMatchObject({ name: 'id' });
-    expect(constraints[0].pattern.test('123')).toBe(true);
-    expect(constraints[0].pattern.test('abc')).toBe(false);
-  });
-
-  it('keeps an unnamed alternation as a constraint', () => {
-    const { constraints, positionalParams } = translateRoutePath('/items/(collection|single)');
-
-    expect(positionalParams).toEqual(['splat']);
-    expect(constraints[0].pattern.test('collection')).toBe(true);
-    expect(constraints[0].pattern.test('Collection')).toBe(true);
-    expect(constraints[0].pattern.test('other')).toBe(false);
-  });
-
-  it('checks every segment of a repeated custom pattern', () => {
-    const { constraints } = translateRoutePath('/files/:path(\\d+)+');
-
-    expect(constraints[0].pattern.test('12')).toBe(true);
-    expect(constraints[0].pattern.test('12/34')).toBe(true);
-    expect(constraints[0].pattern.test('12/ab')).toBe(false);
-  });
-
-  it('hides the parameter used to test a repeated literal', () => {
-    expect(translateRoutePath('/x{ab}+')).toMatchObject({
-      hiddenParams: ['v6Literal0'],
-      constraints: [expect.objectContaining({ name: 'v6Literal0' })],
-    });
-  });
-
-  it('names unnamed groups in order, as v6 numbered them', () => {
-    expect(translateRoutePath('/files/(.*)')).toMatchObject({ positionalParams: ['splat'] });
-    expect(translateRoutePath('/(\\d+)/(.*)')).toMatchObject({
-      path: '/:splat/{*splat2}',
-      positionalParams: ['splat', 'splat2'],
-    });
+  it('namespaces the names it creates when asked, with a ":" so a prefix has parameters', () => {
+    expect(translateRoutePath('/p/(\\d+)/x{ab}+', { namespace: 'v6Prefix1' }).path).toBe(
+      '/p/:"v6Prefix1:Group1"/x:"v6Prefix1:Literal1"'
+    );
+    expect(translateRoutePath('/p/(.*)', { namespace: 'v6Prefix1' }).path).toBe(
+      '/p/{*"v6Prefix1:Group1"}'
+    );
   });
 
   it.each([
@@ -131,8 +100,13 @@ describe('translateRoutePath', () => {
     '/items/(a|b)',
     '/files/:path(\\d+)+',
     '/files/:path(\\d+)*',
+    '{:id(\\d+).html}+',
     '/users/:404',
     '/files/:id$name',
+    '/a/:id(\\d+)suffix',
+    '/img/:w(\\d+)x:h(\\d+)',
+    '/:a([a-z]+):b(\\d*)',
+    '/:a(\\d):b(\\d):c(\\d)',
     '/:attr1?{-:attr2}?',
     '/x{ab}+',
     '{ab}?',
@@ -144,11 +118,11 @@ describe('translateRoutePath', () => {
 
   it.each([
     ['/(?!uploads/).+', 'the group "(?!uploads/)" has no v8 equivalent'],
-    ['{:id(\\d+).html}+', 'the repeated parameter ":id" has a suffix'],
-    ['n:id(\\d+)+', 'the repeated parameter ":id" has no prefix'],
+    ['n:id(\\d+)+', 'Can not repeat "id" without a prefix and suffix'],
+    ['/a/:id(\\d+)/*"x (y)"', 'it is not a valid path-to-regexp v6 path'],
     ['/users/:id(\\d+', 'is unclosed'],
     ['/users/:id(\\d{2,1})', 'the custom pattern for ":id" is invalid'],
-  ])('fails for %s instead of changing what it matches', (path, reason) => {
+  ])('fails for %s, which v6 rejected too', (path, reason) => {
     expect(() => translateRoutePath(path)).toThrow(RoutePathMigrationError);
     expect(() => translateRoutePath(path)).toThrow(reason);
   });

@@ -101,11 +101,11 @@ describe.each([
 
     await expectReply(request(server).get('/content-manager/collection-types/1'), {
       route: '/content-manager/(collection|single)-types/:id',
-      params: { splat: 'collection', 0: 'collection', id: '1' },
+      params: { 0: 'collection', id: '1' },
     });
     await expectReply(request(server).get('/content-manager/single-types/2'), {
       route: '/content-manager/(collection|single)-types/:id',
-      params: { splat: 'single', 0: 'single', id: '2' },
+      params: { 0: 'single', id: '2' },
     });
     await expectReply(request(server).get('/content-manager/other-types/1'), {
       route: '/content-manager/:kind-types/:id',
@@ -134,7 +134,7 @@ describe.each([
 
     await expectReply(request(server).get('/content-manager/Collection-types/1'), {
       route: '/content-manager/(collection|single)-types/:id',
-      params: { splat: 'Collection', 0: 'Collection', id: '1' },
+      params: { 0: 'Collection', id: '1' },
     });
   });
 
@@ -195,28 +195,28 @@ describe.each([
 
     await expectReply(request(server).get('/items/12'), {
       route: '/items/(\\d+)',
-      params: { splat: '12', 0: '12' },
+      params: { 0: '12' },
     });
     await request(server).get('/items/ab').expect(404);
   });
 
-  it('exposes an unnamed (.*) as both ctx.params.splat and ctx.params[0]', async () => {
+  it('exposes an unnamed (.*) as ctx.params[0]', async () => {
     const { server } = createServer('/files/(.*)');
 
     await expectReply(request(server).get('/files/a/b'), {
       route: '/files/(.*)',
-      params: { splat: 'a/b', 0: 'a/b' },
+      params: { 0: 'a/b' },
     });
   });
 
   it.each([
-    ['/files/(.*)', '/files/', { splat: '', 0: '' }],
-    ['/files-:path(.*)', '/files-', { path: '' }],
-    ['/files/:path(.*)', '/files/', { path: '' }],
-  ])('sets %s to an empty string on an empty match', async (route, url, params) => {
+    ['/files/(.*)', '/files/'],
+    ['/files-:path(.*)', '/files-'],
+    ['/files/:path(.*)', '/files/'],
+  ])('leaves %s out of ctx.params on an empty match, as v6 did', async (route, url) => {
     const { server } = createServer(route);
 
-    await expectReply(request(server).get(url), { route, params });
+    await expectReply(request(server).get(url), { route, params: {} });
   });
 
   it('leaves an omitted optional parameter undefined', async () => {
@@ -323,6 +323,70 @@ describe.each([
     await expectReply(request(server).get('/xAB'), { route: '/x{ab}+', params: {} });
     await expectReply(request(server).get('/xabab'), { route: '/x{ab}+', params: {} });
     await request(server).get('/xabc').expect(404);
+  });
+
+  it('checks a custom pattern followed by literal text', async () => {
+    const { server } = createServer('/a/:id(\\d+)suffix');
+
+    await expectReply(request(server).get('/a/12suffix'), {
+      route: '/a/:id(\\d+)suffix',
+      params: { id: '12' },
+    });
+    await request(server).get('/a/xxsuffix').expect(404);
+  });
+
+  it.each([
+    ['/img/:w(\\d+)x:h(\\d+)', '/img/100x200', { w: '100', h: '200' }],
+    ['/:a([a-z]+):b(\\d*)', '/abc123', { a: 'abc', b: '123' }],
+    ['/:a([a-z]+):b(\\d*)', '/abc', { a: 'abc' }],
+    ['/:a(\\d):b(\\d):c(\\d)', '/123', { a: '1', b: '2', c: '3' }],
+  ])('splits parameters written next to each other in %s', async (route, url, params) => {
+    const { server } = createServer(route);
+
+    await expectReply(request(server).get(url), { route, params });
+  });
+
+  it('rejects parameters written next to each other when one fails its pattern', async () => {
+    const { server } = createServer('/img/:w(\\d+)x:h(\\d+)');
+
+    await request(server).get('/img/axb').expect(404);
+  });
+
+  it.each([
+    ['/static/:file(.+\\.js)', '/static/a/b.js', { file: 'a/b.js' }],
+    ['/v/:ver(\\d+/beta)', '/v/1/beta', { ver: '1/beta' }],
+  ])('lets %s match a value containing a slash', async (route, url, params) => {
+    const { server } = createServer(route);
+
+    await expectReply(request(server).get(url), { route, params });
+  });
+
+  it('splits values as v6 did when a pattern is lazy', async () => {
+    const { server } = createServer('/:a(.+?)/:b(.+)');
+
+    await expectReply(request(server).get('/1/2/3'), {
+      route: '/:a(.+?)/:b(.+)',
+      params: { a: '1', b: '2/3' },
+    });
+  });
+
+  it('keeps a parameter named splat next to an unnamed group', async () => {
+    const { server } = createServer('/:splat/(.*)');
+
+    await expectReply(request(server).get('/x/y/z'), {
+      route: '/:splat/(.*)',
+      params: { 0: 'y/z', splat: 'x' },
+    });
+  });
+
+  it('matches a repeated parameter with a suffix', async () => {
+    const { server } = createServer('/f{/:id(\\d+).html}+');
+
+    await expectReply(request(server).get('/f/1.html/2.html'), {
+      route: '/f{/:id(\\d+).html}+',
+      params: { id: '1.html/2' },
+    });
+    await request(server).get('/f/1.html/a.html').expect(404);
   });
 });
 
@@ -513,13 +577,13 @@ describe('router path registration', () => {
     const server = app.callback();
 
     await expectReply(request(server).get('/p/12/a/b'), {
-      params: { 0: '12', 1: 'a/b', splat: 'a/b' },
+      params: { 0: '12', 1: 'a/b' },
       matchedRoute: '/p/(\\d+)/(.*)',
     });
     await request(server).get('/p/abc/a').expect(404);
   });
 
-  it('fills an empty prefix group and hides a repeated prefix literal', async () => {
+  it('leaves an empty prefix group out and hides a repeated prefix literal', async () => {
     const strapi = createStrapi();
     const router = new Router({ prefix: '/h{-x}+/:v(a*)' });
     installRoutePathTranslation(router, strapi);
@@ -532,7 +596,7 @@ describe('router path registration', () => {
     const server = app.callback();
 
     await expectReply(request(server).get('/h-x-x/aa/y'), { v: 'aa' });
-    await expectReply(request(server).get('/h-x//y'), { v: '' });
+    await expectReply(request(server).get('/h-x//y'), {});
     await request(server).get('/h-y/aa/y').expect(404);
   });
 
@@ -576,6 +640,78 @@ describe('router path registration', () => {
 
     await expectReply(request(server).get('/v/1/child'), { ok: true });
     await request(server).get('/v/abc/child').expect(404);
+  });
+
+  it('registers a list of paths under a v6 router prefix', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/p/:pid(\\d+)' });
+    installRoutePathTranslation(router, strapi);
+    router.get(['/a', '/b/:id(\\d+)'], (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/p/1/a'), { pid: '1' });
+    await expectReply(request(server).get('/p/1/b/2'), { pid: '1', id: '2' });
+    await request(server).get('/p/1/b/x').expect(404);
+    await request(server).get('/p/x/a').expect(404);
+  });
+
+  it('checks a custom pattern case-sensitively on a case-sensitive router', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ sensitive: true });
+    installRoutePathTranslation(router, strapi);
+    router.get('/s/:id([a-z]+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/s/abc'), { id: 'abc' });
+    await request(server).get('/s/ABC').expect(404);
+  });
+
+  it('checks a mount path parameter and a route parameter that share a name', async () => {
+    const { router } = createRouterApp();
+    const nested = new Router();
+    installRoutePathTranslation(nested, createStrapi());
+    nested.get('/:id(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.use('/m/:id(\\d+)', nested.routes());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/m/1/2'), { id: '2' });
+    await request(server).get('/m/1/x').expect(404);
+  });
+
+  it('gives pathless middleware the parameters of a v6 router prefix', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/p/(\\d+)' });
+    installRoutePathTranslation(router, strapi);
+    const seen: unknown[] = [];
+    router.use((ctx, next) => {
+      seen.push({ ...ctx.params });
+      return next();
+    });
+    router.get('/a', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/p/7/a'), { 0: '7' });
+    expect(seen).toEqual([{ 0: '7' }]);
   });
 
   it('answers 404 for a failed custom pattern on an API router mounted on the server', async () => {
@@ -629,7 +765,7 @@ describe('mount paths and matched routes', () => {
     const server = createApp(router);
 
     await expectReply(request(server).get('/v/1/child/a/b'), {
-      params: { 0: '1', 1: 'a/b', splat: 'a/b' },
+      params: { 0: '1', 1: 'a/b' },
       matchedRoute: '/v/(\\d+)/child/(.*)',
     });
     await request(server).get('/v/x/child/a').expect(404);
@@ -700,7 +836,7 @@ describe('mount paths and matched routes', () => {
     );
 
     expect(router.stack.map((layer) => [layer.path, getRouteSourcePath(layer)])).toEqual([
-      ['/api/uploads/{*splat}', '/api/uploads/(.*)'],
+      ['/api/uploads/{*v6Group1}', '/api/uploads/(.*)'],
       ['/api/users/:id', '/api/users/:id'],
     ]);
   });
@@ -766,7 +902,7 @@ describe("Strapi's own v6 route paths", () => {
     const { server, strapi } = createStrapiServer([{ paths: ['/uploads/(.*)'] }]);
 
     await expectReply(request(server).get('/uploads/a/b.png'), {
-      params: { 0: 'a/b.png', splat: 'a/b.png' },
+      params: { 0: 'a/b.png' },
       matchedRoute: '/uploads/(.*)',
     });
     expect(strapi.log.warn).not.toHaveBeenCalled();
@@ -776,7 +912,7 @@ describe("Strapi's own v6 route paths", () => {
     const { server } = createStrapiServer([{ paths: ['/plugins/documentation/(.*)'] }]);
 
     await expectReply(request(server).get('/plugins/documentation/swagger/ui.css'), {
-      params: { 0: 'swagger/ui.css', splat: 'swagger/ui.css' },
+      params: { 0: 'swagger/ui.css' },
       matchedRoute: '/plugins/documentation/(.*)',
     });
   });
@@ -785,7 +921,7 @@ describe("Strapi's own v6 route paths", () => {
     const { server } = createStrapiServer([{ api: true, prefix: '', paths: ['/connect/(.*)'] }]);
 
     await expectReply(request(server).get('/api/connect/google/callback'), {
-      params: { 0: 'google/callback', splat: 'google/callback' },
+      params: { 0: 'google/callback' },
       matchedRoute: '/api/connect/(.*)',
     });
   });
@@ -824,12 +960,12 @@ describe("Strapi's own v6 route paths", () => {
     await expectReply(
       request(server).get('/admin/content-manager/collection-types/api::a.a/1/stage'),
       {
-        params: { 0: 'collection', splat: 'collection', model_uid: 'api::a.a', id: '1' },
+        params: { 0: 'collection', model_uid: 'api::a.a', id: '1' },
         matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
       }
     );
     await expectReply(request(server).get('/admin/content-manager/single-types/api::a.a/1/stage'), {
-      params: { 0: 'single', splat: 'single', model_uid: 'api::a.a', id: '1' },
+      params: { 0: 'single', model_uid: 'api::a.a', id: '1' },
       matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
     });
     await request(server).get('/admin/content-manager/other-types/api::a.a/1/stage').expect(404);

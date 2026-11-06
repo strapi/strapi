@@ -119,32 +119,40 @@ Strapi translates:
 - every route object, in `compose-endpoint.ts`;
 - every path, router prefix and mount path given to the root router, the two API routers and the sub-router of a prefixed route group. `installRoutePathTranslation` wraps their `register`, `use`, `prefix` and `match` methods.
 
-A router that a plugin creates itself is not wrapped. A route object composed onto it still keeps the v6 behaviour, through a wrapper around its handler.
+A router that a plugin creates itself is not wrapped. A route object composed onto it still keeps the v6 behaviour, through a wrapper around its handler that matches the v6 path against the end of the request path.
 
-| v6                                                | v8                                  | Kept from v6                                                                          |
-| ------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------- |
-| `/users/:id(\\d+)`                                | `/users/:id`                        | The pattern still decides whether the route matches.                                  |
-| `/users/:id?`                                     | `/users{/:id}`                      |                                                                                       |
-| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`    |                                                                                       |
-| `/uploads/(.*)`                                   | `/uploads/{*splat}`                 | The value is in `ctx.params[0]`, and also in `ctx.params.splat`.                      |
-| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:splat-types/:id` | The alternation is checked, and the value is in `ctx.params[0]`.                      |
-| `/x{-y}+`                                         | `/x:v6Literal0`                     | The repeated literal is checked. The internal parameter is removed from `ctx.params`. |
+The translated v8 path matches every request the v6 path matched, and sometimes more. path-to-regexp v6 (the `path-to-regexp-v6` dependency) then compiles the layer's full v6 path, router prefix and mount path included. That regular expression decides whether the layer matches and fills `ctx.params`, the same way `@koa/router` 12 did. So a v6 route keeps its matches, its parameter values and its 404 versus 405 answers.
 
-What the translator keeps:
+| v6                                                | v8                                     | Notes                                                                        |
+| ------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
+| `/users/:id(\\d+)`                                | `/users/:id`                           | A pattern that may match `/`, such as `.+\\.js`, becomes a wildcard instead. |
+| `/users/:id?`                                     | `/users{/:id}`                         |                                                                              |
+| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`       |                                                                              |
+| `/uploads/(.*)`                                   | `/uploads/{*v6Group1}`                 | The value is in `ctx.params[0]`. `v6Group1` is not in `ctx.params`.          |
+| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:v6Group1-types/:id` | The value is in `ctx.params[0]`.                                             |
+| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/:"w"x:h`                         | A name followed by a name character is quoted.                               |
+| `/:a([a-z]+):b(\\d+)`                             | `{*v6Joined1}`                         | v8 needs text between two parameters, so one wildcard stands for both.       |
+| `/x{-y}+`                                         | `/x:v6Literal1`                        | v8 cannot repeat a literal, so a parameter stands for the repetitions.       |
 
-- A custom pattern is tested against the raw captured text, before URI decoding, with the `i` flag, as v6 did. A value that fails is not a match: the router tries the next route, then answers 404, not 405.
-- Unnamed groups are numbered across the router prefix, the mount path and the route, in that order. With the prefix `/p/(\\d+)` and the route `/(.*)`, `/p/12/a/b` gives `ctx.params[0] = '12'` and `ctx.params[1] = 'a/b'`.
-- A required parameter whose pattern can match nothing, such as `(.*)`, is `''` instead of `undefined`.
+What stays as it was in v6:
+
+- Which requests match, including custom patterns, which are tested before URI decoding. A request the v6 path rejects is not a match: the router tries the next route, then answers 404, not 405.
+- `ctx.params`: the same names and decoded values. Unnamed groups are numbered across the router prefix, the mount path and the route, in that order. With the prefix `/p/(\\d+)` and the route `/(.*)`, `/p/12/a/b` gives `ctx.params[0] = '12'` and `ctx.params[1] = 'a/b'`. A parameter that matched no text is left out. Names that only the v8 path has are removed.
+- Case sensitivity and trailing slashes follow the router's `sensitive` and `strict` options.
 - `ctx._matchedRoute` is the path as written, prefix included. Sentry and OpenTelemetry read it.
 - `strapi routes:list` prints the path as written. The OpenAPI document uses `route.path`, which the translator does not change.
 
-Each layer stores its translation under a symbol. `@koa/router` copies the layers of a nested router with `Object.assign`, which keeps symbol properties, so the checks survive a mount.
+Each layer stores its parts and its v6 matcher under symbols. `@koa/router` copies the layers of a nested router with `Object.assign`, which keeps symbol properties. The layer is re-described when it is mounted, so the matcher covers the mount path too.
 
 Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip the warning.
 
-Some paths cannot be translated. Boot fails with `RoutePathMigrationError` when a repeated parameter with a custom pattern has a suffix or no prefix, when a group starts with `?`, or when a pattern is not a valid regular expression.
+Boot fails with `RoutePathMigrationError` for a path that v6 rejected too, for a group that starts with `?`, and for a path that mixes v6 syntax with v8-only syntax such as a quoted name.
 
-`layer.path` in `strapi.server.router.stack` and `listRoutes()` is the translated path, because `@koa/router` compiles and prefixes it. Code that looks for a layer by its path must compare with the v8 form.
+What changed from `@koa/router` 12:
+
+- `layer.path` in `strapi.server.router.stack` and `listRoutes()` is the translated path, because `@koa/router` compiles and prefixes it. Code that looks for a layer by its path must compare with the v8 form, or call `getRouteSourcePath(layer)`.
+- In a path with no other v6 syntax, a bare `{…}` group is read as v8, where it is optional. In v6 it was required, which made it the same as writing its content without braces.
+- Calling `router.prefix()` again replaces the prefix instead of adding to it. This is `@koa/router` 15 behaviour.
 
 ## The route chain
 

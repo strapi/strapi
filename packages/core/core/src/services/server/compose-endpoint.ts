@@ -117,7 +117,8 @@ export default (strapi: Core.Strapi) => {
           router[method](path, handler);
         });
       } catch (error) {
-        if (error instanceof Error) {
+        // path-to-regexp errors link to its documentation.
+        if (error instanceof Error && /pathToRegexpError/.test(error.message)) {
           throw new RoutePathMigrationError(
             route.path,
             `path-to-regexp v8 rejected the translated path "${path}": ${error.message}`
