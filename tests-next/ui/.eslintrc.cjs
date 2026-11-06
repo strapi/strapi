@@ -12,7 +12,13 @@ const config = {
     'node/no-unpublished-import': 'off',
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
   },
-  ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'test-results/', 'playwright-report/'],
+  ignorePatterns: [
+    'node_modules/',
+    '.eslintrc.cjs',
+    'lint-staged.config.mjs',
+    'test-results/',
+    'playwright-report/',
+  ],
 };
 
 module.exports = config;
