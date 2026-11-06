@@ -1,6 +1,11 @@
 import inquirer from 'inquirer';
 import type { Command } from 'commander';
-import { action as createAdminCommand, command, PASSWORD_ENV_VAR } from '../create-user';
+import {
+  action as createAdminCommand,
+  ADMIN_TOKEN_OUTPUT_PREFIX,
+  command,
+  PASSWORD_ENV_VAR,
+} from '../create-user';
 
 const roleId = 1;
 const load = jest.fn(() => mock) as any;
@@ -8,15 +13,28 @@ const load = jest.fn(() => mock) as any;
 const create = jest.fn();
 const getSuperAdmin = jest.fn(() => Promise.resolve({ id: roleId }));
 const exists = jest.fn();
+const findOne = jest.fn();
+const findUserPermissions = jest.fn();
+const sanitizePermission = jest.fn((permission) => permission);
+const createToken = jest.fn();
+const transaction = jest.fn((callback: () => unknown) => callback());
 
 const admin = {
   services: {
     user: {
       create,
       exists,
+      findOne,
     },
     role: {
       getSuperAdmin,
+    },
+    permission: {
+      findUserPermissions,
+      sanitizePermission,
+    },
+    'api-token-admin': {
+      create: createToken,
     },
   },
 };
@@ -24,6 +42,7 @@ const admin = {
 const mock = {
   load,
   admin,
+  db: { transaction },
 };
 
 jest.mock('@strapi/core', () => {
@@ -412,6 +431,119 @@ describe('admin:create command', () => {
       cmd.exitOverride().configureOutput({ writeErr() {} });
 
       expect(() => cmd.parse(['--allow-weak-password'], { from: 'user' })).toThrow();
+    });
+  });
+
+  describe('Admin token', () => {
+    const owner = { id: 7, email: 'email@email.fr', roles: [{ code: 'strapi-super-admin' }] };
+
+    beforeEach(() => {
+      create.mockReset().mockResolvedValue({ id: 7 });
+      exists.mockReset().mockResolvedValue(false);
+      findOne.mockReset().mockResolvedValue(owner);
+      findUserPermissions.mockReset().mockResolvedValue([
+        {
+          id: 1,
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::article.article',
+          properties: { fields: ['title'] },
+          conditions: [],
+          role: { id: 1 },
+          actionParameters: {},
+        },
+      ]);
+      createToken.mockReset().mockResolvedValue({ accessKey: 'a1b2c3' });
+      transaction.mockClear();
+    });
+
+    test('Creates no token without --with-admin-token', async () => {
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand({
+        email: 'email@email.fr',
+        firstname: 'John',
+        password: 'testPasword1234',
+      });
+
+      expect(create).toHaveBeenCalled();
+      expect(createToken).not.toHaveBeenCalled();
+      expect(transaction).not.toHaveBeenCalled();
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+
+    test('Creates the user and a token with all owner permissions in one transaction', async () => {
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand({
+        email: 'email@email.fr',
+        firstname: 'John',
+        password: 'testPasword1234',
+        withAdminToken: true,
+      });
+
+      expect(transaction).toHaveBeenCalledTimes(1);
+      expect(findOne).toHaveBeenCalledWith(7);
+      expect(findUserPermissions).toHaveBeenCalledWith(owner);
+      expect(createToken).toHaveBeenCalledWith(
+        {
+          kind: 'admin',
+          name: 'Installation token',
+          description: expect.any(String),
+          lifespan: 30 * 24 * 60 * 60 * 1000,
+          adminPermissions: [
+            {
+              action: 'plugin::content-manager.explorer.read',
+              subject: 'api::article.article',
+              properties: { fields: ['title'] },
+              conditions: [],
+            },
+          ],
+        },
+        owner
+      );
+      expect(consoleLog).toHaveBeenCalledWith(`${ADMIN_TOKEN_OUTPUT_PREFIX}a1b2c3`);
+      expect(mockExit).toHaveBeenCalledWith(0);
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+
+    test('Fails without printing a token when the token creation fails', async () => {
+      createToken.mockRejectedValue(new Error('token failure'));
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await expect(
+        createAdminCommand({
+          email: 'email@email.fr',
+          firstname: 'John',
+          password: 'testPasword1234',
+          withAdminToken: true,
+        })
+      ).rejects.toThrow('token failure');
+
+      // The transaction rejects, so the database rolls back the user
+      expect(transaction).toHaveBeenCalledTimes(1);
+      expect(consoleLog).not.toHaveBeenCalledWith(
+        expect.stringContaining(ADMIN_TOKEN_OUTPUT_PREFIX)
+      );
+      expect(mockExit).not.toHaveBeenCalledWith(0);
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+
+    // create-strapi-app searches the help output for this option and parses this prefix
+    test('Keeps the option and the output prefix that create-strapi-app expects', () => {
+      const cmd = command({} as Parameters<typeof command>[0]) as Command;
+
+      expect(cmd.helpInformation()).toContain('--with-admin-token');
+      expect(ADMIN_TOKEN_OUTPUT_PREFIX).toBe('Admin token: ');
     });
   });
 

@@ -21,6 +21,7 @@ import { gitIgnore } from './utils/gitignore';
 import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-manager-args';
 import {
   createAdminUser,
+  getAdminTokenSummary,
   getGeneratedPasswordSummary,
   getManualAdminCommand,
 } from './utils/admin-user';
@@ -305,6 +306,17 @@ async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
     logger.log(['', ...getGeneratedPasswordSummary(adminUser)]);
   }
 
+  if (adminResult?.status === 'created') {
+    if (adminResult.adminToken) {
+      logger.log(['', ...getAdminTokenSummary(adminResult.adminToken)]);
+    } else {
+      logger.warn([
+        `The installed ${chalk.bold('@strapi/strapi')} version cannot create an admin token.`,
+        'Create one in the admin panel: Settings > Admin tokens.',
+      ]);
+    }
+  }
+
   if (adminResult && adminResult.status !== 'created') {
     // The admin user is mandatory: keep the project, do not start it, and exit with code 1.
     // logger.fatal exits instead of throwing, so createStrapi does not delete the project.
@@ -360,7 +372,12 @@ async function runCreateAdminUser({ scope, adminUser }: { scope: Scope; adminUse
   const result = await createAdminUser({ rootPath: scope.rootPath, adminUser });
 
   if (result.status === 'created') {
-    await trackUsage({ event: 'didCreateAdminUser', scope, eventProperties });
+    await trackUsage({
+      event: 'didCreateAdminUser',
+      scope,
+      // Never send the token itself
+      eventProperties: { ...eventProperties, hasAdminToken: result.adminToken !== undefined },
+    });
     logger.success('Admin user created');
   } else {
     await trackUsage({ event: 'didNotCreateAdminUser', scope, eventProperties });

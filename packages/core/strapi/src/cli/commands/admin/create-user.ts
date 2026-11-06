@@ -13,7 +13,26 @@ interface CmdOptions {
   password?: string;
   firstname?: string;
   lastname?: string;
+  withAdminToken?: boolean;
 }
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * The admin token created with `--with-admin-token`.
+ * The lifespan must be one of the admin API values (7, 30, or 90 days, or unlimited).
+ */
+const ADMIN_TOKEN = {
+  name: 'Installation token',
+  description: 'Created by strapi admin:create-user --with-admin-token',
+  lifespan: 30 * DAY_IN_MS,
+};
+
+/**
+ * Prefix of the stdout line that carries the admin token key.
+ * create-strapi-app parses this line: keep both in sync (the tests pin it).
+ */
+const ADMIN_TOKEN_OUTPUT_PREFIX = 'Admin token: ';
 
 /**
  * Environment variable read when `--password` is absent.
@@ -96,29 +115,63 @@ const promptQuestions: QuestionCollection<Answers> = [
   },
 ];
 
-async function createAdmin({ email, password, firstname, lastname }: CmdOptions) {
+async function createAdmin({ email, password, firstname, lastname, withAdminToken }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
+  const { services } = app.admin!;
 
-  const user = await app.admin!.services.user.exists({ email });
+  const user = await services.user.exists({ email });
 
   if (user) {
     console.error(`User with email "${email}" already exists`);
     process.exit(1);
   }
 
-  const superAdminRole = await app.admin!.services.role.getSuperAdmin();
+  const superAdminRole = await services.role.getSuperAdmin();
 
-  await app.admin!.services.user.create({
-    email,
-    firstname,
-    lastname,
-    isActive: true,
-    roles: [superAdminRole.id],
-    ...(password && { password, registrationToken: null }),
+  const createUser = () =>
+    services.user.create({
+      email,
+      firstname,
+      lastname,
+      isActive: true,
+      roles: [superAdminRole.id],
+      ...(password && { password, registrationToken: null }),
+    });
+
+  if (!withAdminToken) {
+    await createUser();
+
+    console.log(`Successfully created new admin`);
+    process.exit(0);
+    return;
+  }
+
+  // One transaction: if the token fails, the user is not created and the command can run again
+  const accessKey: string = await app.db.transaction(async () => {
+    const createdUser = await createUser();
+
+    // The token service checks the roles of the owner (super admin ceiling)
+    const owner = await services.user.findOne(createdUser.id);
+
+    // The token gets every permission of its owner, as the admin panel offers it
+    const ownerPermissions = await services.permission.findUserPermissions(owner);
+    const adminPermissions = ownerPermissions
+      .map(services.permission.sanitizePermission)
+      .map((permission: Record<string, unknown>) =>
+        _.pick(permission, ['action', 'subject', 'properties', 'conditions'])
+      );
+
+    const token = await services['api-token-admin'].create(
+      { kind: 'admin', ...ADMIN_TOKEN, adminPermissions },
+      owner
+    );
+
+    return token.accessKey;
   });
 
   console.log(`Successfully created new admin`);
+  console.log(`${ADMIN_TOKEN_OUTPUT_PREFIX}${accessKey}`);
   process.exit(0);
 }
 
@@ -126,6 +179,7 @@ async function createAdmin({ email, password, firstname, lastname }: CmdOptions)
  * Create new admin user
  */
 const action = async (cmdOptions: CmdOptions = {}) => {
+  const { withAdminToken } = cmdOptions;
   let { email, password, firstname, lastname } = cmdOptions;
 
   if (
@@ -163,7 +217,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     process.exit(1);
   }
 
-  return createAdmin({ email, password, firstname, lastname });
+  return createAdmin({ email, password, firstname, lastname, withAdminToken });
 };
 
 /**
@@ -177,7 +231,11 @@ const command: StrapiCommand = () => {
     .option('-p, --password <password>', `Password of the new admin (or set ${PASSWORD_ENV_VAR})`)
     .option('-f, --firstname <first name>', 'First name of the new admin')
     .option('-l, --lastname <last name>', 'Last name of the new admin')
+    .option(
+      '--with-admin-token',
+      'Also create an admin token with all the permissions of the new admin (valid 30 days), and print it'
+    )
     .action(runAction('admin:create-user', action));
 };
 
-export { action, command, PASSWORD_ENV_VAR };
+export { action, command, PASSWORD_ENV_VAR, ADMIN_TOKEN_OUTPUT_PREFIX };

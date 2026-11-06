@@ -18,6 +18,14 @@ export const ADMIN_PASSWORD_ENV_VAR = 'CREATE_STRAPI_APP_ADMIN_PASSWORD';
  */
 export const CHILD_PASSWORD_ENV_VAR = 'STRAPI_CLI_ADMIN_PASSWORD';
 
+/**
+ * Option of `strapi admin:create-user` that also creates an admin token, and the prefix
+ * of the stdout line that carries its key. Kept in sync with `@strapi/strapi`
+ * (cli/commands/admin/create-user.ts). Its tests pin both values.
+ */
+export const ADMIN_TOKEN_OPTION = '--with-admin-token';
+const ADMIN_TOKEN_LINE_REGEX = /^Admin token: ([a-f0-9]+)$/m;
+
 export const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
 export const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
 
@@ -196,8 +204,24 @@ export async function resolveAdminUser({
 export const getManualAdminCommand = (packageManager: PackageManager) => {
   const separator = packageManager === 'npm' ? ' --' : '';
 
-  return `${packageManager} run strapi${separator} admin:create-user`;
+  return `${packageManager} run strapi${separator} admin:create-user ${ADMIN_TOKEN_OPTION}`;
 };
+
+/**
+ * Lines printed in the installation summary for the admin token.
+ * This is the only place where the CLI shows the token.
+ */
+export const getAdminTokenSummary = (adminToken: string) => [
+  'Admin token (valid 30 days, all the permissions of the admin user):',
+  `  ${chalk.bold(adminToken)}`,
+  'Strapi does not show this token again. Store it in a safe place.',
+  `Send it to the admin API in the header ${chalk.cyan('Authorization: Bearer <token>')}.`,
+];
+
+/**
+ * Reads the admin token key from the `admin:create-user --with-admin-token` output.
+ */
+export const parseAdminToken = (stdout: string) => ADMIN_TOKEN_LINE_REGEX.exec(stdout)?.[1];
 
 /**
  * Lines printed in the installation summary when the CLI generated the password.
@@ -220,7 +244,13 @@ const getErrorOutput = (error: unknown) => {
 };
 
 export type CreateAdminUserResult =
-  { status: 'created' } | { status: 'unsupported' } | { status: 'failed'; error: string };
+  | {
+      status: 'created';
+      /** The admin token key. Undefined when the installed Strapi version cannot create it. */
+      adminToken?: string;
+    }
+  | { status: 'unsupported' }
+  | { status: 'failed'; error: string };
 
 /**
  * Runs `strapi admin:create-user` inside the new project.
@@ -256,9 +286,16 @@ export async function createAdminUser({
       adminUser.firstname,
     ];
 
-    await execa('strapi', args, {
+    const supportsAdminToken = help.stdout.includes(ADMIN_TOKEN_OPTION);
+
+    if (supportsAdminToken) {
+      args.push(ADMIN_TOKEN_OPTION);
+    }
+
+    // stdout is piped, not shown: it carries the token, which the summary shows once
+    const { stdout } = await execa('strapi', args, {
       ...execaOptions,
-      stdio: ['ignore', 'inherit', 'pipe'],
+      stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         [CHILD_PASSWORD_ENV_VAR]: adminUser.password,
         [ADMIN_PASSWORD_ENV_VAR]: undefined,
@@ -266,7 +303,17 @@ export async function createAdminUser({
       },
     });
 
-    return { status: 'created' };
+    if (!supportsAdminToken) {
+      return { status: 'created' };
+    }
+
+    const adminToken = parseAdminToken(stdout);
+
+    if (adminToken === undefined) {
+      return { status: 'failed', error: 'The admin token is missing from the command output' };
+    }
+
+    return { status: 'created', adminToken };
   } catch (error) {
     return { status: 'failed', error: getErrorOutput(error) };
   }

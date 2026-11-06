@@ -20,7 +20,7 @@ Provides the official CLI for Strapi app developers to create new Strapi project
 
 ## Admin user
 
-Every installation that installs the dependencies creates one Super Admin user. The step is mandatory. The CLI has no option to skip it. The code is in `src/utils/admin-user.ts`.
+Every installation that installs the dependencies creates one Super Admin user and one admin token for that user. The step is mandatory. The CLI has no option to skip it. The code is in `src/utils/admin-user.ts`.
 
 The CLI asks for the email and the password together with the other prompts, before the dependency install. It asks for the password twice and applies the same rules as `strapi admin:create-user`: 8 characters minimum, 72 bytes maximum, one lowercase, one uppercase, one number. It does not ask for a name. It sends the first name `Admin`.
 
@@ -41,11 +41,29 @@ The generated password has 24 characters from `a-z`, `A-Z`, and `0-9`, with at l
 
 Templates can pin an older `@strapi/strapi`. The CLI searches the `admin:create-user --help` output for `STRAPI_CLI_ADMIN_PASSWORD`. If the name is absent, the admin step fails.
 
-If the admin step fails, for example because the database server is down, the CLI keeps the project. It prints the error and `<package manager> run strapi admin:create-user`, does not start the app, and exits with code 1.
+If the admin step fails, for example because the database server is down, the CLI keeps the project. It prints the error and `<package manager> run strapi admin:create-user --with-admin-token`, does not start the app, and exits with code 1.
 
 With `--no-install`, the CLI cannot run the command. It skips the admin step and adds the command to the "To get started" text. If `--admin-email` is set, the CLI prints a warning that the flag is ignored. The programmatic `createStrapi(scope)` export, used by `tests/helpers/test-app.js`, creates no admin user.
 
-The CLI sends `willCreateAdminUser`, `didCreateAdminUser`, and `didNotCreateAdminUser` events. Each event carries `passwordGenerated` and nothing else about the admin user. The events never carry the email or the password.
+The CLI sends `willCreateAdminUser`, `didCreateAdminUser`, and `didNotCreateAdminUser` events. Each event carries `passwordGenerated`. `didCreateAdminUser` also carries `hasAdminToken`. The events never carry the email, the password, or the token.
+
+## Admin token
+
+An admin token is an API token with `kind: 'admin'`. It belongs to one admin user, carries a list of admin permissions, and authenticates admin API requests with `Authorization: Bearer <token>`. The service is `api-token-admin` in `packages/core/admin/server/src/services/api-token.ts`.
+
+The CLI passes `--with-admin-token` to `strapi admin:create-user`. With that option, `admin:create-user` does the following:
+
+1. It creates the user and the token in one `strapi.db.transaction`. If the token creation fails, the database rolls back the user, so the command can run again.
+2. It loads the new user with its roles, because the token service checks the Super Admin role of the owner.
+3. It copies every permission of the user (`permission.findUserPermissions`, then `permission.sanitizePermission`) into the token. The token keeps `action`, `subject`, `properties`, and `conditions`.
+4. It names the token `Installation token` and sets a lifespan of 30 days.
+5. It prints the key on its own stdout line: `Admin token: <key>`.
+
+The CLI pipes the stdout of `admin:create-user` and does not print it. It reads the key with `/^Admin token: ([a-f0-9]+)$/m`. If the line is missing, the admin step fails. The CLI shows the key once, in the summary at the end of the installation, after the generated password. The database keeps only a hash and an encrypted copy of the key.
+
+The option name and the output prefix are duplicated in both packages. The `admin:create-user` unit tests pin them. If the `--help` output of the installed `@strapi/strapi` has no `--with-admin-token`, the CLI creates the user without a token and prints a warning.
+
+The token permissions are a copy. If a later content type adds permissions to the Super Admin role, the token does not get them. The user can edit the token in the admin panel.
 
 ## Telemetry
 

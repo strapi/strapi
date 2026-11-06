@@ -3,13 +3,16 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import {
   ADMIN_PASSWORD_ENV_VAR,
+  ADMIN_TOKEN_OPTION,
   AdminUserInputError,
   CHILD_PASSWORD_ENV_VAR,
   DEFAULT_ADMIN_EMAIL,
   createAdminUser,
   generateAdminPassword,
+  getAdminTokenSummary,
   getGeneratedPasswordSummary,
   getManualAdminCommand,
+  parseAdminToken,
   resolveAdminUser,
   takeAdminPasswordFromEnv,
   validateEmail,
@@ -215,9 +218,39 @@ describe('getGeneratedPasswordSummary', () => {
 
 describe('getManualAdminCommand', () => {
   it('adds the npm argument separator only for npm', () => {
-    expect(getManualAdminCommand('npm')).toBe('npm run strapi -- admin:create-user');
-    expect(getManualAdminCommand('yarn')).toBe('yarn run strapi admin:create-user');
-    expect(getManualAdminCommand('pnpm')).toBe('pnpm run strapi admin:create-user');
+    expect(getManualAdminCommand('npm')).toBe(
+      'npm run strapi -- admin:create-user --with-admin-token'
+    );
+    expect(getManualAdminCommand('yarn')).toBe(
+      'yarn run strapi admin:create-user --with-admin-token'
+    );
+    expect(getManualAdminCommand('pnpm')).toBe(
+      'pnpm run strapi admin:create-user --with-admin-token'
+    );
+  });
+});
+
+describe('parseAdminToken', () => {
+  const key = 'ab12'.repeat(64);
+
+  it('reads the key from its own line among other output', () => {
+    expect(
+      parseAdminToken(`[info] Strapi loaded\nSuccessfully created new admin\nAdmin token: ${key}\n`)
+    ).toBe(key);
+  });
+
+  it('returns undefined without a token line', () => {
+    expect(parseAdminToken('Successfully created new admin\n')).toBeUndefined();
+    expect(parseAdminToken('Admin token: not-hex\n')).toBeUndefined();
+  });
+});
+
+describe('getAdminTokenSummary', () => {
+  it('shows the token and how to use it', () => {
+    const text = getAdminTokenSummary('ab12').join('\n');
+
+    expect(text).toContain('ab12');
+    expect(text).toContain('Authorization: Bearer');
   });
 });
 
@@ -272,6 +305,48 @@ describe('createAdminUser', () => {
     const createCall = mockedExeca.mock.calls.find(([, args]) => !args.includes('--help'));
     expect(createCall![1]).not.toContain('--allow-weak-password');
     expect(createCall![2].env[CHILD_PASSWORD_ENV_VAR]).toBe(generated.password);
+  });
+
+  it('requests the admin token and returns it from the piped output', async () => {
+    const key = 'cd34'.repeat(64);
+
+    mockedExeca.mockImplementation(async (_cmd: string, args: string[]) =>
+      args.includes('--help')
+        ? { stdout: `${CHILD_PASSWORD_ENV_VAR} ${ADMIN_TOKEN_OPTION}` }
+        : { stdout: `Successfully created new admin\nAdmin token: ${key}\n` }
+    );
+
+    const result = await createAdminUser({ rootPath: '/app', adminUser });
+
+    expect(result).toEqual({ status: 'created', adminToken: key });
+
+    const createCall = mockedExeca.mock.calls.find(([, args]) => !args.includes('--help'));
+    expect(createCall![1]).toContain(ADMIN_TOKEN_OPTION);
+    // The token must not reach the terminal before the summary
+    expect(createCall![2].stdio[1]).toBe('pipe');
+  });
+
+  it('fails when the token line is missing from the output', async () => {
+    mockedExeca.mockImplementation(async (_cmd: string, args: string[]) =>
+      args.includes('--help')
+        ? { stdout: `${CHILD_PASSWORD_ENV_VAR} ${ADMIN_TOKEN_OPTION}` }
+        : { stdout: 'Successfully created new admin\n' }
+    );
+
+    const result = await createAdminUser({ rootPath: '/app', adminUser });
+
+    expect(result).toMatchObject({ status: 'failed' });
+  });
+
+  it('creates the user without a token when Strapi has no --with-admin-token', async () => {
+    mockHelp(CHILD_PASSWORD_ENV_VAR);
+
+    const result = await createAdminUser({ rootPath: '/app', adminUser });
+
+    expect(result).toEqual({ status: 'created' });
+
+    const createCall = mockedExeca.mock.calls.find(([, args]) => !args.includes('--help'));
+    expect(createCall![1]).not.toContain(ADMIN_TOKEN_OPTION);
   });
 
   it('reports an older Strapi version without running it interactively', async () => {
