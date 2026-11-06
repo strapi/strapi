@@ -10741,6 +10741,56 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/tests-api@workspace:tests-next/api":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-api@workspace:tests-next/api"
+  dependencies:
+    "@strapi/tests-shared": "workspace:*"
+    "@swc/jest": "npm:0.2.39"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    jest: "npm:29.6.0"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/tests-cli@workspace:tests-next/cli":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-cli@workspace:tests-next/cli"
+  dependencies:
+    "@strapi/tests-shared": "workspace:*"
+    "@swc/jest": "npm:0.2.39"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    jest: "npm:29.6.0"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/tests-e2e@workspace:tests-next/ui":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-e2e@workspace:tests-next/ui"
+  dependencies:
+    "@playwright/test": "npm:1.56.1"
+    "@strapi/tests-shared": "workspace:*"
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/tests-shared@workspace:*, @strapi/tests-shared@workspace:tests-next/shared":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-shared@workspace:tests-next/shared"
+  dependencies:
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@strapi/types@npm:5.61.0, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
@@ -17873,7 +17923,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-custom@npm:5.61.0, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
+"eslint-config-custom@npm:5.61.0, eslint-config-custom@workspace:*, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
   languageName: unknown
@@ -30087,7 +30137,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig@npm:5.61.0, tsconfig@workspace:packages/utils/tsconfig":
+"tsconfig@npm:5.61.0, tsconfig@workspace:*, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   languageName: unknown

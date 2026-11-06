@@ -34,6 +34,7 @@ jobs:
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
       migrations: ${{ steps.filter.outputs.migrations }}
+      tests_next: ${{ steps.filter.outputs.tests_next }}
       docs: ${{ steps.filter.outputs.docs }}
       global: ${{ steps.filter.outputs.global }}
       is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
@@ -157,7 +158,7 @@ jobs:
     name: 'lint_oxlint'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions]
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -175,7 +176,7 @@ jobs:
     name: 'typescript (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.tests_next == 'true'
     strategy:
       matrix:
         node: [22, 24, 26]

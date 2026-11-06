@@ -28,6 +28,7 @@
     "examples/plugins/*",
     "examples/*/src/plugins/*",
     ".github/actions/*",
+    "tests-next/*",
     "scripts/*"
   ],
   "scripts": {
