@@ -18,7 +18,7 @@ The `@strapi/strapi` package uses it for the CLI commands. The `@strapi/admin` s
 
 ### Transfer engine
 
-`TransferEngine` in [`src/engine`](https://github.com/strapi/strapi/tree/develop/packages/core/data-transfer/src/engine) takes a source and a destination provider and runs the transfer. The order is: load the JSONL stream packages, bootstrap and init the providers, run the integrity check, validate the stages, run `beforeTransfer` on the providers, transfer the stages, then close. If an error occurs after that load and before close, the engine calls `rollback` on the destination. A failed package load is reported and rethrown without rollback or close, because no provider has started and file or directory rollback would delete an existing `--file` target. Read [Transfer engine](./01-engine/index.md) and [Stream lifecycle](./01-engine/02-stream-lifecycle.md).
+`TransferEngine` in [`src/engine`](https://github.com/strapi/strapi/tree/develop/packages/core/data-transfer/src/engine) takes a source and a destination provider and runs the transfer. The order is: load the JSONL stream packages, bootstrap and init the providers, run the integrity check, validate the stages, run `beforeTransfer` on the providers, transfer the stages, then close. If an error occurs after that load and before close, the engine calls `rollback` on the destination. A failed package load is reported and rethrown without rollback or close, because no provider has started and rollback would delete an archive or the export written at an existing `--file` path. Read [Transfer engine](./01-engine/index.md) and [Stream lifecycle](./01-engine/02-stream-lifecycle.md).
 
 ### Stages
 

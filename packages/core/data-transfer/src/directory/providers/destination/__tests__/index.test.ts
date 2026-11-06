@@ -35,7 +35,8 @@ describe('Directory destination provider', () => {
   });
 
   test('close does not recreate an export after rollback', async () => {
-    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-rollback-'));
+    const parent = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-rollback-'));
+    const dir = path.join(parent, 'export');
     const provider = createLocalDirectoryDestinationProvider({
       directory: { path: dir },
       file: {},
@@ -50,6 +51,32 @@ describe('Directory destination provider', () => {
     await provider.close();
 
     expect(await fs.pathExists(dir)).toBe(false);
+  });
+
+  test('rollback of an existing directory keeps files the export did not write', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-rollback-keep-'));
+    const notesPath = path.join(dir, 'notes.txt');
+    await fs.writeFile(notesPath, 'keep');
+    await fs.outputFile(path.join(dir, 'entities', 'old.jsonl'), '{"id":1}\n');
+
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+    provider.setMetadata('source', {
+      createdAt: new Date().toISOString(),
+      strapi: { version: '5.0.0' },
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+    await pipeline(Readable.from([{ id: 2 }]), provider.createEntitiesWriteStream());
+    await provider.rollback();
+    await provider.close();
+
+    expect(await fs.readFile(notesPath, 'utf8')).toBe('keep');
+    expect(await fs.pathExists(path.join(dir, 'entities'))).toBe(false);
+    expect(await fs.pathExists(path.join(dir, 'metadata.json'))).toBe(false);
+    expect(await fs.pathExists(dir)).toBe(true);
   });
 
   test.each([

@@ -15,6 +15,9 @@ import { createJsonlWriteStream } from '../../../utils/jsonl-write-stream';
 import { createDirectoryJsonlWriter, createFilePathFactory } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
+/** Paths a directory export writes. Rollback removes these and leaves anything else in place. */
+const EXPORT_PATHS = ['metadata.json', 'schemas', 'entities', 'links', 'configuration', 'assets'];
+
 export interface ILocalDirectoryDestinationProviderOptions {
   directory: {
     /** Output root: unpacked Strapi export layout (metadata.json, entities/, …) */
@@ -54,6 +57,8 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   #rolledBack = false;
 
+  #createdRoot = false;
+
   constructor(options: ILocalDirectoryDestinationProviderOptions) {
     this.options = options;
     this.#rootResolved = path.resolve(options.directory.path);
@@ -78,6 +83,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
   async bootstrap(diagnostics: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     this.#rolledBack = false;
+    this.#createdRoot = !(await fs.pathExists(this.#rootResolved));
     this.#reportInfo('preparing directory export');
     await fs.mkdir(this.#rootResolved, { recursive: true });
     this.results.file = { path: this.#rootResolved };
@@ -94,7 +100,17 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
   async rollback(): Promise<void> {
     this.#rolledBack = true;
     this.#reportInfo('rolling back');
-    await fs.rm(this.#rootResolved, { recursive: true, force: true });
+
+    if (this.#createdRoot) {
+      await fs.rm(this.#rootResolved, { recursive: true, force: true });
+      return;
+    }
+
+    await Promise.all(
+      EXPORT_PATHS.map((name) =>
+        fs.rm(path.join(this.#rootResolved, name), { recursive: true, force: true })
+      )
+    );
   }
 
   getMetadata() {
