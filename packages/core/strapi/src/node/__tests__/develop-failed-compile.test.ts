@@ -227,9 +227,9 @@ describe('develop worker', () => {
 
     try {
       await runDevelop();
-      const [onMessage] = process
+      const onMessage = process
         .listeners('message')
-        .filter((listener) => messageListenersBefore.includes(listener) === false);
+        .find((listener) => messageListenersBefore.includes(listener) === false);
 
       await expect((onMessage as (message: string) => Promise<void>)('kill')).rejects.toBe(
         destroyError
