@@ -93,7 +93,10 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
       database: options.dbname,
       username: options.dbusername,
       password: options.dbpassword,
-      filename: options.dbfile,
+      filename:
+        options.dbclient === 'sqlite' && options.dbfile === undefined
+          ? DEFAULT_CONFIG.connection.filename
+          : options.dbfile,
     },
   };
 

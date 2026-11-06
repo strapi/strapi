@@ -117,6 +117,20 @@ describe('syncAPITokensPermissions', () => {
     );
   });
 
+  test('quotes API token names so the warning stays on one line', async () => {
+    const { warn } = setup(
+      [{ id: 1, action: 'api::legacy.legacy.find', token: { id: 1, name: 'evil\nToken "x"' } }],
+      []
+    );
+
+    await syncAPITokensPermissions();
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    const message = warn.mock.calls[0][0] as string;
+    expect(message).not.toMatch(/[\r\n]/);
+    expect(message).toContain('API tokens: "evil\\nToken \\"x\\"" (id 1). ');
+  });
+
   test('does not warn when nothing is removed', async () => {
     const { warn, findMany, deleteMany } = setup(
       [{ id: 1, action: 'api::article.article.find', token: { id: 1, name: 'Read Only' } }],

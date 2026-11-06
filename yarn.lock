@@ -4093,9 +4093,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/utils@npm:^12.0.2":
-  version: 12.0.2
-  resolution: "@graphql-tools/utils@npm:12.0.2"
+"@graphql-tools/utils@npm:^12.0.3":
+  version: 12.0.3
+  resolution: "@graphql-tools/utils@npm:12.0.3"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@whatwg-node/promise-helpers": "npm:^2.0.0"
@@ -4103,7 +4103,7 @@ __metadata:
     tslib: "npm:^2.4.0"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/5cb89effb10091153f15e859869d72e8cc89676f6e529750cf4e43df814b9387762dc7d7324399a8f8e4939867f8f27a9a1786837976844de8c5a95f27a8372d
+  checksum: 10c0/fc7354849632bee78da7510ec3277deec8146d2b1629ce59b3b71c5304ed5da7466abed45fce53f2a735b58770afebb450067dfd006be2aedfeec962961d3e8a
   languageName: node
   linkType: hard
 
@@ -6425,6 +6425,17 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 10c0/2b5b0e1f2e6a18f6e5ce6897c7440ca78f64e0b004834e9808e93ad2b78b96366b562ae4366602669cf8ad793a43d85481b58541e74be71e905e732d833dd691
+  languageName: node
+  linkType: hard
+
+"@playwright/test@npm:1.64.1":
+  version: 1.64.1
+  resolution: "@playwright/test@npm:1.64.1"
+  dependencies:
+    playwright: "npm:1.64.1"
+  bin:
+    playwright: cli.js
+  checksum: 10c0/0a1a853d76d6c532cafaf0366a5448584b766737ebd39bbd23dc0580f3d3b6ef4c833082af47a792e7fc2501f444debdfaad37a87a76cc5b195f3803fc80ea3c
   languageName: node
   linkType: hard
 
@@ -9660,7 +9671,7 @@ __metadata:
     jsonwebtoken: "npm:9.0.3"
     jwks-rsa: "npm:3.1.0"
     lodash: "npm:4.18.1"
-    minimatch: "npm:10.2.5"
+    minimatch: "npm:10.2.6"
     open: "npm:8.4.2"
     ora: "npm:5.4.1"
     pkg-up: "npm:3.1.0"
@@ -9937,7 +9948,7 @@ __metadata:
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.61.0"
     typescript: "npm:5.9.3"
-    undici: "npm:8.12.3"
+    undici: "npm:8.12.4"
     vitest: "catalog:"
     vitest-config: "npm:5.61.0"
     yup: "npm:0.32.9"
@@ -10380,7 +10391,7 @@ __metadata:
     "@apollo/server": "npm:4.13.0"
     "@as-integrations/koa": "npm:1.1.1"
     "@graphql-tools/schema": "npm:10.0.3"
-    "@graphql-tools/utils": "npm:^12.0.2"
+    "@graphql-tools/utils": "npm:^12.0.3"
     "@koa/cors": "npm:5.0.0"
     "@strapi/admin": "npm:5.61.0"
     "@strapi/design-system": "npm:2.2.4"
@@ -10744,6 +10755,56 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/tests-api@workspace:tests-next/api":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-api@workspace:tests-next/api"
+  dependencies:
+    "@strapi/tests-shared": "workspace:*"
+    "@swc/jest": "npm:0.2.39"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    jest: "npm:29.6.0"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/tests-cli@workspace:tests-next/cli":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-cli@workspace:tests-next/cli"
+  dependencies:
+    "@strapi/tests-shared": "workspace:*"
+    "@swc/jest": "npm:0.2.39"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    jest: "npm:29.6.0"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/tests-e2e@workspace:tests-next/ui":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-e2e@workspace:tests-next/ui"
+  dependencies:
+    "@playwright/test": "npm:1.56.1"
+    "@strapi/tests-shared": "workspace:*"
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/tests-shared@workspace:*, @strapi/tests-shared@workspace:tests-next/shared":
+  version: 0.0.0-use.local
+  resolution: "@strapi/tests-shared@workspace:tests-next/shared"
+  dependencies:
+    "@types/node": "npm:22.20.0"
+    eslint-config-custom: "workspace:*"
+    tsconfig: "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@strapi/types@npm:5.61.0, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
@@ -10771,7 +10832,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
-    undici: "npm:8.12.3"
+    undici: "npm:8.12.4"
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
@@ -10854,7 +10915,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     simple-git: "npm:4.0.2"
-    undici: "npm:8.12.3"
+    undici: "npm:8.12.4"
   bin:
     upgrade: ./bin/upgrade.js
   languageName: unknown
@@ -14859,7 +14920,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^5.0.2, brace-expansion@npm:^5.0.5":
+"brace-expansion@npm:^5.0.2, brace-expansion@npm:^5.0.5, brace-expansion@npm:^5.0.8":
   version: 5.0.12
   resolution: "brace-expansion@npm:5.0.12"
   dependencies:
@@ -17866,7 +17927,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-custom@npm:5.61.0, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
+"eslint-config-custom@npm:5.61.0, eslint-config-custom@workspace:*, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
   languageName: unknown
@@ -24169,12 +24230,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:10.2.5, minimatch@npm:^10.2.2, minimatch@npm:^10.2.5":
-  version: 10.2.5
-  resolution: "minimatch@npm:10.2.5"
+"minimatch@npm:10.2.6":
+  version: 10.2.6
+  resolution: "minimatch@npm:10.2.6"
   dependencies:
-    brace-expansion: "npm:^5.0.5"
-  checksum: 10c0/6bb058bd6324104b9ec2f763476a35386d05079c1f5fe4fbf1f324a25237cd4534d6813ecd71f48208f4e635c1221899bef94c3c89f7df55698fe373aaae20fd
+    brace-expansion: "npm:^5.0.8"
+  checksum: 10c0/4559a836243b98bd4d17ea9f7edae698717c76399eea7be374f3737f33164e4907f19e9726891ddeb122f750a5a7fa80d2ac43e851d6e5984dc4ff42ec127d3a
   languageName: node
   linkType: hard
 
@@ -24193,6 +24254,15 @@ __metadata:
   dependencies:
     brace-expansion: "npm:^2.0.1"
   checksum: 10c0/de96cf5e35bdf0eab3e2c853522f98ffbe9a36c37797778d2665231ec1f20a9447a7e567cb640901f89e4daaa95ae5d70c65a9e8aa2bb0019b6facbc3c0575ed
+  languageName: node
+  linkType: hard
+
+"minimatch@npm:^10.2.2, minimatch@npm:^10.2.5":
+  version: 10.2.5
+  resolution: "minimatch@npm:10.2.5"
+  dependencies:
+    brace-expansion: "npm:^5.0.5"
+  checksum: 10c0/6bb058bd6324104b9ec2f763476a35386d05079c1f5fe4fbf1f324a25237cd4534d6813ecd71f48208f4e635c1221899bef94c3c89f7df55698fe373aaae20fd
   languageName: node
   linkType: hard
 
@@ -26216,6 +26286,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"playwright-core@npm:1.64.1":
+  version: 1.64.1
+  resolution: "playwright-core@npm:1.64.1"
+  bin:
+    playwright-core: cli.js
+  checksum: 10c0/91c4f5ed1cff4b0e18b6ac62f66770f5f1b6c204d4aebd6a321c07466dca18a70822ac692597c6059705a703f9768097ac551df179fb49294d639509148e04f3
+  languageName: node
+  linkType: hard
+
 "playwright@npm:1.56.1":
   version: 1.56.1
   resolution: "playwright@npm:1.56.1"
@@ -26228,6 +26307,17 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 10c0/8e9965aede86df0f4722063385748498977b219630a40a10d1b82b8bd8d4d4e9b6b65ecbfa024331a30800163161aca292fb6dd7446c531a1ad25f4155625ab4
+  languageName: node
+  linkType: hard
+
+"playwright@npm:1.64.1":
+  version: 1.64.1
+  resolution: "playwright@npm:1.64.1"
+  dependencies:
+    playwright-core: "npm:1.64.1"
+  bin:
+    playwright: cli.js
+  checksum: 10c0/edf52d0a79feca37bf383e841a467aa68750684128218eac560063991c9e4b615a94901f580cd8a088bb05fd53008ab4a0e5e8d976067698b60ae5d1de2459f3
   languageName: node
   linkType: hard
 
@@ -28957,7 +29047,7 @@ __metadata:
     "@commitlint/config-conventional": "npm:19.1.0"
     "@commitlint/prompt-cli": "npm:19.2.0"
     "@nx/js": "npm:20.8.4"
-    "@playwright/test": "npm:1.56.1"
+    "@playwright/test": "npm:1.64.1"
     "@rollup/plugin-commonjs": "npm:28.0.9"
     "@rollup/plugin-dynamic-import-vars": "npm:2.1.5"
     "@rollup/plugin-image": "npm:3.0.3"
@@ -29015,7 +29105,7 @@ __metadata:
     jest-watch-typeahead: "npm:2.2.2"
     lint-staged: "npm:16.4.0"
     lodash: "npm:4.18.1"
-    minimatch: "npm:10.2.5"
+    minimatch: "npm:10.2.6"
     npm-run-all: "npm:4.1.5"
     nx: "npm:20.8.4"
     oxlint: "npm:1.72.0"
@@ -30080,7 +30170,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig@npm:5.61.0, tsconfig@workspace:packages/utils/tsconfig":
+"tsconfig@npm:5.61.0, tsconfig@workspace:*, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   languageName: unknown
@@ -30490,10 +30580,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:8.12.3":
-  version: 8.12.3
-  resolution: "undici@npm:8.12.3"
-  checksum: 10c0/714919e62b4160eea195fb35c7f5c4907235741e47bfde8a014ac58f6d24df13434e23400d7f48e2c455fd2b259d27f07fce514f04a5b4e99936ba62cbc4bb71
+"undici@npm:8.12.4":
+  version: 8.12.4
+  resolution: "undici@npm:8.12.4"
+  checksum: 10c0/2a83590ce3347ca4e8fb83917bd7ad1d0bcb72ecb6d1a5066f01a89b4941becac569412aa27d7318119ea1a20d217018cce535f8eeed3c1b307d87426f96cfe3
   languageName: node
   linkType: hard
 
