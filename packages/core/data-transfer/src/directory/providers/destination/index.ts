@@ -56,8 +56,9 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   #rolledBack = false;
 
-  // The chain emits `finish` before the inner writer's final flush lands on disk
-  #pendingWrites: Promise<void>[] = [];
+  // The chain emits `finish` before the inner writer's final flush lands on disk. Each entry
+  // settles to the error that stopped the writer, or null.
+  #pendingWrites: Promise<unknown>[] = [];
 
   constructor(options: ILocalDirectoryDestinationProviderOptions) {
     this.options = options;
@@ -94,7 +95,15 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       return;
     }
 
-    await Promise.all(this.#pendingWrites);
+    // By now the stage pipelines have resolved, so a late flush failure only surfaces here
+    const failures = await Promise.all(this.#pendingWrites);
+    const failure = failures.find((error) => error != null);
+    if (failure) {
+      throw new ProviderTransferError('Failed to write export files', {
+        details: { error: failure instanceof Error ? failure : new Error(String(failure)) },
+      });
+    }
+
     await this.#writeMetadata();
   }
 
@@ -124,9 +133,26 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       createFilePathFactory(type),
       this.options.file.maxSizeJsonl
     );
-    // Errors already reach the engine through the stream pipeline
-    this.#pendingWrites.push(finished(entryStream).catch(() => {}));
-    return chain([stringer(), entryStream]);
+    this.#pendingWrites.push(
+      finished(entryStream).then(
+        () => null,
+        // A writer destroyed before any data (a stage with no source) is not a failure
+        (error) => (error?.code === 'ERR_STREAM_PREMATURE_CLOSE' ? null : error)
+      )
+    );
+
+    const writer = chain([stringer(), entryStream]);
+    // The engine destroys only this outer stream for a stage it skips, and `Chain` does not pass
+    // that on: without this the inner writer never closes and `close()` waits forever.
+    writer.once('close', () => {
+      if (!writer.writableFinished) {
+        entryStream.destroy();
+      }
+    });
+    // A late flush failure is re-emitted here after the stage has stopped listening; `close()`
+    // reports it instead.
+    writer.on('error', () => {});
+    return writer;
   }
 
   createSchemasWriteStream() {

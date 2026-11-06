@@ -16,6 +16,7 @@ export const createDirectoryJsonlWriter = (
 ) => {
   let fileIndex = 0;
   let buffer = '';
+  let finalFailed = false;
 
   const resolvePath = (posixName: string) => path.join(rootDir, ...posixName.split('/'));
 
@@ -42,13 +43,24 @@ export const createDirectoryJsonlWriter = (
         await flush();
         callback();
       } catch (err: unknown) {
+        finalFailed = true;
         callback(err instanceof Error ? err : new Error(String(err)));
       }
     },
 
     async destroy(err, callback) {
-      await flush();
-      callback(err);
+      // Always call back, or the stream never closes. After a failed `final` the data is lost
+      // already: flushing it again would only fail again.
+      if (finalFailed) {
+        callback(err);
+        return;
+      }
+      try {
+        await flush();
+        callback(err);
+      } catch (flushError: unknown) {
+        callback(err ?? (flushError instanceof Error ? flushError : new Error(String(flushError))));
+      }
     },
 
     async write(chunk, _encoding, callback) {
