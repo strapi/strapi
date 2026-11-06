@@ -85,10 +85,8 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         strapi,
       });
 
-      await Promise.all([
-        validateEntryData(action.contentType, action.entryDocumentId),
-        validateUniqueEntry(releaseId, action),
-      ]);
+      validateEntryData(action.contentType, action.entryDocumentId);
+      await validateUniqueEntry(releaseId, action);
 
       // If we are adding a singleType, we need to append the documentId of that singleType
       const model = strapi.contentType(action.contentType);

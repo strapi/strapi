@@ -7,6 +7,7 @@ import { useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useGetPreviewUrlQuery } from '../services/preview';
+import { getPreviewUrlStatus } from '../utils/getPreviewUrlStatus';
 
 import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 import type { UID } from '@strapi/types';
@@ -57,7 +58,7 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
       query: {
         documentId,
         locale: document?.locale,
-        status: document?.status,
+        status: getPreviewUrlStatus(document?.status),
       },
     },
     // Don't bother making the request since we won't show any UI

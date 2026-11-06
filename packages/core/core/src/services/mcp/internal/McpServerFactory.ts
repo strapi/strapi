@@ -5,8 +5,10 @@ import { McpResourceRegistry } from '../resource-registry';
 import { McpToolRegistry } from '../tool-registry';
 import type { McpAdminTokenAbility } from '../authentication';
 import { McpCapabilityDefinitionRegistry } from './McpCapabilityDefinitionRegistry';
+import { DEFAULT_MAX_TOOL_INPUT_ELEMENTS } from './McpConfiguration';
 import type { McpCapabilityRegistryReadonly } from './McpCapabilityRegistry';
-import { syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
+import { canUseMcpCapability, syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
+import type { McpToolSchemaScope } from './resolveToolSchemaScope';
 
 export type McpCapabilityDefinitions = {
   tools: McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>;
@@ -38,6 +40,10 @@ export type CreateMcpServerWithRegistriesParams = {
   isDevMode: boolean;
   ability: McpAdminTokenAbility;
   user: Modules.MCP.McpHandlerContext['user'];
+  /** Tools whose schemas the request needs. Defaults to `'all'`. */
+  toolSchemaScope?: McpToolSchemaScope;
+  /** Passed to the SDK as `maxToolInputElements`. */
+  maxToolInputElements?: number;
 };
 
 export const createMcpServerWithRegistries = ({
@@ -46,6 +52,8 @@ export const createMcpServerWithRegistries = ({
   isDevMode,
   ability,
   user,
+  toolSchemaScope = 'all',
+  maxToolInputElements = DEFAULT_MAX_TOOL_INPUT_ELEMENTS,
 }: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
   const capabilities: ServerCapabilities = {
     logging: {},
@@ -69,6 +77,7 @@ export const createMcpServerWithRegistries = ({
     },
     {
       capabilities,
+      maxToolInputElements,
     }
   );
 
@@ -78,6 +87,10 @@ export const createMcpServerWithRegistries = ({
     definitions: definitions.tools,
     ability,
     user,
+    // A tool the token cannot use stays disabled, so its schemas are never advertised nor used.
+    shouldResolveSchemas: (definition) =>
+      (toolSchemaScope === 'all' || toolSchemaScope.has(definition.name)) &&
+      canUseMcpCapability({ ability, definition, isDevMode }),
   });
   const prompts = new McpPromptRegistry({
     strapi,

@@ -101,6 +101,18 @@ describe('Upload content API - GET /upload/files/page (pagination)', () => {
     );
   });
 
+  test('returns every file when pagination[limit]=-1', async () => {
+    const res = await rq({
+      method: 'GET',
+      url: '/upload/files/page',
+      qs: { pagination: { start: 0, limit: -1 } },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(5);
+    expect(res.body.data).toHaveLength(res.body.meta.pagination.total);
+  });
+
   test('omits total/pageCount when pagination[withCount]=false', async () => {
     const res = await rq({
       method: 'GET',
