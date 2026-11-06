@@ -7,7 +7,7 @@ const config = {
   parserOptions: {
     tsconfigRootDir: __dirname,
   },
-  ignorePatterns: ['node_modules/', '.eslintrc.cjs'],
+  ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'lint-staged.config.mjs'],
   overrides: [
     {
       // CommonJS entry points run with plain Node (see src/app/generate-app.cjs).
