@@ -56,8 +56,9 @@ describe('createMcpOAuthRoutes', () => {
     const register = routes.find(({ path }) => path === '/mcp/oauth/register');
     // The static prefixKey keys the limit on IP + endpoint: the default key starts with
     // request.body.email, which an anonymous caller can vary to dodge the limit.
+    // `enabled: true` decouples it from admin.rateLimit.enabled.
     expect(register?.config?.middlewares).toEqual([
-      { name: 'admin::rateLimit', config: { prefixKey: 'mcp:oauth:register' } },
+      { name: 'admin::rateLimit', config: { enabled: true, prefixKey: 'mcp:oauth:register' } },
     ]);
   });
 
@@ -72,8 +73,21 @@ describe('createMcpOAuthRoutes', () => {
     expect(register?.config?.middlewares).toEqual([
       {
         name: 'admin::rateLimit',
-        config: { prefixKey: 'mcp:oauth:register', max: 50, interval: { min: 1 } },
+        config: { enabled: true, prefixKey: 'mcp:oauth:register', max: 50, interval: { min: 1 } },
       },
+    ]);
+  });
+
+  test('registrationRateLimit.enabled: false is forwarded to the middleware', () => {
+    const config = new McpOAuthConfiguration(
+      makeStrapi({ 'server.mcp.oauth.registrationRateLimit': { enabled: false } }),
+      '/mcp'
+    );
+    const routes = createMcpOAuthRoutes(config, '/mcp', makeHandlers());
+    const register = routes.find(({ path }) => path === '/mcp/oauth/register');
+
+    expect(register?.config?.middlewares).toEqual([
+      { name: 'admin::rateLimit', config: { enabled: false, prefixKey: 'mcp:oauth:register' } },
     ]);
   });
 

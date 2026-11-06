@@ -86,10 +86,11 @@ export class McpOAuthConfiguration {
   }
 
   /**
-   * Overrides for the registration endpoint's rate limit (koa2-ratelimit options such as
-   * `max`, `interval`, or `enabled: false`). The default of 5 requests per 5 minutes per IP
-   * is too strict behind a shared egress (a team connecting from claude.ai at once) and the
-   * right setting depends on the deployment's proxy topology.
+   * Overrides for the registration endpoint's rate limit: `enabled: false` to turn it off
+   * (handled by the admin::rateLimit middleware), plus koa2-ratelimit options such as `max`
+   * and `interval`. The default of 5 requests per 5 minutes per IP is too strict behind a
+   * shared egress (a team connecting from claude.ai at once) and the right setting depends
+   * on the deployment's proxy topology.
    */
   getRegistrationRateLimitConfig(): Record<string, unknown> {
     const value = this.#strapi.config.get<unknown>('server.mcp.oauth.registrationRateLimit');

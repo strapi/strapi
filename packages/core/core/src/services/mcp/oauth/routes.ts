@@ -83,13 +83,15 @@ export const createMcpOAuthRoutes = (
       // The default rate-limit key starts with request.body.email, which an anonymous
       // caller can vary to dodge the limit; a static prefixKey keys on IP alone.
       // Deployments behind shared egress IPs can tune or disable the limit through
-      // server.mcp.oauth.registrationRateLimit.
+      // server.mcp.oauth.registrationRateLimit. `enabled: true` here decouples the
+      // limit from admin.rateLimit.enabled: only its own key turns it off.
       config: {
         auth: false,
         middlewares: [
           {
             name: 'admin::rateLimit',
             config: {
+              enabled: true,
               prefixKey: 'mcp:oauth:register',
               ...config.getRegistrationRateLimitConfig(),
             },

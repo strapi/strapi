@@ -10,6 +10,7 @@ import {
   emitAdminUserUpdateAudits,
   touchesTrackedFields,
 } from '../../../../server/src/audit-logs/admin-users';
+import { invalidateMcpSessions } from '../../../../shared/utils/session-auth';
 import { getService } from '../utils';
 
 const { ApplicationError, ValidationError } = errors;
@@ -130,6 +131,9 @@ const updateById = async (id: any, attributes: any) => {
       populate: ['roles'],
     });
 
+    // A password set by any path (own change, super admin, CLI reset) revokes MCP grants.
+    await invalidateMcpSessions(String(id));
+
     strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
     await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
 
@@ -145,6 +149,12 @@ const updateById = async (id: any, attributes: any) => {
   await updateEEDisabledUsersList(id, attributes);
 
   if (updatedUser) {
+    if (attributes.isActive === false) {
+      // Deactivation revokes MCP grants so they cannot keep rotating and come back
+      // to life when the user is reactivated.
+      await invalidateMcpSessions(String(id));
+    }
+
     strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
     await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
   }
@@ -185,6 +195,7 @@ const deleteById = async (id: unknown) => {
   if (sessionManager && sessionManager.hasOrigin('admin')) {
     await sessionManager('admin').invalidateRefreshToken(String(id));
   }
+  await invalidateMcpSessions(String(id));
 
   await removeFromEEDisabledUsersList(id);
 
@@ -224,6 +235,7 @@ const deleteByIds = async (ids: any) => {
     if (sessionManager && sessionManager.hasOrigin('admin')) {
       await sessionManager('admin').invalidateRefreshToken(String(id));
     }
+    await invalidateMcpSessions(String(id));
 
     deletedUsers.push(deletedUser);
   }

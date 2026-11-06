@@ -21,7 +21,14 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
       rateLimitConfig.enabled = true;
     }
 
-    if (rateLimitConfig.enabled === true) {
+    // A route-level `enabled` wins over the global admin.rateLimit.enabled, so a route
+    // with its own rate-limit settings (e.g. MCP OAuth client registration) can be
+    // toggled independently of the admin authentication endpoints.
+    const { enabled: routeEnabled, ...routeConfig } = (config ?? {}) as Record<string, unknown>;
+    const enabled =
+      typeof routeEnabled === 'boolean' ? routeEnabled : rateLimitConfig.enabled === true;
+
+    if (enabled) {
       // TODO: TS - Do the dynamic import
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const rateLimit = require('koa2-ratelimit').RateLimit;
@@ -41,7 +48,7 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
           throw new RateLimitError();
         },
         ...rateLimitConfig,
-        ...config,
+        ...routeConfig,
       };
 
       return rateLimit.middleware(loadConfig)(ctx, next);
