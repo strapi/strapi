@@ -655,12 +655,20 @@ export const createEntityManager = (db: Database): EntityManager => {
             // set happens before connect/disconnect
             const dataset = cleanRelationData.set ?? cleanRelationData.connect ?? [];
 
-            // Copy flows (publish, discardDraft) pass the populated value, which can be empty
-            // TODO @Nico the document service drops these ids on publish (no `__type` on inverse
-            // morph items), so links stay on the draft. Moving them would empty the draft, since
-            // a target row stores a single owner: decide the copy semantics first.
+            // Copy flows (publish, discardDraft) pass the populated value, which can be empty:
+            // - the document service drops these ids, since inverse morph items carry no `__type`
+            //   (document-service/transform/relations/transform/data-ids.ts)
+            // - a populate with a field selection never selects the morph id column, so the
+            //   relation comes back empty (query/helpers/populate/apply.ts)
+            // Publish omits an empty value and leaves the links on the draft. Every other caller,
+            // discardDraft and the draft & publish migration included, is rejected here: there,
+            // skipping it would commit and drop the links of the deleted version. What copying
+            // these links should mean (move them to the new version, or re-point the target rows)
+            // is an open question.
             if (dataset.length === 0) {
-              continue;
+              throw new Error(
+                `Invalid ${uid}.${attributeName} value, expected at least one entry to link`
+              );
             }
 
             // morphOne links a single entry, morphMany links all of them

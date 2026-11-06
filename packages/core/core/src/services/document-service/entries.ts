@@ -32,6 +32,56 @@ const isStrictRelationsEnabled = (): boolean => {
   return rawStrictRelations === true;
 };
 
+/**
+ * Whether a relation write payload links no entry: `[]`, or `{ set: [] }` / `{ connect: [] }`.
+ */
+const isEmptyRelationValue = (value: unknown): boolean => {
+  if (Array.isArray(value) === true) {
+    return (value as unknown[]).length === 0;
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    const { set, connect } = value as { set?: unknown; connect?: unknown };
+    const entries = set ?? connect ?? [];
+    return Array.isArray(entries) === true && (entries as unknown[]).length === 0;
+  }
+
+  return false;
+};
+
+/**
+ * Publish leaves the links of an inverse `morphOne` / `morphMany` whose target is a
+ * `morphToOne` on the draft: they live in the morph columns of the target rows, and a row stores
+ * a single owner. The draft value reaches publish empty, which the database layer rejects, so
+ * omit it. Discard draft keeps rejecting it: there, skipping it would silently drop the links.
+ * What copying these links should mean is not decided yet.
+ */
+const omitEmptyInverseMorphToOneValues = (
+  contentType: { attributes: Record<string, any> },
+  data: Record<string, unknown>
+) => {
+  const keysToOmit = Object.keys(data).filter((key) => {
+    const attribute = contentType.attributes[key];
+
+    if (
+      attribute?.type !== 'relation' ||
+      (attribute.relation !== 'morphOne' && attribute.relation !== 'morphMany')
+    ) {
+      return false;
+    }
+
+    const targetAttribute = strapi.getModel(attribute.target)?.attributes[attribute.morphBy];
+
+    return (
+      targetAttribute?.type === 'relation' &&
+      targetAttribute.relation === 'morphToOne' &&
+      isEmptyRelationValue(data[key]) === true
+    );
+  });
+
+  return keysToOmit.length === 0 ? data : omit(data, keysToOmit);
+};
+
 const createEntriesService = (
   uid: UID.ContentType,
   entityValidator: Modules.EntityValidator.EntityValidator
@@ -169,6 +219,7 @@ const createEntriesService = (
         };
         return transformData(draft, opts);
       },
+      (draft) => omitEmptyInverseMorphToOneValues(contentType, draft),
       // Create the published entry
       (draft) => createEntry({ ...params, data: draft, locale: draft.locale, status: 'published' })
     )(entry);
