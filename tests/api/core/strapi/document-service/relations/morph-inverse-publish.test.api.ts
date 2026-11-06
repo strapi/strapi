@@ -221,10 +221,9 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     ]);
   });
 
-  // A remark can point to the published row: data migrated from v4, where the existing rows
-  // became the published versions, or a subject set to the published id. Publish deletes the old
-  // published row, which clears these links: it must throw and roll back instead.
-  it('throws on republish when the published version owns links and keeps them', async () => {
+  // A remark can point to the published row: a subject set to the published id. Publish deletes
+  // the old published row, which clears these links, so it re-points them to the new one.
+  it('keeps the links the published version owns on republish', async () => {
     const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
     const note = await strapi.documents(NOTE_UID).create({
@@ -239,34 +238,85 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       data: { subject: { id: published?.id, __type: NOTE_UID } },
     });
 
-    await expect(
-      strapi.documents(NOTE_UID).publish({ documentId: note.documentId })
-    ).rejects.toThrow('expected at least one entry to link');
+    const result = await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
 
-    expect(await getNoteRow(note.documentId, 'published')).toMatchObject({ id: published?.id });
+    const republished = await getNoteRow(note.documentId, 'published');
+    expect(republished?.id).not.toBe(published?.id);
+    expect(result.entries).toMatchObject([{ id: republished?.id }]);
     expect(await getRemarkSubjects()).toEqual([
       { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
-      { id: r2.id, subjectId: published?.id, subjectType: NOTE_UID },
+      { id: r2.id, subjectId: republished?.id, subjectType: NOTE_UID },
     ]);
   });
 
-  it('answers a blocked publish from the admin with a 400 and the reason', async () => {
+  // Data migrated from v4: the existing rows became the published versions and own the links,
+  // and the draft copies own none.
+  it('keeps every link of data migrated from v4 on republish', async () => {
     const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
+    const documentId = 'morphinversepublishfromv4';
+    await strapi.db.query(NOTE_UID).create({
+      data: { documentId, title: 'from v4', publishedAt: new Date(), remarks: [r1.id, r2.id] },
+    });
+    await strapi.db.query(NOTE_UID).create({
+      data: { documentId, title: 'from v4', publishedAt: null },
+    });
+
+    await strapi.documents(NOTE_UID).publish({ documentId });
+
+    const republished = await getNoteRow(documentId, 'published');
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: republished?.id, subjectType: NOTE_UID },
+      { id: r2.id, subjectId: republished?.id, subjectType: NOTE_UID },
+    ]);
+
+    // The published version still exposes them
+    const found = await strapi.documents(NOTE_UID).findOne({
+      documentId,
+      status: 'published',
+      populate: { remarks: true },
+    } as any);
+    expect((found as any)?.remarks.map((remark: { id: number }) => remark.id).sort()).toEqual(
+      [r1.id, r2.id].sort()
+    );
+  });
+
+  // Publishing a document without a draft deletes its published row and creates nothing: there is
+  // no new version to re-point the links to, so it throws and rolls back.
+  it('throws on publish without a draft and keeps the links on the published row', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const published = await strapi.db.query(NOTE_UID).create({
+      data: {
+        documentId: 'morphinversepublishonly',
+        title: 'published only',
+        publishedAt: new Date(),
+        remarks: [r1.id],
+      },
+    });
+
+    await expect(
+      strapi.documents(NOTE_UID).publish({ documentId: published.documentId })
+    ).rejects.toThrow('it has no new version');
+
+    expect(await getNoteRow(published.documentId, 'published')).toMatchObject({
+      id: published.id,
+    });
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: published.id, subjectType: NOTE_UID },
+    ]);
+  });
+
+  it('answers a blocked discard draft from the admin with a 400 and the reason', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const note = await strapi.documents(NOTE_UID).create({
       data: { title: 'with remarks', remarks: [r1.id] } as any,
     });
     await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
-    const published = await getNoteRow(note.documentId, 'published');
-
-    await strapi.db.query(REMARK_UID).update({
-      where: { id: r2.id },
-      data: { subject: { id: published?.id, __type: NOTE_UID } },
-    });
+    const draft = await getNoteRow(note.documentId, 'draft');
 
     const res = await testUtils.rq.admin({
       method: 'POST',
-      url: `/content-manager/collection-types/${NOTE_UID}/${note.documentId}/actions/publish`,
+      url: `/content-manager/collection-types/${NOTE_UID}/${note.documentId}/actions/discard`,
       body: {},
     });
 
@@ -275,27 +325,32 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       name: 'ValidationError',
       message: `Invalid ${NOTE_UID}.remarks value, expected at least one entry to link`,
     });
-    expect(await getNoteRow(note.documentId, 'published')).toMatchObject({ id: published?.id });
+    expect(await getNoteRow(note.documentId, 'draft')).toMatchObject({ id: draft?.id });
   });
 
-  // Publish makes one check per call, over every inverse attribute: a morphOne link owned by
-  // the old published version keeps the empty morphMany value too, so publish throws.
-  it('throws on republish when the published version owns a morphOne link only', async () => {
+  it('keeps a morphOne link the published version owns on republish', async () => {
     const pin = await strapi.db.query(PIN_UID).create({ data: { label: 'p1' } });
     const board = await strapi.documents(BOARD_UID).create({ data: { title: 'board' } as any });
     await strapi.documents(BOARD_UID).publish({ documentId: board.documentId });
-    const published = await strapi.db.query(BOARD_UID).findOne({
-      where: { documentId: board.documentId, publishedAt: { $notNull: true } },
-    });
+    const findPublished = () =>
+      strapi.db.query(BOARD_UID).findOne({
+        where: { documentId: board.documentId, publishedAt: { $notNull: true } },
+      });
+    const published = await findPublished();
 
     await strapi.db.query(PIN_UID).update({
       where: { id: pin.id },
       data: { holder: { id: published?.id, __type: BOARD_UID } },
     });
 
-    await expect(
-      strapi.documents(BOARD_UID).publish({ documentId: board.documentId })
-    ).rejects.toThrow(`Invalid ${BOARD_UID}.remarks value, expected at least one entry to link`);
+    await strapi.documents(BOARD_UID).publish({ documentId: board.documentId });
+
+    const republished = await findPublished();
+    const { attributes, tableName } = strapi.db.metadata.get(PIN_UID);
+    const { idColumn } = (attributes.holder as any).morphColumn;
+    const [row] = await strapi.db.getConnection(tableName).select('*').where({ id: pin.id });
+    expect(republished?.id).not.toBe(published?.id);
+    expect(row[idColumn.name]).toBe(republished?.id);
   });
 
   it('clones a morphOne without its link and keeps the link on the source', async () => {
