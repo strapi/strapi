@@ -150,6 +150,8 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 
 `destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
 
+`strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
+
 `destroy()` can run on an instance that did not finish `load()`. For example, `strapi build` and `strapi develop --no-watch-admin` create an instance only to read the configuration, and a signal can arrive during `load()`. A provider `destroy` must not assume that its `register` ran.
 
 ## Idempotency guards
