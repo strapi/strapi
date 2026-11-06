@@ -1,0 +1,172 @@
+import type { Core } from '@strapi/types';
+import { errors } from '@strapi/utils';
+
+import type {
+  TemplateContent,
+  TemplateDefinition,
+  TemplateDetail,
+  TemplateSummary,
+} from '../../../shared/contracts/templates';
+import { render } from './render';
+
+const { ApplicationError, NotFoundError, ValidationError } = errors;
+
+const TEMPLATE_UID = 'plugin::email.template';
+const DEFAULT_LOCALE = 'en';
+const MAX_LOCALE_LENGTH = 16;
+const LOCALE_PATTERN = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
+
+const assertLocale = (locale: string) => {
+  if (
+    typeof locale !== 'string' ||
+    locale.length > MAX_LOCALE_LENGTH ||
+    !LOCALE_PATTERN.test(locale)
+  ) {
+    throw new ValidationError('locale must be a locale code such as "en" or "pt-BR"');
+  }
+};
+
+interface TemplateRow extends TemplateContent {
+  key: string;
+  locale: string;
+}
+
+const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const registry = new Map<string, TemplateDefinition>();
+
+  const query = () => strapi.db.query(TEMPLATE_UID);
+
+  const getDefinition = (key: string) => {
+    const definition = registry.get(key);
+
+    if (!definition) {
+      throw new NotFoundError(`Unknown email template "${key}"`);
+    }
+
+    return definition;
+  };
+
+  const findRows = async (key: string): Promise<TemplateRow[]> =>
+    query().findMany({ where: { key } });
+
+  const toDetail = (
+    key: string,
+    locale: string,
+    definition: TemplateDefinition,
+    row?: TemplateRow
+  ): TemplateDetail => {
+    const content = row ?? definition.defaults;
+
+    return {
+      key,
+      locale,
+      subject: content.subject ?? '',
+      html: content.html ?? '',
+      text: content.text ?? '',
+      variables: [...definition.variables],
+      isDefault: !row,
+    };
+  };
+
+  /** The stored row for the locale, else the `en` row, else the registered defaults. */
+  const get = async (key: string, locale: string = DEFAULT_LOCALE): Promise<TemplateDetail> => {
+    assertLocale(locale);
+    const definition = getDefinition(key);
+    const rows = await findRows(key);
+    const row =
+      rows.find((candidate) => candidate.locale === locale) ??
+      rows.find((candidate) => candidate.locale === DEFAULT_LOCALE);
+
+    return toDetail(key, locale, definition, row);
+  };
+
+  return {
+    /** Registers a template and its defaults. Only possible while Strapi is loading. */
+    register(key: string, definition: TemplateDefinition): void {
+      if (strapi.isLoaded) {
+        throw new ApplicationError(
+          `Email template "${key}" must be registered in register() or bootstrap()`
+        );
+      }
+
+      if (registry.has(key)) {
+        throw new ApplicationError(`Email template "${key}" is already registered`);
+      }
+
+      registry.set(key, {
+        ...definition,
+        defaults: { ...definition.defaults },
+        variables: [...definition.variables],
+      });
+    },
+
+    async list(prefix?: string): Promise<TemplateSummary[]> {
+      const keys = [...registry.keys()]
+        .filter((key) => (prefix ? key.startsWith(prefix) : true))
+        .sort();
+
+      if (keys.length === 0) {
+        return [];
+      }
+
+      const rows: TemplateRow[] = await query().findMany({ where: { key: { $in: keys } } });
+
+      return keys.map((key) => {
+        const locales = rows.filter((row) => row.key === key).map((row) => row.locale);
+
+        return {
+          key,
+          description: registry.get(key)?.description ?? '',
+          locales: [...new Set([DEFAULT_LOCALE, ...locales])].sort(),
+          customised: locales.length > 0,
+        };
+      });
+    },
+
+    get,
+
+    async update(key: string, locale: string, body: TemplateContent): Promise<TemplateDetail> {
+      assertLocale(locale);
+      const definition = getDefinition(key);
+      const data = { subject: body.subject, html: body.html, text: body.text };
+
+      const existing = await query().findOne({ where: { key, locale } });
+
+      if (existing) {
+        await query().update({ where: { id: existing.id }, data });
+      } else {
+        await query().create({ data: { key, locale, ...data } });
+      }
+
+      return toDetail(key, locale, definition, { key, locale, ...data });
+    },
+
+    async reset(key: string, locale: string): Promise<void> {
+      assertLocale(locale);
+      getDefinition(key);
+
+      await query().deleteMany({ where: { key, locale } });
+    },
+
+    async sendTemplate(
+      key: string,
+      to: string,
+      data: Record<string, unknown>,
+      opts: { locale?: string } = {}
+    ): Promise<void> {
+      const template = await get(key, opts.locale);
+
+      await strapi
+        .plugin('email')
+        .service('email')
+        .send({
+          to,
+          subject: render(template.subject, template.variables, data, 'text'),
+          html: render(template.html, template.variables, data, 'html'),
+          text: render(template.text, template.variables, data, 'text'),
+        });
+    },
+  };
+};
+
+export default templatesService;

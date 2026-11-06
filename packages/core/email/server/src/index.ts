@@ -3,6 +3,7 @@ import { services } from './services';
 import { routes } from './routes';
 import { controllers } from './controllers';
 import { config } from './config';
+import { contentTypes } from './content-types';
 import middlewares from './middlewares';
 
 export default {
@@ -11,5 +12,6 @@ export default {
   routes,
   controllers,
   config,
+  contentTypes,
   middlewares,
 };

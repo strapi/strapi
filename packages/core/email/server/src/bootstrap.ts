@@ -74,6 +74,20 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       uid: 'settings.read',
       pluginName: 'email',
     },
+    {
+      section: 'plugins',
+      displayName: 'Read email templates',
+      uid: 'templates.read',
+      subCategory: 'templates',
+      pluginName: 'email',
+    },
+    {
+      section: 'plugins',
+      displayName: 'Edit, reset and test email templates',
+      uid: 'templates.update',
+      subCategory: 'templates',
+      pluginName: 'email',
+    },
   ];
 
   await strapi.service('admin::permission').actionProvider.registerMany(actions);
