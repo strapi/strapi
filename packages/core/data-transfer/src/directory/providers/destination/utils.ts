@@ -47,7 +47,10 @@ export const createDirectoryJsonlWriter = (
     },
 
     async destroy(err, callback) {
-      await flush();
+      // A failed stage must not write its buffer. Rollback may already be deleting the directory.
+      if (!err) {
+        await flush();
+      }
       callback(err);
     },
 

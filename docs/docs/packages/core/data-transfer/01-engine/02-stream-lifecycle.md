@@ -258,29 +258,23 @@ sequenceDiagram
 **Example Implementation:**
 
 ```typescript
-async close(): Promise {
-  try {
-    // Clean up providers
-    const results = await Promise.allSettled([
-      this.sourceProvider.close?.(),
-      this.destinationProvider.close?.()
-    ]);
+async close(): Promise<void> {
+  this.#closed = true;
 
-    // Handle any cleanup errors
-    results.forEach((result) => {
-      if (result.status === 'rejected') {
-        this.reportError(result.reason, 'error');
-      }
-    });
+  const results = await Promise.allSettled([
+    this.sourceProvider.close?.(),
+    this.destinationProvider.close?.(),
+  ]);
 
-    // Final cleanup
-    this.#currentStream = undefined;
-    this.progress.data = {};
-  } catch (error) {
-    this.panic(error);
-  }
+  results.forEach((result) => {
+    if (result.status === 'rejected') {
+      this.panic(result.reason);
+    }
+  });
 }
 ```
+
+A failed transfer does not use this path. After rollback it calls `#closeAfterError()`, which reports a rejected provider `close()` as a warning and does not call `panic()`.
 
 ## Progress Tracking
 

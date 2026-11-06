@@ -79,6 +79,30 @@ describe('Local file destination archive', () => {
     });
   });
 
+  test('a stage that crosses maxSizeJsonl starts the next file with the line separator', async () => {
+    const outputPath = path.join(tempDirectory, 'export');
+    const provider = createLocalFileDestinationProvider({
+      encryption: { enabled: false },
+      compression: { enabled: false },
+      file: { path: outputPath, maxSizeJsonl: 10 },
+    });
+
+    provider.bootstrap({ report: jest.fn() } as never);
+
+    await pipeline(Readable.from([{ id: 1 }, { id: 2 }]), provider.createEntitiesWriteStream());
+    await provider.close();
+
+    const archive = await readArchiveEntries(`${outputPath}.tar`);
+
+    expect(archive['entities/entities_00001.jsonl']).toBe('{"id":1}');
+    expect(archive['entities/entities_00002.jsonl']).toBe('\n{"id":2}');
+    expect(
+      parseJsonl(
+        `${archive['entities/entities_00001.jsonl']}\n${archive['entities/entities_00002.jsonl']}`
+      )
+    ).toEqual([{ id: 1 }, { id: 2 }]);
+  });
+
   test.each([
     ['is the last one', oversizedLast],
     ['is followed by more entities', oversizedThenMore],

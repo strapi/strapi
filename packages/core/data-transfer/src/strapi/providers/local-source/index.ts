@@ -105,6 +105,11 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   async close(): Promise<void> {
+    // bootstrap() can reject before getStrapi(), and close() is still called after that.
+    if (!this.strapi) {
+      return;
+    }
+
     const { autoDestroy } = this.options;
     assertValidStrapi(this.strapi);
     this.strapi.db.lifecycles.enable();

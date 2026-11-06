@@ -75,6 +75,7 @@ describe('Local Strapi Source Provider', () => {
 
       try {
         await expect(provider.bootstrap()).rejects.toBe(loadError);
+        await expect(provider.close()).resolves.toBeUndefined();
         expect(getStrapi).not.toHaveBeenCalled();
         expect(disable).not.toHaveBeenCalled();
         expect(provider.strapi).not.toBeDefined();

@@ -7,9 +7,9 @@ import { loadStreamDeps } from './esm-deps';
 /**
  * Object-mode Writable that serializes each chunk as one JSONL line into `entryStream`.
  *
- * It finishes only once `entryStream` has finished and closed, because entry writers may flush
- * their last file on destroy. Any `entryStream` error, including one raised after the input
- * ended, fails this stream.
+ * It finishes only once `entryStream` has finished and closed. Entry writers flush their last
+ * file when destroyed without an error, and discard the buffer when destroyed with one.
+ * Any `entryStream` error, including one raised after the input ended, fails this stream.
  */
 const createJsonlWriteStream = (entryStream: Writable): Writable => {
   return deferWritable(async () => {
@@ -42,8 +42,12 @@ const createJsonlWriteStream = (entryStream: Writable): Writable => {
         written.then(() => callback(), callback);
       },
       destroy(error, callback) {
-        jsonl.destroy();
-        entryStream.destroy();
+        // Pass the error through. Destroying the entry writer with no error flushes its buffer,
+        // which writes a partial file while rollback is deleting the export.
+        if (!entryStream.destroyed) {
+          entryStream.destroy(error ?? undefined);
+        }
+        jsonl.destroy(error ?? undefined);
         callback(error);
       },
     });

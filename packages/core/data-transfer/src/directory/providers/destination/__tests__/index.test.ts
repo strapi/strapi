@@ -1,3 +1,4 @@
+import { promises as fsp } from 'fs';
 import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 
@@ -5,6 +6,7 @@ import fs from 'fs-extra';
 import { tmpdir } from 'os';
 import path from 'path';
 
+import { createTransferEngine } from '../../../../engine';
 import { ProviderTransferError } from '../../../../errors/providers';
 import * as esmDeps from '../../../../utils/esm-deps';
 import { oversizedLast, oversizedThenMore } from '../../../../__tests__/test-utils';
@@ -165,5 +167,83 @@ describe('Directory destination provider', () => {
     };
     expect(nested?.details?.details?.error).toBeInstanceOf(Error);
     expect(nested?.details?.details?.error?.message).toBe('mock EACCES');
+  });
+
+  test('an aborted stage does not write its partial JSONL file', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-abort-'));
+    const written: string[] = [];
+    const originalWriteFile = fsp.writeFile.bind(fsp);
+    const writeFile = jest.spyOn(fsp, 'writeFile').mockImplementation((file, data, options) => {
+      written.push(String(file));
+      return originalWriteFile(file, data, options);
+    });
+
+    const destination = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+    const createEntitiesWriteStream = destination.createEntitiesWriteStream.bind(destination);
+    destination.createEntitiesWriteStream = () => {
+      const stream = createEntitiesWriteStream();
+      const write = stream.write.bind(stream);
+      stream.write = ((chunk: unknown, encoding?: unknown, cb?: unknown) => {
+        const callback = typeof encoding === 'function' ? encoding : cb;
+        const enc = typeof encoding === 'function' ? undefined : encoding;
+
+        return write(chunk, enc as BufferEncoding, (error?: Error | null) => {
+          // The line is in the entry buffer now. Abort before the stage ends so the
+          // only way it reaches disk is a flush from destroy().
+          setImmediate(() => {
+            engine.abortTransfer().catch(() => {});
+          });
+
+          if (typeof callback === 'function') {
+            callback(error);
+          }
+        });
+      }) as typeof stream.write;
+
+      return stream;
+    };
+    let started = false;
+    const source = {
+      type: 'source' as const,
+      name: 'abort-source',
+      getMetadata: async () => ({
+        createdAt: new Date().toISOString(),
+        strapi: { version: '5.0.0' },
+      }),
+      createEntitiesReadStream() {
+        return new Readable({
+          objectMode: true,
+          read() {
+            if (started) {
+              return;
+            }
+
+            started = true;
+            this.push({ type: 'api::foo.foo', id: 1, data: { title: 'buffered' } });
+          },
+        });
+      },
+    };
+    const engine = createTransferEngine(source, destination, {
+      versionStrategy: 'ignore',
+      schemaStrategy: 'ignore',
+      exclude: [],
+    });
+
+    try {
+      await expect(engine.transfer()).rejects.toThrow(/abort/i);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+
+      expect(written.filter((file) => file.includes(`${path.sep}entities${path.sep}`))).toEqual([]);
+      expect(await fs.pathExists(path.join(dir, 'entities'))).toBe(false);
+    } finally {
+      writeFile.mockRestore();
+      await fs.remove(dir);
+    }
   });
 });

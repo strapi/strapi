@@ -54,7 +54,10 @@ export const createTarEntryStream = (
 
   return new Writable({
     async destroy(err, callback) {
-      await flush();
+      // A failed stage must not write its buffer. Rollback may already be deleting the archive.
+      if (!err) {
+        await flush();
+      }
       callback(err);
     },
 

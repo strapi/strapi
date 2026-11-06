@@ -34,10 +34,11 @@ The `openapi:generate` test compares the generated OpenAPI document to a **Jest 
 
    Or run all snapshot tests in every domain: `yarn test:cli:update` (same as `yarn test:cli -u`).
 
-   **Using Jest alone:** the runner sets `TEST_APPS` and `JWT_SECRET`; you must pass the same when running Jest directly:
+   **Using Jest alone:** the runner sets `TEST_APPS`, `JWT_SECRET`, and `NODE_OPTIONS=--experimental-vm-modules`; you must pass the same when running Jest directly:
 
    ```bash
    TEST_APPS="$PWD/test-apps/cli/test-app-0" JWT_SECRET=test-jwt-secret \
+     NODE_OPTIONS=--experimental-vm-modules \
      npx jest \
        --config jest.config.cli.js \
        --rootDir tests/cli/tests/strapi \
@@ -77,10 +78,11 @@ From the repo root, `yarn test:cli -u` (or `yarn test:cli:update`) forwards `-u`
 yarn test:cli -d strapi -u -- --testPathPattern='openapi-generate'
 ```
 
-The CLI runner sets `TEST_APPS` and `JWT_SECRET`. If you use **Jest alone** instead, pass the same env vars:
+The CLI runner sets `TEST_APPS`, `JWT_SECRET`, and `NODE_OPTIONS=--experimental-vm-modules`. If you use **Jest alone** instead, pass the same env vars. The flag lets data-transfer load `stream-chain` with `import()` inside Jest:
 
 ```bash
 TEST_APPS="$PWD/test-apps/cli/test-app-0" JWT_SECRET=test-jwt-secret \
+  NODE_OPTIONS=--experimental-vm-modules \
   npx jest \
     --config jest.config.cli.js \
     --rootDir tests/cli/tests/strapi \
