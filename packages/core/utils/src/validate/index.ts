@@ -1,7 +1,11 @@
-import { CurriedFunction1, isObject } from 'lodash';
+import { CurriedFunction1, has, isObject, isPlainObject } from 'lodash';
 import type { z } from 'zod/v4';
 
-import { getNonWritableAttributes, constants } from '../content-types';
+import {
+  getNonWritableAttributes,
+  constants,
+  isMorphToRelationalAttribute,
+} from '../content-types';
 import { ALLOWED_QUERY_PARAM_KEYS } from '../content-api-constants';
 import {
   type RouteLike,
@@ -15,11 +19,45 @@ import * as visitors from './visitors';
 import * as validators from './validators';
 import traverseEntity from '../traverse-entity';
 
-import { traverseQueryFilters, traverseQuerySort } from '../traverse';
+import { traverseQueryFilters, traverseQueryPopulate, traverseQuerySort } from '../traverse';
+import type { Path } from '../traverse/factory';
 
 import { Model, Data } from '../types';
 import { ValidationError } from '../errors';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
+import {
+  createRelationRestriction,
+  readActionFor,
+  type PermissionChecker,
+} from '../content-api-permissions';
+import { canSearchText, resolveMatchedGroups, type EntryMatcher } from '../field-rules';
+import {
+  createDraftReadPermission,
+  createDraftRelationRestriction,
+  createJoinWalk,
+  draftReadOf,
+  draftsReach,
+  isWriteAction,
+  joinPathOf,
+  joinsDrafts,
+  reachOf,
+  type DraftRead,
+  type JoinReach,
+} from '../content-api-drafts';
+import { assertDraftAccess } from './drafts-gate';
+import { assertPopulateDepth, splitPopulateLists } from './populate-depth';
+
+/**
+ * Whether reading a type (by uid) through a relation is restricted for the caller, the relation
+ * being the visited key at `path`
+ */
+type RelationRestriction = (uid: string, path?: Path) => boolean;
+
+/**
+ * The restriction of the relations a filters or sort traversal visits, started at rows of `base`
+ * with `reach`; the visited paths start with `prefix` (a populate node's path) when given
+ */
+type RestrictionAt = (base: Model, reach: JoinReach, prefix?: string | null) => RelationRestriction;
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
@@ -35,11 +73,47 @@ export interface Options {
    * When absent, no extra params are allowed in strict mode.
    */
   route?: RouteLike;
+  /**
+   * The data action the request runs: `find`, `findOne`, `create`, `update`, … (for core
+   * controllers, the name of the route's handler). Input rules use `create` / `update`; the root
+   * of a query uses `queryActionFor(action)`. The drafts gate skips the root of `create`, `update`
+   * and `delete`, and checks the types they reach.
+   */
+  action?: string;
+  /**
+   * Set when a write routed as `update` also creates an entry: a single type's first document, or
+   * a new locale of a document. A key the create stamp sets is refused on top of the update's
+   * locked fields.
+   */
+  creates?: boolean;
+  /**
+   * The document id of the entry an `update` writes. With several conditional field groups it says
+   * which ones the entry matches, so the body is held to that entry's fields; without it the
+   * fields every group has are the writable ones.
+   */
+  documentId?: string;
+  /** The locale the request writes, `'*'` for several. None is the default locale */
+  locale?: string;
 }
 
+/** What registry validators are called with, besides the schema */
+export type ValidatorOptions = Pick<Options, 'auth' | 'action'>;
+
+/**
+ * A validator registered through `strapi.validators.add`. It receives `{ auth, action }` when it
+ * declares parameters; a curried one (lodash's `curry`, whose `length` is 0) gets the schema alone.
+ */
 export interface Validator {
-  (schema: Model): CurriedFunction1<Data, Promise<Data>>;
+  (schema: Model, options?: ValidatorOptions): CurriedFunction1<Data, Promise<Data>>;
 }
+
+/**
+ * Calls a registry validator for a schema. A curried `(schema, data) => …` would run at once on a
+ * second argument, taking the options for its data, so a function that declares no parameters gets
+ * the schema alone, as before the options existed.
+ */
+const callRegistered = (validator: Validator, schema: Model, options: ValidatorOptions) =>
+  validator.length > 0 ? validator(schema, options) : validator(schema);
 export interface ValidateFunc {
   (data: unknown, schema: Model, options?: Options): Promise<void>;
 }
@@ -56,9 +130,13 @@ export type ValidateBodyParamHandler = (
   options?: Options
 ) => Promise<void>;
 
-interface APIOptions {
+export interface APIOptions {
   validators?: Validators;
   getModel: (model: string) => Model;
+  /** The Content API permission checker. Its subject-aware steps run only when it is active */
+  permissions?: PermissionChecker;
+  /** Which entries match a filter, for the fields of conditioned rows (`@strapi/core` provides it) */
+  matchEntries?: EntryMatcher;
 }
 
 export interface Validators {
@@ -68,8 +146,169 @@ export interface Validators {
 const createAPIValidators = (opts: APIOptions) => {
   const { getModel } = opts || {};
 
+  /** The checker when the caller's ability carries data rules; the field rules ask nothing else */
+  const activeChecker = (auth: unknown): PermissionChecker | null =>
+    auth && opts?.permissions?.isActive(auth) ? opts.permissions : null;
+
+  /**
+   * Whether reading a type through a relation is restricted for this caller, each uid asked once:
+   * null when the checker is not active (it is asked nothing else then). Make one per request.
+   *
+   * The caller's `read-drafts` filter on a draft-and-publish type restricts too where a filter or
+   * sort joins its drafts: everywhere when the query reads drafts with its `status`, and otherwise
+   * where the rows it is joined from link to drafts (`joinsDrafts`: from a type without draft &
+   * publish, at any depth), as `sanitize.query` restricts them there.
+   */
+  const relationRestrictionFor = (auth: unknown, read?: DraftRead): RestrictionAt | null => {
+    if (!auth || !opts?.permissions?.isActive(auth)) {
+      return null;
+    }
+
+    const restriction = createRelationRestriction(opts.permissions, auth);
+    const drafts = createDraftRelationRestriction(opts.permissions, auth, getModel);
+
+    if (read !== undefined && draftsReach(read, 'filter')) {
+      return () => (uid) => restriction(uid) || drafts(uid);
+    }
+
+    const walk = createJoinWalk(getModel, createDraftReadPermission(opts.permissions, auth));
+
+    return (base, reach, prefix) => (uid, path) => {
+      if (restriction(uid)) {
+        return true;
+      }
+
+      const from = walk({ model: base, reach }, joinPathOf(path?.attribute, prefix));
+
+      return joinsDrafts(from.reach, getModel(uid)) && drafts(uid);
+    };
+  };
+
+  /**
+   * Refuses, in every populate node (relations, components, media, and the fragments of dynamic
+   * zones and morph relations), a sort through a relation to a type the caller's data rules
+   * restrict and a filter on such a relation under a `$not`, as `validateSort` and
+   * `validateFilters` do at the root. Error paths start at the node.
+   *
+   * A node's options (`sort`, `filters`, `populate`, `on`) are read by name, as the query params
+   * converter reads them: the populate traversal takes a key for an attribute when the target has
+   * an attribute of that name, and would not walk a nested `populate` or `on` then.
+   */
+  const throwConditionedPopulateNodes = (restrictionAt: RestrictionAt, schema: Model) => {
+    /** A populate map of rows of `treeSchema`, whose reach is `reach` */
+    const checkTree = async (
+      populate: unknown,
+      treeSchema: Model,
+      reach: JoinReach,
+      basePath?: Path
+    ) => {
+      await traverseQueryPopulate(
+        async ({ value, attribute, parent, path }) => {
+          // Nested nodes are reached by name through checkNode
+          if (parent !== undefined || !attribute) {
+            return;
+          }
+
+          if (attribute.type === 'dynamiczone' || isMorphToRelationalAttribute(attribute)) {
+            const node = isPlainObject(value) ? (value as Record<string, unknown>) : {};
+
+            if (isPlainObject(node.on)) {
+              for (const [uid, fragment] of Object.entries(node.on as Record<string, unknown>)) {
+                // eslint-disable-next-line no-await-in-loop
+                await checkNode(fragment, getModel(uid), reach, path);
+              }
+            }
+
+            // The query layer loads every component of a zone with its nested `populate`, as
+            // `sanitize.query` reads it (one `on` fragment per component). The stock populate
+            // validator refuses any but `'*'` before this runs; this keeps the walks alike
+            if (
+              attribute.type === 'dynamiczone' &&
+              node.populate !== undefined &&
+              node.populate !== null
+            ) {
+              for (const component of attribute.components ?? []) {
+                const componentSchema = getModel(component);
+
+                if (componentSchema !== undefined) {
+                  // eslint-disable-next-line no-await-in-loop
+                  await checkTree(node.populate, componentSchema, reach, path);
+                }
+              }
+            }
+
+            return;
+          }
+
+          let target: string | undefined;
+
+          if (attribute.type === 'relation' && typeof attribute.target === 'string') {
+            target = attribute.target;
+          } else if (attribute.type === 'component') {
+            target = attribute.component;
+          } else if (attribute.type === 'media') {
+            target = 'plugin::upload.file';
+          }
+
+          if (target !== undefined) {
+            await checkNode(value, getModel(target), reach, path);
+          }
+        },
+        { schema: treeSchema, getModel, path: basePath },
+        populate
+      );
+    };
+
+    /** A node of `target`, below rows whose reach is `parentReach` */
+    const checkNode = async (
+      node: unknown,
+      target: Model | undefined,
+      parentReach: JoinReach,
+      path: Path
+    ) => {
+      if (!isPlainObject(node) || target === undefined) {
+        return;
+      }
+
+      const { sort, filters, populate } = node as Record<string, unknown>;
+      const reach = reachOf(target, parentReach);
+      const isRestricted = restrictionAt(target, reach, path.attribute);
+
+      if (sort !== undefined && sort !== null) {
+        await traverseQuerySort(
+          visitors.throwConditionedRelationSort(isRestricted),
+          {
+            schema: target,
+            getModel,
+            path: { raw: `${path.raw}.sort`, attribute: path.attribute },
+          },
+          sort
+        );
+      }
+
+      if (filters !== undefined && filters !== null) {
+        // `raw` restarts at the filters, so only their own `$not` keys count
+        await traverseQueryFilters(
+          visitors.throwConditionedRelationUnderNot(isRestricted),
+          { schema: target, getModel, path: { raw: null, attribute: path.attribute } },
+          filters
+        );
+      }
+
+      if (populate !== undefined && populate !== null) {
+        await checkTree(populate, target, reach, path);
+      }
+    };
+
+    return async (populate: unknown) => {
+      await checkTree(populate, schema, reachOf(schema, 'unversioned'));
+
+      return populate;
+    };
+  };
+
   const validateInput: ValidateFunc = async (data: unknown, schema: Model, options = {}) => {
-    const { auth, route } = options;
+    const { auth, route, action, creates, documentId, locale } = options;
     if (!schema) {
       throw new Error('Missing schema in validateInput');
     }
@@ -96,6 +335,32 @@ const createAPIValidators = (opts: APIOptions) => {
         }
         return data;
       },
+      // What the server sets on a create (the owner) and what an update may not change: the same
+      // 400 naming the field for every caller, before the relation checks give another reason
+      (data: unknown) => {
+        if (auth && opts?.permissions?.isActive(auth) && isPlainObject(data)) {
+          const { permissions: checker } = opts;
+          const body = data as Record<string, unknown>;
+
+          if (action === 'create' || creates) {
+            for (const key of Object.keys(checker.stampFor(auth, schema.uid))) {
+              if (Object.prototype.hasOwnProperty.call(body, key)) {
+                throwInvalidKey({ key, reason: 'it is set by the server' });
+              }
+            }
+          }
+
+          if (action === 'update') {
+            for (const key of checker.lockedFields(auth, schema.uid)) {
+              if (has(body, key)) {
+                throwInvalidKey({ key, reason: 'it can not be changed' });
+              }
+            }
+          }
+        }
+
+        return data;
+      },
       // non-writable attributes
       traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema, getModel }),
       // unrecognized attributes (allowedExtraRootKeys = registered input param keys)
@@ -105,6 +370,42 @@ const createAPIValidators = (opts: APIOptions) => {
         allowedExtraRootKeys,
       }),
     ];
+
+    // what the caller's field rules don't let this write set (the create or update list); the keys
+    // of the create stamp were refused above
+    const fieldChecker = action === 'create' || action === 'update' ? activeChecker(auth) : null;
+
+    if (fieldChecker) {
+      (transforms as Array<(data: unknown) => unknown>).push(async (value: unknown) => {
+        if (!isPlainObject(value)) {
+          return value;
+        }
+
+        const matched =
+          action === 'update'
+            ? await resolveMatchedGroups({
+                checker: fieldChecker,
+                auth,
+                schema,
+                documentId,
+                matcher: opts.matchEntries,
+                locale,
+                creates,
+              })
+            : undefined;
+
+        return traverseEntity(
+          visitors.throwUnauthorizedFields(fieldChecker, auth, action as string, {
+            creates,
+            matched,
+            // Refused above, with a reason of their own
+            stampKeys: [],
+          }),
+          { schema, getModel },
+          value as Data
+        );
+      });
+    }
 
     if (auth) {
       // restricted relations
@@ -117,7 +418,9 @@ const createAPIValidators = (opts: APIOptions) => {
     }
 
     // Apply validators from registry if exists
-    opts?.validators?.input?.forEach((validator: Validator) => transforms.push(validator(schema)));
+    opts?.validators?.input?.forEach((validator: Validator) =>
+      transforms.push(callRegistered(validator, schema, { auth, action }))
+    );
 
     try {
       await pipeAsync(...transforms)(data as Data);
@@ -161,7 +464,7 @@ const createAPIValidators = (opts: APIOptions) => {
   const validateQuery = async (
     query: Record<string, unknown>,
     schema: Model,
-    { auth, strictParams = false, route }: Options = {}
+    { auth, strictParams = false, route, action }: Options = {}
   ) => {
     if (!schema) {
       throw new Error('Missing schema in validateQuery');
@@ -208,32 +511,71 @@ const createAPIValidators = (opts: APIOptions) => {
       }
     }
 
+    // Reading drafts needs read-drafts (403 DRAFT_READ_FORBIDDEN). The root of a write is exempt:
+    // its status says what it writes, and it returns what it wrote. The types a write
+    // reaches through populate, filters and sorts are not
+    if (auth && opts?.permissions) {
+      await assertDraftAccess(query, schema, {
+        auth,
+        checker: opts.permissions,
+        getModel,
+        skipRoot: isWriteAction(action),
+      });
+    }
+
+    // A text search matches on fields no filter names: only for a caller who may query them all
+    const checker = activeChecker(auth);
+
+    if (checker && '_q' in query && !canSearchText(checker, auth, action, schema)) {
+      throw new ValidationError('Invalid key _q: searching by text is not allowed', {
+        key: '_q',
+        path: null,
+        source: 'query',
+        param: '_q',
+      });
+    }
+
     const { filters, sort, fields, populate } = query;
 
+    // Asked once per related type for the whole query
+    const restrictionAt = relationRestrictionFor(auth, draftReadOf(query));
+
     if (filters) {
-      await validateFilters(filters, schema, { auth });
+      await validateFilters(filters, schema, { auth, action }, restrictionAt);
     }
 
     if (sort) {
-      await validateSort(sort, schema, { auth });
+      await validateSort(sort, schema, { auth, action }, restrictionAt);
     }
 
     if (fields) {
-      await validateFields(fields, schema);
+      await validateFields(fields, schema, { auth, action });
     }
 
     // a wildcard is always valid; its conversion will be handled by the entity service and can be optimized with sanitizer
     if (populate && populate !== '*') {
-      await validatePopulate(populate, schema);
+      await validatePopulate(populate, schema, { auth, action }, restrictionAt);
+    }
+
+    // How deep the caller's rows let a populate go: `*` is a level, so a wildcard counts too
+    if (populate && checker) {
+      assertPopulateDepth(populate, schema, { auth, action, checker, getModel });
     }
   };
 
-  const validateFilters: ValidateFunc = async (filters, schema: Model, { auth } = {}) => {
+  const validateFilters = async (
+    filters: unknown,
+    schema: Model,
+    { auth, action }: Options = {},
+    restrictionAt: RestrictionAt | null = relationRestrictionFor(auth)
+  ): Promise<void> => {
     if (!schema) {
       throw new Error('Missing schema in validateFilters');
     }
     if (Array.isArray(filters)) {
-      await Promise.all(filters.map((filter) => validateFilters(filter, schema, { auth })));
+      await Promise.all(
+        filters.map((filter) => validateFilters(filter, schema, { auth, action }, restrictionAt))
+      );
       return;
     }
 
@@ -242,6 +584,30 @@ const createAPIValidators = (opts: APIOptions) => {
     if (auth) {
       transforms.push(
         traverseQueryFilters(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
+    }
+
+    // A filter on a field the caller's rules hide would tell them its value
+    const checker = activeChecker(auth);
+
+    if (checker) {
+      transforms.push(
+        traverseQueryFilters(
+          visitors.throwUnauthorizedFields(checker, auth, readActionFor(action)),
+          { schema, getModel }
+        )
+      );
+    }
+
+    // A filter on a relation to a type the caller's data rules restrict, under a `$not`
+    if (restrictionAt) {
+      const isRestricted = restrictionAt(schema, reachOf(schema, 'unversioned'));
+
+      transforms.push(
+        traverseQueryFilters(visitors.throwConditionedRelationUnderNot(isRestricted), {
           schema,
           getModel,
         })
@@ -259,7 +625,12 @@ const createAPIValidators = (opts: APIOptions) => {
     }
   };
 
-  const validateSort: ValidateFunc = async (sort, schema: Model, { auth } = {}) => {
+  const validateSort = async (
+    sort: unknown,
+    schema: Model,
+    { auth, action }: Options = {},
+    restrictionAt: RestrictionAt | null = relationRestrictionFor(auth)
+  ): Promise<void> => {
     if (!schema) {
       throw new Error('Missing schema in validateSort');
     }
@@ -268,6 +639,30 @@ const createAPIValidators = (opts: APIOptions) => {
     if (auth) {
       transforms.push(
         traverseQuerySort(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
+    }
+
+    // So does an ordering by one
+    const checker = activeChecker(auth);
+
+    if (checker) {
+      transforms.push(
+        traverseQuerySort(visitors.throwUnauthorizedFields(checker, auth, readActionFor(action)), {
+          schema,
+          getModel,
+        })
+      );
+    }
+
+    // A sort through a relation to a type the caller's data rules restrict
+    if (restrictionAt) {
+      const isRestricted = restrictionAt(schema, reachOf(schema, 'unversioned'));
+
+      transforms.push(
+        traverseQuerySort(visitors.throwConditionedRelationSort(isRestricted), {
           schema,
           getModel,
         })
@@ -302,14 +697,39 @@ const createAPIValidators = (opts: APIOptions) => {
     }
   };
 
-  const validatePopulate: ValidateFunc = async (populate, schema: Model) => {
+  const validatePopulate = async (
+    populate: unknown,
+    schema: Model,
+    { auth, action }: Options = {},
+    restrictionAt: RestrictionAt | null = relationRestrictionFor(auth)
+  ): Promise<void> => {
     if (!schema) {
       throw new Error('Missing schema in sanitizePopulate');
     }
+    // Relations the caller's rules hide can't be populated, and the filters and sort of a
+    // populate node read by the target's own fields
+    const checker = activeChecker(auth);
+
+    // Comma lists checked path by path, as the Document Service populates them
+    const checked = checker ? splitPopulateLists(populate) : populate;
+
     const transforms = [validators.defaultValidatePopulate({ schema, getModel })];
 
+    if (checker) {
+      transforms.push(
+        traverseQueryPopulate(
+          visitors.throwUnauthorizedFields(checker, auth, readActionFor(action), { nodes: true }),
+          { schema, getModel }
+        )
+      );
+    }
+
+    if (restrictionAt) {
+      transforms.push(throwConditionedPopulateNodes(restrictionAt, schema));
+    }
+
     try {
-      await pipeAsync(...transforms)(populate);
+      await pipeAsync(...transforms)(checked);
     } catch (e) {
       if (e instanceof ValidationError) {
         e.details.source = 'query';
@@ -329,6 +749,6 @@ const createAPIValidators = (opts: APIOptions) => {
   };
 };
 
-export { createAPIValidators, validators, visitors };
+export { createAPIValidators, validators, visitors, assertDraftAccess };
 
 export type APIValidators = ReturnType<typeof createAPIValidators>;
