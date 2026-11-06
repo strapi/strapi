@@ -12,6 +12,8 @@ export declare const createFakeAiTranslationsProvider: () => {
       sourceLocale: string;
       targetLocales: string[];
       content: Record<string, unknown>;
+      /** Top-level attribute types, as i18n sends them. */
+      contentTypeSchema: Record<string, { type?: string }>;
     }): Promise<{ localizations: Array<{ locale: string; content: Record<string, unknown> }> }>;
   };
 };
