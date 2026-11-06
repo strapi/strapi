@@ -202,7 +202,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
       return strapi.db.transaction(async () => {
         // One transaction has one connection. Publishing in parallel overlaps
-        // queries on that connection and Postgres/MySQL then reject the action.
+        // queries on that connection, and Postgres then warns or, on pg 9, errors.
         const results = [];
         for (const documentId of documentIds) {
           results.push(await this.publish(documentId, uid, { locale, populate: {} }));

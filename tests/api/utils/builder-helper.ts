@@ -75,8 +75,8 @@ export const createTestSetup = async (
 export const destroyTestSetup = async ({ strapi, builder }) => {
   const previous = documentServiceSetupBarrier;
   let releaseBarrier = () => {};
-  // Do not chain onto the previous promise. A chain retains every prior
-  // Strapi instance for the whole Jest process.
+  // Do not chain onto the previous promise. A rejected teardown would
+  // otherwise reject every later setup. The next setup waits only for this one.
   documentServiceSetupBarrier = new Promise((resolve) => {
     releaseBarrier = resolve;
   });

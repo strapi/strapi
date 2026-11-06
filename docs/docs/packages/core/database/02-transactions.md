@@ -27,7 +27,7 @@ await strapi.db.transaction(async ({ trx, rollback, commit, onCommit, onRollback
 
 After the transaction handler is executed, the transaction is committed if all operations succeed. If any of the operations throws, the transaction is rolled back and the data is restored to its previous state.
 
-`onCommit` and `onRollback` callbacks are awaited in order before `strapi.db.transaction` resolves. A failing `onCommit` callback is logged, later `onCommit` callbacks still run, and the call resolves. The commit has already succeeded, so the error does not roll it back. A failing `onRollback` callback rejects the call and skips the remaining rollback callbacks. `onCommit` runs once, after a successful commit.
+`onCommit` and `onRollback` callbacks are awaited in order before the outermost `strapi.db.transaction` resolves. A nested call resolves first and shares those callbacks with its parent. A failing `onCommit` callback is logged, later `onCommit` callbacks still run, and the call resolves. The commit has already succeeded, so the error does not roll it back. A failing `onRollback` callback rejects the call and skips the remaining rollback callbacks. `onCommit` runs once, after a successful commit.
 
 :::note
 Every `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
