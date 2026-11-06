@@ -10746,13 +10746,10 @@ __metadata:
   resolution: "@strapi/tests-api@workspace:tests-next/api"
   dependencies:
     "@strapi/tests-shared": "workspace:*"
-    "@swc/jest": "npm:0.2.39"
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:22.20.0"
     eslint-config-custom: "workspace:*"
-    jest: "npm:29.6.0"
-    jest-junit: "npm:16.0.0"
     tsconfig: "workspace:*"
+    vitest: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10761,13 +10758,10 @@ __metadata:
   resolution: "@strapi/tests-cli@workspace:tests-next/cli"
   dependencies:
     "@strapi/tests-shared": "workspace:*"
-    "@swc/jest": "npm:0.2.39"
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:22.20.0"
     eslint-config-custom: "workspace:*"
-    jest: "npm:29.6.0"
-    jest-junit: "npm:16.0.0"
     tsconfig: "workspace:*"
+    vitest: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -21586,18 +21580,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-junit@npm:16.0.0":
-  version: 16.0.0
-  resolution: "jest-junit@npm:16.0.0"
-  dependencies:
-    mkdirp: "npm:^1.0.4"
-    strip-ansi: "npm:^6.0.1"
-    uuid: "npm:^8.3.2"
-    xml: "npm:^1.0.1"
-  checksum: 10c0/d813d4d142341c2b51b634db7ad6ceb9849514cb58f96ec5e7e4cf4031a557133490452710c2d9dec9b1dd546334d9ca663e042d3070c3e8f102ce6217bd8e2e
-  languageName: node
-  linkType: hard
-
 "jest-leak-detector@npm:^29.6.0":
   version: 29.6.0
   resolution: "jest-leak-detector@npm:29.6.0"
@@ -31827,13 +31809,6 @@ __metadata:
   version: 0.1.0
   resolution: "xml-naming@npm:0.1.0"
   checksum: 10c0/8c7614865361bcb7e53e3e091dac21c567e2b92d447919b2f072775aa9dcfc94a5255bd52fbaa0fd53c93513e53a23a6a835218ad2af512451dbc678392f85fe
-  languageName: node
-  linkType: hard
-
-"xml@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "xml@npm:1.0.1"
-  checksum: 10c0/04bcc9b8b5e7b49392072fbd9c6b0f0958bd8e8f8606fee460318e43991349a68cbc5384038d179ff15aef7d222285f69ca0f067f53d071084eb14c7fdb30411
   languageName: node
   linkType: hard
 

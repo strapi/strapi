@@ -1,9 +1,8 @@
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { appPort, generateApp, startServer, type Server } from '@strapi/tests-shared';
 
-// Each Jest worker gets its own app, port and DB (JEST_WORKER_ID starts at 1).
-const worker = Number(process.env.JEST_WORKER_ID ?? 1);
-
-jest.setTimeout(180_000);
+// Each Vitest worker gets its own app, port and DB (VITEST_POOL_ID starts at 1).
+const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 
 describe('test app lifecycle', () => {
   let server: Server;

@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import os from 'node:os';
 
 import {
@@ -11,9 +12,7 @@ import {
   type Server,
 } from '@strapi/tests-shared';
 
-const worker = Number(process.env.JEST_WORKER_ID ?? 1);
-
-jest.setTimeout(180_000);
+const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 
 /** A non-loopback IPv4 address of this machine, if it has one. */
 const externalAddress = () =>
@@ -56,7 +55,6 @@ describe('test plugin', () => {
     expect(body.future).toEqual(expect.any(Object));
     expect(body.flags).toEqual(expect.any(Object));
     expect(typeof body.ee.isEE).toBe('boolean');
-    // fetch builds its JSON outside Jest's realm, so expect.any(Array) would not match.
     expect(Array.isArray(body.ee.features)).toBe(true);
   });
 
