@@ -1,0 +1,10 @@
+{
+  "extends": "tsconfig/client.json",
+  "compilerOptions": {
+    "paths": {
+      "@tests/*": ["./tests/*"]
+    },
+    "types": ["@testing-library/jest-dom", "jest", "vite/client", "@strapi/types/globals-admin"]
+  },
+  "include": ["src", "../shared", "tests"]
+}
