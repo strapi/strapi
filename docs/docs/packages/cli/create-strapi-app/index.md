@@ -35,13 +35,13 @@ The CLI prompts if `--non-interactive` is absent and stdin is a TTY. `--quicksta
 
 The CLI has no password flag, because a flag value goes into shell history and the process list. The environment variable does not start with `STRAPI_ADMIN_`, because Vite exposes those variables to the admin bundle. At startup, the CLI reads the variable and removes it from `process.env`. The dependency install, its lifecycle scripts, the seed, and `develop` never see it.
 
-After the dependency install and the seed, the CLI runs `strapi admin:create-user --email <email> --firstname Admin` in the new project. It passes the password through the `STRAPI_CLI_ADMIN_PASSWORD` environment variable of that child process, never through its arguments. `admin:create-user` reads that variable only when it does not prompt. The name is duplicated in both packages, and the `admin:create-user` unit tests pin it.
+After the dependency install and the seed, the CLI runs `strapi admin:create-user --email <email> --firstname Admin` in the new project. It passes the password through the `STRAPI_CLI_ADMIN_PASSWORD` environment variable of that child process, never through its arguments. `admin:create-user` reads that variable and deletes it from `process.env` before the app loads, so plugins and bootstrap code never see it. It uses the value only when it does not prompt. The name is duplicated in both packages, and the `admin:create-user` unit tests pin it.
 
-The generated password has 24 characters from `a-z`, `A-Z`, and `0-9`, with at least one of each class. The CLI picks each character with `crypto.randomInt`. The password passes the same strength rules as a typed password. The CLI shows the email and the generated password once, in the summary at the end of the installation. It does not store the password and does not show it again. The CLI shows the summary only if `admin:create-user` succeeded.
+The generated password has 24 characters from `a-z`, `A-Z`, and `0-9`, with at least one of each class. The CLI picks each character with `crypto.randomInt`. The password passes the same strength rules as a typed password. The CLI shows the email and the generated password once, at the end of the installation, and only if `admin:create-user` succeeded. See "Secrets output" for where they go.
 
 Templates can pin an older `@strapi/strapi`. The CLI searches the `admin:create-user --help` output for `STRAPI_CLI_ADMIN_PASSWORD`. If the name is absent, the admin step fails.
 
-If the admin step fails, for example because the database server is down, the CLI keeps the project. It prints the error and `<package manager> run strapi admin:create-user --with-admin-token`, does not start the app, and exits with code 1.
+If the admin step fails, for example because the database server is down, the CLI keeps the project. It prints the error and `<package manager> run strapi admin:create-user --with-admin-token`, does not start the app, and exits with code 1. With `--no-admin-token`, the printed command has no `--with-admin-token`.
 
 With `--no-install`, the CLI cannot run the command. It skips the admin step and adds the command to the "To get started" text. If `--admin-email` is set, the CLI prints a warning that the flag is ignored. The programmatic `createStrapi(scope)` export, used by `tests/helpers/test-app.js`, creates no admin user.
 
@@ -51,7 +51,7 @@ The CLI sends `willCreateAdminUser`, `didCreateAdminUser`, and `didNotCreateAdmi
 
 An admin token is an API token with `kind: 'admin'`. It belongs to one admin user, carries a list of admin permissions, and authenticates admin API requests with `Authorization: Bearer <token>`. The service is `api-token-admin` in `packages/core/admin/server/src/services/api-token.ts`.
 
-The CLI passes `--with-admin-token` to `strapi admin:create-user`. With that option, `admin:create-user` does the following:
+The CLI passes `--with-admin-token` to `strapi admin:create-user`, unless `--no-admin-token` is set. `--no-admin-token` keeps the admin user mandatory and skips only the token. With `--with-admin-token`, `admin:create-user` does the following:
 
 1. It creates the user and the token in one `strapi.db.transaction`. If the token creation fails, the database rolls back the user, so the command can run again.
 2. It loads the new user with its roles, because the token service checks the Super Admin role of the owner.
@@ -59,11 +59,26 @@ The CLI passes `--with-admin-token` to `strapi admin:create-user`. With that opt
 4. It names the token `Installation token` and sets a lifespan of 30 days.
 5. It prints the key on its own stdout line: `Admin token: <key>`.
 
-The CLI pipes the stdout of `admin:create-user` and does not print it. It reads the key with `/^Admin token: ([a-f0-9]+)$/m`. If the line is missing, the admin step fails. The CLI shows the key once, in the summary at the end of the installation, after the generated password. The database keeps only a hash and an encrypted copy of the key.
+The CLI pipes the stdout of `admin:create-user` and does not print it. It reads the key with `/^Admin token: ([a-f0-9]+)$/m`. If the line is missing, the admin step fails. The CLI shows the key once, at the end of the installation, after the generated password. See "Secrets output". The database keeps a hash and an encrypted copy of the key. The token owner can show the key again in the admin panel, in Settings > Admin tokens.
 
 The option name and the output prefix are duplicated in both packages. The `admin:create-user` unit tests pin them. If the `--help` output of the installed `@strapi/strapi` has no `--with-admin-token`, the CLI creates the user without a token and prints a warning.
 
 The token permissions are a copy. If a later content type adds permissions to the Super Admin role, the token does not get them. The user can edit the token in the admin panel.
+
+## Secrets output
+
+The generated password and the admin token are secrets. Where the CLI shows them depends on stdout:
+
+| stdout                                | Output                                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| A TTY (a person at a terminal)        | The CLI prints the secrets at the end of the installation.                                        |
+| Not a TTY (CI, Docker builds, agents) | The CLI writes the secrets to `.strapi-credentials.json` in the project and prints only the path. |
+
+The file holds the email, the generated password, and the admin token. A password that the user chose is never written. The CLI creates the file with mode `0600`, so only its owner can read it. It also restricts an existing file. If the CLI cannot write the file, it prints a warning and never falls back to printing the secrets.
+
+The generated `.gitignore` lists `.strapi-credentials.json`. If a template brings its own `.gitignore`, the CLI adds the entry before `git init`, so the file never reaches the first commit.
+
+In a Docker build, the file stays in the image layer, like the SQLite database. Delete it in the same build step, or copy the values out first.
 
 ## Telemetry
 

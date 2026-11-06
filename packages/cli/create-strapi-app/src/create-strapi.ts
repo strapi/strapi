@@ -20,16 +20,27 @@ import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
 import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-manager-args';
 import {
+  CREDENTIALS_FILE,
   createAdminUser,
+  ensureCredentialsFileIgnored,
   getAdminTokenSummary,
+  getCredentialsFileSummary,
   getGeneratedPasswordSummary,
   getManualAdminCommand,
+  writeCredentialsFile,
 } from './utils/admin-user';
-import type { AdminUser, CreateAdminUserResult } from './utils/admin-user';
+import type { AdminUser, CreateAdminUserResult, Credentials } from './utils/admin-user';
 
 interface CreateStrapiOptions {
   /** The first admin user. Created only when the dependencies are installed. */
   adminUser?: AdminUser;
+  /** Also create an admin token for the admin user. `--no-admin-token` sets it to false. */
+  withAdminToken?: boolean;
+  /**
+   * Print the generated password and the admin token. When false (stdout is not a TTY:
+   * CI, Docker builds), they go to the credentials file instead, so build logs never keep them.
+   */
+  showSecrets?: boolean;
 }
 
 const yarnNodeModulesConfig = 'nodeLinker: node-modules\n';
@@ -97,7 +108,14 @@ async function createStrapi(scope: Scope, options: CreateStrapiOptions = {}) {
   }
 }
 
-async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
+async function createApp(
+  scope: Scope,
+  {
+    adminUser,
+    withAdminToken = true,
+    showSecrets = Boolean(process.stdout.isTTY),
+  }: CreateStrapiOptions
+) {
   const {
     rootPath,
     useTypescript,
@@ -239,6 +257,11 @@ async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
     await fse.writeFile(join(rootPath, '.gitignore'), gitIgnore);
   }
 
+  // Before git init: the credentials file must never reach the first commit
+  if (installDependencies && adminUser) {
+    await ensureCredentialsFileIgnored(rootPath);
+  }
+
   // Init git
   if (gitInit) {
     logger.title('git', 'Initializing git repository.');
@@ -267,11 +290,11 @@ async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
   let adminResult: CreateAdminUserResult | undefined;
 
   if (installDependencies && adminUser) {
-    adminResult = await runCreateAdminUser({ scope, adminUser });
+    adminResult = await runCreateAdminUser({ scope, adminUser, withAdminToken });
   }
 
   const cmd = chalk.cyan(`${packageManager} run`);
-  const adminCmd = chalk.cyan(getManualAdminCommand(packageManager));
+  const adminCmd = chalk.cyan(getManualAdminCommand(packageManager, { withAdminToken }));
 
   logger.title('Strapi', `Your application was created!`);
 
@@ -302,14 +325,16 @@ async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
 
   logger.log(['', 'Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
 
-  if (adminUser?.passwordGenerated && adminResult?.status === 'created') {
-    logger.log(['', ...getGeneratedPasswordSummary(adminUser)]);
-  }
+  if (adminUser && adminResult?.status === 'created') {
+    await showAdminSecrets({
+      rootPath,
+      projectFolder,
+      adminUser,
+      adminToken: adminResult.adminToken,
+      showSecrets,
+    });
 
-  if (adminResult?.status === 'created') {
-    if (adminResult.adminToken) {
-      logger.log(['', ...getAdminTokenSummary(adminResult.adminToken)]);
-    } else {
+    if (withAdminToken && !adminResult.adminToken) {
       logger.warn([
         `The installed ${chalk.bold('@strapi/strapi')} version cannot create an admin token.`,
         'Create one in the admin panel: Settings > Admin tokens.',
@@ -361,7 +386,70 @@ async function createApp(scope: Scope, { adminUser }: CreateStrapiOptions) {
   }
 }
 
-async function runCreateAdminUser({ scope, adminUser }: { scope: Scope; adminUser: AdminUser }) {
+/**
+ * Shows the generated password and the admin token once. If stdout is not a TTY, writes them
+ * to the credentials file instead and prints only its path.
+ */
+async function showAdminSecrets({
+  rootPath,
+  projectFolder,
+  adminUser,
+  adminToken,
+  showSecrets,
+}: {
+  rootPath: string;
+  projectFolder: string;
+  adminUser: AdminUser;
+  adminToken?: string;
+  showSecrets: boolean;
+}) {
+  const credentials: Credentials = {
+    email: adminUser.email,
+    ...(adminUser.passwordGenerated && { password: adminUser.password }),
+    ...(adminToken && { adminToken }),
+  };
+
+  if (credentials.password === undefined && credentials.adminToken === undefined) {
+    return;
+  }
+
+  if (showSecrets) {
+    if (credentials.password !== undefined) {
+      logger.log(['', ...getGeneratedPasswordSummary(adminUser)]);
+    }
+
+    if (credentials.adminToken !== undefined) {
+      logger.log(['', ...getAdminTokenSummary(credentials.adminToken)]);
+    }
+
+    return;
+  }
+
+  try {
+    await writeCredentialsFile(rootPath, credentials);
+    logger.log([
+      '',
+      ...getCredentialsFileSummary(join(projectFolder, CREDENTIALS_FILE), credentials),
+    ]);
+  } catch (error) {
+    // Never fall back to printing the secrets
+    logger.warn([
+      `The CLI could not write ${chalk.bold(CREDENTIALS_FILE)}: ${error instanceof Error ? error.message : String(error)}`,
+      'Reset the admin password with `strapi admin:reset-user-password`,',
+      'and create an admin token in the admin panel: Settings > Admin tokens.',
+    ]);
+  }
+}
+
+async function runCreateAdminUser({
+  scope,
+  adminUser,
+  withAdminToken,
+}: {
+  scope: Scope;
+  adminUser: AdminUser;
+  withAdminToken: boolean;
+}) {
   // Never send the email or the password
   const eventProperties = { passwordGenerated: adminUser.passwordGenerated };
 
@@ -369,7 +457,7 @@ async function runCreateAdminUser({ scope, adminUser }: { scope: Scope; adminUse
 
   await trackUsage({ event: 'willCreateAdminUser', scope, eventProperties });
 
-  const result = await createAdminUser({ rootPath: scope.rootPath, adminUser });
+  const result = await createAdminUser({ rootPath: scope.rootPath, adminUser, withAdminToken });
 
   if (result.status === 'created') {
     await trackUsage({

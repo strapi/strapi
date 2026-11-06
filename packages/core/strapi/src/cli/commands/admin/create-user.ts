@@ -182,6 +182,11 @@ const action = async (cmdOptions: CmdOptions = {}) => {
   const { withAdminToken } = cmdOptions;
   let { email, password, firstname, lastname } = cmdOptions;
 
+  // Take the password out of process.env before the app loads, so plugins and
+  // bootstrap code never see it
+  const envPassword = process.env[PASSWORD_ENV_VAR];
+  delete process.env[PASSWORD_ENV_VAR];
+
   if (
     _.isEmpty(email) &&
     _.isEmpty(password) &&
@@ -197,9 +202,9 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     }
 
     ({ email, password, firstname, lastname } = inquiry);
-  } else if (_.isEmpty(password) && !_.isEmpty(process.env[PASSWORD_ENV_VAR])) {
+  } else if (_.isEmpty(password) && !_.isEmpty(envPassword)) {
     // Read only without prompts, so a stray variable never disables the interactive mode
-    password = process.env[PASSWORD_ENV_VAR];
+    password = envPassword;
   }
 
   try {

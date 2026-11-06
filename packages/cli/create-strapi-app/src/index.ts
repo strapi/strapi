@@ -85,6 +85,7 @@ const command = new commander.Command('create-strapi-app')
     '--admin-email <email>',
     'Email of the first admin user (password: CREATE_STRAPI_APP_ADMIN_PASSWORD env variable)'
   )
+  .option('--no-admin-token', 'Do not create an admin token for the first admin user')
 
   .option('--template <template>', 'Specify a Strapi template')
   .option('--template-branch <templateBranch>', 'Specify a branch for the template')
@@ -272,7 +273,7 @@ async function run(args: string[]): Promise<void> {
   addDatabaseDependencies(scope);
 
   try {
-    await createStrapi(scope, { adminUser });
+    await createStrapi(scope, { adminUser, withAdminToken: options.adminToken !== false });
   } catch (error: unknown) {
     if (!(error instanceof Error)) {
       throw error;

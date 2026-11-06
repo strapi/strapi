@@ -1,15 +1,22 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
 import execa from 'execa';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import {
   ADMIN_PASSWORD_ENV_VAR,
   ADMIN_TOKEN_OPTION,
   AdminUserInputError,
   CHILD_PASSWORD_ENV_VAR,
+  CREDENTIALS_FILE,
   DEFAULT_ADMIN_EMAIL,
   createAdminUser,
+  ensureCredentialsFileIgnored,
   generateAdminPassword,
   getAdminTokenSummary,
+  getCredentialsFileSummary,
   getGeneratedPasswordSummary,
   getManualAdminCommand,
   parseAdminToken,
@@ -17,6 +24,7 @@ import {
   takeAdminPasswordFromEnv,
   validateEmail,
   validatePassword,
+  writeCredentialsFile,
 } from '../admin-user';
 import type { AdminUser } from '../admin-user';
 
@@ -230,6 +238,84 @@ describe('getManualAdminCommand', () => {
   });
 });
 
+describe('getManualAdminCommand with --no-admin-token', () => {
+  it('leaves out --with-admin-token', () => {
+    expect(getManualAdminCommand('npm', { withAdminToken: false })).toBe(
+      'npm run strapi -- admin:create-user'
+    );
+  });
+});
+
+describe('credentials file', () => {
+  let rootPath: string;
+
+  beforeEach(() => {
+    rootPath = fs.mkdtempSync(path.join(os.tmpdir(), 'csa-credentials-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(rootPath, { recursive: true, force: true });
+  });
+
+  it('writes the credentials with owner-only permissions', async () => {
+    const filePath = await writeCredentialsFile(rootPath, {
+      email: 'admin@example.com',
+      password: 'Generated1',
+      adminToken: 'ab12',
+    });
+
+    expect(filePath).toBe(path.join(rootPath, CREDENTIALS_FILE));
+    expect(JSON.parse(fs.readFileSync(filePath, 'utf8'))).toMatchObject({
+      email: 'admin@example.com',
+      password: 'Generated1',
+      adminToken: 'ab12',
+    });
+
+    if (process.platform !== 'win32') {
+      expect((fs.statSync(filePath).mode % 0o1000).toString(8)).toBe('600');
+    }
+  });
+
+  it('restricts an existing file too', async () => {
+    const filePath = path.join(rootPath, CREDENTIALS_FILE);
+    fs.writeFileSync(filePath, '{}', { mode: 0o644 });
+
+    await writeCredentialsFile(rootPath, { email: 'admin@example.com', adminToken: 'ab12' });
+
+    if (process.platform !== 'win32') {
+      expect((fs.statSync(filePath).mode % 0o1000).toString(8)).toBe('600');
+    }
+  });
+
+  it('prints the path and never the secrets', () => {
+    const text = getCredentialsFileSummary(`./app/${CREDENTIALS_FILE}`, {
+      email: 'admin@example.com',
+      password: 'Generated1',
+      adminToken: 'ab12cd34',
+    }).join('\n');
+
+    expect(text).toContain(CREDENTIALS_FILE);
+    expect(text).not.toContain('Generated1');
+    expect(text).not.toContain('ab12cd34');
+  });
+
+  it('adds the file to an existing .gitignore once', async () => {
+    const gitignorePath = path.join(rootPath, '.gitignore');
+    fs.writeFileSync(gitignorePath, 'node_modules');
+
+    await ensureCredentialsFileIgnored(rootPath);
+    await ensureCredentialsFileIgnored(rootPath);
+
+    expect(fs.readFileSync(gitignorePath, 'utf8')).toBe(`node_modules\n${CREDENTIALS_FILE}\n`);
+  });
+
+  it('does not create a .gitignore', async () => {
+    await ensureCredentialsFileIgnored(rootPath);
+
+    expect(fs.existsSync(path.join(rootPath, '.gitignore'))).toBe(false);
+  });
+});
+
 describe('parseAdminToken', () => {
   const key = 'ab12'.repeat(64);
 
@@ -336,6 +422,17 @@ describe('createAdminUser', () => {
     const result = await createAdminUser({ rootPath: '/app', adminUser });
 
     expect(result).toMatchObject({ status: 'failed' });
+  });
+
+  it('does not request a token with --no-admin-token', async () => {
+    mockHelp(`${CHILD_PASSWORD_ENV_VAR} ${ADMIN_TOKEN_OPTION}`);
+
+    const result = await createAdminUser({ rootPath: '/app', adminUser, withAdminToken: false });
+
+    expect(result).toEqual({ status: 'created' });
+
+    const createCall = mockedExeca.mock.calls.find(([, args]) => !args.includes('--help'));
+    expect(createCall![1]).not.toContain(ADMIN_TOKEN_OPTION);
   });
 
   it('creates the user without a token when Strapi has no --with-admin-token', async () => {

@@ -1,7 +1,10 @@
 import { randomInt } from 'node:crypto';
 
+import { join } from 'node:path';
+
 import chalk from 'chalk';
 import execa from 'execa';
+import fse from 'fs-extra';
 
 import type { PackageManager } from '../types';
 
@@ -201,11 +204,78 @@ export async function resolveAdminUser({
 /**
  * The command a user runs by hand to create the admin user.
  */
-export const getManualAdminCommand = (packageManager: PackageManager) => {
+export const getManualAdminCommand = (
+  packageManager: PackageManager,
+  { withAdminToken = true }: { withAdminToken?: boolean } = {}
+) => {
   const separator = packageManager === 'npm' ? ' --' : '';
+  const tokenOption = withAdminToken ? ` ${ADMIN_TOKEN_OPTION}` : '';
 
-  return `${packageManager} run strapi${separator} admin:create-user ${ADMIN_TOKEN_OPTION}`;
+  return `${packageManager} run strapi${separator} admin:create-user${tokenOption}`;
 };
+
+/**
+ * File that receives the generated password and the admin token when stdout is not a TTY
+ * (CI, Docker builds, agents), so that build logs never keep them.
+ * The generated `.gitignore` lists it.
+ */
+export const CREDENTIALS_FILE = '.strapi-credentials.json';
+
+export interface Credentials {
+  email: string;
+  /** Only a generated password. A password the user chose is never written. */
+  password?: string;
+  adminToken?: string;
+}
+
+/**
+ * Writes the credentials file with owner-only permissions (0600) and returns its path.
+ */
+export async function writeCredentialsFile(rootPath: string, credentials: Credentials) {
+  const filePath = join(rootPath, CREDENTIALS_FILE);
+  const content = {
+    ...credentials,
+    note: 'Created by create-strapi-app. Store these values in a safe place, then delete this file.',
+  };
+
+  await fse.writeFile(filePath, `${JSON.stringify(content, null, 2)}\n`, { mode: 0o600 });
+  // `mode` applies only to a new file: also restrict an existing one
+  await fse.chmod(filePath, 0o600);
+
+  return filePath;
+}
+
+/**
+ * Lines printed instead of the secrets when they went to the credentials file.
+ */
+export const getCredentialsFileSummary = (displayPath: string, credentials: Credentials) => [
+  `The admin credentials are in ${chalk.bold(displayPath)} (readable only by you):`,
+  ...(credentials.password ? ['  - the generated admin password'] : []),
+  ...(credentials.adminToken ? ['  - the admin token'] : []),
+  'The CLI does not print them, so that build logs do not keep them.',
+  'Store them in a safe place, then delete the file.',
+];
+
+/**
+ * Adds the credentials file to an existing `.gitignore` (for example from a template).
+ */
+export async function ensureCredentialsFileIgnored(rootPath: string) {
+  const gitignorePath = join(rootPath, '.gitignore');
+
+  if (!(await fse.pathExists(gitignorePath))) {
+    return;
+  }
+
+  const content = await fse.readFile(gitignorePath, 'utf8');
+  const lines = content.split(/\r?\n/).map((line) => line.trim());
+
+  if (lines.includes(CREDENTIALS_FILE) || lines.includes(`/${CREDENTIALS_FILE}`)) {
+    return;
+  }
+
+  const separator = content.length === 0 || content.endsWith('\n') ? '' : '\n';
+  await fse.appendFile(gitignorePath, `${separator}${CREDENTIALS_FILE}\n`);
+}
 
 /**
  * Lines printed in the installation summary for the admin token.
@@ -214,7 +284,8 @@ export const getManualAdminCommand = (packageManager: PackageManager) => {
 export const getAdminTokenSummary = (adminToken: string) => [
   'Admin token (valid 30 days, all the permissions of the admin user):',
   `  ${chalk.bold(adminToken)}`,
-  'Strapi does not show this token again. Store it in a safe place.',
+  'The CLI does not show it again. Store it in a safe place.',
+  'The admin user can show it again in the admin panel: Settings > Admin tokens.',
   `Send it to the admin API in the header ${chalk.cyan('Authorization: Bearer <token>')}.`,
 ];
 
@@ -259,9 +330,12 @@ export type CreateAdminUserResult =
 export async function createAdminUser({
   rootPath,
   adminUser,
+  withAdminToken = true,
 }: {
   rootPath: string;
   adminUser: AdminUser;
+  /** `--no-admin-token` sets it to false */
+  withAdminToken?: boolean;
 }): Promise<CreateAdminUserResult> {
   const execaOptions = {
     cwd: rootPath,
@@ -286,9 +360,9 @@ export async function createAdminUser({
       adminUser.firstname,
     ];
 
-    const supportsAdminToken = help.stdout.includes(ADMIN_TOKEN_OPTION);
+    const requestsAdminToken = withAdminToken && help.stdout.includes(ADMIN_TOKEN_OPTION);
 
-    if (supportsAdminToken) {
+    if (requestsAdminToken) {
       args.push(ADMIN_TOKEN_OPTION);
     }
 
@@ -303,7 +377,7 @@ export async function createAdminUser({
       },
     });
 
-    if (!supportsAdminToken) {
+    if (!requestsAdminToken) {
       return { status: 'created' };
     }
 

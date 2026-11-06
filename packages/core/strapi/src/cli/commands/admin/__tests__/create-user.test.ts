@@ -325,6 +325,27 @@ describe('admin:create command', () => {
       consoleLog.mockRestore();
     });
 
+    test('Removes STRAPI_CLI_ADMIN_PASSWORD from process.env before the app loads', async () => {
+      process.env.STRAPI_CLI_ADMIN_PASSWORD = 'envPassword1234';
+      let envAtLoad: string | undefined = 'not called';
+      load.mockImplementationOnce(() => {
+        envAtLoad = process.env.STRAPI_CLI_ADMIN_PASSWORD;
+        return mock;
+      });
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand({ email: 'email@email.fr', firstname: 'John' });
+
+      expect(envAtLoad).toBeUndefined();
+      expect(process.env.STRAPI_CLI_ADMIN_PASSWORD).toBeUndefined();
+      expect(create).toHaveBeenCalledWith(expect.objectContaining({ password: 'envPassword1234' }));
+
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+    });
+
     test('Prefers --password over STRAPI_CLI_ADMIN_PASSWORD', async () => {
       process.env.STRAPI_CLI_ADMIN_PASSWORD = 'envPassword1234';
 
