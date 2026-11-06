@@ -11,7 +11,6 @@
  * Examples:
  *   yarn test:migrations --initial legacy --database sqlite --skip-build
  *   yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
- *   yarn test:migrations --initial legacy --initial-node 20
  *   yarn test:migrations --initial legacy --initial-node 20 --initial-node-bin "$(nvm which 20)" --workspace-node 22
  *
  * When --scenario is omitted, you must pass **--initial** (no default). When --scenario is set,
@@ -161,7 +160,13 @@ function resolveMultiplier(): number {
   return 1;
 }
 
-function resolveInitialNodeBin(): string {
+function resolveInitialNodeBin(baselineType: string): string {
+  // Only the v4 app needs Node 20. A pinned v5 baseline uses the host Node: its
+  // driver pin follows this repo, and better-sqlite3 13 does not load on Node 20.
+  if (baselineType !== 'v4-scaffold') {
+    return process.execPath;
+  }
+
   const raw = (argv.initialNodeBin as string | undefined) || process.env.MIGRATION_INITIAL_NODE_BIN;
   if (!raw) {
     return process.execPath;
@@ -190,7 +195,7 @@ function assertNodeMajors(initialNodeBin: string): void {
   if (!separateBaseline && initial != null && workspace != null && initial !== workspace) {
     console.error(
       '\n❌ Different --initial-node and --workspace-node need --initial-node-bin: without it the baseline runs on the host Node.\n' +
-        '   Pass --initial-node-bin <path to node>, or a single major (e.g. --initial-node 20).\n'
+        '   Pass --initial-node-bin "$(nvm which 20)" --initial-node 20 --workspace-node 22, or run on one Node.\n'
     );
     process.exit(1);
   }
@@ -352,7 +357,8 @@ async function run(): Promise<void> {
   loadMigrationDotenv();
 
   assertCliInitialOrScenario();
-  const initialNodeBin = resolveInitialNodeBin();
+  const { scenario, sourceLabel } = resolveScenario();
+  const initialNodeBin = resolveInitialNodeBin(scenario.baseline.type);
   assertNodeMajors(initialNodeBin);
 
   const database = resolveDatabase();
@@ -362,8 +368,6 @@ async function run(): Promise<void> {
     fullBuild: argv.build,
     skipBuild: argv.skipBuild,
   });
-
-  const { scenario, sourceLabel } = resolveScenario();
 
   const dataOrigin =
     scenario.dataOrigin != null ? scenario.dataOrigin : inferDataOrigin(scenario.baseline);
@@ -407,7 +411,6 @@ async function run(): Promise<void> {
       multiplier,
       dbEnv,
       initialVersion,
-      nodeBin: initialNodeBin,
     });
   } else {
     throw new Error(`Unknown baseline type: ${scenario.baseline.type}`);

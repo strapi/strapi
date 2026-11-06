@@ -117,9 +117,11 @@ Database driver packages often have their own minimum versions for each version 
 
 | Node Version | PostgreSQL (pg) | MySQL (mysql2) | SQLite (better-sqlite3) |
 | ------------ | --------------- | -------------- | ----------------------- |
-| 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@13.x     |
-| 24           | pg@8.x          | mysql2@3.x     | better-sqlite3@13.x     |
-| 26           | pg@8.x          | mysql2@3.x     | better-sqlite3@13.x     |
+| 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
+| 24           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
+| 26           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
+
+`better-sqlite3@13` needs Node >= 22.14.0 (Node-API 10). On Node 22.0–22.13 it crashes when the database opens. `create-strapi-app` pins `13.0.3` from Node 22.14 and `12.11.1` below that. An existing app can stay on 12.x.
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 

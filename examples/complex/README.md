@@ -189,7 +189,7 @@ Options:
 
 - `--initial <4.x semver>` — required without `--scenario`
 - `--scenario <path>` — JSON scenario (default: `tests/migration/scenarios/v4-to-head.json`)
-- `--initial-node-bin <path>` — Node executable for the baseline scaffold, install and seed (env `MIGRATION_INITIAL_NODE_BIN`); pinned stages and workspace validation keep the host Node
+- `--initial-node-bin <path>` — Node executable for a v4 baseline's scaffold, install and seed (env `MIGRATION_INITIAL_NODE_BIN`). Pinned v5 baselines, later stages, and workspace validation keep the host Node
 - `--initial-node` / `--workspace-node` — optional Node major guards for the baseline runtime and the host (must match unless `--initial-node-bin` is set)
 - `--database sqlite` (default locally) | `postgres` | `mysql` | `mariadb`
 - `--multiplier N`, `--build`, `--skip-build`
