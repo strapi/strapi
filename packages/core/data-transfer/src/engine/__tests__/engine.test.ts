@@ -523,7 +523,7 @@ describe('Transfer engine', () => {
       ]);
     });
 
-    test('runs global, throttle, then stage transforms in order', async () => {
+    test('runs global transforms before stage transforms when throttled', async () => {
       const received: Array<{ data?: { foo?: string } }> = [];
       const source = createSource({
         entities: [
@@ -559,6 +559,35 @@ describe('Transfer engine', () => {
       await engine.transfer();
 
       expect(received.map((entity) => entity.data?.foo)).toEqual(['global,stage', 'global,stage']);
+    });
+
+    test('throttles only the items that pass the transform filters', async () => {
+      const throttle = 3;
+      const entities = Array.from({ length: 5 }, (_, id) => ({
+        id,
+        type: 'api::foo.foo',
+        data: { foo: '' },
+      }));
+
+      const countThrottleDelays = async (keepEntities: boolean) => {
+        const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+        const engine = createTransferEngine(createSource({ entities }), createDestination(), {
+          ...defaultOptions,
+          throttle,
+          transforms: { entities: [{ filter: () => keepEntities }] },
+        });
+
+        await engine.transfer();
+
+        const delays = setTimeoutSpy.mock.calls.filter(([, delay]) => delay === throttle).length;
+        setTimeoutSpy.mockRestore();
+        return delays;
+      };
+
+      const withEntities = await countThrottleDelays(true);
+      const withoutEntities = await countThrottleDelays(false);
+
+      expect(withEntities - withoutEntities).toBe(entities.length);
     });
 
     test('calls all provider stages', async () => {

@@ -130,7 +130,7 @@ sequenceDiagram
 3. A progress tracker stream is initialized for monitoring
 4. A write stream is requested from the Destination Provider
 
-The transform stream is one `stream-chain` chain. It runs the `global` transforms, then the `throttle` delay, then the transforms for the current stage. The entities and links stages append their own schema filter after these.
+The transform stream is one `stream-chain` chain. It runs the `global` transforms, then the transforms for the current stage, then the `throttle` delay. The entities and links stages append their own schema filter after these.
 
 **Example Implementation (simplified from `transferSchemas`):**
 
@@ -141,7 +141,7 @@ async transferSchemas(): Promise<void> {
   const source = await this.sourceProvider.createSchemasReadStream?.();
   const destination = await this.destinationProvider.createSchemasWriteStream?.();
 
-  // global transforms, then throttle, then stage transforms
+  // global transforms, then stage transforms, then throttle
   const transform = await this.#createStageTransformStream(stage);
   const tracker = this.#progressTracker(stage, { key: (value: Schema) => value.modelType });
 

@@ -350,7 +350,7 @@ const options = {
 };
 ```
 
-Each stage runs its items through one transform chain, in this order: the `global` transforms, the `throttle` delay, and then the transforms keyed by the stage name. The `throttle` delay applies to every stage, including entities and links.
+Each stage runs its items through one transform chain, in this order: the `global` transforms, the transforms keyed by the stage name, and then the `throttle` delay. Items that a filter drops are not delayed. The `throttle` delay applies to every stage, including entities and links.
 
 #### versionStrategy
 

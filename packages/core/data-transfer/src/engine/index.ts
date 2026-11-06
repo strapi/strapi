@@ -240,6 +240,9 @@ class TransferEngine<
       pushTransforms(globalTransforms as TransferTransform<unknown>[]);
     }
 
+    pushTransforms(stageTransforms as TransferTransform<unknown>[]);
+
+    // Throttle last so that items dropped by a filter are not delayed.
     if (isNumber(throttle) && throttle > 0) {
       steps.push(
         new PassThrough({
@@ -253,8 +256,6 @@ class TransferEngine<
         })
       );
     }
-
-    pushTransforms(stageTransforms as TransferTransform<unknown>[]);
 
     if (!steps.length) {
       return new PassThrough({ objectMode: true });
