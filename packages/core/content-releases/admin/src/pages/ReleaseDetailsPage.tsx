@@ -835,7 +835,9 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   const {
     isLoading,
-    isFetching,
+    // `currentData` is cleared only when the tab, group or page changes: a reload after an
+    // entry's change keeps the rows on screen instead of the table's loader
+    currentData,
     isError,
     data,
     error: releaseActionsError,
@@ -1208,7 +1210,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             <Table.Root
               rows={releaseActions[key]}
               headers={headers}
-              isLoading={isLoading || isFetching}
+              isLoading={isLoading || !currentData}
             >
               <Table.Content>
                 <Table.Head>
