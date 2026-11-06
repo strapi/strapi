@@ -41,17 +41,22 @@ The `DocumentRBAC` component wraps the ListView & EditView pages providing
 ```ts
 interface DocumentRBACContextValue {
   canCreate?: boolean;
+  canCreateAllFields: boolean;
   canCreateFields: string[];
   canDelete?: boolean;
   canPublish?: boolean;
   canRead?: boolean;
+  canReadAllFields: boolean;
   canReadFields: string[];
   canUpdate?: boolean;
+  canUpdateAllFields: boolean;
   canUpdateFields: string[];
   canUserAction: (
     fieldName: string,
     fieldsUserCanAction: string[],
-    fieldType: Attribute.Kind
+    fieldType: Attribute.Kind,
+    canPerformAction: boolean,
+    canPerformActionOnAllFields: boolean
   ) => boolean;
   isLoading: boolean;
 }
@@ -62,3 +67,5 @@ Because the `useRBAC` hook fetches data from the API to check against `condition
 :::
 
 Using all this information, we can disabled & hide fields in the application based on the user's permissions.
+
+The `canCreateAllFields`, `canReadAllFields`, and `canUpdateAllFields` values indicate unrestricted field access. This is distinct from an explicit empty field list, which grants no field access. Pass both the corresponding global action and unrestricted-field flag to `canUserAction`.

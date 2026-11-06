@@ -13,23 +13,27 @@ import type { Schema } from '@strapi/types';
 
 /**
  * The boolean values indicate the global actions a user can perform on the document.
- * The `string[]` values tell us specifically which fields the actions can be performed on,
- * for example, if the `canReadFields` array is empty, than no fields can be read by the user.
- * This can happen even if the user can read the document.
+ * The `string[]` values contain field restrictions. The `can*AllFields` values distinguish
+ * an unrestricted field grant from an explicit empty list that grants no fields.
  */
 interface DocumentRBACContextValue {
   canCreate?: boolean;
+  canCreateAllFields: boolean;
   canCreateFields: string[];
   canDelete?: boolean;
   canPublish?: boolean;
   canRead?: boolean;
+  canReadAllFields: boolean;
   canReadFields: string[];
   canUpdate?: boolean;
+  canUpdateAllFields: boolean;
   canUpdateFields: string[];
   canUserAction: (
     fieldName: string,
     fieldsUserCanAction: string[],
-    fieldType: Schema.Attribute.Kind
+    fieldType: Schema.Attribute.Kind,
+    canPerformAction: boolean,
+    canPerformActionOnAllFields: boolean
   ) => boolean;
   isLoading: boolean;
 }
@@ -38,12 +42,15 @@ const [DocumentRBACProvider, useDocumentRBAC] = createContext<DocumentRBACContex
   'DocumentRBAC',
   {
     canCreate: false,
+    canCreateAllFields: false,
     canCreateFields: [],
     canDelete: false,
     canPublish: false,
     canRead: false,
+    canReadAllFields: false,
     canReadFields: [],
     canUpdate: false,
+    canUpdateAllFields: false,
     canUpdateFields: [],
     canUserAction: () => false,
     isLoading: false,
@@ -101,20 +108,52 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
       ? extractAndDedupeFields(contentTypePermissions.create)
       : [];
 
+  const canCreateAllFields =
+    !isLoading &&
+    allowedActions.canCreate === true &&
+    hasUnrestrictedFieldAccess(contentTypePermissions.create);
+
   const canReadFields =
     !isLoading && allowedActions.canRead ? extractAndDedupeFields(contentTypePermissions.read) : [];
+
+  const canReadAllFields =
+    !isLoading &&
+    allowedActions.canRead === true &&
+    hasUnrestrictedFieldAccess(contentTypePermissions.read);
 
   const canUpdateFields =
     !isLoading && allowedActions.canUpdate
       ? extractAndDedupeFields(contentTypePermissions.update)
       : [];
 
+  const canUpdateAllFields =
+    !isLoading &&
+    allowedActions.canUpdate === true &&
+    hasUnrestrictedFieldAccess(contentTypePermissions.update);
+
   /**
-   * @description Checks if the user can perform an action on a field based on the field names
-   * provided as the second argument.
+   * @description Checks global action permission, unrestricted access, and any field restrictions.
    */
   const canUserAction: DocumentRBACContextValue['canUserAction'] = React.useCallback(
-    (fieldName, fieldsUserCanAction, fieldType) => {
+    (
+      fieldName,
+      fieldsUserCanAction,
+      fieldType,
+      canPerformAction,
+      canPerformActionOnAllFields
+    ) => {
+      if (!canPerformAction) {
+        return false;
+      }
+
+      if (canPerformActionOnAllFields) {
+        return true;
+      }
+
+      if (fieldsUserCanAction.length === 0) {
+        return false;
+      }
+
       const name = removeNumericalStrings(fieldName.split('.'));
 
       const componentFieldNames = fieldsUserCanAction
@@ -147,8 +186,11 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
     <DocumentRBACProvider
       isLoading={isLoading}
       canCreateFields={canCreateFields}
+      canCreateAllFields={canCreateAllFields}
       canReadFields={canReadFields}
+      canReadAllFields={canReadAllFields}
       canUpdateFields={canUpdateFields}
+      canUpdateAllFields={canUpdateAllFields}
       canUserAction={canUserAction}
       {...allowedActions}
     >
@@ -161,13 +203,16 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
  * @internal it's really small, but it's used three times in a row and DRY for something this straight forward.
  */
 const extractAndDedupeFields = (permissions: Permission[] = []) => {
-  const allFields = permissions.flatMap((permission) => permission.properties?.fields);
-  // An undefined entry means this permission grants access to all fields
-  // (no field-level restriction). Returning [] signals "no restriction" to callers.
-  if (allFields.some((field) => field === undefined)) return [];
-  // Deduplicate fields
+  if (hasUnrestrictedFieldAccess(permissions)) return [];
+  const allFields = permissions.flatMap((permission) => permission.properties?.fields ?? []);
   return Array.from(new Set(allFields as string[]));
 };
+
+const hasUnrestrictedFieldAccess = (permissions: Permission[] = []) =>
+  permissions.some(
+    (permission) =>
+      permission.properties?.fields === undefined || permission.properties.fields === null
+  );
 
 /**
  * @internal removes numerical strings from arrays.

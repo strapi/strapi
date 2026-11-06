@@ -373,6 +373,12 @@ const VersionInputRenderer = ({
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
+  const canCreateAllFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateAllFields);
+  const canReadAllFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadAllFields);
+  const canUpdateAllFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateAllFields);
+  const canCreate = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreate);
+  const canRead = useDocumentRBAC('InputRenderer', (rbac) => rbac.canRead);
+  const canUpdate = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdate);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
   const editableFields = id ? canUpdateFields : canCreateFields;
@@ -381,8 +387,20 @@ const VersionInputRenderer = ({
    * Component fields are always readable and editable,
    * however the fields within them may not be.
    */
-  const canUserReadField = canUserAction(props.name, readableFields, props.type);
-  const canUserEditField = canUserAction(props.name, editableFields, props.type);
+  const canUserReadField = canUserAction(
+    props.name,
+    readableFields,
+    props.type,
+    (id ? canRead : canCreate) ?? false,
+    id ? canReadAllFields : canCreateAllFields
+  );
+  const canUserEditField = canUserAction(
+    props.name,
+    editableFields,
+    props.type,
+    (id ? canUpdate : canCreate) ?? false,
+    id ? canUpdateAllFields : canCreateAllFields
+  );
 
   const fields = useStrapiApp('InputRenderer', (app) => app.fields);
   const { lazyComponentStore } = useLazyComponents(

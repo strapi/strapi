@@ -265,7 +265,107 @@ describe('DocumentRBAC', () => {
       await waitFor(() => expect(result.current.isLoading).toBeFalsy());
 
       expect(result.current.canReadFields).toHaveLength(0);
+      expect(result.current.canReadAllFields).toBe(true);
+      expect(
+        result.current.canUserAction(
+          'privateField',
+          result.current.canReadFields,
+          'string',
+          true,
+          result.current.canReadAllFields
+        )
+      ).toBe(true);
+      expect(
+        result.current.canUserAction(
+          'privateField',
+          result.current.canCreateFields,
+          'string',
+          false,
+          result.current.canCreateAllFields
+        )
+      ).toBe(false);
     });
+  });
+
+  it('only allows an empty field list when the user can perform the action', async () => {
+    const permissions = [
+      {
+        ...ALL_PERMISSIONS[3],
+        properties: {},
+      },
+    ];
+    const { result } = renderRTLHook(() => useDocumentRBAC('TEST', (state) => state), {
+      wrapper({ children }) {
+        return (
+          <Routes>
+            <Route
+              path="/content-manager/:collectionType/:slug"
+              element={<DocumentRBAC permissions={permissions}>{children}</DocumentRBAC>}
+            />
+          </Routes>
+        );
+      },
+      initialEntries: ['/content-manager/collection-types/api::address.address'],
+      providerOptions: { permissions },
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(
+      result.current.canUserAction(
+        'title',
+        result.current.canReadFields,
+        'string',
+        true,
+        result.current.canReadAllFields
+      )
+    ).toBe(true);
+    expect(
+      result.current.canUserAction(
+        'title',
+        result.current.canReadFields,
+        'string',
+        false,
+        result.current.canReadAllFields
+      )
+    ).toBe(false);
+  });
+
+  it('does not treat an explicitly empty field list as unrestricted access', async () => {
+    const model = 'api::empty-fields.empty-fields';
+    const permissions = [
+      {
+        id: 904,
+        action: 'plugin::content-manager.explorer.read',
+        actionParameters: {},
+        subject: model,
+        properties: { fields: [] },
+        conditions: [],
+      } satisfies Permission,
+    ];
+    const { result } = renderRTLHook(() => useDocumentRBAC('TEST', (state) => state), {
+      wrapper({ children }) {
+        return (
+          <Routes>
+            <Route
+              path="/content-manager/:collectionType/:slug"
+              element={<DocumentRBAC permissions={permissions}>{children}</DocumentRBAC>}
+            />
+          </Routes>
+        );
+      },
+      initialEntries: [`/content-manager/collection-types/${model}`],
+      providerOptions: { permissions },
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.canRead).toBe(true);
+    expect(result.current.canReadFields).toEqual([]);
+    expect(result.current.canReadAllFields).toBe(false);
+    expect(
+      result.current.canUserAction('title', result.current.canReadFields, 'string', true, false)
+    ).toBe(false);
   });
 
   describe('can not do anything', () => {

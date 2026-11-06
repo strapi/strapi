@@ -3,7 +3,7 @@ import * as React from 'react';
 import {
   useStrapiApp,
   useForm,
-  InputRenderer as FormInputRenderer,
+   InputRenderer as FormInputRenderer,
   useField,
   createRulesEngine,
   type JsonLogicCondition,
@@ -79,6 +79,12 @@ const BaseInputRenderer = ({
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
+  const canCreateAllFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateAllFields);
+  const canReadAllFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadAllFields);
+  const canUpdateAllFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateAllFields);
+  const canCreate = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreate);
+  const canRead = useDocumentRBAC('InputRenderer', (rbac) => rbac.canRead);
+  const canUpdate = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdate);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
   let idToCheck = document.document?.documentId;
@@ -97,8 +103,20 @@ const BaseInputRenderer = ({
    * Component fields are always readable and editable,
    * however the fields within them may not be.
    */
-  const canUserReadField = canUserAction(props.name, readableFields, props.type);
-  const canUserEditField = canUserAction(props.name, editableFields, props.type);
+  const canUserReadField = canUserAction(
+    props.name,
+    readableFields,
+    props.type,
+    (idToCheck ? canRead : canCreate) ?? false,
+    idToCheck ? canReadAllFields : canCreateAllFields
+  );
+  const canUserEditField = canUserAction(
+    props.name,
+    editableFields,
+    props.type,
+    (idToCheck ? canUpdate : canCreate) ?? false,
+    idToCheck ? canUpdateAllFields : canCreateAllFields
+  );
 
   const fields = useStrapiApp('InputRenderer', (app) => app.fields);
   const { lazyComponentStore } = useLazyComponents(
