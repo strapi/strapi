@@ -11,12 +11,16 @@ export default (({ strapi }: { strapi: Core.Strapi }) => ({
     field,
     data,
     locale,
-  }: {
-    contentTypeUID: UID.ContentType;
-    field: string;
-    data: Record<string, any>;
-    locale?: string;
-  }): Core.IsStrict extends true ? ReturnType<UIDService['generateUIDField']> : Promise<string> {
+  }: Core.IsStrict extends true
+    ? Parameters<UIDService['generateUIDField']>[0]
+    : {
+        contentTypeUID: UID.ContentType;
+        field: string;
+        data: Record<string, any>;
+        locale?: string;
+      }): Core.IsStrict extends true
+    ? ReturnType<UIDService['generateUIDField']>
+    : Promise<string> {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
 

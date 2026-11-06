@@ -5,8 +5,14 @@ import type { UIDService } from './services';
 
 type Implementation = ReturnType<typeof createUIDService>;
 
-// With strict types, generateUIDField resolves to the result of the contract.
+// With strict types, generateUIDField takes and resolves to the types of the contract.
 export type UIDImplementationAssertions = [
+  Expect<
+    Equal<
+      Parameters<Implementation['generateUIDField']>,
+      Parameters<UIDService['generateUIDField']>
+    >
+  >,
   Expect<
     Equal<
       Awaited<ReturnType<Implementation['generateUIDField']>>,
