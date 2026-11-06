@@ -25,6 +25,7 @@ const builder = {
   editContentType: jest.fn(),
   deleteContentType: jest.fn(),
   writeFiles: jest.fn(),
+  renameComponentRows: jest.fn(),
   rollback: jest.fn(),
 };
 
@@ -104,6 +105,11 @@ describe('content type mutation compensation', () => {
       return { uid };
     });
     builder.writeFiles.mockResolvedValue(true);
+    // Like the real builder: `beforeCommit` runs inside the row transaction, and its
+    // rejection propagates out of `renameComponentRows`.
+    builder.renameComponentRows.mockImplementation(
+      async ({ beforeCommit }: { beforeCommit?: () => Promise<unknown> } = {}) => beforeCommit?.()
+    );
     builder.rollback.mockImplementation(async () => {
       files.schemas = new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]);
     });
@@ -147,6 +153,35 @@ describe('content type mutation compensation', () => {
       },
       log: { error: jest.fn() },
     } as any;
+  });
+
+  it('rejects a direct call without displayName before touching the schema or API files', async () => {
+    const { displayName, ...withoutDisplayName } = createInput.contentType;
+    const { generate } = jest.requireMock('@strapi/generators');
+
+    await expect(
+      createContentType({
+        ...createInput,
+        contentType: { ...withoutDisplayName, info: { displayName } },
+      })
+    ).rejects.toThrow('A content type requires a displayName');
+
+    expect(builder.createContentType).not.toHaveBeenCalled();
+    expect(generate).not.toHaveBeenCalled();
+    expect(builder.writeFiles).not.toHaveBeenCalled();
+  });
+
+  it('generates the API with the payload displayName', async () => {
+    const { generate } = jest.requireMock('@strapi/generators');
+
+    await createContentType(createInput);
+
+    expect(generate).toHaveBeenCalledWith(
+      'content-type',
+      expect.objectContaining({ displayName: 'Article' }),
+      expect.anything()
+    );
+    expect(builder.writeFiles).toHaveBeenCalledTimes(1);
   });
 
   it('removes a generated API skeleton when standalone schema creation fails', async () => {
@@ -214,6 +249,32 @@ describe('content type mutation compensation', () => {
     );
     expect(files.apis).toEqual(new Set(['article']));
     expect(files.groups).toBe('before');
+    // The folder commit ran inside the row rewrite, so its failure rolled the rows back.
+    expect(builder.writeFiles).toHaveBeenCalledWith({ renameComponentRows: false });
+    await expect(builder.renameComponentRows.mock.results[0].value).rejects.toThrow(
+      'groups write failed'
+    );
+    expect(builder.rollback).toHaveBeenCalledTimes(1);
+  });
+
+  it('commits the folders inside the row rewrite when a kind switch succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, kind: 'singleType', attributes: {} },
+    });
+
+    expect(builder.writeFiles).toHaveBeenCalledWith({ renameComponentRows: false });
+    expect(builder.renameComponentRows).toHaveBeenCalledWith({
+      beforeCommit: expect.any(Function),
+    });
+    expect(contentStructure.commitFromUpdate).toHaveBeenCalledTimes(1);
+    expect(contentStructure.commitFromUpdate).toHaveBeenCalledWith({
+      deletedUids: new Set([contentType.uid]),
+    });
+
+    const [renameOrder] = builder.renameComponentRows.mock.invocationCallOrder;
+    const [commitOrder] = contentStructure.commitFromUpdate.mock.invocationCallOrder;
+    expect(renameOrder).toBeLessThan(commitOrder);
+    expect(builder.rollback).not.toHaveBeenCalled();
   });
 
   it('emits the update event when a kind switch succeeds', async () => {
@@ -228,16 +289,37 @@ describe('content type mutation compensation', () => {
 
   describe('collectionType to singleType entry guard', () => {
     type Row = { documentId: string; locale?: string; publishedAt: string | null };
+    type Where = {
+      documentId?: { $ne?: string; $null?: boolean; $notNull?: boolean };
+      $or?: Where[];
+    };
+
+    // Rows here always carry a documentId, so `$null` never matches and `$notNull` always does
+    const matches = (row: Row, where?: Where): boolean => {
+      if (where === undefined) {
+        return true;
+      }
+      if (where.$or !== undefined) {
+        return where.$or.some((subWhere) => matches(row, subWhere));
+      }
+      const filter = where.documentId;
+      if (filter === undefined || filter.$notNull === true) {
+        return true;
+      }
+      if (filter.$null === true) {
+        return false;
+      }
+      return row.documentId !== filter.$ne;
+    };
 
     const mockRows = (rows: Row[]) => {
-      const matches = (row: Row, where?: { documentId?: { $ne: string } }) =>
-        where?.documentId === undefined || row.documentId !== where.documentId.$ne;
-
       strapi.db.query = jest.fn(() => ({
-        count: jest.fn(async (params?: { where?: { documentId?: { $ne: string } } }) => {
+        count: jest.fn(async (params?: { where?: Where }) => {
           return rows.filter((row) => matches(row, params?.where)).length;
         }),
-        findOne: jest.fn(async () => rows[0] ?? null),
+        findOne: jest.fn(async (params?: { where?: Where }) => {
+          return rows.find((row) => matches(row, params?.where)) ?? null;
+        }),
       })) as any;
     };
 

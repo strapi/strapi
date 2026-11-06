@@ -244,7 +244,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      */
     const hasBeenNearViewport = useHasBeenNearViewport(fieldRef);
 
-    const { data, isLoading, isFetching, isError, refetch } = useGetRelationsQuery(
+    const shouldLoadSavedRelations = Boolean(id) && isRelatedToCurrentDocument;
+    const {
+      data: loadedData,
+      isLoading,
+      isFetching,
+      isError,
+      refetch,
+    } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -258,15 +265,21 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id || !isRelatedToCurrentDocument || !hasBeenNearViewport,
+        skip: !shouldLoadSavedRelations || !hasBeenNearViewport,
       }
     );
+
+    /**
+     * A skipped query keeps returning the data of the last query that ran. When a saved component
+     * is replaced in place by one without an id (e.g. a copy of another component), that data is
+     * the relations of the replaced component: nothing is loaded for a component without an id.
+     */
+    const data = shouldLoadSavedRelations ? loadedData : undefined;
 
     /**
      * Choosing a new entry for a single relation replaces the saved one, which `handleConnect`
      * can only disconnect once it is loaded. Until then, the combobox stays disabled.
      */
-    const shouldLoadSavedRelations = Boolean(id) && isRelatedToCurrentDocument;
     const isWaitingForSavedRelation =
       ONE_WAY_RELATIONS.has(props.attribute.relation) && shouldLoadSavedRelations && !data;
 

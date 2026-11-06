@@ -32,6 +32,11 @@ export interface SettingPermission {
   displayName: string;
   category: string;
   subCategory: string;
+  /**
+   * The feature is licensed but the server config turns it off.
+   * The action stays grantable so existing grants are kept.
+   */
+  disabledByConfig?: boolean;
 }
 
 export interface PluginPermission {

@@ -34,7 +34,7 @@ export const formatComponent = (component: any) => {
 export const createComponent = async ({
   component,
   components = [],
-}: any): Promise<SchemaHandler> => {
+}: any): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -65,7 +65,7 @@ type ComponentToCreate = {
 export const editComponent = async (
   uid: Internal.UID.Component,
   { component, components = [] }: ComponentToCreate
-): Promise<SchemaHandler> => {
+): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
