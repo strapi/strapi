@@ -10773,7 +10773,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/tests-e2e@workspace:tests-next/ui"
   dependencies:
-    "@playwright/test": "npm:1.56.1"
+    "@playwright/test": "npm:1.64.1"
     "@strapi/tests-shared": "workspace:*"
     "@types/node": "npm:22.20.0"
     eslint-config-custom: "workspace:*"
