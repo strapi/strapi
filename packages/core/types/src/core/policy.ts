@@ -3,8 +3,10 @@ import type { DefaultState, ExtendableContext } from 'koa';
 import type { Strapi } from '.';
 
 /**
- * The policy context is the Koa context the policy runs against,
- * so it exposes the request `state` (e.g. `state.auth`, `state.user`).
+ * The policy context is a copy of the own properties of the Koa context the policy runs
+ * against, so it exposes the request `state` (e.g. `state.auth`, `state.user`).
+ * Koa's delegated getters and methods (e.g. `query`, `throw`) are not copied, so read them
+ * from `request` (e.g. `policyContext.request.query`).
  */
 export type PolicyContext = Omit<ExtendableContext, 'is'> & {
   type: string;
@@ -16,7 +18,7 @@ export type PolicyHandler<TConfig = unknown> = (
   ctx: PolicyContext,
   cfg: TConfig,
   opts: { strapi: Strapi }
-) => boolean | undefined | Promise<boolean | undefined>;
+) => boolean | void | Promise<boolean | void>;
 
 export type Policy<TConfig = unknown> =
   | {
