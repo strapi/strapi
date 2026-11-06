@@ -1072,8 +1072,10 @@ export const installRoutePathTranslation = (router: Router, strapi: Logger) => {
     let mountParts: RoutePathPart[] = [];
     let result: ReturnType<typeof originalUse>;
     const pathless = typeof first !== 'string';
-    const middlewares = (pathless ? [first, ...rest] : rest).filter(
-      (middleware) => typeof middleware === 'function' && !isNestedRouter(middleware)
+    const middlewares = new Set(
+      (pathless ? [first, ...rest] : rest).filter(
+        (middleware) => typeof middleware === 'function' && !isNestedRouter(middleware)
+      )
     );
 
     insideUse += 1;
@@ -1099,7 +1101,7 @@ export const installRoutePathTranslation = (router: Router, strapi: Logger) => {
 
     // A nested router's layers arrive with their own parts; the prefix and mount path come first.
     (router.stack.slice(before) as TranslatedLayer[]).forEach((layer) => {
-      if (pathless && layer.stack.some((middleware) => middlewares.includes(middleware))) {
+      if (pathless && layer.stack.some((middleware) => middlewares.has(middleware))) {
         layer[LAYER_PATHLESS] = true;
       }
 
