@@ -4093,9 +4093,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/utils@npm:^12.0.2":
-  version: 12.0.2
-  resolution: "@graphql-tools/utils@npm:12.0.2"
+"@graphql-tools/utils@npm:^12.0.3":
+  version: 12.0.3
+  resolution: "@graphql-tools/utils@npm:12.0.3"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@whatwg-node/promise-helpers": "npm:^2.0.0"
@@ -4103,7 +4103,7 @@ __metadata:
     tslib: "npm:^2.4.0"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/5cb89effb10091153f15e859869d72e8cc89676f6e529750cf4e43df814b9387762dc7d7324399a8f8e4939867f8f27a9a1786837976844de8c5a95f27a8372d
+  checksum: 10c0/fc7354849632bee78da7510ec3277deec8146d2b1629ce59b3b71c5304ed5da7466abed45fce53f2a735b58770afebb450067dfd006be2aedfeec962961d3e8a
   languageName: node
   linkType: hard
 
@@ -10377,7 +10377,7 @@ __metadata:
     "@apollo/server": "npm:4.13.0"
     "@as-integrations/koa": "npm:1.1.1"
     "@graphql-tools/schema": "npm:10.0.3"
-    "@graphql-tools/utils": "npm:^12.0.2"
+    "@graphql-tools/utils": "npm:^12.0.3"
     "@koa/cors": "npm:5.0.0"
     "@strapi/admin": "npm:5.61.0"
     "@strapi/design-system": "npm:2.2.4"
