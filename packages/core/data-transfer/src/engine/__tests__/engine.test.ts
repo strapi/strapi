@@ -523,6 +523,44 @@ describe('Transfer engine', () => {
       ]);
     });
 
+    test('runs global, throttle, then stage transforms in order', async () => {
+      const received: Array<{ data?: { foo?: string } }> = [];
+      const source = createSource({
+        entities: [
+          { id: 1, type: 'api::foo.foo', data: { foo: '' } },
+          { id: 2, type: 'api::foo.foo', data: { foo: '' } },
+        ],
+      });
+      const destination = createDestination({
+        createEntitiesWriteStream: jest.fn().mockImplementation(
+          () =>
+            new Writable({
+              objectMode: true,
+              write(chunk, _encoding, callback) {
+                received.push(chunk);
+                callback();
+              },
+            })
+        ),
+      });
+      const append = (suffix: string) => (entity: { type: string; data?: { foo?: string } }) => ({
+        ...entity,
+        data: { foo: `${entity.data?.foo ?? ''}${suffix}` },
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        throttle: 1,
+        transforms: {
+          global: [{ map: append('global,') }],
+          entities: [{ map: append('stage') }],
+        },
+      });
+
+      await engine.transfer();
+
+      expect(received.map((entity) => entity.data?.foo)).toEqual(['global,stage', 'global,stage']);
+    });
+
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
       expect(completeSource).toHaveAllSourceStagesCalledTimes(0);

@@ -475,6 +475,47 @@ describe('File source provider', () => {
     await fs.remove(tarPath);
   });
 
+  describe('last JSONL line without a trailing newline', () => {
+    const readEntities = async (content: string) => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'entities/entities_00001.jsonl', content },
+      ]);
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+
+      try {
+        await provider.bootstrap({ report: jest.fn() } as never);
+        const entities: unknown[] = [];
+        for await (const chunk of provider.createEntitiesReadStream()) {
+          entities.push(chunk);
+        }
+        return entities;
+      } finally {
+        await fs.remove(tarPath);
+      }
+    };
+
+    test('is read', async () => {
+      await expect(readEntities('{"id":1}\n{"id":2}')).resolves.toEqual([{ id: 1 }, { id: 2 }]);
+    });
+
+    test('is rejected when malformed', async () => {
+      await expect(readEntities('{"id":1}\n{not json')).rejects.toThrow(
+        /Error parsing backup files/
+      );
+    });
+  });
+
   describe('Backpressure', () => {
     test('entities read stream pauses under backpressure when reading from tar', async () => {
       const tmpDir = os.tmpdir();
