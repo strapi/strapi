@@ -7,6 +7,7 @@ import { FIELDS_TO_IGNORE } from '../constants';
 import type {
   CreateHistoryVersion,
   HistoryVersionAuthor,
+  HistoryVersionAuthorReference,
 } from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
@@ -37,31 +38,74 @@ export const computeRetentionDays = (
   return Math.min(licenseDays, DEFAULT_RETENTION_DAYS);
 };
 
+export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
+
 export type AuthorColumns =
   | {
-      authorType: HistoryVersionAuthor['type'];
-      authorName: HistoryVersionAuthor['name'];
-      authorModel: HistoryVersionAuthor['model'];
-      authorId: HistoryVersionAuthor['id'];
+      authorType: StoredAuthorReference['type'];
+      authorModel: StoredAuthorReference['model'];
+      authorId: StoredAuthorReference['id'];
     }
-  | { authorType: null; authorName: null; authorModel: null; authorId: null };
+  | { authorType: null; authorModel: null; authorId: null };
 
-export const toAuthorColumns = (author: HistoryVersionAuthor): AuthorColumns => ({
+export const toAdminUserAuthor = (user: { id: Data.ID }): HistoryVersionAuthorReference => ({
+  type: 'person',
+  model: 'admin::user',
+  id: String(user.id),
+});
+
+export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
   authorType: author.type,
-  authorName: author.name,
   authorModel: author.model,
   authorId: author.id,
 });
 
-export const toAuthor = (columns: AuthorColumns): HistoryVersionAuthor | null =>
+export const toAuthorReference = (columns: AuthorColumns): StoredAuthorReference | null =>
   columns.authorType === null
     ? null
     : {
         type: columns.authorType,
-        name: columns.authorName,
         model: columns.authorModel,
         id: columns.authorId,
       };
+
+type AuthorNameDictionary = Record<string, Record<string, string>>;
+
+export const toAuthor = (
+  author: StoredAuthorReference | null,
+  authorNameDictionary: AuthorNameDictionary
+): HistoryVersionAuthor | null => {
+  if (!author) {
+    return null;
+  }
+
+  const name = author.id ? authorNameDictionary[author.model]?.[author.id] : undefined;
+
+  return name === undefined ? { ...author, id: null, name: null } : { ...author, name };
+};
+
+interface AdminUserNames {
+  username: string | null;
+  firstname: string | null;
+  lastname: string | null;
+  email: string;
+}
+
+/**
+ * Retrieves the display name of an admin panel user
+ */
+const getDisplayName = ({ firstname, lastname, username, email }: AdminUserNames): string => {
+  if (username) {
+    return username;
+  }
+
+  // firstname is not required if the user is created with a username
+  if (firstname) {
+    return `${firstname} ${lastname ?? ''}`.trim();
+  }
+
+  return email;
+};
 
 type RelationResponse = {
   results: RelationResult[];
@@ -189,6 +233,55 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
       return acc;
     }, {});
+  };
+
+  /**
+   * @description
+   * Finds the current names of the records of a model, keyed by id
+   */
+  const findAuthorNames = async (model: string, ids: string[]): Promise<Record<string, string>> => {
+    switch (model) {
+      case 'admin::user': {
+        const users: Array<AdminUserNames & { id: Data.ID }> = await strapi.db
+          .query('admin::user')
+          .findMany({
+            select: ['id', 'username', 'firstname', 'lastname', 'email'],
+            where: { id: { $in: ids } },
+          });
+
+        return users.reduce<Record<string, string>>((acc, user) => {
+          acc[String(user.id)] = getDisplayName(user);
+
+          return acc;
+        }, {});
+      }
+      default:
+        return {};
+    }
+  };
+
+  /**
+   * @description
+   * Creates a dictionary of the current author names, with one query per model
+   */
+  const getAuthorNameDictionary = async (
+    authors: Array<StoredAuthorReference | null>
+  ): Promise<AuthorNameDictionary> => {
+    const idsByModel = authors.reduce<Record<string, Set<string>>>((acc, author) => {
+      if (author?.id) {
+        acc[author.model] = (acc[author.model] ?? new Set()).add(author.id);
+      }
+
+      return acc;
+    }, {});
+
+    const namesByModel = await Promise.all(
+      Object.entries(idsByModel).map(
+        async ([model, ids]) => [model, await findAuthorNames(model, Array.from(ids))] as const
+      )
+    );
+
+    return Object.fromEntries(namesByModel);
   };
 
   /**
@@ -396,6 +489,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getDefaultLocale,
     isLocalizedContentType,
     getLocaleDictionary,
+    getAuthorNameDictionary,
     getRetentionDays,
     getVersionStatus,
     getDeepPopulate,

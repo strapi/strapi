@@ -5,11 +5,21 @@ export type HistoryVersionSource = 'admin-panel' | 'admin-api';
 
 export type HistoryVersionAuthorType = 'person';
 
-export interface HistoryVersionAuthor {
+export interface HistoryVersionAuthorReference {
   type: HistoryVersionAuthorType;
-  name: string;
   model: string;
   id: string;
+}
+
+export interface HistoryVersionAuthor extends Omit<HistoryVersionAuthorReference, 'id'> {
+  /**
+   * `null` when the author was deleted.
+   */
+  id: string | null;
+  /**
+   * The current name of the author, `null` when the author was deleted.
+   */
+  name: string | null;
 }
 
 /**
@@ -25,7 +35,7 @@ export interface CreateHistoryVersion {
   data: Modules.Documents.AnyDocument;
   schema: Struct.SchemaAttributes;
   source: HistoryVersionSource;
-  author: HistoryVersionAuthor;
+  author: HistoryVersionAuthorReference;
 }
 
 export interface Locale {

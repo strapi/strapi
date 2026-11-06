@@ -1,7 +1,7 @@
 import type { Modules } from '@strapi/types';
 
 import type {
-  HistoryVersionAuthor,
+  HistoryVersionAuthorReference,
   HistoryVersionSource,
 } from '../../../../shared/contracts/history-versions';
 
@@ -9,5 +9,5 @@ export type RequestContext = NonNullable<ReturnType<Modules.RequestContext.Reque
 
 export interface HistoryOrigin {
   source: HistoryVersionSource;
-  author: HistoryVersionAuthor;
+  author: HistoryVersionAuthorReference;
 }

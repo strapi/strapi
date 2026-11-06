@@ -8,7 +8,7 @@ import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
-import { createServiceUtils, toAuthorColumns } from './utils';
+import { createServiceUtils, toAuthor, toAuthorColumns } from './utils';
 import { getVersionOrigin, type StoredVersionOrigin } from './legacy-versions';
 import { getService as getContentManagerService } from '../../utils';
 import { AUDITED_EVENTS, type HistoryRestoreEvent } from '../../audit-logs';
@@ -76,7 +76,9 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           })
         : [];
       const versionsById = new Map(versions.map((version) => [version.id, version]));
-      const results = ids.map((id) => versionsById.get(id)).filter(Boolean);
+      const results = ids
+        .map((id) => versionsById.get(id))
+        .filter(Boolean) as HistoryVersionQueryResult[];
 
       const populateEntry = async (entry: HistoryVersionQueryResult) => {
         return traverseEntity(
@@ -165,11 +167,17 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         );
       };
 
+      const origins = results.map(getVersionOrigin);
+      const authorNameDictionary = await serviceUtils.getAuthorNameDictionary(
+        origins.map(({ author }) => author)
+      );
+
       const formattedResults: any[] = await Promise.all(
-        (results as HistoryVersionQueryResult[]).map(async (result) => {
+        results.map(async (result, index) => {
           return {
-            ...omit(result, ['authorType', 'authorName', 'authorModel', 'authorId']),
-            ...getVersionOrigin(result),
+            ...omit(result, ['authorType', 'authorModel', 'authorId']),
+            source: origins[index].source,
+            author: toAuthor(origins[index].author, authorNameDictionary),
             data: await populateEntry(result),
             meta: {
               unknownAttributes: serviceUtils.getSchemaAttributesDiff(

@@ -131,7 +131,7 @@ describe('history lifecycles service', () => {
     } = {}) => {
       mockGetRequestContext.mockReturnValue({
         state: {
-          user: { id: '123', username: 'kai', email: 'kai@test.com' },
+          user: { id: '123' },
           route: { info: { pluginName, type: 'admin' } },
           auth: { strategy: { name: strategyName } },
         },
@@ -177,7 +177,7 @@ describe('history lifecycles service', () => {
           expect.objectContaining({
             locale: 'en',
             source: 'admin-api',
-            author: { type: 'person', name: 'kai', model: 'admin::user', id: '123' },
+            author: { type: 'person', model: 'admin::user', id: '123' },
           })
         );
       });

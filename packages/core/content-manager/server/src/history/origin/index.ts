@@ -1,6 +1,8 @@
-import { getAdminUserAuthor } from './authors';
-import { isContentManagerRoute } from './content-manager-route';
+import { toAdminUserAuthor } from '../services/utils';
 import type { HistoryOrigin, RequestContext } from './types';
+
+const isContentManagerRoute = ({ state }: RequestContext) =>
+  state.route?.info?.pluginName === 'content-manager' && state.route?.info?.type === 'admin';
 
 export const resolveHistoryOrigin = (
   requestContext: RequestContext | undefined
@@ -12,9 +14,9 @@ export const resolveHistoryOrigin = (
   if (isContentManagerRoute(requestContext)) {
     switch (requestContext.state.auth?.strategy?.name) {
       case 'admin':
-        return { source: 'admin-panel', author: getAdminUserAuthor(requestContext.state.user) };
+        return { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) };
       case 'admin-token':
-        return { source: 'admin-api', author: getAdminUserAuthor(requestContext.state.user) };
+        return { source: 'admin-api', author: toAdminUserAuthor(requestContext.state.user) };
       default:
         return null;
     }

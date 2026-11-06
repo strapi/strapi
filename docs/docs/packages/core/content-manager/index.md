@@ -51,11 +51,11 @@ History records the writes made through the Content Manager routes. Each version
 | `admin-panel` | An admin panel session                       |
 | `admin-api`   | An admin token on the Content Manager routes |
 
-Each version also stores a copy of its author: a type, a display name, and the model and id of the author record.
+Each version also stores a reference to its author: a type, and the model and id of the author record. The versions list shows the current name of the author. A version of a deleted admin shows "Deleted user".
 
 The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead.
 
-Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`, with the admin's current name. Versions of a deleted admin have no author.
+Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`.
 
 The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). The `history` and `preview` folders carry their own `LICENSE` file.
 

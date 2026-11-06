@@ -362,6 +362,7 @@
   "history.sidebar.title": "Versions",
   "history.sidebar.version-card.aria-label": "Version card",
   "history.sidebar.version-card.author-type.person": "Person",
+  "history.sidebar.version-card.deleted-author.person": "Deleted user",
   "history.sidebar.version-card.source.admin-panel": "Admin panel",
   "history.sidebar.version-card.source.admin-api": "Admin API",
   "history.sidebar.versionDescription": "{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}",

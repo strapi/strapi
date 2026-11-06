@@ -151,7 +151,7 @@ describe('history-version service', () => {
       },
       status: 'draft' as const,
       source: 'admin-panel' as const,
-      author: { type: 'person' as const, name: 'kai', model: 'admin::user', id: '1' },
+      author: { type: 'person' as const, model: 'admin::user', id: '1' },
     };
 
     await historyService.createVersion(historyVersionData);
@@ -160,7 +160,6 @@ describe('history-version service', () => {
       data: {
         ...historyVersionColumns,
         authorType: 'person',
-        authorName: 'kai',
         authorModel: 'admin::user',
         authorId: '1',
         createdBy: userId,
@@ -188,7 +187,7 @@ describe('history-version service', () => {
       },
       status: null,
       source: 'admin-panel' as const,
-      author: { type: 'person' as const, name: 'kai', model: 'admin::user', id: '1' },
+      author: { type: 'person' as const, model: 'admin::user', id: '1' },
     };
 
     mockGetRequestContext.mockReturnValueOnce(null as any);
@@ -199,7 +198,6 @@ describe('history-version service', () => {
       data: {
         ...historyVersionColumns,
         authorType: 'person',
-        authorName: 'kai',
         authorModel: 'admin::user',
         authorId: '1',
         createdBy: undefined,

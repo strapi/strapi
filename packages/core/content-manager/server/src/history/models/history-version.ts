@@ -43,9 +43,6 @@ const historyVersion: Model = {
       type: 'enumeration',
       enum: [...HISTORY_VERSION_AUTHOR_TYPES],
     },
-    authorName: {
-      type: 'string',
-    },
     authorModel: {
       type: 'string',
     },
@@ -65,12 +62,6 @@ const historyVersion: Model = {
       useJoinTable: false,
     },
   },
-  indexes: [
-    {
-      name: 'strapi_history_versions_author_index',
-      columns: ['author_model', 'author_id'],
-    },
-  ],
 };
 
 export { historyVersion };
