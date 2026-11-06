@@ -15,6 +15,10 @@ const builderServiceMock = {
   editComponent: jest.fn(),
   deleteComponent: jest.fn(),
   writeFiles: jest.fn().mockResolvedValue(true),
+  // Like the real builder: `beforeCommit` (the folder commit) runs inside the row transaction.
+  renameComponentRows: jest.fn(
+    async ({ beforeCommit }: { beforeCommit?: () => Promise<unknown> } = {}) => beforeCommit?.()
+  ),
   rollback: jest.fn().mockResolvedValue(undefined),
   contentTypes: new Map(),
   components: new Map(),

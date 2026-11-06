@@ -161,6 +161,36 @@ describe('Pagination API', () => {
         expect(body.meta.pagination).not.toHaveProperty('total');
         expect(body.data).toEqual(data.product.slice(0, 2));
       });
+
+      describe('With limit -1', () => {
+        let maxLimit;
+
+        beforeEach(() => {
+          maxLimit = strapi.config.get('api.rest.maxLimit');
+        });
+
+        afterEach(() => {
+          strapi.config.set('api.rest.maxLimit', maxLimit);
+        });
+
+        test('Returns every entry when no maxLimit is set', async () => {
+          strapi.config.set('api.rest.maxLimit', -1);
+
+          const { body } = await getProductAPI({ start: 0, limit: -1 });
+
+          expect(body.meta.pagination).toEqual({ start: 0, limit: -1, total: 4 });
+          expect(body.data).toEqual(data.product);
+        });
+
+        test('Uses maxLimit as the limit', async () => {
+          strapi.config.set('api.rest.maxLimit', 3);
+
+          const { body } = await getProductAPI({ start: 0, limit: -1 });
+
+          expect(body.meta.pagination).toEqual({ start: 0, limit: 3, total: 4 });
+          expect(body.data).toEqual(data.product.slice(0, 3));
+        });
+      });
     });
   });
 });

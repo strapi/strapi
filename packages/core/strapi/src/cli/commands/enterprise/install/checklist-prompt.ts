@@ -11,19 +11,39 @@ export interface ChecklistChoice {
   disabled?: string;
 }
 
+export interface ChecklistFooter {
+  heading: string;
+  lines: string[];
+}
+
 const SUBMIT_LABEL = 'Submit';
 
 const fitWidth = (text: string, width: number): string =>
   text.length <= width ? text : `${text.slice(0, Math.max(width - 1, 0))}…`;
 
+const wrapWords = (text: string, width: number): string[] =>
+  text.split(' ').reduce<string[]>((lines, word) => {
+    const lastLine = lines[lines.length - 1];
+
+    if (lastLine !== undefined && lastLine.length + word.length + 1 <= width) {
+      lines[lines.length - 1] = `${lastLine} ${word}`;
+    } else {
+      lines.push(...(word.match(new RegExp(`.{1,${width}}`, 'gu')) ?? [word]));
+    }
+
+    return lines;
+  }, []);
+
 export const promptChecklist = ({
   message,
   choices,
+  footer,
   input = process.stdin,
   output = process.stdout,
 }: {
   message: string;
   choices: ChecklistChoice[];
+  footer?: ChecklistFooter;
   input?: NodeJS.ReadStream;
   output?: NodeJS.WriteStream;
 }): Promise<string[]> =>
@@ -51,6 +71,15 @@ export const promptChecklist = ({
       return isActive ? `${chalk.cyan('❯')} ${box} ${chalk.cyan(name)}` : `  ${box} ${name}`;
     };
 
+    const renderFooter = (): string[] =>
+      footer
+        ? [
+            '',
+            ...wrapWords(footer.heading, width() - 2).map((line) => `  ${line}`),
+            ...footer.lines.map((line) => chalk.dim(fitWidth(line, width()))),
+          ]
+        : [];
+
     const renderSubmit = () =>
       stops[cursor] === submitIndex
         ? `${chalk.cyan('❯')} ${chalk.cyan.bold(SUBMIT_LABEL)}`
@@ -68,7 +97,8 @@ export const promptChecklist = ({
     };
 
     const question = chalk.bold(message);
-    const render = () => draw([question, ...choices.map(renderChoice), '', renderSubmit()]);
+    const render = () =>
+      draw([question, ...choices.map(renderChoice), ...renderFooter(), '', renderSubmit()]);
 
     const stop = () => {
       input.removeListener('keypress', onKeypress);
