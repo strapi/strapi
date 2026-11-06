@@ -25,6 +25,20 @@ jest.mock('chokidar', () => ({
   watch: (...args: unknown[]) => mockWatch(...args),
 }));
 
+const mockBundleWatcher = { close: jest.fn() };
+
+jest.mock('../create-build-context', () => ({
+  createBuildContext: jest.fn().mockResolvedValue({ bundler: 'vite' }),
+}));
+
+jest.mock('../staticFiles', () => ({
+  writeStaticClientFiles: jest.fn(),
+}));
+
+jest.mock('../vite/watch', () => ({
+  watch: () => Promise.resolve(mockBundleWatcher),
+}));
+
 const createStrapiInstance = () => {
   const reload = Object.assign(jest.fn(), { isWatching: true, isReloading: false });
   const instance = {
@@ -71,14 +85,14 @@ const createLogger = () => {
   };
 };
 
-const runDevelop = async () => {
+const runDevelop = async ({ watchAdmin = false }: { watchAdmin?: boolean } = {}) => {
   const logger = createLogger();
 
   await develop({
     cwd: '/app',
     logger,
     tsconfig: { config: { options: { outDir: '/app/does-not-exist/dist' } }, path: '/app' },
-    watchAdmin: false,
+    watchAdmin,
     buildAdmin: false,
   } as unknown as DevelopOptions);
 
@@ -95,6 +109,8 @@ describe('develop worker', () => {
     const watcher = { on: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
     watcher.on.mockReturnValue(watcher);
     mockWatch.mockReturnValue(watcher);
+    mockBundleWatcher.close.mockReset();
+    mockBundleWatcher.close.mockResolvedValue(undefined);
     messageListenersBefore = process.listeners('message');
   });
 
@@ -137,6 +153,77 @@ describe('develop worker', () => {
     }
 
     expect(strapiInstance.destroy).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith('killed');
+  });
+
+  test('exits when the primary disconnects after the app was stopped', async () => {
+    mockCompile.mockRejectedValue(new Error('TypeScript compilation failed'));
+    // Strapi.destroy() calls process.removeAllListeners(), which also drops the listener the
+    // cluster module adds so a worker exits when its primary goes away. Removing every listener
+    // would also break the test runner, so only the disconnect listeners are dropped here.
+    strapiInstance.destroy.mockImplementation(async () => {
+      process.removeAllListeners('disconnect');
+    });
+    const exit = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    const disconnectListenersBefore = process.listeners('disconnect');
+
+    try {
+      await runDevelop();
+      process.emit('disconnect');
+
+      expect(strapiInstance.destroy).toHaveBeenCalledTimes(1);
+      expect(exit).toHaveBeenCalledWith(0);
+    } finally {
+      exit.mockRestore();
+      process.removeAllListeners('disconnect');
+      disconnectListenersBefore.forEach((listener) =>
+        process.on('disconnect', listener as () => void)
+      );
+    }
+  });
+
+  test('exits on the next file change when the primary is gone', async () => {
+    mockCompile.mockRejectedValue(new Error('TypeScript compilation failed'));
+    const exit = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    const connected = Object.getOwnPropertyDescriptor(process, 'connected');
+
+    try {
+      await runDevelop();
+      Object.defineProperty(process, 'connected', { value: false, configurable: true });
+      const watcher = mockWatch.mock.results[0].value;
+      const [, onChange] = watcher.on.mock.calls.find(([event]: [string]) => event === 'change');
+      await onChange('/app/src/index.ts');
+
+      expect(exit).toHaveBeenCalledWith(0);
+      expect(strapiInstance.reload).not.toHaveBeenCalled();
+    } finally {
+      exit.mockRestore();
+      if (connected === undefined) {
+        delete (process as { connected?: boolean }).connected;
+      } else {
+        Object.defineProperty(process, 'connected', connected);
+      }
+    }
+  });
+
+  test('closes the admin bundler once when the app is stopped and then restarts', async () => {
+    mockCompile.mockRejectedValue(new Error('TypeScript compilation failed'));
+    const send = jest.fn();
+    const originalSend = process.send;
+    process.send = send;
+
+    try {
+      await runDevelop({ watchAdmin: true });
+      expect(mockBundleWatcher.close).toHaveBeenCalledTimes(1);
+
+      process.emit('message', 'kill', undefined);
+      await new Promise(process.nextTick);
+      await new Promise(process.nextTick);
+    } finally {
+      process.send = originalSend;
+    }
+
+    expect(mockBundleWatcher.close).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith('killed');
   });
 

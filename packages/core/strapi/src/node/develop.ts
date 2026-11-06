@@ -221,20 +221,26 @@ const develop = async ({
     const generatingTsSpinner = logger.spinner(`Generating types`);
     const compilingTsSpinner = logger.spinner(`Compiling TS`);
 
-    let isDestroyed = false;
-    const destroyStrapi = async () => {
-      if (isDestroyed === true) {
+    // Stops the app once: the failed-compile path and the restart path can both call it.
+    let isStopped = false;
+    const stopApp = async () => {
+      if (isStopped === true) {
         return;
       }
-      isDestroyed = true;
+      isStopped = true;
       await strapiInstance.destroy();
+      // Not awaited: the restart does not wait for the admin bundler to close.
+      bundleWatcher?.close().catch((closeError: unknown) => {
+        const closeMessage = closeError instanceof Error ? closeError.message : String(closeError);
+        logger.error(`Error while closing the admin bundler: ${closeMessage}`);
+      });
     };
 
     let watcherStarted = false;
     const ensureWatcher = () => {
       if (!watcherStarted) {
         watcherStarted = true;
-        startWatcher(strapiInstance, cwd, polling ?? false, logger, destroyStrapi, bundleWatcher);
+        startWatcher(strapiInstance, cwd, polling ?? false, logger, stopApp);
       }
     };
 
@@ -336,12 +342,16 @@ const develop = async ({
       // Shut it down so it does not keep running jobs while we wait for a fix.
       // Destroy before starting the watcher: destroy removes every process listener.
       try {
-        await destroyStrapi();
+        await stopApp();
       } catch (destroyError: unknown) {
         const destroyMessage =
           destroyError instanceof Error ? destroyError.message : String(destroyError);
         logger.error(`Error while stopping Strapi: ${destroyMessage}`);
       }
+      // destroy() called process.removeAllListeners(), which also removed the listener the cluster
+      // module adds so a worker exits when its primary goes away. Add it back, or the worker
+      // outlives a primary that exits or is killed.
+      process.once('disconnect', () => process.exit(0));
       logger.warn(
         'Strapi is stopped. Fix the errors above, it will restart on the next file change.'
       );
@@ -356,10 +366,15 @@ function startWatcher(
   cwd: string,
   polling: boolean,
   logger: Logger,
-  destroyStrapi: () => Promise<void>,
-  bundleWatcher?: WebpackWatcher | ViteWatcher
+  stopApp: () => Promise<void>
 ) {
   const restart = async () => {
+    // The primary is gone, there is nothing left to restart this worker.
+    if (process.connected === false) {
+      process.exit(0);
+      return;
+    }
+
     if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
       strapiInstance.reload.isReloading = true;
       strapiInstance.reload();
@@ -424,11 +439,8 @@ function startWatcher(
         );
         await watcher.close();
 
-        await destroyStrapi();
+        await stopApp();
 
-        if (bundleWatcher) {
-          bundleWatcher.close();
-        }
         process.send?.('killed');
         break;
       }
