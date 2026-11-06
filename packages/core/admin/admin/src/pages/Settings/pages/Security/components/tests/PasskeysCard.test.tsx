@@ -6,8 +6,10 @@ import { PasskeysCard } from '../PasskeysCard';
 
 import type { PasskeySettings } from '../../../../../../../../shared/contracts/security-settings';
 
+const ENABLED: PasskeySettings = { enabled: true };
+
 const Harness = ({
-  initial = { enabled: true },
+  initial = ENABLED,
   onChange,
   ...props
 }: Partial<React.ComponentProps<typeof PasskeysCard>> & { initial?: PasskeySettings }) => {

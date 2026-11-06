@@ -89,7 +89,7 @@ const TwoFactorEnforcementCard = ({
   onChange,
   roles,
   canUpdate,
-  errors = {},
+  errors,
   saveError,
   mustEnrolFirst = false,
 }: TwoFactorEnforcementCardProps) => {
@@ -184,7 +184,7 @@ const TwoFactorEnforcementCard = ({
             <Field.Root
               name="mfaRequiredRoles"
               required
-              error={errors.requiredRoles}
+              error={errors?.requiredRoles}
               hint={formatMessage(
                 {
                   id: 'Settings.security.mfa.roles.hint',
@@ -239,7 +239,7 @@ const TwoFactorEnforcementCard = ({
             <Field.Root
               name="graceDays"
               required
-              error={errors.graceDays}
+              error={errors?.graceDays}
               hint={formatMessage({
                 id: 'Settings.security.mfa.graceDays.hint',
                 defaultMessage:
