@@ -48,6 +48,30 @@ describe('Directory source provider', () => {
     });
   });
 
+  test('an unreadable JSONL path fails the read stream', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-unreadable-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'entities', 'entities_00001.jsonl'));
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const read = async () => {
+      for await (const chunk of provider.createEntitiesReadStream()) {
+        expect(chunk).toBeDefined();
+      }
+    };
+
+    await expect(
+      Promise.race([
+        read(),
+        new Promise((_resolve, reject) => {
+          setTimeout(() => reject(new Error('read hung')), 2000);
+        }),
+      ])
+    ).rejects.toThrow(/parsing JSONL/);
+  });
+
   test('createAssetsReadStream returns readable', async () => {
     const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-'));
     await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
