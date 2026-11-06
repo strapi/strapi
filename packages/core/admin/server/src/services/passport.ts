@@ -19,7 +19,7 @@ const keyIsValidEventName = (
 // The published declarations must not name `passport-local`: applications do not install
 // `@types/passport-local`, so they already resolve its `Strategy` to `any`, as the EE service
 // returns. `any[]` keeps that type and lets the declarations check with `skipLibCheck: false`.
-// TODO @Nico a strict strategy contract needs a strategy type that names no third-party module.
+// A strict strategy contract needs a strategy type that names no third-party module (CMS-2288).
 const getPassportStrategies = (): any[] => [createLocalStrategy(strapi)];
 
 const registerAuthEvents = () => {
