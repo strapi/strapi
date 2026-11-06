@@ -55,7 +55,7 @@ Each version also stores a copy of its author: a type, a display name, and the m
 
 The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead.
 
-Versions saved before the source and the author existed show as `admin-panel`. Their author comes from `createdBy`, with the admin's name at the time of the upgrade. Versions of a deleted admin have no author.
+Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`, with the admin's current name. Versions of a deleted admin have no author.
 
 The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). The `history` and `preview` folders carry their own `LICENSE` file.
 

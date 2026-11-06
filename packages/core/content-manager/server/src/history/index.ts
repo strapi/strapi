@@ -5,7 +5,6 @@ import { routes } from './routes';
 import { getService } from './utils';
 import { historyVersion } from './models/history-version';
 import { registerHistoryEntitlements } from './entitlements';
-import { historyVersionSourceAndAuthor } from './migrations/history-version-source-and-author';
 
 /**
  * Check once if the feature is enabled before loading it,
@@ -16,7 +15,6 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
     return {
       register({ strapi }) {
         strapi.get('models').add(historyVersion);
-        strapi.db.migrations.providers.internal.register(historyVersionSourceAndAuthor);
         registerHistoryEntitlements(strapi);
       },
       bootstrap({ strapi }) {
@@ -39,7 +37,6 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   return {
     register({ strapi }) {
       strapi.get('models').add(historyVersion);
-      strapi.db.migrations.providers.internal.register(historyVersionSourceAndAuthor);
       registerHistoryEntitlements(strapi);
     },
   };
