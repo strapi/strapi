@@ -61,6 +61,22 @@ describe('createMcpOAuthRoutes', () => {
     ]);
   });
 
+  test('merges server.mcp.oauth.registrationRateLimit into the register rate limit', () => {
+    const config = new McpOAuthConfiguration(
+      makeStrapi({ 'server.mcp.oauth.registrationRateLimit': { max: 50, interval: { min: 1 } } }),
+      '/mcp'
+    );
+    const routes = createMcpOAuthRoutes(config, '/mcp', makeHandlers());
+    const register = routes.find(({ path }) => path === '/mcp/oauth/register');
+
+    expect(register?.config?.middlewares).toEqual([
+      {
+        name: 'admin::rateLimit',
+        config: { prefixKey: 'mcp:oauth:register', max: 50, interval: { min: 1 } },
+      },
+    ]);
+  });
+
   test('omits the registration endpoint when dynamic client registration is disabled', () => {
     const config = new McpOAuthConfiguration(
       makeStrapi({ 'server.mcp.oauth.dynamicClientRegistration': false }),

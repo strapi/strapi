@@ -105,7 +105,8 @@ const parseClientMetadata = (body: Record<string, unknown>): MetadataResult => {
     return invalidMetadata('response_types may only contain code');
   }
 
-  const name = getOptionalString(body, 'client_name', 256);
+  // 255: the client name is stored in a varchar(255) column.
+  const name = getOptionalString(body, 'client_name', 255);
   const clientUri = getOptionalString(body, 'client_uri', 2000);
   const logoUri = getOptionalString(body, 'logo_uri', 2000);
   const scope = getOptionalString(body, 'scope', 512);

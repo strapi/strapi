@@ -104,15 +104,18 @@ Opt-in OAuth 2.1 authorization server for MCP clients (Claude, Cursor, …), imp
 
 ### Configuration
 
-| Key                                          | Default       | Notes                                                             |
-| -------------------------------------------- | ------------- | ----------------------------------------------------------------- |
-| `server.mcp.oauth.enabled`                   | `false`       | Must be `true` (with `server.mcp.enabled`) to mount the endpoints |
-| `server.mcp.oauth.dynamicClientRegistration` | `true`        | `false` removes `POST /mcp/oauth/register` and the metadata entry |
-| `server.mcp.oauth.accessTokenLifespan`       | `1800` (30 m) | Seconds                                                           |
-| `server.mcp.oauth.idleRefreshTokenLifespan`  | 14 days       | Seconds                                                           |
-| `server.mcp.oauth.maxRefreshTokenLifespan`   | 30 days       | Seconds                                                           |
-| `server.mcp.oauth.authorizationCodeLifespan` | `120`         | Seconds, single-use codes                                         |
-| `server.mcp.oauth.consentTicketLifespan`     | `300`         | Seconds, signed consent handoff ticket                            |
+| Key                                          | Default        | Notes                                                                                                                |
+| -------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `server.mcp.oauth.enabled`                   | `false`        | Must be `true` (with `server.mcp.enabled`) to mount the endpoints                                                    |
+| `server.mcp.oauth.dynamicClientRegistration` | `true`         | `false` removes `POST /mcp/oauth/register` and the metadata entry                                                    |
+| `server.mcp.oauth.accessTokenLifespan`       | `1800` (30 m)  | Seconds                                                                                                              |
+| `server.mcp.oauth.idleRefreshTokenLifespan`  | 14 days        | Seconds                                                                                                              |
+| `server.mcp.oauth.maxRefreshTokenLifespan`   | 30 days        | Seconds                                                                                                              |
+| `server.mcp.oauth.authorizationCodeLifespan` | `120`          | Seconds, single-use codes                                                                                            |
+| `server.mcp.oauth.consentTicketLifespan`     | `300`          | Seconds, signed consent handoff ticket                                                                               |
+| `server.mcp.oauth.registrationRateLimit`     | 5 / 5 min / IP | koa2-ratelimit overrides (`max`, `interval`, `enabled`) for the registration endpoint; tune behind shared egress IPs |
+
+The advertised URLs derive from `server.url`. When it is not configured, `start()` logs a warning: the metadata then points at the host-port fallback, which MCP clients can only reach in local development.
 
 ### Endpoints
 
@@ -134,12 +137,12 @@ Consent endpoints, mounted on the **admin router** so the admin session strategy
 | `GET /admin/mcp/oauth/authorization-request` | Returns display data for a pending request (consent screen)            |
 | `POST /admin/mcp/oauth/consent`              | Records approve/deny; issues the code; returns the client redirect URL |
 
-The consent POST additionally requires `ctx.state.session` (set only by the human session strategy), so admin API tokens cannot approve grants.
+The consent POST additionally requires `ctx.state.session` (set only by the human session strategy), so admin API tokens cannot approve grants. The consent screen reduces only https redirect URIs to their host; any other scheme displays the full URI with a warning, because a custom scheme also parses a host (`evilapp://claude.ai`).
 
 ### Flow
 
 1. The MCP client gets a 401 from `/mcp` with `WWW-Authenticate: Bearer resource_metadata=...`, discovers the metadata, and (usually) self-registers.
-2. `GET /mcp/oauth/authorize` validates `client_id`, exact `redirect_uri` match, `response_type=code`, PKCE S256 and the optional `resource`, signs a short-lived **consent ticket** (JWT, derived secret, aud `strapi-mcp-oauth-consent`), and 302-redirects the browser to the admin panel page `/admin/mcp/oauth/consent?ticket=…` (`packages/core/admin/admin/src/pages/OAuthConsentPage.tsx`). Unauthenticated admins pass through the normal login (the `redirectTo` mechanism, persisted across the SSO round trip via `sessionStorage`). Every validation failure answers 400 JSON in place, never an error redirect: registration is open, so an automatic redirect to a registered URI would make the endpoint an open redirector. The browser only leaves the Strapi origin after the admin acts on the consent screen, and the consent screen never puts the self-reported client name in its heading.
+2. `GET /mcp/oauth/authorize` validates `client_id`, exact `redirect_uri` match (except http loopback URIs, where the port is ignored per RFC 8252 §7.3), `response_type=code`, PKCE S256 and the optional `resource`, signs a short-lived **consent ticket** (JWT, derived secret, aud `strapi-mcp-oauth-consent`), and 302-redirects the browser to the admin panel page `/admin/mcp/oauth/consent?ticket=…` (`packages/core/admin/admin/src/pages/OAuthConsentPage.tsx`). Unauthenticated admins pass through the normal login (the `redirectTo` mechanism, persisted across the SSO round trip via `sessionStorage`). Every validation failure answers 400 JSON in place, never an error redirect: registration is open, so an automatic redirect to a registered URI would make the endpoint an open redirector. The browser only leaves the Strapi origin after the admin acts on the consent screen, and the consent screen never puts the self-reported client name in its heading.
 3. On approval, the server issues a single-use authorization code (stored hashed in `admin::mcp-oauth-authorization-code`) bound to the client, redirect URI, PKCE challenge, approving admin user, and a fresh `grantId`; the browser is sent back to the client's redirect URI with `code`, `state`, and `iss` (RFC 9207).
 4. `POST /mcp/oauth/token` authenticates the client (`none`, `client_secret_basic`, or `client_secret_post`), consumes the code atomically, verifies PKCE, and issues tokens through `strapi.sessionManager('mcp')`: the JWT access token and a rotating refresh token persisted in `strapi_sessions` with `deviceId = grantId` and `{clientId, scope, resource}` in the session `metadata`.
 
@@ -149,8 +152,10 @@ A grant acts **as the approving admin user**: every `/mcp` request recomputes `g
 
 - `POST /mcp/oauth/revoke` with either token of the grant.
 - Replay of a consumed authorization code (consumed rows are kept until expiry for detection).
-- Replay of a rotated-out refresh token, or presentation of a refresh token by the wrong client.
-- The user's password change, password reset, and "sign out of all devices" (`invalidateMcpSessions` in `packages/core/admin/shared/utils/session-auth.ts`).
+- Replay of a rotated-out refresh token (after a 30-second grace window in which the same child token is returned, covering client retries and near-simultaneous refreshes), or presentation of a refresh token by the wrong client.
+- The user's password change or reset by any path (own change, super admin, `admin:reset-user-password`), deactivation, deletion, and "sign out of all devices" (`invalidateMcpSessions` in `packages/core/admin/shared/utils/session-auth.ts` and its twin in the admin user service).
+
+Refreshing also re-checks the user: a grant whose user is deleted, deactivated, or blocked cannot rotate, so it cannot come back to life on reactivation.
 
 Grant approvals, denials, revocations, and replay detections are logged through `strapi.log` (`[MCP]` prefix). Access tokens die with their session because the authenticator checks `isSessionActive` per request. Caveat (same as admin panel sessions): after a normal rotation, the _previous_ access token stays valid until its own `exp` (≤ `accessTokenLifespan`).
 

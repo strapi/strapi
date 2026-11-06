@@ -86,6 +86,30 @@ export class McpOAuthConfiguration {
   }
 
   /**
+   * Overrides for the registration endpoint's rate limit (koa2-ratelimit options such as
+   * `max`, `interval`, or `enabled: false`). The default of 5 requests per 5 minutes per IP
+   * is too strict behind a shared egress (a team connecting from claude.ai at once) and the
+   * right setting depends on the deployment's proxy topology.
+   */
+  getRegistrationRateLimitConfig(): Record<string, unknown> {
+    const value = this.#strapi.config.get<unknown>('server.mcp.oauth.registrationRateLimit');
+
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  }
+
+  /**
+   * True when `server.url` is configured. Without it every advertised OAuth URL falls back
+   * to the host-port guess, which is wrong behind any proxy or public domain.
+   */
+  hasConfiguredServerUrl(): boolean {
+    const url = this.#strapi.config.get<unknown>('server.url');
+
+    return typeof url === 'string' && url.trim() !== '';
+  }
+
+  /**
    * RFC 8414 issuer identifier: the server's public base URL.
    */
   get issuer(): string {

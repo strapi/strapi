@@ -365,7 +365,7 @@ describe('MCP OAuth authentication (api)', () => {
       expect(res.statusCode).toBe(401);
     });
 
-    test('refresh rotates the tokens, and reusing the old refresh token revokes the grant', async () => {
+    test('refresh rotates the tokens, with a reuse grace window, then reuse revokes the grant', async () => {
       const tokens = await obtainGrant();
 
       const rotated = await refresh(tokens.refresh_token);
@@ -374,15 +374,25 @@ describe('MCP OAuth authentication (api)', () => {
 
       await expect(listTools(rotated.body.access_token)).resolves.toContain(TEST_TOOL_NAME);
 
-      // Replaying the rotated-out refresh token is treated as a leak: the family dies.
+      // An immediate reuse (a retry after a lost response) is within the grace window and
+      // resolves to the same rotated session instead of killing the grant.
+      const graced = await refresh(tokens.refresh_token);
+      expect(graced.statusCode).toBe(200);
+      await expect(listTools(graced.body.access_token)).resolves.toContain(TEST_TOOL_NAME);
+
+      // Rotate again, then replay the FIRST token: its child has itself been rotated, so
+      // the grace no longer applies and the reuse is treated as a leak — the family dies.
+      const rotatedTwice = await refresh(graced.body.refresh_token);
+      expect(rotatedTwice.statusCode).toBe(200);
+
       const replay = await refresh(tokens.refresh_token);
       expect(replay.statusCode).toBe(400);
       expect(replay.body.error).toBe('invalid_grant');
 
-      const afterReplay = await refresh(rotated.body.refresh_token);
+      const afterReplay = await refresh(rotatedTwice.body.refresh_token);
       expect(afterReplay.statusCode).toBe(400);
 
-      const res = await mcpRpc(rotated.body.access_token, 'tools/list');
+      const res = await mcpRpc(rotatedTwice.body.access_token, 'tools/list');
       expect(res.statusCode).toBe(401);
     });
 

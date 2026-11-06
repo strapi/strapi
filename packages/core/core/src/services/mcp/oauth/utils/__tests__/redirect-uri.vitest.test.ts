@@ -52,5 +52,25 @@ describe('redirect-uri', () => {
       );
       expect(isRegisteredRedirectUri(registered, undefined)).toBe(false);
     });
+
+    test('ignores the port for http loopback URIs (RFC 8252 §7.3)', () => {
+      const loopback = ['http://127.0.0.1:33418/cb', 'http://[::1]:8000/cb'];
+
+      expect(isRegisteredRedirectUri(loopback, 'http://127.0.0.1:49152/cb')).toBe(true);
+      expect(isRegisteredRedirectUri(loopback, 'http://127.0.0.1/cb')).toBe(true);
+      expect(isRegisteredRedirectUri(loopback, 'http://[::1]:51000/cb')).toBe(true);
+      expect(
+        isRegisteredRedirectUri(['http://localhost:3000/cb'], 'http://localhost:4000/cb')
+      ).toBe(true);
+
+      // Everything else about the URI still has to match exactly.
+      expect(isRegisteredRedirectUri(loopback, 'http://127.0.0.1:49152/other')).toBe(false);
+      expect(isRegisteredRedirectUri(loopback, 'http://127.0.0.1:49152/cb?x=1')).toBe(false);
+      expect(isRegisteredRedirectUri(loopback, 'https://127.0.0.1:49152/cb')).toBe(false);
+      // The loopback exception never applies to non-loopback hosts.
+      expect(
+        isRegisteredRedirectUri(['https://example.com:443/cb'], 'https://example.com:8443/cb')
+      ).toBe(false);
+    });
   });
 });

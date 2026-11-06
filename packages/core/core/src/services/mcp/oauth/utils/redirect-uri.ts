@@ -54,13 +54,48 @@ export const isAllowedRedirectUri = (uri: unknown): uri is string => {
   return true;
 };
 
+const parseLoopbackHttpUri = (uri: unknown): URL | null => {
+  if (typeof uri !== 'string') {
+    return null;
+  }
+
+  try {
+    const url = new URL(uri);
+
+    return url.protocol === 'http:' && isLoopbackHostname(url.hostname) ? url : null;
+  } catch {
+    return null;
+  }
+};
+
 /**
- * OAuth 2.1 requires exact string comparison of redirect URIs.
+ * OAuth 2.1 requires exact string comparison of redirect URIs, with one exception:
+ * for http loopback URIs the port must not be compared (RFC 8252 §7.3), because native
+ * apps bind an ephemeral port at authorization time.
  */
 export const isRegisteredRedirectUri = (registeredUris: unknown, requested: unknown): boolean => {
   if (!Array.isArray(registeredUris) || typeof requested !== 'string') {
     return false;
   }
 
-  return registeredUris.includes(requested);
+  if (registeredUris.includes(requested)) {
+    return true;
+  }
+
+  const requestedLoopback = parseLoopbackHttpUri(requested);
+
+  if (requestedLoopback === null) {
+    return false;
+  }
+
+  return registeredUris.some((registered) => {
+    const registeredLoopback = parseLoopbackHttpUri(registered);
+
+    return (
+      registeredLoopback !== null &&
+      registeredLoopback.hostname === requestedLoopback.hostname &&
+      registeredLoopback.pathname === requestedLoopback.pathname &&
+      registeredLoopback.search === requestedLoopback.search
+    );
+  });
 };

@@ -4,6 +4,14 @@ import { MCP_SESSION_ORIGIN } from '../constants';
 
 const SESSION_UID = 'admin::session';
 
+/**
+ * How long after a rotation the previous refresh token may still be presented and receive
+ * the same child token back. Covers a client retrying after a lost response, or several
+ * processes sharing one credential and refreshing at the same time; reuse outside the
+ * window still revokes the whole grant family.
+ */
+export const REFRESH_REUSE_GRACE_MS = 30 * 1000;
+
 export interface GrantMetadata {
   clientId: string;
   scope?: string;
@@ -18,6 +26,8 @@ interface SessionRow {
   origin: string;
   status: string;
   metadata: GrantMetadata | null;
+  createdAt?: string | Date;
+  expiresAt?: string | Date;
 }
 
 export interface IssueGrantInput {
@@ -83,6 +93,73 @@ export const createGrantSessionService = (strapi: Core.Strapi, jwtSecret: string
     await sessions().invalidateRefreshToken(userId, grantId);
   };
 
+  /**
+   * The grant acts as the approving admin user; refreshing must stop the moment that user
+   * is deleted, deactivated, or blocked — otherwise a grant could rotate forever and come
+   * back to life when a user is reactivated.
+   */
+  const isGrantUserActive = async (rawUserId: string): Promise<boolean> => {
+    const numericUserId = Number(rawUserId);
+    const userId =
+      Number.isFinite(numericUserId) && String(numericUserId) === rawUserId
+        ? numericUserId
+        : rawUserId;
+
+    const user = await strapi.db.query('admin::user').findOne({ where: { id: userId } });
+
+    return user?.isActive === true && user.blocked !== true;
+  };
+
+  /**
+   * Within the reuse grace window, a rotated token resolves to its still-active child:
+   * the same child refresh token is returned instead of revoking the family.
+   */
+  const replayChildWithinGrace = async (row: SessionRow): Promise<GrantTokens | null> => {
+    if (row.childId === null) {
+      return null;
+    }
+
+    const child: SessionRow | null = await strapi.db
+      .query(SESSION_UID)
+      .findOne({ where: { sessionId: row.childId } });
+
+    if (
+      child?.origin !== MCP_SESSION_ORIGIN ||
+      child.status !== 'active' ||
+      child.childId !== null ||
+      !child.createdAt ||
+      !child.expiresAt ||
+      Date.now() - new Date(child.createdAt).getTime() > REFRESH_REUSE_GRACE_MS
+    ) {
+      return null;
+    }
+
+    // Reconstruct the child's refresh token the way the session manager signs it.
+    const childToken = jwt.sign(
+      {
+        userId: child.userId,
+        sessionId: child.sessionId,
+        type: 'refresh',
+        iat: Math.floor(new Date(child.createdAt).getTime() / 1000),
+        exp: Math.floor(new Date(child.expiresAt).getTime() / 1000),
+      },
+      jwtSecret,
+      { algorithm: 'HS256', noTimestamp: true }
+    );
+
+    const accessResult = await sessions().generateAccessToken(childToken);
+
+    if ('error' in accessResult) {
+      return null;
+    }
+
+    return {
+      accessToken: accessResult.token,
+      refreshToken: childToken,
+      ...(row.metadata?.scope !== undefined ? { scope: row.metadata.scope } : {}),
+    };
+  };
+
   return {
     findSessionRow,
     revokeFamily,
@@ -144,8 +221,19 @@ export const createGrantSessionService = (strapi: Core.Strapi, jwtSecret: string
         return { error: 'invalid_grant' };
       }
 
+      if (!(await isGrantUserActive(row.userId))) {
+        await revokeFamily(row.userId, row.deviceId);
+        return { error: 'invalid_grant' };
+      }
+
       if (row.status !== 'active' || row.childId !== null) {
-        // The token was already rotated: this is a replay, revoke the family.
+        const replayed = await replayChildWithinGrace(row);
+
+        if (replayed !== null) {
+          return replayed;
+        }
+
+        // The token was rotated out beyond the grace window: a replay, revoke the family.
         strapi.log.warn(
           `[MCP] Rotated refresh token replayed for grant ${row.deviceId} (client ${clientId}); the grant was revoked`
         );

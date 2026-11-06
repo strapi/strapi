@@ -14,14 +14,25 @@ const makeSetup = () => {
   };
 
   const findOne = vi.fn();
+  const userFindOne = vi.fn(async () => ({ id: 7, isActive: true, blocked: false }));
 
   const strapi = {
     sessionManager: vi.fn(() => origin),
-    db: { query: vi.fn(() => ({ findOne })) },
+    db: {
+      query: vi.fn((uid: string) =>
+        uid === 'admin::user' ? { findOne: userFindOne } : { findOne }
+      ),
+    },
     log: { warn: vi.fn(), info: vi.fn() },
   } as unknown as Core.Strapi;
 
-  return { service: createGrantSessionService(strapi, SECRET), origin, findOne, strapi };
+  return {
+    service: createGrantSessionService(strapi, SECRET),
+    origin,
+    findOne,
+    userFindOne,
+    strapi,
+  };
 };
 
 const signToken = (payload: Record<string, unknown>, secret = SECRET) =>
@@ -114,16 +125,71 @@ describe('grant session service', () => {
       expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('wrong client'));
     });
 
-    test('revokes the family when a rotated token is replayed', async () => {
+    test('revokes the family when a rotated token is replayed outside the grace window', async () => {
       const { service, origin, findOne, strapi } = makeSetup();
-      findOne.mockResolvedValue(sessionRow({ childId: 'session-2' }));
       const token = signToken({ type: 'refresh', sessionId: 'session-1' });
+
+      findOne
+        .mockResolvedValueOnce(sessionRow({ status: 'rotated', childId: 'session-2' }))
+        .mockResolvedValueOnce(
+          sessionRow({
+            sessionId: 'session-2',
+            childId: null,
+            createdAt: new Date(Date.now() - 60_000),
+            expiresAt: new Date(Date.now() + 1_000_000),
+          })
+        );
 
       await expect(service.refreshGrant(token, 'client-1')).resolves.toEqual({
         error: 'invalid_grant',
       });
       expect(origin.invalidateRefreshToken).toHaveBeenCalledWith('7', 'grant-1');
       expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('replayed'));
+    });
+
+    test('returns the same child token when a rotated token is reused within the grace window', async () => {
+      const { service, origin, findOne } = makeSetup();
+      const token = signToken({ type: 'refresh', sessionId: 'session-1' });
+      const childCreatedAt = new Date(Date.now() - 5_000);
+      const childExpiresAt = new Date(Date.now() + 1_000_000);
+
+      findOne
+        .mockResolvedValueOnce(sessionRow({ status: 'rotated', childId: 'session-2' }))
+        .mockResolvedValueOnce(
+          sessionRow({
+            sessionId: 'session-2',
+            childId: null,
+            createdAt: childCreatedAt,
+            expiresAt: childExpiresAt,
+          })
+        );
+
+      const result = await service.refreshGrant(token, 'client-1');
+
+      expect(result).toMatchObject({ accessToken: 'access-1', scope: 'mcp' });
+      const replayedPayload = jwt.verify(
+        (result as { refreshToken: string }).refreshToken,
+        SECRET,
+        {
+          algorithms: ['HS256'],
+        }
+      ) as jwt.JwtPayload;
+      expect(replayedPayload.sessionId).toBe('session-2');
+      expect(origin.invalidateRefreshToken).not.toHaveBeenCalled();
+      expect(origin.rotateRefreshToken).not.toHaveBeenCalled();
+    });
+
+    test('revokes the family when the grant user is deactivated, blocked, or gone', async () => {
+      const { service, origin, findOne, userFindOne } = makeSetup();
+      findOne.mockResolvedValue(sessionRow());
+      userFindOne.mockResolvedValue({ id: 7, isActive: false, blocked: false });
+      const token = signToken({ type: 'refresh', sessionId: 'session-1' });
+
+      await expect(service.refreshGrant(token, 'client-1')).resolves.toEqual({
+        error: 'invalid_grant',
+      });
+      expect(origin.invalidateRefreshToken).toHaveBeenCalledWith('7', 'grant-1');
+      expect(origin.rotateRefreshToken).not.toHaveBeenCalled();
     });
 
     test('rotates the token and issues a fresh access token on the happy path', async () => {

@@ -71,7 +71,7 @@ describe('createRegisterHandler', () => {
     ['grant_types', { grant_types: ['implicit'] }],
     ['empty grant_types', { grant_types: [] }],
     ['response_types', { response_types: ['token'] }],
-    ['client_name', { client_name: 'x'.repeat(257) }],
+    ['client_name', { client_name: 'x'.repeat(256) }], // the column is varchar(255)
     ['scope type', { scope: 42 }],
     ['client_uri scheme', { client_uri: 'ftp://example.com' }],
     ['logo_uri value', { logo_uri: 'not-a-url' }],

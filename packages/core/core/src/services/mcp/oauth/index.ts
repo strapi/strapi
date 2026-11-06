@@ -80,6 +80,12 @@ export const createMcpOAuthModule = (strapi: Core.Strapi, config: McpOAuthConfig
         })
       );
 
+      if (!config.hasConfiguredServerUrl()) {
+        strapi.log.warn(
+          `[MCP] server.url is not configured: OAuth discovery metadata will advertise ${config.issuer}, which MCP clients can only reach in local development. Set server.url to the server's public URL.`
+        );
+      }
+
       strapi.log.info(`[MCP] OAuth authorization server available at ${config.issuer}`);
     },
   };
