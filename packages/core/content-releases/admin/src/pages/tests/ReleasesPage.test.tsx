@@ -296,9 +296,9 @@ describe('Releases home page', () => {
     await screen.findByRole('link', { name: 'Ran early' });
     const [early, undated] = screen.getAllByRole('row').slice(1);
 
-    // The relative time counts from the schedule too, like the date under it
+    // The relative time counts from the schedule too, like the date beside it
     expect(within(early).getByRole('time')).toHaveAttribute('datetime', '2026-10-15T09:00:00.000Z');
-    expect(within(early).getByText(/^Oct 15, 2026 • 09:00/)).toBeInTheDocument();
+    expect(within(early).getByText(/^• Oct 15, 2026 • 09:00/)).toBeInTheDocument();
     expect(within(undated).getByText('Not scheduled')).toBeInTheDocument();
     expect(within(undated).queryByText(/Oct 13, 2026/)).not.toBeInTheDocument();
   });

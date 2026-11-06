@@ -12,7 +12,6 @@
   "content-manager-edit-view.remove-from-release": "릴리스에서 제거",
   "content-manager-edit-view.scheduled.date": "{date} {time} ({offset})",
   "content-manager-edit-view.edit-release": "릴리스 수정",
-  "content-releases.content-manager-edit-view.edit-entry": "항목 수정",
   "content-manager-edit-view.remove-from-release.notification.success": "항목이 릴리스에서 제거되었습니다",
   "content-manager-edit-view.release-action-menu": "릴리스 작업 옵션",
   "content-manager.list-view.releases.header": "릴리스 예정",

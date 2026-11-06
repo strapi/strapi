@@ -505,16 +505,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async delete(releaseId: DeleteRelease.Request['params']['id']) {
       const release: Release = await strapi.db.transaction(async () => {
-        const locked = await lockRelease(releaseId, ['releasedAt', 'status'], { strapi });
-
-        if (!locked) {
-          throw new errors.NotFoundError(`No release found for id ${releaseId}`);
-        }
-
-        // A failed release can be deleted, one that released entries (done or partial) can't
-        if (locked.releasedAt && locked.status !== 'failed') {
-          throw new errors.ValidationError('Release already published');
-        }
+        // Only a planned release can be deleted: one that ran, failed included, stays
+        await lockPlannedRelease(releaseId, [], { strapi });
 
         const release: Release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
           where: { id: releaseId },

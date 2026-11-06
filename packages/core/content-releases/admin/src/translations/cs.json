@@ -12,7 +12,6 @@
   "content-manager-edit-view.remove-from-release": "Odebrat z vydání",
   "content-manager-edit-view.scheduled.date": "{date} v {time} ({offset})",
   "content-manager-edit-view.edit-release": "Upravit vydání",
-  "content-releases.content-manager-edit-view.edit-entry": "Upravit záznam",
   "content-manager-edit-view.remove-from-release.notification.success": "Záznam byl odebrán z vydání",
   "content-manager-edit-view.release-action-menu": "Možnosti akcí vydání",
   "content-manager.list-view.releases.header": "K vydání v",

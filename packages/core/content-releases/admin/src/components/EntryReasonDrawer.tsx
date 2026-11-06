@@ -19,6 +19,7 @@ import { getReleaseDateParts } from '../utils/time';
 import { getEntryLinkProps, useCanReadEntry, type EntryLocation } from './EntryLinkButton';
 import { SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
 import { RELEASE_DRAWER_CLASS_NAME } from './ReleaseDrawer';
+import { getBadgeColorProps } from './ReleaseStatusBadge';
 
 import type { ReleaseActionOutcome } from '../../../shared/constants';
 import type { ReleaseAction, ReleaseActionReason } from '../../../shared/contracts/release-actions';
@@ -83,11 +84,11 @@ const REVIEW_STAGE_TITLE = {
  * The reason the badge names. An entry with several kinds of issue gets none: naming the first
  * would hide the others, which the issue box lists.
  */
-const getReasonTitle = ({
+export const getReasonTitle = ({
   outcome,
   reason,
   missingReason,
-}: EntryReasonDetails): MessageDescriptor | null => {
+}: Pick<EntryReasonDetails, 'outcome' | 'reason' | 'missingReason'>): MessageDescriptor | null => {
   const skippedReason: { title: MessageDescriptor; description?: MessageDescriptor } | null =
     outcome && isSkippedOutcome(outcome) ? SKIPPED_REASONS[outcome] : null;
 
@@ -365,20 +366,22 @@ const ReasonBody = ({
             .filter(Boolean)
             .join(' · ')}
         </span>
-        <Badge textColor="danger600" backgroundColor="danger100" borderColor="danger200">
-          {formatMessage(
-            {
-              id: 'content-releases.reason-drawer.status',
-              defaultMessage:
-                '{isFrozen, select, true {Skipped} other {Not ready}}{hasReason, select, true {: {reason}} other {}}',
-            },
-            {
-              isFrozen,
-              hasReason: Boolean(reasonTitle),
-              reason: reasonTitle ? formatMessage(reasonTitle) : '',
-            }
+        <div className="flex items-center gap-4">
+          <Badge {...getBadgeColorProps('danger')}>
+            {formatMessage(
+              {
+                id: 'content-releases.reason-drawer.status',
+                defaultMessage: '{isFrozen, select, true {Skipped} other {Not ready}}',
+              },
+              { isFrozen }
+            )}
+          </Badge>
+          {reasonTitle && (
+            <span className="text-sm font-medium text-destructive">
+              {formatMessage(reasonTitle)}
+            </span>
           )}
-        </Badge>
+        </div>
       </div>
 
       {issueCount > 0 && (

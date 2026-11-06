@@ -12,7 +12,6 @@
   "content-manager-edit-view.remove-from-release": "Usuń z wydania",
   "content-manager-edit-view.scheduled.date": "{date} o {time} ({offset})",
   "content-manager-edit-view.edit-release": "Edytuj wydanie",
-  "content-releases.content-manager-edit-view.edit-entry": "Edytuj wpis",
   "content-manager-edit-view.remove-from-release.notification.success": "Wpis usunięty z wydania",
   "content-manager-edit-view.release-action-menu": "Opcje akcji wydania",
   "content-manager.list-view.releases.header": "Do wydania w",

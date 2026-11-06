@@ -46,7 +46,11 @@ import {
   getSkippedEntriesQuery,
 } from '../components/CreateReleaseFromSkippedDrawer';
 import { EntryLinkButton } from '../components/EntryLinkButton';
-import { EntryReasonDrawer, type EntryReasonDetails } from '../components/EntryReasonDrawer';
+import {
+  EntryReasonDrawer,
+  getReasonTitle,
+  type EntryReasonDetails,
+} from '../components/EntryReasonDrawer';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -535,21 +539,7 @@ const ReleaseDetailsLayout = ({
           primaryAction={
             release.releasedAt ? (
               <Flex gap={2}>
-                {/* A failed run released nothing, so its release can go. One that ran stays */}
-                {release.status === 'failed' && (
-                  <Button
-                    size="S"
-                    variant="danger-light"
-                    startIcon={<Trash />}
-                    disabled={!canDelete}
-                    onClick={toggleWarningSubmit}
-                  >
-                    {formatMessage({
-                      id: 'content-releases.header.actions.delete',
-                      defaultMessage: 'Delete',
-                    })}
-                  </Button>
-                )}
+                {/* A release that ran, failed included, can't be deleted: only a planned one can */}
                 {showCreateFromSkipped && (
                   <Button
                     size="S"
@@ -731,6 +721,25 @@ const ReleaseSubtitle = ({ release, dateText, numberOfEntriesText }: ReleaseSubt
   );
 };
 
+// Row actions (open entry, remove) stay out of the way until the row is hovered or focused; opacity
+// keeps their space reserved so nothing shifts, and touch devices (no hover) always show them.
+const RowActions = styled(Flex)`
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+
+  tr:hover &,
+  tr:focus-within & {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (hover: none) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+`;
+
 const SimpleMenuButton = styled(SimpleMenu)`
   & > span {
     display: flex;
@@ -891,7 +900,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const [updateReleaseAction] = useUpdateReleaseActionMutation();
 
   const handleChangeType = async (
-    e: React.ChangeEvent<HTMLInputElement>,
+    type: ReleaseAction['type'],
     actionId: ReleaseAction['id'],
     actionPath: [string, number]
   ) => {
@@ -901,7 +910,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         actionId,
       },
       body: {
-        type: e.target.value as ReleaseAction['type'],
+        type,
       },
       query: actionsQuery, // We are passing the query params to make optimistic updates
       actionPath, // We are passing the action path to found the position in the cache of the action for optimistic updates
@@ -1209,139 +1218,124 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 </Table.Head>
                 <Table.Loading />
                 <Table.Body>
-                  {releaseActions[key].map(
-                    (
-                      {
-                        id,
-                        contentType,
-                        locale,
-                        type,
-                        entry,
-                        entryDocumentId,
-                        isEntryValid,
-                        outcome,
-                        reason,
-                      },
-                      actionIndex
-                    ) => {
-                      const { isDeleted, isUntitled, entryName } = getEntryNaming(
-                        { entry, contentType },
-                        Boolean(release.releasedAt),
-                        formatMessage
-                      );
-                      const textColor = isDeleted ? 'neutral500' : undefined;
-                      const openReason = () => setReasonActionId(id);
-                      const entryLink = !isDeleted && (
-                        <EntryLinkButton
-                          contentTypeUid={contentType.uid}
-                          kind={contentTypes?.[contentType.uid]?.kind}
-                          documentId={entryDocumentId}
-                          locale={locale?.code}
-                          showErrors={(reason?.validation?.errors.length ?? 0) > 0}
-                        />
-                      );
+                  {releaseActions[key].map((action, actionIndex) => {
+                    const { id, contentType, locale, type, entry, isEntryValid, outcome } = action;
+                    const reasonDetails = toReasonDetails(action);
+                    const { isDeleted, isUntitled, entryName } = reasonDetails;
+                    const textColor = isDeleted ? 'neutral500' : undefined;
+                    const openReason = () => setReasonActionId(id);
+                    const reasonTitle = getReasonTitle(reasonDetails);
+                    const reasonLabel = reasonTitle ? formatMessage(reasonTitle) : null;
+                    const entryLink = !isDeleted && <EntryLinkButton {...reasonDetails.location} />;
 
-                      return (
-                        <Tr key={id}>
-                          <Td width="25%" maxWidth="200px">
-                            {isDeleted || isUntitled ? (
-                              <ItalicName ellipsis textColor={isDeleted ? 'neutral500' : undefined}>
-                                {entryName}
-                              </ItalicName>
-                            ) : (
-                              <Typography ellipsis>{entryName}</Typography>
-                            )}
-                          </Td>
-                          {hasI18nEnabled && (
-                            <Td width="10%">
-                              <Typography
-                                textColor={textColor}
-                              >{`${locale?.name ? locale.name : '-'}`}</Typography>
-                            </Td>
+                    return (
+                      <Tr key={id}>
+                        <Td width="25%" maxWidth="200px">
+                          {isDeleted || isUntitled ? (
+                            <ItalicName ellipsis textColor={isDeleted ? 'neutral500' : undefined}>
+                              {entryName}
+                            </ItalicName>
+                          ) : (
+                            <Typography ellipsis>{entryName}</Typography>
                           )}
-
+                        </Td>
+                        {hasI18nEnabled && (
                           <Td width="10%">
-                            <Typography textColor={textColor}>
-                              {contentType.displayName || ''}
-                            </Typography>
+                            <Typography
+                              textColor={textColor}
+                            >{`${locale?.name ? locale.name : '-'}`}</Typography>
                           </Td>
-                          <Td width="20%">
-                            {release.releasedAt ? (
-                              <Flex gap={2}>
-                                {type === 'publish' ? (
-                                  <Upload aria-hidden fill={textColor ?? 'neutral800'} />
-                                ) : (
-                                  <Download aria-hidden fill={textColor ?? 'neutral800'} />
-                                )}
-                                <Typography textColor={textColor}>
-                                  {formatMessage(
-                                    {
-                                      id: 'content-releases.pages.ReleaseDetails.table.action-type',
-                                      defaultMessage:
-                                        '{isPublish, select, true {Publish} other {Unpublish}}',
-                                    },
-                                    { isPublish: type === 'publish' }
-                                  )}
-                                </Typography>
-                              </Flex>
-                            ) : (
-                              <ReleaseActionOptions
-                                selected={type}
-                                handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
-                                name={`release-action-${id}-type`}
-                                disabled={!canUpdate}
-                              />
-                            )}
-                          </Td>
+                        )}
+
+                        <Td width="10%">
+                          <Typography textColor={textColor}>
+                            {contentType.displayName || ''}
+                          </Typography>
+                        </Td>
+                        <Td width="20%">
                           {release.releasedAt ? (
-                            <>
-                              <Td width="20%" minWidth="200px">
-                                <ReleasedActionStatus
-                                  outcome={outcome}
-                                  isOutcomeUnknown={isOutcomeUnknown}
+                            <Flex gap={2} alignItems="center">
+                              {type === 'publish' ? (
+                                <Upload
+                                  fill={textColor ?? 'neutral800'}
+                                  width="1.6rem"
+                                  height="1.6rem"
+                                  aria-hidden
+                                />
+                              ) : (
+                                <Download
+                                  fill={textColor ?? 'neutral800'}
+                                  width="1.6rem"
+                                  height="1.6rem"
+                                  aria-hidden
+                                />
+                              )}
+                              <Typography textColor={textColor}>
+                                {formatMessage(
+                                  {
+                                    id: 'content-releases.pages.ReleaseDetails.table.action-type',
+                                    defaultMessage:
+                                      '{isPublish, select, true {Publish} other {Unpublish}}',
+                                  },
+                                  { isPublish: type === 'publish' }
+                                )}
+                              </Typography>
+                            </Flex>
+                          ) : (
+                            <ReleaseActionOptions
+                              selected={type}
+                              onChange={(nextType) =>
+                                handleChangeType(nextType, id, [key, actionIndex])
+                              }
+                              name={`release-action-${id}-type`}
+                              disabled={!canUpdate}
+                            />
+                          )}
+                        </Td>
+                        {release.releasedAt ? (
+                          <>
+                            <Td width="20%" minWidth="200px">
+                              <ReleasedActionStatus
+                                reasonLabel={reasonLabel}
+                                outcome={outcome}
+                                isOutcomeUnknown={isOutcomeUnknown}
+                                entryName={entryName}
+                                onOpenReason={openReason}
+                              />
+                            </Td>
+                            <Td>
+                              {/* A ran release has nothing to remove: opening the entry is its only action */}
+                              <RowActions justifyContent="flex-end">{entryLink}</RowActions>
+                            </Td>
+                          </>
+                        ) : (
+                          <>
+                            <Td width="20%" minWidth="200px">
+                              {entry && (
+                                <PlannedActionStatus
+                                  reasonLabel={reasonLabel}
+                                  action={type}
+                                  isEntryValid={isEntryValid}
                                   entryName={entryName}
                                   onOpenReason={openReason}
                                 />
-                              </Td>
-                              <Td>
-                                {/* A ran release has nothing to remove: the pencil is its only action */}
-                                <Flex justifyContent="flex-end">{entryLink}</Flex>
-                              </Td>
-                            </>
-                          ) : (
-                            <>
-                              <Td width="20%" minWidth="200px">
-                                {entry && (
-                                  <PlannedActionStatus
-                                    action={type}
-                                    isEntryValid={isEntryValid}
-                                    entryName={entryName}
-                                    onOpenReason={openReason}
-                                  />
-                                )}
-                              </Td>
-                              <Td>
-                                {/* The menu's "Edit entry" opens the entry: no pencil next to it */}
-                                <Flex justifyContent="flex-end">
-                                  <ReleaseActionMenu.Root>
-                                    <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                      contentTypeUid={contentType.uid}
-                                      documentId={entryDocumentId}
-                                      locale={locale?.code}
-                                    />
-                                    <ReleaseActionMenu.DeleteReleaseActionItem
-                                      releaseId={release.id}
-                                      actionId={id}
-                                    />
-                                  </ReleaseActionMenu.Root>
-                                </Flex>
-                              </Td>
-                            </>
-                          )}
-                        </Tr>
-                      );
-                    }
-                  )}
+                              )}
+                            </Td>
+                            <Td>
+                              {/* Inline actions, aligned with a ran release: open entry + remove */}
+                              <RowActions justifyContent="flex-end" gap={1}>
+                                {entryLink}
+                                <ReleaseActionMenu.DeleteReleaseActionButton
+                                  releaseId={release.id}
+                                  actionId={id}
+                                />
+                              </RowActions>
+                            </Td>
+                          </>
+                        )}
+                      </Tr>
+                    );
+                  })}
                 </Table.Body>
               </Table.Content>
             </Table.Root>

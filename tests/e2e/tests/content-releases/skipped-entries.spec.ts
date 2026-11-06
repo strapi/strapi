@@ -51,7 +51,9 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
       .getByRole('button', { name: `Why ${SKIPPED[0]} was skipped` })
       .click();
     const reason = page.getByRole('dialog');
-    await expect(reason.getByText('Skipped: Validation error')).toBeVisible();
+    // The status, and the reason beside it
+    await expect(reason.getByText('Skipped', { exact: true })).toBeVisible();
+    await expect(reason.getByText('Validation error', { exact: true })).toBeVisible();
     await expect(reason.getByText('Opponent', { exact: true })).toBeVisible();
     await expect(reason.getByRole('link', { name: 'Go to entry' })).toBeVisible();
     await page.keyboard.press('Escape');

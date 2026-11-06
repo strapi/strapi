@@ -38,7 +38,8 @@ describe('PlannedActionStatus', () => {
       );
 
       const button = screen.getByRole('button', { name: 'Why West Ham match isn’t ready' });
-      expect(button).toHaveTextContent('Not ready');
+      expect(screen.getByText('Not ready')).toBeInTheDocument();
+      expect(button).toHaveTextContent('View details');
       expect(button).toHaveAttribute('aria-haspopup', 'dialog');
 
       await user.click(button);
@@ -46,6 +47,22 @@ describe('PlannedActionStatus', () => {
       expect(onOpenReason).toHaveBeenCalledTimes(1);
     }
   );
+
+  it('names the reason on its button when the entry has a single one', () => {
+    render(
+      <PlannedActionStatus
+        action="publish"
+        isEntryValid={false}
+        entryName="West Ham match"
+        reasonLabel="Validation error"
+        onOpenReason={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Why West Ham match isn’t ready' })
+    ).toHaveTextContent('Validation error');
+  });
 });
 
 describe('ReleasedActionStatus', () => {
@@ -78,7 +95,7 @@ describe('ReleasedActionStatus', () => {
     );
 
     const button = screen.getByRole('button', { name: 'Why West Ham match was skipped' });
-    expect(button).toHaveTextContent('Skipped');
+    expect(screen.getByText('Skipped')).toBeInTheDocument();
 
     await user.click(button);
 

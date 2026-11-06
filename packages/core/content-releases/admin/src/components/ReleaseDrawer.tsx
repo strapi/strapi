@@ -20,13 +20,13 @@ import {
   DrawerTitle,
 } from '@strapi/design-system/next';
 import { Cross } from '@strapi/icons';
-import { format, formatISO } from 'date-fns';
+import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Form, Formik, useFormikContext, type FormikHelpers } from 'formik';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { RELEASE_CONDITIONS } from '../../../shared/constants';
-import { getTimezones } from '../utils/time';
+import { getTimezoneName, getTimezones, getWallClock, type TimezoneOption } from '../utils/time';
 import { RELEASE_SCHEMA } from '../validation/schemas';
 
 import type { ReleaseCondition } from '../../../shared/contracts/releases';
@@ -51,7 +51,6 @@ const isEscapeForPicker = (target: EventTarget | null, drawer: HTMLElement | nul
 const FALLBACK_TIMEZONE = 'UTC+00:00&Africa/Abidjan';
 
 // The timezone list's values are `${offset}&${IANA name}`
-const getTimezoneName = (timezone: string) => timezone.split('&')[1];
 const formatTimezoneLabel = (timezone: string) => timezone.replaceAll('&', ' ');
 
 export interface ReleaseDrawerValues {
@@ -137,14 +136,16 @@ export const ReleaseDrawer = ({
     systemTimezone?.value ??
     FALLBACK_TIMEZONE;
   const timezone = findTimezone(initialValues.timezone) ?? defaultTimezone;
-  const zonedScheduledAt = scheduledAt && utcToZonedTime(scheduledAt, getTimezoneName(timezone));
+  const wallClock =
+    initialValues.isScheduled && scheduledAt
+      ? getWallClock(scheduledAt, getTimezoneName(timezone))
+      : null;
 
   const formInitialValues: FormValues = {
     name: initialValues.name,
     isScheduled: initialValues.isScheduled,
-    date:
-      initialValues.isScheduled && zonedScheduledAt ? format(zonedScheduledAt, 'yyyy-MM-dd') : null,
-    time: initialValues.isScheduled && zonedScheduledAt ? format(zonedScheduledAt, 'HH:mm') : '',
+    date: wallClock?.date ?? null,
+    time: wallClock?.time ?? '',
     timezone: initialValues.isScheduled ? timezone : null,
     releaseCondition: initialValues.releaseCondition,
   };
@@ -331,6 +332,15 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
           defaultMessage: 'Schedule',
         })}
       </span>
+      <Checkbox
+        checked={!values.isScheduled}
+        onCheckedChange={(checked) => handleNoScheduleChange(checked === true)}
+      >
+        {formatMessage({
+          id: 'content-releases.release-drawer.form.no-schedule',
+          defaultMessage: "I don't have a release date yet",
+        })}
+      </Checkbox>
       {values.isScheduled && (
         <>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
@@ -392,15 +402,6 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
           />
         </>
       )}
-      <Checkbox
-        checked={!values.isScheduled}
-        onCheckedChange={(checked) => handleNoScheduleChange(checked === true)}
-      >
-        {formatMessage({
-          id: 'content-releases.release-drawer.form.no-schedule',
-          defaultMessage: "I don't have a release date yet",
-        })}
-      </Checkbox>
     </div>
   );
 };
@@ -408,11 +409,6 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
 /* -------------------------------------------------------------------------------------------------
  * TimezoneField
  * -----------------------------------------------------------------------------------------------*/
-
-interface TimezoneOption {
-  offset: string;
-  value: string;
-}
 
 interface TimezoneFieldProps {
   timezoneOptions: TimezoneOption[];
@@ -515,7 +511,8 @@ const ReleaseModeField = () => {
         onValueChange={(value) => setFieldValue('releaseCondition', value)}
       >
         <div className="flex flex-col gap-4">
-          {RELEASE_CONDITIONS.map((condition) => (
+          {/* Design order, not the list's: releasing what's ready reads first, the default second */}
+          {[...RELEASE_CONDITIONS].reverse().map((condition) => (
             <div key={condition} className="flex flex-col gap-1">
               <Radio.Item
                 value={condition}
@@ -528,7 +525,7 @@ const ReleaseModeField = () => {
               >
                 {formatMessage(RELEASE_CONDITION_MESSAGES[condition].label)}
               </Radio.Item>
-              <p className="pl-6 text-xs text-muted-foreground">
+              <p className="pl-7 text-xs text-muted-foreground">
                 {formatMessage(RELEASE_CONDITION_MESSAGES[condition].description)}
               </p>
             </div>
