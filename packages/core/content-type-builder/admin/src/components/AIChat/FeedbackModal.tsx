@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { UnsavedChangesModal, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -186,7 +186,11 @@ export const FeedbackModal: React.FC = () => {
   };
 
   return (
-    <Modal.Root open onOpenChange={closeFeedbackModal}>
+    <UnsavedChangesModal
+      open
+      onOpenChange={closeFeedbackModal}
+      hasUnsavedChanges={feedbackText !== '' || selectedReasons.length > 0}
+    >
       <Modal.Content>
         <Modal.Header>
           <Typography variant="omega" fontWeight="bold">
@@ -236,9 +240,7 @@ export const FeedbackModal: React.FC = () => {
         </Modal.Body>
         <Modal.Footer>
           <Modal.Close>
-            <Button variant="tertiary" onClick={closeFeedbackModal}>
-              {t('form.button.cancel', 'Cancel')}
-            </Button>
+            <Button variant="tertiary">{t('form.button.cancel', 'Cancel')}</Button>
           </Modal.Close>
           <Button
             onClick={handleSubmitFeedback}
@@ -249,6 +251,6 @@ export const FeedbackModal: React.FC = () => {
           </Button>
         </Modal.Footer>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

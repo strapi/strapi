@@ -21,7 +21,13 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
   return new Promise<WebpackWatcher>((res) => {
     const compiler = webpack(finalConfig);
 
-    const devMiddleware = webpackDevMiddleware(compiler);
+    // `.devMiddleware` is set at runtime and omitted from the published types.
+    const koaDevMiddleware = webpackDevMiddleware.koaWrapper(compiler) as ReturnType<
+      typeof webpackDevMiddleware.koaWrapper
+    > & {
+      devMiddleware: ReturnType<typeof webpackDevMiddleware>;
+    };
+    const { devMiddleware } = koaDevMiddleware;
 
     const hotMiddleware = webpackHotMiddleware(compiler, {
       log: false,
@@ -37,34 +43,14 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
       });
     });
 
-    ctx.strapi.server.app.use((context, next) => {
-      // wait for webpack-dev-middleware to signal that the build is ready
-      const ready = new Promise((resolve) => {
+    ctx.strapi.server.app.use(async (context, next) => {
+      await new Promise<void>((resolve) => {
         devMiddleware.waitUntilValid(() => {
-          resolve(true);
+          resolve();
         });
       });
-      // tell webpack-dev-middleware to handle the request
-      const init = new Promise((resolve) => {
-        devMiddleware(
-          context.req,
-          {
-            // @ts-expect-error ignored
-            end(content) {
-              // eslint-disable-next-line no-param-reassign
-              context.body = content;
-              resolve(true);
-            },
-            getHeader: context.get.bind(context),
-            // @ts-expect-error ignored
-            setHeader: context.set.bind(context),
-            locals: context.state,
-          },
-          () => resolve(next())
-        );
-      });
 
-      return Promise.all([ready, init]);
+      await koaDevMiddleware(context, next);
     });
 
     const serveAdmin: Core.MiddlewareHandler = async (ctx, next) => {
