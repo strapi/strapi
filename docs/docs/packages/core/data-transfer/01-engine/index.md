@@ -207,7 +207,7 @@ Content-type filters (`--only-content-types` / `--exclude-content-types`) furthe
 
 When `--only` omits one or more of `content` / `files` / `config`, the CLI prints a dim clarity line listing stages that are not transferred so destination data for those stages is obviously preserved.
 
-A transfer starts by loading the JSONL stream packages, then bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc. If the package load fails, `transfer()` reports the error and rethrows without destination `rollback` or provider `close`. No provider has started, and rollback on the file and directory destinations deletes an existing `--file` path.
+A transfer starts by loading the JSONL stream packages, then bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc. If the package load fails, `transfer()` reports the error and rethrows without destination `rollback` or provider `close`. No provider has started, and rollback deletes a file archive or the export written into an existing directory.
 
 After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
 
