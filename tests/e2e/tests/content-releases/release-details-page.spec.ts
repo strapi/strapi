@@ -12,7 +12,7 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
   const addToReleaseDialog = await page.getByRole('dialog', { name: 'Add to release' });
   await expect(addToReleaseDialog).toBeVisible();
   await expect(
-    addToReleaseDialog.getByRole('radio', { name: 'publish', exact: true })
+    addToReleaseDialog.getByRole('radio', { name: 'Publish', exact: true })
   ).toBeChecked();
   // Select a release
   const submitReleaseButton = await page.getByRole('button', { name: 'Continue' });
@@ -135,9 +135,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       page.getByRole('row').nth(1).getByRole('gridcell', { name: 'West Ham post match analysis' })
     ).toBeVisible();
 
-    // Navigate to a given row's entry in the content-manager
-    await row.getByRole('button', { name: 'Release action options' }).click();
-    await page.getByRole('menuitem', { name: 'Edit entry' }).click();
+    // Navigate to a given row's entry in the content-manager: the row's actions show on hover
+    await row.hover();
+    await row.getByRole('link', { name: 'Open entry' }).click();
     await page.waitForURL('**/content-manager/collection-types/api::article.article/**');
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
 
@@ -146,8 +146,8 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.waitForURL('/admin/plugins/content-releases/*');
 
     // Remove a given row's entry from the release
-    await row.getByRole('button', { name: 'Release action options' }).click();
-    await page.getByRole('menuitem', { name: 'Remove from release' }).click();
+    await row.hover();
+    await row.getByRole('button', { name: 'Remove from release' }).click();
     await expect(row).not.toBeVisible();
   });
 
@@ -211,7 +211,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
         .getByRole('button', { name: 'Why Roy Kent isn’t ready' })
         .click();
       const reason = page.getByRole('dialog');
-      await expect(reason.getByText('Not ready: Validation error')).toBeVisible();
+      // The status, and the reason beside it
+      await expect(reason.getByText('Not ready', { exact: true })).toBeVisible();
+      await expect(reason.getByText('Validation error', { exact: true })).toBeVisible();
       await expect(reason.getByText('Opponent', { exact: true })).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(reason).toBeHidden();

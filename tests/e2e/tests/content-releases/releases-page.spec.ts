@@ -74,35 +74,33 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(partial).toContainText(/1\s+of\s+3\s+ready/);
   });
 
-  test('a release that ran shows its outcome and when it ran, not its readiness', async ({
-    page,
-    releases,
-  }) => {
+  test('a release that ran shows its outcome, not its readiness', async ({ page, releases }) => {
     const partialId = await createReleaseOfMatches(page, {
       name: 'Cup final',
       releaseCondition: 'allow_partial',
       matches: [READY_MATCH, ...NOT_READY_MATCHES],
     });
-    const partialRanAt = await publishRelease(page, partialId);
+    await publishRelease(page, partialId);
     const doneId = await createReleaseOfMatches(page, {
       name: 'League opener',
       releaseCondition: 'all_or_nothing',
       matches: [READY_MATCH],
     });
-    const doneRanAt = await publishRelease(page, doneId);
+    await publishRelease(page, doneId);
 
     await releases.goto();
 
+    // Published by hand: the schedule column shows the schedule, which they never had
     const partial = releases.row('Cup final');
     await expect(partial).toContainText('Partial');
     await expect(partial).toContainText(/3\s+entries/);
-    await expect(partial).toContainText(formatScheduleTime(partialRanAt, BROWSER_TIMEZONE));
+    await expect(partial).toContainText('Not scheduled');
     await expect(partial).not.toContainText(/of\s+\d+\s+ready/);
 
     const done = releases.row('League opener');
     await expect(done).toContainText('Done');
     await expect(done).toContainText(/1\s+entry/);
-    await expect(done).toContainText(formatScheduleTime(doneRanAt, BROWSER_TIMEZONE));
+    await expect(done).toContainText('Not scheduled');
   });
 
   test('a scheduled release that could not go out shows as failed', async ({ page, releases }) => {
@@ -153,9 +151,10 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     page,
     releases,
   }) => {
-    // With the 2 seeded releases, one more than the 16 of a page. Each is released as soon as it's
-    // created: the e2e license caps pending releases at 3, and the seed already holds one
-    for (let index = 1; index <= 15; index++) {
+    // With the 2 seeded releases, one more than the 10 of a page. Each is released as soon as it's
+    // created: the e2e license caps pending releases at 3, and the seed already holds one. None is
+    // scheduled, so they're listed most recently updated first
+    for (let index = 1; index <= 9; index++) {
       const releaseId = await createReleaseOfMatches(page, {
         name: `Sprint ${index}`,
         releaseCondition: 'allow_partial',
@@ -166,15 +165,15 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await releases.goto();
 
-    await expect(releases.releaseCount(17)).toBeVisible();
-    await expect(releases.rows).toHaveCount(16);
-    await expect(releases.rows.first()).toContainText('Sprint 15');
+    await expect(releases.releaseCount(11)).toBeVisible();
+    await expect(releases.rows).toHaveCount(10);
+    await expect(releases.rows.first()).toContainText('Sprint 9');
 
     await releases.goToNextPage();
 
     await expect(releases.rows).toHaveCount(1);
     await expect(releases.row(OLDEST_RELEASE)).toBeVisible();
-    await expect(releases.releaseCount(17)).toBeVisible();
+    await expect(releases.releaseCount(11)).toBeVisible();
   });
 
   test('a user can open a release from anywhere on its row', async ({
@@ -201,7 +200,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(releases.row('The Diamond Dogs')).toContainText('Not scheduled');
   });
 
-  test('A user should be able to create a release with scheduling info and see it first in the list', async ({
+  test('A user should be able to create a release with scheduling info and see it after the unscheduled ones', async ({
     releases,
   }) => {
     const tomorrow = new Date();
@@ -211,7 +210,8 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await releases.createRelease('The Diamond Dogs', { date: tomorrow, time: '08:00' });
 
     await releases.goto();
-    await expect(releases.rows.first()).toContainText('The Diamond Dogs');
+    // The schedule sort, the default, lists the seeded releases first: they have no schedule
+    await expect(releases.rows.last()).toContainText('The Diamond Dogs');
     await expect(releases.row('The Diamond Dogs')).not.toContainText('Not scheduled');
   });
 
