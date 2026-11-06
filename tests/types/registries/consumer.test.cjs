@@ -57,7 +57,8 @@ function permutations(values) {
   );
 }
 
-// Type generation writes `Public` schemas with the switch off and global schemas with it on.
+// Type generation writes `Public` schemas with the switch off, and global plus `Public` schemas with
+// it on.
 const generatedSchemas = (strict) => (strict ? 'generated-strict.d.ts' : 'generated.d.ts');
 const orders = (strict, schemas = [generatedSchemas(strict)]) =>
   permutations([...schemas, 'i18n.d.ts', 'sentry.d.ts', 'overrides.d.ts']);
@@ -107,6 +108,24 @@ function assertClean(program, description) {
       getCurrentDirectory: () => repository,
       getNewLine: () => '\n',
     })}`
+  );
+}
+
+// The full text of an exported type alias of a fixture, as the program's checker resolves it.
+function exportedType(program, name, alias) {
+  const source = program.getSourceFile(fixture(name));
+  assert.ok(source !== undefined, `${name} is not in the program`);
+  const declaration = source.statements.find(
+    (statement) => ts.isTypeAliasDeclaration(statement) && statement.name.text === alias
+  );
+  assert.ok(declaration !== undefined, `${name} does not declare ${alias}`);
+  const checker = program.getTypeChecker();
+  return checker.typeToString(
+    checker.getTypeAtLocation(declaration.name),
+    undefined,
+    // TypeScript combines format flags as a bit mask.
+    // eslint-disable-next-line no-bitwise
+    ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.InTypeAlias
   );
 }
 
@@ -1150,6 +1169,21 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       compile(['settings.d.ts', 'schemas.ts']),
       `${resolution}, strict generated schemas`
     );
+  });
+
+  test(`${resolution}: generated strict schemas type a program without the switch as without strict types`, () => {
+    const withGlobal = compile(['schemas-without-switch.ts']);
+    assertClean(withGlobal, `${resolution}, strict generated schemas without the switch`);
+    // The `Public` block alone is what type generation writes with strict types off.
+    const publicOnly = compile(['schemas-without-switch-public.ts']);
+    assertClean(publicOnly, `${resolution}, strict-off generated schemas`);
+    for (const name of ['ArticleDocument', 'ArticleTitle', 'ArticleValues']) {
+      assert.equal(
+        exportedType(withGlobal, 'schemas-without-switch-public.ts', name),
+        exportedType(publicOnly, 'schemas-without-switch-public.ts', name),
+        `${resolution}, ${name} with and without the global block`
+      );
+    }
   });
 
   test(`${resolution}: the Document Service types fields, filters and populate in strict mode`, () => {
