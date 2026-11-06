@@ -477,7 +477,7 @@ describe('router path registration', () => {
     expect(seen).toEqual([undefined, 'api::article.article']);
   });
 
-  it('translates router.get, including a named route, and rejects a failed custom pattern', async () => {
+  it('translates router.get, including a named route, without enforcing the custom pattern', async () => {
     const { strapi, server, router } = createRouterApp();
 
     router.get('user', '/users/:id(\\d+)', (ctx) => {
@@ -579,7 +579,7 @@ describe('router path registration', () => {
     await request(server).post('/users/abc').expect(405);
   });
 
-  it('translates a v6 router prefix and checks its custom pattern on every route', async () => {
+  it('translates a v6 router prefix without enforcing its custom pattern', async () => {
     const strapi = createStrapi();
     const router = new Router({ prefix: '/pre/:v(\\d+)' });
     installRoutePathTranslation(router, strapi);
@@ -683,7 +683,7 @@ describe('router path registration', () => {
     await request(server).get('/old/1/x').expect(404);
   });
 
-  it('keeps a custom pattern on a mount path for the routes under it', async () => {
+  it('translates a v6 mount path without enforcing its custom pattern', async () => {
     const { router } = createRouterApp();
     const nested = new Router();
     nested.get('/child', (ctx) => {
@@ -748,7 +748,7 @@ describe('router path registration', () => {
     await expectReply(request(server).get('/p/x/a'), { pid: 'x' });
   });
 
-  it('checks a custom pattern case-sensitively on a case-sensitive router', async () => {
+  it('does not apply a custom pattern on a case-sensitive router', async () => {
     const strapi = createStrapi();
     const router = new Router({ sensitive: true });
     installRoutePathTranslation(router, strapi);
@@ -802,7 +802,7 @@ describe('router path registration', () => {
     expect(seen).toEqual([{ 0: '7' }]);
   });
 
-  it('answers 404 for a failed custom pattern on an API router mounted on the server', async () => {
+  it('matches a custom pattern value on an API router mounted on the server', async () => {
     const strapi = createStrapi();
     const router = new Router();
     installRoutePathTranslation(router, strapi);

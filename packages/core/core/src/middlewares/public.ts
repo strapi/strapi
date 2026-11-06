@@ -13,6 +13,10 @@ export const publicStatic: Core.MiddlewareFactory = (
   { strapi }: { strapi: Core.Strapi }
 ) => {
   const { maxAge } = defaultsDeep({}, config, defaults);
+  const servePublic = koaStatic(strapi.dirs.static.public, {
+    maxage: maxAge,
+    defer: true,
+  });
 
   strapi.server.routes([
     {
@@ -35,10 +39,7 @@ export const publicStatic: Core.MiddlewareFactory = (
           return next();
         }
 
-        return koaStatic(strapi.dirs.static.public, {
-          maxage: maxAge,
-          defer: true,
-        })(ctx, next);
+        return servePublic(ctx, next);
       },
       config: { auth: false },
     },
