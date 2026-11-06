@@ -16,6 +16,7 @@ import {
   createTestLogger,
   loggedText,
   readFilePermissions,
+  REGISTRY_URL,
 } from './test-helpers';
 
 const LICENSE = 'license-abc';
@@ -225,14 +226,17 @@ describe('prepareRegistryAccess', () => {
     env = {},
     licenseSource = 'license-file',
     logger = createTestLogger(),
+    registryUrl = REGISTRY_URL,
   }: {
     homeDir: string;
+    registryUrl?: string;
     packageManager?: DetectedPackageManager;
     env?: NodeJS.ProcessEnv;
     licenseSource?: 'environment' | 'license-file';
     logger?: ReturnType<typeof createTestLogger>;
   }) =>
     prepareRegistryAccess({
+      registryUrl,
       appDir: await createTemporaryDirectory(),
       packageManager,
       license: LICENSE,
@@ -294,6 +298,54 @@ describe('prepareRegistryAccess', () => {
 
     expect(await fse.pathExists(path.join(homeDir, '.npmrc'))).toBe(true);
     expect(await fse.pathExists(path.join(homeDir, '.yarnrc.yml'))).toBe(true);
+  });
+
+  it('sets up the registry it is given, in ~/.npmrc and ~/.yarnrc.yml', async () => {
+    const homeDir = await createTemporaryDirectory();
+    const registryUrl = 'http://localhost:4873';
+
+    await (await prepare({ homeDir, registryUrl })).apply();
+    await (
+      await prepare({ homeDir, registryUrl, packageManager: { name: 'yarn', majorVersion: 4 } })
+    ).apply();
+
+    expect(await fse.readFile(path.join(homeDir, '.npmrc'), 'utf8')).toBe(
+      `@strapi-enterprise:registry=http://localhost:4873/\n//localhost:4873/:_authToken=${LICENSE}\n`
+    );
+    expect(await fse.readFile(path.join(homeDir, '.yarnrc.yml'), 'utf8')).toBe(
+      [
+        'npmScopes:',
+        '  strapi-enterprise:',
+        "    npmRegistryServer: 'http://localhost:4873/'",
+        '    npmAlwaysAuth: true',
+        `    npmAuthToken: '${LICENSE}'`,
+        '',
+      ].join('\n')
+    );
+  });
+
+  it('sets up an IPv6 loopback registry with the host npm and Yarn look up', async () => {
+    const homeDir = await createTemporaryDirectory();
+    const registryUrl = 'http://[::1]:4873';
+
+    await (await prepare({ homeDir, registryUrl })).apply();
+    await (
+      await prepare({ homeDir, registryUrl, packageManager: { name: 'yarn', majorVersion: 4 } })
+    ).apply();
+
+    expect(await fse.readFile(path.join(homeDir, '.npmrc'), 'utf8')).toBe(
+      `@strapi-enterprise:registry=http://[::1]:4873/\n//[::1]:4873/:_authToken=${LICENSE}\n`
+    );
+    expect(await fse.readFile(path.join(homeDir, '.yarnrc.yml'), 'utf8')).toBe(
+      [
+        'npmScopes:',
+        '  strapi-enterprise:',
+        "    npmRegistryServer: 'http://[::1]:4873/'",
+        '    npmAlwaysAuth: true',
+        `    npmAuthToken: '${LICENSE}'`,
+        '',
+      ].join('\n')
+    );
   });
 
   it('stops when the user-level file holds another license, and leaves it as is', async () => {
@@ -432,6 +484,7 @@ describe('prepareRegistryAccess', () => {
     const logger = createTestLogger();
 
     const preparing = prepareRegistryAccess({
+      registryUrl: REGISTRY_URL,
       appDir,
       packageManager: { name: 'npm' },
       license: LICENSE,

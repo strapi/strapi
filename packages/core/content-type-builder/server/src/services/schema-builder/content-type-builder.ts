@@ -186,6 +186,8 @@ export default function createComponentBuilder() {
         : path.join(strapi.dirs.app.api, infos.singularName, 'content-types', infos.singularName);
 
       const contentType = createSchemaHandler({
+        uid,
+        isNew: true,
         modelName: infos.singularName,
         dir,
         filename: `schema.json`,
@@ -194,7 +196,6 @@ export default function createComponentBuilder() {
       this.contentTypes.set(uid, contentType);
 
       contentType
-        .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set(
           'collectionName',
@@ -208,7 +209,7 @@ export default function createComponentBuilder() {
         })
         .set('options', {
           ...infos.options,
-          draftAndPublish: infos.draftAndPublish,
+          draftAndPublish: infos.draftAndPublish ?? infos.options?.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config);
@@ -378,6 +379,8 @@ export default function createComponentBuilder() {
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
         .set('options', {
+          // Payloads may omit options keys the CTB does not edit (e.g. populateCreatorFields)
+          ...contentType.schema.options,
           ...infos.options,
           // A payload that does not set draftAndPublish keeps the stored value
           draftAndPublish:

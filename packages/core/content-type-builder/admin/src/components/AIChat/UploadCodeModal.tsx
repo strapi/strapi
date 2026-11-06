@@ -425,6 +425,7 @@ export const UploadCodeModal = () => {
       title={t('chat.code-upload.header', 'Import code')}
       onCancel={handleCancel}
       onComplete={handleComplete}
+      hasUnsavedChanges={projectName !== null || projectAttachment !== null}
     >
       <StepModal.Step
         title={t('chat.code-upload.step1-title', 'Import code')}
