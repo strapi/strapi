@@ -24,6 +24,13 @@ declare global {
         }
     }
 }
+declare module '@strapi/strapi' {
+    export namespace Public {
+        export interface ComponentSchemas {
+            'shared.seo': SharedSeo;
+        }
+    }
+}
 "
 `;
 
@@ -109,6 +116,15 @@ declare global {
                 'api::article.article': ApiArticleArticle;
                 'api::homepage.homepage': ApiHomepageHomepage;
             }
+        }
+    }
+}
+declare module '@strapi/strapi' {
+    export namespace Public {
+        export interface ContentTypeSchemas {
+            'admin::user': AdminUser;
+            'api::article.article': ApiArticleArticle;
+            'api::homepage.homepage': ApiHomepageHomepage;
         }
     }
 }
@@ -220,6 +236,13 @@ declare global {
         }
     }
 }
+declare module '@strapi/strapi' {
+    export namespace Public {
+        export interface ComponentSchemas {
+            'shared.rules': SharedRules;
+        }
+    }
+}
 "
 `;
 
@@ -272,6 +295,13 @@ declare global {
         }
     }
 }
+declare module '@strapi/strapi' {
+    export namespace Public {
+        export interface ContentTypeSchemas {
+            'api::rule.rule': ApiRuleRule;
+        }
+    }
+}
 "
 `;
 
@@ -321,6 +351,13 @@ declare global {
             interface AppContentTypeSchemas {
                 'api::rule.rule': ApiRuleRule;
             }
+        }
+    }
+}
+declare module '@strapi/strapi' {
+    export namespace Public {
+        export interface ContentTypeSchemas {
+            'api::rule.rule': ApiRuleRule;
         }
     }
 }

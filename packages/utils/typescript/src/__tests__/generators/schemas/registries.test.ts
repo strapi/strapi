@@ -92,13 +92,31 @@ describe.each(generators)('%s generator', (_, generator, strapi, [legacyRegistry
     expect(output).toMatchSnapshot();
     expect(output).toContain('declare global');
     expect(output).toMatch(/namespace Strapi\s*{\s*namespace Registries\s*{/);
-    expect(output).not.toContain("declare module '@strapi/strapi'");
-    expect(output).not.toContain('Public');
-    // Besides the extension block, strict output only adds the write rule comments.
+    // Besides the extension blocks, strict output only adds the write rule comments.
     const body = (content: string) =>
       content.slice(0, content.indexOf('declare ')).replace(/^ *\/\*\*.*\*\/\n/gm, '');
     expect(body(output)).toBe(body(legacy));
     expect(legacy).not.toContain('/**');
+  });
+
+  test('with strict types, schemas also augment Public for programs without strict types', async () => {
+    const { output } = await generator({ strapi, logger, strict: true });
+    const { output: legacy } = await generator({ strapi, logger, strict: false });
+    const globalStart = output.indexOf('declare global');
+    const publicStart = output.indexOf("declare module '@strapi/strapi'");
+    const entries = (block: string) => block.match(/'[^']+': \w+;/g);
+
+    expect(globalStart).toBeGreaterThan(-1);
+    expect(publicStart).toBeGreaterThan(globalStart);
+    const globalBlock = output.slice(globalStart, publicStart);
+    const publicBlock = output.slice(publicStart);
+    // The Public block is the block strict off writes, with the same UID-to-interface entries.
+    expect(publicBlock).toBe(legacy.slice(legacy.indexOf("declare module '@strapi/strapi'")));
+    expect(publicBlock).toMatch(
+      new RegExp(`export namespace Public\\s*{\\s*export interface ${legacyRegistry} {`)
+    );
+    expect(entries(publicBlock)).toEqual(entries(globalBlock));
+    expect(entries(publicBlock)).toHaveLength(Object.keys(Object.values(strapi)[0]).length);
   });
 
   test('with strict types, schemas fill the registry strict mode reads', async () => {

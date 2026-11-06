@@ -207,13 +207,14 @@ describe('generate', () => {
     for (const file of ['contentTypes.d.ts', 'components.d.ts']) {
       const content = await fs.readFile(generated(file), 'utf8');
       expect(content).toContain('declare global');
-      expect(content).not.toContain('namespace Public');
+      expect(content).toContain('namespace Public');
     }
 
     await run(false);
     for (const file of ['contentTypes.d.ts', 'components.d.ts']) {
       const content = await fs.readFile(generated(file), 'utf8');
       expect(content).toContain("declare module '@strapi/strapi'");
+      expect(content).toContain('namespace Public');
       expect(content).not.toContain('declare global');
     }
   });

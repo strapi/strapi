@@ -78,7 +78,8 @@ export const format = async (content: string): Promise<string> => {
  *
  * Without strict types, the block augments the `Public` namespace of `@strapi/strapi`, as in
  * previous releases. With strict types, it augments the global `Strapi.Registries` namespace, the
- * only schema registries strict mode reads.
+ * only schema registries strict mode reads. The strict schema generators also write the `Public`
+ * block, for programs that load the schemas without the strict switch.
  */
 export const generateSharedExtensionDefinition = (
   registry: string,

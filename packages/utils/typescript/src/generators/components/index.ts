@@ -68,6 +68,12 @@ export const generateComponentsDefinitions = async (
 
     // Global
     generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions, { strict }),
+
+    // Public: strict programs ignore it. A program without strict.d.ts (a frontend, a types-only
+    // package, a tsconfig that excludes types/generated) reads it, as with strict types off.
+    ...(strict === true
+      ? [generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions)]
+      : []),
   ];
 
   const output = emitDefinitions(allDefinitions);

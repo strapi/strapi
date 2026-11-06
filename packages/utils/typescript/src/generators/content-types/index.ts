@@ -89,6 +89,12 @@ export const generateContentTypesDefinitions = async (
       contentTypesDefinitions,
       { strict }
     ),
+
+    // Public: strict programs ignore it. A program without strict.d.ts (a frontend, a types-only
+    // package, a tsconfig that excludes types/generated) reads it, as with strict types off.
+    ...(strict === true
+      ? [generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions)]
+      : []),
   ];
 
   const output = emitDefinitions(allDefinitions);
