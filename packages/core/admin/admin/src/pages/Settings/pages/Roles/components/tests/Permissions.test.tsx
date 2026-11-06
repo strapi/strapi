@@ -120,6 +120,61 @@ describe('Permissions', () => {
       screen.getByRole('checkbox', { name: 'Access the Email Settings page' })
     ).toBeInTheDocument();
   });
+
+  it('should keep a settings section disabled by config visible, editable and marked', async () => {
+    const layoutWithAuditLogs = {
+      ...layout,
+      sections: {
+        ...layout.sections,
+        settings: [
+          ...layout.sections.settings,
+          {
+            displayName: 'Read',
+            category: 'audit logs',
+            subCategory: 'options',
+            action: 'admin::audit-logs.read',
+            disabledByConfig: true,
+          },
+          {
+            displayName: 'Export',
+            category: 'audit logs',
+            subCategory: 'options',
+            action: 'admin::audit-logs.export',
+            disabledByConfig: true,
+          },
+        ],
+      },
+    };
+
+    const { user } = render(<Permissions layout={layoutWithAuditLogs} />);
+
+    await user.click(screen.getByRole('tab', { name: 'Settings' }));
+    await screen.findByRole('tabpanel', { name: 'Settings' });
+
+    // Only the audit logs section carries the marker
+    expect(screen.getAllByText('Disabled by configuration')).toHaveLength(1);
+
+    // The marker sits inside the trigger, next to the title
+    const auditLogsTrigger = screen.getByRole('button', {
+      name: 'Audit logs Disabled by configuration audit logs settings',
+    });
+    expect(auditLogsTrigger).toHaveTextContent('Disabled by configuration');
+
+    // The trigger clips its single line, so the title row and the badge text must wrap on narrow screens
+    const badge = screen.getByText('Disabled by configuration').parentElement;
+    expect(badge).toHaveStyle({ whiteSpace: 'normal' });
+    expect(badge?.parentElement).toHaveStyle({ flexWrap: 'wrap' });
+
+    await user.click(auditLogsTrigger);
+
+    const readCheckbox = await screen.findByRole('checkbox', { name: 'Read' });
+    expect(readCheckbox).toBeEnabled();
+    expect(screen.getByRole('checkbox', { name: 'Export' })).toBeEnabled();
+
+    await user.click(readCheckbox);
+
+    expect(readCheckbox).toBeChecked();
+  });
 });
 
 // ---------------------------------------------------------------------------
