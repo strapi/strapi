@@ -27,12 +27,19 @@ export const publicStatic: Core.MiddlewareFactory = (
     {
       method: 'GET',
       path: '/((?!uploads/).+)',
-      // Kept in v6 syntax so ctx.params[0] and the route list stay as they were.
+      // Kept in v6 syntax so ctx.params[0] and the route list stay as they were. v8 cannot express
+      // the negative lookahead, so the handler skips /uploads/ itself.
       [Symbol.for('strapi.route.keepV6Path')]: true,
-      handler: koaStatic(strapi.dirs.static.public, {
-        maxage: maxAge,
-        defer: true,
-      }),
+      handler(ctx, next) {
+        if (/^\/uploads\//i.test(ctx.path)) {
+          return next();
+        }
+
+        return koaStatic(strapi.dirs.static.public, {
+          maxage: maxAge,
+          defer: true,
+        })(ctx, next);
+      },
       config: { auth: false },
     },
   ]);
