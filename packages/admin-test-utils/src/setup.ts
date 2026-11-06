@@ -77,11 +77,11 @@ const patchedConsole = {
      * A description is optional for a dialog, and Radix only warns: it is advice, not a broken
      * component. A dialog without a title is still an error, and still fails the test.
      */
-    if (/^Warning: Missing `Description` or `aria-describedby=\{undefined\}`/.test(msg)) {
+    if (msg.startsWith('Warning: Missing `Description` or `aria-describedby={undefined}`')) {
       return;
     }
 
-    if (/^`AlertDialogContent` requires a description/.test(msg)) {
+    if (msg.startsWith('`AlertDialogContent` requires a description')) {
       return;
     }
 
