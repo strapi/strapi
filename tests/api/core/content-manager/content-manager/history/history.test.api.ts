@@ -1024,6 +1024,61 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(latestVersion.source).toBe('admin-api');
       expect(latestVersion.data.description).toBe('Updated with an admin token');
     });
+
+    describe('Versions saved before the source and the author', () => {
+      let documentId: string;
+
+      const createLegacyVersion = async (createdBy: number) => {
+        const historyVersions = strapi.db.query('plugin::content-manager.history-version');
+        const { contentType, relatedDocumentId, locale, status, data, schema } =
+          await historyVersions.findOne({ where: { relatedDocumentId: documentId } });
+
+        return historyVersions.create({
+          data: { contentType, relatedDocumentId, locale, status, data, schema, createdBy },
+        });
+      };
+
+      beforeAll(async () => {
+        const { data } = await createEntry({
+          uid: collectionTypeUid,
+          data: { name: 'Product saved before the source and the author' },
+        });
+        documentId = data.documentId;
+      });
+
+      test('Shows the admin panel source and the admin as the author', async () => {
+        const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+        const legacyVersion = await createLegacyVersion(me.data.id);
+
+        const versions = await findVersions(documentId);
+        const version = versions.find(({ id }) => id === legacyVersion.id);
+
+        expect(version.source).toBe('admin-panel');
+        expect(version.author).toEqual({
+          type: 'person',
+          name: 'admin admin',
+          model: 'admin::user',
+          id: String(me.data.id),
+        });
+      });
+
+      test('Shows no author when the admin was deleted', async () => {
+        const utils = createUtils(strapi);
+        const admin = await utils.createUser({
+          firstname: 'deleted',
+          lastname: 'admin',
+          email: 'deleted.admin@strapi.io',
+        });
+        const legacyVersion = await createLegacyVersion(admin.id);
+        await utils.deleteUserById(admin.id);
+
+        const versions = await findVersions(documentId);
+        const version = versions.find(({ id }) => id === legacyVersion.id);
+
+        expect(version.source).toBe('admin-panel');
+        expect(version.author).toBeNull();
+      });
+    });
   });
 
   describe('Bulk actions create versions', () => {

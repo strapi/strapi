@@ -8,14 +8,18 @@ import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
-import { type AuthorColumns, createServiceUtils, toAuthor, toAuthorColumns } from './utils';
+import { createServiceUtils, toAuthorColumns } from './utils';
+import { getVersionOrigin, type StoredVersionOrigin } from './legacy-versions';
 import { getService as getContentManagerService } from '../../utils';
 import { AUDITED_EVENTS, type HistoryRestoreEvent } from '../../audit-logs';
 
 // Needed because the query engine doesn't return any types yet
-type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale' | 'author'> &
+type HistoryVersionQueryResult = Omit<
+  HistoryVersionDataResponse,
+  'locale' | 'author' | 'source' | 'createdBy'
+> &
   Pick<CreateHistoryVersion, 'locale'> &
-  AuthorColumns;
+  StoredVersionOrigin;
 
 const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
@@ -165,7 +169,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         (results as HistoryVersionQueryResult[]).map(async (result) => {
           return {
             ...omit(result, ['authorType', 'authorName', 'authorModel', 'authorId']),
-            author: toAuthor(result),
+            ...getVersionOrigin(result),
             data: await populateEntry(result),
             meta: {
               unknownAttributes: serviceUtils.getSchemaAttributesDiff(
