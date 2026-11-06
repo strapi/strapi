@@ -58,7 +58,7 @@ describe('translateRoutePath', () => {
     expect(
       translateRoutePath('/a/:id(\\d+)/*"x y"/:"my (name)"/*$rest/(.*)').parameterNames
     ).toEqual(['id', 'x y', 'my (name)', '$rest', 'splat']);
-    expect(translateRoutePath('/files/:path(\\d+)+/:404').parameterNames).toEqual(['path', '404']);
+    expect(translateRoutePath('/files/:path([0-9])+/:404').parameterNames).toEqual(['path', '404']);
   });
 
   it('namespaces the names of unnamed and literal groups when asked', () => {

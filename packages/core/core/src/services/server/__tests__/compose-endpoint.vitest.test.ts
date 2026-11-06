@@ -368,7 +368,7 @@ describe('router path registration', () => {
         method: 'GET',
         path: '/users/:id(\\d+)',
         handler(ctx) {
-          ctx.body = ctx.params;
+          ctx.body = { ok: true };
         },
         info: {},
       },
@@ -426,8 +426,10 @@ describe('router path registration', () => {
     const strapi = createStrapi();
     const router = new Router();
     installRoutePathTranslation(router, strapi);
+    const seen: unknown[] = [];
     router.get('/users/:id(\\d+)', (ctx) => {
-      ctx.body = ctx.params;
+      seen.push(ctx.params.id);
+      ctx.body = { ok: true };
     });
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
@@ -435,7 +437,8 @@ describe('router path registration', () => {
     app.use(router.allowedMethods());
     const server = app.callback();
 
-    await request(server).get('/users/12').expect(200, { id: '12' });
+    await request(server).get('/users/12').expect(200, { ok: true });
+    expect(seen).toEqual(['12']);
     await request(server).get('/users/abc').expect(404);
     await request(server).post('/users/abc').expect(404);
   });
@@ -561,8 +564,10 @@ describe('router path registration', () => {
     installRoutePathTranslation(router, strapi);
     const api = new Router({ prefix: '/api' });
     installRoutePathTranslation(api, strapi);
+    const seen: unknown[] = [];
     api.get('/users/:id(\\d+)', (ctx) => {
-      ctx.body = ctx.params;
+      seen.push(ctx.params.id);
+      ctx.body = { ok: true };
     });
     api.get('/files/:name([^/]+)', (ctx) => {
       ctx.body = { name: ctx.params.name };
@@ -574,7 +579,8 @@ describe('router path registration', () => {
     app.use(router.allowedMethods());
     const server = app.callback();
 
-    await request(server).get('/api/users/12').expect(200, { id: '12' });
+    await request(server).get('/api/users/12').expect(200, { ok: true });
+    expect(seen).toEqual(['12']);
     await request(server).get('/api/users/abc').expect(404);
     await request(server).post('/api/users/abc').expect(404);
     await request(server).get('/api/files/a%2Fb').expect(200, { name: 'a/b' });
