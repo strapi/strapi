@@ -279,6 +279,29 @@ describe('Relations across D&P / i18n combinations (CMS-277)', () => {
       expect(leftPublished.twoWay).toEqual([]);
       expect((await get(R, right.documentId, { status: 'published' })).lefts).toEqual([]);
     });
+
+    // Republishing Right replaces its published row, so the publish-time relation sync has to
+    // point the published Left's links at the new row. A stale link would populate as null / [].
+    test.each([
+      ['without editing Right', false],
+      ['after editing Right', true],
+    ])('republishing Right %s keeps the published link from Left', async (_, edit) => {
+      const { left, right } = await setup();
+      await publish(R, right.documentId);
+      await publish(L, left.documentId);
+
+      if (edit) {
+        await update(R, right.documentId, { name: 'R2' });
+      }
+      await publish(R, right.documentId);
+
+      const leftPublished = await get(L, left.documentId, { status: 'published' });
+      expect(leftPublished.oneWay?.documentId).toBe(right.documentId);
+      expect(ids(leftPublished.twoWay)).toEqual([right.documentId]);
+      expect(ids((await get(R, right.documentId, { status: 'published' })).lefts)).toEqual([
+        left.documentId,
+      ]);
+    });
   });
 
   describe('i18n -> i18n', () => {
@@ -322,6 +345,33 @@ describe('Relations across D&P / i18n combinations (CMS-277)', () => {
         expect(refs(rightDraft.lefts)).toEqual([{ documentId: left.documentId, locale }]);
       }
     });
+
+    test.each([
+      ['without editing Right', false],
+      ['after editing Right', true],
+    ])(
+      'republishing Right %s keeps the published link from Left in every locale',
+      async (_, edit) => {
+        const { left, right } = await setup();
+        await publish(R, right.documentId, '*');
+        await publish(L, left.documentId, '*');
+
+        if (edit) {
+          await update(R, right.documentId, { name: 'R2-en' }, 'en');
+          await update(R, right.documentId, { name: 'R2-fr' }, 'fr');
+        }
+        await publish(R, right.documentId, '*');
+
+        for (const locale of ['en', 'fr']) {
+          const leftPublished = await get(L, left.documentId, { status: 'published', locale });
+          expect(ref(leftPublished.oneWay)).toEqual({ documentId: right.documentId, locale });
+          expect(refs(leftPublished.twoWay)).toEqual([{ documentId: right.documentId, locale }]);
+
+          const rightPublished = await get(R, right.documentId, { status: 'published', locale });
+          expect(refs(rightPublished.lefts)).toEqual([{ documentId: left.documentId, locale }]);
+        }
+      }
+    );
 
     test('connecting a Right entry of another locale links the Right of the Left locale instead', async () => {
       const right = await create(R, { name: 'R-en' }, 'en');
