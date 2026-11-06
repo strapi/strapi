@@ -373,7 +373,7 @@ describe('Database', () => {
       const closePool = db.connection.destroy.bind(db.connection);
       Object.defineProperty(db.connection, 'destroy', {
         configurable: true,
-        value: async () => {
+        async value() {
           closedBeforeHook = !finished;
           return closePool();
         },

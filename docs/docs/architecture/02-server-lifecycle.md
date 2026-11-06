@@ -156,7 +156,7 @@ A second `destroy()` waits for the shutdown already in progress. After that shut
 
 ## Idempotency guards
 
-- Each module records which lifecycle functions ran. A second call to `register`, `bootstrap` or `destroy` on the same module throws, for example `Register for plugin::i18n has already been called`.
+- Each module records which lifecycle functions finished. A second call to `register` or `bootstrap` throws, for example `Register for plugin::i18n has already been called`. A second `destroy` throws when the first one finished. A `destroy` that threw is not recorded, so the next shutdown runs that module again and skips modules that already finished.
 - `start()` skips `load()` when `isLoaded` is `true`. `load()` has no guard of its own. A second `load()` throws from the module guards.
 - The `modules`, `plugins` and `apis` registries throw when a name is added twice.
 - Provider functions have no guard.
