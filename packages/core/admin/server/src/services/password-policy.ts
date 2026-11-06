@@ -1,4 +1,8 @@
+import { errors } from '@strapi/utils';
+
 import type { PasswordPolicy } from '../../../shared/contracts/admin';
+
+const { ValidationError } = errors;
 
 const STORE_KEY = 'password-policy';
 
@@ -12,7 +16,11 @@ export const PASSWORD_MAX_BYTES = 72;
 export const PASSWORD_MIN_LENGTH_FLOOR = 8;
 export const PASSWORD_MIN_LENGTH_CEILING = 64;
 
-/** The rules Strapi always enforced before the policy became configurable. */
+/**
+ * The rules Strapi always enforced before the policy became configurable. The character classes
+ * are Unicode-aware now (`\p{Ll}`, `\p{Lu}`, `\p{Nd}` instead of `[a-z]`, `[A-Z]`, `\d`), so the
+ * default policy also accepts passwords such as `Пароль123` that used to be rejected.
+ */
 export const DEFAULT_PASSWORD_POLICY: Readonly<PasswordPolicy> = Object.freeze({
   minLength: 8,
   requireLowercase: true,
@@ -24,7 +32,7 @@ export const DEFAULT_PASSWORD_POLICY: Readonly<PasswordPolicy> = Object.freeze({
 const POLICY_KEYS = Object.keys(DEFAULT_PASSWORD_POLICY) as Array<keyof PasswordPolicy>;
 
 export type PasswordPolicyRule =
-  'minLength' | 'lowercase' | 'uppercase' | 'number' | 'specialCharacter';
+  'maxBytes' | 'minLength' | 'lowercase' | 'uppercase' | 'number' | 'specialCharacter';
 
 export interface PasswordPolicyViolation {
   rule: PasswordPolicyRule;
@@ -44,6 +52,12 @@ interface RuleDefinition {
  * default policy. Unicode-aware: "é" is a lowercase letter and "٣" a digit, whatever the locale.
  */
 const RULES: RuleDefinition[] = [
+  {
+    rule: 'maxBytes',
+    isEnabled: () => true,
+    isSatisfied: (password) => new TextEncoder().encode(password).length <= PASSWORD_MAX_BYTES,
+    message: () => `must be less than ${PASSWORD_MAX_BYTES + 1} bytes`,
+  },
   {
     rule: 'minLength',
     isEnabled: () => true,
@@ -71,16 +85,24 @@ const RULES: RuleDefinition[] = [
   {
     rule: 'specialCharacter',
     isEnabled: (policy) => policy.requireSpecialCharacter,
-    isSatisfied: (password) => /[^\p{L}\p{N}]/u.test(password),
+    // Anything but a letter or a decimal digit, so "²" or "½" count as special characters
+    isSatisfied: (password) => /[^\p{L}\p{Nd}]/u.test(password),
     message: () => 'must contain at least one special character',
   },
 ];
 
 const getStore = () => strapi.store({ type: 'core', name: 'admin' });
 
+const isValidMinLength = (value: unknown): value is number =>
+  Number.isInteger(value) &&
+  (value as number) >= PASSWORD_MIN_LENGTH_FLOOR &&
+  (value as number) <= PASSWORD_MIN_LENGTH_CEILING;
+
 /**
  * Only keeps the known keys whose type matches the default value, so a hand-edited or outdated
- * core_store row can never break password validation.
+ * core_store row can never break password validation. A stored `minLength` outside the bounds
+ * (imported, transferred or edited by hand) is clamped to them, so it can neither weaken the
+ * policy below the floor nor lock every admin out above the bcrypt limit.
  */
 const sanitize = (input: unknown): Partial<PasswordPolicy> => {
   if (!input || typeof input !== 'object') {
@@ -93,6 +115,17 @@ const sanitize = (input: unknown): Partial<PasswordPolicy> => {
   for (const key of POLICY_KEYS) {
     if (typeof candidate[key] === typeof DEFAULT_PASSWORD_POLICY[key]) {
       policy[key] = candidate[key];
+    }
+  }
+
+  if (typeof policy.minLength === 'number') {
+    if (Number.isFinite(policy.minLength)) {
+      policy.minLength = Math.min(
+        PASSWORD_MIN_LENGTH_CEILING,
+        Math.max(PASSWORD_MIN_LENGTH_FLOOR, Math.ceil(policy.minLength))
+      );
+    } else {
+      delete policy.minLength;
     }
   }
 
@@ -109,7 +142,17 @@ const getPolicy = async (): Promise<PasswordPolicy> => {
   return { ...DEFAULT_PASSWORD_POLICY, ...sanitize(stored) };
 };
 
+/**
+ * Stores the given rules on top of the current policy. Throws a `ValidationError` for a
+ * `minLength` outside the bounds, whoever the caller is (the HTTP route validates it too).
+ */
 const updatePolicy = async (input: Partial<PasswordPolicy>): Promise<PasswordPolicy> => {
+  if (input?.minLength !== undefined && !isValidMinLength(input.minLength)) {
+    throw new ValidationError(
+      `minLength must be an integer between ${PASSWORD_MIN_LENGTH_FLOOR} and ${PASSWORD_MIN_LENGTH_CEILING}`
+    );
+  }
+
   const policy: PasswordPolicy = { ...(await getPolicy()), ...sanitize(input) };
 
   await getStore().set({ key: STORE_KEY, value: policy });
@@ -118,19 +161,17 @@ const updatePolicy = async (input: Partial<PasswordPolicy>): Promise<PasswordPol
 };
 
 /**
- * Every rule of the policy the password breaks, in display order. Empty when it complies.
- * Pure, so the admin panel and other plugins can mirror the check.
+ * Every rule of the given policy the password breaks, in display order, including the bcrypt
+ * byte limit. Empty when it complies. Pure: pass the result of `getPolicy()` to check against
+ * the configured policy.
  */
-const getViolations = (
-  password: string,
-  policy: PasswordPolicy = DEFAULT_PASSWORD_POLICY
-): PasswordPolicyViolation[] => {
+const getViolations = (password: string, policy: PasswordPolicy): PasswordPolicyViolation[] => {
   return RULES.filter(
     (definition) => definition.isEnabled(policy) && !definition.isSatisfied(password, policy)
   ).map((definition) => ({ rule: definition.rule, message: definition.message(policy) }));
 };
 
-const isCompliant = (password: string, policy?: PasswordPolicy): boolean =>
+const isCompliant = (password: string, policy: PasswordPolicy): boolean =>
   getViolations(password, policy).length === 0;
 
 export default {

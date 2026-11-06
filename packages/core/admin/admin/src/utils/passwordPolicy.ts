@@ -95,7 +95,7 @@ const createPasswordSchema = (policy: PasswordPolicy = DEFAULT_PASSWORD_POLICY) 
     schema = schema.test(
       'special-character',
       PASSWORD_MESSAGES.specialCharacter,
-      (value) => !value || /[^\p{L}\p{N}]/u.test(value)
+      (value) => !value || /[^\p{L}\p{Nd}]/u.test(value)
     );
   }
 
@@ -104,15 +104,29 @@ const createPasswordSchema = (policy: PasswordPolicy = DEFAULT_PASSWORD_POLICY) 
 
 type PasswordSchema = ReturnType<typeof createPasswordSchema>;
 
+const isDefaultPasswordPolicy = (policy: PasswordPolicy) =>
+  (Object.keys(DEFAULT_PASSWORD_POLICY) as Array<keyof PasswordPolicy>).every(
+    (key) => policy[key] === DEFAULT_PASSWORD_POLICY[key]
+  );
+
 /**
  * The sentence shown under password inputs, e.g.
  * "Must be at least 8 characters, 1 lowercase, 1 uppercase, 1 number".
+ * The default policy keeps the former `Auth.form.password.hint` key, which every locale and
+ * project translation overrides already cover.
  */
 const formatPasswordPolicyHint = (
   policy: PasswordPolicy,
   formatMessage: IntlShape['formatMessage']
-): string =>
-  formatMessage(
+): string => {
+  if (isDefaultPasswordPolicy(policy)) {
+    return formatMessage({
+      id: 'Auth.form.password.hint',
+      defaultMessage: 'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number',
+    });
+  }
+
+  return formatMessage(
     {
       id: 'Auth.form.password.policyHint',
       defaultMessage:
@@ -126,6 +140,7 @@ const formatPasswordPolicyHint = (
       requireSpecialCharacter: String(policy.requireSpecialCharacter),
     }
   );
+};
 
 export {
   DEFAULT_PASSWORD_POLICY,

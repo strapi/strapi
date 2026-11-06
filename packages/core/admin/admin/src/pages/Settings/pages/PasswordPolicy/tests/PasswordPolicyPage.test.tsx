@@ -31,7 +31,7 @@ describe('PasswordPolicyPage', () => {
     expect(screen.getByRole('checkbox', { name: /Require a special character/ })).not.toBeChecked();
 
     expect(screen.getByTestId('password-policy-preview')).toHaveTextContent(
-      'Must be at least 8 characters, 1 lowercase, 1 uppercase, 1 number'
+      'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number'
     );
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });

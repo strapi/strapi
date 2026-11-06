@@ -70,6 +70,11 @@ describe('passwordPolicy', () => {
         'components.Input.error.contain.specialCharacter',
       ]);
       expect(await errorIdsOf('Testing1234!', policy)).toEqual([]);
+      // Same as the server: only letters and decimal digits are not special characters
+      expect(await errorIdsOf('Testing1234²', policy)).toEqual([]);
+      expect(await errorIdsOf('Testingé1234', policy)).toEqual([
+        'components.Input.error.contain.specialCharacter',
+      ]);
     });
 
     it('keeps rejecting passwords over 72 bytes whatever the policy', async () => {
@@ -86,10 +91,25 @@ describe('passwordPolicy', () => {
   describe('formatPasswordPolicyHint', () => {
     const { formatMessage } = createIntl({ locale: 'en', messages: {} }, createIntlCache());
 
-    it('lists the enabled rules', () => {
+    it('keeps the translated former hint for the default policy', () => {
       expect(formatPasswordPolicyHint(DEFAULT_PASSWORD_POLICY, formatMessage)).toBe(
-        'Must be at least 8 characters, 1 lowercase, 1 uppercase, 1 number'
+        'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number'
       );
+
+      const { formatMessage: formatFrench } = createIntl(
+        {
+          locale: 'fr',
+          messages: { 'Auth.form.password.hint': 'Au moins 8 caractères' },
+        },
+        createIntlCache()
+      );
+
+      expect(formatPasswordPolicyHint({ ...DEFAULT_PASSWORD_POLICY }, formatFrench)).toBe(
+        'Au moins 8 caractères'
+      );
+    });
+
+    it('lists the enabled rules', () => {
       expect(
         formatPasswordPolicyHint(
           { ...DEFAULT_PASSWORD_POLICY, requireSpecialCharacter: true },

@@ -33,6 +33,7 @@ const {
   count,
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
+  assertPasswordIsValid,
   getLanguagesInUse,
 } = userService;
 
@@ -1219,6 +1220,37 @@ describe('User', () => {
         expect(findOne).toHaveBeenCalledWith({ where: { email }, populate: ['roles'] });
       }
     );
+  });
+
+  describe('assertPasswordIsValid', () => {
+    test('Lets a policy read failure through instead of reporting an invalid password', async () => {
+      const failure = new Error('database unavailable');
+
+      global.strapi = {
+        ...global.strapi,
+        admin: {
+          services: {
+            'password-policy': {
+              ...passwordPolicyService,
+              getPolicy: vi.fn(async () => {
+                throw failure;
+              }),
+            },
+          },
+        },
+      } as any;
+
+      await expect(assertPasswordIsValid('Testing1234')).rejects.toBe(failure);
+    });
+
+    test('Resolves for a password complying with the stored policy', async () => {
+      global.strapi = {
+        ...global.strapi,
+        admin: { services: { 'password-policy': passwordPolicyServiceMock } },
+      } as any;
+
+      await expect(assertPasswordIsValid('Testing1234')).resolves.toBeUndefined();
+    });
   });
 
   describe('getLanguagesInUse', () => {

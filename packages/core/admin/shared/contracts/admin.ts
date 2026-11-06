@@ -362,7 +362,7 @@ export interface PasswordPolicy {
   requireLowercase: boolean;
   requireUppercase: boolean;
   requireNumber: boolean;
-  /** Any character that is neither a letter nor a digit. */
+  /** Any character that is neither a letter nor a decimal digit, e.g. `!`, a space or `²`. */
   requireSpecialCharacter: boolean;
 }
 

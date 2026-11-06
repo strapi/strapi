@@ -2,6 +2,7 @@ import { createCommand } from 'commander';
 import { errors, yup } from '@strapi/utils';
 import _ from 'lodash';
 import type { QuestionCollection } from 'inquirer';
+import type { Core } from '@strapi/types';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
@@ -61,30 +62,60 @@ const promptQuestions: QuestionCollection<Answers> = [
   },
 ];
 
-async function createAdmin({ email, password, firstname, lastname }: CmdOptions) {
+/**
+ * The password policy is stored in the database, so a password can only be checked once Strapi
+ * is loaded, after the prompts. In interactive mode, asks for the password again until it is
+ * valid instead of losing every answer; otherwise exits with an error.
+ */
+async function ensureValidPassword(
+  app: Core.Strapi,
+  password: string,
+  interactive: boolean
+): Promise<string> {
+  let candidate = password;
+
+  for (;;) {
+    try {
+      await app.admin!.services.user.assertPasswordIsValid(candidate);
+      return candidate;
+    } catch (err) {
+      if (!(err instanceof errors.ValidationError)) {
+        throw err;
+      }
+
+      console.error(err.message);
+
+      if (!interactive) {
+        process.exit(1);
+      }
+    }
+
+    const inquirer = await getInquirer();
+    ({ password: candidate } = await inquirer.prompt<{ password: string }>([
+      { type: 'password', name: 'password', message: 'Admin password?' },
+    ]));
+  }
+}
+
+async function createAdmin(
+  { email, password: initialPassword, firstname, lastname }: CmdOptions,
+  { interactive = false }: { interactive?: boolean } = {}
+) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  // The password policy is stored in the database, so it can only be read once Strapi is loaded
-  if (password !== undefined) {
-    try {
-      await app.admin!.services.user.assertPasswordIsValid(password);
-    } catch (err) {
-      if (err instanceof errors.ValidationError) {
-        console.error(err.message);
-        process.exit(1);
-      }
-
-      throw err;
-    }
-  }
-
+  // Before the password, so a retried password is never lost to an email already taken
   const user = await app.admin!.services.user.exists({ email });
 
   if (user) {
     console.error(`User with email "${email}" already exists`);
     process.exit(1);
   }
+
+  const password =
+    initialPassword === undefined
+      ? undefined
+      : await ensureValidPassword(app, initialPassword, interactive);
 
   const superAdminRole = await app.admin!.services.role.getSuperAdmin();
 
@@ -106,6 +137,7 @@ async function createAdmin({ email, password, firstname, lastname }: CmdOptions)
  */
 const action = async (cmdOptions: CmdOptions = {}) => {
   let { email, password, firstname, lastname } = cmdOptions;
+  let interactive = false;
 
   if (
     _.isEmpty(email) &&
@@ -122,6 +154,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     }
 
     ({ email, password, firstname, lastname } = inquiry);
+    interactive = true;
   }
 
   try {
@@ -134,7 +167,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     process.exit(1);
   }
 
-  return createAdmin({ email, password, firstname, lastname });
+  return createAdmin({ email, password, firstname, lastname }, { interactive });
 };
 
 /**

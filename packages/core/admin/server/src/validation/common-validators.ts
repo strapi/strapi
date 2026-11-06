@@ -5,7 +5,6 @@ import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
 import actions from '../domain/action/index';
-import { PASSWORD_MAX_BYTES } from '../services/password-policy';
 
 const { actionFields } = actions;
 
@@ -24,63 +23,50 @@ export const username = yup.string().min(1);
 /**
  * Checked against the password policy configured in the admin settings (see the
  * `password-policy` service) at validation time, so a change applies to the next request.
- * The bcrypt byte limit is enforced on top of it and is not configurable.
+ * The service also enforces the bcrypt byte limit, which is not configurable.
  */
-export const password = yup
-  .string()
-  .test(
-    'required-byte-size',
-    // `\${path}` is the Yup interpolation placeholder, not a JS one
-    `\${path} must be less than ${PASSWORD_MAX_BYTES + 1} bytes`,
-    function checkByteSize(value) {
-      if (!value) return true;
+export const password = yup.string().test(
+  'password-policy',
+  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
+  '${path} does not comply with the password policy',
+  async function checkPasswordPolicy(value) {
+    // An empty string is a value: it has to break the policy instead of counting as absent
+    if (_.isNil(value)) return true;
 
-      const byteSize = new TextEncoder().encode(value).length;
-      return byteSize <= PASSWORD_MAX_BYTES;
+    const passwordPolicyService = getService('password-policy');
+
+    let policy;
+    try {
+      policy = await passwordPolicyService.getPolicy();
+    } catch (error) {
+      // yup does not handle the rejection of an async test: `validate()` would never settle and
+      // the rejection would be unhandled. Falling back to the defaults could accept a password
+      // the configured policy forbids, so refuse it instead.
+      strapi.log.error('Unable to read the password policy', error);
+
+      return this.createError({
+        // `\${path}` is the Yup interpolation placeholder, not a JS one
+        message: `\${path} could not be checked against the password policy`,
+      });
     }
-  )
-  .test(
-    'password-policy',
-    // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
-    '${path} does not comply with the password policy',
-    async function checkPasswordPolicy(value) {
-      // An empty string is a value: it has to break the policy instead of counting as absent
-      if (_.isNil(value)) return true;
 
-      const passwordPolicyService = getService('password-policy');
+    const violations = passwordPolicyService.getViolations(value, policy);
 
-      let policy;
-      try {
-        policy = await passwordPolicyService.getPolicy();
-      } catch (error) {
-        // yup does not handle the rejection of an async test: `validate()` would never settle and
-        // the rejection would be unhandled. Falling back to the defaults could accept a password
-        // the configured policy forbids, so refuse it instead.
-        strapi.log.error('Unable to read the password policy', error);
-
-        return this.createError({
-          // `\${path}` is the Yup interpolation placeholder, not a JS one
-          message: `\${path} could not be checked against the password policy`,
-        });
-      }
-
-      const violations = passwordPolicyService.getViolations(value, policy);
-
-      if (violations.length === 0) {
-        return true;
-      }
-
-      // Report every broken rule at once, like the former chain of `.min()` / `.matches()` did
-      return new yup.ValidationError(
-        violations.map((violation) =>
-          // `\${path}` is the Yup interpolation placeholder, not a JS one
-          this.createError({ message: `\${path} ${violation.message}` })
-        ),
-        value,
-        this.path
-      );
+    if (violations.length === 0) {
+      return true;
     }
-  );
+
+    // Report every broken rule at once, like the former chain of `.min()` / `.matches()` did
+    return new yup.ValidationError(
+      violations.map((violation) =>
+        // `\${path}` is the Yup interpolation placeholder, not a JS one
+        this.createError({ message: `\${path} ${violation.message}` })
+      ),
+      value,
+      this.path
+    );
+  }
+);
 
 export const roles = yup.array(yup.strapiID()).min(1);
 

@@ -111,6 +111,9 @@ interface RegisterProps {
   hasAdmin?: boolean;
 }
 
+/** Fields of the invite form sent under `userInfo` and rendered as inputs. */
+const USER_INFO_FIELDS = new Set(['firstname', 'lastname', 'password']);
+
 interface RegisterFormValues {
   firstname: string;
   lastname: string;
@@ -191,7 +194,11 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
   const { setNpsSurveySettings } = useNpsSurveySettings();
-  const { schema: passwordSchema, hint: passwordHint } = usePasswordPolicy();
+  const {
+    schema: passwordSchema,
+    hint: passwordHint,
+    refetch: refetchPasswordPolicy,
+  } = usePasswordPolicy();
 
   const isAdminRegistration = match?.params.authType === 'register-admin';
 
@@ -299,8 +306,24 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         trackUsage('didNotCreateFirstAdmin');
 
         if (res.error.name === 'ValidationError') {
-          setFormErrors(formatValidationErrors(res.error));
-          return;
+          // The body nests the fields under `userInfo`, the form does not
+          const { userInfo: userInfoErrors } = formatValidationErrors(res.error) as {
+            userInfo?: Record<string, string>;
+          };
+          const fieldErrors = Object.fromEntries(
+            Object.entries(userInfoErrors ?? {})
+              .filter(([field]) => USER_INFO_FIELDS.has(field))
+              .map(([field, message]) => [field, String(message).replace(/^userInfo\./, '')])
+          );
+
+          // The password policy may have changed since the page loaded
+          refetchPasswordPolicy();
+
+          // Errors on other paths (e.g. the registration token) have no field: show the alert
+          if (Object.keys(fieldErrors).length > 0) {
+            setFormErrors(fieldErrors);
+            return;
+          }
         }
 
         setApiError(formatAPIError(res.error));

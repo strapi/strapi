@@ -344,6 +344,82 @@ describe('admin:create command', () => {
       consoleError.mockRestore();
     });
 
+    test('Asks again for an invalid password typed at the prompt, keeping the other answers', async () => {
+      process.stdin.isTTY = true;
+      const email = 'email@email.fr';
+      const firstname = 'John';
+      const lastname = 'Doe';
+      const message = 'Invalid password. The password must be at least 8 characters.';
+
+      const mockInquiry = jest
+        .spyOn(inquirer, 'prompt')
+        .mockResolvedValueOnce({ email, password: 'weak', firstname, lastname, confirm: true })
+        .mockResolvedValueOnce({ password: 'stillWeak' })
+        .mockResolvedValueOnce({ password: 'Testing1234' });
+
+      assertPasswordIsValid
+        .mockRejectedValueOnce(new errors.ValidationError(message))
+        .mockRejectedValueOnce(new errors.ValidationError(message))
+        .mockResolvedValueOnce(undefined);
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await createAdminCommand();
+
+      expect(load).toHaveBeenCalledTimes(1);
+      expect(assertPasswordIsValid.mock.calls).toEqual([['weak'], ['stillWeak'], ['Testing1234']]);
+      expect(consoleError).toHaveBeenCalledTimes(2);
+      expect(consoleError).toHaveBeenCalledWith(message);
+      expect(mockInquiry).toHaveBeenLastCalledWith([
+        expect.objectContaining({ type: 'password', name: 'password' }),
+      ]);
+      expect(mockExit).not.toHaveBeenCalledWith(1);
+      expect(mockExit).toHaveBeenCalledWith(0);
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ email, password: 'Testing1234', firstname, lastname })
+      );
+
+      mockInquiry.mockRestore();
+      mockExit.mockRestore();
+      consoleError.mockRestore();
+      consoleLog.mockRestore();
+    });
+
+    test('Checks that the email is free before asking again for the password', async () => {
+      process.stdin.isTTY = true;
+
+      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValueOnce({
+        email: 'taken@email.fr',
+        password: 'weak',
+        firstname: 'John',
+        lastname: 'Doe',
+        confirm: true,
+      });
+
+      exists.mockResolvedValueOnce(true);
+      assertPasswordIsValid.mockRejectedValue(new errors.ValidationError('Invalid password.'));
+
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+        throw new Error('exit');
+      });
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await createAdminCommand().catch((err) => {
+        expect(err).toEqual(new Error('exit'));
+      });
+
+      expect(consoleError).toHaveBeenCalledWith('User with email "taken@email.fr" already exists');
+      expect(assertPasswordIsValid).not.toHaveBeenCalled();
+      expect(mockInquiry).toHaveBeenCalledTimes(1);
+      expect(mockExit).toHaveBeenCalledWith(1);
+
+      mockInquiry.mockRestore();
+      mockExit.mockRestore();
+      consoleError.mockRestore();
+    });
+
     test('Checks an empty password instead of treating it as absent', async () => {
       assertPasswordIsValid.mockRejectedValue(new errors.ValidationError('Invalid password.'));
 

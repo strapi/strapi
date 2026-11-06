@@ -225,7 +225,7 @@ const PasswordPolicyPage = () => {
                         }),
                         hint: formatMessage({
                           id: 'Settings.passwordPolicy.form.requireSpecialCharacter.hint',
-                          defaultMessage: 'Any character that is neither a letter nor a number',
+                          defaultMessage: 'Any character that is neither a letter nor a digit',
                         }),
                         size: 6,
                       },

@@ -16,7 +16,7 @@ import {
  */
 const usePasswordPolicy = () => {
   const { formatMessage } = useIntl();
-  const { data, isLoading } = useGetPasswordPolicyQuery();
+  const { data, isLoading, refetch } = useGetPasswordPolicyQuery();
 
   const policy = data ?? DEFAULT_PASSWORD_POLICY;
 
@@ -26,7 +26,7 @@ const usePasswordPolicy = () => {
     [policy, formatMessage]
   );
 
-  return { policy, schema, hint, isLoading };
+  return { policy, schema, hint, isLoading, refetch };
 };
 
 export { usePasswordPolicy };

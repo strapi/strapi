@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import _, { defaults } from 'lodash';
 
-import { arrays, errors, emitAudit, yup } from '@strapi/utils';
+import { arrays, errors, emitAudit } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import {
@@ -22,7 +22,6 @@ import type {
   AdminUserUpdatePayload,
   // eslint-disable-next-line node/no-unpublished-import
 } from '../../../shared/contracts/shared';
-import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
 import constants from './constants';
 import type { AdminRoleWithUsersCount } from './role';
@@ -222,20 +221,28 @@ const updateById = async (
 };
 
 /**
+ * Check a password against the password policy configured in the admin settings.
+ * @param password - the password to check
+ * @throws ValidationError listing every broken rule. If the policy cannot be read, the store
+ * error is thrown as is, so callers do not mistake it for a password the user can fix.
+ */
+const assertPasswordIsValid = async (password: string) => {
+  const passwordPolicyService = getService('password-policy');
+  const policy = await passwordPolicyService.getPolicy();
+  const violations = passwordPolicyService.getViolations(password, policy);
+
+  if (violations.length > 0) {
+    const reasons = violations.map((violation) => `The password ${violation.message}.`);
+
+    throw new ValidationError(`Invalid password. ${reasons.join(' ')}`);
+  }
+};
+
+/**
  * Reset a user password by email. (Used in admin:reset CLI)
  * @param email - user email
  * @param password - new password
  */
-const assertPasswordIsValid = async (password: string) => {
-  try {
-    await passwordValidator.label('The password').validate(password, { abortEarly: false });
-  } catch (error) {
-    const reasons = error instanceof yup.ValidationError ? `${error.errors.join('. ')}.` : '';
-
-    throw new ValidationError(`Invalid password. ${reasons}`.trim());
-  }
-};
-
 const resetPasswordByEmail = async (email: string, password: string) => {
   const user = await strapi.db
     .query('admin::user')

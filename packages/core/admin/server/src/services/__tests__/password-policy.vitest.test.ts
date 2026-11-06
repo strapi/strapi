@@ -72,6 +72,25 @@ describe('Password policy service', () => {
         requireUppercase: false,
       });
     });
+
+    test.each([
+      [1, PASSWORD_MIN_LENGTH_FLOOR],
+      [100, PASSWORD_MIN_LENGTH_CEILING],
+      [11.5, 12],
+    ])('clamps a stored minLength of %s to %s', async (stored, expected) => {
+      storeGet.mockResolvedValue({ minLength: stored });
+
+      await expect(getPolicy()).resolves.toEqual({
+        ...DEFAULT_PASSWORD_POLICY,
+        minLength: expected,
+      });
+    });
+
+    test('ignores a stored minLength that is not a finite number', async () => {
+      storeGet.mockResolvedValue({ minLength: Number.NaN });
+
+      await expect(getPolicy()).resolves.toEqual(DEFAULT_PASSWORD_POLICY);
+    });
   });
 
   describe('updatePolicy', () => {
@@ -101,21 +120,36 @@ describe('Password policy service', () => {
         value: { ...DEFAULT_PASSWORD_POLICY, minLength: 10 },
       });
     });
+
+    test.each([
+      2,
+      PASSWORD_MIN_LENGTH_FLOOR - 1,
+      PASSWORD_MIN_LENGTH_CEILING + 1,
+      10.5,
+      Number.NaN,
+    ])('rejects a minLength of %s without storing anything', async (minLength) => {
+      storeGet.mockResolvedValue(null);
+
+      await expect(updatePolicy({ minLength })).rejects.toThrow(
+        `minLength must be an integer between ${PASSWORD_MIN_LENGTH_FLOOR} and ${PASSWORD_MIN_LENGTH_CEILING}`
+      );
+      expect(storeSet).not.toHaveBeenCalled();
+    });
   });
 
   describe('getViolations', () => {
     test('accepts a password satisfying the default policy', () => {
-      expect(getViolations('Testing1234')).toEqual([]);
-      expect(isCompliant('Testing1234')).toBe(true);
+      expect(getViolations('Testing1234', DEFAULT_PASSWORD_POLICY)).toEqual([]);
+      expect(isCompliant('Testing1234', DEFAULT_PASSWORD_POLICY)).toBe(true);
     });
 
     test('reports every broken rule, in display order', () => {
-      expect(getViolations('123')).toEqual([
+      expect(getViolations('123', DEFAULT_PASSWORD_POLICY)).toEqual([
         { rule: 'minLength', message: 'must be at least 8 characters' },
         { rule: 'lowercase', message: 'must contain at least one lowercase character' },
         { rule: 'uppercase', message: 'must contain at least one uppercase character' },
       ]);
-      expect(isCompliant('123')).toBe(false);
+      expect(isCompliant('123', DEFAULT_PASSWORD_POLICY)).toBe(false);
     });
 
     test('uses the configured minimum length in the message', () => {
@@ -148,6 +182,21 @@ describe('Password policy service', () => {
       expect(rulesOf('Testing 1234', policy)).toEqual([]);
       // Letters and digits from any script are not special characters
       expect(rulesOf('Testingé1234', policy)).toEqual(['specialCharacter']);
+      // Numbers that are not decimal digits are neither digits nor letters, so they count
+      expect(rulesOf('Abcdefgh²1', policy)).toEqual([]);
+      expect(rulesOf('Abcdefgh½1', policy)).toEqual([]);
+      expect(rulesOf('AbcdefghⅫ1', policy)).toEqual([]);
+    });
+
+    test('rejects passwords over 72 bytes whatever the policy says', () => {
+      const password = `Aa1${'x'.repeat(80)}`;
+
+      expect(getViolations(password, DEFAULT_PASSWORD_POLICY)).toEqual([
+        { rule: 'maxBytes', message: 'must be less than 73 bytes' },
+      ]);
+      expect(isCompliant(password, DEFAULT_PASSWORD_POLICY)).toBe(false);
+      // Multi-byte characters count by their UTF-8 size, not their length
+      expect(rulesOf(`Aa1${'é'.repeat(35)}`)).toEqual(['maxBytes']);
     });
 
     test('recognises letters and digits beyond ASCII', () => {
