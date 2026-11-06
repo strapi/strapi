@@ -13,7 +13,7 @@ type MetricsStoreValue = { lastWeeklyUpdate?: number; weeklySchedule?: string };
 const getWeeklyCronScheduleAt = (date: Date) =>
   `${date.getSeconds()} ${date.getMinutes()} ${date.getHours()} * * ${date.getDay()}`;
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default (({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('workflow-metrics', { strapi }) as typeof workflowMetrics;
   const workflowsService = getService('workflows', { strapi });
 
@@ -51,7 +51,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async ensureWeeklyStoredCronSchedule() {
-      const metricsInfoStored: any = await getMetricsStoreValue();
+      const metricsInfoStored: Core.IsStrict extends true ? MetricsStoreValue : any =
+        await getMetricsStoreValue();
       const { weeklySchedule: currentSchedule, lastWeeklyUpdate } = metricsInfoStored;
 
       const now = new Date();
@@ -76,4 +77,4 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
   };
-};
+}) satisfies Core.ServiceImplementation<'plugin::review-workflows.workflow-weekly-metrics'>;
