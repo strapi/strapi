@@ -68,5 +68,11 @@ export interface Database<TClient extends Database.ClientKind = Database.ClientK
      * example `env.bool('DATABASE_POOL_TIMEOUT_DIAGNOSTICS', true)`): a string is not read as false.
      */
     poolTimeoutDiagnostics?: boolean;
+    /**
+     * Maximum time in milliseconds a query may run before the database cancels it. Unset by
+     * default (no limit). Applied on postgres and mysql only; schema sync and migrations are not
+     * affected. Must be a positive number (for example `env.int('DATABASE_QUERY_TIMEOUT')`).
+     */
+    queryTimeout?: number;
   };
 }
