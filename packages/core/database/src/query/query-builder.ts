@@ -25,6 +25,11 @@ interface State {
   offset: number | null;
   transaction: any;
   forUpdate: boolean;
+  /**
+   * Postgres `FOR NO KEY UPDATE`. On other dialects this falls back to
+   * `forUpdate`, because MySQL has no equivalent and SQLite ignores row locks.
+   */
+  forNoKeyUpdate: boolean;
   onConflict: any;
   merge: any;
   ignore: boolean;
@@ -95,6 +100,8 @@ export interface QueryBuilder {
 
   forUpdate(): QueryBuilder;
 
+  forNoKeyUpdate(): QueryBuilder;
+
   init(params?: any): QueryBuilder;
 
   filters(filters: any): void;
@@ -151,6 +158,7 @@ const createQueryBuilder = (
     offset: null,
     transaction: null,
     forUpdate: false,
+    forNoKeyUpdate: false,
     onConflict: null,
     merge: null,
     ignore: false,
@@ -318,6 +326,13 @@ const createQueryBuilder = (
 
     forUpdate() {
       state.forUpdate = true;
+      state.forNoKeyUpdate = false;
+      return this;
+    },
+
+    forNoKeyUpdate() {
+      state.forNoKeyUpdate = true;
+      state.forUpdate = false;
       return this;
     },
 
@@ -676,7 +691,9 @@ const createQueryBuilder = (
         qb.transacting(state.transaction);
       }
 
-      if (state.forUpdate) {
+      if (state.forNoKeyUpdate && db.dialect.client === 'postgres') {
+        qb.forNoKeyUpdate();
+      } else if (state.forUpdate || state.forNoKeyUpdate) {
         qb.forUpdate();
       }
 

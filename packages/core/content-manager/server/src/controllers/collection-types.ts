@@ -664,6 +664,13 @@ export default {
     }
 
     const publishedDocument = await strapi.db.transaction(async () => {
+      // This transaction reads the document before it updates it. MySQL fixes
+      // the snapshot at the first read, so lock first or a concurrent save of
+      // the same new locale stays invisible and both insert it.
+      if (id != null) {
+        await strapi.db.lockDocumentId(id);
+      }
+
       // Create or update document
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
 
