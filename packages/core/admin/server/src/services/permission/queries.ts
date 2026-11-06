@@ -136,7 +136,7 @@ const formatOwners = (owners: PermissionOwner[]) => {
     return 'none';
   }
 
-  return uniqueOwners.map((owner) => `"${owner.name}" (id ${owner.id})`).join(', ');
+  return uniqueOwners.map((owner) => `${JSON.stringify(owner.name)} (id ${owner.id})`).join(', ');
 };
 
 /**

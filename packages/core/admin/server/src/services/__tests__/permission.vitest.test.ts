@@ -330,7 +330,9 @@ describe('Permission Service', () => {
           log: { warn },
           db: {
             query: () => ({
-              findMany: vi.fn(() => Promise.resolve(permsInDb)),
+              findMany: vi.fn(({ limit, offset }: { limit: number; offset: number }) =>
+                Promise.resolve(permsInDb.slice(offset, offset + limit))
+              ),
               delete: dbDelete,
               update: vi.fn(() => Promise.resolve()),
               count: vi.fn(() => Promise.resolve(permsInDb.length)),
@@ -431,6 +433,54 @@ describe('Permission Service', () => {
             'Admin tokens: none. ' +
             'Without role or admin token: 0.'
         );
+      });
+
+      test('warns once with the totals when the removed permissions span several pages', async () => {
+        // 450 rows: 3 pages of 200, removed rows on each page
+        const permsInDb = Array.from({ length: 450 }, (_, index) => {
+          const id = index + 1;
+          if (id <= 200) {
+            return perm(id, 'admin::audit-logs.read', { role: { id: 3, name: 'QA Auditor' } });
+          }
+          if (id <= 400) {
+            return perm(id, 'admin::audit-logs.export', { apiToken: { id: 7, name: 'siem' } });
+          }
+          return perm(id, 'admin::users.read', { role: { id: 2, name: 'Editor' } });
+        });
+        permsInDb[449] = perm(450, 'admin::legacy.read', { role: { id: 2, name: 'Editor' } });
+
+        const { warn, dbDelete } = setupCleanup(permsInDb, ['admin::users.read']);
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(401);
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn).toHaveBeenCalledWith(
+          'Removed 401 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Actions: admin::audit-logs.read, admin::audit-logs.export, admin::legacy.read. ' +
+            'Subjects: none. ' +
+            'Roles: "QA Auditor" (id 3), "Editor" (id 2). ' +
+            'Admin tokens: "siem" (id 7). ' +
+            'Without role or admin token: 0.'
+        );
+      });
+
+      test('quotes role and admin token names so the warning stays on one line', async () => {
+        const { warn } = setupCleanup(
+          [
+            perm(1, 'admin::legacy.read', { role: { id: 3, name: 'Evil\nRole "x"' } }),
+            perm(2, 'admin::legacy.read', { apiToken: { id: 7, name: 'evil\r\ntoken' } }),
+          ],
+          []
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(warn).toHaveBeenCalledTimes(1);
+        const message = warn.mock.calls[0][0] as string;
+        expect(message).not.toMatch(/[\r\n]/);
+        expect(message).toContain('Roles: "Evil\\nRole \\"x\\"" (id 3). ');
+        expect(message).toContain('Admin tokens: "evil\\r\\ntoken" (id 7). ');
       });
 
       test('does not warn when nothing is removed', async () => {

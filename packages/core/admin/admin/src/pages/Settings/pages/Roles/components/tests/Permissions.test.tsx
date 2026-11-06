@@ -160,6 +160,11 @@ describe('Permissions', () => {
     });
     expect(auditLogsTrigger).toHaveTextContent('Disabled by configuration');
 
+    // The trigger clips its single line, so the title row and the badge text must wrap on narrow screens
+    const badge = screen.getByText('Disabled by configuration').parentElement;
+    expect(badge).toHaveStyle({ whiteSpace: 'normal' });
+    expect(badge?.parentElement).toHaveStyle({ flexWrap: 'wrap' });
+
     await user.click(auditLogsTrigger);
 
     const readCheckbox = await screen.findByRole('checkbox', { name: 'Read' });
