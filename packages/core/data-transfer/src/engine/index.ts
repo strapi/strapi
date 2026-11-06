@@ -852,14 +852,13 @@ class TransferEngine<
     this.progress.data = {};
     this.#closed = false;
 
-    // Set only after the stream packages load. A failed load must not roll back
-    // or close: those paths run on providers that never bootstrapped, and
-    // file/directory rollback deletes an existing --file target.
+    // A failed stream package load happens before any provider runs, so it must skip rollback
+    // and close: providers never bootstrapped, and file/directory rollback deletes an existing
+    // --file target.
     let streamDepsLoaded = false;
 
     try {
-      // Stream packages load with import(), not at startup. Fail before any
-      // provider runs: destination beforeTransfer deletes uploads, and a fast
+      // Load before any provider runs: destination beforeTransfer deletes uploads, and a fast
       // failure during bootstrap races the DB transaction and hangs rollback.
       await loadStreamDeps();
       streamDepsLoaded = true;
@@ -897,11 +896,8 @@ class TransferEngine<
         this.reportError(e, (e as DataTransferError).severity || 'fatal');
       }
 
-      // Rollback and close only after the stream packages have loaded. A load
-      // failure happens before bootstrap, and destination rollback would delete
-      // an existing export target. Once close has started, a provider's
-      // transaction may already have ended and cannot be rolled back safely.
-      // Note: rollback after a later failure will be configurable in the future.
+      // Once close has started, a provider's transaction may already have ended and cannot be
+      // rolled back safely. Note: This will be configurable in the future.
       if (streamDepsLoaded && !this.#closed) {
         try {
           await this.destinationProvider.rollback?.(e as Error);
@@ -920,8 +916,6 @@ class TransferEngine<
       // Providers bootstrapped before the failure may still hold resources: the local providers
       // disable database lifecycles on bootstrap and only re-enable them on close, so skipping this
       // would leave a programmatic caller's Strapi instance with lifecycles permanently off.
-      // Skip it when the stream packages never loaded, so close does not run on providers that
-      // never bootstrapped.
       if (streamDepsLoaded) {
         await this.#closeAfterError();
       }

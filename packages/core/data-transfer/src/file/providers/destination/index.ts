@@ -112,7 +112,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return zlib.createGzip();
   }
 
-  bootstrap(diagnostics: IDiagnosticReporter): void {
+  bootstrap(diagnostics: IDiagnosticReporter): void | Promise<void> {
     this.#diagnostics = diagnostics;
     this.#closed = false;
     const { compression, encryption } = this.options;

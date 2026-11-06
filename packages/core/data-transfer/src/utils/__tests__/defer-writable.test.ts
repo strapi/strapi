@@ -15,15 +15,23 @@ describe('deferWritable', () => {
       proxy.write({ id: 1 }, (error) => (error ? reject(error) : resolve()));
     });
 
+    const finishOrder: string[] = [];
     const destination = new Writable({
       objectMode: true,
       write(chunk, _encoding, callback) {
         received.push(chunk);
         callback();
       },
+      final(callback) {
+        setTimeout(callback, 10);
+      },
     });
+    destination.on('finish', () => finishOrder.push('destination'));
     const finished = new Promise<void>((resolve) => {
-      destination.on('finish', () => resolve());
+      proxy.on('finish', () => {
+        finishOrder.push('proxy');
+        resolve();
+      });
     });
 
     resolveOpen(destination);
@@ -32,6 +40,7 @@ describe('deferWritable', () => {
     await finished;
 
     expect(received).toEqual([{ id: 1 }]);
+    expect(finishOrder).toEqual(['destination', 'proxy']);
   });
 
   test('delivers writes made before opening in order to a slow destination', async () => {
@@ -83,7 +92,9 @@ describe('deferWritable', () => {
     const writeError = new Promise<Error | null | undefined>((resolve) => {
       proxy.write({ id: 1 }, resolve);
     });
-    proxy.end();
+    const endError = new Promise<Error | null | undefined>((resolve) => {
+      proxy.end(resolve);
+    });
 
     await new Promise((resolve) => {
       setImmediate(resolve);
@@ -91,6 +102,7 @@ describe('deferWritable', () => {
     rejectOpen(openError);
 
     expect(await writeError).toBe(openError);
+    expect(await endError).toBe(openError);
     expect(proxy.destroyed).toBe(true);
   });
 
