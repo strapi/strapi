@@ -1,5 +1,4 @@
 import type Router from '@koa/router';
-import type { Core } from '@strapi/types';
 import { pathToRegexp as compileV6Path, type Key as V6Key } from 'path-to-regexp-v6';
 
 /**
@@ -163,7 +162,12 @@ const scanSlashFreeClass = (pattern: string, start: number) => {
         continue;
       }
 
-      if (escaped === undefined || (/[A-Za-z]/.test(escaped) && !(escaped in CONTROL_ESCAPES))) {
+      // A letter may be a class such as `\D`, and a digit an octal escape such as `\57` for `/`.
+      if (
+        escaped === undefined ||
+        /\d/.test(escaped) ||
+        (/[A-Za-z]/.test(escaped) && !(escaped in CONTROL_ESCAPES))
+      ) {
         return -1;
       }
 
@@ -212,6 +216,7 @@ const patternMayMatchSlash = (pattern: string) => {
       if (
         escaped === undefined ||
         escaped === '/' ||
+        /\d/.test(escaped) ||
         (/[A-Za-z]/.test(escaped) && !'dwsbB'.includes(escaped) && !(escaped in CONTROL_ESCAPES))
       ) {
         return true;
@@ -249,9 +254,11 @@ type TranslateOptions = {
   namespace?: string;
 };
 
-export const translateRoutePath = (
+const translate = (
   path: string,
-  { namespace }: TranslateOptions = {}
+  { namespace }: TranslateOptions,
+  // For a v6 path: the v8 path must match everything it matched, even where v8 narrows a parameter.
+  superset: boolean
 ): TranslatedRoutePath => {
   let translated = '';
   let changed = false;
@@ -259,8 +266,8 @@ export const translateRoutePath = (
   const usedNames = new Set(
     [...path.matchAll(/[:*]([$\w]+)/g)].map(([, name]) => name).filter(Boolean)
   );
-  // Where the last parameter was written, so a parameter right after it can join it.
-  let lastParameter: { start: number; end: number; joined?: string } | undefined;
+  // Where each parameter was written, so a later parameter can join them.
+  const spans: { start: number; end: number; wildcard: boolean; joined?: string }[] = [];
 
   const fail = (reason: string): never => {
     throw new RoutePathMigrationError(path, reason);
@@ -276,7 +283,8 @@ export const translateRoutePath = (
     return `"${name.replace(/["\\]/g, '\\$&')}"`;
   };
 
-  // A namespaced name holds a `:`, so @koa/router sees parameters in a prefix of wildcards only.
+  // A namespaced name holds a `:`. @koa/router only sees parameters in a prefix that contains a `:`,
+  // which a prefix of wildcards would not.
   const generateName = (kind: string) => {
     const base = namespace ? `${namespace}:${kind}` : `v6${kind}`;
     let count = 1;
@@ -291,28 +299,52 @@ export const translateRoutePath = (
   };
 
   /**
-   * v8 needs text between two parameters, and v6 did not. One wildcard stands for parameters
-   * written next to each other, and the v6 path splits its value.
+   * v8 needs text between two parameters. It also stops a parameter from containing the text since
+   * the parameter before it, unless that text holds a `/` and one of the two is a single segment.
    */
-  const writeParameter = (text: string, hasLeadingText: boolean) => {
-    if (!hasLeadingText && lastParameter?.end === translated.length) {
-      const joined = lastParameter.joined ?? generateName('Joined');
-      translated = `${translated.slice(0, lastParameter.start)}{*${formatParameterName(joined, undefined)}}`;
-      lastParameter = { start: lastParameter.start, end: translated.length, joined };
+  const mustJoin = (before: (typeof spans)[number], between: string, wildcard: boolean) =>
+    between === '' || (superset && (!between.includes('/') || (before.wildcard && wildcard)));
+
+  /**
+   * Writes `outside`, then the parameter's `text`. When v8 would not match what v6 matched, one
+   * wildcard stands for this parameter and the ones before it, and the v6 path splits its value.
+   */
+  const writeParameter = (outside: string, inside: string, text: string, wildcard: boolean) => {
+    const last = spans.at(-1);
+
+    if (last && mustJoin(last, translated.slice(last.end) + outside + inside, wildcard)) {
+      let { start, joined } = last;
+      spans.pop();
+
+      for (
+        let before = spans.at(-1);
+        before && mustJoin(before, translated.slice(before.end, start), true);
+        before = spans.at(-1)
+      ) {
+        start = before.start;
+        joined ??= before.joined;
+        spans.pop();
+      }
+
+      joined ??= generateName('Joined');
+      changed = true;
+      translated = `${translated.slice(0, start)}{*${formatParameterName(joined, undefined)}}`;
+      spans.push({ start, end: translated.length, wildcard: true, joined });
       return;
     }
 
+    translated += outside;
     const start = translated.length;
     translated += text;
-    lastParameter = { start, end: translated.length };
+    spans.push({ start, end: translated.length, wildcard });
   };
 
   const detachOptionalPrefix = () => {
     const last = translated.at(-1);
     if (last !== undefined && OPTIONAL_PREFIXES.has(last) && translated.at(-2) !== '\\') {
       translated = translated.slice(0, -1);
-      if (lastParameter && lastParameter.end > translated.length) {
-        lastParameter = undefined;
+      if ((spans.at(-1)?.end ?? 0) > translated.length) {
+        spans.pop();
       }
       return last;
     }
@@ -346,17 +378,22 @@ export const translateRoutePath = (
     const escapedSuffix = escapeLiteral(suffix);
 
     if (modifier === '?' || modifier === '*') {
-      writeParameter(`{${escapedPrefix}${token}${escapedSuffix}}`, prefix !== '');
+      writeParameter(
+        '',
+        escapedPrefix,
+        `{${escapedPrefix}${token}${escapedSuffix}}`,
+        spansSegments
+      );
       return;
     }
 
     // A v8 parameter matches at least one character, and a pattern such as `.*` may match none.
     if (pattern !== undefined && new RegExp(`^(?:${pattern})$`, 'i').test('')) {
-      writeParameter(`${escapedPrefix}{${token}}${escapedSuffix}`, prefix !== '');
+      writeParameter(escapedPrefix, '', `{${token}}${escapedSuffix}`, spansSegments);
       return;
     }
 
-    writeParameter(`${escapedPrefix}${token}${escapedSuffix}`, prefix !== '');
+    writeParameter(escapedPrefix, '', `${token}${escapedSuffix}`, spansSegments);
   };
 
   /**
@@ -469,7 +506,7 @@ export const translateRoutePath = (
     // v8 cannot repeat a literal, so a parameter stands for the repetitions.
     const name = formatParameterName(generateName('Literal'), undefined);
     const token = literal.includes('/') ? `*${name}` : `:${name}`;
-    writeParameter(group.modifier === '*' ? `{${token}}` : token, false);
+    writeParameter('', '', group.modifier === '*' ? `{${token}}` : token, token.startsWith('*'));
   };
 
   const failOnLookaround = (pattern: string | undefined) => {
@@ -550,7 +587,7 @@ export const translateRoutePath = (
       }
 
       if (isParameter && pattern === undefined && !modifier) {
-        writeParameter(`:${formatParameterName(name, path[cursor])}`, false);
+        writeParameter('', '', `:${formatParameterName(name, path[cursor])}`, false);
       } else {
         changed = true;
         addParameter(name, pattern, modifier, detachOptionalPrefix(), '', path[cursor]);
@@ -601,6 +638,14 @@ export const translateRoutePath = (
   }
 
   return { path: translated, changed, generatedParams };
+};
+
+export const translateRoutePath = (
+  path: string,
+  options: TranslateOptions = {}
+): TranslatedRoutePath => {
+  const translated = translate(path, options, false);
+  return translated.changed ? translate(path, options, true) : translated;
 };
 
 /**
@@ -674,39 +719,6 @@ const applyV6Params = (
 
 type ParamsContext = { params: Record<string | number, unknown>; path: string };
 
-/**
- * Applies a v6 path on a router without path translation installed. The v6 path is matched against
- * the end of the request path, since the router's own prefix is v8. A request it rejects goes on
- * to the next matching route, as it did in v6.
- */
-export const withTranslatedPathMatching = (
-  source: string,
-  { changed, generatedParams }: TranslatedRoutePath,
-  routeHandler: Core.MiddlewareHandler
-): Core.MiddlewareHandler => {
-  if (!changed) {
-    return routeHandler;
-  }
-
-  const keys: V6Key[] = [];
-  const regexp = compileV6Path(source, keys, { start: false });
-
-  return (ctx, next) => {
-    const { params, path } = ctx as unknown as ParamsContext;
-    const match = regexp.exec(path);
-
-    generatedParams.forEach((name) => delete params[name]);
-
-    if (!match) {
-      keys.forEach(({ name }) => delete params[name]);
-      return next();
-    }
-
-    applyV6Params(params, keys, match);
-    return routeHandler(ctx, next);
-  };
-};
-
 type Logger = { log: { warn: (message: string) => void } };
 
 /**
@@ -745,6 +757,8 @@ type RoutePathPart = {
 type LayerMatcher = V6Matcher & {
   /** The layer's path when the matcher was built. A layer copied and re-prefixed elsewhere differs. */
   layerPath: string;
+  /** The layer's path as written. */
+  source: string;
   keyNames: Set<string | number>;
   ignoreCaptures: boolean;
 };
@@ -764,6 +778,7 @@ type TranslatedLayer = RouterLayer & {
 type LayerMiddleware = RouterLayer['stack'][number];
 type ShimContext = ParamsContext & {
   captures?: string[];
+  routerPath?: string;
   newRouterPath?: string;
   _matchedRoute?: string;
 };
@@ -851,6 +866,7 @@ const createLayerMatcher = (layer: TranslatedLayer): LayerMatcher | undefined =>
       regexp,
       keys,
       layerPath: layer.path,
+      source: getRouteSourcePath(layer),
       keyNames: new Set(keys.map(({ name }) => name)),
       ignoreCaptures: pathless && keys.length === 1,
     };
@@ -872,28 +888,24 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
   const shim = (ctx: ShimContext, next: () => Promise<unknown>) => {
     const matcher = currentMatcher(layer);
 
-    if (matcher) {
-      const match = matcher.regexp.exec(ctx.newRouterPath || ctx.path);
+    // A copy of the layer that a router without path translation mounted runs this shim too.
+    if (!matcher || ctx.routerPath !== layer.path) {
+      return next();
+    }
 
-      layer.paramNames.forEach(({ name }, index) => {
-        if (!matcher.keyNames.has(name) || ctx.captures?.[index]) {
-          delete ctx.params[name];
-        }
-      });
+    const match = matcher.regexp.exec(ctx.newRouterPath || ctx.path);
 
-      if (match && !matcher.ignoreCaptures) {
-        applyV6Params(ctx.params, matcher.keys, match);
+    layer.paramNames.forEach(({ name }, index) => {
+      if (!matcher.keyNames.has(name) || ctx.captures?.[index]) {
+        delete ctx.params[name];
       }
-    } else {
-      (layer[LAYER_PARTS] ?? []).forEach((part) => {
-        part.generatedParams.forEach((name) => delete ctx.params[name]);
-      });
+    });
+
+    if (match && !matcher.ignoreCaptures) {
+      applyV6Params(ctx.params, matcher.keys, match);
     }
 
-    const source = getRouteSourcePath(layer);
-    if (source !== layer.path) {
-      ctx._matchedRoute = source;
-    }
+    ctx._matchedRoute = matcher.source;
 
     return next();
   };
@@ -907,6 +919,14 @@ const isShim = (middleware: LayerMiddleware) =>
 const setLayerParts = (layer: TranslatedLayer, parts: RoutePathPart[]) => {
   layer[LAYER_PARTS] = parts;
   layer[LAYER_MATCHER] = createLayerMatcher(layer);
+
+  // Without its v6 path, the layer would match everything its broader v8 path matches.
+  if (parts.some(isTranslatedPart) && !layer[LAYER_MATCHER]) {
+    throw new RoutePathMigrationError(
+      parts.map((part) => part.source).join(''),
+      'it mixes path-to-regexp v6 syntax with syntax only v8 accepts'
+    );
+  }
 
   // A copied layer still holds the shim of the layer it was copied from, so it gets its own.
   const stack = layer.stack.filter((middleware) => !isShim(middleware));
@@ -948,24 +968,28 @@ const nextNamespace = (kind: string) => {
 let pendingRoute: { source: string; translated: TranslatedRoutePath } | undefined;
 
 /**
- * Registers a translated route object. On a router with path translation installed, the layer
- * records the path as written. Elsewhere, the handler applies the v6 path itself.
+ * Registers a translated route object, so the layer records the path as written. A v6 path needs
+ * path translation on its router, so it is installed on a router that does not have it yet.
  */
 export const registerTranslatedRoute = (
   router: Router,
+  strapi: Logger,
   source: string,
   translated: TranslatedRoutePath,
-  handler: Core.MiddlewareHandler,
-  register: (handler: Core.MiddlewareHandler) => void
+  register: () => void
 ) => {
-  if (!translatedRouters.has(router)) {
-    register(withTranslatedPathMatching(source, translated, handler));
+  if (!translated.changed && !translatedRouters.has(router)) {
+    register();
     return;
+  }
+
+  if (!translatedRouters.has(router)) {
+    installRoutePathTranslation(router, strapi);
   }
 
   pendingRoute = { source, translated };
   try {
-    register(handler);
+    register();
   } finally {
     pendingRoute = undefined;
   }

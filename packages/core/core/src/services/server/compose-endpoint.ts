@@ -113,8 +113,8 @@ export default (strapi: Core.Strapi) => {
       ]);
 
       try {
-        registerTranslatedRoute(router, trim(route.path), translated, routeHandler, (handler) => {
-          router[method](path, handler);
+        registerTranslatedRoute(router, strapi, trim(route.path), translated, () => {
+          router[method](path, routeHandler);
         });
       } catch (error) {
         // path-to-regexp errors link to its documentation.

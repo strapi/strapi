@@ -119,9 +119,9 @@ Strapi translates:
 - every route object, in `compose-endpoint.ts`;
 - every path, router prefix and mount path given to the root router, the two API routers and the sub-router of a prefixed route group. `installRoutePathTranslation` wraps their `register`, `use`, `prefix` and `match` methods.
 
-A router that a plugin creates itself is not wrapped. A route object composed onto it still keeps the v6 behaviour, through a wrapper around its handler that matches the v6 path against the end of the request path.
+A router that a plugin creates itself is not wrapped up front. When a route object with v6 syntax is composed onto it, `registerTranslatedRoute` wraps that router first. A router without translation that mounts a router with translation does not filter the mounted v6 layers. Core never does this.
 
-The translated v8 path matches every request the v6 path matched, and sometimes more. path-to-regexp v6 (the `path-to-regexp-v6` dependency) then compiles the layer's full v6 path, router prefix and mount path included. That regular expression decides whether the layer matches and fills `ctx.params`, the same way `@koa/router` 12 did. So a v6 route keeps its matches, its parameter values and its 404 versus 405 answers.
+The translated v8 path matches every request the v6 path matched, and sometimes more. Where v8 would narrow a parameter, the translator joins it with its neighbours into one wildcard. v8 narrows a parameter when no text separates it from the previous one, or when the text since the previous parameter has no `/`. path-to-regexp v6 (the `path-to-regexp-v6` dependency) then compiles the layer's full v6 path, router prefix and mount path included. That regular expression decides whether the layer matches and fills `ctx.params`, the same way `@koa/router` 12 did. So a v6 route keeps its matches, its parameter values and its 404 versus 405 answers.
 
 | v6                                                | v8                                     | Notes                                                                        |
 | ------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
@@ -130,8 +130,9 @@ The translated v8 path matches every request the v6 path matched, and sometimes 
 | `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`       |                                                                              |
 | `/uploads/(.*)`                                   | `/uploads/{*v6Group1}`                 | The value is in `ctx.params[0]`. `v6Group1` is not in `ctx.params`.          |
 | `/content-manager/(collection\|single)-types/:id` | `/content-manager/:v6Group1-types/:id` | The value is in `ctx.params[0]`.                                             |
-| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/:"w"x:h`                         | A name followed by a name character is quoted.                               |
-| `/:a([a-z]+):b(\\d+)`                             | `{*v6Joined1}`                         | v8 needs text between two parameters, so one wildcard stands for both.       |
+| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/{*v6Joined1}`                    | v8 would keep `x` out of `w`, so one wildcard stands for both.               |
+| `/:a([a-z]+):b(\\d+)`                             | `/{*v6Joined1}`                        | v8 needs text between two parameters, so one wildcard stands for both.       |
+| `/:lang-:region/:id(\\d+)`                        | `/{*v6Joined1}/:id`                    | Only the parameters v8 would narrow are joined.                              |
 | `/x{-y}+`                                         | `/x:v6Literal1`                        | v8 cannot repeat a literal, so a parameter stands for the repetitions.       |
 
 What stays as it was in v6:

@@ -6,7 +6,11 @@ import type { Core } from '@strapi/types';
 import createKoaApp from '../koa';
 import createEndpointComposer from '../compose-endpoint';
 import { createRouteManager } from '../routing';
-import { getRouteSourcePath, installRoutePathTranslation } from '../route-path';
+import {
+  RoutePathMigrationError,
+  getRouteSourcePath,
+  installRoutePathTranslation,
+} from '../route-path';
 
 // Handlers record what they received instead of writing it to the response.
 let lastReply: unknown;
@@ -346,6 +350,22 @@ describe.each([
     await expectReply(request(server).get(url), { route, params });
   });
 
+  it.each([
+    [
+      '/:slug/:year(\\d{4}):month(\\d{2})',
+      '/news/202611',
+      { slug: 'news', year: '2026', month: '11' },
+    ],
+    ['/:a.:b(\\d):c(\\d)', '/x.12', { a: 'x', b: '1', c: '2' }],
+    ['/:a-:b(\\d+-)', '/x-1-', { a: 'x', b: '1-' }],
+    ['/:a.:b(\\w+\\.)', '/x.y.', { a: 'x', b: 'y.' }],
+    ['/o/:id(a\\57b)', '/o/a/b', { id: 'a/b' }],
+  ])('matches %s where v8 alone would narrow a parameter', async (route, url, params) => {
+    const { server } = createServer(route);
+
+    await expectReply(request(server).get(url), { route, params });
+  });
+
   it('rejects parameters written next to each other when one fails its pattern', async () => {
     const { server } = createServer('/img/:w(\\d+)x:h(\\d+)');
 
@@ -640,6 +660,37 @@ describe('router path registration', () => {
 
     await expectReply(request(server).get('/v/1/child'), { ok: true });
     await request(server).get('/v/abc/child').expect(404);
+  });
+
+  it('fails at boot for a route that mixes v6 syntax with v8-only syntax in its prefix', () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/:"my-id"' });
+    installRoutePathTranslation(router, strapi);
+
+    expect(() => router.get('/n/:id(\\d+)', () => undefined)).toThrow(RoutePathMigrationError);
+  });
+
+  it('checks a v6 route composed onto a router with a v8 parameter prefix', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/api/:lang' });
+    createEndpointComposer(strapi)(
+      {
+        method: 'GET',
+        path: '/:a(.*)/:b(\\d+)',
+        handler(ctx) {
+          reply(ctx, { ...ctx.params });
+        },
+        info: {},
+      },
+      { router }
+    );
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/api/en/x/y/1'), { lang: 'en', a: 'x/y', b: '1' });
+    await request(server).get('/api/en/x/y').expect(404);
   });
 
   it('registers a list of paths under a v6 router prefix', async () => {
