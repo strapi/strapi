@@ -35,9 +35,19 @@ The `errors` namespace defines `ApplicationError` and its subclasses, for exampl
 
 `traverseEntity` walks a data entity along its schema. It calls a `Visitor` for each attribute, and it recurses into relations, media, components and dynamic zones. The `traverse` namespace does the same for query parameters: fields, filters, sort and populate. See [traverseEntity](./traverse-entity.md).
 
-`traverseQueryPopulate` recurses into relations, media, components, `on` fragments of dynamic zones and polymorphic relations, and nested `populate` keys. It does not recurse into `sort`, `filters` and `fields` keys. A visitor that checks them runs the matching traversal itself, as the default validators and sanitizers do. A visitor must not recurse into a nested `populate`, because the traversal already visits it with the same visitor. The exception is a schema that also has an attribute named `populate`: the traversal then walks the value as that attribute, so the default validator checks it as a nested populate itself.
+`traverseQueryPopulate` recurses into relations, media, components, `on` fragments of dynamic zones and polymorphic relations, and nested `populate` keys. It does not recurse into `sort`, `filters` and `fields` keys. A visitor that checks them runs the matching traversal itself, as the default validators and sanitizers do. A visitor must not recurse into a nested `populate`, because the traversal already visits it with the same visitor.
 
-`traverseQueryPopulate` deep-copies the populate it is given once, before it walks it. The levels below are not copied again, and neither is a value a visitor sets. So a visitor changes the populate with `set` and `remove`, never writes into the value it is handed, and sets a fresh value rather than one it shares with anything else.
+Below a relation, media, component or `on` fragment, the keys of a populate value are query keywords, even when the schema also has an attribute with the same name. There, `populate` is always a nested populate of that schema, and `sort`, `filters` and `fields` are not walked. Elsewhere, a key that names an attribute is that attribute.
+
+#### Writing a populate visitor
+
+`traverseQueryPopulate` deep-copies the populate it is given once, before it walks it. The levels below are not copied again, and neither is a value a visitor sets. A custom visitor follows three rules:
+
+- Change the populate only with `set` and `remove`.
+- Never write into `value` or `data`. Build a new object or array and `set` it.
+- `set` a fresh value, not one that is shared with anything else, such as a module constant or the query of the caller.
+
+Earlier versions deep-copied every level, so a visitor that wrote into its `value` changed only the copy of that level. Now the write reaches the one copy that every later level and visitor reads. If a visitor sets a shared value, a later write also reaches the other owners of that value. [`populate-copy.vitest.test.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/utils/src/__tests__/populate-copy.vitest.test.ts) runs each built-in populate visitor with the values it is handed frozen.
 
 ### Sanitize and validate
 
