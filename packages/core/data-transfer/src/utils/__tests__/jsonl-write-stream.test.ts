@@ -67,4 +67,17 @@ describe('createJsonlWriteStream', () => {
       'write failed'
     );
   });
+
+  test('reports the entry stream error rather than a later write to the destroyed stream', async () => {
+    const writer = new Writable({
+      write(_chunk, _encoding, callback) {
+        callback(new Error('write failed'));
+      },
+    });
+    const entities = Array.from({ length: 50 }, (_, id) => ({ id }));
+
+    await expect(pipeline(Readable.from(entities), createJsonlWriteStream(writer))).rejects.toThrow(
+      'write failed'
+    );
+  });
 });

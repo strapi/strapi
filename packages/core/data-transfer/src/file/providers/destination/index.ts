@@ -33,7 +33,7 @@ export interface ILocalFileDestinationProviderOptions {
   file: {
     path: string; // the filename to create
     maxSize?: number; // the max size of a single backup file
-    maxSizeJsonl?: number; // the max lines of each jsonl file before creating the next file
+    maxSizeJsonl?: number; // the max size in bytes of each jsonl file before creating the next file; a larger single line fails the stage
   };
 }
 

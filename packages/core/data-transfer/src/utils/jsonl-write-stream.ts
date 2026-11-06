@@ -15,12 +15,27 @@ const createJsonlWriteStream = (entryStream: Writable): Writable => {
   return deferWritable(async () => {
     const { stringer } = await loadStreamDeps();
     const jsonl = stringer();
+
+    // Registered before pipeline() so the cause is known before pipeline destroys `jsonl`;
+    // otherwise the next write fails with ERR_STREAM_DESTROYED instead of the real error.
+    let entryError: Error | undefined;
+    entryStream.once('error', (error: Error) => {
+      entryError = error;
+    });
+
     const written = pipeline(jsonl, entryStream);
 
     const writer = new Writable({
       objectMode: true,
       write(chunk, encoding, callback) {
-        jsonl.write(chunk, encoding, callback);
+        if (entryError) {
+          callback(entryError);
+          return;
+        }
+
+        jsonl.write(chunk, encoding, (error) => {
+          callback(error ? (entryError ?? error) : null);
+        });
       },
       final(callback) {
         jsonl.end();
