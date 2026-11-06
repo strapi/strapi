@@ -1,0 +1,7 @@
+{
+  "name": "@strapi/provider-end-users-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A provider package for the end-users API tests. A project installs it with `providers: ['fixture']`.",
+  "main": "index.js"
+}

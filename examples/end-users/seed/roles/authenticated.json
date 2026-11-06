@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "role": {
+    "name": "Authenticated",
+    "description": "Default role given to authenticated users.",
+    "type": "authenticated",
+    "requireTwoFactor": false
+  },
+  "permissions": [
+    {
+      "action": "api::article.article.find",
+      "subject": null,
+      "properties": {
+        "fields": ["title", "body", "author"]
+      },
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.findOne",
+      "subject": null,
+      "properties": {
+        "fields": ["title", "body", "author"]
+      },
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.create",
+      "subject": null,
+      "properties": {
+        "fields": ["title", "body"]
+      },
+      "conditions": [
+        {
+          "name": "plugin::end-users.is-owner",
+          "params": {
+            "field": "author"
+          }
+        }
+      ]
+    },
+    {
+      "action": "api::article.article.update",
+      "subject": null,
+      "properties": {
+        "fields": ["title", "body"]
+      },
+      "conditions": [
+        {
+          "name": "plugin::end-users.is-owner",
+          "params": {
+            "field": "author"
+          }
+        }
+      ]
+    },
+    {
+      "action": "api::article.article.delete",
+      "subject": null,
+      "properties": {},
+      "conditions": [
+        {
+          "name": "plugin::end-users.is-owner",
+          "params": {
+            "field": "author"
+          }
+        }
+      ]
+    },
+    {
+      "action": "api::article.article.read-drafts",
+      "subject": null,
+      "properties": {},
+      "conditions": [
+        {
+          "name": "plugin::end-users.is-owner",
+          "params": {
+            "field": "author"
+          }
+        }
+      ]
+    },
+    {
+      "action": "api::article.article.publish",
+      "subject": null,
+      "properties": {},
+      "conditions": [
+        {
+          "name": "plugin::end-users.is-owner",
+          "params": {
+            "field": "author"
+          }
+        }
+      ]
+    },
+    {
+      "action": "plugin::end-users.user.find",
+      "subject": null,
+      "properties": {},
+      "conditions": [
+        {
+          "name": "plugin::end-users.is-self",
+          "params": {}
+        }
+      ]
+    }
+  ]
+}
