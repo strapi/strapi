@@ -5989,7 +5989,7 @@ Examples: `admin::audit-logs.read`, `plugin::content-manager.explorer.create`
 
 An action can be registered in the backend during the `register` or `bootstrap` phase of the app or of a plugin. Once the admin cleaned the stored permissions, or once Strapi is loaded, `register` throws.
 
-Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions whose action is not registered. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions.
+Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions that have an unregistered action, a subject the action does not list, only properties that no longer exist (role permissions only), or neither a role nor an admin token. It logs one warning with the count, actions, subjects and owners of the deleted permissions. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions.
 
 Example:
 
@@ -8184,7 +8184,7 @@ During the publishing process, if successful, the status changes to "Done"; othe
 
 When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity.
 
-On delete, `deleteActionsOnDelete` removes the actions of the locales the delete removed, resolved the way the Document Service resolves the `locale` param: every action of the document for a non-localized content type (their locale is stored as `null`) or for `locale: '*'`, the given locale or locales otherwise, and the default locale when none is given.
+On delete, `deleteActionsOnDelete` removes the actions of the locales the delete removed, resolved the way the Document Service resolves the `locale` param: every action of the document for a non-localized content type (their locale is stored as `null`) or for `locale: '*'`, the given locale or locales otherwise, and the default locale when none is given. Only releases that are not released yet (`releasedAt: null`) are touched: a published release keeps its actions and its `done` status.
 
 ### Migrations
 
@@ -8200,7 +8200,7 @@ When a Content Type is deleted, delete all actions containing entries from that 
 
 ### Subscribing to Lifecycles Events
 
-When an entry is deleted delete all actions containing that entry.
+When an entry is deleted delete all actions containing that entry, except those of released releases.
 
 ---
 
