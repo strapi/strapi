@@ -31,9 +31,15 @@ export const appPort = (suite: Suite, index: number) =>
 export const strapiBin = () =>
   path.join(path.dirname(require.resolve('@strapi/strapi/package.json')), 'bin', 'strapi.js');
 
-/** Env every test app runs with, on top of the caller's env. */
+/**
+ * Env every test app (and app generation) runs with, on top of the caller's env. The database
+ * is pinned to the app's SQLite file: a `DATABASE_*` exported in the shell would otherwise win
+ * over the generated `.env`. A database matrix comes later, through this option.
+ */
 export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
   STRAPI_TELEMETRY_DISABLED: 'true',
   NODE_ENV: 'development',
+  DATABASE_CLIENT: 'sqlite',
+  DATABASE_FILENAME: '.tmp/data.db',
 });
