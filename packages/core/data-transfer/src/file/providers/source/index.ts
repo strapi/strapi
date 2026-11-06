@@ -177,7 +177,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   async getSchemas() {
     this.#reportInfo('getting schemas');
     const schemaCollection = await utils.stream.collect<Struct.Schema>(
-      await this.createSchemasReadStream()
+      this.createSchemasReadStream()
     );
 
     if (isEmpty(schemaCollection)) {
@@ -461,9 +461,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               } catch (e: unknown) {
                 outStream.destroy(
                   new ProviderTransferError(
-                    `Error parsing backup files from backup file ${entry.path}: ${
-                      (e as Error).message
-                    }`,
+                    `Error parsing backup files from backup file ${entry.path}: ${errorMessageFromUnknown(e)}`,
                     {
                       details: {
                         error: e,

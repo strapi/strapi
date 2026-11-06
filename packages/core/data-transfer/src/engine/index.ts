@@ -221,10 +221,7 @@ class TransferEngine<
     const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
-    // One chain, in order. Piping each group onto the previous stream and returning
-    // only the last one dropped the earlier groups: pipeline() writes into the
-    // returned stream, so global filters never saw data when a stage transform
-    // was also set.
+    // Every group must be in the returned chain: callers write into that stream only.
     const steps: StreamItem[] = [];
 
     const pushTransforms = (transforms: TransferTransform<unknown>[] = []) => {

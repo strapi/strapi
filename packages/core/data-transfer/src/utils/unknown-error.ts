@@ -3,12 +3,21 @@ const messageFromUnknown = (error: unknown): string => {
     return error;
   }
 
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+
   return 'Unknown error';
 };
 
 /**
- * Preserve an Error. A string becomes its message. Anything else becomes a
- * generic Error, because stringifying an object yields "[object Object]".
+ * Preserve an Error. A string, or an object with a string `message`, becomes the message.
+ * Anything else becomes a generic Error, because stringifying an object yields "[object Object]".
  */
 export const errorFromUnknown = (error: unknown): Error => {
   if (error instanceof Error) {

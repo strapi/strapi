@@ -13,101 +13,68 @@ interface PendingWrite {
 /**
  * A Writable that can be handed back before its real destination exists.
  * Writes wait until `open` resolves, and ending the stream waits until that destination ends.
- * A failure in `open` destroys this stream with that error.
+ * A failure in `open`, or an error from the destination, destroys this stream with that error.
  */
 const deferWritable = (open: () => Promise<Writable>): Writable => {
   let target: Writable | undefined;
-  const queue: PendingWrite[] = [];
-  let failed = false;
-
-  const fail = (error: Error) => {
-    if (failed || proxy.destroyed) {
-      return;
-    }
-
-    failed = true;
-    const pending = queue.splice(0);
-    pending.forEach((item) => item.callback(error));
-    proxy.destroy(error);
-  };
-
-  const pump = () => {
-    if (!target || failed) {
-      return;
-    }
-
-    while (queue.length > 0) {
-      const next = queue[0];
-      const accepted = target.write(next.chunk, next.encoding, next.callback);
-      queue.shift();
-
-      if (!accepted) {
-        target.once('drain', pump);
-        return;
-      }
-    }
-  };
+  // Writable does not call write() again until the previous callback runs, so at most one
+  // write can be waiting for the destination.
+  let pending: PendingWrite | undefined;
 
   const opening = Promise.resolve()
     .then(open)
-    .then((destination) => {
-      if (failed || proxy.destroyed) {
-        destination.destroy();
-        return;
-      }
+    .then(
+      (destination) => {
+        if (proxy.destroyed) {
+          destination.destroy();
+          return;
+        }
 
-      target = destination;
-      destination.on('error', (error: Error) => {
-        fail(error);
-      });
-      pump();
-    })
-    .catch((error: unknown) => {
-      fail(errorFromUnknown(error));
-    });
+        target = destination;
+        destination.on('error', (error: Error) => {
+          proxy.destroy(error);
+        });
+
+        if (pending) {
+          const { chunk, encoding, callback } = pending;
+          pending = undefined;
+          destination.write(chunk, encoding, callback);
+        }
+      },
+      (error: unknown) => {
+        proxy.destroy(errorFromUnknown(error));
+      }
+    );
 
   const proxy = new Writable({
     objectMode: true,
 
     write(chunk, encoding, callback) {
-      if (failed) {
-        callback(new Error('Write stream failed before it was ready'));
-        return;
-      }
-
       if (target) {
         target.write(chunk, encoding, callback);
         return;
       }
 
-      queue.push({ chunk, encoding, callback });
+      pending = { chunk, encoding, callback };
     },
 
     final(callback) {
-      const endTarget = () => {
+      opening.then(() => {
         if (!target) {
           callback(new Error('Write stream ended before it was ready'));
           return;
         }
 
         target.end(callback);
-      };
-
-      if (target) {
-        endTarget();
-        return;
-      }
-
-      opening.then(endTarget).catch((error: unknown) => {
-        callback(errorFromUnknown(error));
       });
     },
 
     destroy(error, callback) {
-      failed = true;
-      const pending = queue.splice(0);
-      const destroyError = error ?? new Error('Stream destroyed');
-      pending.forEach((item) => item.callback(destroyError));
+      if (pending) {
+        const { callback: pendingCallback } = pending;
+        pending = undefined;
+        pendingCallback(error ?? new Error('Stream destroyed'));
+      }
 
       if (target && !target.destroyed) {
         target.destroy(error ?? undefined);

@@ -34,7 +34,7 @@ describe('deferWritable', () => {
     expect(received).toEqual([{ id: 1 }]);
   });
 
-  test('waits for drain when the destination applies backpressure', async () => {
+  test('delivers writes made before opening in order to a slow destination', async () => {
     const received: unknown[] = [];
     const destination = new Writable({
       objectMode: true,
@@ -69,7 +69,7 @@ describe('deferWritable', () => {
     expect(received).toEqual(items);
   });
 
-  test('fails queued writes and the end when opening fails', async () => {
+  test('fails the pending write and the end when opening fails', async () => {
     const openError = new Error('open failed');
     let rejectOpen: (error: Error) => void = () => {};
     const proxy = deferWritable(
