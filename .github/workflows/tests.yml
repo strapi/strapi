@@ -307,13 +307,16 @@ jobs:
     # Browsers and their system libraries are preinstalled in the Playwright image, so the
     # job never runs `playwright install --with-deps`, whose apt step can stall for most of
     # the job timeout on a slow Ubuntu mirror.
+    # `-resolute` is Ubuntu 26.04, which `ubuntu-latest` moves to in November 2026
+    # (actions/runner-images#14748).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       # The image has no zstd, so actions/cache falls back to gzip there. A gzip cache is a
       # different cache version, so these jobs missed every cache the build job saves with
-      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd works in the image
-      # (both are Ubuntu 24.04); actions/cache also calls it as unzstd and zstdmt.
+      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd runs in the image: it
+      # only links libc, zlib, liblzma, liblz4 and libxxhash, which the image's Ubuntu base has.
+      # actions/cache also calls it as unzstd and zstdmt.
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
         - /usr/bin/zstd:/usr/local/bin/unzstd:ro
@@ -400,7 +403,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -461,7 +464,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -525,7 +528,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
