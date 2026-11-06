@@ -332,6 +332,15 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
           defaultMessage: 'Schedule',
         })}
       </span>
+      <Checkbox
+        checked={!values.isScheduled}
+        onCheckedChange={(checked) => handleNoScheduleChange(checked === true)}
+      >
+        {formatMessage({
+          id: 'content-releases.release-drawer.form.no-schedule',
+          defaultMessage: "I don't have a release date yet",
+        })}
+      </Checkbox>
       {values.isScheduled && (
         <>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
@@ -393,15 +402,6 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
           />
         </>
       )}
-      <Checkbox
-        checked={!values.isScheduled}
-        onCheckedChange={(checked) => handleNoScheduleChange(checked === true)}
-      >
-        {formatMessage({
-          id: 'content-releases.release-drawer.form.no-schedule',
-          defaultMessage: "I don't have a release date yet",
-        })}
-      </Checkbox>
     </div>
   );
 };
