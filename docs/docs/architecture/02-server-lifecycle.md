@@ -5,7 +5,7 @@ status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - The statement that plugin modules and API modules have no guaranteed relative order comes from reading `loadApplicationContext` (`Promise.all`). No test confirms it.
-  - Destroy releases the service container after keeping logger and telemetry. A second call waits for an in-flight shutdown and returns immediately after it succeeds. A failed shutdown can be retried from the step that did not finish.
+  - Destroy leaves the service container in place. A second call waits for an in-flight shutdown and returns immediately after it succeeds. A failed shutdown can be retried from the step that did not finish. The API test helper clears the container after destroy succeeds.
 ---
 
 This page describes the boot sequence of the server runtime in `@strapi/core`. Read it before you add code to an internal provider, a loader, or a `register` or `bootstrap` function.
@@ -148,7 +148,7 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 6. `db.destroy()`.
 7. `process.removeAllListeners()`.
 8. `delete global.strapi`. This lets a test create a new instance.
-9. The service container is cleared so a test that keeps the instance does not retain every service. The logger is registered again. Telemetry is registered again when it was loaded, because `strapi export` sends an event after the transfer destroys the instance. Reading any other service after this throws.
+9. The shutdown message is logged. The service container stays registered. API tests keep the instance, and the test helper clears the container after `destroy()` succeeds so the process can collect those services.
 
 A second `destroy()` waits for the shutdown already in progress. After that shutdown succeeds, another `destroy()` returns immediately. If shutdown throws, a later `destroy()` continues from the step that failed, so a closed database is not skipped. `destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
 

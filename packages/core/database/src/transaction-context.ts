@@ -25,6 +25,8 @@ export interface Store {
   trx: Knex.Transaction | null;
   commitCallbacks: Callback[];
   rollbackCallbacks: Callback[];
+  /** Database that opened the transaction. Its `destroy()` waits for these hooks. */
+  owner: object;
 }
 
 const storage = new AsyncLocalStorage<Store>();
@@ -82,10 +84,33 @@ interface CallbackRunOptions {
 }
 
 /**
- * Hooks started by commit and rollback. `strapi.db.transaction` does not wait
- * for them. `Database.destroy` does, before the pool closes.
+ * How long `Database.destroy` waits for commit and rollback hooks. A hook
+ * still running after this stays running, and the pool closes. There is no
+ * setting for it: a stuck hook must not hold process exit.
  */
-const pendingHooks = new Set<Promise<void>>();
+const HOOK_DRAIN_TIMEOUT_MS = 10_000;
+
+/**
+ * Hooks scheduled by `run` when the caller does not pass a database.
+ * Tests that call `transactionCtx` directly use this owner.
+ */
+const defaultHookOwner = {};
+
+/**
+ * Hooks started by commit and rollback, per database. `strapi.db.transaction`
+ * does not wait for them. That database's `destroy` does, before its pool closes.
+ */
+const pendingHooks = new WeakMap<object, Set<Promise<void>>>();
+
+const hooksFor = (owner: object) => {
+  let pending = pendingHooks.get(owner);
+  if (!pending) {
+    pending = new Set();
+    pendingHooks.set(owner, pending);
+  }
+
+  return pending;
+};
 
 const runCallbacks = async (callbacks: Callback[] | undefined, options?: CallbackRunOptions) => {
   if (!callbacks) {
@@ -117,21 +142,53 @@ const scheduleCallbacks = (callbacks: Callback[] | undefined, options?: Callback
     return;
   }
 
+  const owner = storage.getStore()?.owner ?? defaultHookOwner;
+  const pending = hooksFor(owner);
   const tracked = runCallbacks(callbacks, options).finally(() => {
-    pendingHooks.delete(tracked);
+    pending.delete(tracked);
   });
-  pendingHooks.add(tracked);
+  pending.add(tracked);
 };
 
-const settleHooks = async () => {
-  // A hook can open a transaction, which schedules more hooks.
-  while (pendingHooks.size > 0) {
-    await Promise.all(pendingHooks);
+const settleHooks = async (owner: object = defaultHookOwner, timeoutMs = HOOK_DRAIN_TIMEOUT_MS) => {
+  const pending = pendingHooks.get(owner);
+  if (!pending || pending.size === 0) {
+    return true;
   }
+
+  // A hook can open a transaction, which schedules more hooks on this database.
+  const deadline = Date.now() + timeoutMs;
+  while (pending.size > 0) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      return false;
+    }
+
+    let timedOut = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<void>((resolve) => {
+      timeoutId = setTimeout(() => {
+        timedOut = true;
+        resolve();
+      }, remaining);
+    });
+
+    await Promise.race([Promise.all(pending), timeout]);
+    clearTimeout(timeoutId);
+    if (timedOut) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 const transactionCtx = {
-  async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
+  async run<TCallback extends Callback>(
+    trx: Knex.Transaction,
+    cb: TCallback,
+    owner: object = defaultHookOwner
+  ) {
     const store = storage.getStore();
     // Share callback arrays only while the parent transaction is still open.
     // Commit hooks run after that transaction is cleared. A transaction they
@@ -141,6 +198,7 @@ const transactionCtx = {
     return storage.run<ReturnType<TCallback>, void[]>(
       {
         trx,
+        owner,
         commitCallbacks: parent ? parent.commitCallbacks : [],
         rollbackCallbacks: parent ? parent.rollbackCallbacks : [],
       },
@@ -199,8 +257,9 @@ const transactionCtx = {
   },
 
   /**
-   * Wait for commit and rollback hooks, including hooks those hooks start.
-   * `Database.destroy` calls this before closing the pool.
+   * Wait for commit and rollback hooks of one database, including hooks those
+   * hooks start. Returns false when hooks are still running at the deadline.
+   * `Database.destroy` calls this before closing that database's pool.
    */
   settleHooks,
 
@@ -219,4 +278,4 @@ const transactionCtx = {
   },
 };
 
-export { isDeadlockError, transactionCtx, waitForDeadlockRetry };
+export { HOOK_DRAIN_TIMEOUT_MS, isDeadlockError, transactionCtx, waitForDeadlockRetry };

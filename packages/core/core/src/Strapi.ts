@@ -58,18 +58,15 @@ class Strapi extends Container implements Core.Strapi {
 
   /**
    * destroy() can run twice: a transfer provider closes the instance, then the
-   * CLI calls destroy() again. The second call must not touch released services.
-   * A call that overlaps one in progress shares its promise. A call that failed
-   * can run again, from the step that did not finish.
+   * CLI calls destroy() again. The second call returns once the first has
+   * succeeded. A call that overlaps one in progress shares its promise. A call
+   * that failed can run again, from the step that did not finish.
    */
   private destroyed = false;
 
   private destroyPromise?: Promise<void>;
 
   private destroyStage?: number;
-
-  /** Captured before release() so a retry can register them again. */
-  private shutdownKeep?: { logger: Logger; telemetry?: unknown };
 
   internal_config: Record<string, unknown> = {};
 
@@ -643,21 +640,9 @@ class Strapi extends Container implements Core.Strapi {
     this.isLoaded = false;
 
     if ((this.destroyStage ?? 0) < 9) {
-      // Export destroys the instance inside the transfer, then sends telemetry.
-      // The sender already captured fetch. Re-registering telemetry is enough.
-      // Callers such as API tests still hold this object. Release the service
-      // map or every booted app stays in memory until the process exits.
-      // In-flight audit listeners still log after the event hub is cleared.
-      this.shutdownKeep ??= {
-        logger: this.log,
-        telemetry: this.has('telemetry') ? this.telemetry : undefined,
-      };
-      this.release();
-      this.add('logger', this.shutdownKeep.logger);
-      if (this.shutdownKeep.telemetry) {
-        this.add('telemetry', this.shutdownKeep.telemetry);
-      }
-      this.shutdownKeep.logger.info('Strapi has been shut down');
+      // The container stays registered. API tests keep this object, and the
+      // test helper clears the service maps after destroy() succeeds.
+      this.log.info('Strapi has been shut down');
       this.destroyStage = 9;
     }
 

@@ -278,23 +278,27 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return await transactionCtx.run(trx, async () => {
-      try {
-        const callbackParams = {
-          trx,
-          commit,
-          rollback,
-          onCommit: transactionCtx.onCommit,
-          onRollback: transactionCtx.onRollback,
-        };
-        const res = await cb(callbackParams);
-        await commit();
-        return res;
-      } catch (error) {
-        await rollback();
-        throw error;
-      }
-    });
+    return await transactionCtx.run(
+      trx,
+      async () => {
+        try {
+          const callbackParams = {
+            trx,
+            commit,
+            rollback,
+            onCommit: transactionCtx.onCommit,
+            onRollback: transactionCtx.onRollback,
+          };
+          const res = await cb(callbackParams);
+          await commit();
+          return res;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      },
+      this
+    );
   }
 
   /**
@@ -360,11 +364,12 @@ class Database {
   }
 
   /**
-   * Wait for `onCommit` and `onRollback` hooks still running. The transaction
-   * call itself does not wait, so a test that reads a hook's side effect does.
+   * Wait for `onCommit` and `onRollback` hooks still running on this database.
+   * The transaction call itself does not wait, so a test that reads a hook's
+   * side effect does. `destroy()` stops waiting after 10 seconds.
    */
-  settleTransactionHooks() {
-    return transactionCtx.settleHooks();
+  settleTransactionHooks(timeoutMs?: number) {
+    return transactionCtx.settleHooks(this, timeoutMs);
   }
 
   async destroy() {
@@ -375,7 +380,10 @@ class Database {
     }
 
     try {
-      await this.settleTransactionHooks();
+      const drained = await this.settleTransactionHooks();
+      if (!drained) {
+        this.logger.warn('Closing the database connection with transaction hooks still running');
+      }
     } finally {
       await this.connection.destroy();
     }

@@ -47,8 +47,8 @@ const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi:
  * Create a send function for event with all the necessary metadata
  */
 export default (strapi: Core.Strapi): Sender => {
-  // destroy() releases fetch, then export sends telemetry. Keep the function
-  // from startup so that send does not look the service up again.
+  // The API test helper clears the container after a successful destroy.
+  // Keep the fetch function from startup so a later send does not look it up.
   const fetch = strapi.fetch;
   const { uuid, installId: installIdFromPackageJson } = strapi.config;
 

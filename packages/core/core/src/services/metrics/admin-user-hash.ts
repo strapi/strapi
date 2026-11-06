@@ -5,7 +5,7 @@ import type { Core } from '@strapi/types';
  * Generate an admin user hash
  */
 const generateAdminUserHash = (strapi: Core.Strapi) => {
-  // destroy() releases the container, then export still sends telemetry.
+  // The API test helper clears the container after a successful destroy.
   // The requestContext getter throws once that service is gone.
   if (!strapi?.has?.('requestContext')) {
     return '';

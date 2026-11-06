@@ -7,7 +7,7 @@ describe('Strapi.destroy', () => {
     vi.restoreAllMocks();
   });
 
-  it('is idempotent while retaining logger and telemetry after release', async () => {
+  it('returns on a second call and leaves the container in place', async () => {
     const logger = { debug: vi.fn(), error: vi.fn(), info: vi.fn() };
     const telemetry = { destroy: vi.fn(), send: vi.fn() };
     const modules = { destroy: vi.fn() };
@@ -42,9 +42,9 @@ describe('Strapi.destroy', () => {
     expect(services.server.destroy).toHaveBeenCalledTimes(1);
     expect(services.eventHub.destroy).toHaveBeenCalledTimes(1);
     expect(services.db.destroy).toHaveBeenCalledTimes(1);
-    expect(instance.release).toHaveBeenCalledTimes(1);
-    expect(instance.add).toHaveBeenCalledWith('logger', logger);
-    expect(instance.add).toHaveBeenCalledWith('telemetry', telemetry);
+    expect(instance.release).not.toHaveBeenCalled();
+    expect(instance.add).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith('Strapi has been shut down');
   });
 
   it('shares an in-flight destroy and retries the step that failed', async () => {
@@ -103,6 +103,7 @@ describe('Strapi.destroy', () => {
     await instance.destroy();
     expect(modules.destroy).toHaveBeenCalledTimes(1);
     expect(db.destroy).toHaveBeenCalledTimes(2);
-    expect(instance.release).toHaveBeenCalledTimes(1);
+    expect(instance.release).not.toHaveBeenCalled();
+    expect(instance.add).not.toHaveBeenCalled();
   });
 });

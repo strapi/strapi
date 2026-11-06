@@ -129,4 +129,57 @@ describe('transaction hooks', () => {
     expect(order).toEqual(['hook']);
     expect(rolledBack).not.toHaveBeenCalled();
   });
+
+  test('settleHooks waits only for the database that scheduled the hooks', async () => {
+    const first = {};
+    const second = {};
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    await transactionCtx.run(
+      fakeTrx(),
+      async () => {
+        transactionCtx.onCommit(() => gate);
+        await transactionCtx.commit(fakeTrx());
+      },
+      first
+    );
+
+    await expect(transactionCtx.settleHooks(second, 20)).resolves.toBe(true);
+
+    let finished = false;
+    const waiting = transactionCtx.settleHooks(first, 1_000).then((drained) => {
+      finished = true;
+      return drained;
+    });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
+    expect(finished).toBe(false);
+
+    release();
+    await expect(waiting).resolves.toBe(true);
+  });
+
+  test('settleHooks returns when the deadline passes with hooks still running', async () => {
+    const owner = {};
+
+    await transactionCtx.run(
+      fakeTrx(),
+      async () => {
+        transactionCtx.onCommit(
+          () =>
+            new Promise<void>(() => {
+              // Stays pending past the drain deadline.
+            })
+        );
+        await transactionCtx.commit(fakeTrx());
+      },
+      owner
+    );
+
+    await expect(transactionCtx.settleHooks(owner, 15)).resolves.toBe(false);
+  });
 });

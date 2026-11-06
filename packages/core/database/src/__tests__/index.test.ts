@@ -1,5 +1,6 @@
 import knex from 'knex';
 import { Database, DatabaseConfig } from '../index';
+import { HOOK_DRAIN_TIMEOUT_MS } from '../transaction-context';
 import createQueryBuilder from '../query/query-builder';
 import type { Model } from '../types';
 
@@ -395,6 +396,74 @@ describe('Database', () => {
       await db.destroy();
       expect(finished).toBe(true);
       expect(closedBeforeHook).toBe(false);
+    });
+
+    it('closes the pool when a commit hook is still running at the drain deadline', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const warned = jest.spyOn(db.logger, 'warn').mockImplementation(() => undefined);
+
+      let closed = false;
+      const closePool = db.connection.destroy.bind(db.connection);
+      Object.defineProperty(db.connection, 'destroy', {
+        configurable: true,
+        async value() {
+          closed = true;
+          return closePool();
+        },
+      });
+
+      await db.transaction(async ({ onCommit }) => {
+        onCommit(
+          () =>
+            new Promise<void>(() => {
+              // Stays pending past the drain deadline.
+            })
+        );
+      });
+
+      jest.useFakeTimers();
+      try {
+        const destroying = db.destroy();
+        await jest.advanceTimersByTimeAsync(HOOK_DRAIN_TIMEOUT_MS);
+        await destroying;
+      } finally {
+        jest.useRealTimers();
+      }
+
+      expect(closed).toBe(true);
+      expect(warned).toHaveBeenCalledWith(
+        'Closing the database connection with transaction hooks still running'
+      );
+    });
+
+    it('does not wait for commit hooks that belong to another database', async () => {
+      const first = new Database(configConnectionObject);
+      const second = new Database(configConnectionObject);
+      await first.init({ models });
+      await second.init({ models });
+
+      let releaseHook: () => void = () => undefined;
+      const gate = new Promise<void>((resolve) => {
+        releaseHook = resolve;
+      });
+
+      await first.transaction(async ({ onCommit }) => {
+        onCommit(() => gate);
+      });
+
+      try {
+        const closed = await Promise.race([
+          second.destroy().then(() => 'closed' as const),
+          new Promise<'waiting'>((resolve) => {
+            setTimeout(() => resolve('waiting'), 50);
+          }),
+        ]);
+        expect(closed).toBe('closed');
+      } finally {
+        releaseHook();
+        await first.destroy();
+      }
     });
 
     it('keeps the write error when a rollback hook throws and skips the hooks after it', async () => {
