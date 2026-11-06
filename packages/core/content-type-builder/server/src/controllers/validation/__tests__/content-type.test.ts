@@ -35,6 +35,31 @@ describe('Content type validator', () => {
     });
   });
 
+  describe('displayName', () => {
+    const base = { singularName: 'test', pluralName: 'tests', attributes: {} };
+
+    test('Rejects a content type that only sets info.displayName', async () => {
+      const data = {
+        contentType: { ...base, info: { displayName: 'Test' } },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateContentTypeInput(data)).rejects.toMatchObject({
+        name: 'ValidationError',
+        details: {
+          errors: [expect.objectContaining({ path: ['contentType', 'displayName'] })],
+        },
+      });
+    });
+
+    test('Accepts a content type with a top-level displayName', async () => {
+      const data = {
+        contentType: { ...base, displayName: 'Test' },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateContentTypeInput(data)).resolves.toBeDefined();
+    });
+  });
+
   describe('Prevents use of reservedNames in attributes', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
@@ -222,6 +247,49 @@ describe('Content type validator', () => {
         expect(data.components[0]?.attributes?.title.default).toBeUndefined();
         expect(data.components[1]?.attributes?.title.default).toBe('');
       });
+    });
+
+    test('Rejects a non-boolean options.draftAndPublish', async () => {
+      const data = {
+        contentType: {
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          options: { draftAndPublish: 'false' },
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateUpdateContentTypeInput(data)).rejects.toMatchObject({
+        name: 'ValidationError',
+        details: {
+          errors: [
+            expect.objectContaining({ path: ['contentType', 'options', 'draftAndPublish'] }),
+          ],
+        },
+      });
+    });
+
+    test('Accepts a boolean options.draftAndPublish', async () => {
+      const data = {
+        contentType: {
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          options: { draftAndPublish: false },
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateUpdateContentTypeInput(data)).resolves.toBeDefined();
     });
 
     test('Deleted UID target fields are removed from input data', async () => {

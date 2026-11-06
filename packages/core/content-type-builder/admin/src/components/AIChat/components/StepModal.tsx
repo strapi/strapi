@@ -11,6 +11,7 @@ import {
   useMemo,
 } from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import { Modal, Box, Button, Typography } from '@strapi/design-system';
 
 /* -------------------------------------------------------------------------------------------------
@@ -51,6 +52,11 @@ interface StepModalProps {
   children: ReactNode;
   onComplete?: () => void;
   onCancel?: () => void;
+  /**
+   * Unsaved state owned by the component rendering the StepModal. Steps can also
+   * register their own with `useUnsavedChangesModalDirty`.
+   */
+  hasUnsavedChanges?: boolean;
 }
 
 interface StepProps {
@@ -70,6 +76,7 @@ const StepModal = ({
   children,
   onComplete,
   onCancel,
+  hasUnsavedChanges,
 }: StepModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -182,7 +189,7 @@ const StepModal = ({
   return (
     <StepModalContext.Provider value={contextValue}>
       {open && (
-        <Modal.Root open onOpenChange={handleCancel}>
+        <UnsavedChangesModal open onOpenChange={handleCancel} hasUnsavedChanges={hasUnsavedChanges}>
           <Modal.Content>
             <Modal.Header>
               <Typography variant="omega" fontWeight="bold">
@@ -209,9 +216,11 @@ const StepModal = ({
 
               <Modal.Footer>
                 {isFirstStep ? (
-                  <Button variant="tertiary" onClick={handleCancel} type="button">
-                    {currentChild?.cancelLabel || 'Cancel'}
-                  </Button>
+                  <Modal.Close>
+                    <Button variant="tertiary" type="button">
+                      {currentChild?.cancelLabel || 'Cancel'}
+                    </Button>
+                  </Modal.Close>
                 ) : (
                   <Button variant="tertiary" onClick={handleBack} type="button">
                     {currentChild?.backLabel || 'Back'}
@@ -229,7 +238,7 @@ const StepModal = ({
               </Modal.Footer>
             </form>
           </Modal.Content>
-        </Modal.Root>
+        </UnsavedChangesModal>
       )}
     </StepModalContext.Provider>
   );
