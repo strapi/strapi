@@ -68,4 +68,31 @@ describe('document-manager', () => {
       expect(findMany).not.toHaveBeenCalled();
     });
   });
+
+  describe('publication actions without draft and publish', () => {
+    const NON_DP_UID = 'api::non-dp.non-dp';
+
+    beforeEach(() => {
+      global.strapi = {
+        documents: jest.fn(() => ({})),
+        getModel: jest.fn(() => ({ uid: NON_DP_UID, options: { draftAndPublish: false } })),
+      } as any;
+    });
+
+    it.each([
+      ['publish', (service: any) => service.publish('doc-1', NON_DP_UID)],
+      ['publishMany', (service: any) => service.publishMany(NON_DP_UID, ['doc-1'])],
+      ['unpublish', (service: any) => service.unpublish('doc-1', NON_DP_UID)],
+      ['unpublishMany', (service: any) => service.unpublishMany(['doc-1'], NON_DP_UID)],
+      ['discardDraft', (service: any) => service.discardDraft('doc-1', NON_DP_UID)],
+    ])('%s throws a validation error', async (_name, action) => {
+      const service = documentManager({ strapi: global.strapi });
+
+      await expect(action(service)).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: 'Draft and publish is not enabled for this content type',
+      });
+      expect(global.strapi.documents).not.toHaveBeenCalled();
+    });
+  });
 });

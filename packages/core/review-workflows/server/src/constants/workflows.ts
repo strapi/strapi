@@ -21,6 +21,7 @@ export const ERRORS = {
   STAGES_LIMIT:
     'You’ve reached the limit of stages for this workflow in your plan. Try deleting some stages or contact Sales to enable more stages.',
   DUPLICATED_STAGE_NAME: 'Stage names must be unique.',
+  DUPLICATED_WORKFLOW_NAME: 'A workflow with this name already exists.',
 };
 
 export const WORKFLOW_POPULATE = {

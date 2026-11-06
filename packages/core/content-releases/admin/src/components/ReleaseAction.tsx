@@ -6,6 +6,7 @@ import {
   useQueryParams,
   useRBAC,
   isFetchError,
+  FormikUnsavedChangesRegistrar,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useContentManagerContext as useContentManagerContext } from '@strapi/content-manager/strapi-admin';
 import {
@@ -170,6 +171,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
           >
             {({ values, setFieldValue }) => (
               <Form>
+                <FormikUnsavedChangesRegistrar />
                 {releases?.length === 0 ? (
                   <NoReleases />
                 ) : (
@@ -214,12 +216,14 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
                   </Modal.Body>
                 )}
                 <Modal.Footer>
-                  <Button onClick={onClose} variant="tertiary" name="cancel">
-                    {formatMessage({
-                      id: 'content-releases.content-manager-list-view.add-to-release.cancel-button',
-                      defaultMessage: 'Cancel',
-                    })}
-                  </Button>
+                  <Modal.Close>
+                    <Button variant="tertiary" name="cancel">
+                      {formatMessage({
+                        id: 'content-releases.content-manager-list-view.add-to-release.cancel-button',
+                        defaultMessage: 'Cancel',
+                      })}
+                    </Button>
+                  </Modal.Close>
                   {/** * TODO: Ideally we would use isValid from Formik to disable the button,
                   however currently it always returns true * for yup.string().required(), even when
                   the value is falsy (including empty string) */}
