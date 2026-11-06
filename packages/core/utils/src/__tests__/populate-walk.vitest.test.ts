@@ -91,8 +91,9 @@ describe('nested populate is walked once per level', () => {
   });
 
   describe('when a schema has an attribute named populate', () => {
-    // The traversal walks `populate` as that attribute, so validation still checks the value
-    // as a nested populate itself.
+    // Under a relation, `populate` is the nested-populate keyword even when the target also has
+    // an attribute of that name, so the nested populate is checked against the target, by every
+    // validator and sanitizer pass, and not against the attribute's component.
     const models: Record<string, any> = {
       'api::holder.holder': {
         uid: 'api::holder.holder',
@@ -107,6 +108,7 @@ describe('nested populate is walked once per level', () => {
         modelType: 'contentType',
         attributes: {
           name: { type: 'string' },
+          hidden: { type: 'string', private: true },
           populate: { type: 'component', component: 'default.block' },
           secret: {
             type: 'relation',
@@ -114,6 +116,9 @@ describe('nested populate is walked once per level', () => {
             target: 'api::holder.holder',
             private: true,
           },
+          // Not private, but its target is not readable with the auth below.
+          forbidden: { type: 'relation', relation: 'manyToOne', target: 'api::holder.holder' },
+          other: { type: 'relation', relation: 'manyToOne', target: 'api::target.target' },
         },
       },
       'default.block': {
@@ -123,8 +128,46 @@ describe('nested populate is walked once per level', () => {
       },
     };
 
-    const holderValidators = createAPIValidators({ getModel: (uid: string) => models[uid] });
+    const getModel = (uid: string) => models[uid];
+    const holderValidators = createAPIValidators({ getModel });
+    const holderSanitizers = createAPISanitizers({ getModel });
     const holder = models['api::holder.holder'];
+    const auth = { strategy: { name: 'users-permissions' }, credentials: null };
+
+    beforeEach(() => {
+      global.strapi = {
+        getModel,
+        contentTypes: {
+          'api::holder.holder': models['api::holder.holder'],
+          'api::target.target': models['api::target.target'],
+        },
+        components: { 'default.block': models['default.block'] },
+        auth: {
+          async verify(_auth: unknown, { scope }: { scope: string }) {
+            if (scope === 'api::holder.holder.find') {
+              throw new Error('Forbidden');
+            }
+          },
+        },
+      } as any;
+    });
+
+    it('walks the nested populate against the target schema', async () => {
+      const seen: string[] = [];
+
+      await traverseQueryPopulate(
+        ({ key, schema }) => {
+          seen.push(`${schema.uid}.${key}`);
+        },
+        { schema: holder, getModel }
+      )({ related: { populate: { other: true } } });
+
+      expect(seen).toEqual([
+        'api::holder.holder.related',
+        'api::target.target.populate',
+        'api::target.target.other',
+      ]);
+    });
 
     it('rejects a private relation in the nested populate', async () => {
       await expect(
@@ -137,6 +180,57 @@ describe('nested populate is walked once per level', () => {
       await expect(
         holderValidators.populate({ related: { populate: { fields: ['label'] } } }, holder)
       ).rejects.toThrow('Invalid key label');
+    });
+
+    it('accepts relations and fields of the target in the nested populate', async () => {
+      await expect(
+        holderValidators.populate(
+          { related: { populate: { other: true, fields: ['name'] } } },
+          holder
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('sanitization removes a private relation from the nested populate', async () => {
+      await expect(
+        holderSanitizers.populate(
+          { related: { populate: { secret: true, other: true } } },
+          holder,
+          {
+            auth,
+          }
+        )
+      ).resolves.toEqual({ related: { populate: { other: true } } });
+    });
+
+    it('sanitization removes a restricted relation from the nested populate', async () => {
+      await expect(
+        holderSanitizers.populate(
+          { related: { populate: { forbidden: true, other: true } } },
+          holder,
+          { auth }
+        )
+      ).resolves.toEqual({ related: { populate: { other: true } } });
+    });
+
+    it('sanitization checks nested query keywords against the target, not the component', async () => {
+      // `name` is a field of the target, `label` only of the component, `hidden` is private.
+      await expect(
+        holderSanitizers.populate(
+          { related: { populate: { fields: ['name', 'label', 'hidden'] } } },
+          holder,
+          { auth }
+        )
+      ).resolves.toEqual({ related: { populate: { fields: ['name'] } } });
+    });
+
+    it('still populates the attribute itself inside the nested populate', async () => {
+      const populate = { related: { populate: { populate: true } } };
+
+      await expect(holderValidators.populate(populate, holder)).resolves.not.toThrow();
+      await expect(holderSanitizers.populate(populate, holder, { auth })).resolves.toEqual(
+        populate
+      );
     });
   });
 
