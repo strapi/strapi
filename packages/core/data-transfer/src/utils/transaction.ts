@@ -11,7 +11,7 @@ export type TransactionCommit = {
   [transactionCommit]: () => Promise<void>;
 };
 
-export const createTransaction = (strapi: Core.Strapi): Transaction => {
+export const createTransaction = (strapi: Core.Strapi): Transaction & TransactionCommit => {
   const fns: { fn: TransactionCallback; uuid: string }[] = [];
 
   let done = false;

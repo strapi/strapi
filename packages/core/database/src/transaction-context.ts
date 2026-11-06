@@ -126,7 +126,7 @@ const scheduleCallbacks = (callbacks: Callback[] | undefined, options?: Callback
 const settleHooks = async () => {
   // A hook can open a transaction, which schedules more hooks.
   while (pendingHooks.size > 0) {
-    await Promise.all([...pendingHooks]);
+    await Promise.all(pendingHooks);
   }
 };
 
