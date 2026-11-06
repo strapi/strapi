@@ -127,6 +127,12 @@ export const createContentType = async (
   { contentType, components }: any,
   options: CreateContentTypeOptions = {}
 ) => {
+  // The HTTP validator requires `displayName`; direct service callers must provide it too,
+  // otherwise the schema builder writes a schema the core validator rejects at the next load.
+  if (typeof contentType?.displayName !== 'string' || contentType.displayName === '') {
+    throw new ApplicationError('A content type requires a displayName');
+  }
+
   const builder = options.defaultBuilder || createBuilder();
   const uidMap = builder.createNewComponentUIDMap(components || []);
 
@@ -165,7 +171,7 @@ export const createContentType = async (
       generatedApiNames.push(contentType.singularName);
 
       await generateAPI({
-        displayName: contentType!.displayName || contentType!.info.displayName,
+        displayName: contentType.displayName,
         singularName: contentType!.singularName,
         pluralName: contentType!.pluralName,
         kind: contentType!.kind,
