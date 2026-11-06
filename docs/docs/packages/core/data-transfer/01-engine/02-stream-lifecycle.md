@@ -130,32 +130,22 @@ sequenceDiagram
 3. A progress tracker stream is initialized for monitoring
 4. A write stream is requested from the Destination Provider
 
-**Example Implementation:**
+The transform stream is one `stream-chain` chain. It runs the `global` transforms, then the `throttle` delay, then the transforms for the current stage. The entities and links stages append their own schema filter after these.
+
+**Example Implementation (simplified from `transferSchemas`):**
 
 ```typescript
-async transferEntities(): Promise {
-  const stage: TransferStage = 'entities';
+async transferSchemas(): Promise<void> {
+  const stage: TransferStage = 'schemas';
 
-  // 1. Create read stream from source
-  const source = await this.sourceProvider.createEntitiesReadStream?.();
+  const source = await this.sourceProvider.createSchemasReadStream?.();
+  const destination = await this.destinationProvider.createSchemasWriteStream?.();
 
-  // 2. Create transform stream for data modifications
+  // global transforms, then throttle, then stage transforms
   const transform = await this.#createStageTransformStream(stage);
+  const tracker = this.#progressTracker(stage, { key: (value: Schema) => value.modelType });
 
-  // 3. Create progress tracker
-  const tracker = this.#progressTracker(stage);
-
-  // 4. Create write stream from destination
-  const destination = await this.destinationProvider.createEntitiesWriteStream?.();
-
-  // 5. Start the transfer
-  await this.#transferStage({
-    stage,
-    source,
-    destination,
-    transform,
-    tracker
-  });
+  await this.#transferStage({ stage, source, destination, transform, tracker });
 }
 ```
 
@@ -200,46 +190,34 @@ sequenceDiagram
 - Progress events are emitted for monitoring
 - Errors are caught and handled at each step
 
-**Example Flow:**
+**Example Flow (simplified from `#transferStage`):**
 
 ```typescript
-async #transferStage(options: {
-  stage: TransferStage;
-  source?: Readable;
-  destination?: Writable;
-  transform?: PassThrough;
-  tracker?: PassThrough;
-}) {
-  const { stage, source, destination, transform, tracker } = options;
+const streams: (Readable | Writable)[] = [source];
 
-  // Create pipeline
-  let stream: Readable = source;
+if (transform) {
+  streams.push(transform);
+}
+if (tracker) {
+  streams.push(tracker);
+}
+streams.push(destination);
 
-  // Add transform if provided
-  if (transform) {
-    stream = stream.pipe(transform);
-  }
+const controller = new AbortController();
+this.#currentStreamController = controller;
 
-  // Add progress tracker
-  if (tracker) {
-    stream = stream.pipe(tracker);
-  }
-
-  // Connect to destination
-  await new Promise((resolve, reject) => {
-    this.#currentStream = stream
-      .pipe(destination)
-      .on('error', (error) => {
-        this.#emitStageUpdate('error', stage);
-        reject(error);
-      })
-      .on('close', () => {
-        this.#emitStageUpdate('finish', stage);
-        resolve();
-      });
-  });
+try {
+  // resolves once the destination has finished, and closed if it emits 'close'
+  await pipeline(streams, { signal: controller.signal });
+  this.#emitStageUpdate('finish', stage);
+} catch (e) {
+  this.#emitStageUpdate('error', stage);
+  destination.destroy(e as Error);
+  throw e;
 }
 ```
+
+A stage is done only when its destination write stream has finished. File and directory destinations therefore end their JSONL write streams only after the last JSONL file is written, and any write error, such as a line larger than `maxSizeJsonl`, fails the stage.
 
 ### 3. Stream Closing Phase
 

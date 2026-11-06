@@ -350,6 +350,8 @@ const options = {
 };
 ```
 
+Each stage runs its items through one transform chain, in this order: the `global` transforms, the `throttle` delay, and then the transforms keyed by the stage name. The `throttle` delay applies to every stage, including entities and links.
+
 #### versionStrategy
 
 The following `versionStrategy` values may be used:
