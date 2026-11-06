@@ -47,6 +47,37 @@ describe('Local file destination cleanup', () => {
     expect(await fs.pathExists(archivePath)).toBe(false);
   });
 
+  test('a missing output directory fails close instead of crashing the process', async () => {
+    const outputPath = path.join(tempDirectory, 'missing', 'export');
+    const provider = createLocalFileDestinationProvider({
+      encryption: { enabled: false },
+      compression: { enabled: false },
+      file: { path: outputPath },
+    });
+
+    const uncaught: Error[] = [];
+    const onUncaught = (error: Error) => {
+      uncaught.push(error);
+    };
+    process.on('uncaughtException', onUncaught);
+
+    try {
+      provider.bootstrap({ report: jest.fn() } as never);
+
+      await expect(
+        Promise.race([
+          provider.close(),
+          new Promise((_resolve, reject) => {
+            setTimeout(() => reject(new Error('close hung')), 2000);
+          }),
+        ])
+      ).rejects.toThrow(/ENOENT|no such file/i);
+      expect(uncaught).toEqual([]);
+    } finally {
+      process.off('uncaughtException', onUncaught);
+    }
+  });
+
   test('close rejects and the write stream errors when stream packages fail to load', async () => {
     const loadError = new Error("Cannot find module 'stream-chain'");
     const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
