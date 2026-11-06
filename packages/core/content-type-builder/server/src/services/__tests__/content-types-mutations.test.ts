@@ -158,13 +158,15 @@ describe('content type mutation compensation', () => {
   it('rejects a direct call without displayName before touching the schema or API files', async () => {
     const { displayName, ...withoutDisplayName } = createInput.contentType;
     const { generate } = jest.requireMock('@strapi/generators');
+    // An untyped (JavaScript) caller: the contract rejects this payload at compile time.
+    const payloadWithoutDisplayName: any = {
+      ...createInput,
+      contentType: { ...withoutDisplayName, info: { displayName } },
+    };
 
-    await expect(
-      createContentType({
-        ...createInput,
-        contentType: { ...withoutDisplayName, info: { displayName } },
-      })
-    ).rejects.toThrow('A content type requires a displayName');
+    await expect(createContentType(payloadWithoutDisplayName)).rejects.toThrow(
+      'A content type requires a displayName'
+    );
 
     expect(builder.createContentType).not.toHaveBeenCalled();
     expect(generate).not.toHaveBeenCalled();

@@ -134,7 +134,7 @@ type CreateContentTypeOptions = {
  * Creates a content type and handle the nested components sent with it
  */
 export const createContentType = (async (
-  { contentType, components }: any,
+  { contentType, components },
   options: CreateContentTypeOptions = {}
 ) => {
   // The HTTP validator requires `displayName`; direct service callers must provide it too,
@@ -182,9 +182,9 @@ export const createContentType = (async (
 
       await generateAPI({
         displayName: contentType.displayName,
-        singularName: contentType!.singularName,
-        pluralName: contentType!.pluralName,
-        kind: contentType!.kind,
+        singularName: contentType.singularName,
+        pluralName: contentType.pluralName,
+        kind: contentType.kind,
       });
     }
 

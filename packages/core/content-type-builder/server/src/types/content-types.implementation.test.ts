@@ -27,7 +27,12 @@ export type Assertions = [
     >
   >,
   Expect<Equal<Awaited<ReturnType<ContentTypes['createContentTypes']>>, ContentTypeHandler[]>>,
-  // The payload stays `any` while the body reads `contentType.info`, which the contract lacks.
+  Expect<
+    Equal<
+      Parameters<ContentTypes['createContentType']>[0],
+      Parameters<ContentTypesService['createContentType']>[0]
+    >
+  >,
   // `options` keeps its own annotation, which adds the internal `defaultBuilder`.
   Expect<
     Equal<
