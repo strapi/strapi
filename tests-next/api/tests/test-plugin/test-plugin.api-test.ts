@@ -1,44 +1,58 @@
+import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
 
 import {
+  TEST_AI_PROVIDER_ENV_VAR,
   TEST_PLUGIN_ENV_VAR,
   appPort,
   createFakeAiTranslationsProvider,
   generateApp,
   isLoopbackAddress,
   startServer,
+  stopAllServers,
   type App,
   type Server,
 } from '@strapi/tests-shared';
 
 const worker = Number(process.env.JEST_WORKER_ID ?? 1);
+const port = appPort('api', 10 + worker - 1);
 
 jest.setTimeout(180_000);
 
 /** A non-loopback IPv4 address of this machine, if it has one. */
-const externalAddress = () =>
-  Object.values(os.networkInterfaces())
-    .flat()
-    .find((info) => info && info.family === 'IPv4' && !info.internal)?.address;
+const externalAddress = Object.values(os.networkInterfaces())
+  .flat()
+  .find((info) => info && info.family === 'IPv4' && !info.internal)?.address;
 
-describe('test plugin', () => {
-  let app: App;
+const call = (server: Server, method: string, route: string, body?: unknown) =>
+  fetch(`${server.url}/api/tests${route}`, {
+    method,
+    headers: { 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+let app: App;
+
+beforeAll(async () => {
+  app = await generateApp({ name: `api-plugin-${worker}` });
+  // A known feature config, to check how /features splits it.
+  fs.writeFileSync(
+    path.join(app.dir, 'config', 'features.js'),
+    'module.exports = () => ({ future: { testsFlag: true }, useLegacyMediaLibrary: false });\n'
+  );
+});
+
+afterAll(async () => {
+  await stopAllServers();
+});
+
+describe('test plugin routes', () => {
   let server: Server;
 
-  const call = (method: string, path: string, body?: unknown) =>
-    fetch(`${server.url}/api/tests${path}`, {
-      method,
-      headers: { 'content-type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-
   beforeAll(async () => {
-    app = await generateApp({ name: `api-plugin-${worker}` });
     // Listen on every interface, so the loopback check can be tried from another address.
-    server = await startServer(app, {
-      port: appPort('api', 10 + worker - 1),
-      env: { HOST: '0.0.0.0' },
-    });
+    server = await startServer(app, { port, env: { HOST: '0.0.0.0' } });
   });
 
   afterAll(async () => {
@@ -46,17 +60,16 @@ describe('test plugin', () => {
   });
 
   test('reads the feature flags and license features', async () => {
-    const res = await call('GET', '/features');
+    const res = await call(server, 'GET', '/features');
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
-      future: unknown;
-      flags: unknown;
+      future: Record<string, unknown>;
+      flags: Record<string, unknown>;
       ee: { isEE: unknown; features: unknown };
     };
-    expect(body.future).toEqual(expect.any(Object));
-    expect(body.flags).toEqual(expect.any(Object));
+    expect(body.future).toEqual({ testsFlag: true });
+    expect(body.flags).toEqual({ useLegacyMediaLibrary: false });
     expect(typeof body.ee.isEE).toBe('boolean');
-    // fetch builds its JSON outside Jest's realm, so expect.any(Array) would not match.
     expect(Array.isArray(body.ee.features)).toBe(true);
   });
 
@@ -78,61 +91,81 @@ describe('test plugin', () => {
     // Off by default when the plugin loads.
     expect(await failedLogins('rate-limit-off@tests.strapi.io')).not.toContain(429);
 
-    expect(await (await call('POST', '/rate-limit', { enabled: true })).json()).toEqual({
+    expect(await (await call(server, 'POST', '/rate-limit', { enabled: true })).json()).toEqual({
       enabled: true,
     });
     expect(await failedLogins('rate-limit-on@tests.strapi.io')).toContain(429);
 
-    expect((await call('POST', '/rate-limit', { enabled: false })).status).toBe(200);
+    expect((await call(server, 'POST', '/rate-limit', { enabled: false })).status).toBe(200);
     expect(await failedLogins('rate-limit-off-again@tests.strapi.io')).not.toContain(429);
 
-    expect((await call('POST', '/rate-limit', { enabled: 'yes' })).status).toBe(400);
+    expect((await call(server, 'POST', '/rate-limit', { enabled: 'yes' })).status).toBe(400);
   });
 
   test('creates the test transfer token once', async () => {
-    expect(await (await call('POST', '/transfer-token')).json()).toEqual({ created: true });
-    expect(await (await call('POST', '/transfer-token')).json()).toEqual({ created: false });
+    expect(await (await call(server, 'POST', '/transfer-token')).json()).toEqual({ created: true });
+    expect(await (await call(server, 'POST', '/transfer-token')).json()).toEqual({
+      created: false,
+    });
   });
 
-  test('records nothing when the fake AI provider is off, and clears the calls', async () => {
-    expect(await (await call('GET', '/ai/calls')).json()).toEqual({ registered: false, calls: [] });
-    expect((await call('DELETE', '/ai/calls')).status).toBe(204);
-    expect(await (await call('GET', '/ai/calls')).json()).toEqual({ registered: false, calls: [] });
+  // With the fake provider off nothing is recorded, so this only checks that the routes answer.
+  test('answers GET and DELETE /ai/calls while the fake AI provider is off', async () => {
+    const empty = { registered: false, calls: [] };
+    expect(await (await call(server, 'GET', '/ai/calls')).json()).toEqual(empty);
+    expect((await call(server, 'DELETE', '/ai/calls')).status).toBe(204);
+    expect(await (await call(server, 'GET', '/ai/calls')).json()).toEqual(empty);
   });
 
-  test('refuses requests that are not from loopback', async () => {
-    const address = externalAddress();
-    if (!address) {
-      console.warn('No non-loopback interface: skipping the remote request check.');
-      return;
-    }
-    const res = await fetch(`http://${address}:${server.port}/api/tests/features`);
+  (externalAddress ? test : test.skip)('refuses requests that are not from loopback', async () => {
+    const res = await fetch(`http://${externalAddress}:${server.port}/api/tests/features`);
     expect(res.status).toBe(403);
   });
+});
 
-  test('fails the boot when the fake AI provider is requested but rejected', async () => {
-    const { ee } = (await (await call('GET', '/features')).json()) as {
-      ee: { isEE: boolean; features: string[] };
-    };
-    if (ee.isEE && ee.features.includes('cms-byok-ai')) {
-      console.warn('EE with cms-byok-ai: the fake AI provider is accepted, skipping.');
-      return;
+describe('test plugin boot options', () => {
+  afterEach(async () => {
+    await stopAllServers();
+  });
+
+  // With a license, Strapi may accept the fake provider (cms-byok-ai): only CE is checked here.
+  (process.env.STRAPI_LICENSE ? test.skip : test)(
+    'fails the boot when the fake AI provider is requested but rejected',
+    async () => {
+      await expect(startServer(app, { port, fakeAiProvider: true })).rejects.toThrow(
+        // Strapi wraps the error in a box: match the start, which stays on one line.
+        'STRAPI_TEST_AI_PROVIDER=fake, but Strapi rejected the fake AI'
+      );
     }
+  );
 
-    await server.stop();
+  test(`ignores a ${TEST_AI_PROVIDER_ENV_VAR} inherited from the shell`, async () => {
+    const inherited = process.env[TEST_AI_PROVIDER_ENV_VAR];
+    process.env[TEST_AI_PROVIDER_ENV_VAR] = 'fake';
+    try {
+      const server = await startServer(app, { port });
+      expect(await (await call(server, 'GET', '/ai/calls')).json()).toEqual({
+        registered: false,
+        calls: [],
+      });
+    } finally {
+      if (inherited === undefined) {
+        delete process.env[TEST_AI_PROVIDER_ENV_VAR];
+      } else {
+        process.env[TEST_AI_PROVIDER_ENV_VAR] = inherited;
+      }
+    }
+  });
+
+  test('refuses fakeAiProvider without the test plugin', async () => {
     await expect(
-      startServer(app, { port: appPort('api', 10 + worker - 1), fakeAiProvider: true })
-    ).rejects.toThrow(
-      // Strapi wraps the error in a box: match the start, which stays on one line.
-      'STRAPI_TEST_AI_PROVIDER=fake, but Strapi rejected the fake AI'
-    );
+      startServer(app, { port, fakeAiProvider: true, testPlugin: false })
+    ).rejects.toThrow('fakeAiProvider needs the test plugin');
   });
 
   test(`is not loaded without ${TEST_PLUGIN_ENV_VAR}=true`, async () => {
-    await server.stop();
-    server = await startServer(app, { port: appPort('api', 10 + worker - 1), testPlugin: false });
-
-    expect((await call('GET', '/features')).status).toBe(404);
+    const server = await startServer(app, { port, testPlugin: false });
+    expect((await call(server, 'GET', '/features')).status).toBe(404);
   });
 });
 
@@ -142,10 +175,13 @@ describe('test plugin helpers', () => {
     expect(['10.0.0.2', '::ffff:10.0.0.2', '', undefined].some(isLoopbackAddress)).toBe(false);
   });
 
-  test('the fake AI provider translates text and keeps the structure', async () => {
+  test('the fake AI provider only translates text, following the schema', async () => {
     const { provider, calls } = createFakeAiTranslationsProvider();
     const content = {
       title: 'Hello',
+      slug: 'hello',
+      contact: 'a@example.com',
+      day: '2024-01-01',
       count: 2,
       body: [
         {
@@ -163,11 +199,21 @@ describe('test plugin helpers', () => {
       ],
       sections: [{ __component: 'shared.seo', metaTitle: 'Meta' }],
     };
+    const contentTypeSchema = {
+      title: { type: 'string' },
+      slug: { type: 'uid' },
+      contact: { type: 'email' },
+      day: { type: 'date' },
+      count: { type: 'integer' },
+      body: { type: 'blocks' },
+      sections: { type: 'dynamiczone' },
+    };
 
     const result = await provider.generateTranslations({
       sourceLocale: 'en',
       targetLocales: ['fr'],
       content,
+      contentTypeSchema,
     });
 
     expect(result.localizations).toEqual([
@@ -175,6 +221,9 @@ describe('test plugin helpers', () => {
         locale: 'fr',
         content: {
           title: '[fr] Hello',
+          slug: 'hello',
+          contact: 'a@example.com',
+          day: '2024-01-01',
           count: 2,
           body: [
             {

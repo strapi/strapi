@@ -4,8 +4,8 @@
  * Test-only plugin for the /tests-next apps. It replaces the `auth: false` routes of the old
  * app template (`tests/app-template/src/api/config`).
  *
- * - It only loads when `STRAPI_TEST_PLUGIN=true` (see `testPluginConfig` in
- *   tests-next/shared/src/app/generate.ts), and refuses to load otherwise.
+ * - It only loads when `STRAPI_TEST_PLUGIN=true` (see `testPluginConfigEntry` in
+ *   tests-next/shared/src/test-plugin.ts), and refuses to load otherwise.
  * - Every route answers only to loopback requests (`plugin::tests.loopback` policy).
  *
  * Routes, under /api/tests:
