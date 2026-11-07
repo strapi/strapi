@@ -8,6 +8,7 @@ import { createRequest } from 'api-tests/request';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
+import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
 import {
   ENGINE_UIDS,
   PROFILE_UID,
@@ -21,22 +22,27 @@ import {
   setRolePermissions,
 } from '../utils/permissions';
 
+const USER_UID = 'plugin::end-users.user';
 const WRONG = 'not-the-password';
 const INVALID = 'Invalid identifier or password';
 
 let strapi;
 let rq;
 let settings;
+/** What `entry.create` was emitted with, collected by a listener the instance registers at bootstrap. */
+const created: Array<{ uid: string; entry: Record<string, unknown> }> = [];
 
 const signIn = (identifier: unknown, password: unknown = PASSWORD, extra = {}) =>
   rq.post('/api/auth/local', { body: { identifier, password, ...extra } });
+
+const register = (body: Record<string, unknown>) => rq.post('/api/auth/local/register', { body });
 
 const resetState = async () => {
   await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
   await resetRoles(strapi);
   await settings.set({
     methods: { emailPassword: true, username: true },
-    signUp: { requireEmailVerification: false },
+    signUp: { enabled: true, requireEmailVerification: false },
   });
 };
 
@@ -44,6 +50,11 @@ describe('end-users compat: sign-in', () => {
   beforeAll(async () => {
     strapi = await createEndUsersInstance({
       pluginConfig: { ...compatConfig(), trustedOrigins: [TEST_ORIGIN] },
+      async bootstrap({ strapi: instance }) {
+        instance.eventHub.on('entry.create', (event: { uid: string; entry: never }) => {
+          created.push(event);
+        });
+      },
       // Two routes pinned to the old strategy name: one echoes what the strategy put on the
       // context, one needs an `api::` permission.
       async register({ strapi: instance }) {
@@ -264,6 +275,126 @@ describe('end-users compat: sign-in', () => {
           'username',
         ].sort()
       );
+    });
+  });
+
+  describe('POST /api/auth/local/register', () => {
+    const body = (email: string, extra: Record<string, unknown> = {}) => ({
+      username: email.split('@')[0],
+      email,
+      password: PASSWORD,
+      ...extra,
+    });
+
+    it('registers and returns { jwt, user } with the default role and the profile fields', async () => {
+      const res = await register(body('Reg@Example.com', { username: 'john-doe' }));
+
+      expect(res.status).toBe(200);
+      expect(res.body.jwt).toEqual(expect.any(String));
+      expect(res.body.user).toMatchObject({
+        id: expect.any(Number),
+        documentId: expect.any(String),
+        email: 'reg@example.com',
+        username: 'john-doe',
+        provider: 'local',
+        confirmed: false,
+        blocked: false,
+        role: { id: expect.any(Number), type: 'authenticated' },
+      });
+
+      // The token works as a Bearer token, and the stored username signs in
+      const me = await rq.get('/api/users/me', { headers: bearer(res.body.jwt) });
+      const again = await signIn('john-doe');
+
+      expect(me.status).toBe(200);
+      expect(again.status).toBe(200);
+    });
+
+    it('answers the same 400 for a taken email and a taken username', async () => {
+      await seedUpUser(strapi, { email: 'taken@example.com', username: 'taken' });
+
+      const byEmail = await register(body('TAKEN@example.com', { username: 'other' }));
+      const byUsername = await register(body('fresh@example.com', { username: 'Taken' }));
+
+      for (const res of [byEmail, byUsername]) {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatchObject({
+          name: 'ApplicationError',
+          message: 'Email or Username are already taken',
+        });
+      }
+
+      expect(byUsername.body).toEqual(byEmail.body);
+    });
+
+    it('answers Register action is currently disabled when sign-up is off', async () => {
+      await settings.set({ signUp: { enabled: false } });
+
+      const res = await register(body('off@example.com'));
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ApplicationError',
+        message: 'Register action is currently disabled',
+      });
+    });
+
+    it('returns { user } and sends the confirmation email when verification is on', async () => {
+      await settings.set({ signUp: { requireEmailVerification: true } });
+      await strapi.plugin('end-users').service('engine').reload();
+      clearSentEmails();
+
+      try {
+        const res = await register(body('verify@example.com'));
+
+        expect(res.status).toBe(200);
+        expect(res.body).not.toHaveProperty('jwt');
+        expect(res.body.user).toMatchObject({ email: 'verify@example.com', confirmed: false });
+        expect(sentEmails().map((email) => email.subject)).toContain('Confirm your email address');
+      } finally {
+        await settings.set({ signUp: { requireEmailVerification: false } });
+        await strapi.plugin('end-users').service('engine').reload();
+      }
+    });
+
+    it('fires entry.create for the new user', async () => {
+      created.length = 0;
+
+      const res = await register(body('event@example.com'));
+
+      expect(res.status).toBe(200);
+      expect(created).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            uid: USER_UID,
+            entry: expect.objectContaining({ email: 'event@example.com' }),
+          }),
+        ])
+      );
+    });
+
+    it('refuses a weak password', async () => {
+      const res = await register(body('weak@example.com', { password: 'short' }));
+
+      expect(res.status).toBe(400);
+      expect(res.body.data).toBeNull();
+      expect(res.body.error.status).toBe(400);
+      expect(await strapi.db.query(USER_UID).count({ where: { email: 'weak@example.com' } })).toBe(
+        0
+      );
+    });
+
+    it('refuses deviceId', async () => {
+      const res = await register(body('device@example.com', { deviceId: 'device-1' }));
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ApplicationError',
+        message: 'Invalid parameters: deviceId',
+      });
+      expect(
+        await strapi.db.query(USER_UID).count({ where: { email: 'device@example.com' } })
+      ).toBe(0);
     });
   });
 });

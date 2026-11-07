@@ -16,6 +16,7 @@ import type { Core } from '@strapi/types';
 
 import type { CompatConfig } from '../../../compat/config';
 import { local } from '../../../compat/endpoints/local';
+import { register } from '../../../compat/endpoints/register';
 import type { CompatResult } from '../../../compat/endpoints/result';
 
 /** The compat paths, which share one window each. */
@@ -46,6 +47,11 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
     // POST /api/auth/local
     compatLocal: createAuthEndpoint('/local', { method: 'POST' }, async (ctx) =>
       respond(ctx, await local(strapi, cfg, { body: ctx.body, headers: ctx.headers }))
+    ),
+
+    // POST /api/auth/local/register
+    compatRegister: createAuthEndpoint('/local/register', { method: 'POST' }, async (ctx) =>
+      respond(ctx, await register(strapi, cfg, { body: ctx.body, headers: ctx.headers }))
     ),
   },
 
