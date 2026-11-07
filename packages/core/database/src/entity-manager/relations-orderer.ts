@@ -38,11 +38,12 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
   // Boolean to know if we have to recalculate the order of the relations
   let needsSorting = false;
   // Map to validate if relation is already in sortedConnect or DB.
-  const relationInInitialArray = initialArr.reduce(
-    (acc, rel) => ({ ...acc, [rel.id]: true }),
-    {} as Record<ID, boolean>
-  );
+  const relationInInitialArray: Record<ID, boolean> = {};
+  initialArr.forEach((rel) => {
+    relationInInitialArray[rel.id] = true;
+  });
   // Map to store the first index where a relation id is connected
+  // Mutated in place: spreading the accumulator on every item is O(n^2)
   const mappedRelations = connectArr.reduce(
     (mapper, relation: Link) => {
       const adjacentRelId = relation.position?.before || relation.position?.after;
@@ -77,10 +78,12 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
         );
       }
 
-      return {
-        [relation.id]: { ...relation, computed: false },
-        ...mapper,
-      };
+      // The first occurrence of an id wins
+      if (!existingRelation) {
+        mapper[relation.id] = { ...relation, computed: false };
+      }
+
+      return mapper;
     },
     {} as Record<ID, Link & { computed: boolean }>
   );
@@ -88,55 +91,69 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
   // If we don't need to sort the connect array, we can return it as is
   if (!needsSorting) return connectArr;
 
-  // Recursively compute in which order the relation should be connected
-  const computeRelation = (relation: Link, relationsSeenInBranch: Record<ID, boolean>) => {
-    const adjacentRelId = relation.position?.before || relation.position?.after;
-    const adjacentRelation = mappedRelations[adjacentRelId as ID];
+  // Compute in which order the relation should be connected. Walks the chain of adjacent
+  // relations iteratively: a recursive walk overflows the stack on long before/after chains.
+  const computeRelation = (startRelation: Link) => {
+    // Relations of the current branch, waiting for their adjacent relation to be connected first
+    const branch: Link[] = [];
+    const relationsSeenInBranch: Record<ID, boolean> = {};
+    let relation = startRelation;
 
-    // If the relation has already been seen in the current branch,
-    // it means there is a circular reference
-    if (adjacentRelId && relationsSeenInBranch[adjacentRelId]) {
-      throw new InvalidRelationError(
-        'A circular reference was found in the connect array. ' +
-          'One relation is trying to connect before/after another one that is trying to connect before/after it'
-      );
+    for (;;) {
+      const adjacentRelId = relation.position?.before || relation.position?.after;
+
+      // If the relation has already been seen in the current branch,
+      // it means there is a circular reference
+      if (adjacentRelId && relationsSeenInBranch[adjacentRelId]) {
+        throw new InvalidRelationError(
+          'A circular reference was found in the connect array. ' +
+            'One relation is trying to connect before/after another one that is trying to connect before/after it'
+        );
+      }
+
+      // This relation has already been computed
+      if (mappedRelations[relation.id]?.computed) {
+        break;
+      }
+
+      mappedRelations[relation.id].computed = true;
+
+      // Relation does not have a before or after attribute or is in the initial array
+      if (!adjacentRelId || relationInInitialArray[adjacentRelId]) {
+        sortedConnect.push(relation);
+        break;
+      }
+
+      // Look if id is referenced elsewhere in the array
+      if (mappedRelations[adjacentRelId]) {
+        relationsSeenInBranch[relation.id] = true;
+        branch.push(relation);
+        relation = mappedRelations[adjacentRelId];
+      } else if (strictSort) {
+        // If we reach this point, it means that the adjacent relation is not in the connect array
+        // and it is not in the database.
+        throw new InvalidRelationError(
+          `There was a problem connecting relation with id ${
+            relation.id
+          } at position ${JSON.stringify(
+            relation.position
+          )}. The relation with id ${adjacentRelId} needs to be connected first.`
+        );
+      } else {
+        // We are in non-strict mode so we can push the relation.
+        sortedConnect.push({ id: relation.id, position: { end: true } });
+        break;
+      }
     }
 
-    // This relation has already been computed
-    if (mappedRelations[relation.id]?.computed) {
-      return;
-    }
-
-    mappedRelations[relation.id].computed = true;
-
-    // Relation does not have a before or after attribute or is in the initial array
-    if (!adjacentRelId || relationInInitialArray[adjacentRelId]) {
-      sortedConnect.push(relation);
-      return;
-    }
-
-    // Look if id is referenced elsewhere in the array
-    if (mappedRelations[adjacentRelId]) {
-      computeRelation(adjacentRelation, { ...relationsSeenInBranch, [relation.id]: true });
-      sortedConnect.push(relation);
-    } else if (strictSort) {
-      // If we reach this point, it means that the adjacent relation is not in the connect array
-      // and it is not in the database.
-      throw new InvalidRelationError(
-        `There was a problem connecting relation with id ${
-          relation.id
-        } at position ${JSON.stringify(
-          relation.position
-        )}. The relation with id ${adjacentRelId} needs to be connected first.`
-      );
-    } else {
-      // We are in non-strict mode so we can push the relation.
-      sortedConnect.push({ id: relation.id, position: { end: true } });
+    // Each relation of the branch is connected after its adjacent relation
+    for (let i = branch.length - 1; i >= 0; i -= 1) {
+      sortedConnect.push(branch[i]);
     }
   };
 
   // Iterate over connectArr and populate sortedConnect
-  connectArr.forEach((relation) => computeRelation(relation, {}));
+  connectArr.forEach((relation) => computeRelation(relation));
 
   return sortedConnect;
 };
@@ -180,7 +197,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
   orderColumn: keyof TRelation,
   strict?: boolean
 ) => {
-  const computedRelations: OrderedLink[] = _.sortBy(
+  const initialRelations: OrderedLink[] = _.sortBy(
     castArray(initArr ?? []).map((r) => ({
       init: true,
       id: r[idColumn] as ID,
@@ -189,54 +206,152 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     'order'
   );
 
-  const maxOrder = maxBy(computedRelations, 'order')?.order || 0;
+  const maxOrder = maxBy(initialRelations, 'order')?.order || 0;
 
-  const findRelation = (id: ID) => {
-    const idx = computedRelations.findIndex((r) => r.id === id);
-    return { idx, relation: computedRelations[idx] };
+  // The relations are kept in a doubly linked list indexed by id, so that finding, removing and
+  // inserting a relation next to another one does not scan or shift an array: an array made
+  // connecting n positioned relations O(n^2).
+  interface RelationNode {
+    relation: OrderedLink;
+    prev: RelationNode | null;
+    next: RelationNode | null;
+  }
+
+  let head: RelationNode | null = null;
+  let tail: RelationNode | null = null;
+  let size = 0;
+  const nodesById = new Map<ID, RelationNode[]>();
+
+  const linkNode = (relation: OrderedLink, before: RelationNode | null) => {
+    const node: RelationNode = { relation, prev: null, next: before };
+
+    if (before) {
+      node.prev = before.prev;
+      before.prev = node;
+    } else {
+      node.prev = tail;
+      tail = node;
+    }
+
+    if (node.prev) {
+      node.prev.next = node;
+    } else {
+      head = node;
+    }
+
+    size += 1;
+
+    const nodes = nodesById.get(relation.id);
+    if (nodes) {
+      nodes.push(node);
+    } else {
+      nodesById.set(relation.id, [node]);
+    }
   };
 
+  const unlinkNode = (node: RelationNode) => {
+    if (node.prev) {
+      node.prev.next = node.next;
+    } else {
+      head = node.next;
+    }
+
+    if (node.next) {
+      node.next.prev = node.prev;
+    } else {
+      tail = node.prev;
+    }
+
+    size -= 1;
+
+    const nodes = nodesById.get(node.relation.id)!;
+    nodes.splice(nodes.indexOf(node), 1);
+    if (nodes.length === 0) {
+      nodesById.delete(node.relation.id);
+    }
+  };
+
+  // The first node holding this id, in list order
+  const findNode = (id: ID): RelationNode | undefined => {
+    const nodes = nodesById.get(id);
+
+    if (!nodes || nodes.length <= 1) {
+      return nodes?.[0];
+    }
+
+    // Only reached when the same id is in the list more than once
+    for (let node = head; node; node = node.next) {
+      if (node.relation.id === id) {
+        return node;
+      }
+    }
+
+    return undefined;
+  };
+
+  const toArray = () => {
+    const relations: OrderedLink[] = new Array(size);
+    let idx = 0;
+    for (let node = head; node; node = node.next) {
+      relations[idx] = node.relation;
+      idx += 1;
+    }
+    return relations;
+  };
+
+  initialRelations.forEach((relation) => linkNode(relation, null));
+
   const removeRelation = (r: Link) => {
-    const { idx } = findRelation(r.id);
-    if (idx >= 0) {
-      computedRelations.splice(idx, 1);
+    const node = findNode(r.id);
+    if (node) {
+      unlinkNode(node);
     }
   };
 
   const insertRelation = (r: Link) => {
-    let idx;
+    // The node the relation is inserted before, null to insert it at the end
+    let beforeNode: RelationNode | null;
 
     if (r.position?.before) {
-      const { idx: beforeIdx, relation } = findRelation(r.position.before);
+      const node = findNode(r.position.before);
+      if (!node) {
+        throw new Error(`Relation ${r.position.before} is not connected`);
+      }
+
+      const { relation } = node;
       if (relation.init) {
         r.order = relation.order - 0.5;
       } else {
         r.order = relation.order;
       }
-      idx = beforeIdx;
+      beforeNode = node;
     } else if (r.position?.after) {
-      const { idx: afterIdx, relation } = findRelation(r.position.after);
+      const node = findNode(r.position.after);
+      if (!node) {
+        throw new Error(`Relation ${r.position.after} is not connected`);
+      }
+
+      const { relation } = node;
       if (relation.init) {
         r.order = relation.order + 0.5;
       } else {
         r.order = relation.order;
       }
-      idx = afterIdx + 1;
+      beforeNode = node.next;
     } else if (r.position?.start) {
-      if (computedRelations.length > 0) {
-        const firstRelation = computedRelations[0];
+      if (head) {
+        const firstRelation = head.relation;
         r.order = firstRelation.init ? firstRelation.order - 0.5 : firstRelation.order;
       } else {
         r.order = 0.5;
       }
-      idx = 0;
+      beforeNode = head;
     } else {
       r.order = maxOrder + 0.5;
-      idx = computedRelations.length;
+      beforeNode = null;
     }
 
-    // Insert the relation in the array
-    computedRelations.splice(idx, 0, r as OrderedLink);
+    linkNode(r as OrderedLink, beforeNode);
   };
 
   return {
@@ -247,7 +362,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
       return this;
     },
     connect(relations: Link | Link[]) {
-      sortConnectArray(castArray(relations), computedRelations, strict).forEach((relation) => {
+      sortConnectArray(castArray(relations), toArray(), strict).forEach((relation) => {
         this.disconnect(relation);
 
         try {
@@ -265,14 +380,14 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
       return this;
     },
     get() {
-      return computedRelations;
+      return toArray();
     },
     /**
      * Get a map between the relation id and its order
      */
     getOrderMap() {
       const map: Record<ID, number> = {};
-      const chunks = _(computedRelations).groupBy('order').value();
+      const chunks = _(toArray()).groupBy('order').value();
       const sortedKeys = Object.keys(chunks).sort((a, b) => parseFloat(a) - parseFloat(b));
 
       for (const orderStr of sortedKeys) {
