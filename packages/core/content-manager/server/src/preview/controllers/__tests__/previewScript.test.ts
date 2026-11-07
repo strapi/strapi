@@ -104,6 +104,32 @@ describe('previewScript — blocks field forwarding', () => {
     });
   });
 
+  test('forwards a blocks field change with formatting marks (bold, italic) to the host as a CustomEvent', () => {
+    const handler = jest.fn();
+    window.addEventListener(STRAPI_FIELD_CHANGE, handler as EventListener);
+
+    const formattedBlocksValue = [
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: 'Normal ' },
+          { type: 'text', text: 'Bold and italic', bold: true, italic: true },
+        ],
+      },
+    ];
+
+    sendMessage({
+      type: STRAPI_FIELD_CHANGE,
+      payload: { field: 'body', value: formattedBlocksValue },
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect((handler.mock.calls[0][0] as CustomEvent).detail).toEqual({
+      field: 'body',
+      value: formattedBlocksValue,
+    });
+  });
+
   test('forwards a blocks field clear (null value) when type is "blocks"', () => {
     const handler = jest.fn();
     window.addEventListener(STRAPI_FIELD_CHANGE, handler as EventListener);

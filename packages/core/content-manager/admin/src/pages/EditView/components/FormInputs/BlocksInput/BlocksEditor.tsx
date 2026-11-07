@@ -197,9 +197,24 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
+const cloneBlocksState = (
+  value: Schema.Attribute.BlocksValue | Descendant[]
+): Schema.Attribute.BlocksValue | Descendant[] => {
+  try {
+    if (typeof structuredClone === 'function') {
+      return structuredClone(value);
+    }
+  } catch {
+    // fallback to JSON parse/stringify if structuredClone fails
+  }
+
+  return JSON.parse(JSON.stringify(value));
+};
+
 /**
  * Normalize the blocks state to null if the editor state is considered empty,
- * otherwise return the state
+ * otherwise return a cloned copy of the state so form state updates detect changes
+ * even when Slate mutates nodes in place (e.g. formatting changes like bold/italic).
  */
 const normalizeBlocksState = (
   editor: Editor,
@@ -208,7 +223,7 @@ const normalizeBlocksState = (
   const isEmpty =
     value.length === 1 && Editor.isEmpty(editor, value[0] as Schema.Attribute.BlocksNode);
 
-  return isEmpty ? null : value;
+  return isEmpty ? null : cloneBlocksState(value);
 };
 
 interface BlocksEditorProps
