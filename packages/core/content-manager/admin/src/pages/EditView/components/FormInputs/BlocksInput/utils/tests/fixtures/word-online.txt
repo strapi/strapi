@@ -1,0 +1,59 @@
+
+[Prénom] 
+[Nom] 
+
+[Adresse] 
+
+[Téléphone] 
+
+[Adresse e-mail] 
+
+[Profil LinkedIn] 
+
+[Twitter/Blog/Portfolio] 
+
+[Si vous êtes prêt à écrire, sélectionnez simplement le texte de ce conseil et commencez à taper pour le remplacer par le vôtre. Pour obtenir de meilleurs résultats, n’incluez pas d’espace à droite ou à gauche des caractères dans votre sélection. Décrivez brièvement votre objectif professionnel ou faites un résumé de vos compétences. Réutilisez les mots clés de la description du poste.] 
+
+Compétences 
+
+[Dressez une liste de vos points forts en rapport avec le poste que vous visez] 
+
+[Indiquez l’un de vos atouts] 
+
+[Indiquez l’un de vos atouts] 
+
+[Indiquez l’un de vos atouts] 
+
+[Indiquez l’un de vos atouts] 
+
+Expérience 
+
+[DATES DE DÉBUT] – [FIN] 
+
+[Intitulé du poste] / [Entreprise, adresse] 
+
+[Décrivez vos responsabilités et vos réalisations en termes d’impact et de résultats. Citez des exemples tout en restant concis.] 
+
+[DATES DE DÉBUT] – [FIN] 
+
+[Intitulé du poste] / [Entreprise, adresse] 
+
+[Décrivez vos responsabilités et vos réalisations en termes d’impact et de résultats. Citez des exemples tout en restant concis.] 
+
+Formation 
+
+[MOIS Année] 
+
+[Nom du diplôme] / [Établissement, adresse] 
+
+[N’hésitez pas à mettre en avant vos résultats, récompenses et mentions. Vous pouvez également ajouter une description rapide de vos cours.] 
+
+[MOIS Année] 
+
+[Nom du diplôme] / [Établissement, adresse] 
+
+[N’hésitez pas à mettre en avant vos résultats, récompenses et mentions. Vous pouvez également ajouter une description rapide de vos cours.] 
+
+Activités 
+
+[Utilisez cette section pour indiquer vos passions et activités pertinentes. Il peut être utile d’indiquer ici vos expériences d’animation et de volontariat. Vous pouvez également ajouter d’autres informations importantes comme des publications, certifications, langues, etc.] 

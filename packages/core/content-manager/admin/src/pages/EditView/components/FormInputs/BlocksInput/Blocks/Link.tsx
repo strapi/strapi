@@ -17,32 +17,13 @@ import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
+import { isValidAbsoluteLink, isValidLink } from '../utils/links';
 import { type Block } from '../utils/types';
 
 import type { Schema } from '@strapi/types';
 
 const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNode => {
   return element.type === 'link';
-};
-
-const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'mailto:', 'tel:']);
-
-const isValidLink = (link: string) => {
-  try {
-    const url = new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
-
-    return ALLOWED_LINK_PROTOCOLS.has(url.protocol);
-  } catch {
-    return false;
-  }
-};
-
-const isValidAbsoluteLink = (link: string) => {
-  try {
-    return ALLOWED_LINK_PROTOCOLS.has(new URL(link).protocol);
-  } catch {
-    return false;
-  }
 };
 
 const removeLink = (editor: Editor) => {
