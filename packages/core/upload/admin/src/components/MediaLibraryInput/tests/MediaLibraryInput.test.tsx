@@ -164,6 +164,15 @@ const dropFiles = (files: globalThis.File[]) => {
   });
 };
 
+const submitUrls = async (user: ReturnType<typeof render>['user'], urls: string) => {
+  await user.click(screen.getByRole('button', { name: 'Add asset' }));
+  await user.click(await screen.findByRole('menuitem', { name: 'Upload from URL' }));
+  fireEvent.change(await screen.findByRole('textbox'), { target: { value: urls } });
+  // Not `user.click`: user-event submits through `form.requestSubmit(submitter)`,
+  // which jsdom does not implement, so the form would never submit.
+  fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
+};
+
 describe('<MediaLibraryInput /> (Content Manager)', () => {
   // jsdom has no object URLs; uploads preview the picked file through them.
   const { createObjectURL, revokeObjectURL } = URL;
@@ -429,6 +438,32 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   describe('multiple field', () => {
     const multiple = { attribute: { multiple: true } };
 
+    // A repeatable component collapsed mid-upload unmounts its fields.
+    const CollapsibleInput = () => {
+      const [isOpen, setIsOpen] = useState(true);
+
+      return (
+        <>
+          <button type="button" onClick={() => setIsOpen((open) => !open)}>
+            Toggle
+          </button>
+          {isOpen && <MediaLibraryInput name="cover" label="Cover" {...multiple} />}
+        </>
+      );
+    };
+
+    const renderCollapsibleInput = () =>
+      render(<CollapsibleInput />, {
+        providerOptions: { storeConfig },
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Form onSubmit={jest.fn()} method="POST" initialValues={{}}>
+              {children}
+            </Form>
+          ),
+        },
+      });
+
     it('shows only the drop zone while empty', () => {
       renderInput(multiple);
 
@@ -489,30 +524,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
     });
 
     it('attaches an upload that completes after the input remounts', async () => {
-      // A repeatable component collapsed mid-upload unmounts its fields.
-      const CollapsibleInput = () => {
-        const [isOpen, setIsOpen] = useState(true);
-
-        return (
-          <>
-            <button type="button" onClick={() => setIsOpen((open) => !open)}>
-              Toggle
-            </button>
-            {isOpen && <MediaLibraryInput name="cover" label="Cover" {...multiple} />}
-          </>
-        );
-      };
-
-      const { user } = render(<CollapsibleInput />, {
-        providerOptions: { storeConfig },
-        renderOptions: {
-          wrapper: ({ children }) => (
-            <Form onSubmit={jest.fn()} method="POST" initialValues={{}}>
-              {children}
-            </Form>
-          ),
-        },
-      });
+      const { user } = renderCollapsibleInput();
 
       dropFiles([image('first.png'), image('second.png')]);
       await waitFor(() => expect(requests).toHaveLength(1));
@@ -535,6 +547,61 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
         screen.getByRole('button', { name: 'More actions for second.png' })
       ).toBeInTheDocument();
       expect(screen.getAllByRole('button', { name: /^More actions for/ })).toHaveLength(2);
+    });
+
+    it('adds every file of a URL upload to the assets already there', async () => {
+      mockUploadFromUrls.mockReturnValue({
+        unwrap: () =>
+          Promise.resolve({
+            data: [asset(9, 'one.png'), asset(10, 'two.png')],
+            errors: [],
+          }),
+      });
+
+      const { user } = renderInput(multiple, { cover: [asset(1, 'held.png')] });
+
+      await submitUrls(user, 'https://example.com/one.png\nhttps://example.com/two.png');
+
+      expect(
+        await screen.findByRole('button', { name: 'More actions for two.png' })
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'More actions for one.png' })).toBeInTheDocument();
+
+      // The row scrolls to the newest card; the asset already there is one page back.
+      await user.click(screen.getByRole('button', { name: 'Previous slide' }));
+      expect(screen.getByRole('button', { name: 'More actions for held.png' })).toBeInTheDocument();
+    });
+
+    it('keeps a device upload that lands while a URL upload is in flight on a collapsed input', async () => {
+      let resolveUrlUpload: (result: { data: AssetFile[]; errors: never[] }) => void = () => {};
+      mockUploadFromUrls.mockReturnValue({
+        unwrap: () =>
+          new Promise((resolve) => {
+            resolveUrlUpload = resolve;
+          }),
+      });
+
+      const { user } = renderCollapsibleInput();
+
+      await submitUrls(user, 'https://example.com/from-url.png');
+      await waitFor(() => expect(mockUploadFromUrls).toHaveBeenCalledTimes(1));
+
+      dropFiles([image('first.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+
+      await user.click(screen.getByRole('button', { name: 'Toggle' }));
+      await settle('first.png');
+      await act(async () => {
+        resolveUrlUpload({ data: [asset(9, 'from-url.png')], errors: [] });
+      });
+      await user.click(screen.getByRole('button', { name: 'Toggle' }));
+
+      expect(
+        screen.getByRole('button', { name: 'More actions for first.png' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'More actions for from-url.png' })
+      ).toBeInTheDocument();
     });
 
     it('cancels one upload without stopping the others', async () => {
@@ -869,6 +936,37 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       const style = window.getComputedStyle(trigger);
       expect(style.backgroundColor).toBe('transparent');
       expect(style.borderColor).toBe('transparent');
+    });
+
+    it('does not upload from a URL once the user can no longer upload', async () => {
+      const { user, rerender } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+      await user.click(await screen.findByRole('menuitem', { name: 'Upload from URL' }));
+      fireEvent.change(await screen.findByRole('textbox'), {
+        target: { value: 'https://example.com/from-url.png' },
+      });
+
+      Object.assign(mockPermissions, { canCreate: false });
+      rerender(<MediaLibraryInput name="cover" label="Cover" attribute={{ multiple: true }} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
+
+      await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument());
+      expect(mockUploadFromUrls).not.toHaveBeenCalled();
+    });
+
+    it('replaces the asset of a single field with the file of its URL', async () => {
+      mockUploadFromUrls.mockReturnValue({
+        unwrap: () => Promise.resolve({ data: [asset(9, 'from-url.png')], errors: [] }),
+      });
+
+      const { user } = renderInput({}, { cover: asset(1, 'held.png') });
+
+      await submitUrls(user, 'https://example.com/from-url.png');
+
+      expect(await screen.findByText('from-url.png')).toBeInTheDocument();
+      expect(screen.queryByText('held.png')).not.toBeInTheDocument();
     });
 
     it('says a URL file the field does not accept was added to the library', async () => {
