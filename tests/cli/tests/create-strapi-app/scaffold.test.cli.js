@@ -315,6 +315,58 @@ describe('create-strapi-app', () => {
     }
   });
 
+  it('prints the admin:create-user command when dependencies are not installed', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout } = await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-npm'])
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('npm run strapi -- admin:create-user');
+      // No admin user was created, so no generated password in the summary
+      expect(stdout).not.toContain('Password :');
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails before writing files when --admin-email is invalid', async () => {
+    const projectDir = path.join(mkProjectDir(), 'app');
+    try {
+      const { stderr, stdout } = await spawnCsa([
+        projectDir,
+        ...baseScaffoldArgs,
+        '--admin-email',
+        'not-an-email',
+      ])
+        .expect('code', 1)
+        .end();
+
+      expect(`${stdout}${stderr}`).toMatch(/Admin email .* is invalid/);
+      expect(fs.existsSync(projectDir)).toBe(false);
+    } finally {
+      fs.rmSync(path.dirname(projectDir), { recursive: true, force: true });
+    }
+  });
+
+  it('fails before writing files when CREATE_STRAPI_APP_ADMIN_EMAIL is invalid', async () => {
+    const projectDir = path.join(mkProjectDir(), 'app');
+    try {
+      const { stderr, stdout } = await spawnCsa([projectDir, ...baseScaffoldArgs], {
+        CREATE_STRAPI_APP_ADMIN_EMAIL: 'not-an-email',
+      })
+        .expect('code', 1)
+        .end();
+
+      expect(`${stdout}${stderr}`).toMatch(
+        /Admin email .* from CREATE_STRAPI_APP_ADMIN_EMAIL is invalid/
+      );
+      expect(fs.existsSync(projectDir)).toBe(false);
+    } finally {
+      fs.rmSync(path.dirname(projectDir), { recursive: true, force: true });
+    }
+  });
+
   it('prints a semver version with --version', async () => {
     const { stdout } = await spawnCsa(['--version']).expect('code', 0).end();
 

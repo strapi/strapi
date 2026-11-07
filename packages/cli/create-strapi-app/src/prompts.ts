@@ -1,3 +1,5 @@
+import { validateEmail, validatePassword } from './utils/admin-user';
+
 async function directory() {
   const { default: inquirer } = await import('inquirer');
   const { directory } = await inquirer.prompt<{
@@ -78,4 +80,47 @@ async function installDependencies(packageManager: string) {
   return installDependencies;
 }
 
-export { directory, typescript, example, gitInit, installDependencies };
+async function adminEmail() {
+  const { default: inquirer } = await import('inquirer');
+  const { email } = await inquirer.prompt<{
+    email: string;
+  }>([
+    {
+      type: 'input',
+      name: 'email',
+      message: 'Admin user email?',
+      validate: validateEmail,
+    },
+  ]);
+
+  return email;
+}
+
+async function adminPassword() {
+  const { default: inquirer } = await import('inquirer');
+  const { password } = await inquirer.prompt<{
+    password: string;
+    confirmPassword: string;
+  }>([
+    {
+      type: 'password',
+      name: 'password',
+      mask: '*',
+      message: 'Admin user password?',
+      validate: validatePassword,
+    },
+    {
+      type: 'password',
+      name: 'confirmPassword',
+      mask: '*',
+      message: 'Confirm the admin user password:',
+      validate(value: string, answers?: { password?: string }) {
+        return value === answers?.password ? true : 'The passwords do not match';
+      },
+    },
+  ]);
+
+  return password;
+}
+
+export { directory, typescript, example, gitInit, installDependencies, adminEmail, adminPassword };

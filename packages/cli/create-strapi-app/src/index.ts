@@ -8,6 +8,15 @@ import fse from 'fs-extra';
 import * as prompts from './prompts';
 import { handleCloudLogin } from './cloud';
 import { createStrapi } from './create-strapi';
+import {
+  AdminUserInputError,
+  resolveAdminUser,
+  ADMIN_EMAIL_ENV_VAR,
+  getAdminEmailFromEnv,
+  takeAdminPasswordFromEnv,
+  validateEmail,
+} from './utils/admin-user';
+import type { AdminUser } from './utils/admin-user';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
@@ -73,6 +82,13 @@ const command = new commander.Command('create-strapi-app')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--skip-db', 'Skip database configuration')
 
+  // Admin user options
+  .option(
+    '--admin-email <email>',
+    'Email of the first admin user (or CREATE_STRAPI_APP_ADMIN_EMAIL; password: CREATE_STRAPI_APP_ADMIN_PASSWORD env variable)'
+  )
+  .option('--no-admin-token', 'Do not create an admin token for the first admin user')
+
   .option('--template <template>', 'Specify a Strapi template')
   .option('--template-branch <templateBranch>', 'Specify a branch for the template')
   .option('--template-path <templatePath>', 'Specify a path to the template inside the repository')
@@ -80,6 +96,9 @@ const command = new commander.Command('create-strapi-app')
   .description('create a new application');
 
 async function run(args: string[]): Promise<void> {
+  // Remove the password from process.env before any child process starts
+  const adminPasswordFromEnv = takeAdminPasswordFromEnv();
+
   const options = command.parse(args).opts<Options>();
   const directory = command.args[0];
 
@@ -127,6 +146,17 @@ async function run(args: string[]): Promise<void> {
   if (options.nonInteractive && !directory) {
     logger.fatal(
       `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--non-interactive')}`
+    );
+  }
+
+  // `--admin-email` first, then the CREATE_STRAPI_APP_ADMIN_EMAIL environment variable
+  const adminEmailFromEnv = getAdminEmailFromEnv();
+  const adminEmail = options.adminEmail ?? adminEmailFromEnv;
+  const adminEmailSource = options.adminEmail !== undefined ? '--admin-email' : ADMIN_EMAIL_ENV_VAR;
+
+  if (adminEmail !== undefined && validateEmail(adminEmail) !== true) {
+    logger.fatal(
+      `Admin email ${chalk.bold(`"${adminEmail}"`)} from ${chalk.bold(adminEmailSource)} is invalid`
     );
   }
 
@@ -222,10 +252,37 @@ async function run(args: string[]): Promise<void> {
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
 
+  // The admin user is mandatory, but `strapi admin:create-user` needs the installed
+  // dependencies. Without them, the installer prints the command to run instead.
+  let adminUser: AdminUser | undefined;
+
+  if (scope.installDependencies) {
+    try {
+      adminUser = await resolveAdminUser({
+        email: adminEmail,
+        // `--quickstart` still asks. Scripted runs (no TTY) never block on a prompt:
+        // the email uses the default, and the password is generated
+        canPrompt: !options.nonInteractive && Boolean(process.stdin.isTTY),
+        envPassword: adminPasswordFromEnv,
+        prompts: { email: prompts.adminEmail, password: prompts.adminPassword },
+      });
+    } catch (error) {
+      if (error instanceof AdminUserInputError) {
+        logger.fatal(error.message);
+      }
+
+      throw error;
+    }
+  } else if (adminEmail !== undefined) {
+    logger.warn(
+      `${chalk.bold(adminEmailSource)} is ignored: the admin user can only be created after the dependency install`
+    );
+  }
+
   addDatabaseDependencies(scope);
 
   try {
-    await createStrapi(scope);
+    await createStrapi(scope, { adminUser, withAdminToken: options.adminToken !== false });
   } catch (error: unknown) {
     if (!(error instanceof Error)) {
       throw error;

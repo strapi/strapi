@@ -18,8 +18,10 @@ const installArgumentsMap: {
   // Do not pass --legacy-peer-deps: a lockfile written under that mode fails
   // strict `npm ci` unless the same flag is set (see #27019). Fresh Strapi apps
   // install cleanly with npm's default peer-dep resolution.
+  // --no-audit and --no-fund: no audit request and no funding messages during the install.
+  // `npm audit` in the project still reports the vulnerabilities.
   npm: {
-    '*': [],
+    '*': ['--no-audit', '--no-fund'],
   },
   yarn: {
     '<4': ['--network-timeout', '1000000'],
@@ -87,7 +89,8 @@ function mergeMatchingVersionRanges<T>(
   mergeFn: (acc: T, curr: T) => T
 ): T {
   return Object.keys(versionMap).reduce((acc, range) => {
-    if (semver.satisfies(version, range) || range === '*') {
+    // The wildcard entry is the starting value: merging it again would duplicate it
+    if (range !== '*' && semver.satisfies(version, range)) {
       return mergeFn(acc, versionMap[range]);
     }
     return acc;
