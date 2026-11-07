@@ -1,5 +1,6 @@
 import ability from './ability';
 import builderLayoutService from './builder-layout';
+import compat from './compat';
 import condition from './condition';
 import engine from './engine';
 import permission from './permission';
@@ -14,6 +15,7 @@ import userSecurity from './user-security';
 export default {
   ability,
   'builder-layout': builderLayoutService,
+  compat,
   condition,
   engine,
   permission,

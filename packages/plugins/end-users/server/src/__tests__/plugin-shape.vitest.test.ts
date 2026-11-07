@@ -19,6 +19,7 @@ describe('end-users plugin shape', () => {
     expect(Object.keys(plugin.services).sort()).toEqual([
       'ability',
       'builder-layout',
+      'compat',
       'condition',
       'engine',
       'permission',

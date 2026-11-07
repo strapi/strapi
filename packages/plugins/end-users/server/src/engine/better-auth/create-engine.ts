@@ -846,6 +846,9 @@ export const createEngine = (
     });
   };
 
+  // A Users & Permissions token is not a session: it is never found here. The Content API strategy
+  // checks a Bearer value that comes back with no session against those tokens, and counts the
+  // hit in the plugin's own store (the `compat` service), never in the engine's tables.
   const lookupSession = async (headers: Headers): Promise<SessionLookup> => {
     // A reload may swap `auth` while this awaits: the lookup finishes on the instance it started on
     const instance = auth;
