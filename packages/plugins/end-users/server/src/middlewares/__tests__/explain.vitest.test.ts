@@ -274,6 +274,35 @@ describe('explain middleware', () => {
     });
   });
 
+  describe('with the compatibility mode on', () => {
+    const compatOn = {
+      'plugin::end-users.compat.usersPermissions': true,
+      'plugin::end-users.explain': true,
+    };
+
+    it('explains a request the strategy authenticated under its users-permissions name', async () => {
+      const { header, read } = await run({
+        config: compatOn,
+        url: '/api/notes?explain=true',
+        strategy: 'users-permissions',
+      });
+
+      expect(read).toHaveBeenCalled();
+      expect(JSON.parse(header)).toEqual([removed()]);
+    });
+
+    it('does not explain a strategy under the other name', async () => {
+      const { header, read } = await run({
+        config: compatOn,
+        url: '/api/notes?explain=true',
+        strategy: 'end-users',
+      });
+
+      expect(header).toBe('');
+      expect(read).not.toHaveBeenCalled();
+    });
+  });
+
   it('never changes the response when explaining fails', async () => {
     const { ctx, header, debug } = await run({
       config: { 'plugin::end-users.explain': true },

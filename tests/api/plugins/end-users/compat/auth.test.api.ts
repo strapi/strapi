@@ -156,6 +156,7 @@ describe('end-users compat: sign-in', () => {
         await signIn('dee@example.com'),
         await signIn('cy', WRONG),
         await signIn('nobody'),
+        await signIn('nobody@@example', WRONG),
       ];
 
       for (const res of answers) {
@@ -164,6 +165,19 @@ describe('end-users compat: sign-in', () => {
       }
 
       expect(answers[0].body.error).toMatchObject({ name: 'ApplicationError', message: INVALID });
+    });
+
+    it('signs in a username the native username sign-in would refuse', async () => {
+      await seedUpUser(strapi, { email: 'jd@example.com', username: 'john-doe' });
+      await seedUpUser(strapi, { email: 'jo@example.com', username: 'jo' });
+
+      for (const username of ['john-doe', 'JO']) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await signIn(username);
+
+        expect(res.status).toBe(200);
+        expect(res.body.jwt).toEqual(expect.any(String));
+      }
     });
 
     it('signs in with a migrated bcrypt hash', async () => {
@@ -213,7 +227,11 @@ describe('end-users compat: sign-in', () => {
       const locked = await signIn('ivy@example.com');
 
       expect(locked.status).toBe(403);
-      expect(locked.body.code).toBe('ACCOUNT_LOCKED');
+      expect(locked.body.error).toMatchObject({
+        status: 403,
+        name: 'ForbiddenError',
+        details: { code: 'ACCOUNT_LOCKED' },
+      });
       expect(locked.body).not.toHaveProperty('jwt');
     });
 

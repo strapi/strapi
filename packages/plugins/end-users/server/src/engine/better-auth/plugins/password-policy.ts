@@ -10,7 +10,8 @@
  * The paths that only check a password the user already has are left alone, because refusing them
  * for a weak one would lock out people whose password predates the rules: the sign-in paths
  * (`/sign-in/*`), the two-factor paths that ask for the password again (`/two-factor/*`) and
- * `/delete-user`, and the compatibility sign-in `/local`. A body without a string password is left to Better Auth's own validation.
+ * `/delete-user`, and the compatibility sign-in `/local`. A body without a string password is left
+ * to Better Auth's own validation.
  */
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';

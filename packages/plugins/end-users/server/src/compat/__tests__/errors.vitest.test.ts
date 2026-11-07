@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapAuthError, upError } from '../errors';
+import { engineErrorBody, mapAuthError, upError } from '../errors';
 
 describe('compat errors', () => {
   it('upError builds the Strapi envelope', () => {
@@ -33,5 +33,19 @@ describe('compat errors', () => {
     });
     expect(mapAuthError('ACCOUNT_LOCKED')).toBeNull();
     expect(mapAuthError('toString')).toBeNull();
+  });
+
+  it('engineErrorBody keeps the engine status and code in the envelope', () => {
+    expect(engineErrorBody(403, 'Locked', 'ACCOUNT_LOCKED').error).toEqual({
+      status: 403,
+      name: 'ForbiddenError',
+      message: 'Locked',
+      details: { code: 'ACCOUNT_LOCKED' },
+    });
+    expect(engineErrorBody(401, 'x', 'C').error.name).toBe('UnauthorizedError');
+    expect(engineErrorBody(429, 'x', 'C').error).toMatchObject({
+      status: 429,
+      name: 'ApplicationError',
+    });
   });
 });

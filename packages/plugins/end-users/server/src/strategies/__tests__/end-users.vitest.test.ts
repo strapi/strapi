@@ -5,7 +5,7 @@ import type { Core } from '@strapi/types';
 import { USER_UID } from '../../constants';
 import { koaCtx } from '../../engine/better-auth/__tests__/utils/koa-ctx';
 import type { SessionLookup } from '../../engine/types';
-import createEndUsersStrategy, { ALWAYS_ALLOWED_SCOPES } from '../end-users';
+import createEndUsersStrategy, { ALWAYS_ALLOWED_SCOPES, isEndUsersStrategy } from '../end-users';
 
 const NO_SESSION: SessionLookup = {
   session: null,
@@ -167,6 +167,16 @@ describe('the end-users strategy', () => {
         'role-a',
         'role-b',
       ]);
+    });
+  });
+
+  describe('isEndUsersStrategy', () => {
+    it('accepts users-permissions only with compat on, and end-users only with it off', () => {
+      expect(isEndUsersStrategy('end-users', false)).toBe(true);
+      expect(isEndUsersStrategy('users-permissions', false)).toBe(false);
+      expect(isEndUsersStrategy('users-permissions', true)).toBe(true);
+      expect(isEndUsersStrategy('end-users', true)).toBe(false);
+      expect(isEndUsersStrategy(undefined, true)).toBe(false);
     });
   });
 

@@ -2,7 +2,8 @@ import type { Core } from '@strapi/types';
 import type { ExplainEntry } from '@strapi/utils';
 
 import { PLUGIN_ID } from '../constants';
-import { STRATEGY_NAME } from '../strategies/end-users';
+import { readCompatConfig } from '../compat/config';
+import { isEndUsersStrategy } from '../strategies/end-users';
 
 /** The response header that says what the permission checks did to a request */
 export const EXPLAIN_HEADER = 'x-strapi-permissions-explain';
@@ -110,7 +111,10 @@ export const createExplainMiddleware =
         auth?: { strategy?: { name?: unknown } };
       };
 
-      if (route?.info?.type !== 'content-api' || auth?.strategy?.name !== STRATEGY_NAME) {
+      if (
+        route?.info?.type !== 'content-api' ||
+        !isEndUsersStrategy(auth?.strategy?.name, readCompatConfig(strapi).usersPermissions)
+      ) {
         return;
       }
 
