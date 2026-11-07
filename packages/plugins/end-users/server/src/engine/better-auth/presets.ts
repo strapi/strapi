@@ -49,7 +49,10 @@ export const resolvePreset = (config: unknown): unknown => {
     throw new Error(`"${strapiPreset.name}" is not a generic OAuth preset of Better Auth.`);
   }
 
-  const { providerId, ...preset } = make(strapiPreset.options as never) as Record<string, unknown>;
+  const { providerId: _providerId, ...preset } = make(strapiPreset.options as never) as Record<
+    string,
+    unknown
+  >;
 
   return { ...rest, ...preset, ...pick(rest, ['overrideUserInfo', 'providerId']) };
 };

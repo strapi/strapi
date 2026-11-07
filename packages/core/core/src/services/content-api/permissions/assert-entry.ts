@@ -17,7 +17,7 @@ interface EntryCheckParams {
 }
 
 /** The actions a write can be checked for. Anything else is not one, whatever the types say */
-const ENTRY_ACTIONS: readonly unknown[] = ['update', 'delete', 'publish'];
+const ENTRY_ACTIONS = new Set<unknown>(['update', 'delete', 'publish']);
 
 /**
  * A `locale` that names a scope the Document Service resolves: missing (the default locale), one
@@ -72,7 +72,7 @@ export const createEntryCheck = ({ strapi, checker }: EntryCheckParams) => {
     // Anything but `delete` and `publish` is read as an `update`, so a typo or a custom action would
     // be checked against the drafts and let through. The types are erased at runtime: refuse it
     // for every caller, tokens included, so a wrong call shows the same everywhere
-    if (!ENTRY_ACTIONS.includes(action)) {
+    if (!ENTRY_ACTIONS.has(action)) {
       return false;
     }
 

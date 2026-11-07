@@ -138,6 +138,17 @@ const setup = (initial: Row[] = [], { readsProfile = false } = {}) => {
     },
   } as unknown as Core.Strapi;
 
+  // Runs a subscriber's handler for an event, and fails the test when there is none to run
+  const fire = (subscriber: { [event: string]: unknown } | undefined, event: string) => {
+    const handler = subscriber?.[event];
+
+    if (typeof handler !== 'function') {
+      throw new Error(`No subscriber handles ${event}`);
+    }
+
+    handler();
+  };
+
   const subscriberFor = (uid: string) => subscribers.find(({ models }) => models.includes(uid));
 
   return {
@@ -153,9 +164,10 @@ const setup = (initial: Row[] = [], { readsProfile = false } = {}) => {
     documents,
     subscribers,
     subscriberFor,
+    fire,
     // What the engine was last asked to build from
     lastActions: () =>
-      (generateAbility.mock.calls.at(-1)?.[0] as Array<{ action: string }>).map(
+      ((generateAbility.mock.calls.at(-1)?.[0] ?? []) as Array<{ action: string }>).map(
         ({ action }) => action
       ),
     // Who the conditions were last to be evaluated for
@@ -831,12 +843,12 @@ describe('ability service', () => {
       'afterDelete',
       'afterDeleteMany',
     ])('forgets the cached permissions on a permission %s', async (event) => {
-      const { ability, findForRoles, subscriberFor } = setup([
+      const { ability, findForRoles, subscriberFor, fire } = setup([
         { roleDocumentId: 'role-a', action: 'api::note.note.find' },
       ]);
 
       await ability.forUser(USER, [{ documentId: 'role-a' }]);
-      (subscriberFor(PERMISSION_UID)?.[event] as unknown as () => void)();
+      fire(subscriberFor(PERMISSION_UID), event);
       await ability.forUser(USER, [{ documentId: 'role-a' }]);
 
       expect(findForRoles).toHaveBeenCalledTimes(2);
@@ -845,12 +857,12 @@ describe('ability service', () => {
     it.each(['afterUpdate', 'afterUpdateMany', 'afterDelete', 'afterDeleteMany'])(
       'forgets the cached permissions on a role %s',
       async (event) => {
-        const { ability, findForRoles, subscriberFor } = setup([
+        const { ability, findForRoles, subscriberFor, fire } = setup([
           { roleDocumentId: 'role-a', action: 'api::note.note.find' },
         ]);
 
         await ability.forUser(USER, [{ documentId: 'role-a' }]);
-        (subscriberFor(ROLE_UID)?.[event] as unknown as () => void)();
+        fire(subscriberFor(ROLE_UID), event);
         await ability.forUser(USER, [{ documentId: 'role-a' }]);
 
         expect(findForRoles).toHaveBeenCalledTimes(2);

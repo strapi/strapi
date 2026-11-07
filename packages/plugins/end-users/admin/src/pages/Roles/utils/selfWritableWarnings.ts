@@ -5,7 +5,13 @@ const USER_UID = 'plugin::end-users.user';
 const PROFILE_UID = 'plugin::end-users.profile';
 
 /** The user fields Better Auth's own `/update-user` already lets every signed-in user write */
-const UPDATE_USER_FIELDS = ['name', 'image', 'username', 'displayUsername', 'preferredLocale'];
+const UPDATE_USER_FIELDS = new Set<string>([
+  'name',
+  'image',
+  'username',
+  'displayUsername',
+  'preferredLocale',
+]);
 
 /** A grant of a role that would let users write a field a builder condition reads */
 export interface SelfWritableWarning {
@@ -49,7 +55,7 @@ const findSelfWritableWarnings = (
           return false;
         }
 
-        if (source === 'user' && UPDATE_USER_FIELDS.includes(head)) {
+        if (source === 'user' && UPDATE_USER_FIELDS.has(head)) {
           // Everyone can write these already: no grant of this role changes that
           return false;
         }

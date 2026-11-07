@@ -41,11 +41,11 @@ const SLUG = /^[a-z][a-z0-9-]{0,62}$/;
  * Slugs that are no condition's: the admin's page for a new condition is `/conditions/new`, a static
  * route that wins over `/conditions/:slug`, so a condition by that slug could never be opened.
  */
-const RESERVED_SLUGS: readonly string[] = ['new'];
+const RESERVED_SLUGS = new Set<string>(['new']);
 
 const INPUT_NAME = /^[a-z][a-zA-Z0-9]{0,31}$/;
 
-const TO_MANY_RELATIONS: readonly string[] = ['oneToMany', 'manyToMany', 'manyWay'];
+const TO_MANY_RELATIONS = new Set<string>(['oneToMany', 'manyToMany', 'manyWay']);
 
 const KIND_TEXT: Record<ValueKind, string> = {
   string: 'a text',
@@ -102,7 +102,7 @@ export const relationOf = (
   attribute?.type === 'relation' &&
   typeof attribute.target === 'string' &&
   typeof attribute.relation === 'string'
-    ? { target: attribute.target, toMany: TO_MANY_RELATIONS.includes(attribute.relation) }
+    ? { target: attribute.target, toMany: TO_MANY_RELATIONS.has(attribute.relation) }
     : undefined;
 
 /** The enumeration values of an attribute, when it is one */
@@ -117,7 +117,7 @@ export const checkSlug = (value: unknown): string => {
     );
   }
 
-  if (RESERVED_SLUGS.includes(value)) {
+  if (RESERVED_SLUGS.has(value)) {
     return refuse(
       ['slug'],
       `The slug "${value}" is reserved: it is the address of the builder's page for a new condition`

@@ -45,7 +45,7 @@ const DEFAULT_OIDC_SCOPES = ['openid', 'profile', 'email'];
 
 type Plain = Record<string, unknown>;
 
-const WHEN: ProfileMappingWhen[] = ['sign-up', 'every-sign-in'];
+const WHEN = new Set<ProfileMappingWhen>(['sign-up', 'every-sign-in']);
 
 /**
  * The profile attribute types a claim of each type can be written to. A claim typed as a path, that
@@ -126,7 +126,8 @@ const slug = (text: string) =>
   text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    // Every run of other characters is now one hyphen, so at most one is left at each end
+    .replace(/^-|-$/g, '');
 
 const customDefinition = (id: string, custom: { name: string; discoveryUrl: string }) =>
   createDefinition('oauth', {
@@ -335,7 +336,7 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
     typeof value.attribute === 'string' &&
     typeof value.claim === 'string' &&
     value.claim.trim() !== '' &&
-    WHEN.includes(value.when as ProfileMappingWhen);
+    WHEN.has(value.when as ProfileMappingWhen);
 
   /** What the entry maps from the provider's profile; from config it is read-only. */
   const rawMapping = (entry: Entry): unknown =>
@@ -536,7 +537,7 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
       return invalid([], 'A provider is an object');
     }
 
-    const allowed = [
+    const allowed = new Set([
       'enabled',
       'clientId',
       'clientSecret',
@@ -546,10 +547,10 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
       'profileMapping',
       'fields',
       ...(entry.custom ? ['name', 'discoveryUrl'] : []),
-    ];
+    ]);
 
     for (const key of Object.keys(body)) {
-      if (!allowed.includes(key)) {
+      if (!allowed.has(key)) {
         invalid([key], `${key} is not something to set on the provider "${entry.id}"`);
       }
     }

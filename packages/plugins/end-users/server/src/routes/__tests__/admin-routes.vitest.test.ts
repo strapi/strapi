@@ -72,7 +72,8 @@ describe('the admin routes', () => {
       const registered = ADMIN_ACTIONS.map(({ pluginName, uid }) => `plugin::${pluginName}.${uid}`);
 
       for (const route of checkedByPolicy) {
-        const check = (route.config?.policies as Array<{ config: { actions: string[] } }>)[1];
+        const policies = (route.config?.policies ?? []) as Array<{ config: { actions: string[] } }>;
+        const check = policies[1];
 
         expect(check.config.actions.length, describeRoute(route)).toBeGreaterThan(0);
 

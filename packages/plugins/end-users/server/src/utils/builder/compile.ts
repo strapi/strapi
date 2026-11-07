@@ -34,12 +34,12 @@ type ConditionContext = Modules.ContentAPI.ConditionContext;
 type Filter = Record<string, unknown>;
 
 /** Attributes every entry has, whether or not the schema lists them */
-const SYSTEM_FIELDS = ['documentId', 'createdAt', 'updatedAt', 'publishedAt'];
+const SYSTEM_FIELDS = new Set<string>(['documentId', 'createdAt', 'updatedAt', 'publishedAt']);
 
-const DATE_TYPES: readonly string[] = ['date', 'datetime', 'time'];
+const DATE_TYPES = new Set<string>(['date', 'datetime', 'time']);
 
 /** What a date input accepts: a date or a date and time, not a time of day (it can't be compared with `now`) */
-const DATE_INPUT_TYPES: readonly string[] = ['date', 'datetime'];
+const DATE_INPUT_TYPES = new Set<string>(['date', 'datetime']);
 
 const UNIT_MS = { minutes: 60_000, hours: 3_600_000, days: 86_400_000 } as const;
 
@@ -49,11 +49,11 @@ class Unbuildable extends Error {}
 const ownValue = (object: unknown, key: string): unknown =>
   isPlain(object) && hasOwn(object, key) ? object[key] : undefined;
 
-const TO_ONE_RELATIONS: readonly string[] = ['oneToOne', 'manyToOne', 'oneWay'];
+const TO_ONE_RELATIONS = new Set<string>(['oneToOne', 'manyToOne', 'oneWay']);
 
 /** A relation that holds several entries (every kind that isn't to-one, so a new kind fails closed) */
 export const isToMany = (attribute: Plain): boolean =>
-  attribute.type === 'relation' && !TO_ONE_RELATIONS.includes(String(attribute.relation));
+  attribute.type === 'relation' && !TO_ONE_RELATIONS.has(String(attribute.relation));
 
 // --- Values ---------------------------------------------------------------------------------
 
@@ -185,7 +185,7 @@ const POSITIVE: Record<string, string> = {
   $notContainsi: '$containsi',
 };
 
-const PATTERNS: readonly string[] = ['$contains', '$containsi', '$startsWith', '$endsWith'];
+const PATTERNS = new Set<string>(['$contains', '$containsi', '$startsWith', '$endsWith']);
 
 type Comparable = number | bigint | string | boolean;
 
@@ -288,7 +288,7 @@ const holdsPositive = (
   operator: string,
   right: unknown
 ): boolean | undefined => {
-  if (PATTERNS.includes(operator)) {
+  if (PATTERNS.has(operator)) {
     if (typeof left !== 'string' || typeof right !== 'string' || right === '') {
       return undefined;
     }
@@ -485,9 +485,9 @@ export const matchesAccepts = (
 
   switch (accepts) {
     case 'text':
-      return kind === 'string' && !DATE_TYPES.includes(type);
+      return kind === 'string' && !DATE_TYPES.has(type);
     case 'date':
-      return DATE_INPUT_TYPES.includes(type);
+      return DATE_INPUT_TYPES.has(type);
     case 'number':
       return kind === 'number';
     case 'boolean':
@@ -605,7 +605,7 @@ export const compileBuilderCondition = (
         const attribute = attributeOf(schema, hop);
         const last = index === target.path.length - 1;
 
-        if (!schema || (!attribute && !(last && SYSTEM_FIELDS.includes(hop)))) {
+        if (!schema || (!attribute && !(last && SYSTEM_FIELDS.has(hop)))) {
           throw new Unbuildable('no such field');
         }
 
@@ -860,7 +860,7 @@ export const staleReferences = (
   const missingType = (uid: string) => stale.add(`content type ${uid}`);
 
   const hasField = (uid: string, name: string) =>
-    SYSTEM_FIELDS.includes(name) || attributeOf(schemaOf(strapi, uid), name) !== undefined;
+    SYSTEM_FIELDS.has(name) || attributeOf(schemaOf(strapi, uid), name) !== undefined;
 
   /** Follows `path` from `uid`; returns the first part that is gone, if any */
   const checkPath = (uid: string, path: string[]) => {

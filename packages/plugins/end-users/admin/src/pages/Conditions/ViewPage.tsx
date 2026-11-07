@@ -25,6 +25,7 @@ import { pluginId } from '../../pluginId';
 import { useGetBuilderLayoutQuery, useGetConditionsQuery } from '../../services/conditions';
 import { useGetPermissionLayoutQuery } from '../../services/permissions';
 import { getTranslation } from '../../utils/getTranslation';
+import { withOccurrenceKeys } from '../../utils/withOccurrenceKeys';
 
 import { QueryChips } from './components/QueryChips';
 import { SelfWritableAlert } from './components/SelfWritableAlert';
@@ -132,8 +133,8 @@ const GroupList = ({
         )}
       </Typography>
       <Flex direction="column" alignItems="stretch" gap={1} tag="ul" paddingLeft={4}>
-        {group.items.map((item, index) => (
-          <Box tag="li" key={index}>
+        {withOccurrenceKeys(group.items, (item) => JSON.stringify(item)).map(([key, item]) => (
+          <Box tag="li" key={key}>
             {item.kind === 'group' ? (
               <GroupList group={item} describeCheck={describeCheck} />
             ) : (
@@ -294,11 +295,13 @@ const BuilderSections = ({ builder }: { builder: BuilderConditionV2 }) => {
           none
         ) : (
           <Flex direction="column" alignItems="stretch" gap={1} tag="ul">
-            {who.checks.map((check, index) => (
-              <Typography tag="li" key={index} textColor="neutral800">
-                {describe.whoCheck(check)}
-              </Typography>
-            ))}
+            {withOccurrenceKeys(who.checks, (check) => JSON.stringify(check)).map(
+              ([key, check]) => (
+                <Typography tag="li" key={key} textColor="neutral800">
+                  {describe.whoCheck(check)}
+                </Typography>
+              )
+            )}
           </Flex>
         )}
       </Section>

@@ -54,12 +54,12 @@ export type BoundCondition = Modules.ContentAPI.BoundCondition;
 
 type Params = Record<string, unknown>;
 
-const PARAM_TYPES: ReadonlyArray<ContentApiConditionParam['type']> = [
+const PARAM_TYPES = new Set<ContentApiConditionParam['type']>([
   'string',
   'number',
   'boolean',
   'attribute',
-];
+]);
 
 const SOURCES: ReadonlyArray<NonNullable<ContentApiConditionDefinition['source']>> = [
   'builtin',
@@ -640,7 +640,7 @@ export function assertConditionDefinition(
         default?: unknown;
       };
 
-      if (!PARAM_TYPES.includes(type as ContentApiConditionParam['type'])) {
+      if (!PARAM_TYPES.has(type as ContentApiConditionParam['type'])) {
         fail(`param "${param}" has an unknown type`);
       }
 

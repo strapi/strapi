@@ -105,8 +105,7 @@ const lastPart = (name: string, fallback = name) =>
   name
     .replace(/\.[cm]?[jt]s$/, '')
     .split(/::|[./\\]/)
-    .filter(Boolean)
-    .pop() ?? fallback;
+    .findLast(Boolean) ?? fallback;
 
 /** A name as a person reads it: `findOne` is "Find one", `end-users` is "End users" */
 const readable = (name: string): string => {

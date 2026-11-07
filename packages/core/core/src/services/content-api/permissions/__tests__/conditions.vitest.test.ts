@@ -517,7 +517,9 @@ describe('Content API conditions: applyCondition', () => {
 
   // `every` skips the holes of a sparse array, so `[ , 'owner']` would pass a shape check made with it
   it('is false for a sparse lockedFields: a hole is not a field name', () => {
-    const sparse = new Array<string>(2);
+    const sparse = [] as string[];
+
+    sparse.length = 2;
 
     sparse[1] = 'owner';
 

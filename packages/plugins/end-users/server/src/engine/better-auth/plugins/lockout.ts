@@ -31,11 +31,14 @@ import { normalizeEmail } from '../../../utils/normalize-email';
 import { normalizeUsername } from '../../../utils/normalize-username';
 import { clearAttempts, lockoutKey, releaseAttempt, reserveAttempt } from '../lockout-counter';
 
-const SIGN_IN_PATHS = ['/sign-in/email', '/sign-in/username'];
+const SIGN_IN_PATHS = new Set<string>(['/sign-in/email', '/sign-in/username']);
 const RESET_PASSWORD_PATH = '/reset-password';
 
 /** The two answers Better Auth gives to a wrong password (the email one and the username one). */
-const WRONG_PASSWORD_CODES = ['INVALID_EMAIL_OR_PASSWORD', 'INVALID_USERNAME_OR_PASSWORD'];
+const WRONG_PASSWORD_CODES = new Set<string>([
+  'INVALID_EMAIL_OR_PASSWORD',
+  'INVALID_USERNAME_OR_PASSWORD',
+]);
 
 export const ACCOUNT_LOCKED_MESSAGE = 'This account is locked. Try again later.';
 
@@ -148,7 +151,7 @@ export const lockout = (strapi: Core.Strapi): BetterAuthPlugin => ({
   hooks: {
     before: [
       {
-        matcher: (context) => Boolean(context.path && SIGN_IN_PATHS.includes(context.path)),
+        matcher: (context) => Boolean(context.path && SIGN_IN_PATHS.has(context.path)),
         handler: createAuthMiddleware(async (ctx) => {
           const { lockout: options } = await settings(strapi).get();
 
@@ -206,7 +209,7 @@ export const lockout = (strapi: Core.Strapi): BetterAuthPlugin => ({
 
     after: [
       {
-        matcher: (context) => Boolean(context.path && SIGN_IN_PATHS.includes(context.path)),
+        matcher: (context) => Boolean(context.path && SIGN_IN_PATHS.has(context.path)),
         handler: createAuthMiddleware(async (ctx) => {
           const lockoutCtx = ctx as unknown as LockoutContext;
           const reservation = reservations.get(lockoutCtx.context);
@@ -236,7 +239,7 @@ export const lockout = (strapi: Core.Strapi): BetterAuthPlugin => ({
             return;
           }
 
-          if (!WRONG_PASSWORD_CODES.includes(String(returned.body?.code))) {
+          if (!WRONG_PASSWORD_CODES.has(String(returned.body?.code))) {
             // Not a guess (an unverified address, a ban): the attempt does not count
             await releaseAttempt(strapi, key);
 

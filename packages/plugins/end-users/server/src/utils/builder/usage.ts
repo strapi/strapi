@@ -196,7 +196,7 @@ const readsOf = (
 };
 
 /** What no request writes: the user's id and roles, and the profile's `user` */
-const NEVER_WRITTEN = ['documentId', 'roles', 'user'];
+const NEVER_WRITTEN = new Set<string>(['documentId', 'roles', 'user']);
 
 /**
  * Every user and profile field a condition reads that a request could write, as
@@ -207,7 +207,7 @@ const NEVER_WRITTEN = ['documentId', 'roles', 'user'];
 export const readFieldsOf = (condition: BuilderConditionV2): string[] => [
   ...new Set(
     readsOf(condition)
-      .filter(({ attribute }) => !NEVER_WRITTEN.includes(attribute.split('.')[0]))
+      .filter(({ attribute }) => !NEVER_WRITTEN.has(attribute.split('.')[0]))
       .map(({ source, attribute }) => `${source}.${attribute}`)
   ),
 ];
@@ -230,7 +230,7 @@ export const selfWritableOf = (
     const [head] = attribute.split('.');
     const field = `${source}.${attribute}`;
 
-    if (found.has(field) || NEVER_WRITTEN.includes(head)) {
+    if (found.has(field) || NEVER_WRITTEN.has(head)) {
       continue;
     }
 

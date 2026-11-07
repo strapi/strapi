@@ -173,21 +173,21 @@ const mergeOptions = (base: Plain, override: Plain): Plain => {
  */
 const withoutProtectedOptions = (options: Plain): Plain => {
   const {
-    database,
-    secret,
-    secrets,
-    baseURL,
-    basePath,
-    telemetry,
-    plugins,
+    database: _database,
+    secret: _secret,
+    secrets: _secrets,
+    baseURL: _baseURL,
+    basePath: _basePath,
+    telemetry: _telemetry,
+    plugins: _plugins,
     // The plugin configuration's alone, where it is validated
-    trustedOrigins,
+    trustedOrigins: _trustedOrigins,
     ...rest
   } = options;
   const result: Plain = { ...rest };
 
   if (isPlain(result.user)) {
-    const { additionalFields, ...user } = result.user;
+    const { additionalFields: _additionalFields, ...user } = result.user;
     result.user = user;
   }
 
@@ -196,7 +196,7 @@ const withoutProtectedOptions = (options: Plain): Plain => {
     const groupOptions = result[group];
 
     if (isPlain(groupOptions)) {
-      const { fields, modelName, ...kept } = groupOptions;
+      const { fields: _fields, modelName: _modelName, ...kept } = groupOptions;
       result[group] = kept;
     }
   }
@@ -204,12 +204,12 @@ const withoutProtectedOptions = (options: Plain): Plain => {
   // A hashed identifier hides the trusted-device rows from the two-factor reset; the rate limit
   // table is locked like the others
   if (isPlain(result.verification)) {
-    const { storeIdentifier, ...verification } = result.verification;
+    const { storeIdentifier: _storeIdentifier, ...verification } = result.verification;
     result.verification = verification;
   }
 
   if (isPlain(result.rateLimit)) {
-    const { fields, modelName, ...rateLimit } = result.rateLimit;
+    const { fields: _fields, modelName: _modelName, ...rateLimit } = result.rateLimit;
     result.rateLimit = rateLimit;
   }
 
@@ -219,7 +219,7 @@ const withoutProtectedOptions = (options: Plain): Plain => {
 
   if (isPlain(result.rateLimit) && result.rateLimit.storage === 'secondary-storage') {
     // The plugin's own choice (memory or database) stays
-    const { storage, ...rateLimit } = result.rateLimit;
+    const { storage: _storage, ...rateLimit } = result.rateLimit;
     result.rateLimit = rateLimit;
   }
 
@@ -227,9 +227,9 @@ const withoutProtectedOptions = (options: Plain): Plain => {
   // them off
   if (isPlain(result.advanced)) {
     const {
-      database: advancedDatabase,
-      disableOriginCheck,
-      disableCSRFCheck,
+      database: _advancedDatabase,
+      disableOriginCheck: _disableOriginCheck,
+      disableCSRFCheck: _disableCSRFCheck,
       ...advanced
     } = result.advanced;
     result.advanced = advanced;

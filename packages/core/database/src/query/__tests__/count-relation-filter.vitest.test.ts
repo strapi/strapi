@@ -201,7 +201,7 @@ describe('a filtered count over relation joins (what entryMatches rests on)', ()
   });
 
   /** The SQL of the last count the entity manager ran */
-  const lastCount = () => ctx.queries.filter((sql) => /count\(/i.test(sql)).at(-1) as string;
+  const lastCount = () => ctx.queries.findLast((sql) => /count\(/i.test(sql)) as string;
 
   it('counts each version once when its relation rows match more than once', async () => {
     const { countOf, joinedRows, owners } = ctx;

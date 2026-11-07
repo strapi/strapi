@@ -52,6 +52,9 @@ interface ReviewChangesModalProps {
   onCancel: () => void;
 }
 
+/** The default for `warnings`, one array so a render without any doesn't hand over a new one */
+const NO_WARNINGS: SelfWritableWarning[] = [];
+
 /**
  * What a save is about to do, listed before it does it: nothing is sent until the admin confirms.
  * It is open for as long as it is rendered, so whoever renders it decides when.
@@ -59,7 +62,7 @@ interface ReviewChangesModalProps {
 const ReviewChangesModal = ({
   title,
   groups,
-  warnings = [],
+  warnings = NO_WARNINGS,
   onConfirm,
   onCancel,
 }: ReviewChangesModalProps) => {

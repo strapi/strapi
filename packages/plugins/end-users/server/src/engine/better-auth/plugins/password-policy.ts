@@ -25,11 +25,11 @@ const PASSWORD_FIELDS = ['password', 'newPassword'];
 
 /** Paths that verify the password the user already has instead of setting one. */
 const EXISTING_PASSWORD_PREFIXES = ['/sign-in/', '/two-factor/'];
-const EXISTING_PASSWORD_PATHS = ['/delete-user'];
+const EXISTING_PASSWORD_PATHS = new Set<string>(['/delete-user']);
 
 const setsPassword = (path: string | undefined): boolean =>
   Boolean(path) &&
-  !EXISTING_PASSWORD_PATHS.includes(path as string) &&
+  !EXISTING_PASSWORD_PATHS.has(path as string) &&
   !EXISTING_PASSWORD_PREFIXES.some((prefix) => (path as string).startsWith(prefix));
 
 export const passwordPolicy = (strapi: Core.Strapi): BetterAuthPlugin => ({

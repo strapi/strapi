@@ -65,13 +65,22 @@ const DISCOVERY_DOCUMENT = {
  * The hosts the tests name (`*.example.com`) answer with a discovery document; any other address
  * goes to the real network stack, so a test can point at a server of its own.
  */
+/** Whether a request goes to a host under example.com, judged by its parsed host name */
+const isExampleHost = (input: Parameters<typeof fetch>[0]) => {
+  try {
+    return new URL(String(input)).hostname.endsWith('.example.com');
+  } catch {
+    return false;
+  }
+};
+
 const stubDiscoveryHosts = () => {
   const realFetch = globalThis.fetch;
 
   vi.stubGlobal(
     'fetch',
     vi.fn((input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) =>
-      String(input).includes('.example.com')
+      isExampleHost(input)
         ? Promise.resolve(Response.json(DISCOVERY_DOCUMENT))
         : realFetch(input, init)
     )
@@ -464,6 +473,24 @@ describe('provider service', () => {
       expect(
         (await refusal(service.create({ ...body, discoveryUrl: 'ftp://idp.example.com' }))).message
       ).toContain('discoveryUrl');
+    });
+
+    it('makes the id from a name with long runs of dashes and symbols without slowing down', async () => {
+      const { service } = setup();
+      const started = Date.now();
+      const created = await service.create({
+        ...body,
+        name: `${'-'.repeat(100_000)}My IdP${'-!'.repeat(50_000)}`,
+      });
+
+      expect(created.id).toBe('my-idp');
+      expect(Date.now() - started).toBeLessThan(2000);
+
+      const { service: other } = setup();
+
+      expect(
+        (await refusal(other.create({ ...body, name: '-'.repeat(100_000) }))).message
+      ).toContain('id');
     });
 
     it('builds genericOAuth with pkce and the discovery URL', async () => {

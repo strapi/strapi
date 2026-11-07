@@ -28,7 +28,7 @@ interface Row {
   value: string;
 }
 
-const NULL_OPERATORS = ['$null', '$notNull'];
+const NULL_OPERATORS = new Set<string>(['$null', '$notNull']);
 
 const isPlain = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -42,7 +42,7 @@ const isScalar = (value: unknown): value is string | number | boolean =>
  * null".
  */
 const toRow = (path: string, operator: string, value: unknown): Row | undefined => {
-  if (NULL_OPERATORS.includes(operator)) {
+  if (NULL_OPERATORS.has(operator)) {
     if (typeof value !== 'boolean') {
       return undefined;
     }

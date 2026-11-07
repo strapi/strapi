@@ -16,7 +16,7 @@ interface WrittenCheckParams {
   checker: Pick<PermissionChecker, 'filtersFor'>;
 }
 
-const WRITE_ACTIONS: readonly unknown[] = ['create', 'update'];
+const WRITE_ACTIONS = new Set<unknown>(['create', 'update']);
 
 /**
  * The check on the data a Content API create or update wrote, which entry conditions on `create`
@@ -42,7 +42,7 @@ export const createWrittenCheck = ({ strapi, checker }: WrittenCheckParams) => {
     scope
   ) => {
     // The types are erased at runtime: an action that isn't a write is refused for everyone
-    if (!WRITE_ACTIONS.includes(action)) {
+    if (!WRITE_ACTIONS.has(action)) {
       throw new errors.PolicyError('This change is outside what your role allows.');
     }
 

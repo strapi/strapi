@@ -14,9 +14,7 @@ describe('assertNodeVersion', () => {
   it('refuses anything older, and says what is needed and why', () => {
     for (const version of ['22.11.0', '22.0.0', '20.19.0', '18.20.4']) {
       expect(() => assertNodeVersion(version), version).toThrow(/Node\.js 22\.12/);
-      expect(() => assertNodeVersion(version), version).toThrow(
-        new RegExp(version.replace(/\./g, '\\.'))
-      );
+      expect(() => assertNodeVersion(version), version).toThrow(version);
     }
 
     expect(() => assertNodeVersion('22.11.0')).toThrow(/require\(\)/);

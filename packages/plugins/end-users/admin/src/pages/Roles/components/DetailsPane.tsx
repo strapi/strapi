@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 
 import { useGetBoundRoutesQuery } from '../../../services/permissions';
 import { getTranslation } from '../../../utils/getTranslation';
+import { withOccurrenceKeys } from '../../../utils/withOccurrenceKeys';
 import { ACTION_MESSAGES } from '../utils/actionLabels';
 
 import type {
@@ -52,47 +53,49 @@ const RulesList = ({ rules }: RulesListProps) => {
 
   return (
     <Box tag="ul" background="neutral0" borderColor="neutral200" hasRadius>
-      {shown.map(({ kind, name, label, config }, position) => {
-        const kindLabel =
-          kind === 'middleware'
-            ? formatMessage({
-                id: getTranslation('roles.details.middleware'),
-                defaultMessage: 'Middleware',
-              })
-            : formatMessage({
-                id: getTranslation('roles.details.policy'),
-                defaultMessage: 'Policy',
-              });
-        const settings = describeConfig(config);
+      {withOccurrenceKeys(shown, ({ kind, name }) => `${kind}:${name}`).map(
+        ([key, { kind, name, label, config }]) => {
+          const kindLabel =
+            kind === 'middleware'
+              ? formatMessage({
+                  id: getTranslation('roles.details.middleware'),
+                  defaultMessage: 'Middleware',
+                })
+              : formatMessage({
+                  id: getTranslation('roles.details.policy'),
+                  defaultMessage: 'Policy',
+                });
+          const settings = describeConfig(config);
 
-        return (
-          <Flex
-            // A route may run a rule twice: the position is part of the key
-            key={`${kind}:${name}:${position}`}
-            tag="li"
-            justifyContent="space-between"
-            alignItems="baseline"
-            gap={3}
-            paddingTop={2}
-            paddingBottom={2}
-            paddingLeft={3}
-            paddingRight={3}
-            title={`${kindLabel} · ${name}`}
-          >
-            <Typography variant="omega" textColor="neutral800">
-              {label}
-              {settings !== '' && (
-                <Typography variant="pi" textColor="neutral600">
-                  {` ${settings}`}
-                </Typography>
-              )}
-            </Typography>
-            <Typography variant="pi" textColor="neutral600" style={{ whiteSpace: 'nowrap' }}>
-              {kindLabel}
-            </Typography>
-          </Flex>
-        );
-      })}
+          return (
+            <Flex
+              // A route may run a rule twice: the key counts the repeats
+              key={key}
+              tag="li"
+              justifyContent="space-between"
+              alignItems="baseline"
+              gap={3}
+              paddingTop={2}
+              paddingBottom={2}
+              paddingLeft={3}
+              paddingRight={3}
+              title={`${kindLabel} · ${name}`}
+            >
+              <Typography variant="omega" textColor="neutral800">
+                {label}
+                {settings !== '' && (
+                  <Typography variant="pi" textColor="neutral600">
+                    {` ${settings}`}
+                  </Typography>
+                )}
+              </Typography>
+              <Typography variant="pi" textColor="neutral600" style={{ whiteSpace: 'nowrap' }}>
+                {kindLabel}
+              </Typography>
+            </Flex>
+          );
+        }
+      )}
       {hidden > 0 && (
         <Box tag="li" paddingTop={1} paddingBottom={1} paddingLeft={3} paddingRight={3}>
           <Button variant="ghost" size="S" onClick={() => setShowAll((current) => !current)}>
@@ -164,45 +167,42 @@ const ActionRow = ({ label, granted, routes, hint }: ActionRowProps) => {
           {hint}
         </Typography>
       )}
-      {routes.map(({ method, path, rules }, position) => {
-        const color = METHOD_COLORS[method] ?? 'neutral';
+      {withOccurrenceKeys(routes, ({ method, path }) => `${method} ${path}`).map(
+        ([key, { method, path, rules }]) => {
+          const color = METHOD_COLORS[method] ?? 'neutral';
 
-        return (
-          // A route that runs rules has them attached under its box
-          <Flex
-            key={`${method} ${path}:${position}`}
-            direction="column"
-            alignItems="stretch"
-            gap={0}
-          >
-            <Flex background="neutral0" borderColor="neutral200" hasRadius alignItems="stretch">
-              <Flex
-                justifyContent="center"
-                alignItems="center"
-                padding={2}
-                minWidth="64px"
-                background={`${color}100`}
-                borderColor={`${color}200`}
-                hasRadius
-              >
-                <Typography variant="omega" fontWeight="bold" textColor={`${color}600`}>
-                  {method}
-                </Typography>
-              </Flex>
-              <Box padding={2} minWidth={0}>
-                <Typography
-                  variant="omega"
-                  textColor="neutral800"
-                  style={{ overflowWrap: 'anywhere' }}
+          return (
+            // A route that runs rules has them attached under its box
+            <Flex key={key} direction="column" alignItems="stretch" gap={0}>
+              <Flex background="neutral0" borderColor="neutral200" hasRadius alignItems="stretch">
+                <Flex
+                  justifyContent="center"
+                  alignItems="center"
+                  padding={2}
+                  minWidth="64px"
+                  background={`${color}100`}
+                  borderColor={`${color}200`}
+                  hasRadius
                 >
-                  {path}
-                </Typography>
-              </Box>
+                  <Typography variant="omega" fontWeight="bold" textColor={`${color}600`}>
+                    {method}
+                  </Typography>
+                </Flex>
+                <Box padding={2} minWidth={0}>
+                  <Typography
+                    variant="omega"
+                    textColor="neutral800"
+                    style={{ overflowWrap: 'anywhere' }}
+                  >
+                    {path}
+                  </Typography>
+                </Box>
+              </Flex>
+              {rules.length > 0 && <RulesList rules={rules} />}
             </Flex>
-            {rules.length > 0 && <RulesList rules={rules} />}
-          </Flex>
-        );
-      })}
+          );
+        }
+      )}
     </Flex>
   );
 };

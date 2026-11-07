@@ -398,7 +398,7 @@ const USER_UID = 'plugin::end-users.user';
 const PROFILE_UID = 'plugin::end-users.profile';
 
 const SLUG = /^[a-z][a-z0-9-]{0,62}$/;
-const RESERVED_SLUGS: readonly string[] = ['new'];
+const RESERVED_SLUGS = new Set<string>(['new']);
 const INPUT_NAME = /^[a-z][a-zA-Z0-9]{0,31}$/;
 
 const KIND_TEXT: Record<ValueType, string> = {
@@ -1081,10 +1081,10 @@ const checkOnSave = (ctx: Context, form: BuilderForm): void => {
     return problem ? add(ctx, [...valuePath, 'value'], `${rule.field}: ${problem}`) : undefined;
   });
 
-  const offered = fieldsFor(ctx.layout, form.appliesTo).map(({ name }) => name);
+  const offered = new Set(fieldsFor(ctx.layout, form.appliesTo).map(({ name }) => name));
 
   form.onSave.locked.forEach((name, index) => {
-    if (!offered.includes(name)) {
+    if (!offered.has(name)) {
       add(
         ctx,
         ['onSave', 'locked', index],
@@ -1140,7 +1140,7 @@ export const formProblems = (form: BuilderForm, layout: BuilderLayout): FormProb
       ['slug'],
       'The slug is lowercase letters, digits and hyphens, starting with a letter, up to 63 characters'
     );
-  } else if (RESERVED_SLUGS.includes(slug)) {
+  } else if (RESERVED_SLUGS.has(slug)) {
     add(
       ctx,
       ['slug'],

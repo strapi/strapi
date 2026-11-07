@@ -24,7 +24,7 @@ const countClauses = (value: unknown): number => {
 };
 
 /** The group operators: each holds a list of wheres */
-const GROUP_KEYS = ['$and', '$or'];
+const GROUP_KEYS = new Set<string>(['$and', '$or']);
 
 /**
  * Whether a query holds a part that restricts nothing at the query layer, so a condition made of it
@@ -53,7 +53,7 @@ const holdsEmptyPart = (value: unknown, isRoot = true): boolean => {
 
   return Object.entries(value as object).some(
     ([key, child]) =>
-      (GROUP_KEYS.includes(key) && Array.isArray(child) && child.length === 0) ||
+      (GROUP_KEYS.has(key) && Array.isArray(child) && child.length === 0) ||
       holdsEmptyPart(child, false)
   );
 };
@@ -118,7 +118,7 @@ const namesStrippedAttribute = (filters: unknown, model: Schema.Schema | undefin
  * `$not` stays under its own key, and an object of operators is the filter of one attribute.
  */
 const groupsOf = (key: string, value: unknown): string[] => {
-  if (GROUP_KEYS.includes(key)) {
+  if (GROUP_KEYS.has(key)) {
     return [key];
   }
 

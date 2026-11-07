@@ -41,11 +41,20 @@ interface SetupOptions {
   config?: Record<string, unknown>;
 }
 
+/** Whether a URL is on the app's origin, judged by its parsed origin; text that is no URL is not */
+const isAppOrigin = (url: string) => {
+  try {
+    return new URL(url).origin === 'https://app.example.com';
+  } catch {
+    return false;
+  }
+};
+
 const setup = ({
   stored = {},
   schema = profileSchema(),
   installed = ['emailPassword', 'username', 'twoFactor', 'magicLink'],
-  trusted = (url: string) => url.startsWith('https://app.example.com'),
+  trusted = isAppOrigin,
   config = {},
 }: SetupOptions = {}) => {
   const values = new Map<string, unknown>(Object.entries(stored));

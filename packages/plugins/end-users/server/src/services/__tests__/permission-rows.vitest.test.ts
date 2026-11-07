@@ -89,7 +89,7 @@ const COMPONENTS: Record<string, { uid: string; attributes: Record<string, unkno
 };
 
 /** Route actions: what `providers.action` holds */
-const ACTIONS = [
+const ACTIONS = new Set<string>([
   `${ARTICLE_UID}.find`,
   `${ARTICLE_UID}.findOne`,
   `${ARTICLE_UID}.create`,
@@ -101,15 +101,15 @@ const ACTIONS = [
   `${PROFILE_UID}.find`,
   'plugin::end-users.me.find',
   ...ALWAYS_ALLOWED_SCOPES,
-];
+]);
 
 /** `read-drafts` and `publish` of the draft & publish types: what `providers.syntheticAction` holds */
-const SYNTHETIC_ACTIONS = [
+const SYNTHETIC_ACTIONS = new Set<string>([
   `${ARTICLE_UID}.publish`,
   `${ARTICLE_UID}.read-drafts`,
   `${TAG_UID}.publish`,
   `${TAG_UID}.read-drafts`,
-];
+]);
 
 /** A project condition on reviews only, with a required number */
 const minScore = {
@@ -279,8 +279,8 @@ const setup = () => {
         subjectOf,
         conditions: { appliesTo },
         providers: {
-          action: { has: (key: string) => ACTIONS.includes(key) },
-          syntheticAction: { has: (key: string) => SYNTHETIC_ACTIONS.includes(key) },
+          action: { has: (key: string) => ACTIONS.has(key) },
+          syntheticAction: { has: (key: string) => SYNTHETIC_ACTIONS.has(key) },
           condition,
         },
       },

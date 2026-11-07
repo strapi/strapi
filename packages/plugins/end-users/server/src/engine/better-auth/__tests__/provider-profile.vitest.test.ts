@@ -27,7 +27,7 @@ vi.mock('../adapter/adapter', async () => {
 
   return {
     strapiAdapter: () => (options: { advanced?: { database?: Record<string, unknown> } }) => {
-      const { generateId, ...database } = options.advanced?.database ?? {};
+      const { generateId: _generateId, ...database } = options.advanced?.database ?? {};
       const adapter = memoryAdapter(store.db)({
         ...options,
         advanced: { ...options.advanced, database },
