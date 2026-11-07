@@ -22,6 +22,7 @@ export const upError = (name: UpErrorName, message: string, details: unknown = {
  */
 const AUTH_ERRORS: Readonly<Record<string, string>> = {
   INVALID_EMAIL_OR_PASSWORD: 'Invalid identifier or password',
+  INVALID_USERNAME_OR_PASSWORD: 'Invalid identifier or password',
   EMAIL_NOT_VERIFIED: 'Your account email is not confirmed',
   USER_BANNED: 'Your account has been blocked by an administrator',
   BANNED_USER: 'Your account has been blocked by an administrator',

@@ -142,12 +142,66 @@ export interface EngineAccount {
 export type InstalledMethod =
   'emailPassword' | 'username' | 'twoFactor' | 'magicLink' | 'emailOtp' | 'passkey';
 
+/**
+ * The engine's own endpoints a compat route may run (`AuthEngine.callNative`). Named after what they
+ * do, not after a path.
+ */
+export type NativeEndpoint =
+  | 'signInEmail'
+  | 'signInUsername'
+  | 'signUpEmail'
+  | 'requestPasswordReset'
+  | 'resetPassword'
+  | 'changePassword'
+  | 'sendVerificationEmail'
+  | 'verifyEmail';
+
+/** The user an endpoint answers with: the engine's own shape, `id` is a `documentId`. */
+export interface NativeUser {
+  id: ID;
+  email: string;
+  [key: string]: unknown;
+}
+
+interface NativeSession {
+  /** `null` when the engine did not sign the user in (a sign-up that needs a verified email). */
+  token: string | null;
+  user: NativeUser;
+}
+
+/** What each native endpoint answers with. */
+export interface NativeResults {
+  signInEmail: NativeSession & { redirect?: boolean; twoFactorRedirect?: boolean };
+  signInUsername: NativeSession & { twoFactorRedirect?: boolean };
+  signUpEmail: NativeSession;
+  requestPasswordReset: { status: boolean; message?: string };
+  resetPassword: { status: boolean };
+  changePassword: { token: string | null; user: NativeUser };
+  sendVerificationEmail: { status: boolean };
+  verifyEmail: { status: boolean; user?: NativeUser };
+}
+
+export type NativeResult<K extends NativeEndpoint> = NativeResults[K];
+
 export interface AuthEngine {
   /** The tables and fields the engine needs. The plugin turns them into content types. */
   schema(): EngineTable[];
 
   /** Runs the engine's native and compat endpoints. */
   handle(request: Request): Promise<Response>;
+
+  /**
+   * Runs one of the engine's own endpoints for a compat route, with its hooks (lockout, the
+   * password policy, the email rules) and without the router's rate limit and origin check: the
+   * compat route was already limited, and the caller is the server, not a browser. The answer comes
+   * with the response headers the endpoint set (the session cookie, the Bearer token). A refusal is
+   * thrown as the engine gave it: an error with `statusCode` and a `body` that carries `code` and
+   * `message`.
+   */
+  callNative<K extends NativeEndpoint>(
+    endpoint: K,
+    input: { body?: unknown; query?: unknown; headers: Headers }
+  ): Promise<{ headers: Headers; response: NativeResult<K> }>;
 
   /** The session behind a cookie or a Bearer token, or `null`. */
   getSession(headers: Headers): Promise<EngineSession | null>;
