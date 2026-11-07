@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import { local } from '../../../compat/endpoints/local';
+import { register } from '../../../compat/endpoints/register';
 import { readCompatConfig } from '../../../compat/config';
 import { buildAuthOptions } from '../create-engine';
 import type { AuthEngine } from '../../types';
@@ -243,5 +244,143 @@ describe('strapi-compat', () => {
 
   it('the chain has no strapi-compat plugin when compat is off', () => {
     expect(pluginIds(false)).not.toContain('strapi-compat');
+  });
+});
+
+describe('strapi-compat register', () => {
+  let signUp: { enabled: boolean; requireEmailVerification: boolean };
+  let fields: string[];
+  let callNative: ReturnType<typeof vi.fn>;
+  let findUser: ReturnType<typeof vi.fn>;
+  let updateUser: ReturnType<typeof vi.fn>;
+  let strapi: Core.Strapi;
+
+  const cfg = readCompatConfig(configStrapi(true));
+  const base = { username: 'John-Doe', email: 'Ann@Example.com', password: 'Passw0rd!long' };
+  const signUpWith = (body: unknown) => register(strapi, cfg, { body, headers: new Headers() });
+  const message = (result: { body: unknown }) =>
+    (result.body as { error: { message: string } }).error.message;
+
+  beforeEach(() => {
+    signUp = { enabled: true, requireEmailVerification: false };
+    fields = ['company'];
+    callNative = vi.fn(async () => ({
+      headers: new Headers({ 'set-auth-token': 'signed.token' }),
+      response: { token: 'raw', user: { id: 'doc7', email: 'ann@example.com' } },
+    }));
+    findUser = vi.fn(async () => null);
+    updateUser = vi.fn(async () => ({}));
+    strapi = {
+      db: { query: () => ({ findOne: findUser, update: updateUser }) },
+      plugin: () => ({
+        service(name: string) {
+          if (name === 'engine') {
+            return { get: () => ({ callNative }) as unknown as AuthEngine };
+          }
+
+          if (name === 'role') {
+            return {
+              getForUser: async () => [
+                {
+                  id: 1,
+                  documentId: 'r1',
+                  name: 'Authenticated',
+                  description: null,
+                  type: 'authenticated',
+                },
+              ],
+            };
+          }
+
+          return { get: async () => ({ signUp }), getSignUpFields: async () => fields };
+        },
+      }),
+    } as unknown as Core.Strapi;
+  });
+
+  it('refuses unlisted keys with the users-permissions text, deviceId included', async () => {
+    const result = await signUpWith({ ...base, deviceId: 'd1', role: 3 });
+
+    expect(result.status).toBe(400);
+    expect(message(result)).toBe('Invalid parameters: deviceId, role');
+    expect(callNative).not.toHaveBeenCalled();
+  });
+
+  it('accepts a Registration field and passes it to the native sign-up', async () => {
+    const result = await signUpWith({ ...base, company: 'Acme' });
+
+    expect(result.status).toBe(200);
+    expect(callNative).toHaveBeenCalledWith(
+      'signUpEmail',
+      expect.objectContaining({
+        body: expect.objectContaining({ company: 'Acme', email: 'ann@example.com' }),
+      })
+    );
+  });
+
+  it('answers with the same 400 for a taken email and a taken username', async () => {
+    findUser.mockResolvedValue({ documentId: 'other' });
+
+    const result = await signUpWith(base);
+
+    expect(result.status).toBe(400);
+    expect(message(result)).toBe('Email or Username are already taken');
+    expect(findUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { $or: [{ email: 'ann@example.com' }, { username: 'john-doe' }] },
+      })
+    );
+    expect(callNative).not.toHaveBeenCalled();
+  });
+
+  it('sets name from username, and stores a username the native validator would refuse', async () => {
+    const result = await signUpWith({ ...base, username: 'jo' });
+
+    expect(result.status).toBe(200);
+    expect(callNative).toHaveBeenCalledWith(
+      'signUpEmail',
+      expect.objectContaining({ body: expect.objectContaining({ name: 'jo' }) })
+    );
+    expect(callNative.mock.calls[0][1].body).not.toHaveProperty('username');
+    expect(updateUser).toHaveBeenCalledWith({
+      where: { documentId: 'doc7' },
+      data: { username: 'jo' },
+    });
+    expect(result.body).toMatchObject({
+      jwt: 'signed.token',
+      user: { role: { id: 1, name: 'Authenticated' } },
+    });
+  });
+
+  it('answers { user } with no jwt when verification is required', async () => {
+    signUp.requireEmailVerification = true;
+    callNative.mockResolvedValueOnce({
+      headers: new Headers(),
+      response: { token: null, user: { id: 'doc7', email: 'ann@example.com' } },
+    });
+
+    const result = await signUpWith(base);
+
+    expect(result.status).toBe(200);
+    expect(result.body).toHaveProperty('user');
+    expect(result.body).not.toHaveProperty('jwt');
+  });
+
+  it('answers Register action is currently disabled when sign-up is off', async () => {
+    signUp.enabled = false;
+
+    const result = await signUpWith(base);
+
+    expect(message(result)).toBe('Register action is currently disabled');
+    expect(callNative).not.toHaveBeenCalled();
+  });
+
+  it('answers an engine refusal with its status and code', async () => {
+    callNative.mockRejectedValueOnce(engineError(400, 'PASSWORD_TOO_SHORT'));
+
+    expect(await signUpWith(base)).toMatchObject({
+      status: 400,
+      body: { error: { details: { code: 'PASSWORD_TOO_SHORT' } } },
+    });
   });
 });

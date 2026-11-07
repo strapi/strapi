@@ -51,7 +51,22 @@ const AUTH_ERRORS: Readonly<Record<string, string>> = {
   BANNED_USER: 'Your account has been blocked by an administrator',
   INVALID_PASSWORD: 'The provided current password is invalid',
   INVALID_TOKEN: 'Incorrect code provided',
+  USER_ALREADY_EXISTS: 'Email or Username are already taken',
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'Email or Username are already taken',
+  USERNAME_IS_ALREADY_TAKEN: 'Email or Username are already taken',
 };
+
+/** The texts of the register route, which users-permissions answered with as a 400. */
+export const REGISTER_DISABLED = 'Register action is currently disabled';
+export const EMAIL_OR_USERNAME_TAKEN = 'Email or Username are already taken';
+export const invalidParameters = (keys: ReadonlyArray<string>): string =>
+  `Invalid parameters: ${keys.join(', ')}`;
+
+/** The 400 users-permissions gave a body that lacks a required field. */
+export const missingFieldBody = (field: string) =>
+  upError('ValidationError', `${field} is a required field`, {
+    errors: [{ path: [field], name: 'ValidationError', message: `${field} is a required field` }],
+  });
 
 export const mapAuthError = (code: string): { name: UpErrorName; message: string } | null => {
   const message = Object.prototype.hasOwnProperty.call(AUTH_ERRORS, code)
