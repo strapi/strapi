@@ -436,7 +436,6 @@ const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
       const secretSet = typeof secret === 'string' && secret !== '';
       const cookieCache = config('session.cookieCache');
       const domain = config('cookies.domain');
-      const until = config('compat.legacyJwt.until');
       const compat = readCompatConfig(strapi);
       const window = config('rateLimit.window');
       const max = config('rateLimit.max');
@@ -472,7 +471,7 @@ const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
         },
         compat: {
           usersPermissions: compat.usersPermissions,
-          legacyJwtUntil: typeof until === 'string' && until !== '' ? until : null,
+          legacyJwtUntil: compat.legacyJwt.until ? compat.legacyJwt.until.toISOString() : null,
           refresh: {
             enabled: compat.refresh.enabled,
             httpOnly: compat.refresh.httpOnly,

@@ -13,6 +13,9 @@ const user = {
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-02T00:00:00.000Z',
   nickname: 'ay',
+  name: 'A',
+  image: 'x.png',
+  internalColumn: 'secret-ish',
 };
 
 const role = { id: 3, name: 'Authenticated', description: 'd', type: 'authenticated' as const };
@@ -28,12 +31,25 @@ describe('toUpUser', () => {
       provider: 'local',
       confirmed: true,
       blocked: false,
-      nickname: 'ay',
     });
     expect(shaped).not.toHaveProperty('emailVerified');
     expect(shaped).not.toHaveProperty('banned');
     expect(shaped).not.toHaveProperty('banReason');
     expect(shaped).not.toHaveProperty('role');
+    // Only the fields of a users-permissions user: an unknown column and Better Auth's own never show
+    expect(Object.keys(shaped).sort()).toEqual(
+      [
+        'id',
+        'documentId',
+        'username',
+        'email',
+        'provider',
+        'confirmed',
+        'blocked',
+        'createdAt',
+        'updatedAt',
+      ].sort()
+    );
   });
 
   it('merges the profile and the provider, and never lets a profile field replace a user field', () => {
@@ -87,6 +103,22 @@ describe('translateRoleQuery', () => {
     });
     expect(translateRoleQuery({ populate: { role: { fields: ['name'] } } })).toEqual({
       populate: { roles: { fields: ['name'] } },
+    });
+    expect(
+      translateRoleQuery({
+        filters: {
+          $and: [{ $not: { role: { type: 'x' } } }],
+          profile: { role: 'manager', $or: [{ role: 'a' }] },
+        },
+      })
+    ).toEqual({
+      filters: {
+        $and: [{ $not: { roles: { type: 'x' } } }],
+        profile: { role: 'manager', $or: [{ role: 'a' }] },
+      },
+    });
+    expect(translateRoleQuery({ populate: { role: { populate: { role: true } } } })).toEqual({
+      populate: { roles: { populate: { role: true } } },
     });
     expect(translateRoleQuery({ populate: '*', filters: { roleName: 'x' } })).toEqual({
       populate: '*',

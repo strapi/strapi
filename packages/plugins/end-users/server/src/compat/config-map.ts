@@ -14,7 +14,7 @@ export const UP_CONFIG_MAP: Record<string, { target: string | null; note: string
   },
   jwtManagement: {
     target: 'compat.refresh.enabled',
-    note: "'refresh' maps to compat.refresh.enabled; 'legacy' needs nothing, a session token takes the place of the JWT.",
+    note: "'refresh' maps to compat.refresh.enabled; 'legacy-support' needs nothing, a session token takes the place of the JWT.",
   },
   'sessions.accessTokenLifespan': {
     target: null,
@@ -25,6 +25,14 @@ export const UP_CONFIG_MAP: Record<string, { target: string | null; note: string
     note: 'The session lifetime bounds how long a refresh can go on.',
   },
   'sessions.idleRefreshTokenLifespan': {
+    target: 'session.updateAge',
+    note: 'A session is renewed when it is used after this long.',
+  },
+  'sessions.maxSessionLifespan': {
+    target: 'session.expiresIn',
+    note: 'The longest a session lasts, however often it is used.',
+  },
+  'sessions.idleSessionLifespan': {
     target: 'session.updateAge',
     note: 'A session is renewed when it is used after this long.',
   },
@@ -59,34 +67,39 @@ export const UP_CONFIG_MAP: Record<string, { target: string | null; note: string
     note: 'Seconds here; Users & Permissions took milliseconds.',
   },
   'ratelimit.max': { target: 'rateLimit.max', note: 'Requests per window.' },
+  // The next five are not keys of Users & Permissions itself: it hands its `ratelimit` object to the
+  // rate limiter it uses, so a project can set them there
   'ratelimit.delayAfter': {
     target: null,
-    note: 'Requests are refused past the limit; they are not slowed down first. Use rateLimit.customRules to set a limit per path.',
+    note: 'Passed through to the rate limiter, not a key of its own. Requests are refused past the limit; they are not slowed down first. Use rateLimit.customRules to set a limit per path.',
   },
   'ratelimit.timeWait': {
     target: null,
-    note: 'There is no delay step. See rateLimit.window for how long a client waits.',
+    note: 'Passed through to the rate limiter, not a key of its own. There is no delay step: see rateLimit.window for how long a client waits.',
   },
   'ratelimit.prefixKey': {
     target: null,
-    note: 'Limits are kept per client address and path.',
+    note: 'Passed through to the rate limiter, not a key of its own. Limits are kept per client address and path.',
   },
   'ratelimit.whitelist': {
     target: 'rateLimit.customRules',
-    note: "Set a path's rule to false to leave it out of the limit.",
+    note: "Passed through to the rate limiter, not a key of its own. Set a path's rule to false to leave it out of the limit.",
   },
-  'ratelimit.store': { target: 'rateLimit.storage', note: "'database' or 'memory'." },
+  'ratelimit.store': {
+    target: 'rateLimit.storage',
+    note: "Passed through to the rate limiter, not a key of its own. Here it is 'database' or 'memory'.",
+  },
   'register.allowedFields': {
     target: null,
     note: 'Set in the admin under Settings, as the sign-up registration fields.',
   },
   'validationRules.validatePassword': {
     target: null,
-    note: 'Set in the admin under Settings, as the password rules (length and character classes).',
+    note: 'Set in the admin under Settings, as the password rules (length and character classes). Custom logic in the function is not carried over: express it with those rules or in a hook.',
   },
   'callback.validate': {
     target: 'compat.connect.callbacks',
-    note: 'Each provider has one callback URL, and its origin has to be trusted.',
+    note: "The plugin checked a callback sent with a request against the provider's own callback, by origin and path. Here each provider has one callback URL set in this key, and its origin has to be trusted.",
   },
   layout: {
     target: null,
