@@ -3,6 +3,7 @@ import { isAbsolute, join, relative, sep } from 'node:path';
 import chalk from 'chalk';
 import execa from 'execa';
 import fse from 'fs-extra';
+import ora from 'ora';
 import semver from 'semver';
 
 import { createGrowthSsoTrial } from '@strapi/cloud-cli';
@@ -217,18 +218,33 @@ async function createApp(
   }
 
   if (installDependencies) {
-    try {
-      logger.title('deps', `Installing dependencies with ${chalk.cyan(packageManager)}`);
+    logger.title('deps', `Installing dependencies with ${chalk.cyan(packageManager)}`);
 
+    // The package manager output (warnings, audit, funding) stays hidden unless the install fails
+    const spinner = ora({
+      text: 'Installing dependencies. This can take a few minutes.',
+      indent: 7,
+    });
+
+    try {
       await trackUsage({ event: 'willInstallProjectDependencies', scope });
 
+      spinner.start();
       await runInstall(scope);
+      spinner.stop();
 
       await trackUsage({ event: 'didInstallProjectDependencies', scope });
 
       logger.success(`Dependencies installed`);
     } catch (error) {
+      spinner.stop();
+
       const stderr = isStderrError(error) ? error.stderr : '';
+      const output = getInstallOutput(error);
+
+      if (output) {
+        console.error(output);
+      }
 
       await trackUsage({
         event: 'didNotInstallProjectDependencies',
@@ -491,6 +507,19 @@ function getDisplayFolder(relativeFolder: string) {
   return `.${sep}${relativeFolder}`;
 }
 
+/**
+ * The interleaved stdout and stderr of a failed install, so the user can see the error.
+ */
+function getInstallOutput(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'all' in error) {
+    const { all } = error as { all?: unknown };
+
+    return typeof all === 'string' ? all.trim() : '';
+  }
+
+  return '';
+}
+
 async function runInstall({ rootPath, packageManager }: Scope) {
   // include same cwd and env to ensure version check returns same version we use below
   const { envArgs, cmdArgs } = await getInstallArgs(packageManager, {
@@ -503,7 +532,9 @@ async function runInstall({ rootPath, packageManager }: Scope) {
 
   const options: execa.Options = {
     cwd: rootPath,
-    stdio: 'inherit',
+    // Piped, not inherited: the output is shown only if the install fails
+    stdio: ['ignore', 'pipe', 'pipe'],
+    all: true,
     env: {
       ...process.env,
       ...envArgs,

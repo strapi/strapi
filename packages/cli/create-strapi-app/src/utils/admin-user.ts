@@ -283,7 +283,8 @@ export async function ensureCredentialsFileIgnored(rootPath: string) {
  */
 export const getAdminTokenSummary = (adminToken: string) => [
   'Admin token (valid 30 days, all the permissions of the admin user):',
-  `  ${chalk.bold(adminToken)}`,
+  `${chalk.bold(adminToken)}`,
+  ' ',
   'The CLI does not show it again. Store it in a safe place.',
   'The admin user can show it again in the admin panel: Settings > Admin tokens.',
   `Send it to the admin API in the header ${chalk.cyan('Authorization: Bearer <token>')}.`,
