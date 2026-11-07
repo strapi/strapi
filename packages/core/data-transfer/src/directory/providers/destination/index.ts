@@ -1,6 +1,7 @@
 import path from 'path';
 import { createWriteStream } from 'fs';
 import { Writable, pipeline } from 'stream';
+import { finished } from 'stream/promises';
 import fs from 'fs-extra';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
@@ -55,6 +56,10 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   #rolledBack = false;
 
+  // The chain emits `finish` before the inner writer's final flush lands on disk. Each entry
+  // settles to the error that stopped the writer, or null.
+  #pendingWrites: Promise<unknown>[] = [];
+
   constructor(options: ILocalDirectoryDestinationProviderOptions) {
     this.options = options;
     this.#rootResolved = path.resolve(options.directory.path);
@@ -79,6 +84,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
   async bootstrap(diagnostics: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     this.#rolledBack = false;
+    this.#pendingWrites = [];
     this.#reportInfo('preparing directory export');
     await fs.mkdir(this.#rootResolved, { recursive: true });
     this.results.file = { path: this.#rootResolved };
@@ -87,6 +93,15 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
   async close() {
     if (this.#rolledBack) {
       return;
+    }
+
+    // By now the stage pipelines have resolved, so a late flush failure only surfaces here
+    const failures = await Promise.all(this.#pendingWrites);
+    const failure = failures.find((error) => error != null);
+    if (failure) {
+      throw new ProviderTransferError('Failed to write export files', {
+        details: { error: failure instanceof Error ? failure : new Error(String(failure)) },
+      });
     }
 
     await this.#writeMetadata();
@@ -112,48 +127,52 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
     }
   }
 
-  createSchemasWriteStream() {
-    this.#reportInfo('creating schemas write stream');
-    const filePathFactory = createFilePathFactory('schemas');
+  #createJsonlWriteStream(type: string) {
     const entryStream = createDirectoryJsonlWriter(
       this.#rootResolved,
-      filePathFactory,
+      createFilePathFactory(type),
       this.options.file.maxSizeJsonl
     );
-    return chain([stringer(), entryStream]);
+    this.#pendingWrites.push(
+      finished(entryStream).then(
+        () => null,
+        // A writer destroyed before any data (a stage with no source) is not a failure
+        (error) => (error?.code === 'ERR_STREAM_PREMATURE_CLOSE' ? null : error)
+      )
+    );
+
+    const writer = chain([stringer(), entryStream]);
+    // The engine destroys only this outer stream for a stage it skips, and `Chain` does not pass
+    // that on: without this the inner writer never closes and `close()` waits forever.
+    writer.once('close', () => {
+      if (!writer.writableFinished) {
+        entryStream.destroy();
+      }
+    });
+    // A late flush failure is re-emitted here after the stage has stopped listening; `close()`
+    // reports it instead.
+    writer.on('error', () => {});
+    return writer;
+  }
+
+  createSchemasWriteStream() {
+    this.#reportInfo('creating schemas write stream');
+    return this.#createJsonlWriteStream('schemas');
   }
 
   createEntitiesWriteStream(): Writable {
     this.#reportInfo('creating entities write stream');
-    const filePathFactory = createFilePathFactory('entities');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('entities');
   }
 
   createLinksWriteStream(): Writable {
     this.#reportInfo('creating links write stream');
-    const filePathFactory = createFilePathFactory('links');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('links');
   }
 
   createConfigurationWriteStream(): Writable {
     this.#reportInfo('creating configuration write stream');
-    const filePathFactory = createFilePathFactory('configuration');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('configuration');
   }
 
   createAssetsWriteStream(): Writable {
