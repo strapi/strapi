@@ -155,7 +155,7 @@ const toAssocs = (data: Assocs) => {
     };
   }
 
-  if (data?.set) {
+  if (data?.set !== undefined) {
     return {
       set: data.set === null ? data.set : toIdArray(data.set),
     };
