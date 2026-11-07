@@ -29,7 +29,9 @@ const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'mailto:', 't
 
 const isValidLink = (link: string) => {
   try {
-    const url = new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
+    const url = new URL(
+      link.startsWith('/') || link.startsWith('#') ? `https://strapi.io${link}` : link
+    );
 
     return ALLOWED_LINK_PROTOCOLS.has(url.protocol);
   } catch {
