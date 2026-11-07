@@ -178,7 +178,97 @@ const validateProviders = (providers: unknown) => {
   });
 };
 
+const LEGACY_JWT_ALGORITHMS = ['HS256', 'HS384', 'HS512'];
+const SAME_SITE_VALUES = ['lax', 'strict', 'none'];
+
 const LEGACY_JWT_CUTOFF = /^\d{4}-\d{2}-\d{2}(T.*)?$/;
+
+const isAbsoluteUrl = (value: string) => {
+  try {
+    const { protocol } = new URL(value);
+
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * `compat`: the Users & Permissions compatibility mode. That a callback's origin is trusted is
+ * judged when the application starts, against the server's address and Better Auth's own matcher.
+ */
+const validateCompat = (compat: Plain) => {
+  const legacyJwt = group(compat, 'legacyJwt', 'compat.legacyJwt');
+  const refresh = group(compat, 'refresh', 'compat.refresh');
+  const cookie = group(refresh, 'cookie', 'compat.refresh.cookie');
+  const connect = group(compat, 'connect', 'compat.connect');
+
+  optionalBoolean(compat, 'usersPermissions', 'compat.usersPermissions');
+  optionalString(legacyJwt, 'secret', 'compat.legacyJwt.secret');
+
+  const { until, algorithm } = legacyJwt;
+
+  if (
+    until !== undefined &&
+    until !== null &&
+    (typeof until !== 'string' || !LEGACY_JWT_CUTOFF.test(until) || Number.isNaN(Date.parse(until)))
+  ) {
+    invalid('compat.legacyJwt.until', 'a date such as "2027-06-30", or null', until);
+  }
+
+  if (until !== undefined && until !== null && !legacyJwt.secret) {
+    throw new Error(
+      'Invalid end-users configuration: `compat.legacyJwt.until` is set, so `compat.legacyJwt.secret` ' +
+        'must be a non-empty string (the secret the old tokens were signed with, the JWT_SECRET ' +
+        'environment variable by default).'
+    );
+  }
+
+  if (
+    algorithm !== undefined &&
+    algorithm !== null &&
+    !LEGACY_JWT_ALGORITHMS.includes(algorithm as string)
+  ) {
+    invalid('compat.legacyJwt.algorithm', '"HS256", "HS384" or "HS512"', algorithm);
+  }
+
+  optionalBoolean(refresh, 'enabled', 'compat.refresh.enabled');
+  optionalBoolean(refresh, 'httpOnly', 'compat.refresh.httpOnly');
+  optionalString(cookie, 'name', 'compat.refresh.cookie.name');
+  optionalBoolean(cookie, 'secure', 'compat.refresh.cookie.secure');
+  optionalString(cookie, 'path', 'compat.refresh.cookie.path');
+  optionalString(cookie, 'domain', 'compat.refresh.cookie.domain');
+  optionalPositiveInteger(cookie, 'maxAge', 'compat.refresh.cookie.maxAge', 'a number of seconds');
+
+  const { sameSite } = cookie;
+
+  if (
+    sameSite !== undefined &&
+    sameSite !== null &&
+    !SAME_SITE_VALUES.includes(sameSite as string)
+  ) {
+    invalid('compat.refresh.cookie.sameSite', '"lax", "strict" or "none"', sameSite);
+  }
+
+  const { callbacks } = connect;
+
+  if (callbacks === undefined || callbacks === null) {
+    return;
+  }
+
+  if (!isPlain(callbacks)) {
+    invalid('compat.connect.callbacks', 'an object of provider ids and URLs', callbacks);
+    return;
+  }
+
+  for (const [provider, url] of Object.entries(callbacks)) {
+    const key = `compat.connect.callbacks[${JSON.stringify(provider)}]`;
+
+    if (typeof url !== 'string' || !isAbsoluteUrl(url)) {
+      invalid(key, 'an absolute http or https URL', url);
+    }
+  }
+};
 
 /**
  * Checks the plugin configuration after the defaults are merged in. Keys it
@@ -309,21 +399,7 @@ export const validateConfig = (
     invalid('rateLimit.storage', '"database" or "memory"', storage);
   }
 
-  const compat = group(values, 'compat');
-  const legacyJwt = group(compat, 'legacyJwt', 'compat.legacyJwt');
-
-  optionalBoolean(compat, 'usersPermissions', 'compat.usersPermissions');
-  optionalString(legacyJwt, 'secret', 'compat.legacyJwt.secret');
-
-  const { until } = legacyJwt;
-
-  if (
-    until !== undefined &&
-    until !== null &&
-    (typeof until !== 'string' || !LEGACY_JWT_CUTOFF.test(until) || Number.isNaN(Date.parse(until)))
-  ) {
-    invalid('compat.legacyJwt.until', 'a date such as "2027-06-30", or null', until);
-  }
+  validateCompat(group(values, 'compat'));
 
   const { auth } = values;
 

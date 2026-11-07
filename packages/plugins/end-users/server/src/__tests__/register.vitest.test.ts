@@ -79,6 +79,7 @@ const setup = ({
     server: { use: serverUse },
     validators: { add: validatorsAdd },
     plugin,
+    config: { get: vi.fn() },
     documents: { use },
     get: vi.fn((name: string) => (name === 'auth' ? { register: authRegister } : { add })),
     db: {

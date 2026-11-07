@@ -7,6 +7,7 @@ import type {
   EndUsersSettingsPatch,
   SignInMethod,
 } from '../../../shared/contracts/settings';
+import { readCompatConfig } from '../compat/config';
 import { MIN_SECRET_LENGTH, PLUGIN_ID, ROLE_UID } from '../constants';
 import {
   loadProjectAuth,
@@ -436,6 +437,7 @@ const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
       const cookieCache = config('session.cookieCache');
       const domain = config('cookies.domain');
       const until = config('compat.legacyJwt.until');
+      const compat = readCompatConfig(strapi);
       const window = config('rateLimit.window');
       const max = config('rateLimit.max');
       const storage = rateLimitStorage(strapi);
@@ -469,8 +471,15 @@ const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
           storage,
         },
         compat: {
-          usersPermissions: config('compat.usersPermissions') === true,
+          usersPermissions: compat.usersPermissions,
           legacyJwtUntil: typeof until === 'string' && until !== '' ? until : null,
+          refresh: {
+            enabled: compat.refresh.enabled,
+            httpOnly: compat.refresh.httpOnly,
+            cookieName: compat.refresh.cookie.name,
+          },
+          connectProviders: Object.keys(compat.connect.callbacks),
+          legacyJwtHits: null,
         },
         explain: config('explain') === true,
         auth: {
