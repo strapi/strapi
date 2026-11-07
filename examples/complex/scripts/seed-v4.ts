@@ -466,6 +466,67 @@ class ContentSeeder {
     return this.results.basicDpI18n;
   }
 
+  async seedLocalizedDocumentIdRecovery() {
+    console.log('Seeding partial localized document_id recovery state...');
+    const fixture = spec.localizedDocumentIdRecovery;
+    const knex = this.strapi.db.connection;
+    const rows = await knex(fixture.tableName)
+      .select('id', 'locale', 'string_field')
+      .whereNull('published_at')
+      .orderBy('id')
+      .limit(fixture.rows.length);
+    if (rows.length !== fixture.rows.length) {
+      throw new Error(
+        `Could not prepare ${fixture.rows.length} localized document_id recovery rows`
+      );
+    }
+    const rowsByMarker = new Map(
+      fixture.rows.map((expected, index) => [expected.marker, rows[index]])
+    );
+
+    const localeCodes = fixture.rows.map((row) => row.locale);
+    const existingLocales = await knex('i18n_locale').select('code').whereIn('code', localeCodes);
+    const existingLocaleCodes = new Set(existingLocales.map((locale) => locale.code));
+    const now = new Date();
+    const missingLocales = localeCodes
+      .filter((code) => !existingLocaleCodes.has(code))
+      .map((code) => ({ name: code, code, created_at: now, updated_at: now }));
+    if (missingLocales.length > 0) {
+      await knex('i18n_locale').insert(missingLocales);
+    }
+
+    if (!(await knex.schema.hasColumn(fixture.tableName, 'document_id'))) {
+      await knex.schema.alterTable(fixture.tableName, (table) => {
+        table.string('document_id');
+      });
+    }
+
+    const [a, b, c] = fixture.rows.map((expected) => rowsByMarker.get(expected.marker));
+    const ids = [a.id, b.id, c.id];
+
+    await knex.transaction(async (trx) => {
+      for (const expected of fixture.rows) {
+        const row = rowsByMarker.get(expected.marker);
+        await trx(fixture.tableName).where({ id: row.id }).update({
+          string_field: expected.marker,
+          locale: expected.locale,
+          document_id: null,
+        });
+      }
+      await trx(fixture.joinTableName)
+        .whereIn(fixture.joinColumn, ids)
+        .orWhereIn(fixture.inverseJoinColumn, ids)
+        .delete();
+      await trx(fixture.joinTableName).insert([
+        { [fixture.joinColumn]: a.id, [fixture.inverseJoinColumn]: b.id },
+        { [fixture.joinColumn]: b.id, [fixture.inverseJoinColumn]: c.id },
+      ]);
+      await trx(fixture.tableName)
+        .where({ id: b.id })
+        .update({ document_id: fixture.existingDocumentId });
+    });
+  }
+
   // Seed relation content type
   async seedRelation() {
     console.log('Seeding relation...');
@@ -929,6 +990,7 @@ class ContentSeeder {
     await this.seedBasicDp();
     await this.updateComponentRelations();
     await this.seedBasicDpI18n();
+    await this.seedLocalizedDocumentIdRecovery();
     await this.seedRelation();
     await this.seedRelationDp();
     await this.seedRelationDpI18n();
