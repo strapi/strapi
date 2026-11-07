@@ -138,6 +138,11 @@ module.exports = (strapi) => {
       path: '/auth/sessions/:sessionId',
       handler: 'auth.revokeSession',
       config: { prefix: '' },
+      request: {
+        params: {
+          sessionId: validator.sessionIdParam,
+        },
+      },
     },
   ];
 };
