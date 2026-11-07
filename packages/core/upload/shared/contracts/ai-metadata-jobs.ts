@@ -2,11 +2,16 @@
  * AI Metadata Job types shared between admin and server
  */
 
+/**
+ * A job row as read back from the database and sent to the admin. The database
+ * layer returns `datetime` columns as ISO 8601 strings, and `completedAt` is
+ * `null` until the job finishes.
+ */
 export interface AIMetadataJob {
   id: number;
   status: 'processing' | 'completed' | 'failed';
-  createdAt: Date;
-  completedAt?: Date;
+  createdAt: string;
+  completedAt: string | null;
 }
 
 /**

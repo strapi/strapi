@@ -25,9 +25,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     } = attributes[field] as Schema.Attribute.UID;
 
     // @ts-expect-error targetField can be undefined
-    const targetValue = _.get(data, targetField);
+    const targetValue: unknown = _.get(data, targetField);
 
-    if (!_.isEmpty(targetValue)) {
+    // Only strings can be slugified; any other value falls back like an empty one
+    if (typeof targetValue === 'string' && targetValue !== '') {
       return this.findUniqueUID({
         contentTypeUID,
         field,

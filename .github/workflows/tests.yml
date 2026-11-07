@@ -34,6 +34,7 @@ jobs:
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
       migrations: ${{ steps.filter.outputs.migrations }}
+      tests_next: ${{ steps.filter.outputs.tests_next }}
       docs: ${{ steps.filter.outputs.docs }}
       global: ${{ steps.filter.outputs.global }}
       is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
@@ -156,8 +157,6 @@ jobs:
   lint_oxlint:
     name: 'lint_oxlint'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    needs: [conditions]
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -175,7 +174,7 @@ jobs:
     name: 'typescript (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.tests_next == 'true'
     strategy:
       matrix:
         node: [22, 24, 26]
@@ -306,13 +305,16 @@ jobs:
     # Browsers and their system libraries are preinstalled in the Playwright image, so the
     # job never runs `playwright install --with-deps`, whose apt step can stall for most of
     # the job timeout on a slow Ubuntu mirror.
+    # `-resolute` is Ubuntu 26.04, which `ubuntu-latest` moves to in November 2026
+    # (actions/runner-images#14748).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       # The image has no zstd, so actions/cache falls back to gzip there. A gzip cache is a
       # different cache version, so these jobs missed every cache the build job saves with
-      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd works in the image
-      # (both are Ubuntu 24.04); actions/cache also calls it as unzstd and zstdmt.
+      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd runs in the image: it
+      # only links libc, zlib, liblzma, liblz4 and libxxhash, which the image's Ubuntu base has.
+      # actions/cache also calls it as unzstd and zstdmt.
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
         - /usr/bin/zstd:/usr/local/bin/unzstd:ro
@@ -387,15 +389,9 @@ jobs:
   # default decides what runs here: the shared matrix sets neither suite, so it is
   # unaffected by both, and the two suites cannot collide in one app.
   #
-  # Chromium only, for two different reasons — this is the constraint to lift first if
-  # the Media Library suite should join the shared matrix.
-  #
-  # WebKit is a hard limitation: the upload drag-and-drop helper builds a DataTransfer,
-  # which WebKit does not implement.
-  #
-  # The folder drag & drop specs are skipped in the specs themselves rather than filtered
-  # out here — see `RUN_FOLDER_DRAG_SPECS` in `drag-drop-deep.spec.ts`. A grep filter only
-  # protects this job, and those specs must stay parked wherever they are run from.
+  # Chromium only: the upload drag-and-drop helper builds a DataTransfer, which WebKit does
+  # not implement. This is the constraint to lift first if the Media Library suite should
+  # join the shared matrix.
   e2e_media_library:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 45
@@ -405,7 +401,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -466,7 +462,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -530,7 +526,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -677,7 +673,7 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
-        image: postgres
+        image: postgres:18
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -688,7 +684,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -710,7 +705,7 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
-    name: '[CE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (mysql:9.3.0, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       fail-fast: false
       matrix:
@@ -718,7 +713,7 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
-        image: bitnamilegacy/mysql:latest
+        image: bitnamilegacy/mysql:9.3.0
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -787,7 +782,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
-        image: postgres
+        image: postgres:18
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -798,7 +793,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -820,7 +814,7 @@ jobs:
   api_ee_mysql:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
-    name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (mysql:9.3.0, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     # Needs the licence secret. On pull requests only local branches have it (is_local, which is
     # false on every other event), so pushes always run.
     if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
@@ -833,7 +827,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnamilegacy/mysql:latest
+        image: bitnamilegacy/mysql:9.3.0
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi

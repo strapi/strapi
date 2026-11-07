@@ -28,6 +28,7 @@
     "examples/plugins/*",
     "examples/*/src/plugins/*",
     ".github/actions/*",
+    "tests-next/*",
     "scripts/*"
   ],
   "scripts": {
@@ -128,7 +129,7 @@
     "@commitlint/config-conventional": "19.1.0",
     "@commitlint/prompt-cli": "19.2.0",
     "@nx/js": "20.8.4",
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.64.1",
     "@rollup/plugin-commonjs": "28.0.9",
     "@rollup/plugin-dynamic-import-vars": "2.1.5",
     "@rollup/plugin-image": "3.0.3",
@@ -186,7 +187,7 @@
     "jest-watch-typeahead": "2.2.2",
     "lint-staged": "16.4.0",
     "lodash": "4.18.1",
-    "minimatch": "10.2.5",
+    "minimatch": "10.2.6",
     "npm-run-all": "4.1.5",
     "nx": "20.8.4",
     "oxlint": "1.72.0",

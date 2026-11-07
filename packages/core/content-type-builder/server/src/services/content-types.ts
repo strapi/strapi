@@ -127,6 +127,12 @@ export const createContentType = async (
   { contentType, components }: any,
   options: CreateContentTypeOptions = {}
 ) => {
+  // The HTTP validator requires `displayName`; direct service callers must provide it too,
+  // otherwise the schema builder writes a schema the core validator rejects at the next load.
+  if (typeof contentType?.displayName !== 'string' || contentType.displayName === '') {
+    throw new ApplicationError('A content type requires a displayName');
+  }
+
   const builder = options.defaultBuilder || createBuilder();
   const uidMap = builder.createNewComponentUIDMap(components || []);
 
@@ -165,7 +171,7 @@ export const createContentType = async (
       generatedApiNames.push(contentType.singularName);
 
       await generateAPI({
-        displayName: contentType!.displayName || contentType!.info.displayName,
+        displayName: contentType.displayName,
         singularName: contentType!.singularName,
         pluralName: contentType!.pluralName,
         kind: contentType!.kind,
@@ -336,12 +342,16 @@ export const editContentType = async (
         });
       }
 
-      const schemaFilesWritten = await builder.writeFiles();
+      // The rows of renamed components are rewritten below, with the folder commit.
+      const schemaFilesWritten = await builder.writeFiles({ renameComponentRows: false });
       if (!schemaFilesWritten) {
         schemaAlreadyRolledBack = true;
         throw new ApplicationError('Invalid schema edition');
       }
-      await pruneFolderReferences([uid]);
+
+      // The folder commit runs inside the row transaction: if it fails, the rows are rolled
+      // back and the catch restores the files. Filesystem only, no database call in here.
+      await builder.renameComponentRows({ beforeCommit: () => pruneFolderReferences([uid]) });
     } catch (error) {
       await rollbackSchemaMutation({
         builder,
