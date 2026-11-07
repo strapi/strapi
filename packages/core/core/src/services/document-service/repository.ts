@@ -557,10 +557,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
-    // Find if document exists
-    const entryToUpdate = await strapi.db
-      .query(uid)
-      .findOne({ ...query, where: { ...queryParams?.lookup, ...query?.where, documentId } });
+    // Find if document exists. Only its id is used: the caller's fields and populate apply to the
+    // updated entry, so they are not loaded here.
+    const entryToUpdate = await strapi.db.query(uid).findOne({
+      select: ['id'],
+      where: { ...queryParams?.lookup, ...query?.where, documentId },
+    });
 
     let updatedDraft = null;
     if (entryToUpdate) {
