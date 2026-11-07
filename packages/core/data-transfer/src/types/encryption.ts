@@ -9,9 +9,10 @@ export type EncryptionStrategy = (key: string) => Cipheriv | Decipheriv;
 
 export type Strategies = {
   'aes-128-ecb': (key: string) => Cipheriv | Decipheriv;
+  'aes-256-gcm': (key: string) => Cipheriv | Decipheriv;
   aes128: (key: string) => Cipheriv | Decipheriv;
   aes192: (key: string) => Cipheriv | Decipheriv;
   aes256: (key: string) => Cipheriv | Decipheriv;
 };
 
-export type Algorithm = 'aes-128-ecb' | 'aes128' | 'aes192' | 'aes256';
+export type Algorithm = 'aes-128-ecb' | 'aes-256-gcm' | 'aes128' | 'aes192' | 'aes256';

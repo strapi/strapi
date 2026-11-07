@@ -1,32 +1,45 @@
 import { scryptSync, CipherKey, BinaryLike, createDecipheriv } from 'crypto';
 import { EncryptionStrategy, Strategies, Algorithm } from '../../types';
+import { LEGACY_KDF_SALT } from './format';
 
 // @types/node 20.x names this class Decipher; 24.x renames it to Decipheriv. Derive via ReturnType so signatures hold across both.
 type Decipheriv = ReturnType<typeof createDecipheriv>;
 
 // different key values depending on algorithm chosen
-const getDecryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {
+const getDecryptionStrategy = (
+  algorithm: Algorithm,
+  kdfSalt: string | Buffer = LEGACY_KDF_SALT,
+  initVector?: BinaryLike
+): EncryptionStrategy => {
   const strategies: Strategies = {
     'aes-128-ecb'(key: string): Decipheriv {
-      const hashedKey = scryptSync(key, '', 16);
+      const hashedKey = scryptSync(key, kdfSalt, 16);
       const initVector: BinaryLike | null = null;
       const securityKey: CipherKey = hashedKey;
       return createDecipheriv(algorithm, securityKey, initVector);
     },
+    'aes-256-gcm'(key: string): Decipheriv {
+      if (!initVector) {
+        throw new Error('AES-256-GCM requires a nonce');
+      }
+
+      const securityKey: CipherKey = scryptSync(key, kdfSalt, 32);
+      return createDecipheriv(algorithm, securityKey, initVector);
+    },
     aes128(key: string): Decipheriv {
-      const hashedKey = scryptSync(key, '', 32);
+      const hashedKey = scryptSync(key, kdfSalt, 32);
       const initVector: BinaryLike | null = hashedKey.subarray(16);
       const securityKey: CipherKey = hashedKey.subarray(0, 16);
       return createDecipheriv(algorithm, securityKey, initVector);
     },
     aes192(key: string): Decipheriv {
-      const hashedKey = scryptSync(key, '', 40);
+      const hashedKey = scryptSync(key, kdfSalt, 40);
       const initVector: BinaryLike | null = hashedKey.subarray(24);
       const securityKey: CipherKey = hashedKey.subarray(0, 24);
       return createDecipheriv(algorithm, securityKey, initVector);
     },
     aes256(key: string): Decipheriv {
-      const hashedKey = scryptSync(key, '', 48);
+      const hashedKey = scryptSync(key, kdfSalt, 48);
       const initVector: BinaryLike | null = hashedKey.subarray(32);
       const securityKey: CipherKey = hashedKey.subarray(0, 32);
       return createDecipheriv(algorithm, securityKey, initVector);
@@ -46,7 +59,9 @@ const getDecryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {
  */
 export const createDecryptionCipher = (
   key: string,
-  algorithm: Algorithm = 'aes-128-ecb'
+  algorithm: Algorithm = 'aes-128-ecb',
+  kdfSalt: string | Buffer = LEGACY_KDF_SALT,
+  initVector?: BinaryLike
 ): Decipheriv => {
-  return getDecryptionStrategy(algorithm)(key);
+  return getDecryptionStrategy(algorithm, kdfSalt, initVector)(key);
 };
