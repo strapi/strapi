@@ -1,7 +1,7 @@
 import { promises as fsp } from 'fs';
 import path from 'path';
-import { Writable } from 'stream';
 
+import { createBufferedEntryWriter } from '../../../utils/buffered-entry-writer';
 import { createFilePathFactory } from '../../../file/providers/destination/utils';
 
 export { createFilePathFactory };
@@ -15,60 +15,16 @@ export const createDirectoryJsonlWriter = (
   maxSize = 2.56e8
 ) => {
   let fileIndex = 0;
-  let buffer = '';
 
   const resolvePath = (posixName: string) => path.join(rootDir, ...posixName.split('/'));
 
-  const flush = async () => {
-    if (!buffer) {
-      return;
-    }
-
+  const writeEntry = async (content: string) => {
     fileIndex += 1;
     const name = pathFactory(fileIndex);
     const targetPath = resolvePath(name);
     await fsp.mkdir(path.dirname(targetPath), { recursive: true });
-    await fsp.writeFile(targetPath, buffer, 'utf8');
-    buffer = '';
+    await fsp.writeFile(targetPath, content, 'utf8');
   };
 
-  const push = (chunk: string | Buffer) => {
-    buffer += chunk;
-  };
-
-  return new Writable({
-    async final(callback) {
-      try {
-        await flush();
-        callback();
-      } catch (err: unknown) {
-        callback(err instanceof Error ? err : new Error(String(err)));
-      }
-    },
-
-    async destroy(err, callback) {
-      // A failed stage must not write its buffer. Rollback may already be deleting the directory.
-      if (!err) {
-        await flush();
-      }
-      callback(err);
-    },
-
-    async write(chunk, _encoding, callback) {
-      const size = chunk.length;
-
-      if (chunk.length > maxSize) {
-        callback(new Error(`payload too large: ${chunk.length}>${maxSize}`));
-        return;
-      }
-
-      if (buffer.length + size > maxSize) {
-        await flush();
-      }
-
-      push(chunk);
-
-      callback(null);
-    },
-  });
+  return createBufferedEntryWriter({ maxSize, writeEntry, flushOnFinal: true });
 };

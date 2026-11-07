@@ -1,6 +1,7 @@
-import { Writable } from 'stream';
 import { posix } from 'path';
 import tar from 'tar-stream';
+
+import { createBufferedEntryWriter } from '../../../utils/buffered-entry-writer';
 
 /**
  * Create a file path factory for a given path & prefix.
@@ -24,58 +25,23 @@ export const createTarEntryStream = (
   maxSize = 2.56e8
 ) => {
   let fileIndex = 0;
-  let buffer = '';
 
-  const flush = async () => {
-    if (!buffer) {
-      return;
-    }
-
+  const writeEntry = (content: string) => {
     fileIndex += 1;
     const name = pathFactory(fileIndex);
-    const size = buffer.length;
+    const size = content.length;
 
-    await new Promise<void>((resolve, reject) => {
-      archive.entry({ name, size }, buffer, (err) => {
+    return new Promise<void>((resolve, reject) => {
+      archive.entry({ name, size }, content, (err) => {
         if (err) {
           reject(err);
+          return;
         }
 
         resolve();
       });
     });
-
-    buffer = '';
   };
 
-  const push = (chunk: string | Buffer) => {
-    buffer += chunk;
-  };
-
-  return new Writable({
-    async destroy(err, callback) {
-      // A failed stage must not write its buffer. Rollback may already be deleting the archive.
-      if (!err) {
-        await flush();
-      }
-      callback(err);
-    },
-
-    async write(chunk, _encoding, callback) {
-      const size = chunk.length;
-
-      if (chunk.length > maxSize) {
-        callback(new Error(`payload too large: ${chunk.length}>${maxSize}`));
-        return;
-      }
-
-      if (buffer.length + size > maxSize) {
-        await flush();
-      }
-
-      push(chunk);
-
-      callback(null);
-    },
-  });
+  return createBufferedEntryWriter({ maxSize, writeEntry });
 };

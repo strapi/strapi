@@ -1,5 +1,8 @@
+import { promises as fsp } from 'fs';
+import type { Writable } from 'stream';
 import tar from 'tar-stream';
 import { createFilePathFactory, createTarEntryStream } from '../utils';
+import { createDirectoryJsonlWriter } from '../../../../directory/providers/destination/utils';
 
 describe('Local File Destination Provider - Utils', () => {
   describe('Create File Path Factory', () => {
@@ -73,6 +76,170 @@ describe('Local File Destination Provider - Utils', () => {
         });
 
       expect(write()).resolves.not.toBe(null);
+    });
+  });
+  describe.each([
+    ['tar entry stream', 'tar'],
+    ['directory JSONL writer', 'directory'],
+  ] as const)('Entry writer flush handling: %s', (_name, kind) => {
+    type EntryCallback = (error?: Error | null) => void;
+
+    // Called with each entry's content, the test decides when and how it settles
+    let onEntry: (content: string, done: EntryCallback) => void;
+    let written: string[];
+
+    const createWriter = (maxSize: number): Writable => {
+      const pathFactory = createFilePathFactory('entries');
+
+      if (kind === 'tar') {
+        const archive = {
+          entry: (_header: unknown, content: string, done: EntryCallback) => onEntry(content, done),
+        } as unknown as tar.Pack;
+
+        return createTarEntryStream(archive, pathFactory, maxSize);
+      }
+
+      jest.spyOn(fsp, 'mkdir').mockResolvedValue(undefined);
+      jest.spyOn(fsp, 'writeFile').mockImplementation(
+        (_target, content) =>
+          new Promise<void>((resolve, reject) => {
+            onEntry(String(content), (error) => (error ? reject(error) : resolve()));
+          })
+      );
+
+      return createDirectoryJsonlWriter('/tmp/root', pathFactory, maxSize);
+    };
+
+    beforeEach(() => {
+      written = [];
+      onEntry = (content, done) => {
+        written.push(content);
+        done();
+      };
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const tick = () =>
+      new Promise<void>((resolve) => {
+        setImmediate(resolve);
+      });
+
+    const writeChunk = (writer: Writable, chunk: string) =>
+      new Promise<Error | null | undefined>((resolve) => {
+        writer.write(chunk, (error) => resolve(error));
+      });
+
+    const destroyWriter = (writer: Writable, error?: Error) =>
+      new Promise<Error | null | undefined>((resolve) => {
+        writer.once('close', () => resolve(undefined));
+        writer.once('error', (err) => resolve(err));
+        writer.destroy(error);
+      });
+
+    it('passes a rotation flush failure to the write callback', async () => {
+      const flushError = new Error('flush failed');
+      onEntry = (_content, done) => done(flushError);
+
+      const writer = createWriter(5);
+      writer.on('error', () => {});
+
+      expect(await writeChunk(writer, 'abc')).toBeFalsy();
+      expect(await writeChunk(writer, 'def')).toBe(flushError);
+    });
+
+    it('passes a flush failure on an error-free destroy to the destroy callback', async () => {
+      const flushError = new Error('flush failed');
+      onEntry = (_content, done) => done(flushError);
+
+      const writer = createWriter(100);
+      expect(await writeChunk(writer, 'abc')).toBeFalsy();
+
+      await expect(destroyWriter(writer)).resolves.toBe(flushError);
+    });
+
+    it('flushes the buffer on an error-free destroy', async () => {
+      const writer = createWriter(100);
+      expect(await writeChunk(writer, 'abc')).toBeFalsy();
+
+      await destroyWriter(writer);
+
+      expect(written).toEqual(['abc']);
+    });
+
+    it('does not flush the buffer when destroyed with an error', async () => {
+      const writer = createWriter(100);
+      expect(await writeChunk(writer, 'abc')).toBeFalsy();
+
+      const destroyError = new Error('stage failed');
+      await expect(destroyWriter(writer, destroyError)).resolves.toBe(destroyError);
+
+      expect(written).toEqual([]);
+    });
+
+    it('waits for an in-flight flush before the error destroy callback and discards the rest', async () => {
+      let finishEntry: EntryCallback = () => {};
+      onEntry = (content, done) => {
+        written.push(content);
+        finishEntry = done;
+      };
+
+      const writer = createWriter(5);
+      expect(await writeChunk(writer, 'abc')).toBeFalsy();
+
+      // Rotation starts a flush of 'abc' that stays in flight
+      const rotation = writeChunk(writer, 'def');
+      await tick();
+      expect(written).toEqual(['abc']);
+
+      const destroyError = new Error('stage failed');
+      let destroyed = false;
+      const destroy = destroyWriter(writer, destroyError).then((result) => {
+        destroyed = true;
+        return result;
+      });
+
+      await tick();
+      expect(destroyed).toBe(false);
+
+      finishEntry();
+      await rotation;
+
+      await expect(destroy).resolves.toBe(destroyError);
+      // 'def' was not part of the running flush, so it is never written
+      expect(written).toEqual(['abc']);
+    });
+
+    it('keeps the original error when an in-flight flush fails during an error destroy', async () => {
+      let finishEntry: EntryCallback = () => {};
+      onEntry = (_content, done) => {
+        finishEntry = done;
+      };
+
+      const unhandled = jest.fn();
+      process.on('unhandledRejection', unhandled);
+
+      try {
+        const writer = createWriter(5);
+        expect(await writeChunk(writer, 'abc')).toBeFalsy();
+
+        const rotation = writeChunk(writer, 'def');
+        await tick();
+
+        const destroyError = new Error('stage failed');
+        const destroy = destroyWriter(writer, destroyError);
+
+        finishEntry(new Error('flush failed'));
+        await rotation;
+
+        await expect(destroy).resolves.toBe(destroyError);
+        await tick();
+        expect(unhandled).not.toHaveBeenCalled();
+      } finally {
+        process.off('unhandledRejection', unhandled);
+      }
     });
   });
 });

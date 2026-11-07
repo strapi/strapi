@@ -454,7 +454,7 @@ The following events are available:
 `stage::progress` - after each entity in that stage has been transferred
 `stage::skip` - when an entire stage is skipped (eg, when 'only' or 'exclude' are used)
 `stage::error` - when there is an error thrown during a stage
-`transfer::init` - at the very beginning of engine.transfer()
+`transfer::init` - after the JSONL stream packages load and before bootstrap (if that load fails, `transfer::error` is emitted without `transfer::init`)
 `transfer::start` - after bootstrapping and initializing the providers, when the transfer is about to start
 `transfer::finish` - when the transfer has finished
 `transfer::error` - when there is an error thrown during the transfer

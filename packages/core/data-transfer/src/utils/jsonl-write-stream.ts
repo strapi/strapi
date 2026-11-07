@@ -1,5 +1,5 @@
-import { Writable } from 'stream';
-import { pipeline } from 'stream/promises';
+import { Writable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { deferWritable } from './defer-writable';
 import { loadStreamDeps } from './esm-deps';
@@ -8,7 +8,9 @@ import { loadStreamDeps } from './esm-deps';
  * Object-mode Writable that serializes each chunk as one JSONL line into `entryStream`.
  *
  * It finishes only once `entryStream` has finished and closed. Entry writers flush their last
- * file when destroyed without an error, and discard the buffer when destroyed with one.
+ * file when destroyed without an error. When destroyed with an error they discard the buffer that
+ * has not started flushing, and let a flush that is already running finish before the destroy
+ * callback, so rollback does not race it.
  * Any `entryStream` error, including one raised after the input ended, fails this stream.
  */
 const createJsonlWriteStream = (entryStream: Writable): Writable => {
