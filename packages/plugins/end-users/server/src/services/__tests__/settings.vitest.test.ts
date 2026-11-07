@@ -525,7 +525,7 @@ describe('settings service', () => {
         rateLimit: { enabled: true, window: 10, max: 100, storage: 'memory' },
         compat: {
           usersPermissions: true,
-          legacyJwtUntil: '2027-01-01',
+          legacyJwtUntil: '2027-01-01T23:59:59.999Z',
           refresh: { enabled: false, httpOnly: false, cookieName: 'strapi_up_refresh' },
           connectProviders: [],
           legacyJwtHits: null,

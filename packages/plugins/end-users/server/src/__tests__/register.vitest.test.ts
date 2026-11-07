@@ -400,6 +400,57 @@ describe('register', () => {
       expect(conditionRegister).toHaveBeenNthCalledWith(2, isOwner);
     });
 
+    describe('the connect callbacks', () => {
+      const callbacks = { github: 'https://evil.example.com/callback' };
+
+      const withCallbacks = (isTrustedOrigin: (origin: string) => Promise<boolean>) => {
+        const made = setup({ distSrc: dir });
+
+        Object.assign(made.engine, { isTrustedOrigin });
+        Object.assign(made.strapi, {
+          config: {
+            get: (key: string) =>
+              key === 'plugin::end-users.compat.connect.callbacks' ? callbacks : undefined,
+          },
+        });
+
+        return made;
+      };
+
+      it('checks them before it registers the conditions, and waits for the check', async () => {
+        const events: string[] = [];
+        const { strapi, conditionRegister } = withCallbacks(async (origin) => {
+          events.push(`check ${origin}`);
+          await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+          });
+          events.push('checked');
+
+          return true;
+        });
+
+        conditionRegister.mockImplementation(async ({ name }) => {
+          events.push(`register ${name}`);
+        });
+
+        await register({ strapi });
+
+        expect(events).toEqual([
+          'check https://evil.example.com',
+          'checked',
+          'register plugin::end-users.is-self',
+          'register plugin::end-users.is-owner',
+        ]);
+      });
+
+      it('rejects when an origin is not trusted, and registers no condition', async () => {
+        const { strapi, conditionRegister } = withCallbacks(async () => false);
+
+        await expect(register({ strapi })).rejects.toThrow(/compat\.connect\.callbacks/);
+        expect(conditionRegister).not.toHaveBeenCalled();
+      });
+    });
+
     it('fails to register when a built-in condition is refused', async () => {
       const { strapi, conditionRegister } = setup({ distSrc: dir });
 

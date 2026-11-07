@@ -36,20 +36,6 @@ export type UpUserSource = {
   updatedAt: string;
 } & Record<string, unknown>;
 
-/** Fields of the user that only the engine uses: they have U&P names (`confirmed`, `blocked`) or none. */
-const ENGINE_ONLY_FIELDS = new Set([
-  'emailVerified',
-  'banned',
-  'banReason',
-  'banExpires',
-  'failedSignIns',
-  'lockedUntil',
-  'twoFactorEnabled',
-  'lastSignInAt',
-  'role',
-  'roles',
-]);
-
 /** users-permissions has one role per user: the first the user holds. */
 export const toUpRole = (roles: ReadonlyArray<UpRoleSource>): UpRole | null => {
   const [first] = roles;
@@ -70,12 +56,9 @@ export const toUpUser = (
   user: UpUserSource,
   opts: { role?: UpRole | null; extras?: UserExtras } = {}
 ): UpUser => {
-  const rest = Object.fromEntries(
-    Object.entries(user).filter(([key]) => !ENGINE_ONLY_FIELDS.has(key))
-  );
-
+  // Built field by field: a column only the engine uses, or one Better Auth adds, never reaches
+  // the payload. What a project adds to a user lives on the profile.
   const base = {
-    ...rest,
     id: user.id,
     documentId: user.documentId,
     username: user.username ?? null,
@@ -116,19 +99,9 @@ const renameKey = (key: string): string => {
 /** `role`, `role.name:asc` and a comma list of them: the string forms of populate and sort. */
 const renameTokens = (value: string): string => value.split(',').map(renameKey).join(',');
 
-const renameKeysDeep = (value: unknown): unknown => {
-  if (Array.isArray(value)) {
-    return value.map(renameKeysDeep);
-  }
-
-  if (isPlain(value)) {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [renameKey(key), renameKeysDeep(entry)])
-    );
-  }
-
-  return value;
-};
+/** Renames the keys of one object level, and leaves what is under them alone */
+const renameKeys = (value: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(value).map(([key, entry]) => [renameKey(key), entry]));
 
 const renameList = (value: unknown): unknown => {
   if (typeof value === 'string') {
@@ -140,7 +113,29 @@ const renameList = (value: unknown): unknown => {
   }
 
   // `{ role: { fields: [...] } }` for populate, `{ role: 'asc' }` for sort
-  return isPlain(value) ? renameKeysDeep(value) : value;
+  return isPlain(value) ? renameKeys(value) : value;
+};
+
+const LOGICAL_OPERATORS = new Set(['$and', '$or', '$not']);
+
+/**
+ * `role` names the user's relation at the top of the filters and inside the logical operators
+ * there; a key `role` under any other key belongs to that relation (a profile attribute, say).
+ */
+const renameFilters = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(renameFilters);
+  }
+
+  if (!isPlain(value)) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) =>
+      LOGICAL_OPERATORS.has(key) ? [key, renameFilters(entry)] : [renameKey(key), entry]
+    )
+  );
 };
 
 /**
@@ -159,7 +154,7 @@ export const translateRoleQuery = (query: Record<string, unknown>): Record<strin
   }
 
   if ('filters' in out) {
-    out.filters = renameKeysDeep(out.filters);
+    out.filters = renameFilters(out.filters);
   }
 
   return out;
