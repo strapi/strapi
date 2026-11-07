@@ -1,5 +1,8 @@
+import * as React from 'react';
+
 import { fireEvent, render, screen } from '@tests/utils';
 
+import { Drawer } from '../../../../../components/Drawer';
 import { AssetCropEditor } from '../AssetCropEditor';
 import { AssetPreview } from '../AssetPreview';
 
@@ -135,6 +138,49 @@ describe('AssetCropEditor focus on open', () => {
     const active = document.activeElement as HTMLElement;
     expect(active.tagName).not.toBe('INPUT');
     expect(active).toHaveAttribute('tabindex', '-1');
+  });
+});
+
+describe('AssetCropEditor dismissal', () => {
+  it('closes only the crop editor on Escape and leaves the parent drawer open', async () => {
+    const onDrawerClose = jest.fn();
+    const onEditorClose = jest.fn();
+    const EditorInDrawer = () => {
+      const [isCropOpen, setIsCropOpen] = React.useState(false);
+
+      return (
+        <Drawer.Root isVisible onClose={onDrawerClose}>
+          <Drawer.Body>
+            <Drawer.Title>Asset details</Drawer.Title>
+            <Drawer.Description>Edit the selected asset</Drawer.Description>
+            <button onClick={() => setIsCropOpen(true)}>Open crop editor</button>
+            {isCropOpen && (
+              <AssetCropEditor
+                asset={asset}
+                onClose={() => {
+                  onEditorClose();
+                  setIsCropOpen(false);
+                }}
+                onApply={jest.fn()}
+                onSaveAsCopy={jest.fn()}
+                canSaveAsCopy
+              />
+            )}
+          </Drawer.Body>
+        </Drawer.Root>
+      );
+    };
+    const { user } = render(<EditorInDrawer />);
+    await user.click(screen.getByRole('button', { name: 'Open crop editor' }));
+    await user.keyboard('{Escape}');
+
+    expect(onEditorClose).toHaveBeenCalledTimes(1);
+    expect(onDrawerClose).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeVisible();
+
+    await user.keyboard('{Escape}');
+    expect(onDrawerClose).toHaveBeenCalledTimes(1);
   });
 });
 

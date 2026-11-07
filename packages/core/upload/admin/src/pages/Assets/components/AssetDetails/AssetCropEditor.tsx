@@ -4,6 +4,7 @@ import { useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
+  DismissibleLayer,
   Field,
   Flex,
   FocusTrap,
@@ -569,284 +570,292 @@ export const AssetCropEditor = ({
 
   return (
     <Portal>
-      <FocusTrap onEscape={onClose} skipAutoFocus>
-        <Overlay ref={overlayRef} tabIndex={-1}>
-          <HeaderBar alignItems="center">
-            <Crop aria-hidden />
-            <Typography variant="omega" fontWeight="bold">
-              {formatMessage({
-                id: getTranslationKey('asset-details.crop.title'),
-                defaultMessage: 'Crop & Focus area',
-              })}
-            </Typography>
-          </HeaderBar>
-
-          <Body>
-            <RotateControls direction="column" gap={1}>
-              <IconButton
-                disabled={!isReady}
-                onClick={() => handleRotate('right')}
-                label={formatMessage({
-                  id: getTranslationKey('asset-details.crop.rotate-right'),
-                  defaultMessage: 'Rotate 90° right',
+      <DismissibleLayer
+        onEscapeKeyDown={(event) => {
+          event.preventDefault();
+          onClose();
+        }}
+        onInteractOutside={(event) => event.preventDefault()}
+      >
+        <FocusTrap skipAutoFocus>
+          <Overlay ref={overlayRef} tabIndex={-1}>
+            <HeaderBar alignItems="center">
+              <Crop aria-hidden />
+              <Typography variant="omega" fontWeight="bold">
+                {formatMessage({
+                  id: getTranslationKey('asset-details.crop.title'),
+                  defaultMessage: 'Crop & Focus area',
                 })}
-              >
-                <ArrowClockwise />
-              </IconButton>
-            </RotateControls>
+              </Typography>
+            </HeaderBar>
 
-            <CropArea
-              ref={cropAreaRef}
-              $aspect={
-                naturalSize.width && naturalSize.height
-                  ? naturalSize.width / naturalSize.height
-                  : undefined
-              }
-            >
-              {isQuarterTurn ? (
-                /**
-                 * On a quarter turn the image is taken out of flow, leaving the box with no
-                 * in-flow content to size it. A definite height instead of this would fight
-                 * `max-width`: `aspect-ratio` only holds while one side stays `auto`.
-                 */
-                <div aria-hidden style={{ width: naturalSize.width, maxWidth: '100%' }} />
-              ) : null}
-
-              <img
-                ref={imgRef}
-                data-testid="crop-editor-image"
-                style={rotatedImageStyle}
-                src={imageUrl}
-                alt={asset.name}
-                // Always anonymous, unlike AssetPreview/AssetsGrid which gate it:
-                // the editor reads pixels via canvas (useCropImg -> toBlob), which
-                // taints on a cross-origin image loaded without CORS, so every
-                // remote image must be fetched CORS-clean.
-                crossOrigin="anonymous"
-                onLoad={handleImageLoad}
-                draggable={false}
-              />
-
-              {cropPercents ? (
-                <CropOverlay
-                  style={{
-                    left: `${cropPercents.left}%`,
-                    top: `${cropPercents.top}%`,
-                    width: `${cropPercents.width}%`,
-                    height: `${cropPercents.height}%`,
-                  }}
-                  onPointerDown={handleMovePointerDown}
+            <Body>
+              <RotateControls direction="column" gap={1}>
+                <IconButton
+                  disabled={!isReady}
+                  onClick={() => handleRotate('right')}
+                  label={formatMessage({
+                    id: getTranslationKey('asset-details.crop.rotate-right'),
+                    defaultMessage: 'Rotate 90° right',
+                  })}
                 >
-                  <ResizeHandle
-                    type="button"
-                    aria-label={formatMessage({
-                      id: getTranslationKey('asset-details.crop.resize.top-left'),
-                      defaultMessage: 'Resize top-left',
-                    })}
-                    $cursor="nwse-resize"
-                    style={{ left: 0, top: 0 }}
-                    onPointerDown={handleResizePointerDown('tl')}
-                  />
-                  <ResizeHandle
-                    type="button"
-                    aria-label={formatMessage({
-                      id: getTranslationKey('asset-details.crop.resize.top-right'),
-                      defaultMessage: 'Resize top-right',
-                    })}
-                    $cursor="nesw-resize"
-                    style={{ right: 0, top: 0 }}
-                    onPointerDown={handleResizePointerDown('tr')}
-                  />
-                  <ResizeHandle
-                    type="button"
-                    aria-label={formatMessage({
-                      id: getTranslationKey('asset-details.crop.resize.bottom-left'),
-                      defaultMessage: 'Resize bottom-left',
-                    })}
-                    $cursor="nesw-resize"
-                    style={{ left: 0, bottom: 0 }}
-                    onPointerDown={handleResizePointerDown('bl')}
-                  />
-                  <ResizeHandle
-                    type="button"
-                    aria-label={formatMessage({
-                      id: getTranslationKey('asset-details.crop.resize.bottom-right'),
-                      defaultMessage: 'Resize bottom-right',
-                    })}
-                    $cursor="nwse-resize"
-                    style={{ right: 0, bottom: 0 }}
-                    onPointerDown={handleResizePointerDown('br')}
-                  />
+                  <ArrowClockwise />
+                </IconButton>
+              </RotateControls>
 
-                  <FocalPointHandle
-                    type="button"
-                    aria-label={formatMessage({
-                      id: getTranslationKey('asset-details.crop.focal-point'),
-                      defaultMessage: 'Focal point',
+              <CropArea
+                ref={cropAreaRef}
+                $aspect={
+                  naturalSize.width && naturalSize.height
+                    ? naturalSize.width / naturalSize.height
+                    : undefined
+                }
+              >
+                {isQuarterTurn ? (
+                  /**
+                   * On a quarter turn the image is taken out of flow, leaving the box with no
+                   * in-flow content to size it. A definite height instead of this would fight
+                   * `max-width`: `aspect-ratio` only holds while one side stays `auto`.
+                   */
+                  <div aria-hidden style={{ width: naturalSize.width, maxWidth: '100%' }} />
+                ) : null}
+
+                <img
+                  ref={imgRef}
+                  data-testid="crop-editor-image"
+                  style={rotatedImageStyle}
+                  src={imageUrl}
+                  alt={asset.name}
+                  // Always anonymous, unlike AssetPreview/AssetsGrid which gate it:
+                  // the editor reads pixels via canvas (useCropImg -> toBlob), which
+                  // taints on a cross-origin image loaded without CORS, so every
+                  // remote image must be fetched CORS-clean.
+                  crossOrigin="anonymous"
+                  onLoad={handleImageLoad}
+                  draggable={false}
+                />
+
+                {cropPercents ? (
+                  <CropOverlay
+                    style={{
+                      left: `${cropPercents.left}%`,
+                      top: `${cropPercents.top}%`,
+                      width: `${cropPercents.width}%`,
+                      height: `${cropPercents.height}%`,
+                    }}
+                    onPointerDown={handleMovePointerDown}
+                  >
+                    <ResizeHandle
+                      type="button"
+                      aria-label={formatMessage({
+                        id: getTranslationKey('asset-details.crop.resize.top-left'),
+                        defaultMessage: 'Resize top-left',
+                      })}
+                      $cursor="nwse-resize"
+                      style={{ left: 0, top: 0 }}
+                      onPointerDown={handleResizePointerDown('tl')}
+                    />
+                    <ResizeHandle
+                      type="button"
+                      aria-label={formatMessage({
+                        id: getTranslationKey('asset-details.crop.resize.top-right'),
+                        defaultMessage: 'Resize top-right',
+                      })}
+                      $cursor="nesw-resize"
+                      style={{ right: 0, top: 0 }}
+                      onPointerDown={handleResizePointerDown('tr')}
+                    />
+                    <ResizeHandle
+                      type="button"
+                      aria-label={formatMessage({
+                        id: getTranslationKey('asset-details.crop.resize.bottom-left'),
+                        defaultMessage: 'Resize bottom-left',
+                      })}
+                      $cursor="nesw-resize"
+                      style={{ left: 0, bottom: 0 }}
+                      onPointerDown={handleResizePointerDown('bl')}
+                    />
+                    <ResizeHandle
+                      type="button"
+                      aria-label={formatMessage({
+                        id: getTranslationKey('asset-details.crop.resize.bottom-right'),
+                        defaultMessage: 'Resize bottom-right',
+                      })}
+                      $cursor="nwse-resize"
+                      style={{ right: 0, bottom: 0 }}
+                      onPointerDown={handleResizePointerDown('br')}
+                    />
+
+                    <FocalPointHandle
+                      type="button"
+                      aria-label={formatMessage({
+                        id: getTranslationKey('asset-details.crop.focal-point'),
+                        defaultMessage: 'Focal point',
+                      })}
+                      style={{ left: `${focal.x}%`, top: `${focal.y}%` }}
+                      onPointerDown={handleFocalPointerDown}
+                    />
+                  </CropOverlay>
+                ) : null}
+              </CropArea>
+
+              <InfoBox>
+                <Flex direction="column" alignItems="stretch" gap={1} paddingBottom={3}>
+                  <Typography variant="omega" fontWeight="bold" textColor={infoTextColor}>
+                    {formatMessage({
+                      id: getTranslationKey('asset-details.crop.title'),
+                      defaultMessage: 'Crop & Focus area',
                     })}
-                    style={{ left: `${focal.x}%`, top: `${focal.y}%` }}
-                    onPointerDown={handleFocalPointerDown}
-                  />
-                </CropOverlay>
-              ) : null}
-            </CropArea>
+                  </Typography>
+                  <Typography variant="pi" textColor={infoMutedColor}>
+                    {formatMessage({
+                      id: getTranslationKey('asset-details.crop.hint'),
+                      defaultMessage:
+                        'Set the crop area with the rectangle. Pin the always-visible area with the circle.',
+                    })}
+                  </Typography>
+                </Flex>
 
-            <InfoBox>
-              <Flex direction="column" alignItems="stretch" gap={1} paddingBottom={3}>
-                <Typography variant="omega" fontWeight="bold" textColor={infoTextColor}>
-                  {formatMessage({
-                    id: getTranslationKey('asset-details.crop.title'),
-                    defaultMessage: 'Crop & Focus area',
-                  })}
-                </Typography>
-                <Typography variant="pi" textColor={infoMutedColor}>
-                  {formatMessage({
-                    id: getTranslationKey('asset-details.crop.hint'),
-                    defaultMessage:
-                      'Set the crop area with the rectangle. Pin the always-visible area with the circle.',
-                  })}
-                </Typography>
-              </Flex>
+                <Flex gap={6} alignItems="center">
+                  <Flex alignItems="center" gap={2}>
+                    <Flex direction="column" gap={2}>
+                      <FieldRow name="crop-width" gap={2}>
+                        <LabelIcon textColor={infoTextColor}>
+                          <ArrowsHorizontal />
+                        </LabelIcon>
+                        <FieldNumberInput
+                          key={`crop-width-${sizeFieldsKey}`}
+                          aria-label={formatMessage({
+                            id: getTranslationKey('asset-details.crop.width'),
+                            defaultMessage: 'Width (px)',
+                          })}
+                          value={width}
+                          min={1}
+                          max={naturalSize.width || undefined}
+                          onValueChange={(next) => {
+                            if (next !== undefined) setCropSize({ width: next });
+                          }}
+                        />
+                      </FieldRow>
+                      <FieldRow name="crop-height" gap={2}>
+                        <LabelIcon textColor={infoTextColor}>
+                          <ArrowsVertical />
+                        </LabelIcon>
+                        <FieldNumberInput
+                          key={`crop-height-${sizeFieldsKey}`}
+                          aria-label={formatMessage({
+                            id: getTranslationKey('asset-details.crop.height'),
+                            defaultMessage: 'Height (px)',
+                          })}
+                          value={height}
+                          min={1}
+                          max={naturalSize.height || undefined}
+                          onValueChange={(next) => {
+                            if (next !== undefined) setCropSize({ height: next });
+                          }}
+                        />
+                      </FieldRow>
+                    </Flex>
 
-              <Flex gap={6} alignItems="center">
-                <Flex alignItems="center" gap={2}>
-                  <Flex direction="column" gap={2}>
-                    <FieldRow name="crop-width" gap={2}>
-                      <LabelIcon textColor={infoTextColor}>
-                        <ArrowsHorizontal />
-                      </LabelIcon>
-                      <FieldNumberInput
-                        key={`crop-width-${sizeFieldsKey}`}
-                        aria-label={formatMessage({
-                          id: getTranslationKey('asset-details.crop.width'),
-                          defaultMessage: 'Width (px)',
+                    <Flex position="relative">
+                      <IconButton
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.crop.aspect-lock'),
+                          defaultMessage: 'Lock aspect ratio',
                         })}
-                        value={width}
-                        min={1}
-                        max={naturalSize.width || undefined}
+                        variant={aspectLocked ? 'secondary' : 'ghost'}
+                        onClick={toggleAspectLock}
+                      >
+                        <Link />
+                      </IconButton>
+                      <BackgroundPreserveRatio />
+                    </Flex>
+                  </Flex>
+
+                  <Flex direction="column" gap={2} marginLeft={'auto'}>
+                    <FieldRow name="focal-x" gap={2}>
+                      <Field.Label textColor={infoTextColor}>
+                        {formatMessage({
+                          id: getTranslationKey('asset-details.crop.focal-x-axis'),
+                          defaultMessage: 'X',
+                        })}
+                      </Field.Label>
+                      <FieldNumberInput
+                        aria-label={formatMessage({
+                          id: getTranslationKey('asset-details.crop.focal-x'),
+                          defaultMessage: 'Focal point X (px)',
+                        })}
+                        key={`focal-x-${focalXKey}`}
+                        value={focalPxX}
+                        min={0}
+                        max={width || undefined}
                         onValueChange={(next) => {
-                          if (next !== undefined) setCropSize({ width: next });
+                          if (next !== undefined) setFocalPx('x', next);
                         }}
+                        onBlur={syncFocalX}
                       />
                     </FieldRow>
-                    <FieldRow name="crop-height" gap={2}>
-                      <LabelIcon textColor={infoTextColor}>
-                        <ArrowsVertical />
-                      </LabelIcon>
-                      <FieldNumberInput
-                        key={`crop-height-${sizeFieldsKey}`}
-                        aria-label={formatMessage({
-                          id: getTranslationKey('asset-details.crop.height'),
-                          defaultMessage: 'Height (px)',
+                    <FieldRow name="focal-y" gap={2}>
+                      <Field.Label textColor={infoTextColor}>
+                        {formatMessage({
+                          id: getTranslationKey('asset-details.crop.focal-y-axis'),
+                          defaultMessage: 'Y',
                         })}
-                        value={height}
-                        min={1}
-                        max={naturalSize.height || undefined}
+                      </Field.Label>
+                      <FieldNumberInput
+                        aria-label={formatMessage({
+                          id: getTranslationKey('asset-details.crop.focal-y'),
+                          defaultMessage: 'Focal point Y (px)',
+                        })}
+                        key={`focal-y-${focalYKey}`}
+                        value={focalPxY}
+                        min={0}
+                        max={height || undefined}
                         onValueChange={(next) => {
-                          if (next !== undefined) setCropSize({ height: next });
+                          if (next !== undefined) setFocalPx('y', next);
                         }}
+                        onBlur={syncFocalY}
                       />
                     </FieldRow>
                   </Flex>
-
-                  <Flex position="relative">
-                    <IconButton
-                      label={formatMessage({
-                        id: getTranslationKey('asset-details.crop.aspect-lock'),
-                        defaultMessage: 'Lock aspect ratio',
-                      })}
-                      variant={aspectLocked ? 'secondary' : 'ghost'}
-                      onClick={toggleAspectLock}
-                    >
-                      <Link />
-                    </IconButton>
-                    <BackgroundPreserveRatio />
-                  </Flex>
                 </Flex>
+              </InfoBox>
+            </Body>
 
-                <Flex direction="column" gap={2} marginLeft={'auto'}>
-                  <FieldRow name="focal-x" gap={2}>
-                    <Field.Label textColor={infoTextColor}>
-                      {formatMessage({
-                        id: getTranslationKey('asset-details.crop.focal-x-axis'),
-                        defaultMessage: 'X',
-                      })}
-                    </Field.Label>
-                    <FieldNumberInput
-                      aria-label={formatMessage({
-                        id: getTranslationKey('asset-details.crop.focal-x'),
-                        defaultMessage: 'Focal point X (px)',
-                      })}
-                      key={`focal-x-${focalXKey}`}
-                      value={focalPxX}
-                      min={0}
-                      max={width || undefined}
-                      onValueChange={(next) => {
-                        if (next !== undefined) setFocalPx('x', next);
-                      }}
-                      onBlur={syncFocalX}
-                    />
-                  </FieldRow>
-                  <FieldRow name="focal-y" gap={2}>
-                    <Field.Label textColor={infoTextColor}>
-                      {formatMessage({
-                        id: getTranslationKey('asset-details.crop.focal-y-axis'),
-                        defaultMessage: 'Y',
-                      })}
-                    </Field.Label>
-                    <FieldNumberInput
-                      aria-label={formatMessage({
-                        id: getTranslationKey('asset-details.crop.focal-y'),
-                        defaultMessage: 'Focal point Y (px)',
-                      })}
-                      key={`focal-y-${focalYKey}`}
-                      value={focalPxY}
-                      min={0}
-                      max={height || undefined}
-                      onValueChange={(next) => {
-                        if (next !== undefined) setFocalPx('y', next);
-                      }}
-                      onBlur={syncFocalY}
-                    />
-                  </FieldRow>
-                </Flex>
-              </Flex>
-            </InfoBox>
-          </Body>
-
-          <FooterBar alignItems="center">
-            <Button variant="tertiary" onClick={onClose} disabled={isBusy}>
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
-            <Flex gap={2}>
-              {canSaveAsCopy && (
+            <FooterBar alignItems="center">
+              <Button variant="tertiary" onClick={onClose} disabled={isBusy}>
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+              <Flex gap={2}>
+                {canSaveAsCopy && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleAction('copy')}
+                    loading={isBusy}
+                    disabled={!isReady}
+                  >
+                    {formatMessage({
+                      id: getTranslationKey('asset-details.crop.save-as-copy'),
+                      defaultMessage: 'Save as copy',
+                    })}
+                  </Button>
+                )}
                 <Button
-                  variant="secondary"
-                  onClick={() => handleAction('copy')}
+                  variant="default"
+                  onClick={() => handleAction('apply')}
                   loading={isBusy}
                   disabled={!isReady}
                 >
                   {formatMessage({
-                    id: getTranslationKey('asset-details.crop.save-as-copy'),
-                    defaultMessage: 'Save as copy',
+                    id: getTranslationKey('asset-details.crop.apply'),
+                    defaultMessage: 'Apply',
                   })}
                 </Button>
-              )}
-              <Button
-                variant="default"
-                onClick={() => handleAction('apply')}
-                loading={isBusy}
-                disabled={!isReady}
-              >
-                {formatMessage({
-                  id: getTranslationKey('asset-details.crop.apply'),
-                  defaultMessage: 'Apply',
-                })}
-              </Button>
-            </Flex>
-          </FooterBar>
-        </Overlay>
-      </FocusTrap>
+              </Flex>
+            </FooterBar>
+          </Overlay>
+        </FocusTrap>
+      </DismissibleLayer>
     </Portal>
   );
 };
