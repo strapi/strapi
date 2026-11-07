@@ -125,7 +125,7 @@ function previewScript(config) {
   };
 
   /**
-   * Blocks live updates are rendered by the host frontend (e.g. via BlocksRenderer).
+   * Blocks and rich text live updates are rendered by the host frontend (e.g. via BlocksRenderer).
    * Re-dispatch the change on the iframe window so integrators can subscribe with
    * `window.addEventListener('strapiFieldChange', …)` without the preview script
    * attempting to patch the DOM. The admin panel also posts the same payload via
@@ -1713,7 +1713,8 @@ function previewScript(config) {
         // looks like a blocks AST without an explicit type. Both paths delegate to
         // the host frontend so that null/[] clears are forwarded correctly instead
         // of falling through to DOM text patching.
-        if (type === 'blocks' || isBlocksValue(value)) {
+        // Rendered markdown spans many elements, so raw-text patching would duplicate it.
+        if (type === 'blocks' || type === 'richtext' || isBlocksValue(value)) {
           forwardBlocksFieldChange(field, value);
           return;
         }

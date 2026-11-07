@@ -136,6 +136,38 @@ describe('previewScript — blocks field forwarding', () => {
     });
   });
 
+  test('forwards a rich text field change without patching the rendered markdown', () => {
+    document.body.innerHTML = `
+      <div id="content">
+        <p>Hello</p>
+        <ul><li data-strapi-source="documentId=abc&type=richtext&path=content">world</li></ul>
+      </div>`;
+    const handler = jest.fn();
+    window.addEventListener(STRAPI_FIELD_CHANGE, handler as EventListener);
+    const value = 'Hello\n\n- world\n- again';
+
+    sendMessage({
+      type: STRAPI_FIELD_CHANGE,
+      payload: { field: 'content', value, type: 'richtext' },
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect((handler.mock.calls[0][0] as CustomEvent).detail).toEqual({ field: 'content', value });
+    expect(document.querySelector('li')!.textContent).toBe('world');
+  });
+
+  test('still patches the text of a plain text field', () => {
+    document.body.innerHTML =
+      '<h1 data-strapi-source="documentId=abc&type=string&path=title">Old title</h1>';
+
+    sendMessage({
+      type: STRAPI_FIELD_CHANGE,
+      payload: { field: 'title', value: 'New title', type: 'string' },
+    });
+
+    expect(document.querySelector('h1')!.textContent).toBe('New title');
+  });
+
   test('does not forward a plain string value', () => {
     const handler = jest.fn();
     window.addEventListener(STRAPI_FIELD_CHANGE, handler as EventListener);
