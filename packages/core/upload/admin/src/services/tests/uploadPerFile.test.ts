@@ -2,10 +2,12 @@ import { adminApi } from '@strapi/admin/strapi-admin';
 import { renderHook, act, waitFor } from '@tests/utils';
 
 import { useTypedDispatch, useTypedSelector } from '../../store/hooks';
-import { cancelFile, uploadProgressReducer } from '../../store/uploadProgress';
+import { cancelFile, cancelUpload, uploadProgressReducer } from '../../store/uploadProgress';
 import {
+  abortUpload,
   abortUploadFile,
   getUploadSourceFile,
+  useRetryCancelledFilesMutation,
   useRetryUploadFileMutation,
   useUploadFilesMutation,
 } from '../api';
@@ -71,6 +73,7 @@ const setup = (names: string[], { owner }: { owner?: string } = {}) => {
     () => ({
       upload: useUploadFilesMutation()[0],
       retry: useRetryUploadFileMutation()[0],
+      retryAll: useRetryCancelledFilesMutation()[0],
       dispatch: useTypedDispatch(),
       progress: useTypedSelector((state) => state.uploadProgress),
     }),
@@ -194,6 +197,46 @@ describe('per-file upload control', () => {
 
     await expect(retried).resolves.toEqual([expect.objectContaining({ name: 'a.png' })]);
     expect(statuses()).toEqual(['complete', 'complete']);
+  });
+
+  it('uploads a queued file cancelled before the batch when retrying the batch', async () => {
+    const { requests, request, result, statuses } = setup(['a.png', 'b.png', 'c.png']);
+
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      abortUploadFile(result.current.progress.uploadId, 2);
+      result.current.dispatch(cancelFile({ uploadId: result.current.progress.uploadId, index: 2 }));
+    });
+
+    await act(async () => {
+      abortUpload(result.current.progress.uploadId);
+      result.current.dispatch(cancelUpload());
+    });
+    await waitFor(() => expect(statuses()).toEqual(['cancelled', 'cancelled', 'cancelled']));
+
+    requests.length = 0;
+
+    let retried: Promise<unknown> | undefined;
+    act(() => {
+      retried = result.current.retryAll().unwrap();
+    });
+
+    await waitFor(() => expect(requests).toHaveLength(2));
+    await act(async () => {
+      request('a.png').resolve();
+      request('b.png').resolve();
+    });
+
+    await waitFor(() => expect(requests).toHaveLength(3));
+    expect(requests[2].name).toBe('c.png');
+
+    await act(async () => {
+      request('c.png').resolve();
+    });
+
+    await expect(retried).resolves.toHaveLength(3);
+    expect(statuses()).toEqual(['complete', 'complete', 'complete']);
   });
 
   it('refuses to retry a row from a batch that is no longer current', async () => {

@@ -868,6 +868,7 @@ const uploadApi = adminApi
           }
 
           // Reset cancelled files back to pending
+          cancelledIndices.forEach((index) => skippedFiles.delete(getFileKey(uploadId, index)));
           dispatch(retryCancelledFiles());
 
           // Fresh AbortController for the retry run
