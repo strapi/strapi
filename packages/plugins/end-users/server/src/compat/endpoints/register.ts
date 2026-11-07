@@ -105,6 +105,11 @@ export const register = async (
   const email = normalizeEmail(input.email as string);
   const storedUsername = normalizeUsername(username);
 
+  // Users & Permissions answered a taken email or username with this 400, and sign-up forms show
+  // its text, so the compatible route keeps it. That tells a caller whether an address is
+  // registered, which the native sign-up does not. The trade-off is accepted for compatibility: the
+  // route is rate-limited, exists only while `compat.usersPermissions` is on, and the migration
+  // report names it.
   if (await isTaken(strapi, email, storedUsername)) {
     return { status: 400, body: upError('ApplicationError', EMAIL_OR_USERNAME_TAKEN) };
   }
