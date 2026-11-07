@@ -29,6 +29,12 @@ import {
 import { getDirectParent } from '../utils/data';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
+import {
+  CharacterCountField,
+  isCountedAttribute,
+  isNonEmptyString,
+  withCountInHint,
+} from './FormInputs/CharacterCount';
 import { ComponentInput } from './FormInputs/Component/Input';
 import { useComponent } from './FormInputs/ComponentContext';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
@@ -128,6 +134,29 @@ const BaseInputRenderer = ({
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
+
+  /**
+   * Text-like fields get a live character count on the hint line, or on the error line
+   * while the field shows an error. Empty fields show no count, it appears once the user types.
+   */
+  const countedAttribute = isCountedAttribute(props.attribute) ? props.attribute : null;
+  const showCount = countedAttribute !== null && isNonEmptyString(field.value);
+  const countedHint =
+    countedAttribute && showCount
+      ? withCountInHint(hint, { name: props.name, attribute: countedAttribute })
+      : hint;
+  const withCharacterCount = (input: React.ReactElement) =>
+    countedAttribute ? (
+      <CharacterCountField
+        name={props.name}
+        attribute={countedAttribute}
+        hasError={showCount && typeof field.error === 'string'}
+      >
+        {input}
+      </CharacterCountField>
+    ) : (
+      input
+    );
 
   if (!visible) {
     return null;
@@ -252,11 +281,11 @@ const BaseInputRenderer = ({
         />
       );
     case 'richtext':
-      return (
+      return withCharacterCount(
         <Wysiwyg
           key={`input-${props.name}-${localeKey}`}
           {...props}
-          hint={hint}
+          hint={countedHint}
           type={props.type}
           disabled={fieldIsDisabled}
         />
@@ -264,11 +293,11 @@ const BaseInputRenderer = ({
     case 'uid':
       // These props are not needed for the generic form input renderer.
       const { unique: _uniqueUID, ...restUIDProps } = props;
-      return (
+      return withCharacterCount(
         <UIDInput
           key={`input-${props.name}-${localeKey}`}
           {...restUIDProps}
-          hint={hint}
+          hint={countedHint}
           type={props.type}
           disabled={fieldIsDisabled}
         />
@@ -292,12 +321,12 @@ const BaseInputRenderer = ({
     default:
       // These props are not needed for the generic form input renderer.
       const { unique: _unique, mainField: _mainField, ...restProps } = props;
-      return (
+      return withCharacterCount(
         <FormInputRenderer
           key={`input-${props.name}-${localeKey}`}
           {...restProps}
           {...previewProps}
-          hint={hint}
+          hint={countedHint}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}
           disabled={fieldIsDisabled}
