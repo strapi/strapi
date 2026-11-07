@@ -38,9 +38,13 @@ const setup = ({ authenticatedCreated = false, publicCreated = false } = {}) => 
   const plugin = vi.fn(() => ({ service: services }));
   const registerMany = vi.fn(async () => {});
   const adminService = vi.fn(() => ({ actionProvider: { registerMany } }));
+  const defineOrigin = vi.fn();
+  const config = new Map<string, unknown>();
   const strapi = {
     plugin,
     service: adminService,
+    config: { get: vi.fn((key: string) => config.get(key)) },
+    sessionManager: { defineOrigin },
     // No users, and no required profile attribute: the profile steps of the start have nothing to do
     db: { query: vi.fn(() => ({ findMany: vi.fn(async () => []) })) },
     contentTypes: {
@@ -77,10 +81,33 @@ const setup = ({ authenticatedCreated = false, publicCreated = false } = {}) => 
     plugin,
     registerMany,
     adminService,
+    defineOrigin,
+    config,
   };
 };
 
 describe('bootstrap', () => {
+  it('defines the users-permissions origin when compat is on', async () => {
+    const { strapi, defineOrigin, config } = setup();
+
+    config.set('plugin::end-users.compat.usersPermissions', true);
+    config.set('admin.auth.secret', 'admin-secret');
+    await bootstrap({ strapi });
+
+    expect(defineOrigin).toHaveBeenCalledWith(
+      'users-permissions',
+      expect.objectContaining({ jwtSecret: 'admin-secret' })
+    );
+  });
+
+  it('defineLegacyOrigin is not called with compat off', async () => {
+    const { strapi, defineOrigin } = setup();
+
+    await bootstrap({ strapi });
+
+    expect(defineOrigin).not.toHaveBeenCalled();
+  });
+
   it('loads and validates the provider registry, so a bad providers config refuses at start', async () => {
     const { strapi, ensureDefaults } = setup();
 
@@ -300,6 +327,7 @@ describe('bootstrap', () => {
       });
 
       const strapi = {
+        config: { get: vi.fn() },
         db: {
           query: vi.fn((uid: string) =>
             uid === ROLE_UID ? { findOne } : { findMany: vi.fn(async () => []) }

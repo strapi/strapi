@@ -1585,18 +1585,34 @@ describe('role service', () => {
         id: 1,
         roles: [
           {
+            id: 3,
             documentId: 'a',
             name: 'Authenticated',
+            description: 'Default role',
             type: 'authenticated',
             requireTwoFactor: false,
           },
-          { documentId: 'b', name: 'Staff', type: 'custom', requireTwoFactor: true },
+          { id: 4, documentId: 'b', name: 'Staff', type: 'custom', requireTwoFactor: true },
         ],
       });
 
       expect(await role.getForUser('user-1')).toEqual([
-        { documentId: 'a', name: 'Authenticated', type: 'authenticated', requireTwoFactor: false },
-        { documentId: 'b', name: 'Staff', type: 'custom', requireTwoFactor: true },
+        {
+          id: 3,
+          documentId: 'a',
+          name: 'Authenticated',
+          description: 'Default role',
+          type: 'authenticated',
+          requireTwoFactor: false,
+        },
+        {
+          id: 4,
+          documentId: 'b',
+          name: 'Staff',
+          description: null,
+          type: 'custom',
+          requireTwoFactor: true,
+        },
       ]);
       expect(users.findOne).toHaveBeenCalledWith(
         expect.objectContaining({ where: { documentId: 'user-1' } })

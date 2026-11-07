@@ -2,6 +2,8 @@ import type { Core } from '@strapi/types';
 
 import { ADMIN_ACTIONS } from './admin-actions';
 import { logBootWarnings } from './boot-warnings';
+import { readCompatConfig } from './compat/config';
+import { defineLegacyOrigin } from './compat/origin';
 import { isOwner } from './conditions';
 import { PLUGIN_ID, PROFILE_UID, USER_UID } from './constants';
 import { registry } from './providers/registry';
@@ -285,6 +287,14 @@ export const writeUserListLayout = async (strapi: Core.Strapi): Promise<boolean>
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   logBootWarnings(strapi);
+
+  // Tokens Users & Permissions issued carry its origin: defined, they are read by core's session
+  // manager as before
+  const compat = readCompatConfig(strapi);
+
+  if (compat.usersPermissions) {
+    defineLegacyOrigin(strapi, compat);
+  }
 
   // Loads and validates `providers` of config/plugins.ts: a bad entry or package
   // stops the application here, naming it, and not on the first authentication request
