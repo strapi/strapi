@@ -7,6 +7,7 @@ export interface FeaturesFutureFlags {
   experimental_firstPublishedAt?: boolean;
   unstableNextDesignSystem?: boolean;
   unstableCustomOrder?: boolean;
+  unstableWebhookBodyTemplate?: boolean;
   [futureFlagName: string]: boolean | undefined;
 }
 

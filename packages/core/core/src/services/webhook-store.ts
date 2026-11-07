@@ -2,9 +2,12 @@
  * Webhook store is the implementation of webhook storage over the core_store
  */
 
+import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Model, Database } from '@strapi/database';
 import type { Modules } from '@strapi/types';
+
+import { validateWebhookBody } from './webhook-body';
 
 const { ValidationError } = errors;
 
@@ -28,6 +31,9 @@ const webhookModel: Model = {
     events: {
       type: 'json',
     },
+    body: {
+      type: 'json',
+    },
     contentTypeEvents: {
       type: 'json',
     },
@@ -38,9 +44,11 @@ const webhookModel: Model = {
 };
 
 type Webhook = Modules.WebhookStore.Webhook;
-type DBOutput = Omit<Webhook, 'id' | 'isEnabled' | 'contentTypeEvents'> & {
+type DBOutput = Omit<Webhook, 'id' | 'isEnabled' | 'body' | 'contentTypeEvents'> & {
   id: string | number;
   enabled: boolean;
+  // null for the default payload, also for webhooks saved before the body could be customized
+  body?: Webhook['body'];
   // null for webhooks saved before events could be selected per content type
   contentTypeEvents?: Webhook['contentTypeEvents'] | null;
 };
@@ -67,6 +75,7 @@ const toDBObject = (data: Webhook): DBInput => {
     url: data.url,
     headers: data.headers,
     events: data.events,
+    body: data.body ?? null,
     contentTypeEvents: toContentTypeEvents(data),
     enabled: data.isEnabled,
   };
@@ -79,6 +88,7 @@ const fromDBObject = (row: DBOutput): Webhook => {
     url: row.url,
     headers: row.headers,
     events: row.events,
+    body: row.body ?? null,
     contentTypeEvents: row.contentTypeEvents ?? {},
     isEnabled: row.enabled,
   };
@@ -109,7 +119,27 @@ export interface WebhookStore {
   deleteWebhook(id: string): Promise<Webhook | null>;
 }
 
-const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
+const hasSameBodyAndEvents = (saved: Webhook, data: Webhook) => {
+  const pick = ({ body, events, contentTypeEvents }: Webhook) => ({
+    body: body ?? null,
+    events,
+    contentTypeEvents: contentTypeEvents ?? {},
+  });
+
+  return _.isEqual(pick(saved), pick(data));
+};
+
+interface WebhookStoreOptions {
+  db: Database;
+  isBodyTemplateEnabled?: () => boolean;
+  getContentTypes?: () => Parameters<typeof validateWebhookBody>[1];
+}
+
+const createWebhookStore = ({
+  db,
+  isBodyTemplateEnabled = () => false,
+  getContentTypes = () => ({}),
+}: WebhookStoreOptions): WebhookStore => {
   return {
     allowedEvents: new Map([
       ['ENTRY_CREATE', 'entry.create'],
@@ -143,19 +173,37 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
     async createWebhook(data) {
       await webhookEventValidator(this.allowedEvents, getEvents(data));
 
+      if (isBodyTemplateEnabled()) {
+        validateWebhookBody(data, getContentTypes());
+      }
+
+      const row = toDBObject({ ...data, isEnabled: true });
+
       return db
         .query('strapi::webhook')
         .create({
-          data: toDBObject({ ...data, isEnabled: true }),
+          data: isBodyTemplateEnabled() ? row : { ...row, body: null },
         })
         .then(fromDBObject);
     },
     async updateWebhook(id, data) {
       await webhookEventValidator(this.allowedEvents, getEvents(data));
 
+      if (isBodyTemplateEnabled() && data.body) {
+        const saved = await this.findWebhook(id);
+
+        // A saved template stays editable once a field it uses is gone: the runner logs it
+        if (!saved || !hasSameBodyAndEvents(saved, data)) {
+          validateWebhookBody(data, getContentTypes());
+        }
+      }
+
+      const row = toDBObject(data);
+
       const webhook = await db.query('strapi::webhook').update({
         where: { id },
-        data: toDBObject(data),
+        // Without the flag, a saved template is neither sent nor changed
+        data: isBodyTemplateEnabled() ? row : _.omit(row, 'body'),
       });
 
       return webhook ? fromDBObject(webhook) : null;

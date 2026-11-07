@@ -162,6 +162,203 @@ describe('Admin API Webhooks', () => {
     });
   });
 
+  describe('Body template', () => {
+    const template = {
+      ref: 'main',
+      inputs: { event: '{{ event }}', uid: '{{ uid }}', id: '{{ documentId }}' },
+      entry: '{{ entry }}',
+    };
+    const articleEvents = { events: [], contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] } };
+
+    beforeAll(() => {
+      strapi.config.set('features.future.unstableWebhookBodyTemplate', true);
+    });
+
+    afterAll(() => {
+      strapi.config.set('features.future.unstableWebhookBodyTemplate', false);
+    });
+
+    test('A webhook sends the default payload by default', async () => {
+      const { webhook, status } = await createWebhook({});
+
+      expect(status).toBe(201);
+      expect(webhook).toMatchObject({ body: null });
+    });
+
+    test('Can save and update a body template', async () => {
+      const { webhook: createdWebhook, status } = await createWebhook({ body: template });
+
+      expect(status).toBe(201);
+      expect(createdWebhook).toMatchObject({ body: template });
+
+      const { webhook, status: updateStatus } = await updateWebhook(createdWebhook.id, {
+        ...articleEvents,
+        body: { text: 'Published: {{ entry.name }}' },
+      });
+
+      expect(updateStatus).toBe(200);
+      expect(webhook).toMatchObject({ body: { text: 'Published: {{ entry.name }}' } });
+    });
+
+    test.each([
+      ['an unknown variable', { body: { value: '{{ media }}' } }],
+      ['a path into the payload', { ...articleEvents, body: { value: '{{ entry.a.b }}' } }],
+      ['a field of no content type', { ...articleEvents, body: { value: '{{ entry.unknown }}' } }],
+      [
+        'a field without events per content type',
+        { events: ['entry.create'], body: { value: '{{ entry.name }}' } },
+      ],
+    ])('Can not save a template with %s', async (_name, webhook: any) => {
+      const { status } = await createWebhook(webhook);
+
+      expect(status).toBe(400);
+    });
+
+    test('Can not save a body mode, the template always replaces the payload', async () => {
+      const { status } = await createWebhook({ body: template, bodyMode: 'replace' } as any);
+
+      expect(status).toBe(400);
+    });
+
+    test('Updating a webhook without a body keeps the saved template', async () => {
+      const { webhook: createdWebhook } = await createWebhook({ body: template });
+
+      const { webhook, status } = await updateWebhook(createdWebhook.id, { name: 'renamed' });
+
+      expect(status).toBe(200);
+      expect(webhook).toMatchObject({ name: 'renamed', body: template });
+    });
+
+    test('Can go back to the default payload with a null body', async () => {
+      const { webhook: createdWebhook } = await createWebhook({ body: template });
+
+      const { webhook, status } = await updateWebhook(createdWebhook.id, { body: null });
+
+      expect(status).toBe(200);
+      expect(webhook.body).toBeNull();
+    });
+
+    test.each([[['ref']], ['{"ref":"main"}'], [42], [true]])(
+      'Can not save a body that is not a JSON object (%j)',
+      async (body: any) => {
+        const { status } = await createWebhook({ body });
+
+        expect(status).toBe(400);
+      }
+    );
+
+    test('Without the flag, the template is ignored and the saved one is kept', async () => {
+      const { webhook: createdWebhook } = await createWebhook({ body: template });
+
+      strapi.config.set('features.future.unstableWebhookBodyTemplate', false);
+
+      try {
+        const { webhook: ignored, status } = await createWebhook({
+          body: { value: '{{ unknown }}' },
+        });
+        const { webhook } = await updateWebhook(createdWebhook.id, { body: null });
+
+        expect(status).toBe(201);
+        expect(ignored.body).toBeNull();
+        expect(webhook.body).toEqual(template);
+      } finally {
+        strapi.config.set('features.future.unstableWebhookBodyTemplate', true);
+      }
+    });
+
+    describe('Delivery', () => {
+      const requests: Array<{ url: string; body: Record<string, unknown> }> = [];
+      const getDeliveries = (url: string) =>
+        requests.filter((req) => req.url === url).map((req) => req.body);
+
+      const server = http.createServer((req, res) => {
+        let body = '';
+        req.on('data', (chunk) => {
+          body += chunk;
+        });
+        req.on('end', () => {
+          requests.push({ url: req.url, body: JSON.parse(body) });
+          res.end();
+        });
+      });
+
+      let port: number;
+
+      beforeAll(async () => {
+        await new Promise<void>((resolve) => {
+          server.listen(0, '127.0.0.1', resolve);
+        });
+        ({ port } = server.address() as AddressInfo);
+      });
+
+      afterAll(async () => {
+        await new Promise((resolve) => {
+          server.close(resolve);
+        });
+      });
+
+      test('Entry events are sent with the rendered body template', async () => {
+        await createWebhook({
+          url: `http://127.0.0.1:${port}/template`,
+          ...articleEvents,
+          body: { ...template, title: '{{ entry.name }}' },
+        });
+        // For each event, webhooks are sent one after the other, in the order they were created.
+        // So once the last webhook received the event, the other ones were already handled.
+        await createWebhook({
+          url: `http://127.0.0.1:${port}/default`,
+          events: ['entry.create'],
+        });
+
+        const article = await strapi
+          .documents(ARTICLE_UID as any)
+          .create({ data: { name: 'Hello' } });
+
+        const timeout = Date.now() + 10000;
+        while (getDeliveries('/default').length < 1 && Date.now() < timeout) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 50);
+          });
+        }
+
+        const entry = expect.objectContaining({ documentId: article.documentId, name: 'Hello' });
+
+        expect(getDeliveries('/default')).toEqual([
+          {
+            event: 'entry.create',
+            createdAt: expect.any(String),
+            model: 'webhook-article',
+            uid: ARTICLE_UID,
+            entry,
+          },
+        ]);
+        expect(getDeliveries('/template')).toEqual([
+          {
+            ref: 'main',
+            inputs: { event: 'entry.create', uid: ARTICLE_UID, id: article.documentId },
+            entry,
+            title: 'Hello',
+          },
+        ]);
+      });
+
+      test('A test trigger renders the body template against a sample event', async () => {
+        const { webhook } = await createWebhook({
+          url: `http://127.0.0.1:${port}/trigger`,
+          ...articleEvents,
+          body: { event: '{{ event }}', uid: '{{ uid }}', title: '{{ entry.name }}' },
+        });
+
+        const res = await rq({ url: `/admin/webhooks/${webhook.id}/trigger`, method: 'POST' });
+
+        expect(res.statusCode).toBe(200);
+        expect(getDeliveries('/trigger')).toEqual([
+          { event: 'trigger-test', uid: ARTICLE_UID, title: 'Sample name' },
+        ]);
+      });
+    });
+  });
+
   describe('Content type events', () => {
     test('A webhook has no content type events by default', async () => {
       const { webhook, status } = await createWebhook({});

@@ -5,6 +5,12 @@ export interface Webhook {
   headers: Record<string, string>;
   events: string[];
   /**
+   * Template of the request body, sent in place of the default payload when the
+   * `unstableWebhookBodyTemplate` future flag is on. A string value can hold `{{ variable }}`
+   * placeholders, e.g. `{{ event }}` or `{{ entry.title }}`. `null` sends the default payload.
+   */
+  body?: Record<string, unknown> | null;
+  /**
    * Events triggered for a single content type only, by content type UID,
    * e.g. `{ 'api::article.article': ['entry.create'] }`.
    * The events listed in `events` are triggered for every content type.
