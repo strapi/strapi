@@ -43,6 +43,25 @@ const buildSessionMetadataFromContext = (ctx) =>
     userAgent: ctx.request.headers['user-agent'],
   });
 
+/**
+ * Sends the auth response for refresh mode. When httpOnly sessions are enabled (globally via
+ * `sessions.httpOnly` or per request via the `x-strapi-refresh-cookie: httpOnly` header), the
+ * refresh token is set as an httpOnly cookie and omitted from the response body.
+ */
+const sendAuthTokens = (strapi, ctx, { jwt, refreshToken, user }) => {
+  const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+  const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
+
+  if (upSessions?.httpOnly || requestHttpOnly) {
+    const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+    const isProduction = process.env.NODE_ENV === 'production';
+    ctx.cookies.set(cookieName, refreshToken, buildRefreshCookieOptions(upSessions, isProduction));
+    return ctx.send({ jwt, user });
+  }
+
+  return ctx.send({ jwt, refreshToken, user });
+};
+
 const sendRefreshAuthResponse = async (strapi, ctx, user, { metadata } = {}) => {
   const deviceId = extractDeviceId(ctx.request.body);
   const tokenOptions = { type: 'refresh', ...(metadata ? { metadata } : {}) };
@@ -58,17 +77,7 @@ const sendRefreshAuthResponse = async (strapi, ctx, user, { metadata } = {}) => 
     throw new ApplicationError('Invalid credentials');
   }
 
-  const upSessions = strapi.config.get('plugin::users-permissions.sessions');
-  const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
-
-  if (upSessions?.httpOnly || requestHttpOnly) {
-    const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
-    const isProduction = process.env.NODE_ENV === 'production';
-    ctx.cookies.set(cookieName, refresh.token, buildRefreshCookieOptions(upSessions, isProduction));
-    return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
-  }
-
-  return ctx.send({
+  return sendAuthTokens(strapi, ctx, {
     jwt: access.token,
     refreshToken: refresh.token,
     user: await sanitizeUser(user, ctx),
@@ -92,7 +101,7 @@ const reissueTokensAfterPasswordChange = async (strapi, ctx, user) => {
     throw new ApplicationError('Invalid credentials');
   }
 
-  return ctx.send({
+  return sendAuthTokens(strapi, ctx, {
     jwt: access.token,
     refreshToken: refresh.token,
     user: await sanitizeUser(user, ctx),
@@ -655,7 +664,11 @@ module.exports = ({ strapi }) => ({
         throw new ApplicationError('Invalid credentials');
       }
 
-      return ctx.send({ jwt: access.token, refreshToken: refresh.token, user: sanitizedUser });
+      return sendAuthTokens(strapi, ctx, {
+        jwt: access.token,
+        refreshToken: refresh.token,
+        user: sanitizedUser,
+      });
     }
 
     const jwt = getService('jwt').issue(_.pick(user, ['id']));
