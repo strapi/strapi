@@ -108,9 +108,17 @@ If the caller passed `status: 'published'` and a row was written, `update` then 
 4. sets `firstPublishedAt` on each draft if the content type has that field and the value is empty;
 5. creates a new published row from each draft, with `publishedAt` set to the current date;
 6. points the loaded relations to the new published rows;
-7. schedules one `entry.publish` per new row.
+7. adds links from other published entries whose drafts link to the published drafts (see below);
+8. schedules one `entry.publish` per new row.
 
 The draft rows stay. After a publish, the document has a draft row and a published row with the same content.
+
+A published row only links to published rows. When a draft links to an entry that has no published version, publishing the draft drops that link from the new published row. Every later publish of the target puts it back:
+
+- For each unidirectional relation to the published content type, in content types with D&P and in components, `publish` reads the links from draft rows to the drafts it just published. It adds the same link from the published version of the source to the new published row. The link comes from the source's draft, so a link the source added after its last publish is published too, as bidirectional relations already are.
+- A component instance is matched to the instance at the same position in the same field of the published version. The match is kept only when that field holds the same component types in the same order on both versions. When the entry's draft was edited after the last publish (its `updatedAt` differs from the published version's), both instances must also have the same scalar values, and no other instance of the same type in the draft field may have them. Otherwise the link is not added, for example after the draft components were reordered.
+- An xToOne relation is skipped when the published source already links to another entry. The xToMany links of a source are renumbered to follow the order of its draft.
+- Bidirectional relations and relations of a content type to itself come back through their own sync, so this step skips them. It does not schedule an `entry.publish` or `entry.update` for the source entries.
 
 :::caution
 When `create` or `update` calls the inner `publish` function, the call does not pass through the middlewares again. A middleware sees one call with `action: 'create'` or `action: 'update'`, not a separate `publish` call.
