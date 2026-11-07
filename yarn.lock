@@ -10820,6 +10820,8 @@ __metadata:
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
     undici: "npm:8.12.4"
+    vitest: "catalog:"
+    vitest-config: "npm:5.61.0"
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
