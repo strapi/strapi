@@ -25,7 +25,7 @@ const routesOf = (auth: unknown): string[] => {
     }
   }
 
-  return [...routes].sort();
+  return [...routes].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 };
 
 const unique = (values: string[]) => [...new Set(values)];

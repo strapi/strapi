@@ -61,7 +61,7 @@ const engineService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /** Rebuilds the engine when a start-up setting changed since it was built. */
     ensureCurrent(): Promise<void> {
-      if (pending) {
+      if (pending !== undefined) {
         return pending;
       }
 

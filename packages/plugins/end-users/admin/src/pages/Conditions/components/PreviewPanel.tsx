@@ -223,7 +223,9 @@ const PreviewPanel = ({ layout, condition, ready }: PreviewPanelProps) => {
             // The page is one form: Enter would save the condition
             if (event.key === 'Enter') {
               event.preventDefault();
-              handlePreview();
+              handlePreview().catch(() => {
+                // The preview reports its own problems; an unexpected failure leaves the panel as it was
+              });
             }
           }}
         />

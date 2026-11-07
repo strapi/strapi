@@ -49,11 +49,15 @@ const useRoleRows = (roles: EffectivePermissionsRole[] | undefined) => {
 
         return [documentId, data?.permissions ?? []] as const;
       })
-    ).then((loaded) => {
-      if (!cancelled) {
-        setRowsByRole(Object.fromEntries(loaded));
-      }
-    });
+    )
+      .then((loaded) => {
+        if (!cancelled) {
+          setRowsByRole(Object.fromEntries(loaded));
+        }
+      })
+      .catch(() => {
+        // A role that can't be loaded leaves the rows as they were; there is nothing to show for it
+      });
 
     return () => {
       cancelled = true;

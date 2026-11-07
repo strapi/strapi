@@ -103,7 +103,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
     async list(prefix?: string): Promise<TemplateSummary[]> {
       const keys = [...registry.keys()]
         .filter((key) => (prefix ? key.startsWith(prefix) : true))
-        .sort();
+        .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
       if (keys.length === 0) {
         return [];
@@ -117,7 +117,9 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
         return {
           key,
           description: registry.get(key)?.description ?? '',
-          locales: [...new Set([DEFAULT_LOCALE, ...locales])].sort(),
+          locales: [...new Set([DEFAULT_LOCALE, ...locales])].sort((a, b) =>
+            a < b ? -1 : a > b ? 1 : 0
+          ),
           customised: locales.length > 0,
         };
       });

@@ -111,7 +111,8 @@ const isFieldAction = (action: DataAction) => FIELD_ACTIONS.includes(action);
 /** A copy made of new objects: rows are JSON, and `structuredClone` is not everywhere tests run */
 const cloneJson = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
-const sortedUnique = (list: readonly string[]) => [...new Set(list)].sort();
+const sortedUnique = (list: readonly string[]) =>
+  [...new Set(list)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
 const sameSets = (a: readonly string[], b: readonly string[]) => {
   const left = sortedUnique(a);

@@ -84,6 +84,9 @@ const invalid = (path: string[], message: string): never => {
   });
 };
 
+/** Only the origin of this stands in for "this server" when a path is resolved against it */
+const PLACEHOLDER_BASE = 'https://placeholder.invalid';
+
 /**
  * A relative path of this server. Browsers strip tabs and newlines from a URL and read a backslash
  * as a slash, so a value with a control character, whitespace or a backslash is never one
@@ -96,7 +99,7 @@ const isRelativePath = (value: string) => {
   }
 
   try {
-    return new URL(value, 'http://placeholder.invalid').origin === 'http://placeholder.invalid';
+    return new URL(value, PLACEHOLDER_BASE).origin === PLACEHOLDER_BASE;
   } catch {
     return false;
   }

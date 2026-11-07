@@ -130,7 +130,9 @@ export const queryableFields = (rules: FieldRules): Fields => {
     return [];
   }
 
-  return rules.conditional.map((group) => group.fields).reduce(intersectFields);
+  return rules.conditional
+    .map((group) => group.fields)
+    .reduce<Fields>((a, b) => intersectFields(a, b), null);
 };
 
 /** The fields of one entry: `always` and the fields of the groups it matches (their indexes) */

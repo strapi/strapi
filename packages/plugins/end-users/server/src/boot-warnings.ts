@@ -194,7 +194,12 @@ export const warnAboutSyntheticActionClashes = (strapi: Core.Strapi): void => {
       const end = id.lastIndexOf('.');
       const uid = id.slice(0, end);
 
-      clashes.set(uid, [...(clashes.get(uid) ?? []), id.slice(end + 1)].sort());
+      clashes.set(
+        uid,
+        [...(clashes.get(uid) ?? []), id.slice(end + 1)].sort((a, b) =>
+          a < b ? -1 : a > b ? 1 : 0
+        )
+      );
     }
   }
 

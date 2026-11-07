@@ -135,11 +135,8 @@ const callConditionFunction = <T>(
 
     if (isThenable(result)) {
       // Nobody will read what it settles to; a rejection with no handler would be an unhandled one
-      try {
-        Promise.resolve(result).catch(() => {});
-      } catch {
-        // A thenable that fails to be adopted has nothing left to reject
-      }
+      // A thenable that fails to be adopted rejects the wrapper, and this catch takes that too
+      new Promise((resolve) => resolve(result)).catch(() => {});
 
       report(
         definition,
