@@ -184,7 +184,7 @@ The first registry `get` instantiates the controller. Because the route keeps th
 
 ## Core controllers
 
-`createCoreController(uid, cfg)` in [`factories.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/factories.ts) returns a controller factory. The factory builds the base controller for the content type, copies the base actions that `cfg` does not define, and sets the base controller as the prototype. A custom action can call the core action with `super.find(ctx)` and use `this.sanitizeQuery`, `this.sanitizeOutput` and `this.transformResponse`.
+`createCoreController(uid, cfg)` in [`factories.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/factories.ts) returns a controller factory. The factory builds the base controller for the content type, copies the base actions that `cfg` does not define, and sets the base controller as the prototype. A custom action can call the core action with `super.find(ctx)` and use `this.sanitizeQuery`, `this.sanitizeOutput` and `this.transformResponse`. When `cfg` returns a class instance instead of an object literal, the factory keeps its prototype: it copies the class methods to own keys (actions are read from own keys) and adds the missing core actions and helpers bound to the base controller. `createCoreService` does the same for a class instance, without the own-key copy.
 
 The collection type `find` action in [`core-api/controller/collection-type.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/core-api/controller/collection-type.ts):
 
