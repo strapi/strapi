@@ -39,6 +39,7 @@ describe('strapi-compat', () => {
   let methods: { emailPassword: boolean; username: boolean };
   let callNative: ReturnType<typeof vi.fn>;
   let strapi: Core.Strapi;
+  let findUser: ReturnType<typeof vi.fn>;
 
   const cfg = readCompatConfig(configStrapi(true));
   const signIn = (identifier: unknown, password: unknown = 'Passw0rd!long') =>
@@ -50,7 +51,9 @@ describe('strapi-compat', () => {
       headers: new Headers({ 'set-auth-token': 'signed.token' }),
       response: { token: 'raw', user: { id: 'doc7', email: 'ann@example.com' } },
     }));
+    findUser = vi.fn(async () => null as { email: string } | null);
     strapi = {
+      db: { query: () => ({ findOne: findUser }) },
       plugin: () => ({
         service: (name: string) =>
           name === 'engine'
@@ -69,12 +72,52 @@ describe('strapi-compat', () => {
     );
     expect(byEmail).toMatchObject({ status: 200, body: { jwt: 'signed.token' } });
 
+    findUser.mockResolvedValueOnce({ email: 'ann-b@example.com' });
     await signIn('Ann_B');
 
-    expect(callNative).toHaveBeenLastCalledWith(
-      'signInUsername',
-      expect.objectContaining({ body: { username: 'ann_b', password: 'Passw0rd!long' } })
+    expect(findUser).toHaveBeenLastCalledWith(
+      expect.objectContaining({ where: { username: 'ann_b' } })
     );
+    expect(callNative).toHaveBeenLastCalledWith(
+      'signInEmail',
+      expect.objectContaining({ body: { email: 'ann-b@example.com', password: 'Passw0rd!long' } })
+    );
+  });
+
+  it('signs in a username the native username sign-in would refuse (john-doe, jo)', async () => {
+    for (const username of ['john-doe', 'jo']) {
+      findUser.mockResolvedValueOnce({ email: `${username}@example.com` });
+      callNative.mockClear();
+
+      const result = await signIn(username);
+
+      expect(result.status).toBe(200);
+      expect(callNative).toHaveBeenCalledTimes(1);
+      expect(callNative).toHaveBeenCalledWith(
+        'signInEmail',
+        expect.objectContaining({
+          body: { email: `${username}@example.com`, password: 'Passw0rd!long' },
+        })
+      );
+    }
+  });
+
+  it('answers an unknown username and an invalid-looking address with the same 400', async () => {
+    callNative.mockRejectedValueOnce(engineError(401, 'INVALID_EMAIL_OR_PASSWORD'));
+
+    const unknown = await signIn('Nobody-Here');
+    const [call] = callNative.mock.calls.slice(-1);
+
+    // A reserved address derived from the identifier, so the engine does its unknown-user work
+    expect(call[0]).toBe('signInEmail');
+    expect(call[1].body.email).toMatch(/^[0-9a-f]{64}@username\.invalid$/);
+
+    callNative.mockRejectedValueOnce(engineError(400, 'INVALID_EMAIL'));
+
+    const invalid = await signIn('not an@address');
+
+    expect(invalid.status).toBe(400);
+    expect(invalid.body).toEqual(unknown.body);
   });
 
   it('maps credential, unconfirmed, blocked and disabled-method errors to the users-permissions messages', async () => {
@@ -113,12 +156,30 @@ describe('strapi-compat', () => {
     expect(callNative).not.toHaveBeenCalled();
   });
 
-  it('keeps a locked account as the engine answered it', async () => {
-    const locked = engineError(403, 'ACCOUNT_LOCKED');
+  it('answers a locked account with the Strapi envelope, its status and its code', async () => {
+    callNative.mockRejectedValueOnce(engineError(403, 'ACCOUNT_LOCKED'));
 
-    callNative.mockRejectedValueOnce(locked);
+    expect(await signIn('ann@example.com')).toEqual({
+      status: 403,
+      body: {
+        data: null,
+        error: {
+          status: 403,
+          name: 'ForbiddenError',
+          message: 'ACCOUNT_LOCKED',
+          details: { code: 'ACCOUNT_LOCKED' },
+        },
+      },
+    });
+  });
 
-    await expect(signIn('ann@example.com')).rejects.toBe(locked);
+  it('answers any other engine refusal as an ApplicationError with its status and code', async () => {
+    callNative.mockRejectedValueOnce(engineError(429, 'TOO_MANY'));
+
+    expect(await signIn('ann@example.com')).toMatchObject({
+      status: 429,
+      body: { error: { name: 'ApplicationError', details: { code: 'TOO_MANY' } } },
+    });
   });
 
   it('answers a two-factor user with 403 TWO_FACTOR_REQUIRED and no token', async () => {

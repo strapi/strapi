@@ -4,6 +4,7 @@ import type { Core } from '@strapi/types';
 
 import { PER_USER_CACHE_CONTROL, PLUGIN_ID } from '../constants';
 import type abilityService from '../services/ability';
+import { readCompatConfig } from '../compat/config';
 import { isEndUsersStrategy } from '../strategies/end-users';
 
 /**
@@ -23,7 +24,7 @@ const permissionsController = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const auth = ctx.state?.auth as { strategy?: { name?: unknown } } | undefined;
 
-    if (!isEndUsersStrategy(auth?.strategy?.name)) {
+    if (!isEndUsersStrategy(auth?.strategy?.name, readCompatConfig(strapi).usersPermissions)) {
       throw new errors.ForbiddenError();
     }
 

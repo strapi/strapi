@@ -12,11 +12,16 @@ const DESCRIBED = {
   subjects: {},
 };
 
-const setup = () => {
+const setup = (compat = false) => {
   const describeCaller = vi.fn(async () => DESCRIBED);
   const service = vi.fn(() => ({ describe: describeCaller }));
   const plugin = vi.fn(() => ({ service }));
-  const strapi = { plugin } as unknown as Core.Strapi;
+  const strapi = {
+    plugin,
+    config: {
+      get: (path: string) => (path.endsWith('compat.usersPermissions') ? compat : undefined),
+    },
+  } as unknown as Core.Strapi;
 
   const ctxWith = (auth: unknown) => {
     // Koa's `ctx.set(field, value)`, keeping what was set so a test can read the headers
@@ -76,6 +81,20 @@ describe('permissions controller', () => {
       errors.ForbiddenError
     );
     expect(describeCaller).not.toHaveBeenCalled();
+  });
+
+  it('answers the strategy under its users-permissions name only with compat on', async () => {
+    const auth = { strategy: { name: 'users-permissions' }, credentials: null, ability: {} };
+    const on = setup(true);
+
+    await on.permissions.forCaller(on.ctxWith(auth));
+    expect(on.describeCaller).toHaveBeenCalledWith(auth);
+
+    const off = setup(false);
+
+    await expect(off.permissions.forCaller(off.ctxWith(auth))).rejects.toBeInstanceOf(
+      errors.ForbiddenError
+    );
   });
 
   it('is GET /permissions/me under the plugin prefix, with the default scope', () => {

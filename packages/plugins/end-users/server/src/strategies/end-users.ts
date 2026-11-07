@@ -20,9 +20,12 @@ export const COMPAT_STRATEGY_NAME = 'users-permissions';
 export const strategyName = (compat: boolean): 'end-users' | 'users-permissions' =>
   compat ? COMPAT_STRATEGY_NAME : STRATEGY_NAME;
 
-/** Whether a strategy name is this plugin's strategy, under either name. */
-export const isEndUsersStrategy = (name: unknown): boolean =>
-  name === STRATEGY_NAME || name === COMPAT_STRATEGY_NAME;
+/**
+ * Whether a strategy name is this plugin's strategy: the name it has under the current mode. With
+ * the compatibility mode off, a strategy called `users-permissions` is not this plugin's.
+ */
+export const isEndUsersStrategy = (name: unknown, compat: boolean): boolean =>
+  name === strategyName(compat);
 
 /**
  * Route scopes `verify` lets any caller of this strategy through, Public and signed-in alike, with
