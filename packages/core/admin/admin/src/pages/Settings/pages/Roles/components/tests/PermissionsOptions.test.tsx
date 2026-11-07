@@ -580,14 +580,12 @@ describe('Permissions options', () => {
         />
       );
 
-      // cell > row wrapper > the box the buttons are positioned in
-      const box = screen.getAllByTestId('subject-actions-cell')[0].parentElement?.parentElement;
+      // The box the row and its buttons are positioned in
+      const box = screen.getAllByTestId('permissions-row-box')[0];
 
       // jsdom drops `max-content` from computed styles, so the rule is read from the stylesheet
-      const css = Array.from(document.querySelectorAll('style'))
-        .map((style) => style.textContent ?? style.innerHTML)
-        .join('');
-      const rule = box!.className
+      const css = document.head.textContent ?? '';
+      const rule = box.className
         .split(' ')
         .map((name) => new RegExp(`\\.${name}\\{([^}]*)\\}`).exec(css)?.[1] ?? '')
         .join(';');
@@ -757,7 +755,16 @@ describe('Permissions options', () => {
         await openAddress(user);
 
         expect(cell('emailVerified', 'Create')).toBeDisabled();
-        expect(cell('emailVerified', 'Create').closest('[role="group"]')).not.toBeInTheDocument();
+        // No unheld-permission wrapper holds this cell
+        screen
+          .queryAllByRole('group', { name: "You can't grant a permission you don't have yourself" })
+          .forEach((group) => {
+            expect(
+              within(group).queryByRole('checkbox', {
+                name: 'Select emailVerified Create permission',
+              })
+            ).not.toBeInTheDocument();
+          });
 
         // The bulk ticks of the user's permissions leave it alone too
         await user.click(screen.getByRole('checkbox', { name: 'Select all Create permissions' }));

@@ -243,7 +243,11 @@ const Collapse = ({
   const doesConditionButtonHasConditions = checkboxesActions.some((action) => action.hasConditions);
 
   return (
-    <BoxWrapper $isActive={isActive} $hasTrailingCell={Boolean(subjectActions)}>
+    <BoxWrapper
+      data-testid="permissions-row-box"
+      $isActive={isActive}
+      $hasTrailingCell={Boolean(subjectActions)}
+    >
       <Wrapper
         height={rowHeight}
         flex={1}

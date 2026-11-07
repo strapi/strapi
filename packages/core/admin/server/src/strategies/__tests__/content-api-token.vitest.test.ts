@@ -244,18 +244,18 @@ describe('Content-API Token Auth Strategy', () => {
         type: 'custom',
         permissions: ['api::note.note.find', 'api::note.note.create'],
       };
-      const routeAbility = { can: jest.fn(() => true) };
-      const engineGenerateAbility = jest.fn(async () => routeAbility);
-      const subjectAwareGenerateAbility = jest.fn();
+      const routeAbility = { can: vi.fn(() => true) };
+      const engineGenerateAbility = vi.fn(async () => routeAbility);
+      const subjectAwareGenerateAbility = vi.fn();
       const ctx = createContext({}, { request, state: contentApiRouteState });
 
       global.strapi = {
         admin: {
           services: {
-            'api-token-content-api': { getByAccessKey: jest.fn(() => customToken), hash },
+            'api-token-content-api': { getByAccessKey: vi.fn(() => customToken), hash },
           },
         },
-        db: { query: () => ({ update: jest.fn() }) },
+        db: { query: () => ({ update: vi.fn() }) },
         contentAPI: {
           permissions: {
             engine: { generateAbility: engineGenerateAbility },
