@@ -50,12 +50,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./utils": {
       "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.js"
+      "require": "./dist/utils/index.js",
+      "default": "./dist/utils/index.js"
     },
     "./package.json": "./package.json"
   },
