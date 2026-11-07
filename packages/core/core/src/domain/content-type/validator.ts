@@ -1,27 +1,7 @@
 import _ from 'lodash';
 import { yup, strings } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-
-const LIFECYCLES = [
-  'beforeCreate',
-  'afterCreate',
-  'beforeFindOne',
-  'afterFindOne',
-  'beforeFindMany',
-  'afterFindMany',
-  'beforeCount',
-  'afterCount',
-  'beforeCreateMany',
-  'afterCreateMany',
-  'beforeUpdate',
-  'afterUpdate',
-  'beforeUpdateMany',
-  'afterUpdateMany',
-  'beforeDelete',
-  'afterDelete',
-  'beforeDeleteMany',
-  'afterDeleteMany',
-] as const;
+import { lifecyclesShape } from '../lifecycles';
 
 /**
  * For enumerations the least common denomiator is GraphQL, where
@@ -36,8 +16,6 @@ const LIFECYCLES = [
  * into the GraphQL plugin.
  */
 const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
-
-const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () => yup.mixed().nullable().isFunction());
 
 const contentTypeSchemaValidator = yup.object().shape({
   schema: yup.object().shape({
