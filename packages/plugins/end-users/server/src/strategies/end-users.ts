@@ -5,9 +5,12 @@ import type { Context } from 'koa';
 import { PLUGIN_ID, USER_UID } from '../constants';
 import type abilityService from '../services/ability';
 import type roleService from '../services/role';
+import type compatService from '../services/compat';
 import type settingsService from '../services/settings';
 import type { RoleSummary } from '../services/role';
 import type { AuthEngine } from '../engine/types';
+import { readCompatConfig } from '../compat/config';
+import { resolveLegacyUserId, verifyLegacyBearer } from '../compat/legacy-jwt';
 import { toUpRole } from '../compat/shapes';
 import type { UpRole } from '../compat/shapes';
 import { banState } from '../utils/ban';
@@ -100,6 +103,8 @@ const toHeaders = (ctx: Context) => {
  * - a valid session (the session cookie, or a Bearer session token): the user, with their roles
  * - no credentials at all: the Public role
  * - credentials that are not good (unknown, expired, revoked): 401, never the Public role
+ * - with the Users & Permissions compatibility mode on, until `legacyJwt.until`: a Bearer token
+ *   Users & Permissions issued counts as a session of its user
  * - a banned user: 403 with `details.code` `USER_BANNED`
  * - an unverified user, while the Sign-in settings require a verified email: 403
  *   `EMAIL_NOT_VERIFIED`
@@ -116,6 +121,7 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
   const roles = () => plugin().service('role') as ReturnType<typeof roleService>;
   const abilities = () => plugin().service('ability') as ReturnType<typeof abilityService>;
   const settings = () => plugin().service('settings') as ReturnType<typeof settingsService>;
+  const compatHits = () => plugin().service('compat') as ReturnType<typeof compatService>;
 
   const invalidCredentials = () => new errors.UnauthorizedError('Invalid credentials');
 
@@ -187,6 +193,33 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
     return credentials;
   };
 
+  /**
+   * A Bearer value that is not a session may be a token Users & Permissions issued, while the
+   * cut-off (`legacyJwt.until`) is in the future. Answers the `documentId` of its user, or `null`:
+   * no match, a user that is gone, or the bridge closed. A match is counted.
+   */
+  const legacyUserId = async (ctx: Context): Promise<string | null> => {
+    const parts = (ctx.request.headers.authorization ?? '').split(/\s+/);
+
+    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
+      return null;
+    }
+
+    const hit = await verifyLegacyBearer(strapi, parts[1], readCompatConfig(strapi));
+
+    if (!hit) {
+      return null;
+    }
+
+    const userId = await resolveLegacyUserId(strapi, hit);
+
+    if (userId) {
+      compatHits().recordLegacyHit(hit.kind);
+    }
+
+    return userId;
+  };
+
   const authenticate = async (ctx: Context): Promise<Authentication> => {
     // An error here (the database is down) is an error, not a request with no credentials: it
     // propagates and answers 500, and the request is never given the Public role because of it.
@@ -194,33 +227,39 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
       toHeaders(ctx)
     );
 
-    if (!session) {
-      if (credentials) {
-        // A stale session cookie is cleared: kept, it would get the client a 401 on every request
-        // until it ran out
-        if (source === 'cookie') {
-          sendCookies(ctx, setCookies);
-        }
+    let userId = session?.userId ?? null;
 
-        return { authenticated: false, error: invalidCredentials() };
+    if (!session) {
+      if (!credentials) {
+        return {
+          authenticated: true,
+          credentials: null,
+          ability: await abilities().forUser(null, []),
+        };
       }
 
-      return {
-        authenticated: true,
-        credentials: null,
-        ability: await abilities().forUser(null, []),
-      };
-    }
+      // A stale session cookie is cleared: kept, it would get the client a 401 on every request
+      // until it ran out
+      if (source === 'cookie') {
+        sendCookies(ctx, setCookies);
+      }
 
-    if (source === 'cookie') {
+      // Only a Bearer value can be a legacy token, and only with the compatibility mode on
+      userId = compat && source === 'bearer' ? await legacyUserId(ctx) : null;
+
+      // Credentials that are not good are a 401, never the Public role
+      if (!userId) {
+        return { authenticated: false, error: invalidCredentials() };
+      }
+    } else if (source === 'cookie') {
       await assertTrustedOrigin(ctx);
     }
 
     const user = (await strapi.db
       .query(USER_UID)
-      .findOne({ where: { documentId: session.userId } })) as Plain | null;
+      .findOne({ where: { documentId: userId } })) as Plain | null;
 
-    // A session whose user is gone is not a session
+    // A session, or a legacy token, whose user is gone is not a credential
     if (!user) {
       return { authenticated: false, error: invalidCredentials() };
     }

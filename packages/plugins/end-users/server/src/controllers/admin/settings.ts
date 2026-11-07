@@ -4,6 +4,7 @@ import type { Core } from '@strapi/types';
 import type { SettingsResponse } from '../../../../shared/contracts/settings';
 import { PLUGIN_ID } from '../../constants';
 import type { AuthEngine } from '../../engine/types';
+import type compatService from '../../services/compat';
 import type settingsService from '../../services/settings';
 
 /** Better Auth's id for the plugin that checks a password against known breaches */
@@ -21,6 +22,13 @@ const settingsController = ({ strapi }: { strapi: Core.Strapi }) => {
   const respond = async (data: SettingsResponse['data']): Promise<SettingsResponse> => {
     const engine = strapi.plugin(PLUGIN_ID).service('engine').get() as AuthEngine;
     const config = settings().configSummary();
+
+    // Only while the mode is on: with it off there is nothing to count
+    if (config.compat.usersPermissions) {
+      config.compat.legacyJwtHits = await (
+        strapi.plugin(PLUGIN_ID).service('compat') as ReturnType<typeof compatService>
+      ).legacyJwtHits();
+    }
 
     return {
       data,

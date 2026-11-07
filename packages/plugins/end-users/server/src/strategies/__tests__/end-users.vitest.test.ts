@@ -5,7 +5,14 @@ import type { Core } from '@strapi/types';
 import { USER_UID } from '../../constants';
 import { koaCtx } from '../../engine/better-auth/__tests__/utils/koa-ctx';
 import type { SessionLookup } from '../../engine/types';
+import { resolveLegacyUserId, verifyLegacyBearer } from '../../compat/legacy-jwt';
 import createEndUsersStrategy, { ALWAYS_ALLOWED_SCOPES, isEndUsersStrategy } from '../end-users';
+
+vi.mock('../../compat/config', () => ({ readCompatConfig: vi.fn(() => ({ legacyJwt: {} })) }));
+vi.mock('../../compat/legacy-jwt', () => ({
+  verifyLegacyBearer: vi.fn(async () => null),
+  resolveLegacyUserId: vi.fn(async () => null),
+}));
 
 const NO_SESSION: SessionLookup = {
   session: null,
@@ -99,12 +106,14 @@ const setup = ({
   const findOne = vi.fn(async () => user);
   const settings = { signUp: { requireEmailVerification } };
   const get = vi.fn(async () => settings);
+  const recordLegacyHit = vi.fn();
 
   const services: Record<string, unknown> = {
     engine: { get: () => ({ lookupSession, isTrustedOrigin }) },
     role: { getForUser },
     ability: { forUser },
     settings: { get },
+    compat: { recordLegacyHit },
   };
 
   const strapi = {
@@ -120,6 +129,7 @@ const setup = ({
     getForUser,
     findOne,
     settings,
+    recordLegacyHit,
     query: strapi.db.query as unknown as ReturnType<typeof vi.fn>,
   };
 };
@@ -1019,6 +1029,107 @@ describe('the end-users strategy', () => {
         expect(() => strategy.verify({ credentials: null, ability: ABILITY }, undefined)).toThrow(
           errors.UnauthorizedError
         );
+      });
+    });
+  });
+
+  describe('the legacy token bridge', () => {
+    const bearer = (token = 'legacy-token') =>
+      koaCtx({ headers: { authorization: `Bearer ${token}` } });
+    const unknownBearer = (): SessionLookup => ({
+      session: null,
+      credentials: true,
+      source: 'bearer',
+      setCookies: [],
+    });
+
+    beforeEach(() => {
+      vi.mocked(verifyLegacyBearer).mockReset().mockResolvedValue(null);
+      vi.mocked(resolveLegacyUserId).mockReset().mockResolvedValue(null);
+    });
+
+    it('falls through to the legacy bridge only when until is in the future', async () => {
+      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7' });
+      vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
+      const on = setup({ lookup: unknownBearer(), compat: true });
+      const ctx = bearer();
+
+      const result = await on.strategy.authenticate(ctx);
+
+      expect(result).toMatchObject({ authenticated: true, credentials: { documentId: 'user-1' } });
+      expect(ctx.state.user.documentId).toBe('user-1');
+      expect(on.findOne).toHaveBeenCalledWith({ where: { documentId: 'user-1' } });
+      expect(on.recordLegacyHit).toHaveBeenCalledWith('legacy');
+      expect(verifyLegacyBearer).toHaveBeenCalledWith(
+        expect.anything(),
+        'legacy-token',
+        expect.anything()
+      );
+
+      // With compat off the bridge is not asked at all
+      vi.mocked(verifyLegacyBearer).mockClear();
+      const off = setup({ lookup: unknownBearer(), compat: false });
+
+      expect(await off.strategy.authenticate(bearer())).toMatchObject({ authenticated: false });
+      expect(verifyLegacyBearer).not.toHaveBeenCalled();
+
+      // A bridge that has closed (until passed) answers null, and the request is refused
+      vi.mocked(verifyLegacyBearer).mockResolvedValue(null);
+      const closed = setup({ lookup: unknownBearer(), compat: true });
+
+      expect(await closed.strategy.authenticate(bearer())).toMatchObject({ authenticated: false });
+      expect(closed.recordLegacyHit).not.toHaveBeenCalled();
+    });
+
+    it('does not ask the bridge when the engine found a session', async () => {
+      const { strategy } = setup({ lookup: signedIn({ source: 'bearer' }), compat: true });
+
+      await strategy.authenticate(bearer());
+
+      expect(verifyLegacyBearer).not.toHaveBeenCalled();
+    });
+
+    it('answers 401 for a bad token and never falls back to Public', async () => {
+      const { strategy, forUser, recordLegacyHit } = setup({
+        lookup: unknownBearer(),
+        compat: true,
+      });
+
+      const result = (await strategy.authenticate(bearer('nope'))) as {
+        authenticated: boolean;
+        error: Error;
+      };
+
+      expect(result.authenticated).toBe(false);
+      expect(result.error).toBeInstanceOf(errors.UnauthorizedError);
+      expect(forUser).not.toHaveBeenCalled();
+      expect(recordLegacyHit).not.toHaveBeenCalled();
+    });
+
+    it('answers 401, and counts nothing, when the token names a user that is gone', async () => {
+      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7' });
+      vi.mocked(resolveLegacyUserId).mockResolvedValue(null);
+      const { strategy, recordLegacyHit } = setup({ lookup: unknownBearer(), compat: true });
+
+      expect(await strategy.authenticate(bearer())).toMatchObject({ authenticated: false });
+      expect(recordLegacyHit).not.toHaveBeenCalled();
+    });
+
+    it('refuses a banned user holding a valid legacy token with USER_BANNED', async () => {
+      vi.mocked(verifyLegacyBearer).mockResolvedValue({
+        kind: 'access',
+        userId: '7',
+        sessionId: 's-1',
+      });
+      vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
+      const { strategy } = setup({
+        lookup: unknownBearer(),
+        compat: true,
+        user: storedUser({ banned: true }),
+      });
+
+      expect(codeOf(await outcomeOf(strategy.authenticate(bearer())))).toEqual({
+        code: 'USER_BANNED',
       });
     });
   });
