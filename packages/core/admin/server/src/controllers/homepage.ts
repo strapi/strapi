@@ -1,4 +1,5 @@
 import type { Context } from 'koa';
+import type { PerformanceHomeMetrics } from '../../../shared/contracts/performance-metrics';
 import { getService } from '../utils';
 import { HomepageLayout, HomepageLayoutWrite } from './validation/schema';
 
@@ -8,6 +9,10 @@ export default {
   }> {
     const homepageService = getService('homepage');
     return { data: await homepageService.getKeyStatistics() };
+  },
+  async getPerformanceHomeMetrics(): Promise<{ data: PerformanceHomeMetrics }> {
+    const homepageService = getService('homepage');
+    return { data: await homepageService.getPerformanceHomeMetrics() };
   },
   async getHomepageLayout(ctx: Context): Promise<{ data: HomepageLayout | null }> {
     const homepageService = getService('homepage');

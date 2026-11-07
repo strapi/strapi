@@ -67,6 +67,8 @@ const buildDb = ({ uid = UID, tableName = 'articles', i18n = false }: BuildDbOpt
         throw error;
       },
     },
+    // Perf monitoring hook (no-op in SQL-render unit tests).
+    mergeKnexQueryContext() {},
   } as unknown as Database;
 
   return { db, uid };
