@@ -109,6 +109,118 @@ describe('Register', () => {
     expect(screen.queryByText('Invalid registrationToken')).not.toBeInTheDocument();
   });
 
+  it('shows the server password errors of an invite and refreshes the policy', async () => {
+    let policyRequests = 0;
+
+    server.use(
+      http.get('/admin/registration-info', () =>
+        HttpResponse.json({
+          data: { email: 'invitee@example.com', firstname: 'Invitee', lastname: 'User' },
+        })
+      ),
+      // An admin raises the minimum length while the invite page is open
+      http.get('/admin/password-policy', () => {
+        policyRequests += 1;
+
+        return HttpResponse.json({
+          data: {
+            minLength: policyRequests > 1 ? 20 : 8,
+            requireLowercase: true,
+            requireUppercase: true,
+            requireNumber: true,
+            requireSpecialCharacter: false,
+          },
+        });
+      }),
+      http.post('/admin/register', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'userInfo.password must be at least 20 characters',
+              details: {
+                errors: [
+                  {
+                    path: ['userInfo', 'password'],
+                    message: 'userInfo.password must be at least 20 characters',
+                    name: 'ValidationError',
+                  },
+                ],
+              },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    render(<Register />, {
+      initialEntries: ['/auth/register?registrationToken=invite-token'],
+    });
+
+    await waitFor(() => expect(screen.getByLabelText(/^Firstname/i)).toHaveValue('Invitee'));
+
+    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: 'Abcdefgh12' } });
+    fireEvent.change(screen.getByLabelText(/^Confirm Password/i), {
+      target: { value: 'Abcdefgh12' },
+    });
+    fireEvent.submit(document.querySelector('form')!);
+
+    expect(await screen.findByText('password must be at least 20 characters')).toBeInTheDocument();
+    expect(screen.queryByText(/userInfo/)).not.toBeInTheDocument();
+    // The field shows the error instead of the hint; the next validation uses the new policy
+    await waitFor(() => expect(policyRequests).toBe(2));
+    expect(screen.getByRole('heading', { name: 'Welcome to Strapi!' })).toBeInTheDocument();
+  });
+
+  it('shows the alert when the server rejects an invite on a path without a field', async () => {
+    server.use(
+      http.get('/admin/registration-info', () =>
+        HttpResponse.json({
+          data: { email: 'invitee@example.com', firstname: 'Invitee', lastname: 'User' },
+        })
+      ),
+      http.post('/admin/register', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'registrationToken is a required field',
+              details: {
+                errors: [
+                  {
+                    path: ['registrationToken'],
+                    message: 'registrationToken is a required field',
+                    name: 'ValidationError',
+                  },
+                ],
+              },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    render(<Register />, {
+      initialEntries: ['/auth/register?registrationToken=invite-token'],
+    });
+
+    await waitFor(() => expect(screen.getByLabelText(/^Firstname/i)).toHaveValue('Invitee'));
+
+    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: 'Testing123!' } });
+    fireEvent.change(screen.getByLabelText(/^Confirm Password/i), {
+      target: { value: 'Testing123!' },
+    });
+    fireEvent.submit(document.querySelector('form')!);
+
+    expect(await screen.findByText('registrationToken is a required field')).toBeInTheDocument();
+  });
+
   it('should enable all fields on the register-admin route', () => {
     const { getByLabelText } = render(<Register />, {
       initialEntries: ['/auth/register-admin'],

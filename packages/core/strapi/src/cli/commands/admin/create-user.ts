@@ -1,7 +1,8 @@
 import { createCommand } from 'commander';
-import { yup } from '@strapi/utils';
+import { errors, yup } from '@strapi/utils';
 import _ from 'lodash';
 import type { QuestionCollection } from 'inquirer';
+import type { Core } from '@strapi/types';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
@@ -17,25 +18,9 @@ interface CmdOptions {
 
 const emailValidator = yup.string().email('Invalid email address').lowercase();
 
-const passwordValidator = yup
-  .string()
-  .min(8, 'Password must be at least 8 characters long')
-  .test('lowercase', 'Password must contain at least one lowercase character', (value) => {
-    if (!value) return true;
-    return /[a-z]/.test(value);
-  })
-  .test('uppercase', 'Password must contain at least one uppercase character', (value) => {
-    if (!value) return true;
-    return /[A-Z]/.test(value);
-  })
-  .test('number', 'Password must contain at least one number', (value) => {
-    if (!value) return true;
-    return /\d/.test(value);
-  });
-
 const adminCreateSchema = yup.object().shape({
   email: emailValidator,
-  password: passwordValidator,
+  password: yup.string(),
   firstname: yup.string().trim().required('First name is required'),
   lastname: yup.string(),
 });
@@ -67,10 +52,6 @@ const promptQuestions: QuestionCollection<Answers> = [
     type: 'password',
     name: 'password',
     message: 'Admin password?',
-    async validate(value: string) {
-      const validPassword = await passwordValidator.validate(value);
-      return validPassword === value || validPassword;
-    },
   },
   { type: 'input', name: 'firstname', message: 'First name?' },
   { type: 'input', name: 'lastname', message: 'Last name?' },
@@ -81,16 +62,60 @@ const promptQuestions: QuestionCollection<Answers> = [
   },
 ];
 
-async function createAdmin({ email, password, firstname, lastname }: CmdOptions) {
+/**
+ * The password policy is stored in the database, so a password can only be checked once Strapi
+ * is loaded, after the prompts. In interactive mode, asks for the password again until it is
+ * valid instead of losing every answer; otherwise exits with an error.
+ */
+async function ensureValidPassword(
+  app: Core.Strapi,
+  password: string,
+  interactive: boolean
+): Promise<string> {
+  let candidate = password;
+
+  for (;;) {
+    try {
+      await app.admin!.services.user.assertPasswordIsValid(candidate);
+      return candidate;
+    } catch (err) {
+      if (!(err instanceof errors.ValidationError)) {
+        throw err;
+      }
+
+      console.error(err.message);
+
+      if (!interactive) {
+        process.exit(1);
+      }
+    }
+
+    const inquirer = await getInquirer();
+    ({ password: candidate } = await inquirer.prompt<{ password: string }>([
+      { type: 'password', name: 'password', message: 'Admin password?' },
+    ]));
+  }
+}
+
+async function createAdmin(
+  { email, password: initialPassword, firstname, lastname }: CmdOptions,
+  { interactive = false }: { interactive?: boolean } = {}
+) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
+  // Before the password, so a retried password is never lost to an email already taken
   const user = await app.admin!.services.user.exists({ email });
 
   if (user) {
     console.error(`User with email "${email}" already exists`);
     process.exit(1);
   }
+
+  const password =
+    initialPassword === undefined
+      ? undefined
+      : await ensureValidPassword(app, initialPassword, interactive);
 
   const superAdminRole = await app.admin!.services.role.getSuperAdmin();
 
@@ -112,6 +137,7 @@ async function createAdmin({ email, password, firstname, lastname }: CmdOptions)
  */
 const action = async (cmdOptions: CmdOptions = {}) => {
   let { email, password, firstname, lastname } = cmdOptions;
+  let interactive = false;
 
   if (
     _.isEmpty(email) &&
@@ -128,6 +154,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     }
 
     ({ email, password, firstname, lastname } = inquiry);
+    interactive = true;
   }
 
   try {
@@ -140,7 +167,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     process.exit(1);
   }
 
-  return createAdmin({ email, password, firstname, lastname });
+  return createAdmin({ email, password, firstname, lastname }, { interactive });
 };
 
 /**

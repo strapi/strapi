@@ -1,5 +1,6 @@
 import { fireEvent } from '@testing-library/react';
-import { render } from '@tests/utils';
+import { render, screen, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { ResetPassword } from '../ResetPassword';
 
@@ -87,9 +88,9 @@ describe('ResetPassword', () => {
     });
 
     it.each([
-      ['PASSWORD123!', 'Password must contain at least 1 lowercase letter'],
-      ['password123!', 'Password must contain at least 1 uppercase letter'],
-      ['Password!!', 'Password must contain at least 1 number'],
+      ['PASSWORD123!', 'Password must contain at least one lowercase character'],
+      ['password123!', 'Password must contain at least one uppercase character'],
+      ['Password!!', 'Password must contain at least one number'],
     ])('should display the strength error for %s', async (password, expectedMessage) => {
       const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
         initialEntries: [{ search: '?code=test' }],
@@ -101,6 +102,71 @@ describe('ResetPassword', () => {
       fireEvent.click(getByRole('button', { name: 'Change password' }));
 
       expect(await findByText(expectedMessage)).toBeInTheDocument();
+    });
+  });
+
+  describe('password policy', () => {
+    it('follows the policy configured on the server', async () => {
+      server.use(
+        http.get('/admin/password-policy', () =>
+          HttpResponse.json({
+            data: {
+              minLength: 12,
+              requireLowercase: true,
+              requireUppercase: true,
+              requireNumber: true,
+              requireSpecialCharacter: true,
+            },
+          })
+        )
+      );
+
+      const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+        initialEntries: [{ search: '?code=test' }],
+      });
+
+      expect(
+        await findByText(
+          'Must be at least 12 characters, 1 lowercase, 1 uppercase, 1 number, 1 special character'
+        )
+      ).toBeInTheDocument();
+
+      // Valid for the default policy, not for the configured one
+      await user.type(getByLabelText('Password*'), 'Testing123');
+      await user.type(getByLabelText('Confirm Password*'), 'Testing123');
+
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      expect(await findByText('Password must be at least 12 characters')).toBeInTheDocument();
+    });
+
+    it('falls back to the default policy when the request fails', async () => {
+      server.use(
+        http.get('/admin/password-policy', () =>
+          HttpResponse.json(
+            { data: null, error: { status: 500, name: 'InternalServerError', message: 'Boom' } },
+            { status: 500 }
+          )
+        )
+      );
+
+      const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+        initialEntries: [{ search: '?code=test' }],
+      });
+
+      expect(
+        await findByText('Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number')
+      ).toBeInTheDocument();
+
+      await user.type(getByLabelText('Password*'), 'testing123');
+      await user.type(getByLabelText('Confirm Password*'), 'testing123');
+
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      expect(
+        await findByText('Password must contain at least one uppercase character')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('Password must be at least 8 characters')).not.toBeInTheDocument();
     });
   });
 });

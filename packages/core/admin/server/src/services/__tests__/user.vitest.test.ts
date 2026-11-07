@@ -4,6 +4,7 @@ import { errors, queryParams, emitAudit } from '@strapi/utils';
 import constants from '../constants';
 import userService from '../user';
 import userContentType from '../../content-types/User';
+import passwordPolicyService, { DEFAULT_PASSWORD_POLICY } from '../password-policy';
 
 vi.mock('@strapi/utils', async () => ({
   ...(await vi.importActual<typeof import('@strapi/utils')>('@strapi/utils')),
@@ -11,6 +12,12 @@ vi.mock('@strapi/utils', async () => ({
 }));
 
 const { SUPER_ADMIN_CODE } = constants;
+
+// The password validator reads the policy through `admin::password-policy`; serve the defaults.
+const passwordPolicyServiceMock = {
+  ...passwordPolicyService,
+  getPolicy: vi.fn(async () => DEFAULT_PASSWORD_POLICY),
+};
 
 const {
   create,
@@ -26,6 +33,7 @@ const {
   count,
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
+  assertPasswordIsValid,
   getLanguagesInUse,
 } = userService;
 
@@ -398,6 +406,7 @@ describe('User', () => {
             auth: {
               hashPassword,
             },
+            'password-policy': passwordPolicyServiceMock,
           },
         },
       } as any;
@@ -1170,9 +1179,20 @@ describe('User', () => {
       expect(findOne).toHaveBeenCalledWith({ where: { email }, populate: ['roles'] });
     });
 
-    test.each(['abc', 'Abcd', 'Abcdefgh', 'Abcd123'])(
-      'Throws on invalid password',
-      async (password) => {
+    test.each([
+      [
+        'abc',
+        'The password must be at least 8 characters. The password must contain at least one uppercase character. The password must contain at least one number.',
+      ],
+      [
+        'Abcd',
+        'The password must be at least 8 characters. The password must contain at least one number.',
+      ],
+      ['Abcdefgh', 'The password must contain at least one number.'],
+      ['Abcd123', 'The password must be at least 8 characters.'],
+    ])(
+      'Throws on invalid password %s, listing the broken rules of the policy',
+      async (password, reasons) => {
         const email = 'email@email.fr';
 
         const findOne = vi.fn(() => ({ id: 1 }));
@@ -1186,17 +1206,51 @@ describe('User', () => {
               };
             },
           },
+          admin: {
+            services: {
+              'password-policy': passwordPolicyServiceMock,
+            },
+          },
         } as any;
 
         await expect(resetPasswordByEmail(email, password)).rejects.toEqual(
-          new errors.ValidationError(
-            'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
-          )
+          new errors.ValidationError(`Invalid password. ${reasons}`)
         );
 
         expect(findOne).toHaveBeenCalledWith({ where: { email }, populate: ['roles'] });
       }
     );
+  });
+
+  describe('assertPasswordIsValid', () => {
+    test('Lets a policy read failure through instead of reporting an invalid password', async () => {
+      const failure = new Error('database unavailable');
+
+      global.strapi = {
+        ...global.strapi,
+        admin: {
+          services: {
+            'password-policy': {
+              ...passwordPolicyService,
+              getPolicy: vi.fn(async () => {
+                throw failure;
+              }),
+            },
+          },
+        },
+      } as any;
+
+      await expect(assertPasswordIsValid('Testing1234')).rejects.toBe(failure);
+    });
+
+    test('Resolves for a password complying with the stored policy', async () => {
+      global.strapi = {
+        ...global.strapi,
+        admin: { services: { 'password-policy': passwordPolicyServiceMock } },
+      } as any;
+
+      await expect(assertPasswordIsValid('Testing1234')).resolves.toBeUndefined();
+    });
   });
 
   describe('getLanguagesInUse', () => {

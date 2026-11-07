@@ -12,6 +12,7 @@ import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
 import { homepageService } from '../services/homepage';
 import debugDump from '../services/debug-dump';
+import passwordPolicy from '../services/password-policy';
 
 type S = {
   role: typeof role;
@@ -32,6 +33,7 @@ type S = {
   'guided-tour': ReturnType<typeof createGuidedTourService>;
   homepage: ReturnType<typeof homepageService>;
   'debug-dump': ReturnType<typeof debugDump>;
+  'password-policy': typeof passwordPolicy;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };

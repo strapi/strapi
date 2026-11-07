@@ -1,4 +1,6 @@
-import { describe, test, expect, beforeAll, vi, type Mock } from 'vitest';
+import { describe, test, expect, beforeAll, beforeEach, vi, type Mock } from 'vitest';
+import { errors } from '@strapi/utils';
+
 import adminController from '../admin';
 
 describe('Admin Controller', () => {
@@ -201,5 +203,54 @@ describe('Admin Controller', () => {
         data: { isEE: false, isTrial: false, features: [], flags: {}, ai: { enabled: false } },
       });
     });
+  });
+});
+
+describe('Admin Controller | password policy', () => {
+  const policy = {
+    minLength: 12,
+    requireLowercase: true,
+    requireUppercase: true,
+    requireNumber: false,
+    requireSpecialCharacter: true,
+  };
+
+  const getPolicy = vi.fn(async () => policy);
+  const updatePolicy = vi.fn(async (input: Record<string, unknown>) => ({ ...policy, ...input }));
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    global.strapi = {
+      admin: {
+        services: {
+          'password-policy': { getPolicy, updatePolicy },
+        },
+      },
+    } as any;
+  });
+
+  test('getPasswordPolicy returns the effective policy', async () => {
+    await expect(adminController.getPasswordPolicy()).resolves.toEqual({ data: policy });
+    expect(getPolicy).toHaveBeenCalledTimes(1);
+  });
+
+  test('updatePasswordPolicy validates the body before storing it', async () => {
+    const body = { ...policy, minLength: 16 };
+
+    const result = await adminController.updatePasswordPolicy({ request: { body } } as any);
+
+    expect(updatePolicy).toHaveBeenCalledWith(body);
+    expect(result).toEqual({ data: body });
+  });
+
+  test('updatePasswordPolicy rejects an invalid policy without storing anything', async () => {
+    await expect(
+      adminController.updatePasswordPolicy({
+        request: { body: { ...policy, minLength: 4 } },
+      } as any)
+    ).rejects.toBeInstanceOf(errors.ValidationError);
+
+    expect(updatePolicy).not.toHaveBeenCalled();
   });
 });

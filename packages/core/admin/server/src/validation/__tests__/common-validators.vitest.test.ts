@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 
 /**
  * Coverage for the `permission` yup schema's `action-validity` test.
@@ -14,7 +14,11 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
  * rebuilds `strapi.service` to resolve `admin::x` from `strapi.admin.services[x]`, so we stub
  * the provider by assigning a `strapi` instance with that shape.
  */
-import { permission } from '../common-validators';
+import { yup } from '@strapi/utils';
+
+import { permission, password } from '../common-validators';
+import { validateProfileUpdateInput, validateUserUpdateInput } from '../user';
+import passwordPolicyService, { DEFAULT_PASSWORD_POLICY } from '../../services/password-policy';
 
 type ProviderResult =
   { actionId: string; subjects?: unknown; options?: unknown } | undefined | null;
@@ -93,5 +97,123 @@ describe('permission validation — action-validity', () => {
     // so the "not an existing action" error must NOT be raised for an absent action.
     expect(errors).toContain('action is a required field');
     expect(errors).not.toContain('action is not an existing permission action');
+  });
+});
+
+/**
+ * The `password` validator reads the configurable policy through
+ * `strapi.service('admin::password-policy')` at validation time, so a policy change applies to
+ * the next request without a restart. The byte limit (bcrypt) is enforced whatever the policy.
+ */
+describe('password validation — password policy', () => {
+  const stubPasswordPolicy = (policy: Partial<Record<string, unknown>> = {}) => {
+    (global as any).strapi = {
+      plugins: {},
+      api: {},
+      admin: {
+        services: {
+          'password-policy': {
+            ...passwordPolicyService,
+            getPolicy: vi.fn(async () => ({ ...DEFAULT_PASSWORD_POLICY, ...policy })),
+          },
+        },
+      },
+    };
+  };
+
+  const schema = yup.object().shape({ password: password.required() });
+
+  const errorsOf = async (value: string): Promise<Array<{ path?: string; message: string }>> => {
+    try {
+      await schema.validate({ password: value }, { strict: true, abortEarly: false });
+      return [];
+    } catch (e: any) {
+      return e.inner.map((error: any) => ({ path: error.path, message: error.message }));
+    }
+  };
+
+  test('accepts a password satisfying the default policy', async () => {
+    stubPasswordPolicy();
+
+    expect(await errorsOf('Testing1234')).toEqual([]);
+  });
+
+  test('reports every broken rule of the default policy, one error per rule', async () => {
+    stubPasswordPolicy();
+
+    expect(await errorsOf('123')).toEqual([
+      { path: 'password', message: 'password must be at least 8 characters' },
+      { path: 'password', message: 'password must contain at least one lowercase character' },
+      { path: 'password', message: 'password must contain at least one uppercase character' },
+    ]);
+  });
+
+  test('follows the configured policy', async () => {
+    stubPasswordPolicy({ minLength: 12, requireUppercase: false, requireSpecialCharacter: true });
+
+    expect(await errorsOf('testing1234')).toEqual([
+      { path: 'password', message: 'password must be at least 12 characters' },
+      { path: 'password', message: 'password must contain at least one special character' },
+    ]);
+    expect(await errorsOf('testing-12345')).toEqual([]);
+  });
+
+  test('rejects an empty password on the profile and user update schemas', async () => {
+    stubPasswordPolicy();
+
+    for (const validate of [validateProfileUpdateInput, validateUserUpdateInput]) {
+      await expect(
+        validate({ password: '', currentPassword: 'Testing1234' })
+      ).rejects.toMatchObject({
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({ message: 'password must be at least 8 characters' }),
+          ]),
+        },
+      });
+    }
+  });
+
+  test('still treats an absent password as valid', async () => {
+    stubPasswordPolicy();
+
+    await expect(password.validate(undefined)).resolves.toBeUndefined();
+  });
+
+  test('fails validation when the policy cannot be read, without leaving it pending', async () => {
+    const logError = vi.fn();
+    const failure = new Error('database unavailable');
+
+    (global as any).strapi = {
+      plugins: {},
+      api: {},
+      log: { error: logError },
+      admin: {
+        services: {
+          'password-policy': {
+            ...passwordPolicyService,
+            getPolicy: vi.fn(async () => {
+              throw failure;
+            }),
+          },
+        },
+      },
+    };
+
+    expect(await errorsOf('Testing1234')).toEqual([
+      {
+        path: 'password',
+        message: 'password could not be checked against the password policy',
+      },
+    ]);
+    expect(logError).toHaveBeenCalledWith('Unable to read the password policy', failure);
+  });
+
+  test('keeps rejecting passwords over 72 bytes whatever the policy says', async () => {
+    stubPasswordPolicy({ minLength: 8 });
+
+    expect(await errorsOf(`aA1${'b'.repeat(70)}`)).toEqual([
+      { path: 'password', message: 'password must be less than 73 bytes' },
+    ]);
   });
 });
