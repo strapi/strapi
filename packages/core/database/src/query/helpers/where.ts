@@ -67,6 +67,28 @@ const processAttributeWhere = (attribute: Attribute | null, where: unknown, oper
   return processSingleAttributeWhere(attribute, where, operator);
 };
 
+/**
+ * Merges a relation's compiled where into the filters accumulated so far.
+ *
+ * Two relations whose nested where compiles to the same key (`$or`, `$and`, `$not`) must both
+ * apply. Assigning the second over the first silently dropped one relation's constraint, so a
+ * colliding key is moved into `$and` instead.
+ */
+const mergeWhere = (filters: Record<string, unknown>, nested: Record<string, unknown>) => {
+  for (const key of Object.keys(nested)) {
+    if (!(key in filters)) {
+      filters[key] = nested[key];
+      continue;
+    }
+
+    const existing = filters[key];
+    delete filters[key];
+
+    const and = Array.isArray(filters.$and) ? (filters.$and as unknown[]) : [];
+    filters.$and = [...and, { [key]: existing }, { [key]: nested[key] }];
+  }
+};
+
 const processNested = (where: unknown, ctx: WhereCtx) => {
   if (!isRecord(where)) {
     return where;
@@ -178,8 +200,7 @@ function processWhere(
         uid: attribute.target,
       });
 
-      // TODO: use a better merge logic (push to $and when collisions)
-      Object.assign(filters, nestedWhere);
+      mergeWhere(filters, nestedWhere);
 
       continue;
     }
