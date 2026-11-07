@@ -19,10 +19,13 @@ import { createAuthMiddleware } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
+import { readCompatConfig } from '../../../compat/config';
 import { PLUGIN_ID } from '../../../constants';
 import { templateKey } from '../../../emails/templates';
 import type { EmailTemplateName } from '../../../emails/templates';
 import type settingsService from '../../../services/settings';
+import { resolveBasePath } from '../base-path';
+import { resolveServerOrigin } from '../server-origin';
 
 interface EmailUser {
   name?: string | null;
@@ -81,6 +84,27 @@ const tokenPayload = (token: unknown): { email?: string; updateTo?: string } => 
   }
 };
 
+/**
+ * The links of the compatibility mode, which a users-permissions front end reads: the reset link is
+ * the reset page with `?code=`, and the verification link is the compat route with
+ * `?confirmation=`. Native links are the ones Better Auth built.
+ */
+const compatResetUrl = async (strapi: Core.Strapi, token: string): Promise<string> => {
+  const { redirects } = await settings(strapi).get();
+  const origin = resolveServerOrigin(strapi.config);
+  const page = redirects.passwordReset || `${resolveBasePath(strapi.config)}/reset-password`;
+  // A reset page given as a path is on this server
+  const base = /^[a-z][a-z0-9+.-]*:/i.test(page) ? page : `${origin}${page}`;
+
+  return `${base}${base.includes('?') ? '&' : '?'}code=${encodeURIComponent(token)}`;
+};
+
+const compatConfirmationUrl = (strapi: Core.Strapi, token: string): string =>
+  `${resolveServerOrigin(strapi.config)}${resolveBasePath(strapi.config)}/email-confirmation` +
+  `?confirmation=${encodeURIComponent(token)}`;
+
+const compatOn = (strapi: Core.Strapi): boolean => readCompatConfig(strapi).usersPermissions;
+
 const welcome = async (strapi: Core.Strapi, user: EmailUser) => {
   try {
     await send(strapi, 'welcome', user.email, { user: person(user) }, localeOf(user));
@@ -97,8 +121,25 @@ const welcome = async (strapi: Core.Strapi, user: EmailUser) => {
  */
 export const emailSenders = (strapi: Core.Strapi) => ({
   emailAndPassword: {
-    sendResetPassword: async ({ user, url }: { user: EmailUser; url: string }) =>
-      send(strapi, 'reset-password', user.email, { user: person(user), url }, localeOf(user)),
+    sendResetPassword: async ({
+      user,
+      url,
+      token,
+    }: {
+      user: EmailUser;
+      url: string;
+      token?: string;
+    }) =>
+      send(
+        strapi,
+        'reset-password',
+        user.email,
+        {
+          user: person(user),
+          url: compatOn(strapi) && token ? await compatResetUrl(strapi, token) : url,
+        },
+        localeOf(user)
+      ),
   },
   emailVerification: {
     async sendVerificationEmail({
@@ -125,7 +166,13 @@ export const emailSenders = (strapi: Core.Strapi) => ({
         return;
       }
 
-      await send(strapi, 'verify-email', user.email, { user: person(user), url }, localeOf(user));
+      await send(
+        strapi,
+        'verify-email',
+        user.email,
+        { user: person(user), url: compatOn(strapi) ? compatConfirmationUrl(strapi, token) : url },
+        localeOf(user)
+      );
     },
 
     /**

@@ -441,3 +441,79 @@ describe('strapi-email: the welcome', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('smtp down'));
   });
 });
+
+describe('strapi-email: compat links', () => {
+  const user = { name: 'Ann', email: 'ann@example.com' };
+
+  it('builds ?code= and ?confirmation= links only with compat on', async () => {
+    const off = setup({ redirects: { passwordReset: 'https://app.example.com/reset' } });
+
+    await emailSenders(off.strapi).emailAndPassword.sendResetPassword({
+      user,
+      url: 'http://x/reset',
+      token: 'abc',
+    });
+    await emailSenders(off.strapi).emailVerification.sendVerificationEmail({
+      user,
+      url: 'http://x/verify',
+      token: 'def',
+    });
+
+    expect(off.sendTemplate.mock.calls.map((call) => call[2].url)).toEqual([
+      'http://x/reset',
+      'http://x/verify',
+    ]);
+
+    const on = setup({ redirects: { passwordReset: 'https://app.example.com/reset' } });
+
+    on.config['plugin::end-users.compat.usersPermissions'] = true;
+
+    await emailSenders(on.strapi).emailAndPassword.sendResetPassword({
+      user,
+      url: 'http://x/reset',
+      token: 'abc',
+    });
+    await emailSenders(on.strapi).emailVerification.sendVerificationEmail({
+      user,
+      url: 'http://x/verify',
+      token: 'def',
+    });
+
+    expect(on.sendTemplate.mock.calls.map((call) => call[2].url)).toEqual([
+      'https://app.example.com/reset?code=abc',
+      'http://localhost:1337/api/auth/email-confirmation?confirmation=def',
+    ]);
+  });
+
+  it('uses the API reset path when the settings name no reset page', async () => {
+    const { strapi, sendTemplate, config } = setup();
+
+    config['plugin::end-users.compat.usersPermissions'] = true;
+
+    await emailSenders(strapi).emailAndPassword.sendResetPassword({
+      user,
+      url: 'http://x/reset',
+      token: 'abc',
+    });
+
+    expect(sendTemplate.mock.calls[0][2].url).toBe(
+      'http://localhost:1337/api/auth/reset-password?code=abc'
+    );
+  });
+});
+
+describe('strapi-email: compat reset page as a path', () => {
+  it('puts a reset page given as a path on this server', async () => {
+    const { strapi, sendTemplate, config } = setup({ redirects: { passwordReset: '/reset' } });
+
+    config['plugin::end-users.compat.usersPermissions'] = true;
+
+    await emailSenders(strapi).emailAndPassword.sendResetPassword({
+      user: { name: 'Ann', email: 'ann@example.com' },
+      url: 'http://x/reset',
+      token: 'abc',
+    });
+
+    expect(sendTemplate.mock.calls[0][2].url).toBe('http://localhost:1337/reset?code=abc');
+  });
+});
