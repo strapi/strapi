@@ -5,6 +5,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 
 import { Page } from '../../../../admin/src/components/PageHelpers';
 import { useTypedDispatch } from '../../../../admin/src/core/store/hooks';
+import { consumeSsoRedirectTo } from '../../../../admin/src/pages/Auth/utils';
 import { AUTH_COOKIE_NAME, getCookieValue } from '../../../../admin/src/utils/cookies';
 import { establishAdminSession } from '../../../../admin/src/utils/establishAdminSession';
 
@@ -39,7 +40,14 @@ const AuthResponse = () => {
           token: jwtToken,
         });
 
-        navigate('/auth/login');
+        // Restore the deep-link target persisted before the SSO round trip; the login
+        // page re-validates it and performs the redirect.
+        const redirectTo = consumeSsoRedirectTo();
+
+        navigate({
+          pathname: '/auth/login',
+          search: redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : '',
+        });
       } else {
         redirectToOops();
       }

@@ -34,3 +34,41 @@ export const getRedirectTo = (search: string): string => {
 
   return redirectTo;
 };
+
+const SSO_REDIRECT_TO_STORAGE_KEY = 'strapi-sso-redirectTo';
+
+/**
+ * An SSO login leaves the app for the provider and returns on a different route, losing the
+ * `?redirectTo` of the login page. The auth page persists it so the SSO callback can restore
+ * it. Rendering the login page without a `redirectTo` starts a fresh flow, which clears the
+ * stored value.
+ */
+export const persistSsoRedirectTo = (search: string): void => {
+  try {
+    const redirectTo = getRedirectTo(search);
+
+    if (redirectTo !== DEFAULT_REDIRECT_TO) {
+      sessionStorage.setItem(SSO_REDIRECT_TO_STORAGE_KEY, redirectTo);
+    } else {
+      sessionStorage.removeItem(SSO_REDIRECT_TO_STORAGE_KEY);
+    }
+  } catch {
+    // Storage may be unavailable (private windows, blocked site data); the login still
+    // works, it just lands on the home page.
+  }
+};
+
+/**
+ * Reads and clears the `redirectTo` persisted for the SSO round trip. The value is
+ * re-validated by `getRedirectTo` when the login page consumes it.
+ */
+export const consumeSsoRedirectTo = (): string | null => {
+  try {
+    const redirectTo = sessionStorage.getItem(SSO_REDIRECT_TO_STORAGE_KEY);
+    sessionStorage.removeItem(SSO_REDIRECT_TO_STORAGE_KEY);
+
+    return redirectTo && isSameAppPath(redirectTo) ? redirectTo : null;
+  } catch {
+    return null;
+  }
+};

@@ -83,6 +83,32 @@ export interface Http {
   [key: string]: unknown;
 }
 
+export interface McpOAuthConfig {
+  /** Enables the OAuth 2.1 authorization server for MCP clients. Defaults to false. */
+  enabled?: boolean;
+  /** Allows MCP clients to self-register (RFC 7591). Defaults to true. */
+  dynamicClientRegistration?: boolean;
+  /** Access token lifespan in seconds. Defaults to 1 800 (30 minutes). */
+  accessTokenLifespan?: number;
+  /** Idle refresh token lifespan in seconds. Defaults to 1 209 600 (14 days). */
+  idleRefreshTokenLifespan?: number;
+  /** Maximum refresh token lifespan in seconds. Defaults to 2 592 000 (30 days). */
+  maxRefreshTokenLifespan?: number;
+  /** Authorization code lifespan in seconds. Defaults to 120. */
+  authorizationCodeLifespan?: number;
+  /** Consent ticket lifespan in seconds. Defaults to 300. */
+  consentTicketLifespan?: number;
+  /**
+   * Overrides for the registration endpoint's rate limit (koa2-ratelimit options such as
+   * `max`, `interval` or `enabled`). Defaults to 5 requests per 5 minutes per IP.
+   */
+  registrationRateLimit?: {
+    enabled?: boolean;
+    max?: number;
+    interval?: number | { min?: number; sec?: number; hour?: number; day?: number };
+  };
+}
+
 export interface McpConfig {
   enabled?: boolean;
   /** Maximum time (ms) to wait for the MCP transport connection. Defaults to 5 000. */
@@ -94,6 +120,8 @@ export interface McpConfig {
    * Must be an integer >= 1. Set to `Infinity` to disable (JS/TS config only). Defaults to 10 000.
    */
   maxToolInputElements?: number;
+  /** OAuth 2.1 authentication for MCP clients. */
+  oauth?: McpOAuthConfig;
 }
 
 export interface Server {

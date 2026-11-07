@@ -218,6 +218,23 @@ export const getSessionManager = (): Modules.SessionManager.SessionManagerServic
   return manager ?? null;
 };
 
+// Keep in sync with MCP_SESSION_ORIGIN in @strapi/core (services/mcp/oauth/constants.ts),
+// the same way SESSION_CONTENT_TYPE mirrors the admin session UID.
+const MCP_SESSION_ORIGIN = 'mcp';
+
+/**
+ * Revokes every MCP OAuth grant of a user. A no-op when MCP OAuth is not enabled (the origin
+ * is only registered then). Called from the flows that invalidate all admin sessions for
+ * security reasons: password change, password reset and "sign out of all devices".
+ */
+export const invalidateMcpSessions = async (userId: string): Promise<void> => {
+  const sessionManager = getSessionManager();
+
+  if (sessionManager && sessionManager.hasOrigin(MCP_SESSION_ORIGIN)) {
+    await sessionManager(MCP_SESSION_ORIGIN).invalidateRefreshToken(userId);
+  }
+};
+
 export const generateDeviceId = (): string => crypto.randomUUID();
 
 export const extractDeviceParams = (

@@ -122,6 +122,104 @@ describe('EE user service audit events', () => {
   });
 });
 
+describe('EE user service MCP session invalidation', () => {
+  const user = {
+    id: 1,
+    email: 'test@strapi.io',
+    firstname: 'Kai',
+    isActive: true,
+    roles: [{ id: 2, code: 'strapi-editor' }],
+  };
+
+  const setup = () => {
+    const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+    const sessionManager = Object.assign(
+      vi.fn<(origin: string) => { invalidateRefreshToken: typeof invalidateRefreshToken }>(() => ({
+        invalidateRefreshToken,
+      })),
+      { hasOrigin: vi.fn(() => true) }
+    );
+
+    global.strapi = {
+      eventHub: { emit: vi.fn() },
+      db: {
+        query: () => ({
+          findOne: vi.fn(() => Promise.resolve(user)),
+          update: vi.fn(() => Promise.resolve(user)),
+          delete: vi.fn(() => Promise.resolve(user)),
+          count: vi.fn(() => Promise.resolve(0)),
+        }),
+      },
+      store: { set: vi.fn() },
+      sessionManager,
+      admin: {
+        services: {
+          auth: { hashPassword: vi.fn(() => Promise.resolve('hash')) },
+          role: {
+            getSuperAdminWithUsersCount: vi.fn(() => Promise.resolve({ id: 9, usersCount: 2 })),
+          },
+          'seat-enforcement': { getDisabledUserList: vi.fn(() => Promise.resolve(null)) },
+        },
+      },
+    } as any;
+    vi.mocked(emitAudit).mockClear();
+
+    return { sessionManager, invalidateRefreshToken };
+  };
+
+  const mcpCalls = (sessionManager: ReturnType<typeof setup>['sessionManager']) =>
+    sessionManager.mock.calls.filter(([origin]) => origin === 'mcp');
+
+  test('updateById revokes MCP grants when a password is set', async () => {
+    const { sessionManager, invalidateRefreshToken } = setup();
+
+    await updateById(1, { password: 'Secret1234' });
+
+    expect(mcpCalls(sessionManager)).toHaveLength(1);
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
+  });
+
+  test('updateById revokes MCP grants when the user is deactivated', async () => {
+    const { sessionManager, invalidateRefreshToken } = setup();
+
+    await updateById(1, { isActive: false });
+
+    expect(mcpCalls(sessionManager)).toHaveLength(1);
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
+  });
+
+  test('updateById leaves MCP grants alone for other field changes', async () => {
+    const { sessionManager } = setup();
+
+    await updateById(1, { firstname: 'Kai' });
+
+    expect(mcpCalls(sessionManager)).toHaveLength(0);
+  });
+
+  test('deleteById revokes the admin sessions and the MCP grants', async () => {
+    const { sessionManager, invalidateRefreshToken } = setup();
+
+    await deleteById(1);
+
+    expect(sessionManager.mock.calls.map(([origin]) => origin)).toEqual(['admin', 'mcp']);
+    expect(invalidateRefreshToken).toHaveBeenCalledTimes(2);
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
+  });
+
+  test('deleteByIds revokes admin sessions and MCP grants per user', async () => {
+    const { sessionManager } = setup();
+
+    await deleteByIds([1, 2]);
+
+    expect(sessionManager.mock.calls.map(([origin]) => origin)).toEqual([
+      'admin',
+      'mcp',
+      'admin',
+      'mcp',
+    ]);
+  });
+});
+
 describe('EE user service without a super admin role', () => {
   const superAdminUser = { id: 2, email: 'test@strapi.io', roles: [{ code: SUPER_ADMIN_CODE }] };
   const missingRoleMessage = "Cannot proceed because the super admin role doesn't exist.";
