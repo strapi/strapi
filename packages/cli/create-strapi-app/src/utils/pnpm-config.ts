@@ -3,6 +3,7 @@ import fse from 'fs-extra';
 import semver from 'semver';
 
 import type { Scope } from '../types';
+import { betterSqlite3NeedsInstallScript, getBetterSqlite3Version } from './database';
 
 /** allowBuilds in pnpm-workspace.yaml (pnpm >= 10.26). */
 export const PNPM_WORKSPACE_CONFIG_MIN_VERSION = '10.26.0';
@@ -38,25 +39,39 @@ export const shouldUsePackageJsonPnpmConfig = (pnpmVersion: string | null | unde
   return semver.lt(normalized, PNPM_WORKSPACE_CONFIG_MIN_VERSION);
 };
 
-export const getPnpmBuildPackageNames = (scope: Scope): string[] => {
+export const getPnpmBuildPackageNames = (
+  scope: Scope,
+  nodeVersion: string = process.versions.node
+): string[] => {
   const packages = new Set<string>(PNPM_STRAPI_BUILD_PACKAGES);
 
-  if (scope.database.client === 'sqlite') {
+  // 13.x ships a prebuild. Allowing its build makes pnpm run node-gyp, which needs a toolchain.
+  // 12.x still needs its install script so prebuild-install can fetch a binary.
+  if (
+    scope.database.client === 'sqlite' &&
+    betterSqlite3NeedsInstallScript(getBetterSqlite3Version(nodeVersion))
+  ) {
     packages.add(PNPM_SQLITE_BUILD_PACKAGE);
   }
 
   return Array.from(packages).sort();
 };
 
-export const getPnpmAllowBuilds = (scope: Scope): Record<string, true> => {
-  return Object.fromEntries(getPnpmBuildPackageNames(scope).map((name) => [name, true])) as Record<
-    string,
-    true
-  >;
+export const getPnpmAllowBuilds = (
+  scope: Scope,
+  nodeVersion: string = process.versions.node
+): Record<string, true> => {
+  return Object.fromEntries(
+    getPnpmBuildPackageNames(scope, nodeVersion).map((name) => [name, true])
+  ) as Record<string, true>;
 };
 
-export const getPnpmOnlyBuiltDependencies = (scope: Scope, existing: string[] = []): string[] => {
-  return Array.from(new Set([...existing, ...getPnpmBuildPackageNames(scope)])).sort();
+export const getPnpmOnlyBuiltDependencies = (
+  scope: Scope,
+  existing: string[] = [],
+  nodeVersion: string = process.versions.node
+): string[] => {
+  return Array.from(new Set([...existing, ...getPnpmBuildPackageNames(scope, nodeVersion)])).sort();
 };
 
 const quoteYamlKey = (key: string): string => {
@@ -67,8 +82,12 @@ const quoteYamlKey = (key: string): string => {
   return `'${key}'`;
 };
 
-export const formatPnpmWorkspaceYaml = (scope: Scope, pnpmVersion: string | null): string => {
-  const allowBuilds = getPnpmAllowBuilds(scope);
+export const formatPnpmWorkspaceYaml = (
+  scope: Scope,
+  pnpmVersion: string | null,
+  nodeVersion: string = process.versions.node
+): string => {
+  const allowBuilds = getPnpmAllowBuilds(scope, nodeVersion);
   const normalized = pnpmVersion ? semver.coerce(pnpmVersion)?.version : null;
   const isPnpm11 = normalized ? semver.gte(normalized, PNPM11_MIN_VERSION) : true;
 

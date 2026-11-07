@@ -44,20 +44,31 @@ describe('pnpm-config', () => {
     expect(shouldUsePackageJsonPnpmConfig(null)).toBe(false);
   });
 
-  it('includes Strapi native build packages and sqlite only for sqlite projects', () => {
+  it('allows the sqlite install script only when the pinned driver still needs one', () => {
     const sqliteDir = mkProjectDir();
     const postgresDir = mkProjectDir();
 
     try {
-      expect(getPnpmBuildPackageNames(makeScope(sqliteDir))).toEqual([
+      // 12.11.1 on Node < 22.14: prebuild-install has to run.
+      expect(getPnpmBuildPackageNames(makeScope(sqliteDir), '22.13.0')).toEqual([
         '@swc/core',
         'better-sqlite3',
         'core-js-pure',
         'esbuild',
         'sharp',
       ]);
+      // 13.0.3 ships a prebuild. pnpm must not be told to compile it.
+      expect(getPnpmBuildPackageNames(makeScope(sqliteDir), '22.14.0')).toEqual([
+        '@swc/core',
+        'core-js-pure',
+        'esbuild',
+        'sharp',
+      ]);
       expect(
-        getPnpmBuildPackageNames(makeScope(postgresDir, { database: { client: 'postgres' } }))
+        getPnpmBuildPackageNames(
+          makeScope(postgresDir, { database: { client: 'postgres' } }),
+          '22.14.0'
+        )
       ).toEqual(['@swc/core', 'core-js-pure', 'esbuild', 'sharp']);
     } finally {
       fs.rmSync(sqliteDir, { recursive: true, force: true });
@@ -69,15 +80,17 @@ describe('pnpm-config', () => {
     const projectDir = mkProjectDir();
 
     try {
-      const yaml = formatPnpmWorkspaceYaml(makeScope(projectDir), '11.8.0');
+      const yaml = formatPnpmWorkspaceYaml(makeScope(projectDir), '11.8.0', '22.14.0');
 
       expect(yaml).toContain("packages:\n  - '.'");
       expect(yaml).toContain("minimumReleaseAgeExclude:\n  - '@strapi/*'");
       expect(yaml).toContain("'@swc/core': true");
-      expect(yaml).toContain('better-sqlite3: true');
+      expect(yaml).not.toContain('better-sqlite3');
       expect(yaml).toContain('sharp: true');
-      expect(getPnpmAllowBuilds(makeScope(projectDir))).toMatchObject({
+      expect(getPnpmAllowBuilds(makeScope(projectDir), '22.14.0')).toMatchObject({
         '@swc/core': true,
+      });
+      expect(getPnpmAllowBuilds(makeScope(projectDir), '22.13.0')).toMatchObject({
         'better-sqlite3': true,
       });
     } finally {

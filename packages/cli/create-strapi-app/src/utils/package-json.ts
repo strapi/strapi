@@ -2,6 +2,7 @@ import { join } from 'path';
 import { kebabCase, mergeWith } from 'lodash';
 import fse from 'fs-extra';
 
+import { betterSqlite3NeedsInstallScript } from './database';
 import { engines } from './engines';
 import { getPnpmOnlyBuiltDependencies, shouldUsePackageJsonPnpmConfig } from './pnpm-config';
 import type { Scope } from '../types';
@@ -13,7 +14,31 @@ type PnpmPackageConfig = {
 
 type PackageJson = {
   pnpm?: PnpmPackageConfig;
+  dependenciesMeta?: Record<string, { built?: boolean }>;
   [key: string]: unknown;
+};
+
+/**
+ * Yarn 2 through 4.13 run node-gyp for better-sqlite3 13 because it ships binding.gyp.
+ * The prebuild is already in the package, so the build must be skipped.
+ * Yarn 1 ignores this field. Yarn 4.14+ already skips build scripts unless built is true.
+ */
+const getYarnDependenciesMeta = (scope: Scope): PackageJson => {
+  const version = scope.dependencies?.['better-sqlite3'];
+
+  if (scope.packageManager !== 'yarn' || typeof version !== 'string') {
+    return {};
+  }
+
+  if (betterSqlite3NeedsInstallScript(version)) {
+    return {};
+  }
+
+  return {
+    dependenciesMeta: {
+      'better-sqlite3': { built: false },
+    },
+  };
 };
 
 const mergePackageJson = (existingPkg: PackageJson, pkg: PackageJson) =>
@@ -62,6 +87,7 @@ export async function createPackageJSON(scope: Scope) {
       installId: scope.installId,
     },
     engines,
+    ...getYarnDependenciesMeta(scope),
     ...getPnpmPackageJsonConfig(scope, existingPkg),
   };
 

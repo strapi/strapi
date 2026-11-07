@@ -210,6 +210,11 @@
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
+  "dependenciesMeta": {
+    "better-sqlite3": {
+      "built": false
+    }
+  },
   "packageManager": "yarn@4.12.0",
   "engines": {
     "node": ">=22.0.0 <=26.x.x",
