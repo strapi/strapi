@@ -172,6 +172,13 @@ interface EditReleaseItemProps {
 
 const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
   const { formatMessage } = useIntl();
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC(PERMISSIONS);
+
+  if (!canUpdate) {
+    return null;
+  }
 
   return (
     <StyledMenuLink
