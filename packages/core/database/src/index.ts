@@ -53,6 +53,13 @@ interface Settings {
    * read as false.
    */
   poolTimeoutDiagnostics?: boolean;
+  /**
+   * Maximum time in milliseconds a query issued through the query builder may run before the
+   * database cancels it. Unset by default (no limit). Only applied on clients that can cancel
+   * queries (postgres, mysql); ignored on sqlite. Schema sync and migrations are not affected.
+   * Must be a positive number (for example `env.int('DATABASE_QUERY_TIMEOUT')`).
+   */
+  queryTimeout?: number;
   migrations: {
     dir: string;
   };
@@ -71,6 +78,22 @@ export interface DatabaseConfig {
   /** Lifecycle phase of the host application, e.g. "boot" or "runtime", for pool timeout reports. */
   getPhase?: () => string | undefined;
 }
+
+const assertValidQueryTimeout = (queryTimeout: unknown) => {
+  if (queryTimeout === undefined) {
+    return;
+  }
+
+  // A string (e.g. a raw `env('DATABASE_QUERY_TIMEOUT')`) would be silently ignored by knex, leaving
+  // users thinking they are protected when they are not
+  if (typeof queryTimeout !== 'number' || !Number.isFinite(queryTimeout) || queryTimeout <= 0) {
+    throw new Error(
+      `Invalid database setting "queryTimeout": expected a positive number of milliseconds, received ${JSON.stringify(
+        queryTimeout
+      )}. Use env.int() when reading it from an environment variable.`
+    );
+  }
+};
 
 const afterCreate =
   (db: Database) =>
@@ -121,6 +144,8 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+
+    assertValidQueryTimeout(this.config.settings.queryTimeout);
 
     this.dialect = getDialect(this);
 
