@@ -26,6 +26,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::content-type-builder.schema                  │
 │ plugin::content-type-builder.content-structure       │
 │ plugin::email.email                                  │
+│ plugin::email.templates                              │
 │ plugin::upload.provider                              │
 │ plugin::upload.upload                                │
 │ plugin::upload.folder                                │

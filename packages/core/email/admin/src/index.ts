@@ -28,6 +28,19 @@ const admin: Plugin.Config.AdminInput = {
         permissions: PERMISSIONS.settings,
       }
     );
+    app.addSettingsLink('email', {
+      intlLabel: {
+        id: 'email.Settings.templates.title',
+        defaultMessage: 'Templates',
+      },
+      id: 'templates',
+      to: 'email/templates',
+      Component: () =>
+        import('./pages/Templates/TemplatesPage').then((mod) => ({
+          default: mod.ProtectedTemplatesPage,
+        })),
+      permissions: PERMISSIONS.templatesRead,
+    });
     app.registerPlugin({
       id: 'email',
       name: 'email',

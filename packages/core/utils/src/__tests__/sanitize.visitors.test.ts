@@ -433,6 +433,51 @@ describe('Sanitize visitors util', () => {
       expect(set).toHaveBeenCalledTimes(0);
     });
 
+    test('tells onRemove which relation it takes out, and which target of a morph relation', async () => {
+      const onRemove = jest.fn();
+      const visitor = visitors.removeRestrictedRelations(auth, onRemove);
+      const remove = jest.fn();
+      const set = jest.fn();
+      const morphToOne = { type: 'relation', relation: 'morphToOne' };
+      const schema = {
+        uid: 'api::test.test',
+        kind: 'collectionType',
+        info: { singularName: 'test', pluralName: 'tests' },
+        options: {},
+        attributes: { owner: attribute, related: morphToOne },
+      };
+      const path = { attribute: null, raw: null };
+
+      await visitor(
+        { data, key: 'owner', attribute, schema, value: {}, path } as any,
+        { remove, set } as any
+      );
+      await visitor(
+        {
+          data: { related: { id: 1, __type: 'admin::user' } },
+          key: 'related',
+          attribute: morphToOne,
+          schema,
+          value: {},
+          path,
+        } as any,
+        { remove, set } as any
+      );
+
+      expect(onRemove.mock.calls).toEqual([
+        [{ kind: 'relation-removed', uid: 'api::test.test', path: 'owner', target: 'admin::user' }],
+        [
+          {
+            kind: 'relation-removed',
+            uid: 'api::test.test',
+            path: 'related',
+            target: 'admin::user',
+          },
+        ],
+      ]);
+      expect(remove).toHaveBeenCalledTimes(2);
+    });
+
     test('removes unauthorized morphToOne relation targets from output', async () => {
       const remove = jest.fn();
       const set = jest.fn();

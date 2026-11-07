@@ -15,6 +15,53 @@ The UI uses the layout received from the back-end in order to build the UI.
 
 > Endpoint: `/admin/permissions`.
 
+## Props
+
+`<Permissions />` is exported from `@strapi/admin/strapi-admin` (with the types `PermissionsAPI`, `PermissionsProps`, `PermissionsLayout`, `PermissionsRow` and `PermissionsTabId`) so a plugin can edit the permissions of its own roles with it. **This export is experimental:** it is coupled to the admin's role editor and has one consumer (`@strapi/plugin-end-users`), so its props and types may change in a minor release. Every prop below is optional unless stated, and the component renders exactly the admin's role editor when the optional ones are absent.
+
+| Prop                       | Type                                                                                                   | Description                                                                                                                                                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `layout` (required)        | `PermissionsLayout`                                                                                    | The layout described below (the answer of `/admin/permissions`).                                                                                                                                                           |
+| `permissions`              | `Permission[]`                                                                                         | The permissions the form starts from.                                                                                                                                                                                      |
+| `isFormDisabled`           | `boolean`                                                                                              | Disables every checkbox.                                                                                                                                                                                                   |
+| `onLocaleValidationChange` | `(hasErrors: boolean) => void`                                                                         | Called when the locale selection becomes valid or invalid.                                                                                                                                                                 |
+| `userPermissions`          | `Permission[]`                                                                                         | The permissions of the user editing the form. Checkboxes for permissions the user does not hold are disabled, and bulk selections skip them. Without it nothing is limited.                                                |
+| `inheritConditions`        | `boolean`                                                                                              | Admin tokens: conditions are inherited from `userPermissions` and the conditions modal is read-only.                                                                                                                       |
+| `permissionsAreStored`     | `boolean`                                                                                              | Whether `permissions` are what the role stores on the server.                                                                                                                                                              |
+| `tabLabels`                | `Partial<Record<PermissionsTabId, MessageDescriptor \| null>>`                                         | Replaces the label of a tab (`collectionTypes`, `singleTypes`, `plugins` or `settings`). `null` hides the tab: its permissions are still part of what the form reports. The first tab that is left is the one shown first. |
+| `onChange`                 | `(rows: PermissionsRow[]) => void`                                                                     | Called after every change of the form (a reset included, the form as it is first rendered excluded) with the rows `getPermissions()` would send. The latest function passed is the one called.                             |
+| `onOpenSubjectChange`      | `(open: { tab: PermissionsTabId; id: string } \| null) => void`                                        | Called when a content type, a plugin or a settings category opens or closes: `id` is the uid of the content type, or the plugin or category key. `null` means none is open, which is also reported when the tab is left.   |
+| `renderSubjectActions`     | `(args: { tab: 'collectionTypes' \| 'singleTypes'; subject: string; disabled: boolean }) => ReactNode` | Renders actions in the row of each content type, next to its conditions button. `subject` is the uid of the content type and `disabled` the value of `isFormDisabled`.                                                     |
+| `requiredFieldsAction`     | `string`                                                                                               | The id of an action (a `layout` action's `actionId`) that fails unless the role sets every required field. While it is granted on a content type, a warning names the required fields that are not ticked or can't be set. |
+| `renderActionIndicator`    | `(args: { actionId: string; subject: string }) => ReactNode`                                           | Renders an indicator (a dot, say) at the top left of the checkbox of an action in the row of each content type. Return `null` for none.                                                                                    |
+| `searchable`               | `boolean`                                                                                              | Adds a search to each tab (see "Search and bulk confirmation" below).                                                                                                                                                      |
+| `confirmBulkChange`        | `(change: PermissionsBulkChange) => Promise<boolean>`                                                  | Asked before the "select all" of a column applies (see "Search and bulk confirmation" below). Without it the column applies at once.                                                                                       |
+
+The conditions button of a row is not rendered when `layout.conditions` is empty.
+
+The ref gives the `PermissionsAPI`: `getPermissions()`, `hasLocaleValidationErrors()`, `resetForm()` and `setFormAfterSubmit()`. The form is built once from `layout` and `permissions`: remount the component (change its `key`) to load other ones.
+
+### Search and bulk confirmation
+
+Both are opt-in: the Roles page has neither.
+
+- `searchable` puts a search button at the top of each tab, which opens a search box. The text is trimmed and compared without regard to case, as a part of a label. Collection and single types list the content types whose label matches or that have a field (in any property, a group's fields included) or a locked row whose label matches. An open content type lists the fields that match, or every field when its own label matches; a group that is listed because of a field in it opens to the fields that match, or lists all of its fields when its own label matches. Plugins and settings list the categories whose name matches (with everything in them), and otherwise the sub-categories whose name or an action's label matches, which list the actions that match (all of them when the sub-category's name matches). With nothing left the tab says `No content types or fields match “<text>”.` (`plugins or actions` and `settings or actions` in the other two). Each time the text changes, the first content type that has a field (or a locked row) that matches opens, so the match is on screen; a content type listed by its own label alone stays closed, and `onOpenSubjectChange` hears about the one that opens. On the plugins and settings tabs the first category listed opens, unless the one that is open is listed too. Clearing the search leaves the open one as it is. Each tab starts without a search, and leaving a tab drops its search. Searching only decides what is listed: it never reads or changes the form, the required-field warning still looks at every field, and the checkboxes of a group, a sub-category or a content type still cover everything in them. Enter in the search box does not submit the form the editor is in.
+- A column checkbox ("select all" of an action, at the top of a content types tab) then shows and changes the listed content types only, and is off when none of them has the action.
+- `confirmBulkChange` is called with a `PermissionsBulkChange`, `{ tab, actionId, label, subjects, value, filtered }` (the package does not export the type: read it from `PermissionsProps['confirmBulkChange']`), when a column checkbox is clicked: `label` is the action as the column shows it, `subjects` are the uids of the content types the change applies to (the ones that have the action and are listed), `value` is what they are about to be (`true` grants the action) and `filtered` says a search limits them. The form changes when the promise resolves to `true` and stays as it is otherwise (a promise that rejects changes nothing either, and is left unhandled). It is called for every column change, however few content types it covers: the consumer decides whether to ask anyone. A column clicked again before the answer is in is ignored. The function called is the latest one passed. No other change is asked about: a cell, a row, a content type or a group ticks at once.
+
+### Field rules
+
+A layout can ask for more than the Roles page shows. All of it is optional (see the layout shape below):
+
+- `SubjectProperty.disabledActions` (on a field or a group, which passes it on to its fields): the cell of these actions is off and disabled. The field has no value for the action in the form, so it is in no count, bulk ticks never reach it and the sent list never names it, even when the stored permission does.
+- `Subject.locked`: rows with a label and a note and no checkbox, listed under the first matrix of the content type.
+
+These rules apply to the content types that ask for them: with none of these properties in the layout the form, the rows it sends and the Roles page are what they were.
+
+### Empty tabs
+
+A tab with nothing in it says so instead of drawing an empty list, with no search and no column checkboxes. The collection types and single types tabs say `No collection types yet` and `No single types yet`, with a link to the Content-Type Builder; the plugins and settings tabs say `Nothing to set here`. It follows the layout: a tab is empty when the layout lists no content type, no plugin action or no settings action for it.
+
 ## Layout shape
 
 ```js
@@ -30,6 +77,7 @@ const layout = {
         {
           uid: 'string', // Collection type uid,
           label: 'string', // Collection type label,
+          locked: [{ label: 'string', note: 'string' }], // This key is optional: rows without checkboxes, listed under the matrix
           properties: [
             {
               label: 'string', // Property label ex: Fields. By default a collection type always has the fields property, depending on the installed plugins a property can also be Locales.
@@ -39,6 +87,7 @@ const layout = {
                   label: 'string',
                   value: 'string',
                   required: 'boolean', // This key is optional,
+                  disabledActions: [<string>], // This key is optional, the ids of the actions whose cell is off and disabled (a group passes it on to its children),
                   children: [], // This key is optional, if it exists it means that a field has nested fields, the naming can interfere with the React's programmatic API, so in the codebase the key is renamed to `childrenForm`.
                 }
               ]

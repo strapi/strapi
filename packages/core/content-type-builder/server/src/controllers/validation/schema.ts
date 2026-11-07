@@ -4,9 +4,10 @@ import type { Struct, UID } from '@strapi/types';
 import { isNumber, isObject, snakeCase } from 'lodash';
 
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
-import { coreUids, typeKinds } from '../../services/constants';
+import { typeKinds } from '../../services/constants';
 import { isConfigurable } from '../../utils/attributes';
 import { isValidUidTarget } from '../../utils/uid-target';
+import { getRelationKindError } from '../../utils/relation-kinds';
 
 import {
   CATEGORY_NAME_REGEX,
@@ -180,7 +181,9 @@ export const maxGreaterThanMin: SuperRefinement<Record<string, unknown>> = (valu
   }
 };
 
-const checkUserTarget: SuperRefinement<{
+// A target can declare the relation kinds it accepts (`restrictRelationsTo`). The admin panel only
+// offers those, this keeps a payload sent straight to the API from skipping them.
+const checkRelationTargetKind: SuperRefinement<{
   type: string;
   target?: string;
   relation?: string;
@@ -190,21 +193,10 @@ const checkUserTarget: SuperRefinement<{
     return;
   }
 
-  if (value.target === undefined || value.relation === undefined) {
-    return;
-  }
+  const message = getRelationKindError(value);
 
-  const { target, relation, targetAttribute } = value;
-
-  if (
-    target === coreUids.STRAPI_USER &&
-    (!STRAPI_USER_RELATIONS.includes(relation) || targetAttribute !== undefined)
-  ) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['relation'],
-      message: `Relations to ${coreUids.STRAPI_USER} must be one of the following values: ${STRAPI_USER_RELATIONS.join(', ')} without targetAttribute`,
-    });
+  if (message !== null) {
+    ctx.addIssue({ code: 'custom', path: ['relation'], message });
   }
 };
 
@@ -283,8 +275,6 @@ const minLengthSchema = z.number().int().positive().optional();
 
 const requiredSchema = z.boolean().optional();
 const uniqueSchema = z.boolean().optional();
-
-const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
 const baseRelationSchema = z.object({
   type: z.literal('relation'),
@@ -643,7 +633,7 @@ const attributePropertiesSchema = (meta: SchemaMeta) => {
   if (meta.modelType === 'component') {
     return base
       .superRefine(enumRefinement)
-      .superRefine(checkUserTarget)
+      .superRefine(checkRelationTargetKind)
       .superRefine(maxGreaterThanMin)
       .superRefine(maxLengthGreaterThanMinLength);
   }
@@ -651,7 +641,7 @@ const attributePropertiesSchema = (meta: SchemaMeta) => {
   return z
     .union([...base.options, uidSchema, dynamicZoneSchema])
     .superRefine(enumRefinement)
-    .superRefine(checkUserTarget)
+    .superRefine(checkRelationTargetKind)
     .superRefine(uidRefinement)
     .superRefine(maxGreaterThanMin)
     .superRefine(maxLengthGreaterThanMinLength);
