@@ -72,6 +72,19 @@ const patchedConsole = {
       return;
     }
 
+    /**
+     * Radix dialogs (1.1+, through the design system) warn when a dialog has no description.
+     * A description is optional for a dialog, and Radix only warns: it is advice, not a broken
+     * component. A dialog without a title is still an error, and still fails the test.
+     */
+    if (msg.startsWith('Warning: Missing `Description` or `aria-describedby={undefined}`')) {
+      return;
+    }
+
+    if (msg.startsWith('`AlertDialogContent` requires a description')) {
+      return;
+    }
+
     throw new Error(format(...args));
   },
   error(...args: any[]) {
