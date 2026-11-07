@@ -1,6 +1,7 @@
 import path from 'path';
 import type { Readable } from 'stream';
 import { PassThrough } from 'stream';
+import { pipeline } from 'stream/promises';
 
 import fs from 'fs-extra';
 import { isEmpty, keyBy } from 'lodash';
@@ -284,22 +285,28 @@ class LocalDirectorySourceProvider implements ISourceProvider {
     const { chain, parser } = await loadStreamDeps();
     const files = await this.#listJsonlFiles(posixSubdir);
     for (const absPath of files) {
-      const transforms = [parser(), (line: { key: string; value: object }) => line.value];
-
-      const stream = chain(transforms);
-      fs.createReadStream(absPath).pipe(stream);
-
       try {
-        for await (const chunk of stream) {
-          await write(outStream, chunk);
-        }
+        // pipeline forwards a read error. pipe() left it on the file stream, so the
+        // reader waited forever for an end that never came.
+        await pipeline(
+          fs.createReadStream(absPath),
+          chain([parser(), (line: { key: string; value: object }) => line.value]),
+          async (source) => {
+            for await (const chunk of source) {
+              await write(outStream, chunk);
+            }
+          }
+        );
       } catch (e: unknown) {
         outStream.destroy(
-          new ProviderTransferError(`Error parsing JSONL in ${absPath}: ${(e as Error).message}`, {
-            details: {
-              error: e,
-            },
-          })
+          new ProviderTransferError(
+            `Error parsing JSONL in ${absPath}: ${errorMessageFromUnknown(e)}`,
+            {
+              details: {
+                error: e,
+              },
+            }
+          )
         );
         return;
       }
