@@ -10,12 +10,20 @@
  *
  * Its rate-limit rules are the compat paths' only: the native paths keep Better Auth's own.
  */
-import { APIError, createAuthEndpoint } from 'better-auth/api';
+import { APIError, createAuthEndpoint, createAuthMiddleware } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
 import type { CompatConfig } from '../../../compat/config';
+import { emailConfirmation, sendEmailConfirmation } from '../../../compat/endpoints/confirmation';
 import { local } from '../../../compat/endpoints/local';
+import {
+  changePassword,
+  forgotPassword,
+  isCompatChange,
+  isCompatReset,
+  resetPassword,
+} from '../../../compat/endpoints/passwords';
 import { register } from '../../../compat/endpoints/register';
 import type { CompatResult } from '../../../compat/endpoints/result';
 
@@ -25,11 +33,18 @@ const EMAIL_PATHS = new Set<string>(['/forgot-password', '/send-email-confirmati
 
 const WINDOW_SECONDS = 60;
 
+/** The reset token's record in the verification table, which names the user the reset is for. */
+const RESET_IDENTIFIER = 'reset-password:';
+
 /** Turns what a compat endpoint decided into the answer: a refusal is thrown with its own body. */
 const respond = (
-  ctx: { json: (body: Record<string, unknown>) => unknown },
+  ctx: { json: (body: Record<string, unknown>) => unknown; redirect: (url: string) => unknown },
   result: CompatResult
 ) => {
+  if (result.status === 302) {
+    return ctx.redirect((result.body as { location: string }).location);
+  }
+
   if (result.status >= 400) {
     throw new APIError(
       result.status as ConstructorParameters<typeof APIError>[0],
@@ -38,6 +53,18 @@ const respond = (
   }
 
   return ctx.json(result.body as Record<string, unknown>);
+};
+
+/** What ends a request from a hook: the body as the answer, a refusal thrown with its own body. */
+const finish = (result: CompatResult): Record<string, unknown> => {
+  if (result.status >= 400) {
+    throw new APIError(
+      result.status as ConstructorParameters<typeof APIError>[0],
+      result.body as never
+    );
+  }
+
+  return result.body as Record<string, unknown>;
 };
 
 export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuthPlugin => ({
@@ -53,6 +80,80 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
     compatRegister: createAuthEndpoint('/local/register', { method: 'POST' }, async (ctx) =>
       respond(ctx, await register(strapi, cfg, { body: ctx.body, headers: ctx.headers }))
     ),
+
+    // POST /api/auth/forgot-password
+    compatForgotPassword: createAuthEndpoint('/forgot-password', { method: 'POST' }, async (ctx) =>
+      respond(ctx, await forgotPassword(strapi, cfg, { body: ctx.body, headers: ctx.headers }))
+    ),
+
+    // GET /api/auth/email-confirmation
+    compatEmailConfirmation: createAuthEndpoint(
+      '/email-confirmation',
+      { method: 'GET' },
+      async (ctx) =>
+        respond(
+          ctx,
+          await emailConfirmation(strapi, cfg, { query: ctx.query, headers: ctx.headers })
+        )
+    ),
+
+    // POST /api/auth/send-email-confirmation
+    compatSendEmailConfirmation: createAuthEndpoint(
+      '/send-email-confirmation',
+      { method: 'POST' },
+      async (ctx) =>
+        respond(
+          ctx,
+          await sendEmailConfirmation(strapi, cfg, { body: ctx.body, headers: ctx.headers })
+        )
+    ),
+  },
+
+  /**
+   * `/reset-password` and `/change-password` are the native routes with a second body shape. A
+   * request in the users-permissions shape is answered here, from the hook: Better Auth applies a
+   * body a hook rewrites only after every hook has run, so lockout and the password policy would
+   * never see it. The engine's own endpoint is run instead (`callNative`) with the native body, and
+   * its answer, as `{ jwt, user }`, is what ends the request. That inner call passes through this
+   * hook too, with a native body, and goes on.
+   */
+  hooks: {
+    before: [
+      {
+        matcher: (context) => context.path === '/reset-password',
+        handler: createAuthMiddleware(async (ctx) => {
+          if (!isCompatReset(ctx.body)) {
+            return undefined;
+          }
+
+          const result = await resetPassword(strapi, cfg, {
+            body: ctx.body,
+            headers: ctx.headers,
+            async userOfCode(code) {
+              const record = await ctx.context.internalAdapter.findVerificationValue(
+                `${RESET_IDENTIFIER}${code}`
+              );
+
+              return record?.value ?? null;
+            },
+          });
+
+          return finish(result);
+        }),
+      },
+      {
+        matcher: (context) => context.path === '/change-password',
+        handler: createAuthMiddleware(async (ctx) => {
+          if (!isCompatChange(ctx.body)) {
+            return undefined;
+          }
+
+          return finish(
+            await changePassword(strapi, cfg, { body: ctx.body, headers: ctx.headers })
+          );
+        }),
+      },
+    ],
   },
 
   rateLimit: [

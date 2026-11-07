@@ -397,6 +397,245 @@ describe('end-users compat: sign-in', () => {
       ).toBe(0);
     });
   });
+
+  describe('password and email confirmation routes', () => {
+    const NEW_PASSWORD = 'N3w-Passw0rd!long';
+
+    /** The first link in the text of an email */
+    const linkOf = (email: { text: string }) =>
+      new URL(email.text.match(/https?:\/\/\S+/)?.[0] as string);
+
+    const forgot = (body: Record<string, unknown>) =>
+      rq.post('/api/auth/forgot-password', { body });
+
+    /** Asks for a reset and reads the code out of the link in the email that was sent */
+    const requestCode = async (email: string) => {
+      clearSentEmails();
+
+      const res = await forgot({ email });
+
+      expect(res.status).toBe(200);
+
+      return linkOf(sentEmails()[0]).searchParams.get('code') as string;
+    };
+
+    const reset = (body: Record<string, unknown>) => rq.post('/api/auth/reset-password', { body });
+
+    const withVerification = async (run: () => Promise<void>) => {
+      await settings.set({ signUp: { requireEmailVerification: true } });
+      await strapi.plugin('end-users').service('engine').reload();
+
+      try {
+        await run();
+      } finally {
+        await settings.set({ signUp: { requireEmailVerification: false } });
+        await strapi.plugin('end-users').service('engine').reload();
+      }
+    };
+
+    beforeEach(async () => {
+      await settings.set({ redirects: { emailVerified: '/verified', passwordReset: '/reset' } });
+    });
+
+    afterEach(async () => {
+      await settings.set({ redirects: { emailVerified: null, passwordReset: null } });
+    });
+
+    describe('POST /api/auth/forgot-password', () => {
+      it('answers { ok: true } for a known and an unknown email and emails a ?code= link', async () => {
+        await seedUpUser(strapi, { email: 'forgot@example.com' });
+        clearSentEmails();
+
+        const known = await forgot({ email: 'Forgot@Example.com' });
+        const unknown = await forgot({ email: 'nobody-here@example.com' });
+
+        expect(known.status).toBe(200);
+        expect(known.body).toEqual({ ok: true });
+        expect(unknown.status).toBe(200);
+        expect(unknown.body).toEqual({ ok: true });
+        expect(sentEmails()).toHaveLength(1);
+        expect(sentEmails()[0].to).toBe('forgot@example.com');
+
+        const link = linkOf(sentEmails()[0]);
+
+        expect(link.pathname).toBe('/reset');
+        expect(link.searchParams.get('code')).toEqual(expect.any(String));
+      });
+    });
+
+    describe('POST /api/auth/reset-password', () => {
+      it('resets with code, password and passwordConfirmation, returns { jwt, user }, and the old password stops working', async () => {
+        const seeded = await seedUpUser(strapi, { email: 'reset@example.com' });
+        const code = await requestCode('reset@example.com');
+
+        const res = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+
+        expect(res.status).toBe(200);
+        expect(res.body.jwt).toEqual(expect.any(String));
+        expect(res.body.user).toMatchObject({ id: seeded.id, email: 'reset@example.com' });
+
+        const me = await rq.get('/api/users/me', { headers: bearer(res.body.jwt) });
+
+        expect(me.status).toBe(200);
+        expect((await signIn('reset@example.com', PASSWORD)).status).toBe(400);
+        expect((await signIn('reset@example.com', NEW_PASSWORD)).status).toBe(200);
+      });
+
+      it('refuses a wrong code and a weak password', async () => {
+        await seedUpUser(strapi, { email: 'refuse@example.com' });
+        const code = await requestCode('refuse@example.com');
+
+        const wrong = await reset({
+          code: 'not-a-code',
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+        const mismatch = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: `${NEW_PASSWORD}x`,
+        });
+        const weak = await reset({ code, password: 'short', passwordConfirmation: 'short' });
+
+        expect(wrong.status).toBe(400);
+        expect(wrong.body.error).toMatchObject({
+          name: 'ApplicationError',
+          message: 'Incorrect code provided',
+        });
+        expect(mismatch.status).toBe(400);
+        expect(mismatch.body.error.message).toBe('Passwords do not match');
+        expect(weak.status).toBe(400);
+        expect(weak.body.error).toMatchObject({ details: { code: 'PASSWORD_TOO_WEAK' } });
+
+        // The code was not used up by the refusals
+        const ok = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+
+        expect(ok.status).toBe(200);
+      });
+
+      it('a native client posting token and newPassword to /reset-password still works', async () => {
+        await seedUpUser(strapi, { email: 'native@example.com' });
+        const token = await requestCode('native@example.com');
+
+        const res = await reset({ token, newPassword: NEW_PASSWORD });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ status: true });
+        expect((await signIn('native@example.com', NEW_PASSWORD)).status).toBe(200);
+      });
+    });
+
+    describe('POST /api/auth/change-password', () => {
+      it('changes the password, returns a new jwt and the old session token stops working', async () => {
+        await seedUpUser(strapi, { email: 'change@example.com' });
+
+        const { jwt: oldToken } = (await signIn('change@example.com')).body;
+
+        const res = await rq.post('/api/auth/change-password', {
+          headers: bearer(oldToken),
+          body: {
+            currentPassword: PASSWORD,
+            password: NEW_PASSWORD,
+            passwordConfirmation: NEW_PASSWORD,
+          },
+        });
+
+        expect(res.status).toBe(200);
+        expect(res.body.jwt).toEqual(expect.any(String));
+        expect(res.body.jwt).not.toBe(oldToken);
+        expect(res.body.user).toMatchObject({ email: 'change@example.com' });
+
+        const stale = await rq.get('/api/users/me', { headers: bearer(oldToken) });
+        const fresh = await rq.get('/api/users/me', { headers: bearer(res.body.jwt) });
+
+        expect(stale.status).toBe(401);
+        expect(fresh.status).toBe(200);
+        expect((await signIn('change@example.com', PASSWORD)).status).toBe(400);
+        expect((await signIn('change@example.com', NEW_PASSWORD)).status).toBe(200);
+      });
+    });
+
+    describe('email confirmation', () => {
+      it('confirms by the ?confirmation= link, redirects to the configured URL, and answers 400 Invalid token for a bad one', async () => {
+        await withVerification(async () => {
+          clearSentEmails();
+
+          const registered = await register({
+            username: 'confirm',
+            email: 'confirm@example.com',
+            password: PASSWORD,
+          });
+
+          expect(registered.status).toBe(200);
+
+          const link = linkOf(sentEmails()[0]);
+          const followed = await rq.get(`${link.pathname}${link.search}`);
+
+          expect(followed.status).toBe(302);
+          expect(followed.headers.location).toBe('/verified');
+          expect(
+            await strapi.db
+              .query(USER_UID)
+              .count({ where: { email: 'confirm@example.com', emailVerified: true } })
+          ).toBe(1);
+
+          const bad = await rq.get('/api/auth/email-confirmation?confirmation=not-a-token');
+
+          expect(bad.status).toBe(400);
+          expect(bad.body.error).toMatchObject({
+            name: 'ApplicationError',
+            message: 'Invalid token',
+          });
+        });
+      });
+
+      it('send-email-confirmation answers { email, sent: true } for an unknown address too', async () => {
+        await withVerification(async () => {
+          await seedUpUser(strapi, { email: 'again@example.com', confirmed: false });
+          clearSentEmails();
+
+          const known = await rq.post('/api/auth/send-email-confirmation', {
+            body: { email: 'Again@Example.com' },
+          });
+          const unknown = await rq.post('/api/auth/send-email-confirmation', {
+            body: { email: 'nobody-here@example.com' },
+          });
+
+          expect(known.status).toBe(200);
+          expect(known.body).toEqual({ email: 'again@example.com', sent: true });
+          expect(unknown.status).toBe(200);
+          expect(unknown.body).toEqual({ email: 'nobody-here@example.com', sent: true });
+          expect(sentEmails().map((email) => email.to)).toEqual(['again@example.com']);
+        });
+      });
+
+      it('a verification email carries a ?confirmation= link', async () => {
+        await withVerification(async () => {
+          clearSentEmails();
+
+          await register({
+            username: 'linked',
+            email: 'linked@example.com',
+            password: PASSWORD,
+          });
+
+          const link = linkOf(sentEmails()[0]);
+
+          expect(sentEmails()[0].subject).toBe('Confirm your email address');
+          expect(link.pathname).toBe('/api/auth/email-confirmation');
+          expect(link.searchParams.get('confirmation')).toEqual(expect.any(String));
+        });
+      });
+    });
+  });
 });
 
 describe('end-users compat: sign-in rate limit', () => {

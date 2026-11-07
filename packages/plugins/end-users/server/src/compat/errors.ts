@@ -1,3 +1,5 @@
+import type { CompatResult } from './endpoints/result';
+
 export type UpErrorName =
   'ApplicationError' | 'ValidationError' | 'ForbiddenError' | 'UnauthorizedError' | 'NotFoundError';
 
@@ -75,3 +77,54 @@ export const mapAuthError = (code: string): { name: UpErrorName; message: string
 
   return message === undefined ? null : { name: 'ApplicationError', message };
 };
+
+/** What the engine threw, when it threw one of its own (`statusCode` and a `body` with a `code`). */
+export const engineRefusal = (error: unknown) => {
+  const { statusCode, body } = (error ?? {}) as {
+    statusCode?: unknown;
+    body?: { code?: unknown; message?: unknown };
+  };
+
+  if (typeof statusCode !== 'number' || typeof body?.code !== 'string') {
+    return null;
+  }
+
+  return {
+    status: statusCode,
+    code: body.code,
+    message: typeof body.message === 'string' ? body.message : body.code,
+  };
+};
+
+/**
+ * An engine refusal as the answer of a compat route, or `null` when the error is not one of the
+ * engine's (the caller rethrows it). A code in `texts` gets that text as a 400 `ApplicationError`,
+ * then a code users-permissions answered with its own text gets that; any other is Strapi's error
+ * envelope with the engine's status, message and code.
+ */
+export const refusalResult = (
+  error: unknown,
+  texts: Readonly<Record<string, string>> = {}
+): CompatResult | null => {
+  const refusal = engineRefusal(error);
+
+  if (refusal === null) {
+    return null;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(texts, refusal.code)) {
+    return { status: 400, body: upError('ApplicationError', texts[refusal.code]) };
+  }
+
+  const mapped = mapAuthError(refusal.code);
+
+  return mapped === null
+    ? {
+        status: refusal.status,
+        body: engineErrorBody(refusal.status, refusal.message, refusal.code),
+      }
+    : { status: 400, body: upError(mapped.name, mapped.message) };
+};
+
+export const PASSWORDS_DO_NOT_MATCH = 'Passwords do not match';
+export const INVALID_CONFIRMATION_TOKEN = 'Invalid token';
