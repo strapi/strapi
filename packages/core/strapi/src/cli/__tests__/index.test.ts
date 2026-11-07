@@ -97,4 +97,34 @@ describe('commands', () => {
       );
     });
   });
+
+  describe('--skip-compile CLI flag', () => {
+    const argvWith = (...args: string[]) => ['node', '/fake/strapi.js', ...args];
+
+    beforeEach(() => {
+      delete process.env.STRAPI_SKIP_COMPILE;
+    });
+
+    afterAll(() => {
+      delete process.env.STRAPI_SKIP_COMPILE;
+    });
+
+    it('does not set STRAPI_SKIP_COMPILE by default', async () => {
+      await createCLI(argvWith('build'));
+
+      expect(process.env.STRAPI_SKIP_COMPILE).toBeUndefined();
+    });
+
+    it.each([
+      ['after the command', argvWith('build', '--skip-compile')],
+      ['before the command', argvWith('--skip-compile', 'build')],
+    ])('sets STRAPI_SKIP_COMPILE and parses when passed %s', async (_, argv) => {
+      const cli = await createCLI(argv);
+      await cli.parseAsync(argv);
+
+      expect(process.env.STRAPI_SKIP_COMPILE).toBe('true');
+      expect(cli.opts()).toEqual(expect.objectContaining({ skipCompile: true }));
+      expect(nodeBuildMock).toHaveBeenCalledTimes(1);
+    });
+  });
 });
