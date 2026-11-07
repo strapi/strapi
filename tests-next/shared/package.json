@@ -1,5 +1,6 @@
 {
   "name": "@strapi/tests-shared",
+  "type": "commonjs",
   "private": true,
   "description": "Shared foundation of the test suites: app lifecycle, scaffolders, seeders, DB reset and edition.",
   "main": "./src/index.ts",

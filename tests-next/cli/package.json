@@ -1,5 +1,6 @@
 {
   "name": "@strapi/tests-cli",
+  "type": "commonjs",
   "private": true,
   "description": "CLI test suite, run with Jest.",
   "scripts": {

@@ -1,5 +1,6 @@
 {
   "name": "tsconfig",
   "version": "5.61.0",
+  "type": "commonjs",
   "private": true
 }

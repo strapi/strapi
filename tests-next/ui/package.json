@@ -1,5 +1,6 @@
 {
   "name": "@strapi/tests-e2e",
+  "type": "commonjs",
   "private": true,
   "description": "End-to-end (UI) test suite, run with Playwright.",
   "scripts": {
