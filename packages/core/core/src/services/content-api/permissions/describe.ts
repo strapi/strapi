@@ -2,6 +2,13 @@ import type { Modules } from '@strapi/types';
 
 import { compiledPermissionsOf } from './generate-ability';
 
+/** Plain code-unit order, the same order `Array.prototype.sort` gives strings by default. */
+const byCodeUnit = (a: string, b: string): number => {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+};
+
 type PermissionsDescription = Modules.ContentAPI.PermissionsDescription;
 type Described = PermissionsDescription['subjects'][string][string];
 
@@ -25,7 +32,7 @@ const routesOf = (auth: unknown): string[] => {
     }
   }
 
-  return [...routes].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...routes].sort(byCodeUnit);
 };
 
 const unique = (values: string[]) => [...new Set(values)];

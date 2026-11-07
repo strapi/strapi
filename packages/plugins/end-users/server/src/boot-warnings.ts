@@ -3,6 +3,13 @@ import type { Core } from '@strapi/types';
 import { MIN_SECRET_LENGTH, PLUGIN_ID } from './constants';
 import { hasWildcard, originsFromEnv, TRUSTED_ORIGINS_ENV } from './config/trusted-origins';
 
+/** Plain code-unit order, the same order `Array.prototype.sort` gives strings by default. */
+const byCodeUnit = (a: string, b: string): number => {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+};
+
 /**
  * Settings that work, but make a deployment weaker than its owner probably thinks. They are logged
  * at boot and never thrown: the application starts, and the operator is told.
@@ -194,12 +201,7 @@ export const warnAboutSyntheticActionClashes = (strapi: Core.Strapi): void => {
       const end = id.lastIndexOf('.');
       const uid = id.slice(0, end);
 
-      clashes.set(
-        uid,
-        [...(clashes.get(uid) ?? []), id.slice(end + 1)].sort((a, b) =>
-          a < b ? -1 : a > b ? 1 : 0
-        )
-      );
+      clashes.set(uid, [...(clashes.get(uid) ?? []), id.slice(end + 1)].sort(byCodeUnit));
     }
   }
 

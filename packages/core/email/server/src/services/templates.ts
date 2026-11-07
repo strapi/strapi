@@ -9,6 +9,13 @@ import type {
 } from '../../../shared/contracts/templates';
 import { render } from './render';
 
+/** Plain code-unit order, the same order `Array.prototype.sort` gives strings by default. */
+const byCodeUnit = (a: string, b: string): number => {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+};
+
 const { ApplicationError, NotFoundError, ValidationError } = errors;
 
 const TEMPLATE_UID = 'plugin::email.template';
@@ -103,7 +110,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
     async list(prefix?: string): Promise<TemplateSummary[]> {
       const keys = [...registry.keys()]
         .filter((key) => (prefix ? key.startsWith(prefix) : true))
-        .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+        .sort(byCodeUnit);
 
       if (keys.length === 0) {
         return [];
@@ -117,9 +124,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
         return {
           key,
           description: registry.get(key)?.description ?? '',
-          locales: [...new Set([DEFAULT_LOCALE, ...locales])].sort((a, b) =>
-            a < b ? -1 : a > b ? 1 : 0
-          ),
+          locales: [...new Set([DEFAULT_LOCALE, ...locales])].sort(byCodeUnit),
           customised: locales.length > 0,
         };
       });
