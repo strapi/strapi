@@ -32,8 +32,6 @@ function summary(number: number, headRef: string): StubbedRecord['pull'] {
     url: '',
     baseRef: 'develop',
     headRef,
-    milestone: null,
-    milestoneNumber: null,
     mergedAt: '2026-09-05T09:59:00Z',
   };
 }

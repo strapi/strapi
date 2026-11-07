@@ -6,7 +6,6 @@ import {
   formatStable,
   highestStable,
   increment,
-  nextPatchOf,
   parseStable,
 } from '../lib/semver.ts';
 
@@ -75,12 +74,5 @@ describe('increment', () => {
 
   it('refuses a non-stable version', () => {
     assert.throws(() => increment('5.53.0-beta.1', 'patch'), /non-stable/u);
-  });
-});
-
-describe('nextPatchOf', () => {
-  it('names the milestone that collects the following release', () => {
-    assert.equal(nextPatchOf('5.53.0'), '5.53.1');
-    assert.equal(nextPatchOf('5.43.2'), '5.43.3');
   });
 });
