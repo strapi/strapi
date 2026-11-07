@@ -40,6 +40,8 @@ The server part exposes one `admin` router. It holds the routes for authenticati
 
 The `ee/admin` and `ee/server` folders hold the Enterprise code, with their own `LICENSE`. The server `index.ts` merges the Enterprise admin into the base admin when `strapi.EE` is true, and it concatenates the routes. On the client, `useEnterprise` picks the Enterprise or the Community component from `window.strapi.isEE`. Audit logs and license limits live in `ee`. Read [Enterprise Edition](../../../architecture/09-enterprise-edition.md), [Audit logs](./ee/audit-logs.md) and [`useEnterprise`](./features/hooks/use-enterprise.md).
 
+With strict types, the services and controllers that the Enterprise admin merges over the base ones register `Core.LicensedExtension<CE, EE>`, the Enterprise-only services (`persist-tables`, `seat-enforcement`) `Core.Licensed<'licensed', Contract>`, and the audit logs controller `Core.Licensed<'audit-logs', Contract>` (`server/src/types/index.ts`). The Enterprise controller contracts are in `ee/server/src/types/controllers.ts`, and the Enterprise routes are checked against `RouteControllers`, the base map with the Enterprise contracts merged over it. Read [License-gated contracts](../../../contributing/05-typescript.md#license-gated-contracts).
+
 ### Built-in features
 
 The admin part ships features that plugins can use or extend. The [guided tour](./guided-tour.md) teaches new users the panel. The [NPS survey](./features/nps.md) collects feedback. The [admin telemetry](./features/telemetry.md) sends usage events from the browser with `useTracking`. The home page shows widgets, and plugins add their own with `app.widgets.register`.

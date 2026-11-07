@@ -1,4 +1,8 @@
-import { createComponent, deleteComponent, editComponent } from '../components';
+import path from 'path';
+import fs from 'fs';
+import { cloneDeep } from 'lodash';
+
+import { createComponent, deleteComponent, editComponent, formatComponent } from '../components';
 import { collectUnhandledRejections } from './unhandled-rejections';
 
 const builder = {
@@ -48,5 +52,74 @@ describe('Content Type Builder - Components service', () => {
     expect(strapi.log.error).toHaveBeenCalledWith(
       'A component.delete listener failed: listener failed'
     );
+  });
+
+  it('edits a component from the admin payload', async () => {
+    // The body of `PUT /content-type-builder/components/:uid` in
+    // tests/api/core/content-type-builder/components.test.api.js
+    const payload = {
+      component: {
+        category: 'default',
+        icon: 'calendar',
+        displayName: 'New Component',
+        attributes: { name: { type: 'string' as const } },
+        pluginOptions: { pluginName: { option: false } },
+      },
+    };
+
+    await editComponent('default.some-component', payload);
+
+    expect(builder.editComponent).toHaveBeenCalledTimes(1);
+    expect(builder.editComponent).toHaveBeenCalledWith({
+      uid: 'default.some-component',
+      ...payload.component,
+    });
+  });
+});
+
+// The component schema files of the getstarted example app, the way `strapi.components` holds them.
+const componentsDir = path.resolve(
+  __dirname,
+  '../../../../../../../examples/getstarted/src/components'
+);
+
+/** Mirrors `@strapi/core`'s components loader: the raw schema file plus the fields it adds. */
+const loadComponent = (category: string, file: string) => {
+  const schema = JSON.parse(fs.readFileSync(path.join(componentsDir, category, file), 'utf8'));
+  const modelName = path.basename(file, '.json');
+  const uid = `${category}.${modelName}`;
+
+  return Object.assign(schema, {
+    __filename__: file,
+    __schema__: cloneDeep(schema),
+    uid,
+    category,
+    modelType: 'component',
+    modelName,
+    globalId: schema.globalId,
+  });
+};
+
+const loadedComponents = fs.readdirSync(componentsDir).flatMap((category) =>
+  fs
+    .readdirSync(path.join(componentsDir, category))
+    .filter((file) => file.endsWith('.json'))
+    .map((file) => loadComponent(category, file))
+);
+
+describe('Content Type Builder - formatComponent', () => {
+  it('reads components that have no `connection` key', () => {
+    expect(loadedComponents.length).toBeGreaterThan(0);
+
+    for (const component of loadedComponents) {
+      expect(component).not.toHaveProperty('connection');
+      expect(formatComponent(component).schema.connection).toBeUndefined();
+    }
+  });
+
+  it('passes a `connection` key set by the schema file through as is', () => {
+    const component = { ...loadComponent('default', 'apple.json'), connection: 'default' };
+
+    expect(formatComponent(component).schema.connection).toBe('default');
   });
 });

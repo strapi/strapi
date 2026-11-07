@@ -53,9 +53,9 @@ import type * as AttributeUtils from './attributes';
 export type Input<TSchemaUID extends UID.Schema> = AttributeUtils.GetValues<TSchemaUID>;
 
 /**
- * Conditionally applies partial types to schema input data based on the extension status of schema registries.
+ * Conditionally applies partial types to schema input data based on whether the schema is registered.
  *
- * This type evaluates whether the schema registries have been extended.
+ * This type evaluates whether the schema of `TSchemaUID` is registered ({@link Utils.Constants.IsSchemaRegistered}).
  *
  * If so, it returns a partial version of `Input<TSchemaUID>`, otherwise it returns the default `Input` type.
  *
@@ -66,7 +66,7 @@ export type Input<TSchemaUID extends UID.Schema> = AttributeUtils.GetValues<TSch
  * enabling flexibility during schema transitions or extensions without breaking existing data contracts.
  */
 export type PartialInput<TSchemaUID extends UID.Schema> = Utils.If<
-  Utils.Constants.AreSchemaRegistriesExtended,
+  Utils.Constants.IsSchemaRegistered<TSchemaUID>,
   Partial<Input<TSchemaUID>>,
   Input<TSchemaUID>
 >;

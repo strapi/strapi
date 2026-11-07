@@ -7,7 +7,10 @@ import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from '.
 import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
 import { sumDraftCounts } from './utils/draft';
 
-type DocService = Modules.Documents.ServiceInstance;
+// `ServiceInstance` drops the draft-and-publish methods when one registered content type disables
+// draft and publish. The methods below check it at runtime, so they type their options from the
+// draft-and-publish methods of every content type.
+type DocService = Modules.Documents.ServiceInstance & Modules.Documents.DraftAndPublishExtension;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
@@ -73,6 +76,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
+    /** @internal */
     async findMany(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
       const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
       return strapi.documents(uid).findMany(params);
@@ -109,11 +113,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, data: publishData, populate, status: 'draft' };
+      const params = { ...opts, data: publishData, populate, status: 'draft' as const };
 
       return strapi.documents(uid).update({ ...params, documentId: id });
     },
 
+    /** @internal */
     async clone(
       id: Modules.Documents.ID,
       body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
@@ -138,6 +143,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      *  Check if a document exists
+     * @internal
      */
     async exists(uid: UID.CollectionType, id?: string) {
       // Collection type
@@ -151,6 +157,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return count > 0;
     },
 
+    /** @internal */
     async delete(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -164,6 +171,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     // FIXME: handle relations
+    /** @internal */
     async deleteMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
@@ -176,6 +184,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return { count: deletedEntries.length };
     },
 
+    /** @internal */
     async publish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -192,6 +201,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.entries);
     },
 
+    /** @internal */
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
       assertDraftAndPublish(uid);
 
@@ -205,6 +215,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
+    /** @internal */
     async unpublishMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
@@ -229,6 +240,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return { count: unpublishedEntitiesCount };
     },
 
+    /** @internal */
     async unpublish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -245,6 +257,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.entries.at(0));
     },
 
+    /** @internal */
     async discardDraft(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -276,6 +289,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return sumDraftCounts(strapi, document, uid);
     },
 
+    /** @internal */
     async countManyEntriesDraftRelations(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,

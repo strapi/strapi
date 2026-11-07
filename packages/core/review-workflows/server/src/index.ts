@@ -9,6 +9,9 @@ import services from './services';
 import controllers from './controllers';
 import { registerReviewWorkflowsEntitlements } from './entitlements';
 
+export type * from './types';
+export type * from './types/content-types';
+
 const getPlugin = () => {
   if (strapi.ee.features.isEnabled('review-workflows')) {
     return {

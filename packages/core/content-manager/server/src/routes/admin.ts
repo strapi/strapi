@@ -1,6 +1,40 @@
+import type { Context, Next } from 'koa';
+import type { Core } from '@strapi/types';
+import type { RegisteredControllers } from '../types/controllers';
 import { routing } from '../middlewares';
 
-export default {
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const routes: {
+  type: string;
+  routes: (
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: { policies: string[]; middlewares?: undefined };
+      }
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          middlewares: ((ctx: Context, next: Next) => Promise<any>)[];
+          policies: (string | { name: string; config: { actions: string[] } })[];
+        };
+      }
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          middlewares: ((ctx: Context, next: Next) => Promise<any>)[];
+          policies: (
+            string | { name: string; config: { actions: string[]; hasAtLeastOne: boolean } }
+          )[];
+        };
+      }
+  )[];
+} = {
   type: 'admin',
   routes: [
     {
@@ -468,4 +502,6 @@ export default {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<RegisteredControllers, 'plugin::content-manager'>;
+
+export default routes;

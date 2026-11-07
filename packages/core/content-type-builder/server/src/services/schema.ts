@@ -1,7 +1,7 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { mapValues } from 'lodash';
 
-import type { Schema } from '@strapi/types';
+import type { Core, Internal, Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
@@ -24,6 +24,7 @@ import {
   isContentTypeVisible,
 } from './content-types';
 import type { CoreContentStructureService } from './content-structure';
+import type { FormattedAttribute, SchemaService } from '../types/services';
 
 type ContentTypeKind = 'collectionType' | 'singleType';
 
@@ -392,7 +393,7 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<string | nul
  * Unlike the admin, there is no one to confirm a data-losing rename, so it
  * refuses before touching the schema when the rename cannot be migrated.
  */
-export const renameAttribute = async (
+export const renameAttribute = (async (
   uid: string,
   oldName: string,
   newName: string
@@ -511,9 +512,27 @@ export const renameAttribute = async (
   const { data } = await validateUpdateSchema({ data: payload });
 
   await updateSchema(data as CTBSchema);
-};
+}) satisfies Core.Implements<SchemaService['renameAttribute']>;
 
-const formatAttributes = (model: any) => {
+// Develop's inferred results of `formatAttribute` and `formatAttributes`, written as named types so
+// the published declarations reference them instead of inlining every attribute shape (and the
+// `json-logic-js` types of `conditions`). Spreading drops the index signature of the attribute.
+type LegacyAttribute = Schema.Attribute.AnyAttribute & Record<string, any>;
+type WithoutIndexSignature<T> = { [K in keyof T as string extends K ? never : K]: T[K] };
+type LegacyFormattedRelation<T> = T extends unknown
+  ? WithoutIndexSignature<T & { targetAttribute: any }>
+  : never;
+type LegacyFormattedAttribute =
+  | Exclude<LegacyAttribute, { type: 'relation' }>
+  | LegacyFormattedRelation<Extract<LegacyAttribute, { type: 'relation' }>>;
+type LegacyNamed<T> = T extends unknown ? WithoutIndexSignature<T & { name: string }> : never;
+type LegacyNamedAttribute = LegacyNamed<LegacyFormattedAttribute>;
+
+const formatAttributes = (
+  model: any
+): Core.IsStrict extends true
+  ? Array<FormattedAttribute & { name: string }>
+  : LegacyNamedAttribute[] => {
   const { getVisibleAttributes } = contentTypesUtils;
 
   // only get attributes that can be seen in the CTB
@@ -522,7 +541,13 @@ const formatAttributes = (model: any) => {
   });
 };
 
-export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Record<string, any>) => {
+// Morph relations have no `inversedBy` or `mappedBy`: they read `undefined`, so their
+// `targetAttribute` is `null`.
+export const formatAttribute = ((
+  attribute: Core.IsStrict extends true
+    ? Parameters<SchemaService['formatAttribute']>[0] & { inversedBy?: string; mappedBy?: string }
+    : Schema.Attribute.AnyAttribute & Record<string, any>
+): Core.IsStrict extends true ? FormattedAttribute : LegacyFormattedAttribute => {
   if (attribute.type === 'relation') {
     return {
       ...attribute,
@@ -533,10 +558,12 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
   }
 
   return attribute;
-};
+}) satisfies Core.Implements<SchemaService['formatAttribute']>;
 
-export const getSchema = async () => {
-  const contentTypes = mapValues(strapi.contentTypes, (contentType) => {
+export const getSchema = (async () => {
+  // Generic schemas: mapping every declared package schema exceeds the size limit (TS7056).
+  const allContentTypes: Internal.Registry.GenericContentTypeSchemas = strapi.contentTypes;
+  const contentTypes = mapValues(allContentTypes, (contentType) => {
     const {
       uid,
       options,
@@ -595,9 +622,9 @@ export const getSchema = async () => {
       },
     },
   };
-};
+}) satisfies Core.Implements<SchemaService['getSchema']>;
 
-export const updateSchema = async (schema: CTBSchema) => {
+export const updateSchema = (async (schema: CTBSchema) => {
   const builder = createBuilder();
   const apiHandler = getService('api-handler') as typeof import('./api-handler');
 
@@ -849,4 +876,4 @@ export const updateSchema = async (schema: CTBSchema) => {
       });
     }
   }
-};
+}) satisfies Core.Implements<SchemaService['updateSchema']>;

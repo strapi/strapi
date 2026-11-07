@@ -1,6 +1,9 @@
 import type { z } from 'zod/v4';
 import type { LiteralUnion } from '../utils/string';
-import type { MiddlewareHandler } from './middleware';
+import type { MiddlewareHandler, MiddlewareReference } from './middleware';
+import type { ControllerActionReference } from './controller';
+import type { PolicyReference } from './policy';
+import type { AuthenticationService } from '../modules/auth';
 
 export type RouteInfo = {
   apiName?: string;
@@ -18,6 +21,40 @@ export type RouteConfig = {
 export type HandlerReference = string;
 
 export type RouteInput = Omit<Route, 'info'> & { info?: Partial<RouteInfo> };
+
+/**
+ * A strategy a route passes as is in `auth.strategies`, instead of naming a registered one
+ * (`packages/core/core/src/services/auth/index.ts:71-92`).
+ */
+type RouteAuthStrategy = Parameters<AuthenticationService['register']>[1];
+
+/**
+ * Route config whose policy and middleware references are checked against their registries.
+ * See {@link PolicyReference} and {@link MiddlewareReference}. Unlike {@link RouteConfig},
+ * `auth.strategies` accepts strategy objects, as the runtime does.
+ */
+export type RouteConfigFor<TNamespace extends string = never> = Omit<
+  RouteConfig,
+  'policies' | 'middlewares' | 'auth'
+> & {
+  policies?: PolicyReference<TNamespace>[];
+  middlewares?: MiddlewareReference[];
+  auth?: false | { scope?: string[]; strategies?: Array<string | RouteAuthStrategy> };
+};
+
+/**
+ * A route whose string handlers must reference an action of `TControllers`, and whose policies and
+ * middleware names must be registered once any policy or middleware is. See
+ * {@link ControllerActionReference}, {@link PolicyReference} and {@link MiddlewareReference}.
+ */
+export type RouteInputFor<TControllers, TNamespace extends string = never> = Omit<
+  RouteInput,
+  'handler' | 'config'
+> & {
+  handler:
+    ControllerActionReference<TControllers, TNamespace> | MiddlewareHandler | MiddlewareHandler[];
+  config?: RouteConfigFor<TNamespace>;
+};
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'ALL' | 'OPTIONS' | 'HEAD';
 

@@ -6,7 +6,7 @@ import {
   buildPublicationFilterWhere,
   parsePublicationFilter,
 } from '@strapi/utils';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 import type { Context } from '../../types';
 
@@ -48,7 +48,8 @@ export default ({ strapi }: Context) => {
         const { auth } = context.state;
 
         const transformedArgs = transformArgs(args, {
-          contentType: targetContentType,
+          // `transformArgs` keeps its published content type parameter; components share the shape.
+          contentType: targetContentType as Struct.ContentTypeSchema,
           usePagination: true,
         });
 

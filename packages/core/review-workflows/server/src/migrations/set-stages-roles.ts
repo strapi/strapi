@@ -23,7 +23,10 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
     const roles = await strapi.db.query(roleUID).findMany();
 
     // Collect the permissions to add and group them by stage id.
-    const groupedPermissions = {} as any;
+    const groupedPermissions: Record<
+      number,
+      { roleId: number; action: string; fromStage: number }[]
+    > = {};
     roles
       .map((role) => role.id)
       .forEach((roleId) => {

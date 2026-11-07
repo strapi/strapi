@@ -4,6 +4,7 @@ import * as z from 'zod/v4';
 import { createContentApiRoutesFactory } from '@strapi/utils';
 
 import { CONTENT_TYPE_UID_REGEX } from '../controllers/validation/common';
+import type { Controllers } from '../types/controllers';
 
 const componentUIDRegexp = /^[\w-]+\.[\w-]+$/;
 
@@ -160,7 +161,7 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       },
       response: z.object({ data: formattedComponentSchema }),
     },
-  ];
+  ] satisfies Core.RouterInputFor<Controllers, 'plugin::content-type-builder'>['routes'];
 });
 
 export default createRoutes;

@@ -10428,6 +10428,7 @@ __metadata:
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
     "@strapi/strapi": "npm:5.61.0"
+    "@strapi/types": "npm:5.61.0"
     "@types/node": "npm:22.20.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -29132,6 +29133,19 @@ __metadata:
   checksum: 10c0/f5228a6e6b6393c57f52f62e673cfe3be3294b35d6f7842fc24b172ae0a6e6c209fa83241d0e433fc267c503bc2f4ffdbe41a9990ff8ffd5ac425ec0489417f7
   languageName: node
   linkType: hard
+
+"strict-types@workspace:examples/strict-types":
+  version: 0.0.0-use.local
+  resolution: "strict-types@workspace:examples/strict-types"
+  dependencies:
+    "@strapi/strapi": "workspace:*"
+    better-sqlite3: "npm:12.11.1"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-router-dom: "npm:6.30.6"
+    styled-components: "npm:6.4.1"
+  languageName: unknown
+  linkType: soft
 
 "string-argv@npm:^0.3.2, string-argv@npm:~0.3.1":
   version: 0.3.2

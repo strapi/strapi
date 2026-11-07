@@ -12,7 +12,7 @@ const isInternalUid = (uid: string): boolean => {
   return uid.startsWith('admin::') || uid.startsWith('strapi::');
 };
 
-const createContentStructureService = ({ strapi }: { strapi: Core.Strapi }) => {
+const createContentStructureService = (({ strapi }: { strapi: Core.Strapi }) => {
   const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
 
   const isContentTypeVisible = (model: Struct.ContentTypeSchema) => {
@@ -65,6 +65,6 @@ const createContentStructureService = ({ strapi }: { strapi: Core.Strapi }) => {
       };
     },
   };
-};
+}) satisfies Core.ServiceImplementation<'plugin::content-manager.content-structure'>;
 
 export default createContentStructureService;

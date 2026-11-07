@@ -11,6 +11,7 @@ import {
   touchesTrackedFields,
 } from '../../../../server/src/audit-logs/admin-users';
 import { getService } from '../utils';
+import type { SanitizedAdminUser } from '../../../../shared/contracts/shared';
 
 const { ApplicationError, ValidationError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
@@ -264,7 +265,8 @@ const isLastSuperAdminUser = async (userId: unknown) => {
  * Remove private user fields
  * @param {Object} user - user to sanitize
  */
-const sanitizeUser = (user: any) => {
+const sanitizeUser = (user: any): SanitizedAdminUser => {
+  // Same fields as the CE `sanitizeUser`, which types its input.
   return {
     ..._.omit(user, [
       'password',
@@ -274,7 +276,7 @@ const sanitizeUser = (user: any) => {
       'roles',
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
-  };
+  } as SanitizedAdminUser;
 };
 
 /**

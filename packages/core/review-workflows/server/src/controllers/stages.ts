@@ -1,8 +1,10 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
+import type { StageWithPermissions } from '../services/stage-permissions';
 import { validateUpdateStageOnEntity, validateLocale } from '../validation/review-workflows';
 import {
   STAGE_MODEL_UID,
@@ -10,13 +12,17 @@ import {
   STAGE_TRANSITION_UID,
 } from '../constants/workflows';
 
+type UserAbility = Parameters<
+  ContentManagerServices.PermissionCheckerService['create']
+>[0]['userAbility'];
+
 /**
  *
  * @param { Core.Strapi } strapi - Strapi instance
  * @param userAbility
  * @return { (Stage) => SanitizedStage }
  */
-function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
+function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: UserAbility) {
   const permissionChecker = strapi
     .plugin('content-manager')
     .service('permission-checker')
@@ -129,7 +135,12 @@ export default {
       ctx.throw(403, 'Forbidden stage transition');
     }
 
-    const updatedEntity = await stagesService.updateEntity(entity, modelUID, stageId);
+    const updatedEntity = await stagesService.updateEntity(
+      // A document has the fields the service reads; its published parameter type is develop's.
+      entity as Parameters<typeof stagesService.updateEntity>[0],
+      modelUID,
+      stageId
+    );
 
     ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },
@@ -209,10 +220,10 @@ export default {
     }
 
     const otherStages = workflowStages.filter(
-      (stage: { id: number; permissions?: unknown[] }) => stage.id !== entityStageId
+      (stage: { id: number } & StageWithPermissions) => stage.id !== entityStageId
     );
 
-    const data = otherStages.filter((stage: { id: number; permissions?: unknown[] }) =>
+    const data = otherStages.filter((stage: { id: number } & StageWithPermissions) =>
       stagePermissions.canTransitionToStageWithPermissions(stage)
     );
 

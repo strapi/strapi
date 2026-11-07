@@ -1,10 +1,11 @@
 import type { Context } from 'koa';
+import type { Core } from '@strapi/types';
 import { isEmpty } from 'lodash';
 
 import { getService } from '../utils';
 import { validateUpdateSchema } from './validation/schema';
 
-export default () => {
+export default (() => {
   const internals = {
     isUpdating: false,
   };
@@ -61,4 +62,4 @@ export default () => {
       ctx.send({ data: { isUpdating: internals.isUpdating } });
     },
   };
-};
+}) satisfies Core.ControllerFactory<'plugin::content-type-builder.schema'>;

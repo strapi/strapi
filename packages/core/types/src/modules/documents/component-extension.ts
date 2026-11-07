@@ -44,7 +44,7 @@ type ComponentBody<
   TSchemaUID extends UID.Schema = UID.Schema,
   TComponentLikeKeys extends string = string,
 > = Utils.If<
-  Utils.Constants.AreSchemaRegistriesExtended,
+  Utils.Constants.IsSchemaRegistered<TSchemaUID>,
   {
     [
       TAttributeName in Extract<
