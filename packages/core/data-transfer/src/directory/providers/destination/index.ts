@@ -55,6 +55,8 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   #rolledBack = false;
 
+  #pendingWrites: Promise<void>[] = [];
+
   constructor(options: ILocalDirectoryDestinationProviderOptions) {
     this.options = options;
     this.#rootResolved = path.resolve(options.directory.path);
@@ -79,6 +81,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
   async bootstrap(diagnostics: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     this.#rolledBack = false;
+    this.#pendingWrites = [];
     this.#reportInfo('preparing directory export');
     await fs.mkdir(this.#rootResolved, { recursive: true });
     this.results.file = { path: this.#rootResolved };
@@ -89,6 +92,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       return;
     }
 
+    await Promise.all(this.#pendingWrites);
     await this.#writeMetadata();
   }
 
@@ -100,6 +104,22 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   getMetadata() {
     return null;
+  }
+
+  #trackWriter(writeStream: Writable, entryStream: Writable): Writable {
+    this.#pendingWrites.push(
+      new Promise((resolve) => {
+        entryStream.once('close', resolve);
+      })
+    );
+
+    writeStream.once('close', () => {
+      if (!entryStream.destroyed) {
+        entryStream.destroy();
+      }
+    });
+
+    return writeStream;
   }
 
   async #writeMetadata(): Promise<void> {
@@ -120,7 +140,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
-    return chain([stringer(), entryStream]);
+    return this.#trackWriter(chain([stringer(), entryStream]), entryStream);
   }
 
   createEntitiesWriteStream(): Writable {
@@ -131,7 +151,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
-    return chain([stringer(), entryStream]);
+    return this.#trackWriter(chain([stringer(), entryStream]), entryStream);
   }
 
   createLinksWriteStream(): Writable {
@@ -142,7 +162,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
-    return chain([stringer(), entryStream]);
+    return this.#trackWriter(chain([stringer(), entryStream]), entryStream);
   }
 
   createConfigurationWriteStream(): Writable {
@@ -153,7 +173,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
-    return chain([stringer(), entryStream]);
+    return this.#trackWriter(chain([stringer(), entryStream]), entryStream);
   }
 
   createAssetsWriteStream(): Writable {
