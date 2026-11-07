@@ -42,7 +42,15 @@ export interface ConfigSummary {
   session: { expiresIn: string; updateAge: string; cookieCache: string | false };
   /** `window` (seconds) and `max` are Better Auth's defaults, 10 and 100, when not configured */
   rateLimit: { enabled: boolean; window: number; max: number; storage: 'database' | 'memory' };
-  compat: { usersPermissions: boolean; legacyJwtUntil: string | null };
+  compat: {
+    usersPermissions: boolean;
+    legacyJwtUntil: string | null;
+    refresh?: { enabled: boolean; httpOnly: boolean; cookieName: string };
+    /** The provider ids that have a connect callback configured */
+    connectProviders?: string[];
+    /** How many requests used a legacy token, and when the last one did; `null` when not counted */
+    legacyJwtHits?: { legacy: number; access: number; lastHitAt: string | null } | null;
+  };
   explain: boolean;
   /**
    * Better Auth plugin ids, and the template keys the project sends from code. Providers from

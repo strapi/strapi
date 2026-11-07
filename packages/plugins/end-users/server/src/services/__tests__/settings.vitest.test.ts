@@ -523,7 +523,13 @@ describe('settings service', () => {
         cookies: { crossSite: true, domain: '.example.com' },
         session: { expiresIn: '7d', updateAge: '86400', cookieCache: '5m' },
         rateLimit: { enabled: true, window: 10, max: 100, storage: 'memory' },
-        compat: { usersPermissions: true, legacyJwtUntil: '2027-01-01' },
+        compat: {
+          usersPermissions: true,
+          legacyJwtUntil: '2027-01-01',
+          refresh: { enabled: false, httpOnly: false, cookieName: 'strapi_up_refresh' },
+          connectProviders: [],
+          legacyJwtHits: null,
+        },
         explain: true,
         auth: { plugins: [], senders: [] },
       });
@@ -577,6 +583,34 @@ describe('settings service', () => {
         plugins: ['magic-link', 'email-otp', 'have-i-been-pwned'],
         senders: ['verify-email', 'reset-password', 'magic-link'],
       });
+    });
+
+    it('shows the refresh mode and the providers with a callback, but not the callbacks', () => {
+      const { compat } = setup({
+        config: {
+          'compat.refresh.enabled': true,
+          'compat.refresh.httpOnly': true,
+          'compat.refresh.cookie.name': 'rt',
+          'compat.connect.callbacks': { github: 'https://app.example.com/cb' },
+        },
+      }).service.configSummary();
+
+      expect(compat.refresh).toEqual({ enabled: true, httpOnly: true, cookieName: 'rt' });
+      expect(compat.connectProviders).toEqual(['github']);
+      expect(JSON.stringify(compat)).not.toContain('app.example.com');
+    });
+
+    it('the summary never carries the legacy secret', () => {
+      const legacy = ['legacy', 'jwt', Math.random().toString(36).slice(2)].join('-');
+      const { service } = setup({
+        config: {
+          'compat.usersPermissions': true,
+          'compat.legacyJwt.secret': legacy,
+          'compat.legacyJwt.until': '2027-01-01',
+        },
+      });
+
+      expect(JSON.stringify(service.configSummary())).not.toContain(legacy);
     });
 
     it('never carries a secret value', () => {

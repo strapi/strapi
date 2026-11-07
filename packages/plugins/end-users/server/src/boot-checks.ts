@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Core, UID } from '@strapi/types';
 
+import { readCompatConfig } from './compat/config';
 import { PROFILE_UID, USER_UID } from './constants';
 
 const USER_EXTENSION = join('end-users', 'content-types', 'user', 'schema.json');
@@ -108,5 +109,44 @@ export const assertProfileUser = (contentTypes: ContentTypesLike): void => {
 
   if (hasInverseSide(attribute)) {
     return fail('has an inverse side (inversedBy or mappedBy)');
+  }
+};
+
+/**
+ * Compatibility mode answers on the routes Users & Permissions owns, so the two cannot be enabled
+ * together: refusing at boot names both, instead of the routes colliding at request time.
+ */
+export const assertNoUsersPermissions = (strapi: Core.Strapi): void => {
+  if (readCompatConfig(strapi).usersPermissions && strapi.plugin('users-permissions')) {
+    throw new Error(
+      'The end-users plugin has `compat.usersPermissions` on, which takes over the routes of the ' +
+        'users-permissions plugin, and that plugin is still enabled. Disable users-permissions ' +
+        "(`'users-permissions': { enabled: false }` in config/plugins.ts) or turn compat off."
+    );
+  }
+};
+
+/**
+ * A connect callback is where a user lands after signing in with a provider, so its origin has to
+ * be one the application trusts: the server's own or one of `trustedOrigins`. `isTrusted` is the
+ * engine's own matcher (wildcards included), so this agrees with what Better Auth will accept.
+ */
+export const assertConnectCallbacks = async (
+  strapi: Core.Strapi,
+  isTrusted: (origin: string) => Promise<boolean>
+): Promise<void> => {
+  const { callbacks } = readCompatConfig(strapi).connect;
+
+  for (const [provider, url] of Object.entries(callbacks)) {
+    const { origin } = new URL(url);
+
+    // eslint-disable-next-line no-await-in-loop
+    if (!(await isTrusted(origin))) {
+      throw new Error(
+        `Invalid end-users configuration: \`compat.connect.callbacks[${JSON.stringify(provider)}]\` ` +
+          `is ${JSON.stringify(url)}, whose origin ${origin} is not the server's own and is not in ` +
+          '`trustedOrigins`. Add the origin to `trustedOrigins`.'
+      );
+    }
   }
 };

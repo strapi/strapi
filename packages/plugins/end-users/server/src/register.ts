@@ -1,7 +1,13 @@
 import { randomBytes } from 'node:crypto';
 import type { Core } from '@strapi/types';
 
-import { assertLockedUser, assertOneWayRelations, assertProfileUser } from './boot-checks';
+import {
+  assertConnectCallbacks,
+  assertLockedUser,
+  assertNoUsersPermissions,
+  assertOneWayRelations,
+  assertProfileUser,
+} from './boot-checks';
 import { PERMISSION_UID, PLUGIN_ID, USER_UID } from './constants';
 import { registerGeneratedContentTypes } from './content-types/register-generated';
 import { assignDefaultRoleMiddleware } from './document-middlewares/assign-default-role';
@@ -91,6 +97,7 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   assertLockedUser(strapi);
   assertOneWayRelations(strapi.contentTypes);
   assertProfileUser(strapi.contentTypes);
+  assertNoUsersPermissions(strapi);
   ensureDevelopmentSecret(strapi);
   // Before Strapi has loaded: the email plugin refuses a template after that
   registerEmailTemplates(strapi);
@@ -136,7 +143,9 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   // administrators keep them
   strapi.validators.add('content-api.input', engineOwnedUserFieldsValidator);
 
-  return registerConditions(strapi);
+  return assertConnectCallbacks(strapi, engine.isTrustedOrigin).then(() =>
+    registerConditions(strapi)
+  );
 };
 
 export default register;

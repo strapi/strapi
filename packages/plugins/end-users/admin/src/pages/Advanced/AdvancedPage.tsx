@@ -115,6 +115,31 @@ const ConfigSection = ({ config }: { config: SettingsResponse['meta']['config'] 
         'Legacy JWTs accepted until',
         config.compat.legacyJwtUntil ?? none
       )}
+      {config.compat.refresh &&
+        row(
+          'settings.config.compat.refresh',
+          'Refresh tokens',
+          config.compat.refresh.enabled
+            ? formatMessage(
+                config.compat.refresh.httpOnly
+                  ? {
+                      id: getTranslation('settings.config.compat.refresh.cookie'),
+                      defaultMessage: 'On, in the cookie {name}',
+                    }
+                  : {
+                      id: getTranslation('settings.config.compat.refresh.body'),
+                      defaultMessage: 'On, in the response body (cookie name {name})',
+                    },
+                { name: config.compat.refresh.cookieName }
+              )
+            : no
+        )}
+      {config.compat.connectProviders &&
+        row(
+          'settings.config.compat.connect-providers',
+          'Providers with a connect callback',
+          list(config.compat.connectProviders)
+        )}
       {row('settings.config.explain', 'Explain mode', flag(config.explain))}
       {row('settings.config.plugins', 'Better Auth plugins', list(config.auth.plugins))}
       {row('settings.config.senders', 'Emails sent from config', list(config.auth.senders))}

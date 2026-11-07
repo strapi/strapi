@@ -3,7 +3,13 @@ import { join } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
-import { assertLockedUser, assertOneWayRelations, assertProfileUser } from '../boot-checks';
+import {
+  assertConnectCallbacks,
+  assertLockedUser,
+  assertNoUsersPermissions,
+  assertOneWayRelations,
+  assertProfileUser,
+} from '../boot-checks';
 import register from '../register';
 import { PROFILE_UID, USER_UID } from '../constants';
 import profile from '../content-types/profile';
@@ -361,6 +367,7 @@ describe('register', () => {
         name === 'graphql'
           ? undefined
           : { service: () => ({ get: () => engine, register: vi.fn() }) },
+      config: { get: () => undefined },
       documents: { use: vi.fn() },
       get: () => ({ add: vi.fn(), register: vi.fn() }),
       db: { metadata: {} },
@@ -388,5 +395,47 @@ describe('register', () => {
       registered = register({ strapi });
     }).not.toThrow();
     await expect(registered).resolves.toBeUndefined();
+  });
+});
+
+const compatStrapi = (values: Record<string, unknown>, plugins: string[] = []) =>
+  ({
+    config: { get: (key: string) => values[key.replace('plugin::end-users.compat.', '')] },
+    plugin: (name: string) => (plugins.includes(name) ? {} : undefined),
+  }) as unknown as Core.Strapi;
+
+describe('assertNoUsersPermissions', () => {
+  it('refuses compat while the users-permissions plugin is enabled', () => {
+    const strapi = compatStrapi({ usersPermissions: true }, ['users-permissions']);
+
+    expect(() => assertNoUsersPermissions(strapi)).toThrow(
+      /compat\.usersPermissions.*users-permissions/s
+    );
+  });
+
+  it('allows compat without the plugin, and the plugin without compat', () => {
+    expect(() => assertNoUsersPermissions(compatStrapi({ usersPermissions: true }))).not.toThrow();
+    expect(() =>
+      assertNoUsersPermissions(compatStrapi({ usersPermissions: false }, ['users-permissions']))
+    ).not.toThrow();
+  });
+});
+
+describe('assertConnectCallbacks', () => {
+  const strapi = compatStrapi({
+    'connect.callbacks': { github: 'https://app.example.com/connect/github/redirect' },
+  });
+
+  it('names the key and the origin when the origin is not trusted', async () => {
+    await expect(assertConnectCallbacks(strapi, async () => false)).rejects.toThrow(
+      /compat\.connect\.callbacks\["github"\].*https:\/\/app\.example\.com/
+    );
+  });
+
+  it('asks about the origin of the URL, and passes when it is trusted', async () => {
+    const isTrusted = vi.fn(async () => true);
+
+    await expect(assertConnectCallbacks(strapi, isTrusted)).resolves.toBeUndefined();
+    expect(isTrusted).toHaveBeenCalledWith('https://app.example.com');
   });
 });

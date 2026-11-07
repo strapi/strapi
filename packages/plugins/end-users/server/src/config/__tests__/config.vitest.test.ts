@@ -452,6 +452,74 @@ describe('validateConfig', () => {
         /compat\.legacyJwt\.until/
       );
     });
+
+    describe('compat', () => {
+      const compat = (value: Record<string, unknown>) => ({ compat: value });
+
+      it('needs a secret for the legacy tokens once a cut-off is set', () => {
+        expect(() =>
+          validateConfig(compat({ legacyJwt: { until: '2027-06-30', secret: '' } }), {})
+        ).toThrow(/compat\.legacyJwt\.secret/);
+        expect(() => validateConfig(compat({ legacyJwt: { until: '2027-06-30' } }), {})).toThrow(
+          /compat\.legacyJwt\.secret/
+        );
+        expect(() => validateConfig(compat({ legacyJwt: { secret: '' } }), {})).not.toThrow();
+      });
+
+      it('takes one of three algorithms for the legacy tokens', () => {
+        expect(() =>
+          validateConfig(compat({ legacyJwt: { algorithm: 'HS384' } }), {})
+        ).not.toThrow();
+        expect(() => validateConfig(compat({ legacyJwt: { algorithm: 'RS256' } }), {})).toThrow(
+          /compat\.legacyJwt\.algorithm/
+        );
+      });
+
+      it('takes one of three sameSite values for the refresh cookie', () => {
+        expect(() =>
+          validateConfig(compat({ refresh: { cookie: { sameSite: 'none' } } }), {})
+        ).not.toThrow();
+        expect(() =>
+          validateConfig(compat({ refresh: { cookie: { sameSite: 'weird' } } }), {})
+        ).toThrow(/compat\.refresh\.cookie\.sameSite/);
+      });
+
+      it('takes a positive whole number of seconds as the cookie maxAge', () => {
+        expect(() =>
+          validateConfig(compat({ refresh: { cookie: { maxAge: 3600 } } }), {})
+        ).not.toThrow();
+
+        for (const maxAge of [0, -5, 1.5, '60']) {
+          expect(() => validateConfig(compat({ refresh: { cookie: { maxAge } } }), {})).toThrow(
+            /compat\.refresh\.cookie\.maxAge/
+          );
+        }
+      });
+
+      it('takes absolute URLs as connect callbacks', () => {
+        expect(() =>
+          validateConfig(
+            compat({ connect: { callbacks: { github: 'https://app.example.com/cb' } } }),
+            {}
+          )
+        ).not.toThrow();
+
+        for (const url of ['/relative', 'not a url', 'ftp://app.example.com', 42]) {
+          expect(() =>
+            validateConfig(compat({ connect: { callbacks: { github: url } } }), {})
+          ).toThrow(/compat\.connect\.callbacks\["github"\]/);
+        }
+      });
+
+      it('names the key of a refresh switch that is not a boolean', () => {
+        expect(() => validateConfig(compat({ refresh: { enabled: 'yes' } }), {})).toThrow(
+          /compat\.refresh\.enabled/
+        );
+        expect(() => validateConfig(compat({ refresh: { httpOnly: 1 } }), {})).toThrow(
+          /compat\.refresh\.httpOnly/
+        );
+      });
+    });
   });
 });
 
@@ -490,6 +558,10 @@ describe('the default configuration', () => {
     expect(result.session).toEqual({ expiresIn: '7d', updateAge: '1d', cookieCache: false });
     expect(result.compat.usersPermissions).toBe(false);
     expect(result.compat.legacyJwt.until).toBeNull();
+    expect(result.compat.legacyJwt.algorithm).toBe('HS256');
+    expect(result.compat.refresh.enabled).toBe(false);
+    expect(result.compat.refresh.cookie.name).toBe('strapi_up_refresh');
+    expect(result.compat.connect.callbacks).toEqual({});
     expect(result.explain).toBe(false);
     // Every user has a profile: there is no setting for it any more
     expect(result).not.toHaveProperty('profile');

@@ -57,6 +57,33 @@ describe('AdvancedPage', () => {
     expect(screen.getByText('database')).toBeInTheDocument();
   });
 
+  it('shows refresh mode, the cookie name and the legacy cut-off, read-only', async () => {
+    serveSettings({
+      ...SETTINGS,
+      meta: {
+        ...SETTINGS.meta,
+        config: {
+          ...SETTINGS.meta.config,
+          compat: {
+            usersPermissions: true,
+            legacyJwtUntil: '2027-06-30',
+            refresh: { enabled: true, httpOnly: true, cookieName: 'strapi_up_refresh' },
+            connectProviders: ['github', 'google'],
+            legacyJwtHits: null,
+          },
+        },
+      },
+    });
+    renderPage();
+
+    expect(await screen.findByText('Refresh tokens')).toBeInTheDocument();
+    expect(screen.getByText('On, in the cookie strapi_up_refresh')).toBeInTheDocument();
+    expect(screen.getByText('2027-06-30')).toBeInTheDocument();
+    expect(screen.getByText('github, google')).toBeInTheDocument();
+    // Still only the redirects are inputs
+    expect(screen.getAllByRole('textbox')).toHaveLength(3);
+  });
+
   it('says when the secret is not set', async () => {
     serveSettings({
       ...SETTINGS,
