@@ -1,5 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
-
 import { ReactElement } from 'react';
 
 import { render as renderRTL, screen, waitFor } from '@tests/utils';

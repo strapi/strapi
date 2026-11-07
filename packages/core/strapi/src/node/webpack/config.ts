@@ -75,7 +75,6 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
       fallback: {
         path: require.resolve('path-browserify'),
         // Trailing slash resolves the npm `util` package rather than the Node builtin.
-        // eslint-disable-next-line node/no-missing-require
         util: require.resolve('util/'),
       },
     },

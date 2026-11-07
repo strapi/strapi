@@ -793,7 +793,6 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       await openMenu(user);
 
       for (const name of ['Browse library', 'Upload from device', 'Upload from URL']) {
-        // eslint-disable-next-line no-await-in-loop
         const item = await screen.findByRole('menuitem', { name });
         expect(item).toHaveAttribute('aria-disabled', 'true');
         // neutral500: the label greys out along with its icon.

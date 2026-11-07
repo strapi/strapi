@@ -8,7 +8,6 @@ const MAX_URLS = 20;
 export const urlSchema = yup.object().shape({
   urls: yup.string().test({
     name: 'isUrlValid',
-    // eslint-disable-next-line no-template-curly-in-string
     message: '${path}',
     test(values = '') {
       const urls = values.split(/\r?\n/);
@@ -34,7 +33,6 @@ export const urlSchema = yup.object().shape({
 
       const filtered = urls.filter((val) => {
         try {
-          // eslint-disable-next-line no-new
           new URL(val);
 
           return false;
