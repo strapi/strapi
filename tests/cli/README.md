@@ -31,7 +31,9 @@ If any changes are made to the template, or other issues are being encountered, 
 
 ### Environment variables
 
-Jest is started from `tests/utils/runners/cli-runner.js` via **execa** with a **small** `env` object: only what the runner must inject (`TEST_APPS`, `JWT_SECRET`). Execa’s default **`extendEnv: true`** merges that object **on top of** the parent `process.env`.
+Jest is started from `tests/utils/runners/cli-runner.js` via **execa** with a **small** `env` object: only what the runner must inject (`TEST_APPS`, `JWT_SECRET`, and `NODE_OPTIONS` with `--experimental-vm-modules`). Execa’s default **`extendEnv: true`** merges that object **on top of** the parent `process.env`.
+
+`--experimental-vm-modules` is required. Suites that import or export in process (`tests/utils/dts-import.ts`) load the ESM-only `stream-chain` package with `import()`. Jest rejects that import without the flag. The runner sets it. A direct Jest command has to set it too, for example `NODE_OPTIONS=--experimental-vm-modules`.
 
 So you do **not** need to whitelist variables in the runner. For **stress runs**, set `TRANSFER_CLI_MEDIA_COUNT` / `TRANSFER_CLI_MEDIA_BYTES` in the same shell as `yarn test:cli` so the seed scripts see them (defaults are tiny: 2 files × 2048 bytes).
 
