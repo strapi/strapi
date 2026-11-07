@@ -60,7 +60,7 @@ Rows created while the setting is off, or without going through the Document Ser
 
 - a row whose document already has a position takes it;
 - if nothing is ordered yet, documents are ordered by creation, which is the order the API returned until then;
-- otherwise the remaining documents go on top, the most recent first.
+- otherwise the remaining documents go on top, the most recent first. On MySQL the creation `id` is unsigned, so it is cast to a signed integer before that subtraction; otherwise the statement overflows.
 
 ## Moving a document
 

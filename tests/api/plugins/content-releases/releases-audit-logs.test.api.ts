@@ -229,12 +229,13 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       await sleep(400);
       const logs = await findLogs('release.update');
 
+      // JSON/JSONB objects do not preserve insertion order, so compare the field set.
       expect(
         logs.map((log: { payload: { details: { changes: object } } }) =>
-          Object.keys(log.payload.details.changes)
+          Object.keys(log.payload.details.changes).sort()
         )
       ).toEqual([
-        ['scheduledAt', 'isScheduled'],
+        ['isScheduled', 'scheduledAt'],
         // Resending the same values produces no entry
         ['name', 'timezone'],
       ]);

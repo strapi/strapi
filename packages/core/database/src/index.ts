@@ -254,16 +254,23 @@ class Database {
     const trx = notNestedTransaction
       ? await this.startTransaction()
       : (transactionCtx.get() as Knex.Transaction);
+    const logger = this.logger;
 
     async function commit() {
       if (notNestedTransaction) {
-        await transactionCtx.commit(trx);
+        await transactionCtx.commit(trx, (error) => {
+          const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
+          logger.error(`Commit hook failed after the transaction committed: ${detail}`);
+        });
       }
     }
 
     async function rollback() {
       if (notNestedTransaction) {
-        await transactionCtx.rollback(trx);
+        await transactionCtx.rollback(trx, (error) => {
+          const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
+          logger.error(`Rollback hook failed after the transaction rolled back: ${detail}`);
+        });
       }
     }
 
@@ -271,23 +278,27 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return await transactionCtx.run(trx, async () => {
-      try {
-        const callbackParams = {
-          trx,
-          commit,
-          rollback,
-          onCommit: transactionCtx.onCommit,
-          onRollback: transactionCtx.onRollback,
-        };
-        const res = await cb(callbackParams);
-        await commit();
-        return res;
-      } catch (error) {
-        await rollback();
-        throw error;
-      }
-    });
+    return await transactionCtx.run(
+      trx,
+      async () => {
+        try {
+          const callbackParams = {
+            trx,
+            commit,
+            rollback,
+            onCommit: transactionCtx.onCommit,
+            onRollback: transactionCtx.onRollback,
+          };
+          const res = await cb(callbackParams);
+          await commit();
+          return res;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      },
+      this
+    );
   }
 
   /**
@@ -352,6 +363,15 @@ class Database {
     return this.entityManager.createQueryBuilder(uid);
   }
 
+  /**
+   * Wait for `onCommit` and `onRollback` hooks still running on this database.
+   * The transaction call itself does not wait, so a test that reads a hook's
+   * side effect does. `destroy()` stops waiting after 10 seconds.
+   */
+  settleTransactionHooks(timeoutMs?: number) {
+    return transactionCtx.settleHooks(this, timeoutMs);
+  }
+
   async destroy() {
     try {
       await this.lifecycles.clear();
@@ -359,7 +379,14 @@ class Database {
       this.poolDiagnostics?.dispose();
     }
 
-    await this.connection.destroy();
+    try {
+      const drained = await this.settleTransactionHooks();
+      if (!drained) {
+        this.logger.warn('Closing the database connection with transaction hooks still running');
+      }
+    } finally {
+      await this.connection.destroy();
+    }
   }
 }
 

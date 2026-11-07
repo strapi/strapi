@@ -27,6 +27,8 @@ await strapi.db.transaction(async ({ trx, rollback, commit, onCommit, onRollback
 
 After the transaction handler is executed, the transaction is committed if all operations succeed. If any of the operations throws, the transaction is rolled back and the data is restored to its previous state.
 
+`onCommit` and `onRollback` callbacks run after the outermost transaction commits or rolls back. `strapi.db.transaction` resolves without waiting for them, so a write stays as fast as the database commit. The callbacks still run in order. A failing `onCommit` callback is logged, later `onCommit` callbacks still run, and the call has already resolved. The commit has already succeeded, so the error does not roll it back. A failing `onRollback` callback is logged and skips the remaining rollback callbacks. It does not replace the error that caused the rollback. `db.destroy()` waits up to 10 seconds for hooks that belong to that database, then closes the connection pool. Hooks still running at the deadline are left running. Another database in the same process does not wait for them. `onCommit` runs once, after a successful commit.
+
 :::note
 Every `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
 :::
@@ -91,7 +93,9 @@ await strapi.db.transaction(async ({ trx, rollback, commit }) => {
 
 ## When to use transactions
 
-Transactions should be used in cases where multiple operations should be executed together and their execution is dependent on each other. For example, when creating a new user, the user should be created in the database and a welcome email should be sent to the user. If the email fails to send, the user should not be created in the database.
+Transactions should be used when several database operations must succeed or fail together. For example, creating a user and the profile row that belongs to them. If creating the profile throws, the user insert is rolled back too.
+
+A side effect that must not happen for a rolled-back write, such as a welcome email, does not belong in the handler. Register the email with `onCommit`. It is sent once, after the commit. The transaction call returns before that send finishes. If the handler fails, the email is not sent. If the email fails, the user row stays, because the commit has already happened.
 
 ## When not to use transactions
 
