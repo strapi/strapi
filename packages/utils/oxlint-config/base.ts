@@ -47,13 +47,47 @@ export const base = {
             message:
               'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
           },
+          {
+            group: [
+              'lodash/keys',
+              'lodash/keys.js',
+              'lodash/values',
+              'lodash/values.js',
+              'lodash/entries',
+              'lodash/entries.js',
+            ],
+            message:
+              'Use native Object.keys / Object.values / Object.entries instead. They throw on null/undefined, so guard nullish input (e.g. `?? {}`).',
+          },
+          {
+            group: [
+              'lodash/concat',
+              'lodash/concat.js',
+              'lodash/filter',
+              'lodash/filter.js',
+              'lodash/find',
+              'lodash/find.js',
+            ],
+            message:
+              'Use native Array.prototype.concat (or an array spread), filter or find instead. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
+          },
         ],
         paths: [
           {
             name: 'lodash',
-            importNames: ['isArray', 'forEach', 'each'],
+            importNames: [
+              'isArray',
+              'forEach',
+              'each',
+              'keys',
+              'values',
+              'entries',
+              'concat',
+              'filter',
+              'find',
+            ],
             message:
-              'Use native Array.isArray, Array.prototype.forEach or Object.entries / Object.values instead.',
+              'Use native Array.isArray, Array.prototype.forEach / concat / filter / find or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
           },
         ],
       },
