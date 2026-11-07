@@ -142,7 +142,8 @@ export const FolderNameField = ({
   };
 
   const onNameInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    // Do not accept the folder name when Enter confirms an IME composition.
+    if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
       event.preventDefault();
       commitFromEnter();
     }
