@@ -210,10 +210,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
                   gap={1}
                   justifyContent="flex-end"
                   $available={!!availability?.isAvailable}
-                  data-not-here-outer
-                  position="absolute"
                   pointerEvents="none"
-                  right={6}
                   width="100px"
                 >
                   {availability?.isAvailable ? <CheckCircle /> : <WarningCircle />}
@@ -274,6 +271,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
           onChange={field.onChange}
           value={field.value ?? ''}
           {...props}
+          style={{ textOverflow: 'ellipsis' }}
           type="text"
         />
         <Field.Error />
