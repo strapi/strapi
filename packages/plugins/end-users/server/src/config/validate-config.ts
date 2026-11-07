@@ -178,8 +178,8 @@ const validateProviders = (providers: unknown) => {
   });
 };
 
-const LEGACY_JWT_ALGORITHMS = ['HS256', 'HS384', 'HS512'];
-const SAME_SITE_VALUES = ['lax', 'strict', 'none'];
+const LEGACY_JWT_ALGORITHMS = new Set(['HS256', 'HS384', 'HS512']);
+const SAME_SITE_VALUES = new Set(['lax', 'strict', 'none']);
 
 const LEGACY_JWT_CUTOFF = /^\d{4}-\d{2}-\d{2}(T.*)?$/;
 
@@ -227,7 +227,7 @@ const validateCompat = (compat: Plain) => {
   if (
     algorithm !== undefined &&
     algorithm !== null &&
-    !LEGACY_JWT_ALGORITHMS.includes(algorithm as string)
+    !LEGACY_JWT_ALGORITHMS.has(algorithm as string)
   ) {
     invalid('compat.legacyJwt.algorithm', '"HS256", "HS384" or "HS512"', algorithm);
   }
@@ -245,7 +245,7 @@ const validateCompat = (compat: Plain) => {
   if (
     sameSite !== undefined &&
     sameSite !== null &&
-    !SAME_SITE_VALUES.includes(sameSite as string)
+    !SAME_SITE_VALUES.has(sameSite as string)
   ) {
     invalid('compat.refresh.cookie.sameSite', '"lax", "strict" or "none"', sameSite);
   }
