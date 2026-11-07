@@ -309,6 +309,27 @@ async function createApp(
     adminResult = await runCreateAdminUser({ scope, adminUser, withAdminToken });
   }
 
+  // show the folder relative to where the command ran, not the absolute path
+  const projectFolder = getDisplayFolder(relative(process.cwd(), rootPath));
+
+  // In the Admin section, right after the user creation, before "Your application was created!"
+  if (adminUser && adminResult?.status === 'created') {
+    await showAdminSecrets({
+      rootPath,
+      projectFolder,
+      adminUser,
+      adminToken: adminResult.adminToken,
+      showSecrets,
+    });
+
+    if (withAdminToken && !adminResult.adminToken) {
+      logger.warn([
+        `The installed ${chalk.bold('@strapi/strapi')} version cannot create an admin token.`,
+        'Create one in the admin panel: Settings > Admin tokens.',
+      ]);
+    }
+  }
+
   const cmd = chalk.cyan(`${packageManager} run`);
   const adminCmd = chalk.cyan(getManualAdminCommand(packageManager, { withAdminToken }));
 
@@ -317,9 +338,6 @@ async function createApp(
   if (useExample) {
     logger.log(['Seed your database with sample data.', `${cmd} seed:example`, '']);
   }
-
-  // show the folder relative to where the command ran, not the absolute path
-  const projectFolder = getDisplayFolder(relative(process.cwd(), rootPath));
 
   if (installDependencies) {
     logger.log([
@@ -340,23 +358,6 @@ async function createApp(
   }
 
   logger.log(['', 'Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
-
-  if (adminUser && adminResult?.status === 'created') {
-    await showAdminSecrets({
-      rootPath,
-      projectFolder,
-      adminUser,
-      adminToken: adminResult.adminToken,
-      showSecrets,
-    });
-
-    if (withAdminToken && !adminResult.adminToken) {
-      logger.warn([
-        `The installed ${chalk.bold('@strapi/strapi')} version cannot create an admin token.`,
-        'Create one in the admin panel: Settings > Admin tokens.',
-      ]);
-    }
-  }
 
   if (adminResult && adminResult.status !== 'created') {
     // The admin user is mandatory: keep the project, do not start it, and exit with code 1.
