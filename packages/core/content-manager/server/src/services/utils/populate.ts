@@ -3,6 +3,7 @@ import { set, merge, isEmpty, matchesProperty } from 'lodash';
 import * as strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
+import { NON_LISTABLES } from './configuration/attributes';
 
 const {
   isVisibleAttribute,
@@ -26,7 +27,8 @@ type Model = Parameters<typeof isVisibleAttribute>[0];
 export type Populate = Modules.EntityService.Params.Populate.Any<UID.Schema>;
 
 type PopulateOptions = {
-  initialPopulate?: Populate;
+  // `false` skips the attribute
+  initialPopulate?: Populate | false;
   countMany?: boolean;
   countOne?: boolean;
   maxLevel?: number;
@@ -140,6 +142,11 @@ function getPopulateFor(
         },
       };
     case 'dynamiczone':
+      // `false` skips the dynamic zone (e.g. the list view, which can't display it)
+      if (options.initialPopulate === false) {
+        return {};
+      }
+
       return {
         [attributeName]: getPopulateForDZ(attribute, options, level),
       };
@@ -474,6 +481,84 @@ const getPopulateForLocalizations = (model: UID.Schema) => {
   return {};
 };
 
+/**
+ * The scalar fields of a list view row: every scalar attribute except the visible ones the list
+ * can't display (json, richtext, blocks, password). Non-visible scalars (locale, publishedAt,
+ * plugin fields…) are kept for the status, the locale and the columns injected by plugins.
+ */
+const getFieldsForListView = (uid: UID.Schema): string[] => {
+  const model = strapi.getModel(uid);
+
+  if (!model) {
+    return [];
+  }
+
+  return Object.entries(model.attributes)
+    .filter(
+      ([attributeName, attribute]) =>
+        isScalarAttribute(attribute) &&
+        !(NON_LISTABLES.has(attribute.type) && isVisibleAttribute(model, attributeName))
+    )
+    .map(([attributeName]) => attributeName);
+};
+
+/**
+ * Populate overrides for a list view row:
+ * - dynamic zones are not populated, the list can't display them
+ * - visible to-one relations only select the main field of the target (and its documentId),
+ *   the only value their cell displays
+ *
+ * Merge it with `withPopulateOverride` on top of the deep populate of the list.
+ *
+ * @param uid - Content type UID
+ * @param metadatas - Content manager configuration metadatas of the content type, they hold the
+ * main field of each relation
+ */
+const getPopulateOverridesForListView = (
+  uid: UID.Schema,
+  metadatas: Record<string, { edit?: { mainField?: unknown } }> = {}
+) => {
+  const model = strapi.getModel(uid);
+
+  if (!model) {
+    return {};
+  }
+
+  return Object.entries(model.attributes).reduce<Record<string, false | { fields: string[] }>>(
+    (overrides, [attributeName, attribute]) => {
+      if (isDynamicZone(attribute)) {
+        overrides[attributeName] = false;
+        return overrides;
+      }
+
+      if (
+        !isRelation(attribute) ||
+        isMorphToRelation(attribute) ||
+        isAnyToMany(attribute) ||
+        !isVisibleAttribute(model, attributeName) ||
+        !('target' in attribute) ||
+        !attribute.target
+      ) {
+        return overrides;
+      }
+
+      const targetModel = strapi.getModel(attribute.target as UID.Schema);
+      const mainField = metadatas[attributeName]?.edit?.mainField;
+      const mainFieldAttribute =
+        typeof mainField === 'string' ? targetModel?.attributes?.[mainField] : undefined;
+
+      // The documentId is always selected: it is the cell's fallback label
+      overrides[attributeName] = {
+        fields:
+          mainFieldAttribute && isScalarAttribute(mainFieldAttribute) ? [mainField as string] : [],
+      };
+
+      return overrides;
+    },
+    {}
+  );
+};
+
 export {
   getDeepPopulate,
   getDeepPopulateDraftCount,
@@ -481,4 +566,6 @@ export {
   getQueryPopulate,
   buildDeepPopulate,
   getPopulateForLocalizations,
+  getFieldsForListView,
+  getPopulateOverridesForListView,
 };

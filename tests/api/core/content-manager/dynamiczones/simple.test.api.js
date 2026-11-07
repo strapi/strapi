@@ -225,7 +225,8 @@ describe('Not required dynamiczone', () => {
   });
 
   describe('Listing entries', () => {
-    test('The entries have their dynamic zones populated', async () => {
+    // The list can't display dynamic zones, reading an entry returns them (see "Getting one entry")
+    test('The entries are listed without their dynamic zones', async () => {
       const res = await rq({
         method: 'GET',
         url: '/',
@@ -238,18 +239,10 @@ describe('Not required dynamiczone', () => {
 
       expect(res.body.pagination).toBeDefined();
       expect(Array.isArray(res.body.results)).toBe(true);
-      expect(res.body.results).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            field: expect.arrayContaining([
-              expect.objectContaining({
-                id: expect.anything(),
-                __component: expect.any(String),
-              }),
-            ]),
-          }),
-        ])
-      );
+      expect(res.body.results.length).toBeGreaterThan(0);
+      res.body.results.forEach((entry) => {
+        expect(entry).not.toHaveProperty('field');
+      });
     });
   });
 

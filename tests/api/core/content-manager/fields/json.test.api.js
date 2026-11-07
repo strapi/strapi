@@ -75,11 +75,18 @@ describe('Test type json', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
     expect(Array.isArray(res.body.results)).toBe(true);
-    res.body.results.forEach((entry) => {
-      expect(entry.field).toBeDefined();
-      expect(entry.field).not.toBeNull();
-      expect(typeof entry.field).toBe('object');
-    });
+    // The list can't display json: the value is only returned when reading the entry
+    for (const entry of res.body.results) {
+      expect(entry).not.toHaveProperty('field');
+
+      const entryRes = await rq.get(
+        `/content-manager/collection-types/api::withjson.withjson/${entry.documentId}`
+      );
+
+      expect(entryRes.statusCode).toBe(200);
+      expect(entryRes.body.data.field).not.toBeNull();
+      expect(typeof entryRes.body.data.field).toBe('object');
+    }
   });
 
   test.todo('Throw when input is not a nested object');
