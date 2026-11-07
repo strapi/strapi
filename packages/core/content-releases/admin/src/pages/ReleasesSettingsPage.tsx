@@ -45,7 +45,7 @@ const ReleasesSettingsPage = () => {
   );
   const {
     allowedActions: { canUpdate },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
 
   const { timezoneList } = getTimezones(new Date());
 
@@ -215,7 +215,7 @@ const TimezoneDropdown = () => {
   );
   const {
     allowedActions: { canUpdate },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
   const { formatMessage } = useIntl();
   const { timezoneList } = getTimezones(new Date());
   const field = useField<UpdateDefaultTimezone['defaultTimezone']>('defaultTimezone');

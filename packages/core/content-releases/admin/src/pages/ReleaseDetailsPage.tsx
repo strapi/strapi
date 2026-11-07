@@ -103,7 +103,7 @@ const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(Object.values(PERMISSIONS).flat());
   const { canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
   const { trackUsage } = useTracking();
@@ -391,7 +391,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   } = useGetReleaseQuery({ id: releaseId });
   const {
     allowedActions: { canUpdate },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(Object.values(PERMISSIONS).flat());
   const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
   // TODO: Migrated displayedHeader to v5

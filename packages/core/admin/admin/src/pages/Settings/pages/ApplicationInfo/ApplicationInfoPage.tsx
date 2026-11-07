@@ -35,7 +35,7 @@ const ApplicationInfoPage = () => {
 
   const {
     allowedActions: { canRead, canUpdate },
-  } = useRBAC(settings ? settings['project-settings'] : {});
+  } = useRBAC(Object.values({ ...settings?.['project-settings'] }).flat());
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();

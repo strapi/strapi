@@ -72,7 +72,7 @@ const ListView = () => {
   const {
     isLoading: isLoadingRBAC,
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();

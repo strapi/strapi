@@ -52,7 +52,7 @@ const ListPage = () => {
   const {
     isLoading: isRBACLoading,
     allowedActions: { canCreate, canUpdate, canDelete },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
   const { notifyStatus } = useNotifyAT();
 
   const {

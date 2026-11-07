@@ -43,7 +43,7 @@ const ListPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
-  } = useRBAC(permissions.settings?.roles);
+  } = useRBAC(Object.values(permissions.settings?.roles ?? {}).flat());
 
   const { roles, refetch: refetchRoles } = useAdminRoles(
     { filters: query?._q ? { name: { $containsi: query._q } } : undefined },

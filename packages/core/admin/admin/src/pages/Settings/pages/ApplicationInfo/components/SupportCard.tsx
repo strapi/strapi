@@ -201,7 +201,7 @@ const SupportCard = () => {
   );
   const {
     allowedActions: { canRead },
-  } = useRBAC(debugDumpPermissions);
+  } = useRBAC(debugDumpPermissions ?? []);
 
   // Keyed on the licensed plan rather than `isEE` so a customer whose license has lapsed keeps
   // the Strapi support portal link, which is exactly what they need at that moment. This only

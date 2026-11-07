@@ -46,7 +46,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
   const {
     allowedActions: { canDeleteAction },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(Object.values(PERMISSIONS).flat());
 
   const handleDeleteAction = async () => {
     const response = await deleteReleaseAction({
@@ -131,14 +131,12 @@ const ReleaseActionEntryLinkItem = ({
 
   const {
     allowedActions: { canUpdate: canUpdateContentType },
-  } = useRBAC({
-    updateContentType: [
-      {
-        action: 'plugin::content-manager.explorer.update',
-        subject: contentTypeUid,
-      },
-    ],
-  });
+  } = useRBAC([
+    {
+      action: 'plugin::content-manager.explorer.update',
+      subject: contentTypeUid,
+    },
+  ]);
 
   if (!canUpdateContentType || !canUpdateEntryForLocale) {
     return null;
@@ -201,7 +199,7 @@ interface RootProps {
 const Root = ({ children }: RootProps) => {
   const { formatMessage } = useIntl();
 
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(Object.values(PERMISSIONS).flat());
 
   return (
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
