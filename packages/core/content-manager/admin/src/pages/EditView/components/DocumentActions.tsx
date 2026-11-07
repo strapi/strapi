@@ -562,6 +562,13 @@ const DocumentActionConfirmDialog = ({
   loading,
 }: DocumentActionConfirmDialogProps) => {
   const { formatMessage } = useIntl();
+  /**
+   * The `loading` prop disables the Confirm button once the mutation state has
+   * propagated, but a second click landing within a few milliseconds of the first
+   * one can still arrive before that re-render. Ignore it synchronously so a
+   * double-click can only ever submit once.
+   */
+  const isConfirmingRef = React.useRef(false);
 
   const handleClose = async () => {
     if (onCancel) {
@@ -572,8 +579,18 @@ const DocumentActionConfirmDialog = ({
   };
 
   const handleConfirm = async () => {
-    if (onConfirm) {
-      await onConfirm();
+    if (isConfirmingRef.current) {
+      return;
+    }
+
+    isConfirmingRef.current = true;
+
+    try {
+      if (onConfirm) {
+        await onConfirm();
+      }
+    } finally {
+      isConfirmingRef.current = false;
     }
 
     onClose();
@@ -1558,7 +1575,7 @@ const UnpublishAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const { schema } = useDoc();
   const canPublish = useDocumentRBAC('UnpublishAction', ({ canPublish }) => canPublish);
-  const { unpublish } = useDocumentActions();
+  const { unpublish, isLoading } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const { toggleNotification } = useNotification();
@@ -1658,6 +1675,7 @@ const UnpublishAction: DocumentActionComponent = ({
               </Radio.Group>
             </Flex>
           ),
+          loading: isLoading,
           onConfirm: async () => {
             if (!documentId && collectionType !== SINGLE_TYPES) {
               // This should never, ever, happen.
@@ -1803,6 +1821,7 @@ export {
   DocumentActionButton,
   DiscardAction,
   PublishAction,
+  UnpublishAction,
   UpdateAction,
   DEFAULT_ACTIONS,
   openPublishConfirmDialog,
