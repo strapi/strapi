@@ -159,4 +159,63 @@ describe('StageSelect', () => {
       screen.queryByText('You don’t have the permission to update this stage.')
     ).not.toBeInTheDocument();
   });
+
+  describe('license limits', () => {
+    const serveLicenseLimits = (options: Record<string, string>) =>
+      server.use(
+        http.get('/admin/license-limit-information', () =>
+          HttpResponse.json({
+            data: { features: [{ name: 'review-workflows', options }] },
+          })
+        )
+      );
+
+    it('updates the stage when the instance is above the workflow limit', async () => {
+      // The stages handler reports 10 workflows
+      serveLicenseLimits({ numberOfWorkflows: '2', stagesPerWorkflow: '200' });
+      const updateStage = jest.fn();
+      server.use(
+        http.put(
+          '/review-workflows/content-manager/:collectionType/:contentType/:id/stage',
+          async ({ request }) => {
+            updateStage(await request.json());
+            return HttpResponse.json({ data: { id: 12345 } });
+          }
+        )
+      );
+
+      const { user } = render();
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+      await user.click(await screen.findByRole('combobox'));
+      await user.click(screen.getByRole('option', { name: 'Stage 2' }));
+
+      await waitFor(() => expect(updateStage).toHaveBeenCalledWith({ data: { id: 2 } }));
+      expect(
+        screen.queryByText('You’ve reached the limit of workflows in your plan')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the limits modal instead of updating when the workflow is above the stage limit', async () => {
+      serveLicenseLimits({ numberOfWorkflows: '200', stagesPerWorkflow: '1' });
+      const updateStage = jest.fn();
+      server.use(
+        http.put('/review-workflows/content-manager/:collectionType/:contentType/:id/stage', () => {
+          updateStage();
+          return HttpResponse.json({ data: { id: 12345 } });
+        })
+      );
+
+      const { user } = render();
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+      await user.click(await screen.findByRole('combobox'));
+      await user.click(screen.getByRole('option', { name: 'Stage 2' }));
+
+      await screen.findByText(
+        'You have reached the limit of stages for this workflow in your plan'
+      );
+      expect(updateStage).not.toHaveBeenCalled();
+    });
+  });
 });

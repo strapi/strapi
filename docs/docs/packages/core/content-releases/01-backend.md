@@ -237,7 +237,7 @@ During the publishing process, if successful, the status changes to "Done"; othe
 
 When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity.
 
-On delete, `deleteActionsOnDelete` removes the actions of the locales the delete removed, resolved the way the Document Service resolves the `locale` param: every action of the document for a non-localized content type (their locale is stored as `null`) or for `locale: '*'`, the given locale or locales otherwise, and the default locale when none is given.
+On delete, `deleteActionsOnDelete` removes the actions of the locales the delete removed, resolved the way the Document Service resolves the `locale` param: every action of the document for a non-localized content type (their locale is stored as `null`) or for `locale: '*'`, the given locale or locales otherwise, and the default locale when none is given. Only releases that are not released yet (`releasedAt: null`) are touched: a published release keeps its actions and its `done` status.
 
 ## Migrations
 
@@ -253,4 +253,4 @@ When a Content Type is deleted, delete all actions containing entries from that 
 
 ## Subscribing to Lifecycles Events
 
-When an entry is deleted delete all actions containing that entry.
+When an entry is deleted delete all actions containing that entry, except those of released releases.
