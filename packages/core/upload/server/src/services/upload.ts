@@ -841,7 +841,32 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     };
   }
 
+  async function validateNoFileRelations(files: File[]) {
+    if (files.length === 0) {
+      return;
+    }
+
+    // @ts-expect-error - no dynamic types
+    const { joinTable } = strapi.db.metadata.get(FILE_MODEL_UID).attributes.related;
+
+    const relatedFile = await strapi.db
+      .getConnection(joinTable.name)
+      .select(joinTable.joinColumn.name)
+      .whereIn(
+        joinTable.joinColumn.name,
+        files.map(({ id }) => id)
+      )
+      .first();
+
+    if (relatedFile) {
+      throw new errors.ValidationError(
+        'Cannot delete media files that are still used by content. Remove their references first.'
+      );
+    }
+  }
   async function remove(file: File) {
+    await validateNoFileRelations([file]);
+
     const config = strapi.config.get<Config>('plugin::upload');
 
     // execute delete function of the provider
@@ -918,6 +943,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     findPage,
     findAndCountPage,
     remove,
+    validateNoFileRelations,
     getSettings,
     setSettings,
     getConfiguration,

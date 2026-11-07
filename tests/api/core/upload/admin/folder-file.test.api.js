@@ -11,6 +11,19 @@ const { createUtils } = require('api-tests/utils');
 let strapi;
 let rq;
 let utils;
+
+const dogModel = {
+  displayName: 'Dog',
+  singularName: 'dog',
+  pluralName: 'dogs',
+  kind: 'collectionType',
+  attributes: {
+    profilePicture: {
+      type: 'media',
+    },
+  },
+};
+
 const data = {
   folders: [],
   files: [],
@@ -41,6 +54,7 @@ describe('Bulk actions for folders & files', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
+    await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
@@ -306,6 +320,154 @@ describe('Bulk actions for folders & files', () => {
 
       const existingfilesIds = resFiles.body.results.map((f) => f.id);
       expect(existingfilesIds).toEqual(expect.not.arrayContaining([file.id]));
+    });
+
+    test('Cannot bulk-delete files when any file is referenced by content', async () => {
+      const referencedFile = await createAFile(null);
+      const unreferencedFile = await createAFile(null);
+      let dogEntity;
+
+      try {
+        dogEntity = await strapi.db.query('api::dog.dog').create({
+          data: {
+            profilePicture: referencedFile.id,
+          },
+        });
+
+        const res = await rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-delete',
+          body: {
+            fileIds: [unreferencedFile.id, referencedFile.id],
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+
+        const remainingFiles = await Promise.all(
+          [referencedFile.id, unreferencedFile.id].map((id) =>
+            strapi.db.query('plugin::upload.file').findOne({
+              where: { id },
+            })
+          )
+        );
+
+        expect(remainingFiles.every(Boolean)).toBe(true);
+      } finally {
+        if (dogEntity) {
+          await strapi.db.query('api::dog.dog').delete({ where: { id: dogEntity.id } });
+        }
+
+        await Promise.all(
+          [referencedFile.id, unreferencedFile.id].map((id) =>
+            rq({
+              method: 'DELETE',
+              url: `/upload/files/${id}`,
+            })
+          )
+        );
+      }
+    });
+
+    test('Cannot delete a folder containing a file referenced by content', async () => {
+      const folder = await createFolder('folder-with-referenced-file', null);
+      const file = await createAFile(folder.id);
+      let dogEntity;
+
+      try {
+        dogEntity = await strapi.db.query('api::dog.dog').create({
+          data: {
+            profilePicture: file.id,
+          },
+        });
+
+        const res = await rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-delete',
+          body: {
+            folderIds: [folder.id],
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+
+        const [folderAfter, fileAfter] = await Promise.all([
+          rq({ method: 'GET', url: `/upload/folders/${folder.id}` }),
+          rq({ method: 'GET', url: `/upload/files/${file.id}` }),
+        ]);
+
+        expect(folderAfter.statusCode).toBe(200);
+        expect(fileAfter.statusCode).toBe(200);
+      } finally {
+        if (dogEntity) {
+          await strapi.db.query('api::dog.dog').delete({ where: { id: dogEntity.id } });
+        }
+
+        await rq({
+          method: 'DELETE',
+          url: `/upload/files/${file.id}`,
+        });
+
+        await rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-delete',
+          body: {
+            folderIds: [folder.id],
+          },
+        });
+      }
+    });
+
+    test('Does not partially delete a folder when a selected file is referenced', async () => {
+      const folder = await createFolder('mixed-delete-folder', null);
+      const folderFile = await createAFile(folder.id);
+      const referencedFile = await createAFile(null);
+      let dogEntity;
+
+      try {
+        dogEntity = await strapi.db.query('api::dog.dog').create({
+          data: {
+            profilePicture: referencedFile.id,
+          },
+        });
+
+        const res = await rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-delete',
+          body: {
+            folderIds: [folder.id],
+            fileIds: [referencedFile.id],
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+
+        const [folderAfter, folderFileAfter, referencedFileAfter] = await Promise.all([
+          rq({ method: 'GET', url: `/upload/folders/${folder.id}` }),
+          rq({ method: 'GET', url: `/upload/files/${folderFile.id}` }),
+          rq({ method: 'GET', url: `/upload/files/${referencedFile.id}` }),
+        ]);
+
+        expect(folderAfter.statusCode).toBe(200);
+        expect(folderFileAfter.statusCode).toBe(200);
+        expect(referencedFileAfter.statusCode).toBe(200);
+      } finally {
+        if (dogEntity) {
+          await strapi.db.query('api::dog.dog').delete({ where: { id: dogEntity.id } });
+        }
+
+        await Promise.all(
+          [folderFile.id, referencedFile.id].map((id) =>
+            rq({ method: 'DELETE', url: `/upload/files/${id}` })
+          )
+        );
+
+        await rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-delete',
+          body: { folderIds: [folder.id] },
+        });
+      }
     });
 
     test('Deletes a replaced file along with its folder', async () => {
