@@ -4,7 +4,7 @@ import type { Core } from '@strapi/types';
 
 import { PER_USER_CACHE_CONTROL, PLUGIN_ID } from '../constants';
 import type abilityService from '../services/ability';
-import { STRATEGY_NAME } from '../strategies/end-users';
+import { isEndUsersStrategy } from '../strategies/end-users';
 
 /**
  * `GET /api/end-users/permissions/me`: what the caller may do, for a front end deciding what to
@@ -23,7 +23,7 @@ const permissionsController = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const auth = ctx.state?.auth as { strategy?: { name?: unknown } } | undefined;
 
-    if (auth?.strategy?.name !== STRATEGY_NAME) {
+    if (!isEndUsersStrategy(auth?.strategy?.name)) {
       throw new errors.ForbiddenError();
     }
 

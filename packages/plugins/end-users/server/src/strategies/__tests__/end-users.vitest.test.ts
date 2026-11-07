@@ -39,11 +39,32 @@ const storedUser = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-type Held = Array<{ documentId: string; name: string; type: string; requireTwoFactor: boolean }>;
+type Held = Array<{
+  id?: number;
+  documentId: string;
+  name: string;
+  description?: string | null;
+  type: string;
+  requireTwoFactor: boolean;
+}>;
 
 const HELD: Held = [
-  { documentId: 'role-a', name: 'Authenticated', type: 'authenticated', requireTwoFactor: false },
-  { documentId: 'role-b', name: 'Editors', type: 'custom', requireTwoFactor: false },
+  {
+    id: 3,
+    documentId: 'role-a',
+    name: 'Authenticated',
+    description: 'Default role',
+    type: 'authenticated',
+    requireTwoFactor: false,
+  },
+  {
+    id: 4,
+    documentId: 'role-b',
+    name: 'Editors',
+    description: null,
+    type: 'custom',
+    requireTwoFactor: false,
+  },
 ];
 
 const TRUSTED = 'https://app.example.com';
@@ -60,11 +81,13 @@ const setup = ({
   user = storedUser() as Record<string, unknown> | null,
   held = HELD,
   requireEmailVerification = false,
+  compat = false,
 }: {
   lookup?: SessionLookup;
   user?: Record<string, unknown> | null;
   held?: Held;
   requireEmailVerification?: boolean;
+  compat?: boolean;
 } = {}) => {
   const lookupSession = vi.fn(async () => lookup);
   // The engine's matcher, as far as these tests need it: one trusted origin, and its pages
@@ -90,7 +113,7 @@ const setup = ({
   } as unknown as Core.Strapi;
 
   return {
-    strategy: createEndUsersStrategy(strapi),
+    strategy: createEndUsersStrategy(strapi, compat),
     lookupSession,
     isTrustedOrigin,
     forUser,
@@ -116,6 +139,37 @@ const outcomeOf = (promise: Promise<unknown>) => promise.catch((thrown: unknown)
 const codeOf = (outcome: unknown) => (outcome as errors.PolicyError).details;
 
 describe('the end-users strategy', () => {
+  describe('its name and the role it exposes', () => {
+    it('is named end-users with compat off and has no role', async () => {
+      const { strategy } = setup({ lookup: signedIn() });
+      const ctx = koaCtx();
+
+      await strategy.authenticate(ctx);
+
+      expect(strategy.name).toBe('end-users');
+      expect(ctx.state.user).not.toHaveProperty('role');
+    });
+
+    it('is named users-permissions with compat on and sets role to the first role next to roles', async () => {
+      const { strategy } = setup({ lookup: signedIn(), compat: true });
+      const ctx = koaCtx();
+
+      await strategy.authenticate(ctx);
+
+      expect(strategy.name).toBe('users-permissions');
+      expect(ctx.state.user.role).toEqual({
+        id: 3,
+        name: 'Authenticated',
+        description: 'Default role',
+        type: 'authenticated',
+      });
+      expect(ctx.state.user.roles.map((role: { documentId: string }) => role.documentId)).toEqual([
+        'role-a',
+        'role-b',
+      ]);
+    });
+  });
+
   beforeEach(() => {
     ABILITY.can.mockReset().mockReturnValue(true);
   });

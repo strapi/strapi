@@ -44,8 +44,11 @@ export interface RoleListItem extends RoleRow {
 
 /** The roles of a user, as much of each as the request pipeline needs. */
 export interface RoleSummary {
+  /** The database id, which the users-permissions compatibility mode shows. Prefer `documentId`. */
+  id: number;
   documentId: string;
   name: string;
+  description: string | null;
   type: RoleType;
   requireTwoFactor: boolean;
 }
@@ -620,13 +623,17 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
       const user = (await userQuery().findOne({
         where: { documentId: userDocumentId },
         populate: {
-          roles: { select: ['documentId', 'name', 'type', 'requireTwoFactor'] },
+          roles: {
+            select: ['id', 'documentId', 'name', 'description', 'type', 'requireTwoFactor'],
+          },
         },
       })) as { roles?: Plain[] } | null;
 
       return (user?.roles ?? []).map((role) => ({
+        id: role.id as number,
         documentId: role.documentId as string,
         name: role.name as string,
+        description: (role.description as string | null | undefined) ?? null,
         type: role.type as RoleType,
         requireTwoFactor: Boolean(role.requireTwoFactor),
       }));

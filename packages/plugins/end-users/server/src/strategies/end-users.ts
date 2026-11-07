@@ -8,9 +8,21 @@ import type roleService from '../services/role';
 import type settingsService from '../services/settings';
 import type { RoleSummary } from '../services/role';
 import type { AuthEngine } from '../engine/types';
+import { toUpRole } from '../compat/shapes';
+import type { UpRole } from '../compat/shapes';
 import { banState } from '../utils/ban';
 
 export const STRATEGY_NAME = 'end-users';
+
+/** The name the strategy answers to while the Users & Permissions compatibility mode is on. */
+export const COMPAT_STRATEGY_NAME = 'users-permissions';
+
+export const strategyName = (compat: boolean): 'end-users' | 'users-permissions' =>
+  compat ? COMPAT_STRATEGY_NAME : STRATEGY_NAME;
+
+/** Whether a strategy name is this plugin's strategy, under either name. */
+export const isEndUsersStrategy = (name: unknown): boolean =>
+  name === STRATEGY_NAME || name === COMPAT_STRATEGY_NAME;
 
 /**
  * Route scopes `verify` lets any caller of this strategy through, Public and signed-in alike, with
@@ -33,6 +45,8 @@ export interface EndUserCredentials {
   image: string | null;
   emailVerified: boolean;
   roles: Array<{ documentId: string; name: string; type: string }>;
+  /** The first role, as users-permissions shows its one role. Only while that mode is on. */
+  role?: UpRole | null;
 }
 
 type Plain = Record<string, unknown>;
@@ -93,7 +107,7 @@ const toHeaders = (ctx: Context) => {
  *
  * `verify` then asks the ability whether the route's scope is allowed.
  */
-const createEndUsersStrategy = (strapi: Core.Strapi) => {
+const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
   const plugin = () => strapi.plugin(PLUGIN_ID);
   const engine = () => plugin().service('engine').get() as AuthEngine;
   const roles = () => plugin().service('role') as ReturnType<typeof roleService>;
@@ -150,16 +164,25 @@ const createEndUsersStrategy = (strapi: Core.Strapi) => {
   };
 
   /** The signed-in user: the row, and the roles they hold. */
-  const toCredentials = (user: Plain, held: RoleSummary[]): EndUserCredentials => ({
-    id: user.id as number,
-    documentId: user.documentId as string,
-    email: user.email as string,
-    username: (user.username as string | null | undefined) ?? null,
-    name: user.name as string,
-    image: (user.image as string | null | undefined) ?? null,
-    emailVerified: Boolean(user.emailVerified),
-    roles: held.map(({ documentId, name, type }) => ({ documentId, name, type })),
-  });
+  const toCredentials = (user: Plain, held: RoleSummary[]): EndUserCredentials => {
+    const credentials: EndUserCredentials = {
+      id: user.id as number,
+      documentId: user.documentId as string,
+      email: user.email as string,
+      username: (user.username as string | null | undefined) ?? null,
+      name: user.name as string,
+      image: (user.image as string | null | undefined) ?? null,
+      emailVerified: Boolean(user.emailVerified),
+      roles: held.map(({ documentId, name, type }) => ({ documentId, name, type })),
+    };
+
+    // Next to `roles`, never instead of them: code written for users-permissions reads one `role`
+    if (compat) {
+      credentials.role = toUpRole(held);
+    }
+
+    return credentials;
+  };
 
   const authenticate = async (ctx: Context): Promise<Authentication> => {
     // An error here (the database is down) is an error, not a request with no credentials: it
@@ -282,7 +305,7 @@ const createEndUsersStrategy = (strapi: Core.Strapi) => {
     }
   };
 
-  return { name: STRATEGY_NAME, authenticate, verify };
+  return { name: strategyName(compat), authenticate, verify };
 };
 
 export default createEndUsersStrategy;

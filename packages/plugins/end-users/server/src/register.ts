@@ -8,6 +8,7 @@ import {
   assertOneWayRelations,
   assertProfileUser,
 } from './boot-checks';
+import { readCompatConfig } from './compat/config';
 import { PERMISSION_UID, PLUGIN_ID, USER_UID } from './constants';
 import { registerGeneratedContentTypes } from './content-types/register-generated';
 import { assignDefaultRoleMiddleware } from './document-middlewares/assign-default-role';
@@ -125,7 +126,12 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
 
   // After core's API-token strategy, which registers first: a token keeps taking precedence, and
   // only a request that is not one reaches this strategy
-  strapi.get('auth').register('content-api', createEndUsersStrategy(strapi));
+  strapi
+    .get('auth')
+    .register(
+      'content-api',
+      createEndUsersStrategy(strapi, readCompatConfig(strapi).usersPermissions)
+    );
 
   // Explain mode: what the permission checks did to an end user's Content API request,
   // in a header or the debug log. It wraps every request and only touches those of the strategy

@@ -114,6 +114,21 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
         rateLimit: { storage: 'database' },
       },
       async register({ strapi: instance }) {
+        // What the strategy answers to, and what it leaves on the context
+        instance.server.routes({
+          type: 'content-api',
+          routes: [
+            {
+              method: 'GET',
+              path: '/end-users-test/strategy',
+              handler(ctx) {
+                ctx.body = { name: ctx.state.auth.strategy.name, role: ctx.state.user.role };
+              },
+              config: { auth: { strategies: ['end-users'] } },
+            },
+          ],
+        });
+
         instance.config.set('middlewares', [
           'strapi::logger',
           'strapi::errors',
@@ -616,6 +631,16 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect((await rq.get('/api/users/me', { headers: bearer('nope') })).statusCode).toBe(401);
       expect((await rq.get('/api/users/me')).statusCode).toBe(403);
       expect((await rq.get('/api/users/me/profile')).statusCode).toBe(403);
+    });
+
+    it('names its strategy end-users and leaves no single role on the user while compat is off', async () => {
+      const { token } = await signedUp();
+
+      const res = await rq.get('/api/end-users-test/strategy', { headers: bearer(token) });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.name).toBe('end-users');
+      expect(res.body).not.toHaveProperty('role');
     });
 
     it('writes the profile fields a sign-up carries only when the registration list allows them', async () => {
