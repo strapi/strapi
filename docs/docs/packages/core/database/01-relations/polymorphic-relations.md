@@ -19,6 +19,15 @@ Strapi’s polymorphic relation kinds are **`morphToOne`**, **`morphToMany`**, a
 
 **Writes** — `packages/core/database/src/entity-manager/index.ts`: `processData` maps `morphToOne` input (`id` + `typeField`, default `__type`) into inline columns; `attachRelations` / `updateRelations` handle `morphToMany` through join tables. `packages/core/database/src/entity-manager/morph-relations.ts` encodes join rows and related cleanup (e.g. when `morphOne` enforces a single inverse).
 
+When an inverse `morphOne` / `morphMany` targets a `morphToOne`, `attachRelations` writes the owner into the morph columns of the target rows (first entry for `morphOne`, every entry for `morphMany`). It reads `set`, then `connect`, and throws on an empty value. Each target row stores a single owner, so the copy flows do not copy these links. A copy flow passes the populated value of the version it copies: a `morphMany` reaches that check as an empty list, while an empty `morphOne` populates as `null` or `undefined` and is skipped before it. The list below covers `morphMany`; the `morphOne` case is noted per flow.
+
+- **Publish** omits the empty value before `create` (`packages/core/core/src/services/document-service/entries.ts`) when the old published version owns no links. The links stay on the draft; the published version has none. When the old published version owns links (data migrated from v4, where the existing rows became the published versions, or a target row set to the published id), publish keeps the value and throws: deleting the old published version cleared these links, and the error rolls the transaction back. For a `morphOne` whose draft has no link, publish goes through and drops the link of the old published version.
+- **Discard draft** throws. It deletes the old draft, which clears the morph columns of its target rows, then creates the new draft from the published version. Skipping the empty value there would drop every link, so the error rolls the transaction back instead. For a `morphOne`, discard draft goes through and drops the link of the old draft.
+- **Enabling draft & publish** on such a type runs the draft & publish migration, which calls discard draft on every published row (`packages/core/core/src/migrations/draft-publish.ts`). It throws, so Strapi fails at boot, on every start, while that type has published rows.
+- **Clone** throws (`clone` in `packages/core/core/src/services/document-service/repository.ts`).
+
+What copying these links should mean (move them to the latest version, or re-point the target rows to the new version) is not decided.
+
 **Reads (populate)** — `packages/core/database/src/query/helpers/populate/apply.ts` dispatches on `attribute.relation`. `morphToOne` and `morphToMany` load target rows per type; inverse `morphOne` / `morphMany` traverse the inverse. Polymorphic targets use `populate.on` in the query for per-UID options. The populated object for a morph item sets the type discriminator **after** target row fields so the target content-type UID (in `typeField`, default `__type`) is always authoritative if a name collides.
 
 ## Document service

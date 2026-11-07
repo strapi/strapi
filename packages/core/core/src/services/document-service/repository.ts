@@ -25,6 +25,7 @@ import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import * as selfReferentialRelations from './utils/self-referential-relations';
+import * as inverseMorphRelations from './utils/inverse-morph-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
@@ -678,6 +679,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       'published'
     );
 
+    // Links the old published versions own through an inverse morphOne / morphMany of a
+    // morphToOne. Deleting these versions below clears them.
+    const inverseMorphLinks = await inverseMorphRelations.load(
+      uid,
+      oldPublishedVersions.map((entry: any) => entry.id)
+    );
+
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
@@ -716,7 +724,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         });
       }
 
-      return await entries.publish(entryToPublish, queryParams);
+      return await entries.publish(entryToPublish, queryParams, {
+        // Keep the empty inverse morph value when the old published version owned links, so the
+        // database layer throws and the transaction rolls back instead of dropping them
+        omitEmptyInverseMorphValues: inverseMorphLinks.length === 0,
+      });
     });
 
     // Sync unidirectional relations with the new published entries
