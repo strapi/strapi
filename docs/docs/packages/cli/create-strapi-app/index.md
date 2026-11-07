@@ -26,10 +26,12 @@ The CLI asks for the email and the password together with the other prompts, bef
 
 Each value comes from the first source that has it:
 
-| Value    | 1. Explicit input                                       | 2. Prompt | 3. Without prompts          |
-| -------- | ------------------------------------------------------- | --------- | --------------------------- |
-| Email    | `--admin-email <email>`                                 | Yes       | `admin@example.com`         |
-| Password | `CREATE_STRAPI_APP_ADMIN_PASSWORD` environment variable | Yes       | A generated random password |
+| Value    | 1. Explicit input                                                                      | 2. Prompt | 3. Without prompts          |
+| -------- | -------------------------------------------------------------------------------------- | --------- | --------------------------- |
+| Email    | `--admin-email <email>`, then the `CREATE_STRAPI_APP_ADMIN_EMAIL` environment variable | Yes       | `admin@example.com`         |
+| Password | `CREATE_STRAPI_APP_ADMIN_PASSWORD` environment variable                                | Yes       | A generated random password |
+
+If `--admin-email` and `CREATE_STRAPI_APP_ADMIN_EMAIL` are both set, the flag wins. The CLI checks the email before it writes any file. An invalid value stops the CLI with an error that names its source.
 
 The CLI prompts if `--non-interactive` is absent and stdin is a TTY. `--quickstart` still prompts. Without prompts, the CLI uses `admin@example.com` if the email is missing. If the password is missing, the CLI generates one. The CLI has no default password.
 

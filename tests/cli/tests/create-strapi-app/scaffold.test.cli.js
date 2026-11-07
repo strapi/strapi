@@ -349,6 +349,24 @@ describe('create-strapi-app', () => {
     }
   });
 
+  it('fails before writing files when CREATE_STRAPI_APP_ADMIN_EMAIL is invalid', async () => {
+    const projectDir = path.join(mkProjectDir(), 'app');
+    try {
+      const { stderr, stdout } = await spawnCsa([projectDir, ...baseScaffoldArgs], {
+        CREATE_STRAPI_APP_ADMIN_EMAIL: 'not-an-email',
+      })
+        .expect('code', 1)
+        .end();
+
+      expect(`${stdout}${stderr}`).toMatch(
+        /Admin email .* from CREATE_STRAPI_APP_ADMIN_EMAIL is invalid/
+      );
+      expect(fs.existsSync(projectDir)).toBe(false);
+    } finally {
+      fs.rmSync(path.dirname(projectDir), { recursive: true, force: true });
+    }
+  });
+
   it('prints a semver version with --version', async () => {
     const { stdout } = await spawnCsa(['--version']).expect('code', 0).end();
 

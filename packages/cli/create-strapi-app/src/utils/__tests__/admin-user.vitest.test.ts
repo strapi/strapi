@@ -6,6 +6,7 @@ import execa from 'execa';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import {
+  ADMIN_EMAIL_ENV_VAR,
   ADMIN_PASSWORD_ENV_VAR,
   ADMIN_TOKEN_OPTION,
   AdminUserInputError,
@@ -15,6 +16,7 @@ import {
   createAdminUser,
   ensureCredentialsFileIgnored,
   generateAdminPassword,
+  getAdminEmailFromEnv,
   getAdminTokenSummary,
   getCredentialsFileSummary,
   getGeneratedPasswordSummary,
@@ -194,6 +196,19 @@ describe('resolveAdminUser', () => {
     await expect(
       resolveAdminUser({ prompts: makePrompts(), envPassword: 'password', canPrompt: false })
     ).rejects.toThrow(AdminUserInputError);
+  });
+});
+
+describe('getAdminEmailFromEnv', () => {
+  it('reads and trims CREATE_STRAPI_APP_ADMIN_EMAIL', () => {
+    expect(getAdminEmailFromEnv({ [ADMIN_EMAIL_ENV_VAR]: ' admin@acme.com ' })).toBe(
+      'admin@acme.com'
+    );
+  });
+
+  it('treats a missing or empty value as absent', () => {
+    expect(getAdminEmailFromEnv({})).toBeUndefined();
+    expect(getAdminEmailFromEnv({ [ADMIN_EMAIL_ENV_VAR]: '  ' })).toBeUndefined();
   });
 });
 

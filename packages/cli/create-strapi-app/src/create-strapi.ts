@@ -357,7 +357,8 @@ async function createApp(
     ]);
   }
 
-  logger.log(['', 'Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
+  logger.title('Docs', `https://docs.strapi.io/cms`);
+  logger.log(['Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
 
   if (adminResult && adminResult.status !== 'created') {
     // The admin user is mandatory: keep the project, do not start it, and exit with code 1.

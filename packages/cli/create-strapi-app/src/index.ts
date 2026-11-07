@@ -11,6 +11,8 @@ import { createStrapi } from './create-strapi';
 import {
   AdminUserInputError,
   resolveAdminUser,
+  ADMIN_EMAIL_ENV_VAR,
+  getAdminEmailFromEnv,
   takeAdminPasswordFromEnv,
   validateEmail,
 } from './utils/admin-user';
@@ -83,7 +85,7 @@ const command = new commander.Command('create-strapi-app')
   // Admin user options
   .option(
     '--admin-email <email>',
-    'Email of the first admin user (password: CREATE_STRAPI_APP_ADMIN_PASSWORD env variable)'
+    'Email of the first admin user (or CREATE_STRAPI_APP_ADMIN_EMAIL; password: CREATE_STRAPI_APP_ADMIN_PASSWORD env variable)'
   )
   .option('--no-admin-token', 'Do not create an admin token for the first admin user')
 
@@ -147,8 +149,15 @@ async function run(args: string[]): Promise<void> {
     );
   }
 
-  if (options.adminEmail !== undefined && validateEmail(options.adminEmail) !== true) {
-    logger.fatal(`Admin email ${chalk.bold(`"${options.adminEmail}"`)} is invalid`);
+  // `--admin-email` first, then the CREATE_STRAPI_APP_ADMIN_EMAIL environment variable
+  const adminEmailFromEnv = getAdminEmailFromEnv();
+  const adminEmail = options.adminEmail ?? adminEmailFromEnv;
+  const adminEmailSource = options.adminEmail !== undefined ? '--admin-email' : ADMIN_EMAIL_ENV_VAR;
+
+  if (adminEmail !== undefined && validateEmail(adminEmail) !== true) {
+    logger.fatal(
+      `Admin email ${chalk.bold(`"${adminEmail}"`)} from ${chalk.bold(adminEmailSource)} is invalid`
+    );
   }
 
   const skipPrompts = options.quickstart || options.nonInteractive;
@@ -250,7 +259,7 @@ async function run(args: string[]): Promise<void> {
   if (scope.installDependencies) {
     try {
       adminUser = await resolveAdminUser({
-        email: options.adminEmail,
+        email: adminEmail,
         // `--quickstart` still asks. Scripted runs (no TTY) never block on a prompt:
         // the email uses the default, and the password is generated
         canPrompt: !options.nonInteractive && Boolean(process.stdin.isTTY),
@@ -264,9 +273,9 @@ async function run(args: string[]): Promise<void> {
 
       throw error;
     }
-  } else if (options.adminEmail !== undefined) {
+  } else if (adminEmail !== undefined) {
     logger.warn(
-      `${chalk.bold('--admin-email')} is ignored: the admin user can only be created after the dependency install`
+      `${chalk.bold(adminEmailSource)} is ignored: the admin user can only be created after the dependency install`
     );
   }
 

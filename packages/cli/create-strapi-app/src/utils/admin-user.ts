@@ -15,6 +15,17 @@ import type { PackageManager } from '../types';
 export const ADMIN_PASSWORD_ENV_VAR = 'CREATE_STRAPI_APP_ADMIN_PASSWORD';
 
 /**
+ * Environment variable that holds the admin email. `--admin-email` takes precedence.
+ */
+export const ADMIN_EMAIL_ENV_VAR = 'CREATE_STRAPI_APP_ADMIN_EMAIL';
+
+/**
+ * Reads `CREATE_STRAPI_APP_ADMIN_EMAIL`. An empty value counts as absent.
+ */
+export const getAdminEmailFromEnv = (env: NodeJS.ProcessEnv = process.env) =>
+  env[ADMIN_EMAIL_ENV_VAR]?.trim() || undefined;
+
+/**
  * Environment variable read by `strapi admin:create-user` when `--password` is absent.
  * create-strapi-app cannot import `@strapi/strapi`, so the name is duplicated.
  * The `@strapi/strapi` create-user tests pin the name and its presence in `--help`.
