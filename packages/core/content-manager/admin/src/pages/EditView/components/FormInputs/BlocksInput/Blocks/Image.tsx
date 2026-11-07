@@ -160,6 +160,12 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
 const ImageDialog = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const { editor } = useBlocksEditorContext('ImageDialog');
+  // Where the caret was when Image was picked: the editor can lose its selection while the
+  // Media Library dialog is open. The ref follows the content if it changes meanwhile.
+  const [targetRef] = React.useState(() =>
+    editor.selection ? Editor.rangeRef(editor, editor.selection) : null
+  );
+
   const components = useStrapiApp('ImageDialog', (state) => state.components);
 
   if (!components || !isOpen) return null;
@@ -171,58 +177,88 @@ const ImageDialog = () => {
   }>;
 
   const insertImages = (images: Block<'image'>['image'][]) => {
-    // If the selection is inside a list, split the list so that the modified block is outside of it
-    Transforms.unwrapNodes(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-      split: true,
+    const target = targetRef?.current ?? editor.selection;
+    if (!target) return;
+
+    Transforms.select(editor, target);
+    if (!editor.selection) return;
+
+    // A selection across several blocks has no single block to work from: use where it ends
+    if (Range.isExpanded(editor.selection)) {
+      Transforms.collapse(editor, { edge: 'end' });
+    }
+
+    // The closest full block node above the selection
+    const matchBlock = (node: Node) => {
+      if (Editor.isEditor(node)) return false;
+
+      return !['text', 'link'].includes(node.type);
+    };
+    const currentBlockEntry = Editor.above(editor, { match: matchBlock });
+
+    if (!currentBlockEntry) return;
+    const [currentBlock, currentBlockPath] = currentBlockEntry;
+
+    const nodesToInsert = images.map((image) => {
+      const imageNode: Block<'image'> = {
+        type: 'image',
+        image,
+        children: [{ type: 'text', text: '' }],
+      };
+      return imageNode;
     });
-
-    // Save the path of the node that is being replaced by an image to insert the images there later
-    // It's the closest full block node above the selection
-    const nodeEntryBeingReplaced = Editor.above(editor, {
-      match(node) {
-        if (Editor.isEditor(node)) return false;
-
-        const isInlineNode = ['text', 'link'].includes(node.type);
-
-        return !isInlineNode;
-      },
-    });
-
-    if (!nodeEntryBeingReplaced) return;
-    const [, pathToInsert] = nodeEntryBeingReplaced;
 
     // Normalize once the images are in: replacing the only block would otherwise leave an empty
     // document for a moment, which normalization fills with a paragraph that stays after the images
     Editor.withoutNormalizing(editor, () => {
-      // Remove the previous node that is being replaced by an image
-      Transforms.removeNodes(editor);
+      let pathToInsert: Path;
 
-      // Convert images to nodes and insert them
-      const nodesToInsert = images.map((image) => {
-        const imageNode: Block<'image'> = {
-          type: 'image',
-          image,
-          children: [{ type: 'text', text: '' }],
-        };
-        return imageNode;
-      });
+      // An image has no text but isn't empty: inserting next to it must not replace it
+      const isEmptyBlock =
+        !(Element.isElement(currentBlock) && Editor.isVoid(editor, currentBlock)) &&
+        Node.string(currentBlock) === '';
+
+      if (isEmptyBlock) {
+        // An empty block (paragraph, list item…) is replaced by the images. If it's inside a
+        // list, split the list so that the images end up between the two halves.
+        Transforms.unwrapNodes(editor, {
+          match: (node) => !Editor.isEditor(node) && node.type === 'list',
+          split: true,
+        });
+
+        pathToInsert = Editor.above(editor, { match: matchBlock })![1];
+        Transforms.removeNodes(editor, { at: pathToInsert });
+      } else {
+        // A block with content is kept and the images go below it, like images dropped on the
+        // editor. In a list, they go below the whole list: splitting it would restart numbered
+        // lists and could separate an item from its nested list.
+        pathToInsert = Path.next(currentBlockPath.slice(0, 1));
+      }
+
       Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
 
-      // Set the selection on the image since it was cleared by calling removeNodes
-      Transforms.select(editor, pathToInsert);
+      // Select the last inserted image: Enter then adds a paragraph below the images
+      Transforms.select(
+        editor,
+        pathToInsert.slice(0, -1).concat(pathToInsert.at(-1)! + images.length - 1)
+      );
     });
+  };
+
+  const close = () => {
+    targetRef?.unref();
+    setIsOpen(false);
   };
 
   const handleSelectAssets = (images: Schema.Attribute.MediaValue<true>) => {
     insertImages(images.map(toBlockImage));
-    setIsOpen(false);
+    close();
   };
 
   return (
     <MediaLibraryDialog
       allowedTypes={['images']}
-      onClose={() => setIsOpen(false)}
+      onClose={close}
       onSelectAssets={handleSelectAssets}
     />
   );
