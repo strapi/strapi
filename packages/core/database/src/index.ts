@@ -55,6 +55,7 @@ interface Settings {
   poolTimeoutDiagnostics?: boolean;
   migrations: {
     dir: string;
+    postDir?: string;
   };
   [key: string]: unknown;
 }
