@@ -468,7 +468,7 @@ export default {
           dbQuery
             .load(...args)
             // Ensure response is an array
-            .then((res) => ({ results: res ? [res] : [] }));
+            .then((res) => ({ results: res ? [res] : [], pagination: undefined }));
 
     const filters: {
       publishedAt?: Record<string, any>;
