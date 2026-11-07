@@ -1,0 +1,20 @@
+{
+  "Plugin.name": "Birta",
+  "Homepage.title": "Birtu með Strapi Cloud",
+  "Homepage.subTitle": "Hýstu Strapi-verkefnið þitt á skýjaþjónustu okkar með sjálfvirkum útgáfum og alþjóðlegu efnisdreifineti (CDN).",
+  "Homepage.features.cdn": "Alþjóðlegt efnisdreifinet (CDN)",
+  "Homepage.features.pushToDeploy": "Birting við innsendingu",
+  "Homepage.features.customDomain": "Sérsniðin lén",
+  "Homepage.deploy.title": "Veldu þá birtingaraðferð sem þú vilt",
+  "Homepage.deploy.ariaLabel": "Birtingarleiðir",
+  "Homepage.deploy.git.badge": "Mælt með",
+  "Homepage.deploy.git.title": "Birta í Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Birtu GitHub- eða GitLab-verkefni beint í Strapi Cloud",
+  "Homepage.deploy.git.button": "Birta í Strapi Cloud",
+  "Homepage.deploy.cli.title": "Birta með skipanalínu",
+  "Homepage.deploy.cli.subTitle": "Notaðu skipanalínuna til að tengja verkefnið þitt við núverandi Strapi Cloud-verkefni og birtu breytingarnar beint þaðan.",
+  "Homepage.deploy.cli.ariaLabel": "Pakkastjóri",
+  "Homepage.deploy.cli.copy": "Afrita",
+  "Homepage.deploy.cli.copySuccess": "Skipun afrituð á klippiborð",
+  "Homepage.deploy.documentation": "Vandamál? Skoðaðu leiðbeiningarnar okkar"
+}

@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "Bætir GraphQL-endapunkti við með sjálfgefnum API-aðferðum.",
+  "plugin.description.short": "Bætir GraphQL-endapunkti við með sjálfgefnum API-aðferðum.",
+  "plugin.name": "GraphQL"
+}
