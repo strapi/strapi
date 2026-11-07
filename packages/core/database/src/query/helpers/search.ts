@@ -43,7 +43,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`??::text ILIKE ?`, [
           qb.aliasColumn(columnName),
-          `%${escapeQuery(query, '*%\\')}%`,
+          `%${escapeQuery(query, '*%_\\')}%`,
         ]);
       });
 
@@ -54,7 +54,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ? ESCAPE '\\'`, [
           qb.aliasColumn(columnName),
-          `%${escapeQuery(query, '*%\\')}%`,
+          `%${escapeQuery(query, '*%_\\')}%`,
         ]);
       });
       break;
@@ -64,7 +64,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ?`, [
           qb.aliasColumn(columnName),
-          `%${escapeQuery(query, '*%\\')}%`,
+          `%${escapeQuery(query, '*%_\\')}%`,
         ]);
       });
       break;
