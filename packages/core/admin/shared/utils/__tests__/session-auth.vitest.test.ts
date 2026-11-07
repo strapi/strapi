@@ -1,4 +1,5 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest';
+import { describe, test, expect, beforeEach, vi, type Mock } from 'vitest';
+import type { Context } from 'koa';
 import {
   getAccessCookieName,
   getAccessCookiePath,
@@ -6,6 +7,13 @@ import {
   getRefreshCookieOptions,
   getRefreshCookiePath,
   resolveLogoutDeviceId,
+  issueSession,
+  REFRESH_COOKIE_NAME,
+  sessionFamilyOf,
+  MFA_TRUST_COOKIE_NAME,
+  buildTrustCookieOptions,
+  setTrustCookie,
+  clearTrustCookie,
 } from '../session-auth';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
 import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
@@ -353,5 +361,262 @@ describe('resolveLogoutDeviceId', () => {
     await expect(resolveLogoutDeviceId('42', 'session-1', 'client-device')).resolves.toBe(
       'client-device'
     );
+  });
+});
+
+describe('issueSession', () => {
+  const user = { id: 11, email: 'admin@example.com' } as any;
+  const sanitizedUser = { id: 11, email: 'admin@example.com' };
+  const sanitizeUser = vi.fn(() => sanitizedUser);
+
+  const setStrapi = (sessionManagerFn?: Mock) => {
+    global.strapi = {
+      config: { get: vi.fn(() => undefined) },
+      log: { error: vi.fn(), warn: vi.fn() },
+      admin: { services: { user: { sanitizeUser } } },
+      ...(sessionManagerFn ? { sessionManager: sessionManagerFn } : {}),
+    } as any;
+  };
+
+  const buildSessionManager = (overrides: {
+    generateRefreshToken?: Mock;
+    generateAccessToken?: Mock;
+  }) => {
+    const generateRefreshToken =
+      overrides.generateRefreshToken ??
+      vi.fn(() =>
+        Promise.resolve({
+          token: 'refresh-token',
+          sessionId: 'session-1',
+          absoluteExpiresAt: undefined,
+        })
+      );
+    const generateAccessToken =
+      overrides.generateAccessToken ?? vi.fn(() => Promise.resolve({ token: 'access-token' }));
+    const sessionManagerFn = vi.fn(() => ({ generateRefreshToken, generateAccessToken }));
+
+    return { sessionManagerFn, generateRefreshToken, generateAccessToken };
+  };
+
+  const buildCtx = (body: Record<string, unknown> = {}) => {
+    const cookiesSet = vi.fn();
+    const internalServerError = vi.fn();
+    const ctx = {
+      request: { body, secure: false, headers: {} },
+      cookies: { set: cookiesSet },
+      internalServerError,
+    } as unknown as Context;
+
+    return { ctx, cookiesSet, internalServerError };
+  };
+
+  beforeEach(() => {
+    sanitizeUser.mockClear();
+  });
+
+  test('sets the refresh cookie and returns the access token', async () => {
+    const { sessionManagerFn, generateRefreshToken } = buildSessionManager({});
+    setStrapi(sessionManagerFn);
+
+    const { ctx, cookiesSet } = buildCtx();
+
+    const issued = await issueSession(ctx, user);
+
+    expect(sessionManagerFn).toHaveBeenCalledWith('admin');
+    expect(generateRefreshToken).toHaveBeenCalledWith(
+      String(user.id),
+      expect.any(String),
+      expect.objectContaining({ type: 'session' })
+    );
+    expect(cookiesSet).toHaveBeenCalledWith(
+      REFRESH_COOKIE_NAME,
+      'refresh-token',
+      expect.any(Object)
+    );
+    expect(ctx.body).toEqual({
+      data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
+    });
+    expect(sanitizeUser).toHaveBeenCalledWith(user);
+    // The events this login recorded go to the login family it just started: a random id in the
+    // session metadata, which every rotation copies, rather than the session id a refresh replaces.
+    const { metadata } = generateRefreshToken.mock.calls[0][2] as {
+      metadata: { familyId: string; loginAt: string; authMethod?: string };
+    };
+    expect(metadata.familyId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(metadata.loginAt).toEqual(expect.any(String));
+    expect(metadata.authMethod).toBeUndefined();
+    // The family id goes back to the caller, which claims the login's events with it.
+    expect(issued).toEqual({ familyId: metadata.familyId });
+  });
+
+  test('honours rememberMe from the request body by minting a refresh-type session', async () => {
+    const { sessionManagerFn, generateRefreshToken } = buildSessionManager({});
+    setStrapi(sessionManagerFn);
+
+    const { ctx } = buildCtx({ rememberMe: true });
+
+    await issueSession(ctx, user);
+
+    expect(generateRefreshToken).toHaveBeenCalledWith(
+      String(user.id),
+      expect.any(String),
+      expect.objectContaining({ type: 'refresh' })
+    );
+  });
+
+  test('lets deviceId/rememberMe options override the request body (reset-password parity)', async () => {
+    const { sessionManagerFn, generateRefreshToken } = buildSessionManager({});
+    setStrapi(sessionManagerFn);
+
+    // Body asks for rememberMe and carries its own deviceId; the explicit options must win over
+    // both, exactly like resetPassword forcing a fresh device id and a session-type cookie.
+    const { ctx } = buildCtx({ rememberMe: true, deviceId: 'body-device' });
+
+    await issueSession(ctx, user, { deviceId: 'forced-device', rememberMe: false });
+
+    expect(generateRefreshToken).toHaveBeenCalledWith(
+      String(user.id),
+      'forced-device',
+      expect.objectContaining({ type: 'session' })
+    );
+  });
+
+  test('falls back to internalServerError when the session manager is unavailable', async () => {
+    setStrapi(undefined);
+
+    const { ctx, internalServerError, cookiesSet } = buildCtx();
+
+    await issueSession(ctx, user);
+
+    expect(internalServerError).toHaveBeenCalled();
+    expect(cookiesSet).not.toHaveBeenCalled();
+    expect(ctx.body).toBeUndefined();
+  });
+
+  test('falls back to internalServerError when generateAccessToken errors, after the cookie is already set', async () => {
+    const { sessionManagerFn } = buildSessionManager({
+      generateAccessToken: vi.fn(() => Promise.resolve({ error: 'boom' } as any)),
+    });
+    setStrapi(sessionManagerFn);
+
+    const { ctx, internalServerError, cookiesSet } = buildCtx();
+
+    await issueSession(ctx, user);
+
+    expect(cookiesSet).toHaveBeenCalled();
+    expect(internalServerError).toHaveBeenCalled();
+    expect(ctx.body).toBeUndefined();
+  });
+});
+
+describe('trust cookie helpers', () => {
+  const setStrapi = (config: Record<string, unknown> = {}) => {
+    (globalThis as any).strapi = {
+      config: { get: vi.fn((key: string) => config[key]) },
+      log: { warn: vi.fn() },
+    };
+  };
+
+  const buildCtx = (secure = false) => {
+    const set = vi.fn();
+    return { ctx: { cookies: { set }, request: { secure } } as any, set };
+  };
+
+  beforeEach(() => {
+    setStrapi();
+  });
+
+  test('the cookie name is fixed', () => {
+    expect(MFA_TRUST_COOKIE_NAME).toBe('strapi_admin_mfa_trust');
+  });
+
+  test('buildTrustCookieOptions is the refresh cookie scope with an absolute expiry', () => {
+    const expiresAt = new Date(Date.now() + 60_000);
+
+    const options = buildTrustCookieOptions(expiresAt, false);
+
+    expect(options).toMatchObject({
+      httpOnly: true,
+      path: '/admin',
+      sameSite: 'lax',
+      overwrite: true,
+      expires: expiresAt,
+    });
+    expect(options.maxAge).toBeGreaterThan(0);
+    expect(options.maxAge).toBeLessThanOrEqual(60_000);
+  });
+
+  // The trust cookie is read by the admin API (`/admin/login/mfa`), never by the panel, so it
+  // takes the refresh cookie's path: a configured path that does not cover the API is ignored
+  // in favour of the API path. See `getRefreshCookiePath`.
+  test('buildTrustCookieOptions takes the refresh cookie scope, not a panel-only cookie path', () => {
+    setStrapi({
+      'admin.auth.cookie.path': '/dashboard',
+      'admin.auth.cookie.domain': 'example.com',
+    });
+
+    const options = buildTrustCookieOptions(new Date(Date.now() + 1_000));
+
+    expect(options.path).toBe('/admin');
+    expect(options.domain).toBe('example.com');
+  });
+
+  test('buildTrustCookieOptions honours a configured cookie path that covers the admin API', () => {
+    setStrapi({ 'admin.auth.cookie.path': '/' });
+
+    expect(buildTrustCookieOptions(new Date(Date.now() + 1_000)).path).toBe('/');
+  });
+
+  test('a past expiry yields a zero maxAge rather than a negative one', () => {
+    const options = buildTrustCookieOptions(new Date(Date.now() - 1_000));
+
+    expect(options.maxAge).toBe(0);
+  });
+
+  test('setTrustCookie writes the raw token under the trust cookie name', () => {
+    const { ctx, set } = buildCtx();
+    const expiresAt = new Date(Date.now() + 5_000);
+
+    setTrustCookie(ctx, 'raw-token', expiresAt);
+
+    expect(set).toHaveBeenCalledWith(
+      MFA_TRUST_COOKIE_NAME,
+      'raw-token',
+      expect.objectContaining({ httpOnly: true, expires: expiresAt })
+    );
+  });
+
+  test('clearTrustCookie expires the cookie in the past with the same scope', () => {
+    setStrapi({ 'admin.auth.cookie.path': '/' });
+    const { ctx, set } = buildCtx();
+
+    clearTrustCookie(ctx);
+
+    expect(set).toHaveBeenCalledWith(
+      MFA_TRUST_COOKIE_NAME,
+      '',
+      expect.objectContaining({ httpOnly: true, path: '/', expires: new Date(0) })
+    );
+  });
+});
+
+describe('sessionFamilyOf', () => {
+  test('reads the family from the metadata a rotation carries over', () => {
+    expect(
+      sessionFamilyOf({
+        sessionId: 'child',
+        createdAt: new Date('2026-11-04T10:00:00.000Z'),
+        metadata: { familyId: 'fam', loginAt: '2026-11-04T09:00:00.000Z', authMethod: 'sso' },
+      })
+    ).toEqual({ familyId: 'fam', startedAt: new Date('2026-11-04T09:00:00.000Z'), sso: true });
+  });
+
+  test('a session from before families existed is its own family', () => {
+    const createdAt = new Date('2026-11-04T10:00:00.000Z');
+    expect(sessionFamilyOf({ sessionId: 'old', createdAt, metadata: null })).toEqual({
+      familyId: 'old',
+      startedAt: createdAt,
+      sso: false,
+    });
   });
 });

@@ -2,7 +2,7 @@ import _, { castArray, toNumber } from 'lodash';
 
 import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
-import constants from '../../../../server/src/services/constants';
+import constants, { PRIVATE_MFA_FIELDS } from '../../../../server/src/services/constants';
 import type { AdminRoleWithUsersCount } from '../../../../server/src/services/role';
 import {
   LEGACY_USER_EVENTS,
@@ -272,6 +272,7 @@ const sanitizeUser = (user: any) => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
+      ...PRIVATE_MFA_FIELDS,
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };

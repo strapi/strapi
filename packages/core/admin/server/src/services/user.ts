@@ -4,6 +4,7 @@ import _, { defaults } from 'lodash';
 import { arrays, errors, emitAudit } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
+import constants, { PRIVATE_MFA_FIELDS } from './constants';
 import {
   AUDITED_EVENTS,
   LEGACY_USER_EVENTS,
@@ -24,7 +25,6 @@ import type {
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
-import constants from './constants';
 import type { AdminRoleWithUsersCount } from './role';
 
 const { SUPER_ADMIN_CODE } = constants;
@@ -66,6 +66,7 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
+      ...PRIVATE_MFA_FIELDS,
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
@@ -217,6 +218,29 @@ const updateById = async (
     strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
     await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
   }
+
+  return updatedUser;
+};
+
+/**
+ * Writes a password hashed earlier, with the events and audits of a password change. For a reset
+ * of a two-factor account, which commits the new password only once the second factor passed.
+ */
+const setPasswordHash = async (id: Data.ID, passwordHash: string): Promise<AdminUser> => {
+  const previous = await strapi.db
+    .query('admin::user')
+    .findOne({ where: { id }, populate: ['roles'] });
+  const updatedUser = await strapi.db.query('admin::user').update({
+    where: { id },
+    data: { password: passwordHash },
+    populate: ['roles'],
+  });
+
+  strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+  await emitAdminUserUpdateAudits(
+    { strapi },
+    { previous, updated: updatedUser, attributes: { password: passwordHash } }
+  );
 
   return updatedUser;
 };
@@ -522,6 +546,7 @@ const getLanguagesInUse = async (): Promise<string[]> => {
   return users.map((user) => user.preferedLanguage || 'en');
 };
 export default {
+  setPasswordHash,
   create,
   createFirstAdmin,
   updateById,

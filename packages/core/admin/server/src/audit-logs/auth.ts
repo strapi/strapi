@@ -18,6 +18,7 @@ export type LoginFailureReason =
   | 'unexpected_error'
   | 'invalid_credentials'
   | 'account_inactive'
+  | 'mfa_locked'
   | 'sso_connection_error'
   | 'sso_registration_disabled'
   | 'sso_role_misconfigured';
