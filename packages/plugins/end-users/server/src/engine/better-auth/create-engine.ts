@@ -23,6 +23,7 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../../constants';
+import { readCompatConfig } from '../../compat/config';
 import { parseDuration } from '../../config/duration';
 import { banState } from '../../utils/ban';
 import { setProviderClaims } from '../../utils/provider-claims';
@@ -34,6 +35,8 @@ import type {
   EngineSession,
   ID,
   InstalledMethod,
+  NativeEndpoint,
+  NativeResult,
   RequestMeta,
   SessionLookup,
 } from '../types';
@@ -51,6 +54,7 @@ import { emailSenders, strapiEmail, twoFactorOptions } from './plugins/strapi-em
 import { keyOfAccount, lockout } from './plugins/lockout';
 import { clearAttempts } from './lockout-counter';
 import { passwordPolicy } from './plugins/password-policy';
+import { strapiCompat } from './plugins/strapi-compat';
 import { resolvePreset } from './presets';
 import { providerProfile } from './plugins/provider-profile';
 import { strapiProfile } from './plugins/strapi-profile';
@@ -93,7 +97,10 @@ const betterAuthPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
  *   5. `lockout`          (failed password sign-ins lock the account), installed
  *   6. `password-policy`  (the admin's password rules on every way a password is set), installed
  *   7. `last-sign-in`, `provider-profile` (the email guard, the every-sign-in profile mappings)
- *   8. then, when they exist: `strapi-compat`, `legacy-jwt`
+ *   8. `legacy-jwt`, when it exists
+ *
+ * `strapi-compat` (the Users & Permissions routes) is installed before all of these when the
+ * compatibility mode is on, so a hook of its own runs ahead of theirs.
  */
 const strapiPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
   strapiNormalize(),
@@ -371,6 +378,7 @@ export const buildAuthOptions = (
   const genericOAuth = providers.genericOAuth.map((config) =>
     withClaims(strapi, (config as { providerId: string }).providerId, resolvePreset(config))
   );
+  const compat = readCompatConfig(strapi);
   const projectPlugins = (isPlain(project?.options) ? project?.options.plugins : undefined) ?? [];
   const senders = emailSenders(strapi);
 
@@ -439,6 +447,7 @@ export const buildAuthOptions = (
     ...merged,
     ...(trustedOrigins.length > 0 ? { trustedOrigins } : {}),
     plugins: [
+      ...(compat.usersPermissions ? [strapiCompat(strapi, compat)] : []),
       ...betterAuthPlugins(strapi),
       ...strapiPlugins(strapi),
       ...(genericOAuth.length > 0 ? [genericOAuthPlugin({ config: genericOAuth as never })] : []),
@@ -975,6 +984,27 @@ export const createEngine = (
 
     handle(request: Request) {
       return auth.handler(request);
+    },
+
+    async callNative<K extends NativeEndpoint>(
+      endpoint: K,
+      input: { body?: unknown; query?: unknown; headers: Headers }
+    ) {
+      // The instance this call starts on answers it, whatever a reload swaps in meanwhile
+      const instance = auth;
+      const call = (
+        instance.api as unknown as Record<string, (context: Plain) => Promise<unknown>>
+      )[endpoint];
+
+      // A refusal is thrown as Better Auth gave it: the compat route reads its code
+      const result = (await call({
+        ...(input.body !== undefined && { body: input.body }),
+        ...(input.query !== undefined && { query: input.query }),
+        headers: input.headers,
+        returnHeaders: true,
+      })) as { headers: Headers; response: NativeResult<K> };
+
+      return { headers: result.headers, response: result.response };
     },
 
     getSession: async (headers: Headers) => (await lookupSession(headers)).session,
