@@ -30,4 +30,4 @@ Redirects for moved pages only work in a production build. To test them, run `ya
 
 ## Writing docs
 
-Read [Writing docs](docs/contributing/07-writing-docs.md) before you add or move a page. It is also published at [contributor.strapi.io/contributing/writing-docs](https://contributor.strapi.io/contributing/writing-docs). Agents read [AGENTS.md](AGENTS.md) in this folder.
+Read [Writing docs](docs/contributing/07-writing-docs.md) before you add or move a page. It is also published at [contributor.strapi.io/contributing/writing-docs](https://contributor.strapi.io/). Agents read [AGENTS.md](AGENTS.md) in this folder.

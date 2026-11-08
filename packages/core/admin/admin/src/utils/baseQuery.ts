@@ -2,6 +2,7 @@ import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 import {
+  getFailedRequestSessionToken,
   getFetchClient,
   triggerSessionExpired,
   type FetchOptions,
@@ -69,7 +70,7 @@ const simpleQuery: BaseQueryFn<
         if (!isAuthPath(url)) {
           // Defer clearing auth state to AuthProvider so unsaved-change guards
           // can run before token removal (which unmounts edit forms).
-          triggerSessionExpired();
+          triggerSessionExpired(getFailedRequestSessionToken(err));
         }
       }
 

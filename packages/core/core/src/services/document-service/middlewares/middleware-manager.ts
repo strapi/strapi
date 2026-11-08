@@ -25,13 +25,13 @@ export const createMiddlewareManager = () => {
       const next = async () => {
         if (index < middlewares.length) {
           // eslint-disable-next-line no-plusplus
-          return middlewares[index++](ctx, next);
+          return await middlewares[index++](ctx, next);
         }
 
         return cb();
       };
 
-      return next();
+      return await next();
     },
 
     wrapObject<TSource>(source: TSource, ctxDefaults = {}, opts: Options = {}): TSource {
@@ -52,7 +52,7 @@ export const createMiddlewareManager = () => {
                 params,
               };
 
-              return manager.run(ctx, () => prop(ctx.params));
+              return await manager.run(ctx, () => prop(ctx.params));
             };
 
             facade[key] = newMethod as typeof prop;

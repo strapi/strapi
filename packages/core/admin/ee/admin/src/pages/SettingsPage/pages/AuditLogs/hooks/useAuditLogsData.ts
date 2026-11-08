@@ -2,27 +2,25 @@ import * as React from 'react';
 
 import { useNotification } from '../../../../../../../../admin/src/features/Notifications';
 import { useAPIErrorHandler } from '../../../../../../../../admin/src/hooks/useAPIErrorHandler';
-import { useQueryParams } from '../../../../../../../../admin/src/hooks/useQueryParams';
+import { GetAll } from '../../../../../../../../shared/contracts/audit-logs';
 import { useGetAuditLogsQuery, useGetAuditLogUsersQuery } from '../../../../../services/auditLogs';
 
-export const useAuditLogsData = ({
+/**
+ * The authors the user filter lists. The filters the logs are fetched with depend on them, so the
+ * logs are fetched by `useAuditLogs`.
+ */
+export const useAuditLogUsers = ({
   canReadAuditLogs,
-  usersPageSize,
+  pageSize,
 }: {
   canReadAuditLogs: boolean;
-  usersPageSize: number;
+  pageSize: number;
 }) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const [{ query }] = useQueryParams();
 
-  const {
-    data,
-    error,
-    isError: isUsersError,
-    isLoading: isLoadingUsers,
-  } = useGetAuditLogUsersQuery(
-    { pageSize: usersPageSize },
+  const { data, error, isError, isLoading } = useGetAuditLogUsersQuery(
+    { pageSize },
     {
       skip: !canReadAuditLogs,
       refetchOnMountOrArgChange: true,
@@ -43,28 +41,36 @@ export const useAuditLogsData = ({
     }
   }, [error, toggleNotification, formatAPIError]);
 
-  const {
-    data: auditLogs,
-    isLoading: isLoadingAuditLogs,
-    isError: isAuditLogsError,
-    error: auditLogsError,
-  } = useGetAuditLogsQuery(query, {
+  return {
+    users: usersData?.results ?? [],
+    usersPagination: usersData?.pagination ?? undefined,
+    isLoadingUsers: isLoading,
+    // Loading more authors keeps the ones already listed
+    isLoading: isLoading && !usersData,
+    hasError: isError,
+  };
+};
+
+export const useAuditLogs = ({
+  canReadAuditLogs,
+  query,
+}: {
+  canReadAuditLogs: boolean;
+  query: GetAll.Request['query'];
+}) => {
+  const { toggleNotification } = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+
+  const { data, isLoading, isError, error } = useGetAuditLogsQuery(query, {
     refetchOnMountOrArgChange: true,
     skip: !canReadAuditLogs,
   });
 
   React.useEffect(() => {
-    if (auditLogsError) {
-      toggleNotification({ type: 'danger', message: formatAPIError(auditLogsError) });
+    if (error) {
+      toggleNotification({ type: 'danger', message: formatAPIError(error) });
     }
-  }, [auditLogsError, toggleNotification, formatAPIError]);
+  }, [error, toggleNotification, formatAPIError]);
 
-  return {
-    auditLogs,
-    users: usersData?.results ?? [],
-    usersPagination: usersData?.pagination ?? undefined,
-    isLoadingUsers,
-    isLoading: (isLoadingUsers && !usersData) || isLoadingAuditLogs,
-    hasError: isAuditLogsError || isUsersError,
-  };
+  return { auditLogs: data, isLoading, hasError: isError };
 };

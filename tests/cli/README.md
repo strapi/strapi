@@ -35,7 +35,7 @@ Jest is started from `tests/utils/runners/cli-runner.js` via **execa** with a **
 
 So you do **not** need to whitelist variables in the runner. For **stress runs**, set `TRANSFER_CLI_MEDIA_COUNT` / `TRANSFER_CLI_MEDIA_BYTES` in the same shell as `yarn test:cli` so the seed scripts see them (defaults are tiny: 2 files × 2048 bytes).
 
-The same merge behavior applies to **e2e**: `tests/utils/runners/browser-runner.js` only sets `PORT`, `HOST`, `TEST_APP_PATH`, and `STRAPI_DISABLE_EE`; the rest of the environment is inherited from how you invoked `yarn test:e2e`.
+The same merge behavior applies to **e2e**: `tests/utils/runners/browser-runner.js` only sets `PORT`, `HOST` and `TEST_APP_PATH`; the rest of the environment is inherited from how you invoked `yarn test:e2e`, including the edition (`STRAPI_E2E_EDITION`, `STRAPI_DISABLE_EE`) that `applyE2eEditionEnv()` sets when `tests/scripts/run-tests.js` starts.
 
 ### Remote transfer e2e (pull and push, generated media)
 

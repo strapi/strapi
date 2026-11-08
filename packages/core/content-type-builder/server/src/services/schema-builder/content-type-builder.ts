@@ -186,6 +186,8 @@ export default function createComponentBuilder() {
         : path.join(strapi.dirs.app.api, infos.singularName, 'content-types', infos.singularName);
 
       const contentType = createSchemaHandler({
+        uid,
+        isNew: true,
         modelName: infos.singularName,
         dir,
         filename: `schema.json`,
@@ -194,7 +196,6 @@ export default function createComponentBuilder() {
       this.contentTypes.set(uid, contentType);
 
       contentType
-        .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set(
           'collectionName',

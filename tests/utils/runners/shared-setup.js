@@ -5,34 +5,6 @@ const execa = require('execa');
 const fs = require('node:fs/promises');
 const { cleanTestApp, generateTestApp } = require('../../helpers/test-app');
 
-const pathExists = async (filePath) => {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch (err) {
-    return false;
-  }
-};
-
-/**
- * Updates the env file for a generated test app (browser-specific)
- * - Uses app-template/config/features.js to enable future features in the generated app
- */
-const setupTestEnvironment = async (generatedAppPath, templateDir) => {
-  /*
-   * Enable future features in the generated app manually since a template
-   * does not allow the config folder.
-   */
-  const testRootFeaturesConfigPath = path.join(templateDir, 'config', 'features.js');
-  const hasFeaturesConfig = await pathExists(testRootFeaturesConfigPath);
-
-  if (!hasFeaturesConfig) return;
-
-  const configFeatures = await fs.readFile(testRootFeaturesConfigPath);
-  const appFeaturesConfigPath = path.join(generatedAppPath, 'config', 'features.js');
-  await fs.writeFile(appFeaturesConfigPath, configFeatures);
-};
-
 /**
  * Publish all packages to yalc store
  */
@@ -53,7 +25,6 @@ const setupTestApps = async ({
   templateDir,
   setup,
   currentTestApps,
-  setupTestEnvironment,
   // When true (e2e), create one git commit per generated app as the `resetFiles` save point.
   commitE2eBaseline = false,
 }) => {
@@ -100,11 +71,6 @@ const setupTestApps = async ({
         const envFile = (await fs.readFile(pathToEnv)).toString();
         const envWithoutPort = envFile.replace('PORT=1337', '');
         await fs.writeFile(pathToEnv, envWithoutPort);
-
-        // Run additional setup if provided (browser-specific setupTestEnvironment)
-        if (setupTestEnvironment) {
-          await setupTestEnvironment(appPath, templateDir);
-        }
       })
     );
 
@@ -165,5 +131,4 @@ module.exports = {
   publishYalc,
   setupTestApps,
   getCurrentTestApps,
-  setupTestEnvironment,
 };

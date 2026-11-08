@@ -12,6 +12,7 @@ import { toPermission } from '../../domain/permission';
 describe('Permission Service', () => {
   beforeEach(() => {
     global.strapi = {
+      log: { warn: vi.fn() },
       admin: {
         services: {
           condition: {
@@ -314,6 +315,185 @@ describe('Permission Service', () => {
       expect(deletedIds).toContain(1);
       expect(deletedIds).not.toContain(2);
       expect(update).not.toHaveBeenCalled();
+    });
+
+    describe('logging', () => {
+      const setupCleanup = (
+        permsInDb: unknown[],
+        registeredActions: string[],
+        actionSubjects: Record<string, string[]> = {}
+      ) => {
+        const warn = vi.fn();
+        const dbDelete = vi.fn(() => Promise.resolve());
+
+        global.strapi = merge({}, global.strapi, {
+          log: { warn },
+          db: {
+            query: () => ({
+              findMany: vi.fn(({ limit, offset }: { limit: number; offset: number }) =>
+                Promise.resolve(permsInDb.slice(offset, offset + limit))
+              ),
+              delete: dbDelete,
+              update: vi.fn(() => Promise.resolve()),
+              count: vi.fn(() => Promise.resolve(permsInDb.length)),
+            }),
+          },
+          admin: {
+            services: {
+              'content-type': { cleanPermissionFields: vi.fn((perms: unknown[]) => perms) },
+              permission: {
+                actionProvider: {
+                  has: vi.fn((id: string) => registeredActions.includes(id)),
+                  get: vi.fn((id: string) =>
+                    actionSubjects[id] === undefined ? undefined : { subjects: actionSubjects[id] }
+                  ),
+                },
+              },
+            },
+          },
+          eventHub: { emit: vi.fn() },
+        });
+
+        return { warn, dbDelete };
+      };
+
+      const perm = (id: number, action: string, owner: Record<string, unknown>) => ({
+        id,
+        action,
+        actionParameters: {},
+        subject: null,
+        properties: {},
+        conditions: [],
+        role: null,
+        apiToken: null,
+        ...owner,
+      });
+
+      test('warns with the count, actions, roles and admin tokens of the removed permissions', async () => {
+        const auditor = { id: 3, name: 'QA Auditor' };
+        const siemToken = { id: 7, name: 'qa-siem-token' };
+        const { warn, dbDelete } = setupCleanup(
+          [
+            perm(1, 'admin::audit-logs.read', { role: auditor }),
+            perm(2, 'admin::audit-logs.export', { role: auditor }),
+            perm(3, 'admin::audit-logs.read', { apiToken: siemToken }),
+            perm(4, 'admin::audit-logs.export', { apiToken: siemToken }),
+            perm(5, 'admin::users.read', { role: auditor }),
+            perm(6, 'admin::users.read', {}),
+          ],
+          ['admin::users.read']
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(5);
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn).toHaveBeenCalledWith(
+          'Removed 5 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Actions: admin::audit-logs.read, admin::audit-logs.export, admin::users.read. ' +
+            'Subjects: none. ' +
+            'Roles: "QA Auditor" (id 3). ' +
+            'Admin tokens: "qa-siem-token" (id 7). ' +
+            'Without role or admin token: 1.'
+        );
+      });
+
+      test('lists the subjects of the removed permissions', async () => {
+        const editor = { id: 2, name: 'Editor' };
+        const { warn, dbDelete } = setupCleanup(
+          [
+            {
+              ...perm(1, 'plugin::content-manager.explorer.read', { role: editor }),
+              subject: 'api::article.article',
+            },
+            {
+              ...perm(2, 'plugin::content-manager.explorer.read', { role: editor }),
+              subject: 'api::legacy.legacy',
+            },
+            {
+              ...perm(3, 'plugin::content-manager.explorer.update', { role: editor }),
+              subject: 'api::legacy.legacy',
+            },
+          ],
+          ['plugin::content-manager.explorer.read', 'plugin::content-manager.explorer.update'],
+          {
+            'plugin::content-manager.explorer.read': ['api::article.article'],
+            'plugin::content-manager.explorer.update': ['api::article.article'],
+          }
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(2);
+        expect(warn).toHaveBeenCalledWith(
+          'Removed 2 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Actions: plugin::content-manager.explorer.read, plugin::content-manager.explorer.update. ' +
+            'Subjects: api::legacy.legacy. ' +
+            'Roles: "Editor" (id 2). ' +
+            'Admin tokens: none. ' +
+            'Without role or admin token: 0.'
+        );
+      });
+
+      test('warns once with the totals when the removed permissions span several pages', async () => {
+        // 450 rows: 3 pages of 200, removed rows on each page
+        const permsInDb = Array.from({ length: 450 }, (_, index) => {
+          const id = index + 1;
+          if (id <= 200) {
+            return perm(id, 'admin::audit-logs.read', { role: { id: 3, name: 'QA Auditor' } });
+          }
+          if (id <= 400) {
+            return perm(id, 'admin::audit-logs.export', { apiToken: { id: 7, name: 'siem' } });
+          }
+          return perm(id, 'admin::users.read', { role: { id: 2, name: 'Editor' } });
+        });
+        permsInDb[449] = perm(450, 'admin::legacy.read', { role: { id: 2, name: 'Editor' } });
+
+        const { warn, dbDelete } = setupCleanup(permsInDb, ['admin::users.read']);
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(401);
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn).toHaveBeenCalledWith(
+          'Removed 401 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Actions: admin::audit-logs.read, admin::audit-logs.export, admin::legacy.read. ' +
+            'Subjects: none. ' +
+            'Roles: "QA Auditor" (id 3), "Editor" (id 2). ' +
+            'Admin tokens: "siem" (id 7). ' +
+            'Without role or admin token: 0.'
+        );
+      });
+
+      test('quotes role and admin token names so the warning stays on one line', async () => {
+        const { warn } = setupCleanup(
+          [
+            perm(1, 'admin::legacy.read', { role: { id: 3, name: 'Evil\nRole "x"' } }),
+            perm(2, 'admin::legacy.read', { apiToken: { id: 7, name: 'evil\r\ntoken' } }),
+          ],
+          []
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(warn).toHaveBeenCalledTimes(1);
+        const message = warn.mock.calls[0][0] as string;
+        expect(message).not.toMatch(/[\r\n]/);
+        expect(message).toContain('Roles: "Evil\\nRole \\"x\\"" (id 3). ');
+        expect(message).toContain('Admin tokens: "evil\\r\\ntoken" (id 7). ');
+      });
+
+      test('does not warn when nothing is removed', async () => {
+        const { warn, dbDelete } = setupCleanup(
+          [perm(1, 'admin::users.read', { role: { id: 1, name: 'Editor' } })],
+          ['admin::users.read']
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).not.toHaveBeenCalled();
+        expect(warn).not.toHaveBeenCalled();
+      });
     });
   });
 });

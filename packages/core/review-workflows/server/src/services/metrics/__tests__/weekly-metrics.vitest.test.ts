@@ -102,4 +102,45 @@ describe('weekly review workflow metrics', () => {
       expect(setStore).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('ensureWeeklyStoredCronSchedule', () => {
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const storeKey = { type: 'plugin', name: 'ee', key: 'metrics' };
+
+    const createStrapi = (stored: unknown) => {
+      const store = { get: vi.fn(async () => stored), set: vi.fn() };
+      return { store, strapi: { store } as unknown as Core.Strapi };
+    };
+
+    it('resolves the stored schedule when the last send is less than a week old', async () => {
+      const stored = { weeklySchedule: '1 2 3 * * 4', lastWeeklyUpdate: Date.now() - ONE_DAY };
+      const { store, strapi } = createStrapi(stored);
+
+      await expect(weeklyMetrics({ strapi }).ensureWeeklyStoredCronSchedule()).resolves.toBe(
+        '1 2 3 * * 4'
+      );
+      expect(store.get).toHaveBeenCalledWith(storeKey);
+      expect(store.set).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['nothing is stored', null],
+      ['no schedule is stored', { lastWeeklyUpdate: Date.now() }],
+      ['no send is stored', { weeklySchedule: '1 2 3 * * 4' }],
+      [
+        'the last send is more than a week old',
+        { weeklySchedule: '1 2 3 * * 4', lastWeeklyUpdate: Date.now() - 8 * ONE_DAY },
+      ],
+    ])('stores and resolves a new six-field schedule when %s', async (_, stored) => {
+      const { store, strapi } = createStrapi(stored);
+
+      const schedule = await weeklyMetrics({ strapi }).ensureWeeklyStoredCronSchedule();
+
+      expect(schedule).toMatch(/^\d+ \d+ \d+ \* \* \d$/);
+      expect(store.set).toHaveBeenCalledWith({
+        ...storeKey,
+        value: { ...stored, weeklySchedule: schedule },
+      });
+    });
+  });
 });

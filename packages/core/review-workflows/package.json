@@ -53,7 +53,7 @@
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
-    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front": "run -T jest --config ./jest.config.front.js",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch",
     "test:ts:back": "run -T tsc -p server/tsconfig.json",
