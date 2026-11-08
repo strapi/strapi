@@ -457,6 +457,64 @@ describe('Folder', () => {
       data.folders.push(...resFolders.body.data);
     });
 
+    test('Move a folder whose descendant pathId starts with its own pathId', async () => {
+      const destination = await createFolder('prefix-destination', null);
+      const moved = await createFolder('prefix-moved', null);
+
+      // The next pathId is max + 1, so this makes the child's pathId start with the moved folder's
+      const pad = await createFolder('prefix-pad', destination.id);
+      await strapi.db.query('plugin::upload.folder').update({
+        where: { id: pad.id },
+        data: { pathId: moved.pathId * 10 - 1 },
+      });
+
+      const child = await createFolder('prefix-child', moved.id);
+      const grandchild = await createFolder('prefix-grandchild', child.id);
+      const file = await createAFile(child.id);
+
+      expect(child.pathId).toBe(moved.pathId * 10);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${moved.id}`,
+        body: { name: moved.name, parent: destination.id },
+      });
+
+      expect(res.status).toBe(200);
+
+      const movedPath = `${destination.path}/${moved.pathId}`;
+      const resFolders = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: {
+          filters: { id: { $in: [moved.id, child.id, grandchild.id] } },
+          sort: 'id:asc',
+        },
+      });
+
+      expect(resFolders.body.data.map((folder) => folder.path)).toEqual([
+        movedPath,
+        `${movedPath}/${child.pathId}`,
+        `${movedPath}/${child.pathId}/${grandchild.pathId}`,
+      ]);
+
+      const resFile = await rq({ method: 'GET', url: `/upload/files/${file.id}` });
+
+      expect(resFile.body.folderPath).toBe(`${movedPath}/${child.pathId}`);
+
+      data.folders.push(destination);
+    });
+
+    test('Return 404 when moving a folder that does not exist', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/upload/folders/99999',
+        body: { name: 'new name', parent: null },
+      });
+
+      expect(res.status).toBe(404);
+    });
+
     test('Move a folder to root level', async () => {
       const folder0 = await createFolder('folder-test-0', null);
       const folder00 = await createFolder('folder-test-00', folder0.id);
