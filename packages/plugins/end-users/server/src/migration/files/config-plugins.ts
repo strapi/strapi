@@ -906,6 +906,9 @@ const mergeInto = (
       continue;
     }
 
+    // An object the block sets over a value that is not written out as one (a variable, a call)
+    if (ts.isObjectLiteralExpression(incomingValue)) return null;
+
     const wantedText = blockText.slice(
       property.initializer.getStart(blockSf),
       property.initializer.end

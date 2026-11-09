@@ -303,7 +303,13 @@ const snapshot = async (knex: any) => ({
 describe('runRollback', () => {
   beforeEach(() => {
     vi.mocked(updateRecord).mockClear();
-    record = { status: 'completed', claim: { by: 'me' }, staged: {}, carried: { copied: [] } };
+    record = {
+      status: 'completed',
+      claim: { by: 'me' },
+      staged: {},
+      carried: { copied: [] },
+      completedSteps: ['pre-sync', 'users', 'roles'],
+    };
   });
 
   it('restores spelling, roles and profile values, and leaves the same state when run again after the renames', async () => {
@@ -364,6 +370,29 @@ describe('runRollback', () => {
     expect(
       (await knex('up_users').orderBy('id').select('username')).map((u: Row) => u.username)
     ).toEqual(['Alice', 'Bob', 'Carl']);
+    await knex.destroy();
+  });
+
+  it('leaves confirmed, blocked and the role types alone when the users and roles steps never ran', async () => {
+    const { knex, db, ctx } = await project(true, []);
+
+    await knex('up_users').where({ id: 1 }).update({ confirmed: false, blocked: true });
+    await knex('up_users').where({ id: 2 }).update({ confirmed: true, blocked: false });
+    await knex('up_roles').where({ id: 2 }).update({ type: 'content_team' });
+    record.status = 'in-progress';
+    record.completedSteps = ['pre-sync'];
+
+    await runRollback(knex as never, db, ctx);
+
+    const users = await knex('up_users').orderBy('id').select('id', 'confirmed', 'blocked');
+
+    expect(users.map((u: Row) => [u.confirmed, u.blocked])).toEqual([
+      [0, 1],
+      [1, 0],
+      [null, null],
+    ]);
+    expect((await knex('up_roles').where({ id: 2 }).first()).type).toBe('content_team');
+    expect(record.status).toBe('rolled-back');
     await knex.destroy();
   });
 

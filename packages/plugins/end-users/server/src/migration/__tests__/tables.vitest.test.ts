@@ -81,4 +81,18 @@ describe('upLinkColumn', () => {
     expect(upLinkColumn(l, 'profile_id', 'oneToOne')).toBe('user_id');
     expect(upLinkColumn(l, 'user_id', 'oneToOne')).toBe('inv_user_id');
   });
+
+  it('maps a relation to a type called profile onto user_id and profile_id', () => {
+    const l = {
+      joinColumn: { name: 'profile_id' },
+      inverseJoinColumn: { name: 'inv_profile_id' },
+      orderColumnName: 'profile_order',
+      inverseOrderColumnName: 'inv_profile_order',
+    };
+
+    expect(upLinkColumn(l, 'profile_id', 'manyToMany')).toBe('user_id');
+    expect(upLinkColumn(l, 'inv_profile_id', 'manyToMany')).toBe('profile_id');
+    expect(upLinkColumn(l, 'profile_order', 'manyToMany')).toBe('profile_order');
+    expect(upLinkColumn(l, 'inv_profile_order', 'manyToMany')).toBe('user_order');
+  });
 });

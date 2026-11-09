@@ -334,4 +334,11 @@ describe('config/plugins', () => {
     expect(after).toBeNull();
     expect(switchFindings[0].rule).toBe('config-not-editable');
   });
+
+  it('does not replace a nested value that is not written out as an object', async () => {
+    const { after, switchFindings } = await plan('choices-variable.ts.txt', 'config/plugins.ts');
+
+    expect(after).toBeNull();
+    expect(switchFindings[0].rule).toBe('config-not-editable');
+  });
 });

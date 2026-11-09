@@ -269,7 +269,7 @@ const countOf = async (query: Knex.QueryBuilder): Promise<number> =>
   Number(((await query.count({ c: '*' }).first()) as Row | undefined)?.c ?? 0);
 
 /** The user's own columns, brought back from what end-users keeps: verification, ban, provider, username, moved values */
-const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) => {
+const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: string) => {
   const account = modelOf(db, ACCOUNT_UID);
   const verified = columnOf(db, USER_UID, 'emailVerified') ?? 'email_verified';
   const banned = columnOf(db, USER_UID, 'banned') ?? 'banned';
@@ -286,8 +286,11 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
     }
   };
 
-  await copy('confirmed', verified);
-  await copy('blocked', banned);
+  // Only the users step fills `email_verified` and `banned`, from the columns being copied back here
+  if (record.completedSteps.includes('users')) {
+    await copy('confirmed', verified);
+    await copy('blocked', banned);
+  }
 
   if (hasAccounts && columns.includes('provider')) {
     const accounts = (alias: string) =>
@@ -425,7 +428,11 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
 };
 
 /** The users' roles: one each, the first by order and then by id, and the role types users-permissions keeps */
-const restoreRoles = async ({ db, trx, lost }: Run, roleTable: string, linkName: string) => {
+const restoreRoles = async (
+  { db, trx, lost, record }: Run,
+  roleTable: string,
+  linkName: string
+) => {
   const user = modelOf(db, USER_UID);
   const joinTable = user.attributes.roles?.joinTable as
     | {
@@ -487,7 +494,10 @@ const restoreRoles = async ({ db, trx, lost }: Run, roleTable: string, linkName:
   const isCustom = (type: string | null) => !type || !PUBLIC_ROLES.has(type);
   const taken = new Set(roles.filter((role) => !isCustom(role.type)).map((role) => role.type!));
 
-  for (const role of roles.filter((entry) => isCustom(entry.type))) {
+  // A role the roles step never reached keeps the type it has
+  for (const role of record.completedSteps.includes('roles')
+    ? roles.filter((entry) => isCustom(entry.type))
+    : []) {
     const type = upRoleType(role.name ?? '', taken);
 
     taken.add(type);

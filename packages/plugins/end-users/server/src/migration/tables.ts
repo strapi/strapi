@@ -65,7 +65,9 @@ export interface LinkTable {
  * for the same relation. The profile owns the relation, so its own side is `user_id` there. When the
  * other side is named `user_id` too, a relation to the user itself or to a type whose singular name is
  * `user` (the admin's, which review workflows' assignee points at), the metadata layer calls that
- * side `inv_user_id`, and its order column `inv_user_order` on a many-to-many.
+ * side `inv_user_id`, and its order column `inv_user_order` on a many-to-many. A relation to a type
+ * called profile is the profile's own two sides, `profile_id` and `inv_profile_id`, which Users &
+ * Permissions' table calls `user_id` and `profile_id`.
  */
 export const upLinkColumn = (link: LinkTable, column: string, relation?: string): string => {
   if (column === link.joinColumn.name) {
@@ -73,6 +75,12 @@ export const upLinkColumn = (link: LinkTable, column: string, relation?: string)
   }
 
   if (column === link.inverseJoinColumn.name) {
+    // A target that is also called profile: its table names the other side `inv_<join column>`,
+    // Users & Permissions' table names it like the join column of the profile (`profile_id`)
+    if (column === `inv_${link.joinColumn.name}`) {
+      return link.joinColumn.name;
+    }
+
     return column === 'user_id' ? 'inv_user_id' : column;
   }
 
