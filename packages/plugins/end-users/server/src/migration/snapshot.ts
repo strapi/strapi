@@ -128,11 +128,8 @@ const listNotNullColumns = async (knex: Knex, client: DbClient): Promise<string[
  * Rows whose `column` repeats once lower-cased, grouped in SQL: only the rows of a repeated value
  * come back, oldest id first, and never the value itself.
  */
-const duplicatesOf = async (
-  knex: Knex,
-  table: string,
-  column: string
-): Promise<DuplicateGroup[]> => {
+/** The query behind `duplicatesOf`; the subquery is a list, which every client accepts */
+export const duplicatesQuery = (knex: Knex, table: string, column: string): Knex.QueryBuilder => {
   const repeated = knex(table)
     .select(knex.raw(`LOWER(${column})`))
     .whereNotNull(column)
@@ -140,10 +137,18 @@ const duplicatesOf = async (
     .groupByRaw(`LOWER(${column})`)
     .havingRaw('COUNT(*) > 1');
 
-  const rows: Row[] = await knex(`${table} as t`)
+  return knex(`${table} as t`)
     .select('t.id as id', knex.raw(`LOWER(t.${column}) as k`))
-    .whereRaw(`LOWER(t.${column}) IN (?)`, [repeated])
+    .whereIn(knex.raw('LOWER(t.??)', [column]) as unknown as string, repeated)
     .orderBy('t.id');
+};
+
+const duplicatesOf = async (
+  knex: Knex,
+  table: string,
+  column: string
+): Promise<DuplicateGroup[]> => {
+  const rows: Row[] = await duplicatesQuery(knex, table, column);
 
   const groups = new Map<string, number[]>();
 
@@ -347,7 +352,11 @@ export const readUpSnapshot = async (knex: Knex, client: DbClient): Promise<UpSn
   const tables = await listTables(knex, client);
   const has = (name: string) => tables.includes(name);
   const hasUsers = has('up_users');
-  const hasRoles = has('up_roles') && has('up_permissions') && has('up_permissions_role_lnk');
+  const hasRoles =
+    has('up_roles') &&
+    has('up_permissions') &&
+    has('up_permissions_role_lnk') &&
+    has('up_users_role_lnk');
 
   const store = {
     grant: await readStore<UpGrant>(knex, 'grant'),

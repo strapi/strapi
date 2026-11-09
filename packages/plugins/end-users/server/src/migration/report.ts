@@ -23,7 +23,6 @@ export interface ReportContext {
   now: Date;
   permissionContext: PermissionMapContext;
   requiredProviderFields: (id: string) => string[] | null;
-  isAllowedRedirect: (url: string) => boolean;
   graphqlNullable: Array<{ uid: string; fields: string[] }>;
   /** U&P config keys the project sets (check only) */
   configKeys: string[];
@@ -89,13 +88,6 @@ export const CODE_FINDING_SEVERITY: Readonly<Record<CodeFindingRule, Severity>> 
 const MAX_REFS = 200;
 
 const UP = 'plugin::users-permissions.';
-const STANDARD_TABLES = new Set([
-  'up_users',
-  'up_roles',
-  'up_permissions',
-  'up_users_role_lnk',
-  'up_permissions_role_lnk',
-]);
 
 const item = (
   kind: MigrationItemKind,
@@ -138,7 +130,7 @@ const duplicateItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
         'duplicate-email',
         'all',
         `${plural(emails.length, 'email address', 'email addresses')} used by more than one user once capitals are ignored. ` +
-          `The oldest user in each group keeps the address; the other ${plural(rewritten, 'user')} are rewritten. ` +
+          `The oldest user in each group keeps the address; the other ${plural(rewritten, 'user')} ${rewritten === 1 ? 'is' : 'are'} rewritten. ` +
           `Each ref is the kept id, then the rewritten ids.`,
         { count: emails.length, refs: groupRefs(emails) }
       )
@@ -152,7 +144,7 @@ const duplicateItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
         'duplicate-username',
         'all',
         `${plural(names.length, 'username')} used by more than one user once capitals are ignored. ` +
-          `The oldest user in each group keeps the name; the other ${plural(rewritten, 'user')} are rewritten. ` +
+          `The oldest user in each group keeps the name; the other ${plural(rewritten, 'user')} ${rewritten === 1 ? 'is' : 'are'} rewritten. ` +
           `Each ref is the kept id, then the rewritten ids.`,
         { count: names.length, refs: groupRefs(names) }
       )
@@ -428,8 +420,8 @@ const accountItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
       item(
         'pending-tokens',
         'all',
-        `${plural(users.pendingResets, 'password reset token')} are not carried; those users ask for a new reset. ` +
-          `${plural(users.pendingConfirmations, 'confirmation link')} keep working while compatibility mode is on.`,
+        `${plural(users.pendingResets, 'password reset token')} ${users.pendingResets === 1 ? 'is' : 'are'} not carried; those users ask for a new reset. ` +
+          `${plural(users.pendingConfirmations, 'confirmation link')} ${users.pendingConfirmations === 1 ? 'keeps' : 'keep'} working while compatibility mode is on.`,
         { count: users.pendingResets + users.pendingConfirmations }
       )
     );
@@ -448,21 +440,8 @@ const accountItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
 
 const structureItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
   const items: MigrationReportItem[] = [];
-  const extra = snapshot.tables.filter((table) => !STANDARD_TABLES.has(table));
   const tokens = snapshot.apiTokens;
   const adminPermissions = snapshot.adminPermissions;
-
-  if (extra.length > 0) {
-    items.push(
-      item(
-        'staged-undeclared',
-        'all',
-        `${plural(extra.length, 'table')} beyond the standard users-permissions ones hold data of attributes or relations added to the user type. ` +
-          'Their rows are carried only for what the user type declares again; declare each before migrating, or its data stays out of the new tables.',
-        { count: extra.length, refs: extra }
-      )
-    );
-  }
 
   if (snapshot.notNullColumns.length > 0) {
     items.push(

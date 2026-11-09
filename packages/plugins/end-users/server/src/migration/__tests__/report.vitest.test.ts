@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { COMPAT_ROWS } from '../../compat/rows';
 import { buildReport, CODE_FINDING_SEVERITY, ITEM_SEVERITY, nullableOnGraphql } from '../report';
 import type { ReportContext } from '../report';
-import { readUpSnapshot } from '../snapshot';
+import { duplicatesQuery, readUpSnapshot } from '../snapshot';
 import type { UpSnapshot } from '../snapshot';
 
 // Runtime-built, so no secret-shaped literal sits in the source
@@ -56,7 +56,6 @@ const context = (over: Partial<ReportContext> = {}): ReportContext => ({
     isKnownAction: () => true,
   },
   requiredProviderFields: () => [],
-  isAllowedRedirect: () => true,
   graphqlNullable: [],
   configKeys: [],
   codeFindings: [],
@@ -236,7 +235,6 @@ describe('buildReport', () => {
 
   it('lists the other groups once each', () => {
     const snapshot = emptySnapshot();
-    snapshot.tables.push('up_users_cmps');
     snapshot.notNullColumns = ['company'];
     snapshot.apiTokens = [{ id: 5, actions: ['plugin::users-permissions.user.find'] }];
     snapshot.adminPermissions = [
@@ -253,7 +251,6 @@ describe('buildReport', () => {
     );
 
     for (const id of [
-      'staged-undeclared:all',
       'not-null-column:all',
       'api-token:all',
       'admin-permission:all',
@@ -281,6 +278,16 @@ describe('nullableOnGraphql', () => {
         b: { attributes: { x: { required: true } } },
       })
     ).toEqual([{ uid: 'a', fields: ['y', 'z'] }]);
+  });
+});
+
+describe('duplicatesQuery', () => {
+  it.each(['pg', 'mysql2'])('builds the subquery as a list on %s', (client) => {
+    const db = knex({ client });
+    const { sql } = duplicatesQuery(db, 'up_users', 'email').toSQL();
+
+    expect(sql).toContain('in (select');
+    expect(sql).not.toContain('in ((select');
   });
 });
 
@@ -413,6 +420,22 @@ describe('readUpSnapshot', () => {
       users: 2,
     });
     expect(snapshot.notNullColumns).toEqual(['company']);
+
+    await db('up_users').insert([
+      { username: 'bob', email: 'b@x.io', provider: 'local', company: 'c' },
+      { username: 'BOB', email: 'B@x.io', provider: 'local', company: 'c' },
+      { username: 'bob2', email: 'bob2@x.io', provider: 'local', company: 'c' },
+    ]);
+    const more = await readUpSnapshot(db, 'sqlite');
+
+    expect(more.duplicateEmails).toEqual([
+      { keep: 1, rewrite: [2] },
+      { keep: 5, rewrite: [6] },
+    ]);
+    expect(more.duplicateUsernames).toEqual([
+      { keep: 1, rewrite: [2] },
+      { keep: 5, rewrite: [6] },
+    ]);
     expect(snapshot.euUsersRows).toBeNull();
     expect(snapshot.store).toEqual({
       grant: { github: { enabled: true } },
