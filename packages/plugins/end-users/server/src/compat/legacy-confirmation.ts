@@ -5,8 +5,10 @@ import { USER_UID } from '../constants';
 /**
  * The columns users-permissions kept on its user, which the user type carries while compatibility is
  * on: the migration copies them, and an old `?confirmation=` link is read from `confirmationToken`.
- * Types match users-permissions' own so schema sync never alters a carried column. All are private
- * and hidden in the Content Manager; none is written by a request.
+ * Types match users-permissions' own so schema sync never alters a carried column. All are private,
+ * hidden in the Content Manager and not writable: none is written by a request, and what writes them
+ * on purpose (the migration, the mirrored password, the confirmation link) goes through the database
+ * layer, which does not read `writable`.
  */
 export const LEGACY_USER_ATTRIBUTES: Readonly<
   Record<'password' | 'provider' | 'confirmed' | 'blocked' | 'confirmationToken', object>
@@ -17,22 +19,38 @@ export const LEGACY_USER_ATTRIBUTES: Readonly<
     private: true,
     searchable: false,
     visible: false,
+    writable: false,
   },
-  provider: { type: 'string', configurable: false, private: true, visible: false },
+  provider: {
+    type: 'string',
+    configurable: false,
+    private: true,
+    visible: false,
+    writable: false,
+  },
   confirmed: {
     type: 'boolean',
     default: false,
     configurable: false,
     private: true,
     visible: false,
+    writable: false,
   },
-  blocked: { type: 'boolean', default: false, configurable: false, private: true, visible: false },
+  blocked: {
+    type: 'boolean',
+    default: false,
+    configurable: false,
+    private: true,
+    visible: false,
+    writable: false,
+  },
   confirmationToken: {
     type: 'string',
     configurable: false,
     private: true,
     searchable: false,
     visible: false,
+    writable: false,
   },
 };
 

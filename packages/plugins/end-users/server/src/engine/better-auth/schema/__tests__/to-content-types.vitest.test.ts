@@ -97,6 +97,7 @@ describe('toContentTypes', () => {
         private: true,
         visible: false,
         configurable: false,
+        writable: false,
       });
       expect(attributesOf('user')[name]).toBeUndefined();
     }
