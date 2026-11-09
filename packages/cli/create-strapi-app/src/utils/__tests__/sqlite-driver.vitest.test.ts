@@ -10,6 +10,7 @@ import {
   BETTER_SQLITE3_VERSION,
   getBetterSqlite3Version,
 } from '../database';
+import { engines, SQLITE_13_NODE_ENGINE } from '../engines';
 import { createPackageJSON } from '../package-json';
 
 const dirs: string[] = [];
@@ -35,15 +36,28 @@ const scope = (rootPath: string, overrides: Partial<Scope> = {}): Scope => ({
 });
 
 describe('better-sqlite3 version for the running Node', () => {
-  it('pins 12.11.1 below Node 22.14, where the 13.x prebuild crashes', () => {
-    expect(getBetterSqlite3Version('22.13.0')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+  it('pins 12.11.1 where Node-API 10 is missing', () => {
     expect(getBetterSqlite3Version('22.0.0')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+    expect(getBetterSqlite3Version('22.13.0')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+    expect(getBetterSqlite3Version('23.5.0')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
   });
 
-  it('pins 13.0.3 from Node 22.14, where Node-API 10 is available', () => {
+  it('pins 13.0.3 where Node-API 10 is available', () => {
     expect(getBetterSqlite3Version('22.14.0')).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('23.6.0')).toBe(BETTER_SQLITE3_VERSION);
     expect(getBetterSqlite3Version('24.11.0')).toBe(BETTER_SQLITE3_VERSION);
     expect(getBetterSqlite3Version('26.0.0')).toBe(BETTER_SQLITE3_VERSION);
+  });
+
+  it('pins 12.11.1 for Yarn 1, which compiles 13.x', () => {
+    expect(getBetterSqlite3Version('24.11.0', '1.22.22')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+    expect(getBetterSqlite3Version('22.14.0', '1.22.22')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+  });
+
+  it('pins 13.0.3 for Yarn 2 and later when Node can load it', () => {
+    expect(getBetterSqlite3Version('24.11.0', '2.4.3')).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('24.11.0', '4.12.0')).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('22.13.0', '4.12.0')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
   });
 });
 
@@ -57,6 +71,7 @@ describe('createPackageJSON yarn sqlite install', () => {
     const pkg = JSON.parse(fs.readFileSync(path.join(rootPath, 'package.json'), 'utf8'));
 
     expect(pkg.dependenciesMeta).toStrictEqual({ 'better-sqlite3': { built: false } });
+    expect(pkg.engines.node).toBe(SQLITE_13_NODE_ENGINE);
   });
 
   it('leaves the install script enabled for the 12.x pin and for npm', async () => {
@@ -78,6 +93,8 @@ describe('createPackageJSON yarn sqlite install', () => {
     const npmPkg = JSON.parse(fs.readFileSync(path.join(npm13, 'package.json'), 'utf8'));
 
     expect(yarnPkg.dependenciesMeta).toBeUndefined();
+    expect(yarnPkg.engines.node).toBe(engines.node);
     expect(npmPkg.dependenciesMeta).toBeUndefined();
+    expect(npmPkg.engines.node).toBe(SQLITE_13_NODE_ENGINE);
   });
 });

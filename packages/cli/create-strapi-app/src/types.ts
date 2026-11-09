@@ -73,6 +73,8 @@ export interface Scope {
   agentName: string | null;
   /** Resolved at scaffold time when packageManager is pnpm (npm_config_user_agent or pnpm --version). */
   pnpmVersion?: string | null;
+  /** Resolved at scaffold time when packageManager is yarn (npm_config_user_agent or yarn --version). */
+  yarnVersion?: string | null;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { addDatabaseDependencies, getBetterSqlite3Version, getDatabaseInfos } from '../database';
+import {
+  addDatabaseDependencies,
+  BETTER_SQLITE3_NODE_22_13_VERSION,
+  BETTER_SQLITE3_VERSION,
+  getDatabaseInfos,
+} from '../database';
 import { generateDotEnv } from '../dot-env';
 
 import type { Options, Scope } from '../../types';
@@ -24,12 +29,46 @@ const dependencyScope = (client: Scope['database']['client']): Scope => ({
 });
 
 describe('addDatabaseDependencies', () => {
-  it('pins better-sqlite3 when the app uses sqlite', () => {
-    const scope = dependencyScope('sqlite');
+  it('pins better-sqlite3 from the Node version, not the test runner', () => {
+    const node22WithoutNapi = dependencyScope('sqlite');
+    const node23WithoutNapi = dependencyScope('sqlite');
+    const node22WithNapi = dependencyScope('sqlite');
+    const node23WithNapi = dependencyScope('sqlite');
 
-    addDatabaseDependencies(scope);
+    addDatabaseDependencies(node22WithoutNapi, '22.13.0');
+    addDatabaseDependencies(node23WithoutNapi, '23.5.0');
+    addDatabaseDependencies(node22WithNapi, '22.14.0');
+    addDatabaseDependencies(node23WithNapi, '23.6.0');
 
-    expect(scope.dependencies?.['better-sqlite3']).toBe(getBetterSqlite3Version());
+    expect(node22WithoutNapi.dependencies?.['better-sqlite3']).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(node23WithoutNapi.dependencies?.['better-sqlite3']).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(node22WithNapi.dependencies?.['better-sqlite3']).toBe(BETTER_SQLITE3_VERSION);
+    expect(node23WithNapi.dependencies?.['better-sqlite3']).toBe(BETTER_SQLITE3_VERSION);
+  });
+
+  it('pins 12.11.1 when the recorded package manager is Yarn 1', () => {
+    const yarn1 = dependencyScope('sqlite');
+    yarn1.packageManager = 'yarn';
+    yarn1.yarnVersion = '1.22.22';
+
+    const yarn4 = dependencyScope('sqlite');
+    yarn4.packageManager = 'yarn';
+    yarn4.yarnVersion = '4.12.0';
+
+    const npmWithStrayYarnVersion = dependencyScope('sqlite');
+    npmWithStrayYarnVersion.yarnVersion = '1.22.22';
+
+    addDatabaseDependencies(yarn1, '24.0.0');
+    addDatabaseDependencies(yarn4, '24.0.0');
+    addDatabaseDependencies(npmWithStrayYarnVersion, '24.0.0');
+
+    expect(yarn1.dependencies?.['better-sqlite3']).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+    expect(yarn4.dependencies?.['better-sqlite3']).toBe(BETTER_SQLITE3_VERSION);
+    expect(npmWithStrayYarnVersion.dependencies?.['better-sqlite3']).toBe(BETTER_SQLITE3_VERSION);
   });
 
   it('pins the client package when the app does not use sqlite', () => {

@@ -34,14 +34,16 @@ describe('pnpm build allow-list', () => {
     });
   });
 
-  it('omits better-sqlite3 13 so pnpm does not run node-gyp', () => {
+  it('denies the better-sqlite3 13 build so pnpm 11 does not ignore it', () => {
     expect(getPnpmBuildPackageNames(scope('sqlite'), '22.14.0')).toEqual([
       '@swc/core',
       'core-js-pure',
       'esbuild',
       'sharp',
     ]);
-    expect(getPnpmAllowBuilds(scope('sqlite'), '24.0.0')['better-sqlite3']).toBeUndefined();
+    expect(getPnpmBuildPackageNames(scope('sqlite'), '23.5.0')).toContain('better-sqlite3');
+    expect(getPnpmAllowBuilds(scope('sqlite'), '23.6.0')['better-sqlite3']).toBe(false);
+    expect(getPnpmAllowBuilds(scope('sqlite'), '24.0.0')['better-sqlite3']).toBe(false);
   });
 
   it('omits better-sqlite3 for postgres and mysql', () => {
@@ -79,7 +81,7 @@ describe('pnpm build allow-list', () => {
 
     expect(yaml12).toContain('better-sqlite3: true');
     expect(yaml12).not.toContain('minimumReleaseAgeExclude');
-    expect(yaml13).not.toContain('better-sqlite3');
+    expect(yaml13).toContain('better-sqlite3: false');
     expect(yaml13).toContain('minimumReleaseAgeExclude');
     expect(formatPnpmWorkspaceYaml(scope('mysql'), null)).toContain('allowBuilds:');
   });

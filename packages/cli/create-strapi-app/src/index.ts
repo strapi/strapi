@@ -7,7 +7,7 @@ import fse from 'fs-extra';
 
 import * as prompts from './prompts';
 import { handleCloudLogin } from './cloud';
-import { createStrapi } from './create-strapi';
+import { createStrapi, resolveYarnVersion } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
@@ -221,6 +221,8 @@ async function run(args: string[]): Promise<void> {
   }
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
+
+  scope.yarnVersion = await resolveYarnVersion(scope.packageManager);
 
   addDatabaseDependencies(scope);
 

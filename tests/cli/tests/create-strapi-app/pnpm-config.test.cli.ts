@@ -85,10 +85,17 @@ describe('pnpm-config', () => {
       expect(yaml).toContain("packages:\n  - '.'");
       expect(yaml).toContain("minimumReleaseAgeExclude:\n  - '@strapi/*'");
       expect(yaml).toContain("'@swc/core': true");
-      expect(yaml).not.toContain('better-sqlite3');
+      expect(yaml).toContain('better-sqlite3: false');
       expect(yaml).toContain('sharp: true');
       expect(getPnpmAllowBuilds(makeScope(projectDir), '22.14.0')).toMatchObject({
         '@swc/core': true,
+        'better-sqlite3': false,
+      });
+      expect(getPnpmAllowBuilds(makeScope(projectDir), '23.5.0')).toMatchObject({
+        'better-sqlite3': true,
+      });
+      expect(getPnpmAllowBuilds(makeScope(projectDir), '23.6.0')).toMatchObject({
+        'better-sqlite3': false,
       });
       expect(getPnpmAllowBuilds(makeScope(projectDir), '22.13.0')).toMatchObject({
         'better-sqlite3': true,

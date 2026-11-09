@@ -23,13 +23,11 @@ function mkProjectDir() {
 }
 
 /**
- * 13.0.3 is pinned from Node 22.14 and must stay off the pnpm build allow-list.
- * 12.11.1, used below that, still needs its install script.
+ * 12.x still needs its install script. 13.x is denied (`better-sqlite3: false`)
+ * wherever the running Node has Node-API 10.
  */
 function sqliteDriverNeedsPnpmBuild() {
-  const nodeVersion = semver.coerce(process.versions.node).version;
-
-  return semver.lt(nodeVersion, '22.14.0');
+  return Number(process.versions.napi) < 10;
 }
 
 function sqlitePnpmBuildPackages() {
@@ -223,7 +221,7 @@ describe('create-strapi-app', () => {
       if (sqliteDriverNeedsPnpmBuild()) {
         expect(workspace).toContain('better-sqlite3: true');
       } else {
-        expect(workspace).not.toContain('better-sqlite3');
+        expect(workspace).toContain('better-sqlite3: false');
       }
       expect(workspace).toContain("minimumReleaseAgeExclude:\n  - '@strapi/*'");
     } finally {

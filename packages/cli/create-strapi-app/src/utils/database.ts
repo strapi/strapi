@@ -5,21 +5,62 @@ import type { Scope, Options, DBClient, DBConfig } from '../types';
 import { logger } from './logger';
 
 /**
- * 13.0.3 prebuilds are compiled with Node-API 10, which Node ships from 22.14.0.
- * Earlier 22.x releases segfault when the binary loads. 12.11.1 still loads there.
+ * 13.0.3 prebuilds are compiled with Node-API 10.
+ * Node ships that from 22.14.0 and 23.6.0. 22.0–22.13 and 23.0–23.5 segfault when the binary loads.
+ * 12.11.1 still loads there.
  */
 export const BETTER_SQLITE3_VERSION = '13.0.3';
 export const BETTER_SQLITE3_NODE_22_13_VERSION = '12.11.1';
 export const BETTER_SQLITE3_13_MIN_NODE = '22.14.0';
+/** First 23.x release that ships Node-API 10. 23.0–23.5 do not. */
+export const BETTER_SQLITE3_13_MIN_NODE_23 = '23.6.0';
 
-export function getBetterSqlite3Version(nodeVersion: string = process.versions.node): string {
-  const normalized = semver.coerce(nodeVersion)?.version;
-
-  if (normalized && semver.gte(normalized, BETTER_SQLITE3_13_MIN_NODE)) {
-    return BETTER_SQLITE3_VERSION;
+/**
+ * True when this Node version can load the 13.x prebuild.
+ * The running process uses `process.versions.napi`. A passed version uses the releases that shipped Node-API 10.
+ */
+export function nodeCanLoadBetterSqlite3V13(nodeVersion: string = process.versions.node): boolean {
+  if (nodeVersion === process.versions.node) {
+    return Number(process.versions.napi) >= 10;
   }
 
-  return BETTER_SQLITE3_NODE_22_13_VERSION;
+  const normalized = semver.coerce(nodeVersion)?.version;
+
+  if (!normalized || semver.lt(normalized, BETTER_SQLITE3_13_MIN_NODE)) {
+    return false;
+  }
+
+  if (semver.gte(normalized, '23.0.0') && semver.lt(normalized, BETTER_SQLITE3_13_MIN_NODE_23)) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Yarn 1 compiles better-sqlite3 13 because the package ships binding.gyp and has no install script.
+ * 12.11.1 still runs prebuild-install, so Yarn 1 can install it without a C/C++ toolchain.
+ * An unknown Yarn version stays on the Node-based pin.
+ */
+export function yarnCanInstallBetterSqlite3V13(yarnVersion: string | null | undefined): boolean {
+  const normalized = yarnVersion ? semver.coerce(yarnVersion)?.version : null;
+
+  if (!normalized) {
+    return true;
+  }
+
+  return semver.gte(normalized, '2.0.0');
+}
+
+export function getBetterSqlite3Version(
+  nodeVersion: string = process.versions.node,
+  yarnVersion?: string | null
+): string {
+  if (!nodeCanLoadBetterSqlite3V13(nodeVersion) || !yarnCanInstallBetterSqlite3V13(yarnVersion)) {
+    return BETTER_SQLITE3_NODE_22_13_VERSION;
+  }
+
+  return BETTER_SQLITE3_VERSION;
 }
 
 /** 12.x runs prebuild-install. 13.x ships the binary and must not be compiled. */
@@ -136,10 +177,15 @@ const sqlClientModule = {
   postgres: { pg: '8.20.0' },
 };
 
-export function addDatabaseDependencies(scope: Scope) {
+export function addDatabaseDependencies(scope: Scope, nodeVersion: string = process.versions.node) {
   const databaseDependencies =
     scope.database.client === 'sqlite'
-      ? { 'better-sqlite3': getBetterSqlite3Version() }
+      ? {
+          'better-sqlite3': getBetterSqlite3Version(
+            nodeVersion,
+            scope.packageManager === 'yarn' ? scope.yarnVersion : undefined
+          ),
+        }
       : sqlClientModule[scope.database.client];
 
   scope.dependencies = {

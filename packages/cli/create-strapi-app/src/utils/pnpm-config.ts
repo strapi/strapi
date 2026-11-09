@@ -60,10 +60,21 @@ export const getPnpmBuildPackageNames = (
 export const getPnpmAllowBuilds = (
   scope: Scope,
   nodeVersion: string = process.versions.node
-): Record<string, true> => {
-  return Object.fromEntries(
+): Record<string, boolean> => {
+  const allowBuilds: Record<string, boolean> = Object.fromEntries(
     getPnpmBuildPackageNames(scope, nodeVersion).map((name) => [name, true])
-  ) as Record<string, true>;
+  );
+
+  // pnpm 11 fails the install when a build is neither allowed nor denied.
+  // 13.x must be denied so pnpm keeps the prebuild and does not run node-gyp.
+  if (
+    scope.database.client === 'sqlite' &&
+    !betterSqlite3NeedsInstallScript(getBetterSqlite3Version(nodeVersion))
+  ) {
+    allowBuilds[PNPM_SQLITE_BUILD_PACKAGE] = false;
+  }
+
+  return allowBuilds;
 };
 
 export const getPnpmOnlyBuiltDependencies = (
@@ -105,8 +116,8 @@ export const formatPnpmWorkspaceYaml = (
   }
 
   lines.push('allowBuilds:');
-  for (const name of Object.keys(allowBuilds).sort()) {
-    lines.push(`  ${quoteYamlKey(name)}: true`);
+  for (const name of Object.keys(allowBuilds).sort((left, right) => left.localeCompare(right))) {
+    lines.push(`  ${quoteYamlKey(name)}: ${allowBuilds[name]}`);
   }
   lines.push('');
 

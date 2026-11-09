@@ -3,7 +3,7 @@ import { kebabCase, mergeWith } from 'lodash';
 import fse from 'fs-extra';
 
 import { betterSqlite3NeedsInstallScript } from './database';
-import { engines } from './engines';
+import { engines, SQLITE_13_NODE_ENGINE } from './engines';
 import { getPnpmOnlyBuiltDependencies, shouldUsePackageJsonPnpmConfig } from './pnpm-config';
 import type { Scope } from '../types';
 
@@ -50,6 +50,20 @@ const mergePackageJson = (existingPkg: PackageJson, pkg: PackageJson) =>
     return undefined;
   });
 
+const getAppEngines = (scope: Scope) => {
+  const version = scope.dependencies?.['better-sqlite3'];
+
+  if (
+    scope.database.client === 'sqlite' &&
+    typeof version === 'string' &&
+    !betterSqlite3NeedsInstallScript(version)
+  ) {
+    return { ...engines, node: SQLITE_13_NODE_ENGINE };
+  }
+
+  return engines;
+};
+
 const getPnpmPackageJsonConfig = (scope: Scope, existingPkg: PackageJson) => {
   if (scope.packageManager !== 'pnpm' || !shouldUsePackageJsonPnpmConfig(scope.pnpmVersion)) {
     return {};
@@ -86,7 +100,7 @@ export async function createPackageJSON(scope: Scope) {
       uuid: scope.uuid,
       installId: scope.installId,
     },
-    engines,
+    engines: getAppEngines(scope),
     ...getYarnDependenciesMeta(scope),
     ...getPnpmPackageJsonConfig(scope, existingPkg),
   };

@@ -34,25 +34,29 @@ const getUserAgentPackageManagerVersion = (packageManager: Scope['packageManager
   return semver.coerce(version)?.version ?? null;
 };
 
-const shouldWriteYarnNodeModulesConfig = async (packageManager: Scope['packageManager']) => {
+export const resolveYarnVersion = async (packageManager: Scope['packageManager']) => {
   if (packageManager !== 'yarn') {
-    return false;
+    return null;
   }
 
   const userAgentVersion = getUserAgentPackageManagerVersion(packageManager);
 
   if (userAgentVersion) {
-    return semver.gte(userAgentVersion, '3.0.0');
+    return userAgentVersion;
   }
 
   try {
     const packageManagerVersion = await getPackageManagerVersion(packageManager);
-    const normalizedVersion = semver.coerce(packageManagerVersion)?.version;
-
-    return normalizedVersion ? semver.gte(normalizedVersion, '3.0.0') : false;
+    return semver.coerce(packageManagerVersion)?.version ?? null;
   } catch {
-    return false;
+    return null;
   }
+};
+
+const shouldWriteYarnNodeModulesConfig = (yarnVersion: string | null) => {
+  const normalized = yarnVersion ? semver.coerce(yarnVersion)?.version : null;
+
+  return normalized ? semver.gte(normalized, '3.0.0') : false;
 };
 
 const resolvePnpmVersion = async (packageManager: Scope['packageManager']) => {
@@ -144,7 +148,8 @@ async function createApp(scope: Scope) {
   await trackUsage({ event: 'didCopyProjectFiles', scope });
 
   const pnpmVersion = await resolvePnpmVersion(packageManager);
-  const scopeWithPnpmVersion = { ...scope, pnpmVersion };
+  const yarnVersion = scope.yarnVersion ?? (await resolveYarnVersion(packageManager));
+  const scopeWithPnpmVersion = { ...scope, pnpmVersion, yarnVersion };
 
   try {
     await createPackageJSON(scopeWithPnpmVersion);
@@ -158,7 +163,7 @@ async function createApp(scope: Scope) {
     await fse.writeFile(join(rootPath, '.env'), generateDotEnv(scope));
 
     if (
-      (await shouldWriteYarnNodeModulesConfig(packageManager)) &&
+      shouldWriteYarnNodeModulesConfig(yarnVersion) &&
       !(await fse.pathExists(join(rootPath, '.yarnrc.yml')))
     ) {
       await fse.writeFile(join(rootPath, '.yarnrc.yml'), yarnNodeModulesConfig);

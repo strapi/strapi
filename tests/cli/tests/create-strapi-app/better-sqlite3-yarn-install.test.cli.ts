@@ -3,6 +3,15 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+jest.mock('sort-package-json', () => ({
+  sortPackageJson: (pkg: Record<string, unknown>) => pkg,
+}));
+
+import { BETTER_SQLITE3_VERSION } from '../../../../packages/cli/create-strapi-app/src/utils/database';
+import { SQLITE_13_NODE_ENGINE } from '../../../../packages/cli/create-strapi-app/src/utils/engines';
+import { createPackageJSON } from '../../../../packages/cli/create-strapi-app/src/utils/package-json';
+import type { Scope } from '../../../../packages/cli/create-strapi-app/src/types';
+
 const REPO_ROOT = path.resolve(__dirname, '../../../..');
 const YARN_CLI = path.join(REPO_ROOT, '.yarn/releases/yarn-4.12.0.cjs');
 
@@ -17,23 +26,30 @@ const installTest = nodeCanLoadSqlite13 ? it : it.skip;
 
 installTest(
   'a Yarn SQLite app installs better-sqlite3 13 without compiling it',
-  () => {
+  async () => {
     const rootPath = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-sqlite-yarn-install-'));
 
     fs.writeFileSync(path.join(rootPath, '.yarnrc.yml'), 'nodeLinker: node-modules\n');
-    fs.writeFileSync(
-      path.join(rootPath, 'package.json'),
-      JSON.stringify(
-        {
-          name: 'yarn-sqlite',
-          private: true,
-          dependencies: { 'better-sqlite3': '13.0.3' },
-          dependenciesMeta: { 'better-sqlite3': { built: false } },
-        },
-        null,
-        2
-      )
-    );
+
+    const scope: Scope = {
+      name: 'Yarn Sqlite',
+      rootPath,
+      packageManager: 'yarn',
+      database: { client: 'sqlite' },
+      dependencies: { 'better-sqlite3': BETTER_SQLITE3_VERSION },
+      shouldCreateGrowthSsoTrial: false,
+      invocation: 'unknown',
+      agentName: null,
+      uuid: 'test-uuid',
+      installId: 'test-install-id',
+    };
+
+    await createPackageJSON(scope);
+
+    const pkg = JSON.parse(fs.readFileSync(path.join(rootPath, 'package.json'), 'utf8'));
+    expect(pkg.dependencies['better-sqlite3']).toBe(BETTER_SQLITE3_VERSION);
+    expect(pkg.dependenciesMeta).toEqual({ 'better-sqlite3': { built: false } });
+    expect(pkg.engines.node).toBe(SQLITE_13_NODE_ENGINE);
 
     try {
       const install = spawnSync(process.execPath, [YARN_CLI, 'install'], {
