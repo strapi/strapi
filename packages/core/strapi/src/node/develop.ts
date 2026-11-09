@@ -318,6 +318,11 @@ const develop = async ({
 
       ensureWatcher();
 
+      // First-run browser open reads admin.autoOpen, not the CLI flag Vite uses.
+      if (options.open === false) {
+        strapiInstance.config.set('admin.autoOpen', false);
+      }
+
       strapiInstance.start();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);

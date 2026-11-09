@@ -25,10 +25,13 @@ Options:
   --polling         Watch for file changes in network directories (default: false)
   --watch-admin     Watch the admin panel for hot changes
   --open            Open the admin in your browser (default: true)
+  --no-open         Do not open the admin in your browser
   -h, --help        Display help for command
 ```
 
 ## How it works
+
+`--no-open` keeps the browser closed. It stops the admin dev server from opening a tab, and it turns off the first-run browser open. `admin.autoOpen: false` in the server config still turns off only that first-run open.
 
 The develop command sets itself up much like the [build](./01-build.md) command. Once we've injected our middlewares, we load the strapi instance and then generate the types based off the user's instance as well as potentially compiling any TS server code if we're in a TS project. The final step is to watch the project directory so we can restart the strapi instance in real-time as a user is developing their project & being the actual strapi instance.
 

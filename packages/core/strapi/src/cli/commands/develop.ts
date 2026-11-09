@@ -40,6 +40,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--build-admin', 'Build the admin panel', true)
     .option('--no-build-admin', 'Do not build the admin panel in case watch is disabled')
     .option('--open', 'Open the admin in your browser', true)
+    .option('--no-open', 'Do not open the admin in your browser')
     .option('--install-deps', 'Auto-install missing admin dependencies', true)
     .option('--no-install-deps', 'Do not auto-install missing admin dependencies')
     .description('Start your Strapi application in development mode')
