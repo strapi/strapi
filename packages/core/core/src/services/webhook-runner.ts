@@ -282,7 +282,11 @@ class WebhookRunner {
 
     this.checkingDispatcher ??= createCheckingDispatcher(this.destinationChecker);
 
-    return this.fetch(url, { ...init, dispatcher: this.checkingDispatcher } as RequestInit);
+    // Cast: the global RequestInit types its dispatcher with Node's bundled undici types, which
+    // differ from the installed undici version (see utils/fetch.ts)
+    const checkedInit = { ...init, dispatcher: this.checkingDispatcher } as unknown as RequestInit;
+
+    return this.fetch(url, checkedInit);
   }
 
   /**
