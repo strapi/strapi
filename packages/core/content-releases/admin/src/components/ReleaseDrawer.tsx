@@ -305,12 +305,33 @@ interface ScheduleFieldsProps {
   defaultTimezone: string;
 }
 
+// Any separator: the TimePicker uses the locale's (e.g. `10.00`), the form keeps `HH:mm`
+const PICKER_TIME = /^(\d{1,2})\D(\d{2})$/;
+
 const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const { values, setFieldValue, setValues } = useFormikContext<FormValues>();
   const dateError = useFieldError('date');
   const timeError = useFieldError('time');
   const timezoneError = useFieldError('timezone');
+  // The TimePicker lists, parses and emits times in the locale's format, as this formatter writes them
+  const timeFormatter = React.useMemo(
+    () => new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false }),
+    [locale]
+  );
+
+  const toPickerTime = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+
+    return timeFormatter.format(new Date(0, 0, 0, hours, minutes));
+  };
+
+  const toFormTime = (time: string) => {
+    const match = PICKER_TIME.exec(time);
+
+    // Left as is otherwise: the schema reports a time it can't read
+    return match ? `${match[1].padStart(2, '0')}:${match[2]}` : time;
+  };
 
   const handleNoScheduleChange = (hasNoSchedule: boolean) => {
     // The schedule is only hidden, so unticking brings back what was picked. Submitting without a
@@ -379,7 +400,7 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
                     id: 'content-releases.modal.form.input.label.time',
                     defaultMessage: 'Time',
                   })}
-                  onChange={(time) => setFieldValue('time', time ?? '')}
+                  onChange={(time) => setFieldValue('time', time ? toFormTime(time) : '')}
                   clearLabel={formatMessage({
                     id: 'content-releases.modal.form.input.clearLabel',
                     defaultMessage: 'Clear',
@@ -387,7 +408,7 @@ const ScheduleFields = ({ timezoneList, defaultTimezone }: ScheduleFieldsProps) 
                   onClear={() => setFieldValue('time', '')}
                   // Always controlled: left without a value, the picker would keep its own, and a
                   // cleared time could come back, or a time typed again never reach the form
-                  value={values.time}
+                  value={values.time ? toPickerTime(values.time) : ''}
                 />
                 <Field.Error />
               </Field.Root>
