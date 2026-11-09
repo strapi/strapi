@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-end-users",
-  "version": "5.61.0",
+  "version": "5.61.1",
   "description": "End-user authentication for Strapi, built on Better Auth.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -122,12 +122,12 @@
     "typescript": "5.9.3"
   },
   "devDependencies": {
-    "@strapi/admin": "5.61.0",
-    "@strapi/admin-test-utils": "5.61.0",
-    "@strapi/database": "5.61.0",
-    "@strapi/strapi": "5.61.0",
-    "@strapi/types": "5.61.0",
-    "@strapi/utils": "5.61.0",
+    "@strapi/admin": "5.61.1",
+    "@strapi/admin-test-utils": "5.61.1",
+    "@strapi/database": "5.61.1",
+    "@strapi/strapi": "5.61.1",
+    "@strapi/types": "5.61.1",
+    "@strapi/utils": "5.61.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -137,7 +137,7 @@
     "@types/jsonwebtoken": "9.0.3",
     "@types/koa": "2.15.2",
     "@types/node": "22.20.0",
-    "eslint-config-custom": "5.61.0",
+    "eslint-config-custom": "5.61.1",
     "jest": "29.6.0",
     "koa": "2.16.4",
     "msw": "2.13.4",
@@ -145,9 +145,9 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
-    "tsconfig": "5.61.0",
+    "tsconfig": "5.61.1",
     "vitest": "catalog:",
-    "vitest-config": "5.61.0"
+    "vitest-config": "5.61.1"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
