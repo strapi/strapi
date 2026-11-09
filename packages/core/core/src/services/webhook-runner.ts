@@ -10,6 +10,14 @@ import type { Modules } from '@strapi/types';
 import WorkerQueue from './worker-queue';
 import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
+import {
+  createCheckingDispatcher,
+  createDestinationChecker,
+  DestinationBlockedError,
+  findDestinationBlockedError,
+  parseDestinationChecks,
+  type DestinationChecker,
+} from './webhook-destinations';
 
 type Webhook = Modules.WebhookStore.Webhook;
 type Event = Modules.WebhookRunner.Event;
@@ -17,6 +25,7 @@ type Event = Modules.WebhookRunner.Event;
 interface Config {
   defaultHeaders: Record<string, string>;
   deduplicateReleaseWebhooks: boolean;
+  destinationChecks?: unknown;
 }
 
 interface ConstructorParameters {
@@ -34,6 +43,61 @@ const debug = createdDebugger('strapi:webhook');
 const defaultConfiguration: Config = {
   defaultHeaders: {},
   deduplicateReleaseWebhooks: false,
+};
+
+const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
+
+// The most redirects followed with redirects: 'check'
+const MAX_CHECKED_REDIRECTS = 5;
+
+// The most redirects fetch follows itself, used when Strapi follows them with redirects: 'follow'
+const MAX_REDIRECTS = 20;
+
+/**
+ * Whether Node's fetch sends requests through the HTTP_PROXY and HTTPS_PROXY environment variables
+ */
+const usesNodeEnvProxy = () => {
+  const { env, execArgv } = process;
+  const hasProxy = Boolean(env.HTTP_PROXY || env.http_proxy || env.HTTPS_PROXY || env.https_proxy);
+  const flags = [...execArgv, ...(env.NODE_OPTIONS ?? '').split(/\s+/)];
+
+  return hasProxy && (env.NODE_USE_ENV_PROXY === '1' || flags.includes('--use-env-proxy'));
+};
+
+// Fetch drops these when a redirect turns a request into a GET without a body
+const BODY_HEADERS = [
+  'content-encoding',
+  'content-language',
+  'content-location',
+  'content-length',
+  'content-type',
+];
+
+// Fetch drops these when a redirect goes to another origin
+const CROSS_ORIGIN_HEADERS = ['authorization', 'proxy-authorization', 'cookie', 'host'];
+
+/**
+ * The request to send to a redirect's target, following the rules fetch uses when it follows
+ * redirects itself.
+ */
+const getRedirectRequest = (init: RequestInit, status: number, from: URL, to: URL): RequestInit => {
+  const headers = new Headers(init.headers);
+  const method = (init.method ?? 'GET').toUpperCase();
+  const becomesGet =
+    ([301, 302].includes(status) && method === 'POST') ||
+    (status === 303 && !['GET', 'HEAD'].includes(method));
+
+  if (becomesGet) {
+    BODY_HEADERS.forEach((name) => headers.delete(name));
+  }
+
+  if (from.origin !== to.origin) {
+    CROSS_ORIGIN_HEADERS.forEach((name) => headers.delete(name));
+  }
+
+  return becomesGet
+    ? { ...init, method: 'GET', body: undefined, headers }
+    : { ...init, method, headers };
 };
 
 /**
@@ -79,6 +143,10 @@ class WebhookRunner {
 
   private fetch: Fetch;
 
+  private destinationChecker: DestinationChecker;
+
+  private checkingDispatcher?: Fetch['dispatcher'];
+
   constructor({
     eventHub,
     requestContext,
@@ -99,6 +167,18 @@ class WebhookRunner {
     }
 
     this.config = _.merge({}, defaultConfiguration, configuration);
+
+    this.destinationChecker = createDestinationChecker(
+      parseDestinationChecks(this.config.destinationChecks)
+    );
+
+    const { checks, isActive } = this.destinationChecker;
+
+    if (!isActive && (checks.onSend || checks.redirects === 'check')) {
+      this.logger.warn(
+        "server.webhooks.destinationChecks.onSend and redirects: 'check' apply the loopback, privateNetworks and linkLocal checks, and none of them is on, so they have no effect."
+      );
+    }
 
     this.queue = new WorkerQueue({ logger, concurrency: 5 });
 
@@ -171,10 +251,102 @@ class WebhookRunner {
     }
   }
 
+  /**
+   * Applies the address checks turned on in `server.webhooks.destinationChecks` to a URL, before a
+   * webhook is saved. Resolves to what blocks it, or to undefined when it is allowed.
+   */
+  checkDestination(url: string) {
+    return this.destinationChecker.checkUrl(url);
+  }
+
+  /**
+   * Sends one request, applying the destination checks to it when `check` is true.
+   */
+  private async request(url: URL | string, init: RequestInit, check: boolean) {
+    if (!check || !this.destinationChecker.isActive) {
+      return this.fetch(url, init);
+    }
+
+    // With a proxy, the proxy resolves the hostname and opens the connection, so the address can
+    // only be checked beforehand, from here, as a best effort. The proxy is what controls where
+    // requests can go in that setup.
+    if (this.isProxied()) {
+      const blocked = await this.destinationChecker.checkUrl(url);
+
+      if (blocked) {
+        throw new DestinationBlockedError(blocked);
+      }
+
+      return this.fetch(url, init);
+    }
+
+    this.checkingDispatcher ??= createCheckingDispatcher(this.destinationChecker);
+
+    return this.fetch(url, { ...init, dispatcher: this.checkingDispatcher } as RequestInit);
+  }
+
+  /**
+   * Whether requests go through a proxy: `server.proxy.fetch` or `server.proxy.global`, or Node's
+   * own proxy support, which webhooks keep using when a check replaces the dispatcher.
+   */
+  private isProxied() {
+    return this.fetch.dispatcher !== undefined || usesNodeEnvProxy();
+  }
+
+  /**
+   * Sends a webhook request, applying `server.webhooks.destinationChecks.onSend` and `redirects`.
+   */
+  private async send(url: string, init: RequestInit) {
+    const { onSend, redirects } = this.destinationChecker.checks;
+
+    // Redirects are followed here, instead of by fetch, when each target needs a check before it
+    // gets the request: with redirects: 'check', and with onSend behind a proxy, where the check
+    // can't happen when the connection opens
+    const followsRedirects =
+      this.destinationChecker.isActive &&
+      (redirects === 'check' || (redirects === 'follow' && onSend && this.isProxied()));
+
+    if (!followsRedirects) {
+      return this.request(
+        url,
+        { ...init, redirect: redirects === 'none' ? 'manual' : 'follow' },
+        onSend
+      );
+    }
+
+    const maxRedirects = redirects === 'check' ? MAX_CHECKED_REDIRECTS : MAX_REDIRECTS;
+    let target = new URL(url);
+    let request: RequestInit = { ...init, redirect: 'manual' };
+
+    for (let redirectCount = 0; ; redirectCount += 1) {
+      const response = await this.request(target, request, onSend || redirectCount > 0);
+      const location = response.headers.get('location');
+
+      if (!REDIRECT_STATUSES.includes(response.status) || location === null) {
+        return response;
+      }
+
+      await response.body?.cancel();
+
+      if (redirectCount === maxRedirects) {
+        throw new Error(`The webhook was redirected more than ${maxRedirects} times`);
+      }
+
+      const next = new URL(location, target);
+
+      if (next.protocol !== 'http:' && next.protocol !== 'https:') {
+        throw new Error("The webhook was redirected to a URL that isn't http or https");
+      }
+
+      request = getRedirectRequest(request, response.status, target, next);
+      target = next;
+    }
+  }
+
   run(webhook: Webhook, event: string, info = {}) {
     const { url, headers } = webhook;
 
-    return this.fetch(url, {
+    return this.send(url, {
       method: 'post',
       body: JSON.stringify({
         event,
@@ -202,9 +374,15 @@ class WebhookRunner {
         };
       })
       .catch((err) => {
+        const blocked = findDestinationBlockedError(err);
+
+        if (blocked) {
+          this.logger.warn(`Webhook "${webhook.name}" was not sent: ${blocked.message}`);
+        }
+
         return {
           statusCode: 500,
-          message: err.message,
+          message: (blocked ?? err).message,
         };
       });
   }
