@@ -2,6 +2,7 @@ import auth from './auth';
 import condition from './admin/condition';
 import connect from './connect';
 import me from './me';
+import migration from './admin/migration';
 import permissionLayout from './admin/permission-layout';
 import permissions from './permissions';
 import profile from './profile';
@@ -16,6 +17,7 @@ export default {
   condition,
   connect,
   me,
+  migration,
   'permission-layout': permissionLayout,
   permissions,
   profile,

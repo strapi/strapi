@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import conditions from './conditions';
+import migration from './migration';
 import permissions from './permissions';
 import providers from './providers';
 import roles from './roles';
@@ -15,6 +16,7 @@ const routes: Core.RouterInput = {
     ...permissions.routes,
     ...conditions.routes,
     ...providers.routes,
+    ...migration.routes,
     ...settings.routes,
     ...userSecurity.routes,
   ],

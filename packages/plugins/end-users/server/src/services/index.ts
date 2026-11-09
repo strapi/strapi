@@ -3,6 +3,7 @@ import builderLayoutService from './builder-layout';
 import compat from './compat';
 import condition from './condition';
 import engine from './engine';
+import migration from './migration';
 import permission from './permission';
 import permissionLayout from './permission-layout';
 import profile from './profile';
@@ -18,6 +19,7 @@ export default {
   compat,
   condition,
   engine,
+  migration,
   permission,
   'permission-layout': permissionLayout,
   profile,
