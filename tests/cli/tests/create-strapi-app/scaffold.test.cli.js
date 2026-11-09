@@ -22,6 +22,26 @@ function mkProjectDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-csa-cli-test-'));
 }
 
+/**
+ * 13.0.3 is pinned from Node 22.14 and must stay off the pnpm build allow-list.
+ * 12.11.1, used below that, still needs its install script.
+ */
+function sqliteDriverNeedsPnpmBuild() {
+  const nodeVersion = semver.coerce(process.versions.node).version;
+
+  return semver.lt(nodeVersion, '22.14.0');
+}
+
+function sqlitePnpmBuildPackages() {
+  const packages = ['@swc/core', 'core-js-pure', 'esbuild', 'sharp'];
+
+  if (sqliteDriverNeedsPnpmBuild()) {
+    packages.splice(1, 0, 'better-sqlite3');
+  }
+
+  return packages;
+}
+
 function expectGeneratedUploadPolicy(pluginsConfig) {
   const allowedMediaTypes = pluginsConfig.match(/const allowedMediaTypes = \[([\s\S]*?)\];/);
   const deniedTypes = pluginsConfig.match(/const deniedTypes = \[([\s\S]*?)\];/);
@@ -198,9 +218,13 @@ describe('create-strapi-app', () => {
       expect(pkg.dependencies).toMatchObject({ 'better-sqlite3': expect.any(String) });
       expect(pkg.pnpm).toBeUndefined();
       expect(workspace).toContain('allowBuilds:');
-      expect(workspace).toContain('better-sqlite3: true');
       expect(workspace).toContain('sharp: true');
       expect(workspace).toContain("'@swc/core': true");
+      if (sqliteDriverNeedsPnpmBuild()) {
+        expect(workspace).toContain('better-sqlite3: true');
+      } else {
+        expect(workspace).not.toContain('better-sqlite3');
+      }
       expect(workspace).toContain("minimumReleaseAgeExclude:\n  - '@strapi/*'");
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
@@ -218,9 +242,7 @@ describe('create-strapi-app', () => {
 
       const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
 
-      expect(pkg.pnpm.onlyBuiltDependencies).toEqual(
-        expect.arrayContaining(['@swc/core', 'better-sqlite3', 'esbuild', 'sharp'])
-      );
+      expect(pkg.pnpm.onlyBuiltDependencies).toEqual(sqlitePnpmBuildPackages());
       expect(fs.existsSync(path.join(projectDir, 'pnpm-workspace.yaml'))).toBe(false);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
