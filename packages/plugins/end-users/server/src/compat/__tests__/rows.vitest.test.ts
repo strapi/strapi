@@ -101,12 +101,23 @@ describe('the compat coverage ledger', () => {
     expect(missing).toEqual([]);
   });
 
-  it('points at files that exist under the compat API tests or the package', () => {
+  it('names a test on a migrated database for every must-keep row', () => {
+    const missing = COMPAT_ROWS.filter(
+      (entry) =>
+        entry.class === 'must-keep' &&
+        !entry.tests.some(({ file }) => file.startsWith('tests/api/plugins/end-users/migration/'))
+    ).map((entry) => entry.row);
+
+    expect(missing).toEqual([]);
+  });
+
+  it('points at files that exist under the API tests or the package', () => {
     const files = new Set(COMPAT_ROWS.flatMap((entry) => entry.tests.map(({ file }) => file)));
 
     for (const file of files) {
       expect(
         file.startsWith('tests/api/plugins/end-users/compat/') ||
+          file.startsWith('tests/api/plugins/end-users/migration/') ||
           file.startsWith('packages/plugins/end-users/'),
         file
       ).toBe(true);

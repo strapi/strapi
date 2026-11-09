@@ -9,7 +9,7 @@ export interface CompatRow {
   /** The item of the checklist, 1 to 36. */
   row: number;
   class: 'must-keep' | 'shim' | 'major';
-  /** What a project that keeps this behaviour will notice, for the items where there is one. */
+  /** What a project that keeps this behavior will notice, for the items where there is one. */
   break?: string;
   /** Paths are relative to the repository root. */
   tests: Array<{ file: string; title: string }>;
@@ -18,6 +18,7 @@ export interface CompatRow {
 }
 
 const API = 'tests/api/plugins/end-users/compat';
+const MIGRATION = 'tests/api/plugins/end-users/migration';
 const PLUGIN = 'packages/plugins/end-users/server/src';
 
 const auth = `${API}/auth.test.api.ts`;
@@ -26,6 +27,10 @@ const sessions = `${API}/sessions.test.api.ts`;
 const connect = `${API}/connect.test.api.ts`;
 const graphql = `${API}/graphql.test.api.ts`;
 const legacy = `${API}/legacy-tokens.test.api.ts`;
+
+/** The cases on a database migrated from Users & Permissions */
+const after = `${MIGRATION}/after-migration.test.api.ts`;
+const stores = `${MIGRATION}/stores.test.api.ts`;
 
 const compatPlugin = `${PLUGIN}/engine/better-auth/__tests__/strapi-compat.vitest.test.ts`;
 const emailPlugin = `${PLUGIN}/engine/better-auth/__tests__/strapi-email.vitest.test.ts`;
@@ -72,6 +77,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: compatPlugin,
         title: 'answers a two-factor user with 403 TWO_FACTOR_REQUIRED and no token',
       },
+      {
+        file: after,
+        title: 'signs a migrated user in by email and by username with the old password',
+      },
     ],
     note:
       'A migrated username that contains an @ cannot sign in by username, because the sign-in treats any identifier ' +
@@ -99,6 +108,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: compatPlugin,
         title: 'refuses unlisted keys with the users-permissions text, deviceId included',
       },
+      {
+        file: after,
+        title: 'registers a new user next to the migrated ones, with the migrated default role',
+      },
     ],
     note:
       'Register keeps the old "Email or Username are already taken" answer, so on this route the answer tells a ' +
@@ -119,6 +132,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: auth,
         title: 'lets a role holding an api:: permission row govern a Content API route',
       },
+      {
+        file: after,
+        title: 'accepts the jwt of a migrated user as a Bearer token on a Content API route',
+      },
     ],
   },
   {
@@ -136,6 +153,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title: 'an old refresh token from before the cutover exchanges for a session',
       },
       { file: sessions, title: 'an old access token works as a Bearer token' },
+      {
+        file: after,
+        title: 'answers 401 for a bad token and accepts a legacy token issued before the cutover',
+      },
     ],
     note:
       'Old Users & Permissions tokens work only after the migration records that it completed, and only if the token ' +
@@ -147,7 +168,13 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
   {
     row: 5,
     class: 'must-keep',
-    tests: [{ file: auth, title: 'signs in with a migrated bcrypt hash' }],
+    tests: [
+      { file: auth, title: 'signs in with a migrated bcrypt hash' },
+      {
+        file: after,
+        title: 'keeps the stored hash: the old password signs in and a wrong one does not',
+      },
+    ],
   },
   {
     row: 6,
@@ -160,6 +187,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
       {
         file: permissions,
         title: 'answers the strategy under its users-permissions name only with compat on',
+      },
+      {
+        file: after,
+        title: 'names the strategy users-permissions and gives a migrated user their migrated role',
       },
     ],
     note:
@@ -176,7 +207,13 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
       'The user content type is plugin::end-users.user, and nothing answers to plugin::users-permissions.user any ' +
       'more. Custom code that names the old UID, calls strapi.plugin("users-permissions") or its services, or ' +
       'extends it through strapi-server fails at start, not silently.',
-    tests: [{ file: users, title: 'a relation from an app type to the user resolves' }],
+    tests: [
+      { file: users, title: 'a relation from an app type to the user resolves' },
+      {
+        file: after,
+        title: 'resolves an app relation that pointed at a user before the migration',
+      },
+    ],
     note:
       'The codemod rewrites the old UID in schemas and code, and flags every use of the old plugin name, its ' +
       'services and its strapi-server extension for a person to review. There is no runtime alias on purpose: an ' +
@@ -194,6 +231,11 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
       {
         file: legacyJwt,
         title: 'verifies a legacy { id } token and resolves the numeric id to a documentId',
+      },
+      {
+        file: after,
+        title:
+          'keeps numeric ids and documentIds, and derives confirmed, blocked and provider from the migrated data',
       },
     ],
     note:
@@ -221,6 +263,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title:
           'merges the profile and the provider, and never lets a profile field replace a user field',
       },
+      {
+        file: after,
+        title: 'merges the migrated custom fields into the user and writes them to the profile',
+      },
     ],
     note:
       'The codemod rewrites the targets of the old schema extension and moves each custom field to the profile. ' +
@@ -245,6 +291,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: shapes,
         title: 'takes the first role and returns null for none',
       },
+      { file: after, title: 'shows the migrated role with its old id on /users/me?populate=role' },
     ],
     note:
       'A user can now hold several roles. The single role that old code reads is the first of them, so it is a lossy ' +
@@ -259,6 +306,11 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: auth,
         title: 'lets a role holding an api:: permission row govern a Content API route',
       },
+      {
+        file: after,
+        title:
+          'lets a migrated api:: permission govern a route and refuses one that was not granted',
+      },
     ],
   },
   {
@@ -270,6 +322,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
       {
         file: strategy,
         title: 'answers 401 for a bad token and never falls back to Public',
+      },
+      {
+        file: after,
+        title: 'answers 401 for a bad token and accepts a legacy token issued before the cutover',
       },
     ],
     note:
@@ -294,6 +350,11 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: strategy,
         title: 'is refused with 403 and the code EMAIL_NOT_VERIFIED, as a PolicyError',
       },
+      {
+        file: after,
+        title:
+          'refuses the migrated blocked and unconfirmed users with the users-permissions messages',
+      },
     ],
     note:
       'At sign-in a blocked or unconfirmed user gets the old 400 with the old text. On every later request they get ' +
@@ -314,6 +375,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
           'confirms by the ?confirmation= link, redirects to the configured URL, and answers 400 Invalid token for a bad one',
       },
       { file: auth, title: 'answers This provider is disabled when the email method is off' },
+      { file: after, title: 'keeps the migrated sign-up and redirect settings' },
     ],
   },
   {
@@ -337,6 +399,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
       {
         file: passwords,
         title: 'refuse a forgot-password request while email and password sign-in is off',
+      },
+      {
+        file: after,
+        title: 'sends a reset link to the migrated reset URL and resets the password',
       },
     ],
     note:
@@ -362,6 +428,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title:
           'confirms an old ?confirmation= link once and redirects, and answers 400 the second time',
       },
+      { file: after, title: 'confirms a confirmation link sent before the migration, once' },
     ],
   },
   {
@@ -387,6 +454,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: auth,
         title: 'changes the password, returns a new jwt and the old session token stops working',
       },
+      { file: after, title: "changes a migrated user's password and keeps the old column in step" },
     ],
   },
   {
@@ -403,6 +471,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
           'the provider returns to /connect/:provider/callback and the browser lands on the front-end URL with no token in it',
       },
       { file: connect, title: 'answers 404 for /api/connect with compat off' },
+      {
+        file: after,
+        title: 'starts the GitHub flow with the migrated client id and the old callback address',
+      },
     ],
     note:
       'The addresses registered at each identity provider keep working, so the migration asks for no change at the ' +
@@ -424,6 +496,11 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
       },
       { file: connect, title: 'refuses the exchange a second time for the same session' },
       { file: connect, title: 'ignores ?access_token=' },
+      {
+        file: after,
+        title:
+          'links a provider user from before the migration on their first sign-in and exchanges the session once',
+      },
     ],
   },
   {
@@ -435,6 +512,14 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title: 'sets redirectURI to the connect callback only with compat on',
       },
       { file: connect, title: 'the admin shows /api/connect/<id>/callback as the redirect URI' },
+      {
+        file: stores,
+        title: 'stores github with its secret encrypted and shows the connect callback',
+      },
+      {
+        file: stores,
+        title: 'stores auth0 with tenant.auth0.com and twitter disabled, and lists instagram',
+      },
     ],
     note:
       "The migration moves each provider's key, secret, subdomain, JWKS URL and enabled flag from the old store " +
@@ -475,6 +560,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         file: sessions,
         title: 'answers 404 on refresh, logout and sessions with refresh off',
       },
+      {
+        file: after,
+        title: 'exchanges a refresh token issued before the migration and rotates it',
+      },
     ],
     note:
       'The refresh routes answer 404 unless compat.refresh.enabled is true; the codemod sets it from jwtManagement. ' +
@@ -499,7 +588,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
     note:
       'UP_CONFIG_MAP lists each old config key and where it goes. jwtSecret, jwt.* and the refresh settings become ' +
       'compat.legacyJwt and compat.refresh. jwtManagement becomes compat.refresh.enabled. The session lifespans, ' +
-      'jwt.expiresIn, ratelimit, callback.validate and validationRules.validatePassword are not honoured: sessions ' +
+      'jwt.expiresIn, ratelimit, callback.validate and validationRules.validatePassword are not honored: sessions ' +
       'follow the new session settings, rate limits follow the new rate limits, callback.validate is replaced by ' +
       'trusted origins and password rules live on the Sign-in page. The per-email rate limit bucket is gone; the ' +
       'account lockout replaces it for sign-in.',
@@ -518,6 +607,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title: 'declares a rate-limit rule for each compat path and none for the native ones',
       },
       { file: graphql, title: 'limits the sixth login attempt like REST' },
+      { file: after, title: 'locks a migrated account after five wrong passwords' },
     ],
     note:
       'The old per-email bucket is gone. Sign-in is protected by the account lockout and the per-address limit; ' +
@@ -539,6 +629,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title:
           'gives numeric id and documentId, confirmed and blocked from the stored fields, and no private field',
       },
+      { file: after, title: 'never shows the carried users-permissions columns in a user payload' },
     ],
   },
   {
@@ -564,6 +655,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title:
           'refuses an endpoint of a sign-in method that is turned off, as the REST route does, without calling the engine',
       },
+      { file: after, title: 'signs a migrated user in through the GraphQL login' },
     ],
     note:
       'A user with two-factor authentication gets an error from the GraphQL login, not a token. The ' +
@@ -658,6 +750,7 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
     tests: [
       { file: users, title: 'shows the compat summary to an admin, without a secret' },
       { file: users, title: 'still answers the roles routes of the admin side' },
+      { file: stores, title: 'lets the Editor admin role keep its end-user permissions' },
     ],
     note:
       'The migration rewrites the admin permissions held by existing admin roles: the roles, providers, advanced ' +
