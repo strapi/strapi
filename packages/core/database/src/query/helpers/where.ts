@@ -5,6 +5,8 @@ import type { Knex } from 'knex';
 import { isOperator, isOperatorOfType } from '@strapi/utils';
 import * as types from '../../utils/types';
 import { createField } from '../../fields';
+import { toRecognisedBoolean } from '../../fields/boolean';
+import { InvalidBooleanError } from '../../errors';
 import { createJoin } from './join';
 import { toColumnName } from './transform';
 import { escapeQuery } from './search';
@@ -29,6 +31,20 @@ const castValue = (value: unknown, attribute: Attribute | null) => {
   }
 
   return value;
+};
+
+/**
+ * Reads a `$null` / `$notNull` operand with the values boolean filters accept. A truthiness
+ * check read `'false'` or `'no'` as true, so `{ $null: 'false' }` matched the null rows.
+ */
+const toNullOperand = (value: unknown): boolean => {
+  const recognised = toRecognisedBoolean(value);
+
+  if (recognised === null || recognised === undefined) {
+    throw new InvalidBooleanError();
+  }
+
+  return recognised;
 };
 
 const processSingleAttributeWhere = (
@@ -313,7 +329,7 @@ const applyOperator = (
       break;
     }
     case '$null': {
-      if (value) {
+      if (toNullOperand(value) === true) {
         qb.whereNull(column);
       } else {
         qb.whereNotNull(column);
@@ -321,7 +337,7 @@ const applyOperator = (
       break;
     }
     case '$notNull': {
-      if (value) {
+      if (toNullOperand(value) === true) {
         qb.whereNotNull(column);
       } else {
         qb.whereNull(column);

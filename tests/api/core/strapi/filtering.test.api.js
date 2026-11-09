@@ -383,14 +383,14 @@ describe('Filtering API', () => {
         [{ $null: 'true' }],
         [{ $null: '1' }],
         [{ $null: 't' }],
-        [{ $null: 'anything' }],
-        [{ $null: ['anything'] }],
-        [{ $null: { anything: 'anything' } }],
+        [{ $null: 'TRUE' }],
+        [{ $null: 'T' }],
         [{ $notNull: false }],
         [{ $notNull: 'false' }],
         [{ $notNull: '0' }],
         [{ $notNull: 'f' }],
-        [{ $notNull: '' }],
+        [{ $notNull: 'FALSE' }],
+        [{ $notNull: 'F' }],
       ])('Should return only matching items (%s)', async (priceFilter) => {
         const res = await rq({
           method: 'GET',
@@ -414,14 +414,14 @@ describe('Filtering API', () => {
         [{ $notNull: 'true' }],
         [{ $notNull: '1' }],
         [{ $notNull: 't' }],
-        [{ $notNull: 'anything' }],
-        [{ $notNull: ['anything'] }],
-        [{ $notNull: { anything: 'anything' } }],
+        [{ $notNull: 'TRUE' }],
+        [{ $notNull: 'T' }],
         [{ $null: false }],
         [{ $null: 'false' }],
         [{ $null: '0' }],
         [{ $null: 'f' }],
-        [{ $null: '' }],
+        [{ $null: 'FALSE' }],
+        [{ $null: 'F' }],
       ])('Should return three matches (%s)', async (priceFilter) => {
         const res = await rq({
           method: 'GET',
@@ -434,6 +434,33 @@ describe('Filtering API', () => {
         });
 
         expect(res.body.data.length).toBe(3);
+      });
+
+      test.each([
+        [{ $null: 'no' }],
+        [{ $null: 'yes' }],
+        [{ $null: 'anything' }],
+        [{ $null: '' }],
+        [{ $null: ['anything'] }],
+        [{ $null: { anything: 'anything' } }],
+        [{ $notNull: 'no' }],
+        [{ $notNull: 'anything' }],
+        [{ $notNull: '' }],
+        [{ $notNull: ['anything'] }],
+        [{ $notNull: { anything: 'anything' } }],
+      ])('Should reject an unrecognised operand with a 400 (%s)', async (priceFilter) => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              price: priceFilter,
+            },
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toMatchObject({ status: 400, name: 'ValidationError' });
       });
     });
 

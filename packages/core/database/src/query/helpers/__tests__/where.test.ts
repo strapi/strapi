@@ -182,3 +182,42 @@ describe('processWhere - boolean filter values', () => {
     );
   });
 });
+
+describe('applyWhere - $null and $notNull operands', () => {
+  const knex = createKnex({ client: 'better-sqlite3', useNullAsDefault: true });
+
+  afterAll(async () => {
+    await knex.destroy().catch(() => {});
+  });
+
+  const compile = (where: Record<string, unknown>) => {
+    const qb = knex('t');
+    applyWhere(qb, where);
+
+    return qb.toSQL().sql;
+  };
+
+  test.each([true, 'true', 't', '1', 1, 'TRUE', 'True', 'T'])('reads %p as true', (operand) => {
+    expect(compile({ price: { $null: operand } })).toMatch(/`price` is null$/);
+    expect(compile({ price: { $notNull: operand } })).toMatch(/`price` is not null$/);
+  });
+
+  test.each([false, 'false', 'f', '0', 0, 'FALSE', 'False', 'F'])(
+    'reads %p as false',
+    (operand) => {
+      expect(compile({ price: { $null: operand } })).toMatch(/`price` is not null$/);
+      expect(compile({ price: { $notNull: operand } })).toMatch(/`price` is null$/);
+    }
+  );
+
+  test.each(['no', 'yes', '', ' true ', 2, null, undefined, ['no'], { anything: 'anything' }])(
+    'rejects unrecognised operand %p',
+    (operand) => {
+      for (const operator of ['$null', '$notNull']) {
+        expect(() => compile({ price: { [operator]: operand } })).toThrow(
+          expect.objectContaining({ name: 'InvalidBooleanFormat' })
+        );
+      }
+    }
+  );
+});

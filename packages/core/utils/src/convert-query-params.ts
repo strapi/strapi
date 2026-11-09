@@ -187,6 +187,35 @@ export interface Query {
   pageSize?: number;
 }
 
+const NULL_OPERAND_TRUE_VALUES = new Set(['true', 't', '1']);
+const NULL_OPERAND_FALSE_VALUES = new Set(['false', 'f', '0']);
+
+/**
+ * Reads a `$null` / `$notNull` operand with the values boolean filters accept (case-insensitive).
+ * A forced cast read `no` or `FALSE` as true, so `filters[x][$null]=no` matched the null rows.
+ */
+const parseNullOperand = (value: unknown): boolean => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'number' || typeof value === 'string') {
+    const normalized = String(value).toLowerCase();
+
+    if (NULL_OPERAND_TRUE_VALUES.has(normalized) === true) {
+      return true;
+    }
+
+    if (NULL_OPERAND_FALSE_VALUES.has(normalized) === true) {
+      return false;
+    }
+  }
+
+  throw new ValidationError(
+    'Invalid boolean, expected one of true, t, 1, false, f, 0 (case-insensitive)'
+  );
+};
+
 class InvalidOrderError extends ValidationError {
   constructor() {
     super('Invalid order. order can only be one of asc|desc|ASC|DESC');
@@ -765,7 +794,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // Handle operators
       else if (['$null', '$notNull'].includes(key)) {
-        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+        filters[key] = parseNullOperand(filters[key]);
       } else if (isObject(value)) {
         filters[key] = convertAndSanitizeFilters(value, schema);
       }
