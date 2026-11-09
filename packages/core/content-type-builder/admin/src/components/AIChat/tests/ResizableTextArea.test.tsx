@@ -83,6 +83,34 @@ describe('ResizableTextArea keyboard handling', () => {
     }
   );
 
+  test('preserves terminal IME Enter after composition ends, then submits and clears once', () => {
+    const { input, onSubmit } = setup({ clearOnSubmit: true });
+    const confirmation = createEvent.keyDown(input, {
+      key: 'Enter',
+      keyCode: 229,
+      isComposing: false,
+    });
+    fireEvent(input, confirmation);
+
+    expect(confirmation.defaultPrevented).toBe(false);
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(input).toHaveValue('日本語');
+    expect(input).toHaveFocus();
+
+    const ordinaryEnter = createEvent.keyDown(input, {
+      key: 'Enter',
+      keyCode: 13,
+      isComposing: false,
+    });
+    fireEvent(input, ordinaryEnter);
+    expect(ordinaryEnter.defaultPrevented).toBe(true);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith('日本語');
+    expect(input).toHaveValue('');
+    fireEvent.blur(input);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
   test.each([false, true])('leaves Shift+Enter unhandled when composing=%s', (isComposing) => {
     const { input, onSubmit } = setup();
     const event = createEvent.keyDown(input, {

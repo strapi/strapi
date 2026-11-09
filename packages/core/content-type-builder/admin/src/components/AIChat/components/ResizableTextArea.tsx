@@ -59,7 +59,14 @@ export const ResizableTextArea = ({ value, onChange, onSubmit, placeholder }: Te
     }
 
     // Do not submit when Enter confirms an IME composition.
-    if (e.key === 'Enter' && !e.nativeEvent.isComposing && !e.shiftKey && onSubmit) {
+    // Safari may end composition before the confirming Enter keydown.
+    if (
+      e.key === 'Enter' &&
+      !e.nativeEvent.isComposing &&
+      e.nativeEvent.keyCode !== 229 &&
+      !e.shiftKey &&
+      onSubmit
+    ) {
       e.preventDefault();
       onSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
       // Ensure focus is maintained after submission using a small delay

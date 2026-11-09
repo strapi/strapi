@@ -89,7 +89,12 @@ export const EditFolderContent = ({
     (handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void) =>
     (event: React.KeyboardEvent<HTMLFormElement>) => {
       // Do not save the folder when Enter confirms an IME composition.
-      if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+      // Safari may end composition before the confirming Enter keydown.
+      if (
+        event.key === 'Enter' &&
+        !event.nativeEvent.isComposing &&
+        event.nativeEvent.keyCode !== 229
+      ) {
         if (event.target instanceof HTMLInputElement) {
           handleSubmit(event);
           event.preventDefault();

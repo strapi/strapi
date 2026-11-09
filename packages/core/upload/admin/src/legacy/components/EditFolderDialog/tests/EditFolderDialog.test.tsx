@@ -310,6 +310,33 @@ describe('EditFolderDialog', () => {
       }
     );
 
+    test('preserves terminal IME Enter after composition ends, then saves once on ordinary Enter', async () => {
+      const { editFolder, onClose, name } = setupKeyboard();
+      const confirmation = createEvent.keyDown(name, {
+        key: 'Enter',
+        keyCode: 229,
+        isComposing: false,
+      });
+      fireEvent(name, confirmation);
+
+      expect(confirmation.defaultPrevented).toBe(false);
+      expect(editFolder).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+      expect(name).toHaveValue('日本語');
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      const ordinaryEnter = createEvent.keyDown(name, {
+        key: 'Enter',
+        keyCode: 13,
+        isComposing: false,
+      });
+      fireEvent(name, ordinaryEnter);
+      expect(ordinaryEnter.defaultPrevented).toBe(true);
+      await waitFor(() => expect(editFolder).toHaveBeenCalledTimes(1));
+      expect(editFolder).toHaveBeenCalledWith({ name: '日本語', parent: null }, folder?.id);
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
     test('preserves Shift+Enter submission', async () => {
       const { editFolder, onClose, name } = setupKeyboard();
       const shiftEnter = createEvent.keyDown(name, { key: 'Enter', keyCode: 13, shiftKey: true });

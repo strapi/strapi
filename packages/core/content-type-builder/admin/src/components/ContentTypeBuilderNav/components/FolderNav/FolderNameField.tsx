@@ -143,7 +143,12 @@ export const FolderNameField = ({
 
   const onNameInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     // Do not accept the folder name when Enter confirms an IME composition.
-    if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+    // Safari may end composition before the confirming Enter keydown.
+    if (
+      event.key === 'Enter' &&
+      !event.nativeEvent.isComposing &&
+      event.nativeEvent.keyCode !== 229
+    ) {
       event.preventDefault();
       commitFromEnter();
     }

@@ -50,6 +50,35 @@ describe.each(['create', 'rename'])('FolderNameField %s keyboard handling', (mod
     }
   );
 
+  test('preserves terminal IME Enter after composition ends, then accepts ordinary Enter once', () => {
+    const { input, onSubmit, onCancel } = setup();
+    fireEvent.change(input, { target: { value: '日本語' } });
+    const confirmation = createEvent.keyDown(input, {
+      key: 'Enter',
+      keyCode: 229,
+      isComposing: false,
+    });
+    fireEvent(input, confirmation);
+
+    expect(confirmation.defaultPrevented).toBe(false);
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
+    expect(input).toHaveValue('日本語');
+    expect(input).toHaveFocus();
+
+    const ordinaryEnter = createEvent.keyDown(input, {
+      key: 'Enter',
+      keyCode: 13,
+      isComposing: false,
+    });
+    fireEvent(input, ordinaryEnter);
+    expect(ordinaryEnter.defaultPrevented).toBe(true);
+    fireEvent.blur(input);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith('日本語');
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
   test('preserves the initial name during IME confirmation, then accepts blur once', () => {
     const { input, onSubmit, onCancel } = setup();
     fireEvent.keyDown(input, { key: 'Enter', keyCode: 229, isComposing: true });
