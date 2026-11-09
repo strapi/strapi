@@ -99,7 +99,7 @@ describe('webpack watch', () => {
           app,
           routes(routes: Array<{ path: string; handler: Koa.Middleware }>) {
             routes.forEach((route) => {
-              const prefix = route.path.replace('/:path*', '');
+              const prefix = route.path.replace('{/*path}', '');
               app.use((context, next) =>
                 context.path.startsWith(prefix) ? route.handler(context, next) : next()
               );

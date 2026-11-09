@@ -67,4 +67,44 @@ describe('Documentation plugin | Documentation controller', () => {
       expect(ctx.redirect).toHaveBeenCalledWith(`${SERVER_URL}/documentation?error=password`);
     });
   });
+
+  describe('index', () => {
+    test.each([
+      { major: '..', minor: '1', patch: '0' },
+      { major: '1', minor: '../../secret', patch: '0' },
+      { major: '1', minor: '0', patch: 'x' },
+      { major: '1', minor: '2', patch: '3foo' },
+    ])('returns 404 for non-numeric version params %o', async (params) => {
+      const ctx = {
+        params,
+        notFound: vi.fn(),
+      } as unknown as Koa.Context & { notFound: Mock };
+
+      await documentation.index(ctx, vi.fn());
+
+      expect(ctx.notFound).toHaveBeenCalled();
+    });
+
+    test('accepts numeric version params and goes on to read that version', async () => {
+      const log = { error: vi.fn() };
+      global.strapi = {
+        config: { environment: 'development', server: { url: SERVER_URL } },
+        dirs: {
+          app: { extensions: '/nonexistent-strapi-extensions' },
+          dist: { extensions: '/nonexistent-strapi-extensions' },
+        },
+        log,
+      } as any;
+      const ctx = {
+        params: { major: '1', minor: '2', patch: '3' },
+        notFound: vi.fn(),
+      } as unknown as Koa.Context & { notFound: Mock };
+
+      await documentation.index(ctx, vi.fn());
+
+      expect(ctx.notFound).not.toHaveBeenCalled();
+      // The spec file is missing, so the read fails and is logged: proof the version was accepted.
+      expect(log.error).toHaveBeenCalledWith(expect.objectContaining({ code: 'ENOENT' }));
+    });
+  });
 });
