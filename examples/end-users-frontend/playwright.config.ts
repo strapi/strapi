@@ -35,12 +35,12 @@ export default defineConfig({
     {
       name: 'same-site',
       use: { ...devices['Desktop Chrome'], baseURL: SAME_SITE_URL },
-      testIgnore: ADMIN_SPECS,
+      testIgnore: [ADMIN_SPECS, MIGRATION_SPECS],
     },
     {
       name: 'cross-site',
       use: { ...devices['Desktop Chrome'], baseURL: CROSS_SITE_URL },
-      testIgnore: ADMIN_SPECS,
+      testIgnore: [ADMIN_SPECS, MIGRATION_SPECS],
     },
     {
       // The admin panel is on Strapi's own address. It runs after the two above, on the database they
