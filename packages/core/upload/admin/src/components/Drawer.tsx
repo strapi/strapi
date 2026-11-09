@@ -175,6 +175,7 @@ const CloseIconButton = styled(IconButton)`
 
 type PointerDownOutsideHandler = NonNullable<Dialog.DialogContentProps['onPointerDownOutside']>;
 type AutoFocusHandler = NonNullable<Dialog.DialogContentProps['onOpenAutoFocus']>;
+type EscapeKeyDownHandler = NonNullable<Dialog.DialogContentProps['onEscapeKeyDown']>;
 
 /** Vetoes an outside interaction that would otherwise dismiss the drawer. */
 const keepOpen = (event: { preventDefault: () => void }) => event.preventDefault();
@@ -201,6 +202,13 @@ interface DrawerBodyProps extends Omit<FlexProps, 'width' | 'maxHeight'> {
    * rather than a `Dialog.Trigger`, it has nowhere to send it unless this does.
    */
   onCloseAutoFocus?: AutoFocusHandler;
+  /**
+   * Radix's hook before Escape closes the panel; `event.preventDefault()` keeps it
+   * open. The design system's layers (its dialogs, popovers, tooltips) don't
+   * share this panel's Radix copy, so an Escape meant for one of them reaches
+   * the panel too.
+   */
+  onEscapeKeyDown?: EscapeKeyDownHandler;
   children: React.ReactNode;
 }
 
@@ -213,6 +221,7 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
       onPointerDownOutside = keepOpen,
       onOpenAutoFocus,
       onCloseAutoFocus,
+      onEscapeKeyDown,
       children,
       ...props
     },
@@ -225,6 +234,7 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
       onPointerDownOutside={onPointerDownOutside}
       onOpenAutoFocus={onOpenAutoFocus}
       onCloseAutoFocus={onCloseAutoFocus}
+      onEscapeKeyDown={onEscapeKeyDown}
       // Non-modal, so focus legitimately moves outside (tabbing past the last
       // field); only a pointer press should ever dismiss.
       onFocusOutside={keepOpen}
