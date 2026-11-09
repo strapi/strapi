@@ -938,6 +938,104 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+  # /tests-next suites (Test Infrastructure Overhaul). Until a suite holds a migrated domain,
+  # they only run when tests-next/** changes, or on `global` changes (CI files, root
+  # package.json and its Playwright pin, yarn.lock) like the other test jobs. Then the `if:`
+  # becomes nx affected (CMS-2242): the suites depend on @strapi/tests-shared, which depends on
+  # @strapi/strapi, so a change in a tested package triggers them.
+  tests_next_ui:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: 'tests-next ui (${{ matrix.edition }}, browser: ${{ matrix.project }})'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    # Same Playwright image and zstd mounts as `e2e_ce`.
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
+    strategy:
+      fail-fast: false
+      matrix:
+        # Labels only for now: the run step doesn't read them yet and always runs Chromium CE.
+        # The EE replay of @ee and @smoke tests comes with the edition contract (CMS-1944), and
+        # WebKit with the browser projects (CMS-1949); both need the run step to pass them on.
+        edition: [ce]
+        project: [chromium]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run tests-next ui
+        run: yarn nx run @strapi/tests-e2e:test --skip-nx-cache
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: tests-next-ui-${{ matrix.edition }}-${{ matrix.project }}-reports
+          path: |
+            test-apps/next/reports/junit/
+            test-apps/next/reports/ui-html/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  tests_next_api:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: 'tests-next api (ce)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run tests-next api
+        run: yarn nx run @strapi/tests-api:test --skip-nx-cache
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: tests-next-api-reports
+          path: test-apps/next/reports/junit/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  tests_next_cli:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: 'tests-next cli (ce)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run tests-next cli
+        run: yarn nx run @strapi/tests-cli:test --skip-nx-cache
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: tests-next-cli-reports
+          path: test-apps/next/reports/junit/
+          retention-days: 7
+          if-no-files-found: ignore
+
   test_result:
     if: ${{ always() }}
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
@@ -966,6 +1064,9 @@ jobs:
         api_ee_pg,
         api_ee_mysql,
         api_ee_sqlite,
+        tests_next_ui,
+        tests_next_api,
+        tests_next_cli,
         sonarqube,
       ]
     steps:
