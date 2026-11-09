@@ -8,6 +8,7 @@ import {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  UnlockSharedFieldsAction,
   AITranslationStatusAction,
 } from './components/CMHeaderActions';
 import {
@@ -109,6 +110,7 @@ export default {
       AITranslationStatusAction,
       LocalePickerAction,
       FillFromAnotherLocaleAction,
+      UnlockSharedFieldsAction,
     ] as HeaderActionComponent[]);
     contentManagerApis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');

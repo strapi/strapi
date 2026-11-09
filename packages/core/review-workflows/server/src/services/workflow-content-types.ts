@@ -1,4 +1,4 @@
-import type { Core, Data } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { merge, difference } from 'lodash';
 import { getService } from '../utils';
@@ -18,9 +18,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     .service('content-types');
   const stagesService = getService('stages', { strapi });
 
-  const updateContentTypeConfig = async (uid: any, reviewWorkflowOption: any) => {
+  const updateContentTypeConfig = async (uid: UID.ContentType, reviewWorkflowOption: boolean) => {
     // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
-    const modelConfig = await contentManagerContentTypeService.findConfiguration(uid);
+    const modelConfig = await contentManagerContentTypeService.findConfiguration({ uid });
 
     await contentManagerContentTypeService.updateConfiguration(
       { uid },
@@ -78,6 +78,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       );
 
       await async.map(deleted, async (uid: any) => {
+        // A stored UID can outlive its model, which leaves no configuration or stage links to clean up
+        if (strapi.db.metadata.has(uid) === false) {
+          return;
+        }
+
         await updateContentTypeConfig(uid, false);
         await stagesService.deleteAllEntitiesStage(uid, {});
       });

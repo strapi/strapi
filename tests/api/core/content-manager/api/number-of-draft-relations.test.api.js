@@ -533,8 +533,8 @@ describe('CM API - Number of draft relations', () => {
 
   test('Correctly count the number of draft relations across multiple locales and document IDs', async () => {
     // Reset the database and create new data for this test
-    await strapi.query(UID_PRODUCT).deleteMany({});
-    await strapi.query(UID_CATEGORY).deleteMany({});
+    await strapi.db.query(UID_PRODUCT).deleteMany({});
+    await strapi.db.query(UID_CATEGORY).deleteMany({});
 
     // Create multiple new categories and products
     const categories = await Promise.all([

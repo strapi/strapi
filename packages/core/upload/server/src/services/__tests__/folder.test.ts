@@ -49,6 +49,7 @@ describe('folder', () => {
       });
     });
   });
+
   describe('getStructure', () => {
     const rows = [
       { id: 1, name: 'Zeta', parent: null },
@@ -114,6 +115,11 @@ describe('folder', () => {
         },
         { id: 2, name: 'alpha', children: [] },
       ]);
+
+      // Type-level check: children are nodes, not ids (verified by test:ts:back)
+      // @ts-expect-error - a node's children cannot be read as a list of ids
+      const childIds: number[] = structure[1].children;
+      expect(childIds).toHaveLength(3);
     });
 
     test('sorts each folder once, not once per insertion', async () => {
