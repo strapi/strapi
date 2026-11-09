@@ -75,13 +75,170 @@ describe('convert-query-params', () => {
     });
 
     // test filters that should be removed
-    test.each<[string, object]>([
-      ['invalid attribute', { invAttribute: 'test' }],
-      ['invalid operator', { $nope: 'test' }],
-      ['uppercase operator', { $GT: new Date() }],
-    ])('removes: %s', (key, input) => {
-      const res = transformer.private_convertFiltersQueryParams(input, models['api::dog.dog']);
+    test.each<[string, object, string]>([
+      ['invalid attribute', { invAttribute: 'test' }, 'invAttribute'],
+      ['invalid operator', { $nope: 'test' }, '$nope'],
+      ['uppercase operator', { $GT: new Date() }, '$GT'],
+    ])('removes: %s', (_, input, unknownKey) => {
+      const onUnknownFilterKey = jest.fn();
+      const observedTransformer = createTransformer({
+        getModel: (uid: string) => models[uid],
+        onUnknownFilterKey,
+      });
+
+      const res = observedTransformer.private_convertFiltersQueryParams(
+        input,
+        models['api::dog.dog']
+      );
+
       expect(res).toEqual({});
+      expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+      expect(onUnknownFilterKey).toHaveBeenCalledWith({
+        key: unknownKey,
+        uid: 'api::dog.dog',
+        path: [unknownKey],
+        operator: undefined,
+      });
+    });
+
+    describe('onUnknownFilterKey', () => {
+      const createObservedTransformer = () => {
+        const onUnknownFilterKey = jest.fn();
+        const observedTransformer = createTransformer({
+          getModel: (uid: string) => models[uid],
+          onUnknownFilterKey,
+        });
+
+        return { observedTransformer, onUnknownFilterKey };
+      };
+
+      test('is not called when every key is known', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(
+          {
+            id: 1,
+            documentId: { $eq: 'abc' },
+            title: { $eq: 'Hello' },
+            cpa: { field: { $contains: 'x' } },
+            one_to_one: { title: 'Hello' },
+            $or: [{ title: 'a' }, { createdAt: { $gt: '2022-03-17T15:06:57.878Z' } }],
+          },
+          models['api::dog.dog']
+        );
+
+        expect(onUnknownFilterKey).not.toHaveBeenCalled();
+      });
+
+      test('is not called for intentionally removed dynamic zone filters', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const res = observedTransformer.private_convertFiltersQueryParams(
+          { dz: { field: 'x' } },
+          models['api::dog.dog']
+        );
+
+        expect(res).toEqual({});
+        expect(onUnknownFilterKey).not.toHaveBeenCalled();
+      });
+
+      test('reports the nested model and attribute path of an unknown component key', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const res = observedTransformer.private_convertFiltersQueryParams(
+          { title: { $eq: 'Hello' }, cpa: { feild: { $eq: 'a' } } },
+          models['api::dog.dog']
+        );
+
+        expect(res).toEqual({ title: { $eq: 'Hello' } });
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'feild',
+          uid: 'default.cpa',
+          path: ['cpa', 'feild'],
+          operator: undefined,
+        });
+      });
+
+      test('reports unknown keys through relations and logical operators', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(
+          { $and: [{ one_to_one: { $or: [{ titel: 'a' }] } }] },
+          models['api::dog.dog']
+        );
+
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'titel',
+          uid: 'api::dog.dog',
+          path: ['one_to_one', 'titel'],
+          operator: undefined,
+        });
+      });
+
+      test('reports the operator of an object operand on a scalar attribute', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const res = observedTransformer.private_convertFiltersQueryParams(
+          { title: { $not: { $eq: { a: 999 } } } },
+          models['api::dog.dog']
+        );
+
+        expect(res).toEqual({});
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'a',
+          uid: 'api::dog.dog',
+          path: ['title', 'a'],
+          operator: '$eq',
+        });
+      });
+
+      test('reports the operator of an object operand on id', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(
+          { id: { $in: [{ a: 1 }] } },
+          models['api::dog.dog']
+        );
+
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'a',
+          uid: 'api::dog.dog',
+          path: ['id', 'a'],
+          operator: '$in',
+        });
+      });
+
+      test('reports an undefined uid when the model is unknown', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams({ title: 'a' }, undefined);
+
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'title',
+          uid: undefined,
+          path: ['title'],
+          operator: undefined,
+        });
+      });
+
+      test('is called through transformQueryParams', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const query = observedTransformer.transformQueryParams('api::dog.dog', {
+          filters: { titel: 'a' },
+        });
+
+        expect(query.where).toEqual({});
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'titel',
+          uid: 'api::dog.dog',
+          path: ['titel'],
+          operator: undefined,
+        });
+      });
     });
 
     test.todo('partial filtering works');
