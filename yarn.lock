@@ -11325,7 +11325,6 @@ __metadata:
     better-call: "npm:1.4.4"
     eslint-config-custom: "npm:5.61.0"
     jest: "npm:29.6.0"
-    jose: "npm:6.2.13"
     jsonwebtoken: "npm:9.0.3"
     koa: "npm:2.16.4"
     kysely: "npm:0.29.7"
@@ -23760,13 +23759,6 @@ __metadata:
   version: 1.4.0
   resolution: "jju@npm:1.4.0"
   checksum: 10c0/f3f444557e4364cfc06b1abf8331bf3778b26c0c8552ca54429bc0092652172fdea26cbffe33e1017b303d5aa506f7ede8571857400efe459cb7439180e2acad
-  languageName: node
-  linkType: hard
-
-"jose@npm:6.2.13":
-  version: 6.2.13
-  resolution: "jose@npm:6.2.13"
-  checksum: 10c0/a7a175057fd42e129200026320d535deba5c869e764bdb130d4aecb7cc2a22c07eab2bf9fc848188b45b89d95f8e0ba4ce01a8259a4fa45c84bec34f66f2918e
   languageName: node
   linkType: hard
 
