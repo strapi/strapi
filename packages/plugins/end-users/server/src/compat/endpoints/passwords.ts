@@ -58,6 +58,12 @@ export const forgotPassword = async (
   _cfg: CompatConfig,
   { body, headers }: PasswordInput
 ): Promise<CompatResult> => {
+  const refusal = await emailPasswordRefusal(strapi);
+
+  if (refusal) {
+    return refusal;
+  }
+
   const input = plain(body);
   const extra = Object.keys(input).filter((key) => key !== 'email');
 

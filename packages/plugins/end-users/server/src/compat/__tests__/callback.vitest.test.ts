@@ -24,7 +24,9 @@ const setup = (
   } = {}
 ) => {
   const engine = {
-    getSession: vi.fn(async () => ({
+    // The parameter types the mock, so the test can read the headers it was called with.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getSession: vi.fn(async (_headers: Headers) => ({
       id: 's1',
       userId: 'doc1',
       createdAt: overrides.createdAt ?? new Date(),

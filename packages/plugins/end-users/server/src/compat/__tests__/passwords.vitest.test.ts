@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import type { CompatConfig } from '../config';
-import { changePassword, resetPassword } from '../endpoints/passwords';
+import { changePassword, forgotPassword, resetPassword } from '../endpoints/passwords';
 
 const setup = (emailPassword: boolean) => {
   const callNative = vi.fn();
@@ -31,6 +31,16 @@ describe('the compat password endpoints', () => {
       headers,
       userOfCode: async () => 'user',
     });
+
+    expect(result).toMatchObject({ status: 400 });
+    expect(JSON.stringify(result.body)).toContain('This provider is disabled.');
+    expect(callNative).not.toHaveBeenCalled();
+  });
+
+  it('refuse a forgot-password request while email and password sign-in is off', async () => {
+    const { strapi, callNative } = setup(false);
+
+    const result = await forgotPassword(strapi, cfg, { body: { email: 'a@b.co' }, headers });
 
     expect(result).toMatchObject({ status: 400 });
     expect(JSON.stringify(result.body)).toContain('This provider is disabled.');
