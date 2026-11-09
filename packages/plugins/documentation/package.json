@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/admin": "5.61.0",
+    "@strapi/admin": "4.0.0",
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
     "@strapi/utils": "5.61.0",
