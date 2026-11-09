@@ -7,9 +7,13 @@ jest.mock('../../services/homepage', () => ({
   useGetUpcomingReleasesQuery: jest.fn(),
 }));
 
-const scheduledAt = new Date();
-scheduledAt.setDate(scheduledAt.getDate() + 1);
-scheduledAt.setHours(scheduledAt.getHours() + 1);
+/**
+ * RelativeTime counts days by calendar day, so a release 25 hours from the real clock reads
+ * "in 2 days" when the suite runs after 23:00. Pin "now" to a morning and schedule the release
+ * on the next calendar day. Both are local times, so the label holds in any timezone.
+ */
+const now = new Date('2025-07-31T10:00:00');
+const scheduledAt = new Date('2025-08-01T11:00:00');
 
 const mockReleases = [
   {
@@ -37,7 +41,12 @@ const mockReleases = [
 ];
 
 describe('ChartEntriesWidget', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now });
+  });
+
   afterEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
