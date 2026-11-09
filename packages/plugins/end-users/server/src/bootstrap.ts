@@ -4,54 +4,17 @@ import { ADMIN_ACTIONS } from './admin-actions';
 import { logBootWarnings } from './boot-warnings';
 import { readCompatConfig } from './compat/config';
 import { defineLegacyOrigin } from './compat/origin';
-import { isOwner } from './conditions';
+import { readRecord } from './migration/record';
+import { runPostSync } from './migration/post-sync';
 import { PLUGIN_ID, PROFILE_UID, ROLE_FIND_ACTION, USER_UID } from './constants';
 import { registry } from './providers/registry';
 import type permissionService from './services/permission';
 import type roleService from './services/role';
-import type { PermissionRow } from './utils/permission-row';
+import { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow } from './utils/default-permissions';
 import { asProfileLifecycle } from './utils/profile-lifecycle';
 import { writableFields } from './utils/writable-fields';
 
-/** A route-only permission: the route's scope, no subject, no field rule, no condition */
-const routeRow = (action: string): PermissionRow => ({
-  action,
-  subject: null,
-  properties: {},
-  conditions: [],
-});
-
-/** A permission on the caller's own profile: every field, through `is-owner` on `user` */
-export const ownProfileRow = (action: string): PermissionRow => ({
-  action: `${PROFILE_UID}.${action}`,
-  subject: PROFILE_UID,
-  properties: {},
-  conditions: [{ name: isOwner.name, params: { field: 'user' } }],
-});
-
-/**
- * What the Authenticated role may do when it is created:
- *
- * - the three `me` routes (`controllers/me.ts`), which answer only for the caller, so granting them
- *   leaks nothing;
- * - `find`, `findOne` and `update` on the profile type, with `is-owner` on its `user`: a user reads
- *   and changes their own profile, every field but `user`, which `is-owner` locks. No `create` or
- *   `delete`: the plugin makes and removes profiles with their user.
- *
- * Nothing else: not `/api/users*`, not `user.update`.
- *
- * The profile `update` row is the one written with no field list here; it is seeded with the
- * profile's attributes at first start (`writableProfileFields`) and an existing
- * database keeps the row it has.
- */
-export const DEFAULT_AUTHENTICATED_PERMISSIONS: readonly PermissionRow[] = [
-  routeRow('plugin::end-users.me.find'),
-  routeRow('plugin::end-users.me.findProfile'),
-  routeRow('plugin::end-users.me.updateProfile'),
-  ownProfileRow('find'),
-  ownProfileRow('findOne'),
-  ownProfileRow('update'),
-];
+export { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow };
 
 const PROFILE_UPDATE_ACTION = `${PROFILE_UID}.update`;
 
@@ -125,6 +88,11 @@ export const ensureEveryUserHasAProfile = async (
   const users = strapi.db.query(USER_UID);
   const profiles = strapi.db.query(PROFILE_UID);
   const result = { created: 0, failed: [] as Array<{ userId: string; reason: string }> };
+
+  // The migration makes the profiles of the users it moves, with their ids: not before it is done
+  if ((await readRecord(strapi))?.status === 'in-progress') {
+    return result;
+  }
 
   const hasProfile = async (documentId: string) =>
     Boolean(await profiles.findOne({ where: { user: { documentId } }, select: ['id'] }));
@@ -309,6 +277,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   // the admin routes check them. Before the admin's own bootstrap, which gives the Super Admin
   // role every registered action.
   await strapi.service('admin::permission').actionProvider.registerMany(ADMIN_ACTIONS);
+
+  // A migration from users-permissions finishes here, before anything makes roles or profiles
+  await runPostSync(strapi);
 
   // Public and Authenticated: what a request with no credentials, and a new user, are given
   const roles = strapi.plugin(PLUGIN_ID).service('role') as ReturnType<typeof roleService>;

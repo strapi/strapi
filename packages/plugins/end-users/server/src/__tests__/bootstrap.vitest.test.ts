@@ -558,9 +558,18 @@ describe('the profile of every user', () => {
     failWith?: Record<string, Error>;
     /** Users whose profile another instance commits first, so the create here is refused */
     racedFor?: string[];
+    /** The migration's record in the store, when there is one */
+    migration?: { status: string } | null;
   }
 
-  const fake = ({ users, profileOwners, attributes = {}, failWith = {}, racedFor = [] }: Fake) => {
+  const fake = ({
+    users,
+    profileOwners,
+    attributes = {},
+    failWith = {},
+    racedFor = [],
+    migration = null,
+  }: Fake) => {
     const created: Array<{ data: unknown; marked: boolean }> = [];
     const warn = vi.fn();
 
@@ -602,6 +611,7 @@ describe('the profile of every user', () => {
       db: { query: vi.fn((uid: string) => (uid === USER_UID ? userQuery : profileQuery)) },
       documents: vi.fn(() => ({ create })),
       contentTypes: { [PROFILE_UID]: { attributes } },
+      store: () => ({ get: async () => migration }),
       log: { warn },
     } as unknown as Core.Strapi;
 
@@ -639,6 +649,17 @@ describe('the profile of every user', () => {
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0][0]).toContain('user-3');
     expect(warn.mock.calls[0][0]).toContain('company');
+  });
+
+  it('makes none while a migration is in progress, which makes them with the users ids', async () => {
+    const { strapi, create } = fake({
+      users: [{ id: 1, documentId: 'user-1' }],
+      profileOwners: [],
+      migration: { status: 'in-progress' },
+    });
+
+    expect(await ensureEveryUserHasAProfile(strapi)).toEqual({ created: 0, failed: [] });
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('counts nothing as failed when another instance made the profile first', async () => {

@@ -296,7 +296,10 @@ const templateItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
  * action is registered can replace them. An action `isKnownAction` can't tell about yet (`null`) is
  * not counted as dropped here: it is named in the message and decided then.
  */
-const permissionItems = (snapshot: UpSnapshot, ctx: ReportContext): MigrationReportItem[] => {
+export const permissionItems = (
+  snapshot: Pick<UpSnapshot, 'roles'>,
+  ctx: Pick<ReportContext, 'permissionContext'>
+): MigrationReportItem[] => {
   const items: MigrationReportItem[] = [];
   const undecided = new Set<string>();
   const permissionContext: PermissionMapContext = {

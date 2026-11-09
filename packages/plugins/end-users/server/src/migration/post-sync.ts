@@ -1,0 +1,813 @@
+// knex is Strapi's own database layer (hoisted); only its types are used here
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
+import type { Knex } from 'knex';
+import { randomUUID } from 'node:crypto';
+import type { Core } from '@strapi/types';
+
+import { readCompatConfig } from '../compat/config';
+import { ACCOUNT_UID, PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../constants';
+import type permissionService from '../services/permission';
+import { readableFields, writableFields } from '../utils/writable-fields';
+import type { PermissionMapContext } from './map-permissions';
+import { mapRolePermissions } from './map-permissions';
+import {
+  addReportItems,
+  claimMigration,
+  lastClaimOwner,
+  readRecord,
+  releaseMigration,
+  updateRecord,
+} from './record';
+import type { MigrationRecord, MigrationStep } from './record';
+import { permissionItems } from './report';
+import { waitForClaim } from './pre-sync';
+import { upJoinTableName } from './tables';
+
+const PAGE = 1000;
+/** Rows per insert: SQLite takes at most 999 values in one statement */
+const VALUES_PER_STATEMENT = 900;
+
+const USERS_TABLE = 'eu_users';
+const ROLES_TABLE = 'eu_roles';
+const STAGED_PERMISSIONS = 'up_permissions';
+const STAGED_PERMISSION_LINK = 'up_permissions_role_lnk';
+const STAGED_COMPONENTS = 'up_users_cmps';
+const PUBLIC_ROLES = ['public', 'authenticated'];
+const NO_ADDRESS_DOMAIN = '@users.invalid';
+
+type Row = Record<string, unknown>;
+type DbClient = 'sqlite' | 'postgres' | 'mysql';
+
+export interface PostSyncStep {
+  name: MigrationStep;
+  /** `owner` is this start's claim, which a step that writes the record in its own transaction checks */
+  run: (
+    strapi: Core.Strapi,
+    record: MigrationRecord,
+    owner: string
+  ) => Promise<Partial<MigrationRecord> | void>;
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * Helpers
+ * -----------------------------------------------------------------------------------------------*/
+
+const tableOf = (strapi: Core.Strapi, trx: Knex, table: string) => {
+  const schema = strapi.db.getSchemaName();
+
+  return schema ? trx(table).withSchema(schema) : trx(table);
+};
+
+const qualified = (strapi: Core.Strapi, table: string) => {
+  const schema = strapi.db.getSchemaName();
+
+  return schema ? `${schema}.${table}` : table;
+};
+
+const clientOf = (strapi: Core.Strapi) => strapi.db.dialect.client as DbClient;
+
+const hasColumn = (strapi: Core.Strapi, table: string, column: string) =>
+  strapi.db.getSchemaConnection().hasColumn(table, column);
+
+const meta = (strapi: Core.Strapi, uid: string) => {
+  const found = strapi.db.metadata.get(uid) as unknown as {
+    tableName: string;
+    attributes: Record<string, any>;
+  };
+
+  return found;
+};
+
+const columnOf = (strapi: Core.Strapi, uid: string, attribute: string): string | undefined =>
+  meta(strapi, uid).attributes[attribute]?.columnName;
+
+const chunksOf = <T>(items: T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+
+  for (let from = 0; from < items.length; from += size) {
+    chunks.push(items.slice(from, from + size));
+  }
+
+  return chunks;
+};
+
+const stagedAs = (record: MigrationRecord, original: string): string | undefined =>
+  Object.entries(record.staged).find(([, from]) => from === original)?.[0];
+
+/**
+ * Re-checks that this start still holds the migration and gives the claim another 15 minutes. Done
+ * outside any transaction of ours, before the work it protects: a start whose claim ran out and was
+ * taken by another stops here and writes nothing more.
+ */
+const keepHold = async (strapi: Core.Strapi, owner: string): Promise<void> => {
+  if (!(await claimMigration(strapi, owner))) {
+    throw new Error(
+      'This start no longer holds the migration: another start claimed it. Nothing more was written.'
+    );
+  }
+};
+
+/** Inside a transaction: the record still names this start. Reads through the transaction. */
+const stillHeld = async (strapi: Core.Strapi, owner: string): Promise<MigrationRecord> => {
+  const record = await readRecord(strapi);
+
+  if (!record || record.claim?.by !== owner) {
+    throw new Error(
+      'This start no longer holds the migration: another start claimed it. Nothing more was written.'
+    );
+  }
+
+  return record;
+};
+
+/** Writes `patch` over the record, only while this start still holds the claim */
+export const writeFenced = async (
+  strapi: Core.Strapi,
+  owner: string,
+  patch: Partial<MigrationRecord>
+): Promise<MigrationRecord> => {
+  await stillHeld(strapi, owner);
+
+  return updateRecord(strapi, patch);
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * users
+ * -----------------------------------------------------------------------------------------------*/
+
+const NOT_FILLED_FROM_MODEL = new Set(['emailVerified', 'banned', 'documentId']);
+
+/** The model defaults a plain value can carry: a boolean, a number or a string */
+const plainDefault = (value: unknown): string | number | boolean | undefined =>
+  typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string'
+    ? value
+    : undefined;
+
+const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: string) => {
+  const db = strapi.db;
+  const emailVerified = columnOf(strapi, USER_UID, 'emailVerified') ?? 'email_verified';
+  const banned = columnOf(strapi, USER_UID, 'banned') ?? 'banned';
+  const conn = () => db.getConnection(USERS_TABLE);
+
+  const fromOld = async (target: string, old: string) => {
+    const has = await hasColumn(strapi, USERS_TABLE, old);
+
+    await conn().update({
+      [target]: has ? db.connection.raw('COALESCE(??, ?)', [old, false]) : false,
+    });
+  };
+
+  await fromOld(emailVerified, 'confirmed');
+  await conn()
+    .whereRaw('LOWER(??) LIKE ?', ['email', `%${NO_ADDRESS_DOMAIN}`])
+    .update({ [emailVerified]: false });
+  await fromOld(banned, 'blocked');
+
+  // A user with no name is named after the username they signed up with, the spelling they chose first
+  const sources = [];
+
+  for (const column of ['display_username', 'username']) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await hasColumn(strapi, USERS_TABLE, column)) {
+      sources.push(column);
+    }
+  }
+
+  const nameColumn = columnOf(strapi, USER_UID, 'name');
+
+  if (nameColumn && sources.length > 0) {
+    await conn()
+      .whereNull(nameColumn)
+      .update({
+        [nameColumn]: db.connection.raw(`COALESCE(${sources.map(() => '??').join(', ')})`, sources),
+      });
+  }
+
+  // Every other column the engine added, with the default its model gives a new user
+  const attributes = (
+    strapi.contentTypes as unknown as Record<string, { attributes?: Record<string, any> }>
+  )[USER_UID]?.attributes;
+
+  for (const [name, attribute] of Object.entries(attributes ?? {})) {
+    const value = plainDefault(attribute.default);
+    const column = columnOf(strapi, USER_UID, name);
+
+    // eslint-disable-next-line no-await-in-loop
+    if (
+      value !== undefined &&
+      column &&
+      !NOT_FILLED_FROM_MODEL.has(name) &&
+      attribute.type !== 'relation' &&
+      (await hasColumn(strapi, USERS_TABLE, column))
+    ) {
+      // eslint-disable-next-line no-await-in-loop
+      await conn()
+        .whereNull(column)
+        .update({ [column]: value });
+    }
+  }
+
+  // Pages of rows with no document id, each given the id a new document of the type would get
+  const makeId = meta(strapi, USER_UID).attributes.documentId?.default as
+    (() => string) | undefined;
+
+  if (typeof makeId === 'function') {
+    for (;;) {
+      // eslint-disable-next-line no-await-in-loop
+      await keepHold(strapi, owner);
+
+      // eslint-disable-next-line no-await-in-loop
+      const page: Row[] = await conn().whereNull('document_id').select('id').limit(PAGE);
+
+      if (page.length === 0) {
+        break;
+      }
+
+      for (const { id } of page) {
+        // eslint-disable-next-line no-await-in-loop
+        await conn().where({ id }).update({ document_id: makeId() });
+      }
+    }
+  }
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * roles
+ * -----------------------------------------------------------------------------------------------*/
+
+const rolesStep = async (strapi: Core.Strapi, record: MigrationRecord, owner: string) => {
+  const db = strapi.db;
+  const typeColumn = columnOf(strapi, ROLE_UID, 'type') ?? 'type';
+  const roles = () => db.getConnection(ROLES_TABLE);
+  let defaultRoleDocumentId = record.carried.defaultRoleDocumentId;
+
+  if (defaultRoleDocumentId === null) {
+    const advanced = (await strapi
+      .store({ type: 'plugin', name: 'users-permissions' })
+      .get({ key: 'advanced' })) as { default_role?: unknown } | null;
+    const wanted =
+      typeof advanced?.default_role === 'string' ? advanced.default_role : 'authenticated';
+    const role = (await roles()
+      .where({ [typeColumn]: wanted })
+      .orderBy('id')
+      .first('document_id')) as { document_id: string } | undefined;
+
+    defaultRoleDocumentId = role?.document_id ?? null;
+  }
+
+  await keepHold(strapi, owner);
+  await roles()
+    .whereNotIn(typeColumn, PUBLIC_ROLES)
+    .update({ [typeColumn]: 'custom' });
+
+  return { carried: { ...record.carried, defaultRoleDocumentId } };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * permissions
+ * -----------------------------------------------------------------------------------------------*/
+
+const permissionContext = (strapi: Core.Strapi): PermissionMapContext => {
+  const types = strapi.contentTypes as unknown as Record<
+    string,
+    { options?: { draftAndPublish?: boolean } }
+  >;
+  const { action } = strapi.contentAPI.permissions.providers;
+
+  return {
+    compat: readCompatConfig(strapi).usersPermissions,
+    contentTypes: Object.fromEntries(
+      Object.entries(types)
+        .filter(([uid]) => uid.startsWith('api::'))
+        .map(([uid, type]) => [uid, { draftAndPublish: type.options?.draftAndPublish === true }])
+    ),
+    fields: (uid, use) =>
+      use === 'write' ? writableFields(strapi, uid) : readableFields(strapi, uid),
+    isKnownAction: (name) => action.has(name),
+  };
+};
+
+const permissionsStep = async (strapi: Core.Strapi, record: MigrationRecord, owner: string) => {
+  const staged = stagedAs(record, STAGED_PERMISSIONS);
+  const link = stagedAs(record, STAGED_PERMISSION_LINK);
+
+  if (!staged || !link) {
+    strapi.log.warn(
+      `${PLUGIN_ID}: the users-permissions permission tables are not staged, so no role permissions were carried`
+    );
+
+    return;
+  }
+
+  const service = strapi.plugin(PLUGIN_ID).service('permission') as ReturnType<
+    typeof permissionService
+  >;
+  const context = permissionContext(strapi);
+  const db = strapi.db;
+  const roles = (await db
+    .getConnection(ROLES_TABLE)
+    .select('id', 'document_id', 'name', 'type')
+    .orderBy('id')) as Array<{ id: number; document_id: string; name: string; type: string }>;
+  const items = [];
+  let written = 0;
+
+  for (const role of roles) {
+    // eslint-disable-next-line no-await-in-loop
+    await keepHold(strapi, owner);
+
+    // eslint-disable-next-line no-await-in-loop
+    const found: Row[] = await db
+      .getConnection(`${link} as l`)
+      .join(`${staged} as p`, 'p.id', 'l.permission_id')
+      .where('l.role_id', role.id)
+      .orderBy('p.id')
+      .select('p.action as action');
+    const actions = found.map((row) => String(row.action));
+    const mapping = mapRolePermissions(actions, role.type, context);
+
+    // The role's rows are replaced as a whole, so a start that runs this again leaves the same ones
+    // eslint-disable-next-line no-await-in-loop
+    const existing = await service.findForRoles([role.document_id]);
+
+    // eslint-disable-next-line no-await-in-loop
+    await service.applyDiff(role.document_id, {
+      create: mapping.rows,
+      update: [],
+      delete: existing.map((row) => row.documentId),
+    });
+    written += mapping.rows.length;
+
+    items.push(
+      ...permissionItems(
+        { roles: [{ id: role.id, name: role.name, type: role.type, actions, users: 0 }] },
+        { permissionContext: context }
+      )
+    );
+  }
+
+  await addReportItems(strapi, items);
+  strapi.log.info(`${PLUGIN_ID}: wrote ${written} permissions for ${roles.length} roles`);
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * profiles
+ * -----------------------------------------------------------------------------------------------*/
+
+const NON_SCALAR = new Set(['relation', 'component', 'dynamiczone', 'media']);
+
+/** The profile's scalar attributes, as the column each is stored in */
+const profileScalars = (strapi: Core.Strapi): string[] => {
+  const attributes =
+    (strapi.contentTypes as unknown as Record<string, { attributes?: Record<string, any> }>)[
+      PROFILE_UID
+    ]?.attributes ?? {};
+
+  return Object.entries(attributes)
+    .filter(([name, attribute]) => !NON_SCALAR.has(attribute.type) && name !== 'user')
+    .map(([name]) => columnOf(strapi, PROFILE_UID, name))
+    .filter((column): column is string => column !== undefined && column !== 'id');
+};
+
+interface CopyPlan {
+  /** The staged table's original name */
+  from: string;
+  /** The profile's table that takes its rows */
+  into: string;
+  /** The column of the profile's table that holds the profile id */
+  key: string;
+}
+
+/** The staged tables the profile declares, and the profile tables that take them */
+const declaredCopies = (strapi: Core.Strapi): CopyPlan[] => {
+  const profile = meta(strapi, PROFILE_UID);
+  const plans: CopyPlan[] = [];
+
+  for (const [name, attribute] of Object.entries(profile.attributes)) {
+    if (name === 'user') {
+      continue;
+    }
+
+    if (attribute.type === 'relation' && attribute.joinTable) {
+      const { joinTable } = attribute;
+
+      // A table the other side of the relation owns is not the profile's to carry
+      if (joinTable.joinColumn?.referencedTable === profile.tableName) {
+        plans.push({
+          from: upJoinTableName(strapi.db, name),
+          into: joinTable.name,
+          key: joinTable.joinColumn.name,
+        });
+      }
+    }
+  }
+
+  const components = [...strapi.db.metadata.values()].find(
+    (model: any) => model.tableName === `${profile.tableName}_cmps`
+  );
+
+  if (components) {
+    plans.push({ from: STAGED_COMPONENTS, into: components.tableName, key: 'entity_id' });
+  }
+
+  return plans;
+};
+
+/** What the profile of a user is created with: the same-named columns of the user, its timestamps */
+const profileRows = (
+  users: Row[],
+  columns: string[],
+  withPublished: boolean,
+  makeId: () => string
+): Row[] =>
+  users.map((user) => ({
+    id: user.id,
+    document_id: makeId(),
+    ...Object.fromEntries(columns.map((column) => [column, user[column] ?? null])),
+    created_at: user.created_at,
+    updated_at: user.updated_at,
+    ...(withPublished ? { published_at: user.published_at ?? new Date() } : {}),
+  }));
+
+const createProfiles = async (strapi: Core.Strapi, owner: string): Promise<number> => {
+  const db = strapi.db;
+  const profile = meta(strapi, PROFILE_UID);
+  const userLink = profile.attributes.user.joinTable as {
+    name: string;
+    joinColumn: { name: string };
+    inverseJoinColumn: { name: string };
+  };
+  const makeId = profile.attributes.documentId.default as () => string;
+  const withPublished =
+    Boolean(profile.attributes.publishedAt) &&
+    (await hasColumn(strapi, USERS_TABLE, 'published_at'));
+  const columns: string[] = [];
+
+  for (const column of profileScalars(strapi)) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await hasColumn(strapi, USERS_TABLE, column)) {
+      columns.push(column);
+    }
+  }
+
+  const userColumns = [
+    'id',
+    'created_at',
+    'updated_at',
+    ...(withPublished ? ['published_at'] : []),
+    ...columns,
+  ];
+  const width = userColumns.length + 2;
+  let lastId = 0;
+  let created = 0;
+
+  for (;;) {
+    // eslint-disable-next-line no-await-in-loop
+    await keepHold(strapi, owner);
+
+    // eslint-disable-next-line no-await-in-loop
+    const page = (await db
+      .getConnection(`${USERS_TABLE} as u`)
+      .where('u.id', '>', lastId)
+      .whereNotExists(function none() {
+        this.select(db.connection.raw('1'))
+          .from(userLink.name)
+          .whereRaw('?? = ??', [`${userLink.name}.${userLink.inverseJoinColumn.name}`, 'u.id']);
+      })
+      .orderBy('u.id')
+      .limit(PAGE)
+      .select(userColumns.map((column) => `u.${column} as ${column}`))) as Row[];
+
+    if (page.length === 0) {
+      break;
+    }
+
+    lastId = Number(page[page.length - 1].id);
+
+    // eslint-disable-next-line no-await-in-loop
+    await db.transaction(async ({ trx }: { trx: Knex.Transaction }) => {
+      for (const chunk of chunksOf(page, Math.floor(VALUES_PER_STATEMENT / width))) {
+        // eslint-disable-next-line no-await-in-loop
+        await tableOf(strapi, trx, profile.tableName).insert(
+          profileRows(chunk, columns, withPublished, makeId)
+        );
+        // eslint-disable-next-line no-await-in-loop
+        await tableOf(strapi, trx, userLink.name).insert(
+          chunk.map((user) => ({
+            [userLink.joinColumn.name]: user.id,
+            [userLink.inverseJoinColumn.name]: user.id,
+          }))
+        );
+      }
+    });
+    created += page.length;
+  }
+
+  // Postgres counts on from its own sequence, which explicit ids did not move
+  if (clientOf(strapi) === 'postgres') {
+    await db.connection.raw(
+      `select setval(pg_get_serial_sequence(?, 'id'), (select max(id) from ??)) where exists (select 1 from ??)`,
+      [
+        qualified(strapi, profile.tableName),
+        qualified(strapi, profile.tableName),
+        qualified(strapi, profile.tableName),
+      ]
+    );
+  }
+
+  return created;
+};
+
+const dropStaged = async (strapi: Core.Strapi, table: string) => {
+  if (clientOf(strapi) === 'postgres') {
+    await strapi.db.connection.raw('drop table if exists ?? cascade', [qualified(strapi, table)]);
+  } else {
+    await strapi.db.getSchemaConnection().dropTableIfExists(table);
+  }
+};
+
+/** The profile's table takes the rows of its staged one, and the record says so, in one transaction */
+const copyStaged = async (
+  strapi: Core.Strapi,
+  owner: string,
+  stagedName: string,
+  plan: CopyPlan
+): Promise<void> => {
+  const db = strapi.db;
+  const from = Object.keys((await db.getConnection(stagedName).columnInfo()) as object);
+  const to = Object.keys((await db.getConnection(plan.into).columnInfo()) as object);
+  // The user's own column names give way to the profile's: `user_id` is `profile_id`
+  const sourceOf = (column: string) =>
+    column.startsWith('profile_') ? `user_${column.slice('profile_'.length)}` : column;
+  const pairs = to
+    .filter((column) => column !== 'id')
+    .map((column) => ({ column, source: sourceOf(column) }))
+    .filter(({ source }) => from.includes(source));
+  const sourceKey = sourceOf(plan.key);
+
+  await keepHold(strapi, owner);
+  await db.transaction(async ({ trx }: { trx: Knex.Transaction }) => {
+    const record = await stillHeld(strapi, owner);
+
+    if (record.carried.copied.includes(stagedName)) {
+      return;
+    }
+
+    const select = tableOf(strapi, trx, stagedName)
+      .select(pairs.map(({ source }) => source))
+      .whereIn(sourceKey, tableOf(strapi, trx, meta(strapi, PROFILE_UID).tableName).select('id'));
+    const target = qualified(strapi, plan.into);
+
+    await trx
+      .into(
+        trx.raw(`?? (${pairs.map(() => '??').join(', ')})`, [
+          target,
+          ...pairs.map(({ column }) => column),
+        ])
+      )
+      .insert(select);
+    await updateRecord(strapi, {
+      carried: { ...record.carried, copied: [...record.carried.copied, stagedName] },
+    });
+  });
+};
+
+const profilesStep = async (strapi: Core.Strapi, record: MigrationRecord, owner: string) => {
+  const db = strapi.db;
+  const plans = declaredCopies(strapi);
+  const declared = new Set(plans.map(({ from }) => from));
+  const items = [];
+
+  for (const [stagedName, original] of Object.entries(record.staged)) {
+    if (
+      original === STAGED_PERMISSIONS ||
+      original === STAGED_PERMISSION_LINK ||
+      declared.has(original)
+    ) {
+      continue;
+    }
+
+    // eslint-disable-next-line no-await-in-loop
+    const rows = Number(
+      ((await db.getConnection(stagedName).count({ c: '*' }).first()) as Row | undefined)?.c ?? 0
+    );
+
+    items.push({
+      id: `staged-undeclared:${original}`,
+      kind: 'staged-undeclared' as const,
+      severity: 'action' as const,
+      message:
+        `The users-permissions table ${original} holds ${rows} ${rows === 1 ? 'row' : 'rows'} the ` +
+        `profile does not declare, so it was kept as ${stagedName}. Add the matching field to the ` +
+        'profile and copy its rows, or drop the table once nothing needs it.',
+      count: rows,
+      refs: [original],
+      resolved: false,
+    });
+  }
+
+  await addReportItems(strapi, items);
+
+  const created = await createProfiles(strapi, owner);
+
+  for (const plan of plans) {
+    const stagedName = stagedAs(record, plan.from);
+
+    if (stagedName) {
+      // eslint-disable-next-line no-await-in-loop
+      if (await db.getSchemaConnection().hasTable(stagedName)) {
+        // eslint-disable-next-line no-await-in-loop
+        const { carried } = (await readRecord(strapi)) ?? record;
+
+        if (!carried.copied.includes(stagedName)) {
+          // eslint-disable-next-line no-await-in-loop
+          await copyStaged(strapi, owner, stagedName, plan);
+        }
+
+        // eslint-disable-next-line no-await-in-loop
+        await dropStaged(strapi, stagedName);
+      }
+    }
+  }
+
+  strapi.log.info(`${PLUGIN_ID}: created ${created} profiles`);
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * accounts
+ * -----------------------------------------------------------------------------------------------*/
+
+const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: string) => {
+  const db = strapi.db;
+  const account = meta(strapi, ACCOUNT_UID);
+  const column = (attribute: string) => account.attributes[attribute]?.columnName as string;
+  const makeId = account.attributes.documentId.default as () => string;
+  const withPublished =
+    Boolean(account.attributes.publishedAt) &&
+    (await hasColumn(strapi, USERS_TABLE, 'published_at'));
+  const providerId = column('providerId');
+  const accountId = column('accountId');
+  const userId = column('userId');
+  const width = 9;
+  let lastId = 0;
+  let created = 0;
+
+  for (;;) {
+    // eslint-disable-next-line no-await-in-loop
+    await keepHold(strapi, owner);
+
+    // eslint-disable-next-line no-await-in-loop
+    const page = (await db
+      .getConnection(`${USERS_TABLE} as u`)
+      .where('u.provider', 'local')
+      .whereNotNull('u.password')
+      .where('u.password', '<>', '')
+      .where('u.id', '>', lastId)
+      .whereNotExists(function none() {
+        this.select(db.connection.raw('1'))
+          .from(account.tableName)
+          .whereRaw('?? = ??', [`${account.tableName}.${userId}`, 'u.document_id'])
+          .where(`${account.tableName}.${providerId}`, 'credential');
+      })
+      .orderBy('u.id')
+      .limit(PAGE)
+      .select(
+        'u.id as id',
+        'u.document_id as document_id',
+        'u.password as password',
+        'u.created_at as created_at',
+        'u.updated_at as updated_at',
+        ...(withPublished ? ['u.published_at as published_at'] : [])
+      )) as Row[];
+
+    if (page.length === 0) {
+      break;
+    }
+
+    lastId = Number(page[page.length - 1].id);
+
+    for (const chunk of chunksOf(page, Math.floor(VALUES_PER_STATEMENT / width))) {
+      // eslint-disable-next-line no-await-in-loop
+      await db.getConnection(account.tableName).insert(
+        chunk.map((user) => ({
+          document_id: makeId(),
+          [providerId]: 'credential',
+          [accountId]: user.document_id,
+          [userId]: user.document_id,
+          [column('password')]: user.password,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          ...(withPublished ? { published_at: user.published_at ?? new Date() } : {}),
+        }))
+      );
+    }
+
+    created += page.length;
+  }
+
+  strapi.log.info(`${PLUGIN_ID}: created ${created} credential accounts`);
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * The run
+ * -----------------------------------------------------------------------------------------------*/
+
+/** Task 14 appends `stores` and `admin` */
+export const POST_SYNC_STEPS: PostSyncStep[] = [
+  { name: 'users', run: usersStep },
+  { name: 'roles', run: rolesStep },
+  { name: 'permissions', run: permissionsStep },
+  { name: 'profiles', run: profilesStep },
+  { name: 'accounts', run: accountsStep },
+];
+
+/**
+ * The claim to run under: the one the pre-sync took in this start (it is not given back until the
+ * migration is finished), or a new one, waited for while another start holds it. `null` when the
+ * other start finished the migration meanwhile.
+ */
+const takeClaim = async (strapi: Core.Strapi): Promise<string | null> => {
+  const record = await readRecord(strapi);
+  const mine = lastClaimOwner(strapi);
+
+  if (mine && record?.claim?.by === mine && (await claimMigration(strapi, mine))) {
+    return mine;
+  }
+
+  const owner = randomUUID();
+  let announced = false;
+  const outcome = await waitForClaim({
+    claim: () => claimMigration(strapi, owner),
+    completed: async () => (await readRecord(strapi))?.status === 'completed',
+    onWait() {
+      if (!announced) {
+        announced = true;
+        strapi.log.info(`${PLUGIN_ID}: another start is running the migration; waiting for it`);
+      }
+    },
+  });
+
+  if (outcome === 'timeout') {
+    throw new Error(
+      'Another start has held the migration for 15 minutes without finishing it. Check that it is ' +
+        'still running, then deploy again.'
+    );
+  }
+
+  return outcome === 'claimed' ? owner : null;
+};
+
+/**
+ * The migration's second half, in the plugin's bootstrap and before anything creates profiles or
+ * roles: the users' new columns, the roles' types, the roles' permissions with the fixes, a profile
+ * for each user (with the user's id) and a credential account for each user with a password. Does
+ * nothing unless the record is in progress with the pre-sync done. Each step runs once, is recorded
+ * in `completedSteps`, and may run again after a stop without changing what it already wrote.
+ */
+export const runPostSync = async (strapi: Core.Strapi): Promise<void> => {
+  const first = await readRecord(strapi);
+
+  if (
+    !first ||
+    first.status !== 'in-progress' ||
+    !first.completedSteps.includes('pre-sync') ||
+    POST_SYNC_STEPS.every((step) => first.completedSteps.includes(step.name))
+  ) {
+    return;
+  }
+
+  const owner = await takeClaim(strapi);
+
+  if (owner === null) {
+    return;
+  }
+
+  try {
+    for (const step of POST_SYNC_STEPS) {
+      // A step reads the record as the one before left it
+      // eslint-disable-next-line no-await-in-loop
+      const record = await readRecord(strapi);
+
+      if (!record || record.status !== 'in-progress') {
+        return;
+      }
+
+      if (!record.completedSteps.includes(step.name)) {
+        // eslint-disable-next-line no-await-in-loop
+        await keepHold(strapi, owner);
+
+        // eslint-disable-next-line no-await-in-loop
+        const patch = (await step.run(strapi, record, owner)) ?? {};
+        // eslint-disable-next-line no-await-in-loop
+        const current = await stillHeld(strapi, owner);
+
+        // eslint-disable-next-line no-await-in-loop
+        await updateRecord(strapi, {
+          ...patch,
+          completedSteps: [...new Set([...current.completedSteps, step.name])],
+        });
+      }
+    }
+  } finally {
+    await releaseMigration(strapi, owner);
+  }
+};

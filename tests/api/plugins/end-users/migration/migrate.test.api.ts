@@ -127,6 +127,7 @@ const readRecord = (strapi: Core.Strapi) =>
     completedSteps: string[];
     staged: Record<string, string>;
     attempt: number;
+    carried: { defaultRoleDocumentId: string | null; copied: string[] };
   }>;
 
 /**
@@ -228,7 +229,12 @@ describe('migration from users-permissions: before the schema sync', () => {
       old: await tablesLike(db, 'up_'),
     }));
 
-    expect(state.staging.sort()).toEqual(Object.keys(record.staged).sort());
+    // The post-sync copies the tables the profile declares and drops them
+    expect(state.staging.sort()).toEqual(
+      Object.keys(record.staged)
+        .filter((name) => !record.carried.copied.includes(name))
+        .sort()
+    );
     expect(state.old).toEqual([]);
   });
 
@@ -347,12 +353,29 @@ describe('migration from users-permissions: end-users ran beside it first', () =
     expect(empty.users).toBe(0);
     expect(empty.kept).toBeGreaterThan(0);
 
+    // A table of the project's own whose name starts with the plugin's prefix
+    await inspectDatabase(async (db) => {
+      await db.schema.dropTableIfExists('eu_countries');
+      await db.schema.createTable('eu_countries', (table) => {
+        table.integer('id');
+        table.string('name');
+      });
+      await db('eu_countries').insert({ id: 1, name: 'Norway' });
+    });
+
     strapi = await migratedInstance(project);
   });
 
   afterAll(async () => {
     await strapi?.destroy();
+    await inspectDatabase((db) => db.schema.dropTableIfExists('eu_countries'));
     removeProjectTypes();
+  });
+
+  it('leaves a project table that only starts with the plugin prefix, rows and all', async () => {
+    expect(await strapi.db.connection('eu_countries').select('id', 'name')).toEqual([
+      { id: 1, name: 'Norway' },
+    ]);
   });
 
   it('migrates over the empty end-users tables without losing a user, a role or the memo author', async () => {
@@ -387,5 +410,212 @@ describe('migration from users-permissions: end-users ran beside it first', () =
     expect(report.items).toContainEqual(
       expect.objectContaining({ id: 'compat-note:end-users-tables-replaced', severity: 'info' })
     );
+  });
+});
+
+describe('migration from users-permissions: after the schema sync', () => {
+  let project: UsersPermissionsProject;
+  let strapi: Core.Strapi;
+
+  const fixtures = () => Object.values(project.users);
+  const withPassword = () => fixtures().filter((user) => user.password !== null);
+  const store = (key: string) => strapi.store({ type: 'plugin', name: 'end-users' }).get({ key });
+
+  const permissionsOf = async (documentId: string) =>
+    (
+      strapi.plugin('end-users').service('permission') as {
+        findForRoles(ids: string[]): Promise<
+          Array<{
+            action: string;
+            subject: string | null;
+            properties: { fields?: string[] | null };
+            conditions: Array<{ name: string }>;
+          }>
+        >;
+      }
+    ).findForRoles([documentId]);
+
+  const counts = async () => ({
+    profiles: Number((await strapi.db.connection('eu_profiles').count({ c: '*' }).first())?.c),
+    accounts: Number((await strapi.db.connection('eu_accounts').count({ c: '*' }).first())?.c),
+    permissions: Number(
+      (await strapi.db.connection('eu_permissions').count({ c: '*' }).first())?.c
+    ),
+  });
+
+  beforeAll(async () => {
+    await resetAfterMigration();
+    project = await seedUsersPermissionsProject();
+    strapi = await migratedInstance(project);
+  });
+
+  afterAll(async () => {
+    await strapi?.destroy();
+    removeProjectTypes();
+  });
+
+  it('gives every user one profile with the same id and the custom values', async () => {
+    const profiles = await strapi.db.connection('eu_profiles').select('id', 'company');
+    const alice = project.users.alice;
+
+    expect(profiles).toHaveLength(fixtures().length);
+    expect(profiles).toContainEqual({ id: alice.id, company: 'Acme' });
+
+    for (const user of fixtures()) {
+      expect(profiles.map((profile) => profile.id)).toContain(user.id);
+    }
+
+    const links = await strapi.db.connection('eu_profiles_user_lnk').select();
+
+    expect(links).toHaveLength(fixtures().length);
+    expect(links.every((link) => link.profile_id === link.user_id)).toBe(true);
+
+    const component = await strapi.db
+      .connection('eu_profiles_cmps')
+      .where({ entity_id: alice.id, field: 'seo' })
+      .first();
+    const seo = await strapi.db
+      .connection('components_shared_seos')
+      .where({ id: component.cmp_id })
+      .first();
+
+    expect(seo.meta_title).toBe('Alice');
+
+    const organization = await strapi.db
+      .connection('eu_profiles_organization_lnk')
+      .where({ profile_id: alice.id })
+      .first();
+
+    expect(organization.organization_id).toBe(project.ids.organization);
+
+    const avatar = await strapi.db
+      .connection('files_related_mph')
+      .where({ related_id: alice.id, field: 'avatar', related_type: 'plugin::end-users.profile' });
+
+    expect(avatar.map((row) => row.file_id)).toEqual([project.ids.file]);
+
+    // Copied, so the staged copies are gone; the one the profile does not declare is kept
+    const record = await readRecord(strapi);
+    const left = await inspectDatabase(async (db) => tablesLike(db, 'eu_stg_'));
+
+    expect(record.carried.copied).toHaveLength(2);
+    expect(left.filter((name) => record.carried.copied.includes(name))).toEqual([]);
+    expect(left).toHaveLength(Object.keys(record.staged).length - 2);
+    expect(Object.values(record.staged)).toContain('up_users_favorites_lnk');
+  });
+
+  it('keeps the memo author pointing at the same user', async () => {
+    const author = await strapi.db
+      .connection('memos_author_lnk')
+      .where({ memo_id: project.ids.memo })
+      .first();
+
+    expect(author.user_id).toBe(project.users.alice.id);
+  });
+
+  it('lists the staged table the profile does not declare', async () => {
+    const report = (await store('migration-report')) as {
+      items: Array<{ id: string; kind: string; refs?: string[]; count?: number }>;
+    };
+    const items = report.items.filter((item) => item.kind === 'staged-undeclared');
+
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ refs: ['up_users_favorites_lnk'], count: 2 });
+  });
+
+  it('creates a credential account for each local user and none for the provider user', async () => {
+    const accounts = await strapi.db
+      .connection('eu_accounts')
+      .where({ provider_id: 'credential' })
+      .select('account_id', 'user_id', 'password');
+
+    expect(accounts).toHaveLength(withPassword().length);
+
+    for (const user of withPassword()) {
+      const account = accounts.find((row) => row.user_id === user.documentId);
+
+      expect(account?.account_id).toBe(user.documentId);
+      expect(account?.password).toEqual(expect.stringMatching(/^\$2[aby]\$/));
+    }
+
+    expect(accounts.map((row) => row.user_id)).not.toContain(project.users.carol.documentId);
+  });
+
+  it('carries confirmed and blocked, and names users after their old username', async () => {
+    const row = (key: FixtureUser) =>
+      strapi.db.connection('eu_users').where({ id: project.users[key].id }).first();
+
+    expect((await row('bob')).email_verified).toBeFalsy();
+    expect((await row('alice')).email_verified).toBeTruthy();
+    expect((await row('carol')).email_verified).toBeTruthy();
+    expect((await row('dave')).banned).toBeTruthy();
+    expect((await row('alice')).banned).toBeFalsy();
+    expect((await row('alice')).name).toBe('Alice');
+  });
+
+  it('rebuilds role permissions with the fixes', async () => {
+    const authenticated = await permissionsOf(project.roles.authenticated.documentId);
+    const actions = authenticated.map((permission) => permission.action);
+    const update = authenticated.find(
+      (permission) => permission.action === 'plugin::end-users.user.update'
+    );
+
+    expect(actions).toContain('plugin::end-users.me.find');
+    expect(update?.conditions.map((condition) => condition.name)).toEqual([
+      'plugin::end-users.is-self',
+    ]);
+    expect(actions.filter((action) => action === 'api::memo.memo.find')).toHaveLength(1);
+    expect(actions).toEqual(
+      expect.arrayContaining([
+        'plugin::end-users.profile.find',
+        'plugin::end-users.profile.findOne',
+        'plugin::end-users.profile.update',
+      ])
+    );
+    expect(actions.filter((action) => action.startsWith('plugin::users-permissions.'))).toEqual([]);
+
+    const editors = await permissionsOf(project.roles.editors.documentId);
+    const destroy = editors.find(
+      (permission) => permission.action === 'plugin::end-users.user.delete'
+    );
+
+    expect(destroy?.conditions.map((condition) => condition.name)).toEqual([
+      'plugin::end-users.is-self',
+    ]);
+    expect(editors.map((permission) => permission.action)).toContain('api::memo.memo.update');
+
+    const roles = await strapi.db.connection('eu_roles').select('id', 'type');
+
+    expect(roles.find((role) => role.id === project.roles.editors.id)?.type).toBe('custom');
+    expect(roles.find((role) => role.id === project.roles.authenticated.id)?.type).toBe(
+      'authenticated'
+    );
+  });
+
+  it('records the steps', async () => {
+    const record = await readRecord(strapi);
+
+    expect(record.completedSteps).toEqual(
+      expect.arrayContaining(['pre-sync', 'users', 'roles', 'permissions', 'profiles', 'accounts'])
+    );
+    expect(record.carried.copied).toHaveLength(2);
+    expect((record as any).carried.defaultRoleDocumentId).toBe(
+      project.roles.authenticated.documentId
+    );
+  });
+
+  it('runs every step again with the same counts', async () => {
+    const before = await counts();
+
+    // As a start that stopped after the pre-sync leaves it
+    await strapi.store({ type: 'plugin', name: 'end-users' }).set({
+      key: 'migration',
+      value: { ...(await readRecord(strapi)), status: 'in-progress', completedSteps: ['pre-sync'] },
+    });
+    await strapi.destroy();
+    strapi = await migratedInstance(project);
+
+    expect(await counts()).toEqual(before);
+    expect((await readRecord(strapi)).completedSteps).toContain('accounts');
   });
 });

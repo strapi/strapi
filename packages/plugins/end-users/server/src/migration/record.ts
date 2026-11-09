@@ -166,6 +166,21 @@ export const claimMigration = async (
   by: string,
   now: Date = new Date()
 ): Promise<boolean> => {
+  const won = await tryClaim(strapi, by, now);
+
+  if (won) {
+    owners.set(strapi, by);
+  }
+
+  return won;
+};
+
+/** Who last won the claim in this process: the pre-sync's owner, which the post-sync carries on as */
+const owners = new WeakMap<object, string>();
+
+export const lastClaimOwner = (strapi: Core.Strapi): string | undefined => owners.get(strapi);
+
+const tryClaim = async (strapi: Core.Strapi, by: string, now: Date): Promise<boolean> => {
   const claim = { by, until: new Date(now.getTime() + CLAIM_MS).toISOString() };
   const current = await readRaw(strapi);
 

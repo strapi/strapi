@@ -1,6 +1,6 @@
 import { isSelf } from '../conditions';
 import { PLUGIN_ID, PROFILE_UID, ROLE_FIND_ACTION, ROLE_UID, USER_UID } from '../constants';
-import { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow } from '../bootstrap';
+import { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow } from '../utils/default-permissions';
 import type { PermissionRow } from '../utils/permission-row';
 
 const UP = 'plugin::users-permissions';
