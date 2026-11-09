@@ -81,43 +81,51 @@ const rowsOf = (client: string, raw: any): Array<Record<string, any>> => {
   return client.includes('mysql') ? raw[0] : raw;
 };
 
+type ClientKind = 'pg' | 'mysql' | 'sqlite';
+
+const clientKind = (client: string): ClientKind => {
+  if (client.includes('pg')) {
+    return 'pg';
+  }
+
+  if (client.includes('mysql')) {
+    return 'mysql';
+  }
+
+  return 'sqlite';
+};
+
+/** The query listing a table's indexes, per database */
+const INDEX_QUERIES: Record<ClientKind, string> = {
+  pg: 'select indexname as name from pg_indexes where schemaname = current_schema() and tablename = ?',
+  mysql:
+    'select index_name as name from information_schema.statistics where table_schema = database() and table_name = ?',
+  sqlite: 'pragma index_list(??)',
+};
+
+/** The query listing every table, per database */
+const TABLE_QUERIES: Record<ClientKind, string> = {
+  pg: 'select tablename as name from pg_tables where schemaname = current_schema()',
+  mysql: 'select table_name as name from information_schema.tables where table_schema = database()',
+  sqlite: "select name from sqlite_master where type = 'table'",
+};
+
 /** The names of a table's indexes, whatever the database */
 const indexNames = async (db: any, table: string): Promise<string[]> => {
   const client = String(db.client.config.client);
-  const raw = client.includes('pg')
-    ? await db.raw(
-        'select indexname as name from pg_indexes where schemaname = current_schema() and tablename = ?',
-        [table]
-      )
-    : client.includes('mysql')
-      ? await db.raw(
-          'select index_name as name from information_schema.statistics where table_schema = database() and table_name = ?',
-          [table]
-        )
-      : await db.raw('pragma index_list(??)', [table]);
+  const raw = await db.raw(INDEX_QUERIES[clientKind(client)], [table]);
 
   return rowsOf(client, raw).map((row) => String(row.name));
 };
 
+/** The tables whose name starts with a prefix, compared here rather than with LIKE, which would need escaping */
 const tablesLike = async (db: any, prefix: string): Promise<string[]> => {
   const client = String(db.client.config.client);
-  const pattern = `${prefix.replace(/_/g, '\\_')}%`;
-  const raw = client.includes('pg')
-    ? await db.raw(
-        'select tablename as name from pg_tables where schemaname = current_schema() and tablename like ?',
-        [pattern]
-      )
-    : client.includes('mysql')
-      ? await db.raw(
-          'select table_name as name from information_schema.tables where table_schema = database() and table_name like ?',
-          [pattern]
-        )
-      : await db.raw(
-          "select name from sqlite_master where type = 'table' and name like ? escape '\\'",
-          [pattern]
-        );
+  const raw = await db.raw(TABLE_QUERIES[clientKind(client)]);
 
-  return rowsOf(client, raw).map((row) => String(row.name));
+  return rowsOf(client, raw)
+    .map((row) => String(row.name))
+    .filter((name) => name.startsWith(prefix));
 };
 
 const readRecord = (strapi: Core.Strapi) =>
