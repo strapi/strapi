@@ -2,3 +2,169 @@
 
 This plugin adds authentication for the end users of your application (sign-up, sign-in, sessions, roles and
 permissions), built on [Better Auth](https://www.better-auth.com).
+
+## Moving a project from Users & Permissions
+
+The move works the same on Strapi Cloud and on a self-hosted project. No step needs a command: what you change reaches
+production through your repository and a deploy, and what you need to read is shown in the admin panel.
+
+1. Back up the production database. The migration copies and rewrites user data, and once the old tables are cleaned up
+   a backup is the only way back.
+
+2. Add `@strapi/plugin-end-users` to the project and set the migration to check only, in `config/plugins.ts`:
+
+   ```ts
+   export default ({ env }) => ({
+     'end-users': {
+       enabled: true,
+       config: {
+         migration: {
+           fromUsersPermissions: 'check',
+         },
+       },
+     },
+   });
+   ```
+
+   Leave `users-permissions` as it is and deploy. In check mode the plugin stays dormant. It creates no table, answers
+   no Content API route and writes nothing but its report, so Users & Permissions keeps serving your users. The start
+   is refused if Users & Permissions is not loaded, because Strapi would drop its tables.
+
+3. In the admin panel, open Settings, then End users, then Advanced, and read the Migration section on the environment
+   that holds the data. It shows the counts of users, roles and permissions, an estimate of the time the migration
+   takes, and a list of items. An item marked Action needs a decision from you; Info only tells you what will happen.
+   Typical items are users whose email or username is the same once capitals are ignored, providers that need a secret
+   entered, and edited email templates that use expressions which cannot be carried over. Fix what the list asks for,
+   deploy if the fix is in code or config, and select Check again until nothing is left that you did not expect. You
+   can download the report as a file. It holds ids and counts, never an email address, name or secret.
+
+   Two keys change how the migration treats your data, and both are read from `config/plugins.ts` only:
+
+   ```ts
+   migration: {
+     fromUsersPermissions: 'check',
+     // 'keep-oldest' (the default) keeps the oldest user of each duplicate group and rewrites
+     // the others; 'abort' stops the migration instead
+     duplicates: 'keep-oldest',
+     // The sign-up fields to keep. Leave it out to decide from the profile
+     registrationFields: ['firstName', 'lastName'],
+   },
+   ```
+
+4. In development, open the Project files part of the same section. It shows the change to each schema file and to
+   `config/plugins.ts`, with the old and the new text side by side. Select Write the files to apply them. The files are
+   written only by a development server that reloads (`NODE_ENV` set to `development` and `autoReload` on), and only
+   inside `src/` and `config/`; the write is all or nothing. On any other server, or if the config file cannot be edited
+   automatically, the same page gives you the config block and the line that turns Users & Permissions off, to copy by
+   hand. Either way, the development database migrates when the server restarts with the new config.
+
+   The plan does three things:
+
+   - Attributes you added to the Users & Permissions user move to the end-users profile. The schema file of the old user
+     type is deleted. Users & Permissions' own attributes stay behind.
+   - Your end-users entry in `config/plugins.ts` gets `compat.usersPermissions: true`, the legacy token settings and
+     `END_USERS_SECRET`, and Users & Permissions is turned off.
+   - Code that names the old plugin is listed, and not changed.
+
+5. Review the diff and the code findings, then change the code by hand. Each finding names a file and a line:
+
+   | Finding                                                           | What to use instead                                                                                     |
+   | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+   | `plugin::users-permissions.user` named in code                    | `plugin::end-users.user` for account fields, `plugin::end-users.profile` for your own fields            |
+   | A lifecycle subscription on the old user                          | Subscribe to `plugin::end-users.user` (account fields) or `plugin::end-users.profile` (your own fields) |
+   | `strapi.plugin('users-permissions')` services                     | The services of the end-users plugin                                                                    |
+   | A custom login provider registered with `providers-registry`      | Register it as an end-users provider                                                                    |
+   | A `strapi-server` extension of `users-permissions`                | Move what it does to the end-users plugin or to your own routes                                         |
+   | A relation to `plugin::users-permissions.role`                    | End-users has its own roles; the relation needs a decision                                              |
+   | A relation that was the inverse side of one owned by another type | The inverse is not moved; the owning side now targets the end-users user without an inverse             |
+   | An attribute on both the old user and the profile                 | The profile's is kept and the user's is not moved                                                       |
+   | A `config/env/<name>/plugins` file                                | Not changed; apply the same edits by hand                                                               |
+
+   The config findings point at settings that are not carried over, with a note on what replaces each one. For example,
+   `validationRules.validatePassword` becomes the password rules under Settings, and `callback.validate` becomes
+   `compat.connect.callbacks`.
+
+6. Set `END_USERS_SECRET` where the project runs, to a long random string (the plugin warns below 32 characters). It signs the new
+   sessions. On Strapi Cloud that is an environment variable of the project. Set `JWT_SECRET` to the secret Users &
+   Permissions signs its tokens with, so tokens issued before the move keep working. In development the plugin generates
+   a secret and stores it in `.env` when none is set; it never does so in production, and a start without one is
+   refused.
+
+7. Commit the files and deploy with one instance running, as Strapi's own migrations need. The migration runs while
+   the application starts, before the database schema is synchronized. If a second instance starts during that time, it
+   waits for the first to finish.
+
+   The config now says:
+
+   ```ts
+   export default ({ env }) => ({
+     'users-permissions': { enabled: false },
+     'end-users': {
+       enabled: true,
+       config: {
+         secret: env('END_USERS_SECRET'),
+         migration: {
+           fromUsersPermissions: true,
+         },
+         compat: {
+           usersPermissions: true,
+           legacyJwt: {
+             secret: env('JWT_SECRET'),
+             until: null,
+           },
+         },
+       },
+     },
+   });
+   ```
+
+   A start is refused, with a message that says why, when `fromUsersPermissions` is `true` and the end-users tables
+   already hold users, and when the old tables exist and the key is not set. If a start stops partway, deploy again: the
+   migration resumes from the step it reached.
+
+8. Watch the Advanced page. The Migration section now shows the status of the migration and the items to resolve. Mark
+   an item resolved once you have dealt with it; providers, templates and rewritten addresses resolve themselves when
+   you do what they ask. While compat is on, a Legacy token use block counts the requests that still arrive with a
+   token Users & Permissions issued, and when the last one came.
+
+9. Set `compat.legacyJwt.until` from those counts: a date (`'2027-01-31'` lasts to the end of that day, in UTC) after
+   which old tokens are no longer accepted. Move your front ends to the native endpoints while it runs. When the counts
+   show no legacy token use, set `compat.usersPermissions` to `false` and deploy. The first start with compat off
+   cleans up: it drops the staging tables and the leftover columns. After that, the way back is a backup.
+
+   With compat on, the old routes (`/api/auth/local`, `/api/auth/local/register` and the rest) keep answering as
+   Users & Permissions did, and a provider keeps its `/api/connect/<id>/callback` address, so nothing changes at the
+   identity provider.
+
+### Rolling back
+
+Before compat is turned off and the cleanup has run, the migration can be undone.
+
+1. Set `migration.rollback: true` and deploy. The rollback runs while the application starts, in one transaction, and then
+   stops the start with the steps that follow. A restart that finds `rollback` still set after a rollback is refused
+   in the same way, so a process manager cannot bring the project up on empty tables.
+2. Revert the commit that switched the project to end-users, so Users & Permissions is loaded again.
+3. Remove `migration.rollback` and deploy.
+
+Everything the migration moved comes back from its current state, including users created after the move. Some things
+cannot come back, and the log counts them: profile attributes added after the move, provider accounts beyond a user's
+first, and changes to role permissions made after the move (the permissions staged before come back). A rollback is
+refused when compat is off or the cleanup has run; restore the backup instead.
+
+To migrate again after a rollback, switch the project to end-users again with `migration.fromUsersPermissions` set to `true`; the old tables are still in place.
+
+### What is not carried over
+
+- Pending password reset tokens. Those users ask for a new reset. Pending confirmation links keep working while compat
+  is on.
+- The Content Manager layout of the user type (list columns and the edit view). Set it up again in the admin panel.
+- The per-email rate limit of Users & Permissions. Sign-in is protected by the account lockout and a per-address limit;
+  forgot-password and register have no per-email limit.
+- Providers registered through `providers-registry`. They are listed as items, and you register them as end-users
+  providers.
+- Extensions in `strapi-server` for `users-permissions`. Move what they do to the end-users plugin or to your own routes.
+- `GET /api/users/:id` answering 204 for a missing user. It answers 404.
+- The GraphQL role mutations (create, update and delete a role) and the `UsersPermissionsPermission` type. Roles are
+  managed in the admin panel.
+- Changing `email` through `PUT /api/users/:id`. The request is refused, and the address changes through
+  `/change-email`, which proves the new one belongs to the user.
