@@ -81,6 +81,8 @@ const setup = ({
     validators: { add: validatorsAdd },
     plugin,
     config: { get: vi.fn() },
+    // The start control registers its `beforeSync` handler on a hook
+    hook: vi.fn(() => ({ register: vi.fn() })),
     documents: { use },
     get: vi.fn((name: string) => (name === 'auth' ? { register: authRegister } : { add })),
     db: {

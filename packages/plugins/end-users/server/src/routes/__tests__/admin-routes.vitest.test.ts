@@ -13,6 +13,7 @@ import routes from '../index';
 import admin from '../admin';
 import conditions from '../admin/conditions';
 import { guard, guardAny } from '../admin/guard';
+import migration from '../admin/migration';
 import permissions from '../admin/permissions';
 import providers from '../admin/providers';
 import roles from '../admin/roles';
@@ -39,6 +40,7 @@ describe('the admin routes', () => {
       ...permissions.routes,
       ...conditions.routes,
       ...providers.routes,
+      ...migration.routes,
       ...settings.routes,
       ...userSecurity.routes,
     ]);
@@ -253,6 +255,31 @@ describe('the admin routes', () => {
           expect(Object.keys(pluginPolicies)).toContain('is-development');
         }
       }
+    });
+  });
+
+  describe('the migration routes', () => {
+    it.each([
+      ['GET /migration', 'migration.status', SETTINGS_ACTIONS.read],
+      ['PUT /migration/items/:id', 'migration.updateItem', SETTINGS_ACTIONS.update],
+      ['POST /migration/check', 'migration.check', SETTINGS_ACTIONS.update],
+      ['GET /migration/files', 'migration.files', SETTINGS_ACTIONS.read],
+      ['POST /migration/files', 'migration.writeFiles', SETTINGS_ACTIONS.update],
+    ])('%s is handled by %s and needs %s', (route, handler, action) => {
+      const found = migration.routes.find((candidate) => describeRoute(candidate) === route);
+
+      expect(found?.handler).toBe(handler);
+      expect(found?.config).toEqual(guard(action));
+    });
+
+    it('are the five: PUT to update, never PATCH', () => {
+      expect(migration.routes.map(describeRoute).sort()).toEqual([
+        'GET /migration',
+        'GET /migration/files',
+        'POST /migration/check',
+        'POST /migration/files',
+        'PUT /migration/items/:id',
+      ]);
     });
   });
 

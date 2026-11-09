@@ -7,6 +7,7 @@ const strapiWith = (service: () => unknown) => {
   const warn = vi.fn();
   const strapi = {
     plugin: vi.fn(() => ({ service })),
+    config: { get: vi.fn() },
     log: { warn },
   } as unknown as Core.Strapi;
 

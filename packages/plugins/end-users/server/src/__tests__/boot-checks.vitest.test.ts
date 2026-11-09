@@ -368,6 +368,7 @@ describe('register', () => {
           ? undefined
           : { service: () => ({ get: () => engine, register: vi.fn() }) },
       config: { get: () => undefined },
+      hook: () => ({ register: vi.fn() }),
       documents: { use: vi.fn() },
       get: () => ({ add: vi.fn(), register: vi.fn() }),
       db: { metadata: {} },

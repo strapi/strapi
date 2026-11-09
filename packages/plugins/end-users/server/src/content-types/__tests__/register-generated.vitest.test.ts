@@ -28,6 +28,7 @@ const setup = ({ i18n = false }: { i18n?: boolean } = {}) => {
   const strapi = {
     get: vi.fn((name: string) => (name === 'content-types' ? { add } : undefined)),
     plugin: vi.fn((name: string) => (name === 'i18n' && i18n ? {} : undefined)),
+    config: { get: vi.fn() },
     db: {
       metadata: {
         identifiers: {
