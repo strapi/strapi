@@ -1,7 +1,15 @@
 import type * as Schema from '../../../../schema';
 
 import type * as UID from '../../../../uid';
-import type { Guard, If, And, MatchFirst, StrictEqual, IsNotNever } from '../../../../utils';
+import type {
+  Guard,
+  If,
+  And,
+  MatchFirst,
+  StrictEqual,
+  IsNotNever,
+  DoesNotExtends,
+} from '../../../../utils';
 
 import type * as Operator from './operators';
 import type * as AttributeUtils from '../attributes';
@@ -74,6 +82,21 @@ type AttributeCondition<
     : never;
 
 /**
+ * Whether the attribute names of {@link TSchemaUID} are a finite list of names.
+ *
+ * Checks the attribute names rather than the scalar and nested keys: a schema can have only scalar
+ * or only nested attributes, so either list can be empty for a known schema.
+ *
+ * The names are unknown (`string`) when the schema registries are not extended (no generated types)
+ * or when the UID is not in the registries. They are `never` for a union of UIDs whose schemas share
+ * no attribute.
+ */
+type HasKnownAttributeNames<TSchemaUID extends UID.Schema> = And<
+  IsNotNever<Schema.AttributeNames<TSchemaUID>>,
+  DoesNotExtends<string, Schema.AttributeNames<TSchemaUID>>
+>;
+
+/**
  * Tree representation of a Strapi filter for a given schema UID
  */
 export type ObjectNotation<TSchemaUID extends UID.Schema> = {
@@ -84,10 +107,10 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
     infer TScalarKeys extends AttributeUtils.GetScalarKeys<TSchemaUID>,
     infer TNestedKeys extends AttributeUtils.GetNestedKeys<TSchemaUID>,
   ]
-    ? // If both the scalar and nested keys are resolved, then create a strongly
-      // typed filter object, else create a loose generic abstraction.
+    ? // If the schema's attribute names are known, then create a strongly typed filter object, else
+      // create a loose generic abstraction.
       If<
-        And<IsNotNever<TScalarKeys>, IsNotNever<TNestedKeys>>,
+        HasKnownAttributeNames<TSchemaUID>,
         // Strongly typed representation of the filter object tree
         {
           [TIter in IDKey | DocumentIDKey | TScalarKeys]?: AttributeCondition<TSchemaUID, TIter>;
