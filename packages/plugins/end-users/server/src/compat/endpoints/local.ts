@@ -8,6 +8,8 @@ import type { CompatConfig } from '../config';
 import { normalizeUsername } from '../../utils/normalize-username';
 import { missingFieldBody, refusalResult, upError } from '../errors';
 import { loginBody, signedInUser } from '../login-response';
+import { withPendingDevice } from '../pending-device';
+import { wantsRefreshCookie, writeRefreshCookie } from '../refresh-cookie';
 import { ok } from './result';
 import { BEARER_HEADER, TWO_FACTOR_REQUIRED } from './shared';
 import type { CompatResult } from '../types';
@@ -47,7 +49,8 @@ const emailOfUsername = async (strapi: Core.Strapi, username: string): Promise<s
  * up and signed in by its address, both lower-cased. The sign-in is the engine's email sign-in, so
  * a lock and the password policy apply to it. A refusal the engine gave with users-permissions' own
  * text is that text as a 400; any other (a locked account) is Strapi's error envelope with the
- * engine's status, message and code.
+ * engine's status, message and code. A `deviceId` in the body is stored on the session; the refresh
+ * token is in the body, or in a cookie when `refresh.httpOnly` is on or the request asks for it.
  */
 export const local = async (
   strapi: Core.Strapi,
@@ -81,10 +84,12 @@ export const local = async (
   const sent = { headers: new Headers(headers) };
 
   try {
-    const { headers: answered, response } = await engine.callNative('signInEmail', {
-      ...sent,
-      body: { email, password },
-    });
+    const call = () => engine.callNative('signInEmail', { ...sent, body: { email, password } });
+    const { deviceId } = input;
+    const { headers: answered, response } =
+      typeof deviceId === 'string' && deviceId !== ''
+        ? await withPendingDevice(deviceId, call)
+        : await call();
 
     // The second factor is the native routes' to ask for: a compat client has no way to answer it,
     // and gets no token
@@ -102,7 +107,12 @@ export const local = async (
       throw new Error('The sign-in did not give a session token.');
     }
 
-    return ok(loginBody(cfg, { token, user, cookie: false }));
+    const cookie = cfg.refresh.enabled && wantsRefreshCookie(cfg, headers);
+
+    return ok(
+      loginBody(cfg, { token, user, cookie }),
+      cookie ? [writeRefreshCookie(cfg, token)] : undefined
+    );
   } catch (error) {
     const refused = refusalResult(error);
 

@@ -545,8 +545,9 @@ type StoredAccount = Awaited<ReturnType<Context['internalAdapter']['findAccounts
 const toDate = (value: Date | string | number) => (value instanceof Date ? value : new Date(value));
 
 const toEngineSession = (session: StoredSession): EngineSession => {
-  const { impersonatedBy, ipAddress, userAgent } = session as StoredSession & {
+  const { impersonatedBy, ipAddress, userAgent, deviceId } = session as StoredSession & {
     impersonatedBy?: string | null;
+    deviceId?: string | null;
   };
 
   return {
@@ -556,6 +557,7 @@ const toEngineSession = (session: StoredSession): EngineSession => {
     expiresAt: toDate(session.expiresAt),
     ipAddress: ipAddress ?? null,
     userAgent: userAgent ?? null,
+    deviceId: deviceId ?? null,
     impersonatedBy: impersonatedBy ?? null,
     createdAt: toDate(session.createdAt),
     updatedAt: toDate(session.updatedAt),
@@ -1043,6 +1045,7 @@ export const createEngine = (
 
       if (meta.ipAddress != null) request.ipAddress = meta.ipAddress;
       if (meta.userAgent != null) request.userAgent = meta.userAgent;
+      if (meta.deviceId) request.deviceId = meta.deviceId;
 
       const session = await ctx.internalAdapter.createSession(userId, false, request);
 
@@ -1064,6 +1067,18 @@ export const createEngine = (
 
       const sessions = await ctx.internalAdapter.listSessions(userId);
       const tokens = sessions.filter(({ id }) => id !== opts.except).map(({ token }) => token);
+
+      if (tokens.length > 0) {
+        await ctx.internalAdapter.deleteSessions(tokens);
+      }
+    },
+
+    async revokeDevice(userId: ID, deviceId: string) {
+      const ctx = await context();
+      const sessions = await ctx.internalAdapter.listSessions(userId);
+      const tokens = sessions
+        .filter((session) => (session as { deviceId?: string | null }).deviceId === deviceId)
+        .map(({ token }) => token);
 
       if (tokens.length > 0) {
         await ctx.internalAdapter.deleteSessions(tokens);

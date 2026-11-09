@@ -1,10 +1,16 @@
 import type { CompatResult } from './types';
 
 export type UpErrorName =
-  'ApplicationError' | 'ValidationError' | 'ForbiddenError' | 'UnauthorizedError' | 'NotFoundError';
+  | 'ApplicationError'
+  | 'BadRequestError'
+  | 'ValidationError'
+  | 'ForbiddenError'
+  | 'UnauthorizedError'
+  | 'NotFoundError';
 
 const STATUS: Record<UpErrorName, number> = {
   ApplicationError: 400,
+  BadRequestError: 400,
   ValidationError: 400,
   ForbiddenError: 403,
   UnauthorizedError: 401,

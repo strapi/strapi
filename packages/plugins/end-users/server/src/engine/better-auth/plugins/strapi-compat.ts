@@ -10,6 +10,7 @@
  *
  * Its rate-limit rules are the compat paths' only: the native paths keep Better Auth's own.
  */
+import { randomUUID } from 'node:crypto';
 import { APIError, createAuthEndpoint, createAuthMiddleware } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
@@ -25,7 +26,9 @@ import {
   resetPassword,
 } from '../../../compat/endpoints/passwords';
 import { register } from '../../../compat/endpoints/register';
+import { logout, refresh, revokeSession, sessions } from '../../../compat/endpoints/refresh';
 import type { CompatResult } from '../../../compat/types';
+import { pendingDevice } from '../../../compat/pending-device';
 import { pendingUsername } from '../../../compat/pending-username';
 import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 
@@ -37,7 +40,11 @@ const WINDOW_SECONDS = 60;
 
 /** Turns what a compat endpoint decided into the answer: a refusal is thrown with its own body. */
 const respond = (
-  ctx: { json: (body: Record<string, unknown>) => unknown; redirect: (url: string) => unknown },
+  ctx: {
+    json: (body: Record<string, unknown>) => unknown;
+    redirect: (url: string) => unknown;
+    responseHeaders: Headers;
+  },
   result: CompatResult
 ) => {
   if (result.status === 302) {
@@ -49,6 +56,10 @@ const respond = (
       result.status as ConstructorParameters<typeof APIError>[0],
       result.body as never
     );
+  }
+
+  for (const cookie of result.cookies ?? []) {
+    ctx.responseHeaders.append('set-cookie', cookie);
   }
 
   return ctx.json(result.body as Record<string, unknown>);
@@ -69,6 +80,15 @@ const finish = (result: CompatResult): Record<string, unknown> => {
 export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuthPlugin => ({
   id: 'strapi-compat',
 
+  // The device a session belongs to, which the refresh routes use to sign out one device
+  schema: {
+    session: {
+      fields: {
+        deviceId: { type: 'string', required: false, input: false, index: true },
+      },
+    },
+  },
+
   // A compat registration's username goes into the user's own create, so the user never exists
   // without it. Only the compat route enters the mark this reads (`pending-username`).
   init: () => ({
@@ -80,6 +100,19 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
               const username = pendingUsername();
 
               return username === undefined ? undefined : { data: { username } };
+            },
+          },
+        },
+        // Every session has a device: the one a compat sign-in named (`pending-device`), the one
+        // the session was made for, or a new one
+        session: {
+          create: {
+            async before(session: Record<string, unknown>) {
+              if (typeof session.deviceId === 'string' && session.deviceId !== '') {
+                return undefined;
+              }
+
+              return { data: { deviceId: pendingDevice() ?? randomUUID() } };
             },
           },
         },
@@ -96,6 +129,35 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
     // POST /api/auth/local/register
     compatRegister: createAuthEndpoint('/local/register', { method: 'POST' }, async (ctx) =>
       respond(ctx, await register(strapi, cfg, { body: ctx.body, headers: ctx.headers }))
+    ),
+
+    // POST /api/auth/refresh
+    compatRefresh: createAuthEndpoint('/refresh', { method: 'POST' }, async (ctx) =>
+      respond(ctx, await refresh(strapi, cfg, { body: ctx.body, headers: ctx.headers }))
+    ),
+
+    // POST /api/auth/logout
+    compatLogout: createAuthEndpoint('/logout', { method: 'POST' }, async (ctx) =>
+      respond(ctx, await logout(strapi, cfg, { body: ctx.body, headers: ctx.headers }))
+    ),
+
+    // GET /api/auth/sessions
+    compatSessions: createAuthEndpoint('/sessions', { method: 'GET' }, async (ctx) =>
+      respond(ctx, await sessions(strapi, cfg, { headers: ctx.headers }))
+    ),
+
+    // DELETE /api/auth/sessions/:sessionId
+    compatRevokeSession: createAuthEndpoint(
+      '/sessions/:sessionId',
+      { method: 'DELETE' },
+      async (ctx) =>
+        respond(
+          ctx,
+          await revokeSession(strapi, cfg, {
+            headers: ctx.headers,
+            sessionId: ctx.params.sessionId,
+          })
+        )
     ),
 
     // POST /api/auth/forgot-password

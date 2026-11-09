@@ -11,11 +11,17 @@ import { loadUserExtras } from './user-extras';
 /**
  * The answer of a sign-in, sign-up or reset, in the shape users-permissions answered with. `jwt` is
  * the engine's session token: it works as a Bearer token on the Content API, and it is not a JWT.
+ * With the refresh routes on, the same token is the refresh token: it is in the body as
+ * `refreshToken`, or, when the answer carries it in a cookie (`cookie`), not in the body at all.
  */
 export const loginBody = (
-  _cfg: CompatConfig,
+  cfg: CompatConfig,
   input: { token: string; user: UpUser; cookie: boolean }
-): { jwt: string; user: UpUser } => ({ jwt: input.token, user: input.user });
+): { jwt: string; refreshToken?: string; user: UpUser } => ({
+  jwt: input.token,
+  ...(cfg.refresh.enabled && !input.cookie ? { refreshToken: input.token } : {}),
+  user: input.user,
+});
 
 /**
  * The signed-in user as users-permissions shows them, with no role: the profile fields the user's

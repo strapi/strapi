@@ -1786,6 +1786,39 @@ describe('createEngine', () => {
       expect(left.map((session) => session.id)).toEqual([keep.id]);
     });
 
+    it('signs out the sessions of one device and no other, with the compatibility mode on', async () => {
+      const compat = createEngine(
+        fakeStrapi({ 'plugin::end-users.compat.usersPermissions': true }),
+        defineAuth({})
+      );
+      const a = await signUp(compat, 'a@x.io');
+      const b = await signUp(compat, 'b@x.io');
+      const phone = await compat.createSession(a.userId, { deviceId: 'phone' });
+      const laptop = await compat.createSession(a.userId, { deviceId: 'laptop' });
+      const theirs = await compat.createSession(b.userId, { deviceId: 'phone' });
+
+      expect(phone.deviceId).toBe('phone');
+      // The sign-up's own session was given a device of its own
+      expect((await compat.listSessions(a.userId)).every((session) => session.deviceId)).toBe(true);
+
+      await compat.revokeDevice(a.userId, 'phone');
+
+      const left = (await compat.listSessions(a.userId)).map((session) => session.id);
+
+      expect(left).not.toContain(phone.id);
+      expect(left).toContain(laptop.id);
+      expect((await compat.listSessions(b.userId)).map((session) => session.id)).toContain(
+        theirs.id
+      );
+    });
+
+    it('has no device on a session when the compatibility mode is off', async () => {
+      const a = await signUp(engine, 'a@x.io');
+      const session = await engine.createSession(a.userId, { deviceId: 'phone' });
+
+      expect(session.deviceId).toBeNull();
+    });
+
     it('revokes one session of the user, by its token', async () => {
       const a = await signUp(engine, 'a@x.io');
       const keep = await engine.createSession(a.userId, {});

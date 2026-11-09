@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { errors } from '@strapi/utils';
 import { memoryAdapter } from 'better-auth/adapters/memory';
 import { createAuthMiddleware } from 'better-auth/api';
 import { betterAuth } from 'better-auth/minimal';
@@ -16,6 +17,8 @@ import {
   resetPassword,
 } from '../../../compat/endpoints/passwords';
 import { register } from '../../../compat/endpoints/register';
+import { refresh } from '../../../compat/endpoints/refresh';
+import { pendingDevice, withPendingDevice } from '../../../compat/pending-device';
 import { readCompatConfig } from '../../../compat/config';
 import { pendingUsername, withPendingUsername } from '../../../compat/pending-username';
 import { backgroundTaskHandler } from '../background-tasks';
@@ -210,6 +213,65 @@ describe('strapi-compat', () => {
     expect(result.status).toBe(403);
     expect(result.body).toMatchObject({ error: { details: { code: 'TWO_FACTOR_REQUIRED' } } });
     expect(JSON.stringify(result.body)).not.toMatch(/jwt|must-not-leak/);
+  });
+
+  describe('with the refresh routes on', () => {
+    const base = readCompatConfig(configStrapi(true));
+    const on = { ...base, refresh: { ...base.refresh, enabled: true } };
+    const signInWith = (headers: Headers, config = on) =>
+      local(strapi, config, { body: { identifier: 'ann@example.com', password: 'x' }, headers });
+
+    it('answers { jwt, refreshToken, user } and no cookie by default', async () => {
+      const result = await signInWith(new Headers());
+
+      expect(result.body).toMatchObject({ jwt: 'signed.token', refreshToken: 'signed.token' });
+      expect(result.cookies).toBeUndefined();
+    });
+
+    it('answers { jwt, user } and the cookie with the header, or with httpOnly configured', async () => {
+      const asked = await signInWith(new Headers({ 'x-strapi-refresh-cookie': 'httpOnly' }));
+      const configured = await signInWith(new Headers(), {
+        ...on,
+        refresh: { ...on.refresh, httpOnly: true },
+      });
+
+      for (const result of [asked, configured]) {
+        expect(result.body).not.toHaveProperty('refreshToken');
+        expect(result.cookies).toEqual([
+          expect.stringMatching(/^strapi_up_refresh=signed\.token;/),
+        ]);
+      }
+    });
+
+    it('stores the device the body names, and leaves it to the session otherwise', async () => {
+      let seen: string | undefined = 'unset';
+
+      callNative.mockImplementationOnce(async () => {
+        seen = pendingDevice();
+
+        return {
+          headers: new Headers({ 'set-auth-token': 't' }),
+          response: { user: { id: 'doc7' } },
+        };
+      });
+      await local(strapi, on, {
+        body: { identifier: 'ann@example.com', password: 'x', deviceId: 'phone' },
+        headers: new Headers(),
+      });
+
+      expect(seen).toBe('phone');
+
+      await signInWith(new Headers());
+
+      expect(pendingDevice()).toBeUndefined();
+    });
+
+    it('answers { jwt, user } with the routes off, whatever the request asks', async () => {
+      const result = await signInWith(new Headers({ 'x-strapi-refresh-cookie': 'httpOnly' }), cfg);
+
+      expect(result.body).toEqual({ jwt: 'signed.token', user: expect.anything() });
+      expect(result.cookies).toBeUndefined();
+    });
   });
 
   it('refuses a body without an identifier or a password', async () => {
@@ -891,5 +953,416 @@ describe('the engine options', () => {
     await vi.waitFor(() =>
       expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('mail down'))
     );
+  });
+});
+
+describe('strapi-compat refresh routes, through the engine', () => {
+  const PASSWORD = 'Old-Passw0rd!x';
+  const CHROME =
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+  const build = (enabled = true) => {
+    const db = { user: [], session: [], account: [], verification: [] } as Record<string, any[]>;
+    const base = readCompatConfig(configStrapi(true));
+    const cfg = { ...base, refresh: { ...base.refresh, enabled } };
+    let engine: AuthEngine;
+    const strapi = {
+      log: { error: vi.fn() },
+      sessionManager: Object.assign(() => ({}), { hasOrigin: () => false }),
+      plugin: () => ({ service: () => ({ get: () => engine }) }),
+    } as unknown as Core.Strapi;
+
+    const auth = betterAuth({
+      secret: SECRET,
+      baseURL: 'http://localhost:1337',
+      basePath: '/api/auth',
+      telemetry: { enabled: false },
+      database: memoryAdapter(db),
+      emailAndPassword: { enabled: true },
+      plugins: [strapiCompat(strapi, cfg), bearer()],
+    });
+
+    const toSession = (row: any) => ({
+      id: row.id,
+      userId: row.userId,
+      token: row.token,
+      expiresAt: row.expiresAt,
+      ipAddress: row.ipAddress ?? null,
+      userAgent: row.userAgent ?? null,
+      deviceId: row.deviceId ?? null,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    });
+    const internal = async () => (await auth.$context).internalAdapter;
+
+    engine = {
+      async getSession(headers: Headers) {
+        const found = await auth.api
+          .getSession({ headers, query: { disableCookieCache: true } })
+          .catch(() => null);
+
+        return found?.session ? toSession(found.session) : null;
+      },
+      async createSession(userId: string, meta: Record<string, unknown>) {
+        return toSession(await (await internal()).createSession(userId, false, meta as never));
+      },
+      async revokeSession(userId: string, sessionId: string) {
+        const row = (await (await internal()).listSessions(userId)).find((s) => s.id === sessionId);
+
+        if (!row) {
+          throw new errors.NotFoundError('Session not found');
+        }
+
+        await (await internal()).deleteSession(row.token);
+      },
+      async revokeSessions(userId: string) {
+        await (await internal()).deleteUserSessions(userId);
+      },
+      async revokeDevice(userId: string, deviceId: string) {
+        const rows = (await (await internal()).listSessions(userId)).filter(
+          (row: any) => row.deviceId === deviceId
+        );
+
+        await (await internal()).deleteSessions(rows.map((row) => row.token));
+      },
+      async listSessions(userId: string) {
+        return (await (await internal()).listSessions(userId)).map(toSession);
+      },
+    } as unknown as AuthEngine;
+
+    const call = (
+      method: string,
+      path: string,
+      {
+        token,
+        body,
+        headers = {},
+      }: { token?: string; body?: unknown; headers?: Record<string, string> } = {}
+    ) =>
+      auth.handler(
+        new Request(`http://localhost:1337/api/auth${path}`, {
+          method,
+          headers: {
+            ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+            ...(token ? { authorization: `Bearer ${token}` } : {}),
+            ...headers,
+          },
+          body: body === undefined ? undefined : JSON.stringify(body),
+        })
+      );
+
+    /** A sign-in on a device: the session token the compat route would hand out */
+    const signIn = async (email: string, deviceId: string, userAgent?: string) => {
+      const exists = db.user.some((user) => user.email === email);
+      const headers = userAgent ? new Headers({ 'user-agent': userAgent }) : new Headers();
+      const run = () =>
+        exists
+          ? auth.api.signInEmail({
+              body: { email, password: PASSWORD },
+              headers,
+              returnHeaders: true,
+            })
+          : auth.api.signUpEmail({
+              body: { email, password: PASSWORD, name: 'Ann' },
+              headers,
+              returnHeaders: true,
+            });
+      const answered = await withPendingDevice(deviceId, run);
+
+      return answered.headers.get('set-auth-token') as string;
+    };
+
+    return { db, call, signIn, auth, engine, cfg, strapi };
+  };
+
+  const bodyOf = async (response: Response) => (await response.json()) as Record<string, any>;
+
+  it('rotates on refresh and refuses a replayed token with 401', async () => {
+    const { call, signIn } = build();
+    const first = await signIn('ann@example.com', 'device-a');
+
+    const rotated = await call('POST', '/refresh', { body: { refreshToken: first } });
+    const answer = await bodyOf(rotated);
+
+    expect(rotated.status).toBe(200);
+    expect(answer.jwt).toEqual(expect.any(String));
+    expect(answer.refreshToken).toBe(answer.jwt);
+    expect(answer.jwt).not.toBe(first);
+
+    const replay = await call('POST', '/refresh', { body: { refreshToken: first } });
+
+    expect(replay.status).toBe(401);
+    expect(await bodyOf(replay)).toMatchObject({ error: { message: 'Invalid refresh token' } });
+    // The new token is a session token: it signs the caller in
+    expect((await call('GET', '/sessions', { token: answer.jwt })).status).toBe(200);
+  });
+
+  it('keeps the device across a rotation and answers 400 when there is no token', async () => {
+    const { call, signIn, db } = build();
+    const first = await signIn('ann@example.com', 'device-a');
+    const answer = await bodyOf(await call('POST', '/refresh', { body: { refreshToken: first } }));
+
+    expect(db.session).toHaveLength(1);
+    expect(db.session[0]).toMatchObject({ deviceId: 'device-a' });
+    expect(answer.jwt).toEqual(expect.any(String));
+
+    const none = await call('POST', '/refresh', { body: {} });
+
+    expect(none.status).toBe(400);
+    expect(await bodyOf(none)).toMatchObject({ error: { message: 'Missing refresh token' } });
+    expect((await call('POST', '/refresh', { body: { refreshToken: 'nope' } })).status).toBe(401);
+  });
+
+  it('answers { jwt } and the cookie when the request asks for one', async () => {
+    const { call, signIn } = build();
+    const first = await signIn('ann@example.com', 'device-a');
+    const response = await call('POST', '/refresh', {
+      body: { refreshToken: first },
+      headers: { 'x-strapi-refresh-cookie': 'httpOnly' },
+    });
+    const answer = await bodyOf(response);
+
+    expect(answer).not.toHaveProperty('refreshToken');
+    expect(response.headers.getSetCookie().join('\n')).toMatch(/^strapi_up_refresh=.*HttpOnly/);
+  });
+
+  it('refreshes from the cookie, which wins over the body', async () => {
+    const { call, signIn } = build();
+    const token = await signIn('ann@example.com', 'device-a');
+    const response = await call('POST', '/refresh', {
+      body: { refreshToken: 'not-a-token' },
+      headers: { cookie: `strapi_up_refresh=${encodeURIComponent(token)}` },
+    });
+
+    expect(response.status).toBe(200);
+  });
+
+  it('logout by scope all, by deviceId and by current session revokes the right ones', async () => {
+    const { call, signIn, db } = build();
+    const phone = await signIn('ann@example.com', 'phone');
+    const laptop = await signIn('ann@example.com', 'laptop');
+    const tablet = await signIn('ann@example.com', 'tablet');
+
+    expect(
+      (await call('POST', '/logout', { token: phone, body: { deviceId: 'laptop' } })).status
+    ).toBe(200);
+    expect(db.session.map((row) => row.deviceId).sort()).toEqual(['phone', 'tablet']);
+    expect((await call('GET', '/sessions', { token: laptop })).status).toBe(401);
+
+    const current = await call('POST', '/logout', { token: tablet, body: {} });
+
+    expect(await bodyOf(current)).toEqual({ ok: true });
+    expect(db.session.map((row) => row.deviceId)).toEqual(['phone']);
+
+    await signIn('ann@example.com', 'watch');
+    await call('POST', '/logout', { token: phone, body: { scope: 'all' } });
+
+    expect(db.session).toHaveLength(0);
+  });
+
+  it('logout clears the cookie only when the request asks for it, and needs a signed-in caller', async () => {
+    const { call, signIn } = build();
+    const token = await signIn('ann@example.com', 'phone');
+
+    expect((await call('POST', '/logout', { body: {} })).status).toBe(401);
+
+    const plain = await call('POST', '/logout', { token, body: {} });
+
+    expect(plain.headers.getSetCookie()).toEqual([]);
+
+    const again = await signIn('ann@example.com', 'phone');
+    const asked = await call('POST', '/logout', {
+      token: again,
+      body: {},
+      headers: { 'x-strapi-refresh-cookie': 'httpOnly' },
+    });
+
+    expect(asked.headers.getSetCookie().join('')).toMatch(/^strapi_up_refresh=;/);
+  });
+
+  it('lists sessions with current set for the caller and deviceName from the user agent', async () => {
+    const { call, signIn } = build();
+    const phone = await signIn('ann@example.com', 'phone', CHROME);
+    await signIn('ann@example.com', 'laptop');
+    await signIn('bob@example.com', 'other');
+
+    const listed = await bodyOf(await call('GET', '/sessions', { token: phone }));
+
+    expect(listed.data).toHaveLength(2);
+    expect(listed.data[0]).toMatchObject({
+      deviceId: 'phone',
+      deviceName: 'Chrome on macOS',
+      current: true,
+      loginAt: expect.any(String),
+      lastActiveAt: expect.any(String),
+    });
+    expect(listed.data[1]).toMatchObject({ deviceId: 'laptop', current: false });
+    expect(JSON.stringify(listed)).not.toContain(phone);
+    expect((await call('GET', '/sessions')).status).toBe(401);
+  });
+
+  it("revokes one session by id and answers Session not found for another user's", async () => {
+    const { call, signIn } = build();
+    const phone = await signIn('ann@example.com', 'phone');
+    await signIn('ann@example.com', 'laptop');
+    const other = await signIn('bob@example.com', 'other');
+
+    const { data } = await bodyOf(await call('GET', '/sessions', { token: phone }));
+    const laptop = data.find((entry: { deviceId: string }) => entry.deviceId === 'laptop');
+    const bobs = (await bodyOf(await call('GET', '/sessions', { token: other }))).data[0];
+
+    const foreign = await call('DELETE', `/sessions/${bobs.id}`, { token: phone });
+
+    expect(foreign.status).toBe(404);
+    expect(await bodyOf(foreign)).toMatchObject({ error: { message: 'Session not found' } });
+
+    const revoked = await call('DELETE', `/sessions/${laptop.id}`, { token: phone });
+
+    expect(revoked.status).toBe(200);
+    expect(await bodyOf(revoked)).toEqual({ data: {} });
+    expect((await bodyOf(await call('GET', '/sessions', { token: phone }))).data).toHaveLength(1);
+  });
+
+  it('gives every session a device: the one named, or a new one', async () => {
+    const { auth, db } = build();
+
+    await withPendingDevice('named', () =>
+      auth.api.signUpEmail({ body: { email: 'a@example.com', password: PASSWORD, name: 'A' } })
+    );
+    await auth.api.signUpEmail({ body: { email: 'b@example.com', password: PASSWORD, name: 'B' } });
+
+    expect(db.session[0].deviceId).toBe('named');
+    expect(db.session[1].deviceId).toEqual(expect.any(String));
+    expect(db.session[1].deviceId).not.toBe('named');
+  });
+
+  it('answers 404 on all four routes with refresh off, and the routes do not exist with compat off', async () => {
+    const off = build(false);
+    const token = await off.signIn('ann@example.com', 'phone');
+
+    for (const [method, path] of [
+      ['POST', '/refresh'],
+      ['POST', '/logout'],
+      ['GET', '/sessions'],
+      ['DELETE', '/sessions/anything'],
+    ]) {
+      const response = await off.call(method, path, {
+        token,
+        body: method === 'POST' ? {} : undefined,
+      });
+
+      expect(response.status, `${method} ${path}`).toBe(404);
+    }
+
+    const options = buildAuthOptions(configStrapi(false));
+    const compat = strapiCompat(configStrapi(true), readCompatConfig(configStrapi(true)));
+
+    expect((options.plugins ?? []).map((plugin) => plugin.id)).not.toContain('strapi-compat');
+    expect(Object.keys(compat.endpoints ?? {})).toEqual(
+      expect.arrayContaining([
+        'compatRefresh',
+        'compatLogout',
+        'compatSessions',
+        'compatRevokeSession',
+      ])
+    );
+    expect(compat.schema?.session?.fields).toHaveProperty('deviceId');
+  });
+});
+
+describe('strapi-compat refresh, with an old refresh token', () => {
+  const setup = (
+    overrides: { cutover?: unknown; valid?: boolean; until?: boolean; createdAt?: Date } = {}
+  ) => {
+    const base = readCompatConfig(configStrapi(true));
+    const cfg = {
+      ...base,
+      refresh: { ...base.refresh, enabled: true },
+      legacyJwt: {
+        ...base.legacyJwt,
+        until: overrides.until === false ? null : new Date(Date.now() + 86_400_000),
+      },
+    };
+    const manager = {
+      validateRefreshToken: vi.fn(async () =>
+        overrides.valid === false
+          ? { isValid: false }
+          : { isValid: true, userId: '7', sessionId: 'old-session' }
+      ),
+      listSessions: vi.fn(async () => [
+        {
+          sessionId: 'old-session',
+          deviceId: 'old-device',
+          createdAt: overrides.createdAt ?? new Date(Date.now() - 3_600_000),
+        },
+      ]),
+      revokeSessionById: vi.fn(async () => true),
+    };
+    const engine = {
+      getSession: vi.fn(async () => null),
+      createSession: vi.fn(async () => ({ id: 's2', userId: 'doc7', token: 'new-token' })),
+      revokeSession: vi.fn(),
+    };
+    const strapi = {
+      sessionManager: Object.assign(() => manager, { hasOrigin: () => true }),
+      store: () => ({
+        get: async () =>
+          'cutover' in overrides
+            ? overrides.cutover
+            : { status: 'completed', cutoverAt: new Date().toISOString() },
+      }),
+      db: { query: () => ({ findOne: async () => ({ documentId: 'doc7' }) }) },
+      plugin: () => ({ service: () => ({ get: () => engine }) }),
+    } as unknown as Core.Strapi;
+
+    return { cfg, manager, engine, strapi };
+  };
+
+  const run = (ctx: ReturnType<typeof setup>) =>
+    refresh(ctx.strapi, ctx.cfg, {
+      body: { refreshToken: 'old.refresh.token' },
+      headers: new Headers(),
+    });
+
+  it('exchanges an old refresh token for a session that keeps its deviceId, and revokes the old one', async () => {
+    const ctx = setup();
+    const result = await run(ctx);
+
+    expect(result).toMatchObject({
+      status: 200,
+      body: { jwt: 'new-token', refreshToken: 'new-token' },
+    });
+    expect(ctx.engine.createSession).toHaveBeenCalledWith(
+      'doc7',
+      expect.objectContaining({ deviceId: 'old-device' })
+    );
+    expect(ctx.manager.revokeSessionById).toHaveBeenCalledWith('7', 'old-session');
+  });
+
+  it('refuses one that is not valid, one issued after the cutover, and any without a completed migration', async () => {
+    for (const ctx of [
+      setup({ valid: false }),
+      setup({ cutover: null }),
+      setup({ cutover: { status: 'running', cutoverAt: new Date().toISOString() } }),
+      setup({ until: false }),
+    ]) {
+      expect((await run(ctx)).status).toBe(401);
+      expect(ctx.engine.createSession).not.toHaveBeenCalled();
+    }
+
+    // Made after the cutover, which is when the migration was recorded: not one of the old tokens
+    const late = setup({ createdAt: new Date(Date.now() + 3_600_000) });
+
+    expect((await run(late)).status).toBe(401);
+    expect(late.engine.createSession).not.toHaveBeenCalled();
+  });
+
+  it('removes the new session when the old one was revoked meanwhile', async () => {
+    const ctx = setup();
+
+    ctx.manager.revokeSessionById.mockResolvedValue(false);
+
+    expect((await run(ctx)).status).toBe(401);
+    expect(ctx.engine.revokeSession).toHaveBeenCalledWith('doc7', 's2');
   });
 });

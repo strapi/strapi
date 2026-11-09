@@ -75,6 +75,8 @@ export interface EngineTable {
 export interface RequestMeta {
   ipAddress?: string | null;
   userAgent?: string | null;
+  /** The device the session belongs to; a session made with none gets one of its own. */
+  deviceId?: string;
 }
 
 export interface EngineSession {
@@ -85,6 +87,8 @@ export interface EngineSession {
   expiresAt: Date;
   ipAddress?: string | null;
   userAgent?: string | null;
+  /** The device the session was made for, or `null` when the session predates the compatibility mode. */
+  deviceId: string | null;
   /** Set when an administrator is signed in as this user. */
   impersonatedBy?: ID | null;
   createdAt: Date;
@@ -226,6 +230,9 @@ export interface AuthEngine {
 
   /** Signs the user out everywhere, or everywhere but the session `except`. */
   revokeSessions(userId: ID, opts?: { except?: ID }): Promise<void>;
+
+  /** Signs out every session of the user that belongs to the device. */
+  revokeDevice(userId: ID, deviceId: string): Promise<void>;
 
   /** Signs one session out. A session that is not the user's is not found. */
   revokeSession(userId: ID, sessionId: ID): Promise<void>;

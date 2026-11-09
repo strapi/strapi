@@ -25,6 +25,7 @@ const SESSION = {
   id: 'session-1',
   userId: 'user-1',
   token: 'secret-token',
+  deviceId: null,
   expiresAt: new Date(Date.now() + 60_000),
   createdAt: new Date(),
   updatedAt: new Date(),

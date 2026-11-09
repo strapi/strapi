@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 
+import { readCompatConfig } from '../../compat/config';
+
 /**
  * The native Better Auth endpoints: every one of them is a GET or a POST, so these two routes carry
  * them all. `prefix: ''` puts them at `/api/auth/*` instead of under the plugin
@@ -18,3 +20,14 @@ const routes: Core.RouterInput['routes'] = [
 ];
 
 export default routes;
+
+/**
+ * `DELETE /auth/sessions/:sessionId` (the refresh routes' way to sign one session out), which the
+ * catch-all does not carry. Only while the Users & Permissions compatibility mode is on, so the
+ * route table is the one above without it. Made when the routes are read, which is when the server
+ * registers them.
+ */
+export const compatAuthRoutes = (): Core.RouterInput['routes'] =>
+  readCompatConfig(strapi).usersPermissions
+    ? [{ method: 'DELETE', path: '/auth/sessions/:sessionId', handler: 'auth.handle', config }]
+    : [];
