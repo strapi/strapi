@@ -180,6 +180,11 @@ export const createEndUsersInstance = async (
       bypassAuth: false,
     });
   } catch (error) {
+    // A start that failed or was refused has still run every plugin's register: destroy what it
+    // built, or module-level registries (admin's actions and conditions, which an Enterprise plugin
+    // fills in its register) keep its entries and the next instance in this file fails on duplicates
+    const halfBooted = (globalThis as { strapi?: Core.Strapi }).strapi;
+    await halfBooted?.destroy().catch(() => undefined);
     restoreProfile?.();
     restoreConfig();
     await opts.fakeOidc?.stop();
