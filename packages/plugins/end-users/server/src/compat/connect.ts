@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 
+import { PLUGIN_ID } from '../constants';
+import type providerService from '../services/provider';
 import { resolveBasePath } from '../engine/better-auth/base-path';
 import { resolveServerOrigin } from '../engine/better-auth/server-origin';
 import type { AuthEngine } from '../engine/types';
@@ -16,16 +18,16 @@ const restPrefix = (strapi: Core.Strapi): string =>
 export const connectRedirectUri = (strapi: Core.Strapi, provider: string): string =>
   `${resolveServerOrigin(strapi.config)}${restPrefix(strapi)}/connect/${provider}/callback`;
 
-/** An absolute http(s) URL, as the string given, or `null`. */
+/** An absolute http(s) URL, as the parser normalises it (its `href`), or `null`. */
 const absoluteUrl = (value: unknown): string | null => {
   if (typeof value !== 'string') {
     return null;
   }
 
   try {
-    const { protocol } = new URL(value);
+    const { protocol, href } = new URL(value);
 
-    return protocol === 'http:' || protocol === 'https:' ? value : null;
+    return protocol === 'http:' || protocol === 'https:' ? href : null;
   } catch {
     return null;
   }
@@ -38,6 +40,7 @@ const absoluteUrl = (value: unknown): string | null => {
  * 3. the address Users & Permissions defaulted to, `/api/auth/<provider>/callback` on this server,
  *    which is the route that answers with `{ jwt, user }`
  *
+ * The URL is the parsed one (`href`), the form the engine stores and redirects to.
  * `null` when the first or the second source has a value that is not an absolute http(s) URL.
  * Whether the origin of a `?callback=` is trusted is `resolveFrontendCallback`'s to decide.
  */
@@ -77,4 +80,16 @@ export const resolveFrontendCallback = async (
   }
 
   return (await engine.isTrustedOrigin(new URL(url).origin)) ? url : null;
+};
+
+/** Whether the provider is one the engine runs: known, and enabled. */
+export const isProviderEnabled = async (
+  strapi: Core.Strapi,
+  provider: string
+): Promise<boolean> => {
+  const providers = await (
+    strapi.plugin(PLUGIN_ID).service('provider') as ReturnType<typeof providerService>
+  ).list();
+
+  return providers.some((one) => one.id === provider && one.enabled);
 };

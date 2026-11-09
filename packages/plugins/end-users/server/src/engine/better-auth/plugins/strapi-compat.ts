@@ -63,6 +63,10 @@ const respond = (
     ctx.responseHeaders.append('set-cookie', cookie);
   }
 
+  for (const [name, value] of Object.entries(result.headers ?? {})) {
+    ctx.responseHeaders.set(name, value);
+  }
+
   return ctx.json(result.body as Record<string, unknown>);
 };
 

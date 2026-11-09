@@ -237,6 +237,27 @@ export interface AuthEngine {
   /** Signs one session out. A session that is not the user's is not found. */
   revokeSession(userId: ID, sessionId: ID): Promise<void>;
 
+  /**
+   * Takes a session for one use: removes it with a single conditional delete, and answers with it
+   * only when that delete removed exactly one row. Of several requests that claim the same session
+   * at once, one gets it and the rest get `null`, as they do for a session that is gone or is not
+   * the user's.
+   */
+  claimSession(userId: ID, sessionId: ID): Promise<EngineSession | null>;
+
+  /**
+   * Records that the session was just made by the sign-in of `provider`, for one later
+   * `claimProviderSession`. The record is a short-lived row in the database, so it holds across
+   * server instances.
+   */
+  markProviderSession(sessionId: ID, provider: string): Promise<void>;
+
+  /**
+   * Spends the record `markProviderSession` made: `true` for exactly one caller, once, and only
+   * while the record is fresh. `false` for a session that has none, or whose record was spent.
+   */
+  claimProviderSession(sessionId: ID, provider: string): Promise<boolean>;
+
   /** For the admin security panel. */
   listSessions(userId: ID): Promise<EngineSession[]>;
 

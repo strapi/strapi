@@ -9,6 +9,7 @@ import { readLegacyCutover } from '../legacy-jwt';
 import { LEGACY_ORIGIN } from '../origin';
 import {
   clearRefreshCookie,
+  hasRefreshCookie,
   readRefreshToken,
   wantsRefreshCookie,
   writeRefreshCookie,
@@ -21,6 +22,9 @@ interface RequestInput {
   body?: unknown;
   headers: Headers | undefined;
 }
+
+/** The table behind the session manager, where the old refresh tokens' sessions are kept. */
+const LEGACY_SESSION_UID = 'admin::session';
 
 const NOT_FOUND: CompatResult = { status: 404, body: upError('NotFoundError', 'Not Found') };
 
@@ -51,32 +55,31 @@ const callerOf = (engine: AuthEngine, headers: Headers | undefined) =>
   engine.getSession(new Headers(headers));
 
 /**
- * Signs `session` out and gives its user a new one on the same device: the rotation. The token it
- * replaces stops working at once, so a replay is a refusal. When another request rotated the same
- * session first, the new session this one made is removed again and there is nothing to give.
+ * Signs `session` out and gives its user a new one on the same device: the rotation. The session
+ * is claimed first, with one conditional delete that succeeds for one request only, and the new
+ * session is made only after that. The token it replaces stops working at once, so a replay, or a
+ * request that lost the race, is a refusal. A session of an impersonation is never rotated.
  */
 const rotate = async (
   engine: AuthEngine,
   session: EngineSession,
   headers: Headers | undefined
 ): Promise<string | null> => {
-  const next = await engine.createSession(session.userId, {
-    ipAddress: session.ipAddress,
-    userAgent: headers?.get('user-agent') ?? session.userAgent,
-    ...(session.deviceId ? { deviceId: session.deviceId } : {}),
-  });
-
-  try {
-    await engine.revokeSession(session.userId, session.id);
-  } catch (error) {
-    if (!(error instanceof errors.NotFoundError)) {
-      throw error;
-    }
-
-    await engine.revokeSession(next.userId, next.id);
-
+  if (session.impersonatedBy) {
     return null;
   }
+
+  const claimed = await engine.claimSession(session.userId, session.id);
+
+  if (!claimed) {
+    return null;
+  }
+
+  const next = await engine.createSession(claimed.userId, {
+    ipAddress: claimed.ipAddress,
+    userAgent: headers?.get('user-agent') ?? claimed.userAgent,
+    ...(claimed.deviceId ? { deviceId: claimed.deviceId } : {}),
+  });
 
   return next.token;
 };
@@ -85,8 +88,9 @@ const rotate = async (
  * An old refresh token, from the `users-permissions` origin, exchanged for a session that keeps the
  * old one's device. Accepted on the terms of an old access token: before `legacyJwt.until`, once a
  * completed migration is recorded, and only when it was issued no later than the cutover (the
- * session's own creation time). The old
- * session is revoked, so the token cannot be used twice.
+ * session's own creation time). The old session is claimed first, with one conditional delete that
+ * succeeds for one request only, and the new session is made after that, so the token cannot be
+ * used twice.
  */
 const exchangeLegacy = async (
   strapi: Core.Strapi,
@@ -134,16 +138,21 @@ const exchangeLegacy = async (
     return null;
   }
 
-  const next = await engine.createSession(user.documentId, {
-    userAgent: headers?.get('user-agent'),
-    ...(old?.deviceId ? { deviceId: old.deviceId } : {}),
-  });
+  // The manager's own revoke reads and then deletes, and tells both of two racing requests it
+  // succeeded. This delete names the session, its user and the origin in one statement, and its
+  // count says whether this request removed it.
+  const { count } = (await strapi.db.query(LEGACY_SESSION_UID).deleteMany({
+    where: { sessionId: validation.sessionId, userId: validation.userId, origin: LEGACY_ORIGIN },
+  })) as { count: number };
 
-  if (!(await manager.revokeSessionById(validation.userId, validation.sessionId))) {
-    await engine.revokeSession(next.userId, next.id);
-
+  if (count !== 1) {
     return null;
   }
+
+  const next = await engine.createSession(user.documentId, {
+    userAgent: headers?.get('user-agent'),
+    ...(old.deviceId ? { deviceId: old.deviceId } : {}),
+  });
 
   return next.token;
 };
@@ -226,7 +235,7 @@ const sessionToEnd = async (
  * `POST /api/auth/logout`: `{ scope: 'all' }` signs every session of the caller out,
  * `{ deviceId }` the sessions of one device, anything else the current session, or the one the
  * refresh token names. A failure while revoking is logged and the answer is `{ ok: true }` anyway.
- * The refresh cookie is cleared when the request would have been given one.
+ * The refresh cookie is cleared when the request carries it or would have been given one.
  */
 export const logout = async (
   strapi: Core.Strapi,
@@ -261,7 +270,12 @@ export const logout = async (
     strapi.log.error('Logout failed', error);
   }
 
-  return ok({ ok: true }, wantsRefreshCookie(cfg, input.headers) ? [clearRefreshCookie(cfg)] : []);
+  const clear =
+    wantsRefreshCookie(cfg, input.headers) || hasRefreshCookie(cfg, input.headers)
+      ? [clearRefreshCookie(cfg)]
+      : [];
+
+  return ok({ ok: true }, clear);
 };
 
 /**

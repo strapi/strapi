@@ -27,6 +27,7 @@ const FRONT_END = `${TEST_ORIGIN}/connect/done`;
 const CLIENT_SECRET = 'fake-client-secret-value';
 const USER_UID = 'plugin::end-users.user';
 const ACCOUNT_UID = 'plugin::end-users.account';
+const SESSION_UID = 'plugin::end-users.session';
 
 type Res = Awaited<ReturnType<ReturnType<typeof createRequest>['get']>>;
 
@@ -78,6 +79,11 @@ describe('end-users compat: connect and the callback exchange', () => {
           {
             provider: FIXTURE_PACKAGE,
             options: { clientId: 'fake-client', clientSecret: CLIENT_SECRET, issuer: oidc.issuer },
+          },
+          // A second provider the user has no account with
+          {
+            provider: 'github',
+            options: { clientId: 'other-client', clientSecret: CLIENT_SECRET },
           },
         ],
       },
@@ -158,6 +164,59 @@ describe('end-users compat: connect and the callback exchange', () => {
     );
   });
 
+  it('refuses the exchange a second time for the same session', async () => {
+    const callback = await connect();
+    const headers = { cookie: cookiesOf(callback) };
+
+    expect((await rq.get(`/api/auth/${PROVIDER}/callback`, { headers })).status).toBe(200);
+
+    const again = await rq.get(`/api/auth/${PROVIDER}/callback`, { headers });
+
+    expect(again.status).toBe(400);
+    expect(again.body.error.message).toBe(
+      'OAuth authentication requires a completed provider session'
+    );
+  });
+
+  it('refuses the exchange for a session older than five minutes', async () => {
+    const callback = await connect();
+
+    await strapi.db.query(SESSION_UID).updateMany({
+      where: {},
+      data: { createdAt: new Date(Date.now() - 10 * 60 * 1000) },
+    });
+
+    const exchange = await rq.get(`/api/auth/${PROVIDER}/callback`, {
+      headers: { cookie: cookiesOf(callback) },
+    });
+
+    expect(exchange.status).toBe(400);
+    expect(exchange.body.error.message).toBe(
+      'OAuth authentication requires a completed provider session'
+    );
+  });
+
+  it("refuses the exchange under another provider's name", async () => {
+    const callback = await connect();
+    const exchange = await rq.get('/api/auth/github/callback', {
+      headers: { cookie: cookiesOf(callback) },
+    });
+
+    expect(exchange.status).toBe(400);
+    expect(exchange.body.error.message).toBe(
+      'OAuth authentication requires a completed provider session'
+    );
+
+    // The refusal spent nothing: the session still exchanges under the provider that made it
+    expect(
+      (
+        await rq.get(`/api/auth/${PROVIDER}/callback`, {
+          headers: { cookie: cookiesOf(callback) },
+        })
+      ).status
+    ).toBe(200);
+  });
+
   it('ignores ?access_token=', async () => {
     const callback = await connect();
     const named = await rq.get(`/api/auth/${PROVIDER}/callback?access_token=anything`);
@@ -186,6 +245,24 @@ describe('end-users compat: connect and the callback exchange', () => {
     expect(`${target.origin}${target.pathname}`).toBe(FRONT_END);
     expect(target.searchParams.get('error')).toBe('oauth_error');
     expect(target.searchParams.get('error_description')).toBe('access_denied');
+  });
+
+  it('sends a callback with a different state to the front-end URL, with no session', async () => {
+    const start = await rq.get(CONNECT);
+    const authorize = await fetch(start.headers.location as string, { redirect: 'manual' });
+    const returned = new URL(authorize.headers.get('location') as string);
+
+    returned.searchParams.set('state', 'not-the-state');
+
+    const failed = await rq.get(`${returned.pathname}${returned.search}`, {
+      headers: { cookie: cookiesOf(start) },
+    });
+
+    expect(failed.status).toBe(302);
+    expect(new URL(failed.headers.location as string).searchParams.get('error')).toBe(
+      'oauth_error'
+    );
+    expect(cookiesOf(failed)).not.toContain('.session_token=');
   });
 
   it('the admin shows /api/connect/<id>/callback as the redirect URI', async () => {

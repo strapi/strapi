@@ -1,7 +1,9 @@
 /**
  * What the connect routes rely on in Better Auth 1.7.14, read from its source:
  */
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { betterAuth } from 'better-auth/minimal';
+import { memoryAdapter } from 'better-auth/adapters/memory';
 import type { Core } from '@strapi/types';
 
 import { BUILT_IN_PROVIDERS } from '../../providers/built-in';
@@ -103,6 +105,70 @@ describe('frontendCallback', () => {
       `${FRONT_END}/configured`
     );
     expect(engine.isTrustedOrigin).not.toHaveBeenCalled();
+  });
+});
+
+describe('a ?callback= written to get past the origin check', () => {
+  const TRUSTED = 'https://trusted.example.com';
+  let engine: { isTrustedOrigin: (origin: string) => Promise<boolean> };
+
+  // The engine's own matcher, with the one origin trusted: what a browser would be sent to is
+  // decided on the URL the parser makes of the string, so that is what is held to the rule
+  beforeAll(async () => {
+    const auth = betterAuth({
+      database: memoryAdapter({ user: [], session: [], account: [], verification: [] }),
+      secret: 'test-secret-at-least-32-characters-long',
+      baseURL: 'https://api.example.com',
+      trustedOrigins: [TRUSTED],
+      telemetry: { enabled: false },
+    });
+    const context = (await auth.$context) as unknown as {
+      isTrustedOrigin: (url: string) => boolean;
+    };
+
+    engine = { isTrustedOrigin: async (origin) => context.isTrustedOrigin(origin) };
+  });
+
+  const resolve = (value: string) =>
+    resolveFrontendCallback(setup().strapi, engine, 'github', value);
+
+  it.each([
+    ['a protocol-relative URL', '//evil.example.net'],
+    ['userinfo that names the trusted host', `https://trusted.example.com@evil.example.net/`],
+    ['a backslash after the scheme', 'https:\\evil.example.net'],
+    ['a slash and a backslash after the scheme', 'https:/\\evil.example.net'],
+    ['a trailing dot on the host', 'https://trusted.example.com./done'],
+    ['the right host on the wrong scheme', 'http://trusted.example.com/done'],
+    ['a scheme with no slashes', 'http:trusted.example.com'],
+    ['a javascript URL', 'javascript:alert(1)'],
+  ])('refuses %s', async (_name, value) => {
+    await expect(resolve(value)).resolves.toBeNull();
+  });
+
+  it('gives back the parsed URL, which is the one a browser follows', async () => {
+    await expect(resolve('HTTPS://TRUSTED.EXAMPLE.COM/Done?x=1')).resolves.toBe(
+      `${TRUSTED}/Done?x=1`
+    );
+    // A backslash before the at sign ends the host: the parser reads the trusted host here
+    await expect(resolve('https://trusted.example.com\\@evil.example.net')).resolves.toBe(
+      `${TRUSTED}/@evil.example.net`
+    );
+  });
+
+  it('never gives a URL whose origin is not the trusted one', async () => {
+    for (const value of [
+      '//evil.example.net',
+      'https://evil.example.net',
+      'https://trusted.example.com@evil.example.net',
+      'https:\\evil.example.net',
+      'https://trusted.example.com.evil.example.net',
+      'https://TRUSTED.example.com./',
+    ]) {
+      // eslint-disable-next-line no-await-in-loop
+      const resolved = await resolve(value);
+
+      expect(resolved === null || new URL(resolved).origin === TRUSTED, value).toBe(true);
+    }
   });
 });
 

@@ -990,6 +990,7 @@ describe('strapi-compat refresh routes, through the engine', () => {
       ipAddress: row.ipAddress ?? null,
       userAgent: row.userAgent ?? null,
       deviceId: row.deviceId ?? null,
+      impersonatedBy: row.impersonatedBy ?? null,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -1014,6 +1015,25 @@ describe('strapi-compat refresh routes, through the engine', () => {
         }
 
         await (await internal()).deleteSession(row.token);
+      },
+      async claimSession(userId: string, sessionId: string) {
+        const row = (await (await internal()).listSessions(userId)).find((s) => s.id === sessionId);
+
+        if (!row) {
+          return null;
+        }
+
+        const removed = await (
+          await auth.$context
+        ).adapter.deleteMany({
+          model: 'session',
+          where: [
+            { field: 'id', value: sessionId },
+            { field: 'userId', value: userId },
+          ],
+        });
+
+        return removed === 1 ? toSession(row) : null;
       },
       async revokeSessions(userId: string) {
         await (await internal()).deleteUserSessions(userId);
@@ -1097,6 +1117,35 @@ describe('strapi-compat refresh routes, through the engine', () => {
     expect((await call('GET', '/sessions', { token: answer.jwt })).status).toBe(200);
   });
 
+  it('lets one of five refreshes with the same token win, and leaves one session', async () => {
+    const { call, signIn, db } = build();
+    const first = await signIn('ann@example.com', 'device-a');
+
+    const answers = await Promise.all(
+      Array.from({ length: 5 }, () => call('POST', '/refresh', { body: { refreshToken: first } }))
+    );
+
+    expect(answers.map((answer) => answer.status).sort()).toEqual([200, 401, 401, 401, 401]);
+    expect(db.session).toHaveLength(1);
+    expect(db.session[0]).toMatchObject({ deviceId: 'device-a' });
+  });
+
+  it('does not rotate the session of an impersonation', async () => {
+    const { call, signIn, db, engine } = build();
+    const first = await signIn('ann@example.com', 'device-a');
+    const lookup = engine.getSession.bind(engine);
+
+    // The test engine has no admin plugin, so its sessions carry no marker of their own
+    engine.getSession = async (headers) => {
+      const found = await lookup(headers);
+
+      return found && { ...found, impersonatedBy: 'admin-1' };
+    };
+
+    expect((await call('POST', '/refresh', { body: { refreshToken: first } })).status).toBe(401);
+    expect(db.session).toHaveLength(1);
+  });
+
   it('keeps the device across a rotation and answers 400 when there is no token', async () => {
     const { call, signIn, db } = build();
     const first = await signIn('ann@example.com', 'device-a');
@@ -1178,6 +1227,16 @@ describe('strapi-compat refresh routes, through the engine', () => {
     });
 
     expect(asked.headers.getSetCookie().join('')).toMatch(/^strapi_up_refresh=;/);
+
+    // A request that carries the cookie clears it, whether or not it asked for one
+    const carried = await signIn('ann@example.com', 'phone');
+    const cleared = await call('POST', '/logout', {
+      token: carried,
+      body: {},
+      headers: { cookie: 'strapi_up_refresh=whatever' },
+    });
+
+    expect(cleared.headers.getSetCookie().join('')).toMatch(/^strapi_up_refresh=;/);
   });
 
   it('lists sessions with current set for the caller and deviceName from the user agent', async () => {
@@ -1272,7 +1331,13 @@ describe('strapi-compat refresh routes, through the engine', () => {
 
 describe('strapi-compat refresh, with an old refresh token', () => {
   const setup = (
-    overrides: { cutover?: unknown; valid?: boolean; until?: boolean; createdAt?: Date } = {}
+    overrides: {
+      cutover?: unknown;
+      valid?: boolean;
+      until?: boolean;
+      createdAt?: Date;
+      claimed?: number;
+    } = {}
   ) => {
     const base = readCompatConfig(configStrapi(true));
     const cfg = {
@@ -1296,8 +1361,8 @@ describe('strapi-compat refresh, with an old refresh token', () => {
           createdAt: overrides.createdAt ?? new Date(Date.now() - 3_600_000),
         },
       ]),
-      revokeSessionById: vi.fn(async () => true),
     };
+    const deleteMany = vi.fn(async () => ({ count: overrides.claimed ?? 1 }));
     const engine = {
       getSession: vi.fn(async () => null),
       createSession: vi.fn(async () => ({ id: 's2', userId: 'doc7', token: 'new-token' })),
@@ -1311,11 +1376,11 @@ describe('strapi-compat refresh, with an old refresh token', () => {
             ? overrides.cutover
             : { status: 'completed', cutoverAt: new Date().toISOString() },
       }),
-      db: { query: () => ({ findOne: async () => ({ documentId: 'doc7' }) }) },
+      db: { query: () => ({ findOne: async () => ({ documentId: 'doc7' }), deleteMany }) },
       plugin: () => ({ service: () => ({ get: () => engine }) }),
     } as unknown as Core.Strapi;
 
-    return { cfg, manager, engine, strapi };
+    return { cfg, manager, engine, strapi, deleteMany };
   };
 
   const run = (ctx: ReturnType<typeof setup>) =>
@@ -1336,7 +1401,9 @@ describe('strapi-compat refresh, with an old refresh token', () => {
       'doc7',
       expect.objectContaining({ deviceId: 'old-device' })
     );
-    expect(ctx.manager.revokeSessionById).toHaveBeenCalledWith('7', 'old-session');
+    expect(ctx.deleteMany).toHaveBeenCalledWith({
+      where: { sessionId: 'old-session', userId: '7', origin: expect.any(String) },
+    });
   });
 
   it('refuses one that is not valid, one issued after the cutover, and any without a completed migration', async () => {
@@ -1357,12 +1424,10 @@ describe('strapi-compat refresh, with an old refresh token', () => {
     expect(late.engine.createSession).not.toHaveBeenCalled();
   });
 
-  it('removes the new session when the old one was revoked meanwhile', async () => {
-    const ctx = setup();
-
-    ctx.manager.revokeSessionById.mockResolvedValue(false);
+  it('makes no new session when another request claimed the old one first', async () => {
+    const ctx = setup({ claimed: 0 });
 
     expect((await run(ctx)).status).toBe(401);
-    expect(ctx.engine.revokeSession).toHaveBeenCalledWith('doc7', 's2');
+    expect(ctx.engine.createSession).not.toHaveBeenCalled();
   });
 });

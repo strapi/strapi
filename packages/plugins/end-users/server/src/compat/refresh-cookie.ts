@@ -31,6 +31,10 @@ const cookieValue = (headers: Headers | undefined, name: string): string | undef
   return undefined;
 };
 
+/** Whether the request carries the refresh cookie, whatever else it asked for. */
+export const hasRefreshCookie = (cfg: CompatConfig, headers: Headers | undefined): boolean =>
+  cookieValue(headers, cfg.refresh.cookie.name) !== undefined;
+
 /**
  * The refresh token a request carries: the cookie when there is one, the body's `refreshToken`
  * otherwise. `undefined` when there is none.

@@ -2,16 +2,18 @@ import type Koa from 'koa';
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-import { resolveFrontendCallback, frontendCallback } from '../compat/connect';
+import { frontendCallback, isProviderEnabled, resolveFrontendCallback } from '../compat/connect';
 import { PLUGIN_ID } from '../constants';
 import { resolveBasePath } from '../engine/better-auth/base-path';
 import { resolveServerOrigin } from '../engine/better-auth/server-origin';
 import { writeFetchResponse } from '../engine/better-auth/handler';
 import type { AuthEngine } from '../engine/types';
-import type providerService from '../services/provider';
 
 /** What a provider's failure becomes on the way back to the front end. */
 const OAUTH_ERROR = 'oauth_error';
+
+/** The longest `error_description` passed on to the front end. */
+const MAX_DESCRIPTION = 200;
 
 const asText = (value: unknown): string | undefined =>
   typeof value === 'string' && value !== '' ? value : undefined;
@@ -34,6 +36,15 @@ const forwardedHeaders = (ctx: Koa.Context, extra: Record<string, string> = {}):
 
 const isRedirect = (status: number) => status >= 300 && status < 400;
 
+/** The cookies a response sets, as a request would send them back: the ones that were not cleared. */
+const cookieHeaderOf = (response: Response): string =>
+  response.headers
+    .getSetCookie()
+    .filter((line) => !/;\s*max-age=0\b/i.test(line))
+    .map((line) => line.split(';')[0])
+    .filter((pair) => !pair.endsWith('='))
+    .join('; ');
+
 /**
  * The redirect the engine answered the callback with, for the front end: a failure it reports as
  * `?error=<code>` is `?error=oauth_error&error_description=<the code or the description>`, which
@@ -48,7 +59,10 @@ const forFrontEnd = (strapi: Core.Strapi, provider: string, location: string): s
     return location;
   }
 
-  const description = url.searchParams.get('error_description') ?? error;
+  const description = (url.searchParams.get('error_description') ?? error).slice(
+    0,
+    MAX_DESCRIPTION
+  );
   const onEnginePage = url.pathname.startsWith(`${resolveBasePath(strapi.config)}/`);
   const target = onEnginePage
     ? new URL(frontendCallback(strapi, provider, undefined) ?? url.href)
@@ -76,11 +90,8 @@ const connectController = ({ strapi }: { strapi: Core.Strapi }) => {
     /** Starts the sign-in: a 302 to the provider, with the engine's state cookies on it. */
     async start(ctx: Koa.Context) {
       const { provider } = ctx.params as { provider: string };
-      const providers = await (
-        strapi.plugin(PLUGIN_ID).service('provider') as ReturnType<typeof providerService>
-      ).list();
 
-      if (!providers.some((one) => one.id === provider && one.enabled)) {
+      if (!(await isProviderEnabled(strapi, provider))) {
         throw new errors.ApplicationError('This provider is disabled');
       }
 
@@ -130,7 +141,13 @@ const connectController = ({ strapi }: { strapi: Core.Strapi }) => {
     /** The provider's return: the engine finishes the sign-in, and the browser lands on the front end. */
     async callback(ctx: Koa.Context) {
       const { provider } = ctx.params as { provider: string };
-      const response = await engineOf().handle(
+
+      if (!(await isProviderEnabled(strapi, provider))) {
+        throw new errors.ApplicationError('This provider is disabled');
+      }
+
+      const engine = engineOf();
+      const response = await engine.handle(
         new Request(`${endpoint(`/callback/${encodeURIComponent(provider)}`)}${ctx.search}`, {
           method: 'GET',
           headers: forwardedHeaders(ctx, { cookie: ctx.get('cookie') }),
@@ -144,8 +161,18 @@ const connectController = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const headers = new Headers(response.headers);
+      const front = forFrontEnd(strapi, provider, location);
 
-      headers.set('location', forFrontEnd(strapi, provider, location));
+      // A sign-in that went through made the session this provider's exchange may take, once
+      if (!new URL(front, resolveServerOrigin(strapi.config)).searchParams.has('error')) {
+        const made = await engine.getSession(new Headers({ cookie: cookieHeaderOf(response) }));
+
+        if (made) {
+          await engine.markProviderSession(made.id, provider);
+        }
+      }
+
+      headers.set('location', front);
 
       return writeFetchResponse(ctx, new Response(null, { status: response.status, headers }));
     },

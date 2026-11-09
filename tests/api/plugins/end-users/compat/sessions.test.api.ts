@@ -142,6 +142,36 @@ describe('end-users compat: refresh, logout and sessions', () => {
     expect((await refresh({})).status).toBe(400);
   });
 
+  it('five refreshes with one token give one 200, four 401 and one live session', async () => {
+    const racing = async (refreshToken: string) => {
+      const answers = await Promise.all(Array.from({ length: 5 }, () => refresh({ refreshToken })));
+      const won = answers.filter((answer) => answer.status === 200);
+
+      expect(won).toHaveLength(1);
+      expect(answers.filter((answer) => answer.status === 401)).toHaveLength(4);
+
+      return won[0].body.jwt as string;
+    };
+
+    const user = await seedUpUser(strapi, { email: 'kai@example.com' });
+    const { body } = await signIn(user.email, user.password);
+    const jwt = await racing(body.refreshToken);
+
+    const listed = await rq.get('/api/auth/sessions', { headers: bearer(jwt) });
+
+    expect(listed.status).toBe(200);
+    expect(listed.body.data).toHaveLength(1);
+
+    // The same for an old refresh token: one exchange wins and leaves one session behind
+    const other = await seedUpUser(strapi, { email: 'lou@example.com' });
+    const old = await mintOldRefreshToken(strapi, other.id, 'old-device');
+    const exchanged = await racing(old.refreshToken);
+
+    expect(
+      (await rq.get('/api/auth/sessions', { headers: bearer(exchanged) })).body.data
+    ).toHaveLength(1);
+  });
+
   it('refresh works from the cookie', async () => {
     const user = await seedUpUser(strapi, { email: 'cy@example.com' });
     const asked = await signIn(
@@ -257,6 +287,22 @@ describe('end-users compat: refresh, logout and sessions', () => {
     expect(listed.body.data[0]).toMatchObject({ deviceId: 'old-device', current: true });
     // The old token is spent
     expect((await refresh({ refreshToken: old.refreshToken })).status).toBe(401);
+  });
+
+  it('an old access token is not accepted as a refresh token', async () => {
+    const user = await seedUpUser(strapi, { email: 'mia@example.com' });
+    const current = await signIn(user.email, user.password);
+    const old = await mintOldRefreshToken(strapi, user.id, 'old-device');
+
+    const res = await refresh({ refreshToken: old.accessToken });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.message).toBe('Invalid refresh token');
+
+    // No session was made for it
+    const listed = await rq.get('/api/auth/sessions', { headers: bearer(current.body.jwt) });
+
+    expect(listed.body.data).toHaveLength(1);
   });
 
   it('an old access token works as a Bearer token', async () => {

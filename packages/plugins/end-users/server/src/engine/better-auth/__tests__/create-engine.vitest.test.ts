@@ -1848,6 +1848,73 @@ describe('createEngine', () => {
       expect(rowsOf('session')).toHaveLength(before);
     });
 
+    it('reads a session token as a Bearer token with no signature on it, as the refresh route hands it out', async () => {
+      // The refresh routes answer with the token `createSession` makes, not the signed form the
+      // sign-in sets. This fails if the Bearer plugin is ever made to require a signature.
+      const a = await signUp(engine, 'a@x.io');
+      const made = await engine.createSession(a.userId, {});
+
+      expect(await engine.getSession(bearer(made.token))).toMatchObject({ id: made.id });
+    });
+
+    it('claims a session once: of five claims at the same time exactly one gets it', async () => {
+      const a = await signUp(engine, 'a@x.io');
+      const target = await engine.createSession(a.userId, {});
+
+      const claims = await Promise.all(
+        Array.from({ length: 5 }, () => engine.claimSession(a.userId, target.id))
+      );
+
+      expect(claims.filter(Boolean)).toHaveLength(1);
+      expect(claims.find(Boolean)).toMatchObject({ id: target.id, userId: a.userId });
+      expect((await engine.listSessions(a.userId)).map((session) => session.id)).not.toContain(
+        target.id
+      );
+    });
+
+    it("does not claim another user's session or one that is gone, and deletes nothing", async () => {
+      const a = await signUp(engine, 'a@x.io');
+      const b = await signUp(engine, 'b@x.io');
+      const foreign = await engine.createSession(b.userId, {});
+      const before = rowsOf('session').length;
+
+      await expect(engine.claimSession(a.userId, foreign.id)).resolves.toBeNull();
+      await expect(engine.claimSession(a.userId, 'no-such-id')).resolves.toBeNull();
+
+      expect(rowsOf('session')).toHaveLength(before);
+    });
+
+    it('spends the record of a provider sign-in once, for that provider only', async () => {
+      const a = await signUp(engine, 'a@x.io');
+      const target = await engine.createSession(a.userId, {});
+
+      await expect(engine.claimProviderSession(target.id, 'github')).resolves.toBe(false);
+
+      await engine.markProviderSession(target.id, 'github');
+
+      await expect(engine.claimProviderSession(target.id, 'google')).resolves.toBe(false);
+
+      const claims = await Promise.all(
+        Array.from({ length: 5 }, () => engine.claimProviderSession(target.id, 'github'))
+      );
+
+      expect(claims.filter(Boolean)).toHaveLength(1);
+      await expect(engine.claimProviderSession(target.id, 'github')).resolves.toBe(false);
+    });
+
+    it('does not spend a record that has expired', async () => {
+      const a = await signUp(engine, 'a@x.io');
+      const target = await engine.createSession(a.userId, {});
+
+      await engine.markProviderSession(target.id, 'github');
+
+      for (const row of rowsOf('verification')) {
+        row.expiresAt = new Date(Date.now() - 1000);
+      }
+
+      await expect(engine.claimProviderSession(target.id, 'github')).resolves.toBe(false);
+    });
+
     it('does nothing for a user without sessions', async () => {
       await expect(engine.revokeSessions('nobody')).resolves.toBeUndefined();
       await expect(engine.revokeSessions('nobody', { except: 'x' })).resolves.toBeUndefined();

@@ -67,6 +67,12 @@ const CONFIG = `plugin::${PLUGIN_ID}`;
 /** What the two-factor plugin starts the verification identifier of a trusted device with. */
 const TRUST_DEVICE_PREFIX = 'trust-device-';
 
+/** How long a session stays open to the one exchange that follows its provider sign-in. */
+const PROVIDER_SESSION_MARK_MS = 5 * 60 * 1000;
+
+const providerSessionMark = (provider: string, sessionId: string) =>
+  `provider-session-${encodeURIComponent(provider)}-${sessionId}`;
+
 /**
  * Better Auth plugins installed for every project, in this order.
  *
@@ -1095,6 +1101,51 @@ export const createEngine = (
       }
 
       await ctx.internalAdapter.deleteSession(session.token);
+    },
+
+    async claimSession(userId: ID, sessionId: ID) {
+      const ctx = await context();
+      const sessions = await ctx.internalAdapter.listSessions(userId);
+      const session = sessions.find(({ id }) => id === sessionId);
+
+      if (!session) {
+        return null;
+      }
+
+      // One statement with the id and the user in its where: of several claimants, one removes the
+      // row and gets a count of 1
+      const removed = await ctx.adapter.deleteMany({
+        model: 'session',
+        where: [
+          { field: 'id', value: sessionId },
+          { field: 'userId', value: userId },
+        ],
+      });
+
+      return removed === 1 ? toEngineSession(session) : null;
+    },
+
+    async markProviderSession(sessionId: ID, provider: string) {
+      const ctx = await context();
+
+      await ctx.internalAdapter.createVerificationValue({
+        identifier: providerSessionMark(provider, sessionId),
+        value: sessionId,
+        expiresAt: new Date(Date.now() + PROVIDER_SESSION_MARK_MS),
+      });
+    },
+
+    async claimProviderSession(sessionId: ID, provider: string) {
+      const ctx = await context();
+      const removed = await ctx.adapter.deleteMany({
+        model: 'verification',
+        where: [
+          { field: 'identifier', value: providerSessionMark(provider, sessionId) },
+          { field: 'expiresAt', value: new Date(), operator: 'gt' },
+        ],
+      });
+
+      return removed === 1;
     },
 
     async listSessions(userId: ID) {
