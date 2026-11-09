@@ -9,9 +9,11 @@ import { readCompatConfig } from '../compat/config';
 import { PLUGIN_ID } from '../constants';
 import { readMigrationConfig } from './config';
 import type { MigrationConfig } from './config';
+import { runCleanup } from './cleanup';
 import { claimPreSync, runPreSync } from './pre-sync';
-import { readRecord, releaseMigration } from './record';
+import { claimMigration, readRecord, releaseMigration } from './record';
 import type { MigrationRecord } from './record';
+import { runRollback } from './rollback';
 
 const UP_PLUGIN = 'users-permissions';
 const UP_USERS_TABLE = 'up_users';
@@ -162,12 +164,6 @@ export interface MigrationSteps {
   cleanup: MigrationStepFn;
 }
 
-const stub =
-  (name: string): MigrationStepFn =>
-  async (_trx, _db, ctx) => {
-    ctx.strapi.log.info(`${PLUGIN_ID}: migration step "${name}" is not available yet`);
-  };
-
 const readState = async (strapi: Core.Strapi): Promise<MigrationState> => {
   // A schema builder accumulates what is called on it: each question gets its own
   const hasTable = (name: string) => strapi.db.getSchemaConnection().hasTable(name);
@@ -202,8 +198,8 @@ export const registerMigrationControl = (
 ): void => {
   const run: MigrationSteps = {
     preSync: steps.preSync ?? runPreSync,
-    rollback: steps.rollback ?? stub('rollback'),
-    cleanup: steps.cleanup ?? stub('cleanup'),
+    rollback: steps.rollback ?? runRollback,
+    cleanup: steps.cleanup ?? runCleanup,
   };
 
   strapi.hook('strapi::content-types.beforeSync').register(async () => {
@@ -248,7 +244,24 @@ export const registerMigrationControl = (
         break;
       }
       case 'rollback':
-        await strapi.db.transaction(({ trx }) => run.rollback(trx, strapi.db, ctx));
+        // Taken outside the transaction, so another start that reads the record sees it
+        if (!(await claimMigration(strapi, ctx.owner))) {
+          throw new MigrationStop(
+            'Another start holds the migration right now. Wait a few minutes and deploy again.'
+          );
+        }
+
+        try {
+          await strapi.db.transaction(({ trx }) => run.rollback(trx, strapi.db, ctx));
+        } catch (error) {
+          releaseMigration(strapi, ctx.owner).catch((releaseError: unknown) => {
+            strapi.log.warn(
+              `${PLUGIN_ID}: the migration claim could not be released (${String(releaseError instanceof Error ? releaseError.name : 'error')}); it runs out by itself`
+            );
+          });
+          throw error;
+        }
+
         throw new MigrationStop(
           'The migration was rolled back. Revert the commit that switched the config to end-users, ' +
             'remove migration.rollback, and deploy again.'
