@@ -147,7 +147,7 @@ describe('register', () => {
     expect(templateRegister).toHaveBeenCalledWith(
       'end-users.reset-password',
       expect.objectContaining({
-        variables: ['user.name', 'user.email', { name: 'url', secret: true }],
+        variables: ['user.name', 'user.email', { name: 'url', secret: true, url: true }],
         defaults: expect.objectContaining({
           subject: expect.any(String),
           html: expect.any(String),

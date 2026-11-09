@@ -58,7 +58,8 @@ describe('cleanTemplateHtml', () => {
         '<a href="https://example.com/b">f</a>',
         '<a href="mailto:help@example.com">g</a>',
         '<a href="{{ url }}">h</a>',
-      ].join('\n')
+      ].join('\n'),
+      ['url']
     );
 
     expect(cleaned).not.toMatch(/javascript/i);
@@ -67,6 +68,21 @@ describe('cleanTemplateHtml', () => {
     expect(cleaned).toContain('<a href="https://example.com/b">f</a>');
     expect(cleaned).toContain('<a href="mailto:help@example.com">g</a>');
     expect(cleaned).toContain('<a href="{{ url }}">h</a>');
+  });
+
+  it('keeps a leading placeholder in href and src only for a declared link variable', () => {
+    const html = '<a href="{{ url }}">a</a><img src="{{ logo }}"><a href="{{ name }}">b</a>';
+
+    expect(cleanTemplateHtml(html, ['url', 'logo'])).toBe(
+      '<a href="{{ url }}">a</a><img src="{{ logo }}"><a href>b</a>'
+    );
+    expect(cleanTemplateHtml(html)).toBe('<a href>a</a><img src><a href>b</a>');
+  });
+
+  it('decodes an entity-encoded placeholder in an attribute', () => {
+    expect(cleanTemplateHtml('<a title="&#123;&#123; url &#125;&#125;">x</a>')).toBe(
+      '<a title="{{ url }}">x</a>'
+    );
   });
 
   it('drops style values that load a resource', () => {
@@ -100,6 +116,20 @@ describe('findMisplacedSecrets', () => {
     expect(findMisplacedSecrets('<a href="{{ url }}"><img src="{{ otp }}"></a>', secrets)).toEqual([
       'otp',
     ]);
+  });
+
+  it('finds a placeholder written with entities, unquoted or in upper case', () => {
+    expect(findMisplacedSecrets('<img src={{url}}>', secrets)).toEqual(['url']);
+    expect(findMisplacedSecrets('<IMG SRC="{{ url }}">', secrets)).toEqual(['url']);
+    expect(
+      findMisplacedSecrets(
+        '<img src="https://e.example/?t=&#123;&#123; url &#125;&#125;">',
+        secrets
+      )
+    ).toEqual(['url']);
+    expect(
+      findMisplacedSecrets('<span title="&#x7B;&#x7B; otp &#x7D;&#x7D;">x</span>', secrets)
+    ).toEqual(['otp']);
   });
 
   it('accepts a secret variable in text and in an a href', () => {

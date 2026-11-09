@@ -39,10 +39,14 @@ interface TemplateRow extends TemplateContent {
   locale: string;
 }
 
-/** A registered template: the definition with its variables as names, and which of them are secret. */
+/**
+ * A registered template: the definition with its variables as names, which of them are secret, and which may
+ * start a link (the secret ones and those declared as URLs).
+ */
 interface RegisteredTemplate extends Omit<TemplateDefinition, 'variables'> {
   variables: string[];
   secrets: string[];
+  urls: string[];
 }
 
 const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -108,7 +112,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const declared = definition.variables.map((variable) =>
-        typeof variable === 'string' ? { name: variable, secret: false } : variable
+        typeof variable === 'string' ? { name: variable } : variable
       );
 
       registry.set(key, {
@@ -116,6 +120,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
         defaults: { ...definition.defaults },
         variables: declared.map(({ name }) => name),
         secrets: declared.filter(({ secret }) => secret).map(({ name }) => name),
+        urls: declared.filter(({ secret, url }) => secret || url).map(({ name }) => name),
       });
     },
 
@@ -147,7 +152,9 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
     async update(key: string, locale: string, body: TemplateContent): Promise<TemplateDetail> {
       assertLocale(locale);
       const definition = getDefinition(key);
-      const misplaced = findMisplacedSecrets(body.html, definition.secrets);
+      // Clean first, then check and store the same string, so what is checked is exactly what is stored.
+      const html = cleanTemplateHtml(body.html, definition.urls);
+      const misplaced = findMisplacedSecrets(html, definition.secrets);
 
       if (misplaced.length > 0) {
         throw new ValidationError(
@@ -156,7 +163,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
         );
       }
 
-      const data = { subject: body.subject, html: cleanTemplateHtml(body.html), text: body.text };
+      const data = { subject: body.subject, html, text: body.text };
 
       const existing = await query().findOne({ where: { key, locale } });
 
@@ -182,7 +189,21 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
       data: Record<string, unknown>,
       opts: { locale?: string } = {}
     ): Promise<void> {
-      const template = await get(key, opts.locale);
+      const definition = getDefinition(key);
+      let template = await get(key, opts.locale);
+
+      // Rows saved before the save-time checks, or written without them, are checked again here.
+      if (!template.isDefault) {
+        const misplaced = findMisplacedSecrets(template.html, definition.secrets);
+
+        if (misplaced.length > 0) {
+          strapi.log.warn(
+            `Email template "${key}" puts ${misplaced.map((name) => `{{ ${name} }}`).join(', ')} where it ` +
+              'could leak, so the registered default is sent instead'
+          );
+          template = toDetail(key, template.locale, definition);
+        }
+      }
 
       await strapi
         .plugin('email')

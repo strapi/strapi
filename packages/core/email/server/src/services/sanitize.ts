@@ -1,12 +1,16 @@
-import {
+import xssModule from 'xss';
+import type { IWhiteList } from 'xss';
+
+// `xss` is CommonJS: take its members from the default export (typed as the filter function) so the import
+// also links under native ESM.
+const {
   FilterXSS,
   escapeAttrValue,
   friendlyAttrValue,
   parseAttr,
   parseTag,
-  safeAttrValue as defaultSafeAttrValue,
-} from 'xss';
-import type { IWhiteList } from 'xss';
+  safeAttrValue: defaultSafeAttrValue,
+} = xssModule as unknown as typeof import('xss');
 
 /** Attributes any allowed element may carry. Event handler attributes are never in the list. */
 const COMMON_ATTRIBUTES = ['style', 'class', 'dir', 'lang', 'align'];
@@ -96,7 +100,7 @@ const STRIPPED_WITH_CONTENT = [
 const URL_ATTRIBUTES = new Set(['href', 'src']);
 
 /** A `{{ variable }}` placeholder at the start of a value: the value is filled in when the email is sent. */
-const LEADING_PLACEHOLDER = /^\{\{\s*[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\s*\}\}/;
+const LEADING_PLACEHOLDER = /^\{\{\s*([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*\}\}/;
 const ALLOWED_SCHEME = /^(?:https?:|mailto:)/i;
 const FORBIDDEN_STYLE = /url\s*\(|expression|@import|javascript:|behaviou?r|binding/i;
 
@@ -105,48 +109,62 @@ const withoutInvisibleCharacters = (value: string) =>
   // eslint-disable-next-line no-control-regex
   value.replace(/[\u0000- \u007f-\u009f]/g, '');
 
-const isAllowedUrl = (value: string) => {
+const isAllowedUrl = (value: string, urlVariables: readonly string[]) => {
   const compact = withoutInvisibleCharacters(friendlyAttrValue(value));
 
-  return ALLOWED_SCHEME.test(compact) || LEADING_PLACEHOLDER.test(compact);
+  if (ALLOWED_SCHEME.test(compact)) {
+    return true;
+  }
+
+  const placeholder = LEADING_PLACEHOLDER.exec(compact);
+
+  return placeholder !== null && urlVariables.includes(placeholder[1]);
 };
 
-const filter = new FilterXSS({
-  whiteList: buildAllowList(),
-  stripIgnoreTag: true,
-  stripIgnoreTagBody: STRIPPED_WITH_CONTENT,
-  allowCommentTag: false,
-  safeAttrValue(tag, name, value, cssFilter) {
-    if (URL_ATTRIBUTES.has(name)) {
-      return isAllowedUrl(value) ? escapeAttrValue(friendlyAttrValue(value)) : '';
-    }
+const createFilter = (urlVariables: readonly string[]) =>
+  new FilterXSS({
+    whiteList: buildAllowList(),
+    stripIgnoreTag: true,
+    stripIgnoreTagBody: STRIPPED_WITH_CONTENT,
+    allowCommentTag: false,
+    safeAttrValue(tag, name, value, cssFilter) {
+      if (URL_ATTRIBUTES.has(name)) {
+        return isAllowedUrl(value, urlVariables) ? escapeAttrValue(friendlyAttrValue(value)) : '';
+      }
 
-    if (name === 'style' && FORBIDDEN_STYLE.test(friendlyAttrValue(value))) {
-      return '';
-    }
+      if (name === 'style' && FORBIDDEN_STYLE.test(friendlyAttrValue(value))) {
+        return '';
+      }
 
-    return defaultSafeAttrValue(tag, name, value, cssFilter);
-  },
-});
+      return defaultSafeAttrValue(tag, name, value, cssFilter);
+    },
+  });
 
 /**
  * Cleans an HTML email body against an allowlist: scripts, frames, objects, embeds, forms, `base`, `meta`,
  * `link` and `style` elements go, so do event handler attributes, and a URL stays only when it is `http:`,
- * `https:` or `mailto:` (or starts with a `{{ variable }}` placeholder, filled in when the email is sent).
- * Text and `{{ variable }}` placeholders are kept as they are.
+ * `https:` or `mailto:`, or starts with a placeholder for one of `urlVariables` (filled in when the email is
+ * sent). A URL that starts with any other placeholder is dropped. Text and `{{ variable }}` placeholders in text
+ * are kept as they are.
  */
-export const cleanTemplateHtml = (html: string): string => filter.process(html);
+export const cleanTemplateHtml = (html: string, urlVariables: readonly string[] = []): string =>
+  createFilter(urlVariables).process(html);
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const placeholderPattern = (name: string) =>
   new RegExp(`\\{\\{\\s*${escapeRegExp(name)}\\s*\\}\\}`, 'g');
 
+/** Counts placeholders as written and as a browser would read them once its HTML entities are decoded. */
 const countOccurrences = (source: string, secrets: readonly string[]): Map<string, number> => {
   const counts = new Map<string, number>();
+  const decoded = friendlyAttrValue(source);
 
   for (const secret of secrets) {
-    const count = source.match(placeholderPattern(secret))?.length ?? 0;
+    const count = Math.max(
+      source.match(placeholderPattern(secret))?.length ?? 0,
+      decoded.match(placeholderPattern(secret))?.length ?? 0
+    );
 
     if (count > 0) {
       counts.set(secret, count);

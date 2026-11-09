@@ -23,10 +23,12 @@ export interface TemplateDetail extends TemplateContent {
 }
 
 /**
- * A variable a template declares: its name, or the name with `secret: true` when its value gives access to
- * something, such as a reset link or a one-time code. A secret may only appear in text or in an `<a href>`.
+ * A variable a template declares: its name, or the name with flags. `secret: true` marks a value that gives
+ * access to something, such as a reset link or a one-time code: it may only appear in text or in an `<a href>`.
+ * `url: true` marks a value that is a link, so a link or image may start with it (`href="{{ url }}"`). A secret
+ * variable may also start a link.
  */
-export type TemplateVariable = string | { name: string; secret?: boolean };
+export type TemplateVariable = string | { name: string; secret?: boolean; url?: boolean };
 
 export interface TemplateDefinition {
   defaults: TemplateContent;
