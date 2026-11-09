@@ -13,11 +13,15 @@
  * `/delete-user`, and the compatibility sign-in `/local`. The compatibility registration
  * `/local/register` is checked by the sign-up it runs. A body without a string password is left
  * to Better Auth's own validation.
+ *
+ * With the compatibility mode on, passwords are hashed with bcrypt, which reads 72 bytes: a longer
+ * one is refused too.
  */
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
+import { readCompatConfig } from '../../../compat/config';
 import { PLUGIN_ID } from '../../../constants';
 import type settingsService from '../../../services/settings';
 import { PASSWORD_TOO_WEAK, passwordProblem } from '../../password-policy';
@@ -63,8 +67,10 @@ export const passwordPolicy = (strapi: Core.Strapi): BetterAuthPlugin => ({
             strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<typeof settingsService>
           ).get();
 
+          const bcrypt = readCompatConfig(strapi).usersPermissions;
+
           for (const password of given) {
-            const problem = passwordProblem(password, passwords);
+            const problem = passwordProblem(password, passwords, { bcrypt });
 
             if (problem) {
               throw new APIError('BAD_REQUEST', { code: PASSWORD_TOO_WEAK, message: problem });

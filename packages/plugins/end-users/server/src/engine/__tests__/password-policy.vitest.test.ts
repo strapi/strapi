@@ -42,6 +42,7 @@ const DEFAULTS: Policy = { minLength: 8, maxLength: 128, requireMixedClasses: fa
 
 let passwords: Policy;
 let lockoutDb: LockoutDb;
+let compatOn = false;
 
 const fakeStrapi = () =>
   ({
@@ -54,6 +55,7 @@ const fakeStrapi = () =>
           // Several requests from one address: the rate limiter is not what is tested here
           'plugin::end-users.rateLimit.enabled': false,
           'server.absoluteUrl': SERVER_URL,
+          'plugin::end-users.compat.usersPermissions': compatOn,
         })[path] ?? fallback,
     },
     // A password reset forgets the lockout counter
@@ -116,6 +118,25 @@ describe('passwordProblem', () => {
   });
 });
 
+describe('passwordProblem and bcrypt', () => {
+  const at72 = 'a'.repeat(72);
+  // 36 characters, 72 bytes; one more character makes it 74
+  const twoByte = 'é'.repeat(36);
+
+  it('refuses more than 72 bytes only when bcrypt is on', () => {
+    const wide = { ...DEFAULTS, maxLength: 256 };
+
+    expect(passwordProblem(`${at72}b`, wide, { bcrypt: true })).toBe(
+      'The password must be at most 72 bytes long.'
+    );
+    expect(passwordProblem(`${twoByte}é`, wide, { bcrypt: true })).toMatch(/72 bytes/);
+    expect(passwordProblem(at72, wide, { bcrypt: true })).toBeNull();
+    expect(passwordProblem(twoByte, wide, { bcrypt: true })).toBeNull();
+    expect(passwordProblem(`${at72}b`, wide)).toBeNull();
+    expect(passwordProblem(`${twoByte}é`, wide, { bcrypt: false })).toBeNull();
+  });
+});
+
 describe('password-policy', () => {
   let engine: AuthEngine;
   let resetTokens: string[];
@@ -136,6 +157,7 @@ describe('password-policy', () => {
       rateLimit: [],
     };
     passwords = { ...DEFAULTS };
+    compatOn = false;
     resetTokens = [];
 
     engine = createEngine(
@@ -242,6 +264,88 @@ describe('password-policy', () => {
     );
 
     expect(goodReset.status).toBe(200);
+  });
+
+  describe('the 72 bytes bcrypt reads', () => {
+    // 38 characters, 76 bytes
+    const long = 'é'.repeat(38);
+    const ok = 'An0ther!password';
+
+    beforeEach(() => {
+      passwords = { ...DEFAULTS, maxLength: 256 };
+    });
+
+    const build = () => {
+      engine = createEngine(
+        fakeStrapi(),
+        defineAuth({
+          emailAndPassword: {
+            async sendResetPassword({ token }: { token: string }) {
+              resetTokens.push(token);
+            },
+          },
+        })
+      );
+    };
+
+    const everyPath = async () => {
+      const results: Response[] = [await signUp(long, 'new@example.com')];
+      const res = await signUp(GOOD);
+      const cookie = res.headers
+        .getSetCookie()
+        .map((c) => c.split(';')[0])
+        .join('; ');
+
+      results.push(
+        await engine.handle(
+          post('/change-password', { currentPassword: GOOD, newPassword: long }, cookie)
+        )
+      );
+
+      await engine.sendPasswordReset(EMAIL, '/reset');
+      results.push(
+        await engine.handle(post('/reset-password', { token: resetTokens[0], newPassword: long }))
+      );
+
+      return results;
+    };
+
+    it('is refused at sign-up, change and reset with compat on', async () => {
+      compatOn = true;
+      build();
+
+      for (const res of await everyPath()) {
+        expect(res.status).toBe(400);
+        expect(await res.json()).toMatchObject({
+          code: 'PASSWORD_TOO_WEAK',
+          message: 'The password must be at most 72 bytes long.',
+        });
+      }
+
+      expect((await signUp(ok, 'fine@example.com')).status).toBe(200);
+    });
+
+    it('is accepted with compat off', async () => {
+      for (const res of await everyPath()) {
+        expect(res.status).toBe(200);
+      }
+    });
+
+    it('is refused when an administrator sets it, with compat on only', async () => {
+      await signUp(GOOD);
+
+      const userId = String(store.db.user[0].id);
+
+      await expect(engine.setPassword(userId, long)).resolves.toBeUndefined();
+
+      compatOn = true;
+      build();
+
+      await expect(engine.setPassword(userId, long)).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: 'The password must be at most 72 bytes long.',
+      });
+    });
   });
 
   it('refuses a weak password set in the Content Manager', async () => {

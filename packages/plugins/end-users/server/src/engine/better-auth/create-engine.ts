@@ -1226,7 +1226,9 @@ export const createEngine = (
       const { passwords } = await (
         strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<typeof settingsService>
       ).get();
-      const problem = passwordProblem(plain, passwords);
+      const problem = passwordProblem(plain, passwords, {
+        bcrypt: readCompatConfig(strapi).usersPermissions,
+      });
 
       if (problem) {
         throw new errors.ValidationError(problem);
