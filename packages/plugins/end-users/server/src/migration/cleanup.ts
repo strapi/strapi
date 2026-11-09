@@ -5,7 +5,7 @@ import { readRecord, readReport, updateRecord } from './record';
 import { columnsOf, dropColumn, dropTable, hasTable } from './schema-ops';
 import type { DbClient } from './snapshot';
 
-const STAGED_PERMISSIONS = ['up_permissions', 'up_permissions_role_lnk'];
+const STAGED_PERMISSIONS: ReadonlySet<string> = new Set(['up_permissions', 'up_permissions_role_lnk']);
 
 /**
  * The first start with the compatibility mode off after a completed migration: what the way back
@@ -36,7 +36,7 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
 
     if (
       copied ||
-      STAGED_PERMISSIONS.includes(original) ||
+      STAGED_PERMISSIONS.has(original) ||
       resolved.has(`staged-undeclared:${original}`)
     ) {
       dropping.push(staged);

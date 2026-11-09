@@ -19,7 +19,7 @@ const UP_USER = `${UP}.user`;
 const UP_USERS = 'up_users';
 const ADMIN_PERMISSION = 'admin::permission';
 const HISTORY_TABLE = 'strapi_history_versions';
-const PUBLIC_ROLES = ['public', 'authenticated'];
+const PUBLIC_ROLES: ReadonlySet<string> = new Set(['public', 'authenticated']);
 const PAGE = 1000;
 
 type Row = Record<string, unknown>;
@@ -473,7 +473,7 @@ const restoreRoles = async ({ db, trx, lost }: Run, roleTable: string, linkName:
   const roles = (await tableOf(trx, db, roleTable)
     .orderBy('id')
     .select('id', 'name', 'type')) as Array<{ id: number; name: string; type: string | null }>;
-  const isCustom = (type: string | null) => !type || !PUBLIC_ROLES.includes(type);
+  const isCustom = (type: string | null) => !type || !PUBLIC_ROLES.has(type);
   const taken = new Set(roles.filter((role) => !isCustom(role.type)).map((role) => role.type!));
 
   for (const role of roles.filter((entry) => isCustom(entry.type))) {
