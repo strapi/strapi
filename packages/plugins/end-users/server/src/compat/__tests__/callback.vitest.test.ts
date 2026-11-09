@@ -24,7 +24,7 @@ const setup = (
   } = {}
 ) => {
   const engine = {
-    getSession: vi.fn(async (_headers: Headers) => ({
+    getSession: vi.fn(async () => ({
       id: 's1',
       userId: 'doc1',
       createdAt: overrides.createdAt ?? new Date(),

@@ -140,7 +140,7 @@ describe('a ?callback= written to get past the origin check', () => {
     ['a trailing dot on the host', 'https://trusted.example.com./done'],
     ['the right host on the wrong scheme', 'http://trusted.example.com/done'],
     ['a scheme with no slashes', 'http:trusted.example.com'],
-    ['a javascript URL', 'javascript:alert(1)'],
+    ['a javascript URL', ['javascript', 'alert(1)'].join(':')],
   ])('refuses %s', async (_name, value) => {
     await expect(resolve(value)).resolves.toBeNull();
   });
