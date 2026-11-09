@@ -181,7 +181,11 @@ export const createReleaseRun = ({
         releaseId,
         { uid: action.contentType, ...params, event: 'entry.publish' },
         async () => {
-          await strapi.documents(action.contentType).publish(params);
+          // Publishes nothing, without an error, when the entry has no draft (deleted since the check)
+          const { entries } = await strapi.documents(action.contentType).publish(params);
+          if (entries.length === 0) {
+            throw new errors.ValidationError(ENTRY_NOT_FOUND_MESSAGE);
+          }
         }
       );
     } else {

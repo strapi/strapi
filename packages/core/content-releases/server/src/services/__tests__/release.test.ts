@@ -59,9 +59,10 @@ const getUpdatedActions = (updateMany: jest.Mock) =>
 const mockSchedulingSet = jest.fn();
 const mockSchedulingCancel = jest.fn();
 const mockExecute = jest.fn();
-const mockPublish = jest.fn();
-// Unpublishes the entry's published version, as the document service reports it
-const mockUnpublish = jest.fn(async () => ({ entries: [{ id: 1 }] }));
+// Publishes and unpublishes the entry, as the document service reports it
+const PUBLISHED = { entries: [{ id: 1 }] };
+const mockPublish = jest.fn(async () => PUBLISHED);
+const mockUnpublish = jest.fn(async () => PUBLISHED);
 const mockRequestStorage = new AsyncLocalStorage<ParameterizedContext>();
 
 const baseStrapiMock = {
@@ -610,10 +611,12 @@ describe('Release service', () => {
           callOrder.push(`call:${params.documentId}`);
           await firstPublishGate;
           callOrder.push(`resolve:${params.documentId}`);
+          return PUBLISHED;
         })
         .mockImplementationOnce(async (params: { documentId: string }) => {
           callOrder.push(`call:${params.documentId}`);
           callOrder.push(`resolve:${params.documentId}`);
+          return PUBLISHED;
         });
 
       const pageModel = {
@@ -773,6 +776,7 @@ describe('Release service', () => {
               }
             : state
         );
+        return PUBLISHED;
       });
       mockUnpublish.mockImplementationOnce(async () => {
         expect(mockRequestStorage.getStore()?.state).toEqual(
@@ -953,6 +957,7 @@ describe('Release service', () => {
         if (documentId === 'throws') {
           throw new Error('Publish failed');
         }
+        return PUBLISHED;
       });
       const strapiMock = {
         ...baseStrapiMock,
@@ -1047,7 +1052,7 @@ describe('Release service', () => {
               : PUBLISHABLE;
           })
         );
-        const publish = jest.fn();
+        const publish = jest.fn(async () => PUBLISHED);
         const actionUpdate = jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data }));
         const actionUpdateMany = jest.fn();
         const actionQuery = {
@@ -1270,7 +1275,7 @@ describe('Release service', () => {
       mockExecute.mockReturnValueOnce(stored);
       const publish = jest
         .fn()
-        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(PUBLISHED)
         .mockRejectedValueOnce(new errors.ValidationError('Publish failed'));
       // The row as the run wrote it
       const releaseUpdate = jest.fn(async ({ data }) => ({ ...stored, ...data }));
@@ -1363,9 +1368,9 @@ describe('Release service', () => {
         const conflict = Object.assign(new Error('Conflict with another transaction'), props);
         const publish = jest
           .fn()
-          .mockResolvedValueOnce(undefined)
+          .mockResolvedValueOnce(PUBLISHED)
           .mockRejectedValueOnce(conflict)
-          .mockResolvedValue(undefined);
+          .mockResolvedValue(PUBLISHED);
         const update = jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data }));
         const updateMany = jest.fn();
         const strapiMock = {
@@ -1411,8 +1416,8 @@ describe('Release service', () => {
       const run = async ({
         releaseCondition,
         actions,
-        publish = jest.fn(),
-        unpublish = jest.fn(async () => ({ entries: [{ id: 1 }] })),
+        publish = jest.fn(async () => PUBLISHED),
+        unpublish = jest.fn(async () => PUBLISHED),
         findOne = jest.fn(),
         getAssignedWorkflow = jest.fn().mockResolvedValue(null),
       }: {
@@ -1708,7 +1713,7 @@ describe('Release service', () => {
         updateMany: jest.fn(),
         update: jest.fn(),
       };
-      const publish = jest.fn();
+      const publish = jest.fn(async () => PUBLISHED);
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
