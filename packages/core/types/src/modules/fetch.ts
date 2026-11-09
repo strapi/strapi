@@ -1,4 +1,4 @@
-import type { Dispatcher } from 'undici';
+import type { Dispatcher } from 'undici-types';
 
 /**
  * strapi.fetch interface is currently an identical wrapper for Node fetch()

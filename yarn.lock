@@ -10785,9 +10785,11 @@ __metadata:
     "@strapi/utils": "npm:5.62.0"
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
-    "@types/koa": "npm:2.15.2"
+    "@types/koa": "npm:^2.13.5"
     "@types/koa__router": "npm:12.0.0"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:22.20.0"
+    "@types/semver": "npm:7.5.0"
     commander: "npm:8.3.0"
     croner: "npm:10.0.1"
     eslint-config-custom: "npm:5.62.0"
@@ -10795,12 +10797,13 @@ __metadata:
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
+    semver: "npm:7.7.4"
     tsconfig: "npm:5.62.0"
     typedoc: "npm:0.28.19"
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
-    undici: "npm:8.12.4"
+    undici-types: "npm:8.12.4"
     vitest: "catalog:"
     vitest-config: "npm:5.62.0"
     zod: "npm:4.4.3"
@@ -30574,6 +30577,13 @@ __metadata:
   version: 0.1.2
   resolution: "unc-path-regex@npm:0.1.2"
   checksum: 10c0/bf9c781c4e2f38e6613ea17a51072e4b416840fbe6eeb244597ce9b028fac2fb6cfd3dde1f14111b02c245e665dc461aab8168ecc30b14364d02caa37f812996
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:8.12.4":
+  version: 8.12.4
+  resolution: "undici-types@npm:8.12.4"
+  checksum: 10c0/cffd8508446f029c04caf0119b57c8d80545a8a64f0b8b2b548ad85e6ea0d1aa07ea0ac7325992cd40be50c72b9761b03297fd9d91501ca40e14b38d5bbc78ee
   languageName: node
   linkType: hard
 
