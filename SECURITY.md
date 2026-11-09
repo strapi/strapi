@@ -31,7 +31,7 @@ This security policy applies to the packages published from the [`strapi/strapi`
 
 ### Testing Requirements
 
-Reporters are expected to validate findings against a **properly configured production application** before submitting a report. Strapi ships a number of defaults that intentionally favor developer ergonomics during local development, and certain "vulnerabilities" only manifest when the application is run with development-mode defaults. Hardening an application for production deployment is the responsibility of the developer / operator and is documented in the Strapi deployment guides.
+Reporters are expected to validate findings against a **properly configured production application** before submitting a report. Strapi ships a number of defaults that intentionally favor developer ergonomics during local development, and certain "vulnerabilities" only manifest when the application is run with development-mode defaults. Hardening an application for production deployment is the responsibility of the developer / operator and is documented in the Strapi deployment guides. A production application here means one built and started with `NODE_ENV=production`, as the [deployment guide](https://docs.strapi.io/cms/deployment) and the production setup in the [Docker guide](https://docs.strapi.io/cms/installation/docker) both do. `strapi start` does not set `NODE_ENV` itself. When it is unset, Strapi runs with `NODE_ENV=development` and any behavior tied to production mode stays off.
 
 Examples of expected development-mode behavior that should **NOT** be reported as vulnerabilities:
 
@@ -39,7 +39,7 @@ Examples of expected development-mode behavior that should **NOT** be reported a
 - MIME type and file extension restrictions for uploads not being enforced by default
 - Verbose error responses, stack traces, or debug output that only appear in development mode
 - The default admin URL, default API token configuration, and similar deploy-time choices that are documented as requiring operator configuration
-- Any behavior that reproduces under `strapi develop` but does not reproduce under `strapi start` with a hardened production configuration
+- Any behavior that reproduces under `strapi develop`, or under `strapi start` without `NODE_ENV=production`, but does not reproduce when the application runs with `NODE_ENV=production` and a hardened production configuration
 
 If a report only reproduces in development mode or with default development configuration, it will be closed as out of scope.
 
@@ -170,6 +170,13 @@ Pursuant to the [CNA Operational Rules](https://www.cve.org/resourcessupport/all
   > 4.1.3 Well-documented or commonly understood non-default configuration or runtime changes made by an authorized user SHOULD NOT be determined to be Vulnerabilities.
 - Conditions or behaviors that do not lead to a security impact (CNA Operational Rule 4.1.2)
   > 4.1.2 Conditions or behaviors that do not lead to a security impact SHOULD NOT be determined to be Vulnerabilities. Examples of security impacts include an increase in access for an attacker, a decrease in availability of a target, or another violation of security policy.
+- Requests a webhook makes to a destination that an authorized administrator configured, including localhost, private or internal network addresses, and any address the configured destination redirects to (CNA Operational Rules 4.1.3 and 4.1.2, quoted above)
+
+  Creating or editing a webhook requires the `admin::webhooks.create` or `admin::webhooks.update` permission, and the purpose of those permissions is to have the Strapi server send HTTP requests to URLs the administrator chooses. Pointing a webhook at localhost or at a service on the same internal network is a supported setup, for example when the frontend and Strapi run on the same server or in the same cluster. The security boundary is who holds the webhook permissions and what the server is allowed to reach on its network. Strapi also checks some webhook URLs when they are saved in production, to catch common mistakes. We don't rely on that check as a security control, so getting around it, directly or through a redirect, is not a vulnerability.
+
+  This covers reports where a webhook request reaches an address the server can reach from its own network, whether that address was entered directly, reached by following a redirect returned by the configured destination, or reached because the configured hostname resolved to a different address when the webhook was sent than when it was saved. It also covers the headers set on that webhook and its event payload being sent along to that address, and what the request shows the administrator who triggers it (which requires `admin::webhooks.update`), such as whether a port is open, the response status code, or the body of an error response. It applies whether or not the application runs with `NODE_ENV=production`, and whether or not the save-time check is enabled. It replaces the position Strapi took in 2024 when it published [GHSA-v8wj-f5c7-pvxf](https://github.com/strapi/strapi/security/advisories/GHSA-v8wj-f5c7-pvxf) (CVE-2024-52588) for a webhook pointed at localhost.
+
+  It does not cover reports showing that someone without webhook permissions can create, edit or trigger a webhook, or that the server sends a request to a destination taken from content, user input or anywhere other than a webhook an administrator configured. If you need to limit what webhooks can reach, give the webhook permissions only to administrators you trust with outbound requests from the server, and apply egress controls on the network it runs in.
 
 In addition to the CNA Operational Rules, the following classes of report are consistently low-signal and will typically be closed without remediation unless the reporter can demonstrate concrete, non-theoretical impact:
 
