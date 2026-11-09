@@ -242,11 +242,7 @@ const validateCompat = (compat: Plain) => {
 
   const { sameSite } = cookie;
 
-  if (
-    sameSite !== undefined &&
-    sameSite !== null &&
-    !SAME_SITE_VALUES.has(sameSite as string)
-  ) {
+  if (sameSite !== undefined && sameSite !== null && !SAME_SITE_VALUES.has(sameSite as string)) {
     invalid('compat.refresh.cookie.sameSite', '"lax", "strict" or "none"', sameSite);
   }
 
