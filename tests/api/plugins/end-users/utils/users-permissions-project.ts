@@ -249,20 +249,24 @@ export const inspectDatabase = async <T>(fn: (db: Knex) => Promise<T>): Promise<
   }
 };
 
+const TABLE_QUERIES: Record<string, string> = {
+  pg: 'select tablename as name from pg_tables where schemaname = current_schema()',
+  mysql2:
+    'select table_name as name from information_schema.tables where table_schema = database()',
+  'better-sqlite3': "select name from sqlite_master where type = 'table'",
+};
+
 const tableNames = async (db: Knex): Promise<string[]> => {
   const client = String(db.client.config.client);
-  const result = await db.raw(
-    // The alias is the same on each, which Postgres and MySQL otherwise spell their own way
-    client === 'pg'
-      ? 'select tablename as name from pg_tables where schemaname = current_schema()'
-      : client === 'mysql2'
-        ? 'select table_name as name from information_schema.tables where table_schema = database()'
-        : "select name from sqlite_master where type = 'table'"
-  );
-  const rows: Array<{ name: string }> =
-    client === 'pg' ? result.rows : client === 'mysql2' ? result[0] : result;
+  const result = await db.raw(TABLE_QUERIES[client]);
+  // The alias is the same on each; the result's shape is not
+  const rowsOf: Record<string, (raw: any) => Array<{ name: string }>> = {
+    pg: (raw) => raw.rows,
+    mysql2: (raw) => raw[0],
+    'better-sqlite3': (raw) => raw,
+  };
 
-  return rows.map((row) => row.name);
+  return rowsOf[client](result).map((row) => row.name);
 };
 
 const STORE_KEYS = ['plugin_end-users_migration', 'plugin_end-users_migration-report'];
@@ -426,6 +430,8 @@ interface UserSpec {
   role: 'authenticated' | 'editors' | 'editorsLower';
   password: boolean;
 }
+
+const LATE_USERS = new Set<FixtureUser>(['aliceDuplicate', 'erinUpper']);
 
 const USER_SPECS: UserSpec[] = [
   {
@@ -725,7 +731,7 @@ export const seedUsersPermissionsProject = async (
     const users = {} as UsersPermissionsProject['users'];
     const userService = strapi.plugin('users-permissions').service('user');
 
-    for (const spec of USER_SPECS) {
+    for (const spec of USER_SPECS.filter(({ key }) => !LATE_USERS.has(key))) {
       const extra =
         spec.key === 'alice'
           ? {
@@ -758,6 +764,42 @@ export const seedUsersPermissionsProject = async (
       };
     }
 
+    // The two whose spelling differs only in case go in last, straight into the table: the plugin's
+    // own checks would refuse them, and they are what the de-duplication has to handle
+    const bcrypt = await import('bcryptjs');
+    const mysql = strapi.db.dialect.client === 'mysql';
+
+    for (const spec of USER_SPECS.filter(({ key }) => LATE_USERS.has(key))) {
+      // Strapi puts a unique index on `username` (`unique: true`), not on `email`, and MySQL's
+      // collation is case-insensitive: `ERIN` next to `erin` cannot be inserted there
+      if (mysql && spec.key === 'erinUpper') {
+        continue;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      const created = await query(UP_USER).create({
+        data: {
+          documentId: randomBytes(12).toString('hex'),
+          username: spec.username,
+          email: spec.email,
+          provider: spec.provider,
+          password: bcrypt.hashSync(TEST_PASSWORD, 10),
+          confirmed: spec.confirmed,
+          blocked: spec.blocked,
+          role: roles[spec.role].id,
+          publishedAt: new Date(),
+        },
+      });
+
+      users[spec.key] = {
+        id: created.id,
+        documentId: created.documentId,
+        email: spec.email,
+        username: spec.username,
+        password: TEST_PASSWORD,
+      };
+    }
+
     // Too short for the plugin's own validation, which is how a project got one in the first place
     await query(UP_USER).update({ where: { id: users.bob.id }, data: { username: 'jo' } });
     users.bob.username = 'jo';
@@ -771,21 +813,15 @@ export const seedUsersPermissionsProject = async (
       data: { title: 'Welcome', author: users.alice.documentId },
     });
 
-    // The avatar through the Document Service is checked, and put in by hand when it did not take
-    const morphs = strapi.db.getConnection('files_related_mph');
-    const linked = await morphs
+    // The Document Service has to have linked the avatar to alice
+    const linked = await strapi.db
+      .getConnection('files_related_mph')
       .where({ related_id: users.alice.id, related_type: UP_USER, field: 'avatar' })
       .count({ count: '*' })
       .first();
 
     if (Number(linked?.count) === 0) {
-      await morphs.insert({
-        file_id: file.id,
-        related_id: users.alice.id,
-        related_type: UP_USER,
-        field: 'avatar',
-        order: 1,
-      });
+      throw new Error("seed: the Document Service did not link the avatar file to alice's user");
     }
 
     const adminEditor = await seedAdmin(strapi);
