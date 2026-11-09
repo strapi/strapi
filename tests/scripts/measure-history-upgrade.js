@@ -1,18 +1,22 @@
 'use strict';
 
 /**
- * Measures the `content-manager::history-version-source-and-author` migration on a throwaway
- * database, with the history table of the previous Strapi version.
+ * Measures the history upgrade on a throwaway database, from the history table of the previous
+ * Strapi version: the schema sync that adds the source and author columns, then the hook that
+ * clears the author id of the versions when an admin is deleted.
  *
  * Run it from the repo root, after `yarn test:generate-app` and a build:
- *   node tests/scripts/measure-history-migration.js --db=<sqlite|postgres|mysql> --level=<level>
+ *   node tests/scripts/measure-history-upgrade.js --db=<sqlite|postgres|mysql> --level=<level>
  *
  * Postgres and MySQL: set DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME and DATABASE_PASSWORD
  * to a throwaway server. The user needs the right to create databases. The script drops and
- * creates the `ee273_measure` database on it. SQLite uses `test-apps/api/.tmp/ee273-measure.db`.
+ * creates the `ee273_measure` database on it.
+ * SQLite: the script deletes and creates the file of `--sqlite-file` (default: in the OS temp
+ * folder). Keep it outside `test-apps/`, which `yarn test:api` deletes.
  */
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { performance } = require('perf_hooks');
 const dotenv = require('dotenv');
@@ -23,12 +27,11 @@ const { createStrapi } = require('@strapi/strapi');
 
 const APP_DIR = path.resolve(__dirname, '../../test-apps/api');
 const DATABASE_NAME = 'ee273_measure';
-const SQLITE_FILENAME = '.tmp/ee273-measure.db';
+const DEFAULT_SQLITE_FILE = path.join(os.tmpdir(), 'ee273-measure.db');
 
 const HISTORY_VERSION_UID = 'plugin::content-manager.history-version';
 const HISTORY_TABLE = 'strapi_history_versions';
-const MIGRATION_NAME = 'content-manager::history-version-source-and-author';
-const NEW_ATTRIBUTES = ['source', 'authorType', 'authorName', 'authorModel', 'authorId'];
+const NEW_ATTRIBUTES = ['source', 'authorType', 'authorModel', 'authorId'];
 const COPIED_COLUMNS = [
   'content_type',
   'related_document_id',
@@ -41,7 +44,7 @@ const COPIED_COLUMNS = [
 ];
 
 const LEVELS = {
-  tiny: { versions: 10, documents: 5, admins: 1 },
+  tiny: { versions: 10, documents: 5, admins: 2 },
   realistic: { versions: 20_000, documents: 1_000, admins: 5 },
   bigger: { versions: 500_000, documents: 25_000, admins: 50 },
   extreme: { versions: 5_000_000, documents: 250_000, admins: 500 },
@@ -49,6 +52,8 @@ const LEVELS = {
 
 const SEED_SIZE = 1_000;
 const COPY_CHUNK_SIZE = 10_000;
+const SAMPLE_SIZE = 1_000;
+const TOKENS_PER_ADMIN = 10;
 // One version in 10 belongs to a deleted admin: its `created_by_id` is null.
 const DELETED_ADMIN_RATIO = 10;
 
@@ -65,7 +70,11 @@ const parseArgs = () => {
     throw new Error(`Use --level=${Object.keys(LEVELS).join('|')}`);
   }
 
-  return { client: args.db, level: args.level };
+  return {
+    client: args.db,
+    level: args.level,
+    sqliteFile: path.resolve(args['sqlite-file'] ?? DEFAULT_SQLITE_FILE),
+  };
 };
 
 const createServerConnection = (client) => {
@@ -83,9 +92,11 @@ const createServerConnection = (client) => {
   return knex({ client: 'mysql2', connection });
 };
 
-const resetDatabase = async (client) => {
+const resetDatabase = async (client, sqliteFile) => {
   if (client === 'sqlite') {
-    fs.rmSync(path.join(APP_DIR, SQLITE_FILENAME), { force: true });
+    for (const suffix of ['', '-wal', '-shm']) {
+      fs.rmSync(`${sqliteFile}${suffix}`, { force: true });
+    }
     return;
   }
 
@@ -104,13 +115,14 @@ const resetDatabase = async (client) => {
   }
 };
 
-const setDatabaseEnv = (client) => {
+const setDatabaseEnv = (client, sqliteFile) => {
   dotenv.config({ path: path.join(APP_DIR, '.env') });
 
   process.env.DATABASE_CLIENT = client;
 
   if (client === 'sqlite') {
-    process.env.DATABASE_FILENAME = SQLITE_FILENAME;
+    // The test app joins the file name to its own folder
+    process.env.DATABASE_FILENAME = path.relative(APP_DIR, sqliteFile);
   } else {
     process.env.DATABASE_NAME = DATABASE_NAME;
   }
@@ -121,15 +133,6 @@ const toPreviousModel = (model) => ({
   attributes: Object.fromEntries(
     Object.entries(model.attributes).filter(([name]) => !NEW_ATTRIBUTES.includes(name))
   ),
-  indexes: [],
-});
-
-const toNotNullableSourceModel = (model) => ({
-  ...model,
-  attributes: {
-    ...model.attributes,
-    source: { ...model.attributes.source, column: { notNullable: true } },
-  },
 });
 
 const timeMethod = (target, methodName, timings, label) => {
@@ -146,8 +149,15 @@ const timeMethod = (target, methodName, timings, label) => {
   };
 };
 
+const time = async (callback) => {
+  const start = performance.now();
+  const result = await callback();
+
+  return { ms: Math.round(performance.now() - start), result };
+};
+
 /**
- * Loads Strapi like a server start: internal migrations, then schema sync.
+ * Loads Strapi like a server start, with the schema sync.
  * `mapHistoryModel` changes the history model before Strapi reads it.
  */
 const loadStrapi = async ({ mapHistoryModel = (model) => model, run }) => {
@@ -159,7 +169,6 @@ const loadStrapi = async ({ mapHistoryModel = (model) => model, run }) => {
   models.add = (model) =>
     addModel(model.uid === HISTORY_VERSION_UID ? mapHistoryModel(model) : model);
 
-  timeMethod(strapi.db.migrations, 'up', timings, 'migrations');
   timeMethod(strapi.db.schema, 'syncSchema', timings, 'schemaSync');
 
   try {
@@ -250,23 +259,17 @@ const createArticleData = (index, document) => ({
 
 const createAdmins = async (strapi, count) => {
   const now = new Date();
-  const admins = Array.from({ length: count }, (_, index) => {
-    // Cover each rule of the display name: username, then first and last name, then email.
-    const nameRule = index % 3;
-
-    return {
-      document_id: documentId(1_000_000 + index),
-      firstname: nameRule === 0 ? null : `First${index}`,
-      lastname: nameRule === 2 ? `Last${index}` : null,
-      username: nameRule === 1 ? `admin${index}` : null,
-      email: `admin${index}@ee273.test`,
-      is_active: true,
-      blocked: false,
-      created_at: now,
-      updated_at: now,
-      published_at: now,
-    };
-  });
+  const admins = Array.from({ length: count }, (_, index) => ({
+    document_id: documentId(1_000_000 + index),
+    firstname: `First${index}`,
+    lastname: `Last${index}`,
+    email: `admin${index}@ee273.test`,
+    is_active: true,
+    blocked: false,
+    created_at: now,
+    updated_at: now,
+    published_at: now,
+  }));
 
   await strapi.db.connection.batchInsert('admin_users', admins, 100);
 
@@ -320,17 +323,32 @@ const fillVersions = async (strapi, { versions, documents }, adminIds) => {
   }
 };
 
+const getTableSize = async (strapi, client, sqliteFile) => {
+  const connection = strapi.db.connection;
+
+  switch (client) {
+    case 'postgres': {
+      const { rows } = await connection.raw('SELECT pg_total_relation_size(?::regclass) AS size', [
+        HISTORY_TABLE,
+      ]);
+      return Number(rows[0].size);
+    }
+    case 'mysql': {
+      await connection.raw('ANALYZE TABLE ??', [HISTORY_TABLE]);
+      const [rows] = await connection.raw(
+        'SELECT data_length + index_length AS size FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?',
+        [HISTORY_TABLE]
+      );
+      return Number(rows[0].size);
+    }
+    default:
+      return fs.statSync(sqliteFile).size;
+  }
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Checks
  * -----------------------------------------------------------------------------------------------*/
-
-const countByAuthor = async (strapi) =>
-  strapi.db
-    .connection(HISTORY_TABLE)
-    .select('created_by_id', 'source', 'author_type', 'author_name', 'author_model', 'author_id')
-    .count({ count: '*' })
-    .groupBy('created_by_id', 'source', 'author_type', 'author_name', 'author_model', 'author_id')
-    .orderBy(['created_by_id', 'author_id']);
 
 const countByCreatedBy = async (strapi) =>
   strapi.db
@@ -340,140 +358,182 @@ const countByCreatedBy = async (strapi) =>
     .groupBy('created_by_id')
     .orderBy('created_by_id');
 
-const getAdminName = ({ username, firstname, lastname, email }) => {
-  if (username) return username;
-  if (firstname) return `${firstname} ${lastname ?? ''}`.trim();
-  return email;
-};
+const countRows = async (query) => Number((await query.count({ count: '*' }).first()).count);
 
-const checkMigratedRows = async (strapi, createdByBefore) => {
-  const admins = await strapi.db
-    .connection('admin_users')
-    .select('id', 'username', 'firstname', 'lastname', 'email');
-  const adminsById = new Map(admins.map((admin) => [admin.id, admin]));
-  const groups = await countByAuthor(strapi);
+const checkUpgradedRows = async (strapi, createdByBefore) => {
+  const connection = strapi.db.connection;
   const errors = [];
 
-  for (const group of groups) {
-    if (group.source !== 'admin-panel') {
-      errors.push(`source is ${group.source} for ${group.count} rows`);
-    }
+  const rowsWithOrigin = await countRows(
+    connection(HISTORY_TABLE)
+      .whereNotNull('source')
+      .orWhereNotNull('author_type')
+      .orWhereNotNull('author_model')
+      .orWhereNotNull('author_id')
+  );
 
-    if (group.created_by_id === null) {
-      if (group.author_type !== null) {
-        errors.push(`a deleted admin has an author on ${group.count} rows`);
-      }
-
-      continue;
-    }
-
-    const admin = adminsById.get(group.created_by_id);
-    const isExpectedAuthor =
-      group.author_type === 'person' &&
-      group.author_name === getAdminName(admin) &&
-      group.author_model === 'admin::user' &&
-      group.author_id === String(admin.id);
-
-    if (!isExpectedAuthor) {
-      errors.push(`admin ${group.created_by_id} has a wrong author on ${group.count} rows`);
-    }
+  if (rowsWithOrigin > 0) {
+    errors.push(`${rowsWithOrigin} rows have a source or an author`);
   }
 
-  const createdByAfter = await countByCreatedBy(strapi);
-
-  if (JSON.stringify(createdByAfter) !== JSON.stringify(createdByBefore)) {
+  if (JSON.stringify(await countByCreatedBy(strapi)) !== JSON.stringify(createdByBefore)) {
     errors.push('created_by_id changed');
   }
 
-  return { errors, groups };
+  // The legacy adapter reads `source` and `createdBy` through the query engine
+  const sample = await strapi.db.query(HISTORY_VERSION_UID).findMany({
+    select: ['id', 'source'],
+    populate: { createdBy: { select: ['id'] } },
+    orderBy: 'id',
+    limit: SAMPLE_SIZE,
+  });
+  const storedRows = await connection(HISTORY_TABLE)
+    .select('id', 'created_by_id')
+    .orderBy('id')
+    .limit(SAMPLE_SIZE);
+  const createdByIds = new Map(storedRows.map((row) => [row.id, row.created_by_id]));
+
+  for (const version of sample) {
+    if (
+      version.source !== null ||
+      (version.createdBy?.id ?? null) !== createdByIds.get(version.id)
+    ) {
+      errors.push(`version ${version.id} reads a wrong source or createdBy`);
+    }
+  }
+
+  return errors;
 };
 
-const getHistoryTable = async (strapi) => {
+const getHistoryTableIndexes = async (strapi) => {
   const { tables } = await strapi.db.dialect.schemaInspector.getSchema();
 
-  return tables.find((table) => table.name === HISTORY_TABLE);
+  return tables
+    .find((table) => table.name === HISTORY_TABLE)
+    .indexes.map((index) => `${index.name} (${index.columns.join(', ')})`);
 };
 
-const getHistoryTableIndexes = async (strapi) =>
-  (await getHistoryTable(strapi)).indexes.map(
-    (index) => `${index.name} (${index.columns.join(', ')})`
+/* -------------------------------------------------------------------------------------------------
+ * Delete hook
+ * -----------------------------------------------------------------------------------------------*/
+
+const countAuthorRows = (strapi, model, id) =>
+  countRows(strapi.db.connection(HISTORY_TABLE).where({ author_model: model, author_id: id }));
+
+/**
+ * Deletes the admin through the query engine, which runs the database lifecycles
+ */
+const measureAdminDelete = async (strapi, id, errors) => {
+  const rows = await countAuthorRows(strapi, 'admin::user', String(id));
+  const { ms } = await time(() => strapi.db.query('admin::user').delete({ where: { id } }));
+
+  // The hook fails open: check that it cleared the author id
+  const rowsLeft = await countAuthorRows(strapi, 'admin::user', String(id));
+  if (rowsLeft > 0) {
+    errors.push(`the delete of admin ${id} left its id on ${rowsLeft} rows`);
+  }
+
+  return { rows, ms };
+};
+
+const measureDeleteHook = async (strapi) => {
+  const connection = strapi.db.connection;
+  const errors = [];
+
+  const [typicalAdminId] = await connection('admin_users').orderBy('id').pluck('id');
+  const heavyAutomationAdmin = await strapi.db.query('admin::user').create({
+    data: { firstname: 'Heavy', lastname: 'Automation', email: 'heavy@ee273.test' },
+  });
+
+  // Give the versions an author like new versions have: the rows of the first admin stay theirs,
+  // all the other rows of a live admin go to the heavy automation admin
+  const setup = await time(() =>
+    connection(HISTORY_TABLE)
+      .whereNotNull('created_by_id')
+      .update({
+        source: 'admin-panel',
+        author_type: 'person',
+        author_model: 'admin::user',
+        author_id: connection.raw('CASE WHEN ?? = ? THEN ? ELSE ? END', [
+          'created_by_id',
+          typicalAdminId,
+          String(typicalAdminId),
+          String(heavyAutomationAdmin.id),
+        ]),
+      })
   );
 
-const isSourceNullable = async (strapi) => {
-  const { columns } = await getHistoryTable(strapi);
+  const typicalAdmin = await measureAdminDelete(strapi, typicalAdminId, errors);
 
-  return !columns.find((column) => column.name === 'source').notNullable;
+  // Run the update of the token hook once for each token of an admin
+  const tokens = await time(async () => {
+    for (let id = 1; id <= TOKENS_PER_ADMIN; id += 1) {
+      await strapi.db.query(HISTORY_VERSION_UID).updateMany({
+        where: { authorModel: 'admin::api-token', authorId: String(id) },
+        data: { authorId: null },
+      });
+    }
+  });
+
+  const heavyAutomation = await measureAdminDelete(strapi, heavyAutomationAdmin.id, errors);
+
+  return {
+    authorSetupMs: setup.ms,
+    typicalAdminRows: typicalAdmin.rows,
+    typicalAdminDeleteMs: typicalAdmin.ms,
+    tokensDeleteMs: tokens.ms,
+    heavyAutomationRows: heavyAutomation.rows,
+    heavyAutomationDeleteMs: heavyAutomation.ms,
+    errors,
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------
  * Main
  * -----------------------------------------------------------------------------------------------*/
 
-const forgetMigration = (strapi) =>
-  strapi.db.connection('strapi_migrations_internal').where('name', MIGRATION_NAME).delete();
-
 const main = async () => {
-  const { client, level } = parseArgs();
+  const { client, level, sqliteFile } = parseArgs();
   const report = { client, level, ...LEVELS[level] };
 
-  setDatabaseEnv(client);
-  await resetDatabase(client);
+  setDatabaseEnv(client, sqliteFile);
+  await resetDatabase(client, sqliteFile);
 
   // 1. Create the schema of the previous Strapi version, then fill it.
-  const start = performance.now();
-  const { result: createdByBefore } = await loadStrapi({
-    mapHistoryModel: toPreviousModel,
-    async run(strapi) {
-      await forgetMigration(strapi);
-      const adminIds = await createAdmins(strapi, LEVELS[level].admins);
-      await fillVersions(strapi, LEVELS[level], adminIds);
+  const fill = await time(() =>
+    loadStrapi({
+      mapHistoryModel: toPreviousModel,
+      async run(strapi) {
+        const adminIds = await createAdmins(strapi, LEVELS[level].admins);
+        await fillVersions(strapi, LEVELS[level], adminIds);
 
-      return countByCreatedBy(strapi);
-    },
-  });
-  report.fillMs = Math.round(performance.now() - start);
+        return {
+          createdBy: await countByCreatedBy(strapi),
+          tableSize: await getTableSize(strapi, client, sqliteFile),
+        };
+      },
+    })
+  );
+  const previous = fill.result.result;
+  report.fillMs = fill.ms;
+  report.tableSizeMb = Math.round(previous.tableSize / 1_048_576);
 
-  // 2. Start Strapi on this branch: the migration, then the schema sync.
-  const firstRun = await loadStrapi({
-    async run(strapi) {
-      const result = {
-        ...(await checkMigratedRows(strapi, createdByBefore)),
-        indexes: await getHistoryTableIndexes(strapi),
-      };
-
-      await forgetMigration(strapi);
-
-      return result;
-    },
-  });
-  report.migrationMs = firstRun.timings.migrations;
-  report.schemaSyncMs = firstRun.timings.schemaSync;
-  report.indexes = firstRun.result.indexes;
-  report.errors = firstRun.result.errors;
-
-  // 3. Run the migration a second time: it must change nothing.
-  const rerun = await loadStrapi({
+  // 2. Start Strapi on this branch: the schema sync adds the columns.
+  const upgrade = await loadStrapi({
     run: async (strapi) => ({
-      ...(await checkMigratedRows(strapi, createdByBefore)),
-      sameRows:
-        JSON.stringify(await countByAuthor(strapi)) === JSON.stringify(firstRun.result.groups),
+      errors: await checkUpgradedRows(strapi, previous.createdBy),
+      indexes: await getHistoryTableIndexes(strapi),
     }),
   });
-  report.secondMigrationMs = rerun.timings.migrations;
-  report.errors.push(...rerun.result.errors);
-  if (!rerun.result.sameRows) {
-    report.errors.push('the second run changed rows');
-  }
+  report.schemaSyncMs = upgrade.timings.schemaSync;
+  report.indexes = upgrade.result.indexes;
+  report.errors = upgrade.result.errors;
 
-  // 4. The schema sync that `NOT NULL` on `source` would run.
-  const notNullRun = await loadStrapi({
-    mapHistoryModel: toNotNullableSourceModel,
-    run: async (strapi) => ({ isSourceNullable: await isSourceNullable(strapi) }),
-  });
-  report.notNullSchemaSyncMs = notNullRun.timings.schemaSync;
-  if (notNullRun.result.isSourceNullable) {
-    report.errors.push('source is still nullable');
-  }
+  // 3. Delete authors: the hook clears their id on the versions.
+  const deletes = await loadStrapi({ run: measureDeleteHook });
+  const { errors, ...deleteTimings } = deletes.result;
+  Object.assign(report, deleteTimings);
+  report.errors.push(...errors);
 
   console.log(JSON.stringify(report));
 };
