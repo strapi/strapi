@@ -510,6 +510,24 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       ]);
     });
 
+    // The admin sends an empty delta for every relation field on save
+    it('keeps every link on an empty connect and disconnect', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { connect: [], disconnect: [] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
     it.each([
       ['an empty array', []],
       ['an empty set', { set: [] }],
