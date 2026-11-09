@@ -150,7 +150,7 @@ Strapi logs a warning for each translated path, for example `Route "GET /users/:
 
 Boot fails with `RoutePathMigrationError` for a path v6 rejected too, such as `/:a:b` or a repeated parameter with no prefix and suffix, for a group that starts with `?`, and for one path that mixes v6 syntax with a v8 quoted name.
 
-The public files route is still `'/((?!uploads/).+)'`. v8 cannot express that lookahead, so the handler skips a path under `/uploads/` instead. The documentation version route keeps `major`, `minor` and `patch`, and its controller rejects a part that is not a number. Review-workflow routes still match any kind at the router, and a route middleware allows only `collection` and `single`.
+The public files route is still `'/((?!uploads/).+)'`. v8 cannot express that lookahead, so the handler skips a path under `/uploads/` instead. The documentation version route keeps `major`, `minor` and `patch`, and its controller rejects a part that is not a number. Review-workflow stage and assignee routes are registered twice, once for `collection-types` and once for `single-types`, so another kind does not match.
 
 What changed from `@koa/router` 12:
 
