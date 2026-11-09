@@ -71,7 +71,9 @@ export const getPnpmOnlyBuiltDependencies = (
   existing: string[] = [],
   nodeVersion: string = process.versions.node
 ): string[] => {
-  return Array.from(new Set([...existing, ...getPnpmBuildPackageNames(scope, nodeVersion)])).sort();
+  return Array.from(new Set([...existing, ...getPnpmBuildPackageNames(scope, nodeVersion)])).sort(
+    (left, right) => left.localeCompare(right)
+  );
 };
 
 const quoteYamlKey = (key: string): string => {
