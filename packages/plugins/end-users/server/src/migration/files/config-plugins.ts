@@ -821,6 +821,115 @@ const appendProperty = (
     : { start: last.end, end: last.end, text: `,\n${indent}${indented(text, indent)}` };
 };
 
+/** The `config.migration` keys a developer sets during the check: the block never overwrites them */
+const KEPT_WHEN_SET = new Set([
+  'config.migration.duplicates',
+  'config.migration.registrationFields',
+]);
+
+/** The text of a property of the generated block, its later lines moved back to the left margin */
+const propertyText = (
+  sf: TS.SourceFile,
+  text: string,
+  property: TS.ObjectLiteralElementLike
+): string => {
+  const start = property.getStart(sf);
+  const indent = lineIndent(text, start);
+
+  return text
+    .slice(start, property.end)
+    .split('\n')
+    .map((line, index) => (index > 0 && line.startsWith(indent) ? line.slice(indent.length) : line))
+    .join('\n');
+};
+
+/**
+ * The edits that make the project's `'end-users'` object hold what the generated block sets, and
+ * nothing else changed: a key the block sets is replaced (a nested object is merged key by key), a
+ * key it does not set stays as written, whatever it is. `null` when the entry holds a spread, a
+ * computed key or a value that is not written out as an object, which this does not edit.
+ */
+const mergeInto = (
+  ts: Typescript,
+  existingSf: TS.SourceFile,
+  existingSource: string,
+  existing: TS.ObjectLiteralExpression,
+  blockSf: TS.SourceFile,
+  blockText: string,
+  incoming: TS.ObjectLiteralExpression,
+  trail: string[]
+): Edit[] | null => {
+  const current = namedProperties(ts, existing);
+  const wanted = namedProperties(ts, incoming);
+
+  if (!current || !wanted) return null;
+
+  const edits: Edit[] = [];
+
+  for (const { name, property } of wanted) {
+    const path = [...trail, name].join('.');
+    const held = current.find((candidate) => candidate.name === name);
+    const incomingValue = unwrap(ts, property.initializer);
+
+    if (!held) {
+      edits.push(
+        appendProperty(
+          ts,
+          existingSf,
+          existingSource,
+          existing,
+          propertyText(blockSf, blockText, property)
+        )
+      );
+      continue;
+    }
+
+    if (KEPT_WHEN_SET.has(path)) continue;
+
+    const heldValue = unwrap(ts, held.property.initializer);
+
+    if (ts.isObjectLiteralExpression(incomingValue) && ts.isObjectLiteralExpression(heldValue)) {
+      const nested = mergeInto(
+        ts,
+        existingSf,
+        existingSource,
+        heldValue,
+        blockSf,
+        blockText,
+        incomingValue,
+        [...trail, name]
+      );
+
+      if (!nested) return null;
+
+      edits.push(...nested);
+      continue;
+    }
+
+    const wantedText = blockText.slice(
+      property.initializer.getStart(blockSf),
+      property.initializer.end
+    );
+    const heldText = existingSource.slice(
+      held.property.initializer.getStart(existingSf),
+      held.property.initializer.end
+    );
+
+    if (normalized(wantedText) !== normalized(heldText)) {
+      edits.push({
+        start: held.property.initializer.getStart(existingSf),
+        end: held.property.initializer.end,
+        text: indented(
+          wantedText,
+          lineIndent(existingSource, held.property.initializer.getStart(existingSf))
+        ),
+      });
+    }
+  }
+
+  return edits;
+};
+
 /** The edit that turns U&P's entry off, or `null` when it cannot be made, or `[]` when it is off already */
 const disableUsersPermissions = (
   ts: Typescript,
@@ -932,15 +1041,38 @@ export const switchPluginsConfig = async (
     const existing = properties.find(({ name }) => name === END_USERS_KEY);
 
     if (existing) {
-      const current = source.slice(existing.property.getStart(sf), existing.property.end);
+      const heldEntry = unwrap(ts, existing.property.initializer);
+      const blockSf = parseSource(
+        ts,
+        'block.ts',
+        `const entry = {\n${indented(block, '  ').replace(/^/, '  ')}\n};`
+      );
+      const blockText = blockSf.text;
+      let incoming: TS.ObjectLiteralExpression | undefined;
 
-      if (normalized(current) !== normalized(block)) {
-        edits.push({
-          start: existing.property.getStart(sf),
-          end: existing.property.end,
-          text: indented(block, lineIndent(source, existing.property.getStart(sf))),
-        });
+      blockSf.forEachChild((statement) => {
+        if (ts.isVariableStatement(statement)) {
+          const initializer = statement.declarationList.declarations[0]?.initializer;
+
+          if (initializer && ts.isObjectLiteralExpression(initializer)) {
+            const entry = namedProperties(ts, initializer)?.[0]?.property.initializer;
+
+            incoming = entry && ts.isObjectLiteralExpression(entry) ? entry : undefined;
+          }
+        }
+      });
+
+      if (!ts.isObjectLiteralExpression(heldEntry) || !incoming) {
+        return notEditable('the end-users entry is not an object written out in the file');
       }
+
+      const merged = mergeInto(ts, sf, source, heldEntry, blockSf, blockText, incoming, []);
+
+      if (!merged) {
+        return notEditable('the end-users entry holds a spread, a variable or a computed key');
+      }
+
+      edits.push(...merged);
     } else {
       edits.push(appendProperty(ts, sf, source, plugins, `${block},`));
     }

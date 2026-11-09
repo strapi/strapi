@@ -298,12 +298,40 @@ describe('config/plugins', () => {
       expect(second.after).toBe(first.after);
     }
 
-    // an entry that is already there is replaced by the block, not added again
+    // an entry that is already there is merged into, not added again
     const stale = await plan('already.ts.txt', 'config/plugins.ts');
     const result = evaluate(stale.after!);
 
     expect(Object.keys(result).filter((key) => key === 'end-users')).toHaveLength(1);
-    expect(result['end-users'].config.legacy).toBeUndefined();
     expect(result['users-permissions'].enabled).toBe(false);
+  });
+
+  it('keeps every key the project set in its end-users entry, and the choices made during the check', async () => {
+    const first = await plan('choices.ts.txt', 'config/plugins.ts');
+    const result = evaluate(first.after!);
+    const config = result['end-users'].config;
+
+    expect(result['users-permissions'].enabled).toBe(false);
+    expect(config.legacy).toBe('old');
+    expect(config.secret).toBe('env:END_USERS_SECRET');
+    expect(config.migration.duplicates).toBe('abort');
+    expect(config.migration.registrationFields).toEqual(['company']);
+    expect(config.migration.rollback).toBe(false);
+    expect(config.migration.fromUsersPermissions).toBe(true);
+    expect(first.after).toContain("duplicates: 'abort'");
+
+    const { block } = await endUsersConfigBlock(settings(), first.after, {
+      path: 'config/plugins.ts',
+    });
+    const second = await switchPluginsConfig('config/plugins.ts', first.after!, block);
+
+    expect(second.after).toBe(first.after);
+  });
+
+  it('does not edit an end-users entry it cannot read key by key', async () => {
+    const { after, switchFindings } = await plan('choices-spread.ts.txt', 'config/plugins.ts');
+
+    expect(after).toBeNull();
+    expect(switchFindings[0].rule).toBe('config-not-editable');
   });
 });
