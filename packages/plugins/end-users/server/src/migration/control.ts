@@ -233,9 +233,13 @@ export const registerMigrationControl = (
             try {
               await run.preSync(trx, db, ctx);
             } catch (error) {
-              // The transaction still holds the only SQLite connection and the rows it wrote:
-              // the release waits for the rollback, then gives the claim back
-              releaseMigration(strapi, ctx.owner).catch(() => undefined);
+              // Not awaited: the transaction still holds the only SQLite connection, and on
+              // Postgres the row it wrote, so the release can only finish after the rollback
+              releaseMigration(strapi, ctx.owner).catch((releaseError: unknown) => {
+                strapi.log.warn(
+                  `${PLUGIN_ID}: the migration claim could not be released (${String(releaseError instanceof Error ? releaseError.name : 'error')}); it runs out by itself`
+                );
+              });
               throw error;
             }
           },

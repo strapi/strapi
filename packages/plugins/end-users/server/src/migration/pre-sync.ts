@@ -352,6 +352,32 @@ const renameOne = async (trx: Knex, db: Database, from: string, to: string) => {
   }
 };
 
+/**
+ * The tables the plugin's own models own: each model's table and the join, link and component
+ * tables of its attributes. Never decided by a name: a project table that starts with `eu_` is not
+ * the plugin's.
+ */
+const endUsersTables = (db: Database): string[] => {
+  const tables = new Set<string>();
+
+  for (const [uid, meta] of db.metadata.entries()) {
+    if (uid.startsWith(`plugin::${PLUGIN_ID}.`)) {
+      tables.add(meta.tableName);
+
+      for (const attribute of Object.values(meta.attributes) as Array<Record<string, any>>) {
+        const joined = attribute.joinTable?.name;
+
+        // The other side of a relation another type owns is that type's table
+        if (typeof joined === 'string' && joined.startsWith(`${meta.tableName}_`)) {
+          tables.add(joined);
+        }
+      }
+    }
+  }
+
+  return [...tables];
+};
+
 /** The tables in an order that drops each before the ones it points at */
 const dropOrder = (names: string[], pointsAt: Map<string, string[]>): string[] => {
   const ordered: string[] = [];
@@ -378,9 +404,15 @@ const dropOrder = (names: string[], pointsAt: Map<string, string[]>): string[] =
  * renames: they go, with their keys. Staged tables stay.
  */
 const dropEndUsersTables = async (trx: Knex, db: Database, client: DbClient): Promise<number> => {
-  let names = (await tablesStartingWith(trx, client, 'eu_')).filter(
-    (name) => !name.startsWith('eu_stg_')
-  );
+  let names: string[] = [];
+
+  for (const name of endUsersTables(db)) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await tableHas(trx, db, name)) {
+      names.push(name);
+    }
+  }
+
   const schema = db.getSchemaName();
 
   // The connection's own switches, since the transaction holds the only connection SQLite has
