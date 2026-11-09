@@ -36,8 +36,8 @@ describe('test app lifecycle', () => {
   });
 
   test('starts the app and serves the content API', async () => {
-    // startServer already waited for /_health. The users-permissions bootstrap seeds the public
-    // role without any permission, so its content API answers 403.
+    // startServer already waited for /_health. The users-permissions bootstrap gives the public
+    // role its auth actions only, not role.find, so the roles route answers 403.
     const roles = await fetch(`${server.url}/api/users-permissions/roles`);
     expect(roles.status).toBe(403);
   });
