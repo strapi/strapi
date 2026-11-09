@@ -416,6 +416,60 @@ export const migratedInstance = async (
   }
 };
 
+/**
+ * The end-users plugin in check mode next to a running Users & Permissions, on the seeded project:
+ * both plugins are on, the project's types and Users & Permissions extension are in place, and
+ * the plugin is dormant. Put back on destroy, like the other instances.
+ */
+export const checkInstance = async (
+  migration: 'check' | false = 'check'
+): Promise<Core.Strapi> => {
+  if (!lastProject) {
+    throw new Error('checkInstance: seed a project first');
+  }
+
+  const { jwtSecret, refresh } = lastProject;
+
+  writeProjectTypes();
+  writeUsersPermissionsExtension();
+
+  try {
+    const strapi = await createEndUsersInstance({
+      pluginConfig: { migration: { fromUsersPermissions: migration } },
+      // Runs after the instance's plugins config is set and before Strapi reads it: Users &
+      // Permissions, which that config turns off, is put back as the seed's own instance has it
+      builder: {
+        async build() {
+          const config = (globalThis as Record<string, any>)[CONFIG_GLOBAL];
+
+          config['users-permissions'] = {
+            config: {
+              jwtSecret,
+              ...(refresh ? { jwtManagement: 'refresh', sessions: { httpOnly: false } } : {}),
+            },
+          };
+        },
+        async cleanup() {},
+      },
+    });
+
+    const destroy = strapi.destroy.bind(strapi);
+
+    strapi.destroy = async () => {
+      try {
+        await destroy();
+      } finally {
+        restoreApp();
+      }
+    };
+
+    return strapi;
+  } catch (error) {
+    restoreApp();
+    throw error;
+  }
+};
+
 /* -------------------------------------------------------------------------------------------------
  * The seed
  * -----------------------------------------------------------------------------------------------*/

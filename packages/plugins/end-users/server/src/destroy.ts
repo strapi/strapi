@@ -1,12 +1,18 @@
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from './constants';
+import { isCheckMode } from './migration/config';
 import type compatService from './services/compat';
 
 /** Longest shutdown waits for the hit counts to be written */
 export const FLUSH_TIMEOUT_MS = 5_000;
 
 const destroy = async ({ strapi }: { strapi: Core.Strapi }) => {
+  // Dormant: there are no hit counts to write
+  if (isCheckMode(strapi)) {
+    return;
+  }
+
   let timer: NodeJS.Timeout | undefined;
 
   try {
