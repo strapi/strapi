@@ -7,8 +7,8 @@ and the folder is renamed `/tests` at the cutover.
 | --------- | ---------------------- | ------------------------------------------------------------ |
 | `shared/` | `@strapi/tests-shared` | Foundation: app generation and server lifecycle, test plugin |
 | `ui/`     | `@strapi/tests-e2e`    | Playwright, `*.ui-test.ts`                                   |
-| `api/`    | `@strapi/tests-api`    | `*.api-test.ts`                                              |
-| `cli/`    | `@strapi/tests-cli`    | `*.cli-test.ts`                                              |
+| `api/`    | `@strapi/tests-api`    | Vitest, `*.api-test.ts`                                      |
+| `cli/`    | `@strapi/tests-cli`    | Vitest, `*.cli-test.ts`                                      |
 
 ## Run
 
