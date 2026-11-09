@@ -4,8 +4,11 @@ import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 
 import compose from 'koa-compose';
+import { isRouteHandlerStageTracingConfigured } from '../observability/opentelemetry-tracing';
+import { isServerRequestPerfTrackingEnabled } from '../../utils/server-performance-tracking';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
+import { wrapPerfControllerChain, wrapPerfStagePreNext } from './request-performance-stages';
 
 const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
@@ -82,15 +85,32 @@ export default (strapi: Core.Strapi) => {
 
       const action = getAction(route, strapi);
 
-      const routeHandler = compose([
-        createRouteInfoMiddleware(route),
-        authenticate,
-        authorize,
-        createPolicicesMiddleware(route, strapi),
-        ...middlewares,
-        returnBodyMiddleware,
-        ...castArray(action),
-      ]);
+      const perfStagesEnabled =
+        strapi.config.get('server.performance.emitStageEvents') === true &&
+        isServerRequestPerfTrackingEnabled(strapi);
+
+      const useRouteStageWrappers =
+        perfStagesEnabled || isRouteHandlerStageTracingConfigured(strapi);
+
+      const routeHandler = useRouteStageWrappers
+        ? compose([
+            createRouteInfoMiddleware(route),
+            wrapPerfStagePreNext(strapi, 'auth', compose([authenticate, authorize])),
+            wrapPerfStagePreNext(strapi, 'policy', createPolicicesMiddleware(route, strapi)),
+            ...(middlewares.length > 0
+              ? [wrapPerfStagePreNext(strapi, 'middleware', compose(middlewares))]
+              : []),
+            wrapPerfControllerChain(strapi, compose([returnBodyMiddleware, ...castArray(action)])),
+          ])
+        : compose([
+            createRouteInfoMiddleware(route),
+            authenticate,
+            authorize,
+            createPolicicesMiddleware(route, strapi),
+            ...middlewares,
+            returnBodyMiddleware,
+            ...castArray(action),
+          ]);
 
       router[method](path, routeHandler);
     } catch (error) {

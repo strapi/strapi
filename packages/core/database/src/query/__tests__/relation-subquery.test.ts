@@ -65,6 +65,7 @@ const makeDb = () => {
     lifecycles: {
       run: jest.fn(async () => undefined),
     },
+    mergeKnexQueryContext() {},
   } as any;
 
   return { db, connection };
