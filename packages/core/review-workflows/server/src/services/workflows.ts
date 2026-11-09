@@ -174,7 +174,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           await strapi
             .plugin('content-releases')
             .service('release-action')
-            ?.validateActionsByContentTypes(opts.data.contentTypes);
+            ?.validateActionsByContentTypes(opts.data.contentTypes ?? []);
         }
 
         return createdWorkflow;
