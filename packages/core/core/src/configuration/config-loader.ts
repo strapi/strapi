@@ -31,6 +31,7 @@ const RESTRICTED_FILENAMES = [
   'launchedAt',
   'serveAdminPanel',
   'autoReload',
+  'open',
   'environment',
   'packageJsonStrapi',
   'info',

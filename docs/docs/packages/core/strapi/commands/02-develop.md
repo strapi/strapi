@@ -24,14 +24,18 @@ Start your Strapi application in development mode
 Options:
   --polling         Watch for file changes in network directories (default: false)
   --watch-admin     Watch the admin panel for hot changes
-  --open            Open the admin in your browser (default: true)
-  --no-open         Do not open the admin in your browser
+  --open            Always open the admin in your browser, including later starts
+  --no-open         Never open the admin in your browser
   -h, --help        Display help for command
 ```
 
 ## How it works
 
-`--no-open` keeps the browser closed. The browser opens in development only when no admin user exists and `admin.autoOpen` is not false. The flag sets `admin.autoOpen` to false in memory for this process. It does not change `config/admin`. `admin.autoOpen: false` in that file turns off the same open. Vite runs in middleware mode and does not open a browser.
+The admin opens in a browser from `Strapi.openAdmin()` after the server listens. Without a flag, it opens only on the first run, when no admin user exists and `admin.autoOpen` is not `false`.
+
+`--open` opens the admin on every start, including when an admin user exists. `--no-open` never opens it, including on the first run. The flags set the root `open` config value, which `openAdmin()` reads. Neither flag changes `config/admin`.
+
+The admin dev server runs Vite in middleware mode, so it never opens a browser.
 
 The develop command sets itself up much like the [build](./01-build.md) command. Once we've injected our middlewares, we load the strapi instance and then generate the types based off the user's instance as well as potentially compiling any TS server code if we're in a TS project. The final step is to watch the project directory so we can restart the strapi instance in real-time as a user is developing their project & being the actual strapi instance.
 

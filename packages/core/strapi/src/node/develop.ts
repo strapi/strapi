@@ -206,6 +206,7 @@ const develop = async ({
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
       serveAdminPanel: !watchAdmin,
+      open: options.open,
     });
 
     /**
@@ -317,11 +318,6 @@ const develop = async ({
       }
 
       ensureWatcher();
-
-      // The first-run opener reads admin.autoOpen. Vite middleware mode does not open a browser.
-      if (options.open === false) {
-        strapiInstance.config.set('admin.autoOpen', false);
-      }
 
       strapiInstance.start();
     } catch (err: unknown) {

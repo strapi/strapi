@@ -357,11 +357,14 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async openAdmin({ isInitialized }: { isInitialized: boolean }) {
-    const shouldOpenAdmin =
-      this.config.get('environment') === 'development' &&
-      this.config.get('admin.autoOpen', true) !== false;
+    const shouldOpen = utils.shouldOpenAdmin({
+      environment: this.config.get('environment'),
+      autoOpen: this.config.get('admin.autoOpen', true),
+      open: this.config.get('open') as boolean | undefined,
+      isInitialized,
+    });
 
-    if (shouldOpenAdmin && !isInitialized) {
+    if (shouldOpen) {
       try {
         await utils.openBrowser(this.config);
         this.telemetry.send('didOpenTab');
@@ -633,6 +636,11 @@ export interface StrapiOptions {
   distDir: string;
   autoReload?: boolean;
   serveAdminPanel?: boolean;
+  /**
+   * Open the admin in a browser on start. `undefined` keeps the default: only on the
+   * first run, and only when `admin.autoOpen` is not `false`.
+   */
+  open?: boolean;
 }
 
 export default Strapi;

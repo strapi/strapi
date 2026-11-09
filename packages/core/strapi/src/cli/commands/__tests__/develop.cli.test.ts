@@ -22,8 +22,14 @@ describe('develop CLI', () => {
     mockedDevelop.mockClear();
   });
 
-  it('opens the admin by default', async () => {
+  it('leaves open unset when neither flag is passed', async () => {
     await parse();
+
+    expect(mockedDevelop.mock.calls[0][0].open).toBeUndefined();
+  });
+
+  it('sets open to true when --open is passed', async () => {
+    await parse('--open');
 
     expect(mockedDevelop).toHaveBeenCalledWith(expect.objectContaining({ open: true }));
   });
