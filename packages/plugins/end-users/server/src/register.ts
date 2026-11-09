@@ -15,6 +15,7 @@ import { assignDefaultRoleMiddleware } from './document-middlewares/assign-defau
 import { cascadeUserDeleteMiddleware } from './document-middlewares/cascade-user-delete';
 import { createProfileMiddleware } from './document-middlewares/create-profile';
 import { normalizeEmailMiddleware } from './document-middlewares/normalize-email';
+import { notifyEmailChangeMiddleware } from './document-middlewares/notify-email-change';
 import { oneProfilePerUserMiddleware } from './document-middlewares/one-profile-per-user';
 import { revokeOnBanMiddleware } from './document-middlewares/revoke-on-ban';
 import { syncCredentialsMiddleware } from './document-middlewares/sync-credentials';
@@ -123,6 +124,7 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   strapi.documents.use(cascadeUserDeleteMiddleware(strapi));
   strapi.documents.use(revokeOnBanMiddleware(strapi));
   strapi.documents.use(oneProfilePerUserMiddleware(strapi));
+  strapi.documents.use(notifyEmailChangeMiddleware(strapi));
 
   // After core's API-token strategy, which registers first: a token keeps taking precedence, and
   // only a request that is not one reaches this strategy

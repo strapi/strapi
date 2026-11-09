@@ -19,6 +19,7 @@ export type EmailTemplateName =
   | 'verify-email'
   | 'reset-password'
   | 'change-email'
+  | 'email-changed'
   | 'magic-link'
   | 'email-otp'
   | 'two-factor-otp'
@@ -95,6 +96,27 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
         '{{ url }}',
         '',
         "If you didn't ask for this, you can ignore this email.",
+      ].join('\n'),
+    },
+  },
+  {
+    name: 'email-changed',
+    description:
+      "Sent to the old address once a user's email address has changed. It has no link: it says to contact the project if the change was not theirs.",
+    variables: ['appName', 'newEmailMasked', 'changedAt'],
+    defaults: {
+      subject: 'Your email address was changed',
+      html: [
+        '<p>Hi,</p>',
+        '<p>The email address of your {{ appName }} account was changed to {{ newEmailMasked }} on {{ changedAt }}.</p>',
+        "<p>If you didn't make this change, contact {{ appName }} right away.</p>",
+      ].join('\n'),
+      text: [
+        'Hi,',
+        '',
+        'The email address of your {{ appName }} account was changed to {{ newEmailMasked }} on {{ changedAt }}.',
+        '',
+        "If you didn't make this change, contact {{ appName }} right away.",
       ].join('\n'),
     },
   },

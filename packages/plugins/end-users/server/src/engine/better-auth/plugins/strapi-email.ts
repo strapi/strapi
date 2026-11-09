@@ -23,6 +23,7 @@ import { readCompatConfig } from '../../../compat/config';
 import { PLUGIN_ID } from '../../../constants';
 import { templateKey } from '../../../emails/templates';
 import type { EmailTemplateName } from '../../../emails/templates';
+import { maskEmail } from '../../../utils/mask-email';
 import type settingsService from '../../../services/settings';
 import type { TransactionHooks } from '../../../utils/transaction-hooks';
 import { resolveBasePath } from '../base-path';
@@ -56,6 +57,41 @@ const send = (
   locale?: string
 ): Promise<void> =>
   strapi.plugin('email').service('templates').sendTemplate(templateKey(name), to, data, { locale });
+
+/** The name of the application, in the emails that give it: the setting, else the package name. */
+const appNameOf = (strapi: Core.Strapi): string => {
+  const configured = strapi.config.get<unknown>(`plugin::${PLUGIN_ID}.appName`);
+  const packageName = strapi.config.get<unknown>('info.name');
+  const name = [configured, packageName].find(
+    (candidate): candidate is string => typeof candidate === 'string' && candidate.trim() !== ''
+  );
+
+  return name?.trim() ?? 'Strapi';
+};
+
+/**
+ * Tells the old address that the email has changed. The new one is masked (`j***@example.com`) and
+ * there is no link in it: it only says to contact the project if the change was not the user's.
+ */
+export const sendEmailChangedNotice = (
+  strapi: Core.Strapi,
+  {
+    oldEmail,
+    newEmail,
+    preferredLocale,
+  }: { oldEmail: string; newEmail: string; preferredLocale?: unknown }
+): Promise<void> =>
+  send(
+    strapi,
+    'email-changed',
+    oldEmail,
+    {
+      appName: appNameOf(strapi),
+      newEmailMasked: maskEmail(newEmail),
+      changedAt: `${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC`,
+    },
+    localeOf({ preferredLocale })
+  );
 
 const person = (user: EmailUser) => ({ name: user.name ?? '', email: user.email });
 
@@ -217,14 +253,8 @@ export const emailSenders = (strapi: Core.Strapi) => ({
 
 /** The two-factor plugin: the name an authenticator app shows, and the code sent by email. */
 export const twoFactorOptions = (strapi: Core.Strapi) => {
-  const configured = strapi.config.get<unknown>(`plugin::${PLUGIN_ID}.appName`);
-  const packageName = strapi.config.get<unknown>('info.name');
-  const issuer = [configured, packageName].find(
-    (name): name is string => typeof name === 'string' && name.trim() !== ''
-  );
-
   return {
-    issuer: issuer?.trim() ?? 'Strapi',
+    issuer: appNameOf(strapi),
     otpOptions: {
       sendOTP: async ({ user, otp }: { user: EmailUser; otp: string }) =>
         send(

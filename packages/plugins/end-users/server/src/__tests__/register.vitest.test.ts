@@ -127,7 +127,7 @@ describe('register', () => {
     );
   });
 
-  it('registers the seven email templates with the email plugin', () => {
+  it('registers the eight email templates with the email plugin', () => {
     const { strapi, plugin, service, templateRegister } = setup();
 
     register({ strapi });
@@ -136,6 +136,7 @@ describe('register', () => {
     expect(service).toHaveBeenCalledWith('templates');
     expect(templateRegister.mock.calls.map((call) => call[0]).sort()).toEqual([
       'end-users.change-email',
+      'end-users.email-changed',
       'end-users.email-otp',
       'end-users.magic-link',
       'end-users.reset-password',
@@ -152,6 +153,24 @@ describe('register', () => {
           html: expect.any(String),
           text: expect.any(String),
         }),
+      })
+    );
+  });
+
+  it('registers end-users.email-changed with its three variables and an English default', () => {
+    const { strapi, templateRegister } = setup();
+
+    register({ strapi });
+
+    expect(templateRegister).toHaveBeenCalledWith(
+      'end-users.email-changed',
+      expect.objectContaining({
+        variables: ['appName', 'newEmailMasked', 'changedAt'],
+        defaults: {
+          subject: 'Your email address was changed',
+          html: expect.stringContaining('{{ newEmailMasked }}'),
+          text: expect.stringContaining('{{ newEmailMasked }}'),
+        },
       })
     );
   });
@@ -288,8 +307,8 @@ describe('register', () => {
 
     register({ strapi });
 
-    // Five rules after the three that check and complete what a user create writes
-    expect(use).toHaveBeenCalledTimes(8);
+    // Six rules after the three that check and complete what a user create writes
+    expect(use).toHaveBeenCalledTimes(9);
 
     // Run the chain the way the Document Service does, outermost first, on a user create with a
     // password, and watch the order things happen in

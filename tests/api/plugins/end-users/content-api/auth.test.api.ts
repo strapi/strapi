@@ -1459,4 +1459,30 @@ describe('end-users: the emails the engine sends', () => {
     );
     expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(0);
   });
+
+  it('tells the old address, naming the masked new one, once a verified change completes', async () => {
+    const { email, cookie } = await signedUp();
+
+    await rq.post('/api/auth/change-email', {
+      body: { newEmail: 'masked-target@example.com' },
+      headers: { ...FROM_FRONT_END, Cookie: cookie },
+    });
+
+    const confirmation = sentEmails()[sentEmails().length - 1];
+
+    clearSentEmails();
+
+    const followed = await rq.get(linkOf(confirmation), { headers: { Cookie: cookie } });
+
+    expect(followed.statusCode).toBe(302);
+    // Sent once the change is committed, without holding the response: give it a moment to land
+    await new Promise((resolve) => {
+      setTimeout(resolve, 200);
+    });
+    expect(sentEmails()).toHaveLength(1);
+    expect(sentEmails()[0].to).toBe(email);
+    expect(sentEmails()[0].subject).toBe('Your email address was changed');
+    expect(sentEmails()[0].text).toContain('m***@example.com');
+    expect(sentEmails()[0].text).not.toContain('masked-target');
+  });
 });
