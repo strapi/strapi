@@ -244,9 +244,9 @@ describe('Webhooks controller destination checks', () => {
   const blocked = {
     hostname: 'internal.example.com',
     address: '10.0.0.5',
-    check: 'privateNetworks',
+    option: 'blockPrivateNetworks',
     message:
-      'internal.example.com resolves to 10.0.0.5, which server.webhooks.destinationChecks.privateNetworks blocks. Turn that option off to allow it.',
+      'internal.example.com resolves to 10.0.0.5, which server.webhooks.destinationChecks.blockPrivateNetworks blocks. Set it to false to allow it.',
   };
 
   beforeEach(() => {

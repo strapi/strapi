@@ -39,14 +39,20 @@ export type Lookup = (
 
 const CONFIG_KEY = 'server.webhooks.destinationChecks';
 
-const RANGE_CHECKS: AddressCategory[] = ['loopback', 'privateNetworks', 'linkLocal'];
+// The option that blocks each category of address
+const BLOCK_OPTIONS: Record<AddressCategory, BlockedDestination['option']> = {
+  loopback: 'blockLoopback',
+  privateNetworks: 'blockPrivateNetworks',
+  linkLocal: 'blockLinkLocal',
+};
+
 const REDIRECT_MODES: RedirectMode[] = ['follow', 'check', 'none'];
 
 export const DEFAULT_DESTINATION_CHECKS: DestinationChecks = {
-  loopback: false,
-  privateNetworks: false,
-  linkLocal: false,
-  onSend: false,
+  blockLoopback: false,
+  blockPrivateNetworks: false,
+  blockLinkLocal: false,
+  checkOnSend: false,
   redirects: 'follow',
 };
 
@@ -69,7 +75,7 @@ export const parseDestinationChecks = (config: unknown = {}): DestinationChecks 
 
   const checks = { ...DEFAULT_DESTINATION_CHECKS, ...config };
 
-  [...RANGE_CHECKS, 'onSend' as const].forEach((key) => {
+  [...Object.values(BLOCK_OPTIONS), 'checkOnSend' as const].forEach((key) => {
     if (typeof checks[key] !== 'boolean') {
       throw new Error(`${CONFIG_KEY}.${key} must be true or false`);
     }
@@ -82,17 +88,17 @@ export const parseDestinationChecks = (config: unknown = {}): DestinationChecks 
   return checks;
 };
 
-const describeBlocked = (hostname: string, address: string, check: AddressCategory) => {
-  const option = `${CONFIG_KEY}.${check}`;
-  // Says why loopback blocks an address outside its ranges
+const describeBlocked = (hostname: string, address: string, category: AddressCategory) => {
+  const option = `${CONFIG_KEY}.${BLOCK_OPTIONS[category]}`;
+  // Says why blockLoopback blocks an address outside the loopback ranges
   const isOwn =
-    check === 'loopback' && !classifyAddress(address, { ownAddresses: [] }).includes('loopback');
+    category === 'loopback' && !classifyAddress(address, { ownAddresses: [] }).includes('loopback');
   const own = isOwn ? ", one of this server's own addresses" : '';
   const blocked = net.isIP(hostname)
     ? `${option} blocks ${address}${own}.`
     : `${hostname} resolves to ${address}${own}, which ${option} blocks.`;
 
-  return `${blocked} Turn that option off to allow it.`;
+  return `${blocked} Set it to false to allow it.`;
 };
 
 /**
@@ -134,7 +140,9 @@ export const createDestinationChecker = (
   checks: DestinationChecks,
   { lookup = systemLookup }: { lookup?: Lookup } = {}
 ) => {
-  const enabled = RANGE_CHECKS.filter((check) => checks[check]);
+  const enabled = (Object.keys(BLOCK_OPTIONS) as AddressCategory[]).filter(
+    (category) => checks[BLOCK_OPTIONS[category]]
+  );
 
   /**
    * Returns what blocks the first blocked address, if any.
@@ -147,14 +155,14 @@ export const createDestinationChecker = (
     const ownAddresses = getOwnAddresses();
 
     for (const address of addresses) {
-      const check = classifyAddress(address, { ownAddresses }).find((category) =>
-        enabled.includes(category)
+      const category = classifyAddress(address, { ownAddresses }).find((value) =>
+        enabled.includes(value)
       );
 
-      if (check) {
-        const message = describeBlocked(hostname, address, check);
+      if (category) {
+        const message = describeBlocked(hostname, address, category);
 
-        return { hostname, address, check, message };
+        return { hostname, address, option: BLOCK_OPTIONS[category], message };
       }
     }
 
@@ -205,7 +213,7 @@ export const createDestinationChecker = (
   return {
     checks,
     /**
-     * Whether any address check is on. onSend and redirects: 'check' do nothing without one.
+     * Whether any block option is on. checkOnSend and redirects: 'check' do nothing without one.
      */
     isActive: enabled.length > 0,
     lookup,

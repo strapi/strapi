@@ -174,9 +174,9 @@ class WebhookRunner {
 
     const { checks, isActive } = this.destinationChecker;
 
-    if (!isActive && (checks.onSend || checks.redirects === 'check')) {
+    if (!isActive && (checks.checkOnSend || checks.redirects === 'check')) {
       this.logger.warn(
-        "server.webhooks.destinationChecks.onSend and redirects: 'check' apply the loopback, privateNetworks and linkLocal checks, and none of them is on, so they have no effect."
+        "server.webhooks.destinationChecks.checkOnSend and redirects: 'check' apply the blockLoopback, blockPrivateNetworks and blockLinkLocal options, and none of them is on, so they have no effect."
       );
     }
 
@@ -294,23 +294,24 @@ class WebhookRunner {
   }
 
   /**
-   * Sends a webhook request, applying `server.webhooks.destinationChecks.onSend` and `redirects`.
+   * Sends a webhook request, applying `server.webhooks.destinationChecks.checkOnSend` and
+   * `redirects`.
    */
   private async send(url: string, init: RequestInit) {
-    const { onSend, redirects } = this.destinationChecker.checks;
+    const { checkOnSend, redirects } = this.destinationChecker.checks;
 
     // Redirects are followed here, instead of by fetch, when each target needs a check before it
-    // gets the request: with redirects: 'check', and with onSend behind a proxy, where the check
+    // gets the request: with redirects: 'check', and with checkOnSend behind a proxy, where the check
     // can't happen when the connection opens
     const followsRedirects =
       this.destinationChecker.isActive &&
-      (redirects === 'check' || (redirects === 'follow' && onSend && this.isProxied()));
+      (redirects === 'check' || (redirects === 'follow' && checkOnSend && this.isProxied()));
 
     if (!followsRedirects) {
       return this.request(
         url,
         { ...init, redirect: redirects === 'none' ? 'manual' : 'follow' },
-        onSend
+        checkOnSend
       );
     }
 
@@ -319,7 +320,7 @@ class WebhookRunner {
     let request: RequestInit = { ...init, redirect: 'manual' };
 
     for (let redirectCount = 0; ; redirectCount += 1) {
-      const response = await this.request(target, request, onSend || redirectCount > 0);
+      const response = await this.request(target, request, checkOnSend || redirectCount > 0);
       const location = response.headers.get('location');
 
       if (!REDIRECT_STATUSES.includes(response.status) || location === null) {

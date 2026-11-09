@@ -74,21 +74,21 @@ export interface WebhookDestinationChecks {
   /**
    * Blocks loopback and unspecified addresses, and the server's own addresses. Defaults to false.
    */
-  loopback?: boolean;
+  blockLoopback?: boolean;
   /**
    * Blocks private and other non-public network ranges. Defaults to false.
    */
-  privateNetworks?: boolean;
+  blockPrivateNetworks?: boolean;
   /**
    * Blocks link-local addresses and some cloud metadata addresses. Defaults to false.
    */
-  linkLocal?: boolean;
+  blockLinkLocal?: boolean;
   /**
-   * Also applies the checks when a webhook is sent, to the address it connects to. Defaults to false.
+   * Also applies the blocks when a webhook is sent, to the address it connects to. Defaults to false.
    */
-  onSend?: boolean;
+  checkOnSend?: boolean;
   /**
-   * `follow` follows redirects, `check` follows them and applies the checks to each target,
+   * `follow` follows redirects, `check` follows them and applies the blocks to each target,
    * `none` doesn't follow them. Defaults to `follow`.
    */
   redirects?: 'follow' | 'check' | 'none';

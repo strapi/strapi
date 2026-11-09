@@ -1,12 +1,11 @@
 import net from 'node:net';
 import os from 'node:os';
-import type { Modules } from '@strapi/types';
 
 /**
- * The address categories an operator can block webhooks from sending to, named after their
- * `server.webhooks.destinationChecks` options.
+ * The address categories an operator can block webhooks from sending to, each with a
+ * `server.webhooks.destinationChecks` option.
  */
-export type AddressCategory = Modules.WebhookRunner.BlockedDestination['check'];
+export type AddressCategory = 'loopback' | 'privateNetworks' | 'linkLocal';
 
 type Subnet = [address: string, prefix: number];
 

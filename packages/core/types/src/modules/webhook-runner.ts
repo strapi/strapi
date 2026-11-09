@@ -25,11 +25,11 @@ export interface BlockedDestination {
    */
   address: string;
   /**
-   * The option that blocks the address
+   * The `server.webhooks.destinationChecks` option that blocks the address
    */
-  check: 'loopback' | 'privateNetworks' | 'linkLocal';
+  option: 'blockLoopback' | 'blockPrivateNetworks' | 'blockLinkLocal';
   /**
-   * Says what is blocked and which option to turn off to allow it
+   * Says what is blocked and which option to set to false to allow it
    */
   message: string;
 }

@@ -40,18 +40,18 @@ beforeEach(() => {
 describe('parseDestinationChecks', () => {
   test('turns every check off by default and follows redirects', () => {
     expect(parseDestinationChecks()).toEqual({
-      loopback: false,
-      privateNetworks: false,
-      linkLocal: false,
-      onSend: false,
+      blockLoopback: false,
+      blockPrivateNetworks: false,
+      blockLinkLocal: false,
+      checkOnSend: false,
       redirects: 'follow',
     });
   });
 
   test('keeps the options that are set', () => {
-    expect(parseDestinationChecks({ privateNetworks: true, redirects: 'check' })).toEqual({
+    expect(parseDestinationChecks({ blockPrivateNetworks: true, redirects: 'check' })).toEqual({
       ...DEFAULT_DESTINATION_CHECKS,
-      privateNetworks: true,
+      blockPrivateNetworks: true,
       redirects: 'check',
     });
   });
@@ -63,8 +63,8 @@ describe('parseDestinationChecks', () => {
   });
 
   test('rejects invalid values', () => {
-    expect(() => parseDestinationChecks({ loopback: 'yes' })).toThrow(
-      'server.webhooks.destinationChecks.loopback must be true or false'
+    expect(() => parseDestinationChecks({ blockLoopback: 'yes' })).toThrow(
+      'server.webhooks.destinationChecks.blockLoopback must be true or false'
     );
     expect(() => parseDestinationChecks({ redirects: 'manual' })).toThrow(
       "server.webhooks.destinationChecks.redirects must be 'follow', 'check' or 'none'"
@@ -86,24 +86,24 @@ describe('createDestinationChecker', () => {
   });
 
   test('blocks an IP address in an enabled range, and says which option to turn off', async () => {
-    const checker = createChecker({ loopback: true });
+    const checker = createChecker({ blockLoopback: true });
 
     await expect(checker.checkUrl('http://127.0.0.1:1337/hook')).resolves.toEqual({
       hostname: '127.0.0.1',
       address: '127.0.0.1',
-      check: 'loopback',
+      option: 'blockLoopback',
       message:
-        'server.webhooks.destinationChecks.loopback blocks 127.0.0.1. Turn that option off to allow it.',
+        'server.webhooks.destinationChecks.blockLoopback blocks 127.0.0.1. Set it to false to allow it.',
     });
     expect(lookup).not.toHaveBeenCalled();
   });
 
   test('checks other ways of writing an address', async () => {
-    const checker = createChecker({ loopback: true });
+    const checker = createChecker({ blockLoopback: true });
 
     await expect(checker.checkUrl('http://[::1]/')).resolves.toMatchObject({ address: '::1' });
     await expect(checker.checkUrl('http://[::ffff:127.0.0.1]/')).resolves.toMatchObject({
-      check: 'loopback',
+      option: 'blockLoopback',
     });
     await expect(checker.checkUrl('http://2130706433/')).resolves.toMatchObject({
       address: '127.0.0.1',
@@ -114,18 +114,18 @@ describe('createDestinationChecker', () => {
   });
 
   test('blocks a hostname when any of its addresses is blocked', async () => {
-    const checker = createChecker({ privateNetworks: true });
+    const checker = createChecker({ blockPrivateNetworks: true });
 
     await expect(checker.checkUrl('https://internal.test/hook')).resolves.toEqual({
       hostname: 'internal.test',
       address: '10.0.0.5',
-      check: 'privateNetworks',
+      option: 'blockPrivateNetworks',
       message:
-        'internal.test resolves to 10.0.0.5, which server.webhooks.destinationChecks.privateNetworks blocks. Turn that option off to allow it.',
+        'internal.test resolves to 10.0.0.5, which server.webhooks.destinationChecks.blockPrivateNetworks blocks. Set it to false to allow it.',
     });
     await expect(checker.checkUrl('https://mapped.test/hook')).resolves.toMatchObject({
       address: '::ffff:10.0.0.5',
-      check: 'privateNetworks',
+      option: 'blockPrivateNetworks',
     });
   });
 
@@ -145,11 +145,11 @@ describe('createDestinationChecker', () => {
 
     try {
       await expect(
-        createChecker({ loopback: true }).checkUrl('http://public.test/')
+        createChecker({ blockLoopback: true }).checkUrl('http://public.test/')
       ).resolves.toMatchObject({
-        check: 'loopback',
+        option: 'blockLoopback',
         message:
-          "public.test resolves to 93.184.216.34, one of this server's own addresses, which server.webhooks.destinationChecks.loopback blocks. Turn that option off to allow it.",
+          "public.test resolves to 93.184.216.34, one of this server's own addresses, which server.webhooks.destinationChecks.blockLoopback blocks. Set it to false to allow it.",
       });
     } finally {
       networkInterfaces.mockRestore();
@@ -157,7 +157,7 @@ describe('createDestinationChecker', () => {
   });
 
   test('only applies the checks that are on', async () => {
-    const checker = createChecker({ privateNetworks: true });
+    const checker = createChecker({ blockPrivateNetworks: true });
 
     await expect(checker.checkUrl('http://127.0.0.1/')).resolves.toBeUndefined();
     await expect(checker.checkUrl('http://hook.test/')).resolves.toBeUndefined();
@@ -167,15 +167,19 @@ describe('createDestinationChecker', () => {
 
   test('names the check that is on when an address is in two categories', async () => {
     await expect(
-      createChecker({ linkLocal: true }).checkUrl('http://metadata.test/')
-    ).resolves.toMatchObject({ check: 'linkLocal' });
+      createChecker({ blockLinkLocal: true }).checkUrl('http://metadata.test/')
+    ).resolves.toMatchObject({ option: 'blockLinkLocal' });
     await expect(
-      createChecker({ privateNetworks: true }).checkUrl('http://metadata.test/')
-    ).resolves.toMatchObject({ check: 'privateNetworks' });
+      createChecker({ blockPrivateNetworks: true }).checkUrl('http://metadata.test/')
+    ).resolves.toMatchObject({ option: 'blockPrivateNetworks' });
   });
 
   test('allows a hostname that does not resolve, since it has no address to check', async () => {
-    const checker = createChecker({ loopback: true, privateNetworks: true, linkLocal: true });
+    const checker = createChecker({
+      blockLoopback: true,
+      blockPrivateNetworks: true,
+      blockLinkLocal: true,
+    });
 
     await expect(checker.checkUrl('http://unknown.test/')).resolves.toBeUndefined();
     expect(lookup).toHaveBeenCalledWith('unknown.test');
@@ -187,7 +191,7 @@ describe('findDestinationBlockedError', () => {
     const blocked = new DestinationBlockedError({
       hostname: 'internal.test',
       address: '10.0.0.5',
-      check: 'privateNetworks',
+      option: 'blockPrivateNetworks',
       message: 'blocked',
     });
 

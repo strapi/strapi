@@ -680,8 +680,8 @@ describe('Destination checks', () => {
     expect(lookup).not.toHaveBeenCalled();
   });
 
-  test('Warns at startup when onSend or redirects are set without an address check', () => {
-    expect(setupRunner({ onSend: true }).logger.warn).toHaveBeenCalledTimes(1);
+  test('Warns at startup when checkOnSend or redirects are set without a block option', () => {
+    expect(setupRunner({ checkOnSend: true }).logger.warn).toHaveBeenCalledTimes(1);
     expect(setupRunner({ redirects: 'check' }).logger.warn).toHaveBeenCalledTimes(1);
     expect(setupRunner({ redirects: 'none' }).logger.warn).not.toHaveBeenCalled();
   });
@@ -702,7 +702,7 @@ describe('Destination checks', () => {
     });
 
     test("'check' follows a redirect to an address that is allowed", async () => {
-      const { run } = setupRunner({ privateNetworks: true, redirects: 'check' });
+      const { run } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
 
       await expect(run('/to-hook-test')).resolves.toEqual({ statusCode: 200 });
       expect(receivedPaths()).toEqual([`127.0.0.1:${port}/to-hook-test`, `hook.test:${port}/hook`]);
@@ -712,12 +712,12 @@ describe('Destination checks', () => {
     });
 
     test("'check' does not follow a redirect to a blocked address", async () => {
-      const { run, logger } = setupRunner({ privateNetworks: true, redirects: 'check' });
+      const { run, logger } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
 
       await expect(run('/to-internal-test')).resolves.toEqual({
         statusCode: 500,
         message:
-          'internal.test resolves to 10.0.0.5, which server.webhooks.destinationChecks.privateNetworks blocks. Turn that option off to allow it.',
+          'internal.test resolves to 10.0.0.5, which server.webhooks.destinationChecks.blockPrivateNetworks blocks. Set it to false to allow it.',
       });
       expect(receivedPaths()).toEqual([`127.0.0.1:${port}/to-internal-test`]);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -727,25 +727,29 @@ describe('Destination checks', () => {
       );
     });
 
-    test("'check' applies the checks to redirect targets, and to the first request only with onSend", async () => {
+    test("'check' applies the checks to redirect targets, and to the first request only with checkOnSend", async () => {
       // The first request goes to 127.0.0.1, which the loopback check blocks
-      const { run } = setupRunner({ loopback: true, redirects: 'check' });
+      const { run } = setupRunner({ blockLoopback: true, redirects: 'check' });
 
       await expect(run('/same-origin')).resolves.toMatchObject({
         statusCode: 500,
-        message: expect.stringContaining('server.webhooks.destinationChecks.loopback blocks'),
+        message: expect.stringContaining('server.webhooks.destinationChecks.blockLoopback blocks'),
       });
       expect(receivedPaths()).toEqual([`127.0.0.1:${port}/same-origin`]);
 
       received.length = 0;
-      const withOnSend = setupRunner({ loopback: true, redirects: 'check', onSend: true });
+      const withOnSend = setupRunner({
+        blockLoopback: true,
+        redirects: 'check',
+        checkOnSend: true,
+      });
 
       await expect(withOnSend.run('/same-origin')).resolves.toMatchObject({ statusCode: 500 });
       expect(received).toEqual([]);
     });
 
     test("'check' stops after 5 redirects", async () => {
-      const { run } = setupRunner({ privateNetworks: true, redirects: 'check' });
+      const { run } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
 
       await expect(run('/loop')).resolves.toEqual({
         statusCode: 500,
@@ -755,7 +759,7 @@ describe('Destination checks', () => {
     });
 
     test("'check' follows redirects the way fetch does", async () => {
-      const { run } = setupRunner({ privateNetworks: true, redirects: 'check' });
+      const { run } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
 
       // A 303 turns the request into a GET without a body
       await expect(run('/see-other')).resolves.toEqual({ statusCode: 200 });
@@ -771,16 +775,16 @@ describe('Destination checks', () => {
     });
   });
 
-  describe('onSend', () => {
+  describe('checkOnSend', () => {
     test('sends to a hostname that resolves to an allowed address', async () => {
-      const { run } = setupRunner({ privateNetworks: true, onSend: true });
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
 
       await expect(run('/hook', `hook.test:${port}`)).resolves.toEqual({ statusCode: 200 });
       expect(receivedPaths()).toEqual([`hook.test:${port}/hook`]);
     });
 
     test('does not connect to a hostname that resolves to a blocked address', async () => {
-      const { run } = setupRunner({ privateNetworks: true, onSend: true });
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
 
       await expect(run('/hook', `internal.test:${port}`)).resolves.toMatchObject({
         statusCode: 500,
@@ -790,7 +794,7 @@ describe('Destination checks', () => {
     });
 
     test('checks the address the hostname resolves to when the webhook is sent', async () => {
-      const { runner, run } = setupRunner({ privateNetworks: true, onSend: true });
+      const { runner, run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
 
       // Public when the webhook is saved...
       lookup.mockResolvedValueOnce([{ address: '93.184.216.34', family: 4 }] as any);
@@ -808,7 +812,7 @@ describe('Destination checks', () => {
     });
 
     test('also checks the redirects fetch follows', async () => {
-      const { run } = setupRunner({ privateNetworks: true, onSend: true });
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
 
       await expect(run('/to-internal-test')).resolves.toMatchObject({
         statusCode: 500,
@@ -818,17 +822,17 @@ describe('Destination checks', () => {
     });
 
     test('does not connect to an IP address that is blocked', async () => {
-      const { run } = setupRunner({ loopback: true, onSend: true });
+      const { run } = setupRunner({ blockLoopback: true, checkOnSend: true });
 
       await expect(run('/hook')).resolves.toMatchObject({
         statusCode: 500,
-        message: expect.stringContaining('loopback blocks 127.0.0.1.'),
+        message: expect.stringContaining('blockLoopback blocks 127.0.0.1.'),
       });
       expect(received).toEqual([]);
     });
 
     test('passes the lookup options Node gives, when it asks for a single address', async () => {
-      const { run } = setupRunner({ privateNetworks: true, onSend: true });
+      const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
       const autoSelectFamily = net.getDefaultAutoSelectFamily();
 
       net.setDefaultAutoSelectFamily(false);
@@ -860,7 +864,7 @@ describe('Destination checks', () => {
       test('checks the URL before sending it to the proxy', async () => {
         const proxiedFetch = createProxiedFetch();
         const { run } = setupRunner(
-          { privateNetworks: true, onSend: true },
+          { blockPrivateNetworks: true, checkOnSend: true },
           proxiedFetch as unknown as Fetch
         );
 
@@ -876,7 +880,7 @@ describe('Destination checks', () => {
       test('checks redirect targets before sending them to the proxy', async () => {
         const proxiedFetch = createProxiedFetch('http://internal.test/hook');
         const { run } = setupRunner(
-          { privateNetworks: true, onSend: true },
+          { blockPrivateNetworks: true, checkOnSend: true },
           proxiedFetch as unknown as Fetch
         );
 
@@ -894,7 +898,7 @@ describe('Destination checks', () => {
         try {
           const fetch = vi.fn(async () => new Response('ok'));
           const { run } = setupRunner(
-            { privateNetworks: true, onSend: true },
+            { blockPrivateNetworks: true, checkOnSend: true },
             fetch as unknown as Fetch
           );
 
