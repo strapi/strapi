@@ -31,7 +31,7 @@ Options:
 
 ## How it works
 
-`--no-open` keeps the browser closed. It stops the admin dev server from opening a tab, and it turns off the first-run browser open. `admin.autoOpen: false` in the server config still turns off only that first-run open.
+`--no-open` keeps the browser closed. The browser opens in development only when no admin user exists and `admin.autoOpen` is not false. The flag sets `admin.autoOpen` to false in memory for this process. It does not change `config/admin`. `admin.autoOpen: false` in that file turns off the same open. Vite runs in middleware mode and does not open a browser.
 
 The develop command sets itself up much like the [build](./01-build.md) command. Once we've injected our middlewares, we load the strapi instance and then generate the types based off the user's instance as well as potentially compiling any TS server code if we're in a TS project. The final step is to watch the project directory so we can restart the strapi instance in real-time as a user is developing their project & being the actual strapi instance.
 

@@ -131,7 +131,7 @@ Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootst
 
 `strapi.start()` calls `load()` if `strapi.isLoaded` is `false`. Then it calls `listen()`. `listen()` uses `server.socket` if it is set. Otherwise it uses `server.host` and `server.port`.
 
-After the server listens, `postListen()` logs the startup message and sends the `didStartServer` telemetry event without awaiting it. In development, it opens the admin panel in a browser, unless `admin.autoOpen` is `false`, `strapi develop` was started with `--no-open`, or an admin user already exists. `--no-open` also stops the admin dev server from opening a browser on later startups.
+After the server listens, `postListen()` logs the startup message and sends the `didStartServer` telemetry event without awaiting it. In development, it opens the admin panel in a browser when no admin user exists and `admin.autoOpen` is not `false`. `strapi develop --no-open` sets `admin.autoOpen` to false in memory before `start()`, so this open stays closed. It does not change the project config. The Vite dev server does not open a browser.
 
 If `start()` catches an error, it calls `stopWithError()`. This logs the error and calls `stop()`. `stop()` calls `destroy()` without awaiting it, sends `stop` to the parent process when `autoReload` is on, and calls `process.exit(1)`.
 

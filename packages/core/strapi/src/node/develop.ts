@@ -318,7 +318,7 @@ const develop = async ({
 
       ensureWatcher();
 
-      // First-run browser open reads admin.autoOpen, not the CLI flag Vite uses.
+      // The first-run opener reads admin.autoOpen. Vite middleware mode does not open a browser.
       if (options.open === false) {
         strapiInstance.config.set('admin.autoOpen', false);
       }
