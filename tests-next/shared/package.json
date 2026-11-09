@@ -7,9 +7,17 @@
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc -p tsconfig.json"
   },
+  "dependencies": {
+    "@strapi/strapi": "workspace:*",
+    "create-strapi-app": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "22.20.0",
     "eslint-config-custom": "workspace:*",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.6",
+    "styled-components": "6.4.1",
     "tsconfig": "workspace:*"
   }
 }
