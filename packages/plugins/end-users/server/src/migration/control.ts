@@ -9,6 +9,7 @@ import { readCompatConfig } from '../compat/config';
 import { PLUGIN_ID } from '../constants';
 import { readMigrationConfig } from './config';
 import type { MigrationConfig } from './config';
+import { claimPreSync, runPreSync } from './pre-sync';
 import { readRecord } from './record';
 import type { MigrationRecord } from './record';
 
@@ -134,6 +135,8 @@ export interface MigrationContext {
   compat: boolean;
   record: MigrationRecord | null;
   owner: string;
+  /** The attempt this start runs: 1, or one more than the last that was rolled back */
+  attempt: number;
   now: () => Date;
 }
 
@@ -188,7 +191,7 @@ export const registerMigrationControl = (
   steps: Partial<MigrationSteps> = {}
 ): void => {
   const run: MigrationSteps = {
-    preSync: steps.preSync ?? stub('migrate'),
+    preSync: steps.preSync ?? runPreSync,
     rollback: steps.rollback ?? stub('rollback'),
     cleanup: steps.cleanup ?? stub('cleanup'),
   };
@@ -202,17 +205,25 @@ export const registerMigrationControl = (
       compat: state.compat,
       record: state.record,
       owner: randomUUID(),
+      attempt: decision.kind === 'migrate' ? decision.attempt : 1,
       now: () => new Date(),
     };
 
     switch (decision.kind) {
-      case 'migrate':
+      case 'migrate': {
+        const refusal = await claimPreSync(strapi, state.config, ctx.owner);
+
+        if (refusal) {
+          throw new MigrationStop(refusal);
+        }
+
         await strapi.db.migrations.providers.internal.register({
           name: `end-users-from-users-permissions-${decision.attempt}`,
           up: (trx: Knex.Transaction, db: Database) => run.preSync(trx, db, ctx),
           down: () => Promise.resolve(),
         });
         break;
+      }
       case 'rollback':
         await strapi.db.transaction(({ trx }) => run.rollback(trx, strapi.db, ctx));
         throw new MigrationStop(
