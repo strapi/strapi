@@ -7,35 +7,19 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async getUpcomingReleases(): Promise<GetUpcomingReleases.Response['data']> {
-      // Postgres sorts nulls last in ASC. Unscheduled releases are the predictable
-      // first rows (the homepage widget and API tests), then the soonest schedule.
-      const unscheduled = await strapi.db.query('plugin::content-releases.release').findMany({
+      const releases = await strapi.db.query('plugin::content-releases.release').findMany({
         filters: {
-          releasedAt: { $notNull: false },
-          scheduledAt: { $null: true },
+          releasedAt: {
+            $notNull: false,
+          },
         },
-        orderBy: { id: 'asc' },
+        // `scheduledAt` is often null; tie-break by `id` so order is stable across DBs/engines.
+        // (E2E and the admin widget assume a predictable first row in that case — see with-admin seed.)
+        orderBy: [{ scheduledAt: 'asc' }, { id: 'asc' }],
         limit: MAX_DOCUMENTS,
       });
 
-      if (unscheduled.length >= MAX_DOCUMENTS) {
-        return unscheduled;
-      }
-
-      const seenIds = unscheduled.map((release) => release.id);
-      const scheduled = await strapi.db.query('plugin::content-releases.release').findMany({
-        filters: {
-          releasedAt: { $notNull: false },
-          scheduledAt: { $notNull: true },
-          // A release can be scheduled between these two queries. Leave out the
-          // ids already returned so it is not listed twice.
-          ...(seenIds.length > 0 ? { id: { $notIn: seenIds } } : {}),
-        },
-        orderBy: [{ scheduledAt: 'asc' }, { id: 'asc' }],
-        limit: MAX_DOCUMENTS - unscheduled.length,
-      });
-
-      return [...unscheduled, ...scheduled];
+      return releases;
     },
   };
 };

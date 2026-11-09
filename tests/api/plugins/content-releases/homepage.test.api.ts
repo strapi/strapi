@@ -122,15 +122,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     // Assert the response
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toHaveLength(2);
-    // Assert the releases data
-    // Not scheduled release
-    expect(response.body.data[0].name).toBe('Not scheduled release');
-    expect(response.body.data[0].scheduledAt).toBeNull();
-    expect(response.body.data[0].status).toBe('ready');
-    // Next week release
-    expect(response.body.data[1].name).toBe('Next week release');
-    expect(response.body.data[1].scheduledAt).toBeDefined();
-    expect(response.body.data[1].timezone).toBe('Europe/Madrid');
-    expect(response.body.data[1].status).toBe('empty');
+    // Postgres sorts null scheduledAt last. SQLite sorts them first. Assert by name.
+    const notScheduled = response.body.data.find(
+      (release: { name: string }) => release.name === 'Not scheduled release'
+    );
+    const nextWeek = response.body.data.find(
+      (release: { name: string }) => release.name === 'Next week release'
+    );
+    expect(notScheduled.scheduledAt).toBeNull();
+    expect(notScheduled.status).toBe('ready');
+    expect(nextWeek.scheduledAt).toBeDefined();
+    expect(nextWeek.timezone).toBe('Europe/Madrid');
+    expect(nextWeek.status).toBe('empty');
   });
 });

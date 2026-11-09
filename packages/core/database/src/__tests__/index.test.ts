@@ -466,7 +466,7 @@ describe('Database', () => {
       }
     });
 
-    it('keeps the write error when a rollback hook throws and skips the hooks after it', async () => {
+    it('keeps the write error when a rollback hook throws and still runs the hooks after it', async () => {
       const db = new Database(configConnectionObject);
       await db.init({ models });
       jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
@@ -488,7 +488,7 @@ describe('Database', () => {
 
       await db.settleTransactionHooks();
       expect(runs).toBe(1);
-      expect(later).not.toHaveBeenCalled();
+      expect(later).toHaveBeenCalledTimes(1);
       await db.destroy();
     });
 

@@ -31,56 +31,8 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
-const isDeadlockError = (error: unknown) => {
-  const seen = new Set<unknown>();
-
-  const matches = (candidate: unknown): boolean => {
-    if (!candidate || typeof candidate !== 'object' || seen.has(candidate)) {
-      return false;
-    }
-
-    seen.add(candidate);
-    const current = candidate as {
-      code?: string;
-      errno?: number;
-      message?: string;
-      original?: unknown;
-      cause?: unknown;
-    };
-
-    if (current.code === '40P01' || current.code === 'ER_LOCK_DEADLOCK' || current.errno === 1213) {
-      return true;
-    }
-
-    // A driver error often keeps the SQL text after the code is stripped.
-    // A plain Error whose message happens to mention a deadlock is not one.
-    const message = current.message ?? '';
-    const driverError = 'sql' in current || 'sqlState' in current || 'sqlMessage' in current;
-    if (
-      driverError &&
-      (message.includes('deadlock detected') || message.includes('Deadlock found'))
-    ) {
-      return true;
-    }
-
-    return matches(current.original) || matches(current.cause);
-  };
-
-  return matches(error);
-};
-
-/** Short pause so two retried transactions do not collide again immediately. */
-const DEADLOCK_RETRY_DELAY_MS = 25;
-
-const waitForDeadlockRetry = (attempt: number) =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, DEADLOCK_RETRY_DELAY_MS * attempt);
-  });
-
 interface CallbackRunOptions {
   report?: (error: unknown) => void;
-  /** Report the error, skip the remaining callbacks, and do not reject the caller. */
-  stopOnError?: boolean;
 }
 
 /**
@@ -116,20 +68,15 @@ const runCallbacks = async (callbacks: Callback[], options?: CallbackRunOptions)
   // Hooks can register more hooks while they run.
   while (callbacks.length > 0) {
     const batch = callbacks.splice(0, callbacks.length);
-    for (const cb of batch) {
-      try {
-        await cb();
-      } catch (error) {
-        options?.report?.(error);
-        // A commit hook runs after the database has kept the write. Log it
-        // and keep going so one failure does not drop the hooks after it.
-        // A rollback hook stops. The rest would observe a rolled-back write.
-        if (options?.stopOnError || !options?.report) {
-          callbacks.length = 0;
-          return;
+    await Promise.allSettled(
+      batch.map(async (cb) => {
+        try {
+          await cb();
+        } catch (error) {
+          options?.report?.(error);
         }
-      }
-    }
+      })
+    );
   }
 };
 
@@ -248,7 +195,6 @@ const transactionCtx = {
 
     scheduleCallbacks(store?.rollbackCallbacks, {
       report: reportRollbackHookError,
-      stopOnError: true,
     });
   },
 
@@ -274,4 +220,4 @@ const transactionCtx = {
   },
 };
 
-export { HOOK_DRAIN_TIMEOUT_MS, isDeadlockError, transactionCtx, waitForDeadlockRetry };
+export { HOOK_DRAIN_TIMEOUT_MS, transactionCtx };

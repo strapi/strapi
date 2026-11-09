@@ -1,40 +1,10 @@
-import { isDeadlockError, transactionCtx } from '../transaction-context';
+import { transactionCtx } from '../transaction-context';
 
 const fakeTrx = () =>
   ({
     commit: jest.fn(async () => undefined),
     rollback: jest.fn(async () => undefined),
   }) as any;
-
-describe('isDeadlockError', () => {
-  test('matches driver codes and a driver error that only kept the message', () => {
-    expect(isDeadlockError(Object.assign(new Error('boom'), { code: '40P01' }))).toBe(true);
-    expect(isDeadlockError({ errno: 1213, message: 'lock' })).toBe(true);
-    expect(isDeadlockError({ sql: 'update t set a = 1', message: 'deadlock detected' })).toBe(true);
-    expect(isDeadlockError({ message: 'wrapped', original: { code: 'ER_LOCK_DEADLOCK' } })).toBe(
-      true
-    );
-  });
-
-  test('ignores an application error that only mentions a deadlock', () => {
-    expect(isDeadlockError(new Error('deadlock detected'))).toBe(false);
-    expect(isDeadlockError(new Error('Deadlock found'))).toBe(false);
-  });
-
-  test('matches a driver error whose message only says Deadlock found', () => {
-    expect(
-      isDeadlockError({
-        sqlMessage: 'Deadlock found when trying to get lock',
-        message: 'Deadlock found when trying to get lock',
-      })
-    ).toBe(true);
-  });
-
-  test('ignores a driver error that has no message', () => {
-    expect(isDeadlockError({ sqlState: '40P01' })).toBe(false);
-    expect(isDeadlockError({ sql: 'update t set a = 1' })).toBe(false);
-  });
-});
 
 describe('transaction hooks', () => {
   test('commit returns before commit hooks, and settleHooks waits for them', async () => {
@@ -77,7 +47,7 @@ describe('transaction hooks', () => {
     expect(reported).toEqual([error]);
   });
 
-  test('a throwing rollback hook is reported and skips the hooks after it', async () => {
+  test('a throwing rollback hook is reported and the later hooks still run', async () => {
     const error = Object.assign(new Error('rollback hook failed'), { code: '40P01' });
     const later = jest.fn();
     const reported: unknown[] = [];
@@ -94,7 +64,7 @@ describe('transaction hooks', () => {
 
     await transactionCtx.settleHooks();
     expect(reported).toEqual([error]);
-    expect(later).not.toHaveBeenCalled();
+    expect(later).toHaveBeenCalledTimes(1);
   });
 
   test('commit still finishes when a hook fails and nobody is listening', async () => {

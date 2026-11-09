@@ -40,7 +40,7 @@ import {
   cleanOrderColumns,
 } from './regular-relations';
 import { idsForInsertedRows, readAutoIncrementStep } from './inserted-ids';
-import { isDeadlockError, transactionCtx, waitForDeadlockRetry } from '../transaction-context';
+import { transactionCtx } from '../transaction-context';
 import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
@@ -455,37 +455,14 @@ export const createEntityManager = (db: Database): EntityManager => {
         await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
       }
 
-      // Relation order updates deadlock when two users share a role and both
-      // change it. Retry only when this update owns the transaction. Inside a
-      // document write the outer transaction is already aborted, and retrying
-      // here would run the next statements outside it.
-      const nested = Boolean(transactionCtx.get());
-      const maxAttempts = nested ? 1 : 3;
-      let relationsUpdated = false;
-      let lastError: unknown;
-
-      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-        const trx = await strapi.db.transaction();
-        try {
-          await this.updateRelations(uid, id, data, { transaction: trx.get() });
-          await trx.commit();
-          relationsUpdated = true;
-          break;
-        } catch (e) {
-          await trx.rollback();
-
-          lastError = e;
-          if (nested || attempt === maxAttempts || !isDeadlockError(e)) {
-            break;
-          }
-
-          await waitForDeadlockRetry(attempt);
-        }
-      }
-
-      if (!relationsUpdated) {
+      const trx = await strapi.db.transaction();
+      try {
+        await this.updateRelations(uid, id, data, { transaction: trx.get() });
+        await trx.commit();
+      } catch (e) {
+        await trx.rollback();
         await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
-        throw lastError;
+        throw e;
       }
 
       // TODO: do not trigger the findOne lifecycles ?
