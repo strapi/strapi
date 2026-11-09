@@ -234,6 +234,59 @@ describe('Upload plugin', () => {
       await rq({ method: 'DELETE', url: `/upload/files/${id}` });
     });
 
+    test('Rejects the top-level `where` query param when api.rest.strictParams is true', async () => {
+      expect(strapi.config.get('api.rest.strictParams')).toBe(true);
+
+      for (const url of ['/upload/files', '/upload/files/page', '/upload/files/1']) {
+        const res = await rq({
+          method: 'GET',
+          url,
+          qs: { where: { name: { $eq: 'does-not-match' } } },
+        });
+
+        expect(res.statusCode).toBe(400);
+      }
+    });
+
+    test('Ignores the top-level `where` query param when api.rest.strictParams is off', async () => {
+      const file = await strapi.db.query('plugin::upload.file').create({
+        data: {
+          name: 'where-ignored.png',
+          hash: 'where_ignored_hash',
+          ext: '.png',
+          mime: 'image/png',
+          size: 1,
+          url: '/uploads/where_ignored_hash.png',
+          provider: 'local',
+        },
+      });
+
+      const previousStrictParams = strapi.config.get('api.rest.strictParams');
+      strapi.config.set('api.rest.strictParams', false);
+
+      try {
+        for (const url of ['/upload/files', '/upload/files/page']) {
+          const res = await rq({
+            method: 'GET',
+            url,
+            qs: {
+              pagination: { pageSize: 100 },
+              where: { name: { $eq: 'does-not-match' } },
+            },
+          });
+
+          expect(res.statusCode).toBe(200);
+          const results = Array.isArray(res.body) ? res.body : res.body.data;
+          expect(results).toEqual(
+            expect.arrayContaining([expect.objectContaining({ id: file.id })])
+          );
+        }
+      } finally {
+        strapi.config.set('api.rest.strictParams', previousStrictParams);
+        await strapi.db.query('plugin::upload.file').delete({ where: { id: file.id } });
+      }
+    });
+
     test('Get one file with an unknown documentId returns 404', async () => {
       const getRes = await rq({
         method: 'GET',

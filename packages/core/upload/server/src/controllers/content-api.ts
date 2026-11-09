@@ -24,14 +24,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
     const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.validate.query(data, schema, { auth, route });
+    // Same behaviour as core-api: only throw on unknown params if the project turned on strictParams.
+    // Either way they never reach the query, because sanitizeQuery strips them.
+    const strictParams = strapi.config.get('api.rest.strictParams');
+
+    return strapi.contentAPI.validate.query(data, schema, {
+      auth,
+      route,
+      ...(typeof strictParams === 'boolean' && { strictParams }),
+    });
   };
 
   const sanitizeQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
     const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
+    // The upload service hands unknown root keys (e.g. `where`) straight to the query engine
+    return strapi.contentAPI.sanitize.query(data, schema, { auth, route, strictParams: true });
   };
 
   // Files can be addressed by numeric id or documentId (1:1, files have no draft & publish)
