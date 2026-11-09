@@ -24,6 +24,7 @@ import { syncCredentialsMiddleware } from './document-middlewares/sync-credentia
 import { uniqueUserFieldsMiddleware } from './document-middlewares/unique-user-fields';
 import type { AuthEngine } from './engine/types';
 import { registerEmailTemplates } from './emails/templates';
+import { registerMigrationControl } from './migration/control';
 import { createExplainMiddleware } from './middlewares/explain';
 import { registerConditions } from './services/condition';
 import createEndUsersStrategy from './strategies/end-users';
@@ -117,6 +118,9 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   const { usersPermissions: compat } = readCompatConfig(strapi);
 
   hideEngineTypesFromGraphQL(strapi, registerGeneratedContentTypes(strapi, engine));
+  // Decides at the start whether to migrate from Users & Permissions, before the schema is synced
+  registerMigrationControl(strapi);
+
   // The user and the role are named as Users & Permissions named them while the mode is on, and
   // the mode adds its own operations; both before the GraphQL plugin builds its schema
   applyGraphqlTypeNames(strapi, compat);
