@@ -277,6 +277,7 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
   const banned = columnOf(db, USER_UID, 'banned') ?? 'banned';
   const providerId = account.attributes.providerId?.columnName ?? 'provider_id';
   const accountUser = account.attributes.userId?.columnName ?? 'user_id';
+  const accountIdColumn = account.attributes.accountId?.columnName ?? 'account_id';
   const users = () => tableOf(trx, db, userTable);
   const columns = await columnsOf(trx, db, userTable);
   const copy = async (target: string, source: string) => {
@@ -294,8 +295,14 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
         `${alias}.${accountUser}`,
         `${userTable}.document_id`,
       ]);
+    // A password account's id is the user's: matching on it too lets SQLite use the (provider,
+    // account) index in full, where `provider_id` alone has it scan every password account once per
+    // user (quadratic: past half an hour at 100,000 users)
     const credential = (alias: string) =>
-      accounts(alias).select(trx.raw('1')).where(`${alias}.${providerId}`, 'credential');
+      accounts(alias)
+        .select(trx.raw('1'))
+        .where(`${alias}.${providerId}`, 'credential')
+        .whereRaw('?? = ??', [`${alias}.${accountIdColumn}`, `${userTable}.document_id`]);
 
     // Whoever has no password account signs in the way their first account says; the rest locally
     await users()

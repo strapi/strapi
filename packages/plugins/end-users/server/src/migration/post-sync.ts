@@ -686,7 +686,10 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
       .whereNotExists(function none() {
         this.select(db.connection.raw('1'))
           .from(account.tableName)
-          .whereRaw('?? = ??', [`${account.tableName}.${userId}`, 'u.document_id'])
+          // The account id is the user's id, so this matches the (provider, account) unique index
+          // in full. On `user_id` alone SQLite picks that index by `provider_id` and scans every
+          // credential account once for each user: quadratic, 25 minutes at 100,000 users
+          .whereRaw('?? = ??', [`${account.tableName}.${accountId}`, 'u.document_id'])
           .where(`${account.tableName}.${providerId}`, 'credential');
       })
       .orderBy('u.id')

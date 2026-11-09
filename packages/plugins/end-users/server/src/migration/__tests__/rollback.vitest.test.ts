@@ -120,7 +120,11 @@ const models = [
   },
   {
     tableName: 'eu_accounts',
-    attributes: { providerId: col('provider_id'), userId: col('user_id') },
+    attributes: {
+      providerId: col('provider_id'),
+      userId: col('user_id'),
+      accountId: col('account_id'),
+    },
   },
 ];
 
@@ -179,6 +183,7 @@ const project = async (renamed: boolean, permissions: Row[]) => {
     t.increments('id');
     t.string('provider_id');
     t.string('user_id');
+    t.string('account_id');
   });
 
   await knex(users).insert([
@@ -220,7 +225,7 @@ const project = async (renamed: boolean, permissions: Row[]) => {
     { profile_id: 1, user_id: 1 },
     { profile_id: 2, user_id: 2 },
   ]);
-  await knex('eu_accounts').insert({ provider_id: 'credential', user_id: 'd1' });
+  await knex('eu_accounts').insert({ provider_id: 'credential', user_id: 'd1', account_id: 'd1' });
 
   const logs: string[] = [];
   const table = (name: string) => (name === 'admin::permission' ? permissions : []);
