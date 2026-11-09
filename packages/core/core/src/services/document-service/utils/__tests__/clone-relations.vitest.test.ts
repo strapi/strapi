@@ -261,9 +261,8 @@ describe('clone relations', () => {
 
       it.each([
         ['set', { set: [{ documentId: 'file-b' }] }],
-        ['connect', { connect: [{ documentId: 'file-b' }] }],
-        ['disconnect', { disconnect: [{ documentId: 'file-a' }] }],
         ['an empty set', { set: [] }],
+        ['null set', { set: null }],
       ])('replaces a root single media with a submitted %s', async (_, operation) => {
         const { data } = await clone({ cover: operation });
 
@@ -271,22 +270,56 @@ describe('clone relations', () => {
       });
 
       it.each([
-        ['set', { set: [{ documentId: 'file-b' }] }],
-        ['connect', { connect: [{ documentId: 'file-b' }] }],
-        ['disconnect', { disconnect: [{ documentId: 'file-c' }] }],
-      ])('replaces a root multiple media with a submitted %s', async (_, operation) => {
+        ['connect', { connect: [{ documentId: 'file-b' }] }, [{ documentId: 'file-b' }]],
+        ['disconnect of the current file', { disconnect: [{ documentId: 'file-a' }] }, []],
+        ['disconnect by id', { disconnect: [1] }, []],
+        ['disconnect of another file', { disconnect: [{ documentId: 'file-b' }] }, [{ id: 1 }]],
+        ['disconnect and connect', { disconnect: ['file-a'], connect: [{ id: 2 }] }, [{ id: 2 }]],
+      ])('resolves a root single media %s into a set', async (_, operation, expected) => {
+        const { data } = await clone({ cover: operation });
+
+        expect(data.cover).toEqual({ set: expected });
+      });
+
+      it('replaces a root multiple media with a submitted set', async () => {
+        const operation = { set: [{ documentId: 'file-b' }] };
+
         const { data } = await clone({ gallery: operation });
 
         expect(data.gallery).toEqual(operation);
       });
 
-      it('replaces media inside a single component and keeps its other fields', async () => {
+      it.each([
+        [
+          'connect',
+          { connect: [{ documentId: 'file-b' }] },
+          [{ id: 1 }, { id: 3 }, { documentId: 'file-b' }],
+        ],
+        ['connect of a linked file', { connect: ['file-c'] }, [{ id: 1 }, { id: 3 }]],
+        ['partial disconnect', { disconnect: [{ documentId: 'file-c' }] }, [{ id: 1 }]],
+        ['disconnect of another file', { disconnect: [{ id: 2 }] }, [{ id: 1 }, { id: 3 }]],
+        [
+          'disconnect and connect',
+          { disconnect: [{ id: 1 }], connect: [{ id: 1 }, { id: 2 }] },
+          [{ id: 3 }, { id: 1 }, { id: 2 }],
+        ],
+      ])('resolves a root multiple media %s into a set', async (_, operation, expected) => {
+        const { data } = await clone({ gallery: operation });
+
+        expect(data.gallery).toEqual({ set: expected });
+      });
+
+      it('resolves media operations inside a single component and keeps its other fields', async () => {
         const set = { set: [{ documentId: 'file-b' }] };
         const connect = { connect: [{ documentId: 'file-b' }] };
 
         const { data } = await clone({ block: { image: set, images: connect } });
 
-        expect(data.block).toEqual({ id: 10, image: set, images: connect });
+        expect(data.block).toEqual({
+          id: 10,
+          image: set,
+          images: { set: [{ id: 1 }, { id: 3 }, { documentId: 'file-b' }] },
+        });
       });
 
       it('replaces media inside repeatable components and dynamic zones', async () => {

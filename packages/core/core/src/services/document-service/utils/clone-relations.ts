@@ -181,17 +181,96 @@ const traverseAllEntityRelations = (
   );
 };
 
+type RelationOperationOverride = {
+  value: Record<string, unknown>;
+  isMedia: boolean;
+  isMultiple: boolean;
+};
+
+const toList = (value: unknown): unknown[] => {
+  if (value == null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
+};
+
+const isNumericId = (value: unknown) => {
+  return (
+    (typeof value === 'number' && Number.isFinite(value)) ||
+    (typeof value === 'string' && /^\d+$/.test(value))
+  );
+};
+
+const isSameMedia = (file: unknown, ref: unknown) => {
+  if (!isRecord(file)) {
+    return false;
+  }
+
+  if (isNumericId(ref)) {
+    return String(file.id) === String(ref);
+  }
+
+  if (typeof ref === 'string') {
+    return file.documentId === ref;
+  }
+
+  if (isRecord(ref)) {
+    if (ref.id != null) {
+      return String(file.id) === String(ref.id);
+    }
+
+    if (ref.documentId != null) {
+      return file.documentId === ref.documentId;
+    }
+  }
+
+  return false;
+};
+
+const resolveMediaOperations = (
+  sourceMedia: unknown,
+  operations: Record<string, unknown>,
+  isMultiple: boolean
+) => {
+  if (Object.hasOwn(operations, 'set')) {
+    return operations;
+  }
+
+  const disconnect = toList(operations.disconnect);
+  const connect = toList(operations.connect);
+
+  const keptFiles = toList(sourceMedia).filter(
+    (file) => !disconnect.some((ref) => isSameMedia(file, ref))
+  );
+  const kept = keptFiles.map((file) =>
+    isRecord(file) && file.id != null ? { id: file.id } : file
+  );
+
+  if (!isMultiple) {
+    return { set: connect.length > 0 ? connect.slice(-1) : kept.slice(0, 1) };
+  }
+
+  const added = connect.filter((ref) => !keptFiles.some((file) => isSameMedia(file, ref)));
+
+  return { set: [...kept, ...added] };
+};
+
 const collectRelationOperationOverrides = async (
   submittedData: Record<string, unknown>,
   contentType: Schema.ContentType,
   getModel: (uid: string) => Schema.Schema
 ) => {
-  const overrides = new Map<string, Record<string, unknown>>();
+  const overrides = new Map<string, RelationOperationOverride>();
 
   await traverseEntityRelations(
-    ({ path, value }) => {
+    ({ path, value, attribute }) => {
       if (isRelationOperationPayload(value) && hasMeaningfulRelationOperations(value)) {
-        overrides.set(path.rawWithIndices!, value);
+        overrides.set(path.rawWithIndices!, {
+          value,
+          isMedia: attribute?.type === 'media',
+          isMultiple: attribute?.type === 'media' && attribute.multiple === true,
+        });
       }
     },
     { schema: contentType, getModel, includeMedia: true },
@@ -438,8 +517,12 @@ export const prepareCloneData = async (
   deferredCopies.push(...nested.deferredCopies);
   postCloneUpdates.push(...nested.postCloneUpdates);
 
-  for (const [path, value] of relationOperationOverrides) {
-    set(data, path, value);
+  for (const [path, { value, isMedia, isMultiple }] of relationOperationOverrides) {
+    set(
+      data,
+      path,
+      isMedia ? resolveMediaOperations(get(originalData, path), value, isMultiple) : value
+    );
   }
 
   return { data, deferredCopies, postCloneUpdates };

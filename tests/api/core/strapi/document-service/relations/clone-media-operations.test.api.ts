@@ -1,6 +1,6 @@
 /**
- * Clone must treat user-submitted media operation payloads (set / connect / disconnect) as
- * replacements for the original entry's populated media, like it does for relations.
+ * Clone applies user-submitted media operation payloads to the original entry's media:
+ * `set` replaces it, `connect` / `disconnect` are applied on top of it.
  */
 import type { Core, UID } from '@strapi/types';
 
@@ -13,6 +13,7 @@ let strapi: Core.Strapi;
 const builder = createTestBuilder();
 
 const ENTRY_UID = 'api::clone-media-entry.clone-media-entry' as UID.ContentType;
+const LOCALIZED_UID = 'api::clone-media-localized.clone-media-localized' as UID.ContentType;
 const BLOCK_UID = 'default.clone-media-block' as UID.Component;
 
 type MediaFile = { id: number; documentId: string };
@@ -51,6 +52,20 @@ const entryModel = {
   displayName: 'Clone media entry',
   singularName: 'clone-media-entry',
   pluralName: 'clone-media-entries',
+  description: '',
+  collectionName: '',
+};
+
+const localizedModel = {
+  attributes: {
+    name: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+    gallery: { type: 'media', multiple: true, pluginOptions: { i18n: { localized: true } } },
+  },
+  pluginOptions: { i18n: { localized: true } },
+  draftAndPublish: true,
+  displayName: 'Clone media localized',
+  singularName: 'clone-media-localized',
+  pluralName: 'clone-media-localizeds',
   description: '',
   collectionName: '',
 };
@@ -127,12 +142,17 @@ const expectSourceUnchanged = async (source: MediaEntry, { a, c }: Record<string
 
 describe('Document Service clone media operation payloads', () => {
   beforeAll(async () => {
-    await builder.addComponent(blockModel).addContentType(entryModel).build();
+    await builder
+      .addComponent(blockModel)
+      .addContentTypes([entryModel, localizedModel])
+      .addFixtures('plugin::i18n.locale', [{ name: 'Fr', code: 'fr' }])
+      .build();
 
     strapi = await createStrapiInstance();
   });
 
   afterAll(async () => {
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -167,6 +187,40 @@ describe('Document Service clone media operation payloads', () => {
       const clone = await cloneSource(source, {
         cover: { disconnect: [{ documentId: files.a.documentId }] },
       });
+
+      expect(clone.cover ?? null).toBeNull();
+      await expectSourceUnchanged(source, files);
+    });
+
+    testInTransaction('replaces the media with a connect', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, {
+        cover: { connect: [{ documentId: files.b.documentId }] },
+      });
+
+      expect(clone.cover?.id).toBe(files.b.id);
+      await expectSourceUnchanged(source, files);
+    });
+
+    testInTransaction('keeps the source media for a disconnect of another file', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, {
+        cover: { disconnect: [{ documentId: files.b.documentId }] },
+      });
+
+      expect(clone.cover?.id).toBe(files.a.id);
+      await expectSourceUnchanged(source, files);
+    });
+
+    testInTransaction('clears the media with a null set', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, { cover: { set: null } });
 
       expect(clone.cover ?? null).toBeNull();
       await expectSourceUnchanged(source, files);
@@ -230,6 +284,40 @@ describe('Document Service clone media operation payloads', () => {
       expect(ids(clone.gallery)).toEqual([files.b.id]);
       await expectSourceUnchanged(source, files);
     });
+
+    testInTransaction('adds a connected file to the source media', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, {
+        gallery: { connect: [{ documentId: files.b.documentId }] },
+      });
+
+      expect(ids(clone.gallery)).toEqual([files.a.id, files.c.id, files.b.id]);
+      await expectSourceUnchanged(source, files);
+    });
+
+    testInTransaction('removes only the disconnected file', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, {
+        gallery: { disconnect: [{ documentId: files.c.documentId }] },
+      });
+
+      expect(ids(clone.gallery)).toEqual([files.a.id]);
+      await expectSourceUnchanged(source, files);
+    });
+
+    testInTransaction('keeps the source media for a disconnect of another file', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, { gallery: { disconnect: [{ id: files.b.id }] } });
+
+      expect(ids(clone.gallery)).toEqual([files.a.id, files.c.id]);
+      await expectSourceUnchanged(source, files);
+    });
   });
 
   describe('media in components and dynamic zones', () => {
@@ -276,6 +364,58 @@ describe('Document Service clone media operation payloads', () => {
 
       expect(ids(clone.sections?.[0]?.images)).toEqual([files.b.id]);
       await expectSourceUnchanged(source, files);
+    });
+
+    testInTransaction('adds a connected file in a single component', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, {
+        block: { images: { connect: [{ documentId: files.b.documentId }] } },
+      });
+
+      expect(clone.block?.image?.id).toBe(files.a.id);
+      expect(ids(clone.block?.images)).toEqual([files.a.id, files.c.id, files.b.id]);
+      await expectSourceUnchanged(source, files);
+    });
+  });
+
+  describe('localized entries', () => {
+    testInTransaction('applies a connect to every cloned locale', async () => {
+      const files = await createFiles();
+      const documents = strapi.documents(LOCALIZED_UID);
+
+      const en = await documents.create({
+        locale: 'en',
+        data: { name: 'Source en', gallery: [files.a.id] } as any,
+      });
+      await documents.update({
+        documentId: en.documentId,
+        locale: 'fr',
+        data: { name: 'Source fr', gallery: [files.c.id] } as any,
+      });
+
+      const result = await documents.clone({
+        documentId: en.documentId,
+        locale: '*',
+        data: { gallery: { connect: [{ documentId: files.b.documentId }] } } as any,
+      });
+
+      const galleryOf = async (documentId: string, locale: string) => {
+        const entry = (await documents.findOne({
+          documentId,
+          locale,
+          status: 'draft',
+          populate: { gallery: true },
+        })) as unknown as { gallery?: MediaFile[] };
+
+        return ids(entry?.gallery);
+      };
+
+      expect(await galleryOf(result!.documentId, 'en')).toEqual([files.a.id, files.b.id]);
+      expect(await galleryOf(result!.documentId, 'fr')).toEqual([files.c.id, files.b.id]);
+      expect(await galleryOf(en.documentId, 'en')).toEqual([files.a.id]);
+      expect(await galleryOf(en.documentId, 'fr')).toEqual([files.c.id]);
     });
   });
 });
