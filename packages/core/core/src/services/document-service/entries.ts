@@ -205,10 +205,12 @@ const createEntriesService = (
       .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
   }
 
+  // omitEmptyInverseMorphValues is off by default: the caller turns it on only when no link of
+  // the old published version would be lost
   async function publishEntry(
     entry: any,
     params = {} as any,
-    { omitEmptyInverseMorphValues = true }: { omitEmptyInverseMorphValues?: boolean } = {}
+    { omitEmptyInverseMorphValues = false }: { omitEmptyInverseMorphValues?: boolean } = {}
   ) {
     clearTransformDataRequestCache();
     const publishedAt = new Date();

@@ -12,6 +12,11 @@ vi.mock('../transform/query', () => ({
   transformParamsToQuery: vi.fn(() => ({})),
 }));
 
+vi.mock('../transform/data', () => ({
+  clearTransformDataRequestCache: vi.fn(),
+  transformData: vi.fn(async (data: any) => data),
+}));
+
 vi.mock('../components', () => ({
   createComponents: vi.fn(async () => ({})),
   updateComponents: vi.fn(async () => ({})),
@@ -120,6 +125,55 @@ describe('Document Service: entries', () => {
       expect(where).toEqual({ id: 1 });
       expect(data).not.toHaveProperty('documentId');
       expect(data).toMatchObject({ title: 'New' });
+    });
+  });
+  describe('publish', () => {
+    const NOTE_UID = 'api::note.note';
+    const REMARK_UID = 'api::remark.remark';
+
+    // Inverse morphMany of a morphToOne: the links live in the morph columns of the remarks
+    const noteContentType = {
+      ...contentType,
+      uid: NOTE_UID,
+      options: { draftAndPublish: true },
+      attributes: {
+        title: { type: 'string' },
+        remarks: {
+          type: 'relation',
+          relation: 'morphMany',
+          target: REMARK_UID,
+          morphBy: 'subject',
+        },
+      },
+    };
+
+    beforeEach(() => {
+      (global.strapi as any).contentType = vi.fn(() => noteContentType);
+      (global.strapi as any).getModel = vi.fn(() => ({
+        attributes: { subject: { type: 'relation', relation: 'morphToOne' } },
+      }));
+    });
+
+    it('keeps an empty inverse morph value by default', async () => {
+      const entries = createEntriesService(NOTE_UID, entityValidator as any);
+
+      await entries.publish({ id: 1, title: 'Note', remarks: [] });
+
+      expect(dbCreate).toHaveBeenCalledTimes(1);
+      expect(dbCreate.mock.calls[0][0].data).toMatchObject({ title: 'Note', remarks: [] });
+    });
+
+    it('omits an empty inverse morph value when asked', async () => {
+      const entries = createEntriesService(NOTE_UID, entityValidator as any);
+
+      await entries.publish(
+        { id: 1, title: 'Note', remarks: [] },
+        {},
+        { omitEmptyInverseMorphValues: true }
+      );
+
+      expect(dbCreate).toHaveBeenCalledTimes(1);
+      expect(dbCreate.mock.calls[0][0].data).not.toHaveProperty('remarks');
     });
   });
 });
