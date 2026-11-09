@@ -1,0 +1,9 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": { "singularName": "article", "pluralName": "articles", "displayName": "Article" },
+  "attributes": {
+    "title": { "type": "string" },
+    "reviewer": { "type": "relation", "relation": "oneToOne", "target": "plugin::users-permissions.user" }
+  }
+}
