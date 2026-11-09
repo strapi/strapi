@@ -1,7 +1,7 @@
 import { PLUGIN_ID, USER_UID } from '../constants';
 import type { MigrationStepFn } from './control';
 import { leftoverColumns } from './rollback';
-import { readRecord, readReport, updateRecord } from './record';
+import { addReportItems, readRecord, readReport, updateRecord } from './record';
 import { columnsOf, dropColumn, dropTable, hasTable } from './schema-ops';
 import type { DbClient } from './snapshot';
 
@@ -10,12 +10,23 @@ const STAGED_PERMISSIONS: ReadonlySet<string> = new Set([
   'up_permissions_role_lnk',
 ]);
 
+/** The user columns Users & Permissions made and the compatibility mode kept, which the cleanup drops */
+const LEGACY_USER_COLUMNS: ReadonlySet<string> = new Set([
+  'provider',
+  'password',
+  'reset_password_token',
+  'confirmation_token',
+  'confirmed',
+  'blocked',
+]);
+
 /**
  * The first start with the compatibility mode off after a completed migration: what the way back
  * needed goes. The staged permission tables go, and a staged table the profile never declared only
  * once its report item is resolved (the others stay, and the log says how many). Columns the
- * models do not declare go from the user table (the values moved to the profile, the reset token,
- * the compatibility mode's own) and from the roles link table. After this the way back is a backup.
+ * models do not declare go from the roles link table, and from the user table when they are
+ * Users & Permissions' own or the profile took their values; any other column the models do not
+ * declare stays, with an item in the report that names it. After this the way back is a backup.
  */
 export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
   const { strapi } = ctx;
@@ -32,7 +43,7 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
       .map((item) => item.id)
   );
   const dropping: string[] = [];
-  let kept = 0;
+  let keptTables = 0;
 
   for (const [staged, original] of Object.entries(record.staged)) {
     const copied = record.carried.copied.includes(staged);
@@ -44,7 +55,7 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
     ) {
       dropping.push(staged);
     } else {
-      kept += 1;
+      keptTables += 1;
     }
   }
 
@@ -63,14 +74,22 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
     tableName: string;
     attributes: Record<string, { joinTable?: { name: string } }>;
   };
+  const carried = new Set(record.carried.columns);
   const dropped: string[] = [];
+  const kept: string[] = [];
 
   for (const table of [user.tableName, user.attributes.roles?.joinTable?.name]) {
     // A table that is not there (a record written without a migration) has nothing to drop
     // eslint-disable-next-line no-await-in-loop
     if (table && (await hasTable(trx, db, table))) {
       // eslint-disable-next-line no-await-in-loop
-      const columns = leftoverColumns(db, table, await columnsOf(trx, db, table));
+      const leftover = leftoverColumns(db, table, await columnsOf(trx, db, table));
+      const isUsers = table === user.tableName;
+      const columns = isUsers
+        ? leftover.filter((column) => LEGACY_USER_COLUMNS.has(column) || carried.has(column))
+        : leftover;
+
+      kept.push(...leftover.filter((column) => !columns.includes(column)));
 
       for (const column of columns) {
         // eslint-disable-next-line no-await-in-loop
@@ -81,12 +100,35 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
     }
   }
 
+  if (kept.length > 0) {
+    await addReportItems(
+      strapi,
+      kept.map((column) => ({
+        id: `staged-undeclared:${user.tableName}.${column}`,
+        kind: 'staged-undeclared' as const,
+        severity: 'action' as const,
+        message:
+          `The column ${column} of the user table is not declared by the user or profile type and ` +
+          'was not copied to the profile, so it was kept. Add the matching field to the profile and ' +
+          'copy its values, or drop the column once nothing needs it.',
+        refs: [column],
+        resolved: false,
+      }))
+    );
+  }
   await updateRecord(strapi, { cleanedUpAt: ctx.now().toISOString() });
 
-  const keptNote =
-    kept > 0
-      ? `; kept ${kept} staged ${kept === 1 ? 'table' : 'tables'} the profile does not declare, which are dropped once their items in the report are resolved`
-      : '';
+  const keptNote = [
+    keptTables > 0
+      ? `kept ${keptTables} staged ${keptTables === 1 ? 'table' : 'tables'} the profile does not declare, which are dropped once their items in the report are resolved`
+      : '',
+    kept.length > 0
+      ? `kept ${kept.length} ${kept.length === 1 ? 'column' : 'columns'} the models do not declare (${kept.join(', ')}), each with an item in the report`
+      : '',
+  ]
+    .filter(Boolean)
+    .map((note) => `; ${note}`)
+    .join('');
 
   strapi.log.info(
     `${PLUGIN_ID}: cleaned up after the migration: dropped ${dropping.length} staged tables and ${dropped.length} columns (${dropped.join(', ') || 'none'})${keptNote}`

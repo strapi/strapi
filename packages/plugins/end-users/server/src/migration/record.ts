@@ -81,7 +81,9 @@ const parseRecord = (value: unknown): MigrationRecord | null => {
     carried: {
       defaultRoleDocumentId: text(carried.defaultRoleDocumentId),
       copied: textList(carried.copied),
+      columns: textList(carried.columns),
     },
+    rollbackStartedAt: text(value.rollbackStartedAt),
     claim: parseClaim(value.claim),
   };
 };
@@ -125,7 +127,8 @@ const freshRecord = (claim: MigrationRecord['claim'], now: Date): MigrationRecor
   cleanedUpAt: null,
   completedSteps: [],
   staged: {},
-  carried: { defaultRoleDocumentId: null, copied: [] },
+  carried: { defaultRoleDocumentId: null, copied: [], columns: [] },
+  rollbackStartedAt: null,
   claim,
 });
 

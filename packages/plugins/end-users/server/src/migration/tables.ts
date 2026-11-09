@@ -51,3 +51,36 @@ export const planStaging = (
 
   return plan;
 };
+
+/** The columns of a join table, as the database metadata names them */
+export interface LinkTable {
+  joinColumn: { name: string };
+  inverseJoinColumn: { name: string };
+  orderColumnName?: string;
+  inverseOrderColumnName?: string;
+}
+
+/**
+ * The column of Users & Permissions' link table that matches a column of the profile's link table
+ * for the same relation. The profile owns the relation, so its own side is `user_id` there. When the
+ * other side is named `user_id` too, a relation to the user itself or to a type whose singular name is
+ * `user` (the admin's, which review workflows' assignee points at), the metadata layer calls that
+ * side `inv_user_id`, and its order column `inv_user_order` on a many-to-many.
+ */
+export const upLinkColumn = (link: LinkTable, column: string, relation?: string): string => {
+  if (column === link.joinColumn.name) {
+    return 'user_id';
+  }
+
+  if (column === link.inverseJoinColumn.name) {
+    return column === 'user_id' ? 'inv_user_id' : column;
+  }
+
+  if (column === link.inverseOrderColumnName) {
+    return link.orderColumnName === 'user_order' && relation === 'manyToMany'
+      ? 'inv_user_order'
+      : 'user_order';
+  }
+
+  return column;
+};

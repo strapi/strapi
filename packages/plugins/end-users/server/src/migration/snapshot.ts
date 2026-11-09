@@ -126,10 +126,11 @@ const listNotNullColumns = async (knex: Knex, client: DbClient): Promise<string[
 };
 
 /**
- * Rows whose `column` repeats once lower-cased, grouped in SQL: only the rows of a repeated value
- * come back, oldest id first, and never the value itself.
+ * Rows whose `column` repeats once lower-cased, as the database compares them: only the rows of a
+ * repeated value come back, oldest id first, and never the value itself. Each row carries `g`, the
+ * lowest id of its group, which the database named: on MySQL a collation can make `josé` and `jose`
+ * one group that no lower-casing in this process would see.
  */
-/** The query behind `duplicatesOf`; the subquery is a list, which every client accepts */
 export const duplicatesQuery = (
   knex: Knex,
   table: string,
@@ -137,20 +138,23 @@ export const duplicatesQuery = (
   /** Also returns `confirmed` and `blocked`, which decide who keeps the value */
   withTrust = false
 ): Knex.QueryBuilder => {
-  const repeated = knex(table)
-    .select(knex.raw(`LOWER(${column})`))
+  const groups = knex(table)
+    .select(knex.raw('MIN(??) as g', ['id']), knex.raw('LOWER(??) as lc', [column]))
     .whereNotNull(column)
     .andWhere(column, '<>', '')
-    .groupByRaw(`LOWER(${column})`)
+    .groupByRaw('LOWER(??)', [column])
     .havingRaw('COUNT(*) > 1');
 
   return knex(`${table} as t`)
+    .joinRaw('inner join ? on LOWER(??) = g.lc', [
+      groups.as('g') as unknown as Knex.Raw,
+      `t.${column}`,
+    ])
     .select(
       't.id as id',
-      knex.raw(`LOWER(t.${column}) as k`),
+      'g.g as g',
       ...(withTrust ? ['t.confirmed as confirmed', 't.blocked as blocked'] : [])
     )
-    .whereIn(knex.raw('LOWER(t.??)', [column]) as unknown as string, repeated)
     .orderBy('t.id');
 };
 
@@ -165,7 +169,7 @@ const duplicatesOf = async (
   return groupDuplicates(
     rows.map((row) => ({
       id: num(row.id),
-      k: String(row.k),
+      g: num(row.g),
       ...(withTrust ? { confirmed: Boolean(row.confirmed), blocked: Boolean(row.blocked) } : {}),
     }))
   );

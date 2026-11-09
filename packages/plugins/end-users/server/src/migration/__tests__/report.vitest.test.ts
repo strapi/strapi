@@ -7,6 +7,7 @@ import { COMPAT_ROWS } from '../../compat/rows';
 import {
   buildReport,
   CODE_FINDING_SEVERITY,
+  estimateMinutes,
   ITEM_SEVERITY,
   MEASURED_MS_PER_1000_USERS,
   nullableOnGraphql,
@@ -293,6 +294,14 @@ describe('estimate', () => {
   });
 });
 
+describe('estimate rates', () => {
+  it('has a measured rate for SQLite and Postgres and none for MySQL, which gives no estimate', () => {
+    expect(MEASURED_MS_PER_1000_USERS).toEqual({ sqlite: 780, postgres: 1660, mysql: null });
+    expect(estimateMinutes('postgres', 100_008)).toBe(3);
+    expect(estimateMinutes('mysql', 100_000)).toBeNull();
+  });
+});
+
 describe('nullableOnGraphql', () => {
   it('lists the attributes that are not required, and leaves out a type with none', () => {
     expect(
@@ -305,12 +314,52 @@ describe('nullableOnGraphql', () => {
 });
 
 describe('duplicatesQuery', () => {
-  it.each(['pg', 'mysql2'])('builds the subquery as a list on %s', (client) => {
-    const db = knex({ client });
-    const { sql } = duplicatesQuery(db, 'up_users', 'email').toSQL();
+  it.each(['pg', 'mysql2'])(
+    'names the group in SQL, joined on the lower-cased column, on %s',
+    (client) => {
+      const db = knex({ client });
+      const { sql } = duplicatesQuery(db, 'up_users', 'email').toSQL();
 
-    expect(sql).toContain('in (select');
-    expect(sql).not.toContain('in ((select');
+      expect(sql).not.toContain('((select');
+      expect(sql).toMatch(/inner join \(select min\(.id.\) as g, lower\(.email.\) as lc/i);
+      expect(sql).toMatch(/on lower\(.t.\..email.\) = g\.lc/i);
+    }
+  );
+
+  it('returns the lowest id of each group beside every member, trust columns on request', async () => {
+    const db = knex({
+      client: 'better-sqlite3',
+      connection: { filename: ':memory:' },
+      useNullAsDefault: true,
+    });
+
+    await db.schema.createTable('up_users', (t) => {
+      t.increments('id');
+      t.string('email');
+      t.boolean('confirmed');
+      t.boolean('blocked');
+    });
+    await db('up_users').insert([
+      { email: 'A@x.io', confirmed: true, blocked: false },
+      { email: 'b@x.io', confirmed: false, blocked: false },
+      { email: 'a@X.io', confirmed: false, blocked: true },
+      { email: 'c@x.io', confirmed: false, blocked: false },
+      { email: 'B@x.io', confirmed: false, blocked: false },
+      { email: '', confirmed: false, blocked: false },
+      { email: '', confirmed: false, blocked: false },
+    ]);
+
+    const rows = await duplicatesQuery(db, 'up_users', 'email', true);
+
+    expect(rows.map((row: any) => [row.id, row.g])).toEqual([
+      [1, 1],
+      [2, 2],
+      [3, 1],
+      [5, 2],
+    ]);
+    expect(rows[2]).toMatchObject({ confirmed: 0, blocked: 1 });
+
+    await db.destroy();
   });
 });
 

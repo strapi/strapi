@@ -100,8 +100,13 @@ export interface MigrationRecord {
   completedSteps: MigrationStep[];
   /** `eu_stg_<n>` to the table it was copied from */
   staged: Record<string, string>;
-  /** `copied`: the staged tables already copied back */
-  carried: { defaultRoleDocumentId: string | null; copied: string[] };
+  /**
+   * `copied`: the staged tables already copied back; `columns`: the user-table columns the profile
+   * took, which the cleanup may drop
+   */
+  carried: { defaultRoleDocumentId: string | null; copied: string[]; columns: string[] };
+  /** Set before a rollback's first rename; a start that finds it finishes the rollback or refuses */
+  rollbackStartedAt: string | null;
   claim: { by: string; until: string } | null;
 }
 

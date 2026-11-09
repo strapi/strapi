@@ -26,7 +26,8 @@ const record = (patch: Partial<MigrationRecord> = {}): MigrationRecord => ({
   cleanedUpAt: null,
   completedSteps: ['pre-sync'],
   staged: {},
-  carried: { defaultRoleDocumentId: null, copied: [] },
+  carried: { defaultRoleDocumentId: null, copied: [], columns: [] },
+  rollbackStartedAt: null,
   claim: { by: OWNER, until: '2999-01-01T00:00:00.000Z' },
   ...patch,
 });

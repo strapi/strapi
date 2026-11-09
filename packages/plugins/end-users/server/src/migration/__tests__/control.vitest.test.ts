@@ -14,7 +14,8 @@ const record = (patch: Partial<MigrationRecord> = {}): MigrationRecord => ({
   cleanedUpAt: null,
   completedSteps: [],
   staged: {},
-  carried: { defaultRoleDocumentId: null, copied: [] },
+  carried: { defaultRoleDocumentId: null, copied: [], columns: [] },
+  rollbackStartedAt: null,
   claim: null,
   ...patch,
 });
@@ -58,6 +59,31 @@ describe('decideMigration', () => {
     expect(decideMigration(state({ ...check, euUsersRows: null }))).toEqual({ kind: 'check' });
   });
 
+  it('allows check mode again after a completed rollback, when eu_users is gone', () => {
+    const check = {
+      config: { fromUsersPermissions: 'check' },
+      upLoaded: true,
+      record: record({ status: 'rolled-back' }),
+    };
+
+    expect(decideMigration(state({ ...check, euUsersRows: null }))).toEqual({ kind: 'check' });
+    expect(refusal(decideMigration(state({ ...check, euUsersRows: 3 })))).toContain('eu_users');
+  });
+
+  it('refuses check mode for a migration that stopped part-way', () => {
+    expect(
+      refusal(
+        decideMigration(
+          state({
+            config: { fromUsersPermissions: 'check' },
+            upLoaded: true,
+            record: record({ status: 'in-progress' }),
+          })
+        )
+      )
+    ).toContain('eu_users');
+  });
+
   it('refuses check mode when users-permissions is not loaded', () => {
     const decision = decideMigration(state({ config: { fromUsersPermissions: 'check' } }));
 
@@ -79,6 +105,54 @@ describe('decideMigration', () => {
     });
   });
 
+  it('rolls back a migration that stopped part-way, from whatever it reached', () => {
+    expect(
+      decideMigration(
+        state({ config: { rollback: true }, record: record({ status: 'in-progress' }) })
+      )
+    ).toEqual({ kind: 'rollback' });
+  });
+
+  it('says what blocks a rollback of an unfinished migration when the compatibility mode is off', () => {
+    const message = refusal(
+      decideMigration(
+        state({
+          config: { rollback: true },
+          compat: false,
+          record: record({ status: 'in-progress' }),
+        })
+      )
+    );
+
+    expect(message).toContain('compat.usersPermissions');
+    expect(message).not.toContain('cleaned up');
+  });
+
+  it('finishes an interrupted rollback when asked, even with the compatibility mode off', () => {
+    expect(
+      decideMigration(
+        state({
+          config: { rollback: true },
+          compat: false,
+          record: record({ rollbackStartedAt: '2026-11-02T00:00:00.000Z' }),
+        })
+      )
+    ).toEqual({ kind: 'rollback' });
+  });
+
+  it.each(['completed', 'in-progress'] as const)(
+    'refuses a start after an interrupted rollback of a %s migration unless migration.rollback is set',
+    (status) => {
+      const decision = decideMigration(
+        state({ record: record({ status, rollbackStartedAt: '2026-11-02T00:00:00.000Z' }) })
+      );
+
+      expect(refusal(decision)).toContain(
+        'a rollback was interrupted; set migration.rollback: true to finish it'
+      );
+    }
+  );
+
   it('refuses a rollback while migration.rollback is still set after one', () => {
     const decision = decideMigration(
       state({ config: { rollback: true }, record: record({ status: 'rolled-back' }) })
@@ -98,7 +172,7 @@ describe('decideMigration', () => {
       refusal(
         decideMigration(state({ config: { rollback: true }, compat: false, record: record() }))
       )
-    ).toContain('backup');
+    ).toContain('compat.usersPermissions');
   });
 
   it('refuses a rollback after the old tables were cleaned up', () => {
@@ -108,7 +182,7 @@ describe('decideMigration', () => {
           state({ config: { rollback: true }, record: record({ cleanedUpAt: '2026-11-02' }) })
         )
       )
-    ).toContain('backup');
+    ).toContain('cleaned up');
   });
 
   it('migrates attempt two after a rollback when asked again', () => {

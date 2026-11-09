@@ -82,10 +82,10 @@ describe('groupDuplicates', () => {
   it('lets a newer confirmed account keep the value over an older unconfirmed one', () => {
     expect(
       groupDuplicates([
-        { id: 1, k: 'a', confirmed: false, blocked: false },
-        { id: 2, k: 'a', confirmed: true, blocked: true },
-        { id: 3, k: 'a', confirmed: true, blocked: false },
-        { id: 4, k: 'a', confirmed: true, blocked: false },
+        { id: 1, g: 1, confirmed: false, blocked: false },
+        { id: 2, g: 1, confirmed: true, blocked: true },
+        { id: 3, g: 1, confirmed: true, blocked: false },
+        { id: 4, g: 1, confirmed: true, blocked: false },
       ])
     ).toEqual([{ keep: 3, rewrite: [4, 2, 1] }]);
   });
@@ -93,15 +93,30 @@ describe('groupDuplicates', () => {
   it('keeps the lowest id of each value and rewrites the rest, oldest first', () => {
     expect(
       groupDuplicates([
-        { id: 9, k: 'a' },
-        { id: 3, k: 'a' },
-        { id: 5, k: 'b' },
-        { id: 2, k: 'b' },
-        { id: 4, k: 'a' },
+        { id: 9, g: 1 },
+        { id: 3, g: 1 },
+        { id: 5, g: 2 },
+        { id: 2, g: 2 },
+        { id: 4, g: 1 },
       ])
     ).toEqual([
       { keep: 2, rewrite: [5] },
       { keep: 3, rewrite: [4, 9] },
+    ]);
+  });
+
+  it('takes the database group as it comes: values that differ in spelling but share a group are one', () => {
+    // MySQL's accent-insensitive collation puts josé and jose in one group; no value is looked at here
+    expect(
+      groupDuplicates([
+        { id: 4, g: 2 },
+        { id: 2, g: 2 },
+        { id: 7, g: 7 },
+        { id: 9, g: 7 },
+      ])
+    ).toEqual([
+      { keep: 2, rewrite: [4] },
+      { keep: 7, rewrite: [9] },
     ]);
   });
 });

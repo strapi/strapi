@@ -91,8 +91,8 @@ export const CODE_FINDING_SEVERITY: Readonly<Record<CodeFindingRule, Severity>> 
  */
 export const MEASURED_MS_PER_1000_USERS: Record<DbClient, number | null> = {
   sqlite: 780,
-  // Measured at the checkpoint, with the same rehearsal
-  postgres: null,
+  // The same rehearsal on Postgres 17: 166 s for 100,008 users
+  postgres: 1660,
   mysql: null,
 };
 

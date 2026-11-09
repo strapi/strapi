@@ -50,14 +50,26 @@ const ROLLED_BACK =
   'The migration was rolled back. Revert the commit that switched the config to end-users, or, to ' +
   'migrate again, set migration.fromUsersPermissions to true, then deploy again.';
 
+const ROLLBACK_INTERRUPTED =
+  'The migration cannot start: a rollback was interrupted; set migration.rollback: true to finish it, ' +
+  'then deploy again.';
+
 export const decideMigration = (state: MigrationState): MigrationDecision => {
   const { config, compat, upLoaded, record, upUsersTable, euUsersRows } = state;
   const from = config.fromUsersPermissions;
   const notCleanedUp = record !== null && record.cleanedUpAt === null;
+  // The rollback marks its start before its first rename, which MySQL commits on its own
+  const interrupted =
+    record !== null && record.rollbackStartedAt !== null && record.status !== 'rolled-back';
 
   if (from === 'check') {
-    // Sync drops the end-users tables the dormant plugin has no types for: only empty ones may go
-    if (upLoaded && ((euUsersRows !== null && euUsersRows > 0) || record !== null)) {
+    // Sync drops the end-users tables the dormant plugin has no types for: only empty ones may go.
+    // A rolled-back migration has none: its `eu_users` went with the rollback.
+    if (
+      upLoaded &&
+      ((euUsersRows !== null && euUsersRows > 0) ||
+        (record !== null && record.status !== 'rolled-back'))
+    ) {
       return refuse(
         'migration.fromUsersPermissions is "check", but this database already holds end-users data ' +
           '(eu_users has users or a migration is recorded), and check mode would drop those tables. ' +
@@ -80,7 +92,8 @@ export const decideMigration = (state: MigrationState): MigrationDecision => {
   }
 
   if (config.rollback) {
-    if (record?.status === 'completed' && compat && notCleanedUp) {
+    // A migration that stopped part-way rolls back from whatever it reached
+    if (record && record.status !== 'rolled-back' && notCleanedUp && (compat || interrupted)) {
       return { kind: 'rollback' };
     }
 
@@ -88,13 +101,25 @@ export const decideMigration = (state: MigrationState): MigrationDecision => {
       return refuse(ROLLED_BACK_WHILE_SET);
     }
 
+    if (record === null) {
+      return refuse(
+        'migration.rollback is set but there is nothing to roll back: no migration has run. ' +
+          'Remove migration.rollback.'
+      );
+    }
+
     return refuse(
-      record === null
-        ? 'migration.rollback is set but there is nothing to roll back: no migration has run. ' +
-            'Remove migration.rollback.'
-        : 'migration.rollback is set but the migration cannot be rolled back: the compatibility ' +
-            'mode is off or the old tables were cleaned up. Restore a backup instead.'
+      notCleanedUp
+        ? 'migration.rollback is set but cannot be honored: the compatibility mode ' +
+            '(compat.usersPermissions) is off, so sign-ups and password changes since are not in ' +
+            'the old tables. Restore a backup instead.'
+        : 'migration.rollback is set but cannot be honored: the old users-permissions tables were ' +
+            'cleaned up when the compatibility mode was turned off. Restore a backup instead.'
     );
+  }
+
+  if (interrupted) {
+    return refuse(ROLLBACK_INTERRUPTED);
   }
 
   if (record?.status === 'rolled-back') {

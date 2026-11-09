@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Database } from '@strapi/database';
 
+import { updateRecord } from '../record';
 import { leftoverColumns, reverseAdminAction, runRollback, upRoleType } from '../rollback';
 
 const UP = 'plugin::users-permissions';
@@ -301,6 +302,7 @@ const snapshot = async (knex: any) => ({
 
 describe('runRollback', () => {
   beforeEach(() => {
+    vi.mocked(updateRecord).mockClear();
     record = { status: 'completed', claim: { by: 'me' }, staged: {}, carried: { copied: [] } };
   });
 
@@ -331,6 +333,37 @@ describe('runRollback', () => {
       [1, 1],
       [2, 2],
     ]);
+    await knex.destroy();
+  });
+
+  it('marks the rollback as started before it changes a table, and clears the mark when it is done', async () => {
+    const { knex, db, ctx } = await project(false, []);
+
+    await runRollback(knex as never, db, ctx);
+
+    const patches = vi.mocked(updateRecord).mock.calls.map((call) => call[1]);
+
+    expect(Object.keys(patches[0])).toEqual(['rollbackStartedAt']);
+    expect(patches[0].rollbackStartedAt).toBe('1970-01-01T00:00:00.000Z');
+    expect(patches.at(-1)).toMatchObject({ status: 'rolled-back', rollbackStartedAt: null });
+    expect(await knex.schema.hasTable('up_users')).toBe(true);
+    await knex.destroy();
+  });
+
+  it('rolls back a migration that stopped before the profiles and accounts existed', async () => {
+    const { knex, db, ctx } = await project(true, []);
+
+    await knex.schema.dropTable('eu_profiles_user_lnk');
+    await knex.schema.dropTable('eu_profiles');
+    await knex.schema.dropTable('eu_accounts');
+    record.status = 'in-progress';
+
+    await runRollback(knex as never, db, ctx);
+
+    expect(record.status).toBe('rolled-back');
+    expect(
+      (await knex('up_users').orderBy('id').select('username')).map((u: Row) => u.username)
+    ).toEqual(['Alice', 'Bob', 'Carl']);
     await knex.destroy();
   });
 

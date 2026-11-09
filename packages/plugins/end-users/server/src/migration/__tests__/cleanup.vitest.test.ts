@@ -3,11 +3,12 @@ import type { Database } from '@strapi/database';
 
 import { runCleanup } from '../cleanup';
 import * as ops from '../schema-ops';
+import * as store from '../record';
 
 vi.mock('../schema-ops', () => ({
   hasTable: vi.fn().mockResolvedValue(true),
   dropTable: vi.fn().mockResolvedValue(undefined),
-  columnsOf: vi.fn().mockResolvedValue(['id', 'company']),
+  columnsOf: vi.fn().mockResolvedValue(['id', 'company', 'password', 'notes']),
   dropColumn: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -17,6 +18,7 @@ let report: unknown;
 vi.mock('../record', () => ({
   readRecord: vi.fn(async () => record),
   readReport: vi.fn(async () => report),
+  addReportItems: vi.fn(async () => undefined),
   updateRecord: vi.fn(async (_strapi: unknown, patch: Record<string, unknown>) => {
     Object.assign(record, patch);
   }),
@@ -47,7 +49,7 @@ describe('runCleanup', () => {
         eu_stg_2: 'up_permissions_role_lnk',
         eu_stg_3: 'up_users_favorites_lnk',
       },
-      carried: { copied: [] },
+      carried: { copied: [], columns: ['company'] },
     };
     report = {
       items: [{ id: 'staged-undeclared:up_users_favorites_lnk', kind: 'staged-undeclared' }],
@@ -80,6 +82,22 @@ describe('runCleanup', () => {
     expect(vi.mocked(ops.dropTable).mock.calls.map((call) => call[3])).toContain('eu_stg_3');
     expect(vi.mocked(ops.dropColumn).mock.calls.map((call) => [call[3], call[4]])).toEqual([
       ['eu_users', 'company'],
+      ['eu_users', 'password'],
     ]);
+  });
+
+  it('keeps a column that is neither a legacy one nor copied to the profile, and names it in an item', async () => {
+    await runCleanup({} as never, db, ctx());
+
+    expect(vi.mocked(ops.dropColumn).mock.calls.map((call) => call[4])).not.toContain('notes');
+    expect(vi.mocked(store.addReportItems).mock.calls[0][1]).toEqual([
+      expect.objectContaining({
+        id: 'staged-undeclared:eu_users.notes',
+        severity: 'action',
+        refs: ['notes'],
+        message: expect.stringContaining('notes'),
+      }),
+    ]);
+    expect(record.cleanedUpAt).toBe('2026-11-09T10:00:00.000Z');
   });
 });

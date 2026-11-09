@@ -67,7 +67,8 @@ const record = (extra: Record<string, unknown> = {}) => ({
   cleanedUpAt: null,
   completedSteps: [],
   staged: {},
-  carried: { defaultRoleDocumentId: null, copied: [] },
+  carried: { defaultRoleDocumentId: null, copied: [], columns: [] },
+  rollbackStartedAt: null,
   claim: null,
   ...extra,
 });

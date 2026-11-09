@@ -408,7 +408,7 @@ const groupsOf = async (
   return groupDuplicates(
     rows.map((row) => ({
       id: Number(row.id),
-      k: String(row.k),
+      g: Number(row.g),
       ...(withTrust ? { confirmed: Boolean(row.confirmed), blocked: Boolean(row.blocked) } : {}),
     }))
   );
@@ -659,7 +659,8 @@ export const runPreSync: MigrationStepFn = async (trx, db, ctx) => {
       cleanedUpAt: null,
       completedSteps: [],
       staged: {},
-      carried: { defaultRoleDocumentId: null, copied: [] },
+      carried: { defaultRoleDocumentId: null, copied: [], columns: [] },
+      rollbackStartedAt: null,
     });
   }
 

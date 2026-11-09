@@ -11,7 +11,7 @@ import { readRecord, updateRecord } from './record';
 import type { MigrationRecord } from './record';
 import { columnsOf, dropTable, hasTable, qualified, renameBack, tableOf } from './schema-ops';
 import type { DbClient } from './snapshot';
-import { RENAMED, upJoinTableName } from './tables';
+import { RENAMED, upJoinTableName, upLinkColumn } from './tables';
 
 const UP = 'plugin::users-permissions';
 const EU = `plugin::${PLUGIN_ID}`;
@@ -117,10 +117,6 @@ const copiedOriginals = (record: MigrationRecord): Set<string> =>
       .filter((original): original is string => typeof original === 'string')
   );
 
-/** `profile_id` is `user_id` on the way back: the profile's own column names give way to the user's */
-const userColumn = (column: string): string =>
-  column.startsWith('profile_') ? `user_${column.slice('profile_'.length)}` : column;
-
 interface Column {
   /** In the profile's table */
   from: string;
@@ -154,25 +150,27 @@ const linkCopies = (db: Database, copied: Set<string>): Copy[] => {
       joinTable.joinColumn?.referencedTable === profile.tableName &&
       copied.has(to)
     ) {
+      const toUser =
+        joinTable.inverseJoinColumn.referencedTable === modelOf(db, USER_UID).tableName;
       const columns: Column[] = [
         {
           from: joinTable.joinColumn.name,
-          to: userColumn(joinTable.joinColumn.name),
+          to: upLinkColumn(joinTable, joinTable.joinColumn.name, attribute.relation),
           type: 'integer',
           references: UP_USERS,
         },
         {
           from: joinTable.inverseJoinColumn.name,
-          to: joinTable.inverseJoinColumn.name,
+          to: upLinkColumn(joinTable, joinTable.inverseJoinColumn.name, attribute.relation),
           type: 'integer',
-          references: joinTable.inverseJoinColumn.referencedTable,
+          references: toUser ? UP_USERS : joinTable.inverseJoinColumn.referencedTable,
         },
       ];
 
       if (joinTable.orderColumnName) {
         columns.push({
           from: joinTable.orderColumnName,
-          to: joinTable.orderColumnName,
+          to: upLinkColumn(joinTable, joinTable.orderColumnName, attribute.relation),
           type: 'float',
         });
       }
@@ -180,7 +178,7 @@ const linkCopies = (db: Database, copied: Set<string>): Copy[] => {
       if (joinTable.inverseOrderColumnName) {
         columns.push({
           from: joinTable.inverseOrderColumnName,
-          to: userColumn(joinTable.inverseOrderColumnName),
+          to: upLinkColumn(joinTable, joinTable.inverseOrderColumnName, attribute.relation),
           type: 'float',
         });
       }
@@ -280,6 +278,8 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
   const accountIdColumn = account.attributes.accountId?.columnName ?? 'account_id';
   const users = () => tableOf(trx, db, userTable);
   const columns = await columnsOf(trx, db, userTable);
+  // A migration that stopped early has none of end-users' own tables yet
+  const hasAccounts = await hasTable(trx, db, account.tableName);
   const copy = async (target: string, source: string) => {
     if (columns.includes(target) && columns.includes(source)) {
       await users().update({ [target]: trx.raw('COALESCE(??, ?)', [source, false]) });
@@ -289,7 +289,7 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
   await copy('confirmed', verified);
   await copy('blocked', banned);
 
-  if (columns.includes('provider')) {
+  if (hasAccounts && columns.includes('provider')) {
     const accounts = (alias: string) =>
       trx(`${qualified(db, account.tableName)} as ${alias}`).whereRaw('?? = ??', [
         `${alias}.${accountUser}`,
@@ -381,7 +381,9 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
     joinColumn: { name: string };
     inverseJoinColumn: { name: string };
   };
-  const wanted = profileScalars(strapi);
+  const hasProfiles =
+    (await hasTable(trx, db, link.name)) && (await hasTable(trx, db, profile.tableName));
+  const wanted = hasProfiles ? profileScalars(strapi) : [];
   const leftover = new Set(leftoverColumns(db, modelOf(db, USER_UID).tableName, columns));
   const moved = wanted.filter((column) => leftover.has(column));
   const ofUser = (alias: string) =>
@@ -409,15 +411,17 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
   }
 
   // Accounts beyond a user's first have no place in the one `provider` column
-  const all = await countOf(trx(qualified(db, account.tableName)));
-  const owners = Number(
-    (
-      (await trx(qualified(db, account.tableName)).countDistinct({ c: accountUser }).first()) as
-        Row | undefined
-    )?.c ?? 0
-  );
+  if (hasAccounts) {
+    const all = await countOf(trx(qualified(db, account.tableName)));
+    const owners = Number(
+      (
+        (await trx(qualified(db, account.tableName)).countDistinct({ c: accountUser }).first()) as
+          Row | undefined
+      )?.c ?? 0
+    );
 
-  lost.accounts = Math.max(0, all - owners);
+    lost.accounts = Math.max(0, all - owners);
+  }
 };
 
 /** The users' roles: one each, the first by order and then by id, and the role types users-permissions keeps */
@@ -525,6 +529,11 @@ const fillUpTable = async (run: Run, copy: Copy) => {
     joinColumn: { name: string };
     inverseJoinColumn: { name: string };
   };
+
+  if (!(await hasTable(trx, db, link.name))) {
+    return;
+  }
+
   const select = trx(`${qualified(db, copy.from)} as a`)
     .join(`${qualified(db, link.name)} as ul`, `ul.${link.joinColumn.name}`, `a.${copy.key}`)
     .select(
@@ -553,6 +562,11 @@ const restoreMedia = async ({ db, trx }: Run) => {
     joinColumn: { name: string };
     inverseJoinColumn: { name: string };
   };
+
+  if (!(await hasTable(trx, db, link.name))) {
+    return;
+  }
+
   const tables = new Set<string>();
 
   for (const model of db.metadata.values() as Iterable<Model>) {
@@ -759,10 +773,9 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
   const { strapi } = ctx;
   const record = await readRecord(strapi);
 
-  if (!record || record.status !== 'completed' || record.claim?.by !== ctx.owner) {
-    throw new Error(
-      'This start does not hold a completed migration to roll back. Nothing was changed.'
-    );
+  // A migration that stopped part-way (`in-progress`) rolls back from whatever it reached
+  if (!record || record.status === 'rolled-back' || record.claim?.by !== ctx.owner) {
+    throw new Error('This start does not hold a migration to roll back. Nothing was changed.');
   }
 
   const run: Run = {
@@ -783,6 +796,11 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
     'up_users_role_lnk',
     (userModel.attributes.roles?.joinTable?.name as string | undefined) ?? RENAMED.up_users_role_lnk
   );
+
+  if (!(await hasTable(trx, db, userTable))) {
+    throw new Error('There is no user table to roll back. Nothing was changed.');
+  }
+
   const users = await countOf(tableOf(trx, db, userTable));
   const roles = await countOf(tableOf(trx, db, roleTable));
 
@@ -792,6 +810,10 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
   run.lost.permissionRows = (await hasTable(trx, db, 'eu_permissions'))
     ? await countOf(tableOf(trx, db, 'eu_permissions'))
     : 0;
+
+  // Marked before the first rename, which MySQL commits on its own with everything written before it:
+  // a start that finds the mark finishes the rollback, or refuses
+  await updateRecord(strapi, { rollbackStartedAt: ctx.now().toISOString() });
 
   // The three tables the move renamed take their names back, so the keys that point at them follow
   for (const [up, eu] of Object.entries(RENAMED)) {
@@ -816,6 +838,7 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
   await updateRecord(strapi, {
     status: 'rolled-back',
     rolledBackAt: ctx.now().toISOString(),
+    rollbackStartedAt: null,
     claim: null,
   });
   (

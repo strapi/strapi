@@ -25,7 +25,7 @@ import { permissionItems } from './report';
 import { adminStep } from './admin-side';
 import { keepHold, storesStep } from './post-sync-stores';
 import { waitForClaim } from './pre-sync';
-import { upJoinTableName } from './tables';
+import { upJoinTableName, upLinkColumn } from './tables';
 
 const PAGE = 1000;
 /** Rows per insert: SQLite takes at most 999 values in one statement */
@@ -378,6 +378,8 @@ interface CopyPlan {
   into: string;
   /** The column of the profile's table that holds the profile id */
   key: string;
+  /** The column of the staged table that a column of the profile's table takes its values from */
+  source: (column: string) => string;
 }
 
 /** The staged tables the profile declares, and the profile tables that take them */
@@ -399,6 +401,7 @@ const declaredCopies = (strapi: Core.Strapi): CopyPlan[] => {
           from: upJoinTableName(strapi.db, name),
           into: joinTable.name,
           key: joinTable.joinColumn.name,
+          source: (column) => upLinkColumn(joinTable, column, attribute.relation),
         });
       }
     }
@@ -409,7 +412,12 @@ const declaredCopies = (strapi: Core.Strapi): CopyPlan[] => {
   );
 
   if (components) {
-    plans.push({ from: STAGED_COMPONENTS, into: components.tableName, key: 'entity_id' });
+    plans.push({
+      from: STAGED_COMPONENTS,
+      into: components.tableName,
+      key: 'entity_id',
+      source: (column) => column,
+    });
   }
 
   return plans;
@@ -438,6 +446,16 @@ const createProfiles = async (strapi: Core.Strapi, owner: string): Promise<numbe
       columns.push(column);
     }
   }
+
+  // What the profile takes from the user table, recorded so the cleanup drops these and no other custom column
+  const held = await stillHeld(strapi, owner);
+
+  await writeFenced(strapi, owner, {
+    carried: {
+      ...held.carried,
+      columns: [...new Set([...held.carried.columns, ...columns])],
+    },
+  });
 
   const targets = [
     'id',
@@ -556,14 +574,11 @@ const copyStaged = async (
   const db = strapi.db;
   const from = Object.keys((await db.getConnection(stagedName).columnInfo()) as object);
   const to = Object.keys((await db.getConnection(plan.into).columnInfo()) as object);
-  // The user's own column names give way to the profile's: `user_id` is `profile_id`
-  const sourceOf = (column: string) =>
-    column.startsWith('profile_') ? `user_${column.slice('profile_'.length)}` : column;
   const pairs = to
     .filter((column) => column !== 'id')
-    .map((column) => ({ column, source: sourceOf(column) }))
+    .map((column) => ({ column, source: plan.source(column) }))
     .filter(({ source }) => from.includes(source));
-  const sourceKey = sourceOf(plan.key);
+  const sourceKey = plan.source(plan.key);
 
   await keepHold(strapi, owner);
   await db.transaction(async ({ trx }: { trx: Knex.Transaction }) => {

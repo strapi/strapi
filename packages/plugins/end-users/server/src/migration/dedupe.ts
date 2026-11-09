@@ -76,17 +76,18 @@ export const trustRank = (row: { confirmed?: boolean; blocked?: boolean }): numb
 };
 
 /**
- * Rows grouped by the lower-cased value they repeat. The row that keeps the value is the most
+ * Rows grouped by `g`, the group the database put them in (its lowest id): the database's own
+ * comparison decides what repeats, so no value is compared here. The row that keeps the value is the most
  * trusted (confirmed and not blocked, then confirmed, then the rest), the oldest within a rank;
  * the others follow in that order. Rows with no trust columns rank alike, so the oldest keeps.
  */
 export const groupDuplicates = (
-  rows: Array<{ id: number; k: string; confirmed?: boolean; blocked?: boolean }>
+  rows: Array<{ id: number; g: number; confirmed?: boolean; blocked?: boolean }>
 ): DuplicateGroup[] => {
-  const groups = new Map<string, typeof rows>();
+  const groups = new Map<number, typeof rows>();
 
   for (const row of rows) {
-    groups.set(row.k, [...(groups.get(row.k) ?? []), row]);
+    groups.set(row.g, [...(groups.get(row.g) ?? []), row]);
   }
 
   return [...groups.values()]
