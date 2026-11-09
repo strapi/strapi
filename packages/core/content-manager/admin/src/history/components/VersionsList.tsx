@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
-import { AccessibleIcon, Box, Flex, Status, Typography } from '@strapi/design-system';
+import { AccessibleIcon, Box, Flex, Status, Tooltip, Typography } from '@strapi/design-system';
 import { Key, User } from '@strapi/icons';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
@@ -60,16 +60,34 @@ const ItalicName = styled(Typography)`
   font-style: italic;
 `;
 
-const VersionAuthorName = ({ author }: { author: HistoryVersions.HistoryVersionAuthor }) => {
+const VersionAuthorName = ({
+  author,
+  isNameTooltipOpen,
+  onNameTooltipOpenChange,
+}: {
+  author: HistoryVersions.HistoryVersionAuthor;
+  isNameTooltipOpen?: boolean;
+  onNameTooltipOpenChange?: (open: boolean) => void;
+}) => {
   const { formatMessage } = useIntl();
   const Icon = AUTHOR_TYPE_ICONS[author.type];
 
   return (
-    <Flex tag="span" display="inline-flex" gap={1}>
+    <Flex tag="span" display="inline-flex" gap={1} maxWidth="100%">
       <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
         <Icon />
       </AccessibleIcon>
-      {author.name ?? (
+      {author.name ? (
+        <Tooltip
+          label={author.name}
+          open={isNameTooltipOpen}
+          onOpenChange={onNameTooltipOpenChange}
+        >
+          <Typography tag="span" variant="pi" ellipsis>
+            {author.name}
+          </Typography>
+        </Tooltip>
+      ) : (
         <ItalicName tag="span" variant="pi" textColor="neutral500">
           {formatMessage(DELETED_AUTHOR_LABELS[author.type])}
         </ItalicName>
@@ -85,9 +103,13 @@ const VersionAuthorName = ({ author }: { author: HistoryVersions.HistoryVersionA
 const VersionAuthor = ({
   version,
   isCurrent,
+  isNameTooltipOpen,
+  onNameTooltipOpenChange,
 }: {
   version: HistoryVersions.HistoryVersionDataResponse;
   isCurrent: boolean;
+  isNameTooltipOpen?: boolean;
+  onNameTooltipOpenChange?: (open: boolean) => void;
 }) => {
   const { formatMessage } = useIntl();
 
@@ -101,7 +123,13 @@ const VersionAuthor = ({
         },
         {
           distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
-          author: version.author && <VersionAuthorName author={version.author} />,
+          author: version.author && (
+            <VersionAuthorName
+              author={version.author}
+              isNameTooltipOpen={isNameTooltipOpen}
+              onNameTooltipOpenChange={onNameTooltipOpenChange}
+            />
+          ),
           isAnonymous: !version.author,
           isCurrent,
           b: BlueText,
@@ -152,9 +180,27 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
   const [{ query }] = useQueryParams<{ id?: string }>();
   const setIsOpen = useActionsDrawer('VersionCard', (s) => s?.setIsOpen, false);
   const isActive = query.id === version.id.toString();
+  // The name is not focusable inside the card link, so keyboard focus on the card shows its tooltip.
+  // A click also focuses the card: the pointer down tells it apart, like the Radix tooltip trigger.
+  const [isNameTooltipOpen, setIsNameTooltipOpen] = React.useState(false);
+  const isPointerDownRef = React.useRef(false);
 
   const handleClick = () => {
     setIsOpen?.(false);
+  };
+
+  const handlePointerDown = () => {
+    isPointerDownRef.current = true;
+  };
+
+  const handleFocus = () => {
+    setIsNameTooltipOpen(!isPointerDownRef.current);
+    isPointerDownRef.current = false;
+  };
+
+  const handleBlur = () => {
+    setIsNameTooltipOpen(false);
+    isPointerDownRef.current = false;
   };
 
   return (
@@ -172,8 +218,11 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       to={`?${stringify({ ...query, id: version.id })}`}
       style={{ textDecoration: 'none' }}
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
     >
-      <Flex direction="column" gap={1} alignItems="flex-start">
+      <Flex direction="column" gap={1} alignItems="flex-start" maxWidth="100%">
         <Typography tag="h3" fontWeight="semiBold">
           {formatDate(version.createdAt, {
             day: 'numeric',
@@ -183,8 +232,13 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
             minute: '2-digit',
           })}
         </Typography>
-        <Typography tag="p" variant="pi" textColor="neutral600">
-          <VersionAuthor version={version} isCurrent={isCurrent} />
+        <Typography tag="p" variant="pi" textColor="neutral600" maxWidth="100%">
+          <VersionAuthor
+            version={version}
+            isCurrent={isCurrent}
+            isNameTooltipOpen={isNameTooltipOpen}
+            onNameTooltipOpenChange={setIsNameTooltipOpen}
+          />
         </Typography>
       </Flex>
       <Flex gap={2} wrap="wrap">
