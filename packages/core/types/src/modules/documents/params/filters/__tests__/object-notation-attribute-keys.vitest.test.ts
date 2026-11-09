@@ -1,0 +1,26 @@
+import { describe, expect, test } from 'vitest';
+
+import { COMPILE_TIMEOUT_MS, compileFixture } from './compile-fixture.test.utils';
+
+describe('Filters.ObjectNotation attribute keys', () => {
+  test(
+    'rejects unknown attributes for schemas with only scalar or only nested attributes',
+    () => {
+      const { status, signal, output } = compileFixture('known-schema-keys');
+
+      // Each accepted unknown attribute leaves an unused `@ts-expect-error`, which fails the compilation
+      expect({ status, signal }, output).toEqual({ status: 0, signal: null });
+    },
+    COMPILE_TIMEOUT_MS + 10_000
+  );
+
+  test(
+    'accepts any attribute when the schema registries are not extended',
+    () => {
+      const { status, signal, output } = compileFixture('no-schema-registry');
+
+      expect({ status, signal }, output).toEqual({ status: 0, signal: null });
+    },
+    COMPILE_TIMEOUT_MS + 10_000
+  );
+});
