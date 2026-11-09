@@ -1025,37 +1025,60 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(latestVersion.data.description).toBe('Updated with an admin token');
     });
 
-    test('Shows the current name of the author', async () => {
+    const createAuthorVersion = async (firstname: string) => {
       const utils = createUtils(strapi);
       const superAdminRole = await utils.getSuperAdminRole();
       const author = await utils.createUser({
-        firstname: 'renamed',
+        firstname,
         lastname: 'author',
-        email: 'renamed.author@strapi.io',
+        email: `${firstname}.author@strapi.io`,
         roles: [superAdminRole.id],
       });
       const authorRq = await createAuthRequest({ strapi, userInfo: author });
       const { data: entry } = await createEntry({
         uid: collectionTypeUid,
-        data: { name: 'Product of a renamed author' },
+        data: { name: `Product of the ${firstname} author` },
       });
 
       const res = await authorRq({
         method: 'PUT',
         url: `/content-manager/collection-types/${collectionTypeUid}/${entry.documentId}`,
-        body: { description: 'Updated before the rename' },
+        body: { description: `Updated by the ${firstname} author` },
         qs: { locale: 'en' },
       });
       expect(res.statusCode).toBe(200);
 
+      const [latestVersion] = await findVersions(entry.documentId);
+
+      return { author, version: latestVersion, documentId: entry.documentId };
+    };
+
+    test('Shows the current name of the author', async () => {
+      const { author, documentId } = await createAuthorVersion('renamed');
+
       await strapi.service('admin::user').updateById(author.id, { firstname: 'Renamed' });
 
-      const [latestVersion] = await findVersions(entry.documentId);
+      const [latestVersion] = await findVersions(documentId);
       expect(latestVersion.author).toEqual({
         type: 'person',
         name: 'Renamed author',
         model: 'admin::user',
         id: String(author.id),
+      });
+    });
+
+    test('Clears the author id of the versions when the author is deleted', async () => {
+      const { author, version } = await createAuthorVersion('deleted');
+
+      await createUtils(strapi).deleteUserById(author.id);
+
+      const storedVersion = await strapi.db
+        .query('plugin::content-manager.history-version')
+        .findOne({ where: { id: version.id } });
+      expect(storedVersion).toMatchObject({
+        authorType: 'person',
+        authorModel: 'admin::user',
+        authorId: null,
       });
     });
 
