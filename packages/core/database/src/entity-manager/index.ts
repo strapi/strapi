@@ -13,7 +13,6 @@ import {
   map,
   pick,
   uniqBy,
-  uniqWith,
 } from 'lodash';
 
 import * as types from '../utils/types';
@@ -99,7 +98,7 @@ const isValidId = (value: unknown): value is ID => isString(value) || Number.isI
 const isValidObjectId = (value: unknown): value is Entity =>
   isRecord(value) && 'id' in value && isValidId(value.id);
 
-const toIdArray = (
+export const toIdArray = (
   data: unknown
 ): {
   id: ID;
@@ -122,7 +121,23 @@ const toIdArray = (
       return datum;
     });
 
-  return uniqWith(array, isEqual);
+  const keptById = new Map<ID, typeof array>();
+
+  return array.filter((datum) => {
+    const kept = keptById.get(datum.id);
+
+    if (!kept) {
+      keptById.set(datum.id, [datum]);
+      return true;
+    }
+
+    if (kept.some((other) => isEqual(other, datum))) {
+      return false;
+    }
+
+    kept.push(datum);
+    return true;
+  });
 };
 
 type ScalarAssoc = string | number | null;
