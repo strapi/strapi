@@ -19,7 +19,15 @@ const filename = process.env.DATABASE_FILENAME;
 
 // Never the development database: this deletes what it is told to, so it only accepts a name that
 // says it is for the migration run
-if (!filename || !filename.includes('e2e-migration')) {
+// ... and only a file inside the application's own .tmp folder, so a `../` can't lead elsewhere
+const tmpDir = path.resolve(process.cwd(), '.tmp');
+const target = filename ? path.resolve(process.cwd(), filename) : '';
+
+if (
+  !filename ||
+  !path.basename(target).includes('e2e-migration') ||
+  !target.startsWith(tmpDir + path.sep)
+) {
   console.error(
     `DATABASE_FILENAME must name the migration e2e database (for example .tmp/e2e-migration.db), not "${filename ?? ''}": nothing was deleted.`
   );

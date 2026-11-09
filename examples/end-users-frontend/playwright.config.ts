@@ -1,4 +1,9 @@
+import { randomBytes } from 'node:crypto';
+
 import { defineConfig, devices } from '@playwright/test';
+
+// A secret-shaped value is made when the run starts, never written down; workers inherit it
+process.env.E2E_END_USERS_SECRET ??= randomBytes(32).toString('base64');
 
 const STRAPI_URL = 'http://localhost:1337';
 
@@ -60,7 +65,7 @@ export default defineConfig({
         // run never touches the one `yarn develop` uses, and the fixed secret below never has to
         // sign a developer's own sessions.
         DATABASE_FILENAME: '.tmp/e2e.db',
-        END_USERS_SECRET: 'e2e-secret-that-is-long-enough-to-sign-sessions',
+        END_USERS_SECRET: process.env.E2E_END_USERS_SECRET,
         STRAPI_TELEMETRY_DISABLED: 'true',
         // Every test signs up or in from this machine: Better Auth's per-address limit would
         // answer 429 to the later ones

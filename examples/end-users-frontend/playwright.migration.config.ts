@@ -10,6 +10,7 @@ const SAME_SITE_URL = 'http://localhost:5173';
 // password the seed script gave the migrated user.
 process.env.E2E_MIGRATION_PASSWORD ??= `${randomBytes(12).toString('base64url')}-9aA!`;
 process.env.E2E_MIGRATION_JWT_SECRET ??= randomBytes(24).toString('base64');
+process.env.E2E_END_USERS_SECRET ??= randomBytes(32).toString('base64');
 
 /**
  * The migration end to end, apart from the other specs: its own database, and Strapi started twice
@@ -60,7 +61,7 @@ export default defineConfig({
         FRONTEND_URL: SAME_SITE_URL,
         // Named so that the seed script, which deletes it, accepts it
         DATABASE_FILENAME: '.tmp/e2e-migration.db',
-        END_USERS_SECRET: 'e2e-secret-that-is-long-enough-to-sign-sessions',
+        END_USERS_SECRET: process.env.E2E_END_USERS_SECRET,
         STRAPI_TELEMETRY_DISABLED: 'true',
         END_USERS_RATE_LIMIT: 'false',
       },
