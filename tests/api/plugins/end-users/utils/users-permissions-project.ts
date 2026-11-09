@@ -421,9 +421,7 @@ export const migratedInstance = async (
  * both plugins are on, the project's types and Users & Permissions extension are in place, and
  * the plugin is dormant. Put back on destroy, like the other instances.
  */
-export const checkInstance = async (
-  migration: 'check' | false = 'check'
-): Promise<Core.Strapi> => {
+export const checkInstance = async (migration: 'check' | false = 'check'): Promise<Core.Strapi> => {
   if (!lastProject) {
     throw new Error('checkInstance: seed a project first');
   }

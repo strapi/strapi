@@ -10,7 +10,7 @@ import { PLUGIN_ID } from '../constants';
 import { readMigrationConfig } from './config';
 import type { MigrationConfig } from './config';
 import { claimPreSync, runPreSync } from './pre-sync';
-import { readRecord } from './record';
+import { readRecord, releaseMigration } from './record';
 import type { MigrationRecord } from './record';
 
 const UP_PLUGIN = 'users-permissions';
@@ -219,7 +219,16 @@ export const registerMigrationControl = (
 
         await strapi.db.migrations.providers.internal.register({
           name: `end-users-from-users-permissions-${decision.attempt}`,
-          up: (trx: Knex.Transaction, db: Database) => run.preSync(trx, db, ctx),
+          async up(trx: Knex.Transaction, db: Database) {
+            try {
+              await run.preSync(trx, db, ctx);
+            } catch (error) {
+              // The transaction still holds the only SQLite connection and the rows it wrote:
+              // the release waits for the rollback, then gives the claim back
+              releaseMigration(strapi, ctx.owner).catch(() => undefined);
+              throw error;
+            }
+          },
           down: () => Promise.resolve(),
         });
         break;

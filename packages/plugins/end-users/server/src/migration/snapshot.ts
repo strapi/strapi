@@ -2,6 +2,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import type { Knex } from 'knex';
 
+import { groupDuplicates } from './dedupe';
 import { isNativeUsername } from './native-username';
 import type { UpGrant } from './map-providers';
 import type { UpEmailKey, UpEmailTemplate } from './map-templates';
@@ -9,7 +10,7 @@ import type { UpAdvanced } from './map-settings';
 
 export type DbClient = 'sqlite' | 'postgres' | 'mysql';
 
-/** `keep` is the oldest row; `rewrite` the others, oldest first */
+/** `keep` is the row that holds the value (the most trusted, then the oldest); `rewrite` the others in that order */
 export interface DuplicateGroup {
   keep: number;
   rewrite: number[];
@@ -129,7 +130,13 @@ const listNotNullColumns = async (knex: Knex, client: DbClient): Promise<string[
  * come back, oldest id first, and never the value itself.
  */
 /** The query behind `duplicatesOf`; the subquery is a list, which every client accepts */
-export const duplicatesQuery = (knex: Knex, table: string, column: string): Knex.QueryBuilder => {
+export const duplicatesQuery = (
+  knex: Knex,
+  table: string,
+  column: string,
+  /** Also returns `confirmed` and `blocked`, which decide who keeps the value */
+  withTrust = false
+): Knex.QueryBuilder => {
   const repeated = knex(table)
     .select(knex.raw(`LOWER(${column})`))
     .whereNotNull(column)
@@ -138,7 +145,11 @@ export const duplicatesQuery = (knex: Knex, table: string, column: string): Knex
     .havingRaw('COUNT(*) > 1');
 
   return knex(`${table} as t`)
-    .select('t.id as id', knex.raw(`LOWER(t.${column}) as k`))
+    .select(
+      't.id as id',
+      knex.raw(`LOWER(t.${column}) as k`),
+      ...(withTrust ? ['t.confirmed as confirmed', 't.blocked as blocked'] : [])
+    )
     .whereIn(knex.raw('LOWER(t.??)', [column]) as unknown as string, repeated)
     .orderBy('t.id');
 };
@@ -148,18 +159,16 @@ const duplicatesOf = async (
   table: string,
   column: string
 ): Promise<DuplicateGroup[]> => {
-  const rows: Row[] = await duplicatesQuery(knex, table, column);
+  const withTrust = table === 'up_users';
+  const rows: Row[] = await duplicatesQuery(knex, table, column, withTrust);
 
-  const groups = new Map<string, number[]>();
-
-  for (const row of rows) {
-    const key = String(row.k);
-    groups.set(key, [...(groups.get(key) ?? []), num(row.id)]);
-  }
-
-  return [...groups.values()]
-    .map(([keep, ...rewrite]) => ({ keep, rewrite }))
-    .sort((a, b) => a.keep - b.keep);
+  return groupDuplicates(
+    rows.map((row) => ({
+      id: num(row.id),
+      k: String(row.k),
+      ...(withTrust ? { confirmed: Boolean(row.confirmed), blocked: Boolean(row.blocked) } : {}),
+    }))
+  );
 };
 
 const readStore = async <T>(knex: Knex, name: string): Promise<T | null> => {

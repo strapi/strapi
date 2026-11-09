@@ -2,6 +2,7 @@
  * The data move's file: the start control here, the migration itself in the cases that follow.
  */
 import {
+  checkInstance,
   inspectDatabase,
   migratedInstance,
   removeProjectTypes,
@@ -128,6 +129,24 @@ const readRecord = (strapi: Core.Strapi) =>
     attempt: number;
   }>;
 
+/**
+ * A finished migration leaves a link table whose key points at the end-users table, which the next
+ * seed's start drops, and staged tables that hold keys to each other: the project is seeded again
+ * on tables that are made anew
+ */
+const resetAfterMigration = () =>
+  inspectDatabase(async (db) => {
+    await db.schema.dropTableIfExists('memos_author_lnk');
+
+    // Postgres drops staged tables together
+    if (String(db.client.config.client) === 'pg') {
+      for (const table of await tablesLike(db, 'eu_stg_')) {
+        // eslint-disable-next-line no-await-in-loop
+        await db.raw('drop table if exists ?? cascade', [table]);
+      }
+    }
+  });
+
 describe('migration from users-permissions: before the schema sync', () => {
   let project: UsersPermissionsProject;
   let strapi: Core.Strapi;
@@ -249,19 +268,7 @@ describe('migration from users-permissions: a start that stopped after the renam
   let strapi: Core.Strapi;
 
   beforeAll(async () => {
-    // The start before left a link table whose key points at the end-users table, which is gone:
-    // the project is seeded again on a table that is made anew
-    await inspectDatabase(async (db) => {
-      await db.schema.dropTableIfExists('memos_author_lnk');
-
-      // Staged tables hold keys to each other: Postgres drops them together
-      if (String(db.client.config.client) === 'pg') {
-        for (const table of await tablesLike(db, 'eu_stg_')) {
-          // eslint-disable-next-line no-await-in-loop
-          await db.raw('drop table if exists ?? cascade', [table]);
-        }
-      }
-    });
+    await resetAfterMigration();
     project = await seedUsersPermissionsProject();
 
     await inspectDatabase(async (db) => {
@@ -318,5 +325,67 @@ describe('migration from users-permissions: a start that stopped after the renam
         .where({ id: project.users.aliceDuplicate.id })
         .first('email')
     ).toEqual({ email: `alice+dup${project.users.aliceDuplicate.id}@users.invalid` });
+  });
+});
+
+describe('migration from users-permissions: end-users ran beside it first', () => {
+  let project: UsersPermissionsProject;
+  let strapi: Core.Strapi;
+
+  beforeAll(async () => {
+    await resetAfterMigration();
+    project = await seedUsersPermissionsProject();
+
+    // Both plugins on, nothing asked for: end-users makes its own, empty, tables
+    await (await checkInstance(false)).destroy();
+
+    const empty = await inspectDatabase(async (db) => ({
+      users: Number((await db('eu_users').count({ c: '*' }).first())?.c),
+      kept: Number((await db('up_users').count({ c: '*' }).first())?.c),
+    }));
+
+    expect(empty.users).toBe(0);
+    expect(empty.kept).toBeGreaterThan(0);
+
+    strapi = await migratedInstance(project);
+  });
+
+  afterAll(async () => {
+    await strapi?.destroy();
+    removeProjectTypes();
+  });
+
+  it('migrates over the empty end-users tables without losing a user, a role or the memo author', async () => {
+    const users = await strapi.db.connection('eu_users').select('id', 'document_id');
+    const fixtures = Object.values(project.users);
+
+    expect(users).toHaveLength(fixtures.length);
+
+    for (const user of fixtures) {
+      expect(users).toContainEqual({ id: user.id, document_id: user.documentId });
+    }
+
+    const roles = await strapi.db.connection('eu_roles').select('id', 'document_id');
+
+    for (const role of Object.values(project.roles)) {
+      expect(roles).toContainEqual({ id: role.id, document_id: role.documentId });
+    }
+
+    const author = await strapi.db
+      .connection('memos_author_lnk')
+      .where({ memo_id: project.ids.memo })
+      .first();
+
+    expect(author.user_id).toBe(project.users.alice.id);
+  });
+
+  it('says in the report that the end-users roles from before were replaced', async () => {
+    const report = (await strapi
+      .store({ type: 'plugin', name: 'end-users' })
+      .get({ key: 'migration-report' })) as { items: Array<{ id: string; severity: string }> };
+
+    expect(report.items).toContainEqual(
+      expect.objectContaining({ id: 'compat-note:end-users-tables-replaced', severity: 'info' })
+    );
   });
 });

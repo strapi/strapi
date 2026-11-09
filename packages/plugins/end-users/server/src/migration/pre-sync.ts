@@ -10,7 +10,15 @@ import { planRewrites, groupDuplicates } from './dedupe';
 import type { RewriteRule } from './dedupe';
 import type { MigrationConfig } from './config';
 import type { MigrationContext, MigrationStepFn } from './control';
-import { claimMigration, readRecord, readReport, updateRecord, writeReport } from './record';
+import {
+  CLAIM_MS,
+  addReportItems,
+  claimMigration,
+  readRecord,
+  readReport,
+  updateRecord,
+  writeReport,
+} from './record';
 import type { MigrationRecord } from './record';
 import { buildReport } from './report';
 import type { ReportContext } from './report';
@@ -55,6 +63,52 @@ export const refusalOf = (snapshot: UpSnapshot, config: MigrationConfig): string
   return null;
 };
 
+/** How long a start waits for another one's claim, and how often it looks */
+export const CLAIM_POLL_MS = 2000;
+
+/**
+ * Takes the claim, or waits for whoever holds it: tries every `intervalMs`, ends as `completed`
+ * when the migration is finished by the other start, and gives up after `timeoutMs` (the length
+ * of a claim, so one that was never released has run out by then).
+ */
+export const waitForClaim = async ({
+  claim,
+  completed,
+  onWait,
+  intervalMs = CLAIM_POLL_MS,
+  timeoutMs = CLAIM_MS,
+}: {
+  claim: () => Promise<boolean>;
+  completed: () => Promise<boolean>;
+  onWait?: () => void;
+  intervalMs?: number;
+  timeoutMs?: number;
+}): Promise<'claimed' | 'completed' | 'timeout'> => {
+  const startedAt = Date.now();
+
+  for (;;) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await claim()) {
+      return 'claimed';
+    }
+
+    // eslint-disable-next-line no-await-in-loop
+    if (await completed()) {
+      return 'completed';
+    }
+
+    if (Date.now() - startedAt >= timeoutMs) {
+      return 'timeout';
+    }
+
+    onWait?.();
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => {
+      setTimeout(resolve, intervalMs);
+    });
+  }
+};
+
 /**
  * Before the migration is registered: reads what would be migrated, refuses what can't be, and
  * takes the claim. Runs outside the migration's transaction on purpose: a claim written inside it
@@ -75,10 +129,22 @@ export const claimPreSync = async (
     return refusal;
   }
 
-  return (await claimMigration(strapi, owner))
-    ? null
-    : 'Another start holds the migration (its claim lasts 15 minutes). Wait for it to finish, or ' +
-        'for the claim to run out, then deploy again.';
+  let announced = false;
+  const outcome = await waitForClaim({
+    claim: () => claimMigration(strapi, owner),
+    completed: async () => (await readRecord(strapi))?.status === 'completed',
+    onWait() {
+      if (!announced) {
+        announced = true;
+        strapi.log.info(`${PLUGIN_ID}: another start is running the migration; waiting for it`);
+      }
+    },
+  });
+
+  return outcome === 'timeout'
+    ? 'Another start has held the migration for 15 minutes without finishing it. Check that it ' +
+        'is still running, then deploy again.'
+    : null;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -260,6 +326,102 @@ const renameSchemaObjects = async (
   }
 };
 
+/**
+ * Renames one table and makes sure it moved. A table already renamed by an earlier start is left
+ * as it is; anything else that stops the rename (the target exists, the source is gone) throws,
+ * since going on would leave the source for the schema sync to drop.
+ */
+const renameOne = async (trx: Knex, db: Database, from: string, to: string) => {
+  const hasFrom = await db.getSchemaConnection(trx).hasTable(from);
+  const hasTo = await db.getSchemaConnection(trx).hasTable(to);
+
+  if (!hasFrom && hasTo) {
+    return;
+  }
+
+  if (!hasFrom || hasTo) {
+    throw new Error(
+      hasFrom
+        ? `The table ${to} already exists, so ${from} was not renamed. Nothing was recorded.`
+        : `The table ${from} is missing, so it cannot become ${to}. Nothing was recorded.`
+    );
+  }
+
+  if (!(await db.schema.renameTable(trx, { from, to }))) {
+    throw new Error(`The table ${from} was not renamed to ${to}. Nothing was recorded.`);
+  }
+};
+
+/** The tables in an order that drops each before the ones it points at */
+const dropOrder = (names: string[], pointsAt: Map<string, string[]>): string[] => {
+  const ordered: string[] = [];
+  let rest = [...names];
+
+  while (rest.length > 0) {
+    const left = rest;
+    const free = left.filter(
+      (name) => !left.some((other) => other !== name && pointsAt.get(other)?.includes(name))
+    );
+    // A cycle has no free table: those that are left go as they are
+    const next = free.length > 0 ? free : left;
+
+    ordered.push(...next);
+    rest = left.filter((name) => !next.includes(name));
+  }
+
+  return ordered;
+};
+
+/**
+ * With no users in `eu_users` (end-users ran beside users-permissions before the migration) the
+ * tables the plugin made are empty of anything worth keeping, and they are in the way of the
+ * renames: they go, with their keys. Staged tables stay.
+ */
+const dropEndUsersTables = async (trx: Knex, db: Database, client: DbClient): Promise<number> => {
+  let names = (await tablesStartingWith(trx, client, 'eu_')).filter(
+    (name) => !name.startsWith('eu_stg_')
+  );
+  const schema = db.getSchemaName();
+
+  // The connection's own switches, since the transaction holds the only connection SQLite has
+  if (client === 'sqlite') {
+    // Foreign keys stay on inside a transaction: a table goes only once no other one points at it
+    const pointsAt = new Map<string, string[]>();
+
+    for (const name of names) {
+      // eslint-disable-next-line no-await-in-loop
+      const keys = (await trx.raw('pragma foreign_key_list(??)', [name])) as Row[];
+
+      pointsAt.set(
+        name,
+        keys.map((key) => String(key.table))
+      );
+    }
+
+    names = dropOrder(names, pointsAt);
+  } else if (client === 'mysql') {
+    await trx.raw('set foreign_key_checks = 0');
+  }
+
+  try {
+    for (const name of names) {
+      if (client === 'postgres') {
+        // eslint-disable-next-line no-await-in-loop
+        await trx.raw('drop table if exists ?? cascade', [schema ? `${schema}.${name}` : name]);
+      } else {
+        // eslint-disable-next-line no-await-in-loop
+        await db.getSchemaConnection(trx).dropTableIfExists(name);
+      }
+    }
+  } finally {
+    if (client === 'mysql') {
+      await trx.raw('set foreign_key_checks = 1');
+    }
+  }
+
+  return names.length;
+};
+
 const renameTables = async (
   trx: Knex,
   db: Database,
@@ -269,7 +431,7 @@ const renameTables = async (
 ) => {
   for (const [from, to] of pairs) {
     // eslint-disable-next-line no-await-in-loop
-    await db.schema.renameTable(trx, { from, to });
+    await renameOne(trx, db, from, to);
   }
 
   // A table that is not in the new schema yet is not touched by the sync: its old names stay
@@ -285,6 +447,9 @@ const renameTables = async (
     }
   }
 };
+
+const tableHas = (trx: Knex, db: Database, name: string) =>
+  db.getSchemaConnection(trx).hasTable(name);
 
 /** Empties the profile's and the account's tables, children first, so profiles are built again */
 const emptyProfileTables = async (trx: Knex, db: Database, client: DbClient): Promise<number> => {
@@ -314,10 +479,53 @@ const groupsOf = async (
   table: string,
   column: string
 ): Promise<DuplicateGroup[]> => {
-  const rows = (await duplicatesQuery(trx, table, column)) as Array<{ id: unknown; k: unknown }>;
+  const withTrust = table === 'eu_users';
+  const rows = (await duplicatesQuery(trx, table, column, withTrust)) as Row[];
 
-  return groupDuplicates(rows.map((row) => ({ id: Number(row.id), k: String(row.k) })));
+  return groupDuplicates(
+    rows.map((row) => ({
+      id: Number(row.id),
+      k: String(row.k),
+      ...(withTrust ? { confirmed: Boolean(row.confirmed), blocked: Boolean(row.blocked) } : {}),
+    }))
+  );
 };
+
+/** Which of `values` some row of the column already holds, compared in lower case */
+const heldAmong = async (
+  trx: Knex,
+  db: Database,
+  table: string,
+  column: string,
+  values: string[]
+): Promise<string[]> => {
+  const lowered = [...new Set(values.map((value) => value.toLowerCase()))];
+  const held: string[] = [];
+
+  for (let from = 0; from < lowered.length; from += PAGE) {
+    // eslint-disable-next-line no-await-in-loop
+    const rows: Row[] = await tableOf(trx, db, table)
+      .whereRaw(
+        `LOWER(??) in (${lowered
+          .slice(from, from + PAGE)
+          .map(() => '?')
+          .join(', ')})`,
+        [column, ...lowered.slice(from, from + PAGE)]
+      )
+      .select(column);
+
+    held.push(...rows.map((row) => String(row[column]).toLowerCase()));
+  }
+
+  return held;
+};
+
+/** A failed write says which row, never what the database echoes: that can be an address */
+const refused = (what: string, id?: number) =>
+  new Error(
+    `The database refused to ${what}${id === undefined ? '' : ` of row ${id}`}. ` +
+      'Another row probably holds the new value; nothing was recorded.'
+  );
 
 const rewriteGroups = async (
   trx: Knex,
@@ -341,11 +549,39 @@ const rewriteGroups = async (
     }
   }
 
-  for (const { id, value } of planRewrites(groups, rule, values)) {
+  // Plan, look for rows that already hold a planned value, and plan again without those values
+  const taken = new Set<string>();
+  let plan = planRewrites(groups, rule, values, taken);
+
+  for (;;) {
     // eslint-disable-next-line no-await-in-loop
-    await tableOf(trx, db, table)
-      .where({ id })
-      .update({ [column]: value });
+    const held = (
+      await heldAmong(
+        trx,
+        db,
+        table,
+        column,
+        plan.map(({ value }) => value)
+      )
+    ).filter((value) => !taken.has(value));
+
+    if (held.length === 0) {
+      break;
+    }
+
+    held.forEach((value) => taken.add(value));
+    plan = planRewrites(groups, rule, values, taken);
+  }
+
+  for (const { id, value } of plan) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await tableOf(trx, db, table)
+        .where({ id })
+        .update({ [column]: value });
+    } catch {
+      throw refused(`rewrite the ${column}`, id);
+    }
   }
 
   return ids.length;
@@ -362,11 +598,15 @@ const lowercase = async (
   const differs =
     client === 'mysql' ? 'CAST(?? AS BINARY) <> CAST(LOWER(??) AS BINARY)' : '?? <> LOWER(??)';
 
-  return Number(
-    await tableOf(trx, db, table)
-      .whereRaw(differs, [column, column])
-      .update({ [column]: trx.raw('LOWER(??)', [column]) })
-  );
+  try {
+    return Number(
+      await tableOf(trx, db, table)
+        .whereRaw(differs, [column, column])
+        .update({ [column]: trx.raw('LOWER(??)', [column]) })
+    );
+  } catch {
+    throw refused(`lower-case the ${column} column`);
+  }
 };
 
 const migrateUsers = async (trx: Knex, db: Database, client: DbClient) => {
@@ -504,11 +744,38 @@ export const runPreSync: MigrationStepFn = async (trx, db, ctx) => {
     return;
   }
 
+  let replaced = 0;
+
+  if ((await tableHas(trx, db, 'up_users')) && (await tableHas(trx, db, 'eu_users'))) {
+    const users = Number((await tableOf(trx, db, 'eu_users').count({ c: '*' }).first())?.c ?? 0);
+
+    if (users > 0) {
+      throw new Error('eu_users already holds users, so the migration would mix two user tables.');
+    }
+
+    replaced = await dropEndUsersTables(trx, db, client);
+  }
+
   // Once the tables have moved, the data this reads is gone: the report stays as it was
   const snapshot = await readUpSnapshot(trx, client);
 
   if (snapshot.tables.includes('up_users') || !(await readReport(strapi))) {
     await writeReport(strapi, buildReport(snapshot, reportContext(strapi, ctx, client)));
+
+    if (replaced > 0) {
+      await addReportItems(strapi, [
+        {
+          id: 'compat-note:end-users-tables-replaced',
+          kind: 'compat-note',
+          severity: 'info',
+          message:
+            'The end-users plugin had run beside users-permissions before the migration. It had no ' +
+            'users, so its own roles and permissions from before were replaced by the migrated ones.',
+          count: replaced,
+          resolved: false,
+        },
+      ]);
+    }
   }
 
   if (ctx.attempt > 1) {
