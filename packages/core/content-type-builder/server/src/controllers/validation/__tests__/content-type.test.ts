@@ -35,6 +35,31 @@ describe('Content type validator', () => {
     });
   });
 
+  describe('displayName', () => {
+    const base = { singularName: 'test', pluralName: 'tests', attributes: {} };
+
+    test('Rejects a content type that only sets info.displayName', async () => {
+      const data = {
+        contentType: { ...base, info: { displayName: 'Test' } },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateContentTypeInput(data)).rejects.toMatchObject({
+        name: 'ValidationError',
+        details: {
+          errors: [expect.objectContaining({ path: ['contentType', 'displayName'] })],
+        },
+      });
+    });
+
+    test('Accepts a content type with a top-level displayName', async () => {
+      const data = {
+        contentType: { ...base, displayName: 'Test' },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateContentTypeInput(data)).resolves.toBeDefined();
+    });
+  });
+
   describe('Prevents use of reservedNames in attributes', () => {
     test('Throws when reserved names are used', async () => {
       const data = {

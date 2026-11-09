@@ -148,7 +148,7 @@ export const syncAPITokensPermissions = async () => {
       removedPermissions
         .map((permission) => permission.token)
         .filter((token): token is NonNullable<APITokenPermissionRow['token']> => token != null)
-        .map((token) => [token.id, `"${token.name}" (id ${token.id})`])
+        .map((token) => [token.id, `${JSON.stringify(token.name)} (id ${token.id})`])
     );
     const withoutTokenCount = removedPermissions.filter(
       (permission) => permission.token == null
