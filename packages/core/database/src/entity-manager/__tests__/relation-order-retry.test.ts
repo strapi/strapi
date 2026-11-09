@@ -28,6 +28,7 @@ describe('entity-manager relation-order deadlock retry', () => {
       select: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       first: jest.fn().mockReturnThis(),
+      init: jest.fn().mockReturnThis(),
       update: jest.fn().mockReturnThis(),
       execute,
     };
@@ -99,6 +100,17 @@ describe('entity-manager relation-order deadlock retry', () => {
 
     expect(transaction).toHaveBeenCalledTimes(1);
     expect(rollback).toHaveBeenCalledTimes(1);
+  });
+
+  it('commits relation updates when they succeed on the first attempt', async () => {
+    const { em, transaction, commit, rollback } = setup();
+    jest.spyOn(em, 'updateRelations').mockResolvedValue(undefined as never);
+
+    await expect(update(em)).resolves.toBeUndefined();
+
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(commit).toHaveBeenCalledTimes(1);
+    expect(rollback).not.toHaveBeenCalled();
   });
 
   it('does not retry an error that is not a deadlock', async () => {

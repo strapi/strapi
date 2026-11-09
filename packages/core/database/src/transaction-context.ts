@@ -112,11 +112,7 @@ const hooksFor = (owner: object) => {
   return pending;
 };
 
-const runCallbacks = async (callbacks: Callback[] | undefined, options?: CallbackRunOptions) => {
-  if (!callbacks) {
-    return;
-  }
-
+const runCallbacks = async (callbacks: Callback[], options?: CallbackRunOptions) => {
   // Hooks can register more hooks while they run.
   while (callbacks.length > 0) {
     const batch = callbacks.splice(0, callbacks.length);
@@ -184,7 +180,7 @@ const settleHooks = async (owner: object = defaultHookOwner, timeoutMs = HOOK_DR
 };
 
 const transactionCtx = {
-  async run<TCallback extends Callback>(
+  run<TCallback extends Callback>(
     trx: Knex.Transaction,
     cb: TCallback,
     owner: object = defaultHookOwner

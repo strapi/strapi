@@ -20,6 +20,20 @@ describe('isDeadlockError', () => {
     expect(isDeadlockError(new Error('deadlock detected'))).toBe(false);
     expect(isDeadlockError(new Error('Deadlock found'))).toBe(false);
   });
+
+  test('matches a driver error whose message only says Deadlock found', () => {
+    expect(
+      isDeadlockError({
+        sqlMessage: 'Deadlock found when trying to get lock',
+        message: 'Deadlock found when trying to get lock',
+      })
+    ).toBe(true);
+  });
+
+  test('ignores a driver error that has no message', () => {
+    expect(isDeadlockError({ sqlState: '40P01' })).toBe(false);
+    expect(isDeadlockError({ sql: 'update t set a = 1' })).toBe(false);
+  });
 });
 
 describe('transaction hooks', () => {
@@ -181,5 +195,41 @@ describe('transaction hooks', () => {
     );
 
     await expect(transactionCtx.settleHooks(owner, 15)).resolves.toBe(false);
+  });
+
+  test('settleHooks returns when the deadline has already passed', async () => {
+    const owner = {};
+
+    await transactionCtx.run(
+      fakeTrx(),
+      async () => {
+        transactionCtx.onCommit(
+          () =>
+            new Promise<void>(() => {
+              // Still pending when the drain deadline is already 0.
+            })
+        );
+        await transactionCtx.commit(fakeTrx());
+      },
+      owner
+    );
+
+    await expect(transactionCtx.settleHooks(owner, 0)).resolves.toBe(false);
+  });
+
+  test('drains hooks on the default owner when the transaction has none', async () => {
+    const ran = jest.fn();
+
+    await transactionCtx.run(
+      fakeTrx(),
+      async () => {
+        transactionCtx.onCommit(ran);
+        await transactionCtx.commit(fakeTrx());
+      },
+      null as never
+    );
+
+    await transactionCtx.settleHooks();
+    expect(ran).toHaveBeenCalledTimes(1);
   });
 });

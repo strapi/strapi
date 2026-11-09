@@ -18,6 +18,28 @@ import { createRepairManager, type RepairManager } from './repairs';
 import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
 import { withStrapiKnexLog } from './utils/knex-log';
 
+/**
+ * Commit and rollback hooks run after the transaction has already settled.
+ * Log a useful message for Error instances and for thrown non-errors.
+ */
+const formatHookError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  try {
+    const serialized = JSON.stringify(error);
+    return typeof serialized === 'string' ? serialized : '';
+  } catch {
+    // Circular values have no JSON form.
+    return 'Unserializable value';
+  }
+};
+
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
@@ -259,8 +281,9 @@ class Database {
     async function commit() {
       if (notNestedTransaction) {
         await transactionCtx.commit(trx, (error) => {
-          const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
-          logger.error(`Commit hook failed after the transaction committed: ${detail}`);
+          logger.error(
+            `Commit hook failed after the transaction committed: ${formatHookError(error)}`
+          );
         });
       }
     }
@@ -268,8 +291,9 @@ class Database {
     async function rollback() {
       if (notNestedTransaction) {
         await transactionCtx.rollback(trx, (error) => {
-          const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
-          logger.error(`Rollback hook failed after the transaction rolled back: ${detail}`);
+          logger.error(
+            `Rollback hook failed after the transaction rolled back: ${formatHookError(error)}`
+          );
         });
       }
     }

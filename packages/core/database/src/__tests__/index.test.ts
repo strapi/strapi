@@ -492,6 +492,59 @@ describe('Database', () => {
       await db.destroy();
     });
 
+    // Hooks can reject with any value. The log must stay readable for all of them.
+    /* eslint-disable prefer-promise-reject-errors */
+    it('logs hook failures that are not Error instances and errors without a stack', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+      const withoutStack = new Error('missing stack');
+      withoutStack.stack = undefined;
+
+      const circular: { self?: unknown } = {};
+      circular.self = circular;
+
+      await db.transaction(async ({ onCommit }) => {
+        onCommit(() => Promise.reject(withoutStack));
+        onCommit(() => Promise.reject('commit string'));
+        onCommit(() => Promise.reject({ reason: 'commit object' }));
+        // JSON.stringify(undefined) is undefined, so the log detail is empty.
+        onCommit(() => Promise.reject(undefined));
+        onCommit(() => Promise.reject(circular));
+      });
+      await db.settleTransactionHooks();
+
+      await expect(
+        db.transaction(async ({ onRollback }) => {
+          onRollback(() => Promise.reject({ reason: 'rollback object' }));
+          throw new Error('write failed');
+        })
+      ).rejects.toThrow('write failed');
+      await db.settleTransactionHooks();
+
+      const withoutStackOnRollback = new Error('rollback missing stack');
+      withoutStackOnRollback.stack = undefined;
+      await expect(
+        db.transaction(async ({ onRollback }) => {
+          onRollback(() => Promise.reject(withoutStackOnRollback));
+          throw new Error('write failed');
+        })
+      ).rejects.toThrow('write failed');
+      await db.settleTransactionHooks();
+
+      const messages = logged.mock.calls.map(([message]) => String(message));
+      expect(messages.some((message) => message.includes('missing stack'))).toBe(true);
+      expect(messages.some((message) => message.includes('commit string'))).toBe(true);
+      expect(messages.some((message) => message.includes('"reason":"commit object"'))).toBe(true);
+      expect(messages.some((message) => message.includes('Unserializable value'))).toBe(true);
+      expect(messages.some((message) => message.endsWith('transaction committed: '))).toBe(true);
+      expect(messages.some((message) => message.includes('"reason":"rollback object"'))).toBe(true);
+      expect(messages.some((message) => message.includes('rollback missing stack'))).toBe(true);
+      expect(messages.some((message) => message.includes('[object Object]'))).toBe(false);
+      await db.destroy();
+    });
+    /* eslint-enable prefer-promise-reject-errors */
+
     it('logs every failed commit hook and still runs hooks registered by a failure', async () => {
       const db = new Database(configConnectionObject);
       await db.init({ models });
