@@ -108,18 +108,26 @@ describe('Admin API Webhooks', () => {
     });
   });
 
-  test('Can not create a webhook with a local url on production', async () => {
-    // change NODE_ENV to 'production' to test this
+  // No destination check is on by default, in any environment
+  test('Can create a webhook with a local or private url on production', async () => {
     const originalNodeEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = 'production';
 
-    const { status } = await createWebhook({ url: 'http://localhost:1337' });
-    const { status: statusInt } = await createWebhook({ url: '私の.家' });
+    try {
+      const { status } = await createWebhook({ url: 'http://localhost:1337' });
+      const { status: statusPrivate } = await createWebhook({ url: 'http://10.0.0.5/hook' });
 
-    process.env.NODE_ENV = originalNodeEnv;
+      expect(status).toBe(201);
+      expect(statusPrivate).toBe(201);
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+    }
+  });
+
+  test('Can not create a webhook with a url that has no valid host', async () => {
+    const { status } = await createWebhook({ url: '私の.家' });
 
     expect(status).toBe(400);
-    expect(statusInt).toBe(400);
   });
 
   test('Can not create a webhook with an invalid url', async () => {
