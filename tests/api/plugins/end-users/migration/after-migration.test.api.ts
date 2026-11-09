@@ -2,8 +2,8 @@
  * Every must-keep behavior of the compatibility mode, on a database that was migrated from Users &
  * Permissions rather than made fresh: one API case for each row, over the whole stack. The project is
  * seeded once with the old plugin, migrated once, and the cases then talk to the result as an old
- * front end would. The ones that change a user use a user of their own, so the order of the cases does
- * not matter.
+ * front end would. The ones that change a user use a user of their own, so most cases do not depend on
+ * the order they run in. Some do: rows 3 and 11 share a memo count, so they stay in the order written.
  */
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
