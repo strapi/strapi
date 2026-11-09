@@ -146,7 +146,7 @@ What stays as it was in v6:
 
 Each layer stores its parts under a symbol. `@koa/router` copies the layers of a nested router with `Object.assign`, which keeps symbol properties. The layer is re-described when it is mounted.
 
-Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip the warning.
+Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. When that translation drops a custom pattern, it logs a second warning that names the parameter and the pattern, because the route may now match a request meant for a later route. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip both warnings.
 
 Boot fails with `RoutePathMigrationError` for a path v6 rejected too, such as `/:a:b` or a repeated parameter with no prefix and suffix, for a group that starts with `?`, and for one path that mixes v6 syntax with a v8 quoted name.
 

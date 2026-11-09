@@ -12,6 +12,7 @@ import {
   RoutePathMigrationError,
   registerTranslatedRoute,
   translateRoutePath,
+  warnTranslatedRoutePath,
 } from './route-path';
 
 const getMethod = (route: Core.Route) => {
@@ -23,10 +24,8 @@ const getPath = (route: Core.Route, strapi: Core.Strapi) => {
   const translated = translateRoutePath(path);
   const keepsV6Path = (route as { [KEEP_V6_ROUTE_PATH]?: boolean })[KEEP_V6_ROUTE_PATH] === true;
 
-  if (translated.changed && !keepsV6Path) {
-    strapi.log.warn(
-      `Route "${route.method} ${path}" uses path-to-regexp v6 syntax and was migrated to "${translated.path}".`
-    );
+  if (!keepsV6Path) {
+    warnTranslatedRoutePath(strapi, `Route "${route.method} ${path}"`, translated);
   }
 
   return translated;

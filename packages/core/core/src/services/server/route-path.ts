@@ -17,11 +17,20 @@ export class RoutePathMigrationError extends Error {
   }
 }
 
+export type IgnoredRoutePattern = {
+  /** The parameter the pattern was written on. Empty when the group had no name. */
+  parameter: string;
+  pattern: string;
+  unnamed: boolean;
+};
+
 export type TranslatedRoutePath = {
   path: string;
   changed: boolean;
   /** Names the v8 path needs that the v6 path does not have. Removed before the handler runs. */
   generatedParams: string[];
+  /** Custom patterns the translation does not apply, so the route can match more than it used to. */
+  ignoredPatterns: IgnoredRoutePattern[];
 };
 
 // v6 only made `/` and `.` optional along with a parameter.
@@ -250,6 +259,7 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
   let translated = '';
   let changed = false;
   const generatedParams: string[] = [];
+  const ignoredPatterns: IgnoredRoutePattern[] = [];
   const usedNames = new Set(
     [...path.matchAll(/[:*]([$\w]+)/g)].map(([, name]) => name).filter(Boolean)
   );
@@ -359,7 +369,8 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     modifier: string,
     prefix: string,
     suffix: string,
-    nextCharacter: string | undefined
+    nextCharacter: string | undefined,
+    unnamed = false
   ) => {
     if (pattern !== undefined) {
       try {
@@ -369,6 +380,8 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         const reason = error instanceof Error ? error.message : String(error);
         fail(`the custom pattern for ":${name}" is invalid: ${reason}`);
       }
+
+      ignoredPatterns.push({ parameter: unnamed ? '' : name, pattern, unnamed });
     }
 
     if ((modifier === '+' || modifier === '*') && prefix === '' && suffix === '') {
@@ -538,7 +551,15 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     }
 
     const name = group.name || generateName('Group');
-    addParameter(name, group.pattern, group.modifier, group.prefix, group.suffix, path[group.end]);
+    addParameter(
+      name,
+      group.pattern,
+      group.modifier,
+      group.prefix,
+      group.suffix,
+      path[group.end],
+      !group.name
+    );
   };
 
   for (let index = 0; index < path.length; index += 1) {
@@ -603,7 +624,15 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         writeParameter('', '', `:${formatParameterName(name, path[cursor])}`, false, true);
       } else {
         changed = true;
-        addParameter(name, pattern, modifier, detachOptionalPrefix(), '', path[cursor]);
+        addParameter(
+          name,
+          pattern,
+          modifier,
+          detachOptionalPrefix(),
+          '',
+          path[cursor],
+          !isParameter
+        );
       }
 
       index = cursor - 1;
@@ -647,7 +676,7 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     );
   }
 
-  return { path: translated, changed, generatedParams };
+  return { path: translated, changed, generatedParams, ignoredPatterns };
 };
 
 export const translateRoutePath = (
@@ -665,6 +694,34 @@ type Logger = { log: { warn: (message: string) => void } };
  */
 export const KEEP_V6_ROUTE_PATH = Symbol.for('strapi.route.keepV6Path');
 
+/**
+ * Logs the migration, and a separate warning for each custom pattern the translation drops.
+ * A dropped pattern is not a constraint anymore, so the route can catch a later route.
+ */
+export const warnTranslatedRoutePath = (
+  strapi: Logger,
+  subject: string,
+  translated: TranslatedRoutePath,
+  kind: 'route' | 'prefix' = 'route'
+) => {
+  if (!translated.changed) {
+    return;
+  }
+
+  strapi.log.warn(
+    `${subject} uses path-to-regexp v6 syntax and was migrated to "${translated.path}".`
+  );
+
+  const caughtBy = kind === 'prefix' ? 'This prefix' : 'This route';
+
+  for (const ignored of translated.ignoredPatterns) {
+    const target = ignored.unnamed ? 'an unnamed group' : `\`:${ignored.parameter}\``;
+    strapi.log.warn(
+      `${subject}: pattern \`${ignored.pattern}\` on ${target} is no longer enforced. ${caughtBy} may now match requests meant for later routes.`
+    );
+  }
+};
+
 const migrateRouterPath = (
   path: string,
   methods: string[],
@@ -672,13 +729,9 @@ const migrateRouterPath = (
   options?: TranslateOptions
 ) => {
   const translated = translateRoutePath(path, options);
+  const method = methods.map((item) => item.toUpperCase()).join(',');
 
-  if (translated.changed) {
-    const method = methods.map((item) => item.toUpperCase()).join(',');
-    strapi.log.warn(
-      `Route "${method} ${path}" uses path-to-regexp v6 syntax and was migrated to "${translated.path}".`
-    );
-  }
+  warnTranslatedRoutePath(strapi, `Route "${method} ${path}"`, translated);
 
   return translated;
 };
@@ -897,11 +950,7 @@ export const installRoutePathTranslation = (router: Router, strapi: Logger) => {
   const translatePrefix = (prefix: string) => {
     const translated = translateRoutePath(prefix, { namespace: nextNamespace('Prefix') });
 
-    if (translated.changed) {
-      strapi.log.warn(
-        `Router prefix "${prefix}" uses path-to-regexp v6 syntax and was migrated to "${translated.path}".`
-      );
-    }
+    warnTranslatedRoutePath(strapi, `Router prefix "${prefix}"`, translated, 'prefix');
 
     return toPart(prefix, translated);
   };

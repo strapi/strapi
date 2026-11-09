@@ -85,6 +85,9 @@ describe.each([
     expect(strapi.log.warn).toHaveBeenCalledWith(
       'Route "GET /users/:id(\\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".'
     );
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      'Route "GET /users/:id(\\d+)": pattern `\\d+` on `:id` is no longer enforced. This route may now match requests meant for later routes.'
+    );
   });
 
   it('does not warn for a path-to-regexp v8 path', () => {
@@ -487,7 +490,10 @@ describe('router path registration', () => {
       reply(ctx, { me: true });
     });
 
-    expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+    expect(strapi.log.warn).toHaveBeenCalledTimes(2);
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      'Route "GET /users/:id(\\d+)": pattern `\\d+` on `:id` is no longer enforced. This route may now match requests meant for later routes.'
+    );
     expect(router.route('user')).toMatchObject({ path: '/users/:id' });
     await expectReply(request(server).get('/users/12'), { id: '12' });
     await expectReply(request(server).get('/users/me'), { id: 'me' });
@@ -511,7 +517,10 @@ describe('router path registration', () => {
       { router }
     );
 
-    expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+    expect(strapi.log.warn).toHaveBeenCalledTimes(2);
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      'Route "GET /users/:id(\\d+)": pattern `\\d+` on `:id` is no longer enforced. This route may now match requests meant for later routes.'
+    );
   });
 
   it('leaves a v8 brace path unchanged', () => {
@@ -589,6 +598,9 @@ describe('router path registration', () => {
 
     expect(strapi.log.warn).toHaveBeenCalledWith(
       'Router prefix "/pre/:v(\\d+)" uses path-to-regexp v6 syntax and was migrated to "/pre/:v".'
+    );
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      'Router prefix "/pre/:v(\\d+)": pattern `\\d+` on `:v` is no longer enforced. This prefix may now match requests meant for later routes.'
     );
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
@@ -1042,7 +1054,7 @@ describe("Strapi's own v6 route paths", () => {
     });
   });
 
-  it('serves review workflow routes for both kinds with the kind in ctx.params[0]', async () => {
+  it('does not enforce an unnamed alternation, so another value matches as ctx.params[0]', async () => {
     const { server } = createStrapiServer([
       {
         prefix: '/admin',

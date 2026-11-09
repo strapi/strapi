@@ -55,7 +55,12 @@ describe('translateRoutePath', () => {
     '/f/{*"p"}',
     '/users/:"my (name)"',
   ])('does not change the path-to-regexp v8 path %s', (path) => {
-    expect(translateRoutePath(path)).toEqual({ path, changed: false, generatedParams: [] });
+    expect(translateRoutePath(path)).toEqual({
+      path,
+      changed: false,
+      generatedParams: [],
+      ignoredPatterns: [],
+    });
   });
 
   it.each([
@@ -81,6 +86,12 @@ describe('translateRoutePath', () => {
   it('lists the names it creates, which the v6 path does not have', () => {
     expect(translateRoutePath('/f/(\\d+)/(.*)').generatedParams).toEqual(['v6Group1', 'v6Group2']);
     expect(translateRoutePath('/f/:id(\\d+)').generatedParams).toEqual([]);
+    expect(translateRoutePath('/f/:id(\\d+)').ignoredPatterns).toEqual([
+      { parameter: 'id', pattern: '\\d+', unnamed: false },
+    ]);
+    expect(translateRoutePath('/(collection|single)').ignoredPatterns).toEqual([
+      { parameter: '', pattern: 'collection|single', unnamed: true },
+    ]);
   });
 
   it('namespaces the names it creates when asked, with a ":" so a prefix has parameters', () => {
