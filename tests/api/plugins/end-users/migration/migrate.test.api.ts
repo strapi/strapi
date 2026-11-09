@@ -136,7 +136,7 @@ const readRecord = (strapi: Core.Strapi) =>
     completedSteps: string[];
     staged: Record<string, string>;
     attempt: number;
-    carried: { defaultRoleDocumentId: string | null; copied: string[] };
+    carried: { defaultRoleDocumentId: string | null; copied: string[]; columns: string[] };
   }>;
 
 /**
@@ -305,7 +305,8 @@ describe('migration from users-permissions: a start that stopped after the renam
           cleanedUpAt: null,
           completedSteps: [],
           staged: {},
-          carried: { defaultRoleDocumentId: null, copied: [] },
+          carried: { defaultRoleDocumentId: null, copied: [], columns: [] },
+          rollbackStartedAt: null,
           claim: null,
         }),
       });
@@ -523,9 +524,13 @@ describe('migration from users-permissions: after the schema sync', () => {
     const record = await readRecord(strapi);
     const left = await inspectDatabase(async (db) => tablesLike(db, 'eu_stg_'));
 
-    expect(record.carried.copied).toHaveLength(2);
+    // Enterprise adds the review workflow's two links to the user, so these are included, not all
+    const copied = record.carried.copied.map((name) => record.staged[name]);
+
+    expect(copied).toEqual(expect.arrayContaining(['up_users_organization_lnk', 'up_users_cmps']));
+    expect(copied).not.toContain('up_users_favorites_lnk');
     expect(left.filter((name) => record.carried.copied.includes(name))).toEqual([]);
-    expect(left).toHaveLength(Object.keys(record.staged).length - 2);
+    expect(left).toHaveLength(Object.keys(record.staged).length - copied.length);
     expect(Object.values(record.staged)).toContain('up_users_favorites_lnk');
   });
 
@@ -623,7 +628,10 @@ describe('migration from users-permissions: after the schema sync', () => {
     expect(record.completedSteps).toEqual(
       expect.arrayContaining(['pre-sync', 'users', 'roles', 'permissions', 'profiles', 'accounts'])
     );
-    expect(record.carried.copied).toHaveLength(2);
+    expect(record.carried.copied.map((name) => record.staged[name])).toEqual(
+      expect.arrayContaining(['up_users_organization_lnk', 'up_users_cmps'])
+    );
+    expect(record.carried.columns).toEqual(expect.arrayContaining(['company', 'tags']));
     expect((record as any).carried.defaultRoleDocumentId).toBe(
       project.roles.authenticated.documentId
     );

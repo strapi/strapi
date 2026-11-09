@@ -52,6 +52,10 @@ describe('users-permissions project seed', () => {
   });
 
   it('puts the test app back as it was', async () => {
+    // The seeded tables hold keys to up_users, which the start's drop of them does not cascade
+    // over on Postgres: it starts on an empty database, as a fresh test app does
+    await resetDatabase();
+
     const strapi = await migratedInstance(project, { migration: { fromUsersPermissions: false } });
 
     await strapi.destroy();

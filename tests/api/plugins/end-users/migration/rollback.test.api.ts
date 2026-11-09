@@ -10,6 +10,7 @@ import { readRecord } from '../../../../../packages/plugins/end-users/server/src
 import { bearer, TEST_PASSWORD } from '../utils/permissions';
 import { resetDatabase } from '../utils/reset-database';
 import {
+  checkInstance,
   forgetMigration,
   inspectDatabase,
   migratedInstance,
@@ -244,6 +245,18 @@ describe('rollback and cleanup', () => {
     });
   });
 
+  it('starts in check mode again once the rollback is done', async () => {
+    const check = await checkInstance();
+
+    try {
+      expect(
+        Object.keys(check.contentTypes).filter((uid) => uid.startsWith('plugin::end-users'))
+      ).toEqual([]);
+    } finally {
+      await check.destroy();
+    }
+  });
+
   it('migrates again as a second attempt', async () => {
     strapi = await migratedInstance(project);
 
@@ -261,6 +274,50 @@ describe('rollback and cleanup', () => {
         'end-users-from-users-permissions-2',
       ])
     );
+
+    await stop();
+  });
+
+  const patchRecord = (patch: Record<string, unknown>) =>
+    inspectDatabase(async (db) => {
+      const row = await db('strapi_core_store_settings')
+        .where('key', 'plugin_end-users_migration')
+        .first('value');
+
+      await db('strapi_core_store_settings')
+        .where('key', 'plugin_end-users_migration')
+        .update({ value: JSON.stringify({ ...JSON.parse(row.value), ...patch }) });
+    });
+
+  it('refuses to start after an interrupted rollback unless migration.rollback is set', async () => {
+    await patchRecord({ rollbackStartedAt: new Date().toISOString() });
+
+    await expect(migratedInstance(project)).rejects.toThrow(
+      /a rollback was interrupted; set migration\.rollback: true to finish it/
+    );
+  });
+
+  it('finishes that rollback, and rolls back a migration that never reached its end', async () => {
+    await patchRecord({ status: 'in-progress', completedSteps: ['pre-sync', 'users'] });
+
+    await expect(migratedInstance(project, { migration: { rollback: true } })).rejects.toThrow(
+      /rolled back/
+    );
+
+    const record = await inspectDatabase((db) =>
+      db('strapi_core_store_settings').where('key', 'plugin_end-users_migration').first('value')
+    );
+
+    expect(JSON.parse(record.value)).toMatchObject({
+      status: 'rolled-back',
+      rollbackStartedAt: null,
+    });
+  });
+
+  it('migrates a third attempt after that', async () => {
+    strapi = await migratedInstance(project);
+
+    expect(await readRecord(strapi)).toMatchObject({ status: 'completed', attempt: 3 });
 
     await stop();
   });

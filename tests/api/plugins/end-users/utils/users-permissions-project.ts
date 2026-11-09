@@ -80,6 +80,17 @@ export const MIGRATED_PROFILE_ATTRIBUTES: Record<string, unknown> = {
   },
 };
 
+/**
+ * A relation from the user to the user (friends, followers), which only a file that asks for it
+ * has: it adds a link table to the project and to its profile, which other files' counts do not
+ * expect. Off again with `useFriendsRelation(false)`.
+ */
+let friendsRelation = false;
+
+export const useFriendsRelation = (on = true) => {
+  friendsRelation = on;
+};
+
 /* -------------------------------------------------------------------------------------------------
  * The test app's files
  * -----------------------------------------------------------------------------------------------*/
@@ -159,6 +170,9 @@ const writeUsersPermissionsExtension = () => {
       ...stockUserSchema.attributes,
       ...MIGRATED_PROFILE_ATTRIBUTES,
       favorites: { type: 'relation', relation: 'manyToMany', target: ORGANIZATION },
+      ...(friendsRelation
+        ? { friends: { type: 'relation', relation: 'manyToMany', target: UP_USER } }
+        : {}),
       memos: { type: 'relation', relation: 'oneToMany', target: MEMO, mappedBy: 'author' },
     },
   });
@@ -374,7 +388,12 @@ export const migratedInstance = async (
 
   try {
     const strapi = await createEndUsersInstance({
-      profileAttributes: MIGRATED_PROFILE_ATTRIBUTES,
+      profileAttributes: {
+        ...MIGRATED_PROFILE_ATTRIBUTES,
+        ...(friendsRelation
+          ? { friends: { type: 'relation', relation: 'manyToMany', target: EU_USER } }
+          : {}),
+      },
       ...instance,
       pluginConfig: {
         compat: {
