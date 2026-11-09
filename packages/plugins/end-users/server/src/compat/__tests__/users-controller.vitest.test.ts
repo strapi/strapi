@@ -72,7 +72,7 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
   // `banned` is private to the core payload: the output rules drop it
   const core = {
     sanitizeOutput: vi.fn(async (data: unknown) =>
-      (data as Array<Record<string, unknown>>).map(({ banned, ...rest }) => rest)
+      (data as Array<Record<string, unknown>>).map(({ banned: _banned, ...rest }) => rest)
     ),
   };
 
@@ -268,7 +268,9 @@ describe('users in the users-permissions shape', () => {
     const { strapi, ctx, core } = setup();
 
     core.sanitizeOutput.mockImplementation(async (data: unknown) =>
-      (data as Array<Record<string, unknown>>).map(({ banned, emailVerified, ...rest }) => rest)
+      (data as Array<Record<string, unknown>>).map(
+        ({ banned: _banned, emailVerified: _emailVerified, ...rest }) => rest
+      )
     );
 
     const list = ctx();
@@ -391,7 +393,7 @@ describe('users in the users-permissions shape', () => {
     const { strapi, ctx, sanitize } = setup();
     // The caller may not read roles: the sanitizer drops the populate
     sanitize.query.mockImplementation(
-      async ({ populate, ...rest }: Record<string, unknown>) => rest
+      async ({ populate: _populate, ...rest }: Record<string, unknown>) => rest
     );
 
     const me = ctx({
@@ -408,7 +410,7 @@ describe('users in the users-permissions shape', () => {
     const { strapi, ctx, sanitize } = setup();
 
     sanitize.query.mockImplementation(
-      async ({ populate, ...rest }: Record<string, unknown>) => rest
+      async ({ populate: _populate, ...rest }: Record<string, unknown>) => rest
     );
 
     const list = ctx({ query: { populate: 'role' } });
