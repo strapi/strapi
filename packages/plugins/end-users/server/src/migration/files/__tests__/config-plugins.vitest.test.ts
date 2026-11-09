@@ -158,6 +158,38 @@ describe('config/plugins', () => {
     expect(after).not.toContain(secret);
   });
 
+  it('never turns a live secret into text, whichever way the file is read', async () => {
+    const secret = randomBytes(16).toString('hex');
+    const live = settings({
+      config: { jwtSecret: secret, jwt: { expiresIn: '30d' } },
+      jwtSecretFromEnv: false,
+    });
+    const sources: Array<string | null> = [
+      read('arrow.ts.txt'),
+      "export default ({ env }) => ({ 'users-permissions': { config: { jwt: { expiresIn: '7d' } } } });",
+      "export default ({ env }) => ({ 'users-permissions': { config: { ...shared, jwtManagement: 'refresh' } } });",
+      "export default ({ env }) => ({ 'users-permissions': { config: { ...shared } } });",
+      null,
+    ];
+
+    for (const source of sources) {
+      const { block, findings } = await endUsersConfigBlock(live, source);
+      const switched =
+        source === null ? null : await switchPluginsConfig('config/plugins.ts', source, block);
+
+      expect(block).toContain('compat');
+      expect(block).not.toContain(secret);
+      expect(JSON.stringify(findings)).not.toContain(secret);
+      expect(switched?.after ?? '').not.toContain(secret);
+      expect(JSON.stringify(switched?.findings ?? [])).not.toContain(secret);
+    }
+
+    const opaque = await endUsersConfigBlock(live, sources[3]);
+
+    expect(opaque.block).toContain("secret: env('JWT_SECRET')");
+    expect(opaque.findings.map(({ rule }) => rule)).toContain('legacy-secret');
+  });
+
   it('handles an object literal, an arrow function returning one, and a function with a body', async () => {
     const literal = await plan('literal.js.txt', 'config/plugins.js');
 

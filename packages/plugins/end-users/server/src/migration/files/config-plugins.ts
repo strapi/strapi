@@ -136,6 +136,8 @@ interface Entry {
   /** The value when it is a plain literal, else `undefined` */
   value: unknown;
   line: number | null;
+  /** Where it was read: only text written in the project's file may stand for a secret */
+  origin: 'source' | 'live';
 }
 
 type Entries = Map<string, Entry>;
@@ -163,9 +165,17 @@ const flattenLive = (config: Record<string, unknown>): Entries => {
       if (isPlainObject(item) && !known) {
         walk(item, path);
       } else if (typeof item === 'function') {
-        entries.set(path, { text: '', value: item, line: null });
+        entries.set(path, { text: '', value: item, line: null, origin: 'live' });
       } else if (item !== undefined) {
-        entries.set(path, { text: literal(item) ?? '', value: item, line: null });
+        // a secret is never turned into text from the live config
+        const secret = /secret/i.test(path);
+
+        entries.set(path, {
+          text: secret ? '' : (literal(item) ?? ''),
+          value: secret ? undefined : item,
+          line: null,
+          origin: 'live',
+        });
       }
     }
   };
@@ -258,6 +268,7 @@ const flattenSource = (
           text: property.getText(sf),
           value: undefined,
           line: lineOfNode(ts, sf, property),
+          origin: 'source',
         });
         continue;
       }
@@ -275,6 +286,7 @@ const flattenSource = (
           text: property.initializer.getText(sf),
           value: literalValue(ts, property.initializer),
           line: lineOfNode(ts, sf, property),
+          origin: 'source',
         });
       }
     }
@@ -570,7 +582,7 @@ export const endUsersConfigBlock = async (
   const jwtSecret = get('jwtSecret');
 
   if (!environment || jwtSecret) {
-    if (jwtSecret && fromSource && jwtSecret.text !== '') {
+    if (jwtSecret?.origin === 'source' && jwtSecret.text !== '') {
       set('compat.legacyJwt.secret', jwtSecret.text);
     } else {
       set('compat.legacyJwt.secret', JWT_SECRET_CALL);
