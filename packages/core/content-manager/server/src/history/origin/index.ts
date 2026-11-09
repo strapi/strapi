@@ -1,4 +1,4 @@
-import { toAdminUserAuthor } from '../services/utils';
+import { toAdminUserAuthor, toApiTokenAuthor } from '../services/utils';
 import type { HistoryOrigin, RequestContext } from './types';
 
 const isContentManagerRoute = ({ state }: RequestContext) =>
@@ -16,7 +16,10 @@ export const resolveHistoryOrigin = (
       case 'admin':
         return { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) };
       case 'admin-token':
-        return { source: 'admin-api', author: toAdminUserAuthor(requestContext.state.user) };
+        return {
+          source: 'admin-api',
+          author: toApiTokenAuthor(requestContext.state.auth.credentials),
+        };
       default:
         return null;
     }

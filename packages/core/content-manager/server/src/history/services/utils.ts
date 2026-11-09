@@ -54,6 +54,12 @@ export const toAdminUserAuthor = (user: { id: Data.ID }): HistoryVersionAuthorRe
   id: String(user.id),
 });
 
+export const toApiTokenAuthor = (token: { id: Data.ID }): HistoryVersionAuthorReference => ({
+  type: 'token',
+  model: 'admin::api-token',
+  id: String(token.id),
+});
+
 export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
   authorType: author.type,
   authorModel: author.model,
@@ -251,6 +257,17 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
         return users.reduce<Record<string, string>>((acc, user) => {
           acc[String(user.id)] = getDisplayName(user);
+
+          return acc;
+        }, {});
+      }
+      case 'admin::api-token': {
+        const tokens: Array<{ id: Data.ID; name: string }> = await strapi.db
+          .query('admin::api-token')
+          .findMany({ select: ['id', 'name'], where: { id: { $in: ids } } });
+
+        return tokens.reduce<Record<string, string>>((acc, token) => {
+          acc[String(token.id)] = token.name;
 
           return acc;
         }, {});

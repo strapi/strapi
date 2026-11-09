@@ -57,8 +57,8 @@ describe('VersionsList', () => {
     expect(within(versions[1]).getByText(/draft/i)).toBeInTheDocument();
     expect(within(versions[1]).getByText(/by/i)).toBeInTheDocument();
     expect(within(versions[1]).getByText('1/31/2024, 03:58 PM')).toBeInTheDocument();
-    expect(within(versions[1]).getByText('Kai Doe')).toBeInTheDocument();
-    expect(within(versions[1]).getByText('Person')).toBeInTheDocument();
+    expect(within(versions[1]).getByText('Deploy token')).toBeInTheDocument();
+    expect(within(versions[1]).getByText('Token')).toBeInTheDocument();
 
     // Displays the source of each version
     expect(within(versions[0]).getByText('Admin panel')).toBeInTheDocument();
@@ -73,11 +73,14 @@ describe('VersionsList', () => {
     expect(await screen.findByText('?id=26')).toBeInTheDocument();
   });
 
-  it('names a deleted author', async () => {
+  it.each([
+    ['person', 'admin::user', 'Deleted user'],
+    ['token', 'admin::api-token', 'Deleted token'],
+  ])('names a deleted %s author', async (type, model, label) => {
     const [currentVersion, version] = mockHistoryVersionsData.historyVersions.data;
     const versions = {
       ...mockHistoryVersionsData.historyVersions,
-      data: [currentVersion, { ...version, author: { ...version.author, id: null, name: null } }],
+      data: [currentVersion, { ...version, author: { type, model, id: null, name: null } }],
     };
 
     render(
@@ -87,6 +90,6 @@ describe('VersionsList', () => {
       </HistoryProvider>
     );
 
-    expect(within(screen.getAllByRole('link')[1]).getByText('Deleted user')).toBeInTheDocument();
+    expect(within(screen.getAllByRole('link')[1]).getByText(label)).toBeInTheDocument();
   });
 });

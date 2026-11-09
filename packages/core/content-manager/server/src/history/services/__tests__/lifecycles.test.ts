@@ -127,13 +127,12 @@ describe('history lifecycles service', () => {
     const mockRequest = ({
       url = '/content-manager/collection-types/api::article.article/doc-1',
       pluginName = 'content-manager',
-      strategyName = 'admin',
     } = {}) => {
       mockGetRequestContext.mockReturnValue({
         state: {
           user: { id: '123' },
           route: { info: { pluginName, type: 'admin' } },
-          auth: { strategy: { name: strategyName } },
+          auth: { strategy: { name: 'admin' } },
         },
         request: { url },
       });
@@ -169,14 +168,12 @@ describe('history lifecycles service', () => {
 
     describe('recording gate', () => {
       it('records the write with its origin', async () => {
-        mockRequest({ strategyName: 'admin-token' });
-
         await updateArticle();
 
         expect(mockCreateVersion).toHaveBeenCalledWith(
           expect.objectContaining({
             locale: 'en',
-            source: 'admin-api',
+            source: 'admin-panel',
             author: { type: 'person', model: 'admin::user', id: '123' },
           })
         );

@@ -948,7 +948,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       return body.data;
     };
 
-    const createAdminTokenRequest = async () => {
+    const createAdminToken = async (name: string) => {
       const permission = (action: string) => ({
         action,
         subject: collectionTypeUid,
@@ -960,7 +960,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
         method: 'POST',
         url: '/admin/admin-tokens',
         body: {
-          name: 'history-source-admin-token',
+          name,
           adminPermissions: [
             permission('plugin::content-manager.explorer.read'),
             permission('plugin::content-manager.explorer.update'),
@@ -968,7 +968,26 @@ describeOnCondition(edition === 'EE')('History API', () => {
         },
       });
 
-      return createAgent(strapi, { token: body.data.accessKey });
+      return {
+        token: body.data,
+        tokenRq: await createAgent(strapi, { token: body.data.accessKey }),
+      };
+    };
+
+    const createAdminTokenVersion = async (name: string) => {
+      const { token, tokenRq } = await createAdminToken(name);
+
+      const res = await tokenRq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
+        body: { description: `Updated with the ${name}` },
+        qs: { locale: 'en' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(collectionTypeDocumentId);
+
+      return { token, version: latestVersion };
     };
 
     test('Records an admin panel write with the admin panel source', async () => {
@@ -1008,21 +1027,19 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
-    test('Records an admin token write with the admin API source', async () => {
-      const tokenRq = await createAdminTokenRequest();
+    test('Records an admin token write with the admin API source and the token as its author', async () => {
+      const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
 
-      const res = await tokenRq({
-        method: 'PUT',
-        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
-        body: { description: 'Updated with an admin token' },
-        qs: { locale: 'en' },
+      const { token, version } = await createAdminTokenVersion('history-author-token');
+
+      expect(version.source).toBe('admin-api');
+      expect(version.author).toEqual({
+        type: 'token',
+        name: 'history-author-token',
+        model: 'admin::api-token',
+        id: String(token.id),
       });
-
-      expect(res.statusCode).toBe(200);
-
-      const [latestVersion] = await findVersions(collectionTypeDocumentId);
-      expect(latestVersion.source).toBe('admin-api');
-      expect(latestVersion.data.description).toBe('Updated with an admin token');
+      expect(version.createdBy).toMatchObject({ id: me.data.id });
     });
 
     const createAuthorVersion = async (firstname: string) => {
@@ -1078,6 +1095,39 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(storedVersion).toMatchObject({
         authorType: 'person',
         authorModel: 'admin::user',
+        authorId: null,
+      });
+    });
+
+    test('Shows the current name of the token', async () => {
+      const { token, version } = await createAdminTokenVersion('history-renamed-token');
+
+      await rq({
+        method: 'PUT',
+        url: `/admin/admin-tokens/${token.id}`,
+        body: { name: 'history-renamed-token-new-name' },
+      });
+
+      const versions = await findVersions(collectionTypeDocumentId);
+      expect(versions.find(({ id }) => id === version.id).author).toEqual({
+        type: 'token',
+        name: 'history-renamed-token-new-name',
+        model: 'admin::api-token',
+        id: String(token.id),
+      });
+    });
+
+    test('Clears the author id of the versions when the token is deleted', async () => {
+      const { token, version } = await createAdminTokenVersion('history-deleted-token');
+
+      await rq({ method: 'DELETE', url: `/admin/admin-tokens/${token.id}` });
+
+      const storedVersion = await strapi.db
+        .query('plugin::content-manager.history-version')
+        .findOne({ where: { id: version.id } });
+      expect(storedVersion).toMatchObject({
+        authorType: 'token',
+        authorModel: 'admin::api-token',
         authorId: null,
       });
     });

@@ -6,7 +6,6 @@ import { getService } from './utils';
 import { historyVersion } from './models/history-version';
 import { registerHistoryEntitlements } from './entitlements';
 import { HISTORY_VERSION_UID } from './constants';
-import { toAdminUserAuthor } from './services/utils';
 
 /**
  * Clear the author id of the versions when the author is deleted,
@@ -14,13 +13,11 @@ import { toAdminUserAuthor } from './services/utils';
  */
 const clearDeletedAuthors = (strapi: Core.Strapi) => {
   strapi.db.lifecycles.subscribe({
-    models: ['admin::user'],
+    models: ['admin::user', 'admin::api-token'],
     async afterDelete(event) {
-      const { model, id } = toAdminUserAuthor(event.result);
-
       try {
         await strapi.db.query(HISTORY_VERSION_UID).updateMany({
-          where: { authorModel: model, authorId: id },
+          where: { authorModel: event.model.uid, authorId: String(event.result.id) },
           data: { authorId: null },
         });
       } catch (error) {

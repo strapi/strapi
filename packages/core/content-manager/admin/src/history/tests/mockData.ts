@@ -446,7 +446,7 @@ const HISTORY_VERSIONS_MOCK_DATA = {
       locale: null,
       status: 'draft' as const,
       source: 'admin-api' as const,
-      author: { type: 'person' as const, name: 'Kai Doe', model: 'admin::user', id: '1' },
+      author: { type: 'token' as const, name: 'Deploy token', model: 'admin::api-token', id: '1' },
       data: {
         short_text: 'ktchnsnk',
         long_text:
