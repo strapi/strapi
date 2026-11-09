@@ -84,6 +84,29 @@ export const CODE_FINDING_SEVERITY: Readonly<Record<CodeFindingRule, Severity>> 
   'no-source': 'info',
 };
 
+/**
+ * Milliseconds the migrated start took per 1,000 users in the rehearsal
+ * (`tests/api/plugins/end-users/migration/rehearsal.test.api.ts`), by database. `null` where it has
+ * not been measured: the report then gives no estimate rather than a guess.
+ */
+export const MEASURED_MS_PER_1000_USERS: Record<DbClient, number | null> = {
+  sqlite: 780,
+  // Measured at the checkpoint, with the same rehearsal
+  postgres: null,
+  mysql: null,
+};
+
+/** Whole minutes (at least one) the migration takes for `users` users on `client`, or null */
+export const estimateMinutes = (client: DbClient, users: number): number | null => {
+  const rate = MEASURED_MS_PER_1000_USERS[client];
+
+  if (rate === null) {
+    return null;
+  }
+
+  return Math.max(1, Math.ceil(((users / 1000) * rate) / 60_000));
+};
+
 /** An item lists at most this many references; its `count` is always the whole number */
 const MAX_REFS = 200;
 
@@ -500,6 +523,12 @@ const graphqlItems = (ctx: ReportContext): MigrationReportItem[] => {
   ];
 };
 
+const estimate = (client: DbClient, users: number): MigrationReport['estimate'] => {
+  const minutes = estimateMinutes(client, users);
+
+  return minutes === null ? null : { client, minutes };
+};
+
 /**
  * The migration report for a snapshot: what changes, what needs a decision and what is only worth
  * knowing, as items of ids and counts. Pure; the snapshot is read elsewhere.
@@ -538,7 +567,7 @@ export const buildReport = (snapshot: UpSnapshot, ctx: ReportContext): Migration
       roles: snapshot.roles.length,
       permissions: snapshot.roles.reduce((sum, role) => sum + role.actions.length, 0),
     },
-    estimate: null,
+    estimate: estimate(ctx.client, snapshot.users.total),
     items,
   };
 };

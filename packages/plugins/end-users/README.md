@@ -95,6 +95,11 @@ production through your repository and a deploy, and what you need to read is sh
    waits for the first to finish. If a start stops partway, for example because the process was killed, the next start
    picks up where it stopped, after waiting up to 15 minutes for the stopped start's hold on the migration to expire.
 
+   The migration of a project with 100,000 users took about 78 seconds on SQLite (a 16-core workstation), start to
+   finish, and the rollback took about 2 seconds. Postgres and MySQL times are added here once they are measured. Time
+   it on a copy of your own data before you plan a window: the figures depend on the database server and its disk. Once
+   the rate for your database is measured, the Migration section also shows an estimate of the time.
+
    The config now says:
 
    ```ts

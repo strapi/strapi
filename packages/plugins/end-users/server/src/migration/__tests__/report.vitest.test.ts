@@ -4,7 +4,13 @@ import knex, { type Knex } from 'knex';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { COMPAT_ROWS } from '../../compat/rows';
-import { buildReport, CODE_FINDING_SEVERITY, ITEM_SEVERITY, nullableOnGraphql } from '../report';
+import {
+  buildReport,
+  CODE_FINDING_SEVERITY,
+  ITEM_SEVERITY,
+  MEASURED_MS_PER_1000_USERS,
+  nullableOnGraphql,
+} from '../report';
 import type { ReportContext } from '../report';
 import { duplicatesQuery, readUpSnapshot } from '../snapshot';
 import type { UpSnapshot } from '../snapshot';
@@ -267,6 +273,23 @@ describe('buildReport', () => {
     const firstInfo = severities.indexOf('info');
 
     expect(severities.slice(firstInfo).includes('action')).toBe(false);
+  });
+});
+
+describe('estimate', () => {
+  it('estimates the time from the measured rate for the database', () => {
+    const snapshot = emptySnapshot();
+
+    snapshot.users.total = 100_000;
+
+    for (const client of ['sqlite', 'postgres', 'mysql'] as const) {
+      const rate = MEASURED_MS_PER_1000_USERS[client];
+      const { estimate } = buildReport(snapshot, context({ client }));
+
+      expect(estimate).toEqual(
+        rate === null ? null : { client, minutes: Math.max(1, Math.ceil((100 * rate) / 60_000)) }
+      );
+    }
   });
 });
 
