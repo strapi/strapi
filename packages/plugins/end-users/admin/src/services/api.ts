@@ -8,6 +8,7 @@ const endUsersApi = adminApi.enhanceEndpoints({
     'EndUsersSettings',
     'EndUsersUserSecurity',
     'EndUsersProvider',
+    'EndUsersMigration',
   ],
 });
 

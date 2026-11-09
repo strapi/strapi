@@ -30,3 +30,6 @@ export const EMAIL_TEMPLATES_PATH = 'email/templates?prefix=end-users.';
 export const EMAIL_TEMPLATES_PERMISSIONS = [
   { action: 'plugin::email.templates.read', subject: null },
 ];
+
+/** The Migration section of the Advanced page */
+export const MIGRATION_PATH = '/settings/end-users/advanced#migration';

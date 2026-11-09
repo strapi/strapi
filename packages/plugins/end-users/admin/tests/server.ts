@@ -39,6 +39,28 @@ const ROLES = [
 export const server = setupServer(
   /**
    *
+   * migration: every End users page asks for its status; by default no migration has run
+   *
+   */
+  http.get('/end-users/migration', () =>
+    HttpResponse.json({
+      data: {
+        mode: 'active',
+        config: {
+          fromUsersPermissions: null,
+          duplicates: 'keep-oldest',
+          registrationFields: null,
+          rollback: false,
+        },
+        record: null,
+        report: null,
+        unresolved: 0,
+        legacyJwtHits: null,
+      },
+    })
+  ),
+  /**
+   *
    * roles
    *
    */

@@ -5,11 +5,15 @@ import { Alert, Box, Button, Flex, Grid, Typography } from '@strapi/design-syste
 import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { MigrationBanner } from '../../components/MigrationBanner';
 import { ReadOnlyRow } from '../../components/ReadOnlyRow';
 import { PERMISSIONS } from '../../constants';
+import { useGetMigrationStatusQuery } from '../../services/migration';
 import { useGetSettingsQuery } from '../../services/settings';
 import { getTranslation } from '../../utils/getTranslation';
 import { useSaveSettings } from '../../utils/useSaveSettings';
+
+import { MigrationSection } from './MigrationSection';
 
 import type { EndUsersSettings, SettingsResponse } from '../../../../shared/contracts/settings';
 
@@ -229,6 +233,7 @@ const AdvancedForm = ({
                 </Grid.Root>
               </Section>
               <ConfigSection config={settings.meta.config} />
+              <MigrationSection />
             </Flex>
           </Layouts.Content>
         </>
@@ -237,8 +242,50 @@ const AdvancedForm = ({
   );
 };
 
-const AdvancedContent = () => {
+/** The page title, as every Advanced page states it */
+const AdvancedTitle = () => {
   const { formatMessage } = useIntl();
+
+  return (
+    <Page.Title>
+      {formatMessage(
+        { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
+        {
+          name: formatMessage({
+            id: getTranslation('settings.advanced.title'),
+            defaultMessage: 'Advanced',
+          }),
+        }
+      )}
+    </Page.Title>
+  );
+};
+
+/** In check mode the settings routes do not exist: the page is the Migration section alone */
+const CheckModeContent = () => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Page.Main>
+      <AdvancedTitle />
+      <Layouts.Header
+        title={formatMessage({
+          id: getTranslation('settings.advanced.title'),
+          defaultMessage: 'Advanced',
+        })}
+        subtitle={formatMessage({
+          id: getTranslation('settings.advanced.check-mode.subtitle'),
+          defaultMessage: 'The migration from Users & Permissions',
+        })}
+      />
+      <Layouts.Content>
+        <MigrationSection />
+      </Layouts.Content>
+    </Page.Main>
+  );
+};
+
+const AdvancedContent = () => {
   const {
     isLoading: isLoadingPermissions,
     allowedActions: { canUpdate },
@@ -255,26 +302,31 @@ const AdvancedContent = () => {
 
   return (
     <Page.Main>
-      <Page.Title>
-        {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
-          {
-            name: formatMessage({
-              id: getTranslation('settings.advanced.title'),
-              defaultMessage: 'Advanced',
-            }),
-          }
-        )}
-      </Page.Title>
+      <AdvancedTitle />
       <AdvancedForm settings={settings.data} canUpdate={canUpdate} />
     </Page.Main>
   );
 };
 
-/** `/settings/end-users/advanced`: the redirect URLs, and `config/plugins.ts` shown read-only */
+/** Asks the mode first: in check mode `/end-users/settings` is not served and is never requested */
+const AdvancedGate = () => {
+  const migration = useGetMigrationStatusQuery();
+
+  if (migration.isLoading) {
+    return <Page.Loading />;
+  }
+
+  return migration.data?.mode === 'check' ? <CheckModeContent /> : <AdvancedContent />;
+};
+
+/**
+ * `/settings/end-users/advanced`: the redirect URLs, `config/plugins.ts` shown read-only, and the
+ * migration from Users & Permissions
+ */
 const AdvancedPage = () => (
   <Page.Protect permissions={PERMISSIONS.settings.read}>
-    <AdvancedContent />
+    <MigrationBanner />
+    <AdvancedGate />
   </Page.Protect>
 );
 

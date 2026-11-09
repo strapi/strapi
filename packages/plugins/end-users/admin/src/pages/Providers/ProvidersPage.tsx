@@ -27,6 +27,8 @@ import {
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { CheckModeNotice } from '../../components/CheckModeNotice';
+import { MigrationBanner } from '../../components/MigrationBanner';
 import { PERMISSIONS } from '../../constants';
 import { useDeleteProviderMutation, useGetProvidersQuery } from '../../services/providers';
 import { getTranslation } from '../../utils/getTranslation';
@@ -311,7 +313,10 @@ const ProvidersContent = () => {
 
 const ProvidersPage = () => (
   <Page.Protect permissions={PERMISSIONS.providers.read}>
-    <ProvidersContent />
+    <MigrationBanner />
+    <CheckModeNotice>
+      <ProvidersContent />
+    </CheckModeNotice>
   </Page.Protect>
 );
 

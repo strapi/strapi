@@ -1,6 +1,8 @@
 import { Page } from '@strapi/admin/strapi-admin';
 import { Route, Routes } from 'react-router-dom';
 
+import { CheckModeNotice } from '../../components/CheckModeNotice';
+import { MigrationBanner } from '../../components/MigrationBanner';
 import { PERMISSIONS } from '../../constants';
 
 import { CreatePage } from './CreatePage';
@@ -14,12 +16,15 @@ import { ListPage } from './ListPage';
 const RolesPage = () => {
   return (
     <Page.Protect permissions={PERMISSIONS.roles.read}>
-      <Routes>
-        <Route index element={<ListPage />} />
-        <Route path="new" element={<CreatePage />} />
-        <Route path="duplicate/:documentId" element={<CreatePage />} />
-        <Route path=":documentId" element={<EditPage />} />
-      </Routes>
+      <MigrationBanner />
+      <CheckModeNotice>
+        <Routes>
+          <Route index element={<ListPage />} />
+          <Route path="new" element={<CreatePage />} />
+          <Route path="duplicate/:documentId" element={<CreatePage />} />
+          <Route path=":documentId" element={<EditPage />} />
+        </Routes>
+      </CheckModeNotice>
     </Page.Protect>
   );
 };

@@ -1,6 +1,8 @@
 import { Page } from '@strapi/admin/strapi-admin';
 import { Route, Routes } from 'react-router-dom';
 
+import { CheckModeNotice } from '../../components/CheckModeNotice';
+import { MigrationBanner } from '../../components/MigrationBanner';
 import { PERMISSIONS } from '../../constants';
 
 import { BuilderPage } from './BuilderPage';
@@ -15,12 +17,15 @@ import { ViewPage } from './ViewPage';
 const ConditionsPage = () => {
   return (
     <Page.Protect permissions={PERMISSIONS.conditions.read}>
-      <Routes>
-        <Route index element={<ListPage />} />
-        <Route path="new" element={<BuilderPage />} />
-        <Route path="view/:name" element={<ViewPage />} />
-        <Route path=":slug" element={<BuilderPage />} />
-      </Routes>
+      <MigrationBanner />
+      <CheckModeNotice>
+        <Routes>
+          <Route index element={<ListPage />} />
+          <Route path="new" element={<BuilderPage />} />
+          <Route path="view/:name" element={<ViewPage />} />
+          <Route path=":slug" element={<BuilderPage />} />
+        </Routes>
+      </CheckModeNotice>
     </Page.Protect>
   );
 };

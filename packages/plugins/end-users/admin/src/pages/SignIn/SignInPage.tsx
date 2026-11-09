@@ -1,6 +1,8 @@
 import { Page, useRBAC } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
+import { CheckModeNotice } from '../../components/CheckModeNotice';
+import { MigrationBanner } from '../../components/MigrationBanner';
 import { PERMISSIONS } from '../../constants';
 import { useGetRolesQuery } from '../../services/roles';
 import { useGetProfileFieldsQuery, useGetSettingsQuery } from '../../services/settings';
@@ -54,7 +56,10 @@ const SignInContent = () => {
 
 const SignInPage = () => (
   <Page.Protect permissions={PERMISSIONS.settings.read}>
-    <SignInContent />
+    <MigrationBanner />
+    <CheckModeNotice>
+      <SignInContent />
+    </CheckModeNotice>
   </Page.Protect>
 );
 
