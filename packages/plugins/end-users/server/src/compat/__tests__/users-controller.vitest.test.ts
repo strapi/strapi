@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type Koa from 'koa';
 import type { Core } from '@strapi/types';
 
-import { PLUGIN_ID, PROFILE_UID, USER_UID } from '../../constants';
+import { PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../../constants';
 import { compatOr, createUsersCompat, splitRoleQuery } from '../users-controller';
 
 afterEach(() => {
@@ -85,7 +85,9 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
         key === `plugin::end-users.compat.usersPermissions` ? compat : undefined
       ),
     },
-    contentType: (uid: string) => (uid === USER_UID ? userSchema : profileSchema),
+    contentType: (uid: string) =>
+      ({ [USER_UID]: userSchema, [ROLE_UID]: { uid: ROLE_UID, attributes: {} } })[uid] ??
+      profileSchema,
     controller: () => core,
     service: () => service,
     plugin: (id: string) => ({ service: () => (id === PLUGIN_ID ? profiles : undefined) }),
@@ -209,18 +211,114 @@ describe('users in the users-permissions shape', () => {
     expect(documents.create).not.toHaveBeenCalled();
   });
 
+  it('refuses a password on update, naming it, and writes nothing', async () => {
+    const { strapi, ctx, documents, profiles } = setup();
+
+    await expect(
+      createUsersCompat(strapi).update(
+        ctx({ params: { id: '7' }, request: { body: { username: 'x', password: 'a-password' } } })
+      )
+    ).rejects.toMatchObject({ name: 'ApplicationError', message: 'Invalid parameters: password' });
+    expect(documents.update).not.toHaveBeenCalled();
+    expect(profiles.updateForUser).not.toHaveBeenCalled();
+  });
+
+  it('counts under the count rules and their conditions', async () => {
+    const { strapi, ctx, documents, sanitize } = setup();
+
+    sanitize.query.mockImplementation(async () => ({ filters: { $and: [{ id: { $gt: 1 } }] } }));
+
+    const count = ctx();
+
+    await createUsersCompat(strapi).count(count);
+
+    expect(sanitize.query).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ action: 'count' })
+    );
+    expect(documents.count).toHaveBeenCalledWith({ filters: { $and: [{ id: { $gt: 1 } }] } });
+  });
+
+  it('shows a role only with the fields the role type lets the caller read', async () => {
+    const { strapi, ctx, sanitize } = setup();
+
+    sanitize.output.mockImplementation(async (data: object) => {
+      const { id, name } = data as { id: number; name: string };
+
+      return { id, name };
+    });
+
+    const list = ctx({ query: { populate: 'role' } });
+
+    await createUsersCompat(strapi).find(list);
+
+    expect((list.body as Array<{ role: unknown }>)[0].role).toEqual({
+      id: 3,
+      name: 'Authenticated',
+    });
+    expect(sanitize.output).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 3 }),
+      expect.objectContaining({ uid: ROLE_UID }),
+      expect.objectContaining({ action: 'find' })
+    );
+  });
+
+  it('hides confirmed when the caller may not read emailVerified', async () => {
+    const { strapi, ctx, core } = setup();
+
+    core.sanitizeOutput.mockImplementation(async (data: unknown) =>
+      (data as Array<Record<string, unknown>>).map(({ banned, emailVerified, ...rest }) => rest)
+    );
+
+    const list = ctx();
+
+    await createUsersCompat(strapi).find(list);
+
+    expect((list.body as object[])[0]).not.toHaveProperty('confirmed');
+    expect((list.body as object[])[0]).toHaveProperty('blocked', false);
+  });
+
+  it('names a user made without a readable email from the checked body', async () => {
+    const { strapi, ctx, documents, sanitize, service } = setup();
+
+    service.findOne.mockImplementation(async () => stored(9, 'doc-new'));
+    sanitize.input.mockImplementation(async () => ({}));
+
+    await createUsersCompat(strapi).create(
+      ctx({ request: { body: { email: 'new@example.com', username: 'newbie', password: 'pw' } } })
+    );
+
+    expect(documents.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ name: 'newbie' }),
+    });
+  });
+
+  it('answers a successful update with the user even when it left the caller read conditions', async () => {
+    const { strapi, ctx, service, sanitize } = setup();
+
+    sanitize.query.mockImplementation(async () => ({ filters: { id: { $eq: 999 } } }));
+
+    const update = ctx({ params: { id: '7' }, request: { body: { username: 'new' } } });
+
+    await createUsersCompat(strapi).update(update);
+
+    expect(service.findOne).toHaveBeenLastCalledWith('doc-a', {});
+    expect(update.body).toMatchObject({ documentId: 'doc-a' });
+  });
+
   it('writes profile keys to the profile and the rest to the user', async () => {
     const { strapi, ctx, documents, profiles, permissions } = setup();
     const update = ctx({
       params: { id: '7' },
-      request: { body: { username: 'new', bio: 'hello', password: 'a-password' } },
+      request: { body: { username: 'new', bio: 'hello' } },
     });
 
     await createUsersCompat(strapi).update(update);
 
     expect(documents.update).toHaveBeenCalledWith({
       documentId: 'doc-a',
-      data: { username: 'new', password: 'a-password' },
+      data: { username: 'new' },
     });
     expect(profiles.updateForUser).toHaveBeenCalledWith('doc-a', { data: { bio: 'hello' } });
     expect(permissions.assertEntry).toHaveBeenCalledWith(

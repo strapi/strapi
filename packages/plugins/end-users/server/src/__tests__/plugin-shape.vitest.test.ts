@@ -37,6 +37,7 @@ describe('end-users plugin shape', () => {
     expect(Object.keys(plugin.controllers).sort()).toEqual([
       'auth',
       'condition',
+      'connect',
       'me',
       'permission-layout',
       'permissions',

@@ -492,7 +492,7 @@ describe('strapi-compat password and confirmation routes', () => {
         service: (name: string) =>
           name === 'engine'
             ? { get: () => ({ callNative }) as unknown as AuthEngine }
-            : { get: async () => ({ redirects }) },
+            : { get: async () => ({ redirects, methods: { emailPassword: true } }) },
       }),
     } as unknown as Core.Strapi;
   });
@@ -704,7 +704,13 @@ describe('strapi-compat reset, through the engine', () => {
         service: (name: string) =>
           name === 'engine'
             ? { get: () => engine }
-            : { get: async () => ({ passwords: policy, redirects: {} }) },
+            : {
+                get: async () => ({
+                  passwords: policy,
+                  redirects: {},
+                  methods: { emailPassword: true },
+                }),
+              },
       }),
     } as unknown as Core.Strapi;
 

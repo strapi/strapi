@@ -548,6 +548,11 @@ describe('end-users: admin API', () => {
       // The user and its profile are offered; the engine's tables are not
       expect(uids).toEqual(expect.arrayContaining([USER_UID, 'plugin::end-users.profile']));
       expect(uids).not.toContain('plugin::end-users.session');
+
+      // The role type is offered for reading through the user's `roles`: Find, and nothing else
+      const roleType = layout.body.data.contentTypes.find(({ uid }) => uid === ROLE_UID);
+
+      expect(roleType.actions.map(({ action }) => action)).toEqual(['find']);
       expect(layout.body.data.groups.map(({ id }) => id)).toContain('plugin::end-users');
 
       const bound = await rqAdmin.get('/end-users/permissions/routes', {

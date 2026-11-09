@@ -47,6 +47,34 @@ describe('render of links and images', () => {
     );
   });
 
+  it('reads the attributes of a tag one by one, so a decoy inside another value is not an attribute', () => {
+    expect(renderHtml('<a title="x href=" href="{{ url }}">x</a>', 'javascript:alert(1)')).toBe(
+      '<a title="x href=" href="">x</a>'
+    );
+    expect(renderHtml("<a title='src=\"' href='{{ url }}'>x</a>", 'javascript:alert(1)')).toBe(
+      "<a title='src=\"' href=''>x</a>"
+    );
+    expect(renderHtml('<a title="x href={{ url }}" href="#">x</a>', 'javascript:alert(1)')).toBe(
+      '<a title="x href=javascript:alert(1)" href="#">x</a>'
+    );
+    expect(renderHtml('<a title="x href=" href="{{ url }}">x</a>', 'https://x.test')).toBe(
+      '<a title="x href=" href="https://x.test">x</a>'
+    );
+  });
+
+  it('checks unquoted and unspaced attributes too', () => {
+    expect(renderHtml('<a title=x href={{ url }}>x</a>', 'javascript:alert(1)')).toBe(
+      '<a title=x href=>x</a>'
+    );
+    expect(renderHtml('<a title="x"href="{{ url }}">x</a>', 'javascript:alert(1)')).toBe(
+      '<a title="x"href="">x</a>'
+    );
+    expect(renderHtml('<a HREF = {{ url }}>x</a>', 'https://x.test/a')).toBe(
+      '<a HREF = https://x.test/a>x</a>'
+    );
+    expect(renderHtml('<img alt=a src={{url}} />', 'data:text/html,x')).toBe('<img alt=a src= />');
+  });
+
   it('never reads a substituted value as a placeholder', () => {
     expect(renderHtml('<a href="{{ url }}">{{ name }}</a>', 'https://x.test/{{ name }}')).toBe(
       '<a href="https://x.test/{{ name }}">Ana</a>'
@@ -107,6 +135,19 @@ describe('render', () => {
 });
 
 describe('buildSampleData', () => {
+  it('gives a URL variable a sample a link keeps, and the others a bracketed name', () => {
+    const data = buildSampleData(['url', 'user.name', 'app.link'], ['url', 'app.link']);
+
+    expect(data).toEqual({
+      url: 'https://example.com/url',
+      user: { name: '[user.name]' },
+      app: { link: 'https://example.com/app.link' },
+    });
+    expect(render('<a href="{{ url }}">x</a>', ['url'], data, 'html')).toBe(
+      '<a href="https://example.com/url">x</a>'
+    );
+  });
+
   it('builds nested sample data from the variable list', () => {
     expect(buildSampleData(['url', 'user.name', 'user.email'])).toEqual({
       url: '[url]',

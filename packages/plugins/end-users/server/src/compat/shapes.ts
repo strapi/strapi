@@ -17,7 +17,8 @@ export type UpUser = {
   username: string | null;
   email: string;
   provider: string;
-  confirmed: boolean;
+  /** Left out when the caller's field rules do not show `emailVerified` */
+  confirmed?: boolean;
   blocked: boolean;
   createdAt: string;
   updatedAt: string;
@@ -30,7 +31,7 @@ export type UpUserSource = {
   documentId: string;
   email: string;
   username?: string | null;
-  emailVerified: boolean;
+  emailVerified?: boolean;
   banned: boolean;
   createdAt: string;
   updatedAt: string;
@@ -64,7 +65,7 @@ export const toUpUser = (
     username: user.username ?? null,
     email: user.email,
     provider: opts.extras?.provider ?? 'local',
-    confirmed: Boolean(user.emailVerified),
+    ...(user.emailVerified !== undefined && { confirmed: Boolean(user.emailVerified) }),
     blocked: Boolean(user.banned),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,

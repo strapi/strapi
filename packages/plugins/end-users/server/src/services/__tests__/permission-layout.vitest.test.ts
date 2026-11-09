@@ -86,6 +86,16 @@ const CONTENT_TYPES: Record<string, Schema> = {
       roles: relation(ROLE_UID, { relation: 'manyToMany' }),
     },
   },
+  [ROLE_UID]: {
+    uid: ROLE_UID,
+    kind: 'collectionType',
+    info: { displayName: 'Role' },
+    attributes: {
+      name: { type: 'string' },
+      type: { type: 'enumeration' },
+      permissions: relation(PERMISSION_UID, { relation: 'oneToMany' }),
+    },
+  },
   [SESSION]: {
     uid: SESSION,
     kind: 'collectionType',
@@ -140,6 +150,8 @@ const ACTIONS = [
   `${USER_UID}.find`,
   `${USER_UID}.findOne`,
   `${USER_UID}.update`,
+  // The one action of the role type: read through the user's `roles`, with no route
+  `${ROLE_UID}.find`,
   `${SESSION}.find`,
   'plugin::end-users.me.find',
   'plugin::end-users.me.updateProfile',
@@ -284,9 +296,22 @@ describe('permission layout service', () => {
     it('lists those with a registered data action, and leaves out the engine`s types', async () => {
       const uids = (await layout.getLayout()).contentTypes.map((each) => each.uid);
 
-      // `profile` has no action registered here, `session` is the engine's, `permission` has no route
-      expect(uids).toEqual([ARTICLE, HOMEPAGE, USER_UID]);
+      // `profile` has no action registered here, `session` is the engine's, `permission` has no route; `role` has Find only
+      expect(uids).toEqual([ARTICLE, HOMEPAGE, USER_UID, ROLE_UID]);
       expect(layoutContentTypeUids(strapi)).toEqual(uids);
+    });
+
+    it('offers the role type with Find alone, which gives the roles cell of the user an effect', async () => {
+      expect((await contentType(ROLE_UID)).actions.map((each) => each.action)).toEqual(['find']);
+      expect((await action(ROLE_UID, 'find'))?.actionId).toBe(`${ROLE_UID}.find`);
+
+      // The user's `roles` points at a type a role can now be granted `find` on
+      const roles = (await contentType(USER_UID)).fields.find(({ name }) => name === 'roles');
+      const target = (await layout.getLayout()).contentTypes.find(
+        ({ uid }) => uid === roles?.relationTarget
+      );
+
+      expect(target?.actions.some(({ action: name }) => name === 'find')).toBe(true);
     });
 
     it('lists the registered actions in column order', async () => {
@@ -1099,7 +1124,7 @@ describe('permission layout service', () => {
 
       await expect(fresh.getLayout()).rejects.toThrow('registry not ready');
       await expect(fresh.getLayout()).resolves.toMatchObject({
-        contentTypes: [{ uid: ARTICLE }, { uid: HOMEPAGE }, { uid: USER_UID }],
+        contentTypes: [{ uid: ARTICLE }, { uid: HOMEPAGE }, { uid: USER_UID }, { uid: ROLE_UID }],
       });
       expect(getRoutesMap).toHaveBeenCalledTimes(2);
     });

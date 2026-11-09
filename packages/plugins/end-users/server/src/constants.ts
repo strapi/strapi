@@ -5,6 +5,12 @@ export const MIN_SECRET_LENGTH = 32;
 
 export const USER_UID = 'plugin::end-users.user';
 export const ROLE_UID = 'plugin::end-users.role';
+/**
+ * The one Content API action the role type has: reading a role through a relation of another type
+ * (`user.roles`). There is no route for it. A role of the editor grants it as a `find` row on the
+ * role type, and core's field rules for a relation to the type read it (see `registerRoleReadAction`).
+ */
+export const ROLE_FIND_ACTION = `${ROLE_UID}.find`;
 export const PERMISSION_UID = 'plugin::end-users.permission';
 export const PROFILE_UID = 'plugin::end-users.profile';
 export const SESSION_UID = 'plugin::end-users.session';

@@ -12,7 +12,13 @@ import {
 } from '../errors';
 import { loginBody, signedInUser } from '../login-response';
 import { ok } from './result';
-import { BEARER_HEADER, TWO_FACTOR_REQUIRED, engineOf, plain } from './shared';
+import {
+  BEARER_HEADER,
+  TWO_FACTOR_REQUIRED,
+  emailPasswordRefusal,
+  engineOf,
+  plain,
+} from './shared';
 import type { CompatResult } from '../types';
 
 interface PasswordInput {
@@ -136,6 +142,11 @@ export const resetPassword = async (
   { body, headers, userOfCode }: ResetInput
 ): Promise<CompatResult> => {
   const input = plain(body);
+  const refusal = await emailPasswordRefusal(strapi);
+
+  if (refusal) {
+    return refusal;
+  }
 
   if (!text(input.code)) {
     return { status: 400, body: missingFieldBody('code') };
@@ -193,6 +204,11 @@ export const changePassword = async (
   { body, headers }: PasswordInput
 ): Promise<CompatResult> => {
   const input = plain(body);
+  const refusal = await emailPasswordRefusal(strapi);
+
+  if (refusal) {
+    return refusal;
+  }
 
   for (const field of ['currentPassword', 'password', 'passwordConfirmation']) {
     if (!text(input[field])) {

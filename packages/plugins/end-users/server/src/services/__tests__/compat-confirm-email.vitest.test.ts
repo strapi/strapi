@@ -18,6 +18,7 @@ interface Row {
 
 const setup = (row: Row | null, opts: { verifies?: boolean; verifyThrows?: unknown } = {}) => {
   const state = row ? { ...row } : null;
+  let queue: Promise<unknown> = Promise.resolve();
   const callNative = vi.fn(async () => {
     if (opts.verifyThrows) {
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
@@ -34,13 +35,61 @@ const setup = (row: Row | null, opts: { verifies?: boolean; verifyThrows?: unkno
   const engine = { callNative, createSession };
   const strapi = {
     plugin: () => ({ service: () => ({ get: () => engine }) }),
-    db: { query: () => ({ findOne: async () => (state ? { ...state } : null) }) },
+    db: {
+      query: () => ({
+        async findOne() {
+          const seen = state ? { ...state } : null;
+
+          // The answer arrives later, as it would from a database: the others can read the same state
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1);
+          });
+
+          return seen;
+        },
+      }),
+      // The lock on the user's row, as the database gives it: transactions run one after the other
+      queryBuilder() {
+        const builder = {
+          select: () => builder,
+          where: () => builder,
+          first: () => builder,
+          forUpdate: () => builder,
+          execute: async () => undefined,
+        };
+
+        return builder;
+      },
+      transaction(work: () => Promise<unknown>) {
+        const turn = queue.then(work, work);
+
+        queue = turn.catch(() => undefined);
+
+        return turn;
+      },
+    },
   } as unknown as Core.Strapi;
 
   return { callNative, createSession, service: compatService({ strapi }) };
 };
 
 describe('compat service: confirmEmail', () => {
+  it('signs in only one of several calls that use the same link at the same moment, the others read the address as confirmed', async () => {
+    const { service, createSession } = setup({ documentId: 'u1', emailVerified: false });
+    const token = tokenFor('a@example.com');
+
+    const results = await Promise.allSettled(
+      Array.from({ length: 5 }, () => service.confirmEmail(token, {}))
+    );
+
+    expect(results.filter(({ status }) => status === 'fulfilled')).toHaveLength(1);
+    expect(createSession).toHaveBeenCalledTimes(1);
+
+    for (const result of results.filter(({ status }) => status === 'rejected')) {
+      expect((result as PromiseRejectedResult).reason).toMatchObject({ message: 'Invalid token' });
+    }
+  });
+
   it('signs the user in when this call confirmed the address', async () => {
     const { service, createSession } = setup({ documentId: 'u1', emailVerified: false });
 

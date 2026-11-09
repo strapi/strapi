@@ -106,6 +106,33 @@ const methodsOf = (relative: string): Set<SignInMethod> => {
   return found;
 };
 
+/**
+ * Whether the endpoint at `relative` (its path under the base path, `/reset-password`) may be called:
+ * not one of the blocked ones, and not one of a sign-in method an administrator has turned off. The
+ * catch-all route asks it of every request, and so does every other way into the engine (the GraphQL
+ * compat operations).
+ */
+export const isEndpointAllowed = async (
+  strapi: Core.Strapi,
+  relative: string
+): Promise<boolean> => {
+  if (isBlocked(relative)) {
+    return false;
+  }
+
+  const owners = methodsOf(relative);
+
+  if (owners.size === 0) {
+    return true;
+  }
+
+  const { methods } = await (
+    strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<typeof settingsService>
+  ).get();
+
+  return [...owners].every((method) => methods[method]);
+};
+
 export const endpointAllowlist: Core.MiddlewareFactory = (_config, { strapi }) => {
   const basePath = resolveBasePath(strapi.config);
 
@@ -113,20 +140,8 @@ export const endpointAllowlist: Core.MiddlewareFactory = (_config, { strapi }) =
     const relative = relativeTo(requestPathname(ctx), basePath);
 
     // Not under the base path: Better Auth would answer 404, so the answer is the same
-    if (relative === null || isBlocked(relative)) {
+    if (relative === null || !(await isEndpointAllowed(strapi, relative))) {
       return ctx.notFound();
-    }
-
-    const owners = methodsOf(relative);
-
-    if (owners.size > 0) {
-      const { methods } = await (
-        strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<typeof settingsService>
-      ).get();
-
-      if ([...owners].some((method) => !methods[method])) {
-        return ctx.notFound();
-      }
     }
 
     return next();

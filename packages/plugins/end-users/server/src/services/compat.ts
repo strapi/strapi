@@ -158,6 +158,11 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
      * A user with a second factor is confirmed but gets no session, as at `/local`. The engine
      * verifies the token (signature and expiry) before anything is read from it, and refuses it as
      * the REST route does; the user is the one the verified token names.
+     *
+     * Calls with the same link at the same moment are one after the other: the read, the
+     * confirmation and the session run in a transaction that first locks the user's row
+     * (`SELECT ... FOR UPDATE`; SQLite serialises its writers itself), so the second call reads the
+     * address as already confirmed.
      */
     async confirmEmail(
       token: string,
@@ -175,48 +180,73 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
           twoFactorEnabled?: boolean | null;
         } | null;
 
-      // Only to see whether this call is the one that confirms: nobody is signed in by it
-      const email = emailOfToken(token);
-      const before = email ? await read(email) : null;
+      type Outcome = { ok: true; jwt: string; user: UpUser } | { ok: false; error: Error };
 
-      try {
-        await engine.callNative('verifyEmail', { headers: new Headers(), query: { token } });
-      } catch (error) {
-        const refused = refusalResult(error, BAD_LINK);
+      // Refusals are carried out of the transaction, not thrown in it: a second factor is refused
+      // after the address was confirmed, and that must not be rolled back
+      const run = async (email: string | null): Promise<Outcome> => {
+        // Only to see whether this call is the one that confirms: nobody is signed in by it
+        const before = email ? await read(email) : null;
 
-        if (refused === null) {
-          throw error;
+        try {
+          await engine.callNative('verifyEmail', { headers: new Headers(), query: { token } });
+        } catch (error) {
+          const refused = refusalResult(error, BAD_LINK);
+
+          if (refused === null) {
+            throw error;
+          }
+
+          const { message, details } = (
+            refused.body as { error: { message: string; details: object } }
+          ).error;
+
+          return { ok: false, error: new errors.ApplicationError(message, details) };
         }
 
-        const { message, details } = (
-          refused.body as { error: { message: string; details: object } }
-        ).error;
+        if (!email || !before || before.emailVerified === true) {
+          return { ok: false, error: invalid() };
+        }
 
-        throw new errors.ApplicationError(message, details);
+        const after = await read(email);
+
+        if (!after || after.emailVerified !== true) {
+          return { ok: false, error: invalid() };
+        }
+
+        if (after.twoFactorEnabled === true) {
+          return {
+            ok: false,
+            error: new errors.ForbiddenError(TWO_FACTOR_REQUIRED, { code: 'TWO_FACTOR_REQUIRED' }),
+          };
+        }
+
+        const session = await engine.createSession(after.documentId, meta);
+        const user = await signedInUser(strapi, after.documentId);
+
+        return user ? { ok: true, jwt: session.token, user } : { ok: false, error: invalid() };
+      };
+
+      const email = emailOfToken(token);
+      const outcome = await strapi.db.transaction(async () => {
+        if (email) {
+          await strapi.db
+            .queryBuilder(USER_UID)
+            .select('id')
+            .where({ email: normalizeEmail(email) })
+            .first()
+            .forUpdate()
+            .execute();
+        }
+
+        return run(email);
+      });
+
+      if (!outcome.ok) {
+        throw outcome.error;
       }
 
-      if (!email || !before || before.emailVerified === true) {
-        throw invalid();
-      }
-
-      const after = await read(email);
-
-      if (!after || after.emailVerified !== true) {
-        throw invalid();
-      }
-
-      if (after.twoFactorEnabled === true) {
-        throw new errors.ForbiddenError(TWO_FACTOR_REQUIRED, { code: 'TWO_FACTOR_REQUIRED' });
-      }
-
-      const session = await engine.createSession(after.documentId, meta);
-      const user = await signedInUser(strapi, after.documentId);
-
-      if (!user) {
-        throw invalid();
-      }
-
-      return { jwt: session.token, user };
+      return { jwt: outcome.jwt, user: outcome.user };
     },
   };
 };

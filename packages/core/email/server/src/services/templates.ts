@@ -124,6 +124,11 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
+    /** The variables of a template that stand for a URL: the ones declared as URLs, and the secret ones. */
+    urlVariables(key: string): string[] {
+      return [...getDefinition(key).urls];
+    },
+
     async list(prefix?: string): Promise<TemplateSummary[]> {
       const keys = [...registry.keys()]
         .filter((key) => (prefix ? key.startsWith(prefix) : true))

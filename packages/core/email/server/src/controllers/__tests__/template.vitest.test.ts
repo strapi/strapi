@@ -12,7 +12,13 @@ const createCtx = (overrides: Record<string, unknown> = {}) =>
   }) as any;
 
 describe('Template controller', () => {
-  const templates = { update: vi.fn(), reset: vi.fn() };
+  const templates = {
+    update: vi.fn(),
+    reset: vi.fn(),
+    get: vi.fn(),
+    urlVariables: vi.fn(),
+    sendTemplate: vi.fn(),
+  };
   const info = vi.fn();
 
   beforeEach(() => {
@@ -50,5 +56,19 @@ describe('Template controller', () => {
     await expect(templateController.update(createCtx())).rejects.toThrow('refused');
 
     expect(info).not.toHaveBeenCalled();
+  });
+
+  it('sends the test email with a sample link for the URL variables', async () => {
+    templates.get.mockResolvedValue({ variables: ['url', 'user.name'] });
+    templates.urlVariables.mockReturnValue(['url']);
+
+    await templateController.test(createCtx({ state: { user: { id: 7, email: 'a@b.c' } } }));
+
+    expect(templates.sendTemplate).toHaveBeenCalledWith(
+      'end-users.reset-password',
+      'a@b.c',
+      { url: 'https://example.com/url', user: { name: '[user.name]' } },
+      { locale: 'fr' }
+    );
   });
 });

@@ -94,12 +94,10 @@ describe('end-users compat: GraphQL', () => {
       username: 'gqllogin',
     });
 
-    await strapi.db
-      .query(PROFILE_UID)
-      .updateMany({
-        where: { user: { documentId: seeded.documentId } },
-        data: { company: 'Acme' },
-      });
+    await strapi.db.query(PROFILE_UID).updateMany({
+      where: { user: { documentId: seeded.documentId } },
+      data: { company: 'Acme' },
+    });
 
     const res = await signIn('gql-login@example.com');
 
@@ -219,6 +217,70 @@ describe('end-users compat: GraphQL', () => {
     } finally {
       await settings.set({ signUp: { requireEmailVerification: false } });
       await engines.reload();
+    }
+  });
+
+  it('emailConfirmation signs in exactly one of several calls that use the same token at once', async () => {
+    const settings = strapi.plugin('end-users').service('settings');
+    const engines = strapi.plugin('end-users').service('engine');
+
+    await settings.set({ signUp: { requireEmailVerification: true } });
+    await engines.reload();
+
+    try {
+      await gql(
+        `mutation { register(input: { username: "gqlrace", email: "gql-race@example.com", password: "${PASSWORD}" }) { jwt } }`
+      );
+
+      const token = linkOf((await emailsAfter(1))[0]).searchParams.get('confirmation');
+      const confirm = `mutation ($token: String!) { emailConfirmation(confirmation: $token) { jwt } }`;
+      const answers = await Promise.all(Array.from({ length: 4 }, () => gql(confirm, { token })));
+
+      expect(answers.filter((answer) => answer.body.data?.emailConfirmation?.jwt)).toHaveLength(1);
+    } finally {
+      await settings.set({ signUp: { requireEmailVerification: false } });
+      await engines.reload();
+    }
+  });
+
+  it('refuses login, resetPassword and changePassword while email and password sign-in is off', async () => {
+    const settings = strapi.plugin('end-users').service('settings');
+    const user = await seedUpUser(strapi, { email: 'gql-off@example.com', username: 'gqloff' });
+
+    await settings.set({ methods: { emailPassword: false, username: true } });
+
+    try {
+      const login = await signIn('gql-off@example.com');
+      const reset = await gql(
+        `mutation { resetPassword(code: "x", password: "${NEW_PASSWORD}", passwordConfirmation: "${NEW_PASSWORD}") { jwt } }`
+      );
+      const change = await gql(
+        `mutation { changePassword(currentPassword: "${PASSWORD}", password: "${NEW_PASSWORD}", passwordConfirmation: "${NEW_PASSWORD}") { jwt } }`,
+        {},
+        bearer(
+          (
+            await strapi
+              .plugin('end-users')
+              .service('engine')
+              .get()
+              .createSession(user.documentId, {})
+          ).token
+        )
+      );
+
+      for (const answer of [login, reset, change]) {
+        expect(answer.body.errors).toHaveLength(1);
+        expect(answer.body.errors[0].message).toMatch(/disabled|Not Found/);
+      }
+
+      // The same refusal over REST
+      const rest = await rq.post('/api/auth/reset-password', {
+        body: { code: 'x', password: NEW_PASSWORD, passwordConfirmation: NEW_PASSWORD },
+      });
+
+      expect(rest.status).toBe(404);
+    } finally {
+      await settings.set({ methods: { emailPassword: true, username: true } });
     }
   });
 

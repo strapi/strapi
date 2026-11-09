@@ -2,7 +2,7 @@ import type { Core } from '@strapi/types';
 
 import { DATA_ACTIONS } from '../../../shared/contracts/permissions';
 import type { DataAction } from '../../../shared/contracts/permissions';
-import { PLUGIN_ID, PROFILE_UID, USER_UID } from '../constants';
+import { PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../constants';
 
 /**
  * The data action an action id names on a content type (`find` for `api::note.note.find` on
@@ -18,11 +18,14 @@ export const dataActionOf = (action: string, uid: string): DataAction | null => 
 /**
  * The plugin's own types that are not offered in the layout: the engine's tables
  * (sessions, accounts with their hashes, verifications, two-factor secrets, a Better Auth plugin's
- * keys) and the permissions engine's own role and permission rows. Only the user and its profile
- * are ever granted through a role.
+ * keys) and the permissions engine's permission rows. Only the user, its profile and the role (for
+ * reading it through the user's `roles`, with `find` alone) are ever granted through a role.
  */
 export const isEngineType = (uid: string): boolean =>
-  uid.startsWith(`plugin::${PLUGIN_ID}.`) && uid !== USER_UID && uid !== PROFILE_UID;
+  uid.startsWith(`plugin::${PLUGIN_ID}.`) &&
+  uid !== USER_UID &&
+  uid !== PROFILE_UID &&
+  uid !== ROLE_UID;
 
 /**
  * The content types the permission layout lists, in the order Strapi holds them: those with at

@@ -90,7 +90,9 @@ const templateController = {
     const { variables } = await service().get(ctx.params.key, locale);
 
     try {
-      await service().sendTemplate(ctx.params.key, to, buildSampleData(variables), { locale });
+      const sample = buildSampleData(variables, service().urlVariables(ctx.params.key));
+
+      await service().sendTemplate(ctx.params.key, to, sample, { locale });
     } catch (error) {
       if (error instanceof Error) {
         if ('statusCode' in error && error.statusCode === 400) {

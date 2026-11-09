@@ -14,13 +14,16 @@ const config: Core.RouteConfig = { prefix: '' };
  * The caller's own user and profile. The scope of each route, which a role has to be granted, is
  * `plugin::end-users.me.<action>`; Authenticated is given the three when it is created (bootstrap).
  *
+ * Each has a config object of its own: core fills in the scope of a route in its config, so a shared
+ * object would hand every route the scope of the first.
+ *
  * They come before the core routes because `/users/me` is also what `/users/:id` matches: the first
  * route that matches answers.
  */
 export const meRoutes: Core.RouterInput['routes'] = [
-  { method: 'GET', path: '/users/me', handler: 'me.find', config },
-  { method: 'GET', path: '/users/me/profile', handler: 'me.findProfile', config },
-  { method: 'PUT', path: '/users/me/profile', handler: 'me.updateProfile', config },
+  { method: 'GET', path: '/users/me', handler: 'me.find', config: { ...config } },
+  { method: 'GET', path: '/users/me/profile', handler: 'me.findProfile', config: { ...config } },
+  { method: 'PUT', path: '/users/me/profile', handler: 'me.updateProfile', config: { ...config } },
 ];
 
 /**

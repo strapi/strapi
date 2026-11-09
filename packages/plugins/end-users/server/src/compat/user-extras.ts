@@ -1,7 +1,7 @@
 import { contentTypes } from '@strapi/utils';
 import type { Core, Struct, UID } from '@strapi/types';
 
-import { ACCOUNT_UID, PROFILE_UID } from '../constants';
+import { ACCOUNT_UID, PROFILE_UID, USER_UID } from '../constants';
 import { writableProfileAttributes } from '../utils/writable-profile-attributes';
 
 export interface UserExtras {
@@ -120,13 +120,25 @@ export const loadUserExtras = async (
 /**
  * Sorts the keys of a users-permissions write: the profile's own attributes go to the profile, the
  * ones the engine owns or no longer has (`role`, `confirmed`, `blocked`, `provider`) are refused,
- * and the rest is the user's.
+ * and the rest is the user's, as is a key both the user and the profile have.
  */
 export const splitUserWrites = (
   strapi: Core.Strapi,
   body: Record<string, unknown>
 ): { user: Plain; profile: Plain; refused: string[] } => {
-  const profileKeys = new Set(writableProfileAttributes(strapi));
+  // A key the user has is the user's, as it is on a read, where the user's value wins over the profile's
+  const userKeys = new Set([
+    'id',
+    'documentId',
+    'createdAt',
+    'updatedAt',
+    ...Object.keys(
+      (strapi.contentType(USER_UID) as { attributes?: object } | undefined)?.attributes ?? {}
+    ),
+  ]);
+  const profileKeys = new Set(
+    writableProfileAttributes(strapi).filter((name) => !userKeys.has(name))
+  );
   const refusedKeys = new Set<string>(REFUSED_WRITES);
   const user: Plain = {};
   const profile: Plain = {};

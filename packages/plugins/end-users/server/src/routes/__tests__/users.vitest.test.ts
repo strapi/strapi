@@ -41,6 +41,12 @@ const describeRoute = ({ method, path }: { method: string; path: string }) => `$
 
 describe('the users routes', () => {
   describe('me', () => {
+    it('gives each me route a config object of its own', () => {
+      const configs = meRoutes.map(({ config }) => config);
+
+      expect(new Set(configs).size).toBe(meRoutes.length);
+    });
+
     it('are the signed-in user and their own profile', () => {
       expect(meRoutes.map(describeRoute)).toEqual([
         'GET /users/me',

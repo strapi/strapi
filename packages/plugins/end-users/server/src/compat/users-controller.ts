@@ -2,7 +2,7 @@ import { errors } from '@strapi/utils';
 import type Koa from 'koa';
 import type { Core, Struct } from '@strapi/types';
 
-import { PER_USER_CACHE_CONTROL, PLUGIN_ID, PROFILE_UID, USER_UID } from '../constants';
+import { PER_USER_CACHE_CONTROL, PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../constants';
 import type profileService from '../services/profile';
 import { readCompatConfig } from './config';
 import { invalidParameters, missingFieldBody } from './errors';
@@ -29,7 +29,7 @@ interface UserEntries {
   findOne(documentId: string, query: Plain): Promise<Plain | null>;
 }
 
-type QueryAction = 'find' | 'findOne';
+type QueryAction = 'find' | 'findOne' | 'count' | 'create';
 
 const isPlain = (value: unknown): value is Plain =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -38,6 +38,9 @@ const isPlain = (value: unknown): value is Plain =>
 const NUMERIC_ID = /^\d{1,15}$/;
 
 const NOT_FOUND = 'User not found';
+
+/** What of a role the payload can show, besides its `id`, which every caller reads. */
+const ROLE_KEYS = ['name', 'description', 'type'] as const;
 
 export const isUsersCompat = (strapi: Core.Strapi): boolean =>
   readCompatConfig(strapi).usersPermissions;
@@ -113,6 +116,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     strapi.plugin(PLUGIN_ID).service('profile') as ReturnType<typeof profileService>;
   const userSchema = () => strapi.contentType(USER_UID) as Struct.ContentTypeSchema;
   const profileSchema = () => strapi.contentType(PROFILE_UID) as Struct.ContentTypeSchema;
+  const roleSchema = () => strapi.contentType(ROLE_UID) as Struct.ContentTypeSchema;
   const documents = () => strapi.documents(USER_UID as never) as unknown as Documents;
   const entries = () => strapi.service(USER_UID as never) as unknown as UserEntries;
 
@@ -187,14 +191,48 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     return found?.documentId ?? null;
   };
 
+  /** The first of the roles as users-permissions shows its one role, limited to what the caller may read. */
+  const roleOf = async (
+    ctx: Koa.Context,
+    roles: Array<Plain & { id: number }>,
+    ownRole: boolean
+  ): Promise<UpRole | null> => {
+    if (ownRole) {
+      return toUpRole(roles as unknown as Parameters<typeof toUpRole>[0]);
+    }
+
+    const [first] = roles;
+
+    if (!first) {
+      return null;
+    }
+
+    const readable = (await strapi.contentAPI.sanitize.output(
+      first,
+      roleSchema(),
+      options(ctx, 'find') as never
+    )) as Plain;
+    const shown = Object.fromEntries(
+      ROLE_KEYS.filter((key) => key in readable).map((key) => [key, readable[key]])
+    );
+
+    return { id: first.id, ...shown } as unknown as UpRole;
+  };
+
   /**
    * What the engine stores that the payload shows and the output rules hide: whether the email is
    * confirmed and whether the user is blocked (both private or engine-owned to the core payload),
    * and, when asked for, the first role of the user as users-permissions shows its one role.
+   *
+   * The role goes through the output rules of the role type for the caller, so it shows the fields
+   * their `find` row on it lists (`id` always) and no more. `ownRole` skips that: the caller's own
+   * role is no secret from them.
    */
   const loadStored = async (
+    ctx: Koa.Context,
     documentIds: string[],
-    withRoles: boolean
+    withRoles: boolean,
+    ownRole: boolean
   ): Promise<Map<string, { emailVerified: boolean; banned: boolean; role?: UpRole | null }>> => {
     const stored = new Map<
       string,
@@ -210,21 +248,24 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       select: ['documentId', 'emailVerified', 'banned'],
       ...(withRoles && {
         populate: {
-          roles: { select: ['id', 'name', 'description', 'type'], orderBy: { id: 'asc' } },
+          roles: {
+            select: ['id', 'documentId', 'name', 'description', 'type'],
+            orderBy: { id: 'asc' },
+          },
         },
       }),
     })) as Array<{
       documentId: string;
       emailVerified: boolean;
       banned: boolean;
-      roles?: Parameters<typeof toUpRole>[0];
+      roles?: Array<Plain & { id: number }>;
     }>;
 
     for (const row of rows) {
       stored.set(row.documentId, {
         emailVerified: row.emailVerified,
         banned: row.banned,
-        ...(withRoles && { role: toUpRole(row.roles ?? []) }),
+        ...(withRoles && { role: await roleOf(ctx, row.roles ?? [], ownRole) }),
       });
     }
 
@@ -232,26 +273,34 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
   };
 
   /** Users as the core output rules let the caller read them, in the shape of the mode. */
-  const shape = async (ctx: Koa.Context, found: Plain[], wantsRole: boolean): Promise<UpUser[]> => {
+  const shape = async (
+    ctx: Koa.Context,
+    found: Plain[],
+    wantsRole: boolean,
+    ownRole = false
+  ): Promise<UpUser[]> => {
     const readable = (await core().sanitizeOutput(found, ctx)) as UpUserSource[];
     const [extras, stored] = await Promise.all([
       loadUserExtras(strapi, ctx.state?.auth, readable),
       loadStored(
+        ctx,
         readable.map(({ documentId }) => documentId),
-        wantsRole
+        wantsRole,
+        ownRole
       ),
     ]);
 
     return readable.map((user) => {
       const own = stored.get(user.documentId);
 
-      return toUpUser(
-        { ...user, emailVerified: own?.emailVerified ?? false, banned: own?.banned ?? false },
-        {
-          extras: extras.get(user.documentId),
-          ...(wantsRole && { role: own?.role ?? null }),
-        }
-      );
+      // `confirmed` follows the caller's field rules for `emailVerified`. `blocked` is shown whatever
+      // they are, as it was to a reader of the users-permissions payload: the one exception.
+      const shown = 'emailVerified' in user ? { emailVerified: own?.emailVerified ?? false } : {};
+
+      return toUpUser({ ...user, ...shown, banned: own?.banned ?? false } as UpUserSource, {
+        extras: extras.get(user.documentId),
+        ...(wantsRole && { role: own?.role ?? null }),
+      });
     });
   };
 
@@ -262,9 +311,16 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     return isPlain(body) ? body : {};
   };
 
-  /** The writes sorted for the user and for the profile; a key the engine owns is refused. */
-  const sortWrites = (body: Plain) => {
-    const { user, profile, refused } = splitUserWrites(strapi, body);
+  /**
+   * The writes sorted for the user and for the profile; a key the engine owns is refused, and so is
+   * the password unless the user is being created.
+   */
+  const sortWrites = (body: Plain, mayHavePassword: boolean) => {
+    const split = splitUserWrites(strapi, body);
+    const { user, profile } = split;
+    // A password is set when a user is made; after that it changes through its own routes
+    const refused =
+      mayHavePassword || !('password' in user) ? split.refused : [...split.refused, 'password'];
 
     if (refused.length > 0) {
       throw new errors.ApplicationError(invalidParameters(refused));
@@ -335,7 +391,8 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     ctx: Koa.Context,
     documentId: string,
     query: Plain,
-    wantsRole: boolean
+    wantsRole: boolean,
+    ownRole = false
   ): Promise<UpUser | null> => {
     const found = await entries().findOne(documentId, query);
 
@@ -343,9 +400,16 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       return null;
     }
 
-    const [user] = await shape(ctx, [found], wantsRole);
+    const [user] = await shape(ctx, [found], wantsRole, ownRole);
 
     return user;
+  };
+
+  /** The query without its filters, which carry the caller's read conditions. */
+  const unfiltered = (query: Plain): Plain => {
+    const { filters: _filters, ...rest } = query;
+
+    return rest;
   };
 
   const requireFields = (body: Plain) => {
@@ -371,7 +435,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
 
     /** A bare number: the users that match the filters. */
     async count(ctx: Koa.Context) {
-      const { query } = await readQuery(ctx, 'find');
+      const { query } = await readQuery(ctx, 'count');
 
       ctx.body = await documents().count({
         ...(query.filters !== undefined && { filters: query.filters }),
@@ -395,9 +459,11 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
 
       requireFields(body);
 
-      const writes = sortWrites(body);
+      const { query, wantsRole } = await readQuery(ctx, 'create');
+      const writes = sortWrites(body, true);
       const input = await userInput(ctx, 'create', writes.user);
-      const name = (input.name ?? input.username ?? String(input.email).split('@')[0]) as string;
+      // From the body that was checked, not from `input`, which the field rules may have taken them out of
+      const name = (input.name ?? body.username ?? String(body.email).split('@')[0]) as string;
 
       const documentId = await strapi.db.transaction(async () => {
         const created = await documents().create({
@@ -417,7 +483,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       });
 
       ctx.status = 201;
-      ctx.body = await present(ctx, documentId, {}, false);
+      ctx.body = await present(ctx, documentId, unfiltered(query), wantsRole);
     },
 
     async update(ctx: Koa.Context) {
@@ -427,12 +493,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
         throw new errors.NotFoundError(NOT_FOUND);
       }
 
-      const body = bodyOf(ctx);
-      const writes = sortWrites(body);
-
-      if ('password' in body && !writes.password) {
-        throw new errors.ValidationError('password.notNull');
-      }
+      const writes = sortWrites(bodyOf(ctx), false);
 
       const auth = (ctx.state?.auth as never) ?? {};
       const { query, wantsRole } = await readQuery(ctx, 'findOne');
@@ -440,11 +501,10 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       await strapi.contentAPI.permissions.assertEntry(auth, 'update', USER_UID, documentId);
 
       const input = await userInput(ctx, 'update', writes.user, documentId);
-      const data = { ...input, ...(writes.password ? { password: writes.password } : {}) };
 
       await strapi.db.transaction(async () => {
-        if (Object.keys(data).length > 0) {
-          await documents().update({ documentId, data });
+        if (Object.keys(input).length > 0) {
+          await documents().update({ documentId, data: input });
           await strapi.contentAPI.permissions.assertWritten(
             auth,
             'update',
@@ -457,7 +517,9 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
         await writeProfile(ctx, documentId, writes.profile);
       });
 
-      ctx.body = await present(ctx, documentId, query, wantsRole);
+      // Read again without the caller's read conditions: the write may have moved the user out of
+      // them, and a successful write answers with the user it wrote, shaped by the output rules
+      ctx.body = await present(ctx, documentId, unfiltered(query), wantsRole);
     },
 
     /** The deleted user, as it was. */
@@ -492,7 +554,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       }
 
       const { query, wantsRole } = await readQuery(ctx, 'find', true);
-      const user = await present(ctx, documentId, query, wantsRole);
+      const user = await present(ctx, documentId, query, wantsRole, true);
 
       if (!user) {
         throw new errors.NotFoundError(NOT_FOUND);

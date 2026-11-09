@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
-import { ACCOUNT_UID, PROFILE_UID } from '../../constants';
+import { ACCOUNT_UID, PROFILE_UID, USER_UID } from '../../constants';
 import { loadUserExtras, splitUserWrites } from '../user-extras';
 
 const profileSchema = {
@@ -55,7 +55,8 @@ const setup = () => {
   );
   const strapi = {
     documents,
-    contentType: () => profileSchema,
+    contentType: (uid: string) =>
+      uid === USER_UID ? { uid, attributes: { username: {}, name: {}, email: {} } } : profileSchema,
     contentAPI: { sanitize: { output } },
   } as unknown as Core.Strapi;
 
@@ -111,6 +112,16 @@ describe('loadUserExtras', () => {
 });
 
 describe('splitUserWrites', () => {
+  it('gives a key the user and the profile both have to the user', () => {
+    const { strapi } = setup();
+
+    // `email` is an attribute of both: on a read the user's value wins, so a write goes there too
+    expect(splitUserWrites(strapi, { email: 'a@b.io', bio: 'b' })).toMatchObject({
+      user: { email: 'a@b.io' },
+      profile: { bio: 'b' },
+    });
+  });
+
   it('routes profile keys to the profile and lists the refused ones', () => {
     const { strapi } = setup();
 

@@ -6,7 +6,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const setup = (answer: Response) => {
+const setup = (answer: Response, methods: Record<string, boolean> = { emailPassword: true }) => {
   const handle = vi.fn<(request: Request) => Promise<Response>>(async () => answer);
   const engine = { handle };
   const config: Record<string, unknown> = { 'server.url': 'http://localhost:1337' };
@@ -14,7 +14,10 @@ const setup = (answer: Response) => {
   vi.stubGlobal('strapi', {
     config: { get: (key: string) => config[key] },
     plugin: () => ({
-      service: () => ({ ensureCurrent: async () => undefined, get: () => engine }),
+      service: (name: string) =>
+        name === 'settings'
+          ? { get: async () => ({ methods }) }
+          : { ensureCurrent: async () => undefined, get: () => engine },
     }),
   });
 
@@ -86,5 +89,23 @@ describe('callCompat', () => {
       message: 'Too many requests. Please try again later.',
       details: { status: 429 },
     });
+  });
+
+  it('refuses an endpoint of a sign-in method that is turned off, as the REST route does, without calling the engine', async () => {
+    const { handle, ctx } = setup(json({ ok: true }), { emailPassword: false });
+
+    await expect(callCompat(ctx, '/reset-password', {})).rejects.toMatchObject({
+      message: 'Not Found',
+      details: { status: 404 },
+    });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it('lets the endpoint through while its method is on', async () => {
+    const { handle, ctx } = setup(json({ ok: true }));
+
+    await callCompat(ctx, '/reset-password', {});
+
+    expect(handle).toHaveBeenCalledTimes(1);
   });
 });

@@ -11,7 +11,7 @@ import { loginBody, signedInUser } from '../login-response';
 import { withPendingDevice } from '../pending-device';
 import { wantsRefreshCookie, writeRefreshCookie } from '../refresh-cookie';
 import { ok } from './result';
-import { BEARER_HEADER, TWO_FACTOR_REQUIRED } from './shared';
+import { BEARER_HEADER, PROVIDER_DISABLED, TWO_FACTOR_REQUIRED } from './shared';
 import type { CompatResult } from '../types';
 
 interface LocalInput {
@@ -19,7 +19,6 @@ interface LocalInput {
   headers: Headers | undefined;
 }
 
-const DISABLED = 'This provider is disabled.';
 /**
  * The address a username with no account is signed in with: reserved (`.invalid` never resolves),
  * and valid whatever the characters of the identifier, because it is a hash of them. The engine
@@ -75,7 +74,7 @@ export const local = async (
   const byEmail = identifier.includes('@');
 
   if (!(byEmail ? methods.emailPassword : methods.username)) {
-    return { status: 400, body: upError('ApplicationError', DISABLED) };
+    return { status: 400, body: upError('ApplicationError', PROVIDER_DISABLED) };
   }
 
   const engine = plugin.service('engine').get() as AuthEngine;

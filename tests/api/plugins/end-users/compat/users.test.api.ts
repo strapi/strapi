@@ -24,6 +24,7 @@ import {
 const SETTINGS = '/end-users/settings';
 const ROLES = '/end-users/roles';
 const USER_UID = 'plugin::end-users.user';
+const ROLE_UID = 'plugin::end-users.role';
 const ALL_USER_ACTIONS = ['find', 'findOne', 'create', 'update', 'delete', 'count'];
 
 describe('end-users compat: users', () => {
@@ -174,6 +175,58 @@ describe('end-users compat: users', () => {
     expect(res.body[0]).not.toHaveProperty('role');
   });
 
+  it('filters and populates by role on /users when the role is granted Find on the role type', async () => {
+    const caller = await signUp('granted@example.com');
+
+    await seedUpUser(strapi, { email: 'plain@example.com', username: 'plain' });
+    await grant(['find'], [unconditioned(`${ROLE_UID}.find`, ROLE_UID)]);
+
+    const populated = await rq.get('/api/users?populate=role', { headers: caller.headers });
+
+    expect(populated.status).toBe(200);
+    expect(populated.body.find((user) => user.documentId === caller.documentId).role).toMatchObject(
+      {
+        name: 'Authenticated',
+        type: 'authenticated',
+      }
+    );
+
+    const filtered = await rq.get('/api/users?filters[role][type]=authenticated', {
+      headers: caller.headers,
+    });
+
+    expect(filtered.status).toBe(200);
+    expect(filtered.body.map((user) => user.documentId)).toContain(caller.documentId);
+
+    const none = await rq.get('/api/users?filters[role][type]=public', { headers: caller.headers });
+
+    expect(none.status).toBe(200);
+    expect(none.body).toEqual([]);
+  });
+
+  it('shows only the role fields the role type Find row lists', async () => {
+    const caller = await signUp('limited@example.com');
+
+    await grant(['find'], [unconditioned(`${ROLE_UID}.find`, ROLE_UID, { fields: ['name'] })]);
+
+    const res = await rq.get('/api/users?populate=role', { headers: caller.headers });
+
+    expect(res.status).toBe(200);
+    expect(Object.keys(res.body[0].role).sort()).toEqual(['id', 'name']);
+  });
+
+  it('refuses filtering by role on /users without the role grant', async () => {
+    const caller = await signUp('ungranted@example.com');
+
+    await grant(['find']);
+
+    const res = await rq.get('/api/users?filters[role][type]=authenticated', {
+      headers: caller.headers,
+    });
+
+    expect(res.status).toBe(400);
+  });
+
   it('merges profile fields into the user and writes them to the profile', async () => {
     const caller = await signUp('profiled@example.com');
 
@@ -259,6 +312,41 @@ describe('end-users compat: users', () => {
       expect(res.status).toBe(400);
       expect(res.body.error.message).toContain(field);
     }
+  });
+
+  it('refuses a password on update, naming it, and takes one on create', async () => {
+    const caller = await signUp('passwords@example.com');
+
+    await grant(['create', 'update', 'findOne']);
+
+    const refused = await rq.put(`/api/users/${caller.documentId}`, {
+      headers: caller.headers,
+      body: { password: 'Passw0rd!changed' },
+    });
+
+    expect(refused.status).toBe(400);
+    expect(refused.body.error.message).toContain('password');
+
+    const created = await rq.post('/api/users', {
+      headers: caller.headers,
+      body: { email: 'with-password@example.com', username: 'withpw', password: 'Passw0rd!long' },
+    });
+
+    expect(created.status).toBe(201);
+  });
+
+  it('counts the users that match the filters, under the count rules', async () => {
+    const caller = await signUp('countfilter@example.com');
+
+    await seedUpUser(strapi, { email: 'findme@example.com', username: 'findme' });
+    await grant(['count']);
+
+    const res = await rq.get('/api/users/count?filters[username][$eq]=findme', {
+      headers: caller.headers,
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toBe(1);
   });
 
   it('answers 400 for populate of a former inverse relation field', async () => {

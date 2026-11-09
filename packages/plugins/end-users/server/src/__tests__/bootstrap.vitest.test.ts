@@ -9,7 +9,7 @@ import bootstrap, {
   warnAboutRequiredProfileAttributes,
   writeUserListLayout,
 } from '../bootstrap';
-import { PROFILE_UID, ROLE_UID, USER_UID } from '../constants';
+import { PROFILE_UID, ROLE_FIND_ACTION, ROLE_UID, USER_UID } from '../constants';
 import { inProfileLifecycle } from '../utils/profile-lifecycle';
 import { logBootWarnings } from '../boot-warnings';
 import roleService from '../services/role';
@@ -39,12 +39,16 @@ const setup = ({ authenticatedCreated = false, publicCreated = false } = {}) => 
   const registerMany = vi.fn(async () => {});
   const adminService = vi.fn(() => ({ actionProvider: { registerMany } }));
   const defineOrigin = vi.fn();
+  const registerAction = vi.fn(async () => {});
   const config = new Map<string, unknown>();
   const strapi = {
     plugin,
     service: adminService,
     config: { get: vi.fn((key: string) => config.get(key)) },
     sessionManager: { defineOrigin },
+    contentAPI: {
+      permissions: { providers: { action: { has: () => false, register: registerAction } } },
+    },
     // No users, and no required profile attribute: the profile steps of the start have nothing to do
     db: { query: vi.fn(() => ({ findMany: vi.fn(async () => []) })) },
     contentTypes: {
@@ -82,6 +86,7 @@ const setup = ({ authenticatedCreated = false, publicCreated = false } = {}) => 
     registerMany,
     adminService,
     defineOrigin,
+    registerAction,
     config,
   };
 };
@@ -122,6 +127,20 @@ describe('bootstrap', () => {
 
     await expect(bootstrap({ strapi })).rejects.toThrow(/providers\[0\]/);
     expect(ensureDefaults).not.toHaveBeenCalled();
+  });
+
+  it('registers reading a role as a Content API action no route backs, so a role can be granted it', async () => {
+    const { strapi, registerAction } = setup();
+
+    await bootstrap({ strapi });
+
+    expect(ROLE_FIND_ACTION).toBe(`${ROLE_UID}.find`);
+    expect(registerAction).toHaveBeenCalledWith(ROLE_FIND_ACTION, {
+      api: 'plugin::end-users',
+      controller: 'role',
+      action: 'find',
+      uid: ROLE_FIND_ACTION,
+    });
   });
 
   it('creates the Public and Authenticated roles through the role service', async () => {
@@ -334,6 +353,9 @@ describe('bootstrap', () => {
           ),
         },
         contentTypes: {},
+        contentAPI: {
+          permissions: { providers: { action: { has: () => true, register: vi.fn() } } },
+        },
         store: () => ({ get: async () => null, set: vi.fn() }),
         log: { warn: vi.fn() },
         documents: vi.fn(() => ({ create })),

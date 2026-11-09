@@ -5,7 +5,7 @@ import { logBootWarnings } from './boot-warnings';
 import { readCompatConfig } from './compat/config';
 import { defineLegacyOrigin } from './compat/origin';
 import { isOwner } from './conditions';
-import { PLUGIN_ID, PROFILE_UID, USER_UID } from './constants';
+import { PLUGIN_ID, PROFILE_UID, ROLE_FIND_ACTION, USER_UID } from './constants';
 import { registry } from './providers/registry';
 import type permissionService from './services/permission';
 import { NOT_GRANTABLE } from './services/permission-layout';
@@ -285,6 +285,26 @@ export const writeUserListLayout = async (strapi: Core.Strapi): Promise<boolean>
   return true;
 };
 
+/**
+ * Makes `find` on the role type an action a role can be granted, with no route behind it. A relation
+ * to a type is only read by a caller who may `find` that type (core's relation sanitizer asks for
+ * `<target>.find`), and an action no route has is not one the Content API knows, so a `user.roles`
+ * the editor offered could never be read. With the action registered, a row for it opens that scope
+ * for the callers it is granted to, and carries the field rules of the role type.
+ */
+export const registerRoleReadAction = async (strapi: Core.Strapi): Promise<void> => {
+  const { action } = strapi.contentAPI.permissions.providers;
+
+  if (!action.has(ROLE_FIND_ACTION)) {
+    await action.register(ROLE_FIND_ACTION, {
+      api: `plugin::${PLUGIN_ID}`,
+      controller: 'role',
+      action: 'find',
+      uid: ROLE_FIND_ACTION,
+    });
+  }
+};
+
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   logBootWarnings(strapi);
 
@@ -299,6 +319,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   // Loads and validates `providers` of config/plugins.ts: a bad entry or package
   // stops the application here, naming it, and not on the first authentication request
   registry(strapi);
+
+  await registerRoleReadAction(strapi);
 
   // What an admin user can be granted to do with end users: the admin role editor lists them, and
   // the admin routes check them. Before the admin's own bootstrap, which gives the Super Admin
