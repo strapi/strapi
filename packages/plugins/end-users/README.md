@@ -147,10 +147,14 @@ Before compat is turned off and the cleanup has run, the migration can be undone
 2. Revert the commit that switched the project to end-users, so Users & Permissions is loaded again.
 3. Remove `migration.rollback` and deploy.
 
-Everything the migration moved comes back from its current state, including users created after the move. Some things
-cannot come back, and the log counts them: profile attributes added after the move, provider accounts beyond a user's
-first, and changes to role permissions made after the move (the permissions staged before come back). A rollback is
-refused when compat is off or the cleanup has run; restore the backup instead.
+Everything the migration moved comes back from its current state, including users created after the move and the
+spelling of each username. Some things cannot come back, and the log counts them. Profile attributes added after the move
+and provider accounts beyond a user's first stay behind, and so do roles beyond a user's first, since Users & Permissions
+gives a user one role. Changes to role permissions made after the move are lost too, because the permissions staged
+before it come back. Settings, provider and email template edits made after the move are not carried back either, and
+Users & Permissions goes on with the ones it had. When a profile permission of an admin role cannot be merged into the
+matching user permission without granting more than the user permission did, it is dropped and the log names the fields
+to grant again in the admin. A rollback is refused when compat is off or the cleanup has run; restore the backup instead.
 
 To migrate again after a rollback, switch the project to end-users again with `migration.fromUsersPermissions` set to `true`; the old tables are still in place.
 

@@ -172,22 +172,16 @@ export const moveSequence = async (trx: Knex, db: Database, from: string, to: st
 };
 
 /**
- * Renames a table and what carries its name. A table that an earlier run already moved is left as
- * it is; a target that exists, or a source that is gone, stops the run before anything is lost.
+ * Renames one table and makes sure it moved. A table already renamed by an earlier start is left
+ * as it is; anything else that stops the rename (the target exists, the source is gone) throws,
+ * since going on would leave the source for the schema sync to drop.
  */
-export const renameBack = async (
-  trx: Knex,
-  db: Database,
-  client: DbClient,
-  from: string,
-  to: string,
-  dropped?: (name: string) => boolean
-) => {
+export const renameOne = async (trx: Knex, db: Database, from: string, to: string) => {
   const hasFrom = await hasTable(trx, db, from);
   const hasTo = await hasTable(trx, db, to);
 
   if (!hasFrom && hasTo) {
-    return;
+    return false;
   }
 
   if (!hasFrom || hasTo) {
@@ -200,6 +194,22 @@ export const renameBack = async (
 
   if (!(await db.schema.renameTable(trx, { from, to }))) {
     throw new Error(`The table ${from} was not renamed to ${to}. Nothing was recorded.`);
+  }
+
+  return true;
+};
+
+/** Renames a table and what carries its name; a table an earlier run already moved is left alone */
+export const renameBack = async (
+  trx: Knex,
+  db: Database,
+  client: DbClient,
+  from: string,
+  to: string,
+  dropped?: (name: string) => boolean
+) => {
+  if (!(await renameOne(trx, db, from, to))) {
+    return;
   }
 
   await moveSchemaObjects(trx, db, client, from, to, dropped);

@@ -60,7 +60,7 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
     tableName: string;
     attributes: Record<string, { joinTable?: { name: string } }>;
   };
-  let dropped = 0;
+  const dropped: string[] = [];
 
   for (const table of [user.tableName, user.attributes.roles?.joinTable?.name]) {
     // A table that is not there (a record written without a migration) has nothing to drop
@@ -74,7 +74,7 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
         await dropColumn(trx, db, client, table, column);
       }
 
-      dropped += columns.length;
+      dropped.push(...columns);
     }
   }
 
@@ -86,6 +86,6 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
       : '';
 
   strapi.log.info(
-    `${PLUGIN_ID}: cleaned up after the migration: dropped ${dropping.length} staged tables and ${dropped} columns${keptNote}`
+    `${PLUGIN_ID}: cleaned up after the migration: dropped ${dropping.length} staged tables and ${dropped.length} columns (${dropped.join(', ') || 'none'})${keptNote}`
   );
 };

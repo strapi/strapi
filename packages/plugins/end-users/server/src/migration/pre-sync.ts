@@ -24,6 +24,13 @@ import { buildReport } from './report';
 import type { ReportContext } from './report';
 import { duplicatesQuery, readUpSnapshot } from './snapshot';
 import type { DbClient, DuplicateGroup, UpSnapshot } from './snapshot';
+import {
+  hasTable as tableHas,
+  moveSchemaObjects,
+  moveSequence,
+  renameOne,
+  tableOf,
+} from './schema-ops';
 import { RENAMED, planStaging } from './tables';
 
 export { RENAMED, stagingName, upJoinTableName } from './tables';
@@ -239,119 +246,6 @@ const tablesStartingWith = async (
   return rows.map((row) => String(row.name));
 };
 
-const tableOf = (trx: Knex, db: Database, table: string) => {
-  const schema = db.getSchemaName();
-
-  return schema ? trx(table).withSchema(schema) : trx(table);
-};
-
-/** Postgres keeps a table's id sequence under its old name after a rename */
-const renamePostgresSequence = async (trx: Knex, db: Database, from: string, to: string) => {
-  const schema = db.getSchemaName();
-  const qualified = (name: string) => (schema ? `${schema}.${name}` : name);
-  const sequence = `select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where c.relkind = 'S' and c.relname = ? and n.nspname = current_schema()`;
-  const has = async (name: string) =>
-    ((await trx.raw(sequence, [name])) as { rows: Row[] }).rows.length > 0;
-
-  if ((await has(`${from}_id_seq`)) && !(await has(`${to}_id_seq`))) {
-    await trx.raw('ALTER SEQUENCE ?? RENAME TO ??', [qualified(`${from}_id_seq`), `${to}_id_seq`]);
-  }
-};
-
-/** The names of a table's indexes and constraints (SQLite and MySQL: indexes and foreign keys) */
-const schemaObjectNames = async (trx: Knex, client: DbClient, table: string): Promise<string[]> => {
-  if (client === 'sqlite') {
-    const indexes = (await trx.raw('pragma index_list(??)', [table])) as Row[];
-
-    return indexes.map((row) => String(row.name));
-  }
-
-  if (client === 'postgres') {
-    const result = (await trx.raw(
-      `select c.conname as name from pg_constraint c
-         join pg_class t on t.oid = c.conrelid
-         join pg_namespace n on n.oid = t.relnamespace
-         where n.nspname = current_schema() and t.relname = ?
-       union
-       select indexname as name from pg_indexes
-         where schemaname = current_schema() and tablename = ?`,
-      [table, table]
-    )) as { rows: Row[] };
-
-    return result.rows.map((row) => String(row.name));
-  }
-
-  const [rows] = (await trx.raw(
-    `select index_name as name from information_schema.statistics
-       where table_schema = database() and table_name = ?
-     union
-     select constraint_name as name from information_schema.table_constraints
-       where table_schema = database() and table_name = ? and constraint_type = 'FOREIGN KEY'`,
-    [table, table]
-  )) as [Row[]];
-
-  return rows.map((row) => String(row.name));
-};
-
-/**
- * Brings the indexes, keys and constraints that still carry the old table's name in line with the
- * new one: renamed where the database can (Postgres), dropped where it can't (the schema sync
- * builds them again under the new name). Left alone they would sit beside the new ones.
- */
-const renameSchemaObjects = async (
-  trx: Knex,
-  db: Database,
-  client: DbClient,
-  from: string,
-  to: string
-) => {
-  const prefix = `${from}_`;
-  const names = (await schemaObjectNames(trx, client, to)).filter((name) =>
-    name.startsWith(prefix)
-  );
-
-  for (const name of new Set(names)) {
-    if (db.dialect.canRenameSchemaObjects()) {
-      // eslint-disable-next-line no-await-in-loop
-      await db.dialect.renameSchemaObject(trx, {
-        table: to,
-        from: name,
-        to: `${to}_${name.slice(prefix.length)}`,
-      });
-    } else {
-      // eslint-disable-next-line no-await-in-loop
-      await db.dialect.dropSchemaObject(trx, { table: to, name });
-    }
-  }
-};
-
-/**
- * Renames one table and makes sure it moved. A table already renamed by an earlier start is left
- * as it is; anything else that stops the rename (the target exists, the source is gone) throws,
- * since going on would leave the source for the schema sync to drop.
- */
-const renameOne = async (trx: Knex, db: Database, from: string, to: string) => {
-  const hasFrom = await db.getSchemaConnection(trx).hasTable(from);
-  const hasTo = await db.getSchemaConnection(trx).hasTable(to);
-
-  if (!hasFrom && hasTo) {
-    return;
-  }
-
-  if (!hasFrom || hasTo) {
-    throw new Error(
-      hasFrom
-        ? `The table ${to} already exists, so ${from} was not renamed. Nothing was recorded.`
-        : `The table ${from} is missing, so it cannot become ${to}. Nothing was recorded.`
-    );
-  }
-
-  if (!(await db.schema.renameTable(trx, { from, to }))) {
-    throw new Error(`The table ${from} was not renamed to ${to}. Nothing was recorded.`);
-  }
-};
-
 /**
  * The tables the plugin's own models own: each model's table and the join, link and component
  * tables of its attributes. Never decided by a name: a project table that starts with `eu_` is not
@@ -470,18 +364,15 @@ const renameTables = async (
   if (keys) {
     for (const [from, to] of pairs) {
       // eslint-disable-next-line no-await-in-loop
-      await renameSchemaObjects(trx, db, client, from, to);
+      await moveSchemaObjects(trx, db, client, from, to);
 
       if (client === 'postgres') {
         // eslint-disable-next-line no-await-in-loop
-        await renamePostgresSequence(trx, db, from, to);
+        await moveSequence(trx, db, from, to);
       }
     }
   }
 };
-
-const tableHas = (trx: Knex, db: Database, name: string) =>
-  db.getSchemaConnection(trx).hasTable(name);
 
 /** Empties the profile's and the account's tables, children first, so profiles are built again */
 const emptyProfileTables = async (trx: Knex, db: Database, client: DbClient): Promise<number> => {

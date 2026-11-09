@@ -151,6 +151,14 @@ describe('rollback and cleanup', () => {
       expect(res.body.jwt).toEqual(expect.any(String));
     });
 
+    it('signs alice in with the username spelling she signed up with', async () => {
+      const res = await createRequest({ strapi: up }).post('/api/auth/local', {
+        body: { identifier: 'Alice', password: changedPassword },
+      });
+
+      expect(res.status).toBe(200);
+    });
+
     it('brings back every user, the new one included, with their custom data', async () => {
       const populate = ['role', 'seo', 'avatar', 'organization', 'favorites'];
       const users = (await up.db.connection('up_users').count({ c: '*' }).first()) as Row;
@@ -214,6 +222,26 @@ describe('rollback and cleanup', () => {
       );
       expect(rows.filter((row) => row.subject === 'plugin::end-users.profile')).toEqual([]);
     });
+
+    it('creates a new user through users-permissions', async () => {
+      // The register route also sends the confirmation email, which this app has no provider for
+      const created = await up.plugin('users-permissions').service('user').add({
+        username: 'hank',
+        email: 'hank@example.com',
+        provider: 'local',
+        password: ginaPassword,
+        confirmed: true,
+        role: project.roles.authenticated.documentId,
+      });
+
+      expect(created.id).toEqual(expect.any(Number));
+
+      const res = await createRequest({ strapi: up }).post('/api/auth/local', {
+        body: { identifier: 'hank', password: ginaPassword },
+      });
+
+      expect(res.status).toBe(200);
+    });
   });
 
   it('migrates again as a second attempt', async () => {
@@ -254,6 +282,7 @@ describe('rollback and cleanup', () => {
       favorites: await db.schema.hasTable(stagedOf('up_users_favorites_lnk')!),
       password: await db.schema.hasColumn('eu_users', 'password'),
       company: await db.schema.hasColumn('eu_users', 'company'),
+      userOrder: await db.schema.hasColumn('eu_users_roles_lnk', 'user_ord'),
     }));
 
     expect(state).toEqual({
@@ -262,6 +291,7 @@ describe('rollback and cleanup', () => {
       favorites: true,
       password: false,
       company: false,
+      userOrder: false,
     });
 
     await stop();

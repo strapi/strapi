@@ -1,6 +1,7 @@
 // knex is Strapi's own database layer (hoisted); only its types are used here
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import type { Knex } from 'knex';
+import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';
 import type { Database } from '@strapi/database';
 
@@ -321,6 +322,51 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
     }
   }
 
+  // The spelling a user signed up with comes back from `display_username`; a user whose username was
+  // rewritten (a duplicate) or whose spelling another user already holds keeps the migrated one
+  if (columns.includes('display_username')) {
+    const mysql = db.dialect.client === 'mysql';
+    const candidates = () =>
+      trx(`${qualified(db, userTable)} as u`)
+        .whereNotNull('u.display_username')
+        .whereRaw('LOWER(??) = ??', ['u.display_username', 'u.username'])
+        .whereRaw(mysql ? 'CAST(?? AS BINARY) <> CAST(?? AS BINARY)' : '?? <> ??', [
+          'u.display_username',
+          'u.username',
+        ]);
+    const holders = () =>
+      trx(`${qualified(db, userTable)} as o`)
+        .select(trx.raw('1'))
+        .whereRaw('?? = ??', ['o.username', 'u.display_username'])
+        .whereRaw('?? <> ??', ['o.id', 'u.id']);
+
+    for (;;) {
+      // eslint-disable-next-line no-await-in-loop
+      const ids = (
+        (await candidates().whereNotExists(holders()).limit(PAGE).select('u.id')) as Row[]
+      ).map((row) => row.id as number);
+
+      if (ids.length === 0) {
+        break;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await users()
+        .whereIn('id', ids)
+        .update({ username: trx.raw('??', ['display_username']) });
+    }
+
+    const kept = (
+      (await candidates().whereExists(holders()).limit(50).select('u.id')) as Row[]
+    ).map((row) => row.id);
+
+    if (kept.length > 0) {
+      strapi.log.info(
+        `${PLUGIN_ID}: ${kept.length === 50 ? 'at least 50' : kept.length} users keep their migrated username because another user holds their original spelling (ids ${kept.join(', ')})`
+      );
+    }
+  }
+
   // Each scalar column the move took to the profile takes the profile's current value
   const profile = modelOf(db, PROFILE_UID);
   const link = profile.attributes.user.joinTable as {
@@ -329,7 +375,7 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
     inverseJoinColumn: { name: string };
   };
   const wanted = profileScalars(strapi);
-  const leftover = new Set(leftoverColumns(db, userTable, columns));
+  const leftover = new Set(leftoverColumns(db, modelOf(db, USER_UID).tableName, columns));
   const moved = wanted.filter((column) => leftover.has(column));
   const ofUser = (alias: string) =>
     trx(`${qualified(db, link.name)} as ${alias}`).whereRaw('?? = ??', [
@@ -368,7 +414,7 @@ const restoreUsers = async ({ strapi, db, trx, lost }: Run, userTable: string) =
 };
 
 /** The users' roles: one each, the first by order and then by id, and the role types users-permissions keeps */
-const restoreRoles = async ({ db, trx, lost }: Run, roleTable: string) => {
+const restoreRoles = async ({ db, trx, lost }: Run, roleTable: string, linkName: string) => {
   const user = modelOf(db, USER_UID);
   const joinTable = user.attributes.roles?.joinTable as
     | {
@@ -378,7 +424,6 @@ const restoreRoles = async ({ db, trx, lost }: Run, roleTable: string) => {
         orderColumnName?: string;
       }
     | undefined;
-  const linkName = joinTable?.name ?? 'eu_users_roles_lnk';
   const userKey = joinTable?.joinColumn.name ?? 'user_id';
   const order = joinTable?.orderColumnName ?? 'role_ord';
   const link = () => tableOf(trx, db, linkName);
@@ -540,9 +585,15 @@ const restoreMedia = async ({ db, trx }: Run) => {
 const restoreStaged = async ({ db, trx, client, record }: Run) => {
   for (const [staged, original] of Object.entries(record.staged)) {
     // eslint-disable-next-line no-await-in-loop
-    if (!record.carried.copied.includes(staged) && (await hasTable(trx, db, staged))) {
-      // eslint-disable-next-line no-await-in-loop
-      await renameBack(trx, db, client, staged, original);
+    if (await hasTable(trx, db, staged)) {
+      if (record.carried.copied.includes(staged)) {
+        // Copied into the profile's table, which the rollback has just read back: nothing to keep
+        // eslint-disable-next-line no-await-in-loop
+        await dropTable(trx, db, client, staged);
+      } else {
+        // eslint-disable-next-line no-await-in-loop
+        await renameBack(trx, db, client, staged, original);
+      }
     }
   }
 
@@ -568,6 +619,7 @@ interface PermissionRow {
   action: string;
   subject: string | null;
   properties: { fields?: unknown } & Record<string, unknown>;
+  conditions?: unknown;
   role?: { id: number } | null;
 }
 
@@ -575,6 +627,9 @@ const fieldsOf = (row: PermissionRow): string[] | null =>
   Array.isArray(row.properties?.fields)
     ? (row.properties.fields as unknown[]).filter((f): f is string => typeof f === 'string')
     : null;
+
+const withoutFields = (properties: PermissionRow['properties'] | undefined) =>
+  Object.fromEntries(Object.entries(properties ?? {}).filter(([key]) => key !== 'fields'));
 
 /** The user's `roles` is the `role` of users-permissions */
 const RENAMED_FIELDS: Readonly<Record<string, string>> = { roles: 'role' };
@@ -647,8 +702,16 @@ const restoreAdmin = async ({ strapi, db, trx, lost }: Run) => {
 
     const have = fieldsOf(into);
     const add = fieldsOf(row);
+    const same =
+      isDeepStrictEqual(into.conditions ?? [], row.conditions ?? []) &&
+      isDeepStrictEqual(withoutFields(into.properties), withoutFields(row.properties));
 
-    if (have && add) {
+    if (!same) {
+      // Never wider than the user's row: the fields are not merged, and the log says what to grant
+      strapi.log.info(
+        `${PLUGIN_ID}: the profile permission of admin role ${row.role!.id} on ${row.action} has other conditions or properties than the user's, so its fields (${(add ?? []).join(', ') || 'all'}) were not merged; grant them in users-permissions if they are needed`
+      );
+    } else if (have && add) {
       const union = [...new Set([...have, ...add])];
 
       if (union.length > have.length) {
@@ -704,14 +767,20 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
     copied: copiedOriginals(record),
     lost: { profileAttributes: 0, accounts: 0, roleLinks: 0, permissionRows: 0, adminActions: 0 },
   };
-  const userTable = modelOf(db, USER_UID).tableName;
-  const roleTable = RENAMED.up_roles;
+  // MySQL commits each rename on its own: a run that stopped after them finds the tables renamed
+  const nameNow = async (up: string, eu: string) => ((await hasTable(trx, db, eu)) ? eu : up);
+  const userModel = modelOf(db, USER_UID);
+  const userTable = await nameNow(UP_USERS, userModel.tableName);
+  const roleTable = await nameNow('up_roles', RENAMED.up_roles);
+  const linkTable = await nameNow(
+    'up_users_role_lnk',
+    (userModel.attributes.roles?.joinTable?.name as string | undefined) ?? RENAMED.up_users_role_lnk
+  );
   const users = await countOf(tableOf(trx, db, userTable));
   const roles = await countOf(tableOf(trx, db, roleTable));
 
   await restoreUsers(run, userTable);
-
-  await restoreRoles(run, roleTable);
+  await restoreRoles(run, roleTable, linkTable);
 
   run.lost.permissionRows = (await hasTable(trx, db, 'eu_permissions'))
     ? await countOf(tableOf(trx, db, 'eu_permissions'))
