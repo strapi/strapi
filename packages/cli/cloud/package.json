@@ -50,7 +50,7 @@
     "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
-    "@strapi/utils": "5.61.0",
+    "@strapi/utils": "4.0.0",
     "axios": "1.20.0",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -64,7 +64,7 @@
     "jwks-rsa": "3.1.0",
     "lodash": "4.18.1",
     "minimatch": "10.2.6",
-    "open": "8.4.2",
+    "open": "11.0.0",
     "ora": "5.4.1",
     "pkg-up": "3.1.0",
     "tar": "7.5.22",
