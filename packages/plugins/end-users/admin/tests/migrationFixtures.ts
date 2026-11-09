@@ -6,8 +6,8 @@ import type {
   MigrationReport,
   MigrationReportItem,
   MigrationStatusResponse,
+  ProjectFiles,
 } from '../../shared/contracts/migration';
-import type { ProjectFiles } from '../src/services/migration';
 
 type Status = MigrationStatusResponse['data'];
 

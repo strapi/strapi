@@ -121,3 +121,25 @@ export interface MigrationStatusResponse {
     legacyJwtHits: { legacy: number; access: number; lastHitAt: string | null } | null;
   };
 }
+
+/** One file a project changes: `before` null is a file created, `after` null a file deleted */
+export interface FileChange {
+  path: string;
+  before: string | null;
+  after: string | null;
+}
+
+export type ProjectFilesReason = 'not-development' | 'no-source' | 'config-not-editable';
+
+/** What `GET /end-users/migration/files` answers */
+export interface ProjectFiles {
+  writable: boolean;
+  reason: ProjectFilesReason | null;
+  /** The schema files only; the config file is never sent back */
+  changes: FileChange[];
+  /** The `'end-users'` entry, for a project that edits its config by hand */
+  configBlock: string;
+  /** The line that turns Users & Permissions off, for the same */
+  usersPermissionsLine: string;
+  findings: CodeFinding[];
+}

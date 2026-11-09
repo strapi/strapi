@@ -5,15 +5,17 @@ import {
   useAPIErrorHandler,
   useClipboard,
   useNotification,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import { Alert, Box, Button, Dialog, Flex, Loader, Typography } from '@strapi/design-system';
 import { Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { PERMISSIONS } from '../../constants';
 import { useGetProjectFilesQuery, useWriteProjectFilesMutation } from '../../services/migration';
 import { getTranslation } from '../../utils/getTranslation';
 
-import type { ProjectFiles as ProjectFilesPlan } from '../../services/migration';
+import type { ProjectFiles as ProjectFilesPlan } from '../../../../shared/contracts/migration';
 
 const REASONS: Record<
   NonNullable<ProjectFilesPlan['reason']>,
@@ -104,6 +106,10 @@ const ProjectFiles = () => {
   const { data, isLoading, error } = useGetProjectFilesQuery();
   const [writeFiles] = useWriteProjectFilesMutation();
   const [isConfirming, setIsConfirming] = React.useState(false);
+  const [isErrorDismissed, setIsErrorDismissed] = React.useState(false);
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC(PERMISSIONS.settings);
 
   if (isLoading) {
     return (
@@ -112,9 +118,10 @@ const ProjectFiles = () => {
   }
 
   if (error || !data) {
-    return (
+    return isErrorDismissed ? null : (
       <Alert
         variant="danger"
+        onClose={() => setIsErrorDismissed(true)}
         closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
       >
         {formatMessage({
@@ -234,10 +241,9 @@ const ProjectFiles = () => {
               defaultMessage: 'Code to change by hand',
             })}
           </Typography>
-          {data.findings.map((finding, index) => (
+          {data.findings.map((finding) => (
             <Typography
-              // A rule can match twice on a line, so the position is part of the key
-              key={`${finding.path}:${finding.line ?? 0}:${finding.rule}:${index}`}
+              key={`${finding.path}:${finding.line ?? 0}:${finding.rule}:${finding.message}`}
               tag="p"
               textColor="neutral800"
             >
@@ -247,7 +253,7 @@ const ProjectFiles = () => {
         </Flex>
       )}
 
-      {data.writable ? (
+      {data.writable && canUpdate ? (
         <Flex>
           <Button type="button" onClick={() => setIsConfirming(true)}>
             {formatMessage({

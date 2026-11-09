@@ -18,6 +18,7 @@ import { getTranslation } from '../utils/getTranslation';
 const CheckModeNotice = ({ children }: { children?: React.ReactNode }) => {
   const { formatMessage } = useIntl();
   const { data, isLoading } = useGetMigrationStatusQuery();
+  const [isDismissed, setIsDismissed] = React.useState(false);
 
   if (isLoading) {
     return <Page.Loading />;
@@ -27,9 +28,14 @@ const CheckModeNotice = ({ children }: { children?: React.ReactNode }) => {
     return <>{children}</>;
   }
 
+  if (isDismissed) {
+    return null;
+  }
+
   return (
     <Layouts.Content>
       <Alert
+        onClose={() => setIsDismissed(true)}
         variant="default"
         closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
         action={

@@ -1,5 +1,5 @@
-import { render, screen } from '@tests/utils';
 import { ACTIVE, CHECK, serveMigration } from '@tests/migrationFixtures';
+import { render, screen } from '@tests/utils';
 
 import { CheckModeNotice } from '../CheckModeNotice';
 
@@ -20,6 +20,16 @@ describe('CheckModeNotice', () => {
       '/settings/end-users/advanced#migration'
     );
     expect(screen.queryByText('Page content')).not.toBeInTheDocument();
+  });
+
+  it('hides when Close is pressed', async () => {
+    serveMigration(CHECK);
+    const { user } = render(<CheckModeNotice />);
+
+    await screen.findByText('End users turns on when the migration runs');
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByText(/turns on when/)).not.toBeInTheDocument();
   });
 
   it('shows the page itself outside check mode', async () => {

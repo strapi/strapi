@@ -1,29 +1,12 @@
 import { endUsersApi } from './api';
 
 import type {
-  CodeFinding,
   MigrationReportItem,
   MigrationStatusResponse,
+  ProjectFiles,
 } from '../../../shared/contracts/migration';
 
 type MigrationStatus = MigrationStatusResponse['data'];
-
-/** One file the migration changes: `before` null is a file created, `after` null a file deleted */
-interface FileChange {
-  path: string;
-  before: string | null;
-  after: string | null;
-}
-
-/** What `GET /end-users/migration/files` answers (the server's `ProjectFiles`) */
-interface ProjectFiles {
-  writable: boolean;
-  reason: 'not-development' | 'no-source' | 'config-not-editable' | null;
-  changes: FileChange[];
-  configBlock: string;
-  usersPermissionsLine: string;
-  findings: CodeFinding[];
-}
 
 /** The admin routes answer `{ data }`. */
 type Answer<T> = { data: T };
@@ -88,4 +71,4 @@ export {
   useUpdateMigrationItemMutation,
   useWriteProjectFilesMutation,
 };
-export type { FileChange, MigrationStatus, ProjectFiles };
+export type { MigrationStatus };

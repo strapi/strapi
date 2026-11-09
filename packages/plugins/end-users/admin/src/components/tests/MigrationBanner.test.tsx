@@ -1,5 +1,5 @@
-import { render, screen, server, waitFor } from '@tests/utils';
 import { ACTIVE, serveMigration } from '@tests/migrationFixtures';
+import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { MigrationBanner } from '../MigrationBanner';
@@ -14,6 +14,16 @@ describe('MigrationBanner', () => {
       'href',
       '/settings/end-users/advanced#migration'
     );
+  });
+
+  it('hides when Close is pressed', async () => {
+    serveMigration();
+    const { user } = render(<MigrationBanner />);
+
+    await screen.findByText('2 migration items need attention');
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByText('2 migration items need attention')).not.toBeInTheDocument();
   });
 
   it('renders nothing with no record, no unresolved item, or a refused query', async () => {

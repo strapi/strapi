@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Alert, Box, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -14,14 +16,16 @@ import { getTranslation } from '../utils/getTranslation';
 const MigrationBanner = () => {
   const { formatMessage } = useIntl();
   const { data } = useGetMigrationStatusQuery();
+  const [isDismissed, setIsDismissed] = React.useState(false);
 
-  if (!data?.record || data.unresolved === 0) {
+  if (isDismissed || !data?.record || data.unresolved === 0) {
     return null;
   }
 
   return (
     <Box paddingLeft={10} paddingRight={10} paddingTop={6}>
       <Alert
+        onClose={() => setIsDismissed(true)}
         variant="warning"
         closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
         action={

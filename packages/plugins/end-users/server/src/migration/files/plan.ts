@@ -2,7 +2,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Core } from '@strapi/types';
 
-import type { CodeFinding } from '../../../../shared/contracts/migration';
+import type {
+  CodeFinding,
+  FileChange,
+  ProjectFiles,
+  ProjectFilesReason,
+} from '../../../../shared/contracts/migration';
 import {
   endUsersConfigBlock,
   switchPluginsConfig,
@@ -12,7 +17,6 @@ import {
 import type { UsersPermissionsSettings } from './config-plugins';
 import { scanCode } from './code';
 import { planSchemaChanges } from './schemas';
-import type { FileChange } from './types';
 
 const UP_PLUGIN = 'users-permissions';
 const UP_CONFIG = `plugin::${UP_PLUGIN}`;
@@ -22,19 +26,7 @@ const MAX_FILE_BYTES = 1024 * 1024;
 const SKIPPED_FOLDERS = new Set(['node_modules', '.git']);
 const CONFIG_FILES = ['config/plugins.ts', 'config/plugins.js'];
 
-export type ProjectFilesReason = 'not-development' | 'no-source' | 'config-not-editable';
-
-export interface ProjectFiles {
-  writable: boolean;
-  reason: ProjectFilesReason | null;
-  /** The schema files only; the config file is never sent back */
-  changes: FileChange[];
-  /** The `'end-users'` entry, for a project that edits its config by hand */
-  configBlock: string;
-  /** The line that turns Users & Permissions off, for the same */
-  usersPermissionsLine: string;
-  findings: CodeFinding[];
-}
+export type { ProjectFiles, ProjectFilesReason };
 
 /** What the server writes: `ProjectFiles` and the change to `config/plugins`, which never leaves it */
 export interface ProjectFilesPlan extends ProjectFiles {

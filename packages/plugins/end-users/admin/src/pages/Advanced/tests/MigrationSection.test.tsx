@@ -1,5 +1,5 @@
-import { render, screen, server, waitFor } from '@tests/utils';
 import { ACTIVE, CHECK, REPORT, serveMigration } from '@tests/migrationFixtures';
+import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { AdvancedPage } from '../AdvancedPage';

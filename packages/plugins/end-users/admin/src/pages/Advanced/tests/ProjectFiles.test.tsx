@@ -1,7 +1,9 @@
-import { render, screen, server, waitFor } from '@tests/utils';
+import { render as renderAdmin } from '@strapi/admin/strapi-admin/test';
 import { FILES, serveMigration, ACTIVE } from '@tests/migrationFixtures';
+import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { PERMISSIONS } from '../../../constants';
 import { ProjectFiles } from '../ProjectFiles';
 
 describe('ProjectFiles', () => {
@@ -38,6 +40,29 @@ describe('ProjectFiles', () => {
 
     expect(await screen.findByText(/written only by a development server/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Write the files' })).not.toBeInTheDocument();
+  });
+
+  it('hides the write button from an administrator without update rights', async () => {
+    serveMigration(ACTIVE, FILES);
+    // The shared render grants every permission: this one holds read only
+    renderAdmin(<ProjectFiles />, {
+      providerOptions: { permissions: [PERMISSIONS.settings.read[0]] },
+    });
+
+    expect(await screen.findByText('Project files')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Write the files' })).not.toBeInTheDocument();
+  });
+
+  it('hides the planning error when Close is pressed', async () => {
+    server.use(
+      http.get('/end-users/migration/files', () => new HttpResponse(null, { status: 500 }))
+    );
+    const { user } = render(<ProjectFiles />);
+
+    await screen.findByText('The project files could not be planned.');
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByText('The project files could not be planned.')).not.toBeInTheDocument();
   });
 
   it('shows the config block and the users-permissions line with copy buttons, and each change', async () => {
