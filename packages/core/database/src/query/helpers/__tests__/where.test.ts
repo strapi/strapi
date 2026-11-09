@@ -1,7 +1,7 @@
 import createKnex from 'knex';
 import type { Knex } from 'knex';
 
-import { applyWhere } from '../where';
+import { applyWhere, processWhere } from '../where';
 
 // Strapi maps its sqlite/mysql/postgres clients onto these knex clients
 // (see src/connection.ts). We only compile queries here (`toSQL`), so no
@@ -131,5 +131,54 @@ describe('applyWhere - LIKE operator escaping', () => {
         expect(sql).not.toMatch(/CAST/i);
       }
     });
+  });
+});
+
+describe('processWhere - boolean filter values', () => {
+  const ctx = {
+    db: { metadata: { get: () => ({ attributes: { flag: { type: 'boolean' } } }) } },
+    qb: { aliasColumn: (column: string) => column },
+    uid: 'api::article.article',
+  } as unknown as Parameters<typeof processWhere>[1];
+
+  test.each([
+    [true, true],
+    ['true', true],
+    ['t', true],
+    ['1', true],
+    [1, true],
+    [false, false],
+    ['false', false],
+    ['f', false],
+    ['0', false],
+    [0, false],
+    ['TRUE', true],
+    ['T', true],
+    ['FALSE', false],
+    ['F', false],
+  ])('casts %p to %p', (input, expected) => {
+    expect(processWhere({ flag: { $eq: input } }, ctx)).toEqual({ flag: { $eq: expected } });
+  });
+
+  test('keeps null', () => {
+    expect(processWhere({ flag: { $eq: null } }, ctx)).toEqual({ flag: { $eq: null } });
+  });
+
+  test('casts every value of $in', () => {
+    expect(processWhere({ flag: { $in: ['t', '0'] } }, ctx)).toEqual({
+      flag: { $in: [true, false] },
+    });
+  });
+
+  test.each(['$null', '$notNull'])('does not cast %s values', (operator) => {
+    expect(processWhere({ flag: { [operator]: 'true' } }, ctx)).toEqual({
+      flag: { [operator]: 'true' },
+    });
+  });
+
+  test.each(['yes', 'no', '', 2, 'on'])('rejects unrecognised value %p', (input) => {
+    expect(() => processWhere({ flag: { $eq: input } }, ctx)).toThrow(
+      expect.objectContaining({ name: 'InvalidBooleanFormat' })
+    );
   });
 });

@@ -1,10 +1,11 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, expectTypeOf, vi } from 'vitest';
 import _ from 'lodash';
 import { queryParams, errors } from '@strapi/utils';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 import roleContentType from '../../content-types/Role';
 import roleService from '../role';
+import * as permissionQueries from '../permission/queries';
 
 const {
   sanitizeRole,
@@ -1862,6 +1863,61 @@ describe('Role', () => {
       await addPermissions(roleId, input);
 
       expect(createMany).toHaveBeenCalledWith(expect.arrayContaining(expected));
+    });
+
+    test('Returns the stored permissions with their number id and action parameters', async () => {
+      const storedRows = [
+        {
+          id: 12,
+          documentId: 'stored-permission',
+          action: 'plugin::review-workflows.stage.transition',
+          actionParameters: { from: 3 },
+          subject: null,
+          properties: {},
+          conditions: [],
+          createdAt: '2026-11-09T00:00:00.000Z',
+          updatedAt: '2026-11-09T00:00:00.000Z',
+        },
+      ];
+      const dbCreate = vi.fn(async () => storedRows.shift());
+
+      global.strapi = {
+        db: { query: () => ({ create: dbCreate }) },
+        eventHub: { emit: vi.fn() },
+        admin: {
+          services: {
+            permission: { createMany: permissionQueries.createMany },
+          },
+        },
+      } as any;
+
+      const permissions = await addPermissions(1, [
+        { action: 'plugin::review-workflows.stage.transition', actionParameters: { from: 3 } },
+      ]);
+
+      expect(dbCreate).toHaveBeenCalledWith({
+        data: {
+          action: 'plugin::review-workflows.stage.transition',
+          actionParameters: { from: 3 },
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+      });
+      expect(permissions).toStrictEqual([
+        {
+          id: 12,
+          action: 'plugin::review-workflows.stage.transition',
+          actionParameters: { from: 3 },
+          subject: null,
+          properties: {},
+          conditions: [],
+        },
+      ]);
+      expectTypeOf(permissions[0].id).toEqualTypeOf<number>();
+      expectTypeOf(permissions[0].actionParameters).toEqualTypeOf<{ from: number }>();
+      expectTypeOf(permissions[0].subject).toEqualTypeOf<string | null>();
     });
   });
 

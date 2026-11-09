@@ -80,7 +80,7 @@
     "prompts": "2.4.2",
     "semver": "7.7.4",
     "simple-git": "4.0.2",
-    "undici": "8.12.3"
+    "undici": "8.12.4"
   },
   "devDependencies": {
     "@strapi/types": "5.61.0",

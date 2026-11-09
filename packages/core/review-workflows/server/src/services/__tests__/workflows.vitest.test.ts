@@ -293,6 +293,32 @@ describe('review-workflows workflows service', () => {
   });
 
   describe('when release-action service is present', () => {
+    it('create without contentTypes creates the workflow and validates no content type', async () => {
+      const strapi = createStrapiMock({
+        releaseActionService: { validateActionsByContentTypes },
+      });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+      const data = {
+        name: 'Editorial',
+        stages: [{ name: 'Todo' }],
+        stageRequiredToPublishName: 'Todo',
+      };
+      createMany.mockResolvedValue([{ id: 10, name: 'Todo' }]);
+
+      await expect(service.create({ data })).resolves.toEqual(workflow);
+
+      expect(migrate).not.toHaveBeenCalled();
+      expect(strapi.db.query().create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { ...data, stages: [10], stageRequiredToPublish: 10 },
+        })
+      );
+      expect(validateActionsByContentTypes).toHaveBeenCalledTimes(1);
+      // No content type is assigned, so the validation targets no content type uid.
+      const [contentTypeUids] = validateActionsByContentTypes.mock.calls[0];
+      expect(contentTypeUids ?? []).toEqual([]);
+    });
+
     it('update should still call validateActionsByContentTypes', async () => {
       const strapi = createStrapiMock({
         releaseActionService: { validateActionsByContentTypes },

@@ -1,10 +1,10 @@
 module.exports = () => ({
   upload: {
     config: {
-      // Narrow, unambiguous deny so the upload journey's "unsupported file type"
-      // step has something real to reject — the default config allows every type.
+      // Cover both browser-declared and extension-derived executable MIME types
+      // so the upload rejection fixture behaves the same in Chromium and WebKit.
       security: {
-        deniedTypes: ['application/x-msdownload'],
+        deniedTypes: ['application/x-msdownload', 'application/x-msdos-program'],
       },
     },
   },
