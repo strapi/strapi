@@ -92,4 +92,32 @@ describe('VersionsList', () => {
 
     expect(within(screen.getAllByRole('link')[1]).getByText(label)).toBeInTheDocument();
   });
+
+  it('shows the full author name in a tooltip on hover', async () => {
+    const { user } = render(
+      // @ts-expect-error we don't need all the context
+      <HistoryProvider page={1} versions={mockHistoryVersionsData.historyVersions}>
+        <VersionsList />
+      </HistoryProvider>
+    );
+
+    await user.hover(within(screen.getAllByRole('link')[1]).getByText('Deploy token'));
+
+    expect(await screen.findByRole('tooltip', { name: 'Deploy token' })).toBeInTheDocument();
+  });
+
+  it('shows the full author name in a tooltip on keyboard focus', async () => {
+    const { user } = render(
+      // @ts-expect-error we don't need all the context
+      <HistoryProvider page={1} versions={mockHistoryVersionsData.historyVersions}>
+        <VersionsList />
+      </HistoryProvider>
+    );
+
+    await user.tab();
+    await user.tab();
+
+    expect(screen.getAllByRole('link')[1]).toHaveFocus();
+    expect(await screen.findByRole('tooltip', { name: 'Deploy token' })).toBeInTheDocument();
+  });
 });
