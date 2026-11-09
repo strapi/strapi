@@ -9,6 +9,8 @@ import type {
   ProviderSummary,
   ProviderUpdateBody,
 } from '../../../shared/contracts/providers';
+import { readCompatConfig } from '../compat/config';
+import { connectRedirectUri } from '../compat/connect';
 import { PLUGIN_ID, PROFILE_UID } from '../constants';
 import { resolveBasePath } from '../engine/better-auth/base-path';
 import { resolveServerOrigin } from '../engine/better-auth/server-origin';
@@ -396,8 +398,11 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
     return undefined;
   };
 
+  /** The compatibility mode keeps the address Users & Permissions gave a provider's callback. */
   const redirectUri = (id: string) =>
-    `${resolveServerOrigin(strapi.config)}${resolveBasePath(strapi.config)}/callback/${id}`;
+    readCompatConfig(strapi).usersPermissions
+      ? connectRedirectUri(strapi, id)
+      : `${resolveServerOrigin(strapi.config)}${resolveBasePath(strapi.config)}/callback/${id}`;
 
   const summarize = (entry: Entry): ProviderSummary => {
     const enabled = isEnabled(entry);
@@ -920,16 +925,23 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
         // The toggle is the administrator's, so it wins over whatever the definition set. Better
         // Auth names it differently for a social provider and for a generic OAuth one.
         const update = updatesUserOnSignIn(entry);
+        // With the compatibility mode on, the address the provider sends the browser back to is
+        // the connect callback: Better Auth sends this one to the authorize and token endpoints
+        const redirect = readCompatConfig(strapi).usersPermissions
+          ? { redirectURI: connectRedirectUri(strapi, entry.id) }
+          : {};
 
         if (entry.definition.kind === 'social') {
           built.socialProviders[entry.id] = {
             ...(init as Plain),
+            ...redirect,
             overrideUserInfoOnSignIn: update,
           };
         } else {
           built.genericOAuth.push({
             pkce: true,
             ...(init as Plain),
+            ...redirect,
             overrideUserInfo: update,
             providerId: entry.id,
           });

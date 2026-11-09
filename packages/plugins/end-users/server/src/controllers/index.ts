@@ -1,5 +1,6 @@
 import auth from './auth';
 import condition from './admin/condition';
+import connect from './connect';
 import me from './me';
 import permissionLayout from './admin/permission-layout';
 import permissions from './permissions';
@@ -13,6 +14,7 @@ import userSecurity from './admin/user-security';
 export default {
   auth,
   condition,
+  connect,
   me,
   'permission-layout': permissionLayout,
   permissions,

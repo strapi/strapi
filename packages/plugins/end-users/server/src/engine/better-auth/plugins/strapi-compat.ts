@@ -16,6 +16,7 @@ import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
 import type { CompatConfig } from '../../../compat/config';
+import { callback } from '../../../compat/endpoints/callback';
 import { emailConfirmation, sendEmailConfirmation } from '../../../compat/endpoints/confirmation';
 import { local } from '../../../compat/endpoints/local';
 import {
@@ -75,6 +76,22 @@ const finish = (result: CompatResult): Record<string, unknown> => {
   }
 
   return result.body as Record<string, unknown>;
+};
+
+/**
+ * The session cookie's value as the bearer plugin hands it out (`set-auth-token`): URL-encoded, the
+ * signed token. Whichever form the cookie reader gave, it is that.
+ */
+const sessionToken = (value: string | null | undefined): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    return encodeURIComponent(decodeURIComponent(value));
+  } catch {
+    return encodeURIComponent(value);
+  }
 };
 
 export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuthPlugin => ({
@@ -156,6 +173,21 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
           await revokeSession(strapi, cfg, {
             headers: ctx.headers,
             sessionId: ctx.params.sessionId,
+          })
+        )
+    ),
+
+    // GET /api/auth/:provider/callback
+    compatProviderCallback: createAuthEndpoint(
+      '/:provider/callback',
+      { method: 'GET' },
+      async (ctx) =>
+        respond(
+          ctx,
+          await callback(strapi, cfg, {
+            provider: ctx.params.provider,
+            headers: ctx.headers,
+            token: sessionToken(ctx.getCookie(ctx.context.authCookies.sessionToken.name)),
           })
         )
     ),
