@@ -18,8 +18,14 @@ const CROSS_SITE_URL = 'http://127.0.0.1:5173';
 // the `e2e` before `admin`.
 const ADMIN_SPECS = /[\\/]e2e[\\/]admin[\\/].*\.spec\.ts$/;
 
+// The specs of `e2e/migration` need a database seeded with Users & Permissions and a Strapi that
+// migrates it, which `playwright.migration.config.ts` sets up. Without that they fail, so only that
+// config runs them.
+const MIGRATION_SPECS = /[\\/]e2e[\\/]migration[\\/]/;
+
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: MIGRATION_SPECS,
   fullyParallel: false,
   workers: 1,
   retries: 0,
