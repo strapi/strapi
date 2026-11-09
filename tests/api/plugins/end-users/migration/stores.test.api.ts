@@ -20,6 +20,9 @@ import {
   seedUsersPermissionsProject,
 } from '../utils/users-permissions-project';
 import type { UsersPermissionsProject } from '../utils/users-permissions-project';
+import { resetDatabase } from '../utils/reset-database';
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const ORIGIN = 'https://app.example.test';
 const UP = 'plugin::users-permissions';
@@ -77,6 +80,7 @@ describe('migration from users-permissions: stores, admin side and finish', () =
     await strapi?.destroy();
     await resetAfterMigration();
     removeProjectTypes();
+    await resetDatabase();
   });
 
   it('carries sign-up, verification, both redirects and the default role into the settings', async () => {
@@ -218,7 +222,7 @@ describe('migration from users-permissions: stores, admin side and finish', () =
 
     for (const user of Object.values(project.users)) {
       expect(json).not.toContain(user.email);
-      expect(json).not.toMatch(new RegExp(`\\b${user.username.replace(/[.]/g, '\\.')}\\b`));
+      expect(json).not.toMatch(new RegExp(`\\b${escapeRegExp(user.username)}\\b`));
     }
 
     expect(json).not.toContain(project.githubSecret);

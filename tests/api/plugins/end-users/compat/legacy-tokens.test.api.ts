@@ -18,6 +18,7 @@ import {
   emptyTables,
   resetRoles,
 } from '../utils/permissions';
+import { resetDatabase } from '../utils/reset-database';
 
 const ROUTE = '/api/end-users-test/legacy';
 const UNTIL_KEY = 'plugin::end-users.compat.legacyJwt.until';
@@ -88,6 +89,7 @@ describe('end-users compat: legacy tokens', () => {
   afterAll(async () => {
     await recordMigration(null);
     await strapi.destroy();
+    await resetDatabase();
   });
 
   it('accepts a legacy { id } token issued before the cut-off', async () => {

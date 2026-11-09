@@ -14,6 +14,7 @@ import {
 } from '../utils/users-permissions-project';
 import type { UsersPermissionsProject } from '../utils/users-permissions-project';
 import { TEST_PASSWORD } from '../utils/permissions';
+import { resetDatabase } from '../utils/reset-database';
 
 const MIGRATION = '/end-users/migration';
 const REPORT_KEY = 'plugin_end-users_migration-report';
@@ -178,6 +179,11 @@ describe('migration from users-permissions: check mode', () => {
 });
 
 describe('migration from users-permissions: check mode over end-users data', () => {
+  afterAll(async () => {
+    removeProjectTypes();
+    await resetDatabase();
+  });
+
   it('refuses to start when eu_users holds users, and drops nothing', async () => {
     const project = await seedUsersPermissionsProject();
     const migrated = await migratedInstance(project);
@@ -193,6 +199,5 @@ describe('migration from users-permissions: check mode over end-users data', () 
     await expect(checkInstance()).rejects.toThrow(/eu_users/);
 
     expect(await users()).toBe(before);
-    removeProjectTypes();
   });
 });

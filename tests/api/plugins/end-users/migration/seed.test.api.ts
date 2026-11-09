@@ -14,6 +14,7 @@ import {
 } from '../utils/users-permissions-project';
 import type { UsersPermissionsProject } from '../utils/users-permissions-project';
 import { TEST_PASSWORD, bearer } from '../utils/permissions';
+import { resetDatabase } from '../utils/reset-database';
 
 const appFile = (...segments: string[]) =>
   path.join(path.dirname(process.env.ENV_PATH as string), ...segments);
@@ -25,8 +26,9 @@ describe('users-permissions project seed', () => {
     project = await seedUsersPermissionsProject();
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     removeProjectTypes();
+    await resetDatabase();
   });
 
   it('seeds a project the users-permissions plugin itself serves', async () => {

@@ -10,6 +10,7 @@ import {
 } from '../utils/users-permissions-project';
 import type { Core } from '@strapi/types';
 import type { FixtureUser, UsersPermissionsProject } from '../utils/users-permissions-project';
+import { resetDatabase } from '../utils/reset-database';
 
 describe('migration from users-permissions: start control', () => {
   let project: UsersPermissionsProject;
@@ -460,6 +461,7 @@ describe('migration from users-permissions: after the schema sync', () => {
   afterAll(async () => {
     await strapi?.destroy();
     removeProjectTypes();
+    await resetDatabase();
   });
 
   it('gives every user one profile with the same id and the custom values', async () => {

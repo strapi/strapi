@@ -2,6 +2,7 @@ import { createAuthRequest } from 'api-tests/request';
 import { createUtils } from 'api-tests/utils';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
+import { resetDatabase } from '../utils/reset-database';
 
 const PASSWORD = 'Password123';
 const MIGRATION = '/end-users/migration';
@@ -68,6 +69,7 @@ describe('end-users: admin migration API', () => {
     await store().delete({ key: 'migration-report' });
     await utils.deleteUsersById([authorId]);
     await strapi.destroy();
+    await resetDatabase();
   });
 
   it('answers the empty status with no record', async () => {

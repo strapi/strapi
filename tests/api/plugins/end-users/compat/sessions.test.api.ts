@@ -18,6 +18,7 @@ import {
   emptyTables,
   resetRoles,
 } from '../utils/permissions';
+import { resetDatabase } from '../utils/reset-database';
 
 const LEGACY_ROUTE = '/api/end-users-test/legacy';
 const COOKIE = 'strapi_up_refresh';
@@ -401,6 +402,7 @@ describe('end-users compat: refresh routes off', () => {
   afterAll(async () => {
     await reset();
     await strapi.destroy();
+    await resetDatabase();
   });
 
   it('answers 404 on refresh, logout and sessions with refresh off', async () => {
