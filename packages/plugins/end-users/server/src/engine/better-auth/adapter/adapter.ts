@@ -40,6 +40,14 @@
  * adapter checks every field of every `where` against the content type and throws instead, and it
  * refuses an empty `where` wherever one would match an arbitrary or every row.
  *
+ * The users-permissions password
+ * -------------------------------
+ * With the compatibility mode on, a credential account's password is also written to the user's
+ * own `password` column (the one users-permissions reads), in the same transaction as the account
+ * write, so a project that rolls back finds the password the user last set. Better Auth reaches
+ * the account only through `create`, `update` and `updateMany` (sign-up, reset, change and
+ * `setPassword` all end in one of them), so those three carry the mirror.
+ *
  * Not supported: native joins (`advanced.database.joins`). Better Auth falls back to separate
  * queries when it is left off, which is the default, and the adapter refuses to run with it on.
  */
@@ -55,7 +63,8 @@ import type {
 } from 'better-auth/adapters';
 import type { UID } from '@strapi/strapi';
 
-import { PLUGIN_ID } from '../../../constants';
+import { readCompatConfig } from '../../../compat/config';
+import { PLUGIN_ID, USER_UID } from '../../../constants';
 import { singularNameOf } from '../model-names';
 import { transformFilters } from './transformers/filters';
 import type { StrapiFilters } from './transformers/filters';
@@ -104,6 +113,7 @@ interface Documents {
  */
 interface Db {
   findOne(params: { where: Row }): Promise<Row | null>;
+  findMany(params: { where: Row }): Promise<Row[]>;
   updateMany(params: { where: Row; data: Row }): Promise<{ count: number }>;
   deleteMany(params: { where: Row }): Promise<{ count: number }>;
 }
@@ -297,11 +307,55 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
       .forUpdate()
       .execute<Row | null | undefined>();
 
+  const isAccount = (target: ModelTarget) => modelKeyOf(target) === 'account';
+
+  /** Whether a write to this model may carry a password that must be mirrored. */
+  const mirrorsPassword = (target: ModelTarget, data: Row) =>
+    isAccount(target) &&
+    typeof data[resolveField(target, 'password')] === 'string' &&
+    readCompatConfig(strapi).usersPermissions;
+
+  /**
+   * Copies a credential account's password to the user row. A raw write through the database
+   * layer: the Document Service would take the password for a new credential and hash it again.
+   * Runs inside the caller's transaction.
+   */
+  const mirrorToUser = async (
+    target: ModelTarget,
+    account: Row,
+    password: unknown,
+    overrides: Row = {}
+  ) => {
+    const providerId = overrides[resolveField(target, 'providerId')] ?? account.providerId;
+    const userId = account[resolveField(target, 'userId')];
+
+    if (providerId !== 'credential' || typeof userId !== 'string') {
+      return;
+    }
+
+    await strapi.db
+      .query(USER_UID)
+      .updateMany({ where: { documentId: userId }, data: { password } });
+  };
+
   return {
     async create({ data, ...target }) {
-      const created = await documentsOf(target).create({ data });
+      if (
+        !mirrorsPassword(target, data) ||
+        data[resolveField(target, 'providerId')] !== 'credential'
+      ) {
+        const created = await documentsOf(target).create({ data });
 
-      return asRow(rowMapper(target)(created));
+        return asRow(rowMapper(target)(created));
+      }
+
+      return inTransaction(async () => {
+        const created = await documentsOf(target).create({ data });
+
+        await mirrorToUser(target, created, data[resolveField(target, 'password')]);
+
+        return asRow(rowMapper(target)(created));
+      });
     },
 
     async update({ where, update, ...target }) {
@@ -339,6 +393,10 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
 
         const updated = count > 0 ? await dbOf(target).findOne({ where: { id } }) : null;
 
+        if (updated && mirrorsPassword(target, update as Row)) {
+          await mirrorToUser(target, updated, (update as Row)[resolveField(target, 'password')]);
+        }
+
         return updated ? asRow(rowMapper(target)(updated)) : null;
       });
     },
@@ -363,12 +421,32 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
         });
       }
 
-      const { count } = await dbOf(target).updateMany({
-        where: filtersOf(target, where),
-        data: update,
-      });
+      const filters = filtersOf(target, where);
 
-      return count;
+      if (!mirrorsPassword(target, update as Row)) {
+        const { count } = await dbOf(target).updateMany({ where: filters, data: update });
+
+        return count;
+      }
+
+      // `updatePassword` ends here: the accounts are read first, so each one's user is known.
+      return inTransaction(async () => {
+        const accounts = await dbOf(target).findMany({ where: filters });
+        const { count } = await dbOf(target).updateMany({ where: filters, data: update });
+
+        for (const account of accounts) {
+          // One at a time: they share the transaction, which is a single connection.
+          // eslint-disable-next-line no-await-in-loop
+          await mirrorToUser(
+            target,
+            account,
+            (update as Row)[resolveField(target, 'password')],
+            update as Row
+          );
+        }
+
+        return count;
+      });
     },
 
     async delete({ where, ...target }) {

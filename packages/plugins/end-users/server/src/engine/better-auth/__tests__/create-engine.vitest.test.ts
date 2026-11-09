@@ -250,6 +250,19 @@ describe('buildAuthOptions', () => {
     ).resolves.toBe(true);
   });
 
+  it('hashes with bcrypt with compat on and with the default otherwise', async () => {
+    const on = buildAuthOptions(fakeStrapi({ 'plugin::end-users.compat.usersPermissions': true }));
+    const off = buildAuthOptions(fakeStrapi());
+
+    const hash = await on.emailAndPassword?.password?.hash?.('some-password');
+
+    expect(hash).toMatch(/^\$2[ab]\$10\$/);
+    await expect(
+      on.emailAndPassword?.password?.verify?.({ hash: hash as string, password: 'some-password' })
+    ).resolves.toBe(true);
+    expect(off.emailAndPassword?.password?.hash).toBeUndefined();
+  });
+
   it("installs username, two-factor, bearer and admin, then the plugin's own, in that order", () => {
     const ids = buildAuthOptions(fakeStrapi()).plugins?.map((plugin) => plugin.id);
 

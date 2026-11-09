@@ -148,6 +148,22 @@ const verifyPasswordHash = async ({ hash, password }: { hash: string; password: 
   }
 };
 
+/** U&P's cost factor, so a hash written here is one U&P reads when a project rolls back. */
+const BCRYPT_ROUNDS = 10;
+
+/**
+ * What `emailAndPassword.password` is. With the compatibility mode on, passwords are hashed with
+ * bcrypt, as Users & Permissions did, so the hash mirrored into the user row still signs the
+ * user in after a rollback. Off, hashing stays Better Auth's own and only `verify` is widened.
+ */
+const passwordHashing = (usersPermissions: boolean) =>
+  usersPermissions
+    ? {
+        hash: (password: string) => bcrypt.hash(password, BCRYPT_ROUNDS),
+        verify: verifyPasswordHash,
+      }
+    : { verify: verifyPasswordHash };
+
 /* ---------------------------------------------------------------------------------------------
  * Options
  * ------------------------------------------------------------------------------------------- */
@@ -421,7 +437,7 @@ export const buildAuthOptions = (
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: inputs.requireEmailVerification,
-      password: { verify: verifyPasswordHash },
+      password: passwordHashing(compat.usersPermissions),
       // The widest range the settings allow: the admin's `minLength` and `maxLength` are checked per
       // request by `password-policy`, so a change needs no rebuild. Never read the admin's values here.
       minPasswordLength: 8,

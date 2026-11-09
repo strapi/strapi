@@ -58,6 +58,7 @@ describe('strapiAdapter', () => {
   };
   let db: {
     findOne: ReturnType<typeof vi.fn>;
+    findMany: ReturnType<typeof vi.fn>;
     updateMany: ReturnType<typeof vi.fn>;
     deleteMany: ReturnType<typeof vi.fn>;
   };
@@ -71,6 +72,7 @@ describe('strapiAdapter', () => {
   let strapiMock: {
     documents: ReturnType<typeof vi.fn>;
     getModel: ReturnType<typeof vi.fn>;
+    config: { get: ReturnType<typeof vi.fn> };
     db: {
       transaction: ReturnType<typeof vi.fn>;
       query: ReturnType<typeof vi.fn>;
@@ -90,6 +92,7 @@ describe('strapiAdapter', () => {
     };
     db = {
       findOne: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
       updateMany: vi.fn().mockResolvedValue({ count: 0 }),
       deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
     };
@@ -104,6 +107,7 @@ describe('strapiAdapter', () => {
       documents: vi.fn(() => documents),
       // Every field is an attribute unless a test says otherwise.
       getModel: vi.fn(() => ({ attributes: anyAttribute })),
+      config: { get: vi.fn(() => false) },
       db: {
         transaction: vi.fn(async (work: Callback) => work({})),
         query: vi.fn(() => db),
@@ -380,6 +384,104 @@ describe('strapiAdapter', () => {
 
       expect(row).toBeNull();
       expect(db.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('the users-permissions password', () => {
+    const compatOn = () => strapiMock.config.get.mockImplementation(() => true);
+    const password = 'hashed-value';
+    const userWrites = () =>
+      strapiMock.db.query.mock.calls.filter(([uid]) => uid === 'plugin::end-users.user');
+
+    it('mirrors a credential password into the user row with compat on', async () => {
+      compatOn();
+      documents.create.mockResolvedValue({
+        id: 1,
+        documentId: 'acc1',
+        userId: 'u1',
+        providerId: 'credential',
+      });
+
+      await adapter.create({
+        model: 'account',
+        data: { userId: 'u1', providerId: 'credential', accountId: 'u1', password },
+      });
+
+      expect(userWrites()).toHaveLength(1);
+      expect(db.updateMany).toHaveBeenCalledWith({
+        where: { documentId: 'u1' },
+        data: { password },
+      });
+      expect(strapiMock.db.transaction).toHaveBeenCalled();
+    });
+
+    it('mirrors a changed password, on update and on updateMany', async () => {
+      compatOn();
+      db.findOne
+        .mockResolvedValueOnce({ id: 5 })
+        .mockResolvedValueOnce({ id: 5, userId: 'u1', providerId: 'credential' });
+      db.updateMany.mockResolvedValue({ count: 1 });
+
+      await adapter.update({
+        model: 'account',
+        where: [{ field: 'id', value: 'acc1' }],
+        update: { password },
+      });
+
+      expect(db.updateMany).toHaveBeenLastCalledWith({
+        where: { documentId: 'u1' },
+        data: { password },
+      });
+
+      db.findMany.mockResolvedValue([{ id: 5, userId: 'u2', providerId: 'credential' }]);
+
+      await adapter.updateMany({
+        model: 'account',
+        where: [
+          { field: 'userId', value: 'u2' },
+          { field: 'providerId', value: 'credential' },
+        ],
+        update: { password },
+      });
+
+      expect(db.updateMany).toHaveBeenLastCalledWith({
+        where: { documentId: 'u2' },
+        data: { password },
+      });
+    });
+
+    it('mirrors nothing with compat off, or for a provider account', async () => {
+      documents.create.mockResolvedValue({ id: 1, documentId: 'acc1', userId: 'u1' });
+
+      await adapter.create({
+        model: 'account',
+        data: { userId: 'u1', providerId: 'credential', accountId: 'u1', password },
+      });
+
+      expect(userWrites()).toHaveLength(0);
+
+      compatOn();
+      db.findMany.mockResolvedValue([{ id: 6, userId: 'u1', providerId: 'github' }]);
+      db.updateMany.mockResolvedValue({ count: 1 });
+
+      await adapter.create({
+        model: 'account',
+        data: { userId: 'u1', providerId: 'github', accountId: 'g1', password },
+      });
+      await adapter.updateMany({
+        model: 'account',
+        where: [{ field: 'userId', value: 'u1' }],
+        update: { password },
+      });
+      await adapter.updateMany({
+        model: 'account',
+        where: [{ field: 'userId', value: 'u1' }],
+        update: { accessToken: 'token-value' },
+      });
+
+      expect(db.updateMany).not.toHaveBeenCalledWith(
+        expect.objectContaining({ where: { documentId: 'u1' } })
+      );
     });
   });
 
