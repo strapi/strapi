@@ -17,6 +17,9 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
+  // stream-chain 4 is ESM-only and Jest 29 cannot load ESM without --experimental-vm-modules,
+  // so unit tests compile it to CommonJS. Built code still loads it with a real import().
+  transformIgnorePatterns: ['/node_modules/(?!(stream-chain)/)', String.raw`\.pnp\.[^\/]+$`],
   // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
   // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
