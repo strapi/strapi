@@ -8,10 +8,10 @@ import { isOwner } from './conditions';
 import { PLUGIN_ID, PROFILE_UID, ROLE_FIND_ACTION, USER_UID } from './constants';
 import { registry } from './providers/registry';
 import type permissionService from './services/permission';
-import { NOT_GRANTABLE } from './services/permission-layout';
 import type roleService from './services/role';
 import type { PermissionRow } from './utils/permission-row';
 import { asProfileLifecycle } from './utils/profile-lifecycle';
+import { writableFields } from './utils/writable-fields';
 
 /** A route-only permission: the route's scope, no subject, no field rule, no condition */
 const routeRow = (action: string): PermissionRow => ({
@@ -22,7 +22,7 @@ const routeRow = (action: string): PermissionRow => ({
 });
 
 /** A permission on the caller's own profile: every field, through `is-owner` on `user` */
-const ownProfileRow = (action: string): PermissionRow => ({
+export const ownProfileRow = (action: string): PermissionRow => ({
   action: `${PROFILE_UID}.${action}`,
   subject: PROFILE_UID,
   properties: {},
@@ -59,27 +59,10 @@ const PROFILE_UPDATE_ACTION = `${PROFILE_UID}.update`;
  * The profile's attributes a request can write, taken now: the list Authenticated's
  * profile `update` row is seeded with, instead of every field. A field added to the profile later is
  * therefore not writable by end users until an administrator grants it. `user` is left out (it is
- * what `is-owner` locks), and so are private and read-only attributes. A component or relation is
- * named once, as the Content API's field rules take it.
+ * what `is-owner` locks), and so are private and read-only attributes (see `writableFields`).
  */
-const writableProfileFields = (strapi: Core.Strapi): string[] => {
-  const attributes = (
-    strapi.contentTypes as unknown as Record<
-      string,
-      { attributes?: Record<string, { private?: boolean; writable?: boolean }> }
-    >
-  )[PROFILE_UID]?.attributes;
-
-  return Object.entries(attributes ?? {})
-    .filter(
-      ([name, attribute]) =>
-        name !== 'user' &&
-        !NOT_GRANTABLE.has(name) &&
-        attribute.private !== true &&
-        attribute.writable !== false
-    )
-    .map(([name]) => name);
-};
+const writableProfileFields = (strapi: Core.Strapi): string[] =>
+  writableFields(strapi, PROFILE_UID).filter((name) => name !== 'user');
 
 /**
  * Gives the Authenticated role its default permissions, all in one diff. Called only by the start
