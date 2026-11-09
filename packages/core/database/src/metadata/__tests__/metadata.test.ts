@@ -320,6 +320,99 @@ describe('metadata', () => {
               'Error on attribute role in model undefined(strapi::core-store): Metadata for "missingtarget" not found'
             );
           });
+
+          // The inverse (mappedBy) side creates no join column or join table, so it must check its target on its own
+          const inverseSideRelations = [
+            ['oneToMany', { relation: 'oneToMany', mappedBy: 'article' }],
+            ['oneToOne', { relation: 'oneToOne', mappedBy: 'article' }],
+            ['manyToMany', { relation: 'manyToMany', mappedBy: 'articles' }],
+          ] as const;
+
+          test.each(inverseSideRelations)(
+            'throws error on missing target of an inverse side %s relation',
+            (_relation, relationAttribute) => {
+              const badModels = [
+                {
+                  uid: 'api::article.article',
+                  singularName: 'article',
+                  tableName: 'articles',
+                  attributes: {
+                    contributors: {
+                      type: 'relation',
+                      ...relationAttribute,
+                      target: 'plugin::users-permissions.user',
+                    },
+                  },
+                },
+              ] as any;
+
+              expect(() => createMetadata(badModels)).toThrow(
+                'Error on attribute contributors in model article(api::article.article): Metadata for "plugin::users-permissions.user" not found'
+              );
+            }
+          );
+        });
+
+        describe('inverse side relations', () => {
+          const inverseSideRelations = [
+            ['oneToMany', 'manyToOne', { inversedBy: 'contributors' }],
+            ['oneToOne', 'oneToOne', { inversedBy: 'contributors' }],
+            ['manyToMany', 'manyToMany', { inversedBy: 'contributors' }],
+          ] as const;
+
+          test.each(inverseSideRelations)(
+            'loads an inverse side %s relation whose target exists',
+            (inverseRelation, ownerRelation, ownerAttribute) => {
+              const models = [
+                {
+                  uid: 'api::article.article',
+                  singularName: 'article',
+                  tableName: 'articles',
+                  attributes: {
+                    contributors: {
+                      type: 'relation',
+                      relation: inverseRelation,
+                      target: 'api::writer.writer',
+                      mappedBy: 'article',
+                    },
+                  },
+                },
+                {
+                  uid: 'api::writer.writer',
+                  singularName: 'writer',
+                  tableName: 'writers',
+                  attributes: {
+                    article: {
+                      type: 'relation',
+                      relation: ownerRelation,
+                      target: 'api::article.article',
+                      ...ownerAttribute,
+                    },
+                  },
+                },
+              ] as any;
+
+              expect(() => createMetadata(models)).not.toThrow();
+            }
+          );
+
+          test('does not look up a target for a morphToOne relation', () => {
+            const models = [
+              {
+                uid: 'api::article.article',
+                singularName: 'article',
+                tableName: 'articles',
+                attributes: {
+                  related: {
+                    type: 'relation',
+                    relation: 'morphToOne',
+                  },
+                },
+              },
+            ] as any;
+
+            expect(() => createMetadata(models)).not.toThrow();
+          });
         });
       });
     });
