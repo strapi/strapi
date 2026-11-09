@@ -92,6 +92,12 @@ describe('translateRoutePath', () => {
     expect(translateRoutePath('/(collection|single)').ignoredPatterns).toEqual([
       { parameter: '', pattern: 'collection|single', unnamed: true },
     ]);
+    expect(translateRoutePath('/files/(.*)').ignoredPatterns).toEqual([]);
+    expect(translateRoutePath('/files/:path(.*)').ignoredPatterns).toEqual([]);
+    expect(translateRoutePath('/files-:path(.*)').ignoredPatterns).toEqual([]);
+    expect(translateRoutePath('/f/(\\d+)/(.*)').ignoredPatterns).toEqual([
+      { parameter: '', pattern: '\\d+', unnamed: true },
+    ]);
   });
 
   it('namespaces the names it creates when asked, with a ":" so a prefix has parameters', () => {

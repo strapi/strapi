@@ -381,7 +381,10 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         fail(`the custom pattern for ":${name}" is invalid: ${reason}`);
       }
 
-      ignoredPatterns.push({ parameter: unnamed ? '' : name, pattern, unnamed });
+      // `.*` becomes a wildcard that matches the same text, including an empty capture.
+      if (pattern !== '.*') {
+        ignoredPatterns.push({ parameter: unnamed ? '' : name, pattern, unnamed });
+      }
     }
 
     if ((modifier === '+' || modifier === '*') && prefix === '' && suffix === '') {

@@ -500,6 +500,25 @@ describe('router path registration', () => {
     await expectReply(request(server).get('/users/abc'), { id: 'abc' });
   });
 
+  it('does not warn that .* is no longer enforced', () => {
+    const { strapi, router } = createRouterApp();
+
+    router.get('/files/(.*)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.get('/files/:path(.*)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.get('/files-:path(.*)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    expect(strapi.log.warn).toHaveBeenCalledTimes(3);
+    expect(strapi.log.warn.mock.calls.map(([message]) => message).join('\n')).not.toContain(
+      'no longer enforced'
+    );
+  });
+
   it('does not warn again for a path compose-endpoint already migrated', () => {
     const strapi = createStrapi();
     const router = new Router();
