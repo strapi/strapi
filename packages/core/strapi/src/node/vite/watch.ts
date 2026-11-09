@@ -81,7 +81,7 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
     }
   };
 
-  const adminRoute = `${ctx.adminPath}/:path*`;
+  const adminRoute = `${ctx.adminPath}{/*path}`;
 
   // Remove any existing admin routes to prevent conflicts during restart
   const existingRoutes = ctx.strapi.server.router.stack.filter(

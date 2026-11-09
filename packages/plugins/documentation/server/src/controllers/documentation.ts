@@ -57,6 +57,12 @@ export default {
        * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
        */
       const { major, minor, patch } = ctx.params;
+
+      // The version is part of a file path, and params are URI-decoded.
+      if ([major, minor, patch].some((part) => part !== undefined && !/^\d+$/.test(part))) {
+        return ctx.notFound();
+      }
+
       const version =
         major && minor && patch
           ? `${major}.${minor}.${patch}`
