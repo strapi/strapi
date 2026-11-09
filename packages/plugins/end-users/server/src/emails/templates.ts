@@ -9,6 +9,9 @@ import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../constants';
 
+/** A variable whose value gives access to something, so the email plugin keeps it out of images and attributes. */
+const secret = (name: string) => ({ name, secret: true });
+
 /** The registry key of a template: `end-users.<name>`. */
 export const templateKey = (name: EmailTemplateName) => `${PLUGIN_ID}.${name}`;
 
@@ -24,7 +27,7 @@ export type EmailTemplateName =
 interface EmailTemplate {
   name: EmailTemplateName;
   description: string;
-  variables: string[];
+  variables: Array<string | { name: string; secret: boolean }>;
   defaults: { subject: string; html: string; text: string };
 }
 
@@ -32,7 +35,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     name: 'verify-email',
     description: 'Asks a user to confirm their email address.',
-    variables: ['user.name', 'user.email', 'url'],
+    variables: ['user.name', 'user.email', secret('url')],
     defaults: {
       subject: 'Confirm your email address',
       html: [
@@ -54,7 +57,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     name: 'reset-password',
     description: 'Gives a user a link to choose a new password.',
-    variables: ['user.name', 'user.email', 'url'],
+    variables: ['user.name', 'user.email', secret('url')],
     defaults: {
       subject: 'Reset your password',
       html: [
@@ -76,7 +79,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     name: 'change-email',
     description: 'Sent to the new address when a user asks to change their email address.',
-    variables: ['user.name', 'user.email', 'newEmail', 'url'],
+    variables: ['user.name', 'user.email', 'newEmail', secret('url')],
     defaults: {
       subject: 'Confirm your new email address',
       html: [
@@ -98,7 +101,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     name: 'magic-link',
     description: 'Signs a user in with a link.',
-    variables: ['email', 'url'],
+    variables: ['email', secret('url')],
     defaults: {
       subject: 'Your sign-in link',
       html: [
@@ -121,7 +124,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     name: 'email-otp',
     description:
       'Sends a one-time code by email. The type is sign-in, email-verification, forget-password or change-email.',
-    variables: ['email', 'otp', 'type'],
+    variables: ['email', secret('otp'), 'type'],
     defaults: {
       subject: 'Your verification code',
       html: [
@@ -142,7 +145,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     name: 'two-factor-otp',
     description: 'Sends the code a user asked for as their second sign-in step.',
-    variables: ['user.name', 'otp'],
+    variables: ['user.name', secret('otp')],
     defaults: {
       subject: 'Your sign-in code',
       html: [

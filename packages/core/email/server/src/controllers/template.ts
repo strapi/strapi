@@ -24,6 +24,9 @@ const getLocale = (ctx: Koa.Context): string => {
   return locale;
 };
 
+/** The id of the signed-in admin, for the log lines of changes. */
+const adminId = (ctx: Koa.Context): string => String(ctx.state.user?.id ?? 'unknown');
+
 const getBody = (ctx: Koa.Context): TemplateContent => {
   const body = ctx.request.body as Partial<Record<keyof TemplateContent, unknown>> | undefined;
 
@@ -54,11 +57,23 @@ const templateController = {
   async update(ctx: Koa.Context) {
     const locale = getLocale(ctx);
 
-    ctx.body = { data: await service().update(ctx.params.key, locale, getBody(ctx)) };
+    const data = await service().update(ctx.params.key, locale, getBody(ctx));
+
+    strapi.log.info(
+      `Email template "${ctx.params.key}" (${locale}) was saved by admin user ${adminId(ctx)}`
+    );
+
+    ctx.body = { data };
   },
 
   async reset(ctx: Koa.Context) {
-    await service().reset(ctx.params.key, getLocale(ctx));
+    const locale = getLocale(ctx);
+
+    await service().reset(ctx.params.key, locale);
+
+    strapi.log.info(
+      `Email template "${ctx.params.key}" (${locale}) was reset by admin user ${adminId(ctx)}`
+    );
 
     ctx.body = { data: { ok: true } };
   },

@@ -8,6 +8,7 @@ import type {
   TemplateSummary,
 } from '../../../shared/contracts/templates';
 import { render } from './render';
+import { cleanTemplateHtml, findMisplacedSecrets } from './sanitize';
 
 /** Plain code-unit order, the same order `Array.prototype.sort` gives strings by default. */
 const byCodeUnit = (a: string, b: string): number => {
@@ -38,8 +39,14 @@ interface TemplateRow extends TemplateContent {
   locale: string;
 }
 
+/** A registered template: the definition with its variables as names, and which of them are secret. */
+interface RegisteredTemplate extends Omit<TemplateDefinition, 'variables'> {
+  variables: string[];
+  secrets: string[];
+}
+
 const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
-  const registry = new Map<string, TemplateDefinition>();
+  const registry = new Map<string, RegisteredTemplate>();
 
   const query = () => strapi.db.query(TEMPLATE_UID);
 
@@ -59,7 +66,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const toDetail = (
     key: string,
     locale: string,
-    definition: TemplateDefinition,
+    definition: RegisteredTemplate,
     row?: TemplateRow
   ): TemplateDetail => {
     const content = row ?? definition.defaults;
@@ -100,10 +107,15 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ApplicationError(`Email template "${key}" is already registered`);
       }
 
+      const declared = definition.variables.map((variable) =>
+        typeof variable === 'string' ? { name: variable, secret: false } : variable
+      );
+
       registry.set(key, {
         ...definition,
         defaults: { ...definition.defaults },
-        variables: [...definition.variables],
+        variables: declared.map(({ name }) => name),
+        secrets: declared.filter(({ secret }) => secret).map(({ name }) => name),
       });
     },
 
@@ -135,7 +147,16 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
     async update(key: string, locale: string, body: TemplateContent): Promise<TemplateDetail> {
       assertLocale(locale);
       const definition = getDefinition(key);
-      const data = { subject: body.subject, html: body.html, text: body.text };
+      const misplaced = findMisplacedSecrets(body.html, definition.secrets);
+
+      if (misplaced.length > 0) {
+        throw new ValidationError(
+          `The HTML puts ${misplaced.map((name) => `{{ ${name} }}`).join(', ')} where it could leak: ` +
+            'a variable that carries a secret may only appear in text or in a link (<a href>)'
+        );
+      }
+
+      const data = { subject: body.subject, html: cleanTemplateHtml(body.html), text: body.text };
 
       const existing = await query().findOne({ where: { key, locale } });
 

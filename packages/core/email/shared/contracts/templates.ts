@@ -22,8 +22,14 @@ export interface TemplateDetail extends TemplateContent {
   isDefault: boolean;
 }
 
+/**
+ * A variable a template declares: its name, or the name with `secret: true` when its value gives access to
+ * something, such as a reset link or a one-time code. A secret may only appear in text or in an `<a href>`.
+ */
+export type TemplateVariable = string | { name: string; secret?: boolean };
+
 export interface TemplateDefinition {
   defaults: TemplateContent;
-  variables: string[];
+  variables: TemplateVariable[];
   description?: string;
 }
