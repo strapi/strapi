@@ -63,9 +63,7 @@ const validateDestination = async (url: string) => {
   const blocked = await strapi.get('webhookRunner').checkDestination(url);
 
   if (blocked) {
-    throw new errors.ValidationError(blocked.message, {
-      errors: [{ path: ['url'], message: blocked.message, name: 'ValidationError', value: url }],
-    });
+    throw new errors.ApplicationError(blocked.message);
   }
 };
 

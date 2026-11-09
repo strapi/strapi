@@ -8,6 +8,7 @@
 import dns from 'node:dns';
 import net from 'node:net';
 import type { Core, Modules } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import type { Dispatcher } from 'undici';
 // Imported from their own files, as in utils/fetch.ts, which explains why
 /* eslint-disable import/extensions -- required by the ESM build: undici has no exports map */
@@ -102,14 +103,14 @@ const describeBlocked = (hostname: string, address: string, category: AddressCat
 };
 
 /**
- * Thrown when a webhook would connect to an address that one of the checks blocks.
+ * Thrown when a webhook would connect to an address that one of the checks blocks. An
+ * ApplicationError, so that the admin shows its message when a webhook is triggered.
  */
-export class DestinationBlockedError extends Error {
+export class DestinationBlockedError extends errors.ApplicationError {
   readonly destination: BlockedDestination;
 
   constructor(destination: BlockedDestination) {
     super(destination.message);
-    this.name = 'DestinationBlockedError';
     this.destination = destination;
   }
 }

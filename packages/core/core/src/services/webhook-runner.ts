@@ -245,6 +245,11 @@ class WebhookRunner {
 
     for (const webhook of activeWebhooks) {
       await this.run(webhook, event, info).catch((error: unknown) => {
+        // run() already logged why a destination check blocked the webhook
+        if (error instanceof DestinationBlockedError) {
+          return;
+        }
+
         this.logger.error('Error running webhook');
         this.logger.error(error);
       });
@@ -381,13 +386,16 @@ class WebhookRunner {
       .catch((err) => {
         const blocked = findDestinationBlockedError(err);
 
+        // Rejects instead of reporting a failed delivery, so that triggering the webhook from the
+        // admin shows the reason as an error
         if (blocked) {
           this.logger.warn(`Webhook "${webhook.name}" was not sent: ${blocked.message}`);
+          throw blocked;
         }
 
         return {
           statusCode: 500,
-          message: (blocked ?? err).message,
+          message: err.message,
         };
       });
   }

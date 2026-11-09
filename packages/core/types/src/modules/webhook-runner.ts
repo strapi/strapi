@@ -43,6 +43,10 @@ export interface WebhookRunner {
   deleteListener(event: string): void;
   createListener(event: string): void;
   executeListener({ event, info }: Event): Promise<void>;
+  /**
+   * Sends a webhook. Resolves to the response status, and to its body when it isn't a 2xx.
+   * Rejects with an ApplicationError when a destination check blocks the webhook.
+   */
   run(
     webhook: Webhook,
     event: string,

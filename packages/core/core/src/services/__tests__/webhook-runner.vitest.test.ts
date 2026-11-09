@@ -686,6 +686,28 @@ describe('Destination checks', () => {
     expect(setupRunner({ redirects: 'none' }).logger.warn).not.toHaveBeenCalled();
   });
 
+  test('Logs a webhook a check blocks once, as a warning, when an event triggers it', async () => {
+    const eventHub = createEventHub();
+    const logger = { error: vi.fn(), warn: vi.fn() };
+    const runner = createWebhookRunner({
+      eventHub,
+      requestContext,
+      logger: logger as any,
+      configuration: { destinationChecks: { blockLoopback: true, checkOnSend: true } },
+      fetch: (url, init) => globalThis.fetch(url, init),
+    });
+
+    runner.add(createWebhook({ url: `http://127.0.0.1:${port}/hook` }));
+    await eventHub.emit('entry.create', { model: 'article', uid: ARTICLE_UID, entry: { id: 1 } });
+    await new Promise((done) => {
+      setTimeout(done, 50);
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(received).toEqual([]);
+  });
+
   describe('redirects', () => {
     test("'follow' follows redirects, as before", async () => {
       const { run } = setupRunner({ redirects: 'follow' });
@@ -714,8 +736,8 @@ describe('Destination checks', () => {
     test("'check' does not follow a redirect to a blocked address", async () => {
       const { run, logger } = setupRunner({ blockPrivateNetworks: true, redirects: 'check' });
 
-      await expect(run('/to-internal-test')).resolves.toEqual({
-        statusCode: 500,
+      await expect(run('/to-internal-test')).rejects.toMatchObject({
+        name: 'ApplicationError',
         message:
           'internal.test resolves to 10.0.0.5, which server.webhooks.destinationChecks.blockPrivateNetworks blocks. Set it to false to allow it.',
       });
@@ -731,8 +753,8 @@ describe('Destination checks', () => {
       // The first request goes to 127.0.0.1, which the loopback check blocks
       const { run } = setupRunner({ blockLoopback: true, redirects: 'check' });
 
-      await expect(run('/same-origin')).resolves.toMatchObject({
-        statusCode: 500,
+      await expect(run('/same-origin')).rejects.toMatchObject({
+        name: 'ApplicationError',
         message: expect.stringContaining('server.webhooks.destinationChecks.blockLoopback blocks'),
       });
       expect(receivedPaths()).toEqual([`127.0.0.1:${port}/same-origin`]);
@@ -744,7 +766,9 @@ describe('Destination checks', () => {
         checkOnSend: true,
       });
 
-      await expect(withOnSend.run('/same-origin')).resolves.toMatchObject({ statusCode: 500 });
+      await expect(withOnSend.run('/same-origin')).rejects.toMatchObject({
+        name: 'ApplicationError',
+      });
       expect(received).toEqual([]);
     });
 
@@ -786,8 +810,8 @@ describe('Destination checks', () => {
     test('does not connect to a hostname that resolves to a blocked address', async () => {
       const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
 
-      await expect(run('/hook', `internal.test:${port}`)).resolves.toMatchObject({
-        statusCode: 500,
+      await expect(run('/hook', `internal.test:${port}`)).rejects.toMatchObject({
+        name: 'ApplicationError',
         message: expect.stringContaining('internal.test resolves to 10.0.0.5'),
       });
       expect(received).toEqual([]);
@@ -804,8 +828,8 @@ describe('Destination checks', () => {
 
       // ...private when it is sent
       lookup.mockResolvedValueOnce([{ address: '10.0.0.5', family: 4 }] as any);
-      await expect(run('/hook', `hook.test:${port}`)).resolves.toMatchObject({
-        statusCode: 500,
+      await expect(run('/hook', `hook.test:${port}`)).rejects.toMatchObject({
+        name: 'ApplicationError',
         message: expect.stringContaining('hook.test resolves to 10.0.0.5'),
       });
       expect(received).toEqual([]);
@@ -814,8 +838,8 @@ describe('Destination checks', () => {
     test('also checks the redirects fetch follows', async () => {
       const { run } = setupRunner({ blockPrivateNetworks: true, checkOnSend: true });
 
-      await expect(run('/to-internal-test')).resolves.toMatchObject({
-        statusCode: 500,
+      await expect(run('/to-internal-test')).rejects.toMatchObject({
+        name: 'ApplicationError',
         message: expect.stringContaining('internal.test resolves to 10.0.0.5'),
       });
       expect(receivedPaths()).toEqual([`127.0.0.1:${port}/to-internal-test`]);
@@ -824,8 +848,8 @@ describe('Destination checks', () => {
     test('does not connect to an IP address that is blocked', async () => {
       const { run } = setupRunner({ blockLoopback: true, checkOnSend: true });
 
-      await expect(run('/hook')).resolves.toMatchObject({
-        statusCode: 500,
+      await expect(run('/hook')).rejects.toMatchObject({
+        name: 'ApplicationError',
         message: expect.stringContaining('blockLoopback blocks 127.0.0.1.'),
       });
       expect(received).toEqual([]);
@@ -868,7 +892,9 @@ describe('Destination checks', () => {
           proxiedFetch as unknown as Fetch
         );
 
-        await expect(run('/hook', 'internal.test')).resolves.toMatchObject({ statusCode: 500 });
+        await expect(run('/hook', 'internal.test')).rejects.toMatchObject({
+          name: 'ApplicationError',
+        });
         expect(proxiedFetch).not.toHaveBeenCalled();
 
         await expect(run('/hook', 'hook.test')).resolves.toEqual({ statusCode: 200 });
@@ -884,8 +910,8 @@ describe('Destination checks', () => {
           proxiedFetch as unknown as Fetch
         );
 
-        await expect(run('/hook', 'hook.test')).resolves.toMatchObject({
-          statusCode: 500,
+        await expect(run('/hook', 'hook.test')).rejects.toMatchObject({
+          name: 'ApplicationError',
           message: expect.stringContaining('internal.test resolves to 10.0.0.5'),
         });
         expect(proxiedFetch).toHaveBeenCalledTimes(1);
@@ -902,7 +928,9 @@ describe('Destination checks', () => {
             fetch as unknown as Fetch
           );
 
-          await expect(run('/hook', 'internal.test')).resolves.toMatchObject({ statusCode: 500 });
+          await expect(run('/hook', 'internal.test')).rejects.toMatchObject({
+            name: 'ApplicationError',
+          });
           await expect(run('/hook', 'hook.test')).resolves.toEqual({ statusCode: 200 });
           // No dispatcher of its own, so the request still goes through Node's proxy
           expect(fetch.mock.calls).toHaveLength(1);

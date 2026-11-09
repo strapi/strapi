@@ -284,7 +284,7 @@ describe('Webhooks controller destination checks', () => {
     expect(ctx.created).toHaveBeenCalledWith({ data: webhook });
   });
 
-  test('createWebhook rejects a URL a check blocks, on the url field', async () => {
+  test('createWebhook rejects a URL a check blocks, with the reason', async () => {
     const createWebhook = vi.fn();
     const runner = setStrapi({ createWebhook });
     runner.checkDestination.mockResolvedValue(blocked);
@@ -292,18 +292,8 @@ describe('Webhooks controller destination checks', () => {
 
     const error = await webhooksController.createWebhook(ctx as any).catch((e) => e);
 
-    expect(error).toBeInstanceOf(errors.ValidationError);
+    expect(error).toBeInstanceOf(errors.ApplicationError);
     expect(error.message).toBe(blocked.message);
-    expect(error.details).toEqual({
-      errors: [
-        {
-          path: ['url'],
-          message: blocked.message,
-          name: 'ValidationError',
-          value: 'https://internal.example.com/hook',
-        },
-      ],
-    });
     expect(createWebhook).not.toHaveBeenCalled();
     expect(emitAuditMock).not.toHaveBeenCalled();
   });
@@ -318,7 +308,7 @@ describe('Webhooks controller destination checks', () => {
     });
 
     await expect(webhooksController.updateWebhook(ctx as any)).rejects.toMatchObject({
-      name: 'ValidationError',
+      name: 'ApplicationError',
       message: blocked.message,
     });
     expect(runner.checkDestination).toHaveBeenCalledWith('https://internal.example.com/hook');
