@@ -21,8 +21,13 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => HTML_E
 // An attribute of a tag, read from the start of what is left of it: a name and, optionally, a quoted or
 // unquoted value (an unquoted one may hold a whole `{{ placeholder }}`, spaces included).
 const TAG_HEAD = /^<\/?[^\s>/]*/;
-const TAG_ATTRIBUTE =
-  /\s*([^\s"'<>/=]+)(?:(\s*=\s*)("[^"]*"|'[^']*'|(?:\{\{[^}]*\}\}|[^\s"'>])+))?/y;
+// The unquoted value's three parts never match the same character (a placeholder starts with `{{`, a
+// lone brace is not followed by another, everything else is not a brace), so it can't backtrack.
+const UNQUOTED_VALUE = String.raw`(?:\{\{[^}]*\}\}|\{(?!\{)|[^\s"'>{])+`;
+const TAG_ATTRIBUTE = new RegExp(
+  String.raw`\s*([^\s"'<>/=]+)(?:(\s*=\s*)("[^"]*"|'[^']*'|${UNQUOTED_VALUE}))?`,
+  'y'
+);
 const URL_ATTRIBUTES = new Set(['href', 'src']);
 const ALLOWED_SCHEME = /^(?:https?:|mailto:)/i;
 
