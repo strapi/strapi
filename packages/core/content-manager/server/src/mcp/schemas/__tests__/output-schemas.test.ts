@@ -104,6 +104,22 @@ describe('runtime shaping ↔ output schema agreement', () => {
     expect(parsed.success).toBe(true);
   });
 
+  it('document metadata accepts the runtime default locale', () => {
+    const parsed = schema.safeParse({
+      data: { title: 'ok' },
+      meta: {
+        availableLocales: [],
+        availableStatus: [],
+        defaultLocale: 'en',
+      },
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.meta).toMatchObject({ defaultLocale: 'en' });
+    }
+  });
+
   it('list schema accepts shaped many-relations in results', () => {
     const parsed = buildListOutputSchema(attributes, null).safeParse({
       results: [

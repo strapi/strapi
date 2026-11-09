@@ -227,8 +227,6 @@
   "list.table.header.sort": "Sortuj według {label}",
   "list.table.content.empty-label": "To pole jest puste",
   "tabs.title": "W jaki sposób chcesz przesłać pliki?",
-  "window.confirm.close-modal.file": "Czy napewno? Twoje zmiany zostaną utracone.",
-  "window.confirm.close-modal.files": "Czy napewno? Masz pliki, które nie zostały jeszcze przesłane.",
   "config.back": "Wstecz",
   "config.subtitle": "Zdefiniuj ustawienia widoku biblioteki multimediów.",
   "config.entries.title": "Wpisy na stronę",

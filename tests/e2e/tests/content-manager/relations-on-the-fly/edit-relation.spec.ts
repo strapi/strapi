@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../../utils/login';
+import { loginWithApi } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { clickAndWait, publishAndConfirmDraftRelations } from '../../../../utils/shared';
 
@@ -9,8 +9,8 @@ const AUTHOR_EDIT_URL =
 test.describe('Relations on the fly - Edit a Relation', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('I want to edit an existing relation in a modal and save and publish the related document', async ({

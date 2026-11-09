@@ -20,8 +20,9 @@ import type {
   BatchDelete,
 } from '../../../shared/contracts/roles';
 import { AdminRole } from '../../../shared/contracts/shared';
+import { getCeilingRequester } from '../services/permission/ceiling-requester';
 
-const { ApplicationError } = errors;
+const { ApplicationError, ForbiddenError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
 
 export default {
@@ -165,6 +166,22 @@ export default {
     const normalizedPermissions = (await roleService.hooks.willValidateUpdatePermissions.call(
       input.permissions
     )) as typeof input.permissions;
+
+    try {
+      await roleService.checkPermissionsCeiling(
+        getCeilingRequester(ctx),
+        role.id,
+        normalizedPermissions
+      );
+    } catch (error) {
+      // A ForbiddenError thrown from a controller is turned into a bare 403 by the auth
+      // middleware, so respond here to keep the message and the rejected permissions.
+      if (error instanceof ForbiddenError) {
+        return ctx.forbidden(error.message, error.details);
+      }
+
+      throw error;
+    }
 
     const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
 

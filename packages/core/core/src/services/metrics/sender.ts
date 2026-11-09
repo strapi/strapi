@@ -34,6 +34,9 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
+// Native fetch ignores `timeout`: it becomes a per-request AbortSignal and never reaches fetch
+const { timeout, ...fetchDefaults } = defaultQueryOpts;
+
 /**
  * Add properties from the package.json strapi key in the metadata
  */
@@ -101,7 +104,8 @@ export default (strapi: Core.Strapi): Sender => {
           ...payload.groupProperties,
         },
       }),
-      ..._.merge({ headers: { 'X-Strapi-Event': event } }, defaultQueryOpts, opts),
+      signal: AbortSignal.timeout(timeout),
+      ..._.merge({ headers: { 'X-Strapi-Event': event } }, fetchDefaults, opts),
     };
 
     try {

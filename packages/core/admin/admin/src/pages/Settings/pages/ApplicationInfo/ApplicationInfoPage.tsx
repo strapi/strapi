@@ -43,6 +43,7 @@ const ApplicationInfoPage = () => {
     'ApplicationInfoPage',
     (state) => state.isStrapiMajorBehind
   );
+  const shouldUpdateStrapi = useAppInfo('ApplicationInfoPage', (state) => state.shouldUpdateStrapi);
   const strapiVersion = useAppInfo('ApplicationInfoPage', (state) => state.strapiVersion);
 
   const {

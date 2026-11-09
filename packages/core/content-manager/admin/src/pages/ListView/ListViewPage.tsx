@@ -18,7 +18,9 @@ import {
   useIsMobile,
   useClipboard,
   tours,
+  deepEncodeQueryValues,
   withEncodedUserParams,
+  toApiFilters,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -37,6 +39,12 @@ import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-do
 import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
+import { COLLECTION_TYPES } from '../../constants/collections';
+import {
+  CUSTOM_ORDER_FIELD,
+  CUSTOM_ORDER_SORT,
+  isCustomOrderFeatureEnabled,
+} from '../../constants/customOrder';
 import { HOOKS } from '../../constants/hooks';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -51,6 +59,7 @@ import {
   usePersistentPartialQueryParams,
 } from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
+import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
@@ -58,14 +67,21 @@ import { getDisplayName } from '../../utils/users';
 import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { BulkActionsRenderer } from './components/BulkActions/Actions';
-import { listViewFilters as Filters } from './components/Filters';
+import { CustomOrder, useCustomOrder } from './components/CustomOrder';
+import { listViewFilters as Filters, useListViewFilterOptions } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
+import {
+  applyAttributeRenamesToFilters,
+  applyAttributeRenamesToHeaders,
+  applyAttributeRenamesToSort,
+} from './utils/applyAttributeRenames';
 
 import type { Modules } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
+const NON_LINKABLE_TYPES = new Set(['media', 'relation', 'component', 'dynamiczone']);
 
 /* -------------------------------------------------------------------------------------------------
  * ListViewPage
@@ -87,6 +103,25 @@ type ListViewQuery = {
   pageSize?: string;
   sort?: string;
   _q?: string;
+};
+
+type ListSettings = ReturnType<typeof useDocumentLayout>['list']['settings'];
+
+/**
+ * When the entries of the collection type follow a custom order, that order is
+ * what the list shows unless the user sorts on a column.
+ */
+const hasCustomOrderEnabled = (collectionType: string, settings: ListSettings) =>
+  collectionType === COLLECTION_TYPES &&
+  settings.customOrder === true &&
+  isCustomOrderFeatureEnabled();
+
+const getDefaultSort = (settings: ListSettings, hasCustomOrder: boolean) => {
+  if (hasCustomOrder) {
+    return CUSTOM_ORDER_SORT;
+  }
+
+  return settings.defaultSortBy ? `${settings.defaultSortBy}:${settings.defaultSortOrder}` : '';
 };
 
 const ListViewPage = () => {
@@ -133,6 +168,18 @@ const ListViewPage = () => {
     [model]
   );
   const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
+
+  const { currentData: configuration } = useGetContentTypeConfigurationQuery(model);
+  const attributeRenames = React.useMemo(
+    () => configuration?.contentType?.attributeRenames ?? {},
+    [configuration?.contentType?.attributeRenames]
+  );
+  /**
+   * The schema can be cached before this configuration response arrives. Dropping
+   * unknown column names in that window deletes a renamed field before its new
+   * name is known, and the browser cannot get it back.
+   */
+  const configurationReady = configuration?.contentType?.uid === model;
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
@@ -192,28 +239,120 @@ const ListViewPage = () => {
   }, [displayedHeaderNames, handleResetHeaders, list.layout]);
 
   React.useEffect(() => {
-    if (!schema?.attributes) return;
+    if (!configurationReady || !schema?.attributes) return;
     if (!displayedHeaderNames || displayedHeaderNames.length === 0) return;
     if (schema.uid !== model) return;
 
-    const allowedDisplayHeaders = displayedHeaderNames.filter((header) =>
-      Object.keys(schema?.attributes).includes(header)
+    const nextHeaders = applyAttributeRenamesToHeaders(
+      displayedHeaderNames,
+      schema.attributes,
+      attributeRenames
     );
+    const headersChanged = nextHeaders.some((name, index) => name !== displayedHeaderNames[index]);
 
-    if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
-      handleSetHeaders(allowedDisplayHeaders);
+    if (headersChanged || nextHeaders.length !== displayedHeaderNames.length) {
+      handleSetHeaders(nextHeaders);
     }
-  }, [displayedHeaderNames, handleSetHeaders, model, schema?.attributes, schema?.uid]);
+  }, [
+    attributeRenames,
+    configurationReady,
+    displayedHeaderNames,
+    handleSetHeaders,
+    model,
+    schema?.attributes,
+    schema?.uid,
+  ]);
+
+  const hasCustomOrder = hasCustomOrderEnabled(collectionType, list.settings);
 
   const [{ query }, setQuery] = useQueryParams<ListViewQuery>({
     page: '1',
     pageSize: list.settings.pageSize.toString(),
-    sort: list.settings.defaultSortBy
-      ? `${list.settings.defaultSortBy}:${list.settings.defaultSortOrder}`
-      : '',
+    sort: getDefaultSort(list.settings, hasCustomOrder),
   });
 
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+  // A sort on the custom order can be left over in the URL or in the saved view
+  // after the setting has been turned off.
+  React.useEffect(() => {
+    if (
+      !isLoadingLayout &&
+      !hasCustomOrder &&
+      typeof query.sort === 'string' &&
+      query.sort.startsWith(`${CUSTOM_ORDER_FIELD}:`)
+    ) {
+      setQuery(withEncodedUserParams(query, { sort: undefined }), 'push', true);
+    }
+  }, [hasCustomOrder, isLoadingLayout, query, setQuery]);
+
+  React.useEffect(() => {
+    if (!configurationReady || !schema?.attributes || schema.uid !== model) {
+      return;
+    }
+
+    const nextSort =
+      typeof query.sort === 'string'
+        ? applyAttributeRenamesToSort(query.sort, schema.attributes, attributeRenames)
+        : query.sort;
+    const nextFilters = query.filters
+      ? applyAttributeRenamesToFilters(query.filters, schema.attributes, attributeRenames)
+      : query.filters;
+    const sortChanged = nextSort !== query.sort;
+    const filtersChanged = JSON.stringify(nextFilters) !== JSON.stringify(query.filters);
+
+    if (!sortChanged && !filtersChanged) {
+      return;
+    }
+
+    setQuery(
+      withEncodedUserParams(query, {
+        ...(sortChanged ? { sort: nextSort } : {}),
+        ...(filtersChanged ? { filters: deepEncodeQueryValues(nextFilters) } : {}),
+      }),
+      'push',
+      true
+    );
+  }, [
+    attributeRenames,
+    configurationReady,
+    model,
+    query,
+    schema?.attributes,
+    schema?.uid,
+    setQuery,
+  ]);
+
+  const queryParams = React.useMemo(() => {
+    if (!configurationReady || !schema?.attributes || schema.uid !== model) {
+      return buildValidParams(query);
+    }
+
+    return buildValidParams({
+      ...query,
+      ...(typeof query.sort === 'string'
+        ? {
+            sort: applyAttributeRenamesToSort(query.sort, schema.attributes, attributeRenames),
+          }
+        : {}),
+      ...(query.filters
+        ? {
+            filters: applyAttributeRenamesToFilters(
+              query.filters,
+              schema.attributes,
+              attributeRenames
+            ),
+          }
+        : {}),
+    });
+  }, [attributeRenames, configurationReady, model, query, schema?.attributes, schema?.uid]);
+  const filterOptions = useListViewFilterOptions(schema, list);
+  // A date-time filter stores a day or a minute: the API reads it as the instants it covers
+  const params = React.useMemo(
+    () =>
+      queryParams.filters
+        ? { ...queryParams, filters: toApiFilters(queryParams.filters, filterOptions) }
+        : queryParams,
+    [queryParams, filterOptions]
+  );
   const hasAppliedFilters = (query.filters?.$and?.length ?? 0) > 0;
   const hasStatusFilter = Boolean(
     query.filters?.$and?.some(
@@ -237,7 +376,7 @@ const ListViewPage = () => {
     }
   }, [hasStatusFilter, query, setQuery]);
 
-  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
+  const { data, error, isLoading, isFetching, fulfilledTimeStamp } = useGetAllDocumentsQuery(
     {
       model,
       params,
@@ -273,13 +412,25 @@ const ListViewPage = () => {
     }
   }, [pagination, formatMessage, query, navigate]);
 
-  const { canCreate, isLoadingActionsRBAC } = useDocumentRBAC(
+  const { canCreate, canUpdate, isLoadingActionsRBAC } = useDocumentRBAC(
     'ListViewPage',
-    ({ canCreate, isLoading }) => ({
+    ({ canCreate, canUpdate, isLoading }) => ({
       canCreate,
+      canUpdate,
       isLoadingActionsRBAC: isLoading,
     })
   );
+
+  const customOrder = useCustomOrder({
+    model,
+    isAvailable: hasCustomOrder,
+    canUpdate: canUpdate === true,
+    sort: query.sort,
+    params,
+    results,
+    pagination,
+    fulfilledTimeStamp,
+  });
 
   const runHookWaterfall = useStrapiApp('ListViewPage', ({ runHookWaterfall }) => runHookWaterfall);
   /**
@@ -328,10 +479,27 @@ const ListViewPage = () => {
       } satisfies ListFieldLayout);
     }
 
+    if (hasCustomOrder) {
+      // Sorting on this column is how the user comes back to the custom order
+      formattedHeaders.unshift({
+        attribute: {
+          type: 'custom',
+        },
+        name: CUSTOM_ORDER_FIELD,
+        label: formatMessage({
+          id: getTranslation('containers.list.table-headers.order'),
+          defaultMessage: 'order',
+        }),
+        searchable: false,
+        sortable: true,
+      } satisfies ListFieldLayout);
+    }
+
     return formattedHeaders;
   }, [
     displayedHeaders,
     formatMessage,
+    hasCustomOrder,
     hasStatusFilter,
     list,
     runHookWaterfall,
@@ -372,13 +540,13 @@ const ListViewPage = () => {
    * dynamic zones (they embed their own links/menus), plugin-formatted columns
    * (`cellFormatter`), and the synthetic `status` column.
    */
-  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
   const linkCandidates = tableHeaders.filter(
     ({ name, attribute, cellFormatter }) =>
       name !== 'status' &&
+      name !== CUSTOM_ORDER_FIELD &&
       typeof cellFormatter !== 'function' &&
       attribute &&
-      !NON_LINKABLE_TYPES.includes(attribute.type)
+      !NON_LINKABLE_TYPES.has(attribute.type)
   );
 
   // The link column for a given row: the first candidate that actually has a
@@ -439,7 +607,7 @@ const ListViewPage = () => {
 
   const actions =
     list.settings.filterable && schema ? (
-      <Filters.Root schema={schema} layout={list}>
+      <Filters.Root schema={schema} options={filterOptions}>
         <Layouts.Action
           endActions={endActions}
           startActions={startActions}
@@ -500,131 +668,155 @@ const ListViewPage = () => {
             </Box>
           ) : (
             <Flex gap={4} direction="column" alignItems="stretch">
-              <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
-                <TableActionsBar />
-                <Table.Content>
-                  <Table.Head>
-                    <Table.HeaderCheckboxCell />
-                    {tableHeaders.map((header: ListFieldLayout) => (
-                      <Table.HeaderCell key={header.name} {...header} />
-                    ))}
-                  </Table.Head>
-                  <Table.Loading />
-                  <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
-                  <Table.Body>
-                    {results.map((row) => {
-                      const rowLinkField = getRowLinkField(row);
-                      return (
-                        <Table.Row
-                          cursor="pointer"
-                          key={row.id}
-                          onClick={handleRowClick(row.documentId)}
-                        >
-                          <Table.CheckboxCell id={row.id} />
-                          {tableHeaders.map(({ cellFormatter, ...header }) => {
-                            if (header.name === 'status') {
-                              const { status } = row;
+              <CustomOrder.Root state={customOrder}>
+                <Table.Root
+                  rows={customOrder.rows}
+                  headers={tableHeaders}
+                  isLoading={isFetching && !customOrder.isMoving}
+                >
+                  <TableActionsBar />
+                  <Table.Content>
+                    <Table.Head>
+                      <Table.HeaderCheckboxCell />
+                      {tableHeaders.map((header: ListFieldLayout) => (
+                        <Table.HeaderCell key={header.name} {...header} />
+                      ))}
+                    </Table.Head>
+                    <Table.Loading />
+                    <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
+                    <Table.Body>
+                      {customOrder.rows.map((row, index) => {
+                        const rowLinkField = getRowLinkField(row);
+                        return (
+                          <CustomOrder.Row
+                            cursor="pointer"
+                            key={row.id}
+                            documentId={row.documentId}
+                            onClick={handleRowClick(row.documentId)}
+                          >
+                            <Table.CheckboxCell id={row.id} />
+                            {tableHeaders.map(({ cellFormatter, ...header }) => {
+                              if (header.name === CUSTOM_ORDER_FIELD) {
+                                return (
+                                  <CustomOrder.PositionCell
+                                    key={header.name}
+                                    documentId={row.documentId}
+                                    position={
+                                      ((pagination?.page ?? 1) - 1) * (pagination?.pageSize ?? 0) +
+                                      index +
+                                      1
+                                    }
+                                    total={pagination?.total ?? customOrder.rows.length}
+                                  />
+                                );
+                              }
+                              if (header.name === 'status') {
+                                const { status } = row;
 
+                                return (
+                                  <Table.Cell key={header.name}>
+                                    <DocumentStatus status={status} maxWidth={'min-content'} />
+                                  </Table.Cell>
+                                );
+                              }
+                              if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
+                                // Display the users full name
+                                // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                                // In this case, we display a dash
+                                return (
+                                  <Table.Cell key={header.name}>
+                                    <Typography textColor="neutral800">
+                                      {row[header.name.split('.')[0]]
+                                        ? getDisplayName(row[header.name.split('.')[0]])
+                                        : '-'}
+                                    </Typography>
+                                  </Table.Cell>
+                                );
+                              }
+                              if (header.name === 'documentId') {
+                                // When documentId is the primary link column, only its
+                                // id text becomes the link; the copy button stays outside.
+                                const isDocumentIdLink =
+                                  header.name === rowLinkField && Boolean(row.documentId);
+                                return (
+                                  <Table.Cell key={header.name}>
+                                    <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
+                                      {isDocumentIdLink ? (
+                                        <Typography
+                                          tag={ReactRouterLink}
+                                          to={{
+                                            pathname: row.documentId,
+                                            search: stringify({ plugins: query.plugins }),
+                                          }}
+                                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                          textColor="neutral800"
+                                          maxWidth="30rem"
+                                          ellipsis
+                                        >
+                                          {row.documentId}
+                                        </Typography>
+                                      ) : (
+                                        <Typography
+                                          textColor="neutral800"
+                                          maxWidth="30rem"
+                                          ellipsis
+                                        >
+                                          {row.documentId || '-'}
+                                        </Typography>
+                                      )}
+                                      {row.documentId && (
+                                        <IconButton
+                                          variant="ghost"
+                                          size="S"
+                                          label={formatMessage({
+                                            id: 'content-manager.actions.copy-documentId.label',
+                                            defaultMessage: 'Copy',
+                                          })}
+                                          onClick={(e) => handleCopyDocumentId(e, row.documentId)}
+                                        >
+                                          <Duplicate />
+                                        </IconButton>
+                                      )}
+                                    </Flex>
+                                  </Table.Cell>
+                                );
+                              }
+                              if (typeof cellFormatter === 'function') {
+                                return (
+                                  <Table.Cell key={header.name}>
+                                    {cellFormatter(row, header, { collectionType, model })}
+                                  </Table.Cell>
+                                );
+                              }
                               return (
                                 <Table.Cell key={header.name}>
-                                  <DocumentStatus status={status} maxWidth={'min-content'} />
+                                  <CellContent
+                                    content={row[header.name.split('.')[0]]}
+                                    rowId={row.documentId}
+                                    {...header}
+                                    linkTo={
+                                      header.name === rowLinkField
+                                        ? {
+                                            pathname: row.documentId,
+                                            search: stringify({ plugins: query.plugins }),
+                                          }
+                                        : undefined
+                                    }
+                                  />
                                 </Table.Cell>
                               );
-                            }
-                            if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
-                              // Display the users full name
-                              // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
-                              // In this case, we display a dash
-                              return (
-                                <Table.Cell key={header.name}>
-                                  <Typography textColor="neutral800">
-                                    {row[header.name.split('.')[0]]
-                                      ? getDisplayName(row[header.name.split('.')[0]])
-                                      : '-'}
-                                  </Typography>
-                                </Table.Cell>
-                              );
-                            }
-                            if (header.name === 'documentId') {
-                              // When documentId is the primary link column, only its
-                              // id text becomes the link; the copy button stays outside.
-                              const isDocumentIdLink =
-                                header.name === rowLinkField && Boolean(row.documentId);
-                              return (
-                                <Table.Cell key={header.name}>
-                                  <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
-                                    {isDocumentIdLink ? (
-                                      <Typography
-                                        tag={ReactRouterLink}
-                                        to={{
-                                          pathname: row.documentId,
-                                          search: stringify({ plugins: query.plugins }),
-                                        }}
-                                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                        textColor="neutral800"
-                                        maxWidth="30rem"
-                                        ellipsis
-                                      >
-                                        {row.documentId}
-                                      </Typography>
-                                    ) : (
-                                      <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
-                                        {row.documentId || '-'}
-                                      </Typography>
-                                    )}
-                                    {row.documentId && (
-                                      <IconButton
-                                        variant="ghost"
-                                        size="S"
-                                        label={formatMessage({
-                                          id: 'content-manager.actions.copy-documentId.label',
-                                          defaultMessage: 'Copy',
-                                        })}
-                                        onClick={(e) => handleCopyDocumentId(e, row.documentId)}
-                                      >
-                                        <Duplicate />
-                                      </IconButton>
-                                    )}
-                                  </Flex>
-                                </Table.Cell>
-                              );
-                            }
-                            if (typeof cellFormatter === 'function') {
-                              return (
-                                <Table.Cell key={header.name}>
-                                  {/* @ts-expect-error – TODO: fix this TS error */}
-                                  {cellFormatter(row, header, { collectionType, model })}
-                                </Table.Cell>
-                              );
-                            }
-                            return (
-                              <Table.Cell key={header.name}>
-                                <CellContent
-                                  content={row[header.name.split('.')[0]]}
-                                  rowId={row.documentId}
-                                  {...header}
-                                  linkTo={
-                                    header.name === rowLinkField
-                                      ? {
-                                          pathname: row.documentId,
-                                          search: stringify({ plugins: query.plugins }),
-                                        }
-                                      : undefined
-                                  }
-                                />
-                              </Table.Cell>
-                            );
-                          })}
-                          {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
-                          <ActionsCell onClick={(e) => e.stopPropagation()}>
-                            <TableActions document={row} />
-                          </ActionsCell>
-                        </Table.Row>
-                      );
-                    })}
-                  </Table.Body>
-                </Table.Content>
-              </Table.Root>
+                            })}
+                            {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
+                            <ActionsCell onClick={(e) => e.stopPropagation()}>
+                              <TableActions document={row} />
+                            </ActionsCell>
+                          </CustomOrder.Row>
+                        );
+                      })}
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Root>
+              </CustomOrder.Root>
               <Pagination.Root
                 {...pagination}
                 defaultPageSize={list.settings.pageSize}

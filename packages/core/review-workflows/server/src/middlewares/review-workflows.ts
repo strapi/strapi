@@ -29,7 +29,7 @@ export function contentTypeMiddleware(strapi: Core.Strapi) {
       };
     }
   };
-  strapi.server.router.use('/content-type-builder/content-types/:uid?', (ctx, next) => {
+  strapi.server.router.use('/content-type-builder/content-types{/:uid}', (ctx, next) => {
     if (ctx.method === 'PUT' || ctx.method === 'POST') {
       moveReviewWorkflowOption(ctx);
     }

@@ -28,6 +28,7 @@ const baseLicense: LicenseData = {
   registrySyncErrorKind: null,
   features: [],
   entitlements: [],
+  auditLogs: { enabled: true },
   planEntitlements: [
     { feature: 'sso', available: true, limits: [] },
     {

@@ -7,7 +7,18 @@ import {
   createMockedQueryBuilder,
   getStrapiFactory,
 } from '../../../../__tests__/test-utils';
+import * as esmDeps from '../../../../utils/esm-deps';
 import { createLocalStrapiSourceProvider } from '..';
+
+jest.mock('../../../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 describe('Local Strapi Source Provider', () => {
   describe('Bootstrap', () => {
@@ -40,6 +51,40 @@ describe('Local Strapi Source Provider', () => {
       await provider.bootstrap();
 
       expect(provider.strapi).toBeDefined();
+    });
+
+    test('rejects a stream dependency load failure before touching Strapi', async () => {
+      const loadError = new Error("Cannot find module 'stream-chain'");
+      const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+        typeof esmDeps.loadStreamDeps
+      >;
+      loadStreamDeps.mockRejectedValueOnce(loadError);
+
+      const disable = jest.fn();
+      const getStrapi = jest.fn(
+        getStrapiFactory({
+          db: {
+            lifecycles: {
+              enable: jest.fn(),
+              disable,
+            },
+          },
+        })
+      );
+      const provider = createLocalStrapiSourceProvider({ getStrapi });
+
+      try {
+        await expect(provider.bootstrap()).rejects.toBe(loadError);
+        await expect(provider.close()).resolves.toBeUndefined();
+        expect(getStrapi).not.toHaveBeenCalled();
+        expect(disable).not.toHaveBeenCalled();
+        expect(provider.strapi).not.toBeDefined();
+      } finally {
+        loadStreamDeps.mockReset();
+        loadStreamDeps.mockImplementation(() =>
+          jest.requireActual<typeof esmDeps>('../../../../utils/esm-deps').loadStreamDeps()
+        );
+      }
     });
   });
 

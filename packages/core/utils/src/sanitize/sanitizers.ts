@@ -1,6 +1,7 @@
-import { curry, isEmpty, isPlainObject } from 'lodash';
+import { isEmpty, isPlainObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
+import { curry } from '../curry';
 import traverseEntity from '../traverse-entity';
 import { isScalarAttribute, constants } from '../content-types';
 
@@ -137,6 +138,14 @@ const defaultSanitizeSort = curry((ctx: Context, sort: unknown) => {
   )(sort);
 });
 
+/**
+ * A step that removes an entry from a fields list leaves `undefined` in its place, and the
+ * fields traversal only reads a list made of strings. The gaps are dropped after every step, so
+ * each step sees every entry the previous one kept.
+ */
+const removeNilFields = (value: unknown) =>
+  Array.isArray(value) ? value.filter((field) => field != null) : value;
+
 const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
   if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizeFields');
@@ -155,12 +164,13 @@ const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
         remove(key);
       }
     }, ctx),
+    removeNilFields,
     // Remove private fields
     traverseQueryFields(removePrivate, ctx),
+    removeNilFields,
     // Remove password fields
     traverseQueryFields(removePassword, ctx),
-    // Remove nil values from fields array
-    (value) => (Array.isArray(value) ? value.filter((field) => field != null) : value)
+    removeNilFields
   )(fields);
 });
 
@@ -190,9 +200,11 @@ const defaultSanitizePopulate = curry((ctx: Context, populate: unknown) => {
         set(key, await defaultSanitizeFields({ schema, getModel, parent }, value));
       }
 
-      if (key === 'populate') {
-        set(key, await defaultSanitizePopulate({ schema, getModel, parent }, value));
-      }
+      // A nested `populate` is not sanitized here. The populate traversal walks into it with
+      // each visitor of this pipeline (the `isPopulateKeyword` handler in
+      // traverse/query-populate.ts), also when the schema has an attribute named `populate`, so
+      // sanitizing it here as well walked every nested level twice, and the work doubled with
+      // each level of nesting.
     }, ctx),
     // Remove private fields
     traverseQueryPopulate(removePrivate, ctx)

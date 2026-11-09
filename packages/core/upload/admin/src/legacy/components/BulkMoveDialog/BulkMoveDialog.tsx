@@ -1,3 +1,4 @@
+import { FormikUnsavedChangesRegistrar } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Grid, Field, Loader, Modal, Typography } from '@strapi/design-system';
 import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
@@ -12,6 +13,8 @@ import { SelectTree } from '../SelectTree/SelectTree';
 import type { Folder } from '../../../../../shared/contracts/folders';
 import type { OptionSelectTree } from '../SelectTree/SelectTree';
 import type { FetchError } from '@strapi/admin/strapi-admin';
+
+const EMPTY_SELECTED: NonNullable<BulkMoveDialogProps['selected']> = [];
 
 type InitialFormData = {
   destination:
@@ -36,7 +39,11 @@ export interface BulkMoveDialogProps {
   currentFolder?: FolderWithType;
 }
 
-export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMoveDialogProps) => {
+export const BulkMoveDialog = ({
+  onClose,
+  selected = EMPTY_SELECTED,
+  currentFolder,
+}: BulkMoveDialogProps) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
   const { move } = useBulkMove();
@@ -104,6 +111,7 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
       <Formik validateOnChange={false} onSubmit={handleSubmit} initialValues={initialFormData}>
         {({ values, errors, setFieldValue }) => (
           <Form noValidate>
+            <FormikUnsavedChangesRegistrar />
             <Modal.Header>
               <Modal.Title>
                 {formatMessage({

@@ -22,13 +22,14 @@ import { getStrapiUpdateInfo } from '../utils/strapiUpdate';
 import { hashAdminUserEmail } from '../utils/users';
 
 import { useAuthenticatedAccessTracking } from './useAuthenticatedAccessTracking';
+import { useHashedAdminUserId } from './useHashedAdminUserId';
 
 const { version: strapiVersion } = packageInfo;
 
 const AdminLayout = () => {
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
-  const [userId, setUserId] = React.useState<string>();
+  const userId = useHashedAdminUserId(userInfo);
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();

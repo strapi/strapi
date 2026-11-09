@@ -4,7 +4,7 @@ import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
 
 const { ApplicationError } = errors;
-const validActions = [STAGE_TRANSITION_UID];
+const validActions = new Set([STAGE_TRANSITION_UID]);
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const roleService = getAdminService('role');
@@ -29,7 +29,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       action: string;
       fromStage: number;
     }) {
-      if (!validActions.includes(action)) {
+      if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
       const permissions = await roleService.addPermissions(roleId, [
@@ -56,7 +56,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       action: string;
       toStage: number;
     }) {
-      if (!validActions.includes(action)) {
+      if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
       const permissions = await roleService.addPermissions(roleId, [

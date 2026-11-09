@@ -20,6 +20,7 @@ import { useWarnIfUnsavedChanges } from '../hooks/useWarnIfUnsavedChanges';
 import { getIn, setIn } from '../utils/objects';
 
 import { createContext } from './Context';
+import { useUnsavedChangesModalDirty } from './UnsavedChangesModal';
 
 import type {
   InputProps as InputPropsImpl,
@@ -27,6 +28,9 @@ import type {
   EnumerationProps,
 } from './FormInputs/types';
 import type * as Yup from 'yup';
+
+const DEFAULT_ON_PROCEED: NonNullable<BlockerProps['onProceed']> = () => {};
+const DEFAULT_ON_CANCEL: NonNullable<BlockerProps['onCancel']> = () => {};
 
 /* -------------------------------------------------------------------------------------------------
  * FormContext
@@ -358,6 +362,9 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [state.values, initialValues.current]
     );
+
+    // Only has an effect when the form is rendered inside an `UnsavedChangesModal`.
+    useUnsavedChangesModalDirty(modified && !state.isSubmitting);
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
       if (typeof eventOrPath === 'string') {
@@ -855,7 +862,10 @@ interface BlockerProps {
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
+const Blocker = ({
+  onProceed = DEFAULT_ON_PROCEED,
+  onCancel = DEFAULT_ON_CANCEL,
+}: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);

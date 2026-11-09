@@ -40,6 +40,8 @@ import { adminApi } from '../src/services/api';
 import { server } from './server';
 import { initialState } from './store';
 
+const EMPTY_PERMISSIONS: NonNullable<ProvidersProps['permissions']> = [];
+
 setLogger({
   log: () => {},
   warn: () => {},
@@ -97,7 +99,12 @@ const DEFAULT_PERMISSIONS = [
   },
 ];
 
-const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
+const Providers = ({
+  children,
+  initialEntries,
+  storeConfig,
+  permissions = EMPTY_PERMISSIONS,
+}: ProvidersProps) => {
   /**
    * Keep these instances stable for the lifetime of the render.
    * Recreating the data router on rerenders can crash React Router.
@@ -191,10 +198,10 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                       light: lightTheme,
                     }}
                   >
-                    <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
-                      <QueryClientProvider client={queryClientRef.current!}>
-                        <DndProvider backend={HTML5Backend}>
-                          <NotificationsProvider>
+                    <NotificationsProvider>
+                      <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+                        <QueryClientProvider client={queryClientRef.current!}>
+                          <DndProvider backend={HTML5Backend}>
                             <GuidedTourContext enabled={false}>
                               <ConfigurationContextProvider
                                 showReleaseNotification={false}
@@ -219,10 +226,10 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                                 </AppInfoProvider>
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
-                          </NotificationsProvider>
-                        </DndProvider>
-                      </QueryClientProvider>
-                    </AuthProvider>
+                          </DndProvider>
+                        </QueryClientProvider>
+                      </AuthProvider>
+                    </NotificationsProvider>
                   </Theme>
                 </LanguageProvider>
               </Provider>

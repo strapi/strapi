@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Accordion,
+  Badge,
   Box,
   BoxComponent,
   Checkbox,
@@ -18,6 +19,7 @@ import {
   SettingPermission,
   PluginPermission,
 } from '../../../../../../../shared/contracts/permissions';
+import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -30,8 +32,11 @@ import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData'
 
 import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
 
 import type { GenericLayout } from '../utils/layouts';
+
+const EMPTY_ACTIONS: NonNullable<SubCategoryProps['actions']> = [];
 
 /* -------------------------------------------------------------------------------------------------
  * PluginsAndSettingsPermissions
@@ -92,6 +97,12 @@ const Row = ({
   const categoryName = name.split('::').pop() ?? '';
   const categoryDisplayName =
     categoryName === 'upload' ? 'Media Library' : capitalise(categoryName.replace(/-/g, ' '));
+  // The section stays visible and editable: hiding it would drop its grants on the next save
+  const isDisabledByConfig =
+    childrenForm.length > 0 &&
+    childrenForm.every(({ actions }) =>
+      actions.every((action) => 'disabledByConfig' in action && action.disabledByConfig === true)
+    );
 
   return (
     <Accordion.Item value={name}>
@@ -103,7 +114,22 @@ const Row = ({
             { category: categoryName }
           )} ${kind === 'plugins' ? 'plugin' : kind}`}
         >
-          {categoryDisplayName}
+          {isDisabledByConfig === true ? (
+            // Next to the title, not after the caret, so the caret stays aligned with other rows.
+            // The trigger clips its single line without an ellipsis, so on narrow screens the
+            // badge moves under the title and, if still too wide, wraps its own text.
+            <Flex tag="span" gap={2} wrap="wrap">
+              {categoryDisplayName}
+              <WrappingBadge>
+                {formatMessage({
+                  id: 'Settings.permissions.category.disabled-by-config',
+                  defaultMessage: 'Disabled by configuration',
+                })}
+              </WrappingBadge>
+            </Flex>
+          ) : (
+            categoryDisplayName
+          )}
         </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content>
@@ -137,7 +163,7 @@ interface SubCategoryProps {
 }
 
 const SubCategory = ({
-  actions = [],
+  actions = EMPTY_ACTIONS,
   categoryName,
   isFormDisabled,
   subCategoryName,
@@ -148,7 +174,7 @@ const SubCategory = ({
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
     checkUserHasPermission,
-    userPermissions,
+    inheritConditions,
   } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
@@ -239,33 +265,33 @@ const SubCategory = ({
                     $disabled={isFormDisabled || !userHasPermission}
                     $hasConditions={hasConditions}
                   >
-                    <Checkbox
-                      name={checkboxName}
-                      disabled={isFormDisabled || !userHasPermission}
-                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onCheckedChange={(value) => {
-                        onChangeSimpleCheckbox({
-                          target: {
-                            name: checkboxName,
-                            value: !!value,
-                          },
-                        });
-                      }}
-                      checked={value}
+                    <UnheldPermissionTooltip
+                      isFormDisabled={isFormDisabled}
+                      userHasPermission={userHasPermission}
                     >
-                      {displayName}
-                    </Checkbox>
+                      <Checkbox
+                        name={checkboxName}
+                        disabled={isFormDisabled || !userHasPermission}
+                        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                        onCheckedChange={(value) => {
+                          onChangeSimpleCheckbox({
+                            target: {
+                              name: checkboxName,
+                              value: !!value,
+                            },
+                          });
+                        }}
+                        checked={value}
+                      >
+                        {displayName}
+                      </Checkbox>
+                    </UnheldPermissionTooltip>
                   </CheckboxWrapper>
                 </Grid.Item>
               );
             })}
           </Grid.Root>
-          <Modal.Root
-            open={isConditionModalOpen}
-            onOpenChange={() => {
-              setIsConditionModalOpen((prev) => !prev);
-            }}
-          >
+          <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
             <Modal.Trigger>
               <ConditionsButton hasConditions={doesButtonHasCondition} />
             </Modal.Trigger>
@@ -273,17 +299,21 @@ const SubCategory = ({
               headerBreadCrumbs={[categoryName, subCategoryName]}
               actions={formattedActions}
               isFormDisabled={isFormDisabled}
-              isReadOnly={userPermissions !== undefined}
+              isReadOnly={inheritConditions}
               onClose={() => {
                 setIsConditionModalOpen(false);
               }}
             />
-          </Modal.Root>
+          </UnsavedChangesModal>
         </Flex>
       </Box>
     </>
   );
 };
+
+const WrappingBadge = styled(Badge)`
+  white-space: normal;
+`;
 
 const Border = styled<BoxComponent>(Box)`
   align-self: center;
