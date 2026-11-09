@@ -1308,6 +1308,22 @@ describe('end-users: the emails the engine sends', () => {
   let templates;
   let accounts = 0;
 
+  /**
+   * Emails go out once the transaction commits and without holding the response, so they land a
+   * moment after it: wait (up to 5 s) until `count` have arrived
+   */
+  const emailsSent = async (count: number) => {
+    const deadline = Date.now() + 5000;
+
+    while (sentEmails().length < count && Date.now() < deadline) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 25);
+      });
+    }
+
+    return sentEmails();
+  };
+
   /** The first link in the text of an email, as a path on this server */
   const linkOf = (email: { text: string }) => {
     const url = new URL(email.text.match(/https?:\/\/\S+/)?.[0] as string);
@@ -1365,6 +1381,7 @@ describe('end-users: the emails the engine sends', () => {
     });
 
     expect(requested.statusCode).toBe(200);
+    await emailsSent(1);
     expect(sentEmails()).toHaveLength(1);
     expect(sentEmails()[0].to).toBe(email);
 
@@ -1400,6 +1417,7 @@ describe('end-users: the emails the engine sends', () => {
     });
 
     expect(res.statusCode).toBe(200);
+    await emailsSent(1);
     expect(sentEmails()).toHaveLength(1);
     expect(sentEmails()[0].to).toBe('verify-me@example.com');
     expect(sentEmails()[0].subject).toBe('Confirm your email address');
@@ -1414,6 +1432,7 @@ describe('end-users: the emails the engine sends', () => {
         .count({ where: { email: 'verify-me@example.com', emailVerified: true } })
     ).toBe(1);
     // The welcome follows the verification, once
+    await emailsSent(2);
     expect(sentEmails().map((email) => email.subject)).toEqual([
       'Confirm your email address',
       'Welcome',
@@ -1432,6 +1451,7 @@ describe('end-users: the emails the engine sends', () => {
 
     await rq.post('/api/auth/request-password-reset', { body: { email }, headers: FROM_FRONT_END });
 
+    await emailsSent(1);
     expect(sentEmails()).toHaveLength(1);
     expect(sentEmails()[0].subject).toBe(`Choose a new password for ${email}`);
   });
@@ -1447,6 +1467,7 @@ describe('end-users: the emails the engine sends', () => {
     });
 
     expect(changed.statusCode).toBe(200);
+    await emailsSent(1);
     expect(sentEmails()).toHaveLength(1);
     expect(sentEmails()[0].to).toBe('moved@example.com');
     expect(sentEmails()[0].subject).toBe('Confirm your new email address');
@@ -1468,6 +1489,18 @@ describe('end-users: the emails the engine sends', () => {
       headers: { ...FROM_FRONT_END, Cookie: cookie },
     });
 
+    // The sign-up may have sent its own email: the confirmation is the one sent last, once it lands
+    const deadline = Date.now() + 5000;
+
+    while (
+      !sentEmails().some((email) => email.subject === 'Confirm your new email address') &&
+      Date.now() < deadline
+    ) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 25);
+      });
+    }
+
     const confirmation = sentEmails()[sentEmails().length - 1];
 
     clearSentEmails();
@@ -1475,10 +1508,8 @@ describe('end-users: the emails the engine sends', () => {
     const followed = await rq.get(linkOf(confirmation), { headers: { Cookie: cookie } });
 
     expect(followed.statusCode).toBe(302);
-    // Sent once the change is committed, without holding the response: give it a moment to land
-    await new Promise((resolve) => {
-      setTimeout(resolve, 200);
-    });
+    // Sent once the change is committed, without holding the response: wait for it to land
+    await emailsSent(1);
     expect(sentEmails()).toHaveLength(1);
     expect(sentEmails()[0].to).toBe(email);
     expect(sentEmails()[0].subject).toBe('Your email address was changed');

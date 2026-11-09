@@ -287,8 +287,11 @@ describe('end-users compat: sign-in', () => {
 
       const res = await signIn('kim@example.com');
 
-      expect(Object.keys(res.body.user).sort()).toEqual(
-        [
+      const keys = Object.keys(res.body.user);
+
+      // The profile's readable fields are merged in, so extra keys are allowed
+      expect(keys).toEqual(
+        expect.arrayContaining([
           'blocked',
           'confirmed',
           'createdAt',
@@ -298,8 +301,19 @@ describe('end-users compat: sign-in', () => {
           'provider',
           'updatedAt',
           'username',
-        ].sort()
+        ])
       );
+
+      [
+        'password',
+        'resetPasswordToken',
+        'confirmationToken',
+        'token',
+        'accessToken',
+        'refreshToken',
+        'banned',
+        'emailVerified',
+      ].forEach((privateKey) => expect(keys).not.toContain(privateKey));
     });
   });
 
