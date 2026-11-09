@@ -146,7 +146,9 @@ production through your repository and a deploy, and what you need to read is sh
 9. Set `compat.legacyJwt.until` from those counts: a date (`'2027-01-31'` lasts to the end of that day, in UTC) after
    which old tokens are no longer accepted. Move your front ends to the native endpoints while it runs. When the counts
    show no legacy token use, set `compat.usersPermissions` to `false` and deploy. The first start with compat off
-   cleans up: it drops the staging tables and the leftover columns. After that, the way back is a backup.
+   cleans up. It drops the staging tables the migration carried over, the columns Users & Permissions kept on the user
+   and the custom columns the migration copied into profiles. A column it did not copy stays, and the report lists it
+   as an item for you to resolve. After the cleanup, the way back is a backup.
 
    With compat on, the old routes (`/api/auth/local`, `/api/auth/local/register` and the rest) keep answering as
    Users & Permissions did, and a provider keeps its `/api/connect/<id>/callback` address, so nothing changes at the
@@ -169,7 +171,8 @@ gives a user one role. Changes to role permissions made after the move are lost 
 before it come back. Settings, provider and email template edits made after the move are not carried back either, and
 Users & Permissions goes on with the ones it had. When a profile permission of an admin role cannot be merged into the
 matching user permission without granting more than the user permission did, it is dropped and the log names the fields
-to grant again in the admin. A rollback is refused when compat is off or the cleanup has run; restore the backup instead.
+to grant again in the admin. A rollback is refused once compat is off or the cleanup has run, unless an earlier rollback was interrupted, which it
+finishes. Otherwise restore the backup instead.
 
 To migrate again after a rollback, switch the project to end-users again with `migration.fromUsersPermissions` set to `true`; the old tables are still in place.
 
