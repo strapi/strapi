@@ -738,6 +738,7 @@ describe('Destination checks', () => {
 
       await expect(run('/to-internal-test')).rejects.toMatchObject({
         name: 'ApplicationError',
+        details: { hostname: 'internal.test', address: '10.0.0.5', option: 'blockPrivateNetworks' },
         message:
           'internal.test resolves to 10.0.0.5, which server.webhooks.destinationChecks.blockPrivateNetworks blocks. Set it to false to allow it.',
       });

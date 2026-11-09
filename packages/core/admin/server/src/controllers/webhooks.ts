@@ -57,13 +57,16 @@ type ContentTypeEvents = Modules.WebhookStore.Webhook['contentTypeEvents'];
 
 /**
  * Applies the destination checks turned on in `server.webhooks.destinationChecks`. They are all
- * off by default, so any URL is accepted unless an operator turns one on.
+ * off by default, so any URL is accepted unless an operator turns one on. The details name the
+ * option that blocks the URL, which the admin uses to show a translated message.
  */
 const validateDestination = async (url: string) => {
   const blocked = await strapi.get('webhookRunner').checkDestination(url);
 
   if (blocked) {
-    throw new errors.ApplicationError(blocked.message);
+    const { message, ...details } = blocked;
+
+    throw new errors.ApplicationError(message, details);
   }
 };
 

@@ -294,6 +294,12 @@ describe('Webhooks controller destination checks', () => {
 
     expect(error).toBeInstanceOf(errors.ApplicationError);
     expect(error.message).toBe(blocked.message);
+    // The admin shows a translated message for the option
+    expect(error.details).toEqual({
+      hostname: 'internal.example.com',
+      address: '10.0.0.5',
+      option: 'blockPrivateNetworks',
+    });
     expect(createWebhook).not.toHaveBeenCalled();
     expect(emitAuditMock).not.toHaveBeenCalled();
   });

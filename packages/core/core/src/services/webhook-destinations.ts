@@ -104,13 +104,20 @@ const describeBlocked = (hostname: string, address: string, category: AddressCat
 
 /**
  * Thrown when a webhook would connect to an address that one of the checks blocks. An
- * ApplicationError, so that the admin shows its message when a webhook is triggered.
+ * ApplicationError, so that triggering the webhook from the admin reports it. Its details name
+ * the option, which the admin uses to show a translated message instead of this one.
  */
-export class DestinationBlockedError extends errors.ApplicationError {
+export class DestinationBlockedError extends errors.ApplicationError<
+  'ApplicationError',
+  string,
+  Omit<BlockedDestination, 'message'>
+> {
   readonly destination: BlockedDestination;
 
   constructor(destination: BlockedDestination) {
-    super(destination.message);
+    const { message, ...details } = destination;
+
+    super(message, details);
     this.destination = destination;
   }
 }
