@@ -24,6 +24,7 @@ import { PLUGIN_ID } from '../../../constants';
 import { templateKey } from '../../../emails/templates';
 import type { EmailTemplateName } from '../../../emails/templates';
 import type settingsService from '../../../services/settings';
+import type { TransactionHooks } from '../../../utils/transaction-hooks';
 import { resolveBasePath } from '../base-path';
 import { resolveServerOrigin } from '../server-origin';
 
@@ -114,6 +115,73 @@ const welcome = async (strapi: Core.Strapi, user: EmailUser) => {
   }
 };
 
+const sendReset = async (
+  strapi: Core.Strapi,
+  { user, url, token }: { user: EmailUser; url: string; token?: string }
+) =>
+  send(
+    strapi,
+    'reset-password',
+    user.email,
+    {
+      user: person(user),
+      url: compatOn(strapi) && token ? await compatResetUrl(strapi, token) : url,
+    },
+    localeOf(user)
+  );
+
+const sendVerification = async (
+  strapi: Core.Strapi,
+  { user, url, token }: { user: EmailUser; url: string; token: string }
+) => {
+  const { email: current, updateTo } = tokenPayload(token);
+
+  if (updateTo) {
+    // `user.email` is already the new address here; the one being replaced is in the token
+    await send(
+      strapi,
+      'change-email',
+      updateTo,
+      { user: person({ ...user, email: current ?? user.email }), newEmail: updateTo, url },
+      localeOf(user)
+    );
+
+    return;
+  }
+
+  await send(
+    strapi,
+    'verify-email',
+    user.email,
+    { user: person(user), url: compatOn(strapi) ? compatConfirmationUrl(strapi, token) : url },
+    localeOf(user)
+  );
+};
+
+/**
+ * Runs `work` once the request's database transaction has committed, and not at all when it rolls
+ * back. Better Auth runs an endpoint in one transaction and, with a background-task handler set,
+ * lets the email outlive it: left in the transaction's context, the send would read through a
+ * transaction that is already over. The answer does not wait for it, so a failure has no request
+ * left to answer and is logged.
+ */
+const afterCommit = (strapi: Core.Strapi, work: () => Promise<void>): Promise<void> => {
+  const run = () => {
+    work().catch((error: unknown) => {
+      strapi.log.error(`${PLUGIN_ID}: an email could not be sent (${(error as Error)?.message}).`);
+    });
+  };
+
+  // Without a database there is no transaction to wait for: it is sent, and awaited, at once
+  if (typeof strapi.db?.transaction !== 'function') {
+    return work();
+  }
+
+  return strapi.db.transaction(({ onCommit }: TransactionHooks) => {
+    onCommit(run);
+  });
+};
+
 /**
  * The senders of `emailVerification`, `emailAndPassword` and the welcome. `sendVerificationEmail`
  * also carries a change of address: Better Auth sends that confirmation through it, to the new
@@ -121,59 +189,12 @@ const welcome = async (strapi: Core.Strapi, user: EmailUser) => {
  */
 export const emailSenders = (strapi: Core.Strapi) => ({
   emailAndPassword: {
-    sendResetPassword: async ({
-      user,
-      url,
-      token,
-    }: {
-      user: EmailUser;
-      url: string;
-      token?: string;
-    }) =>
-      send(
-        strapi,
-        'reset-password',
-        user.email,
-        {
-          user: person(user),
-          url: compatOn(strapi) && token ? await compatResetUrl(strapi, token) : url,
-        },
-        localeOf(user)
-      ),
+    sendResetPassword: (input: { user: EmailUser; url: string; token?: string }) =>
+      afterCommit(strapi, () => sendReset(strapi, input)),
   },
   emailVerification: {
-    async sendVerificationEmail({
-      user,
-      url,
-      token,
-    }: {
-      user: EmailUser;
-      url: string;
-      token: string;
-    }) {
-      const { email: current, updateTo } = tokenPayload(token);
-
-      if (updateTo) {
-        // `user.email` is already the new address here; the one being replaced is in the token
-        await send(
-          strapi,
-          'change-email',
-          updateTo,
-          { user: person({ ...user, email: current ?? user.email }), newEmail: updateTo, url },
-          localeOf(user)
-        );
-
-        return;
-      }
-
-      await send(
-        strapi,
-        'verify-email',
-        user.email,
-        { user: person(user), url: compatOn(strapi) ? compatConfirmationUrl(strapi, token) : url },
-        localeOf(user)
-      );
-    },
+    sendVerificationEmail: (input: { user: EmailUser; url: string; token: string }) =>
+      afterCommit(strapi, () => sendVerification(strapi, input)),
 
     /**
      * Once, when the address is verified. Better Auth runs this for a changed address too, which is

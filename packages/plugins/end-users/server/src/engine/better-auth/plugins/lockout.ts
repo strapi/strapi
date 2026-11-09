@@ -29,6 +29,7 @@ import { PLUGIN_ID } from '../../../constants';
 import type settingsService from '../../../services/settings';
 import { normalizeEmail } from '../../../utils/normalize-email';
 import { normalizeUsername } from '../../../utils/normalize-username';
+import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 import { clearAttempts, lockoutKey, releaseAttempt, reserveAttempt } from '../lockout-counter';
 
 const SIGN_IN_PATHS = new Set<string>(['/sign-in/email', '/sign-in/username']);
@@ -197,7 +198,7 @@ export const lockout = (strapi: Core.Strapi): BetterAuthPlugin => ({
           }
 
           const verification = await lockoutCtx.context.internalAdapter.findVerificationValue(
-            `reset-password:${token}`
+            `${RESET_PASSWORD_IDENTIFIER}${token}`
           );
 
           if (verification?.value) {

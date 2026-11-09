@@ -1,4 +1,4 @@
-import type { CompatResult } from './endpoints/result';
+import type { CompatResult } from './types';
 
 export type UpErrorName =
   'ApplicationError' | 'ValidationError' | 'ForbiddenError' | 'UnauthorizedError' | 'NotFoundError';

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { memoryAdapter } from 'better-auth/adapters/memory';
 import { createAuthMiddleware } from 'better-auth/api';
 import { betterAuth } from 'better-auth/minimal';
-import { bearer } from 'better-auth/plugins';
+import { bearer, username } from 'better-auth/plugins';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
@@ -13,9 +13,12 @@ import {
   forgotPassword,
   isCompatChange,
   isCompatReset,
+  resetPassword,
 } from '../../../compat/endpoints/passwords';
 import { register } from '../../../compat/endpoints/register';
 import { readCompatConfig } from '../../../compat/config';
+import { pendingUsername, withPendingUsername } from '../../../compat/pending-username';
+import { backgroundTaskHandler } from '../background-tasks';
 import { buildAuthOptions } from '../create-engine';
 import type { AuthEngine } from '../../types';
 import { passwordPolicy } from '../plugins/password-policy';
@@ -215,13 +218,14 @@ describe('strapi-compat', () => {
     expect(callNative).not.toHaveBeenCalled();
   });
 
-  it('password-policy does not treat /local as a setter', () => {
+  it('password-policy leaves /local and /local/register to the calls they make', () => {
     const policy = (buildAuthOptions(configStrapi(true)).plugins ?? []).find(
       ({ id }) => id === 'password-policy'
     );
     const matches = (path: string) => policy?.hooks?.before?.[0].matcher({ path } as never);
 
     expect(matches('/local')).toBe(false);
+    expect(matches('/local/register')).toBe(false);
     expect(matches('/sign-in/email')).toBe(false);
     expect(matches('/reset-password')).toBe(true);
   });
@@ -265,7 +269,7 @@ describe('strapi-compat register', () => {
   let fields: string[];
   let callNative: ReturnType<typeof vi.fn>;
   let findUser: ReturnType<typeof vi.fn>;
-  let updateUser: ReturnType<typeof vi.fn>;
+  let usernameSeen: Array<string | undefined>;
   let strapi: Core.Strapi;
 
   const cfg = readCompatConfig(configStrapi(true));
@@ -277,14 +281,18 @@ describe('strapi-compat register', () => {
   beforeEach(() => {
     signUp = { enabled: true, requireEmailVerification: false };
     fields = ['company'];
-    callNative = vi.fn(async () => ({
-      headers: new Headers({ 'set-auth-token': 'signed.token' }),
-      response: { token: 'raw', user: { id: 'doc7', email: 'ann@example.com' } },
-    }));
+    usernameSeen = [];
+    callNative = vi.fn(async () => {
+      usernameSeen.push(pendingUsername());
+
+      return {
+        headers: new Headers({ 'set-auth-token': 'signed.token' }),
+        response: { token: 'raw', user: { id: 'doc7', email: 'ann@example.com' } },
+      };
+    });
     findUser = vi.fn(async () => null);
-    updateUser = vi.fn(async () => ({}));
     strapi = {
-      db: { query: () => ({ findOne: findUser, update: updateUser }) },
+      db: { query: () => ({ findOne: findUser }) },
       plugin: () => ({
         service(name: string) {
           if (name === 'engine') {
@@ -346,7 +354,7 @@ describe('strapi-compat register', () => {
     expect(callNative).not.toHaveBeenCalled();
   });
 
-  it('sets name from username, and stores a username the native validator would refuse', async () => {
+  it('sets name from username, and hands a username the native validator would refuse to the user create', async () => {
     const result = await signUpWith({ ...base, username: 'jo' });
 
     expect(result.status).toBe(200);
@@ -355,10 +363,9 @@ describe('strapi-compat register', () => {
       expect.objectContaining({ body: expect.objectContaining({ name: 'jo' }) })
     );
     expect(callNative.mock.calls[0][1].body).not.toHaveProperty('username');
-    expect(updateUser).toHaveBeenCalledWith({
-      where: { documentId: 'doc7' },
-      data: { username: 'jo' },
-    });
+    // The username goes with the user create, through the mark the compat hook reads
+    expect(usernameSeen).toEqual(['jo']);
+    expect(pendingUsername()).toBeUndefined();
     expect(result.body).toMatchObject({
       jwt: 'signed.token',
       user: { role: { id: 1, name: 'Authenticated' } },
@@ -444,18 +451,17 @@ describe('strapi-compat password and confirmation routes', () => {
     expect(isCompatChange('text')).toBe(false);
   });
 
-  it('answers forgot-password with { ok: true } and the reset base of the settings', async () => {
+  it('answers forgot-password with { ok: true } and passes no redirect to the engine', async () => {
     const result = await forgotPassword(strapi, cfg, {
       body: { email: 'Ann@Example.com' },
       headers,
     });
 
     expect(result).toEqual({ status: 200, body: { ok: true } });
+    // The link is built on the settings by the email sender: no redirect goes to the engine
     expect(callNative).toHaveBeenCalledWith(
       'requestPasswordReset',
-      expect.objectContaining({
-        body: { email: 'ann@example.com', redirectTo: 'https://app.example.com/reset' },
-      })
+      expect.objectContaining({ body: { email: 'ann@example.com' } })
     );
   });
 
@@ -511,7 +517,7 @@ describe('strapi-compat password and confirmation routes', () => {
   it('verifies an address and redirects to the configured URL or /', async () => {
     const query = { confirmation: 'tok' };
 
-    expect(await emailConfirmation(strapi, cfg, { query, headers })).toEqual({
+    expect(await emailConfirmation(strapi, cfg, { query })).toEqual({
       status: 302,
       body: { location: '/' },
     });
@@ -522,7 +528,7 @@ describe('strapi-compat password and confirmation routes', () => {
 
     redirects.emailVerified = 'https://app.example.com/welcome';
 
-    expect(await emailConfirmation(strapi, cfg, { query, headers })).toMatchObject({
+    expect(await emailConfirmation(strapi, cfg, { query })).toMatchObject({
       body: { location: 'https://app.example.com/welcome' },
     });
   });
@@ -530,7 +536,7 @@ describe('strapi-compat password and confirmation routes', () => {
   it('answers a bad confirmation token with 400 Invalid token', async () => {
     callNative.mockRejectedValueOnce(engineError(401, 'INVALID_TOKEN'));
 
-    const result = await emailConfirmation(strapi, cfg, { query: { confirmation: 'x' }, headers });
+    const result = await emailConfirmation(strapi, cfg, { query: { confirmation: 'x' } });
 
     expect(result.status).toBe(400);
     expect(message(result)).toBe('Invalid token');
@@ -538,12 +544,63 @@ describe('strapi-compat password and confirmation routes', () => {
 
   it('answers send-email-confirmation with { email, sent: true }', async () => {
     expect(
-      await sendEmailConfirmation(strapi, cfg, { body: { email: 'Ann@Example.com' }, headers })
+      await sendEmailConfirmation(strapi, cfg, { body: { email: 'Ann@Example.com' } })
     ).toEqual({ status: 200, body: { email: 'ann@example.com', sent: true } });
     expect(callNative).toHaveBeenCalledWith(
       'sendVerificationEmail',
       expect.objectContaining({ body: { email: 'ann@example.com' } })
     );
+  });
+
+  it('calls the engine for a confirmation with no credentials of the caller', async () => {
+    await sendEmailConfirmation(strapi, cfg, { body: { email: 'ann@example.com' } });
+    await emailConfirmation(strapi, cfg, { query: { confirmation: 'tok' } });
+
+    for (const [, input] of callNative.mock.calls) {
+      expect([...(input.headers as Headers).keys()]).toEqual([]);
+    }
+  });
+
+  describe('the sign-in after a reset', () => {
+    const resetBody = { code: 'c', password: 'new-one', passwordConfirmation: 'new-one' };
+    const run = () =>
+      resetPassword(strapi, cfg, { body: resetBody, headers, userOfCode: async () => 'doc7' });
+
+    it('answers 403 TWO_FACTOR_REQUIRED and no jwt for a user with a second factor', async () => {
+      callNative.mockImplementation(async (endpoint: string) => ({
+        headers: new Headers(),
+        response: endpoint === 'signInEmail' ? { twoFactorRedirect: true } : { status: true },
+      }));
+
+      expect(await run()).toMatchObject({
+        status: 403,
+        body: { error: { details: { code: 'TWO_FACTOR_REQUIRED' } } },
+      });
+    });
+
+    it('answers the unconfirmed-address text when the sign-in refuses the user', async () => {
+      callNative.mockImplementation(async (endpoint: string) => {
+        if (endpoint === 'signInEmail') {
+          throw engineError(403, 'EMAIL_NOT_VERIFIED');
+        }
+
+        return { headers: new Headers(), response: { status: true } };
+      });
+
+      const result = await run();
+
+      expect(result.status).toBe(400);
+      expect(message(result)).toBe('Your account email is not confirmed');
+    });
+
+    it('fails when the sign-in gives no session token', async () => {
+      callNative.mockImplementation(async () => ({
+        headers: new Headers(),
+        response: { status: true },
+      }));
+
+      await expect(run()).rejects.toThrow('The sign-in did not give a session token.');
+    });
   });
 });
 
@@ -566,7 +623,9 @@ describe('strapi-compat reset, through the engine', () => {
     },
   });
 
-  const build = () => {
+  const build = (
+    extra: { background?: boolean; sender?: (token: string) => Promise<void> } = {}
+  ) => {
     const db = { user: [], session: [], account: [], verification: [] } as Record<string, any[]>;
     const tokens: string[] = [];
     let engine: AuthEngine;
@@ -597,12 +656,17 @@ describe('strapi-compat reset, through the engine', () => {
         enabled: true,
         async sendResetPassword({ token }: { token: string }) {
           tokens.push(token);
+          await extra.sender?.(token);
         },
       },
+      ...(extra.background
+        ? { advanced: { backgroundTasks: { handler: backgroundTaskHandler(strapi) } } }
+        : {}),
       plugins: [
         strapiCompat(strapi, readCompatConfig(configStrapi(true))),
         probe(),
         passwordPolicy(strapi),
+        username(),
         bearer(),
       ],
     });
@@ -617,23 +681,23 @@ describe('strapi-compat reset, through the engine', () => {
       },
     } as unknown as AuthEngine;
 
-    const post = (path: string, body: unknown) =>
+    const post = (path: string, body: unknown, headers: Record<string, string> = {}) =>
       auth.handler(
         new Request(`http://localhost:1337/api/auth${path}`, {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          headers: { 'content-type': 'application/json', ...headers },
           body: JSON.stringify(body),
         })
       );
 
-    return { auth, post, tokens };
+    return { auth, post, tokens, db, strapi };
   };
 
   beforeEach(() => {
     seen = [];
   });
 
-  it('the reset rewrite is what lockout and the password policy read', async () => {
+  it('lockout and the password policy see the native body on the inner call', async () => {
     const { auth, post, tokens } = build();
 
     await auth.api.signUpEmail({
@@ -700,5 +764,132 @@ describe('strapi-compat reset, through the engine', () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toMatchObject({ code: 'INVALID_TOKEN' });
     expect(seen).toEqual([{ code: 'c', token: 'bad', newPassword: STRONG }]);
+  });
+
+  it('answers a compat change-password body with { jwt, user } and leaves a native one alone', async () => {
+    const { auth, post } = build();
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
+      returnHeaders: true,
+    });
+    const cookie = signedUp.headers.get('set-cookie') ?? '';
+    const authed = { cookie: cookie.split(';')[0] };
+
+    const compat = await post(
+      '/change-password',
+      { currentPassword: 'Old-Passw0rd!x', password: STRONG, passwordConfirmation: STRONG },
+      authed
+    );
+    const answer = (await compat.json()) as { jwt: string };
+
+    expect(compat.status).toBe(200);
+    expect(answer).toMatchObject({ jwt: expect.any(String), user: expect.anything() });
+
+    // The other sessions were revoked, so the next calls carry the new one
+    const renewed = { authorization: `Bearer ${answer.jwt}` };
+
+    // A native body goes to the native endpoint untouched, which answers its own shape
+    const native = await post(
+      '/change-password',
+      { currentPassword: STRONG, newPassword: 'An0ther!Passw0rd' },
+      renewed
+    );
+
+    expect(native.status).toBe(200);
+    expect(await native.json()).not.toHaveProperty('jwt');
+
+    // With both shapes in one body, `newPassword` makes it native
+    const both = await post(
+      '/change-password',
+      { currentPassword: 'x', newPassword: 'y', passwordConfirmation: 'y' },
+      renewed
+    );
+
+    expect(await both.json()).not.toHaveProperty('jwt');
+  });
+
+  it('writes the username of a compat registration in the same user create', async () => {
+    const { auth, db } = build();
+
+    await withPendingUsername('jo', () =>
+      auth.api.signUpEmail({
+        body: { email: 'jo@example.com', password: 'Old-Passw0rd!x', name: 'jo' },
+      })
+    );
+
+    expect(db.user).toHaveLength(1);
+    expect(db.user[0]).toMatchObject({ email: 'jo@example.com', username: 'jo' });
+
+    await auth.api.signUpEmail({
+      body: { email: 'other@example.com', password: 'Old-Passw0rd!x', name: 'Other' },
+    });
+
+    // Outside the compat route nothing sets one
+    expect(db.user[1].username ?? null).toBeNull();
+  });
+
+  it('answers /forgot-password before the reset email has been sent, and a failed send does not fail it', async () => {
+    let finish: () => void = () => undefined;
+    const sending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    let sent = false;
+    const { auth, post, tokens } = build({
+      background: true,
+      async sender() {
+        await sending;
+        sent = true;
+      },
+    });
+
+    await auth.api.signUpEmail({
+      body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
+    });
+
+    const response = await post('/forgot-password', { email: 'ann@example.com' });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ ok: true });
+    // The send had started and had not finished when the answer came
+    expect(tokens).toHaveLength(1);
+    expect(sent).toBe(false);
+
+    finish();
+    await sending;
+    await Promise.resolve();
+    expect(sent).toBe(true);
+
+    const failing = build({
+      background: true,
+      async sender() {
+        throw new Error('smtp down');
+      },
+    });
+
+    await failing.auth.api.signUpEmail({
+      body: { email: 'bob@example.com', password: 'Old-Passw0rd!x', name: 'Bob' },
+    });
+
+    const refused = await failing.post('/forgot-password', { email: 'bob@example.com' });
+
+    expect(refused.status).toBe(200);
+  });
+});
+
+describe('the engine options', () => {
+  it('detaches background work and revokes sessions on a password reset', () => {
+    const options = buildAuthOptions(configStrapi(true));
+
+    expect(options.advanced?.backgroundTasks?.handler).toEqual(expect.any(Function));
+    expect(options.emailAndPassword?.revokeSessionsOnPasswordReset).toBe(true);
+  });
+
+  it('logs a background task that fails', async () => {
+    const strapi = configStrapi(true);
+
+    backgroundTaskHandler(strapi)(Promise.reject(new Error('mail down')));
+    await vi.waitFor(() =>
+      expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('mail down'))
+    );
   });
 });

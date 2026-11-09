@@ -1,8 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { PLUGIN_ID, USER_UID } from '../../constants';
-import type { AuthEngine } from '../../engine/types';
-import type settingsService from '../../services/settings';
+import { USER_UID } from '../../constants';
 import { normalizeEmail } from '../../utils/normalize-email';
 import type { CompatConfig } from '../config';
 import {
@@ -14,22 +12,13 @@ import {
 } from '../errors';
 import { loginBody, signedInUser } from '../login-response';
 import { ok } from './result';
-import type { CompatResult } from './result';
+import { BEARER_HEADER, TWO_FACTOR_REQUIRED, engineOf, plain } from './shared';
+import type { CompatResult } from '../types';
 
 interface PasswordInput {
   body: unknown;
   headers: Headers | undefined;
 }
-
-/** The Bearer token the engine's bearer plugin sets next to the session cookie. */
-const BEARER_HEADER = 'set-auth-token';
-
-const TWO_FACTOR_REQUIRED = 'Two-factor authentication is required to sign in.';
-
-const plain = (body: unknown): Record<string, unknown> =>
-  typeof body === 'object' && body !== null && !Array.isArray(body)
-    ? (body as Record<string, unknown>)
-    : {};
 
 const has = (body: Record<string, unknown>, key: string): boolean =>
   Object.prototype.hasOwnProperty.call(body, key);
@@ -53,13 +42,10 @@ export const isCompatChange = (body: unknown): boolean => {
 
 const text = (value: unknown): value is string => typeof value === 'string' && value !== '';
 
-const engineOf = (strapi: Core.Strapi) =>
-  strapi.plugin(PLUGIN_ID).service('engine').get() as AuthEngine;
-
 /**
  * `POST /api/auth/forgot-password`: `{ email }` and no other key, answered with `{ ok: true }`
  * whether or not the address has an account (the engine does not say either). The link in the email
- * is built on the reset base of the settings.
+ * is built on the reset base of the settings by the email sender, so no redirect is passed here.
  */
 export const forgotPassword = async (
   strapi: Core.Strapi,
@@ -77,17 +63,10 @@ export const forgotPassword = async (
     return { status: 400, body: missingFieldBody('email') };
   }
 
-  const { redirects } = await (
-    strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<typeof settingsService>
-  ).get();
-
   try {
     await engineOf(strapi).callNative('requestPasswordReset', {
       headers: new Headers(headers),
-      body: {
-        email: normalizeEmail(input.email),
-        ...(redirects.passwordReset && { redirectTo: redirects.passwordReset }),
-      },
+      body: { email: normalizeEmail(input.email) },
     });
   } catch (error) {
     const refused = refusalResult(error);
@@ -188,6 +167,9 @@ export const resetPassword = async (
       });
     }
 
+    // The reset has succeeded by now and its code is spent. The sign-in that follows is the normal
+    // one, with every rule that applies to it (an unconfirmed address, a second factor, a lock): when
+    // one of them refuses, the answer says so, and the password has changed all the same.
     return await signInWith(strapi, cfg, userId, password, headers);
   } catch (error) {
     const refused = refusalResult(error);

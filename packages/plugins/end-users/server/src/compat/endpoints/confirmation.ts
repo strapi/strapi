@@ -1,18 +1,17 @@
 import type { Core } from '@strapi/types';
 
-import { PLUGIN_ID } from '../../constants';
-import type { AuthEngine } from '../../engine/types';
 import type settingsService from '../../services/settings';
+import { PLUGIN_ID } from '../../constants';
 import { normalizeEmail } from '../../utils/normalize-email';
 import type { CompatConfig } from '../config';
 import { INVALID_CONFIRMATION_TOKEN, missingFieldBody, refusalResult } from '../errors';
 import { ok } from './result';
-import type { CompatResult } from './result';
+import { engineOf, plain } from './shared';
+import type { CompatResult } from '../types';
 
 interface ConfirmationInput {
   query?: unknown;
   body?: unknown;
-  headers: Headers | undefined;
 }
 
 /** What the engine says of a link it cannot use; users-permissions said one thing for them all. */
@@ -22,14 +21,6 @@ const BAD_LINK: Readonly<Record<string, string>> = {
   USER_NOT_FOUND: INVALID_CONFIRMATION_TOKEN,
 };
 
-const plain = (value: unknown): Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-
-const engineOf = (strapi: Core.Strapi) =>
-  strapi.plugin(PLUGIN_ID).service('engine').get() as AuthEngine;
-
 /**
  * `GET /api/auth/email-confirmation?confirmation=<token>`: the engine verifies the address, then
  * the browser is sent on, to `redirects.emailVerified` of the settings or `/`. The answer is the
@@ -38,7 +29,7 @@ const engineOf = (strapi: Core.Strapi) =>
 export const emailConfirmation = async (
   strapi: Core.Strapi,
   _cfg: CompatConfig,
-  { query, headers }: ConfirmationInput
+  { query }: ConfirmationInput
 ): Promise<CompatResult> => {
   const { confirmation } = plain(query);
 
@@ -48,7 +39,7 @@ export const emailConfirmation = async (
 
   try {
     await engineOf(strapi).callNative('verifyEmail', {
-      headers: new Headers(headers),
+      headers: new Headers(),
       query: { token: confirmation },
     });
   } catch (error) {
@@ -76,7 +67,7 @@ export const emailConfirmation = async (
 export const sendEmailConfirmation = async (
   strapi: Core.Strapi,
   _cfg: CompatConfig,
-  { body, headers }: ConfirmationInput
+  { body }: ConfirmationInput
 ): Promise<CompatResult> => {
   const { email } = plain(body);
 
@@ -88,7 +79,7 @@ export const sendEmailConfirmation = async (
 
   try {
     await engineOf(strapi).callNative('sendVerificationEmail', {
-      headers: new Headers(headers),
+      headers: new Headers(),
       body: { email: address },
     });
   } catch (error) {

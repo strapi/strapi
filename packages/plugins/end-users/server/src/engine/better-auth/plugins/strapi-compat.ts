@@ -25,16 +25,15 @@ import {
   resetPassword,
 } from '../../../compat/endpoints/passwords';
 import { register } from '../../../compat/endpoints/register';
-import type { CompatResult } from '../../../compat/endpoints/result';
+import type { CompatResult } from '../../../compat/types';
+import { pendingUsername } from '../../../compat/pending-username';
+import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 
 /** The compat paths, which share one window each. */
 const SIGN_IN_PATHS = new Set<string>(['/local', '/local/register']);
 const EMAIL_PATHS = new Set<string>(['/forgot-password', '/send-email-confirmation']);
 
 const WINDOW_SECONDS = 60;
-
-/** The reset token's record in the verification table, which names the user the reset is for. */
-const RESET_IDENTIFIER = 'reset-password:';
 
 /** Turns what a compat endpoint decided into the answer: a refusal is thrown with its own body. */
 const respond = (
@@ -70,6 +69,24 @@ const finish = (result: CompatResult): Record<string, unknown> => {
 export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuthPlugin => ({
   id: 'strapi-compat',
 
+  // A compat registration's username goes into the user's own create, so the user never exists
+  // without it. Only the compat route enters the mark this reads (`pending-username`).
+  init: () => ({
+    options: {
+      databaseHooks: {
+        user: {
+          create: {
+            async before() {
+              const username = pendingUsername();
+
+              return username === undefined ? undefined : { data: { username } };
+            },
+          },
+        },
+      },
+    },
+  }),
+
   endpoints: {
     // POST /api/auth/local
     compatLocal: createAuthEndpoint('/local', { method: 'POST' }, async (ctx) =>
@@ -90,22 +107,14 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
     compatEmailConfirmation: createAuthEndpoint(
       '/email-confirmation',
       { method: 'GET' },
-      async (ctx) =>
-        respond(
-          ctx,
-          await emailConfirmation(strapi, cfg, { query: ctx.query, headers: ctx.headers })
-        )
+      async (ctx) => respond(ctx, await emailConfirmation(strapi, cfg, { query: ctx.query }))
     ),
 
     // POST /api/auth/send-email-confirmation
     compatSendEmailConfirmation: createAuthEndpoint(
       '/send-email-confirmation',
       { method: 'POST' },
-      async (ctx) =>
-        respond(
-          ctx,
-          await sendEmailConfirmation(strapi, cfg, { body: ctx.body, headers: ctx.headers })
-        )
+      async (ctx) => respond(ctx, await sendEmailConfirmation(strapi, cfg, { body: ctx.body }))
     ),
   },
 
@@ -131,7 +140,7 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
             headers: ctx.headers,
             async userOfCode(code) {
               const record = await ctx.context.internalAdapter.findVerificationValue(
-                `${RESET_IDENTIFIER}${code}`
+                `${RESET_PASSWORD_IDENTIFIER}${code}`
               );
 
               return record?.value ?? null;

@@ -8,6 +8,7 @@ import { createRequest } from 'api-tests/request';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
+import { createFixtureBuilder } from '../utils/fixtures';
 import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
 import {
   ENGINE_UIDS,
@@ -42,14 +43,32 @@ const resetState = async () => {
   await resetRoles(strapi);
   await settings.set({
     methods: { emailPassword: true, username: true },
-    signUp: { enabled: true, requireEmailVerification: false },
+    signUp: { enabled: true, requireEmailVerification: false, registrationFields: [] },
   });
+};
+
+/** The emails sent so far, once `count` of them have been: they leave after the response. */
+const emailsAfter = async (count: number) => {
+  const deadline = Date.now() + 3000;
+
+  while (sentEmails().length < count && Date.now() < deadline) {
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
+  }
+
+  return sentEmails();
 };
 
 describe('end-users compat: sign-in', () => {
   beforeAll(async () => {
     strapi = await createEndUsersInstance({
       pluginConfig: { ...compatConfig(), trustedOrigins: [TEST_ORIGIN] },
+      // `api::note.note`, the type the governed route below is granted on
+      builder: createFixtureBuilder(),
+      // A profile field a registration may carry
+      profileAttributes: { company: { type: 'string' } },
       async bootstrap({ strapi: instance }) {
         instance.eventHub.on('entry.create', (event: { uid: string; entry: never }) => {
           created.push(event);
@@ -160,7 +179,7 @@ describe('end-users compat: sign-in', () => {
       const me = await rq.get('/api/users/me', { headers: bearer(res.body.jwt) });
 
       expect(me.status).toBe(200);
-      expect(me.body.email).toBe('bea@example.com');
+      expect(me.body.data.email).toBe('bea@example.com');
     });
 
     it('answers wrong password, unknown user and a password-less account with the same 400', async () => {
@@ -292,8 +311,12 @@ describe('end-users compat: sign-in', () => {
       ...extra,
     });
 
-    it('registers and returns { jwt, user } with the default role and the profile fields', async () => {
-      const res = await register(body('Reg@Example.com', { username: 'john-doe' }));
+    it('registers and returns { jwt, user } with the default role, one profile and a Registration field stored on it', async () => {
+      await settings.set({ signUp: { registrationFields: ['company'] } });
+
+      const res = await register(
+        body('Reg@Example.com', { username: 'john-doe', company: 'Acme' })
+      );
 
       expect(res.status).toBe(200);
       expect(res.body.jwt).toEqual(expect.any(String));
@@ -307,6 +330,13 @@ describe('end-users compat: sign-in', () => {
         blocked: false,
         role: { id: expect.any(Number), type: 'authenticated' },
       });
+
+      const profiles = await strapi.db
+        .query(PROFILE_UID)
+        .findMany({ where: { user: { documentId: res.body.user.documentId } } });
+
+      expect(profiles).toHaveLength(1);
+      expect(profiles[0]).toMatchObject({ company: 'Acme' });
 
       // The token works as a Bearer token, and the stored username signs in
       const me = await rq.get('/api/users/me', { headers: bearer(res.body.jwt) });
@@ -356,7 +386,9 @@ describe('end-users compat: sign-in', () => {
         expect(res.status).toBe(200);
         expect(res.body).not.toHaveProperty('jwt');
         expect(res.body.user).toMatchObject({ email: 'verify@example.com', confirmed: false });
-        expect(sentEmails().map((email) => email.subject)).toContain('Confirm your email address');
+        expect((await emailsAfter(1)).map((email) => email.subject)).toContain(
+          'Confirm your email address'
+        );
       } finally {
         await settings.set({ signUp: { requireEmailVerification: false } });
         await strapi.plugin('end-users').service('engine').reload();
@@ -422,7 +454,7 @@ describe('end-users compat: sign-in', () => {
 
       expect(res.status).toBe(200);
 
-      return linkOf(sentEmails()[0]).searchParams.get('code') as string;
+      return linkOf((await emailsAfter(1))[0]).searchParams.get('code') as string;
     };
 
     const reset = (body: Record<string, unknown>) => rq.post('/api/auth/reset-password', { body });
@@ -459,10 +491,13 @@ describe('end-users compat: sign-in', () => {
         expect(known.body).toEqual({ ok: true });
         expect(unknown.status).toBe(200);
         expect(unknown.body).toEqual({ ok: true });
-        expect(sentEmails()).toHaveLength(1);
-        expect(sentEmails()[0].to).toBe('forgot@example.com');
 
-        const link = linkOf(sentEmails()[0]);
+        const emails = await emailsAfter(1);
+
+        expect(emails).toHaveLength(1);
+        expect(emails[0].to).toBe('forgot@example.com');
+
+        const link = linkOf(emails[0]);
 
         expect(link.pathname).toBe('/reset');
         expect(link.searchParams.get('code')).toEqual(expect.any(String));
@@ -527,6 +562,24 @@ describe('end-users compat: sign-in', () => {
         expect(ok.status).toBe(200);
       });
 
+      it('ends the sessions that existed before the reset: the old token answers 401, the new jwt 200', async () => {
+        await seedUpUser(strapi, { email: 'revoked@example.com' });
+
+        const { jwt: oldToken } = (await signIn('revoked@example.com')).body;
+        const before = await rq.get('/api/users/me', { headers: bearer(oldToken) });
+        const code = await requestCode('revoked@example.com');
+        const res = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+
+        expect(before.status).toBe(200);
+        expect(res.status).toBe(200);
+        expect((await rq.get('/api/users/me', { headers: bearer(oldToken) })).status).toBe(401);
+        expect((await rq.get('/api/users/me', { headers: bearer(res.body.jwt) })).status).toBe(200);
+      });
+
       it('a native client posting token and newPassword to /reset-password still works', async () => {
         await seedUpUser(strapi, { email: 'native@example.com' });
         const token = await requestCode('native@example.com');
@@ -582,7 +635,7 @@ describe('end-users compat: sign-in', () => {
 
           expect(registered.status).toBe(200);
 
-          const link = linkOf(sentEmails()[0]);
+          const link = linkOf((await emailsAfter(1))[0]);
           const followed = await rq.get(`${link.pathname}${link.search}`);
 
           expect(followed.status).toBe(302);
@@ -619,7 +672,7 @@ describe('end-users compat: sign-in', () => {
           expect(known.body).toEqual({ email: 'again@example.com', sent: true });
           expect(unknown.status).toBe(200);
           expect(unknown.body).toEqual({ email: 'nobody-here@example.com', sent: true });
-          expect(sentEmails().map((email) => email.to)).toEqual(['again@example.com']);
+          expect((await emailsAfter(1)).map((email) => email.to)).toEqual(['again@example.com']);
         });
       });
 
@@ -633,9 +686,10 @@ describe('end-users compat: sign-in', () => {
             password: PASSWORD,
           });
 
-          const link = linkOf(sentEmails()[0]);
+          const [sent] = await emailsAfter(1);
+          const link = linkOf(sent);
 
-          expect(sentEmails()[0].subject).toBe('Confirm your email address');
+          expect(sent.subject).toBe('Confirm your email address');
           expect(link.pathname).toBe('/api/auth/email-confirmation');
           expect(link.searchParams.get('confirmation')).toEqual(expect.any(String));
         });

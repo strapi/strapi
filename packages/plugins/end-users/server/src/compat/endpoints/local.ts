@@ -6,10 +6,11 @@ import type { AuthEngine } from '../../engine/types';
 import type settingsService from '../../services/settings';
 import type { CompatConfig } from '../config';
 import { normalizeUsername } from '../../utils/normalize-username';
-import { engineErrorBody, mapAuthError, upError } from '../errors';
+import { missingFieldBody, refusalResult, upError } from '../errors';
 import { loginBody, signedInUser } from '../login-response';
 import { ok } from './result';
-import type { CompatResult } from './result';
+import { BEARER_HEADER, TWO_FACTOR_REQUIRED } from './shared';
+import type { CompatResult } from '../types';
 
 interface LocalInput {
   body: unknown;
@@ -17,36 +18,6 @@ interface LocalInput {
 }
 
 const DISABLED = 'This provider is disabled.';
-const TWO_FACTOR_REQUIRED = 'Two-factor authentication is required to sign in.';
-
-/** The Bearer token the engine's bearer plugin sets next to the session cookie. */
-const BEARER_HEADER = 'set-auth-token';
-
-const missing = (field: string): CompatResult => ({
-  status: 400,
-  body: upError('ValidationError', `${field} is a required field`, {
-    errors: [{ path: [field], name: 'ValidationError', message: `${field} is a required field` }],
-  }),
-});
-
-/** What the engine threw, when it threw one of its own (`statusCode` and a `body` with a `code`). */
-const engineRefusal = (error: unknown) => {
-  const { statusCode, body } = (error ?? {}) as {
-    statusCode?: unknown;
-    body?: { code?: unknown; message?: unknown };
-  };
-
-  if (typeof statusCode !== 'number' || typeof body?.code !== 'string') {
-    return null;
-  }
-
-  return {
-    status: statusCode,
-    code: body.code,
-    message: typeof body.message === 'string' ? body.message : body.code,
-  };
-};
-
 /**
  * The address a username with no account is signed in with: reserved (`.invalid` never resolves),
  * and valid whatever the characters of the identifier, because it is a hash of them. The engine
@@ -87,11 +58,11 @@ export const local = async (
   const { identifier, password } = input;
 
   if (typeof identifier !== 'string' || identifier === '') {
-    return missing('identifier');
+    return { status: 400, body: missingFieldBody('identifier') };
   }
 
   if (typeof password !== 'string' || password === '') {
-    return missing('password');
+    return { status: 400, body: missingFieldBody('password') };
   }
 
   const plugin = strapi.plugin(PLUGIN_ID);
@@ -133,19 +104,12 @@ export const local = async (
 
     return ok(loginBody(cfg, { token, user, cookie: false }));
   } catch (error) {
-    const refusal = engineRefusal(error);
+    const refused = refusalResult(error);
 
-    if (refusal === null) {
+    if (refused === null) {
       throw error;
     }
 
-    const mapped = mapAuthError(refusal.code);
-
-    return mapped === null
-      ? {
-          status: refusal.status,
-          body: engineErrorBody(refusal.status, refusal.message, refusal.code),
-        }
-      : { status: 400, body: upError(mapped.name, mapped.message) };
+    return refused;
   }
 };

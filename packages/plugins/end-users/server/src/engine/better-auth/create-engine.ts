@@ -54,6 +54,7 @@ import { emailSenders, strapiEmail, twoFactorOptions } from './plugins/strapi-em
 import { keyOfAccount, lockout } from './plugins/lockout';
 import { clearAttempts } from './lockout-counter';
 import { passwordPolicy } from './plugins/password-policy';
+import { backgroundTaskHandler } from './background-tasks';
 import { strapiCompat } from './plugins/strapi-compat';
 import { resolvePreset } from './presets';
 import { providerProfile } from './plugins/provider-profile';
@@ -402,6 +403,9 @@ export const buildAuthOptions = (
       // Strapi's Document Service makes the id (a documentId). The adapter does not ask for one
       // either (`disableIdGeneration`); this keeps Better Auth's own id helper in step with it.
       database: { generateId: false },
+      // The emails and the timing work Better Auth can leave until after the response run detached,
+      // so a known address does not answer more slowly than an unknown one
+      backgroundTasks: { handler: backgroundTaskHandler(strapi) },
     },
     rateLimit: rateLimitOptions(strapi),
     // There is no hosted service to report to. (See `turnTelemetryOff` for the environment.)
@@ -414,6 +418,8 @@ export const buildAuthOptions = (
       // request by `password-policy`, so a change needs no rebuild. Never read the admin's values here.
       minPasswordLength: 8,
       maxPasswordLength: 256,
+      // A reset signs the user out everywhere: whoever held a session keeps it no longer
+      revokeSessionsOnPasswordReset: true,
       ...senders.emailAndPassword,
     },
     // Every email goes through the email plugin's templates; a sender the project sets wins

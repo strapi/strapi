@@ -10,16 +10,17 @@ import type { CompatConfig } from '../config';
 import {
   EMAIL_OR_USERNAME_TAKEN,
   REGISTER_DISABLED,
-  engineErrorBody,
   invalidParameters,
-  mapAuthError,
   missingFieldBody,
+  refusalResult,
   upError,
 } from '../errors';
 import { loginBody, signedInUser } from '../login-response';
+import { withPendingUsername } from '../pending-username';
 import { toUpRole } from '../shapes';
 import { ok } from './result';
-import type { CompatResult } from './result';
+import { BEARER_HEADER } from './shared';
+import type { CompatResult } from '../types';
 
 interface RegisterInput {
   body: unknown;
@@ -28,27 +29,6 @@ interface RegisterInput {
 
 /** The keys every register body may carry; the registration fields of the settings come on top. */
 const REGISTER_KEYS = ['username', 'email', 'password'] as const;
-
-/** The Bearer token the engine's bearer plugin sets next to the session cookie. */
-const BEARER_HEADER = 'set-auth-token';
-
-/** What the engine threw, when it threw one of its own (`statusCode` and a `body` with a `code`). */
-const engineRefusal = (error: unknown) => {
-  const { statusCode, body } = (error ?? {}) as {
-    statusCode?: unknown;
-    body?: { code?: unknown; message?: unknown };
-  };
-
-  if (typeof statusCode !== 'number' || typeof body?.code !== 'string') {
-    return null;
-  }
-
-  return {
-    status: statusCode,
-    code: body.code,
-    message: typeof body.message === 'string' ? body.message : body.code,
-  };
-};
 
 const isTaken = async (strapi: Core.Strapi, email: string, username: string): Promise<boolean> => {
   const found = await strapi.db
@@ -68,7 +48,7 @@ const isTaken = async (strapi: Core.Strapi, email: string, username: string): Pr
  *
  * The username is not sent to the engine's sign-up: that validates it (three characters or more,
  * letters, digits, `_` and `.`), and users-permissions allowed `jo` and `john-doe`. It is stored
- * once the user exists, in the one spelling the plugin looks usernames up by.
+ * in the same user create, in the one spelling the plugin looks usernames up by.
  */
 export const register = async (
   strapi: Core.Strapi,
@@ -120,15 +100,15 @@ export const register = async (
   );
 
   try {
-    const { headers: answered, response } = await engine.callNative('signUpEmail', {
-      headers: new Headers(headers),
-      body: { ...profile, name: username, email, password: input.password },
-    });
+    // The username goes into the user's own create (see `pending-username`), so there is no
+    // moment at which the user exists without it
+    const { headers: answered, response } = await withPendingUsername(storedUsername, () =>
+      engine.callNative('signUpEmail', {
+        headers: new Headers(headers),
+        body: { ...profile, name: username, email, password: input.password },
+      })
+    );
     const documentId = response.user.id as string;
-
-    await strapi.db
-      .query(USER_UID)
-      .update({ where: { documentId }, data: { username: storedUsername } });
 
     const [user, held] = await Promise.all([
       signedInUser(strapi, documentId),
@@ -153,19 +133,12 @@ export const register = async (
 
     return ok(loginBody(cfg, { token, user: withRole, cookie: false }));
   } catch (error) {
-    const refusal = engineRefusal(error);
+    const refused = refusalResult(error);
 
-    if (refusal === null) {
+    if (refused === null) {
       throw error;
     }
 
-    const mapped = mapAuthError(refusal.code);
-
-    return mapped === null
-      ? {
-          status: refusal.status,
-          body: engineErrorBody(refusal.status, refusal.message, refusal.code),
-        }
-      : { status: 400, body: upError(mapped.name, mapped.message) };
+    return refused;
   }
 };

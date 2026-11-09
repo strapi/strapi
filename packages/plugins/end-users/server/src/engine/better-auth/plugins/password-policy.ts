@@ -10,7 +10,8 @@
  * The paths that only check a password the user already has are left alone, because refusing them
  * for a weak one would lock out people whose password predates the rules: the sign-in paths
  * (`/sign-in/*`), the two-factor paths that ask for the password again (`/two-factor/*`) and
- * `/delete-user`, and the compatibility sign-in `/local`. A body without a string password is left
+ * `/delete-user`, and the compatibility sign-in `/local`. The compatibility registration
+ * `/local/register` is checked by the sign-up it runs. A body without a string password is left
  * to Better Auth's own validation.
  */
 import { APIError, createAuthMiddleware } from 'better-auth/api';
@@ -28,9 +29,17 @@ const PASSWORD_FIELDS = ['password', 'newPassword'];
 const EXISTING_PASSWORD_PREFIXES = ['/sign-in/', '/two-factor/'];
 const EXISTING_PASSWORD_PATHS = new Set<string>(['/delete-user', '/local']);
 
+/**
+ * The compatibility registration. It runs the engine's own sign-up, which the policy checks, and
+ * answers a weak password in the shape of its own errors: checked here, the refusal would come in
+ * the native shape.
+ */
+const INNER_CALL_PATHS = new Set<string>(['/local/register']);
+
 const setsPassword = (path: string | undefined): boolean =>
   Boolean(path) &&
   !EXISTING_PASSWORD_PATHS.has(path as string) &&
+  !INNER_CALL_PATHS.has(path as string) &&
   !EXISTING_PASSWORD_PREFIXES.some((prefix) => (path as string).startsWith(prefix));
 
 export const passwordPolicy = (strapi: Core.Strapi): BetterAuthPlugin => ({

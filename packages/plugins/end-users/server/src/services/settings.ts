@@ -252,7 +252,8 @@ const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
           invalid([group, key], `${group}.${key} is not a setting`);
         }
 
-        if (!fits(next[group][key], value)) {
+        // Against the default, not the current value: a redirect that is set must be clearable
+        if (!fits((defaults() as unknown as Record<string, Plain>)[group][key], value)) {
           invalid([group, key], `${group}.${key} has the wrong type`);
         }
 
