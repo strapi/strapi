@@ -5,7 +5,7 @@ permissions), built on [Better Auth](https://www.better-auth.com).
 
 ## Moving a project from Users & Permissions
 
-The move works the same on Strapi Cloud and on a self-hosted project. No step needs a command: what you change reaches
+The move works the same on Strapi Cloud and on a self-hosted project. No step needs a command. What you change reaches
 production through your repository and a deploy, and what you need to read is shown in the admin panel.
 
 1. Back up the production database. The migration copies and rewrites user data, and once the old tables are cleaned up
@@ -52,18 +52,21 @@ production through your repository and a deploy, and what you need to read is sh
    ```
 
 4. In development, open the Project files part of the same section. It shows the change to each schema file and to
-   `config/plugins.ts`, with the old and the new text side by side. Select Write the files to apply them. The files are
+   `config/plugins.ts`. For the schema files it shows the old and the new text side by side. For `config/plugins.ts` it
+   shows the end-users block that will be set, not the whole file, so read your own file next to it. Select Write the
+   files to apply the changes. The files are
    written only by a development server that reloads (`NODE_ENV` set to `development` and `autoReload` on), and only
    inside `src/` and `config/`; the write is all or nothing. On any other server, or if the config file cannot be edited
    automatically, the same page gives you the config block and the line that turns Users & Permissions off, to copy by
    hand. Either way, the development database migrates when the server restarts with the new config.
 
-   The plan does three things:
+   The plan makes three changes.
 
    - Attributes you added to the Users & Permissions user move to the end-users profile. The schema file of the old user
      type is deleted. Users & Permissions' own attributes stay behind.
    - Your end-users entry in `config/plugins.ts` gets `compat.usersPermissions: true`, the legacy token settings and
-     `END_USERS_SECRET`, and Users & Permissions is turned off.
+     `END_USERS_SECRET`, and Users & Permissions is turned off. An entry you already have is merged into, not replaced.
+     Every key you set in it stays, including the `duplicates` and `registrationFields` choices from step 3.
    - Code that names the old plugin is listed, and not changed.
 
 5. Review the diff and the code findings, then change the code by hand. Each finding names a file and a line:
@@ -95,12 +98,14 @@ production through your repository and a deploy, and what you need to read is sh
    waits for the first to finish. If a start stops partway, for example because the process was killed, the next start
    picks up where it stopped, after waiting up to 15 minutes for the stopped start's hold on the migration to expire.
 
-   The migration of a project with 100,000 users took about 78 seconds on SQLite (a 16-core workstation), start to
-   finish, and the rollback took about 2 seconds. Postgres and MySQL times are added here once they are measured. Time
-   it on a copy of your own data before you plan a window: the figures depend on the database server and its disk. Once
-   the rate for your database is measured, the Migration section also shows an estimate of the time.
+   A project with 100,008 users migrated in about 87 seconds on SQLite and in about 166 seconds on Postgres 17, both
+   on the same 16-core workstation, start to finish. The rollback on SQLite took about 2 seconds. MySQL times are added
+   here once they are measured. Time it on a copy of your own data before you plan a window, because the figures depend
+   on the database server and its disk. Once the rate for your database is measured, the Migration section also shows
+   an estimate of the time.
 
-   The config now says:
+   After the migration, the end-users part of your `config/plugins.ts` reads like this. Your file also holds the keys
+   you set yourself, and the Users & Permissions entry is switched off.
 
    ```ts
    export default ({ env }) => ({
@@ -127,6 +132,11 @@ production through your repository and a deploy, and what you need to read is sh
    A start is refused, with a message that says why, when `fromUsersPermissions` is `true` and the end-users tables
    already hold users, and when the old tables exist and the key is not set. If a start stops partway, deploy again: the
    migration resumes from the step it reached.
+
+   If the migration fails the same way on every start, undo it by setting `migration.rollback: true` in
+   `config/plugins.ts` and deploying. A rollback that was interrupted is finished with the same key; until then the
+   start says so and refuses. After a rollback the project can start in check mode again, by setting
+   `fromUsersPermissions` back to `'check'` and turning `migration.rollback` off.
 
 8. Watch the Advanced page. The Migration section now shows the status of the migration and the items to resolve. Mark
    an item resolved once you have dealt with it; providers, templates and rewritten addresses resolve themselves when
