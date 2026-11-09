@@ -12,11 +12,11 @@ const UP_USER = `${UP}.user`;
 const EU = `plugin::${PLUGIN_ID}`;
 const HISTORY_TABLE = 'strapi_history_versions';
 const PERMISSION_UID = 'admin::permission';
-const CM_ACTIONS_WITH_FIELDS = [
+const CM_ACTIONS_WITH_FIELDS: ReadonlySet<string> = new Set([
   'plugin::content-manager.explorer.read',
   'plugin::content-manager.explorer.create',
   'plugin::content-manager.explorer.update',
-];
+]);
 
 /**
  * The admin actions that carry over, by name. Updating an email template is not among them: the
@@ -170,7 +170,7 @@ const carryContentManagerRows = async (
     await keepHold(strapi, owner);
 
     // The profile's row goes in first: a start that stops after it finds the user's row still to do
-    if (moved.length > 0 && CM_ACTIONS_WITH_FIELDS.includes(row.action)) {
+    if (moved.length > 0 && CM_ACTIONS_WITH_FIELDS.has(row.action)) {
       // eslint-disable-next-line no-await-in-loop
       const existing = (await query.findOne({
         where: { action: row.action, subject: PROFILE_UID, role: roleId },
