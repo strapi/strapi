@@ -16,6 +16,8 @@ const articleModel = {
     morphWithoutTarget: { type: 'relation', relation: 'morphToMany' },
     // An attribute can still carry `target` explicitly set to undefined
     morphWithUndefinedTarget: { type: 'relation', relation: 'morphToOne', target: undefined },
+    // A broken schema can carry `target: null`, which neither the old nor the new check rejects
+    relationWithNullTarget: { type: 'relation', relation: 'manyToOne', target: null },
     tags: { type: 'relation', relation: 'manyToMany', target: TAG_UID },
   },
 };
@@ -82,6 +84,13 @@ describe('relations morph check (extractAndValidateRequestInfo)', () => {
         `The relational field morphWithUndefinedTarget on ${ARTICLE_UID} has no target model`
       )
     );
+  });
+
+  test('lets a relation attribute whose target is null through the morph check', async () => {
+    // Only `undefined` is rejected: a null target reaches the next guard (field read permission)
+    await expect(
+      relations.extractAndValidateRequestInfo(createCtx('relationWithNullTarget'))
+    ).rejects.toThrow(errors.ForbiddenError);
   });
 
   test('lets a relation attribute with a target through the morph check', async () => {

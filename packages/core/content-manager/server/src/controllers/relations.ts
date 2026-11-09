@@ -168,7 +168,8 @@ export default {
     }
 
     // Morph-to relations (morphToOne, morphToMany) have no single target model.
-    // The `in` check lets TypeScript narrow `attribute` to the relations that declare a target.
+    // `attribute` is still `any` here: the `in` check prepares the narrowing for the strict types
+    // branch, where `attribute` is typed and only the relations that declare a target pass it.
     if (!('target' in attribute) || attribute.target === undefined) {
       throw new errors.ValidationError(
         `The relational field ${targetField} on ${model} has no target model`
