@@ -1,10 +1,11 @@
+import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';
 
 import type { MigrationReportItem } from '../../../shared/contracts/migration';
 import { PLUGIN_ID, PROFILE_UID, USER_UID } from '../constants';
 import { keepHold } from './post-sync-stores';
 import type { PostSyncStep } from './post-sync';
-import { addReportItems } from './record';
+import { addReportItems, readReport } from './record';
 import { ITEM_SEVERITY } from './report';
 
 const UP = 'plugin::users-permissions';
@@ -12,6 +13,7 @@ const UP_USER = `${UP}.user`;
 const EU = `plugin::${PLUGIN_ID}`;
 const HISTORY_TABLE = 'strapi_history_versions';
 const PERMISSION_UID = 'admin::permission';
+const ITEM_ID = 'admin-permission:all';
 const CM_ACTIONS_WITH_FIELDS: ReadonlySet<string> = new Set([
   'plugin::content-manager.explorer.read',
   'plugin::content-manager.explorer.create',
@@ -80,14 +82,10 @@ const carryActions = async (
   }
 
   const unmapped = new Set<string>();
-  const roles = new Set<number>();
-  let mapped = 0;
 
   for (const row of rows) {
     const target = mapAdminAction(row.action);
     const roleId = row.role!.id;
-
-    roles.add(roleId);
 
     if (target === null) {
       unmapped.add(row.action);
@@ -109,21 +107,27 @@ const carryActions = async (
       // eslint-disable-next-line no-await-in-loop
       await query.update({ where: { id: row.id }, data: { action: target } });
     }
-
-    mapped += 1;
   }
 
-  const left = [...unmapped];
+  // Rows mapped by an earlier start are gone by now: no total is stated, and the actions that had no
+  // counterpart are the ones an earlier start listed together with this one's
+  const earlier = (await readReport(strapi))?.items.find((entry) => entry.id === ITEM_ID);
+  const left = [
+    ...new Set([
+      ...(earlier?.refs ?? []).map(String).filter((ref) => ref.startsWith(`${UP}.`)),
+      ...unmapped,
+    ]),
+  ];
   const noCounterpart =
     left.length > 0
       ? ` ${left.length === 1 ? 'One action has' : `${left.length} actions have`} no counterpart and ${left.length === 1 ? 'is' : 'are'} removed when the application has started; grant what is needed in the admin.`
       : '';
 
   return {
-    id: 'admin-permission:all',
+    id: ITEM_ID,
     kind: 'admin-permission',
     severity: ITEM_SEVERITY['admin-permission'],
-    message: `${rows.length} admin ${rows.length === 1 ? 'permission' : 'permissions'} on ${roles.size} admin ${roles.size === 1 ? 'role' : 'roles'} referred to users-permissions; ${mapped} now ${mapped === 1 ? 'names' : 'name'} the end-users or email plugin action that replaces it.${noCounterpart}`,
+    message: `Admin permissions on users-permissions were mapped to the end-users or email plugin action that replaces each.${noCounterpart}`,
     count: left.length,
     refs: left,
     resolved: false,
@@ -138,7 +142,7 @@ const carryActions = async (
 const carryContentManagerRows = async (
   strapi: Core.Strapi,
   owner: string
-): Promise<{ rewritten: number; profileRows: number }> => {
+): Promise<{ rewritten: number; profileRows: number; items: MigrationReportItem[] }> => {
   const query = strapi.db.query(PERMISSION_UID);
   const rows = (
     (await query.findMany({
@@ -151,6 +155,7 @@ const carryContentManagerRows = async (
     attributesOf(strapi, PROFILE_UID).filter((name) => name !== 'user')
   );
   let profileRows = 0;
+  const items: MigrationReportItem[] = [];
 
   for (const row of rows) {
     const roleId = row.role!.id;
@@ -177,16 +182,33 @@ const carryContentManagerRows = async (
       })) as PermissionRow | null;
 
       if (existing) {
-        const have = Array.isArray(existing.properties?.fields)
-          ? (existing.properties.fields as string[])
-          : [];
-        const union = [...new Set([...have, ...moved])];
+        const { fields: haveFields, ...haveRest } = existing.properties ?? {};
+        const { fields: _sourceFields, ...sourceRest } = properties;
+        const same =
+          isDeepStrictEqual(existing.conditions ?? [], row.conditions ?? []) &&
+          isDeepStrictEqual(haveRest, sourceRest);
 
-        if (union.length > have.length) {
-          // eslint-disable-next-line no-await-in-loop
-          await query.update({
-            where: { id: existing.id },
-            data: { properties: { ...existing.properties, fields: union } },
+        if (same) {
+          const have = Array.isArray(haveFields) ? (haveFields as string[]) : [];
+          const union = [...new Set([...have, ...moved])];
+
+          if (union.length > have.length) {
+            // eslint-disable-next-line no-await-in-loop
+            await query.update({
+              where: { id: existing.id },
+              data: { properties: { ...existing.properties, fields: union } },
+            });
+          }
+        } else {
+          // Its conditions or properties differ: merging could grant the fields more widely than the user row did
+          items.push({
+            id: `admin-permission:profile:${roleId}:${row.action}`,
+            kind: 'admin-permission',
+            severity: 'action',
+            message: `Admin role ${roleId} has its own ${row.action} permission on the profile, with other conditions than the one it had on the user, so the fields that moved to the profile were not added to it. Grant those fields on the profile for that role in the admin.`,
+            count: moved.length,
+            refs: moved,
+            resolved: false,
           });
         }
       } else {
@@ -221,7 +243,7 @@ const carryContentManagerRows = async (
     });
   }
 
-  return { rewritten: rows.length, profileRows };
+  return { rewritten: rows.length, profileRows, items };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -256,12 +278,10 @@ export const adminStep: PostSyncStep = {
   name: 'admin',
   async run(strapi, _record, owner) {
     const actions = await carryActions(strapi, owner);
-    const { rewritten, profileRows } = await carryContentManagerRows(strapi, owner);
+    const { rewritten, profileRows, items } = await carryContentManagerRows(strapi, owner);
     const history = await carryHistory(strapi, owner);
 
-    if (actions) {
-      await addReportItems(strapi, [actions]);
-    }
+    await addReportItems(strapi, [...(actions ? [actions] : []), ...items]);
 
     strapi.log.info(
       `${PLUGIN_ID}: carried ${rewritten} Content Manager permissions (${profileRows} profile permissions added) and ${history} history versions`

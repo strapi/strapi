@@ -156,9 +156,14 @@ describe('migration from users-permissions: stores, admin side and finish', () =
     // these two come without, so they stay off and the report says what each needs
     expect((await providers().get('auth0')).enabled).toBe(false);
     expect((await providers().get('twitter')).enabled).toBe(false);
-    expect(await reportItem('provider-needs-input:auth0')).toMatchObject({
-      refs: ['clientId', 'clientSecret'],
-    });
+    const item = (await reportItem('provider-needs-input:auth0')) as {
+      message: string;
+      refs: string[];
+    };
+
+    expect(item.refs).toEqual(['clientId', 'clientSecret']);
+    // What Users & Permissions held is on the item, for the admin to copy
+    expect(item.message).toContain('domain: tenant.auth0.com');
     expect(await reportItem('provider-needs-input:twitter')).toMatchObject({
       refs: ['clientId', 'clientSecret'],
     });

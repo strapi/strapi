@@ -1,6 +1,8 @@
+import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import type { MigrationReportItem } from '../../../shared/contracts/migration';
+import type { ProviderUpdateBody } from '../../../shared/contracts/providers';
 import type { EndUsersSettingsPatch } from '../../../shared/contracts/settings';
 import { PLUGIN_ID, PROFILE_UID } from '../constants';
 import { BUILT_IN_PROVIDERS } from '../providers/built-in';
@@ -145,7 +147,30 @@ const settingsItems = async (
 
   if (Object.keys(patch).length > 0) {
     await keepHold(strapi, owner);
-    await settings.set(patch);
+
+    try {
+      await settings.set(patch);
+    } catch (error) {
+      if (!(error instanceof errors.ValidationError)) {
+        throw error;
+      }
+
+      const keys = (
+        (error.details as { errors?: Array<{ path?: unknown[] }> } | undefined)?.errors ?? []
+      )
+        .map((entry) => (entry.path ?? []).join('.'))
+        .filter(Boolean);
+
+      strapi.log.warn(`${PLUGIN_ID}: the settings were not carried over: ${messageOf(error)}`);
+      items.push(
+        item(
+          'compat-note',
+          'settings-not-saved',
+          'The settings end-users refused were not carried over (see the application log). Set sign-up, redirects and sign-in methods in the admin.',
+          { count: keys.length, refs: keys, severity: 'action' }
+        )
+      );
+    }
   }
 
   return items;
@@ -194,7 +219,9 @@ const templateItems = async (
           throw error;
         }
 
-        strapi.log.warn(`${PLUGIN_ID}: the ${label} email was refused by the email plugin`);
+        strapi.log.warn(
+          `${PLUGIN_ID}: the ${label} email was refused by the email plugin: ${messageOf(error)}`
+        );
         items.push(
           item(
             'template-untranslated',
@@ -244,11 +271,32 @@ const hasEncryptionKey = (strapi: Core.Strapi): boolean => {
   }
 };
 
-const needsInput = (id: string, missing: string[], why: string) =>
+/** What Users & Permissions held for a provider and is not a secret, as `name: value` for the admin to copy */
+const heldValues = (body: ProviderUpdateBody): string => {
+  const values: string[] = [];
+
+  if (body.clientId) {
+    values.push(`clientId: ${body.clientId}`);
+  }
+
+  for (const [name, value] of Object.entries(body.fields ?? {})) {
+    if (typeof value === 'string' && value !== '') {
+      values.push(`${name}: ${value}`);
+    }
+  }
+
+  if (body.scopes && body.scopes.length > 0) {
+    values.push(`scopes: ${body.scopes.join(', ')}`);
+  }
+
+  return values.length > 0 ? ` It held ${values.join('; ')}.` : '';
+};
+
+const needsInput = (id: string, missing: string[], why: string, body: ProviderUpdateBody) =>
   item(
     'provider-needs-input',
     id,
-    `The ${id} provider is not carried over yet: ${why}. Its redirect URI is the one shown in its settings.`,
+    `The ${id} provider is not carried over yet: ${why}.${heldValues(body)} Its redirect URI is the one shown in its settings.`,
     { count: missing.length, refs: missing }
   );
 
@@ -278,7 +326,8 @@ const providerItems = async (
         needsInput(
           upId,
           [...new Set([...missing, 'clientSecret'])],
-          'admin.secrets.encryptionKey is not set, so its secret cannot be stored; set the key, then enter the secret in the admin'
+          'admin.secrets.encryptionKey is not set, so its secret cannot be stored; set the key, then enter the secret in the admin',
+          mapping.body
         )
       );
       continue;
@@ -305,7 +354,8 @@ const providerItems = async (
           missing,
           mapping.kind === 'mapped'
             ? 'it could not be stored (see the application log); set it up in the admin'
-            : `it needs ${missing.join(', ')} before it can be stored; enter them in the admin`
+            : `it needs ${missing.join(', ')} before it can be stored; enter them in the admin`,
+          mapping.body
         )
       );
     }

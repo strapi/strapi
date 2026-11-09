@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
+import * as records from '../record';
 import { adminStep, mapAdminAction } from '../admin-side';
 
 vi.mock('../record', async (importOriginal) => ({
@@ -68,6 +69,7 @@ const fakeStrapi = (rows: Row[]) => {
 
   return {
     log: { info: vi.fn(), warn: vi.fn() },
+    store: () => ({ get: async () => null }),
     contentTypes: {
       'plugin::end-users.user': { attributes: { email: {}, username: {}, roles: {} } },
       'plugin::end-users.profile': { attributes: { company: {}, seo: {}, user: {} } },
@@ -156,5 +158,72 @@ describe('adminStep', () => {
     expect(rows.find((one) => one.id === 2)?.action).toBe('plugin::end-users.roles.read');
     // No counterpart: left for core's cleanup
     expect(rows.find((one) => one.id === 3)?.action).toBe(`${UP}.email-templates.update`);
+  });
+
+  it('leaves an existing profile row alone when its conditions differ, and asks an admin to grant the fields', async () => {
+    const existing = row(9, CM_READ, 'plugin::end-users.profile', {
+      properties: { fields: ['seo'] },
+      conditions: [],
+    });
+    const rows = [
+      row(1, CM_READ, `${UP}.user`, {
+        properties: { fields: ['username', 'company'] },
+        conditions: ['admin::is-creator'],
+      }),
+      existing,
+    ];
+    const strapi = fakeStrapi(rows);
+
+    await adminStep.run(strapi, {} as never, 'owner');
+
+    expect(rows.find((one) => one.id === 9)).toMatchObject({
+      properties: { fields: ['seo'] },
+      conditions: [],
+    });
+    expect(records.addReportItems).toHaveBeenCalledWith(strapi, [
+      expect.objectContaining({
+        id: `admin-permission:profile:7:${CM_READ}`,
+        severity: 'action',
+        refs: ['company'],
+      }),
+    ]);
+  });
+
+  it('merges into an existing profile row whose conditions and properties match', async () => {
+    const rows = [
+      row(1, CM_READ, `${UP}.user`, {
+        properties: { fields: ['company'], locales: ['en'] },
+        conditions: ['admin::is-creator'],
+      }),
+      row(9, CM_READ, 'plugin::end-users.profile', {
+        properties: { fields: ['seo'], locales: ['en'] },
+        conditions: ['admin::is-creator'],
+      }),
+    ];
+
+    await adminStep.run(fakeStrapi(rows), {} as never, 'owner');
+
+    expect(rows.find((one) => one.id === 9)?.properties.fields).toEqual(['seo', 'company']);
+  });
+
+  it('names no total in the admin-permission item, so a run after a stop reports the same', async () => {
+    const rows = [row(2, `${UP}.roles.read`, null), row(3, `${UP}.email-templates.update`, null)];
+    const strapi = fakeStrapi(rows);
+
+    await adminStep.run(strapi, {} as never, 'owner');
+
+    const [first] = vi.mocked(records.addReportItems).mock.calls[0][1];
+
+    // The earlier start's item is what the report holds when the next start finds only the unmapped row
+    (strapi as any).store = () => ({ get: async () => ({ version: 1, items: [first] }) });
+    vi.mocked(records.addReportItems).mockClear();
+    await adminStep.run(strapi, {} as never, 'owner');
+
+    expect(vi.mocked(records.addReportItems).mock.calls[0][1][0]).toMatchObject({
+      id: 'admin-permission:all',
+      count: 1,
+      refs: [`${UP}.email-templates.update`],
+      message: first.message,
+    });
   });
 });
