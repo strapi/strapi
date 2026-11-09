@@ -7,7 +7,7 @@ review_notes:
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
   - 'Commit callbacks run after the write returns. A failing commit or rollback callback is logged, later callbacks still run, and a rollback callback does not replace the write error.'
-  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release.ts`. The rest of this page was not re-verified.
+  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release-run.ts`. The rest of this page was not re-verified.
 ---
 
 This page follows one write through the server. It explains the layers and the order in which they run. It is not an API reference for the Document Service.

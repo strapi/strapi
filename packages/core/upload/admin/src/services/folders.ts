@@ -136,12 +136,7 @@ const foldersApi = uploadApi.injectEndpoints({
         url: '/upload/folder-structure',
         method: 'GET',
       }),
-      // TODO: align GetFolderStructure contract with the real /upload/folder-structure
-      // envelope and drop this defensive unwrap (data[] vs { data: [] }).
-      transformResponse: (response: GetFolderStructure.Response['data']) =>
-        ((response as unknown as { data: FolderNode[] })?.data ??
-          (response as unknown as FolderNode[]) ??
-          []) as FolderNode[],
+      transformResponse: (response: GetFolderStructure.Response['data']) => response.data,
       providesTags: [{ type: 'Folder', id: 'STRUCTURE' }],
     }),
     /**

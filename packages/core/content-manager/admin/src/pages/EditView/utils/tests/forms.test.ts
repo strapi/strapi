@@ -1,5 +1,5 @@
 import { ComponentsDictionary, Schema } from '../../../../hooks/useDocument';
-import { createDefaultForm } from '../forms';
+import { createDefaultForm, getPublishValidationErrors } from '../forms';
 
 describe('forms', () => {
   describe('createDefaultForm', () => {
@@ -136,6 +136,68 @@ describe('forms', () => {
       expect(createDefaultForm({ ...contentType, attributes: ctAttributes }, components)).toEqual(
         expected
       );
+    });
+  });
+
+  describe('getPublishValidationErrors', () => {
+    const contentType: Schema = {
+      uid: 'api::test.test',
+      apiID: 'api::test.test',
+      isDisplayed: true,
+      modelType: 'contentType',
+      kind: 'collectionType',
+      info: {
+        displayName: 'test',
+        singularName: 'test',
+        pluralName: 'tests',
+      },
+      modelName: 'test',
+      globalId: 'api::test.test',
+      options: { draftAndPublish: true },
+      attributes: {
+        title: { type: 'string', required: true },
+        seo: { type: 'component', component: 'shared.seo', repeatable: false },
+      },
+    };
+
+    const components = {
+      'shared.seo': {
+        uid: 'shared.seo',
+        category: 'shared',
+        isDisplayed: true,
+        apiID: 'seo',
+        modelType: 'component',
+        modelName: 'seo',
+        globalId: 'ComponentSharedSeo',
+        info: { displayName: 'seo' },
+        attributes: {
+          id: { type: 'integer' },
+          metaTitle: { type: 'string', required: true },
+        },
+      },
+    } as unknown as ComponentsDictionary;
+
+    const requiredError = {
+      id: 'components.Input.error.validation.required',
+      defaultMessage: expect.any(String),
+    };
+
+    it('reports required fields as publishing would, including nested ones', () => {
+      expect(
+        getPublishValidationErrors(
+          { title: '', seo: { id: 1, metaTitle: '' } },
+          { schema: contentType, components }
+        )
+      ).toEqual({ title: requiredError, seo: { metaTitle: requiredError } });
+    });
+
+    it('returns no errors when the values can be published', () => {
+      expect(
+        getPublishValidationErrors(
+          { title: 'Hello', seo: { id: 1, metaTitle: 'Meta' } },
+          { schema: contentType, components }
+        )
+      ).toEqual({});
     });
   });
 });
