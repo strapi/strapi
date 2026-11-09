@@ -1,4 +1,5 @@
 import { isDefineAuthResult } from '../engine/better-auth/define-auth';
+import { DUPLICATES_MODES, MAX_FIELD_LENGTH, MAX_REGISTRATION_FIELDS } from '../migration/config';
 import { parseDuration } from './duration';
 import {
   hasBackslash,
@@ -266,6 +267,50 @@ const validateCompat = (compat: Plain) => {
   }
 };
 
+/** `migration`: the migration from Users & Permissions. */
+const validateMigration = (migration: Plain) => {
+  const { fromUsersPermissions, duplicates, registrationFields } = migration;
+
+  if (
+    fromUsersPermissions !== undefined &&
+    fromUsersPermissions !== null &&
+    typeof fromUsersPermissions !== 'boolean' &&
+    fromUsersPermissions !== 'check'
+  ) {
+    invalid(
+      'migration.fromUsersPermissions',
+      'true, false, "check", or null',
+      fromUsersPermissions
+    );
+  }
+
+  if (
+    duplicates !== undefined &&
+    duplicates !== null &&
+    !DUPLICATES_MODES.includes(duplicates as (typeof DUPLICATES_MODES)[number])
+  ) {
+    invalid('migration.duplicates', '"keep-oldest" or "abort"', duplicates);
+  }
+
+  if (registrationFields !== undefined && registrationFields !== null) {
+    if (
+      !Array.isArray(registrationFields) ||
+      registrationFields.length > MAX_REGISTRATION_FIELDS ||
+      registrationFields.some(
+        (name) => typeof name !== 'string' || name === '' || name.length > MAX_FIELD_LENGTH
+      )
+    ) {
+      invalid(
+        'migration.registrationFields',
+        `a list of at most ${MAX_REGISTRATION_FIELDS} field names, each up to ${MAX_FIELD_LENGTH} characters`,
+        registrationFields
+      );
+    }
+  }
+
+  optionalBoolean(migration, 'rollback', 'migration.rollback');
+};
+
 /**
  * Checks the plugin configuration after the defaults are merged in. Keys it
  * does not know are left alone: a project may add its own.
@@ -396,6 +441,7 @@ export const validateConfig = (
   }
 
   validateCompat(group(values, 'compat'));
+  validateMigration(group(values, 'migration'));
 
   const { auth } = values;
 

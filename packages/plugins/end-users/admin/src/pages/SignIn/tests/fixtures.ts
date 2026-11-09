@@ -34,6 +34,12 @@ export const SETTINGS: SettingsResponse = {
       session: { expiresIn: '7d', updateAge: '1d', cookieCache: false },
       rateLimit: { enabled: true, window: 10, max: 100, storage: 'database' },
       compat: { usersPermissions: false, legacyJwtUntil: null },
+      migration: {
+        fromUsersPermissions: null,
+        duplicates: 'keep-oldest',
+        registrationFields: null,
+        rollback: false,
+      },
       explain: false,
       auth: { plugins: ['username'], senders: ['end-users.welcome'] },
     },

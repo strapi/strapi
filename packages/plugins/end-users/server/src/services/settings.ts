@@ -14,6 +14,7 @@ import {
   rateLimitStorage,
   SUPPORTED_SENDERS,
 } from '../engine/better-auth/create-engine';
+import { readMigrationConfig } from '../migration/config';
 import type { AuthEngine } from '../engine/types';
 import { writableProfileAttributes } from '../utils/writable-profile-attributes';
 import { PERMISSIONS_TTL_MS } from './ability';
@@ -481,6 +482,7 @@ const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
           connectProviders: Object.keys(compat.connect.callbacks),
           legacyJwtHits: null,
         },
+        migration: readMigrationConfig(strapi),
         explain: config('explain') === true,
         auth: {
           plugins: (Array.isArray(plugins) ? plugins : [])

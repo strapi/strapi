@@ -26,6 +26,12 @@ type Env = {
  * maps a provider id to the URL its front end receives the sign-in on, an absolute URL on a
  * trusted origin.
  *
+ * `migration` is the migration from Users & Permissions, config only. `migration.fromUsersPermissions`
+ * is `true` to migrate when the application starts, `'check'` to only report what it would do, and
+ * `false` or unset to leave it alone. `migration.duplicates` (`'keep-oldest'` or `'abort'`),
+ * `migration.registrationFields` (a list of field names, or `null` to decide from the profile) and
+ * `migration.rollback` (undo it on the next start) shape the run.
+ *
  * `rateLimit.enabled` is `true` in every environment (Better Auth itself only limits in production).
  * `rateLimit.window` (seconds), `rateLimit.max` and `rateLimit.customRules` have no default here:
  * left out, Better Auth's own apply (10 seconds, 100 requests). `customRules` is Better Auth's own
@@ -66,6 +72,12 @@ export default {
         },
       },
       connect: { callbacks: {} as Record<string, string> },
+    },
+    migration: {
+      fromUsersPermissions: null as boolean | 'check' | null,
+      duplicates: 'keep-oldest',
+      registrationFields: null as string[] | null,
+      rollback: false,
     },
     rateLimit: { enabled: true },
     providers: [] as unknown[],

@@ -51,6 +51,14 @@ export interface ConfigSummary {
     /** How many requests used a legacy token, and when the last one did; `null` when not counted */
     legacyJwtHits?: { legacy: number; access: number; lastHitAt: string | null } | null;
   };
+  /** The `migration` keys of `config/plugins.ts`: from Users & Permissions to this plugin */
+  migration: {
+    /** `null`: not set. `'check'`: only the check, nothing is changed */
+    fromUsersPermissions: boolean | 'check' | null;
+    duplicates: 'keep-oldest' | 'abort';
+    registrationFields: string[] | null;
+    rollback: boolean;
+  };
   explain: boolean;
   /**
    * Better Auth plugin ids, and the template keys the project sends from code. Providers from

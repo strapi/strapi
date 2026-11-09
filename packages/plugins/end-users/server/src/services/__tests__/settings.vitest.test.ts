@@ -530,8 +530,32 @@ describe('settings service', () => {
           connectProviders: [],
           legacyJwtHits: null,
         },
+        migration: {
+          fromUsersPermissions: null,
+          duplicates: 'keep-oldest',
+          registrationFields: null,
+          rollback: false,
+        },
         explain: true,
         auth: { plugins: [], senders: [] },
+      });
+    });
+
+    it('the summary shows the migration keys', () => {
+      const { migration } = setup({
+        config: {
+          'migration.fromUsersPermissions': 'check',
+          'migration.duplicates': 'abort',
+          'migration.registrationFields': ['company'],
+          'migration.rollback': true,
+        },
+      }).service.configSummary();
+
+      expect(migration).toEqual({
+        fromUsersPermissions: 'check',
+        duplicates: 'abort',
+        registrationFields: ['company'],
+        rollback: true,
       });
     });
 

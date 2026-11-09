@@ -144,6 +144,8 @@ export const createEndUsersInstance = async (
       resolve: require.resolve('@strapi/plugin-end-users/package.json'),
       config: {
         secret: TEST_SECRET,
+        // Not asked for: a test that is about the migration sets its own
+        migration: { fromUsersPermissions: false },
         ...opts.pluginConfig,
         rateLimit: { enabled: false, ...(opts.pluginConfig?.rateLimit as object | undefined) },
       },
