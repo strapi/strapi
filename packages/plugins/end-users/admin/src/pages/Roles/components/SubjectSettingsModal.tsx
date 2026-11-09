@@ -11,6 +11,7 @@ import {
   SingleSelect,
   SingleSelectOption,
   Typography,
+  VisuallyHidden,
 } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -152,6 +153,11 @@ const SettingsForm = ({
   return (
     <>
       <Modal.Header>
+        <VisuallyHidden>
+          <Modal.Title>
+            {`${contentType.label}, ${formatMessage({ id: 'global.settings', defaultMessage: 'Settings' })}`}
+          </Modal.Title>
+        </VisuallyHidden>
         <Breadcrumbs
           id="end-users-conditions-modal-breadcrumbs"
           label={`${contentType.label}, ${formatMessage({ id: 'global.settings', defaultMessage: 'Settings' })}`}
