@@ -198,14 +198,26 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
       const overdue = releases.filter(({ scheduledAt }) => new Date(scheduledAt!) < now);
 
       for (const release of releases.filter((release) => !overdue.includes(release))) {
-        await this.set(release.id, new Date(release.scheduledAt!)).catch((error: unknown) => {
-          // A release deleted or frozen since the read has nothing left to arm
-          if (error instanceof errors.NotFoundError) {
-            return;
-          }
+        const scheduledAt = new Date(release.scheduledAt!);
+        const isArmed = await this.set(release.id, scheduledAt).then(
+          () => true,
+          (error: unknown) => {
+            // A release deleted or frozen since the read has nothing left to arm
+            if (!(error instanceof errors.NotFoundError)) {
+              strapi.log.error(`[Content Releases] Couldn't schedule release ${release.id}`, {
+                error,
+              });
+            }
 
-          strapi.log.error(`[Content Releases] Couldn't schedule release ${release.id}`, { error });
-        });
+            return false;
+          }
+        );
+
+        // Came due while the sync was running: cron never fires a job for a date already past
+        if (isArmed && scheduledAt.getTime() <= Date.now()) {
+          this.cancel(release.id);
+          overdue.push(release);
+        }
       }
 
       // After arming the others, as these runs can take a while
