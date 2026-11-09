@@ -31,9 +31,9 @@ production through your repository and a deploy, and what you need to read is sh
    is refused if Users & Permissions is not loaded, because Strapi would drop its tables.
 
 3. In the admin panel, open Settings, then End users, then Advanced, and read the Migration section on the environment
-   that holds the data. It shows the counts of users, roles and permissions, an estimate of the time the migration
-   takes, and a list of items. An item marked Action needs a decision from you; Info only tells you what will happen.
-   Typical items are users whose email or username is the same once capitals are ignored, providers that need a secret
+   that holds the data. It shows the counts of users, roles and permissions, and a list of items. An item marked
+   Action needs a decision from you; Info only tells you what will happen.
+   Typical items are users whose email or username is the same apart from letter case, providers that need a secret
    entered, and edited email templates that use expressions which cannot be carried over. Fix what the list asks for,
    deploy if the fix is in code or config, and select Check again until nothing is left that you did not expect. You
    can download the report as a file. It holds ids and counts, never an email address, name or secret.
@@ -92,7 +92,8 @@ production through your repository and a deploy, and what you need to read is sh
 
 7. Commit the files and deploy with one instance running, as Strapi's own migrations need. The migration runs while
    the application starts, before the database schema is synchronized. If a second instance starts during that time, it
-   waits for the first to finish.
+   waits for the first to finish. If a start stops partway, for example because the process was killed, the next start
+   picks up where it stopped, after waiting up to 15 minutes for the stopped start's hold on the migration to expire.
 
    The config now says:
 
