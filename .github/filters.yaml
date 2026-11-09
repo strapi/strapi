@@ -44,6 +44,11 @@ cli:
   - 'tests/scripts/generate-test-app.js'
   - 'tests/setup/jest-cli.setup.js'
   - 'jest.config.cli.js'
+# New test suites (Test Infrastructure Overhaul): linted (ESLint in `lint` and OxLint in
+# `lint_oxlint`, which have no filter), type checked, and run by the `tests_next_*` jobs. Until a
+# suite holds a migrated domain, those jobs run on this filter and on `global` only (CMS-2242).
+tests_next:
+  - 'tests-next/**'
 # Umzug migration sources + v4→v5 integration harness (fixture app at examples/complex; runner at tests/migration/)
 # Fixture paths may move under tests/migration/ later; keep both globs in sync until then (see tests/migration/README.md).
 migrations:
