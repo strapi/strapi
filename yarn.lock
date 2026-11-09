@@ -11014,6 +11014,7 @@ __metadata:
     styled-components: "npm:6.4.1"
     vitest: "catalog:"
     vitest-config: "npm:5.61.0"
+    xss: "npm:1.0.13"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
   peerDependencies:
@@ -34296,7 +34297,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xss@npm:^1.0.6":
+"xss@npm:1.0.13, xss@npm:^1.0.6":
   version: 1.0.13
   resolution: "xss@npm:1.0.13"
   dependencies:
