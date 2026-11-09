@@ -1,4 +1,4 @@
-import type { ProviderCreateBody } from '../../../shared/contracts/providers';
+import type { ProviderUpdateBody } from '../../../shared/contracts/providers';
 
 /** One entry of Users & Permissions' stored `grant`, as the admin form and the seed write it */
 export type UpGrant = Record<
@@ -17,16 +17,21 @@ export type UpGrant = Record<
 
 export type ProviderMapping =
   | { kind: 'email'; enabled: boolean }
-  | { kind: 'mapped'; upId: string; body: ProviderCreateBody; callback: string | null }
+  | { kind: 'mapped'; upId: string; body: ProviderUpdateBody; callback: string | null }
   | {
       kind: 'needs-input';
       upId: string;
-      body: ProviderCreateBody;
+      body: ProviderUpdateBody;
       missing: string[];
       callback: string | null;
     }
   | { kind: 'not-supported'; upId: string; reason: 'no-equivalent' | 'custom' };
 
+/**
+ * Every provider mapped here is one end-users ships, so its `body` is written with the provider
+ * service's `update(upId, body)`; `create` takes custom OpenID Connect providers only, and none
+ * of these maps to one.
+ */
 type Entry = UpGrant[string];
 
 /** Providers that map to the built-in or preset of the same id */
@@ -114,22 +119,19 @@ const isUntouched = (entry: Entry): boolean =>
   !trimmed(entry.jwksurl);
 
 const buildBody = (
-  upId: string,
   entry: Entry,
   fields: Record<string, string>,
   enabled: boolean,
   withCredentials: boolean
-): ProviderCreateBody => {
+): ProviderUpdateBody => {
   const scopes = toScopes(entry.scope);
+  const clientId = withCredentials ? trimmed(entry.key) : '';
+  const clientSecret = withCredentials ? trimmed(entry.secret) : '';
 
   return {
-    id: upId,
-    // Built-in and preset providers are matched by id; these two only satisfy the create contract
-    name: upId,
-    discoveryUrl: '',
-    clientId: withCredentials ? trimmed(entry.key) : '',
-    clientSecret: withCredentials ? trimmed(entry.secret) : '',
     enabled,
+    ...(clientId ? { clientId } : {}),
+    ...(clientSecret ? { clientSecret } : {}),
     ...(scopes.length > 0 ? { scopes } : {}),
     ...(Object.keys(fields).length > 0 ? { fields } : {}),
   };
@@ -146,7 +148,9 @@ export const mapUpGrant = (
 ): ProviderMapping[] => {
   const mappings: ProviderMapping[] = [];
 
-  for (const [upId, entry = {}] of Object.entries(grant ?? {})) {
+  for (const [upId, rawEntry] of Object.entries(grant ?? {})) {
+    const entry = rawEntry ?? {};
+
     if (upId === 'email') {
       mappings.push({ kind: 'email', enabled: Boolean(entry.enabled) });
       continue;
@@ -167,7 +171,7 @@ export const mapUpGrant = (
       mappings.push({
         kind: 'needs-input',
         upId,
-        body: buildBody(upId, entry, {}, false, false),
+        body: buildBody(entry, {}, false, false),
         missing: ['clientId', 'clientSecret'],
         callback,
       });
@@ -200,7 +204,7 @@ export const mapUpGrant = (
       mappings.push({
         kind: 'needs-input',
         upId,
-        body: buildBody(upId, entry, fields, false, true),
+        body: buildBody(entry, fields, false, true),
         missing,
         callback,
       });
@@ -208,7 +212,7 @@ export const mapUpGrant = (
       mappings.push({
         kind: 'mapped',
         upId,
-        body: buildBody(upId, entry, fields, entry.enabled ?? false, true),
+        body: buildBody(entry, fields, entry.enabled ?? false, true),
         callback,
       });
     }

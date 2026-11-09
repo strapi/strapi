@@ -9,6 +9,10 @@ export interface UpEmailTemplate {
   };
 }
 
+/**
+ * `sender` is true when the stored sender or reply-to differs from the seeded one, whatever becomes
+ * of the body: it belongs in the email plugin's config.
+ */
 export type TemplateTranslation =
   | {
       kind: 'translated';
@@ -17,11 +21,10 @@ export type TemplateTranslation =
       subject: string;
       html: string;
       text: string;
-      /** The stored sender or reply-to differs from the seeded one: it belongs in the email plugin's config */
       sender: boolean;
     }
-  | { kind: 'default'; key: string }
-  | { kind: 'untranslated'; key: string; placeholders: string[] };
+  | { kind: 'default'; key: string; sender: boolean }
+  | { kind: 'untranslated'; key: string; placeholders: string[]; sender: boolean };
 
 const KEYS: Record<UpEmailKey, 'end-users.reset-password' | 'end-users.verify-email'> = {
   reset_password: 'end-users.reset-password',
@@ -79,11 +82,11 @@ const htmlToText = (html: string): string =>
     .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n\n')
     .replace(/<[^>]*>/g, '')
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -102,13 +105,18 @@ export const translateUpTemplate = (
   const message = options.message ?? '';
   const subject = options.object ?? '';
   const seeded = SEEDED[upKey];
+  const from = options.from ?? {};
+  const sender =
+    Boolean(options.response_email?.trim()) ||
+    (from.name !== undefined && from.name !== SEEDED_SENDER.name) ||
+    (from.email !== undefined && from.email !== SEEDED_SENDER.email);
 
   if (
     !normalise(message) ||
     (normalise(message) === normalise(seeded.message) &&
       normalise(subject) === normalise(seeded.object))
   ) {
-    return { kind: 'default', key };
+    return { kind: 'default', key, sender };
   }
 
   const html = rewrite(message);
@@ -116,14 +124,8 @@ export const translateUpTemplate = (
   const placeholders = [...new Set([...html.left, ...title.left])];
 
   if (placeholders.length > 0) {
-    return { kind: 'untranslated', key, placeholders };
+    return { kind: 'untranslated', key, placeholders, sender };
   }
-
-  const from = options.from ?? {};
-  const sender =
-    Boolean(options.response_email?.trim()) ||
-    (from.name !== undefined && from.name !== SEEDED_SENDER.name) ||
-    (from.email !== undefined && from.email !== SEEDED_SENDER.email);
 
   return {
     kind: 'translated',

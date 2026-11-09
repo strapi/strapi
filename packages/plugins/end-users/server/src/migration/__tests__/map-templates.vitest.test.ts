@@ -57,6 +57,7 @@ describe('translateUpTemplate', () => {
       kind: 'untranslated',
       key: 'end-users.reset-password',
       placeholders: ['SERVER_URL'],
+      sender: false,
     });
   });
 
@@ -77,6 +78,53 @@ describe('translateUpTemplate', () => {
     expect(translateUpTemplate('email_confirmation', seeded)).toEqual({
       kind: 'default',
       key: 'end-users.verify-email',
+      sender: false,
     });
+  });
+
+  it('translates the subject', () => {
+    expect(
+      translateUpTemplate('reset_password', {
+        options: {
+          object: 'Hi <%= USER.username %>',
+          message: '<p><%= URL %>?code=<%= TOKEN %></p>',
+        },
+      })
+    ).toMatchObject({ kind: 'translated', subject: 'Hi {{ user.name }}' });
+  });
+
+  it('leaves a bare URL untranslated', () => {
+    expect(translateUpTemplate('reset_password', stored('<p><%= URL %></p>'))).toMatchObject({
+      kind: 'untranslated',
+      placeholders: ['URL'],
+    });
+  });
+
+  it('sets the sender flag from response_email alone, on every kind', () => {
+    const reply = { response_email: 'help@acme.test' };
+
+    expect(
+      translateUpTemplate('reset_password', stored('<p><%= URL %>?code=<%= TOKEN %></p>', reply))
+    ).toMatchObject({ kind: 'translated', sender: true });
+    expect(
+      translateUpTemplate('reset_password', stored('<p><%= SERVER_URL %></p>', reply))
+    ).toMatchObject({
+      kind: 'untranslated',
+      sender: true,
+    });
+    expect(
+      translateUpTemplate('reset_password', {
+        options: { ...reply, object: 'Reset password', message: '' },
+      })
+    ).toEqual({ kind: 'default', key: 'end-users.reset-password', sender: true });
+  });
+
+  it('decodes &amp; last, so &amp;lt; stays &lt;', () => {
+    const result = translateUpTemplate(
+      'reset_password',
+      stored('<p>a &amp;lt; b &lt; c <%= URL %>?code=<%= TOKEN %></p>')
+    );
+
+    expect(result).toMatchObject({ kind: 'translated', text: 'a &lt; b < c {{ url }}' });
   });
 });

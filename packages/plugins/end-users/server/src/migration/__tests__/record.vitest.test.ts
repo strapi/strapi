@@ -2,7 +2,7 @@
 // compare-and-swap against a real SQLite table rather than a mock
 /* eslint-disable import/no-extraneous-dependencies, node/no-extraneous-import */
 import knex, { type Knex } from 'knex';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import type { MigrationReport, MigrationReportItem } from '../../../../shared/contracts/migration';
@@ -23,6 +23,7 @@ import {
 const PREFIX = 'plugin_end-users_';
 
 let db: Knex;
+const warnings = vi.fn();
 
 /** The core store over a real table, as the plugin store reads and writes it */
 const makeStrapi = () => {
@@ -46,7 +47,11 @@ const makeStrapi = () => {
     },
   });
 
-  return { store: scoped, db: { connection: db } } as unknown as Core.Strapi;
+  return {
+    store: scoped,
+    db: { connection: db },
+    log: { warn: warnings },
+  } as unknown as Core.Strapi;
 };
 
 const NOW = new Date('2026-11-09T10:00:00.000Z');
@@ -142,6 +147,18 @@ describe('the migration record', () => {
 
     expect(updated).toMatchObject({ status: 'completed', attempt: 2, completedSteps: ['users'] });
     expect(await readRecord(strapi)).toEqual(updated);
+  });
+
+  it('keeps the fields of the stored record it does not know', async () => {
+    const strapi = makeStrapi();
+
+    await put(MIGRATION_KEY, record({ extra: 'kept' }));
+    await updateRecord(strapi, { attempt: 3 });
+
+    expect(await strapi.store({}).get({ key: MIGRATION_KEY })).toMatchObject({
+      extra: 'kept',
+      attempt: 3,
+    });
   });
 
   it('refuses to update when there is no record', async () => {
@@ -243,7 +260,9 @@ describe('the migration report', () => {
   it('adds items by id: the same id replaces, a new one is appended, and no report means no write', async () => {
     const strapi = makeStrapi();
 
+    warnings.mockClear();
     await addReportItems(strapi, [item('compat-note:a', 'one')]);
+    expect(warnings).toHaveBeenCalledTimes(1);
     expect(await readReport(strapi)).toBeNull();
     expect(await db('strapi_core_store_settings')).toHaveLength(0);
 
@@ -257,6 +276,28 @@ describe('the migration report', () => {
       ['compat-note:a', 'one'],
       ['compat-note:b', 'two, again'],
       ['compat-note:c', 'three'],
+    ]);
+  });
+
+  it('keeps what was resolved on a replaced item, unless the new item says otherwise', async () => {
+    const strapi = makeStrapi();
+    const resolvedAt = '2026-11-09T09:00:00.000Z';
+
+    await writeReport(
+      strapi,
+      report([
+        { ...item('compat-note:a', 'one'), resolved: true, resolvedAt },
+        { ...item('compat-note:b', 'two'), resolved: true, resolvedAt },
+      ])
+    );
+    await addReportItems(strapi, [
+      item('compat-note:a', 'one, again'),
+      { ...item('compat-note:b', 'two, again'), resolved: true, resolvedAt: 'later' },
+    ]);
+
+    expect((await readReport(strapi))?.items).toMatchObject([
+      { id: 'compat-note:a', message: 'one, again', resolved: true, resolvedAt },
+      { id: 'compat-note:b', resolved: true, resolvedAt: 'later' },
     ]);
   });
 });

@@ -28,9 +28,6 @@ describe('mapUpGrant', () => {
         upId: 'github',
         callback: 'https://app.test/a',
         body: {
-          id: 'github',
-          name: 'github',
-          discoveryUrl: '',
           clientId: key,
           clientSecret: secret,
           enabled: true,
@@ -119,12 +116,7 @@ describe('mapUpGrant', () => {
         upId: 'twitter',
         callback: null,
         missing: ['clientId', 'clientSecret'],
-        body: expect.objectContaining({
-          id: 'twitter',
-          enabled: false,
-          clientId: '',
-          clientSecret: '',
-        }),
+        body: { enabled: false },
       },
       { kind: 'not-supported', upId: 'instagram', reason: 'no-equivalent' },
       { kind: 'not-supported', upId: 'cas', reason: 'no-equivalent' },
@@ -152,6 +144,10 @@ describe('mapUpGrant', () => {
     expect(
       mapUpGrant({ github: { enabled: false, key: '', secret: '' }, twitter: {} }, none)
     ).toEqual([]);
+  });
+
+  it('does not throw on an empty grant entry', () => {
+    expect(mapUpGrant({ github: null } as unknown as UpGrant, none)).toEqual([]);
   });
 
   it('turns the email entry into the email and password method', () => {

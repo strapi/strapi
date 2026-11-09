@@ -102,7 +102,9 @@ export const updateRecord = async (
     throw new Error('There is no migration record to update.');
   }
 
-  const next = { ...current, ...patch };
+  // Fields of the stored record this code does not know are kept, as `claimMigration` keeps them
+  const raw = await store(strapi).get({ key: MIGRATION_KEY });
+  const next = { ...(isPlain(raw) ? raw : {}), ...current, ...patch } as MigrationRecord;
 
   await writeRecord(strapi, next);
 
@@ -252,7 +254,7 @@ export const writeReport = async (strapi: Core.Strapi, report: MigrationReport):
 
 /**
  * Merges `items` into the stored report by `id`: an item with an id the report has replaces it, a
- * new one is appended. Does nothing when no report is stored.
+ * new one is appended. Logs and does nothing when no report is stored.
  */
 export const addReportItems = async (
   strapi: Core.Strapi,
@@ -261,13 +263,27 @@ export const addReportItems = async (
   const report = await readReport(strapi);
 
   if (!report) {
+    strapi.log.warn('The migration report is not stored, so its new items were not recorded.');
+
     return;
   }
 
   const merged = new Map(report.items.map((item) => [item.id, item]));
 
   for (const item of items) {
-    merged.set(item.id, item);
+    const old = merged.get(item.id);
+
+    // A replaced item keeps what an administrator already resolved, unless the new one says otherwise
+    merged.set(
+      item.id,
+      old?.resolved
+        ? {
+            ...item,
+            resolved: item.resolved || old.resolved,
+            resolvedAt: item.resolvedAt ?? old.resolvedAt,
+          }
+        : item
+    );
   }
 
   await writeReport(strapi, { ...report, items: [...merged.values()] });

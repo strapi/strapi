@@ -65,4 +65,13 @@ describe('mapUpAdvanced', () => {
       skipped: [],
     });
   });
+
+  it('ignores a redirect that is not a string', () => {
+    const result = mapUpAdvanced(
+      { email_reset_password: 42 as unknown as string },
+      { ...ctx, defaultRoleDocumentId: null }
+    );
+
+    expect(result).toEqual({ patch: {}, skipped: [] });
+  });
 });

@@ -51,7 +51,8 @@ export const mapUpAdvanced = (
   ] as const;
 
   for (const [key, target] of redirectKeys) {
-    const url = advanced[key]?.trim();
+    const value = advanced[key];
+    const url = typeof value === 'string' ? value.trim() : '';
 
     if (!url) {
       continue;
