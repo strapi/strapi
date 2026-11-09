@@ -673,7 +673,8 @@ const ReleaseSubtitle = ({ release, dateText, numberOfEntriesText }: ReleaseSubt
       });
     }
 
-    if (hasRunReleasedNothing(release)) {
+    // Also a release that missed its schedule: it never ran, so "Released 0 of" would read as a run
+    if (totals.released === 0) {
       return formatMessage({
         id: 'content-releases.pages.ReleaseDetails.header-subtitle.nothing-released',
         defaultMessage: 'Nothing was released',
