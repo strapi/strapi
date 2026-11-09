@@ -100,7 +100,9 @@ const toGroups = (address: string): number[] => {
   const start = toNumbers(head);
   const end = toNumbers(rest);
 
-  return [...start, ...new Array(8 - start.length - end.length).fill(0), ...end];
+  const zeros = Array.from({ length: 8 - start.length - end.length }, () => 0);
+
+  return [...start, ...zeros, ...end];
 };
 
 const isZero = (groups: number[]) => groups.every((group) => group === 0);

@@ -46,7 +46,7 @@ const BLOCK_OPTIONS: Record<AddressCategory, BlockedDestination['option']> = {
   linkLocal: 'blockLinkLocal',
 };
 
-const REDIRECT_MODES: RedirectMode[] = ['follow', 'check', 'none'];
+const REDIRECT_MODES = new Set<RedirectMode>(['follow', 'check', 'none']);
 
 export const DEFAULT_DESTINATION_CHECKS: DestinationChecks = {
   blockLoopback: false,
@@ -81,7 +81,7 @@ export const parseDestinationChecks = (config: unknown = {}): DestinationChecks 
     }
   });
 
-  if (!REDIRECT_MODES.includes(checks.redirects)) {
+  if (!REDIRECT_MODES.has(checks.redirects)) {
     throw new Error(`${CONFIG_KEY}.redirects must be 'follow', 'check' or 'none'`);
   }
 

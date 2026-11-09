@@ -45,7 +45,7 @@ const defaultConfiguration: Config = {
   deduplicateReleaseWebhooks: false,
 };
 
-const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
 // The most redirects followed with redirects: 'check'
 const MAX_CHECKED_REDIRECTS = 5;
@@ -323,7 +323,7 @@ class WebhookRunner {
       const response = await this.request(target, request, checkOnSend || redirectCount > 0);
       const location = response.headers.get('location');
 
-      if (!REDIRECT_STATUSES.includes(response.status) || location === null) {
+      if (!REDIRECT_STATUSES.has(response.status) || location === null) {
         return response;
       }
 
