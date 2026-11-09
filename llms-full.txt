@@ -2690,7 +2690,6 @@ The flags Strapi declares are listed in `FeaturesFutureFlags` ([`features.ts`](h
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `experimental_firstPublishedAt` | The `firstPublishedAt` attribute on draft and publish content                                                             |
 | `unstableCustomOrder`           | The [custom order](../packages/core/content-manager/07-custom-order.md) of collection type entries in the Content Manager |
-| `unstableNextDesignSystem`      | Building the admin panel against the next design system                                                                   |
 
 The type also accepts any other string key, so a plugin can read its own flag without changing `@strapi/types`.
 
@@ -2703,7 +2702,6 @@ Add the flag under `future` in the `config/features.(js|ts)` file of your Strapi
 
 export default ({ env }) => ({
   future: {
-    unstableNextDesignSystem: true,
     experimental_firstPublishedAt: env.bool('STRAPI_FEATURES_FUTURE_FIRST_PUBLISHED_AT', false),
   },
 });
@@ -13616,7 +13614,7 @@ interface BuildContext {
 
 #### Static Files
 
-The next step is to create a `runtime` folder in the root of the strapi project, a generic name `.strapi` is used and the build specifically uses a subfolder called `client`. This leaves more space for us to expand as and when we require it. We only generate two files for this – an `index.html` which is a static rendered React Component from the `@strapi/admin` package (DefaultDocument) & an `app.js` file which calls the `renderAdmin` function & provides a mount point & plugin object.
+The next step is to create a `runtime` folder in the root of the strapi project, a generic name `.strapi` is used and the build specifically uses a subfolder called `client`. This leaves more space for us to expand as and when we require it. The build writes these files to this folder. The `index.html` file is a static render of the DefaultDocument React component from the `@strapi/admin` package. The `app.js` file calls the `renderAdmin` function and gives it a mount point and the plugin object. The `styles.css` file imports `@strapi/design-system/next/source.css` by the absolute path that `@strapi/admin` resolves, and lists the directories that Tailwind scans. `app.js` imports `styles.css`. Both bundlers compile it with Tailwind: Vite with `@tailwindcss/vite`, webpack with `postcss-loader` and `@tailwindcss/postcss`.
 
 #### Bundling
 
@@ -13806,12 +13804,11 @@ It runs in Node.js for the CLI and the build. The `@strapi/strapi/admin` export 
 
 #### Entry exports
 
-The `exports` field of `package.json` has four entries.
+The `exports` field of `package.json` has three entries.
 
 - `.` (`src/index.ts`) re-exports everything from `@strapi/core` and the types from `@strapi/types`.
 - `./admin` (`src/admin.ts`) exports `renderAdmin`, which mounts the admin application with the built-in admin plugins and the plugins of the application. It also exports hooks and helpers of `@strapi/admin` and `@strapi/content-manager`.
 - `./admin/test` re-exports the test helpers of `@strapi/admin`.
-- `./admin/styles.css` is the base stylesheet of the admin panel.
 
 #### The `strapi` binary
 
