@@ -19,6 +19,11 @@ export interface ConfigBlockOptions {
   path?: string;
   /** A `config/env/<name>/plugins` file: only the keys it holds, no `migration`, `secret` or `usersPermissions` */
   environment?: boolean;
+  /**
+   * For a block that is shown rather than written: a secret never takes the project's text, whatever
+   * the expression (a literal, an `env()` call with a fallback), but is read from the environment
+   */
+  redactSecrets?: boolean;
 }
 
 /** The change to Users & Permissions, for a project that edits its `config/plugins` by hand */
@@ -582,9 +587,24 @@ export const endUsersConfigBlock = async (
   const jwtSecret = get('jwtSecret');
 
   if (!environment || jwtSecret) {
-    if (jwtSecret?.origin === 'source' && jwtSecret.text !== '') {
+    if (jwtSecret?.origin === 'source' && jwtSecret.text !== '' && !options.redactSecrets) {
       set('compat.legacyJwt.secret', jwtSecret.text);
     } else {
+      if (
+        options.redactSecrets &&
+        jwtSecret?.origin === 'source' &&
+        jwtSecret.text.replace(/\s+/g, '') !== JWT_SECRET_CALL
+      ) {
+        findings.push(
+          findingOf(
+            path,
+            'legacy-secret',
+            'The config writes the legacy JWT secret in the file (a literal, or with a fallback). Read it from the JWT_SECRET environment variable only.',
+            jwtSecret.line
+          )
+        );
+      }
+
       set('compat.legacyJwt.secret', JWT_SECRET_CALL);
 
       if (!settings.jwtSecretFromEnv) {

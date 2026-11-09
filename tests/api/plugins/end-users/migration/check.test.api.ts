@@ -7,6 +7,7 @@ import type { Core } from '@strapi/types';
 
 import {
   checkInstance,
+  migratedInstance,
   inspectDatabase,
   removeProjectTypes,
   seedUsersPermissionsProject,
@@ -155,5 +156,43 @@ describe('migration from users-permissions: check mode', () => {
     }
 
     expect((await rqAdmin.post(`${MIGRATION}/files`)).status).toBe(403);
+  });
+
+  it('answers 409 with the reason when the plan cannot be written', async () => {
+    const before = process.env.NODE_ENV;
+
+    // The test app's config/plugins file is not one a plan can edit
+    process.env.NODE_ENV = 'development';
+    strapi.config.set('autoReload', true);
+
+    try {
+      const res = await rqAdmin.post(`${MIGRATION}/files`);
+
+      expect(res.status).toBe(409);
+      expect(res.body.error.details).toEqual({ reason: 'config-not-editable' });
+    } finally {
+      process.env.NODE_ENV = before;
+      strapi.config.set('autoReload', false);
+    }
+  });
+});
+
+describe('migration from users-permissions: check mode over end-users data', () => {
+  it('refuses to start when eu_users holds users, and drops nothing', async () => {
+    const project = await seedUsersPermissionsProject();
+    const migrated = await migratedInstance(project);
+
+    await migrated.destroy();
+
+    const users = () =>
+      inspectDatabase(async (db) => Number((await db('eu_users').count({ c: '*' }).first())?.c));
+    const before = await users();
+
+    expect(before).toBeGreaterThan(0);
+
+    await expect(checkInstance()).rejects.toThrow(/eu_users/);
+
+    expect(await users()).toBe(before);
+    removeProjectTypes();
   });
 });

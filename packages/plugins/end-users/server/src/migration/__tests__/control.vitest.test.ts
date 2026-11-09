@@ -49,6 +49,15 @@ describe('decideMigration', () => {
     ).toEqual({ kind: 'check' });
   });
 
+  it('refuses check mode when eu_users holds users or a migration is recorded, and goes on when it is empty or missing', () => {
+    const check = { config: { fromUsersPermissions: 'check' }, upLoaded: true };
+
+    expect(refusal(decideMigration(state({ ...check, euUsersRows: 2 })))).toContain('eu_users');
+    expect(refusal(decideMigration(state({ ...check, record: record() })))).toContain('eu_users');
+    expect(decideMigration(state({ ...check, euUsersRows: 0 }))).toEqual({ kind: 'check' });
+    expect(decideMigration(state({ ...check, euUsersRows: null }))).toEqual({ kind: 'check' });
+  });
+
   it('refuses check mode when users-permissions is not loaded', () => {
     const decision = decideMigration(state({ config: { fromUsersPermissions: 'check' } }));
 

@@ -113,6 +113,15 @@ describe('migration service', () => {
     expect(second.set).toHaveBeenCalledTimes(1);
   });
 
+  it('decides the address item from the users, not from its refs, which stop at a cap', async () => {
+    const report = reportOf([item('duplicate-email', 'all', { refs: [] })]);
+    const open = setup({ report, leftWithPlaceholder: 1 });
+    const done = setup({ report, leftWithPlaceholder: 0 });
+
+    expect((await open.service.status()).unresolved).toBe(1);
+    expect((await done.service.status()).unresolved).toBe(0);
+  });
+
   it('refuses to acknowledge a kind that resolves itself', async () => {
     const { service, set } = setup({ report: reportOf([item('provider-needs-input', 'github')]) });
 

@@ -94,4 +94,21 @@ describe('writeProjectFiles', () => {
     expect(fs.existsSync(file('package.json'))).toBe(false);
     expect(leftovers()).toEqual([]);
   });
+
+  it('refuses a path a symbolic link leads out of src and config', async () => {
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'eu-outside-'));
+
+    try {
+      fs.mkdirSync(file('src'), { recursive: true });
+      fs.symlinkSync(outside, file('src/linked'));
+
+      await expect(
+        writeProjectFiles(dir, [{ path: 'src/linked/new/x.json', before: null, after: 'x' }])
+      ).rejects.toThrow(/not inside src\/ or config\//);
+
+      expect(fs.readdirSync(outside)).toEqual([]);
+    } finally {
+      fs.rmSync(outside, { recursive: true, force: true });
+    }
+  });
 });

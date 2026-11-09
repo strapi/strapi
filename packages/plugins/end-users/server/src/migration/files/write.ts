@@ -25,6 +25,33 @@ const resolveInside = (appDir: string, relative: string): string => {
   return path.join(appDir, ...normalized.split('/'));
 };
 
+/** The real path of a file that may not exist yet: its deepest existing ancestor, resolved */
+const realTarget = async (target: string): Promise<string> => {
+  let ancestor = target;
+  const rest: string[] = [];
+
+  for (;;) {
+    try {
+      return path.join(await fs.realpath(ancestor), ...rest);
+    } catch {
+      rest.unshift(path.basename(ancestor));
+      ancestor = path.dirname(ancestor);
+    }
+  }
+};
+
+/** Refuses a path that a symbolic link leads out of `src/` and `config/` */
+const assertNoEscape = async (appDir: string, relative: string, target: string) => {
+  const real = await realTarget(target);
+  const roots = await Promise.all(
+    WRITABLE_ROOTS.map((root) => realTarget(path.join(appDir, root)))
+  );
+
+  if (!roots.some((root) => real.startsWith(`${root}${path.sep}`))) {
+    throw new Error(`Refusing to write ${relative}: it is not inside src/ or config/.`);
+  }
+};
+
 const exists = (file: string) =>
   fs.access(file).then(
     () => true,
@@ -53,6 +80,8 @@ export const writeProjectFiles = async (appDir: string, changes: FileChange[]): 
 
   for (const change of changes) {
     const target = resolveInside(appDir, change.path);
+
+    await assertNoEscape(appDir, change.path, target);
 
     steps.push({
       target,

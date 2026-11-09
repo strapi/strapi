@@ -138,6 +138,25 @@ describe('planProjectFiles', () => {
     expect(plan.findings.map((finding) => finding.rule)).toEqual(['no-source']);
   });
 
+  it('names each environment plugins file to edit by hand', async () => {
+    writeProject();
+    put('config/env/production/plugins.ts', 'export default () => ({});\n');
+    put('config/env/staging/plugins.js', 'module.exports = () => ({});\n');
+
+    const plan = await planProjectFiles(makeStrapi());
+
+    expect(
+      plan.findings
+        .filter((finding) => finding.path.startsWith('config/env/'))
+        .map((f) => [f.path, f.rule])
+    ).toEqual([
+      ['config/env/production/plugins.ts', 'config-not-editable'],
+      ['config/env/staging/plugins.js', 'config-not-editable'],
+    ]);
+    // the plan itself is unaffected
+    expect(plan.writable).toBe(true);
+  });
+
   it('is not writable outside development, and says why first', async () => {
     writeProject();
     vi.stubEnv('NODE_ENV', 'production');
@@ -177,22 +196,26 @@ describe('planProjectFiles', () => {
     expect(plan.configBlock).toContain('env(');
   });
 
-  it('shows a secret the config writes as a literal as an env call, and says so', async () => {
-    writeProject();
+  it('shows a secret the config writes as a literal or with a fallback as an env call, and says so', async () => {
     const literal = randomBytes(18).toString('hex');
+    const fallback = randomBytes(18).toString('hex');
 
-    put(
-      'config/plugins.ts',
-      `export default () => ({\n  'users-permissions': { config: { jwtSecret: '${literal}' } },\n});\n`
-    );
+    for (const written of [`'${literal}'`, `env('JWT_SECRET', '${fallback}')`]) {
+      writeProject();
+      put(
+        'config/plugins.ts',
+        `export default ({ env }) => ({\n  'users-permissions': { config: { jwtSecret: ${written} } },\n});\n`
+      );
 
-    const plan = await planProjectFiles(makeStrapi());
-    const shown = publicProjectFiles(plan);
+      const plan = await planProjectFiles(makeStrapi());
+      const shown = JSON.stringify(publicProjectFiles(plan));
 
-    // the file the server writes keeps the project's own text
-    expect(plan.configBlock).toContain(literal);
-    expect(JSON.stringify(shown)).not.toContain(literal);
-    expect(shown.configBlock).toContain("secret: env('JWT_SECRET')");
-    expect(shown.findings.some((finding) => finding.rule === 'legacy-secret')).toBe(true);
+      // the file the server writes keeps the project's own text
+      expect(plan.configChange?.after).toContain(written);
+      expect(shown).not.toContain(literal);
+      expect(shown).not.toContain(fallback);
+      expect(plan.configBlock).toContain("secret: env('JWT_SECRET')");
+      expect(plan.findings.some((finding) => finding.rule === 'legacy-secret')).toBe(true);
+    }
   });
 });

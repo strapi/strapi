@@ -122,6 +122,30 @@ const readSettings = async (strapi: Core.Strapi): Promise<UsersPermissionsSettin
   };
 };
 
+/** `config/env/<name>/plugins`: not planned, so each one is named for the admin to edit by hand */
+const environmentConfigFindings = async (appDir: string): Promise<CodeFinding[]> => {
+  const envDir = path.join(appDir, 'config', 'env');
+  const names = await fs.readdir(envDir).catch(() => [] as string[]);
+  const found: CodeFinding[] = [];
+
+  for (const name of [...names].sort((a, b) => a.localeCompare(b))) {
+    for (const ext of ['ts', 'js']) {
+      const relative = `config/env/${name}/plugins.${ext}`;
+
+      if ((await readText(path.join(appDir, ...relative.split('/')))) !== null) {
+        found.push({
+          path: relative,
+          line: null,
+          rule: 'config-not-editable',
+          message: `This file is not changed. If it sets users-permissions or end-users options for the ${name} environment, edit it by hand: turn off Users & Permissions (${USERS_PERMISSIONS_LINE}) and move its settings to the end-users entry.`,
+        });
+      }
+    }
+  }
+
+  return found;
+};
+
 const noSource = (): CodeFinding => ({
   path: 'src',
   line: null,
@@ -168,6 +192,8 @@ export const planProjectFiles = async (strapi: Core.Strapi): Promise<ProjectFile
     findings.push(...scanCode(file, source));
   }
 
+  findings.push(...(await environmentConfigFindings(appDir)));
+
   const settings = await readSettings(strapi);
   let reason: ProjectFilesReason | null = null;
   let configChange: FileChange | null = null;
@@ -184,11 +210,15 @@ export const planProjectFiles = async (strapi: Core.Strapi): Promise<ProjectFile
     }
   }
 
-  const { block, findings: blockFindings } = await endUsersConfigBlock(settings, source, {
+  // The block the file gets keeps the project's own text; the one that is shown reads every secret
+  // from the environment, whatever the project wrote
+  const { block } = await endUsersConfigBlock(settings, source, { path: configPath });
+  const shown = await endUsersConfigBlock(settings, source, {
     path: configPath,
+    redactSecrets: true,
   });
 
-  findings.push(...blockFindings);
+  findings.push(...shown.findings);
 
   if (source === null) {
     const typescript = await fs.access(path.join(appDir, 'tsconfig.json')).then(
@@ -218,7 +248,7 @@ export const planProjectFiles = async (strapi: Core.Strapi): Promise<ProjectFile
     {
       ...base,
       changes: schemas.changes,
-      configBlock: block,
+      configBlock: shown.block,
       findings,
       configChange,
     },
@@ -226,65 +256,9 @@ export const planProjectFiles = async (strapi: Core.Strapi): Promise<ProjectFile
   );
 };
 
-const SECRET_KEY = /secret|password|token|key$/i;
-const LITERAL_VALUE =
-  /^(\s*)(['"]?)([\w.-]+)\2:\s*('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`[^`]*`|\d+)(,?)\s*$/;
-
-const envName = (key: string, parents: string[]): string =>
-  key === 'secret' && parents.includes('legacyJwt')
-    ? 'JWT_SECRET'
-    : key
-        .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
-        .replace(/[^A-Za-z0-9]+/g, '_')
-        .toUpperCase();
-
-/**
- * The block as it may be shown: a secret-bearing key keeps its text only when it reads the
- * environment; a literal becomes an `env()` call and a finding. The file the server writes keeps
- * what the project wrote, as it is already in their file.
- */
-const redactBlock = (block: string): { block: string; findings: CodeFinding[] } => {
-  const findings: CodeFinding[] = [];
-  const parents: string[] = [];
-  const lines = block.split('\n').map((line) => {
-    const match = LITERAL_VALUE.exec(line);
-
-    if (!match) {
-      const opener = /^\s*(?:['"]?)([\w.-]+)(?:['"]?):\s*\{\s*$/.exec(line);
-
-      if (opener) parents.push(opener[1]);
-      else if (/^\s*\},?\s*$/.test(line)) parents.pop();
-
-      return line;
-    }
-
-    const [, indent, quote, key, , comma] = match;
-
-    if (!SECRET_KEY.test(key)) return line;
-
-    const name = envName(key, parents);
-
-    findings.push({
-      path: 'config/plugins',
-      line: null,
-      rule: 'legacy-secret',
-      message: `The config writes ${key} as a literal. Read it from an environment variable (${name}) instead; it is shown here as env('${name}').`,
-    });
-
-    return `${indent}${quote}${key}${quote}: env('${name}')${comma}`;
-  });
-
-  return { block: lines.join('\n'), findings };
-};
-
-/** What the Content API may send: the plan without the change to the config file, no literal secret */
+/** What the Content API may send: the plan without the change to the config file */
 export const publicProjectFiles = (plan: ProjectFilesPlan): ProjectFiles => {
   const { configChange: _configChange, ...files } = plan;
-  const redacted = redactBlock(files.configBlock);
 
-  return {
-    ...files,
-    configBlock: redacted.block,
-    findings: [...files.findings, ...redacted.findings],
-  };
+  return files;
 };

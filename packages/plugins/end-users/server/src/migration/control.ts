@@ -54,6 +54,16 @@ export const decideMigration = (state: MigrationState): MigrationDecision => {
   const notCleanedUp = record !== null && record.cleanedUpAt === null;
 
   if (from === 'check') {
+    // Sync drops the end-users tables the dormant plugin has no types for: only empty ones may go
+    if (upLoaded && ((euUsersRows !== null && euUsersRows > 0) || record !== null)) {
+      return refuse(
+        'migration.fromUsersPermissions is "check", but this database already holds end-users data ' +
+          '(eu_users has users or a migration is recorded), and check mode would drop those tables. ' +
+          'Set migration.fromUsersPermissions to false or remove it to keep running end-users, or ' +
+          'restore a database without them.'
+      );
+    }
+
     return upLoaded
       ? { kind: 'check' }
       : refuse(
