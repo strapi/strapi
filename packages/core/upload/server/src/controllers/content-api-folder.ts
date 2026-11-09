@@ -15,7 +15,7 @@ type ContentApiFolder = {
   id: Data.ID;
   documentId: Data.DocumentID;
   name: string;
-  path: string;
+  path: string | null;
   createdAt: string;
   updatedAt: string;
   parent?: { id: Data.ID; documentId: Data.DocumentID } | null;
@@ -72,8 +72,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         response.parent = folder.parent ?? null;
       }
 
-      if ('name' in folder) {
-        response.namePath = namePaths[folders[index].path];
+      const { path } = folders[index];
+
+      if ('name' in folder && typeof path === 'string') {
+        response.namePath = namePaths[path];
       }
 
       return response;

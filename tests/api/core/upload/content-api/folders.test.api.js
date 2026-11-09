@@ -248,6 +248,26 @@ describe('Upload content API - read-only folders routes', () => {
       ]);
     });
 
+    test('lists and reads a folder without a path', async () => {
+      const pathless = await strapi.db
+        .query('plugin::upload.folder')
+        .create({ data: { name: 'Pathless', pathId: 999995, path: null } });
+
+      const list = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { id: pathless.id } },
+      });
+      const one = await rq({ method: 'GET', url: `/upload/folders/${pathless.id}` });
+      await deleteFolders([pathless.id]);
+
+      expect(list.statusCode).toBe(200);
+      expect(list.body.data).toMatchObject([{ id: pathless.id, path: null }]);
+      expect(list.body.data[0]).not.toHaveProperty('namePath');
+      expect(one.statusCode).toBe(200);
+      expect(one.body.data).not.toHaveProperty('namePath');
+    });
+
     test('lists and reads a folder whose path has out-of-range segments', async () => {
       const outOfRange = await strapi.db.query('plugin::upload.folder').create({
         data: {

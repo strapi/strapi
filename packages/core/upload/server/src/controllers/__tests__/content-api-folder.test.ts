@@ -90,4 +90,13 @@ describe('Content API Folder Controller - findOne', () => {
     expect(data).not.toHaveProperty('namePath');
     expect(data.parent).toEqual({ id: 1, documentId: 'root' });
   });
+
+  test('leaves `namePath` out of a folder without a path', async () => {
+    const folder = { ...rootFolder, path: null } as unknown as Folder;
+
+    const data = await findOne(createController(folder));
+
+    expect(data.path).toBeNull();
+    expect(data).not.toHaveProperty('namePath');
+  });
 });

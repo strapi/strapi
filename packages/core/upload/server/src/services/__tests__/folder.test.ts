@@ -119,6 +119,10 @@ describe('folder', () => {
       expect(await folderService.getNamePaths([path])).toEqual({ [path]: namePath });
     });
 
+    test('skips a folder without a path', async () => {
+      expect(await folderService.getNamePaths([null, '/1'])).toEqual({ '/1': '/Clients' });
+    });
+
     test.each(['99999999999', '2147483648', '1e21'])(
       'skips the out-of-range segment %s without querying it',
       async (segment) => {
