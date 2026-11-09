@@ -27,7 +27,11 @@ const STORE_TABLE = 'strapi_core_store_settings';
 /** The row's own key: the core store prefixes a plugin's key with its type and name */
 const rowKey = (key: string) => `plugin_${PLUGIN_ID}_${key}`;
 
-const STATUSES: readonly MigrationStatus[] = ['in-progress', 'completed', 'rolled-back'];
+const STATUSES: ReadonlySet<string> = new Set<MigrationStatus>([
+  'in-progress',
+  'completed',
+  'rolled-back',
+]);
 
 type Plain = Record<string, unknown>;
 
@@ -53,7 +57,7 @@ const parseClaim = (value: unknown): MigrationRecord['claim'] => {
  * its empty value. Only a status that is not one of the three makes it no record.
  */
 const parseRecord = (value: unknown): MigrationRecord | null => {
-  if (!isPlain(value) || !STATUSES.includes(value.status as MigrationStatus)) {
+  if (!isPlain(value) || !STATUSES.has(value.status as string)) {
     return null;
   }
 

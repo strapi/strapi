@@ -76,11 +76,21 @@ const rewrite = (value: string): { value: string; left: string[] } => {
   return { value: mapped, left };
 };
 
+/** Removes every tag, again until none is left, so a tag split around another can't survive one pass */
+const stripTags = (html: string): string => {
+  let text = html;
+  let previous: string;
+
+  do {
+    previous = text;
+    text = text.replace(/<[^>]*>/g, '');
+  } while (text !== previous);
+
+  return text;
+};
+
 const htmlToText = (html: string): string =>
-  html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n\n')
-    .replace(/<[^>]*>/g, '')
+  stripTags(html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n\n'))
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')

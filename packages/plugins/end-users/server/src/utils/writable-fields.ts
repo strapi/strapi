@@ -1,7 +1,10 @@
 import type { Core } from '@strapi/types';
 
 import { NOT_GRANTABLE } from '../services/permission-layout';
-import { ENGINE_OWNED_USER_FIELDS, REQUEST_NEVER_WRITES_USER_RELATIONS } from './engine-owned-user-fields';
+import {
+  ENGINE_OWNED_USER_FIELDS,
+  REQUEST_NEVER_WRITES_USER_RELATIONS,
+} from './engine-owned-user-fields';
 import { USER_UID } from '../constants';
 
 type Attributes = Record<string, { private?: boolean; writable?: boolean }>;

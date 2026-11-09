@@ -5,7 +5,13 @@ import { mapUpAdvanced } from '../map-settings';
 const ctx = {
   emailEnabled: true,
   defaultRoleDocumentId: 'role-doc-1',
-  isAllowedRedirect: (url: string) => url.startsWith('https://app.test'),
+  isAllowedRedirect(url: string) {
+    try {
+      return new URL(url).origin === 'https://app.test';
+    } catch {
+      return false;
+    }
+  },
 };
 
 describe('mapUpAdvanced', () => {
