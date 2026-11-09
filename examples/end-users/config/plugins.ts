@@ -21,7 +21,11 @@ const localEmailProvider = () => {
   return path.relative(fs.realpathSync(emailPluginDirectory), fs.realpathSync(provider));
 };
 
-const pluginsConfig = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin => ({
+type PluginEntry = { enabled?: boolean; resolve?: string; config?: Record<string, unknown> };
+
+const basePluginsConfig = ({
+  env,
+}: Core.Config.Shared.ConfigParams): Record<string, PluginEntry> => ({
   'end-users': {
     enabled: true,
     config: {
@@ -55,5 +59,47 @@ const pluginsConfig = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Pl
     },
   },
 });
+
+/**
+ * The migration end-to-end run (`end-users-frontend/playwright.migration.config.ts`) starts this
+ * application twice on one database: first as a project that still uses Users & Permissions
+ * (`seed`), then migrated (`migrate`). Left unset, which is every other start, nothing changes.
+ */
+const pluginsConfig = (params: Core.Config.Shared.ConfigParams): Core.Config.Plugin => {
+  const config = basePluginsConfig(params);
+  const stage = params.env('END_USERS_E2E_MIGRATION');
+  const endUsers = config['end-users'];
+
+  if (stage === 'seed') {
+    return {
+      ...config,
+      'end-users': { ...endUsers, enabled: false },
+      // The plugin is not an installed dependency of the example: it is resolved from the workspace
+      'users-permissions': {
+        enabled: true,
+        resolve: require.resolve('@strapi/plugin-users-permissions/package.json'),
+        // Given, or the plugin writes a secret of its own to `.env`
+        config: { jwtSecret: params.env('JWT_SECRET') },
+      },
+    };
+  }
+
+  if (stage === 'migrate') {
+    return {
+      ...config,
+      'end-users': {
+        ...endUsers,
+        config: {
+          ...endUsers.config,
+          compat: { usersPermissions: true },
+          migration: { fromUsersPermissions: true },
+        },
+      },
+      'users-permissions': { enabled: false },
+    };
+  }
+
+  return config;
+};
 
 export default pluginsConfig;
