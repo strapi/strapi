@@ -114,7 +114,6 @@
     "bcryptjs": "2.4.3",
     "better-auth": "1.7.14",
     "better-call": "1.4.4",
-    "jose": "6.2.13",
     "jsonwebtoken": "9.0.3",
     "kysely": "0.29.7",
     "nanostores": "1.5.5",

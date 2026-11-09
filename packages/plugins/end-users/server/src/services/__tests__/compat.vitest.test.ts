@@ -68,7 +68,11 @@ describe('compat service', () => {
       lastHitAt: new Date(Date.now()).toISOString(),
     });
     for (const value of written) {
-      expect(Object.keys(value as object).sort()).toEqual(['access', 'lastHitAt', 'legacy']);
+      expect(Object.keys(value as object).sort((a, b) => a.localeCompare(b))).toEqual([
+        'access',
+        'lastHitAt',
+        'legacy',
+      ]);
     }
   });
 
@@ -104,5 +108,20 @@ describe('compat service', () => {
       key: 'legacyJwtHits',
       value: expect.objectContaining({ legacy: 1 }),
     });
+  });
+
+  it('forgets the cached migration record on request', async () => {
+    const { get } = setup({ status: 'completed', cutoverAt: '2026-07-01T00:00:00.000Z' });
+    const { readLegacyCutover } = await import('../../compat/legacy-jwt');
+    const strapi = { store: () => ({ get }), log: { warn: vi.fn() } } as unknown as Core.Strapi;
+    const own = compatService({ strapi });
+
+    await readLegacyCutover(strapi);
+    await readLegacyCutover(strapi);
+    expect(get).toHaveBeenCalledTimes(1);
+
+    own.clearCutoverCache();
+    await readLegacyCutover(strapi);
+    expect(get).toHaveBeenCalledTimes(2);
   });
 });

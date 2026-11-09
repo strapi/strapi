@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../constants';
+import { clearLegacyCutoverCache } from '../compat/legacy-jwt';
 import type { LegacyHit } from '../compat/legacy-jwt';
 
 const HITS_KEY = 'legacyJwtHits';
@@ -38,7 +39,9 @@ const readStored = (value: unknown): LegacyJwtHits => {
  *
  * Only counts and the time of the last hit are kept: never a token, a user or an address. Hits are
  * counted in memory and added to the stored totals lazily, at most once a minute and when the
- * plugin is destroyed, so a request never waits on a write.
+ * plugin is destroyed, so a request never waits on a write. Two instances of the application each
+ * read the stored totals and write them back, so they can lose counts; acceptable for an indicator
+ * of whether it is safe to set the cut-off.
  */
 const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
   const store = () => strapi.store({ type: 'plugin', name: PLUGIN_ID });
@@ -108,6 +111,14 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
         access: stored.access + pending.access,
         lastHitAt: pending.lastHitAt ?? stored.lastHitAt,
       };
+    },
+
+    /**
+     * Drops the cached read of the migration record, so the next legacy token is judged by the
+     * record as it is now. Called by whatever writes the record.
+     */
+    clearCutoverCache(): void {
+      clearLegacyCutoverCache(strapi);
     },
 
     /** Writes what is waiting. Called when the plugin is destroyed. */
