@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PROFILE_UID, USER_UID } from '../../constants';
 import usersRoutes, { meRoutes } from '../content-api/users';
@@ -23,6 +23,19 @@ vi.mock('@strapi/strapi', () => ({
     },
   },
 }));
+
+// The count route depends on the compatibility mode, which is read from the configuration
+const stubCompat = (usersPermissions: boolean) =>
+  vi.stubGlobal('strapi', {
+    config: {
+      get: (key: string) => (key.endsWith('.usersPermissions') ? usersPermissions : undefined),
+    },
+  });
+
+// Also while the tests are collected: a `describe` body reads the routes
+stubCompat(false);
+beforeEach(() => stubCompat(false));
+afterEach(() => vi.unstubAllGlobals());
 
 const describeRoute = ({ method, path }: { method: string; path: string }) => `${method} ${path}`;
 
@@ -109,6 +122,27 @@ describe('the users routes', () => {
 
     it('are made when read, from the content type then, and not when the module loads', () => {
       expect(typeof usersRoutes).toBe('function');
+    });
+  });
+
+  describe('count', () => {
+    it('is a route before the core routes while compat is on, with a scope of its own', () => {
+      stubCompat(true);
+
+      const paths = usersRoutes().map(describeRoute);
+
+      expect(paths).toContain('GET /users/count');
+      expect(paths.indexOf('GET /users/count')).toBeLessThan(paths.indexOf('GET /users/:id'));
+
+      const route = usersRoutes().find(({ path }) => path === '/users/count');
+      const first = usersRoutes().find(({ path }) => path === '/users/me');
+
+      expect(route?.handler).toBe(`${USER_UID}.count`);
+      expect(route?.config).not.toBe(first?.config);
+    });
+
+    it('is not a route with compat off', () => {
+      expect(usersRoutes().map(describeRoute)).not.toContain('GET /users/count');
     });
   });
 

@@ -179,7 +179,7 @@ describe('end-users compat: sign-in', () => {
       const me = await rq.get('/api/users/me', { headers: bearer(res.body.jwt) });
 
       expect(me.status).toBe(200);
-      expect(me.body.data.email).toBe('bea@example.com');
+      expect(me.body.email).toBe('bea@example.com');
     });
 
     it('answers wrong password, unknown user and a password-less account with the same 400', async () => {

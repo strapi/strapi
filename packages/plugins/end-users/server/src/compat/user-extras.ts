@@ -90,20 +90,25 @@ export const loadUserExtras = async (
     let profile: Plain | null = null;
 
     if (stored) {
+      // The profile's own identity and its link to the user stay while the rules are applied: a
+      // field group held under `is-owner` is judged by them. They are dropped from what is merged.
       const kept = Object.fromEntries(
         Object.entries(stored).filter(
           ([key]) =>
-            !PROFILE_IDENTITY.has(key) &&
-            !(key in user) &&
+            (PROFILE_IDENTITY.has(key) || !(key in user)) &&
             !contentTypes.isPrivateAttribute(schema, key)
         )
       );
 
-      profile = (await strapi.contentAPI.sanitize.output(kept, schema, {
+      const readable = (await strapi.contentAPI.sanitize.output(kept, schema, {
         auth: auth ?? {},
         action: 'findOne',
         unfiltered: true,
       } as never)) as Plain;
+
+      profile = Object.fromEntries(
+        Object.entries(readable).filter(([key]) => !PROFILE_IDENTITY.has(key))
+      );
     }
 
     extras.set(documentId, { profile, provider: providerOf(documentId) });

@@ -5,6 +5,7 @@ import type { Core, UID } from '@strapi/types';
 import { PER_USER_CACHE_CONTROL, PLUGIN_ID, PROFILE_UID, USER_UID } from '../constants';
 import type profileService from '../services/profile';
 import type userService from '../services/user';
+import { createUsersCompat, isUsersCompat } from '../compat/users-controller';
 
 /**
  * What the core controllers of the user type give: the query and input checks and the output
@@ -80,6 +81,11 @@ const meController = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async find(ctx: Koa.Context) {
+      // The user in the shape users-permissions gave it, while that mode is on
+      if (isUsersCompat(strapi)) {
+        return createUsersCompat(strapi).me(ctx);
+      }
+
       ctx.set('Cache-Control', PER_USER_CACHE_CONTROL);
 
       const userDocumentId = caller(ctx);

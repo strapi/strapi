@@ -102,7 +102,7 @@ describe('loadUserExtras', () => {
     ]);
 
     expect(output).toHaveBeenCalledWith(
-      { bio: 'one', hidden: 'h' },
+      { id: 1, documentId: 'p1', bio: 'one', hidden: 'h', user: { documentId: 'u1' } },
       profileSchema,
       expect.objectContaining({ auth })
     );
