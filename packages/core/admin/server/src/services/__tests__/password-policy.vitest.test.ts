@@ -6,10 +6,12 @@ import passwordPolicyService, {
   PASSWORD_MIN_LENGTH_FLOOR,
 } from '../password-policy';
 
-const { getPolicy, updatePolicy, getViolations, isCompliant } = passwordPolicyService;
-
 const storeGet = vi.fn();
 const storeSet = vi.fn();
+
+const { getPolicy, updatePolicy, getViolations, isCompliant } = passwordPolicyService({
+  strapi: { store: () => ({ get: storeGet, set: storeSet }) } as any,
+});
 
 const rulesOf = (password: string, policy = DEFAULT_PASSWORD_POLICY) =>
   getViolations(password, policy).map((violation) => violation.rule);
@@ -17,10 +19,19 @@ const rulesOf = (password: string, policy = DEFAULT_PASSWORD_POLICY) =>
 describe('Password policy service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
 
-    global.strapi = {
-      store: () => ({ get: storeGet, set: storeSet }),
-    } as any;
+  test('reads the policy of the instance it belongs to, not the global one', async () => {
+    const storeOf = (minLength: number) => () => ({
+      get: vi.fn(async () => ({ minLength })),
+      set: vi.fn(),
+    });
+    // Another instance is the global one
+    global.strapi = { store: storeOf(8) } as any;
+
+    const service = passwordPolicyService({ strapi: { store: storeOf(20) } as any });
+
+    expect((await service.getPolicy()).minLength).toBe(20);
   });
 
   describe('constants', () => {

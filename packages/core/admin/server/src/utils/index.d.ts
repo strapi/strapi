@@ -33,7 +33,7 @@ type S = {
   'guided-tour': ReturnType<typeof createGuidedTourService>;
   homepage: ReturnType<typeof homepageService>;
   'debug-dump': ReturnType<typeof debugDump>;
-  'password-policy': typeof passwordPolicy;
+  'password-policy': ReturnType<typeof passwordPolicy>;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };

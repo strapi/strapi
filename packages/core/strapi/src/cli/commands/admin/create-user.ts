@@ -63,6 +63,36 @@ const promptQuestions: QuestionCollection<Answers> = [
 ];
 
 /**
+ * Strapi's own signal handler (`destroyOnSignal` in @strapi/core, installed by `createStrapi`)
+ * destroys the app and exits with code 0. An interrupted command (e.g. Ctrl-C while the app loads
+ * or at the password prompt) must exit with an error instead, so that handler is replaced: it
+ * would run first and exit before ours. Same approach as the data transfer commands.
+ */
+function failOnSignal(app: Core.Strapi) {
+  let signalReceived = false;
+
+  const handler = async () => {
+    // Signals can arrive twice, see `destroyOnSignal` in @strapi/core
+    if (signalReceived) {
+      return;
+    }
+
+    signalReceived = true;
+
+    try {
+      await app.destroy();
+    } finally {
+      process.exit(1);
+    }
+  };
+
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.removeAllListeners(signal);
+    process.on(signal, handler);
+  });
+}
+
+/**
  * The password policy is stored in the database, so a password can only be checked once Strapi
  * is loaded, after the prompts. In interactive mode, asks for the password again until it is
  * valid instead of losing every answer; otherwise exits with an error.
@@ -102,7 +132,14 @@ async function createAdmin(
   { interactive = false }: { interactive?: boolean } = {}
 ) {
   const appContext = await compileStrapi();
-  const app = await createStrapi(appContext).load();
+  const app = createStrapi(appContext);
+
+  failOnSignal(app);
+  await app.load();
+
+  // The command may wait for a password: the project's cron jobs must not run meanwhile, as they
+  // may also be running in the server
+  app.cron.stop();
 
   // Before the password, so a retried password is never lost to an email already taken
   const user = await app.admin!.services.user.exists({ email });

@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import type { PasswordPolicy } from '../../../shared/contracts/admin';
@@ -91,8 +92,6 @@ const RULES: RuleDefinition[] = [
   },
 ];
 
-const getStore = () => strapi.store({ type: 'core', name: 'admin' });
-
 const isValidMinLength = (value: unknown): value is number =>
   Number.isInteger(value) &&
   (value as number) >= PASSWORD_MIN_LENGTH_FLOOR &&
@@ -133,34 +132,6 @@ const sanitize = (input: unknown): Partial<PasswordPolicy> => {
 };
 
 /**
- * The effective policy: the stored one on top of the defaults, so a policy saved by an older
- * version (missing newer rules) keeps working.
- */
-const getPolicy = async (): Promise<PasswordPolicy> => {
-  const stored = await getStore().get({ key: STORE_KEY });
-
-  return { ...DEFAULT_PASSWORD_POLICY, ...sanitize(stored) };
-};
-
-/**
- * Stores the given rules on top of the current policy. Throws a `ValidationError` for a
- * `minLength` outside the bounds, whoever the caller is (the HTTP route validates it too).
- */
-const updatePolicy = async (input: Partial<PasswordPolicy>): Promise<PasswordPolicy> => {
-  if (input?.minLength !== undefined && !isValidMinLength(input.minLength)) {
-    throw new ValidationError(
-      `minLength must be an integer between ${PASSWORD_MIN_LENGTH_FLOOR} and ${PASSWORD_MIN_LENGTH_CEILING}`
-    );
-  }
-
-  const policy: PasswordPolicy = { ...(await getPolicy()), ...sanitize(input) };
-
-  await getStore().set({ key: STORE_KEY, value: policy });
-
-  return policy;
-};
-
-/**
  * Every rule of the given policy the password breaks, in display order, including the bcrypt
  * byte limit. Empty when it complies. Pure: pass the result of `getPolicy()` to check against
  * the configured policy.
@@ -174,9 +145,43 @@ const getViolations = (password: string, policy: PasswordPolicy): PasswordPolicy
 const isCompliant = (password: string, policy: PasswordPolicy): boolean =>
   getViolations(password, policy).length === 0;
 
-export default {
-  getPolicy,
-  updatePolicy,
-  getViolations,
-  isCompliant,
+const passwordPolicyService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const getStore = () => strapi.store({ type: 'core', name: 'admin' });
+
+  /**
+   * The effective policy: the stored one on top of the defaults, so a policy saved by an older
+   * version (missing newer rules) keeps working.
+   */
+  const getPolicy = async (): Promise<PasswordPolicy> => {
+    const stored = await getStore().get({ key: STORE_KEY });
+
+    return { ...DEFAULT_PASSWORD_POLICY, ...sanitize(stored) };
+  };
+
+  /**
+   * Stores the given rules on top of the current policy. Throws a `ValidationError` for a
+   * `minLength` outside the bounds, whoever the caller is (the HTTP route validates it too).
+   */
+  const updatePolicy = async (input: Partial<PasswordPolicy>): Promise<PasswordPolicy> => {
+    if (input?.minLength !== undefined && !isValidMinLength(input.minLength)) {
+      throw new ValidationError(
+        `minLength must be an integer between ${PASSWORD_MIN_LENGTH_FLOOR} and ${PASSWORD_MIN_LENGTH_CEILING}`
+      );
+    }
+
+    const policy: PasswordPolicy = { ...(await getPolicy()), ...sanitize(input) };
+
+    await getStore().set({ key: STORE_KEY, value: policy });
+
+    return policy;
+  };
+
+  return {
+    getPolicy,
+    updatePolicy,
+    getViolations,
+    isCompliant,
+  };
 };
+
+export default passwordPolicyService;

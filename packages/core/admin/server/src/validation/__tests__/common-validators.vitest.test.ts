@@ -113,7 +113,7 @@ describe('password validation — password policy', () => {
       admin: {
         services: {
           'password-policy': {
-            ...passwordPolicyService,
+            ...passwordPolicyService({ strapi: {} as any }),
             getPolicy: vi.fn(async () => ({ ...DEFAULT_PASSWORD_POLICY, ...policy })),
           },
         },
@@ -191,7 +191,7 @@ describe('password validation — password policy', () => {
       admin: {
         services: {
           'password-policy': {
-            ...passwordPolicyService,
+            ...passwordPolicyService({ strapi: {} as any }),
             getPolicy: vi.fn(async () => {
               throw failure;
             }),

@@ -23,9 +23,14 @@ const admin = {
   },
 };
 
+const stopCron = jest.fn();
+const destroy = jest.fn(() => Promise.resolve());
+
 const mock = {
   load,
   admin,
+  cron: { stop: stopCron },
+  destroy,
 };
 
 jest.mock('@strapi/core', () => {
@@ -35,12 +40,47 @@ jest.mock('@strapi/core', () => {
   return { createStrapi, compileStrapi };
 });
 
+/**
+ * Retries the assertion until the async signal handler has run, or fails after a second.
+ */
+const waitForExpect = async (assertion: () => void) => {
+  const deadline = Date.now() + 1000;
+
+  for (;;) {
+    try {
+      assertion();
+      return;
+    } catch (error) {
+      if (Date.now() > deadline) throw error;
+      await new Promise((resolve) => {
+        setImmediate(resolve);
+      });
+    }
+  }
+};
+
 describe('admin:create command', () => {
+  const signals = ['SIGINT', 'SIGTERM'] as const;
+  let signalListeners: Record<string, NodeJS.SignalsListener[]>;
+
   beforeEach(() => {
+    // The command replaces the signal listeners, keep the ones of the test runner
+    signalListeners = Object.fromEntries(
+      signals.map((signal) => [signal, process.listeners(signal)])
+    );
+    stopCron.mockClear();
+    destroy.mockClear();
     load.mockClear();
     create.mockClear();
     getSuperAdmin.mockClear();
     assertPasswordIsValid.mockReset();
+  });
+
+  afterEach(() => {
+    signals.forEach((signal) => {
+      process.removeAllListeners(signal);
+      signalListeners[signal].forEach((listener) => process.on(signal, listener));
+    });
   });
 
   test('createAdminCommand accepts direct input', async () => {
@@ -64,6 +104,58 @@ describe('admin:create command', () => {
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
+  });
+
+  describe('Once Strapi is created', () => {
+    const options = { email: 'email@email.fr', password: 'testPasword1234', firstname: 'John' };
+    let mockExit: jest.SpyInstance;
+    let consoleLog: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      mockExit.mockRestore();
+      consoleLog.mockRestore();
+      load.mockImplementation(() => mock);
+    });
+
+    test('Stops the cron jobs as soon as the app is loaded', async () => {
+      await createAdminCommand(options);
+
+      expect(stopCron).toHaveBeenCalled();
+      // Before the password is checked, which may wait for a new password
+      expect(stopCron.mock.invocationCallOrder[0]).toBeLessThan(
+        assertPasswordIsValid.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('Exits with an error when interrupted at the password prompt', async () => {
+      await createAdminCommand(options);
+      mockExit.mockClear();
+
+      process.emit('SIGINT', 'SIGINT');
+      // Signals can arrive twice: the app is destroyed once
+      process.emit('SIGINT', 'SIGINT');
+
+      await waitForExpect(() => expect(mockExit).toHaveBeenCalledWith(1));
+      expect(destroy).toHaveBeenCalledTimes(1);
+      expect(mockExit).toHaveBeenCalledTimes(1);
+    });
+
+    test('Exits with an error when interrupted while the app loads', async () => {
+      load.mockImplementationOnce(() => {
+        process.emit('SIGINT', 'SIGINT');
+        return mock;
+      });
+
+      await createAdminCommand(options);
+
+      await waitForExpect(() => expect(mockExit).toHaveBeenCalledWith(1));
+      expect(destroy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Handles prompt input', () => {

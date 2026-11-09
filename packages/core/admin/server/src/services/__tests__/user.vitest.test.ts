@@ -15,7 +15,7 @@ const { SUPER_ADMIN_CODE } = constants;
 
 // The password validator reads the policy through `admin::password-policy`; serve the defaults.
 const passwordPolicyServiceMock = {
-  ...passwordPolicyService,
+  ...passwordPolicyService({ strapi: {} as any }),
   getPolicy: vi.fn(async () => DEFAULT_PASSWORD_POLICY),
 };
 

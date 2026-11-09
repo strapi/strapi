@@ -111,6 +111,7 @@ describe('Register', () => {
 
   it('shows the server password errors of an invite and refreshes the policy', async () => {
     let policyRequests = 0;
+    let registerRequests = 0;
 
     server.use(
       http.get('/admin/registration-info', () =>
@@ -132,8 +133,10 @@ describe('Register', () => {
           },
         });
       }),
-      http.post('/admin/register', () =>
-        HttpResponse.json(
+      http.post('/admin/register', () => {
+        registerRequests += 1;
+
+        return HttpResponse.json(
           {
             data: null,
             error: {
@@ -152,8 +155,8 @@ describe('Register', () => {
             },
           },
           { status: 400 }
-        )
-      )
+        );
+      })
     );
 
     render(<Register />, {
@@ -173,6 +176,12 @@ describe('Register', () => {
     // The field shows the error instead of the hint; the next validation uses the new policy
     await waitFor(() => expect(policyRequests).toBe(2));
     expect(screen.getByRole('heading', { name: 'Welcome to Strapi!' })).toBeInTheDocument();
+
+    // Submitting again fails on the client with the new 20-character rule: no second request
+    fireEvent.submit(document.querySelector('form')!);
+
+    expect(await screen.findByText('Password must be at least 20 characters')).toBeInTheDocument();
+    expect(registerRequests).toBe(1);
   });
 
   it('shows the alert when the server rejects an invite on a path without a field', async () => {
