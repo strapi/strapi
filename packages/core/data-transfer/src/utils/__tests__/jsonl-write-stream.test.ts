@@ -80,4 +80,44 @@ describe('createJsonlWriteStream', () => {
       'write failed'
     );
   });
+
+  test('destroy waits until the entry stream has closed', async () => {
+    let releaseDestroy: ((error?: Error | null) => void) | undefined;
+    let markWritten: () => void = () => {};
+    const written = new Promise<void>((resolve) => {
+      markWritten = resolve;
+    });
+    const writer = new Writable({
+      write(_chunk, _encoding, callback) {
+        markWritten();
+        callback();
+      },
+      destroy(error, callback) {
+        releaseDestroy = () => callback(error);
+      },
+    });
+    writer.on('error', () => {});
+
+    const stream = createJsonlWriteStream(writer);
+    stream.on('error', () => {});
+    stream.write({ id: 1 });
+    await written;
+
+    let closed = false;
+    stream.on('close', () => {
+      closed = true;
+    });
+    stream.destroy(new Error('abort'));
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+
+    expect(closed).toBe(false);
+    expect(releaseDestroy).toEqual(expect.any(Function));
+    releaseDestroy?.();
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+    expect(closed).toBe(true);
+  });
 });

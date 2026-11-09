@@ -246,4 +246,108 @@ describe('Directory destination provider', () => {
       await fs.remove(dir);
     }
   });
+
+  test('an abort during a rotation write waits for that write before rollback', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-rotation-abort-'));
+    const entity = { type: 'api::foo.foo', id: 1, data: { title: 'buffered' } };
+    // One JSONL line fits. The next line starts a new file, which is the rotation write we hold.
+    const maxSizeJsonl = JSON.stringify(entity).length + 1;
+    const order: string[] = [];
+    let releaseWrite: () => void = () => {};
+    let markWriteStarted: () => void = () => {};
+    const writeStarted = new Promise<void>((resolve) => {
+      markWriteStarted = resolve;
+    });
+    const destination = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: { maxSizeJsonl },
+    });
+    const rollback = destination.rollback.bind(destination);
+    destination.rollback = async () => {
+      order.push('rm-start');
+      try {
+        await rollback();
+      } finally {
+        order.push('rm-end');
+      }
+    };
+    let started = false;
+    const source = {
+      type: 'source' as const,
+      name: 'rotation-abort-source',
+      getMetadata: async () => ({
+        createdAt: new Date().toISOString(),
+        strapi: { version: '5.0.0' },
+      }),
+      createEntitiesReadStream() {
+        return new Readable({
+          objectMode: true,
+          read() {
+            if (started) {
+              return;
+            }
+
+            started = true;
+            this.push(entity);
+            this.push({ ...entity, id: 2 });
+            this.push(null);
+          },
+        });
+      },
+    };
+    const engine = createTransferEngine(source, destination, {
+      versionStrategy: 'ignore',
+      schemaStrategy: 'ignore',
+      exclude: [],
+    });
+    const originalWriteFile = fsp.writeFile.bind(fsp);
+    let held = false;
+    const writeFile = jest.spyOn(fsp, 'writeFile').mockImplementation((file, data, options) => {
+      if (!held && String(file).includes(`${path.sep}entities${path.sep}`)) {
+        held = true;
+        markWriteStarted();
+        engine.abortTransfer().catch(() => {});
+        order.push('write-start');
+        return new Promise((resolve, reject) => {
+          releaseWrite = () => {
+            originalWriteFile(file, data, options).then(() => {
+              order.push('write-end');
+              resolve();
+            }, reject);
+          };
+        });
+      }
+
+      return originalWriteFile(file, data, options);
+    });
+
+    try {
+      let settled = false;
+      const transfer = engine.transfer().then(
+        (result) => {
+          settled = true;
+          return result;
+        },
+        (error) => {
+          settled = true;
+          throw error;
+        }
+      );
+
+      await writeStarted;
+      await new Promise((resolve) => {
+        setImmediate(resolve);
+      });
+      expect(settled).toBe(false);
+      expect(order).toEqual(['write-start']);
+
+      releaseWrite();
+      await expect(transfer).rejects.toThrow(/abort/i);
+      expect(order).toEqual(['write-start', 'write-end', 'rm-start', 'rm-end']);
+      expect(await fs.pathExists(dir)).toBe(false);
+    } finally {
+      writeFile.mockRestore();
+      await fs.remove(dir);
+    }
+  });
 });

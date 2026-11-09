@@ -9,8 +9,8 @@ import { loadStreamDeps } from './esm-deps';
  *
  * It finishes only once `entryStream` has finished and closed. Entry writers flush their last
  * file when destroyed without an error. When destroyed with an error they discard the buffer that
- * has not started flushing, and let a flush that is already running finish before the destroy
- * callback, so rollback does not race it.
+ * has not started flushing. This stream waits for a flush that is already running to finish
+ * before it closes, so a rollback that waits for this stream does not race that write.
  * Any `entryStream` error, including one raised after the input ended, fails this stream.
  */
 const createJsonlWriteStream = (entryStream: Writable): Writable => {
@@ -44,13 +44,32 @@ const createJsonlWriteStream = (entryStream: Writable): Writable => {
         written.then(() => callback(), callback);
       },
       destroy(error, callback) {
-        // Pass the error through. Destroying the entry writer with no error flushes its buffer,
-        // which writes a partial file while rollback is deleting the export.
+        // Pass the error through. An error-free destroy flushes the entry buffer and would write
+        // a partial file while rollback deletes the export. Wait for the entry stream to close so
+        // a flush that is already running finishes before that rollback.
+        let finished = false;
+        const finish = () => {
+          if (finished) {
+            return;
+          }
+
+          finished = true;
+          callback(error);
+        };
+
+        if (!jsonl.destroyed) {
+          jsonl.destroy(error ?? undefined);
+        }
+
+        if (entryStream.closed) {
+          finish();
+          return;
+        }
+
+        entryStream.once('close', finish);
         if (!entryStream.destroyed) {
           entryStream.destroy(error ?? undefined);
         }
-        jsonl.destroy(error ?? undefined);
-        callback(error);
       },
     });
 

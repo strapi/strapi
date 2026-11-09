@@ -13,6 +13,8 @@ interface PendingWrite {
 /**
  * A Writable that can be handed back before its real destination exists.
  * Writes wait until `open` resolves, and ending the stream waits until that destination ends.
+ * Destroy waits until that destination closes, so a flush it is already running finishes
+ * before a caller that waits for this stream, including rollback, continues.
  * A failure in `open`, or an error from the destination, destroys this stream with that error.
  */
 const deferWritable = (open: () => Promise<Writable>): Writable => {
@@ -25,15 +27,18 @@ const deferWritable = (open: () => Promise<Writable>): Writable => {
     .then(open)
     .then(
       (destination) => {
+        target = destination;
+        // Swallow a destroy error when this proxy is already destroyed. Otherwise an
+        // in-flight flush that fails while we are waiting for close becomes unhandled.
+        destination.on('error', (error: Error) => {
+          if (!proxy.destroyed) {
+            proxy.destroy(error);
+          }
+        });
+
         if (proxy.destroyed) {
-          destination.destroy();
           return;
         }
-
-        target = destination;
-        destination.on('error', (error: Error) => {
-          proxy.destroy(error);
-        });
 
         if (pending) {
           const { chunk, encoding, callback } = pending;
@@ -80,11 +85,48 @@ const deferWritable = (open: () => Promise<Writable>): Writable => {
         pendingCallback(error ?? new Error('Stream destroyed'));
       }
 
-      if (target && !target.destroyed) {
-        target.destroy(error ?? undefined);
+      let finished = false;
+      const finish = () => {
+        if (finished) {
+          return;
+        }
+
+        finished = true;
+        callback(error);
+      };
+
+      // Rollback starts only after pipeline() rejects, and pipeline() waits for this close.
+      // Waiting here keeps a destination flush that is already running ahead of that rollback.
+      const waitForClose = (stream: Writable) => {
+        if (stream.closed) {
+          finish();
+          return;
+        }
+
+        stream.once('close', finish);
+        if (!stream.destroyed) {
+          stream.destroy(error ?? undefined);
+        }
+      };
+
+      if (target) {
+        waitForClose(target);
+        return;
       }
 
-      callback(error);
+      opening.then(
+        () => {
+          if (target) {
+            waitForClose(target);
+            return;
+          }
+
+          finish();
+        },
+        () => {
+          finish();
+        }
+      );
     },
   });
 

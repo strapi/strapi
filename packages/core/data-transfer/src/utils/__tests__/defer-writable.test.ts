@@ -160,6 +160,48 @@ describe('deferWritable', () => {
     expect(destination.destroyed).toBe(true);
   });
 
+  test('destroy waits until the destination has closed', async () => {
+    let releaseDestroy: ((error?: Error | null) => void) | undefined;
+    const destination = new Writable({
+      objectMode: true,
+      write(_chunk, _encoding, callback) {
+        callback();
+      },
+      destroy(error, callback) {
+        releaseDestroy = () => callback(error);
+      },
+    });
+    destination.on('error', () => {});
+
+    const proxy = deferWritable(async () => destination);
+    proxy.on('error', () => {});
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+    proxy.write({ id: 1 });
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+
+    let closed = false;
+    proxy.on('close', () => {
+      closed = true;
+    });
+    proxy.destroy(new Error('abort'));
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+
+    expect(closed).toBe(false);
+    expect(releaseDestroy).toEqual(expect.any(Function));
+    releaseDestroy?.();
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+    expect(closed).toBe(true);
+    expect(destination.destroyed).toBe(true);
+  });
+
   test('destroys the stream when opening fails', async () => {
     const openError = new Error("Cannot find module 'stream-chain'");
     const proxy = deferWritable(() => Promise.reject(openError));

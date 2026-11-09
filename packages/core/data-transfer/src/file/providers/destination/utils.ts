@@ -32,14 +32,27 @@ export const createTarEntryStream = (
     const size = content.length;
 
     return new Promise<void>((resolve, reject) => {
-      archive.entry({ name, size }, content, (err) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+      // tar-stream 2.2.0 does not call the callback when the pack is finalized or destroyed,
+      // and it throws instead of calling back when another entry is still open. Either one
+      // would leave this promise pending, and a destroy that waits for the flush would hang.
+      let entry: unknown;
+      try {
+        entry = archive.entry({ name, size }, content, (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
 
-        resolve();
-      });
+          resolve();
+        });
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error(String(err)));
+        return;
+      }
+
+      if (!entry) {
+        reject(new Error('Cannot write a tar entry after the archive has closed'));
+      }
     });
   };
 

@@ -276,10 +276,11 @@ async close(): Promise<void> {
 
 A transfer that fails before provider closing begins does not use this path. It rolls back, then calls
 `#closeAfterError()`, which reports a rejected provider `close()` as a warning and does not call
-`panic()`. A failure inside `close()` itself is different: `close()` sets `#closed` before the
-provider close calls finish, then `panic()` throws. Rollback is skipped because `#closed` is already
-set, and `#closeAfterError()` returns without closing again, so a partial archive or directory is
-left in place.
+`panic()`. A failed load of the JSONL stream packages is the exception: no provider has started, so
+the engine reports the error and skips both the rollback and `#closeAfterError()`. A failure inside
+`close()` itself is different: `close()` sets `#closed` before the provider close calls finish, then
+`panic()` throws. Rollback is skipped because `#closed` is already set, and `#closeAfterError()`
+returns without closing again, so a partial archive or directory is left in place.
 
 ## Progress Tracking
 

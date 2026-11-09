@@ -17,7 +17,8 @@ interface BufferedEntryWriterOptions {
  * - Write, final and destroy share one flush chain, so flushes never overlap.
  * - Destroyed without an error: flush what is left and report a failure to the destroy callback.
  * - Destroyed with an error: discard the buffer that has not started flushing, but wait for a flush
- *   that is already running so a rollback does not race it. The original error is kept.
+ *   that is already running before this stream closes. The original error is kept. Callers that
+ *   wait for this close, including the JSONL write stream, keep rollback from racing that write.
  */
 export const createBufferedEntryWriter = ({
   maxSize,

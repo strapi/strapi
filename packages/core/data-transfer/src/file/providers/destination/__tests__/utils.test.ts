@@ -77,6 +77,69 @@ describe('Local File Destination Provider - Utils', () => {
 
       expect(write()).resolves.not.toBe(null);
     });
+
+    const writeChunk = (writer: Writable, chunk: string) =>
+      new Promise<Error | null | undefined>((resolve) => {
+        writer.write(chunk, (error) => resolve(error));
+      });
+
+    const destroyWriter = (writer: Writable, error?: Error) =>
+      new Promise<Error | null | undefined>((resolve) => {
+        writer.once('close', () => resolve(undefined));
+        writer.once('error', (err) => resolve(err));
+        writer.destroy(error);
+      });
+
+    it('writes one entry into a real pack', async () => {
+      const archive = tar.pack();
+      const chunks: Buffer[] = [];
+      archive.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+      const ended = new Promise<void>((resolve, reject) => {
+        archive.on('end', () => resolve());
+        archive.on('error', reject);
+      });
+      const writer = createTarEntryStream(archive, createFilePathFactory('entries'), 100);
+
+      expect(await writeChunk(writer, 'hello')).toBeFalsy();
+      expect(await destroyWriter(writer)).toBeFalsy();
+      archive.finalize();
+      await ended;
+
+      expect(Buffer.concat(chunks).length).toBeGreaterThan(0);
+    });
+
+    it('rejects a flush when a real pack has already finalized', async () => {
+      const archive = tar.pack();
+      archive.resume();
+      archive.finalize();
+      const writer = createTarEntryStream(archive, createFilePathFactory('entries'), 100);
+
+      expect(await writeChunk(writer, 'hello')).toBeFalsy();
+      await expect(destroyWriter(writer)).resolves.toEqual(
+        expect.objectContaining({
+          message: 'Cannot write a tar entry after the archive has closed',
+        })
+      );
+    });
+
+    it('rejects a flush when a real pack is already piping an entry', async () => {
+      const archive = tar.pack();
+      archive.resume();
+      const openEntry = archive.entry({ name: 'assets/open.txt', size: 4 });
+      const writer = createTarEntryStream(archive, createFilePathFactory('entries'), 100);
+
+      try {
+        expect(await writeChunk(writer, 'hello')).toBeFalsy();
+        await expect(destroyWriter(writer)).resolves.toEqual(
+          expect.objectContaining({ message: 'already piping an entry' })
+        );
+      } finally {
+        openEntry.destroy();
+        archive.destroy();
+      }
+    });
   });
   describe.each([
     ['tar entry stream', 'tar'],
@@ -93,7 +156,12 @@ describe('Local File Destination Provider - Utils', () => {
 
       if (kind === 'tar') {
         const archive = {
-          entry: (_header: unknown, content: string, done: EntryCallback) => onEntry(content, done),
+          // A real pack returns a stream when it accepts an entry. Undefined means it dropped
+          // the callback, which writeEntry treats as a failure.
+          entry(_header: unknown, content: string, done: EntryCallback) {
+            onEntry(content, done);
+            return {} as ReturnType<tar.Pack['entry']>;
+          },
         } as unknown as tar.Pack;
 
         return createTarEntryStream(archive, pathFactory, maxSize);
