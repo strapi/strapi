@@ -17,17 +17,18 @@ export interface AIMetadataJob {
 /**
  * GET /upload/ai-metadata-jobs/latest
  *
- * The most recent still-active backfill job. 404s when nothing is running, so
- * there is no `null` on the wire — callers get an error response instead.
+ * The most recent backfill job, whatever its status, so the admin can resume
+ * polling a running job or report how the last one ended. The job is the bare
+ * response body, not wrapped in `{ data }`. 404s when no job exists or AI
+ * metadata is not enabled, so there is no `null` on the wire — callers get an
+ * error response instead.
  */
 export declare namespace GetLatestAIMetadataJob {
   export interface Request {
     query?: {};
   }
 
-  export interface Response {
-    data: AIMetadataJob;
-  }
+  export type Response = AIMetadataJob;
 }
 
 /**

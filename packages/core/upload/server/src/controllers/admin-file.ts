@@ -238,8 +238,10 @@ export default {
   /**
    * `GET /upload/ai-metadata-jobs/latest`
    *
-   * The most recent still-active backfill job, so a client that reloads mid-run
-   * can pick the progress bar back up. 404s when nothing is running.
+   * The most recent backfill job, whatever its status, sent as the bare body
+   * (see `GetLatestAIMetadataJob`). A client that reloads mid-run picks the
+   * progress bar back up, and one that polls sees the run complete or fail.
+   * 404s when no job exists or AI metadata is not enabled.
    */
   async getLatestAIMetadataJob(ctx: Context) {
     if ((await getService('aiMetadata').isEnabled()) === false) {
