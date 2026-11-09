@@ -24,6 +24,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     {
       method: 'GET',
       path: '/uploads/(.*)',
+      // Kept in v6 syntax so ctx.params[0] and the API documentation stay as they were.
+      [Symbol.for('strapi.route.keepV6Path')]: true,
       handler: [range, koaStatic(strapi.dirs.static.public, { defer: true, ...localServerConfig })],
       config: { auth: false },
     },

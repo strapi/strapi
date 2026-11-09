@@ -170,11 +170,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         metrics.sendDidCreateWorkflow(createdWorkflow.id, !!opts.data.stageRequiredToPublishName);
 
-        if (opts.data.stageRequiredToPublishName) {
+        if (opts.data.contentTypes?.length) {
           await strapi
             .plugin('content-releases')
             .service('release-action')
-            ?.validateActionsByContentTypes(opts.data.contentTypes ?? []);
+            ?.validateActionsByContentTypes(opts.data.contentTypes);
         }
 
         return createdWorkflow;
