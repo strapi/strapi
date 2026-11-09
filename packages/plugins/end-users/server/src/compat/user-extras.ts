@@ -68,10 +68,30 @@ export const loadUserExtras = async (
     providers.set(userId, [...(providers.get(userId) ?? []), providerId]);
   }
 
+  // A migrated user without an account keeps the provider users-permissions stored (the carried
+  // column exists only while compatibility is on)
+  const carried = new Map<string, string>();
+  const unlinked = ids.filter((documentId) => !providers.has(documentId));
+
+  if (unlinked.length > 0 && 'provider' in (strapi.contentType(USER_UID)?.attributes ?? {})) {
+    const rows = (await strapi.db.query(USER_UID).findMany({
+      where: { documentId: { $in: unlinked } },
+      select: ['documentId', 'provider'],
+    })) as Array<{ documentId: string; provider?: string | null }>;
+
+    for (const row of rows) {
+      if (typeof row.provider === 'string' && row.provider !== '') {
+        carried.set(row.documentId, row.provider);
+      }
+    }
+  }
+
   const providerOf = (documentId: string): string => {
     const linked = providers.get(documentId) ?? [];
 
-    return linked.includes('credential') ? 'local' : (linked[0] ?? 'local');
+    return linked.includes('credential')
+      ? 'local'
+      : (linked[0] ?? carried.get(documentId) ?? 'local');
   };
 
   const profileOf = new Map<string, Plain>();

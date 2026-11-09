@@ -4,7 +4,8 @@ import type settingsService from '../../services/settings';
 import { PLUGIN_ID } from '../../constants';
 import { normalizeEmail } from '../../utils/normalize-email';
 import type { CompatConfig } from '../config';
-import { INVALID_CONFIRMATION_TOKEN, missingFieldBody, refusalResult } from '../errors';
+import { INVALID_CONFIRMATION_TOKEN, missingFieldBody, refusalResult, upError } from '../errors';
+import { confirmLegacyToken, isLegacyConfirmationToken } from '../legacy-confirmation';
 import { ok } from './result';
 import { engineOf, plain } from './shared';
 import type { CompatResult } from '../types';
@@ -28,7 +29,7 @@ export const BAD_LINK: Readonly<Record<string, string>> = {
  */
 export const emailConfirmation = async (
   strapi: Core.Strapi,
-  _cfg: CompatConfig,
+  cfg: CompatConfig,
   { query }: ConfirmationInput
 ): Promise<CompatResult> => {
   const { confirmation } = plain(query);
@@ -37,19 +38,26 @@ export const emailConfirmation = async (
     return { status: 400, body: missingFieldBody('confirmation') };
   }
 
-  try {
-    await engineOf(strapi).callNative('verifyEmail', {
-      headers: new Headers(),
-      query: { token: confirmation },
-    });
-  } catch (error) {
-    const refused = refusalResult(error, BAD_LINK);
-
-    if (refused === null) {
-      throw error;
+  if (cfg.usersPermissions && isLegacyConfirmationToken(confirmation)) {
+    // A link mailed by users-permissions before the cutover: its token is read from the carried column
+    if ((await confirmLegacyToken(strapi, confirmation)) === null) {
+      return { status: 400, body: upError('ApplicationError', INVALID_CONFIRMATION_TOKEN) };
     }
+  } else {
+    try {
+      await engineOf(strapi).callNative('verifyEmail', {
+        headers: new Headers(),
+        query: { token: confirmation },
+      });
+    } catch (error) {
+      const refused = refusalResult(error, BAD_LINK);
 
-    return refused;
+      if (refused === null) {
+        throw error;
+      }
+
+      return refused;
+    }
   }
 
   const { redirects } = await (

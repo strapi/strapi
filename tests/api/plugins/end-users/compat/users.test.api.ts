@@ -449,6 +449,23 @@ describe('end-users compat: users', () => {
     expect(byEmail('deriver@example.com')).toMatchObject({ provider: 'local' });
   });
 
+  it('derives provider from the carried column for a user without an account', async () => {
+    const caller = await signUp('carrier@example.com');
+    const migrated = await seedUpUser(strapi, { email: 'migrated@example.com', credential: false });
+
+    await strapi.db.query('plugin::end-users.user').update({
+      where: { documentId: migrated.documentId },
+      data: { provider: 'google' },
+    });
+    await grant(['find']);
+
+    const res = await rq.get('/api/users', { headers: caller.headers });
+    const byEmail = (email: string) => res.body.find((user) => user.email === email);
+
+    expect(byEmail(migrated.email)).toMatchObject({ provider: 'google' });
+    expect(byEmail('carrier@example.com')).toMatchObject({ provider: 'local' });
+  });
+
   it('answers 404 on /api/users-permissions/roles and /permissions', async () => {
     const caller = await signUp('absent@example.com');
 

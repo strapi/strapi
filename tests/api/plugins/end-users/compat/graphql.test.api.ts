@@ -4,6 +4,7 @@
  * `emailConfirmation` mutations and `me`, all of them going through the compat routes. The rate-limit
  * case needs rate limiting on, so it runs in a second instance after the first one is gone.
  */
+import { randomBytes } from 'node:crypto';
 import { createRequest } from 'api-tests/request';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
@@ -218,6 +219,34 @@ describe('end-users compat: GraphQL', () => {
       await settings.set({ signUp: { requireEmailVerification: false } });
       await engines.reload();
     }
+  });
+
+  it('emailConfirmation with an old token signs the user in once', async () => {
+    const token = randomBytes(20).toString('hex');
+    const seeded = await seedUpUser(strapi, { email: 'gql-old@example.com', confirmed: false });
+
+    await strapi.db.query(USER_UID).update({
+      where: { documentId: seeded.documentId },
+      data: { confirmationToken: token },
+    });
+
+    const confirm = `mutation ($token: String!) {
+      emailConfirmation(confirmation: $token) { jwt user { email confirmed } }
+    }`;
+
+    const first = await gql(confirm, { token });
+
+    expect(first.body.errors).toBeUndefined();
+    expect(first.body.data.emailConfirmation.jwt).toEqual(expect.any(String));
+    expect(first.body.data.emailConfirmation.user).toEqual({
+      email: 'gql-old@example.com',
+      confirmed: true,
+    });
+
+    const second = await gql(confirm, { token });
+
+    expect(second.body.data.emailConfirmation).toBeNull();
+    expect(second.body.errors[0].message).toBe('Invalid token');
   });
 
   it('emailConfirmation signs in exactly one of several calls that use the same token at once', async () => {

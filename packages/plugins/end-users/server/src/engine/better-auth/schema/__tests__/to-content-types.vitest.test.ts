@@ -23,6 +23,7 @@ import {
 } from '../../../../constants';
 import { fromAuthTables } from '../from-auth-tables';
 import { PRIVATE_FIELDS, READ_ONLY_FIELDS } from '../private-fields';
+import { LEGACY_USER_ATTRIBUTES } from '../../../../compat/legacy-confirmation';
 import { toContentTypes } from '../to-content-types';
 
 type Json = Record<string, unknown>;
@@ -77,6 +78,33 @@ describe('toContentTypes', () => {
   const indexesOf = (name: string) =>
     (cts[name].schema.indexes ?? []) as Array<{ name: string; columns: string[]; type?: string }>;
   const pluginOptionsOf = (name: string) => (cts[name].schema.pluginOptions ?? {}) as Json;
+
+  it('declares the five carried columns, private and hidden, only with compat on', () => {
+    const carried = Object.keys(LEGACY_USER_ATTRIBUTES);
+    const withCompat = toContentTypes(fixtureTables, naming, true).user.schema
+      .attributes as unknown as Record<string, Json>;
+
+    expect(carried.sort((a, b) => a.localeCompare(b))).toEqual([
+      'blocked',
+      'confirmationToken',
+      'confirmed',
+      'password',
+      'provider',
+    ]);
+
+    for (const name of carried) {
+      expect(withCompat[name]).toMatchObject({
+        private: true,
+        visible: false,
+        configurable: false,
+      });
+      expect(attributesOf('user')[name]).toBeUndefined();
+    }
+
+    expect(withCompat.password.type).toBe('password');
+    expect(withCompat.provider.type).toBe('string');
+    expect(withCompat.confirmed).toMatchObject({ type: 'boolean', default: false });
+  });
 
   it('names tables eu_* and uids plugin::end-users.*', () => {
     expect(cts.user.schema.collectionName).toBe('eu_users');

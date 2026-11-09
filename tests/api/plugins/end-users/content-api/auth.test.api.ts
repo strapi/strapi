@@ -951,6 +951,22 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
   });
 
   describe('a user the engine looks after, whichever way they were made', () => {
+    it('declares none of the carried columns with compat off', async () => {
+      const carried = ['password', 'provider', 'confirmed', 'blocked', 'confirmationToken'];
+      const attributes = Object.keys(strapi.contentType(USER_UID).attributes);
+      const columns = Object.keys(await strapi.db.connection('eu_users').columnInfo());
+
+      for (const name of carried) {
+        expect(attributes).not.toContain(name);
+      }
+
+      for (const column of ['password', 'provider', 'confirmed', 'blocked', 'confirmation_token']) {
+        expect(columns).not.toContain(column);
+      }
+
+      expect((await rq.get('/api/auth/email-confirmation?confirmation=x')).status).toBe(404);
+    });
+
     it('gives a new sign-up the Authenticated role and never Public, and keeps the roles out of the answer', async () => {
       const up = await signUp('newbie@example.com');
 

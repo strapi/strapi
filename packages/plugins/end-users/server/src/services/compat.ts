@@ -4,7 +4,9 @@ import { errors } from '@strapi/utils';
 import { PLUGIN_ID, USER_UID } from '../constants';
 import { BAD_LINK } from '../compat/endpoints/confirmation';
 import { TWO_FACTOR_REQUIRED } from '../compat/endpoints/shared';
+import { readCompatConfig } from '../compat/config';
 import { refusalResult } from '../compat/errors';
+import { confirmLegacyToken, isLegacyConfirmationToken } from '../compat/legacy-confirmation';
 import { clearLegacyCutoverCache } from '../compat/legacy-jwt';
 import type { LegacyHit } from '../compat/legacy-jwt';
 import { signedInUser } from '../compat/login-response';
@@ -159,6 +161,9 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
      * verifies the token (signature and expiry) before anything is read from it, and refuses it as
      * the REST route does; the user is the one the verified token names.
      *
+     * A link mailed by users-permissions before the cutover carries a 40-character hex token and is
+     * read from the carried column instead (see `confirmLegacyToken`), with the same rules.
+     *
      * Calls with the same link at the same moment are one after the other: the read, the
      * confirmation and the session run in a transaction that first locks the user's row
      * (`SELECT ... FOR UPDATE`; SQLite serialises its writers itself), so the second call reads the
@@ -170,6 +175,35 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
     ): Promise<{ jwt: string; user: UpUser }> {
       const engine = strapi.plugin(PLUGIN_ID).service('engine').get() as AuthEngine;
       const invalid = () => new errors.ApplicationError(BAD_LINK.INVALID_TOKEN);
+
+      if (isLegacyConfirmationToken(token) && readCompatConfig(strapi).usersPermissions) {
+        // A link mailed by users-permissions: the carried token is confirmed once, in its own
+        // transaction, so the session below is issued only to the call that confirmed it
+        const confirmation = await confirmLegacyToken(strapi, token);
+
+        if (!confirmation?.confirmedNow) {
+          throw invalid();
+        }
+
+        const row = (await strapi.db.query(USER_UID).findOne({
+          where: { documentId: confirmation.documentId },
+          select: ['twoFactorEnabled'],
+        })) as { twoFactorEnabled?: boolean | null } | null;
+
+        if (row?.twoFactorEnabled === true) {
+          throw new errors.ForbiddenError(TWO_FACTOR_REQUIRED, { code: 'TWO_FACTOR_REQUIRED' });
+        }
+
+        const session = await engine.createSession(confirmation.documentId, meta);
+        const signedIn = await signedInUser(strapi, confirmation.documentId);
+
+        if (!signedIn) {
+          throw invalid();
+        }
+
+        return { jwt: session.token, user: signedIn };
+      }
+
       const read = async (email: string) =>
         (await strapi.db.query(USER_UID).findOne({
           where: { email: normalizeEmail(email) },

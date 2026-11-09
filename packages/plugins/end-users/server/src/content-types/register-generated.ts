@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../constants';
+import { readCompatConfig } from '../compat/config';
 import type { AuthEngine } from '../engine/types';
 import { toContentTypes } from '../engine/better-auth/schema/to-content-types';
 
@@ -79,7 +80,11 @@ export const registerGeneratedContentTypes = (
   strapi: Core.Strapi,
   engine: AuthEngine
 ): string[] => {
-  const contentTypes = toContentTypes(engine.schema(), strapi.db.metadata);
+  const contentTypes = toContentTypes(
+    engine.schema(),
+    strapi.db.metadata,
+    readCompatConfig(strapi).usersPermissions
+  );
 
   for (const [singularName, { schema }] of Object.entries(contentTypes)) {
     Object.assign(schema, { plugin: PLUGIN_ID, globalId: globalIdOf(singularName) });

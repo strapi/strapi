@@ -4,6 +4,7 @@
  * `describe`. The rate-limit case needs rate limiting on, so it runs in a second instance after the
  * first one is gone (one instance at a time per file).
  */
+import { randomBytes } from 'node:crypto';
 import { createRequest } from 'api-tests/request';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
@@ -333,6 +334,34 @@ describe('end-users compat: sign-in', () => {
         'banned',
         'emailVerified',
       ].forEach((privateKey) => expect(keys).not.toContain(privateKey));
+    });
+
+    it('never shows the carried columns in a user payload', async () => {
+      const seeded = await seedUpUser(strapi, {
+        email: 'carried@example.com',
+        username: 'carried',
+      });
+
+      await strapi.db.query(USER_UID).update({
+        where: { documentId: seeded.documentId },
+        data: {
+          password: randomBytes(30).toString('hex'),
+          confirmationToken: randomBytes(20).toString('hex'),
+          provider: 'github',
+        },
+      });
+
+      const signedIn = await signIn('carried@example.com');
+      const me = await rq.get('/api/users/me', { headers: bearer(signedIn.body.jwt) });
+
+      expect(me.status).toBe(200);
+
+      for (const payload of [signedIn.body.user, me.body]) {
+        expect(payload).not.toHaveProperty('password');
+        expect(payload).not.toHaveProperty('confirmationToken');
+        // `provider` is derived from the account, not read from the carried column
+        expect(payload.provider).toBe('local');
+      }
     });
   });
 
@@ -686,6 +715,39 @@ describe('end-users compat: sign-in', () => {
             name: 'ApplicationError',
             message: 'Invalid token',
           });
+        });
+      });
+
+      it('confirms an old ?confirmation= link once and redirects, and answers 400 the second time', async () => {
+        // The token users-permissions would have mailed: 40 hex characters, carried in its column
+        const token = randomBytes(20).toString('hex');
+        const seeded = await seedUpUser(strapi, {
+          email: 'old-link@example.com',
+          confirmed: false,
+        });
+
+        await strapi.db.query(USER_UID).update({
+          where: { documentId: seeded.documentId },
+          data: { confirmationToken: token },
+        });
+
+        const first = await rq.get(`/api/auth/email-confirmation?confirmation=${token}`);
+
+        expect(first.status).toBe(302);
+        expect(first.headers.location).toBe('/verified');
+
+        const stored = await strapi.db.query(USER_UID).findOne({
+          where: { documentId: seeded.documentId },
+        });
+
+        expect(stored).toMatchObject({ emailVerified: true, confirmationToken: null });
+
+        const second = await rq.get(`/api/auth/email-confirmation?confirmation=${token}`);
+
+        expect(second.status).toBe(400);
+        expect(second.body.error).toMatchObject({
+          name: 'ApplicationError',
+          message: 'Invalid token',
         });
       });
 

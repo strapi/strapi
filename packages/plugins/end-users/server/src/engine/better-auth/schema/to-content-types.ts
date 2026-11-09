@@ -15,6 +15,7 @@
  */
 import type { Struct } from '@strapi/types';
 
+import { LEGACY_USER_ATTRIBUTES } from '../../../compat/legacy-confirmation';
 import { graphqlTypeNames } from '../../../compat/graphql/names';
 import { ROLE_UID } from '../../../constants';
 import type { EngineField, EngineTable } from '../../types';
@@ -249,7 +250,11 @@ const toPluginOptions = (singularName: string): Record<string, unknown> => {
   };
 };
 
-const toContentType = (table: EngineTable, db: DbNaming): Struct.ContentTypeSchema => {
+const toContentType = (
+  table: EngineTable,
+  db: DbNaming,
+  carryLegacyColumns: boolean
+): Struct.ContentTypeSchema => {
   const singularName = singularNameOf(table.name);
   const pluralName = pluralNameOf(singularName);
   // The table is named after the engine's stable key, never after a configured model name, so a
@@ -281,6 +286,14 @@ const toContentType = (table: EngineTable, db: DbNaming): Struct.ContentTypeSche
         }
       : { name: db.identifiers.getIndexName([collectionName, ...columns]), columns };
   });
+
+  if (singularName === USER_TYPE && carryLegacyColumns) {
+    // users-permissions' columns, carried while compatibility is on (never over an attribute the
+    // engine generated)
+    for (const [name, attribute] of Object.entries(LEGACY_USER_ATTRIBUTES)) {
+      attributes[name] ??= { ...attribute };
+    }
+  }
 
   if (singularName === USER_TYPE) {
     // The plugin's own attribute, not Better Auth's and not a project's (the type is locked). A
@@ -318,17 +331,19 @@ const toContentType = (table: EngineTable, db: DbNaming): Struct.ContentTypeSche
  * `plugin::end-users.<key>` is built from.
  *
  * `db` defaults to `strapi.db.metadata`; it is a parameter so the function stays a pure one.
+ * `carryLegacyColumns` adds users-permissions' five columns to the user (compatibility on).
  */
 export const toContentTypes = (
   tables: EngineTable[],
-  db: DbNaming = strapi.db.metadata
+  db: DbNaming = strapi.db.metadata,
+  carryLegacyColumns = false
 ): Record<string, { schema: Struct.ContentTypeSchema }> => {
   const contentTypes: Record<string, { schema: Struct.ContentTypeSchema }> = {};
 
   for (const table of tables) {
     if (table.disableMigrations) continue;
 
-    const schema = toContentType(table, db);
+    const schema = toContentType(table, db, carryLegacyColumns);
     contentTypes[schema.info.singularName] = { schema };
   }
 

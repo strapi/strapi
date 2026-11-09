@@ -199,9 +199,9 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
     note:
       'The data move belongs to the migration: users, roles, permissions and their links, including provider, ' +
       'confirmed, blocked, documentId and custom attributes. Each user keeps the integer id, because old tokens and ' +
-      'old front ends refer to it. A ?confirmation= link sent before the cutover works only once the migration ' +
-      'carries the confirmation token and adds the reader that checks it; nothing reads a carried-over token today, so ' +
-      'until then such a link does not confirm the address. Reset tokens that were pending at the cutover are not ' +
+      'old front ends refer to it. A ?confirmation= link sent before the cutover works through the reader of the ' +
+      'carried confirmation token (a 40-character hex value is looked up in that column instead of being verified as a ' +
+      'signed token). Reset tokens that were pending at the cutover are not ' +
       'carried over, so a reset in flight is lost and the user asks again.',
   },
   {
@@ -357,6 +357,11 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
         title: 'send-email-confirmation answers { email, sent: true } for an unknown address too',
       },
       { file: auth, title: 'a verification email carries a ?confirmation= link' },
+      {
+        file: auth,
+        title:
+          'confirms an old ?confirmation= link once and redirects, and answers 400 the second time',
+      },
     ],
   },
   {

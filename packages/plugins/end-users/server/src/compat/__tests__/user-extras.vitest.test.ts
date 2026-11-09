@@ -67,6 +67,29 @@ const setup = () => {
 };
 
 describe('loadUserExtras', () => {
+  it('falls back to the carried provider when the user has no account', async () => {
+    const strapi = {
+      documents: () => ({ findMany: async () => [] }),
+      contentType: (uid: string) =>
+        uid === USER_UID ? { uid, attributes: { provider: {} } } : profileSchema,
+      contentAPI: { sanitize: { output: async (data: unknown) => data } },
+      db: {
+        query: () => ({
+          findMany: async () => [
+            { documentId: 'u1', provider: 'github' },
+            { documentId: 'u2', provider: null },
+          ],
+        }),
+      },
+    } as unknown as Core.Strapi;
+    vi.stubGlobal('strapi', { config: { get: (_key: string, fallback?: unknown) => fallback } });
+
+    const extras = await loadUserExtras(strapi, {}, [{ documentId: 'u1' }, { documentId: 'u2' }]);
+
+    expect(extras.get('u1')?.provider).toBe('github');
+    expect(extras.get('u2')?.provider).toBe('local');
+  });
+
   it('makes one profile query and one accounts query for many users', async () => {
     const { strapi, documents, findMany } = setup();
 
