@@ -5,6 +5,8 @@ import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-hel
 const NOTE_UID = 'api::morph-note.morph-note' as const;
 const REMARK_UID = 'api::morph-remark.morph-remark' as const;
 const CARD_UID = 'api::morph-card.morph-card' as const;
+const PIN_UID = 'api::morph-pin.morph-pin' as const;
+const BOARD_UID = 'api::morph-board.morph-board' as const;
 
 /**
  * Inverse `morphMany` of a `morphToOne`: the link is stored in the morph columns of the
@@ -63,6 +65,37 @@ const cardContentType = {
   },
 };
 
+/** Target of a second `morphToOne`, so a board can own a `morphOne` link apart from its remarks */
+const pinContentType = {
+  kind: 'collectionType' as const,
+  collectionName: 'morph_pins',
+  singularName: 'morph-pin',
+  pluralName: 'morph-pins',
+  displayName: 'Morph pin',
+  description: '',
+  draftAndPublish: false,
+  attributes: {
+    label: { type: 'string' },
+    holder: { type: 'relation', relation: 'morphToOne' },
+  },
+};
+
+/** Draft & publish type with both an inverse `morphOne` and an inverse `morphMany` */
+const boardContentType = {
+  kind: 'collectionType' as const,
+  collectionName: 'morph_boards',
+  singularName: 'morph-board',
+  pluralName: 'morph-boards',
+  displayName: 'Morph board',
+  description: '',
+  draftAndPublish: true,
+  attributes: {
+    title: { type: 'string' },
+    pin: { type: 'relation', relation: 'morphOne', target: PIN_UID, morphBy: 'holder' },
+    remarks: { type: 'relation', relation: 'morphMany', target: REMARK_UID, morphBy: 'subject' },
+  },
+};
+
 const resources = {
   schemas: {
     components: {},
@@ -71,6 +104,8 @@ const resources = {
       [REMARK_UID]: remarkContentType,
       [NOTE_UID]: noteContentType,
       [CARD_UID]: cardContentType,
+      [PIN_UID]: pinContentType,
+      [BOARD_UID]: boardContentType,
     },
   },
   fixtures: {
@@ -78,6 +113,8 @@ const resources = {
       [NOTE_UID]: [],
       [REMARK_UID]: [],
       [CARD_UID]: [],
+      [PIN_UID]: [],
+      [BOARD_UID]: [],
     },
   },
 };
@@ -99,6 +136,8 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     await strapi.db.query(NOTE_UID).deleteMany({});
     await strapi.db.query(REMARK_UID).deleteMany({});
     await strapi.db.query(CARD_UID).deleteMany({});
+    await strapi.db.query(PIN_UID).deleteMany({});
+    await strapi.db.query(BOARD_UID).deleteMany({});
   });
 
   /** Morph columns are not mapped back on query results, so read the raw remark rows. */
@@ -206,6 +245,71 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     expect(await getRemarkSubjects()).toEqual([
       { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
       { id: r2.id, subjectId: published?.id, subjectType: NOTE_UID },
+    ]);
+  });
+
+  it('answers a blocked publish from the admin with a 400 and the reason', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
+    const note = await strapi.documents(NOTE_UID).create({
+      data: { title: 'with remarks', remarks: [r1.id] } as any,
+    });
+    await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+    const published = await getNoteRow(note.documentId, 'published');
+
+    await strapi.db.query(REMARK_UID).update({
+      where: { id: r2.id },
+      data: { subject: { id: published?.id, __type: NOTE_UID } },
+    });
+
+    const res = await testUtils.rq.admin({
+      method: 'POST',
+      url: `/content-manager/collection-types/${NOTE_UID}/${note.documentId}/actions/publish`,
+      body: {},
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toMatchObject({
+      name: 'ValidationError',
+      message: `Invalid ${NOTE_UID}.remarks value, expected at least one entry to link`,
+    });
+    expect(await getNoteRow(note.documentId, 'published')).toMatchObject({ id: published?.id });
+  });
+
+  // Publish makes one check per call, over every inverse attribute: a morphOne link owned by
+  // the old published version keeps the empty morphMany value too, so publish throws.
+  it('throws on republish when the published version owns a morphOne link only', async () => {
+    const pin = await strapi.db.query(PIN_UID).create({ data: { label: 'p1' } });
+    const board = await strapi.documents(BOARD_UID).create({ data: { title: 'board' } as any });
+    await strapi.documents(BOARD_UID).publish({ documentId: board.documentId });
+    const published = await strapi.db.query(BOARD_UID).findOne({
+      where: { documentId: board.documentId, publishedAt: { $notNull: true } },
+    });
+
+    await strapi.db.query(PIN_UID).update({
+      where: { id: pin.id },
+      data: { holder: { id: published?.id, __type: BOARD_UID } },
+    });
+
+    await expect(
+      strapi.documents(BOARD_UID).publish({ documentId: board.documentId })
+    ).rejects.toThrow(`Invalid ${BOARD_UID}.remarks value, expected at least one entry to link`);
+  });
+
+  it('clones a morphOne without its link and keeps the link on the source', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const card = await strapi.documents(CARD_UID).create({
+      data: { title: 'pinned', pinnedRemark: [r1.id] } as any,
+    });
+    const source = await strapi.db.query(CARD_UID).findOne({
+      where: { documentId: card.documentId },
+    });
+
+    const result = await strapi.documents(CARD_UID).clone({ documentId: card.documentId } as any);
+
+    expect(result.entries).toHaveLength(1);
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: source?.id, subjectType: CARD_UID },
     ]);
   });
 

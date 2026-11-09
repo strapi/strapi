@@ -18,6 +18,7 @@ import {
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
+import { InvalidRelationError } from '../errors';
 import { createRepository } from './entity-repository';
 import {
   cleanMorphToManyOrderColumn,
@@ -668,8 +669,9 @@ export const createEntityManager = (db: Database): EntityManager => {
             // Skipping the value would commit and drop the links of the deleted version. What
             // copying these links should mean (move them to the new version, or re-point the
             // target rows) is an open question.
+            // An InvalidRelationError reaches the client as a 400 with this message, not a 500
             if (dataset.length === 0) {
-              throw new Error(
+              throw new InvalidRelationError(
                 `Invalid ${uid}.${attributeName} value, expected at least one entry to link`
               );
             }
