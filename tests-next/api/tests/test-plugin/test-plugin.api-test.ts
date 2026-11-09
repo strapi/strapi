@@ -1,3 +1,4 @@
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -15,10 +16,8 @@ import {
   type Server,
 } from '@strapi/tests-shared';
 
-const worker = Number(process.env.JEST_WORKER_ID ?? 1);
+const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 const port = appPort('api', 10 + worker - 1);
-
-jest.setTimeout(180_000);
 
 /** A non-loopback IPv4 address of this machine, if it has one. */
 const externalAddress = Object.values(os.networkInterfaces())
