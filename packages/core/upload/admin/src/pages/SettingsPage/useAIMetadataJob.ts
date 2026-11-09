@@ -15,9 +15,7 @@ const fetchLatestJob = async (
   get: ReturnType<typeof useFetchClient>['get']
 ): Promise<AIMetadataJob | null> => {
   try {
-    const { data } = await get<GetLatestAIMetadataJob.Response['data']>(
-      '/upload/ai-metadata-jobs/latest'
-    );
+    const { data } = await get<GetLatestAIMetadataJob.Response>('/upload/ai-metadata-jobs/latest');
     return data;
   } catch {
     // Return null on any error - UI treats this as "no active job"

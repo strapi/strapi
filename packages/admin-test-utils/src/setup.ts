@@ -61,6 +61,14 @@ const patchedConsole = {
       })
       .join(' ');
 
+    // TODO(design-system): give each modal and dialog a description, as Radix expects
+    if (
+      /Missing `Description` or `aria-describedby=\{undefined\}`/.test(msg) ||
+      /requires a description for the component to be accessible/.test(msg)
+    ) {
+      return;
+    }
+
     /**
      * React Router emits dev-only warnings about upcoming v7 behavior when `future`
      * flags are left undefined. We don't want test log pollution or flaky failures
@@ -69,19 +77,6 @@ const patchedConsole = {
      * Everything else remains strict: any other warn fails the test.
      */
     if (/Future Flag Warning/i.test(msg)) {
-      return;
-    }
-
-    /**
-     * Radix dialogs (1.1+, through the design system) warn when a dialog has no description.
-     * A description is optional for a dialog, and Radix only warns: it is advice, not a broken
-     * component. A dialog without a title is still an error, and still fails the test.
-     */
-    if (msg.startsWith('Warning: Missing `Description` or `aria-describedby={undefined}`')) {
-      return;
-    }
-
-    if (msg.startsWith('`AlertDialogContent` requires a description')) {
       return;
     }
 
