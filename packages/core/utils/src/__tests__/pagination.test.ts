@@ -165,6 +165,17 @@ describe('Pagination util', () => {
         });
       });
 
+      test('Uses maxLimit as limit when limit is the query string -1', () => {
+        // Query strings reach this util unparsed, e.g. `?pagination[limit]=-1`
+        const pagination = { limit: '-1' } as unknown as { limit: number };
+        const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
+
+        expect(defaultPagination).toEqual({
+          start: 0,
+          limit: maxLimit,
+        });
+      });
+
       test('Uses 1 as limit', () => {
         const pagination = { limit: -2 };
         const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
@@ -273,6 +284,17 @@ describe('Pagination util', () => {
 
       test('Uses -1 as limit', () => {
         const pagination = { limit: -1 };
+        const defaultPagination = withDefaultPagination(pagination, { defaults });
+
+        expect(defaultPagination).toEqual({
+          start: 0,
+          limit: -1,
+        });
+      });
+
+      test('Uses -1 as limit when limit is the query string -1', () => {
+        // Query strings reach this util unparsed, e.g. `?pagination[limit]=-1`
+        const pagination = { limit: '-1' } as unknown as { limit: number };
         const defaultPagination = withDefaultPagination(pagination, { defaults });
 
         expect(defaultPagination).toEqual({

@@ -262,6 +262,46 @@ describe('Test uid service', () => {
 
       expect(uid).toBe('slug-default');
     });
+
+    describe('Target field value types', () => {
+      const strapi = {
+        ...baseStrapi,
+        contentTypes: {
+          'my-model': {
+            modelName: 'myTestModel',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+              slug: {
+                type: 'uid',
+                targetField: 'title',
+              },
+            },
+          },
+        },
+      } as any;
+
+      test.each([
+        ['a string', 'Test title', 'test-title'],
+        ['an empty string', '', 'my-test-model'],
+        ['an object', { a: 'b' }, 'my-test-model'],
+        ['an array', ['x'], 'my-test-model'],
+        ['a number', 42, 'my-test-model'],
+        ['a boolean', true, 'my-test-model'],
+        ['null', null, 'my-test-model'],
+      ])('Handles the target value when it is %s', async (_label, title, expected) => {
+        const uidService = uidServiceLoader({ strapi });
+
+        const uid = await uidService.generateUIDField({
+          contentTypeUID: 'my-model',
+          field: 'slug',
+          data: { title },
+        } as any);
+
+        expect(uid).toBe(expected);
+      });
+    });
   });
 
   describe('findUniqueUID', () => {
