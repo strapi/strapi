@@ -167,8 +167,9 @@ export default {
       );
     }
 
-    // Morph-to relations (morphToOne, morphToMany) have no single target model
-    if (attribute.target === undefined) {
+    // Morph-to relations (morphToOne, morphToMany) have no single target model.
+    // The `in` check lets TypeScript narrow `attribute` to the relations that declare a target.
+    if (!('target' in attribute) || attribute.target === undefined) {
       throw new errors.ValidationError(
         `The relational field ${targetField} on ${model} has no target model`
       );
