@@ -134,9 +134,31 @@ describe('the engine-owned user fields', () => {
   });
 
   it('lets the rest of a user body through, unchanged', async () => {
-    const data = { name: 'A', email: 'a@example.com' };
+    const data = { name: 'A', username: 'a' };
 
     await expect(run(USER_SCHEMA, data)).resolves.toBe(data);
+  });
+
+  it('refuses an email on a write of an existing user, and takes it on a create', async () => {
+    const validators = validate.createAPIValidators({
+      getModel: (uid: string) =>
+        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA })[uid] as never,
+      validators: { input: [engineOwnedUserFieldsValidator] },
+    });
+
+    await expect(
+      validators.input({ email: 'a@example.com' }, USER_SCHEMA, { action: 'update' })
+    ).rejects.toMatchObject({
+      name: 'ValidationError',
+      message: 'email can only be changed through /change-email',
+      details: { key: 'email', path: 'email' },
+    });
+    await expect(
+      validators.input({ email: 'a@example.com' }, USER_SCHEMA, { action: 'create' })
+    ).resolves.toBeUndefined();
+    await expect(
+      validators.input({ email: 'a@example.com' }, PROFILE_SCHEMA, { action: 'update' })
+    ).resolves.toBeUndefined();
   });
 
   it('refuses a field that is there, whatever its value, and leaves what is not an object alone', async () => {

@@ -22,6 +22,7 @@ const setup = (answer: Response, methods: Record<string, boolean> = { emailPassw
   });
 
   const ctx = {
+    append: vi.fn(),
     request: {
       ip: '203.0.113.7',
       headers: {
@@ -74,6 +75,32 @@ describe('callCompat', () => {
     // The client address is the one Strapi sees, not the one the client wrote
     expect(request.headers.get('x-forwarded-for')).toBe('203.0.113.7');
     expect(await request.json()).toEqual({ identifier: 'a', password: 'b' });
+  });
+
+  it('hands the cookies of the answer to the client, the refresh cookie of a login included', async () => {
+    const answer = new Response(JSON.stringify({ jwt: 'token', user: { id: 1 } }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+
+    answer.headers.append('set-cookie', 'strapi_up_refresh=abc; Path=/; HttpOnly');
+
+    const { ctx } = setup(answer);
+
+    await callCompat(ctx, '/local', {});
+
+    expect((ctx as unknown as { append: ReturnType<typeof vi.fn> }).append).toHaveBeenCalledWith(
+      'Set-Cookie',
+      ['strapi_up_refresh=abc; Path=/; HttpOnly']
+    );
+  });
+
+  it('sets no cookie when the answer has none', async () => {
+    const { ctx } = setup(json({ jwt: 'token', user: { id: 1 } }));
+
+    await callCompat(ctx, '/local', {});
+
+    expect((ctx as unknown as { append: ReturnType<typeof vi.fn> }).append).not.toHaveBeenCalled();
   });
 
   it('returns the parsed body of an answer', async () => {

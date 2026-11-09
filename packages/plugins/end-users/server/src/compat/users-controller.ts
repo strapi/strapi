@@ -172,7 +172,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
 
   /** The `documentId` a numeric id or a `documentId` names, or `null` when no user has it. */
   const resolve = async (id: unknown): Promise<string | null> => {
-    const key = String(id ?? '');
+    const key = typeof id === 'string' || typeof id === 'number' ? String(id) : '';
 
     if (key === '') {
       return null;
@@ -405,12 +405,28 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     return user;
   };
 
+  /** The numeric id of a user, which the payload carries next to its `documentId`. */
+  const numericIdOf = async (documentId: string): Promise<number | null> => {
+    const found = (await strapi.db
+      .query(USER_UID)
+      .findOne({ where: { documentId }, select: ['id'] })) as { id: number } | null;
+
+    return found?.id ?? null;
+  };
+
   /** The query without its filters, which carry the caller's read conditions. */
   const unfiltered = (query: Plain): Plain => {
     const { filters: _filters, ...rest } = query;
 
     return rest;
   };
+
+  const textOf = (value: unknown) =>
+    typeof value === 'string' && value !== '' ? value : undefined;
+
+  /** The display name of a new user, from what the caller's create rules let through. */
+  const nameFor = (input: Plain): string =>
+    textOf(input.name) ?? textOf(input.username) ?? textOf(input.email)?.split('@')[0] ?? 'user';
 
   const requireFields = (body: Plain) => {
     for (const field of ['email', 'username', 'password']) {
@@ -436,6 +452,17 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     /** A bare number: the users that match the filters. */
     async count(ctx: Koa.Context) {
       const { query } = await readQuery(ctx, 'count');
+      const { filters } = (ctx.query ?? {}) as Plain;
+
+      // The conditions of the count rows are in `query`. What the filters may name is what `find`
+      // lets the caller read: a count must not answer for a field they cannot see
+      if (filters !== undefined) {
+        await strapi.contentAPI.validate.query(
+          { filters },
+          userSchema(),
+          options(ctx, 'find') as never
+        );
+      }
 
       ctx.body = await documents().count({
         ...(query.filters !== undefined && { filters: query.filters }),
@@ -462,8 +489,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       const { query, wantsRole } = await readQuery(ctx, 'create');
       const writes = sortWrites(body, true);
       const input = await userInput(ctx, 'create', writes.user);
-      // From the body that was checked, not from `input`, which the field rules may have taken them out of
-      const name = (input.name ?? body.username ?? String(body.email).split('@')[0]) as string;
+      const name = nameFor(input);
 
       const documentId = await strapi.db.transaction(async () => {
         const created = await documents().create({
@@ -517,9 +543,12 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
         await writeProfile(ctx, documentId, writes.profile);
       });
 
-      // Read again without the caller's read conditions: the write may have moved the user out of
-      // them, and a successful write answers with the user it wrote, shaped by the output rules
-      ctx.body = await present(ctx, documentId, unfiltered(query), wantsRole);
+      // Read again under the caller's read conditions. A write may have moved the user out of them;
+      // then the answer is the identity alone, which the caller already holds
+      ctx.body = (await present(ctx, documentId, query, wantsRole)) ?? {
+        id: await numericIdOf(documentId),
+        documentId,
+      };
     },
 
     /** The deleted user, as it was. */

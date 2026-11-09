@@ -210,7 +210,7 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const after = await read(email);
 
-        if (!after || after.emailVerified !== true) {
+        if (after?.emailVerified !== true) {
           return { ok: false, error: invalid() };
         }
 

@@ -314,6 +314,25 @@ describe('end-users compat: users', () => {
     }
   });
 
+  it('refuses an email in an update, naming it: an address changes only through /change-email', async () => {
+    const caller = await signUp('keeps@example.com');
+
+    await grant(['update', 'findOne']);
+
+    const res = await rq.put(`/api/users/${caller.documentId}`, {
+      headers: caller.headers,
+      body: { email: 'moved@example.com' },
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toContain('email');
+    expect(res.body.error.message).toContain('/change-email');
+
+    const read = await rq.get(`/api/users/${caller.documentId}`, { headers: caller.headers });
+
+    expect(read.body.email).toBe('keeps@example.com');
+  });
+
   it('refuses a password on update, naming it, and takes one on create', async () => {
     const caller = await signUp('passwords@example.com');
 
@@ -347,6 +366,25 @@ describe('end-users compat: users', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toBe(1);
+  });
+
+  it('refuses to count by a field the caller cannot read through find', async () => {
+    const caller = await signUp('oracle@example.com');
+
+    await seedUpUser(strapi, { email: 'secret@example.com' });
+    await grant(['count'], [unconditioned(`${USER_UID}.find`, USER_UID, { fields: ['username'] })]);
+
+    const byEmail = await rq.get('/api/users/count?filters[email][$eq]=secret@example.com', {
+      headers: caller.headers,
+    });
+
+    expect(byEmail.status).toBe(400);
+
+    const byUsername = await rq.get('/api/users/count?filters[username][$notNull]=true', {
+      headers: caller.headers,
+    });
+
+    expect(byUsername.status).toBe(200);
   });
 
   it('answers 400 for populate of a former inverse relation field', async () => {

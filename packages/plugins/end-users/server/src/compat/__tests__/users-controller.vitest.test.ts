@@ -30,9 +30,9 @@ const stored = (id: number, documentId: string) => ({
 const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')] } = {}) => {
   const service = {
     find: vi.fn(async () => ({ results: users })),
-    findOne: vi.fn(
-      async (documentId: string) => users.find((u) => u.documentId === documentId) ?? null
-    ),
+    findOne: vi.fn<
+      (documentId: string, query?: object) => Promise<ReturnType<typeof stored> | null>
+    >(async (documentId) => users.find((u) => u.documentId === documentId) ?? null),
   };
   const documents = {
     create: vi.fn(async () => ({ documentId: 'doc-new' })),
@@ -53,12 +53,17 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
     input: vi.fn(async (data: object) => data),
     output: vi.fn(async (data: object) => data),
   };
-  const validate = { query: vi.fn(async () => {}), input: vi.fn(async () => {}) };
+  const validate = {
+    query: vi.fn<(query: object, schema: object, options: { action?: string }) => Promise<void>>(
+      async () => {}
+    ),
+    input: vi.fn(async () => {}),
+  };
   const dbQuery = vi.fn(() => ({
-    findOne: vi.fn(async ({ where }: { where: { id: number } }) => {
-      const found = users.find((u) => u.id === where.id);
+    findOne: vi.fn(async ({ where }: { where: { id?: number; documentId?: string } }) => {
+      const found = users.find((u) => u.id === where.id || u.documentId === where.documentId);
 
-      return found ? { documentId: found.documentId } : null;
+      return found ? { id: found.id, documentId: found.documentId } : null;
     }),
     findMany: vi.fn(async () =>
       users.map((u) => ({
@@ -109,7 +114,7 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
       ...extra,
     }) as unknown as Koa.Context & { body?: unknown; status?: number };
 
-  return { strapi, service, documents, profiles, permissions, sanitize, core, ctx };
+  return { strapi, service, documents, profiles, permissions, sanitize, validate, core, ctx };
 };
 
 describe('users in the users-permissions shape', () => {
@@ -240,6 +245,28 @@ describe('users in the users-permissions shape', () => {
     expect(documents.count).toHaveBeenCalledWith({ filters: { $and: [{ id: { $gt: 1 } }] } });
   });
 
+  it('counts only by fields the caller may read through find', async () => {
+    const { strapi, ctx, documents, validate } = setup();
+
+    validate.query.mockImplementation(async (_query, _schema, options) => {
+      if (options.action === 'find') {
+        throw Object.assign(new Error('Invalid key secret'), { name: 'ValidationError' });
+      }
+    });
+
+    const filters = { secret: { $eq: 'x' } };
+
+    await expect(
+      createUsersCompat(strapi).count(ctx({ query: { filters } }))
+    ).rejects.toMatchObject({ name: 'ValidationError' });
+    expect(validate.query).toHaveBeenCalledWith(
+      { filters },
+      expect.anything(),
+      expect.objectContaining({ action: 'find' })
+    );
+    expect(documents.count).not.toHaveBeenCalled();
+  });
+
   it('shows a role only with the fields the role type lets the caller read', async () => {
     const { strapi, ctx, sanitize } = setup();
 
@@ -281,32 +308,55 @@ describe('users in the users-permissions shape', () => {
     expect((list.body as object[])[0]).toHaveProperty('blocked', false);
   });
 
-  it('names a user made without a readable email from the checked body', async () => {
+  it('sets the name of a new user only from what the field rules of the caller let through', async () => {
     const { strapi, ctx, documents, sanitize, service } = setup();
+    const body = { email: 'new@example.com', username: 'newbie', name: 'Given', password: 'pw' };
 
     service.findOne.mockImplementation(async () => stored(9, 'doc-new'));
-    sanitize.input.mockImplementation(async () => ({}));
 
-    await createUsersCompat(strapi).create(
-      ctx({ request: { body: { email: 'new@example.com', username: 'newbie', password: 'pw' } } })
-    );
+    const created = async (allowed: Record<string, unknown>) => {
+      sanitize.input.mockImplementationOnce(async () => allowed);
+      documents.create.mockClear();
 
-    expect(documents.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ name: 'newbie' }),
-    });
+      await createUsersCompat(strapi).create(ctx({ request: { body } }));
+
+      return (documents.create.mock.calls[0] as unknown as [{ data: { name: string } }])[0].data
+        .name;
+    };
+
+    expect(await created({ name: 'Given', username: 'newbie' })).toBe('Given');
+    // `name` stripped: the username the rules let through, never the one of the body alone
+    expect(await created({ username: 'newbie' })).toBe('newbie');
+    expect(await created({ email: 'new@example.com' })).toBe('new');
+    expect(await created({})).toBe('user');
   });
 
-  it('answers a successful update with the user even when it left the caller read conditions', async () => {
+  it('answers an update that left the caller read conditions with the identity alone', async () => {
     const { strapi, ctx, service, sanitize } = setup();
 
     sanitize.query.mockImplementation(async () => ({ filters: { id: { $eq: 999 } } }));
+    // The re-read is under the caller's conditions: the user is not one of the rows they match now
+    service.findOne.mockImplementation(async (_documentId: string, query?: object) =>
+      query && 'filters' in query ? null : stored(7, 'doc-a')
+    );
 
     const update = ctx({ params: { id: '7' }, request: { body: { username: 'new' } } });
 
     await createUsersCompat(strapi).update(update);
 
-    expect(service.findOne).toHaveBeenLastCalledWith('doc-a', {});
-    expect(update.body).toMatchObject({ documentId: 'doc-a' });
+    expect(service.findOne).toHaveBeenLastCalledWith('doc-a', {
+      filters: { id: { $eq: 999 } },
+    });
+    expect(update.body).toEqual({ id: 7, documentId: 'doc-a' });
+  });
+
+  it('answers an update with the user, shaped, while it is still readable', async () => {
+    const { strapi, ctx } = setup();
+    const update = ctx({ params: { id: '7' }, request: { body: { username: 'new' } } });
+
+    await createUsersCompat(strapi).update(update);
+
+    expect(update.body).toMatchObject({ id: 7, documentId: 'doc-a', email: 'doc-a@example.com' });
   });
 
   it('writes profile keys to the profile and the rest to the user', async () => {

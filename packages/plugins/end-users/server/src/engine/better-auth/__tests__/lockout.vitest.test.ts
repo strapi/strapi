@@ -45,6 +45,8 @@ let lockoutDb: LockoutDb;
 
 const fakeStrapi = () =>
   ({
+    // No Users & Permissions origin: nothing old to sign out
+    sessionManager: Object.assign(() => ({}), { hasOrigin: () => false }),
     config: {
       get: (path: string, fallback?: unknown) =>
         ({

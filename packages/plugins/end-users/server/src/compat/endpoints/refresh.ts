@@ -1,11 +1,13 @@
 import { errors, getDeviceName, sanitizeSessionEntry, sortSessionsForDisplay } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import { USER_UID } from '../../constants';
+import { PLUGIN_ID, USER_UID } from '../../constants';
 import type { AuthEngine, EngineSession } from '../../engine/types';
+import type compatService from '../../services/compat';
 import type { CompatConfig } from '../config';
 import { upError } from '../errors';
 import { readLegacyCutover } from '../legacy-jwt';
+import { revokeLegacySessions } from '../legacy-sessions';
 import { LEGACY_ORIGIN } from '../origin';
 import {
   clearRefreshCookie,
@@ -154,6 +156,12 @@ const exchangeLegacy = async (
     ...(old.deviceId ? { deviceId: old.deviceId } : {}),
   });
 
+  // A device that only ever comes back to refresh is still on an old token: it counts as one, so
+  // the hit counter shows when the cut-off can be set
+  (strapi.plugin(PLUGIN_ID).service('compat') as ReturnType<typeof compatService>).recordLegacyHit(
+    'access'
+  );
+
   return next.token;
 };
 
@@ -203,21 +211,6 @@ export const refresh = async (
   }
 };
 
-/** Signs the user out of their old Users & Permissions sessions too, all or one device's. */
-const revokeLegacy = async (strapi: Core.Strapi, documentId: string, deviceId?: string) => {
-  if (!strapi.sessionManager.hasOrigin(LEGACY_ORIGIN)) {
-    return;
-  }
-
-  const user = (await strapi.db
-    .query(USER_UID)
-    .findOne({ where: { documentId }, select: ['id'] })) as { id?: number } | null;
-
-  if (user?.id !== undefined) {
-    await strapi.sessionManager(LEGACY_ORIGIN).invalidateRefreshToken(String(user.id), deviceId);
-  }
-};
-
 /** The session a plain logout ends: the one the refresh token names, the caller's own otherwise. */
 const sessionToEnd = async (
   engine: AuthEngine,
@@ -228,7 +221,7 @@ const sessionToEnd = async (
   const token = readRefreshToken(cfg, headers, body);
   const named = token ? await engine.getSession(asBearer(token)) : null;
 
-  return named && named.userId === caller.userId ? named.id : caller.id;
+  return named?.userId === caller.userId ? named.id : caller.id;
 };
 
 /**
@@ -258,11 +251,11 @@ export const logout = async (
 
   try {
     if (scope === 'all') {
+      // The engine signs out the old Users & Permissions sessions with the rest
       await engine.revokeSessions(caller.userId);
-      await revokeLegacy(strapi, caller.userId);
     } else if (device) {
       await engine.revokeDevice(caller.userId, device);
-      await revokeLegacy(strapi, caller.userId, device);
+      await revokeLegacySessions(strapi, caller.userId, device);
     } else {
       await engine.revokeSession(caller.userId, await sessionToEnd(engine, cfg, caller, input));
     }

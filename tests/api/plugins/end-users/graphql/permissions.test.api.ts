@@ -202,16 +202,17 @@ describe('end-users: the content api permissions on GraphQL', () => {
       return pick(res.body.data).map(({ name }) => name);
     };
 
-    it('exposes EndUser, its roles and its profile, and no session, account, jwk or permission queries', async () => {
+    it('exposes EndUser and its profile, its roles through the user only, and no session, account, jwk or permission queries', async () => {
       const queries = await namesOf(
         '{ __schema { queryType { fields { name } } } }',
         (data) => data.__schema.queryType.fields
       );
       const types = await namesOf('{ __schema { types { name } } }', (data) => data.__schema.types);
 
-      expect(queries).toEqual(
-        expect.arrayContaining(['endUsers', 'endUser', 'endUserRoles', 'endUserProfiles'])
-      );
+      expect(queries).toEqual(expect.arrayContaining(['endUsers', 'endUser', 'endUserProfiles']));
+      // A role is read through the user's relation: no query lists them
+      expect(queries).not.toContain('endUserRoles');
+      expect(queries).not.toContain('endUserRole');
 
       for (const hidden of [
         'sessions',

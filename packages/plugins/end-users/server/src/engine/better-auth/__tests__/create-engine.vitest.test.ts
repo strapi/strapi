@@ -29,6 +29,7 @@ import {
   loadProjectAuth,
 } from '../create-engine';
 import { DISCOVERY_TIMEOUT_MS } from '../../../providers/discovery';
+import { revokeLegacySessions } from '../../../compat/legacy-sessions';
 import type { AuthEngine } from '../../types';
 import { emptyStartupInputs } from '../../startup-inputs';
 import type { StartupInputs } from '../../startup-inputs';
@@ -52,6 +53,11 @@ const emptyDatabase = () => ({
   note: [],
   fileNote: [],
 });
+
+// The sessions of the old plugin are core's session manager's: what matters here is that they are asked
+vi.mock('../../../compat/legacy-sessions', () => ({
+  revokeLegacySessions: vi.fn(async () => undefined),
+}));
 
 vi.mock('../adapter/adapter', async () => {
   const { memoryAdapter } = await import('better-auth/adapters/memory');
@@ -124,6 +130,8 @@ const fakeStrapi = (values: ConfigValues = {}, distSrc = '/nonexistent/end-users
     config: {
       get: (path: string, fallback?: unknown) => (path in all ? all[path] : fallback),
     },
+    // No Users & Permissions origin: nothing old to sign out
+    sessionManager: Object.assign(() => ({}), { hasOrigin: () => false }),
     // Read when a request arrives, after `beforeAll` has made the database
     get db() {
       return lockoutDb.db;
@@ -1772,6 +1780,28 @@ describe('createEngine', () => {
       expect(await engine.listSessions(a.userId)).toEqual([]);
       expect(await engine.getSession(bearer(a.signed))).toBeNull();
       expect(await engine.getSession(bearer(b.signed))).not.toBeNull();
+    });
+
+    it('signs the user out of the sessions of the old Users & Permissions too', async () => {
+      const a = await signUp(engine, 'a@x.io');
+
+      vi.mocked(revokeLegacySessions).mockClear();
+      await engine.revokeSessions(a.userId);
+
+      expect(revokeLegacySessions).toHaveBeenCalledTimes(1);
+      expect(revokeLegacySessions).toHaveBeenCalledWith(expect.anything(), a.userId);
+    });
+
+    it('signs the user out of them on a password reset too', async () => {
+      const options = buildAuthOptions(fakeStrapi());
+      const { onPasswordReset } = options.emailAndPassword as unknown as {
+        onPasswordReset: (data: { user: { id: string } }) => Promise<void>;
+      };
+
+      vi.mocked(revokeLegacySessions).mockClear();
+      await onPasswordReset({ user: { id: 'doc-user' } });
+
+      expect(revokeLegacySessions).toHaveBeenCalledWith(expect.anything(), 'doc-user');
     });
 
     it('signs the user out everywhere but the session named', async () => {

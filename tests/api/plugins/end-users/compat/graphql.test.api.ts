@@ -243,7 +243,7 @@ describe('end-users compat: GraphQL', () => {
     }
   });
 
-  it('refuses login, resetPassword and changePassword while email and password sign-in is off', async () => {
+  it('refuses login, register, resetPassword and changePassword while email and password sign-in is off', async () => {
     const settings = strapi.plugin('end-users').service('settings');
     const user = await seedUpUser(strapi, { email: 'gql-off@example.com', username: 'gqloff' });
 
@@ -251,6 +251,12 @@ describe('end-users compat: GraphQL', () => {
 
     try {
       const login = await signIn('gql-off@example.com');
+      const registered = await gql(
+        `mutation ($input: UsersPermissionsRegisterInput!) {
+          register(input: $input) { jwt }
+        }`,
+        { input: { username: 'gqlnew', email: 'gql-new@example.com', password: PASSWORD } }
+      );
       const reset = await gql(
         `mutation { resetPassword(code: "x", password: "${NEW_PASSWORD}", passwordConfirmation: "${NEW_PASSWORD}") { jwt } }`
       );
@@ -268,7 +274,7 @@ describe('end-users compat: GraphQL', () => {
         )
       );
 
-      for (const answer of [login, reset, change]) {
+      for (const answer of [login, registered, reset, change]) {
         expect(answer.body.errors).toHaveLength(1);
         expect(answer.body.errors[0].message).toMatch(/disabled|Not Found/);
       }
@@ -279,6 +285,18 @@ describe('end-users compat: GraphQL', () => {
       });
 
       expect(rest.status).toBe(404);
+
+      // No account was made by the refused registrations, over GraphQL or REST
+      const restRegistered = await rq.post('/api/auth/local/register', {
+        body: { username: 'restnew', email: 'rest-new@example.com', password: PASSWORD },
+      });
+
+      expect(restRegistered.status).toBe(400);
+      expect(
+        await strapi.db
+          .query(USER_UID)
+          .count({ where: { email: { $in: ['gql-new@example.com', 'rest-new@example.com'] } } })
+      ).toBe(0);
     } finally {
       await settings.set({ methods: { emailPassword: true, username: true } });
     }
@@ -368,6 +386,9 @@ describe('end-users compat: GraphQL', () => {
       '{ mutations: __type(name: "Mutation") { fields { name } } types: __schema { types { name } } }'
     );
     const mutations = res.body.data.mutations.fields.map(({ name }) => name);
+    const queries = (
+      await gql('{ queries: __type(name: "Query") { fields { name } } }')
+    ).body.data.queries.fields.map(({ name }) => name);
     const types = res.body.data.types.types.map(({ name }) => name);
 
     expect(mutations).toEqual(
@@ -382,6 +403,8 @@ describe('end-users compat: GraphQL', () => {
       ])
     );
     expect(mutations.filter((name) => /role/i.test(name))).toEqual([]);
+    // A role is read through the user's relation: there is no query that lists them
+    expect(queries.filter((name) => /role/i.test(name))).toEqual([]);
     expect(types).toEqual(expect.arrayContaining(['UsersPermissionsUser', 'UsersPermissionsRole']));
     expect(types.filter((name) => /permissionspermission/i.test(name))).toEqual([]);
   });
@@ -436,5 +459,31 @@ describe('end-users compat: GraphQL sign-in rate limit', () => {
 
     expect(sixth.body.data).toBeNull();
     expect(sixth.body.errors[0].message).toMatch(/too many requests/i);
+  });
+});
+
+describe('end-users compat: GraphQL login with the refresh cookie', () => {
+  beforeAll(async () => {
+    strapi = await createEndUsersInstance({
+      pluginConfig: { ...compatConfig({ refresh: { enabled: true, httpOnly: true } }) },
+    });
+    rq = createRequest({ strapi });
+    await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
+  });
+
+  afterAll(async () => {
+    await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
+    await strapi.destroy();
+  });
+
+  it('sets the refresh cookie, as /local does, when the refresh token is kept out of the body', async () => {
+    await seedUpUser(strapi, { email: 'gql-cookie@example.com' });
+
+    const res = await signIn('gql-cookie@example.com');
+    const cookies = (res.headers['set-cookie'] ?? []) as string[];
+
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.login.jwt).toEqual(expect.any(String));
+    expect(cookies.find((cookie) => cookie.startsWith('strapi_up_refresh='))).toContain('HttpOnly');
   });
 });

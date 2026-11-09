@@ -19,7 +19,7 @@ import { loginBody, signedInUser } from '../login-response';
 import { withPendingUsername } from '../pending-username';
 import { toUpRole } from '../shapes';
 import { ok } from './result';
-import { BEARER_HEADER } from './shared';
+import { BEARER_HEADER, emailPasswordRefusal } from './shared';
 import type { CompatResult } from '../types';
 
 interface RegisterInput {
@@ -61,6 +61,13 @@ export const register = async (
 
   if (!signUp.enabled) {
     return { status: 400, body: upError('ApplicationError', REGISTER_DISABLED) };
+  }
+
+  // A password sign-up while that sign-in is off would leave an account only a provider may use
+  const refusal = await emailPasswordRefusal(strapi);
+
+  if (refusal) {
+    return refusal;
   }
 
   const input = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>;

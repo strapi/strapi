@@ -18,9 +18,9 @@ import { normalizeEmail } from '../utils/normalize-email';
  */
 export const notifyEmailChangeMiddleware =
   (strapi: Core.Strapi): Modules.Documents.Middleware.Middleware =>
-  async (ctx, next) => {
+  (ctx, next) => {
     if (ctx.uid !== USER_UID || ctx.action !== 'update') {
-      return next();
+      return Promise.resolve(next());
     }
 
     const params = ctx.params as
@@ -28,42 +28,44 @@ export const notifyEmailChangeMiddleware =
     const email = params?.data?.email;
 
     if (!params?.documentId || typeof email !== 'string') {
-      return next();
+      return Promise.resolve(next());
     }
 
     const { documentId } = params;
 
-    return strapi.db.transaction(async ({ onCommit }: TransactionHooks) => {
-      const before = (await strapi.db
-        .query(USER_UID)
-        .findOne({ where: { documentId }, select: ['email', 'preferredLocale'] })) as {
-        email?: unknown;
-        preferredLocale?: unknown;
-      } | null;
-      const result = await next();
+    return Promise.resolve(
+      strapi.db.transaction(async ({ onCommit }: TransactionHooks) => {
+        const before = (await strapi.db
+          .query(USER_UID)
+          .findOne({ where: { documentId }, select: ['email', 'preferredLocale'] })) as {
+          email?: unknown;
+          preferredLocale?: unknown;
+        } | null;
+        const result = await next();
 
-      // An update of a user that is not there changes no address
-      if (!result || typeof before?.email !== 'string') {
-        return result;
-      }
+        // An update of a user that is not there changes no address
+        if (!result || typeof before?.email !== 'string') {
+          return result;
+        }
 
-      const oldEmail = before.email;
-      const newEmail = normalizeEmail(email);
+        const oldEmail = before.email;
+        const newEmail = normalizeEmail(email);
 
-      if (normalizeEmail(oldEmail) !== newEmail) {
-        onCommit(() => {
-          sendEmailChangedNotice(strapi, {
-            oldEmail,
-            newEmail,
-            preferredLocale: before.preferredLocale,
-          }).catch((error: unknown) => {
-            strapi.log.warn(
-              `end-users: could not send the email-changed notice (${(error as Error)?.message}).`
-            );
+        if (normalizeEmail(oldEmail) !== newEmail) {
+          onCommit(() => {
+            sendEmailChangedNotice(strapi, {
+              oldEmail,
+              newEmail,
+              preferredLocale: before.preferredLocale,
+            }).catch((error: unknown) => {
+              strapi.log.warn(
+                `end-users: could not send the email-changed notice (${(error as Error)?.message}).`
+              );
+            });
           });
-        });
-      }
+        }
 
-      return result;
-    });
+        return result;
+      })
+    );
   };

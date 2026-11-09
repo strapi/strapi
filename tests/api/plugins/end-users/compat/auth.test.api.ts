@@ -239,6 +239,25 @@ describe('end-users compat: sign-in', () => {
       expect(blocked.body.error.message).toBe('Your account has been blocked by an administrator');
     });
 
+    it('refuses to register while the email method is off', async () => {
+      await settings.set({ methods: { emailPassword: false } });
+
+      const res = await register({
+        username: 'offreg',
+        email: 'offreg@example.com',
+        password: PASSWORD,
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ApplicationError',
+        message: 'This provider is disabled.',
+      });
+      expect(
+        await strapi.db.query(USER_UID).count({ where: { email: 'offreg@example.com' } })
+      ).toBe(0);
+    });
+
     it('answers This provider is disabled when the email method is off', async () => {
       await seedUpUser(strapi, { email: 'hal@example.com' });
       await settings.set({ methods: { emailPassword: false } });
@@ -738,6 +757,18 @@ describe('end-users compat: sign-in rate limit', () => {
       expect((await signIn('lee@example.com', WRONG)).status).toBe(400);
     }
 
-    expect((await signIn('lee@example.com', WRONG)).status).toBe(429);
+    const limited = await signIn('lee@example.com', WRONG);
+
+    expect(limited.status).toBe(429);
+    // The envelope the old plugin answered with, not Better Auth's own body
+    expect(limited.body).toEqual({
+      data: null,
+      error: {
+        status: 429,
+        name: 'RateLimitError',
+        message: expect.any(String),
+        details: {},
+      },
+    });
   });
 });

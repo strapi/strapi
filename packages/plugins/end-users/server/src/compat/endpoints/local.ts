@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID, USER_UID } from '../../constants';
-import type { AuthEngine } from '../../engine/types';
+import type { AuthEngine, NativeResult } from '../../engine/types';
 import type settingsService from '../../services/settings';
 import type { CompatConfig } from '../config';
 import { normalizeUsername } from '../../utils/normalize-username';
@@ -11,7 +11,7 @@ import { loginBody, signedInUser } from '../login-response';
 import { withPendingDevice } from '../pending-device';
 import { wantsRefreshCookie, writeRefreshCookie } from '../refresh-cookie';
 import { ok } from './result';
-import { BEARER_HEADER, PROVIDER_DISABLED, TWO_FACTOR_REQUIRED } from './shared';
+import { BEARER_HEADER, PROVIDER_DISABLED, TWO_FACTOR_REQUIRED, plain } from './shared';
 import type { CompatResult } from '../types';
 
 interface LocalInput {
@@ -42,6 +42,50 @@ const emailOfUsername = async (strapi: Core.Strapi, username: string): Promise<s
     : placeholderEmail(username);
 };
 
+/** The refusal of a body that lacks the identifier or the password, or `null`. */
+const missingCredential = (input: Record<string, unknown>): CompatResult | null => {
+  for (const field of ['identifier', 'password']) {
+    const value = input[field];
+
+    if (typeof value !== 'string' || value === '') {
+      return { status: 400, body: missingFieldBody(field) };
+    }
+  }
+
+  return null;
+};
+
+/** The engine's answer to the sign-in as the compat answer: the token and the user, or the second factor's refusal. */
+const answerOf = async (
+  strapi: Core.Strapi,
+  cfg: CompatConfig,
+  headers: Headers | undefined,
+  { headers: answered, response }: { headers: Headers; response: NativeResult<'signInEmail'> }
+): Promise<CompatResult> => {
+  // The second factor is the native routes' to ask for: a compat client has no way to answer it,
+  // and gets no token
+  if (response.twoFactorRedirect) {
+    return {
+      status: 403,
+      body: upError('ForbiddenError', TWO_FACTOR_REQUIRED, { code: 'TWO_FACTOR_REQUIRED' }),
+    };
+  }
+
+  const token = answered.get(BEARER_HEADER);
+  const user = await signedInUser(strapi, response.user.id);
+
+  if (!token || !user) {
+    throw new Error('The sign-in did not give a session token.');
+  }
+
+  const cookie = cfg.refresh.enabled && wantsRefreshCookie(cfg, headers);
+
+  return ok(
+    loginBody(cfg, { token, user, cookie }),
+    cookie ? [writeRefreshCookie(cfg, token)] : undefined
+  );
+};
+
 /**
  * `POST /api/auth/local`: an identifier (an address or a username) and a password, answered with
  * `{ jwt, user }`. An identifier with an `@` is an address, anything else a username that is looked
@@ -56,17 +100,15 @@ export const local = async (
   cfg: CompatConfig,
   { body, headers }: LocalInput
 ): Promise<CompatResult> => {
-  const input = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>;
-  const { identifier, password } = input;
+  const input = plain(body);
+  const missing = missingCredential(input);
 
-  if (typeof identifier !== 'string' || identifier === '') {
-    return { status: 400, body: missingFieldBody('identifier') };
+  if (missing) {
+    return missing;
   }
 
-  if (typeof password !== 'string' || password === '') {
-    return { status: 400, body: missingFieldBody('password') };
-  }
-
+  const identifier = input.identifier as string;
+  const password = input.password as string;
   const plugin = strapi.plugin(PLUGIN_ID);
   const { methods } = await (
     plugin.service('settings') as ReturnType<typeof settingsService>
@@ -85,33 +127,12 @@ export const local = async (
   try {
     const call = () => engine.callNative('signInEmail', { ...sent, body: { email, password } });
     const { deviceId } = input;
-    const { headers: answered, response } =
+    const answered =
       typeof deviceId === 'string' && deviceId !== ''
         ? await withPendingDevice(deviceId, call)
         : await call();
 
-    // The second factor is the native routes' to ask for: a compat client has no way to answer it,
-    // and gets no token
-    if (response.twoFactorRedirect) {
-      return {
-        status: 403,
-        body: upError('ForbiddenError', TWO_FACTOR_REQUIRED, { code: 'TWO_FACTOR_REQUIRED' }),
-      };
-    }
-
-    const token = answered.get(BEARER_HEADER);
-    const user = await signedInUser(strapi, response.user.id);
-
-    if (!token || !user) {
-      throw new Error('The sign-in did not give a session token.');
-    }
-
-    const cookie = cfg.refresh.enabled && wantsRefreshCookie(cfg, headers);
-
-    return ok(
-      loginBody(cfg, { token, user, cookie }),
-      cookie ? [writeRefreshCookie(cfg, token)] : undefined
-    );
+    return await answerOf(strapi, cfg, headers, answered);
   } catch (error) {
     const refused = refusalResult(error);
 

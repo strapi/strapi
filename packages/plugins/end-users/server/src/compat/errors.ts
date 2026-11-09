@@ -6,7 +6,8 @@ export type UpErrorName =
   | 'ValidationError'
   | 'ForbiddenError'
   | 'UnauthorizedError'
-  | 'NotFoundError';
+  | 'NotFoundError'
+  | 'RateLimitError';
 
 const STATUS: Record<UpErrorName, number> = {
   ApplicationError: 400,
@@ -15,6 +16,7 @@ const STATUS: Record<UpErrorName, number> = {
   ForbiddenError: 403,
   UnauthorizedError: 401,
   NotFoundError: 404,
+  RateLimitError: 429,
 };
 
 /** The envelope Strapi (and so users-permissions) answers an error with. */
@@ -77,9 +79,7 @@ export const missingFieldBody = (field: string) =>
   });
 
 export const mapAuthError = (code: string): { name: UpErrorName; message: string } | null => {
-  const message = Object.prototype.hasOwnProperty.call(AUTH_ERRORS, code)
-    ? AUTH_ERRORS[code]
-    : undefined;
+  const message = Object.hasOwn(AUTH_ERRORS, code) ? AUTH_ERRORS[code] : undefined;
 
   return message === undefined ? null : { name: 'ApplicationError', message };
 };
@@ -118,7 +118,7 @@ export const refusalResult = (
     return null;
   }
 
-  if (Object.prototype.hasOwnProperty.call(texts, refusal.code)) {
+  if (Object.hasOwn(texts, refusal.code)) {
     return { status: 400, body: upError('ApplicationError', texts[refusal.code]) };
   }
 

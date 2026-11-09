@@ -2633,6 +2633,20 @@ describe('end-users: the Content API rules, over REST', () => {
       expect((await stored(me.documentId)).name).toBe('Renamed');
     });
 
+    it('answers 400 naming email, which changes only through /change-email, and changes nothing', async () => {
+      await grant(UPDATE_ANY_USER);
+
+      const me = await signUp();
+      const before = await stored(me.documentId);
+      const res = await putUser(me.token, me.documentId, { email: 'elsewhere@example.com' });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({ name: 'ValidationError' });
+      expect(res.body.error.message).toContain('email');
+      expect(res.body.error.message).toContain('/change-email');
+      expect((await stored(me.documentId)).email).toBe(before.email);
+    });
+
     it('answers 400 naming an identity or engine-owned field under is-self, and to a body that gives the caller roles', async () => {
       await grant(UPDATE_SELF);
 

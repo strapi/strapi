@@ -24,6 +24,8 @@ import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../../constants';
 import { readCompatConfig } from '../../compat/config';
+import { revokeLegacySessions } from '../../compat/legacy-sessions';
+import { compatRateLimitResponse } from '../../compat/rate-limit';
 import { parseDuration } from '../../config/duration';
 import { banState } from '../../utils/ban';
 import { setProviderClaims } from '../../utils/provider-claims';
@@ -426,6 +428,9 @@ export const buildAuthOptions = (
       maxPasswordLength: 256,
       // A reset signs the user out everywhere: whoever held a session keeps it no longer
       revokeSessionsOnPasswordReset: true,
+      // ...and out of the sessions Users & Permissions issued, which that setting does not reach
+      onPasswordReset: async ({ user }: { user: { id: string } }) =>
+        revokeLegacySessions(strapi, user.id),
       ...senders.emailAndPassword,
     },
     // Every email goes through the email plugin's templates; a sender the project sets wins
@@ -999,8 +1004,16 @@ export const createEngine = (
       );
     },
 
-    handle(request: Request) {
-      return auth.handler(request);
+    async handle(request: Request) {
+      const response = await auth.handler(request);
+
+      return readCompatConfig(strapi).usersPermissions
+        ? compatRateLimitResponse(
+            response,
+            new URL(request.url).pathname,
+            resolveBasePath(strapi.config)
+          )
+        : response;
     },
 
     async callNative<K extends NativeEndpoint>(
@@ -1064,6 +1077,9 @@ export const createEngine = (
 
     async revokeSessions(userId: ID, opts?: { except?: ID }) {
       const ctx = await context();
+
+      // The old Users & Permissions sessions are never the one to keep
+      await revokeLegacySessions(strapi, String(userId));
 
       if (!opts?.except) {
         await ctx.internalAdapter.deleteUserSessions(userId);

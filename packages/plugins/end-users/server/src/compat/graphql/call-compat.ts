@@ -78,6 +78,13 @@ export const callCompat = async (ctx: Context, path: string, body: unknown): Pro
     throw new errors.ApplicationError(message, details);
   }
 
+  // The refresh cookie of a login in the httpOnly mode: what REST sets, reaches the client here too
+  const cookies = response.headers.getSetCookie();
+
+  if (cookies.length > 0) {
+    ctx.append('Set-Cookie', cookies);
+  }
+
   if (parsed === null || typeof parsed !== 'object') {
     throw new Error('The compat route did not answer with a body.');
   }

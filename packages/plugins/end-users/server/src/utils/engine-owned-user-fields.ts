@@ -44,22 +44,32 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
  * verified in the Content Manager: it writes through the Document Service, which never runs a
  * Content API validator, and so do the engine and the plugin's own rules.
  *
- * It declares its parameters, so core hands it `{ auth, action }` with the schema; it
- * refuses the same for every caller, so it reads neither.
+ * It declares its parameters, so core hands it `{ auth, action }` with the schema. It refuses the
+ * same for every caller, so it reads the action only: `email` is refused on every write but a
+ * create.
  */
-export const engineOwnedUserFieldsValidator: Validator = (schema) => {
+export const engineOwnedUserFieldsValidator: Validator = (schema, options) => {
   const check = async (data: unknown) => {
     if (schema?.uid !== USER_UID || !isObject(data)) {
       return data;
     }
 
     for (const field of [...ENGINE_OWNED_USER_FIELDS, ...REQUEST_NEVER_WRITES_USER_RELATIONS]) {
-      if (Object.prototype.hasOwnProperty.call(data, field)) {
+      if (Object.hasOwn(data, field)) {
         throw new errors.ValidationError(`${field} can only be changed by the plugin`, {
           key: field,
           path: field,
         });
       }
+    }
+
+    // An address is given when a user is made and changes only through `/change-email`, which proves
+    // the new one is the user's: a write of the user never sets it
+    if (options?.action !== 'create' && Object.hasOwn(data, 'email')) {
+      throw new errors.ValidationError('email can only be changed through /change-email', {
+        key: 'email',
+        path: 'email',
+      });
     }
 
     return data;

@@ -55,7 +55,7 @@ export const frontendCallback = (
 
   const { callbacks } = readCompatConfig(strapi).connect;
 
-  if (Object.prototype.hasOwnProperty.call(callbacks, provider)) {
+  if (Object.hasOwn(callbacks, provider)) {
     return absoluteUrl(callbacks[provider]);
   }
 

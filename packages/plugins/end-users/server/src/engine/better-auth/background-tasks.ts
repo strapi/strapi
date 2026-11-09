@@ -2,6 +2,14 @@ import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../../constants';
 
+const reasonOf = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return typeof error === 'string' ? error : 'unknown error';
+};
+
 /**
  * Better Auth's `advanced.backgroundTasks.handler`: the work it does not need to wait for (the
  * emails it sends, the dummy work that hides whether an address has an account) runs after the
@@ -13,8 +21,6 @@ export const backgroundTaskHandler =
   (strapi: Core.Strapi) =>
   (task: Promise<unknown>): void => {
     task.catch((error: unknown) => {
-      strapi.log.error(
-        `${PLUGIN_ID}: a background task failed (${(error as Error)?.message ?? String(error)}).`
-      );
+      strapi.log.error(`${PLUGIN_ID}: a background task failed (${reasonOf(error)}).`);
     });
   };

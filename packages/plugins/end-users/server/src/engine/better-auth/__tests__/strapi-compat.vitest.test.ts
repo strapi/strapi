@@ -326,7 +326,55 @@ describe('strapi-compat', () => {
   });
 });
 
+describe('strapi-compat rate limit', () => {
+  const rulesFor = (rateLimit: Record<string, unknown>) => {
+    const base = configStrapi(true);
+    const strapi = {
+      ...base,
+      config: {
+        get: (path: string, fallback?: unknown) =>
+          path.startsWith('plugin::end-users.rateLimit.')
+            ? (rateLimit[path.slice('plugin::end-users.rateLimit.'.length)] ?? fallback)
+            : base.config.get(path, fallback),
+      },
+    } as unknown as Core.Strapi;
+
+    return strapiCompat(strapi, readCompatConfig(strapi)).rateLimit as Array<{
+      pathMatcher: (path: string) => boolean;
+      window: number;
+      max: number;
+    }>;
+  };
+
+  const ruleOf = (rules: ReturnType<typeof rulesFor>, path: string) =>
+    rules.find((rule) => rule.pathMatcher(path));
+
+  it('keeps its own windows and limits when the project sets none', () => {
+    const rules = rulesFor({});
+
+    expect(ruleOf(rules, '/local')).toMatchObject({ window: 60, max: 5 });
+    expect(ruleOf(rules, '/local/register')).toMatchObject({ window: 60, max: 5 });
+    expect(ruleOf(rules, '/forgot-password')).toMatchObject({ window: 60, max: 3 });
+    expect(ruleOf(rules, '/send-email-confirmation')).toMatchObject({ window: 60, max: 3 });
+    expect(ruleOf(rules, '/refresh')).toBeUndefined();
+  });
+
+  it('follows the window and the max the project sets', () => {
+    const rules = rulesFor({ window: 30, max: 2 });
+
+    expect(ruleOf(rules, '/local')).toMatchObject({ window: 30, max: 2 });
+    expect(ruleOf(rules, '/forgot-password')).toMatchObject({ window: 30, max: 2 });
+  });
+
+  it('ignores a value that is not a positive whole number', () => {
+    const rules = rulesFor({ window: 0, max: 'many' });
+
+    expect(ruleOf(rules, '/local')).toMatchObject({ window: 60, max: 5 });
+  });
+});
+
 describe('strapi-compat register', () => {
+  let emailPassword: boolean;
   let signUp: { enabled: boolean; requireEmailVerification: boolean };
   let fields: string[];
   let callNative: ReturnType<typeof vi.fn>;
@@ -341,6 +389,7 @@ describe('strapi-compat register', () => {
     (result.body as { error: { message: string } }).error.message;
 
   beforeEach(() => {
+    emailPassword = true;
     signUp = { enabled: true, requireEmailVerification: false };
     fields = ['company'];
     usernameSeen = [];
@@ -375,7 +424,10 @@ describe('strapi-compat register', () => {
             };
           }
 
-          return { get: async () => ({ signUp }), getSignUpFields: async () => fields };
+          return {
+            get: async () => ({ signUp, methods: { emailPassword } }),
+            getSignUpFields: async () => fields,
+          };
         },
       }),
     } as unknown as Core.Strapi;
@@ -455,6 +507,20 @@ describe('strapi-compat register', () => {
 
     expect(message(result)).toBe('Register action is currently disabled');
     expect(callNative).not.toHaveBeenCalled();
+  });
+
+  it('refuses to register while email and password sign-in is off, after the sign-up check', async () => {
+    emailPassword = false;
+
+    const result = await signUpWith(base);
+
+    expect(result.status).toBe(400);
+    expect(message(result)).toBe('This provider is disabled.');
+    expect(callNative).not.toHaveBeenCalled();
+
+    signUp.enabled = false;
+
+    expect(message(await signUpWith(base))).toBe('Register action is currently disabled');
   });
 
   it('answers an engine refusal with its status and code', async () => {
@@ -693,7 +759,12 @@ describe('strapi-compat reset, through the engine', () => {
     let engine: AuthEngine;
 
     const policy = { minLength: 8, maxLength: 128, requireMixedClasses: true };
+    const invalidateLegacy = vi.fn(async () => undefined);
     const strapi = {
+      config: { get: () => undefined },
+      sessionManager: Object.assign(() => ({ invalidateRefreshToken: invalidateLegacy }), {
+        hasOrigin: () => true,
+      }),
       db: {
         query: () => ({
           findOne: async ({ where }: { where: { documentId: string } }) =>
@@ -758,7 +829,7 @@ describe('strapi-compat reset, through the engine', () => {
         })
       );
 
-    return { auth, post, tokens, db, strapi };
+    return { auth, post, tokens, db, strapi, invalidateLegacy };
   };
 
   beforeEach(() => {
@@ -835,13 +906,23 @@ describe('strapi-compat reset, through the engine', () => {
   });
 
   it('answers a compat change-password body with { jwt, user } and leaves a native one alone', async () => {
-    const { auth, post } = build();
+    const { auth, post, db, invalidateLegacy } = build();
     const signedUp = await auth.api.signUpEmail({
       body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
       returnHeaders: true,
     });
     const cookie = signedUp.headers.get('set-cookie') ?? '';
     const authed = { cookie: cookie.split(';')[0] };
+
+    // A wrong current password changes nothing, and signs nothing out
+    const wrong = await post(
+      '/change-password',
+      { currentPassword: 'not-it', password: STRONG, passwordConfirmation: STRONG },
+      authed
+    );
+
+    expect(wrong.status).toBe(400);
+    expect(invalidateLegacy).not.toHaveBeenCalled();
 
     const compat = await post(
       '/change-password',
@@ -852,6 +933,8 @@ describe('strapi-compat reset, through the engine', () => {
 
     expect(compat.status).toBe(200);
     expect(answer).toMatchObject({ jwt: expect.any(String), user: expect.anything() });
+    // The old Users & Permissions sessions of the user go with the others
+    expect(invalidateLegacy).toHaveBeenCalledWith(String(db.user[0].id), undefined);
 
     // The other sessions were revoked, so the next calls carry the new one
     const renewed = { authorization: `Bearer ${answer.jwt}` };
@@ -973,6 +1056,7 @@ describe('strapi-compat refresh routes, through the engine', () => {
     const cfg = { ...base, refresh: { ...base.refresh, enabled } };
     let engine: AuthEngine;
     const strapi = {
+      config: { get: () => undefined },
       log: { error: vi.fn() },
       sessionManager: Object.assign(() => ({}), { hasOrigin: () => false }),
       plugin: () => ({ service: () => ({ get: () => engine }) }),
@@ -1369,6 +1453,7 @@ describe('strapi-compat refresh, with an old refresh token', () => {
       ]),
     };
     const deleteMany = vi.fn(async () => ({ count: overrides.claimed ?? 1 }));
+    const recordLegacyHit = vi.fn();
     const engine = {
       getSession: vi.fn(async () => null),
       createSession: vi.fn(async () => ({ id: 's2', userId: 'doc7', token: 'new-token' })),
@@ -1383,10 +1468,13 @@ describe('strapi-compat refresh, with an old refresh token', () => {
             : { status: 'completed', cutoverAt: new Date().toISOString() },
       }),
       db: { query: () => ({ findOne: async () => ({ documentId: 'doc7' }), deleteMany }) },
-      plugin: () => ({ service: () => ({ get: () => engine }) }),
+      plugin: () => ({
+        service: (name: string) =>
+          name === 'compat' ? { recordLegacyHit } : { get: () => engine },
+      }),
     } as unknown as Core.Strapi;
 
-    return { cfg, manager, engine, strapi, deleteMany };
+    return { cfg, manager, engine, strapi, deleteMany, recordLegacyHit };
   };
 
   const run = (ctx: ReturnType<typeof setup>) =>
@@ -1410,6 +1498,8 @@ describe('strapi-compat refresh, with an old refresh token', () => {
     expect(ctx.deleteMany).toHaveBeenCalledWith({
       where: { sessionId: 'old-session', userId: '7', origin: expect.any(String) },
     });
+    // The exchange counts as a use of an old token, which a device that only refreshes never makes otherwise
+    expect(ctx.recordLegacyHit).toHaveBeenCalledTimes(1);
   });
 
   it('refuses one that is not valid, one issued after the cutover, and any without a completed migration', async () => {
@@ -1421,6 +1511,7 @@ describe('strapi-compat refresh, with an old refresh token', () => {
     ]) {
       expect((await run(ctx)).status).toBe(401);
       expect(ctx.engine.createSession).not.toHaveBeenCalled();
+      expect(ctx.recordLegacyHit).not.toHaveBeenCalled();
     }
 
     // Made after the cutover, which is when the migration was recorded: not one of the old tokens
@@ -1435,5 +1526,6 @@ describe('strapi-compat refresh, with an old refresh token', () => {
 
     expect((await run(ctx)).status).toBe(401);
     expect(ctx.engine.createSession).not.toHaveBeenCalled();
+    expect(ctx.recordLegacyHit).not.toHaveBeenCalled();
   });
 });

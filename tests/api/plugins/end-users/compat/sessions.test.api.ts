@@ -8,6 +8,7 @@ import { createRequest } from 'api-tests/request';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
+import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
 import { makeLegacySecret, mintOldRefreshToken } from '../utils/legacy-tokens';
 import {
   ENGINE_UIDS,
@@ -287,6 +288,79 @@ describe('end-users compat: refresh, logout and sessions', () => {
     expect(listed.body.data[0]).toMatchObject({ deviceId: 'old-device', current: true });
     // The old token is spent
     expect((await refresh({ refreshToken: old.refreshToken })).status).toBe(401);
+  });
+
+  describe('the old refresh sessions of a user, after the password is changed or the user signs out everywhere', () => {
+    const NEW_PASSWORD = 'N3w-Passw0rd!long';
+
+    it('a password change signs them out', async () => {
+      const user = await seedUpUser(strapi, { email: 'ned@example.com' });
+      const old = await mintOldRefreshToken(strapi, user.id, 'old-device');
+      const current = await signIn(user.email, user.password);
+
+      const changed = await rq.post('/api/auth/change-password', {
+        headers: bearer(current.body.jwt),
+        body: {
+          currentPassword: user.password,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        },
+      });
+
+      expect(changed.status).toBe(200);
+      expect((await refresh({ refreshToken: old.refreshToken })).status).toBe(401);
+    });
+
+    it('a password reset signs them out', async () => {
+      const user = await seedUpUser(strapi, { email: 'olly@example.com' });
+      const old = await mintOldRefreshToken(strapi, user.id, 'old-device');
+
+      const settings = strapi.plugin('end-users').service('settings');
+
+      await settings.set({ redirects: { passwordReset: '/reset' } });
+      clearSentEmails();
+
+      expect(
+        (await rq.post('/api/auth/forgot-password', { body: { email: user.email } })).status
+      ).toBe(200);
+
+      const deadline = Date.now() + 3000;
+
+      while (sentEmails().length < 1 && Date.now() < deadline) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => {
+          setTimeout(resolve, 20);
+        });
+      }
+
+      const link = new URL(sentEmails()[0].text.match(/https?:\/\/\S+/)?.[0] as string);
+      const reset = await rq.post('/api/auth/reset-password', {
+        body: {
+          code: link.searchParams.get('code'),
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        },
+      });
+
+      await settings.set({ redirects: { passwordReset: null } });
+
+      expect(reset.status).toBe(200);
+      expect((await refresh({ refreshToken: old.refreshToken })).status).toBe(401);
+    });
+
+    it('signing out everywhere signs them out', async () => {
+      const user = await seedUpUser(strapi, { email: 'pat@example.com' });
+      const old = await mintOldRefreshToken(strapi, user.id, 'old-device');
+      const current = await signIn(user.email, user.password);
+
+      const out = await rq.post('/api/auth/logout', {
+        body: { scope: 'all' },
+        headers: bearer(current.body.jwt),
+      });
+
+      expect(out.status).toBe(200);
+      expect((await refresh({ refreshToken: old.refreshToken })).status).toBe(401);
+    });
   });
 
   it('an old access token is not accepted as a refresh token', async () => {

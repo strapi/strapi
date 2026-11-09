@@ -147,8 +147,9 @@ const connectController = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const engine = engineOf();
+      const target = endpoint(`/callback/${encodeURIComponent(provider)}`);
       const response = await engine.handle(
-        new Request(`${endpoint(`/callback/${encodeURIComponent(provider)}`)}${ctx.search}`, {
+        new Request(`${target}${ctx.search}`, {
           method: 'GET',
           headers: forwardedHeaders(ctx, { cookie: ctx.get('cookie') }),
           redirect: 'manual',

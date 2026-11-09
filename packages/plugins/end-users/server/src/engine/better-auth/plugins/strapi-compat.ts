@@ -15,6 +15,7 @@ import { APIError, createAuthEndpoint, createAuthMiddleware } from 'better-auth/
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
+import { PLUGIN_ID } from '../../../constants';
 import type { CompatConfig } from '../../../compat/config';
 import { callback } from '../../../compat/endpoints/callback';
 import { emailConfirmation, sendEmailConfirmation } from '../../../compat/endpoints/confirmation';
@@ -31,13 +32,23 @@ import { logout, refresh, revokeSession, sessions } from '../../../compat/endpoi
 import type { CompatResult } from '../../../compat/types';
 import { pendingDevice } from '../../../compat/pending-device';
 import { pendingUsername } from '../../../compat/pending-username';
+import { revokeLegacySessions } from '../../../compat/legacy-sessions';
 import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 
 /** The compat paths, which share one window each. */
 const SIGN_IN_PATHS = new Set<string>(['/local', '/local/register']);
 const EMAIL_PATHS = new Set<string>(['/forgot-password', '/send-email-confirmation']);
 
-const WINDOW_SECONDS = 60;
+const DEFAULT_WINDOW_SECONDS = 60;
+const SIGN_IN_MAX = 5;
+const EMAIL_MAX = 3;
+
+/** A positive whole number the project set under `rateLimit`, or `undefined`. */
+const limitSetting = (strapi: Core.Strapi, key: 'window' | 'max'): number | undefined => {
+  const value = strapi.config.get(`plugin::${PLUGIN_ID}.rateLimit.${key}`);
+
+  return typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : undefined;
+};
 
 /** Turns what a compat endpoint decided into the answer: a refusal is thrown with its own body. */
 const respond = (
@@ -117,10 +128,10 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
       databaseHooks: {
         user: {
           create: {
-            async before() {
+            before() {
               const username = pendingUsername();
 
-              return username === undefined ? undefined : { data: { username } };
+              return Promise.resolve(username === undefined ? undefined : { data: { username } });
             },
           },
         },
@@ -128,12 +139,12 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
         // the session was made for, or a new one
         session: {
           create: {
-            async before(session: Record<string, unknown>) {
+            before(session: Record<string, unknown>) {
               if (typeof session.deviceId === 'string' && session.deviceId !== '') {
-                return undefined;
+                return Promise.resolve(undefined);
               }
 
-              return { data: { deviceId: pendingDevice() ?? randomUUID() } };
+              return Promise.resolve({ data: { deviceId: pendingDevice() ?? randomUUID() } });
             },
           },
         },
@@ -261,18 +272,34 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
         }),
       },
     ],
+    after: [
+      {
+        // A password change signs the user out of the old Users & Permissions sessions too, which
+        // the native `revokeOtherSessions` does not reach. The compat shape runs this route as well
+        matcher: (context) => context.path === '/change-password',
+        handler: createAuthMiddleware(async (ctx) => {
+          const userId = ctx.context.session?.user.id;
+
+          if (userId && !(ctx.context.returned instanceof APIError)) {
+            await revokeLegacySessions(strapi, userId);
+          }
+        }),
+      },
+    ],
   },
 
+  // The windows and the limits of the project's `rateLimit` when it sets them, the compat paths'
+  // own otherwise. A rule of `customRules` for a path still wins over these.
   rateLimit: [
     {
       pathMatcher: (path: string) => SIGN_IN_PATHS.has(path),
-      window: WINDOW_SECONDS,
-      max: 5,
+      window: limitSetting(strapi, 'window') ?? DEFAULT_WINDOW_SECONDS,
+      max: limitSetting(strapi, 'max') ?? SIGN_IN_MAX,
     },
     {
       pathMatcher: (path: string) => EMAIL_PATHS.has(path),
-      window: WINDOW_SECONDS,
-      max: 3,
+      window: limitSetting(strapi, 'window') ?? DEFAULT_WINDOW_SECONDS,
+      max: limitSetting(strapi, 'max') ?? EMAIL_MAX,
     },
   ],
 });

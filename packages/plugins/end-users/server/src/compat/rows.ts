@@ -199,9 +199,10 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
     note:
       'The data move belongs to the migration: users, roles, permissions and their links, including provider, ' +
       'confirmed, blocked, documentId and custom attributes. Each user keeps the integer id, because old tokens and ' +
-      'old front ends refer to it. The confirmation token is carried over so links sent before the cutover keep ' +
-      'working. Reset tokens that were pending at the cutover are not carried over, so a reset in flight is lost and ' +
-      'the user asks again.',
+      'old front ends refer to it. A ?confirmation= link sent before the cutover works only once the migration ' +
+      'carries the confirmation token and adds the reader that checks it; nothing reads a carried-over token today, so ' +
+      'until then such a link does not confirm the address. Reset tokens that were pending at the cutover are not ' +
+      'carried over, so a reset in flight is lost and the user asks again.',
   },
   {
     row: 9,
@@ -610,7 +611,9 @@ export const COMPAT_ROWS: ReadonlyArray<CompatRow> = [
       '/api/users uses the core pagination, where the old plugin returned every user in one array; a front end that ' +
       'expected them all must page. Filters and populate on role need the role read permission granted to the ' +
       "caller's role, or they are refused or dropped. Writing role, confirmed, blocked or provider through " +
-      '/api/users is refused, and a missing user answers 404 where the old plugin answered 204.',
+      '/api/users is refused, and a missing user answers 404 where the old plugin answered 204. Changing email through ' +
+      'PUT /api/users/:id is refused too, naming the field: the old plugin allowed it, and here an address changes only ' +
+      'through /change-email, which proves the new one belongs to the user. The Content Manager is not affected.',
   },
   {
     row: 31,

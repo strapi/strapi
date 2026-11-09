@@ -150,10 +150,13 @@ const createFilter = (urlVariables: readonly string[]) =>
 export const cleanTemplateHtml = (html: string, urlVariables: readonly string[] = []): string =>
   createFilter(urlVariables).process(html);
 
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
 const placeholderPattern = (name: string) =>
-  new RegExp(`\\{\\{\\s*${escapeRegExp(name)}\\s*\\}\\}`, 'g');
+  new RegExp(String.raw`\{\{\s*${escapeRegExp(name)}\s*\}\}`, 'g');
+
+const occurrences = (text: string, name: string): number =>
+  [...text.matchAll(placeholderPattern(name))].length;
 
 /** Counts placeholders as written and as a browser would read them once its HTML entities are decoded. */
 const countOccurrences = (source: string, secrets: readonly string[]): Map<string, number> => {
@@ -161,10 +164,7 @@ const countOccurrences = (source: string, secrets: readonly string[]): Map<strin
   const decoded = friendlyAttrValue(source);
 
   for (const secret of secrets) {
-    const count = Math.max(
-      source.match(placeholderPattern(secret))?.length ?? 0,
-      decoded.match(placeholderPattern(secret))?.length ?? 0
-    );
+    const count = Math.max(occurrences(source, secret), occurrences(decoded, secret));
 
     if (count > 0) {
       counts.set(secret, count);

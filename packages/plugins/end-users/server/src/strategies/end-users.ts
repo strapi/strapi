@@ -220,54 +220,55 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
     return userId;
   };
 
-  const authenticate = async (ctx: Context): Promise<Authentication> => {
+  /**
+   * Whose request this is: the `documentId` of the session's user, or of a legacy token's, or the
+   * refusal (`Authentication`) of credentials that are not good, or `null` for no credentials at all.
+   */
+  const identify = async (
+    ctx: Context
+  ): Promise<{ userId: string; cookies: string[] } | { refusal: Authentication } | null> => {
     // An error here (the database is down) is an error, not a request with no credentials: it
     // propagates and answers 500, and the request is never given the Public role because of it.
     const { session, credentials, source, setCookies } = await engine().lookupSession(
       toHeaders(ctx)
     );
 
-    let userId = session?.userId ?? null;
-
-    if (!session) {
-      if (!credentials) {
-        return {
-          authenticated: true,
-          credentials: null,
-          ability: await abilities().forUser(null, []),
-        };
-      }
-
-      // A stale session cookie is cleared: kept, it would get the client a 401 on every request
-      // until it ran out
+    if (session) {
       if (source === 'cookie') {
-        sendCookies(ctx, setCookies);
+        await assertTrustedOrigin(ctx);
       }
 
-      // Only a Bearer value can be a legacy token, and only with the compatibility mode on
-      userId = compat && source === 'bearer' ? await legacyUserId(ctx) : null;
-
-      // Credentials that are not good are a 401, never the Public role
-      if (!userId) {
-        return { authenticated: false, error: invalidCredentials() };
-      }
-    } else if (source === 'cookie') {
-      await assertTrustedOrigin(ctx);
+      // The engine sends a fresh cookie when it extends a session. A cookie client only keeps a
+      // sliding lifetime if that cookie reaches it. A Bearer client has no use for one.
+      return { userId: session.userId, cookies: source === 'cookie' ? setCookies : [] };
     }
 
-    const user = (await strapi.db
-      .query(USER_UID)
-      .findOne({ where: { documentId: userId } })) as Plain | null;
-
-    // A session, or a legacy token, whose user is gone is not a credential
-    if (!user) {
-      return { authenticated: false, error: invalidCredentials() };
+    if (!credentials) {
+      return null;
     }
 
-    // Checked here, on every request, because a ban takes effect on the next one. The error is
-    // thrown, not returned: a returned error is always a 401, and carries no code. It is a
-    // `PolicyError` so that its message and code survive core's `authorize` on a GET (see
-    // `assertTrustedOrigin`).
+    // A stale session cookie is cleared: kept, it would get the client a 401 on every request
+    // until it ran out
+    if (source === 'cookie') {
+      sendCookies(ctx, setCookies);
+    }
+
+    // Only a Bearer value can be a legacy token, and only with the compatibility mode on
+    const userId = compat && source === 'bearer' ? await legacyUserId(ctx) : null;
+
+    // Credentials that are not good are a 401, never the Public role
+    return userId
+      ? { userId, cookies: [] }
+      : { refusal: { authenticated: false, error: invalidCredentials() } };
+  };
+
+  /**
+   * The checks every request of a signed-in user passes, made on each one because a ban takes
+   * effect on the next request. The errors are thrown, not returned: a returned error is always a
+   * 401, and carries no code. They are `PolicyError`s so that their message and code survive core's
+   * `authorize` on a GET (see `assertTrustedOrigin`).
+   */
+  const assertUsable = async (user: Plain): Promise<RoleSummary[]> => {
     if (banState(user) === 'active') {
       throw new errors.PolicyError('You have been banned from this application.', {
         code: 'USER_BANNED',
@@ -294,6 +295,35 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
       });
     }
 
+    return held;
+  };
+
+  const authenticate = async (ctx: Context): Promise<Authentication> => {
+    const identity = await identify(ctx);
+
+    if (identity === null) {
+      return {
+        authenticated: true,
+        credentials: null,
+        ability: await abilities().forUser(null, []),
+      };
+    }
+
+    if ('refusal' in identity) {
+      return identity.refusal;
+    }
+
+    const user = (await strapi.db
+      .query(USER_UID)
+      .findOne({ where: { documentId: identity.userId } })) as Plain | null;
+
+    // A session, or a legacy token, whose user is gone is not a credential
+    if (!user) {
+      return { authenticated: false, error: invalidCredentials() };
+    }
+
+    const held = await assertUsable(user);
+
     const endUser = toCredentials(user, held);
     // The row, not the credentials: conditions read `$user.<attribute>`, and the credentials carry
     // seven of them. The ability service leaves out what is private.
@@ -301,11 +331,7 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
 
     ctx.state.user = endUser;
 
-    // The engine sends a fresh cookie when it extends a session. A cookie client only keeps a
-    // sliding lifetime if that cookie reaches it. A Bearer client has no use for one.
-    if (source === 'cookie') {
-      sendCookies(ctx, setCookies);
-    }
+    sendCookies(ctx, identity.cookies);
 
     return { authenticated: true, credentials: endUser, ability };
   };

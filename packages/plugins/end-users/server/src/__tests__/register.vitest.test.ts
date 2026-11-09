@@ -46,7 +46,8 @@ const setup = ({
   const service = vi.fn(() => ({ get, register: templateRegister }));
   // The GraphQL plugin's extension service: what the engine's types are hidden through
   const disable = vi.fn();
-  const shadowCRUD = vi.fn(() => ({ disable }));
+  const disableQueries = vi.fn();
+  const shadowCRUD = vi.fn(() => ({ disable, disableQueries }));
   const graphqlService = vi.fn(() => ({ shadowCRUD }));
   const plugin = vi.fn((name: string) => {
     if (name !== 'graphql') {
@@ -109,6 +110,7 @@ const setup = ({
     addQueryParams,
     shadowCRUD,
     disable,
+    disableQueries,
     graphqlService,
   };
 };
@@ -222,10 +224,21 @@ describe('register', () => {
       expect(shadowCRUD.mock.calls.map(([uid]: unknown[]) => uid).sort()).toEqual([
         'plugin::end-users.jwk',
         'plugin::end-users.permission',
+        'plugin::end-users.role',
         'plugin::end-users.session',
         'plugin::end-users.two-factor',
       ]);
       expect(disable).toHaveBeenCalledTimes(4);
+    });
+
+    it('leaves the role no query of its own: it is read through the user', () => {
+      const { strapi, shadowCRUD, disable, disableQueries } = setup({ tables });
+
+      register({ strapi });
+
+      expect(disableQueries).toHaveBeenCalledTimes(1);
+      expect(shadowCRUD).toHaveBeenLastCalledWith('plugin::end-users.role');
+      expect(disable).not.toHaveBeenCalledWith('plugin::end-users.role');
     });
 
     it('follows the engine: a type the configuration does not produce is not named', () => {
@@ -235,6 +248,7 @@ describe('register', () => {
 
       expect(shadowCRUD.mock.calls.map(([uid]: unknown[]) => uid)).toEqual([
         'plugin::end-users.permission',
+        'plugin::end-users.role',
       ]);
     });
 

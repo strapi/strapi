@@ -24,6 +24,9 @@ const DEFAULT_LOCALE = 'en';
 const MAX_LOCALE_LENGTH = 16;
 const LOCALE_PATTERN = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
 
+/** `{{ a }}, {{ b }}`: the variables as they are written in a template. */
+const placeholders = (names: string[]): string => names.map((name) => `{{ ${name} }}`).join(', ');
+
 const assertLocale = (locale: string) => {
   if (
     typeof locale !== 'string' ||
@@ -163,7 +166,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (misplaced.length > 0) {
         throw new ValidationError(
-          `The HTML puts ${misplaced.map((name) => `{{ ${name} }}`).join(', ')} where it could leak: ` +
+          `The HTML puts ${placeholders(misplaced)} where it could leak: ` +
             'a variable that carries a secret may only appear in text or in a link (<a href>)'
         );
       }
@@ -198,13 +201,17 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
       let template = await get(key, opts.locale);
 
       // Rows saved before the save-time checks, or written without them, are checked again here.
+      // A row whose HTML the cleaning would change (a tag left open, say, which a browser reads
+      // differently from the way it is split here) is not one that can be checked, so it is not sent.
       if (!template.isDefault) {
         const misplaced = findMisplacedSecrets(template.html, definition.secrets);
+        const unclean = cleanTemplateHtml(template.html, definition.urls) !== template.html;
 
-        if (misplaced.length > 0) {
+        if (misplaced.length > 0 || unclean) {
           strapi.log.warn(
-            `Email template "${key}" puts ${misplaced.map((name) => `{{ ${name} }}`).join(', ')} where it ` +
-              'could leak, so the registered default is sent instead'
+            misplaced.length > 0
+              ? `Email template "${key}" puts ${placeholders(misplaced)} where it could leak, so the registered default is sent instead`
+              : `Email template "${key}" holds HTML that was not cleaned, so the registered default is sent instead`
           );
           template = toDetail(key, template.locale, definition);
         }

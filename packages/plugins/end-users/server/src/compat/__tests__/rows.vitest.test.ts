@@ -32,8 +32,27 @@ const read = (file: string): string => {
   return sources.get(file) as string;
 };
 
-const hasTitle = (file: string, title: string): boolean =>
-  ["'", '"', '`'].some((quote) => read(file).includes(`(${quote}${title}${quote}`));
+/** A call that does not run: `it.skip`, `it.todo`, `xit`, `xtest`. */
+const SKIPPED_CALLEE = /(?:\.(?:skip|todo)|^x(?:it|test))$/;
+
+/** Whether `title` is the title of a test that runs: a skipped or todo one is no coverage. */
+const hasTitle = (file: string, title: string): boolean => {
+  const source = read(file);
+
+  return ["'", '"', '`'].some((quote) => {
+    const needle = `(${quote}${title}${quote}`;
+
+    for (let at = source.indexOf(needle); at !== -1; at = source.indexOf(needle, at + 1)) {
+      const callee = /[\w.$]+$/.exec(source.slice(0, at))?.[0] ?? '';
+
+      if (!SKIPPED_CALLEE.test(callee)) {
+        return true;
+      }
+    }
+
+    return false;
+  });
+};
 
 describe('the compat coverage ledger', () => {
   it('has the 36 rows of the checklist, once each', () => {
@@ -53,6 +72,23 @@ describe('the compat coverage ledger', () => {
         ).toBe(true);
       }
     }
+  });
+
+  it('does not count a skipped or todo test as coverage', () => {
+    // Built from pieces, so this file never holds a skipped test of its own
+    const skipped = ['it.sk', "ip('a title', () => {});", "xit('another', () => {});"].join('');
+    const todo = ['it.to', "do('a third');"].join('');
+    const running = "it('a title', () => {});";
+
+    sources.set('fake.ts', [skipped, todo, running].join('\n'));
+
+    expect(hasTitle('fake.ts', 'a title')).toBe(true);
+    expect(hasTitle('fake.ts', 'another')).toBe(false);
+    expect(hasTitle('fake.ts', 'a third')).toBe(false);
+
+    sources.set('fake.ts', skipped);
+
+    expect(hasTitle('fake.ts', 'a title')).toBe(false);
   });
 
   it('names only tests that are in their files', () => {

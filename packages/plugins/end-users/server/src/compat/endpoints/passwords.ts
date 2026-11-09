@@ -26,8 +26,7 @@ interface PasswordInput {
   headers: Headers | undefined;
 }
 
-const has = (body: Record<string, unknown>, key: string): boolean =>
-  Object.prototype.hasOwnProperty.call(body, key);
+const has = (body: Record<string, unknown>, key: string): boolean => Object.hasOwn(body, key);
 
 /**
  * The reset body users-permissions took: a `code` and no `token`. A body with both is the native
@@ -106,7 +105,7 @@ const signInWith = async (
     .findOne({ where: { documentId: userId }, select: ['email'] })) as { email?: unknown } | null;
 
   if (typeof user?.email !== 'string') {
-    throw new Error('The user of the reset could not be found.');
+    throw new TypeError('The user of the reset could not be found.');
   }
 
   const { headers: answered, response } = await engineOf(strapi).callNative('signInEmail', {

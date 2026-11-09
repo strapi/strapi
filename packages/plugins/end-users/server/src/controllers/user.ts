@@ -19,7 +19,7 @@ export default factories.createCoreController(USER_UID, ({ strapi }) => {
   const compat = createUsersCompat(strapi);
 
   return {
-    async find(ctx: Koa.Context) {
+    find(ctx: Koa.Context) {
       return compatOr(
         strapi,
         () => compat.find(ctx),
@@ -27,7 +27,7 @@ export default factories.createCoreController(USER_UID, ({ strapi }) => {
       );
     },
 
-    async findOne(ctx: Koa.Context) {
+    findOne(ctx: Koa.Context) {
       return compatOr(
         strapi,
         () => compat.findOne(ctx),
@@ -35,7 +35,7 @@ export default factories.createCoreController(USER_UID, ({ strapi }) => {
       );
     },
 
-    async create(ctx: Koa.Context) {
+    create(ctx: Koa.Context) {
       return compatOr(
         strapi,
         () => compat.create(ctx),
@@ -43,7 +43,7 @@ export default factories.createCoreController(USER_UID, ({ strapi }) => {
       );
     },
 
-    async update(ctx: Koa.Context) {
+    update(ctx: Koa.Context) {
       return compatOr(
         strapi,
         () => compat.update(ctx),
@@ -51,7 +51,7 @@ export default factories.createCoreController(USER_UID, ({ strapi }) => {
       );
     },
 
-    async delete(ctx: Koa.Context) {
+    delete(ctx: Koa.Context) {
       return compatOr(
         strapi,
         () => compat.delete(ctx),
@@ -59,13 +59,11 @@ export default factories.createCoreController(USER_UID, ({ strapi }) => {
       );
     },
 
-    async count(ctx: Koa.Context) {
+    count(ctx: Koa.Context) {
       return compatOr(
         strapi,
         () => compat.count(ctx),
-        () => {
-          throw new errors.NotFoundError();
-        }
+        () => Promise.reject(new errors.NotFoundError())
       );
     },
   };

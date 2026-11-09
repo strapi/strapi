@@ -11,7 +11,7 @@ import {
 import { readCompatConfig } from './compat/config';
 import { registerCompatGraphql } from './compat/graphql/compat-schema';
 import { applyGraphqlTypeNames } from './compat/graphql/names';
-import { PERMISSION_UID, PLUGIN_ID, USER_UID } from './constants';
+import { PERMISSION_UID, PLUGIN_ID, ROLE_UID, USER_UID } from './constants';
 import { registerGeneratedContentTypes } from './content-types/register-generated';
 import { assignDefaultRoleMiddleware } from './document-middlewares/assign-default-role';
 import { cascadeUserDeleteMiddleware } from './document-middlewares/cascade-user-delete';
@@ -53,6 +53,10 @@ const hideEngineTypesFromGraphQL = (strapi: Core.Strapi, registered: string[]) =
   for (const uid of [...uids, PERMISSION_UID]) {
     shadowCRUD(uid).disable();
   }
+
+  // A role is read through the user's relation, under the `find` grant on it (there is no `/api/roles`
+  // over REST either): its own queries would list every role to whoever holds that grant
+  shadowCRUD(ROLE_UID).disableQueries();
 };
 
 const SECRET_ENV = 'END_USERS_SECRET';
