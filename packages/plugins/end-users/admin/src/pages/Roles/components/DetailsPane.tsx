@@ -22,7 +22,7 @@ import type { PermissionsTabId } from '@strapi/admin/strapi-admin';
 /** How many policies and middlewares a route lists before "Show N more" */
 const RULES_SHOWN = 3;
 
-/** The colours of the method badge: the admin's own, from read to remove */
+/** The colors of the method badge: the admin's own, from read to remove */
 const METHOD_COLORS: Record<string, 'secondary' | 'success' | 'warning' | 'danger' | 'neutral'> = {
   GET: 'secondary',
   POST: 'success',

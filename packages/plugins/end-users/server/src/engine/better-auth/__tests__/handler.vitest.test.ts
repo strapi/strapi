@@ -185,7 +185,7 @@ describe('toFetchRequest', () => {
   });
 
   it('does not turn another content type into JSON: Better Auth decides on the type the client sent', async () => {
-    // koa-body also parses these into an object; labelling them application/json would let a
+    // koa-body also parses these into an object; labeling them application/json would let a
     // cross-site form post reach endpoints that only take JSON
     for (const type of ['application/vnd.api+json', 'application/csp-report']) {
       const req = toFetchRequest(

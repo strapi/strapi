@@ -75,7 +75,7 @@ describe('notify-email-change', () => {
   it('sends the notice when an admin changes the email in the Content Manager', async () => {
     const { run, sendTemplate } = setup({ stored: { email: 'old@example.com' } });
 
-    // The Content Manager sends whatever was typed: the normalising rule runs before this one
+    // The Content Manager sends whatever was typed: the normalizing rule runs before this one
     await run('  Admin-Set@Example.com ');
 
     expect(sendTemplate).toHaveBeenCalledWith(

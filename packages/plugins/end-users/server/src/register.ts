@@ -126,7 +126,7 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   applyGraphqlTypeNames(strapi, compat);
   registerCompatGraphql(strapi, compat);
 
-  // In this order: the email is normalised first, so the uniqueness check compares what is stored,
+  // In this order: the email is normalized first, so the uniqueness check compares what is stored,
   // and a create that is refused for a taken email never looks up the default role. The rules after
   // them do their work once the user is written (a password, the profile) or around a delete or a
   // ban; the later a rule is registered, the closer it is to the write, so the profile is made

@@ -10,7 +10,7 @@ const WRITING_ACTIONS: ReadonlySet<string> = new Set(['create', 'update', 'clone
  * `normalize-email`: whatever writes an end user through the Document Service (the Content Manager,
  * a lifecycle, a script, the adapter) stores the email trimmed and in lower case.
  *
- * Requests that arrive through Better Auth's endpoints are normalised earlier, by `strapi-normalize`,
+ * Requests that arrive through Better Auth's endpoints are normalized earlier, by `strapi-normalize`,
  * because Better Auth validates the address before it gets here; this is the same rule for every
  * other way in. Without it `Alice@Example.com` and `alice@example.com` would be two users in a
  * database that compares strings exactly.

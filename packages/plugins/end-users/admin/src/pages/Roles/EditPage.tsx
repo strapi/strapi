@@ -121,7 +121,7 @@ interface SubjectSettingsContextValue {
 }
 
 /**
- * What the Settings button of each content type reads. The editor is memoised and draws those
+ * What the Settings button of each content type reads. The editor is memoized and draws those
  * buttons through `renderSubjectActions`, so they get their data from here: a change of settings
  * renders the buttons and not the editor.
  */
@@ -324,7 +324,7 @@ const PermissionsPanelBase = ({
     [rows, setFormValue]
   );
 
-  // Stable, like every callback of the memoised panel: the slot reads what it shows from context
+  // Stable, like every callback of the memoized panel: the slot reads what it shows from context
   const renderSubjectActions = React.useCallback<
     NonNullable<PermissionsProps['renderSubjectActions']>
   >(

@@ -896,7 +896,7 @@ describe('end-users: admin API', () => {
       expect(await strapi.documents(ROLE_UID).count({ filters: { type: 'public' } })).toBe(1);
     });
 
-    it('refuses a file that is not a role file, or whose rows this installation cannot honour, and creates nothing', async () => {
+    it('refuses a file that is not a role file, or whose rows this installation cannot honor, and creates nothing', async () => {
       const before = await strapi.documents(ROLE_UID).count({});
 
       const answers = await sequentially([

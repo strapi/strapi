@@ -10,7 +10,7 @@
  *   `where`, and asking the schema about `documentId` would throw.
  * - conditions on the same field no longer overwrite each other: `expiresAt > a AND expiresAt < b`
  *   keeps both.
- * - `mode: 'insensitive'` is honoured through Strapi's `$eqi`, `$nei`, `$containsi`, ... operators.
+ * - `mode: 'insensitive'` is honored through Strapi's `$eqi`, `$nei`, `$containsi`, ... operators.
  */
 import type { CleanedWhere } from 'better-auth/adapters';
 

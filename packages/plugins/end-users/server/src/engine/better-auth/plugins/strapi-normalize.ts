@@ -2,7 +2,7 @@
  * `strapi-normalize`: trims and lower-cases the email of every request before anything else reads it.
  *
  * Better Auth validates the address (`z.email()` refuses a trailing space) before the Document
- * Service middleware that normalises emails on write (`normalize-email`) ever runs, so
+ * Service middleware that normalizes emails on write (`normalize-email`) ever runs, so
  * `"Alice@Example.com "` would be refused at the door rather than stored as `alice@example.com`.
  * This is the same rule, applied where Better Auth reads the request body. The plugin is first in
  * the Strapi slot so the plugins after it (roles, profile, and the project's) only see the normal

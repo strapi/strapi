@@ -79,7 +79,7 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
   const signIn = (email: string, password = PASSWORD, headers: Record<string, string> = {}) =>
     rq.post('/api/auth/sign-in/email', { body: { email, password }, headers });
 
-  /** A user who signed up, and what they would send to be recognised */
+  /** A user who signed up, and what they would send to be recognized */
   const signedUp = async (extra: Record<string, unknown> = {}) => {
     emails += 1;
 

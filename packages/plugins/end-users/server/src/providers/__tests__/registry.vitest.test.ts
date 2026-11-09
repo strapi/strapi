@@ -239,7 +239,7 @@ describe('validating field values against the definition', () => {
 });
 
 describe('defineProvider', () => {
-  it('makes a definition of kind oauth that isProviderDefinition recognises', () => {
+  it('makes a definition of kind oauth that isProviderDefinition recognizes', () => {
     const definition = defineProvider({ id: 'my-idp', name: 'My IdP', init: () => ({}) });
 
     expect(definition.kind).toBe('oauth');

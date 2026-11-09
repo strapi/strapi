@@ -329,7 +329,7 @@ describe('compileBuilderCondition', () => {
         ).toBe(true);
       });
 
-      it('normalises a time: 09:30:00.000 is 09:30, and later is later', () => {
+      it('normalizes a time: 09:30:00.000 is 09:30, and later is later', () => {
         const stored = { opensAt: '09:30:00.000' };
 
         expect(holdsFor(onProfile('opensAt', '$eq', fixed('09:30')), stored)).toBe(true);

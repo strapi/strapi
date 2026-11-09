@@ -7,7 +7,7 @@ import { guard } from './guard';
 /**
  * The builder's writes: the admin must be signed in and hold `conditions.update`, and only then does
  * Strapi have to be running in development (`plugin::end-users.is-development`), so that only an
- * authorised admin learns the environment.
+ * authorized admin learns the environment.
  */
 const writeGuard = (): Core.RouteConfig => ({
   policies: [

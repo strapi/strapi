@@ -230,7 +230,7 @@ const SOCIAL: ProviderDefinition[] = [
       loginUrl: url('Login URL', { hint: 'A My Domain URL. Empty uses the environment.' }),
     },
   }),
-  social('vk', { name: 'VK', fields: { scheme: select('Colour scheme', ['light', 'dark']) } }),
+  social('vk', { name: 'VK', fields: { scheme: select('Color scheme', ['light', 'dark']) } }),
   social('zoom', { name: 'Zoom' }),
   social('notion', { name: 'Notion' }),
   social('kakao', { name: 'Kakao' }),

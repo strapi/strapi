@@ -12,8 +12,8 @@ describe('Templates ListPage', () => {
 
     expect(screen.getByText('Asks a new user to confirm their email address')).toBeInTheDocument();
     expect(screen.getByText('en, fr')).toBeInTheDocument();
-    // Only the customised template carries the badge.
-    expect(screen.getAllByText('Customised')).toHaveLength(1);
+    // Only the customized template carries the badge.
+    expect(screen.getAllByText('Customized')).toHaveLength(1);
   });
 
   it('lists every template without a prefix', async () => {

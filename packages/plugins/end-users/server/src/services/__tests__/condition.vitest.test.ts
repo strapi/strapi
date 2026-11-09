@@ -869,7 +869,7 @@ exports.default = {
               query: objectQuery,
               source: 'builtin',
             },
-            // Computed when it runs: a function of the user is never serialised
+            // Computed when it runs: a function of the user is never serialized
             { name: 'api::computed', displayName: 'Computed', query: () => true, source: 'code' },
             mine(),
           ],

@@ -109,7 +109,7 @@ interface Documents {
 /**
  * The part of the database layer the engine-table writes use. `where` here is the same filter
  * object the Document Service takes (attribute names, `$eq`, `$and`, ...), but it is applied as
- * written: no sanitising, no draft/publish handling.
+ * written: no sanitizing, no draft/publish handling.
  */
 interface Db {
   findOne(params: { where: Row }): Promise<Row | null>;

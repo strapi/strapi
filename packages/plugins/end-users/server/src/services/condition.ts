@@ -685,7 +685,7 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
    * One condition as the admin's list shows it. A builder condition carries itself as version 2
    * (`builder`), what it names that is gone (`stale`) and the roles its Who checks name
    * (`rolesNamed`); a code definition carries its query when that is a static object, and a function
-   * of the user is computed when it runs and is never serialised.
+   * of the user is computed when it runs and is never serialized.
    */
   const toListItem = (
     definition: ContentApiConditionDefinition,

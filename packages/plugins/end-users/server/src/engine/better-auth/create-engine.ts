@@ -534,7 +534,7 @@ const isPrefixOfSupportedPath = (path: string[]) =>
   );
 
 /**
- * The options in `auth` that are passed to Better Auth as they are but are not modelled by the
+ * The options in `auth` that are passed to Better Auth as they are but are not modeled by the
  * plugin: `plugins` and the email senders (`SUPPORTED_SENDERS`) are supported, everything else is
  * experimental.
  */

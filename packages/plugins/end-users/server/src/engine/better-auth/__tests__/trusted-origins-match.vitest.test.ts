@@ -66,7 +66,7 @@ const matchesAnyWebOrigin = (pattern: string) =>
   GROUPS.some((group) => group.some((url) => isTrusted(pattern, url)));
 
 /**
- * Pattern, and whether it trusts every origin of a web scheme. Labelled by hand, so that a change
+ * Pattern, and whether it trusts every origin of a web scheme. Labeled by hand, so that a change
  * in Better Auth's matcher fails here and says which side moved.
  */
 const CASES: Array<[pattern: string, everyOrigin: boolean]> = [

@@ -166,7 +166,7 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
      *
      * Calls with the same link at the same moment are one after the other: the read, the
      * confirmation and the session run in a transaction that first locks the user's row
-     * (`SELECT ... FOR UPDATE`; SQLite serialises its writers itself), so the second call reads the
+     * (`SELECT ... FOR UPDATE`; SQLite serializes its writers itself), so the second call reads the
      * address as already confirmed.
      */
     async confirmEmail(

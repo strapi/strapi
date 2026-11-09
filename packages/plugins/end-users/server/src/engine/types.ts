@@ -82,7 +82,7 @@ export interface RequestMeta {
 export interface EngineSession {
   id: ID;
   userId: ID;
-  /** The secret session token. Callers must never serialise it into a response or a log line. */
+  /** The secret session token. Callers must never serialize it into a response or a log line. */
   token: string;
   expiresAt: Date;
   ipAddress?: string | null;

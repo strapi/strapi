@@ -28,7 +28,7 @@ function normalizeCode(value: string) {
 }
 
 /**
- * Labelled one-time-code input.
+ * Labeled one-time-code input.
  *
  * Shared by every code-based flow (email OTP, two-factor challenge,
  * two-factor enrollment) so slot sizing, pasting, and error wiring behave the

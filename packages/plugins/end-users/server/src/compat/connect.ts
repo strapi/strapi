@@ -18,7 +18,7 @@ const restPrefix = (strapi: Core.Strapi): string =>
 export const connectRedirectUri = (strapi: Core.Strapi, provider: string): string =>
   `${resolveServerOrigin(strapi.config)}${restPrefix(strapi)}/connect/${provider}/callback`;
 
-/** An absolute http(s) URL, as the parser normalises it (its `href`), or `null`. */
+/** An absolute http(s) URL, as the parser normalizes it (its `href`), or `null`. */
 const absoluteUrl = (value: unknown): string | null => {
   if (typeof value !== 'string') {
     return null;

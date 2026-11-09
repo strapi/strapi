@@ -29,7 +29,7 @@
  *      this backfill, which two instances can run at once, creates one apart from the user's own create
  *   8. a role saved with 1,201 permissions: every row is stored, in chunks, and read back
  *
- * Case 5 is a wiring check, not a race check: Better Auth serialises the consumers of one token
+ * Case 5 is a wiring check, not a race check: Better Auth serializes the consumers of one token
  * inside the process (`withVerificationConsumeLock`, `db/internal-adapter.mjs`), so the ten requests
  * never reach the adapter at the same time. It shows that the endpoint, the lock and the adapter
  * agree, and that a lost request is refused for the token and for nothing else. Cases 1-3 are the
@@ -327,7 +327,7 @@ describe('end-users: the adapter under concurrency', () => {
     });
   });
 
-  // A wiring check, not the proof of atomicity (see the header): Better Auth serialises same-token
+  // A wiring check, not the proof of atomicity (see the header): Better Auth serializes same-token
   // consumers in the process, so cases 1-3 are what show the database decides.
   describe('a reset-password token through the endpoint', () => {
     it(`is redeemed by exactly one of ${HTTP_CALLERS} simultaneous requests`, async () => {

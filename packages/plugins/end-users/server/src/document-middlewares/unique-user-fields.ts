@@ -27,8 +27,8 @@ const takenMessage = (field: UniqueField) => `${field} is already taken`;
  * error from the database.
  *
  * It is a check and not a lock: two writes at the same moment can both pass it, and the index still
- * refuses the second. It runs after `normalize-email`, and normalises the email again itself, so the
- * address is compared the way it is stored. The username is normalised here, the way Better Auth
+ * refuses the second. It runs after `normalize-email`, and normalizes the email again itself, so the
+ * address is compared the way it is stored. The username is normalized here, the way Better Auth
  * does (`normalizeUsername`), both to compare and to store: a username written in mixed case
  * through the Document Service is stored in lower case, so Better Auth's sign-in by username (which
  * lower-cases what it is given) can find it and a second spelling of it is a duplicate.

@@ -226,7 +226,7 @@ describe('the admin routes', () => {
         const found = conditions.routes.find((candidate) => describeRoute(candidate) === route);
 
         expect(found?.handler).toBe(handler);
-        // In this order: only an authorised admin learns whether Strapi runs in development
+        // In this order: only an authorized admin learns whether Strapi runs in development
         expect(found?.config?.policies).toEqual([
           'admin::isAuthenticatedAdmin',
           { name: 'admin::hasPermissions', config: { actions: [CONDITION_ACTIONS.update] } },

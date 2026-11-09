@@ -105,7 +105,7 @@ export const ListPage = () => {
                       <Badge>
                         {formatMessage({
                           id: 'email.Templates.list.customised',
-                          defaultMessage: 'Customised',
+                          defaultMessage: 'Customized',
                         })}
                       </Badge>
                     ) : null}

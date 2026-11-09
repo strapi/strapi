@@ -31,7 +31,7 @@ const KEYS: Record<UpEmailKey, 'end-users.reset-password' | 'end-users.verify-em
   email_confirmation: 'end-users.verify-email',
 };
 
-/** What Users & Permissions seeds, compared whitespace-normalised */
+/** What Users & Permissions seeds, compared whitespace-normalized */
 const SEEDED: Record<UpEmailKey, { object: string; message: string }> = {
   reset_password: {
     object: 'Reset password',

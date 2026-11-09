@@ -333,7 +333,7 @@ describe('defineAuth', () => {
     ).not.toThrow();
   });
 
-  it('returns the options under a brand the engine recognises', () => {
+  it('returns the options under a brand the engine recognizes', () => {
     const options = { session: { expiresIn: 60 } };
     const result = defineAuth(options);
 

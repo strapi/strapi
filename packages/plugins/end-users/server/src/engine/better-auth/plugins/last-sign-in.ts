@@ -5,7 +5,7 @@
  *
  * It is a plugin (and not an option of the base) so it adds to a project's own `databaseHooks`
  * instead of being replaced by them. The write goes through the adapter, not the internal adapter
- * (which is made after plugins are initialised), so it runs no user hooks of its own.
+ * (which is made after plugins are initialized), so it runs no user hooks of its own.
  *
  * A failed write is logged and never fails the sign-in: the date is information, not a gate.
  */

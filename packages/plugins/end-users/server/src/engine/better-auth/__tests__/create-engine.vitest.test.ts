@@ -1324,7 +1324,7 @@ describe('createEngine', () => {
       expect(await engine.getSession(bearer(signed))).toBeNull();
     });
 
-    it('does not honour the cookie cache: a revoked session is gone at once', async () => {
+    it('does not honor the cookie cache: a revoked session is gone at once', async () => {
       const res = await engine.handle(
         json('/sign-up/email', { email: 'cache@x.io', password: PASSWORD, name: 'C' })
       );
@@ -2508,7 +2508,7 @@ describe('createEngine', () => {
     });
 
     it('keeps the old instance when the new context rejects', async () => {
-      // A plugin that initialises once and fails the next time, which is what a bad provider does
+      // A plugin that initializes once and fails the next time, which is what a bad provider does
       let builds = 0;
       const fragile = createEngine(
         fakeStrapi({ 'server.absoluteUrl': SERVER_URL }),
@@ -2672,7 +2672,7 @@ describe('createEngine with the opt-in plugins', () => {
       new Request(`${SERVER_URL}/api/auth/passkey/generate-register-options`)
     );
 
-    // Better Auth's own error handling recognises an error thrown from the plugin
+    // Better Auth's own error handling recognizes an error thrown from the plugin
     expect(anonymous.status).toBe(401);
 
     const signedIn = await engine.handle(

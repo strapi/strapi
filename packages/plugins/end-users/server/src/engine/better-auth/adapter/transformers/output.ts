@@ -5,7 +5,7 @@
  * https://github.com/strapi-community/plugin-better-auth
  *
  * The adapter declares `supportsDates: true`, so Better Auth expects `Date` objects, but Strapi
- * returns datetime attributes as ISO strings. The original recognised dates by pattern; that turns
+ * returns datetime attributes as ISO strings. The original recognized dates by pattern; that turns
  * a text field that merely looks like a datetime into a `Date`, so this converts only the fields
  * Better Auth's own schema declares as dates.
  *

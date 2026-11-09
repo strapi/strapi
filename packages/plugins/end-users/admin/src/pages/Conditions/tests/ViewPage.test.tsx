@@ -169,7 +169,7 @@ beforeEach(() => {
   );
 });
 
-/** The section with this heading: each is a labelled region */
+/** The section with this heading: each is a labeled region */
 const section = async (name: string) => within(await screen.findByRole('region', { name }));
 
 describe('ViewPage', () => {

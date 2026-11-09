@@ -29,7 +29,7 @@ export type UserButtonLink = {
   label: ReactNode;
   /** Destination URL. */
   href: string;
-  /** Optional leading icon. Sized/coloured to match built-in items. */
+  /** Optional leading icon. Sized/colored to match built-in items. */
   icon?: ReactNode;
   /** Forwarded to the underlying `DropdownMenuItem`. */
   variant?: 'default' | 'destructive';

@@ -172,7 +172,7 @@ const changesUser = (value: unknown, current: { id?: number; documentId?: string
  * The check and the write run in one transaction that first locks the row of the user the write
  * names (`SELECT ... FOR UPDATE`, as the adapter's `lockRow` does). Two creates for one user meet
  * at that lock: the second waits for the first to commit, then runs its check and finds the
- * profile. SQLite serialises writers inside a transaction itself, so the lock is nothing there.
+ * profile. SQLite serializes writers inside a transaction itself, so the lock is nothing there.
  * Called inside a transaction already (`create-profile` runs inside the user's own create), the
  * work joins it, and the user's row is already held by it.
  */

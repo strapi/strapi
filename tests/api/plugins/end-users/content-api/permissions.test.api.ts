@@ -354,7 +354,7 @@ describe('end-users: the Content API rules, over REST', () => {
     const roleIdOf = async (type: string) =>
       (await strapi.db.query(ROLE_UID).findOne({ where: { type } })).documentId as string;
 
-    /** A user who signed up: their document id and what they would send to be recognised */
+    /** A user who signed up: their document id and what they would send to be recognized */
     const signUp = async () => {
       emails += 1;
 

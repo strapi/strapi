@@ -47,7 +47,7 @@ const setup = (row: { id: number; documentId: string; emailVerified: boolean; to
 };
 
 describe('legacy confirmation', () => {
-  it('recognises a forty-character lowercase hex token and nothing else', () => {
+  it('recognizes a forty-character lowercase hex token and nothing else', () => {
     expect(isLegacyConfirmationToken(hex('a'))).toBe(true);
     expect(isLegacyConfirmationToken(hex('0f', 20))).toBe(true);
     expect(isLegacyConfirmationToken(hex('a', 39))).toBe(false);

@@ -258,7 +258,7 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
       countUsers(documentId),
     ]);
 
-    // The rows the engine could no longer honour (an action, field or condition that has gone):
+    // The rows the engine could no longer honor (an action, field or condition that has gone):
     // the editor sets them aside, and they are the ones a save of the role would refuse
     const problems: PermissionProblem[] = permission()
       .findProblems(rows)

@@ -2,7 +2,7 @@
  * Koa <-> Fetch bridge for Better Auth, whose handler takes a `Request` and returns a `Response`.
  *
  * The request side rebuilds the request from what Koa has already parsed: Strapi's body parser has
- * consumed the raw stream, so the body is serialised again from `ctx.request.body`. The content type
+ * consumed the raw stream, so the body is serialized again from `ctx.request.body`. The content type
  * is never changed to suit the body: Better Auth only takes JSON (and, on a few sign-in endpoints,
  * forms) and answers 415 to the rest, and that decision must be made on the type the client sent. A
  * body Strapi parsed as multipart goes on as multipart, not as JSON, or a cross-site `<form>` post

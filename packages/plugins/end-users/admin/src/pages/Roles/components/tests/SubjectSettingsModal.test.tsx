@@ -340,7 +340,7 @@ describe('SubjectSettingsModal', () => {
     expect(screen.getByRole('img', { name: dot })).toBeInTheDocument();
   });
 
-  it('forgets what was edited when it is cancelled', async () => {
+  it('forgets what was edited when it is canceled', async () => {
     const { user, onApply } = await setup();
 
     await choose(user, 'Find', ['Is VIP']);

@@ -183,7 +183,7 @@ const collectLeaves = (fields: LayoutField[], inheritedReadOnly = false): Leaf[]
 
 const indexes = new WeakMap<PermissionLayout, LayoutIndex>();
 
-/** Memoised on the layout object, which the page keeps for as long as the server runs */
+/** Memoized on the layout object, which the page keeps for as long as the server runs */
 const indexLayout = (layout: PermissionLayout): LayoutIndex => {
   const known = indexes.get(layout);
 
