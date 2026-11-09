@@ -1,8 +1,16 @@
 import type { Core } from '@strapi/types';
+import { errors } from '@strapi/utils';
 
-import { PLUGIN_ID } from '../constants';
+import { PLUGIN_ID, USER_UID } from '../constants';
+import { BAD_LINK } from '../compat/endpoints/confirmation';
+import { TWO_FACTOR_REQUIRED } from '../compat/endpoints/shared';
+import { refusalResult } from '../compat/errors';
 import { clearLegacyCutoverCache } from '../compat/legacy-jwt';
 import type { LegacyHit } from '../compat/legacy-jwt';
+import { signedInUser } from '../compat/login-response';
+import type { UpUser } from '../compat/shapes';
+import type { AuthEngine } from '../engine/types';
+import { normalizeEmail } from '../utils/normalize-email';
 
 const HITS_KEY = 'legacyJwtHits';
 
@@ -14,6 +22,21 @@ export interface LegacyJwtHits {
   access: number;
   lastHitAt: string | null;
 }
+
+/**
+ * The address a verification token was made for. The token is a signed token whose payload names
+ * it; it is read here only for the user it names, and a session is made only after the engine has
+ * verified the token.
+ */
+const emailOfToken = (token: string): string | null => {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString());
+
+    return typeof payload?.email === 'string' ? payload.email : null;
+  } catch {
+    return null;
+  }
+};
 
 const empty = (): LegacyJwtHits => ({ legacy: 0, access: 0, lastHitAt: null });
 
@@ -123,6 +146,78 @@ const compatService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /** Writes what is waiting. Called when the plugin is destroyed. */
     flush,
+
+    /**
+     * Confirms an address with the token of the link in the email, and signs the user in: the
+     * `{ jwt, user }` a GraphQL `emailConfirmation` answers with.
+     *
+     * A verification token is not single-use by itself: it stays good until it expires. So the
+     * session is the one thing the link may give once: it is issued only when this call is the one
+     * that confirmed the address (it was not confirmed before and is now), and a link used again,
+     * or for an address that was already confirmed, is the `Invalid token` error with no session.
+     * A user with a second factor is confirmed but gets no session, as at `/local`. The engine
+     * verifies the token (signature and expiry) before anything is read from it, and refuses it as
+     * the REST route does; the user is the one the verified token names.
+     */
+    async confirmEmail(
+      token: string,
+      meta: { ipAddress?: string | null; userAgent?: string | null } = {}
+    ): Promise<{ jwt: string; user: UpUser }> {
+      const engine = strapi.plugin(PLUGIN_ID).service('engine').get() as AuthEngine;
+      const invalid = () => new errors.ApplicationError(BAD_LINK.INVALID_TOKEN);
+      const read = async (email: string) =>
+        (await strapi.db.query(USER_UID).findOne({
+          where: { email: normalizeEmail(email) },
+          select: ['documentId', 'emailVerified', 'twoFactorEnabled'],
+        })) as {
+          documentId: string;
+          emailVerified?: boolean | null;
+          twoFactorEnabled?: boolean | null;
+        } | null;
+
+      // Only to see whether this call is the one that confirms: nobody is signed in by it
+      const email = emailOfToken(token);
+      const before = email ? await read(email) : null;
+
+      try {
+        await engine.callNative('verifyEmail', { headers: new Headers(), query: { token } });
+      } catch (error) {
+        const refused = refusalResult(error, BAD_LINK);
+
+        if (refused === null) {
+          throw error;
+        }
+
+        const { message, details } = (
+          refused.body as { error: { message: string; details: object } }
+        ).error;
+
+        throw new errors.ApplicationError(message, details);
+      }
+
+      if (!email || !before || before.emailVerified === true) {
+        throw invalid();
+      }
+
+      const after = await read(email);
+
+      if (!after || after.emailVerified !== true) {
+        throw invalid();
+      }
+
+      if (after.twoFactorEnabled === true) {
+        throw new errors.ForbiddenError(TWO_FACTOR_REQUIRED, { code: 'TWO_FACTOR_REQUIRED' });
+      }
+
+      const session = await engine.createSession(after.documentId, meta);
+      const user = await signedInUser(strapi, after.documentId);
+
+      if (!user) {
+        throw invalid();
+      }
+
+      return { jwt: session.token, user };
+    },
   };
 };
 

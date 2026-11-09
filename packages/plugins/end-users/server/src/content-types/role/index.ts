@@ -1,4 +1,5 @@
-import { GRAPHQL_TYPE_NAMES, PERMISSION_UID } from '../../constants';
+import { graphqlTypeNames } from '../../compat/graphql/names';
+import { PERMISSION_UID } from '../../constants';
 
 /** `public` is what a request with no credentials gets, `authenticated` what a new user gets. */
 export const ROLE_TYPES = ['public', 'authenticated', 'custom'] as const;
@@ -30,7 +31,7 @@ export default {
       'content-type-builder': { visible: false },
       i18n: { localized: false },
       // `EndUserRole`, `endUserRoles`, ... on GraphQL
-      graphql: { typeName: GRAPHQL_TYPE_NAMES.role },
+      graphql: { typeName: graphqlTypeNames(false).role },
     },
     attributes: {
       // `unique: true` is Strapi's own check (a select before the insert, with a friendly error) and

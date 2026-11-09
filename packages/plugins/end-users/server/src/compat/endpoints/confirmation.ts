@@ -15,7 +15,7 @@ interface ConfirmationInput {
 }
 
 /** What the engine says of a link it cannot use; users-permissions said one thing for them all. */
-const BAD_LINK: Readonly<Record<string, string>> = {
+export const BAD_LINK: Readonly<Record<string, string>> = {
   INVALID_TOKEN: INVALID_CONFIRMATION_TOKEN,
   TOKEN_EXPIRED: INVALID_CONFIRMATION_TOKEN,
   USER_NOT_FOUND: INVALID_CONFIRMATION_TOKEN,

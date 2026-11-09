@@ -9,6 +9,8 @@ import {
   assertProfileUser,
 } from './boot-checks';
 import { readCompatConfig } from './compat/config';
+import { registerCompatGraphql } from './compat/graphql/compat-schema';
+import { applyGraphqlTypeNames } from './compat/graphql/names';
 import { PERMISSION_UID, PLUGIN_ID, USER_UID } from './constants';
 import { registerGeneratedContentTypes } from './content-types/register-generated';
 import { assignDefaultRoleMiddleware } from './document-middlewares/assign-default-role';
@@ -108,7 +110,13 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   // the engine is built now, and its tables become content types before Strapi syncs the database.
   const engine: AuthEngine = strapi.plugin(PLUGIN_ID).service('engine').get();
 
+  const { usersPermissions: compat } = readCompatConfig(strapi);
+
   hideEngineTypesFromGraphQL(strapi, registerGeneratedContentTypes(strapi, engine));
+  // The user and the role are named as Users & Permissions named them while the mode is on, and
+  // the mode adds its own operations; both before the GraphQL plugin builds its schema
+  applyGraphqlTypeNames(strapi, compat);
+  registerCompatGraphql(strapi, compat);
 
   // In this order: the email is normalised first, so the uniqueness check compares what is stored,
   // and a create that is refused for a taken email never looks up the default role. The rules after
@@ -128,12 +136,7 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
 
   // After core's API-token strategy, which registers first: a token keeps taking precedence, and
   // only a request that is not one reaches this strategy
-  strapi
-    .get('auth')
-    .register(
-      'content-api',
-      createEndUsersStrategy(strapi, readCompatConfig(strapi).usersPermissions)
-    );
+  strapi.get('auth').register('content-api', createEndUsersStrategy(strapi, compat));
 
   // Explain mode: what the permission checks did to an end user's Content API request,
   // in a header or the debug log. It wraps every request and only touches those of the strategy

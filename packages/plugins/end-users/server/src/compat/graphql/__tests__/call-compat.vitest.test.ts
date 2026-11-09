@@ -1,0 +1,90 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { callCompat } from '../call-compat';
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+const setup = (answer: Response) => {
+  const handle = vi.fn<(request: Request) => Promise<Response>>(async () => answer);
+  const engine = { handle };
+  const config: Record<string, unknown> = { 'server.url': 'http://localhost:1337' };
+
+  vi.stubGlobal('strapi', {
+    config: { get: (key: string) => config[key] },
+    plugin: () => ({
+      service: () => ({ ensureCurrent: async () => undefined, get: () => engine }),
+    }),
+  });
+
+  const ctx = {
+    request: {
+      ip: '203.0.113.7',
+      headers: {
+        authorization: 'Bearer abc',
+        origin: 'http://localhost:5173',
+        'x-forwarded-for': '198.51.100.1',
+        'content-length': '99',
+      },
+    },
+  } as never;
+
+  return { handle, ctx };
+};
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+
+describe('callCompat', () => {
+  it("forwards the caller's headers and throws the envelope's message", async () => {
+    const { handle, ctx } = setup(
+      json(
+        {
+          data: null,
+          error: {
+            status: 403,
+            name: 'ForbiddenError',
+            message: 'Account locked',
+            details: { code: 'ACCOUNT_LOCKED' },
+          },
+        },
+        403
+      )
+    );
+
+    await expect(
+      callCompat(ctx, '/local', { identifier: 'a', password: 'b' })
+    ).rejects.toMatchObject({
+      name: 'ApplicationError',
+      message: 'Account locked',
+      details: { status: 403, code: 'ACCOUNT_LOCKED' },
+    });
+
+    const request = handle.mock.calls[0][0];
+
+    expect(request.method).toBe('POST');
+    expect(request.url).toBe('http://localhost:1337/api/auth/local');
+    expect(request.headers.get('authorization')).toBe('Bearer abc');
+    expect(request.headers.get('origin')).toBe('http://localhost:5173');
+    expect(request.headers.get('content-type')).toBe('application/json');
+    // The client address is the one Strapi sees, not the one the client wrote
+    expect(request.headers.get('x-forwarded-for')).toBe('203.0.113.7');
+    expect(await request.json()).toEqual({ identifier: 'a', password: 'b' });
+  });
+
+  it('returns the parsed body of an answer', async () => {
+    const { ctx } = setup(json({ jwt: 'token', user: { id: 1 } }));
+
+    expect(await callCompat(ctx, '/local', {})).toEqual({ jwt: 'token', user: { id: 1 } });
+  });
+
+  it("uses the message of a refusal that is not Strapi's envelope, such as a rate limit", async () => {
+    const { ctx } = setup(json({ message: 'Too many requests. Please try again later.' }, 429));
+
+    await expect(callCompat(ctx, '/local', {})).rejects.toMatchObject({
+      message: 'Too many requests. Please try again later.',
+      details: { status: 429 },
+    });
+  });
+});

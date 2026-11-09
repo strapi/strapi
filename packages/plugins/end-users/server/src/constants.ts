@@ -16,12 +16,24 @@ export const RATE_LIMIT_UID = 'plugin::end-users.rate-limit';
 /**
  * The GraphQL type names of the plugin's public types, set as `pluginOptions.graphql.typeName` (the
  * GraphQL plugin names every type, query and mutation of a type from it, with no plugin prefix).
- * The other types of the plugin are hidden from GraphQL (see `register`).
+ * The other types of the plugin are hidden from GraphQL (see `register`). These are the names
+ * without the Users & Permissions compatibility mode; `graphqlTypeNames` gives the ones in use.
  */
 export const GRAPHQL_TYPE_NAMES = {
   user: { singular: 'EndUser', plural: 'EndUsers' },
   role: { singular: 'EndUserRole', plural: 'EndUserRoles' },
   profile: { singular: 'EndUserProfile', plural: 'EndUserProfiles' },
+} as const;
+
+/**
+ * The same types under the names Users & Permissions gave its own, so a client's queries,
+ * fragments and generated types keep working while the compatibility mode is on. The profile has
+ * no counterpart there and keeps its name.
+ */
+export const COMPAT_GRAPHQL_TYPE_NAMES = {
+  user: { singular: 'UsersPermissionsUser', plural: 'UsersPermissionsUsers' },
+  role: { singular: 'UsersPermissionsRole', plural: 'UsersPermissionsRoles' },
+  profile: GRAPHQL_TYPE_NAMES.profile,
 } as const;
 
 /**

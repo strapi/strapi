@@ -1,4 +1,5 @@
-import { GRAPHQL_TYPE_NAMES, USER_UID } from '../../constants';
+import { graphqlTypeNames } from '../../compat/graphql/names';
+import { USER_UID } from '../../constants';
 
 /**
  * `plugin::end-users.profile` (`eu_profiles`): what a project knows about an end user beyond what
@@ -35,7 +36,7 @@ export default {
     pluginOptions: {
       i18n: { localized: false },
       // `EndUserProfile`, `endUserProfiles`, ... on GraphQL
-      graphql: { typeName: GRAPHQL_TYPE_NAMES.profile },
+      graphql: { typeName: graphqlTypeNames(false).profile },
     },
     attributes: {
       user: {

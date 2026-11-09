@@ -61,7 +61,11 @@ const pathAndQuery = (ctx: Context) => {
   }
 };
 
-const toHeaders = (ctx: Context, origin: URL) => {
+/**
+ * The headers of the Request built for the context: what the client sent, with the connection's
+ * own headers dropped and the address and host set from Strapi's own view, never the client's.
+ */
+export const toHeaders = (ctx: Context, origin: URL) => {
   const headers = new Headers();
 
   for (const [name, value] of Object.entries(ctx.request.headers)) {

@@ -72,3 +72,24 @@ describe('the names derived from an overridden type name', () => {
     expect(naming.getDynamicZoneName(ct, 'blocks')).toBe('EndUserBlocksDynamicZone');
   });
 });
+
+describe('the names derived from the Users & Permissions type names', () => {
+  const role = {
+    ...userCt,
+    uid: 'plugin::end-users.role',
+    modelName: 'role',
+    info: { singularName: 'role', pluralName: 'roles' },
+    pluginOptions: {
+      graphql: { typeName: { singular: 'UsersPermissionsRole', plural: 'UsersPermissionsRoles' } },
+    },
+  } as any;
+
+  it('names the connection, the filters and the relation types other types point at from the override', () => {
+    expect(naming.getFindConnectionQueryName(role)).toBe('usersPermissionsRoles_connection');
+    expect(naming.getFiltersInputTypeName(role)).toBe('UsersPermissionsRoleFiltersInput');
+    expect(naming.getRelationResponseCollectionName(role)).toBe(
+      'UsersPermissionsRoleRelationResponseCollection'
+    );
+    expect(naming.getContentTypeInputName(role)).toBe('UsersPermissionsRoleInput');
+  });
+});

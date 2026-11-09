@@ -15,7 +15,8 @@
  */
 import type { Struct } from '@strapi/types';
 
-import { GRAPHQL_TYPE_NAMES, ROLE_UID } from '../../../constants';
+import { graphqlTypeNames } from '../../../compat/graphql/names';
+import { ROLE_UID } from '../../../constants';
 import type { EngineField, EngineTable } from '../../types';
 import { pluralNameOf, singularNameOf } from '../model-names';
 import { isHiddenField, isPrivateField, isReadOnlyField } from './private-fields';
@@ -236,8 +237,8 @@ const toPluginOptions = (singularName: string): Record<string, unknown> => {
       'content-manager': { visible: true },
       i18n: { localized: false },
       // The GraphQL types are `EndUser`, `endUsers`, `createEndUser`, ... and not the type's
-      // `EndUsersUser`: the user is the plugin's one public type (see `GRAPHQL_TYPE_NAMES`)
-      graphql: { typeName: GRAPHQL_TYPE_NAMES.user },
+      // `EndUsersUser`: the user is the plugin's one public type (see `graphqlTypeNames`)
+      graphql: { typeName: graphqlTypeNames(false).user },
     };
   }
 
