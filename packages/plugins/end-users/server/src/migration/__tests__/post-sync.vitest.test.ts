@@ -31,7 +31,12 @@ const record = (patch: Partial<MigrationRecord> = {}): MigrationRecord => ({
   ...patch,
 });
 
-const strapi = { log: { info: vi.fn(), warn: vi.fn() } } as unknown as Core.Strapi;
+const clearCutoverCache = vi.fn();
+const strapi = {
+  log: { info: vi.fn(), warn: vi.fn() },
+  store: () => ({ get: async () => null, set: async () => undefined }),
+  plugin: () => ({ service: () => ({ clearCutoverCache }) }),
+} as unknown as Core.Strapi;
 
 /** The record as the store holds it: updates are merged in, as `updateRecord` does */
 const store = (initial: MigrationRecord) => {
@@ -68,7 +73,7 @@ describe('runPostSync', () => {
 
     await runPostSync(strapi);
 
-    expect(ran).toEqual(['permissions', 'profiles', 'accounts']);
+    expect(ran).toEqual(['permissions', 'profiles', 'accounts', 'stores', 'admin']);
     expect(current().completedSteps).toEqual([
       'pre-sync',
       'users',
@@ -76,8 +81,36 @@ describe('runPostSync', () => {
       'permissions',
       'profiles',
       'accounts',
+      'stores',
+      'admin',
     ]);
     expect(records.releaseMigration).toHaveBeenCalledWith(strapi, OWNER);
+  });
+
+  it('finishes the migration after the last step: completed, with the cutover, and the cache cleared', async () => {
+    const current = store(record({ cutoverAt: '2026-11-09T01:00:00.000Z' }));
+
+    await runPostSync(strapi);
+
+    expect(current()).toMatchObject({
+      status: 'completed',
+      cutoverAt: '2026-11-09T01:00:00.000Z',
+      completedAt: expect.any(String),
+    });
+    expect(clearCutoverCache).toHaveBeenCalledTimes(1);
+  });
+
+  it('finishes a migration whose steps were all recorded before a stop', async () => {
+    const current = store(
+      record({
+        completedSteps: ['pre-sync', ...POST_SYNC_STEPS.map((step) => step.name)],
+      })
+    );
+
+    await runPostSync(strapi);
+
+    expect(ran).toEqual([]);
+    expect(current().status).toBe('completed');
   });
 
   it('skips everything unless the pre-sync is recorded', async () => {

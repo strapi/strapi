@@ -15,11 +15,15 @@ import {
   claimMigration,
   lastClaimOwner,
   readRecord,
+  readReport,
   releaseMigration,
   updateRecord,
+  writeReport,
 } from './record';
 import type { MigrationRecord, MigrationStep } from './record';
 import { permissionItems } from './report';
+import { adminStep } from './admin-side';
+import { keepHold, storesStep } from './post-sync-stores';
 import { waitForClaim } from './pre-sync';
 import { upJoinTableName } from './tables';
 
@@ -93,19 +97,6 @@ const chunksOf = <T>(items: T[], size: number): T[][] => {
 
 const stagedAs = (record: MigrationRecord, original: string): string | undefined =>
   Object.entries(record.staged).find(([, from]) => from === original)?.[0];
-
-/**
- * Re-checks that this start still holds the migration and gives the claim another 15 minutes. Done
- * outside any transaction of ours, before the work it protects: a start whose claim ran out and was
- * taken by another stops here and writes nothing more.
- */
-const keepHold = async (strapi: Core.Strapi, owner: string): Promise<void> => {
-  if (!(await claimMigration(strapi, owner))) {
-    throw new Error(
-      'This start no longer holds the migration: another start claimed it. Nothing more was written.'
-    );
-  }
-};
 
 /** Inside a transaction: the record still names this start. Reads through the transaction. */
 const stillHeld = async (strapi: Core.Strapi, owner: string): Promise<MigrationRecord> => {
@@ -711,14 +702,56 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
  * The run
  * -----------------------------------------------------------------------------------------------*/
 
-/** Task 14 appends `stores` and `admin` */
 export const POST_SYNC_STEPS: PostSyncStep[] = [
   { name: 'users', run: usersStep },
   { name: 'roles', run: rolesStep },
   { name: 'permissions', run: permissionsStep },
   { name: 'profiles', run: profilesStep },
   { name: 'accounts', run: accountsStep },
+  storesStep,
+  adminStep,
 ];
+
+/**
+ * Ends the migration: the report is stamped, the record becomes `completed` with the cutover (which
+ * the compatibility mode reads, so the legacy tokens are judged by it from now on), the claim is
+ * given up and one line of counts is logged. `owner` is the claim this start holds; the record is
+ * written only while it still does.
+ */
+export const finishMigration = async (
+  strapi: Core.Strapi,
+  owner: string | undefined = lastClaimOwner(strapi)
+): Promise<void> => {
+  const now = new Date().toISOString();
+  const report = await readReport(strapi);
+
+  if (report) {
+    await writeReport(strapi, { ...report, generatedAt: now });
+  } else {
+    strapi.log.warn(`${PLUGIN_ID}: the migration report is not stored`);
+  }
+
+  const record = (await readRecord(strapi)) as MigrationRecord;
+  const patch: Partial<MigrationRecord> = {
+    status: 'completed',
+    cutoverAt: record.cutoverAt ?? now,
+    completedAt: now,
+  };
+
+  await (owner ? writeFenced(strapi, owner, patch) : updateRecord(strapi, patch));
+  (strapi.plugin(PLUGIN_ID).service('compat') as { clearCutoverCache(): void }).clearCutoverCache();
+
+  if (owner) {
+    await releaseMigration(strapi, owner);
+  }
+
+  const items = report?.items ?? [];
+  const open = items.filter((entry) => entry.severity === 'action' && !entry.resolved).length;
+
+  strapi.log.info(
+    `${PLUGIN_ID}: migration completed: ${report?.counts.users ?? 0} users, ${report?.counts.roles ?? 0} roles, ${items.length} report items, ${open} to act on`
+  );
+};
 
 /**
  * The claim to run under: the one the pre-sync took in this start (it is not given back until the
@@ -761,17 +794,14 @@ const takeClaim = async (strapi: Core.Strapi): Promise<string | null> => {
  * roles: the users' new columns, the roles' types, the roles' permissions with the fixes, a profile
  * for each user (with the user's id) and a credential account for each user with a password. Does
  * nothing unless the record is in progress with the pre-sync done. Each step runs once, is recorded
- * in `completedSteps`, and may run again after a stop without changing what it already wrote.
+ * in `completedSteps`, and may run again after a stop without changing what it already wrote. The
+ * last two carry the stores (settings, emails, providers) and the admin side; then the migration is
+ * finished.
  */
 export const runPostSync = async (strapi: Core.Strapi): Promise<void> => {
   const first = await readRecord(strapi);
 
-  if (
-    !first ||
-    first.status !== 'in-progress' ||
-    !first.completedSteps.includes('pre-sync') ||
-    POST_SYNC_STEPS.every((step) => first.completedSteps.includes(step.name))
-  ) {
+  if (!first || first.status !== 'in-progress' || !first.completedSteps.includes('pre-sync')) {
     return;
   }
 
@@ -807,6 +837,8 @@ export const runPostSync = async (strapi: Core.Strapi): Promise<void> => {
         });
       }
     }
+
+    await finishMigration(strapi, owner);
   } finally {
     await releaseMigration(strapi, owner);
   }

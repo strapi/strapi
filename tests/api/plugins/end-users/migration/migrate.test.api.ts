@@ -271,7 +271,7 @@ describe('migration from users-permissions: before the schema sync', () => {
   it('records the step', async () => {
     const record = await readRecord(strapi);
 
-    expect(record.status).toBe('in-progress');
+    expect(record.status).toBe('completed');
     expect(record.completedSteps).toContain('pre-sync');
     expect(record.cutoverAt).toEqual(expect.any(String));
   });
