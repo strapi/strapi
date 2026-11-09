@@ -22,4 +22,5 @@ export const HISTORY_VERSION_SOURCES = [
 
 export const HISTORY_VERSION_AUTHOR_TYPES = [
   'person',
+  'token',
 ] as const satisfies readonly HistoryVersionAuthorType[];

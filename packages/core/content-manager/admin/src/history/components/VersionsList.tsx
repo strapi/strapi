@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
 import { AccessibleIcon, Box, Flex, Status, Typography } from '@strapi/design-system';
-import { User } from '@strapi/icons';
+import { Key, User } from '@strapi/icons';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -31,6 +31,7 @@ const BlueText = (children: React.ReactNode) => (
 
 const AUTHOR_TYPE_ICONS: Record<HistoryVersions.HistoryVersionAuthorType, React.ElementType> = {
   person: User,
+  token: Key,
 };
 
 const AUTHOR_TYPE_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
@@ -38,12 +39,20 @@ const AUTHOR_TYPE_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, Messa
     id: 'content-manager.history.sidebar.version-card.author-type.person',
     defaultMessage: 'Person',
   },
+  token: {
+    id: 'content-manager.history.sidebar.version-card.author-type.token',
+    defaultMessage: 'Token',
+  },
 };
 
 const DELETED_AUTHOR_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
   person: {
     id: 'content-manager.history.sidebar.version-card.deleted-author.person',
     defaultMessage: 'Deleted user',
+  },
+  token: {
+    id: 'content-manager.history.sidebar.version-card.deleted-author.token',
+    defaultMessage: 'Deleted token',
   },
 };
 

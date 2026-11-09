@@ -3,7 +3,7 @@ import { type errors } from '@strapi/utils';
 
 export type HistoryVersionSource = 'admin-panel' | 'admin-api';
 
-export type HistoryVersionAuthorType = 'person';
+export type HistoryVersionAuthorType = 'person' | 'token';
 
 export interface HistoryVersionAuthorReference {
   type: HistoryVersionAuthorType;
