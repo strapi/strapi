@@ -67,7 +67,13 @@ describe('end-users compat: sign-in', () => {
               handler(ctx) {
                 ctx.body = { name: ctx.state.auth.strategy.name, role: ctx.state.user.role };
               },
-              config: { auth: { strategies: ['users-permissions'] } },
+              // Core needs a scope; this one is let through for any caller of the strategy.
+              config: {
+                auth: {
+                  strategies: ['users-permissions'],
+                  scope: ['plugin::end-users.permissions.forCaller'],
+                },
+              },
             },
             {
               method: 'GET',

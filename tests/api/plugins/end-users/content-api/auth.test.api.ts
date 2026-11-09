@@ -124,7 +124,13 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
               handler(ctx) {
                 ctx.body = { name: ctx.state.auth.strategy.name, role: ctx.state.user.role };
               },
-              config: { auth: { strategies: ['end-users'] } },
+              // Core needs a scope; this one is let through for any caller of the strategy.
+              config: {
+                auth: {
+                  strategies: ['end-users'],
+                  scope: ['plugin::end-users.permissions.forCaller'],
+                },
+              },
             },
           ],
         });
