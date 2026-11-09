@@ -407,4 +407,182 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       { id: r1.id, subjectId: published.id, subjectType: NOTE_UID },
     ]);
   });
+  describe('update', () => {
+    const createRemarks = async (count: number) => {
+      const remarks = [];
+      for (let i = 1; i <= count; i += 1) {
+        remarks.push(await strapi.db.query(REMARK_UID).create({ data: { text: `r${i}` } }));
+      }
+      return remarks;
+    };
+
+    it('links every entry of an array and unlinks the entries left out', async () => {
+      const [r1, r2, r3, r4] = await createRemarks(4);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r4.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: [r1.id, r2.id, r3.id] },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r4.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('links every entry of a set', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { set: [r2.id, r1.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('keeps the existing links on connect', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { connect: [r2.id, r3.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('unlinks only the entries given to disconnect', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+      const otherNote = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'other', remarks: [r3.id] },
+      });
+
+      // r3 belongs to another note, so disconnecting it from this note is a no-op
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { disconnect: [r1.id, r3.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: otherNote.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('applies connect and disconnect together', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { connect: [r3.id], disconnect: [r1.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it.each([
+      ['an empty array', []],
+      ['an empty set', { set: [] }],
+      ['null', null],
+    ])('unlinks every entry on %s', async (_label, value) => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: value },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('links every entry of an array through the document service', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] } as any,
+      });
+
+      await strapi.documents(NOTE_UID).update({
+        documentId: note.documentId,
+        data: { remarks: [r1.id, r2.id, r3.id] } as any,
+      });
+
+      const draft = await getNoteRow(note.documentId, 'draft');
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: draft?.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('links only the first entry of a morphOne array', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const card = await strapi.db.query(CARD_UID).create({
+        data: { title: 'pinned', pinnedRemark: [r1.id] },
+      });
+
+      await strapi.db.query(CARD_UID).update({
+        where: { id: card.id },
+        data: { pinnedRemark: [r2.id, r3.id] },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: card.id, subjectType: CARD_UID },
+        { id: r3.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('replaces the linked entry of a morphOne on connect', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const card = await strapi.db.query(CARD_UID).create({
+        data: { title: 'pinned', pinnedRemark: [r1.id] },
+      });
+
+      await strapi.db.query(CARD_UID).update({
+        where: { id: card.id },
+        data: { pinnedRemark: { connect: [r2.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: card.id, subjectType: CARD_UID },
+      ]);
+    });
+  });
 });

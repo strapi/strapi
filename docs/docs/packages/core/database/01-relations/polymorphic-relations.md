@@ -36,6 +36,8 @@ The error is an `InvalidRelationError`, so a request that hits it gets a 400 `Va
 
 What copying these links should mean (move them to the latest version, or re-point the target rows to the new version) is not decided.
 
+On update, `updateRelations` writes the same morph columns. A `set` (an array, `{ set }` or `null`) clears every target row that points to the entry, then links the first entry for `morphOne` and every entry for `morphMany`. An empty `set` or `null` leaves no link. Without a `set`, `disconnect` clears only the given rows that point to the entry, and `connect` links the given rows and keeps the existing links. On a `morphOne`, `connect` replaces the linked row.
+
 **Reads (populate)** — `packages/core/database/src/query/helpers/populate/apply.ts` dispatches on `attribute.relation`. `morphToOne` and `morphToMany` load target rows per type; inverse `morphOne` / `morphMany` traverse the inverse. Polymorphic targets use `populate.on` in the query for per-UID options. The populated object for a morph item sets the type discriminator **after** target row fields so the target content-type UID (in `typeField`, default `__type`) is always authoritative if a name collides.
 
 ## Document service
