@@ -36,8 +36,24 @@ export const writableFields = (strapi: Core.Strapi, uid: string): string[] =>
     )
     .map(([name]) => name);
 
-/** The attributes of a type a role's read rows may name: not private, not `NOT_GRANTABLE` */
+/** The engine-owned user fields a read row may still name: U&P exposed `confirmed`, and this is its successor */
+const READABLE_ENGINE_OWNED: ReadonlySet<string> = new Set(['emailVerified']);
+
+/**
+ * The attributes of a type a role's read rows may name: not private, not `NOT_GRANTABLE`, and on the
+ * end-user type not the fields only the plugin writes, bar the verified flag. Two-factor state and
+ * the sign-in dates are never readable through a role.
+ */
 export const readableFields = (strapi: Core.Strapi, uid: string): string[] =>
   Object.entries(attributesOf(strapi, uid))
-    .filter(([name, attribute]) => !NOT_GRANTABLE.has(name) && attribute.private !== true)
+    .filter(
+      ([name, attribute]) =>
+        !NOT_GRANTABLE.has(name) &&
+        attribute.private !== true &&
+        !(
+          uid === USER_UID &&
+          (ENGINE_OWNED_USER_FIELDS as readonly string[]).includes(name) &&
+          !READABLE_ENGINE_OWNED.has(name)
+        )
+    )
     .map(([name]) => name);

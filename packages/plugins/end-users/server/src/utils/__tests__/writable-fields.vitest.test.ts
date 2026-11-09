@@ -53,3 +53,36 @@ describe('readableFields', () => {
     expect(readableFields(strapi, 'api::note.note')).toEqual(['title', 'score']);
   });
 });
+
+describe('readableFields on the end-user type', () => {
+  it('never names the two-factor, session or ban fields, but keeps emailVerified and roles', () => {
+    const strapi = strapiWith({
+      [USER_UID]: {
+        attributes: {
+          email: { type: 'email' },
+          nickname: { type: 'string' },
+          emailVerified: { type: 'boolean' },
+          twoFactorEnabled: { type: 'boolean' },
+          lastSignInAt: { type: 'datetime' },
+          banned: { type: 'boolean' },
+          banReason: { type: 'string' },
+          banExpires: { type: 'datetime' },
+          failedSignIns: { type: 'integer' },
+          lockedUntil: { type: 'datetime' },
+          roles: { type: 'relation' },
+        },
+      },
+      'api::note.note': {
+        attributes: { twoFactorEnabled: { type: 'boolean' }, title: { type: 'string' } },
+      },
+    });
+
+    expect(readableFields(strapi, USER_UID)).toEqual([
+      'email',
+      'nickname',
+      'emailVerified',
+      'roles',
+    ]);
+    expect(readableFields(strapi, 'api::note.note')).toEqual(['twoFactorEnabled', 'title']);
+  });
+});
