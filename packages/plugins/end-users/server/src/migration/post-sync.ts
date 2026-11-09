@@ -346,6 +346,18 @@ const permissionsStep = async (strapi: Core.Strapi, record: MigrationRecord, own
 
 const NON_SCALAR = new Set(['relation', 'component', 'dynamiczone', 'media']);
 
+/** What the profile gets of its own, never from the user's row: ids, document id, timestamps, authors, locale */
+const OWN_COLUMNS = new Set([
+  'id',
+  'document_id',
+  'created_at',
+  'updated_at',
+  'published_at',
+  'created_by_id',
+  'updated_by_id',
+  'locale',
+]);
+
 /** The profile's scalar attributes, as the column each is stored in */
 const profileScalars = (strapi: Core.Strapi): string[] => {
   const attributes =
@@ -356,7 +368,7 @@ const profileScalars = (strapi: Core.Strapi): string[] => {
   return Object.entries(attributes)
     .filter(([name, attribute]) => !NON_SCALAR.has(attribute.type) && name !== 'user')
     .map(([name]) => columnOf(strapi, PROFILE_UID, name))
-    .filter((column): column is string => column !== undefined && column !== 'id');
+    .filter((column): column is string => column !== undefined && !OWN_COLUMNS.has(column));
 };
 
 interface CopyPlan {
@@ -403,21 +415,8 @@ const declaredCopies = (strapi: Core.Strapi): CopyPlan[] => {
   return plans;
 };
 
-/** What the profile of a user is created with: the same-named columns of the user, its timestamps */
-const profileRows = (
-  users: Row[],
-  columns: string[],
-  withPublished: boolean,
-  makeId: () => string
-): Row[] =>
-  users.map((user) => ({
-    id: user.id,
-    document_id: makeId(),
-    ...Object.fromEntries(columns.map((column) => [column, user[column] ?? null])),
-    created_at: user.created_at,
-    updated_at: user.updated_at,
-    ...(withPublished ? { published_at: user.published_at ?? new Date() } : {}),
-  }));
+/** Users per statement */
+const ID_RANGE = 1000;
 
 const createProfiles = async (strapi: Core.Strapi, owner: string): Promise<number> => {
   const db = strapi.db;
@@ -440,57 +439,88 @@ const createProfiles = async (strapi: Core.Strapi, owner: string): Promise<numbe
     }
   }
 
-  const userColumns = [
+  const targets = [
     'id',
+    'document_id',
+    ...columns,
     'created_at',
     'updated_at',
     ...(withPublished ? ['published_at'] : []),
-    ...columns,
   ];
-  const width = userColumns.length + 2;
-  let lastId = 0;
+  const bounds = (await db
+    .getConnection(USERS_TABLE)
+    .min({ lo: 'id' })
+    .max({ hi: 'id' })
+    .first()) as { lo: number | null; hi: number | null } | undefined;
   let created = 0;
 
-  for (;;) {
+  for (
+    let from = Number(bounds?.lo ?? 1);
+    bounds?.hi != null && from <= Number(bounds.hi);
+    from += ID_RANGE
+  ) {
+    const to = from + ID_RANGE - 1;
+
     // eslint-disable-next-line no-await-in-loop
     await keepHold(strapi, owner);
 
     // eslint-disable-next-line no-await-in-loop
-    const page = (await db
-      .getConnection(`${USERS_TABLE} as u`)
-      .where('u.id', '>', lastId)
-      .whereNotExists(function none() {
-        this.select(db.connection.raw('1'))
-          .from(userLink.name)
-          .whereRaw('?? = ??', [`${userLink.name}.${userLink.inverseJoinColumn.name}`, 'u.id']);
-      })
-      .orderBy('u.id')
-      .limit(PAGE)
-      .select(userColumns.map((column) => `u.${column} as ${column}`))) as Row[];
+    created += await db.transaction(async ({ trx }: { trx: Knex.Transaction }): Promise<number> => {
+      const withoutProfile = (query: Knex.QueryBuilder) =>
+        query.whereBetween('u.id', [from, to]).whereNotExists(function none() {
+          this.select(trx.raw('1'))
+            .from(userLink.name)
+            .whereRaw('?? = ??', [`${userLink.name}.${userLink.inverseJoinColumn.name}`, 'u.id']);
+        });
 
-    if (page.length === 0) {
-      break;
-    }
+      const ids = (
+        (await withoutProfile(tableOf(strapi, trx, `${USERS_TABLE} as u`)).select(
+          'u.id as id'
+        )) as Row[]
+      ).map((row) => Number(row.id));
 
-    lastId = Number(page[page.length - 1].id);
-
-    // eslint-disable-next-line no-await-in-loop
-    await db.transaction(async ({ trx }: { trx: Knex.Transaction }) => {
-      for (const chunk of chunksOf(page, Math.floor(VALUES_PER_STATEMENT / width))) {
-        // eslint-disable-next-line no-await-in-loop
-        await tableOf(strapi, trx, profile.tableName).insert(
-          profileRows(chunk, columns, withPublished, makeId)
-        );
-        // eslint-disable-next-line no-await-in-loop
-        await tableOf(strapi, trx, userLink.name).insert(
-          chunk.map((user) => ({
-            [userLink.joinColumn.name]: user.id,
-            [userLink.inverseJoinColumn.name]: user.id,
-          }))
-        );
+      if (ids.length === 0) {
+        return 0;
       }
+
+      // Column values move as the database holds them (JSON included): one statement per range.
+      // The user's own document id stands in until each profile gets the one its model gives.
+      const select = withoutProfile(tableOf(strapi, trx, `${USERS_TABLE} as u`)).select([
+        'u.id',
+        'u.document_id',
+        ...columns.map((column) => `u.${column}`),
+        'u.created_at',
+        'u.updated_at',
+        ...(withPublished ? [trx.raw('COALESCE(??, ?)', ['u.published_at', new Date()])] : []),
+      ]);
+
+      await trx
+        .into(
+          trx.raw(`?? (${targets.map(() => '??').join(', ')})`, [
+            qualified(strapi, profile.tableName),
+            ...targets,
+          ])
+        )
+        .insert(select);
+      await trx
+        .into(
+          trx.raw('?? (??, ??)', [
+            qualified(strapi, userLink.name),
+            userLink.joinColumn.name,
+            userLink.inverseJoinColumn.name,
+          ])
+        )
+        .insert(trx.select('u.id', 'u.id').from(`${USERS_TABLE} as u`).whereIn('u.id', ids));
+
+      for (const id of ids) {
+        // eslint-disable-next-line no-await-in-loop
+        await tableOf(strapi, trx, profile.tableName)
+          .where({ id })
+          .update({ document_id: makeId() });
+      }
+
+      return ids.length;
     });
-    created += page.length;
   }
 
   // Postgres counts on from its own sequence, which explicit ids did not move
@@ -790,6 +820,23 @@ const takeClaim = async (strapi: Core.Strapi): Promise<string | null> => {
 };
 
 /**
+ * A failed query's message holds its SQL and bound values (columns of a profile, ids, hashes). The
+ * log gets the step and the database's error code; the error that goes on carries no query text.
+ */
+const isDatabaseError = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && ('sql' in error || 'code' in error);
+
+const withoutQuery = (strapi: Core.Strapi, step: string, error: unknown): Error => {
+  const { code } = (error ?? {}) as { code?: unknown };
+  const named = typeof code === 'string' || typeof code === 'number' ? ` (error code ${code})` : '';
+  const message = `The migration step "${step}" failed${named}. Nothing was recorded for it.`;
+
+  strapi.log.error(`${PLUGIN_ID}: ${message}`);
+
+  return new Error(message);
+};
+
+/**
  * The migration's second half, in the plugin's bootstrap and before anything creates profiles or
  * roles: the users' new columns, the roles' types, the roles' permissions with the fixes, a profile
  * for each user (with the user's id) and a credential account for each user with a password. Does
@@ -825,8 +872,15 @@ export const runPostSync = async (strapi: Core.Strapi): Promise<void> => {
         // eslint-disable-next-line no-await-in-loop
         await keepHold(strapi, owner);
 
-        // eslint-disable-next-line no-await-in-loop
-        const patch = (await step.run(strapi, record, owner)) ?? {};
+        let patch: Partial<MigrationRecord> | void;
+
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          patch = (await step.run(strapi, record, owner)) ?? {};
+        } catch (error) {
+          throw isDatabaseError(error) ? withoutQuery(strapi, step.name, error) : error;
+        }
+
         // eslint-disable-next-line no-await-in-loop
         const current = await stillHeld(strapi, owner);
 

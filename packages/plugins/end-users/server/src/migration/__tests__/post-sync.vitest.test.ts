@@ -33,7 +33,7 @@ const record = (patch: Partial<MigrationRecord> = {}): MigrationRecord => ({
 
 const clearCutoverCache = vi.fn();
 const strapi = {
-  log: { info: vi.fn(), warn: vi.fn() },
+  log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   store: () => ({ get: async () => null, set: async () => undefined }),
   plugin: () => ({ service: () => ({ clearCutoverCache }) }),
 } as unknown as Core.Strapi;
@@ -135,5 +135,24 @@ describe('runPostSync', () => {
     await expect(runPostSync(strapi)).rejects.toThrow(/no longer holds the migration/);
     expect(ran).toEqual([]);
     expect(current().completedSteps).toEqual(['pre-sync']);
+  });
+
+  it('logs a failed step by name and error code, and rethrows without the query', async () => {
+    store(record());
+    vi.spyOn(POST_SYNC_STEPS[0], 'run').mockRejectedValue(
+      Object.assign(new Error('insert into "eu_accounts" values ($1) - secret-value'), {
+        code: '23505',
+        sql: 'insert into "eu_accounts" values ($1)',
+      })
+    );
+
+    const error = await runPostSync(strapi).catch((caught: Error) => caught);
+
+    expect((error as Error).message).toBe(
+      'The migration step "users" failed (error code 23505). Nothing was recorded for it.'
+    );
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.not.stringContaining('secret-value'));
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('"users"'));
+    expect(records.releaseMigration).toHaveBeenCalled();
   });
 });

@@ -70,6 +70,7 @@ export interface UsersPermissionsProject {
 /** What a project adds to the profile: what the migration carries over from the user */
 export const MIGRATED_PROFILE_ATTRIBUTES: Record<string, unknown> = {
   company: { type: 'string' },
+  tags: { type: 'json' },
   seo: { type: 'component', repeatable: false, component: 'shared.seo' },
   avatar: { type: 'media', multiple: false, allowedTypes: ['images', 'files'] },
   organization: {
@@ -788,6 +789,7 @@ export const seedUsersPermissionsProject = async (
         spec.key === 'alice'
           ? {
               company: 'Acme',
+              tags: ['vip', 'beta'],
               seo: { metaTitle: 'Alice' },
               avatar: file.id,
               organization: acme.documentId,

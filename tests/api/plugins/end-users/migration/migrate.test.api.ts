@@ -463,11 +463,26 @@ describe('migration from users-permissions: after the schema sync', () => {
   });
 
   it('gives every user one profile with the same id and the custom values', async () => {
-    const profiles = await strapi.db.connection('eu_profiles').select('id', 'company');
+    const profiles = await strapi.db.connection('eu_profiles').select('id', 'company', 'tags');
     const alice = project.users.alice;
 
     expect(profiles).toHaveLength(fixtures().length);
-    expect(profiles).toContainEqual({ id: alice.id, company: 'Acme' });
+    expect(profiles).toContainEqual(expect.objectContaining({ id: alice.id, company: 'Acme' }));
+
+    // A JSON array moves as it is stored
+    const aliceRow = profiles.find((profile) => profile.id === alice.id);
+
+    expect(typeof aliceRow.tags === 'string' ? JSON.parse(aliceRow.tags) : aliceRow.tags).toEqual([
+      'vip',
+      'beta',
+    ]);
+
+    // Each profile has its own document id, not the user's
+    const documents = await strapi.db.connection('eu_profiles').pluck('document_id');
+    const userDocuments = await strapi.db.connection('eu_users').pluck('document_id');
+
+    expect(new Set(documents).size).toBe(documents.length);
+    expect(documents.filter((id) => userDocuments.includes(id))).toEqual([]);
 
     for (const user of fixtures()) {
       expect(profiles.map((profile) => profile.id)).toContain(user.id);
