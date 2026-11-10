@@ -295,7 +295,7 @@ describe('clone relations', () => {
           { connect: [{ documentId: 'file-b' }] },
           [{ id: 1 }, { id: 3 }, { documentId: 'file-b' }],
         ],
-        ['connect of a linked file', { connect: ['file-c'] }, [{ id: 1 }, { id: 3 }]],
+        ['connect of a linked file', { connect: ['file-a'] }, [{ id: 3 }, 'file-a']],
         ['partial disconnect', { disconnect: [{ documentId: 'file-c' }] }, [{ id: 1 }]],
         ['disconnect of another file', { disconnect: [{ id: 2 }] }, [{ id: 1 }, { id: 3 }]],
         [
@@ -333,6 +333,39 @@ describe('clone relations', () => {
         expect(data.blocks).toEqual([{ id: 20, image: set, images: [fileA] }]);
         expect(data.sections).toEqual([
           { id: 30, __component: MEDIA_BLOCK, image: fileA, images: set },
+        ]);
+      });
+
+      it('resolves media operations against the matching repeatable component or dynamic zone item', async () => {
+        const source = {
+          ...original,
+          blocks: [
+            { id: 20, images: [fileA] },
+            { id: 21, images: [fileC] },
+          ],
+          sections: [
+            { id: 30, __component: MEDIA_BLOCK, images: [fileA, fileC] },
+            { id: 31, __component: MEDIA_BLOCK, images: [fileC] },
+          ],
+        };
+
+        const { data } = await prepareCloneData(
+          source,
+          {
+            blocks: [{ images: { connect: [{ id: 2 }] } }],
+            sections: [{}, { __component: MEDIA_BLOCK, images: { disconnect: [{ id: 3 }] } }],
+          },
+          mediaArticleModel as never,
+          getMediaModel as never
+        );
+
+        expect(data.blocks).toEqual([
+          { id: 20, images: { set: [{ id: 1 }, { id: 2 }] } },
+          { id: 21, images: [fileC] },
+        ]);
+        expect(data.sections).toEqual([
+          { id: 30, __component: MEDIA_BLOCK, images: [fileA, fileC] },
+          { id: 31, __component: MEDIA_BLOCK, images: { set: [] } },
         ]);
       });
 

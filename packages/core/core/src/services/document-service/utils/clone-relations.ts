@@ -2,7 +2,7 @@ import { get, has, merge, set, unset } from 'lodash';
 
 import type { Core, Schema, UID } from '@strapi/types';
 import { contentTypes, traverseEntity } from '@strapi/utils';
-import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
+import { isNumeric, traverseEntityRelations } from '../transform/relations/utils/map-relation';
 import {
   getDefaultLocale,
   getRelationTargetLocale,
@@ -195,19 +195,12 @@ const toList = (value: unknown): unknown[] => {
   return Array.isArray(value) ? value : [value];
 };
 
-const isNumericId = (value: unknown) => {
-  return (
-    (typeof value === 'number' && Number.isFinite(value)) ||
-    (typeof value === 'string' && /^\d+$/.test(value))
-  );
-};
-
 const isSameMedia = (file: unknown, ref: unknown) => {
   if (!isRecord(file)) {
     return false;
   }
 
-  if (isNumericId(ref)) {
+  if (isNumeric(ref)) {
     return String(file.id) === String(ref);
   }
 
@@ -240,20 +233,15 @@ const resolveMediaOperations = (
   const disconnect = toList(operations.disconnect);
   const connect = toList(operations.connect);
 
-  const keptFiles = toList(sourceMedia).filter(
-    (file) => !disconnect.some((ref) => isSameMedia(file, ref))
-  );
-  const kept = keptFiles.map((file) =>
-    isRecord(file) && file.id != null ? { id: file.id } : file
-  );
+  const kept = toList(sourceMedia)
+    .filter((file) => ![...disconnect, ...connect].some((ref) => isSameMedia(file, ref)))
+    .map((file) => (isRecord(file) && file.id != null ? { id: file.id } : file));
 
   if (!isMultiple) {
-    return { set: connect.length > 0 ? connect.slice(-1) : kept.slice(0, 1) };
+    return { set: connect.length > 0 ? connect.slice(-1) : kept };
   }
 
-  const added = connect.filter((ref) => !keptFiles.some((file) => isSameMedia(file, ref)));
-
-  return { set: [...kept, ...added] };
+  return { set: [...kept, ...connect] };
 };
 
 const collectRelationOperationOverrides = async (

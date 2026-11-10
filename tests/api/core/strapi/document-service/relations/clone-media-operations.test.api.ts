@@ -297,6 +297,18 @@ describe('Document Service clone media operation payloads', () => {
       await expectSourceUnchanged(source, files);
     });
 
+    testInTransaction('moves a connected file that is already linked to the end', async () => {
+      const files = await createFiles();
+      const source = await createSource(files);
+
+      const clone = await cloneSource(source, {
+        gallery: { connect: [{ documentId: files.a.documentId }] },
+      });
+
+      expect(ids(clone.gallery)).toEqual([files.c.id, files.a.id]);
+      await expectSourceUnchanged(source, files);
+    });
+
     testInTransaction('removes only the disconnected file', async () => {
       const files = await createFiles();
       const source = await createSource(files);
@@ -377,6 +389,38 @@ describe('Document Service clone media operation payloads', () => {
       expect(clone.block?.image?.id).toBe(files.a.id);
       expect(ids(clone.block?.images)).toEqual([files.a.id, files.c.id, files.b.id]);
       await expectSourceUnchanged(source, files);
+    });
+
+    testInTransaction('applies operations to the matching item of a two-item source', async () => {
+      const { a, b, c } = await createFiles();
+      const source = (await strapi.documents(ENTRY_UID).create({
+        data: {
+          name: 'Source',
+          blocks: [{ images: [a.id] }, { images: [c.id] }],
+          sections: [
+            { __component: BLOCK_UID, images: [a.id, c.id] },
+            { __component: BLOCK_UID, images: [c.id] },
+          ],
+        } as any,
+      })) as unknown as MediaEntry;
+
+      const clone = await cloneSource(source, {
+        blocks: [{ images: { connect: [{ documentId: b.documentId }] } }],
+        sections: [
+          { __component: BLOCK_UID },
+          { __component: BLOCK_UID, images: { disconnect: [{ documentId: c.documentId }] } },
+        ],
+      });
+
+      expect(clone.blocks?.map((block) => ids(block.images))).toEqual([[a.id, b.id], [c.id]]);
+      expect(clone.sections?.map((section) => ids(section.images))).toEqual([[a.id, c.id], []]);
+
+      const reloaded = await findEntry(source.documentId);
+      expect(reloaded.blocks?.map((block) => ids(block.images))).toEqual([[a.id], [c.id]]);
+      expect(reloaded.sections?.map((section) => ids(section.images))).toEqual([
+        [a.id, c.id],
+        [c.id],
+      ]);
     });
   });
 
