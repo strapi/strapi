@@ -1,6 +1,4 @@
 /* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
-// knex is Strapi's own database layer (hoisted); only its types are used here
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import type { Knex } from 'knex';
 import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';

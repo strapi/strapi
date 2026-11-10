@@ -1,6 +1,4 @@
-// knex is Strapi's own database layer (hoisted), not a dependency of this plugin: the test runs the
 // compare-and-swap against a real SQLite table rather than a mock
-/* eslint-disable import/no-extraneous-dependencies, node/no-extraneous-import */
 import knex, { type Knex } from 'knex';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';

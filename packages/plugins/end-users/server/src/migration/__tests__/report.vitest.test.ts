@@ -1,5 +1,3 @@
-// knex is Strapi's own database layer (hoisted), not a dependency of this plugin
-/* eslint-disable import/no-extraneous-dependencies, node/no-extraneous-import */
 import knex, { type Knex } from 'knex';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

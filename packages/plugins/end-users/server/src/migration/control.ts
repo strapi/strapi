@@ -1,6 +1,4 @@
 import { randomUUID } from 'node:crypto';
-// knex is Strapi's own database layer (hoisted); only its types are used here
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import type { Knex } from 'knex';
 import type { Core } from '@strapi/types';
 import type { Database } from '@strapi/database';
