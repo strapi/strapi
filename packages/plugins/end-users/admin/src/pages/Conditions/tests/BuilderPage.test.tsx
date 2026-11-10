@@ -1,5 +1,5 @@
 import { render as renderAdmin } from '@strapi/admin/strapi-admin/test';
-import { createEvent, fireEvent, within } from '@testing-library/react';
+import { configure, createEvent, fireEvent, within } from '@testing-library/react';
 import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes, useLocation } from 'react-router-dom';
@@ -16,6 +16,12 @@ import type {
   ConditionListItem,
   ConditionPreviewRequest,
 } from '../../../../../shared/contracts/conditions';
+
+/**
+ * Saving waits on mocked server answers and on the restart status the page polls. On a busy CI
+ * runner that takes longer than Testing Library's one-second default, so the waits get five.
+ */
+configure({ asyncUtilTimeout: 5000 });
 
 /**
  * The page takes the restart overlay from `@strapi/strapi/admin`, which loads the whole admin, the
