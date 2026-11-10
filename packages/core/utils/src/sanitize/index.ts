@@ -15,7 +15,7 @@ import * as sanitizers from './sanitizers';
 import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
-import type { Model, Data } from '../types';
+import type { Model, Data, Entry } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
 import { hasSort } from '../sort-query';
 import {
@@ -95,7 +95,7 @@ export type SanitizerOptions = Pick<Options, 'auth' | 'action'>;
  * declares parameters; a curried one (lodash's `curry`, whose `length` is 0) gets the schema alone.
  */
 export interface Sanitizer {
-  (schema: Model, options?: SanitizerOptions): CurriedFunction1<Data, Promise<Data>>;
+  (schema: Model, options?: SanitizerOptions): CurriedFunction1<Entry, Promise<Entry>>;
 }
 
 /**
@@ -209,7 +209,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     const fieldChecker = action === 'create' || action === 'update' ? activeChecker(auth) : null;
 
     if (fieldChecker) {
-      (transforms as Array<(data: Data) => Data | Promise<Data>>).push(async (value) => {
+      (transforms as Array<(data: Entry) => Entry | Promise<Entry>>).push(async (value) => {
         if (!isPlainObject(value)) {
           return value;
         }

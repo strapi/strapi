@@ -22,7 +22,7 @@ import traverseEntity from '../traverse-entity';
 import { traverseQueryFilters, traverseQueryPopulate, traverseQuerySort } from '../traverse';
 import type { Path } from '../traverse/factory';
 
-import { Model, Data } from '../types';
+import type { Model, Data, Entry } from '../types';
 import { ValidationError } from '../errors';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
 import {
@@ -104,7 +104,7 @@ export type ValidatorOptions = Pick<Options, 'auth' | 'action'>;
  * declares parameters; a curried one (lodash's `curry`, whose `length` is 0) gets the schema alone.
  */
 export interface Validator {
-  (schema: Model, options?: ValidatorOptions): CurriedFunction1<Data, Promise<Data>>;
+  (schema: Model, options?: ValidatorOptions): CurriedFunction1<Entry, Promise<Entry>>;
 }
 
 /**
