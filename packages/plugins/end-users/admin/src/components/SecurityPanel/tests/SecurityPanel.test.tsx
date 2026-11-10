@@ -1,4 +1,5 @@
 import { render as renderAdmin } from '@strapi/admin/strapi-admin/test';
+import { fireEvent, within } from '@testing-library/react';
 import { screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -173,6 +174,18 @@ describe('SecurityPanel', () => {
     );
   });
 
+  it('asks before closing the ban dialog with a reason that is not sent', async () => {
+    const calls = serve();
+    const { user } = renderPanel();
+
+    await user.click(await screen.findByRole('button', { name: 'Ban' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Reason' }), 'Spam');
+    await user.keyboard('{Escape}');
+
+    expect(await screen.findByText(/You have unsaved changes/)).toBeInTheDocument();
+    expect(calls).toHaveLength(0);
+  });
+
   it('bans with a reason and an expiry', async () => {
     const calls = serve();
     const { user } = renderPanel();
@@ -187,7 +200,7 @@ describe('SecurityPanel', () => {
 
     const before = Date.now();
 
-    await user.click(screen.getByRole('button', { name: 'Ban', hidden: false }));
+    fireEvent.click(within(modal).getByRole('button', { name: 'Ban' }));
 
     await waitFor(() => expect(calls).toHaveLength(1));
 
