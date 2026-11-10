@@ -43,13 +43,15 @@ describe('AssignedWidget', () => {
 
   it('renders "Untitled" for an empty title', () => {
     (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
-      data: [{ ...mockDocuments[0], title: '' }],
+      data: [{ ...mockDocuments[0], documentId: 'doc-empty-title', title: '' }],
       isLoading: false,
       error: null,
     });
 
     render(<AssignedWidget />);
-    expect(screen.getByText('Untitled')).toBeInTheDocument();
+    expect(screen.getByRole('grid')).not.toHaveTextContent('doc-empty-title');
+    const titleCell = screen.getByTitle('Untitled');
+    expect(titleCell).toHaveTextContent(/^Untitled$/);
   });
 
   it('renders a dash for a document without a stage', () => {

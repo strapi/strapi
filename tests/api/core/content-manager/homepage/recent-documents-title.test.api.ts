@@ -3,7 +3,14 @@
 import { createTestBuilder } from 'api-tests/builder';
 import { createAuthRequest } from 'api-tests/request';
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createUtils } from 'api-tests/utils';
+import { createUtils, describeOnCondition } from 'api-tests/utils';
+
+import {
+  STAGE_MODEL_UID,
+  WORKFLOW_MODEL_UID,
+} from '../../../../../packages/core/review-workflows/server/src/constants/workflows';
+
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const measureUid = 'api::measure.measure';
 const measureModel = {
@@ -154,5 +161,57 @@ describe('Homepage API - recent documents title with a non-string main field', (
 
     expect(titles.filled).toBe(filled.documentId);
     expect(titles.empty).toBe(empty.documentId);
+  });
+
+  // The review workflows "Assigned to me" widget reads its titles from the same content manager
+  // query, through an EE endpoint
+  describeOnCondition(edition === 'EE')('Assigned to me', () => {
+    let workflow;
+
+    beforeAll(async () => {
+      const stage = await strapi.db.query(STAGE_MODEL_UID).create({ data: { name: 'Stage' } });
+      workflow = await strapi.db.query(WORKFLOW_MODEL_UID).create({
+        data: { contentTypes: [], name: 'recent-documents-title', stages: [stage.id] },
+      });
+      const workflowResponse = await rq({
+        method: 'PUT',
+        url: `/review-workflows/workflows/${workflow.id}`,
+        body: { data: { contentTypes: [measureUid] } },
+      });
+      expect(workflowResponse.statusCode).toBe(200);
+
+      const user = rq.getLoggedUser();
+      for (const document of [filled, empty]) {
+        const assigneeResponse = await rq({
+          method: 'PUT',
+          url: `/review-workflows/content-manager/collection-types/${measureUid}/${document.documentId}/assignee`,
+          body: { data: { id: user.id } },
+        });
+        expect(assigneeResponse.statusCode).toBe(200);
+      }
+    });
+
+    afterAll(async () => {
+      if (workflow !== undefined) {
+        await rq({ method: 'DELETE', url: `/review-workflows/workflows/${workflow.id}` });
+      }
+    });
+
+    test('returns an empty title for an empty main field', async () => {
+      await setMainField('name');
+
+      const response = await rq({
+        method: 'GET',
+        url: '/review-workflows/homepage/recently-assigned-documents',
+      });
+      expect(response.statusCode).toBe(200);
+
+      const titles = new Map<string, unknown>(
+        response.body.data.map((doc) => [doc.documentId, doc.title])
+      );
+      expect(titles.get(filled.documentId)).toBe('Filled');
+      // Rendered as "Untitled" by the widget, not as the document id
+      expect(titles.get(empty.documentId)).toBe('');
+    });
   });
 });

@@ -77,8 +77,10 @@ describe.each([
   it('renders "Untitled" for an empty title', () => {
     mockRecentDocuments([{ ...recentDocument, title: '' }]);
     render(<RecentDocumentsWidget />);
-    expect(screen.getByText('Untitled')).toBeInTheDocument();
-    expect(screen.queryByText('doc-1')).not.toBeInTheDocument();
+    // The server used to send the document id as the title of an empty main field
+    expect(screen.getByRole('grid')).not.toHaveTextContent(recentDocument.documentId);
+    const titleCell = screen.getByTitle('Untitled');
+    expect(titleCell).toHaveTextContent(/^Untitled$/);
   });
 });
 
