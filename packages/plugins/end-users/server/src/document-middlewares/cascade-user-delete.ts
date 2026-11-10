@@ -90,17 +90,19 @@ export const cascadeUserDeleteMiddleware =
         fields: ['documentId'],
       })) as Array<{ documentId: string }>;
 
+      /* eslint-disable no-await-in-loop -- deleted in order, inside one transaction on a single connection */
       for (const profile of profiles) {
-        // eslint-disable-next-line no-await-in-loop
         await asProfileLifecycle(() =>
           strapi.documents(PROFILE_UID).delete({ documentId: profile.documentId })
         );
       }
+      /* eslint-enable no-await-in-loop */
 
+      /* eslint-disable no-await-in-loop -- deleted in order, inside one transaction on a single connection */
       for (const { uid, attribute } of userReferences(strapi, engine)) {
-        // eslint-disable-next-line no-await-in-loop
         await query(uid).deleteMany({ where: { [attribute]: documentId } });
       }
+      /* eslint-enable no-await-in-loop */
 
       await query(VERIFICATION_UID).deleteMany({ where: { value: documentId } });
 

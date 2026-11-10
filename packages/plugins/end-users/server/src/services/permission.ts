@@ -527,14 +527,15 @@ const permissionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const scope = { role: { id: role.id } };
 
+        /* eslint-disable no-await-in-loop -- the writes share the transaction's single connection, so they run one at a time */
         for (const ids of chunksOf(toDelete)) {
-          // eslint-disable-next-line no-await-in-loop
           await permissions().deleteMany({ where: { ...scope, documentId: { $in: ids } } });
         }
+        /* eslint-enable no-await-in-loop */
 
         // One at a time: each row has its own values, and they share the transaction's connection
+        /* eslint-disable no-await-in-loop -- the writes share the transaction's single connection, so they run one at a time */
         for (const { documentId, ...changes } of toUpdate) {
-          // eslint-disable-next-line no-await-in-loop
           const updated = await permissions().update({
             where: { ...scope, documentId },
             data: changes,
@@ -544,13 +545,15 @@ const permissionService = ({ strapi }: { strapi: Core.Strapi }) => {
             throw new errors.NotFoundError(`Permission ${documentId} not found on this role`);
           }
         }
+        /* eslint-enable no-await-in-loop */
 
+        /* eslint-disable no-await-in-loop -- the writes share the transaction's single connection, so they run one at a time */
         for (const rows of chunksOf(toCreate)) {
-          // eslint-disable-next-line no-await-in-loop
           await permissions().createMany({
             data: rows.map((row) => ({ ...row, role: role.id, publishedAt })),
           });
         }
+        /* eslint-enable no-await-in-loop */
 
         const changesWhatARowIs =
           toCreate.length > 0 ||

@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 // knex is Strapi's own database layer (hoisted); only its types are used here
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import type { Knex } from 'knex';
@@ -95,12 +96,10 @@ export const waitForClaim = async ({
   const startedAt = Date.now();
 
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     if (await claim()) {
       return 'claimed';
     }
 
-    // eslint-disable-next-line no-await-in-loop
     if (await completed()) {
       return 'completed';
     }
@@ -110,7 +109,6 @@ export const waitForClaim = async ({
     }
 
     onWait?.();
-    // eslint-disable-next-line no-await-in-loop
     await new Promise((resolve) => {
       setTimeout(resolve, intervalMs);
     });
@@ -307,7 +305,6 @@ const dropEndUsersTables = async (trx: Knex, db: Database, client: DbClient): Pr
   let names: string[] = [];
 
   for (const name of endUsersTables(db)) {
-    // eslint-disable-next-line no-await-in-loop
     if (await tableHas(trx, db, name)) {
       names.push(name);
     }
@@ -321,7 +318,6 @@ const dropEndUsersTables = async (trx: Knex, db: Database, client: DbClient): Pr
     const pointsAt = new Map<string, string[]>();
 
     for (const name of names) {
-      // eslint-disable-next-line no-await-in-loop
       const keys = (await trx.raw('pragma foreign_key_list(??)', [name])) as Row[];
 
       pointsAt.set(
@@ -338,10 +334,8 @@ const dropEndUsersTables = async (trx: Knex, db: Database, client: DbClient): Pr
   try {
     for (const name of names) {
       if (client === 'postgres') {
-        // eslint-disable-next-line no-await-in-loop
         await trx.raw('drop table if exists ?? cascade', [schema ? `${schema}.${name}` : name]);
       } else {
-        // eslint-disable-next-line no-await-in-loop
         await db.getSchemaConnection(trx).dropTableIfExists(name);
       }
     }
@@ -362,18 +356,15 @@ const renameTables = async (
   { keys }: { keys: boolean }
 ) => {
   for (const [from, to] of pairs) {
-    // eslint-disable-next-line no-await-in-loop
     await renameOne(trx, db, from, to);
   }
 
   // A table that is not in the new schema yet is not touched by the sync: its old names stay
   if (keys) {
     for (const [from, to] of pairs) {
-      // eslint-disable-next-line no-await-in-loop
       await moveSchemaObjects(trx, db, client, from, to);
 
       if (client === 'postgres') {
-        // eslint-disable-next-line no-await-in-loop
         await moveSequence(trx, db, from, to);
       }
     }
@@ -385,12 +376,10 @@ const emptyProfileTables = async (trx: Knex, db: Database, client: DbClient): Pr
   let removed = 0;
 
   for (const base of NEXT_ATTEMPT_EMPTIES) {
-    // eslint-disable-next-line no-await-in-loop
     const found = await tablesStartingWith(trx, client, base);
     const children = found.filter((name) => name.startsWith(`${base}_`));
 
     for (const name of [...children, ...found.filter((name) => name === base)]) {
-      // eslint-disable-next-line no-await-in-loop
       removed += Number(await tableOf(trx, db, name).del());
     }
   }
@@ -432,7 +421,6 @@ const heldAmong = async (
   const held: string[] = [];
 
   for (let from = 0; from < lowered.length; from += PAGE) {
-    // eslint-disable-next-line no-await-in-loop
     const rows: Row[] = await tableOf(trx, db, table)
       .whereRaw(
         `LOWER(??) in (${lowered
@@ -468,7 +456,6 @@ const rewriteGroups = async (
   const values = new Map<number, string>();
 
   for (let from = 0; from < ids.length; from += PAGE) {
-    // eslint-disable-next-line no-await-in-loop
     const rows: Row[] = await tableOf(trx, db, table)
       .whereIn('id', ids.slice(from, from + PAGE))
       .select('id', column);
@@ -483,7 +470,6 @@ const rewriteGroups = async (
   let plan = planRewrites(groups, rule, values, taken);
 
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     const held = (
       await heldAmong(
         trx,
@@ -504,7 +490,6 @@ const rewriteGroups = async (
 
   for (const { id, value } of plan) {
     try {
-      // eslint-disable-next-line no-await-in-loop
       await tableOf(trx, db, table)
         .where({ id })
         .update({ [column]: value });
@@ -602,9 +587,7 @@ const retypeMedia = async (trx: Knex, db: Database): Promise<number> => {
   let retyped = 0;
 
   for (const table of morphTables(db)) {
-    // eslint-disable-next-line no-await-in-loop
     if (await db.getSchemaConnection(trx).hasTable(table)) {
-      // eslint-disable-next-line no-await-in-loop
       retyped += Number(
         await tableOf(trx, db, table)
           .where({ related_type: UP_USER_UID })

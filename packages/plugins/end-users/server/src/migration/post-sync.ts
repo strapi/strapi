@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 // knex is Strapi's own database layer (hoisted); only its types are used here
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import type { Knex } from 'knex';
@@ -166,7 +167,6 @@ const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: s
   const sources = [];
 
   for (const column of ['display_username', 'username']) {
-    // eslint-disable-next-line no-await-in-loop
     if (await hasColumn(strapi, USERS_TABLE, column)) {
       sources.push(column);
     }
@@ -191,7 +191,6 @@ const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: s
     const value = plainDefault(attribute.default);
     const column = columnOf(strapi, USER_UID, name);
 
-    // eslint-disable-next-line no-await-in-loop
     if (
       value !== undefined &&
       column &&
@@ -199,7 +198,6 @@ const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: s
       attribute.type !== 'relation' &&
       (await hasColumn(strapi, USERS_TABLE, column))
     ) {
-      // eslint-disable-next-line no-await-in-loop
       await conn()
         .whereNull(column)
         .update({ [column]: value });
@@ -212,10 +210,8 @@ const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: s
 
   if (typeof makeId === 'function') {
     for (;;) {
-      // eslint-disable-next-line no-await-in-loop
       await keepHold(strapi, owner);
 
-      // eslint-disable-next-line no-await-in-loop
       const page: Row[] = await conn().whereNull('document_id').select('id').limit(PAGE);
 
       if (page.length === 0) {
@@ -223,7 +219,6 @@ const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: s
       }
 
       for (const { id } of page) {
-        // eslint-disable-next-line no-await-in-loop
         await conn().where({ id }).update({ document_id: makeId() });
       }
     }
@@ -320,10 +315,8 @@ const permissionsStep = async (strapi: Core.Strapi, record: MigrationRecord, own
   let written = 0;
 
   for (const role of roles) {
-    // eslint-disable-next-line no-await-in-loop
     await keepHold(strapi, owner);
 
-    // eslint-disable-next-line no-await-in-loop
     const found: Row[] = await db
       .getConnection(`${link} as l`)
       .join(`${staged} as p`, 'p.id', 'l.permission_id')
@@ -334,10 +327,8 @@ const permissionsStep = async (strapi: Core.Strapi, record: MigrationRecord, own
     const mapping = mapRolePermissions(actions, role.type, context);
 
     // The role's rows are replaced as a whole, so a start that runs this again leaves the same ones
-    // eslint-disable-next-line no-await-in-loop
     const existing = await service.findForRoles([role.document_id]);
 
-    // eslint-disable-next-line no-await-in-loop
     await service.applyDiff(role.document_id, {
       create: mapping.rows,
       update: [],
@@ -463,7 +454,6 @@ const createProfiles = async (strapi: Core.Strapi, owner: string): Promise<numbe
   const columns: string[] = [];
 
   for (const column of profileScalars(strapi)) {
-    // eslint-disable-next-line no-await-in-loop
     if (await hasColumn(strapi, USERS_TABLE, column)) {
       columns.push(column);
     }
@@ -501,10 +491,8 @@ const createProfiles = async (strapi: Core.Strapi, owner: string): Promise<numbe
   ) {
     const to = from + ID_RANGE - 1;
 
-    // eslint-disable-next-line no-await-in-loop
     await keepHold(strapi, owner);
 
-    // eslint-disable-next-line no-await-in-loop
     created += await db.transaction(async ({ trx }: { trx: Knex.Transaction }): Promise<number> => {
       const withoutProfile = (query: Knex.QueryBuilder) =>
         query.whereBetween('u.id', [from, to]).whereNotExists(function none() {
@@ -553,7 +541,6 @@ const createProfiles = async (strapi: Core.Strapi, owner: string): Promise<numbe
         .insert(trx.select('u.id', 'u.id').from(`${USERS_TABLE} as u`).whereIn('u.id', ids));
 
       for (const id of ids) {
-        // eslint-disable-next-line no-await-in-loop
         await tableOf(strapi, trx, profile.tableName)
           .where({ id })
           .update({ document_id: makeId() });
@@ -644,7 +631,6 @@ const profilesStep = async (strapi: Core.Strapi, record: MigrationRecord, owner:
       continue;
     }
 
-    // eslint-disable-next-line no-await-in-loop
     const rows = Number(
       ((await db.getConnection(stagedName).count({ c: '*' }).first()) as Row | undefined)?.c ?? 0
     );
@@ -671,17 +657,13 @@ const profilesStep = async (strapi: Core.Strapi, record: MigrationRecord, owner:
     const stagedName = stagedAs(record, plan.from);
 
     if (stagedName) {
-      // eslint-disable-next-line no-await-in-loop
       if (await db.getSchemaConnection().hasTable(stagedName)) {
-        // eslint-disable-next-line no-await-in-loop
         const { carried } = (await readRecord(strapi)) ?? record;
 
         if (!carried.copied.includes(stagedName)) {
-          // eslint-disable-next-line no-await-in-loop
           await copyStaged(strapi, owner, stagedName, plan);
         }
 
-        // eslint-disable-next-line no-await-in-loop
         await dropStaged(strapi, stagedName);
       }
     }
@@ -710,10 +692,8 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
   let created = 0;
 
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     await keepHold(strapi, owner);
 
-    // eslint-disable-next-line no-await-in-loop
     const page = (await db
       .getConnection(`${USERS_TABLE} as u`)
       .where('u.provider', 'local')
@@ -747,7 +727,6 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
     lastId = Number(page[page.length - 1].id);
 
     for (const chunk of chunksOf(page, Math.floor(VALUES_PER_STATEMENT / width))) {
-      // eslint-disable-next-line no-await-in-loop
       await db.getConnection(account.tableName).insert(
         chunk.map((user) => ({
           document_id: makeId(),
@@ -901,7 +880,6 @@ export const runPostSync = async (strapi: Core.Strapi): Promise<void> => {
   try {
     for (const step of POST_SYNC_STEPS) {
       // A step reads the record as the one before left it
-      // eslint-disable-next-line no-await-in-loop
       const record = await readRecord(strapi);
 
       if (!record || record.status !== 'in-progress') {
@@ -909,22 +887,18 @@ export const runPostSync = async (strapi: Core.Strapi): Promise<void> => {
       }
 
       if (!record.completedSteps.includes(step.name)) {
-        // eslint-disable-next-line no-await-in-loop
         await keepHold(strapi, owner);
 
         let patch: Partial<MigrationRecord> | void;
 
         try {
-          // eslint-disable-next-line no-await-in-loop
           patch = (await step.run(strapi, record, owner)) ?? {};
         } catch (error) {
           throw isDatabaseError(error) ? withoutQuery(strapi, step.name, error) : error;
         }
 
-        // eslint-disable-next-line no-await-in-loop
         const current = await stillHeld(strapi, owner);
 
-        // eslint-disable-next-line no-await-in-loop
         await updateRecord(strapi, {
           ...patch,
           completedSteps: [...new Set([...current.completedSteps, step.name])],

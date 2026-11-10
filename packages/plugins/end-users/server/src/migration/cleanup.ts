@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 import { PLUGIN_ID, USER_UID } from '../constants';
 import type { MigrationStepFn } from './control';
 import { leftoverColumns } from './rollback';
@@ -63,9 +64,7 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
   const linksFirst = (name: string) => (record.staged[name]?.endsWith('_lnk') ? 0 : 1);
 
   for (const table of dropping.sort((a, b) => linksFirst(a) - linksFirst(b))) {
-    // eslint-disable-next-line no-await-in-loop
     if (await hasTable(trx, db, table)) {
-      // eslint-disable-next-line no-await-in-loop
       await dropTable(trx, db, client, table);
     }
   }
@@ -80,9 +79,7 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
 
   for (const table of [user.tableName, user.attributes.roles?.joinTable?.name]) {
     // A table that is not there (a record written without a migration) has nothing to drop
-    // eslint-disable-next-line no-await-in-loop
     if (table && (await hasTable(trx, db, table))) {
-      // eslint-disable-next-line no-await-in-loop
       const leftover = leftoverColumns(db, table, await columnsOf(trx, db, table));
       const isUsers = table === user.tableName;
       const columns = isUsers
@@ -92,7 +89,6 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
       kept.push(...leftover.filter((column) => !columns.includes(column)));
 
       for (const column of columns) {
-        // eslint-disable-next-line no-await-in-loop
         await dropColumn(trx, db, client, table, column);
       }
 

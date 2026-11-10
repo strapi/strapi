@@ -409,13 +409,14 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
           const documents = documentsOf(target);
           let updated = 0;
 
+          /* eslint-disable no-await-in-loop -- one at a time: they share the transaction, which is a single connection */
           for (const documentId of await findDocumentIds(target, where)) {
             // One at a time: they share the transaction, which is a single connection.
-            // eslint-disable-next-line no-await-in-loop
             if (await documents.update({ documentId, data: update })) {
               updated += 1;
             }
           }
+          /* eslint-enable no-await-in-loop */
 
           return updated;
         });
@@ -434,9 +435,9 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
         const accounts = await dbOf(target).findMany({ where: filters });
         const { count } = await dbOf(target).updateMany({ where: filters, data: update });
 
+        /* eslint-disable no-await-in-loop -- one at a time: they share the transaction, which is a single connection */
         for (const account of accounts) {
           // One at a time: they share the transaction, which is a single connection.
-          // eslint-disable-next-line no-await-in-loop
           await mirrorToUser(
             target,
             account,
@@ -444,6 +445,7 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
             update as Row
           );
         }
+        /* eslint-enable no-await-in-loop */
 
         return count;
       });
@@ -483,9 +485,9 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
           const documents = documentsOf(target);
           let deleted = 0;
 
+          /* eslint-disable no-await-in-loop -- one at a time: they share the transaction, which is a single connection */
           for (const documentId of await findDocumentIds(target, where)) {
             // One at a time: they share the transaction, which is a single connection.
-            // eslint-disable-next-line no-await-in-loop
             const result = await documents.delete({ documentId });
 
             // `entries` lists what the delete removed; a document that vanished first is not counted.
@@ -493,6 +495,7 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
               deleted += 1;
             }
           }
+          /* eslint-enable no-await-in-loop */
 
           return deleted;
         });

@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';
 
@@ -92,19 +93,15 @@ const carryActions = async (
       continue;
     }
 
-    // eslint-disable-next-line no-await-in-loop
     await keepHold(strapi, owner);
 
-    // eslint-disable-next-line no-await-in-loop
     const existing = await query.findOne({
       where: { action: target, role: roleId, subject: row.subject },
     });
 
     if (existing) {
-      // eslint-disable-next-line no-await-in-loop
       await query.delete({ where: { id: row.id } });
     } else {
-      // eslint-disable-next-line no-await-in-loop
       await query.update({ where: { id: row.id }, data: { action: target } });
     }
   }
@@ -171,12 +168,10 @@ const carryContentManagerRows = async (
         (field) => !userAttributes.has(rootOf(field)) && profileAttributes.has(rootOf(field))
       ) ?? [];
 
-    // eslint-disable-next-line no-await-in-loop
     await keepHold(strapi, owner);
 
     // The profile's row goes in first: a start that stops after it finds the user's row still to do
     if (moved.length > 0 && CM_ACTIONS_WITH_FIELDS.has(row.action)) {
-      // eslint-disable-next-line no-await-in-loop
       const existing = (await query.findOne({
         where: { action: row.action, subject: PROFILE_UID, role: roleId },
       })) as PermissionRow | null;
@@ -193,7 +188,6 @@ const carryContentManagerRows = async (
           const union = [...new Set([...have, ...moved])];
 
           if (union.length > have.length) {
-            // eslint-disable-next-line no-await-in-loop
             await query.update({
               where: { id: existing.id },
               data: { properties: { ...existing.properties, fields: union } },
@@ -212,7 +206,6 @@ const carryContentManagerRows = async (
           });
         }
       } else {
-        // eslint-disable-next-line no-await-in-loop
         await query.create({
           data: {
             action: row.action,
@@ -227,7 +220,6 @@ const carryContentManagerRows = async (
       }
     }
 
-    // eslint-disable-next-line no-await-in-loop
     await query.update({
       where: { id: row.id },
       data: {

@@ -100,8 +100,8 @@ export const ensureEveryUserHasAProfile = async (
 
   let lastId = 0;
 
+  /* eslint-disable no-await-in-loop -- pages are read in turn, and a profile is made one at a time so a race with another instance is seen */
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     const page = (await users.findMany({
       select: ['id', 'documentId'],
       where: { id: { $gt: lastId } },
@@ -115,7 +115,6 @@ export const ensureEveryUserHasAProfile = async (
 
     lastId = page[page.length - 1].id;
 
-    // eslint-disable-next-line no-await-in-loop
     const withProfile = (await profiles.findMany({
       where: { user: { documentId: { $in: page.map((user) => user.documentId) } } },
       populate: { user: { select: ['documentId'] } },
@@ -124,7 +123,6 @@ export const ensureEveryUserHasAProfile = async (
 
     for (const { documentId } of page.filter((user) => !covered.has(user.documentId))) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         await asProfileLifecycle(() =>
           documentsOf<PluginDocuments>(strapi, PROFILE_UID).create({
             data: { user: { connect: [documentId] } },
@@ -133,7 +131,6 @@ export const ensureEveryUserHasAProfile = async (
         result.created += 1;
       } catch (error) {
         // Another instance starting at the same moment made it first: nothing is missing
-        // eslint-disable-next-line no-await-in-loop
         if (!(await hasProfile(documentId))) {
           const reason = reasonOf(error);
 
@@ -146,6 +143,7 @@ export const ensureEveryUserHasAProfile = async (
       }
     }
   }
+  /* eslint-enable no-await-in-loop */
 };
 
 /**
