@@ -107,6 +107,6 @@ describe('summarize', () => {
   });
 
   it('says that an empty condition restricts nothing', () => {
-    expect(summarize(base, layout, formatMessage)).toEqual(['Applies to .', 'Restricts nothing.']);
+    expect(summarize(base, layout, formatMessage)).toEqual(['Restricts nothing.']);
   });
 });

@@ -178,7 +178,7 @@ describe('ViewPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Is owner', level: 1 })).toBeInTheDocument();
     expect(
-      screen.getByText("It is built into the end-users plugin, so it can't be changed.")
+      screen.getByText("It is built into the End users plugin, so it can't be changed.")
     ).toBeInTheDocument();
 
     // About: the name, source and content types, and a paragraph of what the code does

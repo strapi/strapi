@@ -201,7 +201,7 @@ export const OnSaveSection = ({
           </Flex>
         );
       })}
-      <Flex>
+      <Flex gap={3}>
         <Button
           type="button"
           variant="tertiary"
@@ -220,6 +220,14 @@ export const OnSaveSection = ({
             defaultMessage: 'Set a field on create',
           })}
         </Button>
+        {options.length === 0 && !disabled && (
+          <Typography textColor="neutral600" variant="pi">
+            {formatMessage({
+              id: getTranslation('conditions.builder.choose-types-first'),
+              defaultMessage: 'Choose a content type first.',
+            })}
+          </Typography>
+        )}
       </Flex>
       <Field.Root name="locked">
         <Field.Label>

@@ -479,7 +479,7 @@ const ConditionBuilder = ({
                       )}
                     </Typography>
                   )}
-                  {restrictsNothing && (
+                  {restrictsNothing && (modified || isEditing) && (
                     <Flex
                       gap={3}
                       padding={4}
@@ -564,7 +564,13 @@ const ConditionBuilder = ({
                       </Flex>
                     </Grid.Item>
                     <Grid.Item col={4} xs={12} direction="column" alignItems="stretch">
-                      <Flex direction="column" alignItems="stretch" gap={6}>
+                      {/* Stays in view while the sections below it are edited */}
+                      <Flex
+                        direction="column"
+                        alignItems="stretch"
+                        gap={6}
+                        style={{ position: 'sticky', top: '10rem' }}
+                      >
                         <SummaryCard condition={toCondition(form)} layout={layout} />
                         <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                           <PreviewPanel

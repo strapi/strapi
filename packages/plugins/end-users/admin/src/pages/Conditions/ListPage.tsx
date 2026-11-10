@@ -127,7 +127,7 @@ const ListPage = () => {
             <LinkButton tag={Link} to="new" startIcon={<Plus />} size="S">
               {formatMessage({
                 id: getTranslation('conditions.list.add'),
-                defaultMessage: 'New condition',
+                defaultMessage: 'Add new condition',
               })}
             </LinkButton>
           ) : null

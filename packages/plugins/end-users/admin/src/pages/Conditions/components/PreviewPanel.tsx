@@ -198,7 +198,7 @@ const PreviewPanel = ({ layout, condition, ready }: PreviewPanelProps) => {
           disabled={subjects.length === 0}
           placeholder={formatMessage({
             id: getTranslation('conditions.builder.preview.choose-type'),
-            defaultMessage: 'Choose a content type under Applies to',
+            defaultMessage: 'Choose content types first',
           })}
         >
           {subjects.map((uid) => (
@@ -264,7 +264,7 @@ const PreviewPanel = ({ layout, condition, ready }: PreviewPanelProps) => {
         <Typography textColor="neutral600" variant="pi">
           {formatMessage({
             id: getTranslation('conditions.builder.preview.not-ready'),
-            defaultMessage: 'Fix the problems listed above to preview this condition.',
+            defaultMessage: 'Fix the problems with this condition to preview it.',
           })}
         </Typography>
       )}

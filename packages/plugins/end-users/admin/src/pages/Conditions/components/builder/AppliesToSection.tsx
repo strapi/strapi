@@ -60,7 +60,7 @@ export const AppliesToSection = ({
             hint={formatMessage({
               id: getTranslation('conditions.builder.name.hint'),
               defaultMessage:
-                'Lowercase letters, digits and hyphens. It names the condition api::name, and cannot change once it is created.',
+                'Lowercase letters, digits and hyphens. Code refers to the condition as api::your-name. It cannot change once it is created.',
             })}
           >
             <Field.Label>

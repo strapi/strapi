@@ -109,10 +109,10 @@ describe('ListPage', () => {
     ]);
   });
 
-  it('offers New condition in development only', async () => {
+  it('offers Add new condition in development only', async () => {
     const { unmount } = renderListPage();
 
-    const link = await screen.findByRole('link', { name: 'New condition' });
+    const link = await screen.findByRole('link', { name: 'Add new condition' });
 
     expect(link).toHaveAttribute('href', '/settings/end-users/conditions/new');
     expect(screen.queryByText(DEVELOPMENT_ONLY)).not.toBeInTheDocument();
@@ -123,13 +123,13 @@ describe('ListPage', () => {
 
     await screen.findByRole('heading', { name: 'Conditions' });
 
-    expect(screen.queryByRole('link', { name: 'New condition' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Add new condition' })).not.toBeInTheDocument();
     expect(screen.getByText(DEVELOPMENT_ONLY)).toHaveTextContent(
       'Conditions can be created and changed only while Strapi runs with strapi develop.'
     );
   });
 
-  it('offers no New condition to an admin who may only read conditions', async () => {
+  it('offers no Add new condition to an admin who may only read conditions', async () => {
     renderAdmin(tree, {
       initialEntries: ['/settings/end-users/conditions'],
       providerOptions: { permissions: PERMISSIONS.conditions.read },
@@ -137,7 +137,7 @@ describe('ListPage', () => {
 
     await screen.findByRole('heading', { name: 'Conditions' });
 
-    expect(screen.queryByRole('link', { name: 'New condition' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Add new condition' })).not.toBeInTheDocument();
     // Development, so the notice about `strapi develop` would be wrong
     expect(screen.queryByText(DEVELOPMENT_ONLY)).not.toBeInTheDocument();
     // The builder still opens, read-only, to see what a condition does

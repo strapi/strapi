@@ -479,7 +479,7 @@ const ConditionView = ({ condition, layout, canReadRoles }: ConditionViewProps) 
                 {
                   id: getTranslation('conditions.view.read-only'),
                   defaultMessage:
-                    "{source, select, builtin {It is built into the end-users plugin, so it can't be changed.} plugin {A plugin registers it: change it in that plugin.} code {It is written in your project's code, in <code>src/end-users/conditions</code>: change it there.} other {It is a file in <code>src/end-users/conditions</code> that the builder did not write: change the file.}}",
+                    "{source, select, builtin {It is built into the End users plugin, so it can't be changed.} plugin {A plugin registers it: change it in that plugin.} code {It is written in your project's code, in <code>src/end-users/conditions</code>: change it there.} other {It is a file in <code>src/end-users/conditions</code> that the builder did not write: change the file.}}",
                 },
                 {
                   source,

@@ -434,7 +434,7 @@ describe('BuilderPage', () => {
       // No content type is chosen yet
       expect(screen.getByRole('button', { name: 'Preview' })).toBeDisabled();
       expect(
-        screen.getByText('Fix the problems listed above to preview this condition.')
+        screen.getByText('Fix the problems with this condition to preview it.')
       ).toBeInTheDocument();
     });
 
@@ -683,9 +683,12 @@ describe('BuilderPage', () => {
       const { user } = renderAt('new');
 
       await findHeading('New condition');
-      expect(screen.getByText('This condition restricts nothing.')).toBeInTheDocument();
+      // An untouched form has nothing to warn about yet
+      expect(screen.queryByText('This condition restricts nothing.')).not.toBeInTheDocument();
 
       await startNew(user);
+      expect(screen.getByText('This condition restricts nothing.')).toBeInTheDocument();
+
       await user.click(screen.getByRole('button', { name: 'Add check' }));
 
       expect(screen.queryByText('This condition restricts nothing.')).not.toBeInTheDocument();
@@ -726,6 +729,22 @@ describe('BuilderPage', () => {
       await user.keyboard('{Escape}');
 
       expect(await screen.findByText('Choose at least one content type.')).toBeVisible();
+    });
+
+    it('says why Add check is unavailable until a content type is chosen, and leaves the summary empty', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+
+      expect(screen.getByRole('button', { name: 'Add check' })).toBeDisabled();
+      expect(screen.getAllByText('Choose a content type first.').length).toBeGreaterThan(0);
+      expect(screen.queryByText(/^Applies to \./)).not.toBeInTheDocument();
+
+      await startNew(user);
+
+      expect(screen.getByRole('button', { name: 'Add check' })).toBeEnabled();
+      expect(screen.queryByText('Choose a content type first.')).not.toBeInTheDocument();
+      expect(screen.getByText('Applies to Article.')).toBeInTheDocument();
     });
 
     it('locks a saved input name', async () => {

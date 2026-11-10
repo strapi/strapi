@@ -203,7 +203,10 @@ export const summarize = (
       (uid) => layout.contentTypes.find((type) => type.uid === uid)?.displayName ?? uid
     );
 
-    sentences.push(say('appliesTypes', 'Applies to {types}.', { types: list(names) }));
+    // Nothing is said until a content type is chosen: "Applies to ." says nothing
+    if (names.length > 0) {
+      sentences.push(say('appliesTypes', 'Applies to {types}.', { types: list(names) }));
+    }
   }
 
   if (condition.inputs.length > 0) {

@@ -5,6 +5,7 @@ import {
   IconButton,
   SingleSelect,
   SingleSelectOption,
+  Typography,
 } from '@strapi/design-system';
 import { Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -300,6 +301,14 @@ const GroupEditor = ({ label, group, offered, depth, onChange, onRemove }: Group
               defaultMessage: 'Add check',
             })}
           </Button>
+          {!canAdd && !disabled && (
+            <Typography textColor="neutral600" variant="pi">
+              {formatMessage({
+                id: getTranslation('conditions.builder.choose-types-first'),
+                defaultMessage: 'Choose a content type first.',
+              })}
+            </Typography>
+          )}
           {depth === 0 && (
             <Button
               type="button"
