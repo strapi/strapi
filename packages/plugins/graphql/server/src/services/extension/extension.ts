@@ -37,9 +37,26 @@ const getDefaultState = (): Extension => ({
 
 const createExtension = ({ strapi }: { strapi: Core.Strapi }) => {
   const configs: Array<Configuration | ConfigurationFactory> = [];
+  let requiredOutputNullable = false;
 
   return {
     shadowCRUD: createShadowCRUDManager(),
+
+    /**
+     * Make the required fields of output types nullable, for a plugin that hides fields from a
+     * caller (a hidden field is null, and a non-null one would null its whole parent). Call it
+     * while registering, before the schema is built; input types are not affected.
+     */
+    nullableRequiredOutput(enabled = true) {
+      requiredOutputNullable = enabled;
+
+      return this;
+    },
+
+    /** Whether a plugin asked for required output fields to be nullable */
+    isRequiredOutputNullable() {
+      return requiredOutputNullable;
+    },
 
     /**
      * Register a new extension configuration

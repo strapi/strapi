@@ -2,11 +2,12 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import createTypeBuilder from '../type';
 
-/** A strapi whose graphql plugin offers what `buildTypeDefinition` reads, with or without end-users */
-const makeStrapi = (withEndUsers: boolean) => {
+/** A strapi whose graphql plugin offers what `buildTypeDefinition` reads, opted in to nullable output or not */
+const makeStrapi = (optedIn: boolean) => {
   const services: Record<string, any> = {
     extension: {
       shadowCRUD: () => ({ field: () => ({ hasOutputEnabled: () => true }) }),
+      isRequiredOutputNullable: () => optedIn,
     },
     utils: {
       naming: {
@@ -32,7 +33,7 @@ const makeStrapi = (withEndUsers: boolean) => {
         return { service: (service: string) => services[service], config: () => false };
       }
 
-      return name === 'end-users' && withEndUsers ? {} : undefined;
+      return undefined;
     },
   } as any;
 };
@@ -49,7 +50,7 @@ const article = {
 } as any;
 
 /** What `buildTypeDefinition` declares: each field, and whether it is non-null */
-const fieldsOf = (withEndUsers: boolean) => {
+const fieldsOf = (optedIn: boolean) => {
   const fields: Record<string, { nonNull: boolean }> = {};
 
   const builder = (nonNull: boolean): any => ({
@@ -64,7 +65,7 @@ const fieldsOf = (withEndUsers: boolean) => {
     },
   });
 
-  const { buildTypeDefinition } = createTypeBuilder({ strapi: makeStrapi(withEndUsers) } as any);
+  const { buildTypeDefinition } = createTypeBuilder({ strapi: makeStrapi(optedIn) } as any);
 
   (buildTypeDefinition(article) as any).value.definition(builder(false));
 
@@ -81,7 +82,7 @@ describe('output types', () => {
     delete (globalThis as any).strapi;
   });
 
-  it('keep required fields non-null without end-users', () => {
+  it('keep required fields non-null when no plugin opted in', () => {
     expect(fieldsOf(false)).toEqual({
       documentId: { nonNull: true },
       title: { nonNull: true },
@@ -89,7 +90,7 @@ describe('output types', () => {
     });
   });
 
-  it('make required output fields nullable with end-users, and keep documentId non-null', () => {
+  it('make required output fields nullable once a plugin opted in, and keep documentId non-null', () => {
     expect(fieldsOf(true)).toEqual({
       documentId: { nonNull: true },
       title: { nonNull: false },
@@ -117,6 +118,7 @@ describe('relation fields where the association resolver hides the relation', ()
           isDisabled: () => false,
         }),
         use: vi.fn(),
+        isRequiredOutputNullable: () => false,
       },
       utils: {
         naming: {

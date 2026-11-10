@@ -17,14 +17,14 @@ export default (context: Context) => {
   const { strapi } = context;
   const getGraphQLService = strapi.plugin('graphql').service;
 
-  // With end-users installed, a field the caller's role cannot read is null, and so is a required
-  // one: an output type that kept it non-null would turn a hidden field into an error that nulls
-  // its whole parent. Input types keep `required`, and `documentId` stays non-null. This is read
-  // once per schema build (a builders instance is made for each), so the schema is the same for
-  // every request.
-  const relaxRequired = strapi.plugin('end-users') !== undefined;
-
   const extension = getGraphQLService('extension');
+
+  // When a plugin opted in (end-users, outside migration check mode), a field the caller's role
+  // cannot read is null, and so is a required one: an output type that kept it non-null would turn
+  // a hidden field into an error that nulls its whole parent. Input types keep `required`, and
+  // `documentId` stays non-null. This is read once per schema build (a builders instance is made
+  // for each), so the schema is the same for every request.
+  const relaxRequired = extension.isRequiredOutputNullable();
 
   /**
    * Add a scalar attribute to the type definition
