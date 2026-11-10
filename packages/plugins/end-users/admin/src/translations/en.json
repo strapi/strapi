@@ -480,5 +480,7 @@
   "migration.check.minutes": "{count, plural, one {# minute} other {# minutes}}",
   "conditions.param.set-on-create": "Set the owner on create",
   "conditions.param.set-on-create.hint": "Set the owner to the signed-in user when an entry is created.",
-  "conditions.builder.choose-types-first": "Choose a content type first."
+  "conditions.builder.choose-types-first": "Choose a content type first.",
+  "providers.oidc.name.hint": "What the provider is called. Its address in the callback URL is made from it.",
+  "providers.trust-for-linking.hint": "A sign-in with this provider is linked to the existing account that has the same email. Turn it on only for a provider that checks emails."
 }

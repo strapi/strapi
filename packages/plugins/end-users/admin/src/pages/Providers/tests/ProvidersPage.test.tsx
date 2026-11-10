@@ -458,6 +458,22 @@ describe('ProvidersPage', () => {
     expect(await screen.findByText(/You have unsaved changes/)).toBeInTheDocument();
   });
 
+  it('says what Trust for account linking does, and keeps Copy inside the redirect URI field', async () => {
+    serveProviders();
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    expect(
+      await within(dialog).findByText(/linked to the existing account that has the same email/)
+    ).toBeInTheDocument();
+    // The copy button is the field's own action: the field's name labels both
+    const uri = within(dialog).getByRole('textbox', { name: 'Redirect URI' });
+
+    expect(uri).toHaveAttribute('readonly');
+    expect(within(dialog).getByRole('button', { name: 'Copy redirect URI' })).toBeInTheDocument();
+  });
+
   it('copies the redirect URI', async () => {
     serveProviders();
     const { user } = renderPage();
@@ -483,6 +499,13 @@ describe('ProvidersPage', () => {
 
     // A submit button, so that Enter in a field submits the form
     expect(add).toHaveAttribute('type', 'submit');
+
+    // It says what is asked, and what a discovery URL looks like
+    expect(within(dialog).getByText(/What the provider is called/)).toBeInTheDocument();
+    expect(within(dialog).getByRole('textbox', { name: /Discovery URL/ })).toHaveAttribute(
+      'placeholder',
+      'https://issuer.example.com/.well-known/openid-configuration'
+    );
 
     await user.type(within(dialog).getByRole('textbox', { name: /Name/ }), 'Acme SSO');
     fireEvent.click(add);

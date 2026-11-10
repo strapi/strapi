@@ -101,12 +101,18 @@ const AddOidcModal = ({ open, onClose, onCreated }: AddOidcModalProps) => {
                       id: getTranslation('providers.oidc.name'),
                       defaultMessage: 'Name',
                     })}
+                    hint={formatMessage({
+                      id: getTranslation('providers.oidc.name.hint'),
+                      defaultMessage:
+                        'What the provider is called. Its address in the callback URL is made from it.',
+                    })}
                     autoComplete="off"
                     required
                   />
                   <TextField
                     name="discoveryUrl"
                     type="url"
+                    placeholder="https://issuer.example.com/.well-known/openid-configuration"
                     label={formatMessage({
                       id: getTranslation('providers.discovery-url'),
                       defaultMessage: 'Discovery URL',

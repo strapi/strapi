@@ -751,21 +751,23 @@ const ProviderForm = ({
                     defaultMessage: 'Redirect URI',
                   })}
                 </Field.Label>
-                <Flex gap={2}>
-                  <Box grow={1}>
-                    <TextInput value={detail.redirectUri} readOnly />
-                  </Box>
-                  <IconButton
-                    type="button"
-                    label={formatMessage({
-                      id: getTranslation('providers.redirect-uri.copy'),
-                      defaultMessage: 'Copy redirect URI',
-                    })}
-                    onClick={handleCopy}
-                  >
-                    <Duplicate />
-                  </IconButton>
-                </Flex>
+                <TextInput
+                  value={detail.redirectUri}
+                  readOnly
+                  endAction={
+                    <IconButton
+                      type="button"
+                      variant="ghost"
+                      label={formatMessage({
+                        id: getTranslation('providers.redirect-uri.copy'),
+                        defaultMessage: 'Copy redirect URI',
+                      })}
+                      onClick={handleCopy}
+                    >
+                      <Duplicate />
+                    </IconButton>
+                  }
+                />
                 <Field.Hint />
               </Field.Root>
 
@@ -774,6 +776,11 @@ const ProviderForm = ({
                 label={formatMessage({
                   id: getTranslation('providers.trust-for-linking'),
                   defaultMessage: 'Trust for account linking',
+                })}
+                hint={formatMessage({
+                  id: getTranslation('providers.trust-for-linking.hint'),
+                  defaultMessage:
+                    'A sign-in with this provider is linked to the existing account that has the same email. Turn it on only for a provider that checks emails.',
                 })}
                 disabled={disabled}
               />

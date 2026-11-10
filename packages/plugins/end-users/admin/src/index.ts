@@ -30,19 +30,6 @@ export default {
           permissions: PERMISSIONS.roles.read,
         },
         {
-          id: 'conditions',
-          to: `${pluginId}/conditions`,
-          intlLabel: {
-            id: getTranslation('Settings.conditions.link'),
-            defaultMessage: 'Conditions',
-          },
-          Component: () =>
-            import('./pages/Conditions/ConditionsPage').then((mod) => ({
-              default: mod.ConditionsPage,
-            })),
-          permissions: PERMISSIONS.conditions.read,
-        },
-        {
           id: 'sign-in',
           to: `${pluginId}/sign-in`,
           intlLabel: {
@@ -67,6 +54,29 @@ export default {
           permissions: PERMISSIONS.providers.read,
         },
         {
+          // The email plugin owns this page and its route: this is only a link to it
+          id: 'email-templates',
+          to: EMAIL_TEMPLATES_PATH,
+          intlLabel: {
+            id: getTranslation('Settings.email-templates.link'),
+            defaultMessage: 'Email templates',
+          },
+          permissions: EMAIL_TEMPLATES_PERMISSIONS,
+        },
+        {
+          id: 'conditions',
+          to: `${pluginId}/conditions`,
+          intlLabel: {
+            id: getTranslation('Settings.conditions.link'),
+            defaultMessage: 'Conditions',
+          },
+          Component: () =>
+            import('./pages/Conditions/ConditionsPage').then((mod) => ({
+              default: mod.ConditionsPage,
+            })),
+          permissions: PERMISSIONS.conditions.read,
+        },
+        {
           id: 'advanced',
           to: `${pluginId}/advanced`,
           intlLabel: {
@@ -78,16 +88,6 @@ export default {
               default: mod.AdvancedPage,
             })),
           permissions: PERMISSIONS.settings.read,
-        },
-        {
-          // The email plugin owns this page and its route: this is only a link to it
-          id: 'email-templates',
-          to: EMAIL_TEMPLATES_PATH,
-          intlLabel: {
-            id: getTranslation('Settings.email-templates.link'),
-            defaultMessage: 'Email templates',
-          },
-          permissions: EMAIL_TEMPLATES_PERMISSIONS,
         },
       ]
     );
