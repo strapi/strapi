@@ -1,15 +1,16 @@
 import type { Core } from '@strapi/strapi';
 import * as Sentry from '@sentry/node';
-import type { Config } from '../config';
+import type { SentryService } from '../types/services';
+import type { SentryConfig } from '../types/config';
 
 const createSentryService = (strapi: Core.Strapi) => {
   let isReady = false;
   let instance: typeof Sentry | null = null;
 
   // Retrieve user config and merge it with the default one
-  const config = strapi.config.get('plugin::sentry') as Config;
+  const config = strapi.config.get<SentryConfig>('plugin::sentry');
 
-  return {
+  const service = {
     /**
      * Initialize Sentry service
      */
@@ -70,6 +71,12 @@ const createSentryService = (strapi: Core.Strapi) => {
       });
     },
   };
+
+  // Checked here rather than with `satisfies` on the literal, which would type `this` and change the
+  // published `init()` return type from develop's `any`.
+  service satisfies SentryService;
+
+  return service;
 };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => createSentryService(strapi);

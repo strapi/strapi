@@ -9,6 +9,8 @@ const config = {
     'rollup.config.mjs',
     'coverage/',
     'lint-staged.config.mjs',
+    // Declarations of the JavaScript entry, type checked by tests/types/registries.
+    'types/**/*.d.ts',
   ],
   overrides: [
     {

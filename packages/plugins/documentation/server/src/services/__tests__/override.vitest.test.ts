@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import override from '../override';
+import type { OverrideService } from '../../types/services';
 
 const strapiMock = {
   log: {
@@ -76,6 +77,16 @@ describe('Documentation plugin | Override service', () => {
 
     expect(overrideService.registeredOverrides).toEqual([mockOverride]);
     expect(overrideService.excludedFromGeneration).toEqual(['test', 'some-other-api-to-exclude']);
+  });
+
+  it('should register an override and exclude apis when the options name no plugin origin', () => {
+    const mockOverride = { tags: [] };
+
+    const overrideService: OverrideService = override({ strapi });
+    overrideService.registerOverride(mockOverride, { excludeFromGeneration: ['homepage'] });
+
+    expect(overrideService.registeredOverrides).toEqual([mockOverride]);
+    expect(overrideService.excludedFromGeneration).toEqual(['homepage']);
   });
 
   it('should register an api or plugin to exclude from generation', () => {
