@@ -41,16 +41,13 @@ const mockReleases = [
 ];
 
 describe('ChartEntriesWidget', () => {
-  beforeEach(() => {
-    jest.useFakeTimers({ now });
-  });
-
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
   });
 
   it('renders a table with upcoming releases', () => {
+    jest.useFakeTimers({ now });
     jest.mocked(useGetUpcomingReleasesQuery).mockReturnValue({
       data: mockReleases,
       isLoading: false,
