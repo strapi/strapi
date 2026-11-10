@@ -113,3 +113,71 @@ articles.findMany({
     links: { artcle: { title: 'a' } },
   },
 });
+
+/**
+ * The id shortcut on a nested attribute of a component: the target's id, or one operator object on
+ * it. The database applies it to the target's id.
+ */
+export const shortcut: Filters<'shared.link'>[] = [
+  { article: 5 },
+  { article: 'a' },
+  { article: { $in: [1, 2] } },
+  { article: { $eq: 1 } },
+  { article: { $null: true } },
+  { article: { $notNull: true } },
+  { article: { title: 'a' } },
+  { article: { id: { $in: [1, 2] } } },
+  {
+    article: {
+      // @ts-expect-error An operator next to attribute keys throws at runtime
+      $in: [1],
+      title: 'a',
+    },
+  },
+  {
+    // @ts-expect-error Two operators throw at runtime
+    article: { $gt: 1, $lt: 5 },
+  },
+  {
+    article: {
+      // @ts-expect-error Unknown attribute in a relation filter
+      titel: 'a',
+    },
+  },
+  {
+    // @ts-expect-error Wrong value type for $null
+    article: { $null: 'a' },
+  },
+];
+
+export const nestedComponentShortcut: Filters<'shared.card'>[] = [
+  { seo: 1 },
+  { seo: { $null: true } },
+  { seo: { metaTitle: 'a' } },
+  {
+    seo: {
+      // @ts-expect-error Unknown attribute in a component filter
+      metaTitel: 'a',
+    },
+  },
+];
+
+export const shortcutFromContentType: Filters<'api::article.article'>[] = [
+  { links: { article: 5 } },
+  { links: { article: { $in: [1, 2] } } },
+  {
+    // @ts-expect-error The shortcut is not accepted on content type attributes
+    seo: { $null: true },
+  },
+];
+
+articles.findMany({ filters: { links: { article: { $null: true } } } });
+
+articles.findMany({
+  filters: {
+    links: {
+      // @ts-expect-error Two operators throw at runtime
+      article: { $gt: 1, $lt: 5 },
+    },
+  },
+});

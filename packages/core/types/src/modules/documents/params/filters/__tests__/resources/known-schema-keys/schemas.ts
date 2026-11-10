@@ -24,6 +24,17 @@ interface Link extends Struct.ComponentSchema {
 }
 
 /**
+ * A component with a nested component attribute only
+ */
+interface Card extends Struct.ComponentSchema {
+  collectionName: 'components_shared_card';
+  info: { displayName: 'Card' };
+  attributes: {
+    seo: Schema.Attribute.Component<'shared.seo', false>;
+  };
+}
+
+/**
  * A content type with both scalar and nested attributes
  */
 interface Article extends Struct.CollectionTypeSchema {
@@ -43,5 +54,6 @@ declare module '../../../../../../../public/registries' {
   export interface ComponentSchemas {
     'shared.seo': Seo;
     'shared.link': Link;
+    'shared.card': Card;
   }
 }

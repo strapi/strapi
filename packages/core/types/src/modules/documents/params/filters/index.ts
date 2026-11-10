@@ -26,7 +26,9 @@ type DocumentIDKey = 'documentId';
  * The target UID is resolved through `infer` before recursing. When `TSchemaUID` is a type
  * parameter, the conditional type stays deferred, so TypeScript does not build an endless chain of
  * new `ObjectNotation<Target<...>>` instantiations, which would exhaust the heap on nested filters.
- * When `TSchemaUID` is known, the type is the same as `ObjectNotation<Target>`.
+ * When `TSchemaUID` is known, the type is `ObjectNotation<Target>`.
+ *
+ * Inside a component, the attribute also accepts the id shortcut ({@link IdShortcut}).
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
@@ -36,8 +38,45 @@ type NestedAttributeCondition<
     Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TAttributeName>>,
     UID.Schema
   > extends infer TTargetUID extends UID.Schema
-    ? ObjectNotation<TTargetUID>
+    ? If<
+        IsComponent<TSchemaUID>,
+        ObjectNotation<TTargetUID> | IdShortcut<TTargetUID>,
+        ObjectNotation<TTargetUID>
+      >
     : never;
+
+/**
+ * Filter on the id of a nested attribute's target: the id itself, or an object with exactly one
+ * operator (e.g. `5`, `{ $in: [1, 2] }`, `{ $null: true }`).
+ *
+ * The database applies it to the target's id. It throws for an object with several operators, or
+ * with an operator next to other keys, so each operator object forbids the other operators and the
+ * target's filter keys.
+ */
+type IdShortcut<TTargetUID extends UID.Schema> =
+  | Params.Attribute.ID
+  | {
+      [TOperator in Operator.Where]: { [TIter in TOperator]: IdOperatorValue<TOperator> } & {
+        [TIter in Exclude<Operator.Where, TOperator> | FilterKeys<TTargetUID>]?: never;
+      };
+    }[Operator.Where];
+
+type IdOperatorValue<TOperator extends Operator.Where> = TOperator extends Operator.BooleanValue
+  ? boolean
+  : TOperator extends Operator.DynamicArrayValue
+    ? Params.Attribute.ID[]
+    : TOperator extends Operator.DynamicBoundValue
+      ? [Params.Attribute.ID, Params.Attribute.ID]
+      : Params.Attribute.ID;
+
+/**
+ * Non-operator keys of the filter object of {@link TSchemaUID}, plus its groups and `$not`
+ */
+type FilterKeys<TSchemaUID extends UID.Schema> =
+  | Operator.Group
+  | Operator.Logical
+  | IdentifierKeys<TSchemaUID>
+  | If<HasKnownAttributeNames<TSchemaUID>, Schema.AttributeNames<TSchemaUID>, never>;
 
 /**
  * Filter representation for scalar attributes
@@ -100,9 +139,14 @@ type HasKnownAttributeNames<TSchemaUID extends UID.Schema> = And<
  * Identifier keys a filter accepts on top of the schema's attributes. Components have no documentId.
  */
 type IdentifierKeys<TSchemaUID extends UID.Schema> = If<
-  StrictEqual<Schema.ModelType<TSchemaUID>, 'component'>,
+  IsComponent<TSchemaUID>,
   IDKey,
   IDKey | DocumentIDKey
+>;
+
+type IsComponent<TSchemaUID extends UID.Schema> = StrictEqual<
+  Schema.ModelType<TSchemaUID>,
+  'component'
 >;
 
 /**
