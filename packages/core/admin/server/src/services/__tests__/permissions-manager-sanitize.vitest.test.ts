@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, expectTypeOf, beforeAll } from 'vitest';
 import { AbilityBuilder, Ability } from '@casl/ability';
 import { pick } from 'lodash';
 
@@ -155,6 +155,64 @@ describe('Permissions Manager - Sanitize', () => {
       expect(result.sort).toEqual({ c: 'desc' });
       expect(result.populate).toEqual({ c: true });
       expect(result.fields).toEqual([undefined, 'c']);
+    });
+  });
+
+  describe('Result types', () => {
+    const createFooHelpers = () =>
+      createSanitizeHelpers({
+        action: 'read',
+        model: fooModel.uid,
+        ability: defineAbility((can: any) => can('read', 'api::foo.foo')),
+      });
+
+    it('sanitizeInput and sanitizeOutput keep the type of the data', async () => {
+      const helpers = createFooHelpers();
+      const data = { a: 'Foo', c: 'Bar' };
+
+      const input = helpers.sanitizeInput(data, { subject: fooModel.uid });
+      const output = helpers.sanitizeOutput(data, { subject: fooModel.uid });
+
+      expectTypeOf(input).toEqualTypeOf<Promise<{ a: string; c: string }>>();
+      expectTypeOf(output).toEqualTypeOf<Promise<{ a: string; c: string }>>();
+      expect(await input).toEqual({ c: 'Bar' });
+      expect(await output).toEqual({ c: 'Bar' });
+    });
+
+    it('sanitizeInput and sanitizeOutput keep the type of an array of data', async () => {
+      const helpers = createFooHelpers();
+      const data = [{ a: 'Foo', c: 'Bar' }];
+
+      const input = helpers.sanitizeInput(data, { subject: fooModel.uid });
+      const output = helpers.sanitizeOutput(data, { subject: fooModel.uid });
+
+      expectTypeOf(input).toEqualTypeOf<Promise<{ a: string; c: string }[]>>();
+      expectTypeOf(output).toEqualTypeOf<Promise<{ a: string; c: string }[]>>();
+      expect(await input).toEqual([{ c: 'Bar' }]);
+      expect(await output).toEqual([{ c: 'Bar' }]);
+    });
+
+    it('sanitizeInput and sanitizeOutput keep unknown data unknown', () => {
+      const helpers = createFooHelpers();
+      const data: unknown = { c: 'Bar' };
+
+      expectTypeOf(helpers.sanitizeInput(data)).toEqualTypeOf<Promise<unknown>>();
+      expectTypeOf(helpers.sanitizeOutput(data)).toEqualTypeOf<Promise<unknown>>();
+    });
+
+    it('sanitizeInput and sanitizeOutput return any for any data', () => {
+      const helpers = createFooHelpers();
+      const data: any = { c: 'Bar' };
+
+      expectTypeOf(helpers.sanitizeInput(data)).toEqualTypeOf<Promise<any>>();
+      expectTypeOf(helpers.sanitizeOutput(data)).toEqualTypeOf<Promise<any>>();
+    });
+
+    it('sanitizeQuery keeps an unknown result', () => {
+      const helpers = createFooHelpers();
+      const query = { filters: { c: 'Bar' } };
+
+      expectTypeOf(helpers.sanitizeQuery(query)).toEqualTypeOf<Promise<unknown>>();
     });
   });
 

@@ -311,7 +311,7 @@ const createRolesIfNoneExist = async () => {
     {
       restrictedSubjects: ['plugin::users-permissions.user', ...nonDisplayedUids],
     }
-  );
+  ) as Permission[];
 
   const authorPermissions = editorPermissions
     .filter(({ action }: any) => action !== ACTIONS.publish)
@@ -515,18 +515,45 @@ const checkPermissionsCeiling = async (
   }
 };
 
-const addPermissions = async (roleId: Data.ID, permissions: any) => {
+/**
+ * A permission to add to a role, with the action parameters to store as is.
+ */
+type AddPermissionPayload<TActionParameters extends object> = Omit<
+  CreatePermissionPayload,
+  'actionParameters'
+> & {
+  actionParameters?: TActionParameters;
+};
+
+/**
+ * A permission that {@link addPermissions} stored: the database gives it a number id, and it keeps
+ * the action parameters it was given (`{}` when none were given).
+ */
+export type AddedPermission<TActionParameters extends object = object> = Omit<
+  Permission,
+  'id' | 'actionParameters' | 'subject'
+> & {
+  id: number;
+  actionParameters: TActionParameters;
+  subject: string | null;
+};
+
+const addPermissions = async <TActionParameters extends object = object>(
+  roleId: Data.ID,
+  permissions: AddPermissionPayload<TActionParameters>[]
+): Promise<AddedPermission<TActionParameters>[]> => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
 
   const permissionsWithRole = permissions
-    .map((permission: Permission) => ({ ...permission, role: roleId }))
+    .map((permission) => ({ ...permission, role: roleId }))
     // @ts-expect-error - refactor domain/permission Condition type, as it's now expecting
     // a string but it should be a Condition interface
     .map(sanitizeConditions(conditionProvider))
     .map(permissionDomain.create);
 
-  return createMany(permissionsWithRole);
+  // `createMany` declares the wider `Permission`: `id` as `Data.ID`, `actionParameters` as `object`
+  return createMany(permissionsWithRole) as Promise<AddedPermission<TActionParameters>[]>;
 };
 
 const isContentTypeAction = (action: Action) => action.section === CONTENT_TYPE_SECTION;

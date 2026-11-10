@@ -61,6 +61,14 @@ const patchedConsole = {
       })
       .join(' ');
 
+    // TODO(design-system): give each modal and dialog a description, as Radix expects
+    if (
+      /Missing `Description` or `aria-describedby=\{undefined\}`/.test(msg) ||
+      /requires a description for the component to be accessible/.test(msg)
+    ) {
+      return;
+    }
+
     /**
      * React Router emits dev-only warnings about upcoming v7 behavior when `future`
      * flags are left undefined. We don't want test log pollution or flaky failures

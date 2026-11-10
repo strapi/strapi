@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "5.61.0",
+  "version": "5.61.1",
   "description": "Adds GraphQL endpoint with default API methods.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -65,9 +65,9 @@
     "@graphql-tools/schema": "10.0.3",
     "@graphql-tools/utils": "^12.0.3",
     "@koa/cors": "5.0.0",
-    "@strapi/design-system": "2.2.4",
-    "@strapi/icons": "2.2.4",
-    "@strapi/utils": "5.61.0",
+    "@strapi/design-system": "2.3.0",
+    "@strapi/icons": "2.3.0",
+    "@strapi/utils": "5.61.1",
     "graphql": "^16.8.1",
     "graphql-depth-limit": "^1.1.0",
     "graphql-playground-middleware-koa": "^1.6.21",
@@ -79,24 +79,24 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
-    "@strapi/admin": "5.61.0",
-    "@strapi/strapi": "5.61.0",
-    "@strapi/types": "5.61.0",
+    "@strapi/admin": "5.61.1",
+    "@strapi/strapi": "5.61.1",
+    "@strapi/types": "5.61.1",
     "@types/graphql-depth-limit": "1.1.5",
     "@types/koa-bodyparser": "4.3.12",
     "@types/koa__cors": "5.0.0",
     "@types/node": "22.20.0",
     "cross-env": "^7.0.3",
-    "eslint-config-custom": "5.61.0",
+    "eslint-config-custom": "5.61.1",
     "koa": "2.16.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
-    "tsconfig": "5.61.0",
+    "tsconfig": "5.61.1",
     "typescript": "5.9.3",
     "vitest": "catalog:",
-    "vitest-config": "5.61.0"
+    "vitest-config": "5.61.1"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

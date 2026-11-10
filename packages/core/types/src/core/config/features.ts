@@ -6,7 +6,6 @@
 export interface FeaturesFutureFlags {
   experimental_firstPublishedAt?: boolean;
   unstableAdminMfa?: boolean;
-  unstableNextDesignSystem?: boolean;
   unstableCustomOrder?: boolean;
   [futureFlagName: string]: boolean | undefined;
 }
