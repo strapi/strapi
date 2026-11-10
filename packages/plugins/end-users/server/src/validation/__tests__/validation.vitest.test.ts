@@ -23,6 +23,9 @@ const refusal = async (run: () => unknown) => {
 describe('input validation', () => {
   describe('a role body', () => {
     it('is any object, a class instance included', async () => {
+      const instance = new (class Role {})();
+
+      await expect(validateRoleBody(instance)).resolves.toBe(instance);
       await expect(validateRoleBody({ name: 'Editors' })).resolves.toEqual({ name: 'Editors' });
       await expect(validateRoleBody({})).resolves.toEqual({});
     });
@@ -113,5 +116,30 @@ describe('input validation', () => {
     ]) {
       expect(() => validateHasAnyAdminPermissionConfig(bad), JSON.stringify(bad)).toThrow();
     }
+  });
+
+  it('names the field that was refused', async () => {
+    const pathOf = async (run: () => unknown) => {
+      try {
+        await run();
+      } catch (error) {
+        return (error as { details: { errors: Array<{ path: string[] }> } }).details.errors[0].path;
+      }
+
+      return undefined;
+    };
+
+    expect(await pathOf(() => validateConditionPreview({ subject: 1 }))).toEqual(['subject']);
+    expect(
+      await pathOf(() => validateConditionPreview({ subject: 'a', userDocumentId: '' }))
+    ).toEqual(['userDocumentId']);
+    expect(
+      await pathOf(() =>
+        validateConditionPreview({ subject: 'a', userDocumentId: 'b', inputs: [] })
+      )
+    ).toEqual(['inputs']);
+    expect(await pathOf(() => validateResolved('x'))).toEqual(['resolved']);
+    expect(await pathOf(() => validateRoutesSubject(1))).toEqual(['subject']);
+    expect(await pathOf(() => validateProfileBody({}))).toEqual(['data']);
   });
 });

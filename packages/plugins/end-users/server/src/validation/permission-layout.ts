@@ -6,7 +6,9 @@ const routesSubjectSchema = yup
   .test(
     'subject',
     'subject is one string: a content type uid or a route group id',
-    (value) => typeof value === 'string'
+    function subject(value) {
+      return typeof value === 'string' || this.createError({ path: 'subject' });
+    }
   );
 
 export const validateRoutesSubject = validateYupSchema(routesSubjectSchema, { abortEarly: true });

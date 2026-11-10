@@ -6,8 +6,8 @@ import { isPlain } from '../utils/is-plain';
 const profileBodySchema = yup
   .mixed()
   .nullable()
-  .test('data', 'Missing "data" payload in the request body', (value) => {
-    return isPlain(value) && isPlain(value.data);
+  .test('data', 'Missing "data" payload in the request body', function data(value) {
+    return (isPlain(value) && isPlain(value.data)) || this.createError({ path: 'data' });
   });
 
 export const validateProfileBody = validateYupSchema(profileBodySchema, { abortEarly: true });
