@@ -1,9 +1,21 @@
 import { ACTIVE, CHECK, REPORT, serveMigration } from '@tests/migrationFixtures';
-import { answered, render, screen, server, waitFor } from '@tests/utils';
+import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { useGetMigrationStatusQuery } from '../../../services/migration';
 import { AdvancedPage } from '../AdvancedPage';
 import { MigrationSection } from '../MigrationSection';
+
+/**
+ * Renders once the status has been read, from the same query as the component under test, so the
+ * two see the answer in the same update: a test that asserts something is NOT shown waits for this
+ * first, or it passes before the request is answered.
+ */
+const StatusRead = () => {
+  const { isLoading } = useGetMigrationStatusQuery();
+
+  return isLoading ? null : <p>Status read</p>;
+};
 
 describe('MigrationSection', () => {
   it('shows only the migration page in check mode', async () => {
@@ -167,11 +179,14 @@ describe('MigrationSection', () => {
 
   it('is not shown when no migration has run', async () => {
     serveMigration({ ...ACTIVE, record: null, report: null });
-    const statusRead = answered('/end-users/migration');
+    render(
+      <>
+        <MigrationSection />
+        <StatusRead />
+      </>
+    );
 
-    render(<MigrationSection />);
-
-    await statusRead();
+    await screen.findByText('Status read');
     expect(screen.queryByRole('heading', { name: 'Migration' })).not.toBeInTheDocument();
   });
 });

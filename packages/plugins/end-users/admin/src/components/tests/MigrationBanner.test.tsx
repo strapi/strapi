@@ -1,8 +1,20 @@
 import { ACTIVE, serveMigration } from '@tests/migrationFixtures';
-import { answered, render, screen, server } from '@tests/utils';
+import { render, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { useGetMigrationStatusQuery } from '../../services/migration';
 import { MigrationBanner } from '../MigrationBanner';
+
+/**
+ * Renders once the status has been read, from the same query as the component under test, so the
+ * two see the answer in the same update: a test that asserts something is NOT shown waits for this
+ * first, or it passes before the request is answered.
+ */
+const StatusRead = () => {
+  const { isLoading } = useGetMigrationStatusQuery();
+
+  return isLoading ? null : <p>Status read</p>;
+};
 
 describe('MigrationBanner', () => {
   it('shows the count of unresolved items and links to the migration section', async () => {
@@ -37,13 +49,17 @@ describe('MigrationBanner', () => {
     for (const arrange of cases) {
       arrange();
       // The status is read before the banner decides: what it shows is checked once it is answered
-      const statusRead = answered('/end-users/migration');
-      const { container, unmount } = render(<MigrationBanner />);
+      const { container, unmount } = render(
+        <>
+          <MigrationBanner />
+          <StatusRead />
+        </>
+      );
 
-      await statusRead();
+      await screen.findByText('Status read');
       expect(screen.queryByText(/need attention/)).not.toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
-      expect(container).toHaveTextContent('');
+      expect(container).toHaveTextContent('Status read');
       unmount();
     }
   });

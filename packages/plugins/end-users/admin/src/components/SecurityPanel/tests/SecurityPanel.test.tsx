@@ -200,7 +200,13 @@ describe('SecurityPanel', () => {
 
     const before = Date.now();
 
-    fireEvent.click(within(modal).getByRole('button', { name: 'Ban' }));
+    const confirmBan = within(modal).getByRole('button', { name: 'Ban' });
+
+    // A submit button inside the form of the fields, so that Enter in the reason bans
+    expect(confirmBan).toHaveAttribute('type', 'submit');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(confirmBan.closest('form')).not.toBeNull();
+    fireEvent.click(confirmBan);
 
     await waitFor(() => expect(calls).toHaveLength(1));
 

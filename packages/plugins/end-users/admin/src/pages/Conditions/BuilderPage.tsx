@@ -309,9 +309,16 @@ const ConditionBuilder = ({
           const fields = fieldsFor(layout, form.appliesTo);
           const problems = formProblems(form, layout);
           const { fields: fieldProblems, rest: otherProblems } = splitProblems(problems, form);
+          const laterSectionsEdited =
+            form.inputs.length > 0 ||
+            form.who.checks.length > 0 ||
+            countChecks(form.which) > 0 ||
+            form.onSave.stamp.length > 0 ||
+            form.onSave.locked.length > 0;
           const fieldError = (part: 'slug' | 'displayName' | 'types') => {
             const server = part === 'types' ? undefined : fieldErrors[part];
-            const found = touched[part] ? fieldProblems[part] : undefined;
+            // Once a section after them has been filled in, a missing name is what stops the save
+            const found = touched[part] || laterSectionsEdited ? fieldProblems[part] : undefined;
 
             return (
               server ??
@@ -347,7 +354,7 @@ const ConditionBuilder = ({
                     startIcon={<Check />}
                     disabled={!canSave || isDeleting}
                     // The form is submitting while the confirmation waits for its answer
-                    loading={isSubmitting && !confirmation.question !== null}
+                    loading={isSubmitting && confirmation.question === null}
                     fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}

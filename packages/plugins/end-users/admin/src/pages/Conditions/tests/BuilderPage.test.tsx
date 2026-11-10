@@ -721,6 +721,19 @@ describe('BuilderPage', () => {
       expect(screen.queryByText(/displayName|types is a list/)).not.toBeInTheDocument();
     });
 
+    it('says what is missing once a later section has been filled in, though no field was left', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+      expect(screen.queryByText('This value is required.')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Add input' }));
+
+      // The name and the display name are what stops the save now: they say so
+      expect(await screen.findAllByText('This value is required.')).toHaveLength(2);
+      expect(screen.getByText('Choose at least one content type.')).toBeInTheDocument();
+    });
+
     it('says a content type is needed on its field once the choice is closed with none', async () => {
       const { user } = renderAt('new');
 
@@ -918,6 +931,11 @@ describe('BuilderPage', () => {
       expect(
         within(dialog).getByText('2 roles use this condition. Saving changes what they grant.')
       ).toBeInTheDocument();
+      // The save is waiting for the answer, not running: its button is not busy
+      expect(screen.getByRole('button', { name: 'Save', hidden: true })).toHaveAttribute(
+        'aria-disabled',
+        'false'
+      );
 
       await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 

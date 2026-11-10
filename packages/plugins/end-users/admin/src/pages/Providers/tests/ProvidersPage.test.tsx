@@ -543,6 +543,18 @@ describe('ProvidersPage', () => {
     expect(await within(dialog).findByText('Too short')).toBeInTheDocument();
   });
 
+  it('saves from a submit button inside the form, so Enter in a field saves', async () => {
+    serveProviders();
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+    const save = await within(dialog).findByRole('button', { name: 'Save' });
+
+    expect(save).toHaveAttribute('type', 'submit');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(save.closest('form')).not.toBeNull();
+  });
+
   it('asks before closing a provider with changes that are not saved', async () => {
     serveProviders();
     const { user } = renderPage();
@@ -594,8 +606,10 @@ describe('ProvidersPage', () => {
     const dialog = await screen.findByRole('dialog');
     const add = within(dialog).getByRole('button', { name: 'Add provider' });
 
-    // A submit button, so that Enter in a field submits the form
+    // A submit button inside the form of the fields, so that Enter in a field submits it
     expect(add).toHaveAttribute('type', 'submit');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(add.closest('form')).not.toBeNull();
 
     // It says what is asked, and what a discovery URL looks like
     expect(within(dialog).getByText(/What the provider is called/)).toBeInTheDocument();
