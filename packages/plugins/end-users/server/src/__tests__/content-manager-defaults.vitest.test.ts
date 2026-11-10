@@ -8,9 +8,15 @@ import {
 } from '../content-manager-defaults';
 import { PROFILE_UID, USER_UID } from '../constants';
 
-const setup = () => {
+const setup = (attributeNames: string[] = names) => {
   const stores: Record<string, Record<string, unknown>> = {};
   const strapi = {
+    contentTypes: Object.fromEntries(
+      [USER_UID, PROFILE_UID].map((uid) => [
+        uid,
+        { attributes: Object.fromEntries(attributeNames.map((name) => [name, { type: 'string' }])) },
+      ])
+    ),
     store: ({ name }: { name: string }) => ({
       get: async ({ key }: { key: string }) => stores[name]?.[key] ?? null,
       async set({ key, value }: { key: string; value: unknown }) {
@@ -42,7 +48,19 @@ const names = [
 const configuration = (attributes: string[]) => ({
   uid: USER_UID,
   metadatas: Object.fromEntries([...attributes, 'id'].map((name) => [name, meta(name)])),
-  layouts: { list: [], edit: [attributes.map((name) => ({ name, size: 6 }))] },
+  // What the Content Manager generates: two fields of size 6 to a row, in schema order
+  layouts: {
+    list: [],
+    edit: attributes
+      .reduce<{ name: string; size: number }[][]>((rows, name, index) => {
+        if (index % 2 === 0) {
+          rows.push([]);
+        }
+        rows[rows.length - 1].push({ name, size: 6 });
+
+        return rows;
+      }, []),
+  },
 });
 
 describe('the default Content Manager configuration', () => {
@@ -93,6 +111,30 @@ describe('the default Content Manager configuration', () => {
     expect(shown[shown.length - 1]).toBe('lastSignInAt');
     expect(shown.slice(0, 3)).toEqual(['name', 'email', 'emailVerified']);
     expect(shown).toHaveLength(names.length - USER_EDIT_LAYOUT_OMITTED.length);
+  });
+
+  it('keeps an edit layout an administrator arranged, and still writes the labels', async () => {
+    const { strapi, stores } = setup();
+    const arranged = configuration(names);
+
+    // Their own order and grouping: the last sign-in first, and the ban fields kept
+    arranged.layouts.edit = [
+      [
+        { name: 'lastSignInAt', size: 6 },
+        { name: 'banned', size: 6 },
+      ],
+      [{ name: 'email', size: 12 }],
+    ];
+    stores.content_manager = { [KEY(USER_UID)]: arranged };
+
+    await writeContentManagerDefaults(strapi);
+
+    const written = stores.content_manager[KEY(USER_UID)] as ReturnType<typeof configuration>;
+
+    expect(written.layouts.edit).toEqual(arranged.layouts.edit);
+    expect(written.metadatas.emailVerified.edit.label).toBe('Email verified');
+    // Done: a later start does not look again
+    expect(stores.end_users ?? stores['end-users']).toBeDefined();
   });
 
   it('labels the profile and leaves its layout as it is', async () => {

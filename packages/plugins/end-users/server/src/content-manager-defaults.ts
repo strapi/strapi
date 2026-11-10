@@ -127,6 +127,61 @@ const withLabels = (metadatas: Record<string, Metadata>): Record<string, Metadat
     })
   );
 
+type Attributes = Record<string, { type?: string }>;
+
+/**
+ * Whether the stored edit layout is still the one the Content Manager generates: the attributes in
+ * schema order, packed into rows of 12 by the size of each field. Anything else was arranged by an
+ * administrator and is left alone. A project that removed fields and changed nothing else looks
+ * generated; that costs it nothing, the fields it hid stay hidden.
+ */
+const isGeneratedLayout = (strapi: Core.Strapi, uid: string, edit: EditCell[][]): boolean => {
+  const attributes = (
+    strapi.contentTypes as unknown as Record<string, { attributes?: Attributes }> | undefined
+  )?.[uid]?.attributes;
+
+  if (!attributes) {
+    return false;
+  }
+
+  const names = edit.flat().map(({ name }) => name);
+  const inSchemaOrder = Object.keys(attributes).filter((name) => names.includes(name));
+
+  if (names.join() !== inSchemaOrder.join()) {
+    return false;
+  }
+
+  const sizes = (
+    strapi.plugin?.('content-manager')?.service?.('field-sizes') as
+      | { getFieldSize: (type: string) => { default: number } }
+      | undefined
+  )?.getFieldSize;
+
+  const expected: EditCell[][] = [[]];
+  let used = 0;
+
+  for (const name of names) {
+    const size = sizes ? sizes(attributes[name].type ?? 'string').default : undefined;
+    const cell = edit.flat().find((each) => each.name === name)!;
+    const width = size ?? cell.size;
+
+    if (size !== undefined && cell.size !== size) {
+      return false;
+    }
+
+    if (used + width > MAX_ROW_SIZE) {
+      expected.push([]);
+      used = 0;
+    }
+
+    expected[expected.length - 1].push(cell);
+    used += width;
+  }
+
+  return JSON.stringify(expected.map((row) => row.map(({ name }) => name))) ===
+    JSON.stringify(edit.map((row) => row.map(({ name }) => name)));
+};
+
 const writeDefaults = async (strapi: Core.Strapi, uid: string, withLayout: boolean) => {
   const own = strapi.store({ type: 'plugin', name: PLUGIN_ID });
   const flag = `contentManagerDefaults::${uid}`;
@@ -144,7 +199,9 @@ const writeDefaults = async (strapi: Core.Strapi, uid: string, withLayout: boole
     return false;
   }
 
-  const layouts = withLayout
+  // An edit layout an administrator arranged is theirs: the labels are written, the layout is not
+  const layouts =
+    withLayout && isGeneratedLayout(strapi, uid, configuration.layouts?.edit ?? [])
     ? { ...configuration.layouts, edit: toEditLayout(configuration.layouts?.edit ?? []) }
     : configuration.layouts;
 
