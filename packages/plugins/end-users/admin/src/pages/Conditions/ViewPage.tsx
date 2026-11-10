@@ -20,6 +20,7 @@ import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useParams } from 'react-router-dom';
 
+import { NotFound } from '../../components/NotFound';
 import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
 import { useGetBuilderLayoutQuery, useGetConditionsQuery } from '../../services/conditions';
@@ -795,7 +796,7 @@ const ViewPage = () => {
   const condition = conditions.find((each) => each.name === name);
 
   if (!condition) {
-    return <Page.NoData />;
+    return <NotFound kind="condition" backPath={CONDITIONS_PATH} />;
   }
 
   return <ConditionView condition={condition} layout={layout} canReadRoles={canReadRoles} />;

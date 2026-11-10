@@ -329,15 +329,15 @@ describe('ViewPage', () => {
     expect(users.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('shows no content for a name no condition has, `new` included', async () => {
+  it('says a name no condition has is not found, `new` included', async () => {
     const { unmount } = renderView('api::nobody');
 
-    expect(await screen.findByText(/No content found/)).toBeInTheDocument();
+    expect(await screen.findByText(/This condition doesn't exist/)).toBeInTheDocument();
 
     unmount();
     renderView('new');
 
-    expect(await screen.findByText(/No content found/)).toBeInTheDocument();
+    expect(await screen.findByText(/This condition doesn't exist/)).toBeInTheDocument();
   });
 
   it('says a condition that lost a content type or field denies everything, on that condition only', async () => {

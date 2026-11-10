@@ -17,6 +17,7 @@ import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { NotFound } from '../../components/NotFound';
 import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
 import { useLazyGetConditionsQuery } from '../../services/conditions';
@@ -92,6 +93,10 @@ const TAB_LABELS: PermissionsProps['tabLabels'] = {
 
 /** A column ticked or unticked on this many content types or more is asked about first */
 const BULK_CONFIRM_FROM = 3;
+
+/** The server answered 404: nothing has this id */
+const isNotFound = (error: unknown) =>
+  typeof error === 'object' && error !== null && (error as { status?: unknown }).status === 404;
 
 /** 409 `ROLE_CHANGED`: the role was saved by someone else after this editor loaded it */
 const isRoleChanged = (error: unknown) => {
@@ -807,7 +812,12 @@ const EditPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC(PERMISSIONS.roles);
   const { data: layout, isLoading: isLoadingLayout } = useGetPermissionLayoutQuery();
-  const { data: role, isLoading: isLoadingRole, refetch } = useGetRoleQuery(documentId);
+  const {
+    data: role,
+    error: roleError,
+    isLoading: isLoadingRole,
+    refetch,
+  } = useGetRoleQuery(documentId);
   const [reloads, setReloads] = React.useState(0);
 
   const revision = role?.revision;
@@ -836,6 +846,11 @@ const EditPage = () => {
 
   if (isLoadingPermissions || isLoadingLayout || isLoadingRole) {
     return <Page.Loading />;
+  }
+
+  // A role the server does not have is not a failure to load: it says so, with the way back
+  if (!role && isNotFound(roleError)) {
+    return <NotFound kind="role" backPath={ROLES_PATH} />;
   }
 
   if (!layout || !role) {

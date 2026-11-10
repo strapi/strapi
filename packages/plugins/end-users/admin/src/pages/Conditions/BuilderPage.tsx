@@ -22,6 +22,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { NotFound } from '../../components/NotFound';
 import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
 import { endUsersApi } from '../../services/api';
@@ -669,7 +670,7 @@ const BuilderLoader = () => {
 
   // The builder opens builder conditions only: the others are in code, a plugin or the plugin itself
   if (slug !== undefined && condition?.source !== 'builder') {
-    return <Page.NoData />;
+    return <NotFound kind="condition" backPath={CONDITIONS_PATH} />;
   }
 
   return (

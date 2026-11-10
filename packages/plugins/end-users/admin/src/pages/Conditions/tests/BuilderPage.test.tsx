@@ -1068,13 +1068,17 @@ describe('BuilderPage', () => {
     it('opens only builder conditions', async () => {
       renderAt('by-code');
 
-      expect(await screen.findByText('No content found')).toBeInTheDocument();
+      expect(await screen.findByText(/This condition doesn't exist/)).toBeInTheDocument();
     });
 
     it('opens nothing for a name no condition has', async () => {
       renderAt('missing');
 
-      expect(await screen.findByText('No content found')).toBeInTheDocument();
+      // The same page as a role that does not exist: its header, and the way back
+      expect(
+        await screen.findByRole('heading', { name: 'Condition not found' })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/This condition doesn't exist/)).toBeInTheDocument();
     });
   });
 

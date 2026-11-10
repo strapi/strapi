@@ -89,6 +89,25 @@ const save = async () => {
 };
 
 describe('EditPage', () => {
+  it('says a role the server does not have is not found, with the page header', async () => {
+    serveRoles();
+    server.use(
+      http.get('/end-users/roles/gone', () =>
+        HttpResponse.json(
+          { error: { status: 404, name: 'NotFoundError', message: 'Not Found' } },
+          { status: 404 }
+        )
+      )
+    );
+    renderRoles('gone');
+
+    expect(await findHeading('Role not found')).toBeInTheDocument();
+    expect(
+      screen.getByText("This role doesn't exist. It may have been deleted.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Something went wrong/i)).not.toBeInTheDocument();
+  });
+
   it('shows the four tabs, the content API columns and a dot where a route has rules', async () => {
     serveRoles();
     renderRoles('p1');
