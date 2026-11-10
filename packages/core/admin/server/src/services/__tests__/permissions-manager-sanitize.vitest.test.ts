@@ -3,6 +3,7 @@ import { AbilityBuilder, Ability } from '@casl/ability';
 import { pick } from 'lodash';
 
 import sift from 'sift';
+import type { Core } from '@strapi/types';
 import createSanitizeHelpers from '../permission/permissions-manager/sanitize';
 
 const allowedOperations = [
@@ -156,6 +157,51 @@ describe('Permissions Manager - Sanitize', () => {
       expect(result.populate).toEqual({ c: true });
       expect(result.fields).toEqual([undefined, 'c']);
     });
+
+    it('Resolves to a new query object that keeps the other keys and expands a wildcard populate', async () => {
+      const helpers = createSanitizeHelpers({
+        action: 'read',
+        model: articleModel.uid,
+        ability: defineAbility((can: any) => can('read', 'api::article.article')),
+      });
+      const query = { page: '2', populate: '*' };
+
+      const result = await helpers.sanitizeQuery(query, { subject: articleModel.uid });
+
+      expect(result).not.toBe(query);
+      expect(result).toEqual({ page: '2', populate: { createdBy: true, updatedBy: true } });
+    });
+  });
+
+  describe('Sanitize an array', () => {
+    const createFooHelpers = () =>
+      createSanitizeHelpers({
+        action: 'read',
+        model: fooModel.uid,
+        ability: defineAbility((can: any) => can('read', 'api::foo.foo')),
+      });
+
+    it('Sanitizes each output entity', async () => {
+      const data = [
+        { a: 'Foo', c: 'Bar' },
+        { a: 'Baz', c: 'Qux' },
+      ];
+
+      const result = await createFooHelpers().sanitizeOutput(data, { subject: fooModel.uid });
+
+      expect(result).toEqual([{ c: 'Bar' }, { c: 'Qux' }]);
+    });
+
+    it('Sanitizes each input entity', async () => {
+      const data = [
+        { a: 'Foo', c: 'Bar' },
+        { a: 'Baz', c: 'Qux' },
+      ];
+
+      const result = await createFooHelpers().sanitizeInput(data, { subject: fooModel.uid });
+
+      expect(result).toEqual([{ c: 'Bar' }, { c: 'Qux' }]);
+    });
   });
 
   describe('Result types', () => {
@@ -212,7 +258,10 @@ describe('Permissions Manager - Sanitize', () => {
       const helpers = createFooHelpers();
       const query = { filters: { c: 'Bar' } };
 
-      expectTypeOf(helpers.sanitizeQuery(query)).toEqualTypeOf<Promise<unknown>>();
+      // With strict types, the contract resolves the sanitized query to a query object
+      expectTypeOf(helpers.sanitizeQuery(query)).toEqualTypeOf<
+        Promise<Core.IsStrict extends true ? Record<string, unknown> : unknown>
+      >();
     });
   });
 

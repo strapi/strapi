@@ -3,6 +3,7 @@ import { Context } from 'koa';
 import { strapi as dataTransferStrapi } from '@strapi/data-transfer';
 import { errors } from '@strapi/utils';
 import dataTransferAuthStrategy from '../../strategies/data-transfer';
+import type { Controllers, PrefixedActions } from '../../types/controllers';
 
 const {
   remote: {
@@ -32,4 +33,4 @@ export const pull = createPullController({ verify });
 export default {
   push,
   pull,
-};
+} satisfies PrefixedActions<Controllers['transfer'], 'runner'>;
