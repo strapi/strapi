@@ -168,6 +168,17 @@ This service is used to enable RBAC functionality for review workflow stages. Ea
 
 This service is used to ensure the feature is working as expected and validate the data to be valid.
 
+## Typed contracts
+
+With strict types, lookups of the plugin resolve to the contracts it registers in `packages/core/review-workflows/server/src/types/`. Read [TypeScript](../../../contributing/05-typescript.md) for the registries.
+
+- The nine services have hand-written contracts in `types/services.ts`, checked against their implementations with `Core.ServiceFactory` or `satisfies`. Members that only the plugin calls are tagged `@internal`.
+- The four controllers (`workflows`, `stages`, `assignees`, `homepage`) have contracts in `types/controllers.ts`. The routes are checked against them with `Core.RouterInputFor`. `homepage` is a factory, checked with `Core.ControllerFactory`, and `Core.SameNames` checks the names of the merged controllers map.
+- Every service and controller entry is registered as `Core.Licensed<'review-workflows', Contract>`: the plugin registers them only when the license that verifies at boot lists `review-workflows`. An application that lists the feature in `licensedFeatures` gets `Contract`, one that does not gets `undefined`. Package and plugin programs get `Contract | undefined` and check the lookup result. The plugin's own `getService` and `getAdminService` (`utils/index.ts`) return the defined contract, because its code runs only with the feature. Read [License-gated contracts](../../../contributing/05-typescript.md#license-gated-contracts).
+- The `review-workflows.updateEntryStage` event and the `plugin_ee_metrics` store row are registered too.
+
+Without strict types, the lookups keep their previous types.
+
 ## Alternatives
 
 The Review Workflow feature is currently included as a core feature within the Strapi repository. However, there has been discussion about potentially moving it to a plugin in the future. While no decision has been made on this subject yet, it is possible that it may happen at some point in the future.
