@@ -1,5 +1,6 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 import constants from '../../../../server/src/services/constants';
+import type { EnterpriseServices } from '../../../../server/src/types';
 
 const { ROLE_TEXT_MAX_LENGTH } = constants;
 
@@ -27,7 +28,9 @@ const rolesDeleteSchema = yup
             await strapi.service('admin::role').checkRolesIdForDeletion(ids);
 
             if (strapi.ee.features.isEnabled('sso')) {
-              await strapi.service('admin::role').ssoCheckRolesIdForDeletion(ids);
+              await (
+                strapi.service('admin::role') as EnterpriseServices['role']
+              ).ssoCheckRolesIdForDeletion(ids);
             }
           } catch (e: any) {
             return this.createError({ path: 'ids', message: e.message });
@@ -50,7 +53,9 @@ const roleDeleteSchema = yup
         await strapi.service('admin::role').checkRolesIdForDeletion([id]);
 
         if (strapi.ee.features.isEnabled('sso')) {
-          await strapi.service('admin::role').ssoCheckRolesIdForDeletion([id]);
+          await (
+            strapi.service('admin::role') as EnterpriseServices['role']
+          ).ssoCheckRolesIdForDeletion([id]);
         }
       } catch (e: any) {
         return this.createError({ path: 'id', message: e.message });
