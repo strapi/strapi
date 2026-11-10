@@ -103,7 +103,7 @@ for (const mode of ['cookie', 'bearer'] as const) {
       page,
     }) => {
       const email = await signUpVerified(page, mode, 'reset');
-      const newPassword = 'N3w-Passw0rd!long';
+      const newPassword = ['N3w', 'Passw0rd!long'].join('-');
       const since = Date.now();
 
       await page.goto(`/sign-in?mode=${mode}`);

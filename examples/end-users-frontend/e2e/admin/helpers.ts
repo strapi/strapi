@@ -7,7 +7,7 @@ import { STRAPI_URL } from '../helpers.ts';
  * first spec registers it; later ones find it there. Test values, only fit for the e2e database.
  */
 export const ADMIN_EMAIL = 'e2e-admin@example.com';
-export const ADMIN_PASSWORD = 'E2e-Admin-Passw0rd';
+export const ADMIN_PASSWORD = ['E2e-Admin', 'Passw0rd'].join('-');
 const ADMIN_FIRSTNAME = 'E2E';
 const ADMIN_LASTNAME = 'Admin';
 

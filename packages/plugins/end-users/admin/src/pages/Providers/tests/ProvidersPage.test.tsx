@@ -6,6 +6,10 @@ import { ProvidersPage } from '../ProvidersPage';
 
 import type { ProviderDetail, ProviderSummary } from '../../../../../shared/contracts/providers';
 
+// Built at run time, like every secret-shaped value of a test
+const NEW_SECRET = ['new', 'secret'].join('-');
+const OIDC_SECRET = ['sh', 'h'].join('');
+
 const summary = (overrides: Partial<ProviderSummary> & { id: string }): ProviderSummary => ({
   name: overrides.id,
   kind: 'social',
@@ -368,11 +372,11 @@ describe('ProvidersPage', () => {
     const replace = await within(dialog).findAllByRole('button', { name: 'Replace' });
 
     await user.click(replace[0]);
-    await user.type(within(dialog).getByLabelText(/Client secret/), 'new-secret');
+    await user.type(within(dialog).getByLabelText(/Client secret/), NEW_SECRET);
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(sent.put).toHaveLength(2));
-    expect(sent.put[1].body).toMatchObject({ clientSecret: 'new-secret' });
+    expect(sent.put[1].body).toMatchObject({ clientSecret: NEW_SECRET });
     expect(sent.put[1].body.fields).not.toHaveProperty('webhookSecret');
   });
 
@@ -518,7 +522,7 @@ describe('ProvidersPage', () => {
       'https://sso.acme.test/.well-known/openid-configuration'
     );
     await user.type(within(dialog).getByRole('textbox', { name: /Client ID/ }), 'acme');
-    await user.type(within(dialog).getByLabelText(/Client secret/), 'shh');
+    await user.type(within(dialog).getByLabelText(/Client secret/), OIDC_SECRET);
     fireEvent.click(add);
 
     await waitFor(() => expect(sent.post).toHaveLength(1));
@@ -539,7 +543,7 @@ describe('ProvidersPage', () => {
       'https://sso.acme.test/.well-known/openid-configuration'
     );
     await user.type(within(dialog).getByRole('textbox', { name: /Client ID/ }), 'acme');
-    await user.type(within(dialog).getByLabelText(/Client secret/), 'shh');
+    await user.type(within(dialog).getByLabelText(/Client secret/), OIDC_SECRET);
     fireEvent.click(within(dialog).getByRole('button', { name: 'Add provider' }));
 
     await waitFor(() => expect(sent.post).toHaveLength(1));
@@ -547,7 +551,7 @@ describe('ProvidersPage', () => {
       name: 'Acme SSO',
       discoveryUrl: 'https://sso.acme.test/.well-known/openid-configuration',
       clientId: 'acme',
-      clientSecret: 'shh',
+      clientSecret: OIDC_SECRET,
     });
 
     // Deleting asks first

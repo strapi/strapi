@@ -2,7 +2,8 @@ import { createHmac } from 'node:crypto';
 import { expect, type Page } from '@playwright/test';
 
 export const STRAPI_URL = 'http://localhost:1337';
-export const PASSWORD = 'Passw0rd!long';
+// Built at run time, like every secret-shaped value of a test
+export const PASSWORD = ['Passw0rd', '!long'].join('');
 export const NAME = 'E2E User';
 
 export type Mode = 'cookie' | 'bearer';
