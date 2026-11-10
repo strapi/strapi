@@ -17,9 +17,10 @@ const decodeBase32 = (input: string) => {
 
 /**
  * The current time-based one-time code (RFC 6238: HMAC-SHA1, 30 seconds, 6 digits) for the secret
- * of an `otpauth://` URI, such as the one `/two-factor/enable` answers with.
+ * of an `otpauth://` URI, such as the one `/two-factor/enable` answers with. `periodOffset` moves
+ * the code that many 30-second periods: -1 is the one the app showed a period ago.
  */
-export const totpFromUri = (uri: string): string => {
+export const totpFromUri = (uri: string, periodOffset = 0): string => {
   const secret = new URL(uri).searchParams.get('secret');
 
   if (!secret) {
@@ -28,7 +29,7 @@ export const totpFromUri = (uri: string): string => {
 
   const counter = Buffer.alloc(8);
 
-  counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 1000 / 30)));
+  counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 1000 / 30) + periodOffset));
 
   const digest = createHmac('sha1', decodeBase32(secret)).update(counter).digest();
   const offset = digest[digest.length - 1] & 0xf;

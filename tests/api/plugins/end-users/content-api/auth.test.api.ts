@@ -1155,6 +1155,209 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect((await me(bystander.token)).statusCode).toBe(200);
     });
   });
+
+  describe('the second factor, past the happy path', () => {
+    const post = (path: string, body: unknown, cookie: string) =>
+      rq.post(`/api/auth${path}`, { body, headers: { cookie, ...FROM_FRONT_END } });
+
+    /** A user whose authenticator is confirmed, with the URI it was set up from */
+    const withTwoFactor = async () => {
+      const user = await signedUp();
+      const enabled = await post('/two-factor/enable', { password: PASSWORD }, user.cookie);
+
+      expect(enabled.statusCode).toBe(200);
+
+      const uri = enabled.body.totpURI as string;
+
+      expect(
+        (await post('/two-factor/verify-totp', { code: totpFromUri(uri) }, user.cookie)).statusCode
+      ).toBe(200);
+
+      return { ...user, uri };
+    };
+
+    /** What a password sign-in gives a user with two-factor: the cookie that carries the challenge */
+    const challengeOf = async (email: string) => {
+      const res = await signIn(email);
+
+      expect(res.body.twoFactorRedirect).toBe(true);
+
+      return cookieOf(res, 'strapi.two_factor');
+    };
+
+    const rowOf = (documentId: string) =>
+      strapi.db.query(TWO_FACTOR_UID).findOne({ where: { userId: documentId } });
+
+    it('opens nothing at the password step: the challenge is not a session', async () => {
+      const { email, documentId } = await withTwoFactor();
+      const before = await count(SESSION_UID, { userId: documentId });
+      const challenge = await challengeOf(email);
+
+      // The sign-in made a session and took it back at once: only the sign-up's is left
+      expect(await count(SESSION_UID, { userId: documentId })).toBe(before);
+
+      // The challenge cookie is all the client holds: no route takes it for a session
+      for (const route of ['/api/users/me', '/api/users/me/profile']) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await rq.get(route, { headers: { cookie: challenge } });
+
+        expect({ route, refused: [401, 403].includes(res.statusCode) }).toEqual({
+          route,
+          refused: true,
+        });
+      }
+
+      expect(
+        (await rq.get('/api/auth/get-session', { headers: { cookie: challenge } })).body
+      ).toBeNull();
+      expect(
+        (await rq.get('/api/auth/list-sessions', { headers: { cookie: challenge } })).statusCode
+      ).toBe(401);
+    });
+
+    it('takes a code from the period before this one, and refuses one from two periods back', async () => {
+      const { email, uri } = await withTwoFactor();
+
+      const tooOld = await post(
+        '/two-factor/verify-totp',
+        { code: totpFromUri(uri, -2) },
+        await challengeOf(email)
+      );
+
+      expect(tooOld.statusCode).toBe(401);
+      expect(tooOld.body.code).toBe('INVALID_CODE');
+
+      // Better Auth allows one period of clock drift either way, and the plugin keeps that
+      const drifted = await post(
+        '/two-factor/verify-totp',
+        { code: totpFromUri(uri, -1) },
+        await challengeOf(email)
+      );
+
+      expect(drifted.statusCode).toBe(200);
+    });
+
+    it('takes the same code a second time inside its window, as Better Auth does: a code is not single-use', async () => {
+      const { email, uri } = await withTwoFactor();
+      const code = totpFromUri(uri);
+
+      expect(
+        (await post('/two-factor/verify-totp', { code }, await challengeOf(email))).statusCode
+      ).toBe(200);
+
+      // Another sign-in, the same code: nothing remembers that it was spent
+      expect(
+        (await post('/two-factor/verify-totp', { code }, await challengeOf(email))).statusCode
+      ).toBe(200);
+    });
+
+    it('locks the second factor after ten wrong codes, refuses the right one until the lock ends, and lets it in after', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+      const sessions = await count(SESSION_UID, { userId: documentId });
+      let challenge = '';
+
+      // A challenge takes a few wrong codes and then wants a new sign-in, so the ten come from three
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        if (attempt % 4 === 0) {
+          // eslint-disable-next-line no-await-in-loop
+          challenge = await challengeOf(email);
+        }
+
+        // eslint-disable-next-line no-await-in-loop
+        const wrong = await post('/two-factor/verify-totp', { code: '000000' }, challenge);
+
+        expect(wrong.statusCode).toBe(401);
+      }
+
+      expect((await rowOf(documentId)).lockedUntil).toBeTruthy();
+
+      challenge = await challengeOf(email);
+
+      const locked = await post('/two-factor/verify-totp', { code: totpFromUri(uri) }, challenge);
+
+      expect(locked.statusCode).toBe(429);
+      expect(locked.headers['set-auth-token']).toBeUndefined();
+      expect(await count(SESSION_UID, { userId: documentId })).toBe(sessions);
+
+      // The lock is a date: once it has passed, the right code is taken and the count starts over
+      await strapi.db.query(TWO_FACTOR_UID).update({
+        where: { userId: documentId },
+        data: { lockedUntil: new Date(Date.now() - 1000) },
+      });
+
+      const after = await post('/two-factor/verify-totp', { code: totpFromUri(uri) }, challenge);
+
+      expect(after.statusCode).toBe(200);
+      expect(await rowOf(documentId)).toMatchObject({
+        failedVerificationCount: 0,
+        lockedUntil: null,
+      });
+    });
+
+    it('turns two-factor off only for the right password', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+      const signedIn = await post(
+        '/two-factor/verify-totp',
+        { code: totpFromUri(uri) },
+        await challengeOf(email)
+      );
+      const session = cookieOf(signedIn, 'strapi.session_token');
+
+      expect(session).toBeDefined();
+
+      const wrong = await post('/two-factor/disable', { password: 'not-the-password' }, session);
+
+      expect(wrong.statusCode).toBe(400);
+      expect((await strapi.documents(USER_UID).findOne({ documentId })).twoFactorEnabled).toBe(
+        true
+      );
+
+      const none = await post('/two-factor/disable', {}, session);
+
+      expect(none.statusCode).toBe(400);
+      expect((await strapi.documents(USER_UID).findOne({ documentId })).twoFactorEnabled).toBe(
+        true
+      );
+
+      const right = await post('/two-factor/disable', { password: PASSWORD }, session);
+
+      expect(right.statusCode).toBe(200);
+      expect((await strapi.documents(USER_UID).findOne({ documentId })).twoFactorEnabled).toBe(
+        false
+      );
+      expect(await count(TWO_FACTOR_UID, { userId: documentId })).toBe(0);
+    });
+  });
+
+  describe('sign-up, in parallel', () => {
+    it('lets one of ten simultaneous sign-ups for an address through, however the address is spelled, and makes one user and one profile', async () => {
+      const spellings = [
+        'parallel@example.com',
+        'Parallel@Example.com',
+        'PARALLEL@EXAMPLE.COM',
+        ' parallel@example.com',
+        'parallel@example.com ',
+      ];
+      const results = await Promise.all(
+        Array.from({ length: 10 }, (_, index) => signUp(spellings[index % spellings.length]))
+      );
+      const statuses = results.map(({ statusCode }) => statusCode);
+
+      expect(statuses.filter((status) => status === 200)).toHaveLength(1);
+      // The rest are refused for the address, never a server error: a unique index that fires is not an answer
+      expect(
+        statuses.filter((status) => status !== 200).every((status) => status >= 400 && status < 500)
+      ).toBe(true);
+      expect(await count(USER_UID, { email: 'parallel@example.com' })).toBe(1);
+
+      const user = await strapi
+        .documents(USER_UID)
+        .findFirst({ filters: { email: 'parallel@example.com' } });
+
+      expect(await profileOf(user.documentId)).toHaveLength(1);
+      expect(await count(ACCOUNT_UID, { userId: user.documentId })).toBe(1);
+    });
+  });
 });
 
 describe('end-users: rate limiting', () => {
