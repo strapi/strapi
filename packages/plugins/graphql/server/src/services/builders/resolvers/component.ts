@@ -1,4 +1,4 @@
-import type { Internal, Schema } from '@strapi/types';
+import type { Internal, Schema, Struct } from '@strapi/types';
 
 import type { Context } from '../../types';
 
@@ -21,7 +21,11 @@ export default ({ strapi }: Context) => ({
 
       const component = strapi.getModel(componentName);
 
-      const transformedArgs = transformArgs(args, { contentType: component, usePagination: true });
+      // `transformArgs` keeps its published content type parameter; components share the shape.
+      const transformedArgs = transformArgs(args, {
+        contentType: component as unknown as Struct.ContentTypeSchema,
+        usePagination: true,
+      });
       await strapi.contentAPI.validate.query(transformedArgs, component, {
         auth: ctx?.state?.auth,
       });

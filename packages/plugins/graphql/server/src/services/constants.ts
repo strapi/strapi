@@ -138,21 +138,7 @@ const ERROR_CODES = {
   emptyDynamicZone: 'dynamiczone.empty',
 } as const;
 
-export type Constants = {
-  PAGINATION_TYPE_NAME: string;
-  RESPONSE_COLLECTION_META_TYPE_NAME: string;
-  PUBLICATION_STATE_TYPE_NAME: string;
-  GRAPHQL_SCALARS: string[];
-  STRAPI_SCALARS: string[];
-  GENERIC_MORPH_TYPENAME: string;
-  KINDS: typeof KINDS;
-  GRAPHQL_SCALAR_OPERATORS: typeof GRAPHQL_SCALAR_OPERATORS;
-  SCALARS_ASSOCIATIONS: typeof SCALARS_ASSOCIATIONS;
-  ERROR_CODES: typeof ERROR_CODES;
-  ERROR_TYPE_NAME: string;
-};
-
-export default () => ({
+const createConstants = () => ({
   PAGINATION_TYPE_NAME,
   RESPONSE_COLLECTION_META_TYPE_NAME,
   DELETE_MUTATION_RESPONSE_TYPE_NAME,
@@ -167,3 +153,8 @@ export default () => ({
   ERROR_CODES,
   ERROR_TYPE_NAME,
 });
+
+/** The constants service, as runtime builds it. */
+export type Constants = ReturnType<typeof createConstants>;
+
+export default createConstants;
