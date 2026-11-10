@@ -8,6 +8,7 @@ import { readRecord } from './migration/record';
 import { runPostSync } from './migration/post-sync';
 import { PLUGIN_ID, PROFILE_UID, ROLE_FIND_ACTION, USER_UID } from './constants';
 import { registry } from './providers/registry';
+import { writeContentManagerDefaults } from './content-manager-defaults';
 import type permissionService from './services/permission';
 import type roleService from './services/role';
 import { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow } from './utils/default-permissions';
@@ -293,6 +294,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   await writeUserListLayout(strapi);
+  await writeContentManagerDefaults(strapi);
   warnAboutRequiredProfileAttributes(strapi);
   await ensureEveryUserHasAProfile(strapi);
 };
