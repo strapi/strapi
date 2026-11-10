@@ -88,6 +88,7 @@ const VersionAuthorName = ({
       </Flex>
       {author.name ? (
         <Tooltip
+          side="bottom"
           label={author.name}
           open={isNameTooltipOpen}
           onOpenChange={onNameTooltipOpenChange}
