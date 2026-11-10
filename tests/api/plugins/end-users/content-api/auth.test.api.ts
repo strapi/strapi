@@ -8,12 +8,15 @@
  * the database and the Koa middleware chain. The Content API strategy and the permission rules on
  * content are in `permissions.test.api.ts`.
  */
+import { randomBytes } from 'node:crypto';
 import request from 'supertest';
 import { createAuthRequest, createContentAPIRequest, createRequest } from 'api-tests/request';
-import { createEndUsersInstance } from '../utils/create-end-users-instance';
+import { TEST_SECRET, createEndUsersInstance } from '../utils/create-end-users-instance';
+import { importEsm } from '../utils/import-esm';
 import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
 import { extendProfile } from '../utils/extend-profile';
 import { totpFromUri } from '../utils/totp';
+import { emailsAfter, until } from '../utils/wait';
 import {
   ENGINE_UIDS,
   PROFILE_UID,
@@ -34,6 +37,9 @@ const VERIFICATION_UID = 'plugin::end-users.verification';
 const TWO_FACTOR_UID = 'plugin::end-users.two-factor';
 const TOKEN_NAME = 'end-users-auth-test';
 const UNTRUSTED = 'https://evil.example.com';
+// Built at run time: a literal password in the source trips secret scanning
+const NEW_PASSWORD = `${randomBytes(6).toString('hex')}-Aa1!`;
+const OTHER_PASSWORD = `${randomBytes(6).toString('hex')}-Bb2!`;
 
 /**
  * What a browser sends with a state-changing request from the front end. Better Auth refuses one
@@ -1154,6 +1160,539 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect((await me(bystander.token)).statusCode).toBe(200);
     });
   });
+
+  describe('the second factor, past the happy path', () => {
+    const post = (path: string, body: unknown, cookie: string) =>
+      rq.post(`/api/auth${path}`, { body, headers: { cookie, ...FROM_FRONT_END } });
+
+    /** A user whose authenticator is confirmed, with the URI it was set up from */
+    const withTwoFactor = async () => {
+      const user = await signedUp();
+      const enabled = await post('/two-factor/enable', { password: PASSWORD }, user.cookie);
+
+      expect(enabled.statusCode).toBe(200);
+
+      const uri = enabled.body.totpURI as string;
+
+      expect(
+        (await post('/two-factor/verify-totp', { code: totpFromUri(uri) }, user.cookie)).statusCode
+      ).toBe(200);
+
+      return { ...user, uri };
+    };
+
+    /** What a password sign-in gives a user with two-factor: the cookie that carries the challenge */
+    const challengeOf = async (email: string) => {
+      const res = await signIn(email);
+
+      expect(res.body.twoFactorRedirect).toBe(true);
+
+      return cookieOf(res, 'strapi.two_factor');
+    };
+
+    const rowOf = (documentId: string) =>
+      strapi.db.query(TWO_FACTOR_UID).findOne({ where: { userId: documentId } });
+
+    it('opens nothing at the password step: the challenge is not a session', async () => {
+      const { email, documentId } = await withTwoFactor();
+      const before = await count(SESSION_UID, { userId: documentId });
+      const challenge = await challengeOf(email);
+
+      // The sign-in made a session and took it back at once: only the sign-up's is left
+      expect(await count(SESSION_UID, { userId: documentId })).toBe(before);
+
+      // The challenge cookie is all the client holds: no route takes it for a session
+      for (const route of ['/api/users/me', '/api/users/me/profile']) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await rq.get(route, { headers: { cookie: challenge } });
+
+        expect({ route, refused: [401, 403].includes(res.statusCode) }).toEqual({
+          route,
+          refused: true,
+        });
+      }
+
+      expect(
+        (await rq.get('/api/auth/get-session', { headers: { cookie: challenge } })).body
+      ).toBeNull();
+      expect(
+        (await rq.get('/api/auth/list-sessions', { headers: { cookie: challenge } })).statusCode
+      ).toBe(401);
+    });
+
+    /**
+     * Signs in, and only then works out the code, so a period that ends during the sign-in (which
+     * hashes a password) does not move it. Out of the last two seconds of a period first, for the
+     * offsets that sit at the edge of what is accepted.
+     */
+    const verifyWith = async (email: string, uri: string, periodOffset: number) => {
+      const challenge = await challengeOf(email);
+      const left = 30_000 - (Date.now() % 30_000);
+
+      if (left < 2000) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, left + 50);
+        });
+      }
+
+      return post('/two-factor/verify-totp', { code: totpFromUri(uri, periodOffset) }, challenge);
+    };
+
+    it('takes a code from the period before this one, and refuses one from two periods back', async () => {
+      const { email, uri } = await withTwoFactor();
+      const tooOld = await verifyWith(email, uri, -2);
+
+      expect(tooOld.statusCode).toBe(401);
+      expect(tooOld.body.code).toBe('INVALID_CODE');
+
+      // Better Auth allows one period of clock drift either way, and the plugin keeps that
+      expect((await verifyWith(email, uri, -1)).statusCode).toBe(200);
+    });
+
+    it('takes the same code a second time inside its window, as Better Auth does: a code is not single-use', async () => {
+      const { email, uri } = await withTwoFactor();
+      const challenges = [await challengeOf(email), await challengeOf(email)];
+      const code = totpFromUri(uri);
+
+      // Two sign-ins, the same code: nothing remembers that it was spent
+      for (const challenge of challenges) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await post('/two-factor/verify-totp', { code }, challenge);
+
+        expect(res.statusCode).toBe(200);
+      }
+    });
+
+    it('locks the second factor after ten wrong codes, refuses the right one until the lock ends, and lets it in after', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+      const sessions = await count(SESSION_UID, { userId: documentId });
+      let challenge = '';
+
+      // A challenge takes a few wrong codes and then wants a new sign-in, so the ten come from three
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        if (attempt % 4 === 0) {
+          // eslint-disable-next-line no-await-in-loop
+          challenge = await challengeOf(email);
+        }
+
+        // eslint-disable-next-line no-await-in-loop
+        const wrong = await post('/two-factor/verify-totp', { code: '000000' }, challenge);
+
+        expect(wrong.statusCode).toBe(401);
+
+        if (attempt === 8) {
+          // eslint-disable-next-line no-await-in-loop
+          expect((await rowOf(documentId)).lockedUntil).toBeNull();
+        }
+      }
+
+      expect((await rowOf(documentId)).lockedUntil).toBeTruthy();
+
+      challenge = await challengeOf(email);
+
+      const locked = await post('/two-factor/verify-totp', { code: totpFromUri(uri) }, challenge);
+
+      expect(locked.statusCode).toBe(429);
+      expect(locked.headers['set-auth-token']).toBeUndefined();
+      expect(await count(SESSION_UID, { userId: documentId })).toBe(sessions);
+
+      // The lock is a date: once it has passed, the right code is taken and the count starts over
+      await strapi.db.query(TWO_FACTOR_UID).update({
+        where: { userId: documentId },
+        data: { lockedUntil: new Date(Date.now() - 1000) },
+      });
+
+      const after = await post('/two-factor/verify-totp', { code: totpFromUri(uri) }, challenge);
+
+      expect(after.statusCode).toBe(200);
+      expect(await rowOf(documentId)).toMatchObject({
+        failedVerificationCount: 0,
+        lockedUntil: null,
+      });
+    });
+
+    it('turns two-factor off only for the right password', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+      const signedIn = await post(
+        '/two-factor/verify-totp',
+        { code: totpFromUri(uri) },
+        await challengeOf(email)
+      );
+      const session = cookieOf(signedIn, 'strapi.session_token');
+
+      expect(session).toBeDefined();
+
+      const wrong = await post('/two-factor/disable', { password: 'not-the-password' }, session);
+
+      expect(wrong.statusCode).toBe(400);
+      expect((await strapi.documents(USER_UID).findOne({ documentId })).twoFactorEnabled).toBe(
+        true
+      );
+
+      const none = await post('/two-factor/disable', {}, session);
+
+      expect(none.statusCode).toBe(400);
+      expect((await strapi.documents(USER_UID).findOne({ documentId })).twoFactorEnabled).toBe(
+        true
+      );
+
+      const right = await post('/two-factor/disable', { password: PASSWORD }, session);
+
+      expect(right.statusCode).toBe(200);
+      expect((await strapi.documents(USER_UID).findOne({ documentId })).twoFactorEnabled).toBe(
+        false
+      );
+      expect(await count(TWO_FACTOR_UID, { userId: documentId })).toBe(0);
+    });
+  });
+
+  describe('every default-on native endpoint, with and without a session', () => {
+    type Probe = {
+      method: 'GET' | 'POST';
+      path: string;
+      body?: Record<string, unknown>;
+      /** What a caller with a session is answered: the endpoint ran, and the body was judged */
+      signedIn: number[];
+    };
+
+    // The endpoints that need a session. A body that would be valid goes along, so the answer
+    // says "who are you" and not "what is this body".
+    const PROTECTED: Probe[] = [
+      { method: 'GET', path: '/list-sessions', signedIn: [200] },
+      { method: 'GET', path: '/list-accounts', signedIn: [200] },
+      { method: 'GET', path: '/account-info?accountId=not-an-account', signedIn: [400, 404] },
+      { method: 'POST', path: '/update-session', body: {}, signedIn: [400] },
+      { method: 'POST', path: '/update-user', body: { name: 'Probed' }, signedIn: [200] },
+      { method: 'POST', path: '/verify-password', body: { password: PASSWORD }, signedIn: [200] },
+      {
+        method: 'POST',
+        path: '/change-password',
+        body: { currentPassword: 'not-the-password', newPassword: NEW_PASSWORD },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/change-email',
+        body: { newEmail: 'probe-moved@example.com' },
+        signedIn: [200],
+      },
+      {
+        method: 'POST',
+        path: '/revoke-session',
+        body: { token: 'not-a-token' },
+        signedIn: [200, 400],
+      },
+      { method: 'POST', path: '/revoke-other-sessions', body: {}, signedIn: [200] },
+      {
+        method: 'POST',
+        path: '/link-social',
+        body: { provider: 'not-a-provider' },
+        signedIn: [400, 404],
+      },
+      {
+        method: 'POST',
+        path: '/unlink-account',
+        body: { providerId: 'not-a-provider', accountId: 'not-an-account' },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/get-access-token',
+        body: { accountId: 'not-an-account' },
+        signedIn: [400, 404],
+      },
+      {
+        method: 'POST',
+        path: '/refresh-token',
+        body: { accountId: 'not-an-account' },
+        signedIn: [400, 404],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/get-totp-uri',
+        body: { password: PASSWORD },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/generate-backup-codes',
+        body: { password: PASSWORD },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/disable',
+        body: { password: PASSWORD },
+        signedIn: [200],
+      },
+    ];
+
+    // These take the challenge a password sign-in leaves, or a session: with neither they say so
+    const SECOND_FACTOR: Probe[] = [
+      { method: 'POST', path: '/two-factor/send-otp', body: {}, signedIn: [200] },
+      {
+        method: 'POST',
+        path: '/two-factor/verify-otp',
+        body: { code: '000000' },
+        signedIn: [400, 401],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/verify-totp',
+        body: { code: '000000' },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/verify-backup-code',
+        body: { code: 'not-a-code' },
+        signedIn: [400],
+      },
+    ];
+
+    // What anyone may call, with no session: sign-in and sign-up, the reset and verify links, the
+    // health and error pages. Each is answered, and none is a 401 for want of a session.
+    const PUBLIC: Array<Omit<Probe, 'signedIn'>> = [
+      {
+        method: 'POST',
+        path: '/sign-up/email',
+        body: { email: 'probe-public@example.com', password: PASSWORD, name: 'P' },
+      },
+      {
+        method: 'POST',
+        path: '/sign-in/email',
+        body: { email: 'nobody@example.com', password: 'not-the-password' },
+      },
+      {
+        method: 'POST',
+        path: '/sign-in/username',
+        body: { username: 'nobody', password: 'not-the-password' },
+      },
+      { method: 'POST', path: '/request-password-reset', body: { email: 'nobody@example.com' } },
+      {
+        method: 'POST',
+        path: '/reset-password',
+        body: { token: 'nope', newPassword: NEW_PASSWORD },
+      },
+      { method: 'POST', path: '/send-verification-email', body: { email: 'nobody@example.com' } },
+      { method: 'POST', path: '/is-username-available', body: { username: 'probe_free' } },
+      { method: 'GET', path: '/get-session' },
+      { method: 'GET', path: '/verify-email?token=nope' },
+      { method: 'GET', path: '/reset-password/nope?callbackURL=/reset' },
+      { method: 'GET', path: '/ok' },
+      { method: 'GET', path: '/error' },
+    ];
+
+    const call = (
+      { method, path, body }: Pick<Probe, 'method' | 'path' | 'body'>,
+      headers: Record<string, string> = {}
+    ) =>
+      method === 'GET'
+        ? rq.get(`/api/auth${path}`, { headers })
+        : rq.post(`/api/auth${path}`, { body: body ?? {}, headers });
+
+    /** What each endpoint answered, by method and path, so one failure shows them all */
+    const statusesOf = async (
+      probes: Array<Pick<Probe, 'method' | 'path' | 'body'>>,
+      headers: Record<string, string>
+    ) => {
+      const seen: Record<string, string> = {};
+
+      for (const probe of probes) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await call(probe, headers);
+
+        seen[`${probe.method} ${probe.path}`] = `${res.statusCode} ${res.body?.code ?? ''}`.trim();
+      }
+
+      return seen;
+    };
+
+    const everyKey = <T>(probes: Array<Pick<Probe, 'method' | 'path'>>, value: T) =>
+      Object.fromEntries(probes.map(({ method, path }) => [`${method} ${path}`, value]));
+
+    /** The status alone: Better Auth gives some 401s a code and some none */
+    const statusOnly = (seen: Record<string, string>) =>
+      Object.fromEntries(Object.entries(seen).map(([key, answer]) => [key, answer.split(' ')[0]]));
+
+    // The revoke-sessions probe is last: it is the one that signs a caller out
+    const NEEDING_A_SESSION = [...PROTECTED, { method: 'POST' as const, path: '/revoke-sessions' }];
+
+    it('answers 401 to each endpoint that needs a session when none is sent', async () => {
+      expect(statusOnly(await statusesOf(NEEDING_A_SESSION, FROM_FRONT_END))).toEqual(
+        everyKey(NEEDING_A_SESSION, '401')
+      );
+    });
+
+    it('answers 401 to each endpoint that needs a session when the token names none', async () => {
+      const seen = await statusesOf(NEEDING_A_SESSION, {
+        ...FROM_FRONT_END,
+        ...bearer('not-a-session-token'),
+      });
+
+      expect(statusOnly(seen)).toEqual(everyKey(NEEDING_A_SESSION, '401'));
+    });
+
+    it('runs each of them for a signed-in user', async () => {
+      const { cookie } = await signedUp();
+      const seen = await statusesOf(PROTECTED, { ...FROM_FRONT_END, cookie });
+
+      // The answer for each is one the endpoint gives a caller it knows: the call got past the
+      // session check and was judged on its body
+      expect(
+        Object.fromEntries(
+          PROTECTED.map(({ method, path, signedIn }) => [
+            `${method} ${path}`,
+            signedIn.includes(Number(seen[`${method} ${path}`].split(' ')[0])),
+          ])
+        )
+      ).toEqual(everyKey(PROTECTED, true));
+    });
+
+    it('answers 401 to the second-factor endpoints without a challenge or a session, and judges the body for a session', async () => {
+      const { cookie } = await signedUp();
+
+      expect(await statusesOf(SECOND_FACTOR, FROM_FRONT_END)).toEqual(
+        everyKey(SECOND_FACTOR, '401 INVALID_TWO_FACTOR_COOKIE')
+      );
+
+      // send-otp is left out: it has a test of its own below
+      const judged = SECOND_FACTOR.filter(({ path }) => path !== '/two-factor/send-otp');
+      const seen = await statusesOf(judged, { ...FROM_FRONT_END, cookie });
+
+      expect(
+        Object.fromEntries(
+          judged.map(({ method, path, signedIn }) => [
+            `${method} ${path}`,
+            signedIn.includes(Number(seen[`${method} ${path}`].split(' ')[0])),
+          ])
+        )
+      ).toEqual(everyKey(judged, true));
+    });
+
+    it('accepts a session for send-otp even when the user has no second factor: Better Auth sends the code', async () => {
+      const { email, cookie } = await signedUp();
+
+      clearSentEmails();
+
+      const res = await call(
+        { method: 'POST', path: '/two-factor/send-otp', body: {} },
+        { ...FROM_FRONT_END, cookie }
+      );
+
+      expect(res.statusCode).toBe(200);
+      await until(() => sentEmails().some((sent) => sent.to === email), {
+        what: 'the one-time code email',
+      });
+    });
+
+    it('ends every session of the caller on revoke-sessions, and the same cookie is then refused', async () => {
+      const { cookie } = await signedUp();
+      const headers = { ...FROM_FRONT_END, cookie };
+
+      expect(
+        (await call({ method: 'POST', path: '/revoke-sessions', body: {} }, headers)).statusCode
+      ).toBe(200);
+      expect((await call({ method: 'GET', path: '/list-sessions' }, headers)).statusCode).toBe(401);
+    });
+
+    it('does not turn the public endpoints away for want of a session', async () => {
+      const seen = await statusesOf(PUBLIC, FROM_FRONT_END);
+
+      // Each answers what it answers a stranger: a bad credential or token is a 401 or a 400 with
+      // the endpoint's own code, never the bare "who are you" of a missing session
+      expect(seen).toEqual({
+        'POST /sign-up/email': '200',
+        'POST /sign-in/email': '401 INVALID_EMAIL_OR_PASSWORD',
+        'POST /sign-in/username': '401 INVALID_USERNAME_OR_PASSWORD',
+        'POST /request-password-reset': '200',
+        'POST /reset-password': '400 INVALID_TOKEN',
+        'POST /send-verification-email': '200',
+        'POST /is-username-available': '200',
+        'GET /get-session': '200',
+        'GET /verify-email?token=nope': '401 INVALID_TOKEN',
+        'GET /reset-password/nope?callbackURL=/reset': '302',
+        'GET /ok': '200',
+        'GET /error': '200',
+      });
+    });
+
+    it('answers 404 to a path Better Auth does not have', async () => {
+      for (const path of ['/nothing', '/two-factor/nothing', '/sign-in/nothing']) {
+        // eslint-disable-next-line no-await-in-loop
+        expect((await rq.get(`/api/auth${path}`)).statusCode).toBe(404);
+      }
+    });
+
+    it('never shows one user the provider tokens of another', async () => {
+      const mine = await signedUp();
+      const theirs = await signedUp();
+      const secret = `access-${randomBytes(8).toString('hex')}`;
+
+      // A provider account of the other user, with tokens, as a sign-in through a provider leaves it
+      const theirAccount = await strapi.documents(ACCOUNT_UID).create({
+        data: {
+          userId: theirs.documentId,
+          providerId: 'some-idp',
+          accountId: 'their-subject',
+          accessToken: secret,
+          refreshToken: `refresh-${secret}`,
+        },
+      });
+      const asMe = { ...FROM_FRONT_END, cookie: mine.cookie };
+      const attempts = [
+        rq.post('/api/auth/get-access-token', {
+          body: { accountId: theirAccount.documentId },
+          headers: asMe,
+        }),
+        rq.post('/api/auth/get-access-token', {
+          body: { accountId: theirAccount.documentId, userId: theirs.documentId },
+          headers: asMe,
+        }),
+        rq.post('/api/auth/refresh-token', {
+          body: { accountId: theirAccount.documentId, userId: theirs.documentId },
+          headers: asMe,
+        }),
+        rq.get(`/api/auth/account-info?accountId=${theirAccount.documentId}`, { headers: asMe }),
+      ];
+
+      for (const res of await Promise.all(attempts)) {
+        expect(JSON.stringify(res.body)).not.toContain(secret);
+        expect([400, 403, 404]).toContain(res.statusCode);
+      }
+
+      // The other user's accounts never show in this user's list, and a list never carries a token
+      const list = await rq.get('/api/auth/list-accounts', { headers: { cookie: mine.cookie } });
+
+      expect(list.body.map((account) => account.providerId)).toEqual(['credential']);
+      expect(JSON.stringify(list.body)).not.toMatch(/accessToken|refreshToken|password/);
+    });
+  });
+
+  describe('sign-up, in parallel', () => {
+    it('lets one of ten simultaneous sign-ups for an address through, however its case is spelled, and makes one user and one profile', async () => {
+      // Case only: padding is refused by validation before the duplicate check could be reached
+      const spellings = ['parallel@example.com', 'Parallel@Example.com', 'PARALLEL@EXAMPLE.COM'];
+      const results = await Promise.all(
+        Array.from({ length: 10 }, (_, index) => signUp(spellings[index % spellings.length]))
+      );
+      const statuses = results.map(({ statusCode }) => statusCode);
+
+      expect(statuses.filter((status) => status === 200)).toHaveLength(1);
+      // The others are refused as a client error, whichever database sits underneath
+      expect(
+        statuses.filter((status) => status !== 200).every((status) => status >= 400 && status < 500)
+      ).toBe(true);
+      expect(await count(USER_UID, { email: 'parallel@example.com' })).toBe(1);
+
+      const user = await strapi
+        .documents(USER_UID)
+        .findFirst({ filters: { email: 'parallel@example.com' } });
+
+      expect(await profileOf(user.documentId)).toHaveLength(1);
+      expect(await count(ACCOUNT_UID, { userId: user.documentId })).toBe(1);
+    });
+  });
 });
 
 describe('end-users: rate limiting', () => {
@@ -1183,6 +1722,28 @@ describe('end-users: rate limiting', () => {
     }
 
     expect((await signIn()).statusCode).toBe(429);
+  });
+
+  it('answers 429 to the fourth password check of a signed-in user within the window', async () => {
+    const up = await rq.post('/api/auth/sign-up/email', {
+      body: { email: 'limited-check@example.com', password: PASSWORD, name: 'Limited' },
+    });
+
+    expect(up.statusCode).toBe(200);
+
+    const check = () =>
+      rq.post('/api/auth/verify-password', {
+        body: { password: 'not-the-password' },
+        headers: bearer(up.headers['set-auth-token']),
+      });
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      expect((await check()).statusCode).not.toBe(429);
+    }
+
+    // A guessing loop on the password of a signed-in user is limited like a sign-in is
+    expect((await check()).statusCode).toBe(429);
   });
 });
 
@@ -1301,7 +1862,7 @@ describe('end-users: lockout after failed sign-ins and the password policy', () 
       (await rq.get('/api/auth/get-session', { headers: { cookie: other } })).body
     ).not.toBeNull();
 
-    const changed = await change('An0ther!password');
+    const changed = await change(NEW_PASSWORD);
 
     expect(changed.statusCode).toBe(200);
 
@@ -1328,17 +1889,7 @@ describe('end-users: the emails the engine sends', () => {
    * Emails go out once the transaction commits and without holding the response, so they land a
    * moment after it: wait (up to 5 s) until `count` have arrived
    */
-  const emailsSent = async (count: number) => {
-    const deadline = Date.now() + 5000;
-
-    while (sentEmails().length < count && Date.now() < deadline) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 25);
-      });
-    }
-
-    return sentEmails();
-  };
+  const emailsSent = (count: number) => emailsAfter(count);
 
   /** The first link in the text of an email, as a path on this server */
   const linkOf = (email: { text: string }) => {
@@ -1370,6 +1921,7 @@ describe('end-users: the emails the engine sends', () => {
   });
 
   afterAll(async () => {
+    await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
     await strapi.destroy();
   });
 
@@ -1415,10 +1967,10 @@ describe('end-users: the emails the engine sends', () => {
         headers: FROM_FRONT_END,
       });
 
-    expect((await reset('An0ther!password')).statusCode).toBe(200);
-    expect((await reset('Yet-an0ther!password')).statusCode).toBe(400);
+    expect((await reset(NEW_PASSWORD)).statusCode).toBe(200);
+    expect((await reset(OTHER_PASSWORD)).statusCode).toBe(400);
     expect(
-      (await rq.post('/api/auth/sign-in/email', { body: { email, password: 'An0ther!password' } }))
+      (await rq.post('/api/auth/sign-in/email', { body: { email, password: NEW_PASSWORD } }))
         .statusCode
     ).toBe(200);
   });
@@ -1506,16 +2058,10 @@ describe('end-users: the emails the engine sends', () => {
     });
 
     // The sign-up may have sent its own email: the confirmation is the one sent last, once it lands
-    const deadline = Date.now() + 5000;
-
-    while (
-      !sentEmails().some((email) => email.subject === 'Confirm your new email address') &&
-      Date.now() < deadline
-    ) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 25);
-      });
-    }
+    await until(
+      () => sentEmails().some((email) => email.subject === 'Confirm your new email address'),
+      { what: 'the change-email confirmation' }
+    );
 
     const confirmation = sentEmails()[sentEmails().length - 1];
 
@@ -1531,5 +2077,241 @@ describe('end-users: the emails the engine sends', () => {
     expect(sentEmails()[0].subject).toBe('Your email address was changed');
     expect(sentEmails()[0].text).toContain('m***@example.com');
     expect(sentEmails()[0].text).not.toContain('masked-target');
+  });
+
+  describe('what a mail scanner does to the links', () => {
+    it('lets a reset link be fetched any number of times, and spends the token on the POST only', async () => {
+      const { email } = await signedUp();
+
+      clearSentEmails();
+      await rq.post('/api/auth/request-password-reset', {
+        body: { email },
+        headers: FROM_FRONT_END,
+      });
+
+      const mail = await until(() => sentEmails()[0], { what: 'the first email' });
+      const link = linkOf(mail);
+      const tokens: Array<string | null> = [];
+
+      // A scanner, a prefetching client and the person: each GET lands on the reset page with the
+      // same token, and none of them uses it up
+      for (let visit = 0; visit < 3; visit += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const visited = await rq.get(link);
+
+        expect(visited.statusCode).toBe(302);
+        tokens.push(
+          new URL(visited.headers.location, 'http://localhost').searchParams.get('token')
+        );
+      }
+
+      expect(tokens[0]).toEqual(expect.any(String));
+      expect(new Set(tokens).size).toBe(1);
+
+      const reset = (newPassword: string) =>
+        rq.post('/api/auth/reset-password', {
+          body: { token: tokens[0], newPassword },
+          headers: FROM_FRONT_END,
+        });
+
+      expect((await reset(NEW_PASSWORD)).statusCode).toBe(200);
+      expect((await reset(OTHER_PASSWORD)).statusCode).toBe(400);
+      expect(
+        (
+          await rq.post('/api/auth/sign-in/email', {
+            body: { email, password: NEW_PASSWORD },
+          })
+        ).statusCode
+      ).toBe(200);
+    });
+
+    it('lets a verification link be fetched twice: the token is signed, not spent', async () => {
+      await settings.set({ signUp: { requireEmailVerification: true } });
+      await strapi.plugin('end-users').service('engine').reload();
+
+      const email = 'scanned-verify@example.com';
+
+      expect(
+        (
+          await rq.post('/api/auth/sign-up/email', {
+            body: { email, password: PASSWORD, name: 'Test' },
+            headers: FROM_FRONT_END,
+          })
+        ).statusCode
+      ).toBe(200);
+
+      const mail = await until(() => sentEmails()[0], { what: 'the first email' });
+      const link = linkOf(mail);
+      const first = await rq.get(link);
+      const second = await rq.get(link);
+
+      expect([first.statusCode, second.statusCode]).toEqual([302, 302]);
+      expect([first.headers.location, second.headers.location]).toEqual(['/verified', '/verified']);
+      expect(await strapi.db.query(USER_UID).count({ where: { email, emailVerified: true } })).toBe(
+        1
+      );
+    });
+  });
+
+  describe('changing the email address', () => {
+    /** Asks for the change, and answers the link in the email that goes to the new address */
+    const requestChange = async (cookie: string, newEmail: string, sendsMail = true) => {
+      clearSentEmails();
+
+      const res = await rq.post('/api/auth/change-email', {
+        body: { newEmail },
+        headers: { ...FROM_FRONT_END, Cookie: cookie },
+      });
+
+      return {
+        res,
+        mail: sendsMail
+          ? await until(() => sentEmails().find((sent) => sent.to === newEmail), {
+              what: `the confirmation sent to ${newEmail}`,
+            })
+          : undefined,
+      };
+    };
+
+    const emailOf = async (email: string) => strapi.db.query(USER_UID).count({ where: { email } });
+
+    it('leaves the address as it was until the link is followed, so the old one still signs in', async () => {
+      const { email, cookie } = await signedUp();
+      const { res, mail } = await requestChange(cookie, 'later@example.com');
+
+      expect(res.statusCode).toBe(200);
+      expect(mail?.to).toBe('later@example.com');
+      expect(await emailOf(email)).toBe(1);
+      expect(await emailOf('later@example.com')).toBe(0);
+      expect(
+        (await rq.post('/api/auth/sign-in/email', { body: { email, password: PASSWORD } }))
+          .statusCode
+      ).toBe(200);
+      expect(
+        (
+          await rq.post('/api/auth/sign-in/email', {
+            body: { email: 'later@example.com', password: PASSWORD },
+          })
+        ).statusCode
+      ).toBe(401);
+    });
+
+    it('changes nothing for a link whose token was tampered with, and for one that expired, and sends no notice', async () => {
+      const { email, cookie } = await signedUp();
+      const { mail } = await requestChange(cookie, 'tampered@example.com');
+      const link = new URL(linkOf(mail as { text: string }), 'http://localhost');
+      const token = link.searchParams.get('token') as string;
+
+      // From here on, every mail that lands is one a visit sent
+      clearSentEmails();
+      const [header, payload, signature] = token.split('.');
+      // The first character of the signature carries all its six bits, unlike the last
+      const forged = [
+        header,
+        payload,
+        `${signature[0] === 'A' ? 'B' : 'A'}${signature.slice(1)}`,
+      ].join('.');
+
+      const { createEmailVerificationToken } = await importEsm('better-auth/api');
+      const tokenFor = (newEmail: string, expiresIn: number, user = email) =>
+        createEmailVerificationToken(TEST_SECRET, user, newEmail, expiresIn, {
+          requestType: 'change-email-verification',
+        });
+      const expired = await tokenFor('expired@example.com', -60);
+
+      for (const [name, bad] of [
+        ['tampered', forged],
+        ['expired', expired],
+      ]) {
+        const url = new URL(link);
+
+        url.searchParams.set('token', bad);
+
+        // eslint-disable-next-line no-await-in-loop
+        const res = await rq.get(`${url.pathname}${url.search}`, { headers: { Cookie: cookie } });
+
+        expect({
+          name,
+          error: /error=/.test(res.headers.location ?? '') || res.statusCode >= 400,
+        }).toEqual({
+          name,
+          error: true,
+        });
+      }
+
+      expect(await emailOf(email)).toBe(1);
+      expect(await emailOf('tampered@example.com')).toBe(0);
+      expect(await emailOf('expired@example.com')).toBe(0);
+
+      // The real link still works. The list was emptied before the refused visits, so a notice one
+      // of them sent would be in it ahead of this one (in practice mail goes out in the order asked)
+      expect(
+        (await rq.get(linkOf(mail as { text: string }), { headers: { Cookie: cookie } })).statusCode
+      ).toBe(302);
+      await until(
+        () => sentEmails().some((sent) => sent.subject === 'Your email address was changed'),
+        { what: 'the notice of the change' }
+      );
+      expect(sentEmails().map((sent) => sent.subject)).toEqual(['Your email address was changed']);
+
+      // Control: a token made the same way with time left on it is taken, so the refusal of the
+      // expired one was for its expiry and not for the way it was built
+      const other = await signedUp();
+      const fresh = await tokenFor('control@example.com', 3600, other.email);
+      const followed = await rq.get(
+        `${link.pathname}?${new URLSearchParams({ token: fresh, callbackURL: '/' })}`,
+        { headers: { Cookie: other.cookie } }
+      );
+
+      expect(followed.statusCode).toBe(302);
+      expect(await emailOf('control@example.com')).toBe(1);
+    });
+
+    it('answers 200 to a change to an address another user holds, changes nothing and sends nothing to it', async () => {
+      const mine = await signedUp();
+      const theirs = await signedUp();
+
+      const { res } = await requestChange(mine.cookie, theirs.email, false);
+
+      // The answer is the one a free address gets, so the endpoint does not say which exist
+      expect(res.statusCode).toBe(200);
+      expect(await emailOf(mine.email)).toBe(1);
+      expect(await emailOf(theirs.email)).toBe(1);
+
+      // The list was emptied by the request above: a change let through afterwards is the first
+      // mail there is, and a mail the held address had been sent would have come before it
+      const { mail } = await requestChange(mine.cookie, 'free-address@example.com');
+
+      expect(sentEmails().map((sent) => sent.to)).toEqual(['free-address@example.com']);
+      expect(mail?.to).toBe('free-address@example.com');
+    });
+
+    it('does nothing the second time the same link is followed', async () => {
+      const { email, cookie } = await signedUp();
+      const { mail } = await requestChange(cookie, 'once@example.com');
+      const link = linkOf(mail as { text: string });
+      const notices = () =>
+        sentEmails().filter((sent) => sent.subject === 'Your email address was changed');
+
+      expect((await rq.get(link, { headers: { Cookie: cookie } })).statusCode).toBe(302);
+      await until(() => notices().length === 1, { what: 'the notice of the change' });
+      clearSentEmails();
+
+      await rq.get(link, { headers: { Cookie: cookie } });
+
+      expect(await emailOf('once@example.com')).toBe(1);
+
+      // The list is empty, so a notice the second visit sent would be in it ahead of the reset
+      // mail below (in practice mail goes out in the order it was asked for)
+      await rq.post('/api/auth/request-password-reset', {
+        body: { email: 'once@example.com' },
+        headers: FROM_FRONT_END,
+      });
+      await until(() => sentEmails().some((sent) => sent.subject === 'Reset your password'), {
+        what: 'the reset email',
+      });
+      expect(notices()).toHaveLength(0);
+      expect(await emailOf(email)).toBe(0);
+    });
   });
 });

@@ -12,6 +12,7 @@
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { createAuthRequest, createContentAPIRequest, createRequest } from 'api-tests/request';
+import { until } from '../utils/wait';
 import {
   ARTICLE_UID,
   FOLDER_UID,
@@ -1938,11 +1939,22 @@ describe('end-users: the Content API rules, over REST', () => {
     };
     let receiver: http.Server;
 
-    // Delivery is queued after the commit: a refused create is given the time a delivery takes
-    const settle = () =>
-      new Promise((resolve) => {
-        setTimeout(resolve, 750);
-      });
+    const titles = () => delivered.map((payload) => payload.entry?.title);
+
+    // Delivery is queued after the commit, so "nothing was sent" is shown by a later create that
+    // is let through: once its webhook has arrived, one that a refused create queued earlier
+    // would (in practice, deliveries leave in the order they were queued) be here too
+    let markers = 0;
+    const settle = async () => {
+      markers += 1;
+
+      const title = `ok-settled-${markers}`;
+
+      expect((await post(title)).statusCode).toBe(201);
+      await until(() => titles().includes(title), { what: `the webhook of "${title}"` });
+
+      return title;
+    };
 
     beforeAll(async () => {
       await reset();
@@ -2006,13 +2018,15 @@ describe('end-users: the Content API rules, over REST', () => {
 
     it('sends no webhook for a refused create, and one for a create that goes through', async () => {
       expect((await post('nope')).statusCode).toBe(403);
-      await settle();
-      expect(delivered).toEqual([]);
+      const marker = await settle();
+
+      expect(titles()).toEqual([marker]);
 
       expect((await post('ok-webhook')).statusCode).toBe(201);
-      await settle();
-      expect(delivered).toHaveLength(1);
-      expect(delivered[0]).toMatchObject({ event: 'entry.create', entry: { title: 'ok-webhook' } });
+      await until(() => titles().includes('ok-webhook'), { what: 'the webhook of "ok-webhook"' });
+      expect(delivered.find((payload) => payload.entry?.title === 'ok-webhook')).toMatchObject({
+        event: 'entry.create',
+      });
     });
 
     it('refuses a create through GraphQL with FORBIDDEN, and writes nothing and emits no event', async () => {
@@ -2026,8 +2040,6 @@ describe('end-users: the Content API rules, over REST', () => {
       expect(refused.body.errors[0].extensions.code).toBe('FORBIDDEN');
       expect(await articleCount()).toBe(before);
       expect(created).not.toHaveBeenCalled();
-      await settle();
-      expect(delivered).toEqual([]);
 
       const fine = await rq.post('/graphql', {
         headers: bearer(a.token),
@@ -2039,6 +2051,10 @@ describe('end-users: the Content API rules, over REST', () => {
       expect(fine.body.errors).toBeUndefined();
       expect(fine.body.data.createArticle.title).toBe('ok-gql');
       expect(await articleCount()).toBe(before + 1);
+
+      // Only what was let through was announced
+      await settle();
+      expect(titles()).not.toContain('nope');
     });
 
     it('refuses an update that leaves data outside the conditions, over REST and GraphQL, and leaves the entry as it was', async () => {

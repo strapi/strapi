@@ -16,10 +16,13 @@ import {
   emptyTables,
   resetRoles,
 } from '../utils/permissions';
+import { clearSentEmails } from '../utils/email-capture-provider';
 import { totpFromUri } from '../utils/totp';
+import { emailsAfter } from '../utils/wait';
 
 const USER_UID = 'plugin::end-users.user';
 const TWO_FACTOR_UID = 'plugin::end-users.two-factor';
+const SESSION_UID = 'plugin::end-users.session';
 const READ = 'plugin::content-manager.explorer.read';
 const FROM_FRONT_END = { Origin: TEST_ORIGIN };
 const AUTHOR_PASSWORD = 'Password123';
@@ -159,6 +162,79 @@ describe('end-users: admin user security API', () => {
     expect((await signIn(email)).statusCode).toBe(403);
 
     expect((await rqAdmin.post(`${base(documentId)}/unban`)).status).toBe(200);
+    expect((await signIn(email)).statusCode).toBe(200);
+  });
+
+  it('a ban with an end date refuses sign-in until the date, and lets the user back in after it', async () => {
+    const { email, documentId } = await signedUp();
+    const until = new Date(Date.now() + 60 * 60 * 1000);
+
+    const banned = await rqAdmin.post(`${base(documentId)}/ban`, {
+      body: { reason: 'cooling off', expiresAt: until.toISOString() },
+    });
+
+    expect(banned.status).toBe(200);
+
+    const security = await rqAdmin.get(`${base(documentId)}/security`);
+
+    expect(security.body.data.status).toMatchObject({ banned: true, banReason: 'cooling off' });
+    // To the second: a database may keep a date to less than a millisecond
+    expect(Math.floor(new Date(security.body.data.status.banExpires).getTime() / 1000)).toBe(
+      Math.floor(until.getTime() / 1000)
+    );
+    expect((await signIn(email)).statusCode).toBe(403);
+
+    // Time passing is the date going by: the ban is for the engine to lift, not for an admin
+    await strapi.db
+      .query(USER_UID)
+      .update({ where: { documentId }, data: { banExpires: new Date(Date.now() - 1000) } });
+
+    expect((await signIn(email)).statusCode).toBe(200);
+  });
+
+  it('refuses a ban whose end date is not in the future, and bans nobody', async () => {
+    const { email, documentId } = await signedUp();
+
+    for (const expiresAt of [new Date(Date.now() - 60_000).toISOString(), 'not a date', 12345]) {
+      // eslint-disable-next-line no-await-in-loop
+      const res = await rqAdmin.post(`${base(documentId)}/ban`, { body: { expiresAt } });
+
+      expect({ expiresAt, status: res.status }).toEqual({ expiresAt, status: 400 });
+    }
+
+    expect((await rqAdmin.get(`${base(documentId)}/security`)).body.data.status.banned).toBe(false);
+    expect((await signIn(email)).statusCode).toBe(200);
+  });
+
+  it('sends the user one password reset email, and one verification email', async () => {
+    const { email, documentId } = await signedUp();
+
+    clearSentEmails();
+
+    expect((await rqAdmin.post(`${base(documentId)}/send-password-reset`)).status).toBe(200);
+    // The user signed up with confirmation off, so their address is not confirmed
+    expect((await rqAdmin.post(`${base(documentId)}/send-verification`)).status).toBe(200);
+
+    // Both have landed before anything is counted, so a duplicate of the first would show
+    const sent = await emailsAfter(2);
+
+    expect(sent.map(({ to }) => to)).toEqual([email, email]);
+    expect(sent[0].text).toContain('/reset-password/');
+    expect(sent[1].text).toContain('/verify-email');
+    expect(sent[0].subject).not.toBe(sent[1].subject);
+  });
+
+  it('signs the user out everywhere, and the tokens stop naming a session', async () => {
+    const { email, documentId, token } = await signedUp();
+    const other = (await signIn(email)).headers['set-auth-token'];
+
+    expect(await strapi.db.query(SESSION_UID).count({ where: { userId: documentId } })).toBe(2);
+
+    expect((await rqAdmin.delete(`${base(documentId)}/sessions`)).status).toBe(200);
+
+    expect(await strapi.db.query(SESSION_UID).count({ where: { userId: documentId } })).toBe(0);
+    expect((await rq.get('/api/users/me', { headers: bearer(token) })).statusCode).toBe(401);
+    expect((await rq.get('/api/users/me', { headers: bearer(other) })).statusCode).toBe(401);
     expect((await signIn(email)).statusCode).toBe(200);
   });
 
