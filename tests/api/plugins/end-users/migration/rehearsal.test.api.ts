@@ -1,10 +1,10 @@
 /**
- * A migration and a rollback at the size of a large project, timed. Off unless
- * `END_USERS_REHEARSAL_USERS` is set (the number of users to add to the seeded project):
+ * A migration and a rollback at the size of a large project, timed. It runs with 2,000 users on
+ * every run, so a regression in bulk insert, batching or rollback shows up on each pull request.
+ * `END_USERS_REHEARSAL_USERS` raises it (the number of users to add to the seeded project), and
+ * prints the times the README and the report's estimate are built from:
  *
  *   END_USERS_REHEARSAL_USERS=100000 yarn test:api tests/api/plugins/end-users/migration/rehearsal.test.api.ts
- *
- * The times it prints are the ones the README and the report's estimate are built from.
  */
 import { randomBytes } from 'node:crypto';
 import type { Knex } from 'knex';
@@ -18,7 +18,8 @@ import {
 } from '../utils/users-permissions-project';
 import type { UsersPermissionsProject } from '../utils/users-permissions-project';
 
-const USERS = Number(process.env.END_USERS_REHEARSAL_USERS ?? 0);
+const SIZED = Boolean(process.env.END_USERS_REHEARSAL_USERS);
+const USERS = Number(process.env.END_USERS_REHEARSAL_USERS || 2000);
 /** SQLite refuses more than 500 rows in one insert (a compound select), and 1,000 is fine elsewhere */
 const batchSize = (db: Knex) => (String(db.client.config.client).includes('sqlite') ? 500 : 1000);
 const UP_USER = 'plugin::users-permissions.user';
@@ -46,7 +47,20 @@ const addUsers = async (db: Knex, project: UsersPermissionsProject, total: numbe
   // One hash for all of them: hashing 100,000 passwords would be most of the run
   const password = bcrypt.hashSync(randomBytes(12).toString('base64url'), 10);
   const alice = project.users.alice;
-  const template = (await db('up_users').where({ id: alice.id }).first()) as Row;
+  const row = (await db('up_users').where({ id: alice.id }).first()) as Row;
+  // MySQL hands a JSON column back parsed, and the driver would spread an array into one value per
+  // element, which is more values than columns
+  const template = Object.fromEntries(
+    Object.entries(row).map(([column, value]) => [
+      column,
+      value !== null &&
+      typeof value === 'object' &&
+      !(value instanceof Date) &&
+      !Buffer.isBuffer(value)
+        ? JSON.stringify(value)
+        : value,
+    ])
+  );
   const roleLink = (await db('up_users_role_lnk').where({ user_id: alice.id }).first()) as Row;
   const mediaLink = (await db('files_related_mph')
     .where({ related_id: alice.id, related_type: UP_USER, field: 'avatar' })
@@ -112,7 +126,7 @@ const CLIENT_NAMES: Record<string, string> = {
 
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 
-(USERS > 0 ? describe : describe.skip)(`rehearsal: ${USERS} users`, () => {
+describe(`rehearsal: ${USERS} users`, () => {
   jest.setTimeout(2 * 60 * 60 * 1000);
 
   let project: UsersPermissionsProject;
@@ -141,9 +155,6 @@ const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 
     migrateMs = Date.now() - started;
 
-    // eslint-disable-next-line no-console
-    console.log(`rehearsal: migrated start ${seconds(migrateMs)}`);
-
     try {
       const migrated = await inspectDatabase((db) =>
         tally(db, 'eu_users', 'plugin::end-users.profile')
@@ -155,6 +166,7 @@ const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 
       expect(migrated[0]).toBe(before[0]);
       expect(profiles).toBe(before[0]);
+      expect(migrated[1]).toBe(before[1]);
       expect(accounts).toBe(before[1]);
       expect(migrated[2]).toBe(before[2]);
     } finally {
@@ -173,9 +185,11 @@ const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 
     expect(after).toEqual(before);
 
-    // eslint-disable-next-line no-console
-    console.log(
-      `rehearsal ${CLIENT_NAMES[client] ?? client}: ${before[0]} users, migrated start ${seconds(migrateMs)}, rollback start ${seconds(rollbackMs)}`
-    );
+    if (SIZED) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `rehearsal ${CLIENT_NAMES[client] ?? client}: ${before[0]} users, migrated start ${seconds(migrateMs)}, rollback start ${seconds(rollbackMs)}`
+      );
+    }
   });
 });

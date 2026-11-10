@@ -261,15 +261,34 @@ describe('migration from users-permissions: stores, admin side and finish', () =
       claim: { by: 'other-start', until: new Date(Date.now() + 60_000).toISOString() },
     });
 
+    // The start says so once it has been refused the claim and is waiting: that, not a pause, is
+    // what shows it is held back
+    const announced = jest.spyOn(strapi.log, 'info');
     let settled = false;
     const second = runPostSync(strapi).then(() => {
       settled = true;
     });
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 500);
-    });
-    expect(settled).toBe(false);
+    try {
+      const deadline = Date.now() + 10_000;
+
+      while (
+        !announced.mock.calls.some(([message]) => String(message).includes('waiting for it')) &&
+        Date.now() < deadline
+      ) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => {
+          setTimeout(resolve, 25);
+        });
+      }
+
+      expect(
+        announced.mock.calls.some(([message]) => String(message).includes('waiting for it'))
+      ).toBe(true);
+      expect(settled).toBe(false);
+    } finally {
+      announced.mockRestore();
+    }
 
     // The other start finishes
     await updateRecord(strapi, { status: 'completed', claim: null });

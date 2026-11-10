@@ -145,6 +145,12 @@ const inTransaction = async <T>(work: () => Promise<T>): Promise<T> => {
   return result;
 };
 
+const isSnapshotConflict = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  ((error as { errno?: unknown }).errno === 1020 ||
+    (error as { code?: unknown }).code === 'ER_CHECKREAD');
+
 /** `{ id } AND <filters>`: the one row that was read, and only while the filters still hold. */
 const guardedBy = (id: unknown, filters: StrapiFilters): StrapiFilters => ({
   $and: [{ id }, filters],
@@ -520,9 +526,21 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
           return null;
         }
 
-        const { count } = await dbOf(target).deleteMany({ where: guardedBy(row.id, filters) });
+        try {
+          const { count } = await dbOf(target).deleteMany({ where: guardedBy(row.id, filters) });
 
-        return count === 1 ? asRow(rowMapper(target)(row)) : null;
+          return count === 1 ? asRow(rowMapper(target)(row)) : null;
+        } catch (error) {
+          // Only MySQL-family drivers raise this error, so no dialect check: MariaDB's snapshot
+          // isolation refuses a delete of a row that another transaction changed after this one
+          // read it (error 1020), where other databases delete nothing: the same lost race, so the
+          // same answer
+          if (isSnapshotConflict(error)) {
+            return null;
+          }
+
+          throw error;
+        }
       });
     },
 
