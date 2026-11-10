@@ -289,6 +289,42 @@ describe('user-security service', () => {
       expect(second.engine.sendPasswordReset).toHaveBeenCalledWith('a@x.io', '/reset');
     });
 
+    it('refuses to send a password reset to a banned user, who could not use it, and says why', async () => {
+      const banned = setup({
+        user: { documentId: DOC, email: 'a@x.io', banned: true, banExpires: null },
+      });
+
+      await expect(banned.service.sendPasswordReset(DOC)).rejects.toThrow(
+        'This user is banned. Unban them before sending a password reset.'
+      );
+      expect(banned.engine.sendPasswordReset).not.toHaveBeenCalled();
+
+      // A ban with an end date still ahead holds; one that has run out is no ban
+      const timed = setup({
+        user: {
+          documentId: DOC,
+          email: 'a@x.io',
+          banned: true,
+          banExpires: new Date(Date.now() + 60_000),
+        },
+      });
+
+      await expect(timed.service.sendPasswordReset(DOC)).rejects.toThrow('banned');
+
+      const over = setup({
+        user: {
+          documentId: DOC,
+          email: 'a@x.io',
+          banned: true,
+          banExpires: new Date(Date.now() - 60_000),
+        },
+      });
+
+      await over.service.sendPasswordReset(DOC);
+
+      expect(over.engine.sendPasswordReset).toHaveBeenCalledWith('a@x.io', '/');
+    });
+
     it('sends a verification email, to the setting or the root', async () => {
       const first = setup();
 

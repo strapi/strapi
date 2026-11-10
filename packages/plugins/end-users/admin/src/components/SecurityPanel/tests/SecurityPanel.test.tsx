@@ -222,6 +222,48 @@ describe('SecurityPanel', () => {
     expect(screen.queryByRole('button', { name: 'Ban' })).not.toBeInTheDocument();
   });
 
+  it('disables Send password reset for a banned user, with a hint, and leaves the other email alone', async () => {
+    const calls = serve({
+      ...SECURITY,
+      status: { banned: true, banReason: 'Spam', banExpires: null, lockedUntil: null },
+    });
+    const { user } = renderPanel();
+
+    const reset = await screen.findByRole('button', { name: 'Send password reset' });
+
+    expect(reset).toBeDisabled();
+    expect(
+      screen.getByText('This user is banned. Unban them to send a password reset.')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resend verification' })).toBeEnabled();
+
+    await user.click(reset);
+
+    expect(calls).toEqual([]);
+  });
+
+  it('offers Send password reset to a user whose ban has run out, and to one who is not banned', async () => {
+    serve({
+      ...SECURITY,
+      status: {
+        banned: true,
+        banReason: 'Spam',
+        banExpires: new Date(Date.now() - 60_000).toISOString(),
+        lockedUntil: null,
+      },
+    });
+    const ended = renderPanel();
+
+    expect(await screen.findByRole('button', { name: 'Send password reset' })).toBeEnabled();
+    expect(screen.queryByText(/This user is banned/)).not.toBeInTheDocument();
+    ended.unmount();
+
+    serve();
+    renderPanel();
+
+    expect(await screen.findByRole('button', { name: 'Send password reset' })).toBeEnabled();
+  });
+
   it('hides actions without explorer.update', async () => {
     serve();
     renderAdmin(<Panel {...SAVED} />, { providerOptions: { permissions: [READ] } });

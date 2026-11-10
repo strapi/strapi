@@ -397,6 +397,7 @@
   "security-panel.emails": "Emails",
   "security-panel.emails.reset-sent": "Password reset email sent.",
   "security-panel.emails.reset": "Send password reset",
+  "security-panel.emails.reset-banned": "This user is banned. Unban them to send a password reset.",
   "security-panel.emails.verification-sent": "Verification email sent.",
   "security-panel.emails.verification": "Resend verification",
   "security-panel.profile": "Profile",

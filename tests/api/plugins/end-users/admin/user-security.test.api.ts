@@ -224,6 +224,26 @@ describe('end-users: admin user security API', () => {
     expect(sent[0].subject).not.toBe(sent[1].subject);
   });
 
+  it('refuses to send a banned user a password reset, sends nothing, and sends one once they are unbanned', async () => {
+    const { email, documentId } = await signedUp();
+
+    expect((await rqAdmin.post(`${base(documentId)}/ban`, { body: {} })).status).toBe(200);
+    clearSentEmails();
+
+    const refused = await rqAdmin.post(`${base(documentId)}/send-password-reset`);
+
+    expect(refused.status).toBe(400);
+    expect(refused.body.error.message).toBe(
+      'This user is banned. Unban them before sending a password reset.'
+    );
+
+    expect((await rqAdmin.post(`${base(documentId)}/unban`)).status).toBe(200);
+    expect((await rqAdmin.post(`${base(documentId)}/send-password-reset`)).status).toBe(200);
+
+    // The one mail is the one after the unban: the refused request sent none
+    expect((await emailsAfter(1)).map(({ to }) => to)).toEqual([email]);
+  });
+
   it('signs the user out everywhere, and the tokens stop naming a session', async () => {
     const { email, documentId, token } = await signedUp();
     const other = (await signIn(email)).headers['set-auth-token'];

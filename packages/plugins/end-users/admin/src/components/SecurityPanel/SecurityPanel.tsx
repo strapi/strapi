@@ -195,6 +195,11 @@ const SecurityContent = ({ documentId }: { documentId: string }) => {
   const security: UserSecurity = data;
   const { accounts, sessions, status } = security;
   const locked = status.lockedUntil !== null && new Date(status.lockedUntil).getTime() > Date.now();
+  // A ban with no end date holds, and so does one whose end date is still ahead. The server refuses
+  // the reset for the same user, since no reset mail goes to a banned address
+  const banInForce =
+    status.banned &&
+    (status.banExpires === null || new Date(status.banExpires).getTime() > Date.now());
   const when = (value: string) => formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
 
   const accountLabel = (providerId: string) =>
@@ -518,7 +523,7 @@ const SecurityContent = ({ documentId }: { documentId: string }) => {
               variant="tertiary"
               size="S"
               loading={sending === 'reset'}
-              disabled={sending !== null}
+              disabled={sending !== null || banInForce}
               onClick={() =>
                 sendEmail(
                   'reset',
@@ -535,6 +540,14 @@ const SecurityContent = ({ documentId }: { documentId: string }) => {
                 defaultMessage: 'Send password reset',
               })}
             </Button>
+            {banInForce && (
+              <Typography variant="pi" textColor="neutral600">
+                {formatMessage({
+                  id: getTranslation('security-panel.emails.reset-banned'),
+                  defaultMessage: 'This user is banned. Unban them to send a password reset.',
+                })}
+              </Typography>
+            )}
             <Button
               variant="tertiary"
               size="S"

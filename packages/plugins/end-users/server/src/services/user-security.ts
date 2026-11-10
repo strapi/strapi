@@ -13,6 +13,7 @@ import type abilityService from './ability';
 import type { CallerPermissions } from './ability';
 import type roleService from './role';
 import type settingsService from './settings';
+import { banState } from '../utils/ban';
 import { isPlain } from '../utils/is-plain';
 import { contentTypesOf, documentsOf, type PluginDocuments } from '../utils/typed-strapi';
 
@@ -327,6 +328,12 @@ const userSecurityService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async sendPasswordReset(documentId: string): Promise<void> {
       const user = await userOf(documentId);
+
+      // The reset sender mails a banned user nothing, so saying "sent" would be false. An admin has
+      // no address to protect from enumeration: they are told
+      if (banState(user) === 'active') {
+        refuse('This user is banned. Unban them before sending a password reset.');
+      }
 
       await engine().sendPasswordReset(user.email as string, await redirectOf('passwordReset'));
     },
