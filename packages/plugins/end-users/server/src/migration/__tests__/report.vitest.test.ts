@@ -9,6 +9,7 @@ import {
   ITEM_SEVERITY,
   MEASURED_MS_PER_1000_USERS,
   nullableOnGraphql,
+  pendingLinkItem,
 } from '../report';
 import type { ReportContext } from '../report';
 import { duplicatesQuery, readUpSnapshot } from '../snapshot';
@@ -130,6 +131,37 @@ describe('buildReport', () => {
       '/api/connect/github/callback'
     );
     expect(report.counts.providerUsers).toEqual({ github: 2, twitter: 1, instagram: 0 });
+  });
+
+  it('says a provider`s users are linked on their first sign-in with it, once', () => {
+    const snapshot = emptySnapshot();
+    snapshot.users.byProvider = { local: 1, facebook: 3 };
+
+    const message = find(buildReport(snapshot, context()), 'provider-users:facebook')?.message;
+
+    expect(message).toContain('first sign-in with facebook');
+    expect(message).toContain('even if facebook does not say the address is verified');
+  });
+
+  it('counts the pending links by provider, as information with no address in it', () => {
+    expect(pendingLinkItem({})).toBeNull();
+    expect(pendingLinkItem({ github: 0 })).toBeNull();
+
+    const pending = pendingLinkItem({ keycloak: 5, github: 1 });
+
+    expect(pending).toMatchObject({
+      id: 'provider-pending-links:all',
+      kind: 'provider-pending-links',
+      severity: 'info',
+      count: 6,
+      refs: ['github', 'keycloak'],
+      resolved: false,
+    });
+    expect(pending?.message).toContain('6 users who signed up with a provider have a pending link');
+    expect(pending?.message).toContain('github: 1, keycloak: 5');
+    expect(pendingLinkItem({ github: 1 })?.message).toContain(
+      '1 user who signed up with a provider has'
+    );
   });
 
   it('reports the permissions each role loses or changes', () => {

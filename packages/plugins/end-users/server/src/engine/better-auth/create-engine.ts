@@ -59,6 +59,7 @@ import { passwordPolicy } from './plugins/password-policy';
 import { backgroundTaskHandler } from './background-tasks';
 import { strapiCompat } from './plugins/strapi-compat';
 import { resolvePreset } from './presets';
+import { pendingLink } from './plugins/pending-link';
 import { providerProfile } from './plugins/provider-profile';
 import { strapiProfile } from './plugins/strapi-profile';
 import { fromAuthTables } from './schema/from-auth-tables';
@@ -477,6 +478,8 @@ export const buildAuthOptions = (
       ...betterAuthPlugins(strapi),
       ...strapiPlugins(strapi),
       ...(genericOAuth.length > 0 ? [genericOAuthPlugin({ config: genericOAuth as never })] : []),
+      // After the generic OAuth plugin: it wraps every provider, the ones that plugin adds included
+      pendingLink(strapi),
       ...(projectPlugins as BetterAuthPlugin[]),
     ],
   } as BetterAuthOptions;

@@ -138,6 +138,18 @@ const buildBody = (
 };
 
 /**
+ * The end-users provider of a Users & Permissions user's `provider` column, or `null` for a user
+ * who signed up with a password. Every provider keeps its id: `mapUpGrant` carries a provider under
+ * the name Users & Permissions gave it, and one it can't carry (a custom provider, Instagram, CAS)
+ * comes back under that name when the project registers it again.
+ */
+export const endUsersProviderOf = (upProvider: unknown): string | null => {
+  const id = trimmed(upProvider);
+
+  return id === '' || id === 'local' ? null : id;
+};
+
+/**
  * Turns Users & Permissions' stored `grant` into what end-users has for each provider. `required`
  * answers, for a provider id, the fields its definition requires beyond the client id and secret
  * (`null` when the plugin has no definition of that id). Pure: nothing is read or written.

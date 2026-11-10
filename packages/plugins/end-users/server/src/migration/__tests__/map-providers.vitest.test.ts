@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapUpGrant } from '../map-providers';
+import { endUsersProviderOf, mapUpGrant } from '../map-providers';
 import type { UpGrant } from '../map-providers';
 
 // Built at runtime: no key-shaped literal in the source
@@ -157,5 +157,21 @@ describe('mapUpGrant', () => {
     expect(mapUpGrant({ email: { enabled: false } }, none)).toEqual([
       { kind: 'email', enabled: false },
     ]);
+  });
+});
+
+describe('endUsersProviderOf', () => {
+  it('keeps the id of every provider a user signed up with, carried or not', () => {
+    for (const id of ['github', 'keycloak', 'twitter', 'instagram', 'my-custom']) {
+      expect(endUsersProviderOf(id)).toBe(id);
+    }
+
+    expect(endUsersProviderOf(' github ')).toBe('github');
+  });
+
+  it('answers null for a password user and a provider that is not named', () => {
+    for (const value of ['local', '', '  ', null, undefined, 42]) {
+      expect(endUsersProviderOf(value), String(value)).toBeNull();
+    }
   });
 });

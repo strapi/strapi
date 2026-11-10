@@ -45,6 +45,7 @@ export const ITEM_SEVERITY: Readonly<Record<MigrationItemKind, Severity>> = {
   'provider-needs-input': 'action',
   'provider-not-supported': 'action',
   'provider-users': 'info',
+  'provider-pending-links': 'info',
   'template-untranslated': 'action',
   'template-skipped': 'info',
   'email-sender': 'info',
@@ -260,14 +261,35 @@ const providerItems = (snapshot: UpSnapshot, ctx: ReportContext): MigrationRepor
       item(
         'provider-users',
         provider,
-        `${plural(users, 'user')} signed up with ${provider}. They are linked to their account when they next sign in with it, as long as ${provider} reports the address as verified and the user's address is confirmed here; ` +
-          `otherwise the sign-in is refused with account_not_linked. ${redirectNote(provider, ctx.compat)}`,
+        `${plural(users, 'user')} signed up with ${provider}. Each is linked to their account on their first sign-in with ${provider}, when it sends the address they have here and that address is confirmed, even if ${provider} does not say the address is verified. ` +
+          `After that, another ${provider} account with the same address is linked only if ${provider} says the address is verified. ${redirectNote(provider, ctx.compat)}`,
         { count: users }
       )
     );
   }
 
   return items;
+};
+
+/**
+ * The item that says how many users the migration gave a pending link (`utils/pending-link`), by
+ * the counts of each provider, or `null` when it gave none. Provider ids and counts only.
+ */
+export const pendingLinkItem = (byProvider: Record<string, number>): MigrationReportItem | null => {
+  const providers = Object.keys(byProvider).sort();
+  const total = providers.reduce((sum, provider) => sum + byProvider[provider], 0);
+
+  if (total === 0) {
+    return null;
+  }
+
+  return item(
+    'provider-pending-links',
+    'all',
+    `${plural(total, 'user')} who signed up with a provider ${total === 1 ? 'has' : 'have'} a pending link (${providers.map((provider) => `${provider}: ${byProvider[provider]}`).join(', ')}). ` +
+      'Their first sign-in with that provider, with the address they have here, links it to their account. Refs are the providers.',
+    { count: total, refs: providers }
+  );
 };
 
 const EMAIL_KEYS: UpEmailKey[] = ['reset_password', 'email_confirmation'];

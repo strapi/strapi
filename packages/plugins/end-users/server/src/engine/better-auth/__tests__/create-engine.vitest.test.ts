@@ -277,7 +277,22 @@ describe('buildAuthOptions', () => {
       'password-policy',
       'last-sign-in',
       'provider-profile',
+      'pending-link',
     ]);
+  });
+
+  it('installs pending-link after the generic OAuth plugin, whose providers it wraps', () => {
+    const ids =
+      buildAuthOptions(fakeStrapi(), undefined, {
+        ...emptyStartupInputs(),
+        providers: {
+          ...emptyStartupInputs().providers,
+          genericOAuth: [{ providerId: 'fake-idp', discoveryUrl: 'https://idp.example.com' }],
+        },
+      } as never).plugins?.map((plugin) => plugin.id) ?? [];
+
+    expect(ids.indexOf('generic-oauth')).toBeGreaterThanOrEqual(0);
+    expect(ids.indexOf('pending-link')).toBe(ids.indexOf('generic-oauth') + 1);
   });
 
   it('puts two-factor before bearer, so the token is not for a session two-factor deleted', () => {
@@ -316,6 +331,7 @@ describe('buildAuthOptions', () => {
       'password-policy',
       'last-sign-in',
       'provider-profile',
+      'pending-link',
       'project-plugin',
     ]);
   });
