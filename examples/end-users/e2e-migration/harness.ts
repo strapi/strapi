@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module';
+import path from 'node:path';
 import type { Core } from '@strapi/strapi';
 
 /**
@@ -28,7 +30,11 @@ export const migrationStage = (): Stage | undefined => stageOf(process.env.END_U
 /** Users & Permissions is not an installed dependency of the example: it is resolved from the workspace. */
 const usersPermissions = ({ env }: Core.Config.Shared.ConfigParams): PluginEntry => ({
   enabled: true,
-  resolve: require.resolve('@strapi/plugin-users-permissions/package.json'),
+  // From the application's folder, which is where Strapi runs: the file itself may be loaded as a
+  // module without `require`
+  resolve: createRequire(path.join(process.cwd(), 'package.json')).resolve(
+    '@strapi/plugin-users-permissions/package.json'
+  ),
   // Given, or the plugin writes a secret of its own to `.env`
   config: { jwtSecret: env('JWT_SECRET') },
 });

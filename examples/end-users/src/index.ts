@@ -1,7 +1,13 @@
 import type { Core } from '@strapi/strapi';
 
-import { pointAuthorAtUsersPermissions, withoutEndUsersType } from '../e2e-migration/harness';
 import { seedExample } from './seed';
+
+type Harness = typeof import('../e2e-migration/harness');
+
+// Loaded only when the migration test run asks for it, so this file works when it is copied
+// without the `e2e-migration` folder
+const migrationHarness = (): Harness | undefined =>
+  process.env.END_USERS_E2E_MIGRATION ? require('../e2e-migration/harness') : undefined;
 
 export default {
   /**
@@ -11,7 +17,7 @@ export default {
    * This gives you an opportunity to extend code.
    */
   register({ strapi }: { strapi: Core.Strapi }) {
-    pointAuthorAtUsersPermissions(strapi);
+    migrationHarness()?.pointAuthorAtUsersPermissions(strapi);
   },
 
   /**
@@ -23,7 +29,7 @@ export default {
    */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     // There is no end-user type to seed in a start that is checking or has not yet migrated
-    if (withoutEndUsersType()) {
+    if (migrationHarness()?.withoutEndUsersType()) {
       return;
     }
 

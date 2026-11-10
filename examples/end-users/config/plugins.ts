@@ -2,8 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import type { Core } from '@strapi/strapi';
 
-import { withMigrationHarness } from '../e2e-migration/harness';
-
 /**
  * Where the email plugin finds the example's provider (`providers/file-email.js`). The plugin turns
  * the provider name to lower case and, when no `@strapi/provider-email-<name>` package exists,
@@ -62,8 +60,16 @@ const basePluginsConfig = ({
   },
 });
 
-const pluginsConfig = (params: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
-  // Changes nothing unless the migration end-to-end run (or `check`) starts the example
-  withMigrationHarness(basePluginsConfig(params), params);
+type Harness = typeof import('../e2e-migration/harness');
+
+const pluginsConfig = (params: Core.Config.Shared.ConfigParams): Core.Config.Plugin => {
+  const config = basePluginsConfig(params);
+
+  // The migration test harness is loaded only when a run asks for it, so this file works when it
+  // is copied without the `e2e-migration` folder
+  return params.env('END_USERS_E2E_MIGRATION')
+    ? (require('../e2e-migration/harness') as Harness).withMigrationHarness(config, params)
+    : config;
+};
 
 export default pluginsConfig;
