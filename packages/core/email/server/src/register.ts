@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-export const TEMPLATE_UID = 'plugin::email.template';
+import { TEMPLATE_UID } from './constants';
 
 export const register = ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.plugin('graphql')) {
