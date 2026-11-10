@@ -14,7 +14,10 @@ import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createMockResponse, withMockedFetch } from 'api-tests/mock-fetch';
 import type { Core } from '@strapi/types';
 
-import { pendingLinkIdentifier } from '../../../../../packages/plugins/end-users/server/src/utils/pending-link';
+import {
+  pendingLinkIdentifier,
+  pendingLinkSecret,
+} from '../../../../../packages/plugins/end-users/server/src/utils/pending-link';
 import { startFakeOidc } from '../utils/fake-oidc';
 import type { FakeOidc, FakeOidcUser } from '../utils/fake-oidc';
 import { TEST_PASSWORD } from '../utils/permissions';
@@ -311,7 +314,11 @@ describe('migration from users-permissions: provider users are linked on their f
     // No migration records a link for a generic provider: this one is written by hand
     await strapi!.db.query(VERIFICATION_UID).create({
       data: {
-        identifier: pendingLinkIdentifier('keycloak', 'alice@example.com'),
+        identifier: pendingLinkIdentifier(
+          'keycloak',
+          'alice@example.com',
+          pendingLinkSecret(strapi!)
+        ),
         value: documentIdOf('alice'),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },

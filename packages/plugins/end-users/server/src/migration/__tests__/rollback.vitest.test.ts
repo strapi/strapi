@@ -240,7 +240,7 @@ const project = async (renamed: boolean, permissions: Row[]) => {
   });
   // Carl signed up with GitHub and never signed in since; the other row is the engine's own
   await knex('eu_verifications').insert([
-    { identifier: pendingLinkIdentifier('github', 'c@x.test'), value: 'd3' },
+    { identifier: pendingLinkIdentifier('github', 'c@x.test', 'a-key'), value: 'd3' },
     { identifier: 'provider-session-github-s1', value: 's1' },
   ]);
 

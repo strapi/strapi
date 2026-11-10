@@ -17,6 +17,7 @@ import {
   PENDING_LINK_LIFETIME_MS,
   PROVIDERS_WITHOUT_EMAIL_VERIFICATION,
   pendingLinkIdentifier,
+  pendingLinkSecret,
 } from '../utils/pending-link';
 import { readableFields, writableFields } from '../utils/writable-fields';
 import type { PermissionMapContext } from './map-permissions';
@@ -757,7 +758,11 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
 
   strapi.log.info(`${PLUGIN_ID}: created ${created} credential accounts`);
 
-  const linked = await recordPendingLinks(strapi, owner);
+  // Links live only while compat is on: a run with it off writes none, as the first start after
+  // would drop them
+  const linked = readCompatConfig(strapi).usersPermissions
+    ? await recordPendingLinks(strapi, owner)
+    : {};
   const item = pendingLinkItem(linked);
 
   if (item) {
@@ -793,6 +798,7 @@ const recordPendingLinks = async (
   const emailVerified = columnOf(strapi, USER_UID, 'emailVerified') ?? 'email_verified';
   const banned = columnOf(strapi, USER_UID, 'banned') ?? 'banned';
   const expiresAt = new Date(Date.now() + PENDING_LINK_LIFETIME_MS);
+  const secret = pendingLinkSecret(strapi);
   const width = 7;
   const byProvider: Record<string, number> = {};
   let lastId = 0;
@@ -827,7 +833,10 @@ const recordPendingLinks = async (
       byProvider[providerId] = (byProvider[providerId] ?? 0) + 1;
 
       return [
-        { identifier: pendingLinkIdentifier(providerId, user.email), userId: user.document_id },
+        {
+          identifier: pendingLinkIdentifier(providerId, user.email, secret),
+          userId: user.document_id,
+        },
       ];
     });
 

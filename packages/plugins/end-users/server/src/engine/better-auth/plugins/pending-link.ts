@@ -38,6 +38,7 @@ import {
   PROVIDERS_WITHOUT_EMAIL_VERIFICATION,
   pendingLinkIdentifier,
   pendingLinkPrefix,
+  pendingLinkSecret,
 } from '../../../utils/pending-link';
 
 /** Marks a provider whose `getUserInfo` is wrapped, so it is wrapped once */
@@ -102,7 +103,8 @@ const claimsVerification = (profile: unknown): boolean =>
 const trustForPendingLink = async (
   strapi: Core.Strapi,
   providerId: string,
-  answer: ProviderAnswer
+  answer: ProviderAnswer,
+  shared: unknown
 ) => {
   const { user } = answer;
 
@@ -118,7 +120,10 @@ const trustForPendingLink = async (
 
   const auth = tryGetCurrentAuthEndpointContext()?.context as AuthContext | undefined;
 
-  if (!auth || auth.trustedProviders.includes(providerId)) {
+  // The context `init` received is the one every request shares: trusting a provider there would
+  // trust it for all of them. Better Auth gives each request its own copy; should a version ever
+  // run `auth.api.*` on the shared one, the grant fails closed.
+  if (!auth || auth === shared || auth.trustedProviders.includes(providerId)) {
     return;
   }
 
@@ -127,7 +132,12 @@ const trustForPendingLink = async (
   try {
     const link = (await auth.adapter.findOne({
       model: 'verification',
-      where: [{ field: 'identifier', value: pendingLinkIdentifier(providerId, email) }],
+      where: [
+        {
+          field: 'identifier',
+          value: pendingLinkIdentifier(providerId, email, pendingLinkSecret(strapi)),
+        },
+      ],
     })) as StoredLink | null;
 
     if (!link || new Date(link.expiresAt).getTime() <= Date.now()) {
@@ -157,7 +167,12 @@ const trustForPendingLink = async (
 };
 
 /** Wraps the `getUserInfo` of each provider of `ids`, once */
-const wrapProviders = (strapi: Core.Strapi, providers: unknown, ids: ReadonlySet<string>) => {
+const wrapProviders = (
+  strapi: Core.Strapi,
+  providers: unknown,
+  ids: ReadonlySet<string>,
+  shared: unknown
+) => {
   if (!Array.isArray(providers)) {
     return;
   }
@@ -179,7 +194,7 @@ const wrapProviders = (strapi: Core.Strapi, providers: unknown, ids: ReadonlySet
       const answer = await original.apply(this, args);
 
       if (answer) {
-        await trustForPendingLink(strapi, provider.id, answer);
+        await trustForPendingLink(strapi, provider.id, answer, shared);
       }
 
       return answer;
@@ -207,7 +222,7 @@ export const pendingLink = (
     init(context) {
       // The provider objects Better Auth built from the social providers' config, before any
       // plugin installed after this one could add another provider under the same id
-      wrapProviders(strapi, context.socialProviders, eligible);
+      wrapProviders(strapi, context.socialProviders, eligible, context);
 
       return {
         options: {
@@ -238,6 +253,11 @@ export const pendingLink = (
                   return spent === 1 ? undefined : false;
                 },
                 async after(account: { userId: string; providerId: string }) {
+                  // Only the listed providers have links: no delete for every other account made
+                  if (!eligible.has(account.providerId)) {
+                    return;
+                  }
+
                   try {
                     await context.adapter.deleteMany({
                       model: 'verification',

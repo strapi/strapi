@@ -57,7 +57,13 @@ describe('stepOfCode', () => {
 
   it('answers null, never throws, for a code that is not six ASCII digits', async () => {
     // Six characters, seven bytes: the lengths of the two strings differ once encoded
-    for (const code of ['12345\u00e9', '\u0661\u0662\u0663\u0664\u0665\u0666', '12 456', '12345a', '']) {
+    for (const code of [
+      '12345\u00e9',
+      '\u0661\u0662\u0663\u0664\u0665\u0666',
+      '12 456',
+      '12345a',
+      '',
+    ]) {
       // eslint-disable-next-line no-await-in-loop
       await expect(stepOfCode(SECRET, code, {}, NOW), code).resolves.toBeNull();
     }
