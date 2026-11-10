@@ -2,6 +2,7 @@ import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
+import { getTypeArtifacts } from '../../utils/typescript-artifacts';
 
 interface CmdOptions {
   debug?: boolean;
@@ -23,20 +24,20 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
   const { createStrapi, compileStrapi } = require('@strapi/core');
 
   const appContext = await compileStrapi({ ignoreDiagnostics: true });
-  const app = await createStrapi(appContext).register();
+  const strapiInstance = await createStrapi(appContext).register();
 
   await tsUtils.generators.generate({
-    strapi: app,
+    strapi: strapiInstance,
     pwd: appContext.appDir,
     rootDir: outDir ?? undefined,
     logger: {
       silent,
       debug,
     },
-    artifacts: { contentTypes: true, components: true },
+    artifacts: getTypeArtifacts(strapiInstance),
   });
 
-  await app.destroy();
+  await strapiInstance.destroy();
 };
 
 /**
@@ -44,7 +45,7 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
  */
 const command: StrapiCommand = () => {
   return createCommand('ts:generate-types')
-    .description(`Generate TypeScript typings for your schemas`)
+    .description(`Generate TypeScript typings for your schemas and plugin contracts`)
     .option('-d, --debug', `Run the generation with debug messages`, false)
     .option('-s, --silent', `Run the generation silently, without any output`, false)
     .option(
