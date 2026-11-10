@@ -55,6 +55,23 @@ describe('MigrationSection', () => {
     expect(checked).toHaveLength(1);
   });
 
+  it('offers to run the check until one exists, and says one minute in the singular', async () => {
+    serveMigration({ ...CHECK, report: null });
+    const { unmount } = render(<MigrationSection />);
+
+    expect(await screen.findByRole('button', { name: 'Run the check' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Check again' })).not.toBeInTheDocument();
+
+    unmount();
+    serveMigration({
+      ...CHECK,
+      report: { ...CHECK.report!, estimate: { client: 'sqlite', minutes: 1 } },
+    });
+    render(<MigrationSection />);
+
+    expect(await screen.findByText('1 minute')).toBeInTheDocument();
+  });
+
   it('lists every item and marks an acknowledged one resolved', async () => {
     const sent: unknown[] = [];
 
@@ -73,12 +90,15 @@ describe('MigrationSection', () => {
     expect(screen.getByText('API tokens are not changed')).toBeInTheDocument();
     expect(screen.getByText('1 affected')).toBeInTheDocument();
 
+    // Only an Action item can be ticked: the API token item is Info, and has nothing to resolve
     const boxes = screen.getAllByRole('checkbox', { name: 'Mark resolved' });
 
-    // The role item is open, the API token item is already resolved
-    expect(boxes).toHaveLength(2);
+    expect(boxes).toHaveLength(1);
     expect(boxes[0]).not.toBeChecked();
-    expect(boxes[1]).toBeChecked();
+    // A resolved item says so on its badge, and an open one keeps its kind
+    // (the column heading is the other)
+    expect(screen.getAllByText('Resolved')).toHaveLength(2);
+    expect(screen.getAllByText('Action')).toHaveLength(2);
 
     await user.click(boxes[0]);
 
@@ -92,8 +112,8 @@ describe('MigrationSection', () => {
     render(<MigrationSection />);
 
     expect(await screen.findByText(/Resolves when the provider is ready/)).toBeInTheDocument();
-    // Three items, one without a checkbox: the provider
-    expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+    // Three items: the role one is ticked by hand, the provider resolves itself, the Info one has no box
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1);
   });
 
   it('downloads the report as JSON', async () => {
@@ -134,12 +154,13 @@ describe('MigrationSection', () => {
     render(<MigrationSection />);
 
     expect(await screen.findByText('Legacy token use')).toBeInTheDocument();
-    expect(screen.getByText('Legacy tokens').nextSibling).toHaveTextContent('7');
-    expect(screen.getByText('Access tokens').nextSibling).toHaveTextContent('31');
-    expect(screen.getByText('Last legacy token').nextSibling).toHaveTextContent('Nov 8, 2026');
+    expect(screen.getByText('Legacy tokens')).toBeInTheDocument();
+    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(screen.getByText('31')).toBeInTheDocument();
+    expect(screen.getByText('Last legacy token')).toBeInTheDocument();
 
     expect(screen.getByText('Migration settings')).toBeInTheDocument();
-    expect(screen.getByText('keep-oldest')).toBeInTheDocument();
+    expect(screen.getByText('Keep the oldest')).toBeInTheDocument();
     expect(screen.getByText('displayName')).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });

@@ -74,6 +74,19 @@ describe('SignInPage', () => {
     expect(screen.queryByText(/`/)).not.toBeInTheDocument();
   });
 
+  it('words every toggle as Enabled and Disabled, and marks none as required', async () => {
+    serveSettings();
+    renderPage();
+
+    await screen.findByRole('heading', { name: 'Sign-in' });
+
+    expect(screen.getAllByText('Enabled').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Disabled').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/^(true|false)$/i)).not.toBeInTheDocument();
+    // A toggle can't be empty: only the numbers carry the asterisk
+    expect(screen.getAllByText('*')).toHaveLength(4);
+  });
+
   it('shows a stored method that is not installed as off, and keeps the stored value', async () => {
     const saved = serveSettings({
       ...SETTINGS,
@@ -125,7 +138,9 @@ describe('SignInPage', () => {
     serveSettings();
     renderPage();
 
-    expect(await screen.findByText('7d')).toBeInTheDocument();
+    expect(await screen.findByText('7 days')).toBeInTheDocument();
+    expect(screen.getByText('Session cookie cache')).toBeInTheDocument();
+    expect(screen.getByText('Off')).toBeInTheDocument();
     expect(screen.getByText('Session lasts')).toBeInTheDocument();
   });
 });

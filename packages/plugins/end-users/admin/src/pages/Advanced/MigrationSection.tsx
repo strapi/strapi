@@ -1,18 +1,32 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useNotification, useRBAC } from '@strapi/admin/strapi-admin';
-import { Badge, Box, Button, Checkbox, Flex, Typography } from '@strapi/design-system';
+import {
+  Badge,
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Typography,
+} from '@strapi/design-system';
 import { Download } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
-import { ReadOnlyRow } from '../../components/ReadOnlyRow';
+import { ReadOnlyList, ReadOnlyRow } from '../../components/ReadOnlyRow';
 import { PERMISSIONS } from '../../constants';
 import {
   useGetMigrationStatusQuery,
   useRunMigrationCheckMutation,
   useUpdateMigrationItemMutation,
 } from '../../services/migration';
+import { formatDuplicates } from '../../utils/configWords';
 import { getTranslation } from '../../utils/getTranslation';
 
 import { ProjectFiles } from './ProjectFiles';
@@ -44,6 +58,7 @@ type Format = (
   values?: Record<string, string | number>
 ) => string;
 
+/** One item of the report: what kind it is, what it says, how many it touches, and whether it is done */
 const ItemRow = ({
   item,
   canResolve,
@@ -56,49 +71,60 @@ const ItemRow = ({
   onResolve: (item: MigrationReportItem, resolved: boolean) => void;
 }) => {
   const resolvedBy = RESOLVED_BY[item.kind];
+  const isAction = item.severity === 'action';
+
+  const resolution = () => {
+    // An info item says what will happen: there is nothing to do or to tick
+    if (!isAction) {
+      return null;
+    }
+
+    if (resolvedBy) {
+      return (
+        <Typography textColor="neutral600">
+          {item.resolved ? null : format(resolvedBy.id, resolvedBy.defaultMessage)}
+        </Typography>
+      );
+    }
+
+    return (
+      <Checkbox
+        checked={item.resolved}
+        disabled={!canResolve}
+        onCheckedChange={(checked: boolean | 'indeterminate') => onResolve(item, checked === true)}
+      >
+        {format('migration.items.mark-resolved', 'Mark resolved')}
+      </Checkbox>
+    );
+  };
 
   return (
-    <Flex
-      direction="column"
-      alignItems="stretch"
-      gap={2}
-      paddingTop={3}
-      paddingBottom={3}
-      borderColor="neutral150"
-      borderStyle="solid"
-      borderWidth="1px 0 0 0"
-    >
-      <Flex gap={3} alignItems="center" wrap="wrap">
-        <Badge active={item.severity === 'action' && !item.resolved}>
-          {item.severity === 'action'
-            ? format('migration.items.action', 'Action')
-            : format('migration.items.info', 'Info')}
-        </Badge>
+    <Tr>
+      <Td>
+        {item.resolved ? (
+          <Badge backgroundColor="success100" textColor="success700">
+            {format('migration.items.resolved', 'Resolved')}
+          </Badge>
+        ) : (
+          <Badge active={isAction}>
+            {isAction
+              ? format('migration.items.action', 'Action')
+              : format('migration.items.info', 'Info')}
+          </Badge>
+        )}
+      </Td>
+      <Td>
         <Typography textColor="neutral800">{item.message}</Typography>
+      </Td>
+      <Td>
         {item.count !== undefined && (
           <Typography textColor="neutral600">
             {format('migration.items.count', '{count} affected', { count: item.count })}
           </Typography>
         )}
-      </Flex>
-      {resolvedBy ? (
-        <Typography textColor="neutral600">
-          {item.resolved
-            ? format('migration.items.resolved', 'Resolved')
-            : format(resolvedBy.id, resolvedBy.defaultMessage)}
-        </Typography>
-      ) : (
-        <Checkbox
-          checked={item.resolved}
-          disabled={!canResolve}
-          onCheckedChange={(checked: boolean | 'indeterminate') =>
-            onResolve(item, checked === true)
-          }
-        >
-          {format('migration.items.mark-resolved', 'Mark resolved')}
-        </Checkbox>
-      )}
-    </Flex>
+      </Td>
+      <Td>{resolution()}</Td>
+    </Tr>
   );
 };
 
@@ -181,7 +207,7 @@ const MigrationBody = ({ status }: { status: MigrationStatus }) => {
             )}
           </Typography>
           {report ? (
-            <Flex direction="column" alignItems="stretch" gap={1}>
+            <ReadOnlyList>
               {row('migration.check.last', 'Last check', date(report.generatedAt))}
               {row('migration.check.users', 'Users', formatNumber(report.counts.users))}
               {row('migration.check.roles', 'Roles', formatNumber(report.counts.roles))}
@@ -194,11 +220,15 @@ const MigrationBody = ({ status }: { status: MigrationStatus }) => {
                 row(
                   'migration.check.estimate',
                   'Estimated time',
-                  format('migration.check.minutes', '{count} minutes', {
-                    count: report.estimate.minutes,
-                  })
+                  format(
+                    'migration.check.minutes',
+                    '{count, plural, one {# minute} other {# minutes}}',
+                    {
+                      count: report.estimate.minutes,
+                    }
+                  )
                 )}
-            </Flex>
+            </ReadOnlyList>
           ) : (
             <Typography textColor="neutral600">
               {format('migration.check.never', 'The check has not run yet.')}
@@ -212,51 +242,77 @@ const MigrationBody = ({ status }: { status: MigrationStatus }) => {
               disabled={!canUpdate}
               onClick={handleCheck}
             >
-              {format('migration.check.again', 'Check again')}
+              {report
+                ? format('migration.check.again', 'Check again')
+                : format('migration.check.run', 'Run the check')}
             </Button>
           </Flex>
         </Flex>
       )}
 
       {!isCheck && record && (
-        <Flex direction="column" alignItems="stretch" gap={1}>
+        <ReadOnlyList>
           {row('migration.record.status', 'Status', recordStatus[record.status] ?? record.status)}
           {row('migration.record.attempt', 'Attempt', record.attempt)}
           {row('migration.record.started', 'Started', date(record.startedAt))}
           {row('migration.record.completed', 'Completed', date(record.completedAt))}
           {record.rolledBackAt &&
             row('migration.record.rolled-back', 'Rolled back', date(record.rolledBackAt))}
-        </Flex>
+        </ReadOnlyList>
       )}
 
       {!isCheck && legacyJwtHits && (
-        <Flex direction="column" alignItems="stretch" gap={1}>
-          <Typography fontWeight="bold">
+        <Flex direction="column" alignItems="stretch" gap={3}>
+          <Typography variant="delta" tag="h3">
             {format('migration.hits.title', 'Legacy token use')}
           </Typography>
-          {row('migration.hits.legacy', 'Legacy tokens', formatNumber(legacyJwtHits.legacy))}
-          {row('migration.hits.access', 'Access tokens', formatNumber(legacyJwtHits.access))}
-          {row('migration.hits.last', 'Last legacy token', date(legacyJwtHits.lastHitAt))}
+          <ReadOnlyList>
+            {row('migration.hits.legacy', 'Legacy tokens', formatNumber(legacyJwtHits.legacy))}
+            {row('migration.hits.access', 'Access tokens', formatNumber(legacyJwtHits.access))}
+            {row('migration.hits.last', 'Last legacy token', date(legacyJwtHits.lastHitAt))}
+          </ReadOnlyList>
         </Flex>
       )}
 
       {report && report.items.length > 0 && (
-        <Flex direction="column" alignItems="stretch">
-          <Typography fontWeight="bold">{format('migration.items.title', 'Items')}</Typography>
-          {report.items.map((item) => (
-            <ItemRow
-              key={item.id}
-              item={item}
-              canResolve={canUpdate && !isCheck}
-              format={format}
-              onResolve={handleResolve}
-            />
-          ))}
+        <Flex direction="column" alignItems="stretch" gap={3}>
+          <Typography variant="delta" tag="h3">
+            {format('migration.items.title', 'Items')}
+          </Typography>
+          <Table colCount={4} rowCount={report.items.length + 1}>
+            <Thead>
+              <Tr>
+                {[
+                  ['migration.items.column.kind', 'Kind'],
+                  ['migration.items.column.item', 'Item'],
+                  ['migration.items.column.affected', 'Affected'],
+                  ['migration.items.column.resolved', 'Resolved'],
+                ].map(([id, defaultMessage]) => (
+                  <Th key={id}>
+                    <Typography variant="sigma" textColor="neutral600">
+                      {format(id, defaultMessage)}
+                    </Typography>
+                  </Th>
+                ))}
+              </Tr>
+            </Thead>
+            <Tbody>
+              {report.items.map((item) => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  canResolve={canUpdate && !isCheck}
+                  format={format}
+                  onResolve={handleResolve}
+                />
+              ))}
+            </Tbody>
+          </Table>
         </Flex>
       )}
 
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        <Typography fontWeight="bold">
+      <Flex direction="column" alignItems="stretch" gap={3}>
+        <Typography variant="delta" tag="h3">
           {format('migration.settings.title', 'Migration settings')}
         </Typography>
         <Typography textColor="neutral600">
@@ -265,16 +321,22 @@ const MigrationBody = ({ status }: { status: MigrationStatus }) => {
             'These are set in the migration key of config/plugins.ts and cannot be edited here.'
           )}
         </Typography>
-        {row('migration.settings.from', 'From Users & Permissions', fromLabel)}
-        {row('migration.settings.duplicates', 'Duplicate emails', config.duplicates)}
-        {row(
-          'migration.settings.registration-fields',
-          'Registration fields',
-          config.registrationFields && config.registrationFields.length > 0
-            ? config.registrationFields.join(', ')
-            : none
-        )}
-        {row('migration.settings.rollback', 'Roll back', config.rollback ? yes : no)}
+        <ReadOnlyList>
+          {row('migration.settings.from', 'From Users & Permissions', fromLabel)}
+          {row(
+            'migration.settings.duplicates',
+            'Duplicate emails',
+            formatDuplicates(config.duplicates, formatMessage)
+          )}
+          {row(
+            'migration.settings.registration-fields',
+            'Registration fields',
+            config.registrationFields && config.registrationFields.length > 0
+              ? config.registrationFields.join(', ')
+              : none
+          )}
+          {row('migration.settings.rollback', 'Roll back', config.rollback ? yes : no)}
+        </ReadOnlyList>
       </Flex>
 
       {report && (
@@ -318,7 +380,16 @@ const MigrationSection = () => {
   }
 
   return (
-    <Box ref={ref} id="migration" background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+    <Box
+      ref={ref}
+      id="migration"
+      // The page header is sticky: the heading must not land under it
+      style={{ scrollMarginTop: '12rem' }}
+      background="neutral0"
+      padding={6}
+      shadow="filterShadow"
+      hasRadius
+    >
       <Flex direction="column" alignItems="stretch" gap={4}>
         <Typography variant="delta" tag="h2">
           {formatMessage({

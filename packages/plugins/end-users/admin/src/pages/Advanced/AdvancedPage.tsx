@@ -6,10 +6,11 @@ import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { MigrationBanner } from '../../components/MigrationBanner';
-import { ReadOnlyRow } from '../../components/ReadOnlyRow';
+import { ReadOnlyList, ReadOnlyRow } from '../../components/ReadOnlyRow';
 import { PERMISSIONS } from '../../constants';
 import { useGetMigrationStatusQuery } from '../../services/migration';
 import { useGetSettingsQuery } from '../../services/settings';
+import { formatDuration, formatStorage } from '../../utils/configWords';
 import { getTranslation } from '../../utils/getTranslation';
 import { useSaveSettings } from '../../utils/useSaveSettings';
 
@@ -41,6 +42,8 @@ const ConfigSection = ({ config }: { config: SettingsResponse['meta']['config'] 
   const no = formatMessage({ id: getTranslation('settings.config.no'), defaultMessage: 'No' });
   const flag = (value: boolean) => (value ? yes : no);
   const list = (values: string[]) => (values.length > 0 ? values.join(', ') : none);
+  const duration = (value: string) => formatDuration(value, formatMessage);
+  const off = formatMessage({ id: getTranslation('settings.config.off'), defaultMessage: 'Off' });
   const row = (id: string, defaultMessage: string, value: React.ReactNode) => (
     <ReadOnlyRow label={formatMessage({ id: getTranslation(id), defaultMessage })}>
       {value}
@@ -71,82 +74,96 @@ const ConfigSection = ({ config }: { config: SettingsResponse['meta']['config'] 
           })}
         </Alert>
       )}
-      {row(
-        'settings.config.secret',
-        'Secret',
-        config.secret.set
-          ? formatMessage({
-              id: getTranslation('settings.config.secret.set'),
-              defaultMessage: 'Set',
-            })
-          : formatMessage({
-              id: getTranslation('settings.config.secret.not-set'),
-              defaultMessage: 'Not set',
-            })
-      )}
-      {row('settings.config.trusted-origins', 'Trusted origins', list(config.trustedOrigins))}
-      {row(
-        'settings.config.cookies.cross-site',
-        'Cross-site cookies',
-        flag(config.cookies.crossSite)
-      )}
-      {row('settings.config.cookies.domain', 'Cookie domain', config.cookies.domain ?? none)}
-      {row('settings.config.session.expires-in', 'Session lasts', config.session.expiresIn)}
-      {row('settings.config.session.update-age', 'Session renewed after', config.session.updateAge)}
-      {row(
-        'settings.config.session.cookie-cache',
-        'Session cookie cache',
-        config.session.cookieCache === false ? none : config.session.cookieCache
-      )}
-      {row('settings.config.rate-limit', 'Rate limiting', flag(config.rateLimit.enabled))}
-      {row(
-        'settings.config.rate-limit.window',
-        'Rate limit window',
-        formatMessage(
-          { id: getTranslation('settings.config.seconds'), defaultMessage: '{count} seconds' },
-          { count: config.rateLimit.window }
-        )
-      )}
-      {row('settings.config.rate-limit.max', 'Requests per window', config.rateLimit.max)}
-      {row('settings.config.rate-limit.storage', 'Rate limit storage', config.rateLimit.storage)}
-      {row(
-        'settings.config.compat.users-permissions',
-        'Users & Permissions compatibility',
-        flag(config.compat.usersPermissions)
-      )}
-      {row(
-        'settings.config.compat.legacy-jwt',
-        'Legacy JWTs accepted until',
-        config.compat.legacyJwtUntil ?? none
-      )}
-      {config.compat.refresh &&
-        row(
-          'settings.config.compat.refresh',
-          'Refresh tokens',
-          config.compat.refresh.enabled
-            ? formatMessage(
-                config.compat.refresh.httpOnly
-                  ? {
-                      id: getTranslation('settings.config.compat.refresh.cookie'),
-                      defaultMessage: 'On, in the cookie {name}',
-                    }
-                  : {
-                      id: getTranslation('settings.config.compat.refresh.body'),
-                      defaultMessage: 'On, in the response body (cookie name {name})',
-                    },
-                { name: config.compat.refresh.cookieName }
-              )
-            : no
+      <ReadOnlyList>
+        {row(
+          'settings.config.secret',
+          'Secret',
+          config.secret.set
+            ? formatMessage({
+                id: getTranslation('settings.config.secret.set'),
+                defaultMessage: 'Set',
+              })
+            : formatMessage({
+                id: getTranslation('settings.config.secret.not-set'),
+                defaultMessage: 'Not set',
+              })
         )}
-      {config.compat.connectProviders &&
-        row(
-          'settings.config.compat.connect-providers',
-          'Providers with a connect callback',
-          list(config.compat.connectProviders)
+        {row('settings.config.trusted-origins', 'Trusted origins', list(config.trustedOrigins))}
+        {row(
+          'settings.config.cookies.cross-site',
+          'Cross-site cookies',
+          flag(config.cookies.crossSite)
         )}
-      {row('settings.config.explain', 'Explain mode', flag(config.explain))}
-      {row('settings.config.plugins', 'Better Auth plugins', list(config.auth.plugins))}
-      {row('settings.config.senders', 'Emails sent from config', list(config.auth.senders))}
+        {row('settings.config.cookies.domain', 'Cookie domain', config.cookies.domain ?? none)}
+        {row(
+          'settings.config.session.expires-in',
+          'Session lasts',
+          duration(config.session.expiresIn)
+        )}
+        {row(
+          'settings.config.session.update-age',
+          'Session renewed after',
+          duration(config.session.updateAge)
+        )}
+        {row(
+          'settings.config.session.cookie-cache',
+          'Session cookie cache',
+          config.session.cookieCache === false ? off : duration(config.session.cookieCache)
+        )}
+        {row('settings.config.rate-limit', 'Rate limiting', flag(config.rateLimit.enabled))}
+        {row(
+          'settings.config.rate-limit.window',
+          'Rate limit window',
+          formatMessage(
+            { id: getTranslation('settings.config.seconds'), defaultMessage: '{count} seconds' },
+            { count: config.rateLimit.window }
+          )
+        )}
+        {row('settings.config.rate-limit.max', 'Requests per window', config.rateLimit.max)}
+        {row(
+          'settings.config.rate-limit.storage',
+          'Rate limit storage',
+          formatStorage(config.rateLimit.storage, formatMessage)
+        )}
+        {row(
+          'settings.config.compat.users-permissions',
+          'Users & Permissions compatibility',
+          flag(config.compat.usersPermissions)
+        )}
+        {row(
+          'settings.config.compat.legacy-jwt',
+          'Legacy JWTs accepted until',
+          config.compat.legacyJwtUntil ?? none
+        )}
+        {config.compat.refresh &&
+          row(
+            'settings.config.compat.refresh',
+            'Refresh tokens',
+            config.compat.refresh.enabled
+              ? formatMessage(
+                  config.compat.refresh.httpOnly
+                    ? {
+                        id: getTranslation('settings.config.compat.refresh.cookie'),
+                        defaultMessage: 'On, in the cookie {name}',
+                      }
+                    : {
+                        id: getTranslation('settings.config.compat.refresh.body'),
+                        defaultMessage: 'On, in the response body (cookie name {name})',
+                      },
+                  { name: config.compat.refresh.cookieName }
+                )
+              : no
+          )}
+        {config.compat.connectProviders &&
+          row(
+            'settings.config.compat.connect-providers',
+            'Providers with a connect callback',
+            list(config.compat.connectProviders)
+          )}
+        {row('settings.config.explain', 'Explain mode', flag(config.explain))}
+        {row('settings.config.plugins', 'Better Auth plugins', list(config.auth.plugins))}
+        {row('settings.config.senders', 'Emails sent from config', list(config.auth.senders))}
+      </ReadOnlyList>
     </Section>
   );
 };
