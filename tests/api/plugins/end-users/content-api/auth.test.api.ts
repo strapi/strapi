@@ -8,6 +8,7 @@
  * the database and the Koa middleware chain. The Content API strategy and the permission rules on
  * content are in `permissions.test.api.ts`.
  */
+import { randomBytes } from 'node:crypto';
 import request from 'supertest';
 import { createAuthRequest, createContentAPIRequest, createRequest } from 'api-tests/request';
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
@@ -1329,6 +1330,302 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
     });
   });
 
+  describe('every default-on native endpoint, with and without a session', () => {
+    type Probe = {
+      method: 'GET' | 'POST';
+      path: string;
+      body?: Record<string, unknown>;
+      /** What a caller with a session is answered: the endpoint ran, and the body was judged */
+      signedIn: number[];
+    };
+
+    // The endpoints that need a session. A body that would be valid goes along, so the answer
+    // says "who are you" and not "what is this body".
+    const PROTECTED: Probe[] = [
+      { method: 'GET', path: '/list-sessions', signedIn: [200] },
+      { method: 'GET', path: '/list-accounts', signedIn: [200] },
+      { method: 'GET', path: '/account-info?accountId=not-an-account', signedIn: [400, 404] },
+      { method: 'POST', path: '/update-session', body: {}, signedIn: [400] },
+      { method: 'POST', path: '/update-user', body: { name: 'Probed' }, signedIn: [200] },
+      { method: 'POST', path: '/verify-password', body: { password: PASSWORD }, signedIn: [200] },
+      {
+        method: 'POST',
+        path: '/change-password',
+        body: { currentPassword: 'not-the-password', newPassword: 'An0ther!password' },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/change-email',
+        body: { newEmail: 'probe-moved@example.com' },
+        signedIn: [200],
+      },
+      {
+        method: 'POST',
+        path: '/revoke-session',
+        body: { token: 'not-a-token' },
+        signedIn: [200, 400],
+      },
+      { method: 'POST', path: '/revoke-other-sessions', body: {}, signedIn: [200] },
+      {
+        method: 'POST',
+        path: '/link-social',
+        body: { provider: 'not-a-provider' },
+        signedIn: [400, 404],
+      },
+      {
+        method: 'POST',
+        path: '/unlink-account',
+        body: { providerId: 'not-a-provider', accountId: 'not-an-account' },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/get-access-token',
+        body: { accountId: 'not-an-account' },
+        signedIn: [400, 404],
+      },
+      {
+        method: 'POST',
+        path: '/refresh-token',
+        body: { accountId: 'not-an-account' },
+        signedIn: [400, 404],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/get-totp-uri',
+        body: { password: PASSWORD },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/generate-backup-codes',
+        body: { password: PASSWORD },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/disable',
+        body: { password: PASSWORD },
+        signedIn: [200],
+      },
+    ];
+
+    // These take the challenge a password sign-in leaves, or a session: with neither they say so
+    const SECOND_FACTOR: Probe[] = [
+      { method: 'POST', path: '/two-factor/send-otp', body: {}, signedIn: [200] },
+      { method: 'POST', path: '/two-factor/verify-otp', body: { code: '000000' }, signedIn: [401] },
+      {
+        method: 'POST',
+        path: '/two-factor/verify-totp',
+        body: { code: '000000' },
+        signedIn: [400],
+      },
+      {
+        method: 'POST',
+        path: '/two-factor/verify-backup-code',
+        body: { code: 'not-a-code' },
+        signedIn: [400],
+      },
+    ];
+
+    // What anyone may call, with no session: sign-in and sign-up, the reset and verify links, the
+    // health and error pages. Each is answered, and none is a 401 for want of a session.
+    const PUBLIC: Array<Omit<Probe, 'signedIn'>> = [
+      {
+        method: 'POST',
+        path: '/sign-up/email',
+        body: { email: 'probe-public@example.com', password: PASSWORD, name: 'P' },
+      },
+      {
+        method: 'POST',
+        path: '/sign-in/email',
+        body: { email: 'nobody@example.com', password: 'not-the-password' },
+      },
+      {
+        method: 'POST',
+        path: '/sign-in/username',
+        body: { username: 'nobody', password: 'not-the-password' },
+      },
+      { method: 'POST', path: '/request-password-reset', body: { email: 'nobody@example.com' } },
+      {
+        method: 'POST',
+        path: '/reset-password',
+        body: { token: 'nope', newPassword: 'An0ther!password' },
+      },
+      { method: 'POST', path: '/send-verification-email', body: { email: 'nobody@example.com' } },
+      { method: 'POST', path: '/is-username-available', body: { username: 'probe-free' } },
+      { method: 'GET', path: '/get-session' },
+      { method: 'GET', path: '/verify-email?token=nope' },
+      { method: 'GET', path: '/reset-password/nope' },
+      { method: 'GET', path: '/ok' },
+      { method: 'GET', path: '/error' },
+    ];
+
+    const call = (
+      { method, path, body }: Pick<Probe, 'method' | 'path' | 'body'>,
+      headers: Record<string, string> = {}
+    ) =>
+      method === 'GET'
+        ? rq.get(`/api/auth${path}`, { headers })
+        : rq.post(`/api/auth${path}`, { body: body ?? {}, headers });
+
+    /** What each endpoint answered, by method and path, so one failure shows them all */
+    const statusesOf = async (
+      probes: Array<Pick<Probe, 'method' | 'path' | 'body'>>,
+      headers: Record<string, string>
+    ) => {
+      const seen: Record<string, string> = {};
+
+      for (const probe of probes) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await call(probe, headers);
+
+        seen[`${probe.method} ${probe.path}`] = `${res.statusCode} ${res.body?.code ?? ''}`.trim();
+      }
+
+      return seen;
+    };
+
+    const everyKey = <T>(probes: Array<Pick<Probe, 'method' | 'path'>>, value: T) =>
+      Object.fromEntries(probes.map(({ method, path }) => [`${method} ${path}`, value]));
+
+    /** The status alone: Better Auth gives some 401s a code and some none */
+    const statusOnly = (seen: Record<string, string>) =>
+      Object.fromEntries(Object.entries(seen).map(([key, answer]) => [key, answer.split(' ')[0]]));
+
+    // The revoke-sessions probe is last: it is the one that signs a caller out
+    const NEEDING_A_SESSION = [...PROTECTED, { method: 'POST' as const, path: '/revoke-sessions' }];
+
+    it('answers 401 to each endpoint that needs a session when none is sent', async () => {
+      expect(statusOnly(await statusesOf(NEEDING_A_SESSION, FROM_FRONT_END))).toEqual(
+        everyKey(NEEDING_A_SESSION, '401')
+      );
+    });
+
+    it('answers 401 to each endpoint that needs a session when the token names none', async () => {
+      const seen = await statusesOf(NEEDING_A_SESSION, {
+        ...FROM_FRONT_END,
+        ...bearer('not-a-session-token'),
+      });
+
+      expect(statusOnly(seen)).toEqual(everyKey(NEEDING_A_SESSION, '401'));
+    });
+
+    it('runs each of them for a signed-in user', async () => {
+      const { cookie } = await signedUp();
+      const seen = await statusesOf(PROTECTED, { ...FROM_FRONT_END, cookie });
+
+      // The answer for each is one the endpoint gives a caller it knows: the call got past the
+      // session check and was judged on its body
+      expect(
+        Object.fromEntries(
+          PROTECTED.map(({ method, path, signedIn }) => [
+            `${method} ${path}`,
+            signedIn.includes(Number(seen[`${method} ${path}`].split(' ')[0])),
+          ])
+        )
+      ).toEqual(everyKey(PROTECTED, true));
+    });
+
+    it('answers 401 to the second-factor endpoints without a challenge or a session, and judges the body for a session', async () => {
+      const { cookie } = await signedUp();
+
+      expect(await statusesOf(SECOND_FACTOR, FROM_FRONT_END)).toEqual(
+        everyKey(SECOND_FACTOR, '401 INVALID_TWO_FACTOR_COOKIE')
+      );
+
+      const seen = await statusesOf(SECOND_FACTOR, { ...FROM_FRONT_END, cookie });
+
+      expect(
+        Object.fromEntries(
+          SECOND_FACTOR.map(({ method, path, signedIn }) => [
+            `${method} ${path}`,
+            signedIn.includes(Number(seen[`${method} ${path}`].split(' ')[0])),
+          ])
+        )
+      ).toEqual(everyKey(SECOND_FACTOR, true));
+    });
+
+    it('ends every session of the caller on revoke-sessions, and only then answers 401 to the next call', async () => {
+      const { cookie } = await signedUp();
+      const headers = { ...FROM_FRONT_END, cookie };
+
+      expect(
+        (await call({ method: 'POST', path: '/revoke-sessions', body: {} }, headers)).statusCode
+      ).toBe(200);
+      expect((await call({ method: 'GET', path: '/list-sessions' }, headers)).statusCode).toBe(401);
+      expect(
+        (await call({ method: 'POST', path: '/revoke-sessions', body: {} }, FROM_FRONT_END))
+          .statusCode
+      ).toBe(401);
+    });
+
+    it('does not turn the public endpoints away for want of a session', async () => {
+      const seen = await statusesOf(PUBLIC, FROM_FRONT_END);
+
+      expect(
+        Object.fromEntries(
+          Object.entries(seen).map(([key, answer]) => [
+            key,
+            answer.startsWith('404') || answer.endsWith('UNAUTHORIZED'),
+          ])
+        )
+      ).toEqual(everyKey(PUBLIC, false));
+    });
+
+    it('answers 404 to a path Better Auth does not have', async () => {
+      for (const path of ['/nothing', '/two-factor/nothing', '/sign-in/nothing']) {
+        // eslint-disable-next-line no-await-in-loop
+        expect((await rq.get(`/api/auth${path}`)).statusCode).toBe(404);
+      }
+    });
+
+    it('never shows one user the provider tokens of another', async () => {
+      const mine = await signedUp();
+      const theirs = await signedUp();
+      const secret = `access-${randomBytes(8).toString('hex')}`;
+
+      // A provider account of the other user, with tokens, as a sign-in through a provider leaves it
+      const theirAccount = await strapi.documents(ACCOUNT_UID).create({
+        data: {
+          userId: theirs.documentId,
+          providerId: 'some-idp',
+          accountId: 'their-subject',
+          accessToken: secret,
+          refreshToken: `refresh-${secret}`,
+        },
+      });
+      const asMe = { ...FROM_FRONT_END, cookie: mine.cookie };
+      const attempts = [
+        rq.post('/api/auth/get-access-token', {
+          body: { accountId: theirAccount.documentId },
+          headers: asMe,
+        }),
+        rq.post('/api/auth/get-access-token', {
+          body: { accountId: theirAccount.documentId, userId: theirs.documentId },
+          headers: asMe,
+        }),
+        rq.post('/api/auth/refresh-token', {
+          body: { accountId: theirAccount.documentId, userId: theirs.documentId },
+          headers: asMe,
+        }),
+        rq.get(`/api/auth/account-info?accountId=${theirAccount.documentId}`, { headers: asMe }),
+      ];
+
+      for (const res of await Promise.all(attempts)) {
+        expect(JSON.stringify(res.body)).not.toContain(secret);
+        expect([400, 403, 404]).toContain(res.statusCode);
+      }
+
+      // The other user's accounts never show in this user's list, and a list never carries a token
+      const list = await rq.get('/api/auth/list-accounts', { headers: { cookie: mine.cookie } });
+
+      expect(list.body.map((account) => account.providerId)).toEqual(['credential']);
+      expect(JSON.stringify(list.body)).not.toMatch(/accessToken|refreshToken|password/);
+    });
+  });
+
   describe('sign-up, in parallel', () => {
     it('lets one of ten simultaneous sign-ups for an address through, however the address is spelled, and makes one user and one profile', async () => {
       const spellings = [
@@ -1387,6 +1684,28 @@ describe('end-users: rate limiting', () => {
     }
 
     expect((await signIn()).statusCode).toBe(429);
+  });
+
+  it('answers 429 to the fourth password check of a signed-in user within the window', async () => {
+    const up = await rq.post('/api/auth/sign-up/email', {
+      body: { email: 'limited-check@example.com', password: PASSWORD, name: 'Limited' },
+    });
+
+    expect(up.statusCode).toBe(200);
+
+    const check = () =>
+      rq.post('/api/auth/verify-password', {
+        body: { password: 'not-the-password' },
+        headers: bearer(up.headers['set-auth-token']),
+      });
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      expect((await check()).statusCode).not.toBe(429);
+    }
+
+    // A guessing loop on the password of a signed-in user is limited like a sign-in is
+    expect((await check()).statusCode).toBe(429);
   });
 });
 
