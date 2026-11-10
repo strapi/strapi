@@ -10,6 +10,7 @@ import {
   MEASURED_MS_PER_1000_USERS,
   nullableOnGraphql,
   pendingLinkItem,
+  requiredOnGraphql,
 } from '../report';
 import type { ReportContext } from '../report';
 import { duplicatesQuery, readUpSnapshot } from '../snapshot';
@@ -63,6 +64,7 @@ const context = (over: Partial<ReportContext> = {}): ReportContext => ({
   },
   requiredProviderFields: () => [],
   graphqlNullable: [],
+  graphqlRequired: null,
   configKeys: [],
   codeFindings: [],
   ...over,
@@ -304,6 +306,53 @@ describe('buildReport', () => {
     const firstInfo = severities.indexOf('info');
 
     expect(severities.slice(firstInfo).includes('action')).toBe(false);
+  });
+});
+
+describe('GraphQL nullability', () => {
+  it('announces in the check that the switch makes required output fields nullable on every type', () => {
+    const required = [{ uid: 'api::article.article', fields: ['title', 'slug'] }];
+    const report = buildReport(emptySnapshot(), context({ graphqlRequired: required }));
+    const announced = find(report, 'graphql-nullable:required');
+
+    expect(announced).toMatchObject({
+      kind: 'graphql-nullable',
+      severity: 'info',
+      count: 2,
+      refs: ['api::article.article'],
+    });
+    expect(announced?.message).toContain('on every content type and component');
+    expect(announced?.message).toContain('because a field rule can hide a field');
+    expect(announced?.message).toContain('2 required fields on 1 type');
+  });
+
+  it('announces it for a project with no required field too, and not when there is no GraphQL', () => {
+    const none = find(
+      buildReport(emptySnapshot(), context({ graphqlRequired: [] })),
+      'graphql-nullable:required'
+    );
+
+    expect(none).toMatchObject({ count: 0, refs: [] });
+    expect(none?.message).toContain('0 required fields;');
+    expect(
+      find(buildReport(emptySnapshot(), context()), 'graphql-nullable:required')
+    ).toBeUndefined();
+  });
+
+  it('finds the required attributes a client can read', () => {
+    expect(
+      requiredOnGraphql({
+        'api::article.article': {
+          attributes: {
+            title: { required: true },
+            body: {},
+            token: { required: true, private: true },
+          },
+        },
+        'shared.seo': { attributes: { metaTitle: { required: false } } },
+        'api::empty.empty': {},
+      })
+    ).toEqual([{ uid: 'api::article.article', fields: ['title'] }]);
   });
 });
 

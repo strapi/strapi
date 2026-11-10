@@ -24,6 +24,11 @@ export interface ReportContext {
   permissionContext: PermissionMapContext;
   requiredProviderFields: (id: string) => string[] | null;
   graphqlNullable: Array<{ uid: string; fields: string[] }>;
+  /**
+   * The project's own types with required fields, when it serves GraphQL and the plugin is in check
+   * mode: what the switch makes nullable in the schema. `null` when there is nothing to announce.
+   */
+  graphqlRequired: Array<{ uid: string; fields: string[] }> | null;
   /** U&P config keys the project sets (check only) */
   configKeys: string[];
   /** What `planProjectFiles` found (check only) */
@@ -530,20 +535,37 @@ const structureItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
 };
 
 const graphqlItems = (ctx: ReportContext): MigrationReportItem[] => {
+  const items: MigrationReportItem[] = [];
   const fields = ctx.graphqlNullable.reduce((sum, type) => sum + type.fields.length, 0);
 
-  if (fields === 0) {
-    return [];
+  if (fields > 0) {
+    items.push(
+      item(
+        'graphql-nullable',
+        'all',
+        `${plural(fields, 'field')} on ${plural(ctx.graphqlNullable.length, 'type')} are nullable in the GraphQL schema. A client typed on a non-null value for them needs a check.`,
+        { count: fields, refs: ctx.graphqlNullable.map((type) => type.uid) }
+      )
+    );
   }
 
-  return [
-    item(
-      'graphql-nullable',
-      'all',
-      `${plural(fields, 'field')} on ${plural(ctx.graphqlNullable.length, 'type')} are nullable in the GraphQL schema. A client typed on a non-null value for them needs a check.`,
-      { count: fields, refs: ctx.graphqlNullable.map((type) => type.uid) }
-    ),
-  ];
+  if (ctx.graphqlRequired) {
+    const required = ctx.graphqlRequired.reduce((sum, type) => sum + type.fields.length, 0);
+    const types = ctx.graphqlRequired.length;
+
+    items.push(
+      item(
+        'graphql-nullable',
+        'required',
+        'Once the project switches to end-users, every output field that is required in the GraphQL schema becomes nullable, on every content type and component, because a field rule can hide a field from a caller. ' +
+          'Input types keep their required fields, and check mode changes nothing. ' +
+          `The project's own types have ${plural(required, 'required field')}${types > 0 ? ` on ${plural(types, 'type')}` : ''}; a client typed on a non-null value for them needs a check. Refs are those types.`,
+        { count: required, refs: ctx.graphqlRequired.map((type) => type.uid) }
+      )
+    );
+  }
+
+  return items;
 };
 
 const estimate = (client: DbClient, users: number): MigrationReport['estimate'] => {
@@ -594,6 +616,22 @@ export const buildReport = (snapshot: UpSnapshot, ctx: ReportContext): Migration
     items,
   };
 };
+
+/**
+ * The types with required attributes a client can read, with those attributes: what a GraphQL
+ * schema shows as non-null until end-users makes them nullable. A type with none is left out.
+ */
+export const requiredOnGraphql = (
+  types: Record<string, { attributes?: Record<string, { required?: boolean; private?: boolean }> }>
+): Array<{ uid: string; fields: string[] }> =>
+  Object.entries(types)
+    .map(([uid, type]) => ({
+      uid,
+      fields: Object.entries(type.attributes ?? {})
+        .filter(([, attribute]) => attribute.required === true && attribute.private !== true)
+        .map(([name]) => name),
+    }))
+    .filter((type) => type.fields.length > 0);
 
 /**
  * The content types whose attributes are not required, with those attributes: what a GraphQL schema

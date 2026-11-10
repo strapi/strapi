@@ -122,6 +122,30 @@ describe('migration from users-permissions: check mode', () => {
     }
   });
 
+  it('leaves the GraphQL schema as it is, and says what the switch will change in it', async () => {
+    // Users & Permissions' user: `email` is required, so its output field is non-null. The full
+    // register would make it nullable, with every other required output field
+    const res = await createRequest({ strapi }).post('/graphql', {
+      body: {
+        query: '{ __type(name: "UsersPermissionsUser") { fields { name type { kind } } } }',
+      },
+    });
+
+    expect(res.status).toBe(200);
+
+    const fields = res.body.data.__type.fields as Array<{ name: string; type: { kind: string } }>;
+
+    expect(fields.find((field) => field.name === 'email')?.type.kind).toBe('NON_NULL');
+
+    const report = (await rqAdmin.get(MIGRATION)).body.data.report;
+    const announced = report.items.find(
+      (item: { id: string }) => item.id === 'graphql-nullable:required'
+    );
+
+    expect(announced).toMatchObject({ kind: 'graphql-nullable', severity: 'info' });
+    expect(announced.message).toContain('on every content type and component');
+  });
+
   it('stores a report with no seeded address, username or provider secret', async () => {
     const row = await strapi.db
       .connection('strapi_core_store_settings')
