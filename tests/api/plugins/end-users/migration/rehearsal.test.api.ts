@@ -1,6 +1,8 @@
 /**
- * A migration and a rollback at the size of a large project, timed. Off unless
- * `END_USERS_REHEARSAL_USERS` is set (the number of users to add to the seeded project):
+ * A migration and a rollback at the size of a large project, timed. This is a benchmark, not a test:
+ * CI skips it unless `END_USERS_REHEARSAL_USERS` is set (the number of users to add to the seeded
+ * project), because adding that many users takes minutes and what it prints depends on the machine,
+ * so it proves nothing a pass or fail could carry:
  *
  *   END_USERS_REHEARSAL_USERS=100000 yarn test:api tests/api/plugins/end-users/migration/rehearsal.test.api.ts
  *
