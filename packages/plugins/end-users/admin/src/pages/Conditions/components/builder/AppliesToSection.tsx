@@ -9,6 +9,8 @@ import {
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { getTranslation } from '../../../../utils/getTranslation';
+
 import { Section } from './Section';
 
 import type { AppliesTo } from '../../../../../../shared/builder/types';
@@ -45,7 +47,7 @@ export const AppliesToSection = ({
   return (
     <Section
       title={formatMessage({
-        id: 'end-users.conditions.builder.name-and-types',
+        id: getTranslation('conditions.builder.name-and-types'),
         defaultMessage: 'Name and content types',
       })}
     >
@@ -56,7 +58,7 @@ export const AppliesToSection = ({
             error={errors.slug}
             required
             hint={formatMessage({
-              id: 'end-users.conditions.builder.name.hint',
+              id: getTranslation('conditions.builder.name.hint'),
               defaultMessage:
                 'Lowercase letters, digits and hyphens. It names the condition api::name, and cannot change once it is created.',
             })}
@@ -82,13 +84,13 @@ export const AppliesToSection = ({
             error={errors.displayName}
             required
             hint={formatMessage({
-              id: 'end-users.conditions.builder.display-name.hint',
+              id: getTranslation('conditions.builder.display-name.hint'),
               defaultMessage: 'What a role editor shows.',
             })}
           >
             <Field.Label>
               {formatMessage({
-                id: 'end-users.conditions.builder.display-name',
+                id: getTranslation('conditions.builder.display-name'),
                 defaultMessage: 'Display name',
               })}
             </Field.Label>
@@ -109,7 +111,7 @@ export const AppliesToSection = ({
             <Radio.Group
               name="appliesToKind"
               aria-label={formatMessage({
-                id: 'end-users.conditions.builder.applies-to',
+                id: getTranslation('conditions.builder.applies-to'),
                 defaultMessage: 'Applies to',
               })}
               value={appliesTo.kind}
@@ -125,19 +127,19 @@ export const AppliesToSection = ({
             >
               <Radio.Item value="types">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.types',
+                  id: getTranslation('conditions.builder.applies-to.types'),
                   defaultMessage: 'Chosen content types',
                 })}
               </Radio.Item>
               <Radio.Item value="user-relation">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.user-relation',
+                  id: getTranslation('conditions.builder.applies-to.user-relation'),
                   defaultMessage: 'Every content type that has a relation to the end user',
                 })}
               </Radio.Item>
               <Radio.Item value="all">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.all',
+                  id: getTranslation('conditions.builder.applies-to.all'),
                   defaultMessage: 'Every content type',
                 })}
               </Radio.Item>
@@ -148,13 +150,13 @@ export const AppliesToSection = ({
                 error={errors.types}
                 required
                 hint={formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.hint',
+                  id: getTranslation('conditions.builder.applies-to.hint'),
                   defaultMessage: 'The content types a role can use this condition on.',
                 })}
               >
                 <Field.Label>
                   {formatMessage({
-                    id: 'end-users.conditions.builder.content-types',
+                    id: getTranslation('conditions.builder.content-types'),
                     defaultMessage: 'Content types',
                   })}
                 </Field.Label>
@@ -165,7 +167,7 @@ export const AppliesToSection = ({
                   onOpenChange={(open: boolean) => !open && onTouch('types')}
                   withTags
                   placeholder={formatMessage({
-                    id: 'end-users.conditions.builder.applies-to.placeholder',
+                    id: getTranslation('conditions.builder.applies-to.placeholder'),
                     defaultMessage: 'Choose content types',
                   })}
                 >

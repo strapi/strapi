@@ -1,6 +1,7 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { getTranslation } from '../../../../utils/getTranslation';
 import { summarize } from '../../utils/summarize';
 
 import type { BuilderConditionV2 } from '../../../../../../shared/builder/types';
@@ -28,7 +29,7 @@ export const SummaryCard = ({ condition, layout }: SummaryCardProps) => {
       <Flex direction="column" alignItems="stretch" gap={3}>
         <Typography id="builder-summary-title" variant="delta" tag="h2">
           {formatMessage({
-            id: 'end-users.conditions.builder.summary',
+            id: getTranslation('conditions.builder.summary'),
             defaultMessage: 'Summary',
           })}
         </Typography>

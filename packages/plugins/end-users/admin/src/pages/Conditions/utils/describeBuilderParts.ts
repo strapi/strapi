@@ -1,3 +1,5 @@
+import { getTranslation } from '../../../utils/getTranslation';
+
 import { createValueDescriber, sayWith } from './summarize';
 
 import type { SummaryFormatter } from './summarize';
@@ -16,7 +18,7 @@ import type {
  */
 export const createPartDescriber = (formatMessage: SummaryFormatter) => {
   const say = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
-    formatMessage({ id: `end-users.conditions.view.part.${id}`, defaultMessage }, values);
+    formatMessage({ id: getTranslation(`conditions.view.part.${id}`), defaultMessage }, values);
   const { quote, describeValue, describeOperation } = createValueDescriber(sayWith(formatMessage));
 
   const describeCheckOperation = (operator: string, value: BuilderValue | undefined) =>

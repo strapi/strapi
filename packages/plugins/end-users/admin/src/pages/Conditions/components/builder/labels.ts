@@ -1,5 +1,7 @@
 import { useIntl } from 'react-intl';
 
+import { getTranslation } from '../../../../utils/getTranslation';
+
 const WORDS = {
   field: 'field',
   operator: 'operator',
@@ -31,7 +33,7 @@ export type Word = keyof typeof WORDS;
  */
 export const useLabels = () => {
   const { formatMessage } = useIntl();
-  const id = (key: string) => `end-users.conditions.builder.label.${key}`;
+  const id = (key: string) => getTranslation(`conditions.builder.label.${key}`);
 
   return {
     /** "Which": the root group's name */

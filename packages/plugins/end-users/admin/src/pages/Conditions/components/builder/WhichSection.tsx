@@ -10,6 +10,7 @@ import { Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { operatorsFor, takesNoValue } from '../../../../../../shared/builder/operators';
+import { getTranslation } from '../../../../utils/getTranslation';
 import { newKey } from '../../utils/builderForm';
 import { pathOptions, reshapeValue, slotOfAccepts, slotOfPath } from '../../utils/builderOptions';
 
@@ -143,7 +144,7 @@ const CheckRow = ({ label, check, offered, onChange, onRemove }: CheckRowProps) 
           <SingleSelectOption key={name} value={`${FIELD_INPUT}${name}`}>
             {formatMessage(
               {
-                id: 'end-users.conditions.builder.which.field-input',
+                id: getTranslation('conditions.builder.which.field-input'),
                 defaultMessage: 'the field chosen for {name}',
               },
               { name }
@@ -172,7 +173,7 @@ const CheckRow = ({ label, check, offered, onChange, onRemove }: CheckRowProps) 
       )}
       <IconButton
         label={formatMessage({
-          id: 'end-users.conditions.builder.which.remove-check',
+          id: getTranslation('conditions.builder.which.remove-check'),
           defaultMessage: 'Remove check',
         })}
         disabled={disabled}
@@ -226,19 +227,19 @@ const GroupEditor = ({ label, group, offered, depth, onChange, onRemove }: Group
           >
             <SingleSelectOption value="all">
               {formatMessage({
-                id: 'end-users.conditions.builder.group.all',
+                id: getTranslation('conditions.builder.group.all'),
                 defaultMessage: 'All of',
               })}
             </SingleSelectOption>
             <SingleSelectOption value="any">
               {formatMessage({
-                id: 'end-users.conditions.builder.group.any',
+                id: getTranslation('conditions.builder.group.any'),
                 defaultMessage: 'Any of',
               })}
             </SingleSelectOption>
             <SingleSelectOption value="none">
               {formatMessage({
-                id: 'end-users.conditions.builder.group.none',
+                id: getTranslation('conditions.builder.group.none'),
                 defaultMessage: 'None of',
               })}
             </SingleSelectOption>
@@ -246,7 +247,7 @@ const GroupEditor = ({ label, group, offered, depth, onChange, onRemove }: Group
           {onRemove && (
             <IconButton
               label={formatMessage({
-                id: 'end-users.conditions.builder.which.remove-group',
+                id: getTranslation('conditions.builder.which.remove-group'),
                 defaultMessage: 'Remove group',
               })}
               disabled={disabled}
@@ -295,7 +296,7 @@ const GroupEditor = ({ label, group, offered, depth, onChange, onRemove }: Group
             }}
           >
             {formatMessage({
-              id: 'end-users.conditions.builder.which.add-check',
+              id: getTranslation('conditions.builder.which.add-check'),
               defaultMessage: 'Add check',
             })}
           </Button>
@@ -313,7 +314,7 @@ const GroupEditor = ({ label, group, offered, depth, onChange, onRemove }: Group
               }}
             >
               {formatMessage({
-                id: 'end-users.conditions.builder.which.add-group',
+                id: getTranslation('conditions.builder.which.add-group'),
                 defaultMessage: 'Add group',
               })}
             </Button>
@@ -336,11 +337,11 @@ export const WhichSection = ({ which, onChange, ...offered }: WhichSectionProps)
   return (
     <Section
       title={formatMessage({
-        id: 'end-users.conditions.builder.which',
+        id: getTranslation('conditions.builder.which'),
         defaultMessage: 'Which entries',
       })}
       description={formatMessage({
-        id: 'end-users.conditions.builder.which.description',
+        id: getTranslation('conditions.builder.which.description'),
         defaultMessage:
           'The entries a user can reach. The checks use the fields every chosen content type has.',
       })}
