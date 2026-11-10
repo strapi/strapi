@@ -28,7 +28,8 @@ type DocumentIDKey = 'documentId';
  * new `ObjectNotation<Target<...>>` instantiations, which would exhaust the heap on nested filters.
  * When `TSchemaUID` is known, the type is `ObjectNotation<Target>`.
  *
- * Inside a component, the attribute also accepts the id shortcut ({@link IdShortcut}).
+ * Inside a component, the attribute also accepts one operator on the target's id
+ * ({@link IdOperatorCondition}).
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
@@ -40,26 +41,28 @@ type NestedAttributeCondition<
   > extends infer TTargetUID extends UID.Schema
     ? If<
         IsComponent<TSchemaUID>,
-        ObjectNotation<TTargetUID> | IdShortcut<TTargetUID>,
+        ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>,
         ObjectNotation<TTargetUID>
       >
     : never;
 
 /**
- * Filter on the id of a nested attribute's target: the id itself, or an object with exactly one
- * operator (e.g. `5`, `{ $in: [1, 2] }`, `{ $null: true }`).
+ * Filter on the id of a nested attribute's target: an object with exactly one operator (e.g.
+ * `{ $in: [1, 2] }`, `{ $null: true }`).
  *
  * The database applies it to the target's id. It throws for an object with several operators, or
  * with an operator next to other keys, so each operator object forbids the other operators and the
  * target's filter keys.
+ *
+ * The forbidden keys are optional `never` properties, so the type stays assignable to
+ * `ObjectNotation<Target>` and reading a filter back keeps the target's keys. A bare id would break
+ * that, so it is not accepted: write `{ id: 5 }` or `{ $eq: 5 }`.
  */
-type IdShortcut<TTargetUID extends UID.Schema> =
-  | Params.Attribute.ID
-  | {
-      [TOperator in Operator.Where]: { [TIter in TOperator]: IdOperatorValue<TOperator> } & {
-        [TIter in Exclude<Operator.Where, TOperator> | FilterKeys<TTargetUID>]?: never;
-      };
-    }[Operator.Where];
+type IdOperatorCondition<TTargetUID extends UID.Schema> = {
+  [TOperator in Operator.Where]: { [TIter in TOperator]: IdOperatorValue<TOperator> } & {
+    [TIter in Exclude<Operator.Where, TOperator> | FilterKeys<TTargetUID>]?: never;
+  };
+}[Operator.Where];
 
 type IdOperatorValue<TOperator extends Operator.Where> = TOperator extends Operator.BooleanValue
   ? boolean
