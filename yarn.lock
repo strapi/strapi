@@ -2780,7 +2780,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@base-ui/react@npm:1.9.0":
+"@base-ui/react@npm:^1.9.0":
   version: 1.9.0
   resolution: "@base-ui/react@npm:1.9.0"
   dependencies:
@@ -2858,7 +2858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@better-auth-ui/core@npm:1.7.33":
+"@better-auth-ui/core@npm:^1.7.32":
   version: 1.7.33
   resolution: "@better-auth-ui/core@npm:1.7.33"
   dependencies:
@@ -2907,7 +2907,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@better-auth-ui/react@npm:1.7.33":
+"@better-auth-ui/react@npm:^1.7.32":
   version: 1.7.33
   resolution: "@better-auth-ui/react@npm:1.7.33"
   peerDependencies:
@@ -2930,7 +2930,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@better-auth/agent-auth@npm:0.6.2":
+"@better-auth/agent-auth@npm:^0.6.2":
   version: 0.6.2
   resolution: "@better-auth/agent-auth@npm:0.6.2"
   dependencies:
@@ -4417,7 +4417,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource-variable/geist@npm:5.3.0":
+"@fontsource-variable/geist@npm:^5.3.0":
   version: 5.3.0
   resolution: "@fontsource-variable/geist@npm:5.3.0"
   checksum: 10c0/6b1d1d249643377c885d040769bf0964f242e8d03c4470535329ad4eed3d30a8134fea0d45c0b99b8069924a1f506a3bcb5b8d9cea77b7b5234dc7dd57371842
@@ -5934,7 +5934,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mikkelscheike/email-provider-links@npm:6.0.2":
+"@mikkelscheike/email-provider-links@npm:^6.0.2":
   version: 6.0.2
   resolution: "@mikkelscheike/email-provider-links@npm:6.0.2"
   checksum: 10c0/ea4a84e27fa32c45e30be3137ce9b333838b6a858593152c64165c6dcd29cf950d2b9fd4111fb943bf256cf36e56496b07a206fa90cba365da5e83014d4a7f66
@@ -12956,7 +12956,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tailwindcss/vite@npm:4.3.5":
+"@tailwindcss/vite@npm:^4.3.3":
   version: 4.3.5
   resolution: "@tailwindcss/vite@npm:4.3.5"
   dependencies:
@@ -13013,14 +13013,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.107.1":
+"@tanstack/query-core@npm:5.107.1, @tanstack/query-core@npm:^5.105.0":
   version: 5.107.1
   resolution: "@tanstack/query-core@npm:5.107.1"
   checksum: 10c0/991070e0d7b9a7fb7459f6399090f22e9769dd30efcea316c3e9a0b5442990378fcdd9ed37548cec0729c627189e091100dbe7d3778c666100c373db0b978963
   languageName: node
   linkType: hard
 
-"@tanstack/react-form@npm:1.33.5":
+"@tanstack/react-form@npm:^1.33.5":
   version: 1.33.5
   resolution: "@tanstack/react-form@npm:1.33.5"
   dependencies:
@@ -13035,7 +13035,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-pacer@npm:0.24.1":
+"@tanstack/react-pacer@npm:^0.24.1":
   version: 0.24.1
   resolution: "@tanstack/react-pacer@npm:0.24.1"
   dependencies:
@@ -13048,7 +13048,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:5.107.1":
+"@tanstack/react-query@npm:^5.105.0":
   version: 5.107.1
   resolution: "@tanstack/react-query@npm:5.107.1"
   dependencies:
@@ -14117,21 +14117,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:19.3.0":
-  version: 19.3.0
-  resolution: "@types/react-dom@npm:19.3.0"
-  peerDependencies:
-    "@types/react": ^19.3.0
-  checksum: 10c0/ce0066d28b62bc6afdd17ca84756b8fbe0f6ffc0c8b1e60739abc30e81510da2edbc1007e6ab3d974d30f5a8c25bb0f7de8d7ce09736c909fe84c0f9aed0b946
-  languageName: node
-  linkType: hard
-
 "@types/react-dom@npm:^18":
   version: 18.3.7
   resolution: "@types/react-dom@npm:18.3.7"
   peerDependencies:
     "@types/react": ^18.0.0
   checksum: 10c0/8bd309e2c3d1604a28a736a24f96cbadf6c05d5288cfef8883b74f4054c961b6b3a5e997fd5686e492be903c8f3380dba5ec017eff3906b1256529cd2d39603e
+  languageName: node
+  linkType: hard
+
+"@types/react-dom@npm:^19.3.0":
+  version: 19.3.0
+  resolution: "@types/react-dom@npm:19.3.0"
+  peerDependencies:
+    "@types/react": ^19.3.0
+  checksum: 10c0/ce0066d28b62bc6afdd17ca84756b8fbe0f6ffc0c8b1e60739abc30e81510da2edbc1007e6ab3d974d30f5a8c25bb0f7de8d7ce09736c909fe84c0f9aed0b946
   languageName: node
   linkType: hard
 
@@ -14898,7 +14898,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-react@npm:6.3.0":
+"@vitejs/plugin-react@npm:^6.1.2":
   version: 6.3.0
   resolution: "@vitejs/plugin-react@npm:6.3.0"
   dependencies:
@@ -16604,17 +16604,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bowser@npm:2.15.0":
-  version: 2.15.0
-  resolution: "bowser@npm:2.15.0"
-  checksum: 10c0/f412e2650baac8c6ac5cc7fc249dcba994278e94916cfe0243d970d1bcae57e2ca1fae2ea01bdd71e0b932565b840ba230520c6f437f229a9433b359d9f96744
-  languageName: node
-  linkType: hard
-
 "bowser@npm:^2.11.0":
   version: 2.11.0
   resolution: "bowser@npm:2.11.0"
   checksum: 10c0/04efeecc7927a9ec33c667fa0965dea19f4ac60b3fea60793c2e6cf06c1dcd2f7ae1dbc656f450c5f50783b1c75cf9dc173ba6f3b7db2feee01f8c4b793e1bd3
+  languageName: node
+  linkType: hard
+
+"bowser@npm:^2.15.0":
+  version: 2.15.0
+  resolution: "bowser@npm:2.15.0"
+  checksum: 10c0/f412e2650baac8c6ac5cc7fc249dcba994278e94916cfe0243d970d1bcae57e2ca1fae2ea01bdd71e0b932565b840ba230520c6f437f229a9433b359d9f96744
   languageName: node
   linkType: hard
 
@@ -17211,7 +17211,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"class-variance-authority@npm:0.7.1":
+"class-variance-authority@npm:0.7.1, class-variance-authority@npm:^0.7.1":
   version: 0.7.1
   resolution: "class-variance-authority@npm:0.7.1"
   dependencies:
@@ -17380,21 +17380,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cn@npm:0.5.2":
-  version: 0.5.2
-  resolution: "cn@npm:0.5.2"
-  bin:
-    cn: bin/cn.mjs
-  checksum: 10c0/8ace6457ae6094658f75c6795ad1ce73f4bd75e0134cc93a1d3514d83b1be1ab1bb75eba8c295b27302cf9a5dff6582ac105870e862aa2af2205b52a9371a353
-  languageName: node
-  linkType: hard
-
 "cn@npm:^0.2.4":
   version: 0.2.6
   resolution: "cn@npm:0.2.6"
   bin:
     cn: bin/cn.mjs
   checksum: 10c0/7d5744771e897061e210d5aa49563d254518e7e032ec372991d8e1ebb1d61057b4ec538810de31ac267153e610c141ec54b0befd006c0220e772a652824b9830
+  languageName: node
+  linkType: hard
+
+"cn@npm:^0.5.0":
+  version: 0.5.2
+  resolution: "cn@npm:0.5.2"
+  bin:
+    cn: bin/cn.mjs
+  checksum: 10c0/8ace6457ae6094658f75c6795ad1ce73f4bd75e0134cc93a1d3514d83b1be1ab1bb75eba8c295b27302cf9a5dff6582ac105870e862aa2af2205b52a9371a353
   languageName: node
   linkType: hard
 
@@ -18355,7 +18355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:4.4.0, date-fns@npm:^4.1.0":
+"date-fns@npm:^4.1.0, date-fns@npm:^4.4.0":
   version: 4.4.0
   resolution: "date-fns@npm:4.4.0"
   checksum: 10c0/988f0a13db183f5dfc85c36bbb6847a9c135a9225888bbea4005876ec15539a8613c21a07370a4e7ea543918d5a1cafb423c528b42cdbbde5fdfddb178126b21
@@ -19189,43 +19189,43 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "end-users-frontend@workspace:examples/end-users-frontend"
   dependencies:
-    "@base-ui/react": "npm:1.9.0"
-    "@better-auth-ui/core": "npm:1.7.33"
-    "@better-auth-ui/react": "npm:1.7.33"
-    "@better-auth/agent-auth": "npm:0.6.2"
+    "@base-ui/react": "npm:^1.9.0"
+    "@better-auth-ui/core": "npm:^1.7.32"
+    "@better-auth-ui/react": "npm:^1.7.32"
+    "@better-auth/agent-auth": "npm:^0.6.2"
     "@better-auth/api-key": "npm:1.7.14"
     "@better-auth/passkey": "npm:1.7.14"
-    "@fontsource-variable/geist": "npm:5.3.0"
-    "@mikkelscheike/email-provider-links": "npm:6.0.2"
+    "@fontsource-variable/geist": "npm:^5.3.0"
+    "@mikkelscheike/email-provider-links": "npm:^6.0.2"
     "@playwright/test": "npm:1.64.1"
-    "@tailwindcss/vite": "npm:4.3.5"
-    "@tanstack/query-core": "npm:5.107.1"
-    "@tanstack/react-form": "npm:1.33.5"
-    "@tanstack/react-pacer": "npm:0.24.1"
-    "@tanstack/react-query": "npm:5.107.1"
+    "@tailwindcss/vite": "npm:^4.3.3"
+    "@tanstack/query-core": "npm:^5.105.0"
+    "@tanstack/react-form": "npm:^1.33.5"
+    "@tanstack/react-pacer": "npm:^0.24.1"
+    "@tanstack/react-query": "npm:^5.105.0"
     "@types/node": "npm:22.20.0"
     "@types/react-19": "npm:@types/react@19.3.0"
-    "@types/react-dom": "npm:19.3.0"
-    "@vitejs/plugin-react": "npm:6.3.0"
+    "@types/react-dom": "npm:^19.3.0"
+    "@vitejs/plugin-react": "npm:^6.1.2"
     better-auth: "npm:1.7.14"
-    bowser: "npm:2.15.0"
-    class-variance-authority: "npm:0.7.1"
-    cn: "npm:0.5.2"
-    date-fns: "npm:4.4.0"
-    input-otp: "npm:1.5.0"
-    lucide-react: "npm:1.70.0"
-    next-themes: "npm:0.4.6"
-    react: "npm:19.3.1"
-    react-day-picker: "npm:10.0.2"
-    react-dom: "npm:19.3.1"
-    react-router-dom: "npm:7.18.5"
-    shadcn: "npm:4.23.0"
-    sonner: "npm:2.0.8"
-    tailwindcss: "npm:4.3.5"
-    tw-animate-css: "npm:1.4.0"
-    typescript: "npm:6.0.3"
-    vite: "npm:8.3.7"
-    zod: "npm:4.6.7"
+    bowser: "npm:^2.15.0"
+    class-variance-authority: "npm:^0.7.1"
+    cn: "npm:^0.5.0"
+    date-fns: "npm:^4.4.0"
+    input-otp: "npm:^1.5.0"
+    lucide-react: "npm:^1.63.0"
+    next-themes: "npm:^0.4.6"
+    react: "npm:^19.3.1"
+    react-day-picker: "npm:^10.0.2"
+    react-dom: "npm:^19.3.1"
+    react-router-dom: "npm:^7.18.5"
+    shadcn: "npm:^4.23.0"
+    sonner: "npm:^2.0.8"
+    tailwindcss: "npm:^4.3.3"
+    tw-animate-css: "npm:^1.4.0"
+    typescript: "npm:^6.0.3"
+    vite: "npm:^8.3.5"
+    zod: "npm:^4.6.7"
   languageName: unknown
   linkType: soft
 
@@ -22600,7 +22600,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"input-otp@npm:1.5.0":
+"input-otp@npm:^1.5.0":
   version: 1.5.0
   resolution: "input-otp@npm:1.5.0"
   peerDependencies:
@@ -25546,16 +25546,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:1.70.0":
-  version: 1.70.0
-  resolution: "lucide-react@npm:1.70.0"
+"lucide-react@npm:^1.63.0":
+  version: 1.71.0
+  resolution: "lucide-react@npm:1.71.0"
   peerDependencies:
     "@types/react": "*"
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/bce0a8b5f77c78933a4b6c2037d4ce371d1eaff8986849ef7fb28da131be3fa6964e4d2459ff40c9ac719402cddced55311af3d34397b178449817d312dfa4c5
+  checksum: 10c0/5c7b5e8ddad36e23fe2e3d59abea791f7da1b5392c4f34d0e8f07872c59f6e1ae91829148f1ec7e2a22b4a942a475d6ffbc94d4ff24bcc29caee8dec1b02584d
   languageName: node
   linkType: hard
 
@@ -26900,7 +26900,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next-themes@npm:0.4.6":
+"next-themes@npm:^0.4.6":
   version: 0.4.6
   resolution: "next-themes@npm:0.4.6"
   peerDependencies:
@@ -29117,7 +29117,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-day-picker@npm:10.0.2":
+"react-day-picker@npm:^10.0.2":
   version: 10.0.2
   resolution: "react-day-picker@npm:10.0.2"
   dependencies:
@@ -29179,7 +29179,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.3.1":
+"react-dom@npm:^19.3.1":
   version: 19.3.1
   resolution: "react-dom@npm:19.3.1"
   dependencies:
@@ -29457,7 +29457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:7.18.5":
+"react-router-dom@npm:^7.18.5":
   version: 7.18.5
   resolution: "react-router-dom@npm:7.18.5"
   dependencies:
@@ -29595,7 +29595,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.3.1":
+"react@npm:^19.3.1":
   version: 19.3.1
   resolution: "react@npm:19.3.1"
   checksum: 10c0/f0ed036d1223562c09c8347858ca712733ea6e27a30db709ee9c3f3f176d3e9e767afce735d59956addf3d030102e256bba82dea635fc1bdb0e01107e98fef10
@@ -30892,7 +30892,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shadcn@npm:4.23.0":
+"shadcn@npm:^4.23.0":
   version: 4.23.0
   resolution: "shadcn@npm:4.23.0"
   dependencies:
@@ -31345,7 +31345,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sonner@npm:2.0.8":
+"sonner@npm:^2.0.8":
   version: 2.0.8
   resolution: "sonner@npm:2.0.8"
   peerDependencies:
@@ -32336,7 +32336,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:4.3.5":
+"tailwindcss@npm:4.3.5, tailwindcss@npm:^4.3.3":
   version: 4.3.5
   resolution: "tailwindcss@npm:4.3.5"
   checksum: 10c0/a02a1759cc3aaad5d9b5da7919bc2d5570432960e0f933be752185ced814fc8a193885effd9628bc3067c81552c13293e469b8e46e5a43b148dbfc97f00b5994
@@ -32942,7 +32942,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tw-animate-css@npm:1.4.0":
+"tw-animate-css@npm:^1.4.0":
   version: 1.4.0
   resolution: "tw-animate-css@npm:1.4.0"
   checksum: 10c0/6cfbc19ccc73883ec80ef1f9147f43e736cb01ee99c8172968b37eb81b720523d30e38b1a96aef92db3c586d864204db5510b51744ddacbbf0ad8e3c7fb56ec7
@@ -33150,7 +33150,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:6.0.3":
+"typescript@npm:^6.0.3":
   version: 6.0.3
   resolution: "typescript@npm:6.0.3"
   bin:
@@ -33180,7 +33180,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^6.0.3#optional!builtin<compat/typescript>":
   version: 6.0.3
   resolution: "typescript@patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"
   bin:
@@ -33926,63 +33926,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:8.3.7":
-  version: 8.3.7
-  resolution: "vite@npm:8.3.7"
-  dependencies:
-    fsevents: "npm:~2.3.3"
-    lightningcss: "npm:^1.33.0"
-    picomatch: "npm:^4.0.7"
-    postcss: "npm:^8.5.32"
-    rolldown: "npm:~1.2.18"
-    tinyglobby: "npm:^0.2.17"
-  peerDependencies:
-    "@types/node": ^20.19.0 || >=22.12.0
-    "@vitejs/devtools": ^0.7.1 || ^0.8.0
-    esbuild: ^0.27.0 || ^0.28.0
-    jiti: ">=1.21.0"
-    less: ^4.0.0
-    sass: ^1.70.0
-    sass-embedded: ^1.70.0
-    stylus: ">=0.54.8"
-    sugarss: ^5.0.0
-    terser: ^5.16.0
-    tsx: ^4.8.1
-    yaml: ^2.4.2
-  dependenciesMeta:
-    fsevents:
-      optional: true
-  peerDependenciesMeta:
-    "@types/node":
-      optional: true
-    "@vitejs/devtools":
-      optional: true
-    esbuild:
-      optional: true
-    jiti:
-      optional: true
-    less:
-      optional: true
-    sass:
-      optional: true
-    sass-embedded:
-      optional: true
-    stylus:
-      optional: true
-    sugarss:
-      optional: true
-    terser:
-      optional: true
-    tsx:
-      optional: true
-    yaml:
-      optional: true
-  bin:
-    vite: bin/vite.js
-  checksum: 10c0/5433e9c0120edd79479e02d943bcde19ecd74be4c6e8e220bdb120693229425858620d07665baa4adafbcc3d1096a70c86ef179653fa310d777aaed8f6fe74cf
-  languageName: node
-  linkType: hard
-
 "vite@npm:^6.0.0 || ^7.0.0 || ^8.0.0":
   version: 8.3.5
   resolution: "vite@npm:8.3.5"
@@ -34037,6 +33980,63 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: 10c0/33991600925b6717429c14a2c2907554aed077489ee6ff7815f9f49d5de559f5173ccb0472f2b3f9eef2a49e2e014f6cb624db8d4adebb37baad3a8cbc15065a
+  languageName: node
+  linkType: hard
+
+"vite@npm:^8.3.5":
+  version: 8.3.7
+  resolution: "vite@npm:8.3.7"
+  dependencies:
+    fsevents: "npm:~2.3.3"
+    lightningcss: "npm:^1.33.0"
+    picomatch: "npm:^4.0.7"
+    postcss: "npm:^8.5.32"
+    rolldown: "npm:~1.2.18"
+    tinyglobby: "npm:^0.2.17"
+  peerDependencies:
+    "@types/node": ^20.19.0 || >=22.12.0
+    "@vitejs/devtools": ^0.7.1 || ^0.8.0
+    esbuild: ^0.27.0 || ^0.28.0
+    jiti: ">=1.21.0"
+    less: ^4.0.0
+    sass: ^1.70.0
+    sass-embedded: ^1.70.0
+    stylus: ">=0.54.8"
+    sugarss: ^5.0.0
+    terser: ^5.16.0
+    tsx: ^4.8.1
+    yaml: ^2.4.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+    "@vitejs/devtools":
+      optional: true
+    esbuild:
+      optional: true
+    jiti:
+      optional: true
+    less:
+      optional: true
+    sass:
+      optional: true
+    sass-embedded:
+      optional: true
+    stylus:
+      optional: true
+    sugarss:
+      optional: true
+    terser:
+      optional: true
+    tsx:
+      optional: true
+    yaml:
+      optional: true
+  bin:
+    vite: bin/vite.js
+  checksum: 10c0/5433e9c0120edd79479e02d943bcde19ecd74be4c6e8e220bdb120693229425858620d07665baa4adafbcc3d1096a70c86ef179653fa310d777aaed8f6fe74cf
   languageName: node
   linkType: hard
 
@@ -34887,13 +34887,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:4.6.7, zod@npm:^4.3.6, zod@npm:^4.5.4":
-  version: 4.6.7
-  resolution: "zod@npm:4.6.7"
-  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
-  languageName: node
-  linkType: hard
-
 "zod@npm:^3.19.1, zod@npm:^3.24.1":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
@@ -34905,6 +34898,13 @@ __metadata:
   version: 4.5.4
   resolution: "zod@npm:4.5.4"
   checksum: 10c0/511a2a4d1a6f875dfdd70a1586989a8b14ef126776cd6218a2c760b9f65f14ef389ec20d92ee1aa4fcb4566d4ff3fa012956044f9dc503510d82e4c756a8ba92
+  languageName: node
+  linkType: hard
+
+"zod@npm:^4.3.6, zod@npm:^4.5.4, zod@npm:^4.6.7":
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard
 
