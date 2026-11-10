@@ -1,6 +1,6 @@
 export default {
   schema: {
-    collectionName: 'email_templates',
+    collectionName: 'strapi_email_templates',
     info: {
       singularName: 'template',
       pluralName: 'templates',
@@ -20,10 +20,9 @@ export default {
         type: 'string',
         required: true,
       },
+      // The i18n plugin owns `locale` on every content type and sets its required and default rules.
       locale: {
         type: 'string',
-        required: true,
-        default: 'en',
       },
       subject: {
         type: 'string',
