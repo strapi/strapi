@@ -224,7 +224,7 @@ describe('strapi-email: the senders', () => {
 });
 
 describe('strapi-email: in the engine options', () => {
-  it('keeps a sender the project set in config/plugins.ts', () => {
+  it('keeps a sender the project set in config/plugins.ts', async () => {
     const { strapi } = setup();
     const sendResetPassword = vi.fn();
     const sendVerificationEmail = vi.fn();
@@ -236,7 +236,11 @@ describe('strapi-email: in the engine options', () => {
       })
     );
 
-    expect(options.emailAndPassword?.sendResetPassword).toBe(sendResetPassword);
+    // The reset sender is the project's, behind the check that mails no banned user
+    const input = { user: { id: 'u1', email: 'user@example.com', banned: false }, url: 'u' };
+
+    await (options.emailAndPassword?.sendResetPassword as (data: unknown) => Promise<void>)(input);
+    expect(sendResetPassword).toHaveBeenCalledWith(input, undefined);
     expect(options.emailVerification?.sendVerificationEmail).toBe(sendVerificationEmail);
   });
 

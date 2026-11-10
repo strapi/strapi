@@ -3,6 +3,43 @@
 This plugin adds authentication for the end users of your application (sign-up, sign-in, sessions, roles and
 permissions), built on [Better Auth](https://www.better-auth.com).
 
+## Route policies
+
+Four policies gate a project's own REST routes on the signed-in end user:
+
+| Policy                               | Config                                       | Refuses with              |
+| ------------------------------------ | -------------------------------------------- | ------------------------- |
+| `plugin::end-users.is-authenticated` | none                                         | `AUTHENTICATION_REQUIRED` |
+| `plugin::end-users.has-role`         | `{ roles: string[], mode?: 'any' \| 'all' }` | `ROLE_REQUIRED`           |
+| `plugin::end-users.is-verified`      | none                                         | `EMAIL_NOT_VERIFIED`      |
+| `plugin::end-users.has-two-factor`   | none                                         | `TWO_FACTOR_REQUIRED`     |
+
+```ts
+// src/api/report/routes/custom-report.ts
+export default {
+  routes: [
+    {
+      method: 'GET',
+      path: '/reports/summary',
+      handler: 'report.summary',
+      config: {
+        policies: [
+          'plugin::end-users.is-verified',
+          { name: 'plugin::end-users.has-role', config: { roles: ['Editors', 'Reviewers'] } },
+        ],
+      },
+    },
+  ],
+};
+```
+
+`has-role` names roles by name or `documentId`; `mode: 'any'` (the default) needs one of them, `mode: 'all'` every
+one. A `has-role` with no roles stops the start. A refusal is a 403 whose `error.name` is `PolicyError` and whose
+`error.details.code` is the code above. A caller who is not signed in, an API token included, is refused with
+`AUTHENTICATION_REQUIRED` by all four. The route still needs its action granted to the roles that call it, and it must
+not set `auth: false`, since then nobody is signed in. GraphQL does not run route policies, so a rule that must hold
+on both APIs belongs in a condition.
+
 ## Moving a project from Users & Permissions
 
 The move works the same on Strapi Cloud and on a self-hosted project. No step needs a command. What you change reaches
@@ -185,6 +222,12 @@ To migrate again after a rollback, switch the project to end-users again with `m
   forgot-password and register have no per-email limit.
 - Providers registered through `providers-registry`. They are listed as items, and you register them as end-users
   providers.
+- Signing in through a provider to an existing account with the same address when the provider does not say the address
+  is verified (Facebook, VK, LINE and Spotify never do). That sign-in is refused until an administrator turns on Trust
+  for account linking for the provider (Settings, End users, Providers). Users who signed up with Facebook under Users &
+  Permissions, had confirmed their address and were not blocked are the exception, since Facebook only gives an address
+  its owner confirmed: the migration records a pending link for each, and their first sign-in with Facebook, with the
+  address they have here, links it to their account. The links last until compatibility mode is turned off.
 - Extensions in `strapi-server` for `users-permissions`. Move what they do to the end-users plugin or to your own routes.
 - `GET /api/users/:id` answering 204 for a missing user. It answers 404.
 - The GraphQL role mutations (create, update and delete a role) and the `UsersPermissionsPermission` type. Roles are

@@ -3,6 +3,7 @@ import type { Database } from '@strapi/database';
 
 import { updateRecord } from '../record';
 import { leftoverColumns, reverseAdminAction, runRollback, upRoleType } from '../rollback';
+import { pendingLinkIdentifier } from '../../utils/pending-link';
 
 const UP = 'plugin::users-permissions';
 const EU = 'plugin::end-users';
@@ -68,6 +69,7 @@ describe('leftoverColumns', () => {
 const USER_UID = 'plugin::end-users.user';
 const PROFILE_UID = 'plugin::end-users.profile';
 const ACCOUNT_UID = 'plugin::end-users.account';
+const VERIFICATION_UID = 'plugin::end-users.verification';
 
 type Row = Record<string, any>;
 
@@ -127,12 +129,17 @@ const models = [
       accountId: col('account_id'),
     },
   },
+  {
+    tableName: 'eu_verifications',
+    attributes: { identifier: col('identifier'), value: col('value') },
+  },
 ];
 
 const byUid: Record<string, unknown> = {
   [USER_UID]: models[0],
   [PROFILE_UID]: models[1],
   [ACCOUNT_UID]: models[2],
+  [VERIFICATION_UID]: models[3],
 };
 
 /** A project that migrated: tables under the names `renamed` says, three users, one admin role */
@@ -226,6 +233,16 @@ const project = async (renamed: boolean, permissions: Row[]) => {
     { profile_id: 2, user_id: 2 },
   ]);
   await knex('eu_accounts').insert({ provider_id: 'credential', user_id: 'd1', account_id: 'd1' });
+  await knex.schema.createTable('eu_verifications', (t) => {
+    t.increments('id');
+    t.string('identifier');
+    t.string('value');
+  });
+  // Carl signed up with GitHub and never signed in since; the other row is the engine's own
+  await knex('eu_verifications').insert([
+    { identifier: pendingLinkIdentifier('github', 'c@x.test'), value: 'd3' },
+    { identifier: 'provider-session-github-s1', value: 's1' },
+  ]);
 
   const logs: string[] = [];
   const table = (name: string) => (name === 'admin::permission' ? permissions : []);
@@ -337,6 +354,17 @@ describe('runRollback', () => {
     expect(first.links.map((link: Row) => [link.user_id, link.role_id])).toEqual([
       [1, 1],
       [2, 2],
+    ]);
+    await knex.destroy();
+  });
+
+  it('drops the pending links of provider users, and nothing else the engine keeps', async () => {
+    const { knex, db, ctx } = await project(false, []);
+
+    await runRollback(knex as never, db, ctx);
+
+    expect(await knex('eu_verifications').select('identifier')).toEqual([
+      { identifier: 'provider-session-github-s1' },
     ]);
     await knex.destroy();
   });

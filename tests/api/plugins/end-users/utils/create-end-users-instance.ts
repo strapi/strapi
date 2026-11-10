@@ -23,6 +23,9 @@ export const TEST_ENCRYPTION_KEY = 'end-users-test-encryption-key';
  * twice. This is test plumbing only: the plugin's code does not change for it.
  */
 const ESM_DEPENDENCIES = [
+  '@better-auth/core/context',
+  // Its CommonJS build requires `@noble/hashes`, an ES module
+  '@better-auth/utils/otp',
   'better-auth/adapters',
   'better-auth/api',
   'better-auth/crypto',

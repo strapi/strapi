@@ -9,7 +9,7 @@ import { USER_UID } from '../constants';
 import { BUILT_IN_PROVIDERS } from '../providers/built-in';
 import { planProjectFiles } from './files/plan';
 import { writeReport } from './record';
-import { buildReport, nullableOnGraphql } from './report';
+import { buildReport, nullableOnGraphql, requiredOnGraphql } from './report';
 import type { ReportContext } from './report';
 import { readUpSnapshot } from './snapshot';
 import type { DbClient } from './snapshot';
@@ -148,6 +148,14 @@ const reportContext = (
       strapi.plugin('graphql') && upUser?.attributes
         ? nullableOnGraphql({ [USER_UID]: { attributes: upUser.attributes } })
         : [],
+    // The switch makes every type's required output fields nullable, not only the user's: the
+    // project's own types are the ones its clients were typed on
+    graphqlRequired: strapi.plugin('graphql')
+      ? requiredOnGraphql({
+          ...Object.fromEntries(Object.entries(types).filter(([uid]) => uid.startsWith('api::'))),
+          ...(strapi.components as unknown as Record<string, TypeLike>),
+        })
+      : null,
     configKeys: configKeys(strapi),
     codeFindings,
   };

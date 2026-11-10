@@ -711,7 +711,19 @@ describe('migration from users-permissions: a start that stops part way', () => 
     return stored ? (JSON.parse(stored.value).completedSteps ?? []) : [];
   };
 
-  /** A start that fails on a statement, then one that does not */
+  /** The claim on the migration as the database holds it, `null` when nobody holds it */
+  const heldClaim = async (): Promise<unknown> => {
+    const stored = await inspectDatabase((db) =>
+      db('strapi_core_store_settings').where('key', 'plugin_end-users_migration').first('value')
+    );
+
+    return stored ? (JSON.parse(stored.value).claim ?? null) : null;
+  };
+
+  /**
+   * A start that fails on a statement. It has given its claim back by the time it has failed: a
+   * claim it still held would make the next start wait 15 minutes for it to run out.
+   */
   const stopAt = async (pattern: RegExp) => {
     const restore = failStatements(pattern);
 
@@ -721,23 +733,7 @@ describe('migration from users-permissions: a start that stops part way', () => 
       restore();
     }
 
-    // Works around a held-claim defect, fixed separately: a start that stops gives its claim back
-    // without waiting for the answer, and the database closing can cut that short, so the next
-    // start waits out the 15 minutes. The claim is made to have run out
-    await inspectDatabase(async (db) => {
-      const stored = await db('strapi_core_store_settings')
-        .where('key', 'plugin_end-users_migration')
-        .first('value');
-      // A start that stopped before it wrote the record has none to lapse
-      const record = stored ? JSON.parse(stored.value) : null;
-
-      if (record?.claim) {
-        record.claim = { ...record.claim, until: new Date(Date.now() - 1000).toISOString() };
-        await db('strapi_core_store_settings')
-          .where('key', 'plugin_end-users_migration')
-          .update({ value: JSON.stringify(record) });
-      }
-    });
+    expect(await heldClaim()).toBeNull();
   };
 
   beforeAll(async () => {
@@ -793,6 +789,26 @@ describe('migration from users-permissions: a start that stops part way', () => 
 
     expect(twice).toEqual([]);
   };
+
+  it('gives the claim back when the pre-sync stops, so the next start goes ahead at once', async () => {
+    await resumes();
+
+    const restore = failStatements(/^(alter|rename) .*eu_stg_/is);
+
+    try {
+      await expect(migratedInstance(project)).rejects.toThrow(/injected stop/);
+    } finally {
+      restore();
+    }
+
+    // Read straight after the failed start: the release was waited for before the start failed,
+    // not left to finish while the database closed
+    expect(await heldClaim()).toBeNull();
+
+    strapi = await migratedInstance(project);
+
+    expect(await readRecord(strapi)).toMatchObject({ status: 'completed', claim: null });
+  });
 
   it('finishes on the next start when the staging of the tables stopped', async () => {
     await resumes();

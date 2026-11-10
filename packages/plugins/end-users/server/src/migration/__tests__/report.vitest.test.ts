@@ -9,6 +9,8 @@ import {
   ITEM_SEVERITY,
   MEASURED_MS_PER_1000_USERS,
   nullableOnGraphql,
+  pendingLinkItem,
+  requiredOnGraphql,
 } from '../report';
 import type { ReportContext } from '../report';
 import { duplicatesQuery, readUpSnapshot } from '../snapshot';
@@ -62,6 +64,7 @@ const context = (over: Partial<ReportContext> = {}): ReportContext => ({
   },
   requiredProviderFields: () => [],
   graphqlNullable: [],
+  graphqlRequired: null,
   configKeys: [],
   codeFindings: [],
   ...over,
@@ -130,6 +133,45 @@ describe('buildReport', () => {
       '/api/connect/github/callback'
     );
     expect(report.counts.providerUsers).toEqual({ github: 2, twitter: 1, instagram: 0 });
+  });
+
+  it('says the users of a provider that never verifies an address get a pending link, and the others do not', () => {
+    const snapshot = emptySnapshot();
+    snapshot.users.byProvider = { local: 1, facebook: 3, github: 2 };
+
+    const report = buildReport(snapshot, context());
+    const facebook = find(report, 'provider-users:facebook')?.message;
+    const github = find(report, 'provider-users:github')?.message;
+
+    expect(facebook).toContain('never says an address is verified');
+    expect(facebook).toContain(
+      'Each one who confirmed their address and is not blocked gets a pending link'
+    );
+    expect(facebook).toContain('until compatibility mode is turned off');
+    expect(github).toContain('as long as github reports the address as verified');
+    expect(github).not.toContain('pending link');
+  });
+
+  it('counts the pending links by provider, as information with no address in it', () => {
+    expect(pendingLinkItem({})).toBeNull();
+    expect(pendingLinkItem({ github: 0 })).toBeNull();
+
+    const pending = pendingLinkItem({ vk: 5, facebook: 1 });
+
+    expect(pending).toMatchObject({
+      id: 'provider-pending-links:all',
+      kind: 'provider-pending-links',
+      severity: 'info',
+      count: 6,
+      refs: ['facebook', 'vk'],
+      resolved: false,
+    });
+    expect(pending?.message).toContain(
+      '6 users who signed up with a provider that never says an address is verified have a pending link'
+    );
+    expect(pending?.message).toContain('facebook: 1, vk: 5');
+    expect(pending?.message).toContain('dropped when compatibility mode is turned off');
+    expect(pendingLinkItem({ facebook: 1 })?.message).toContain('verified has a pending link');
   });
 
   it('reports the permissions each role loses or changes', () => {
@@ -272,6 +314,53 @@ describe('buildReport', () => {
     const firstInfo = severities.indexOf('info');
 
     expect(severities.slice(firstInfo).includes('action')).toBe(false);
+  });
+});
+
+describe('GraphQL nullability', () => {
+  it('announces in the check that the switch makes required output fields nullable on every type', () => {
+    const required = [{ uid: 'api::article.article', fields: ['title', 'slug'] }];
+    const report = buildReport(emptySnapshot(), context({ graphqlRequired: required }));
+    const announced = find(report, 'graphql-nullable:required');
+
+    expect(announced).toMatchObject({
+      kind: 'graphql-nullable',
+      severity: 'info',
+      count: 2,
+      refs: ['api::article.article'],
+    });
+    expect(announced?.message).toContain('on every content type and component');
+    expect(announced?.message).toContain('because a field rule can hide a field');
+    expect(announced?.message).toContain('2 required fields on 1 type');
+  });
+
+  it('announces it for a project with no required field too, and not when there is no GraphQL', () => {
+    const none = find(
+      buildReport(emptySnapshot(), context({ graphqlRequired: [] })),
+      'graphql-nullable:required'
+    );
+
+    expect(none).toMatchObject({ count: 0, refs: [] });
+    expect(none?.message).toContain('0 required fields;');
+    expect(
+      find(buildReport(emptySnapshot(), context()), 'graphql-nullable:required')
+    ).toBeUndefined();
+  });
+
+  it('finds the required attributes a client can read', () => {
+    expect(
+      requiredOnGraphql({
+        'api::article.article': {
+          attributes: {
+            title: { required: true },
+            body: {},
+            token: { required: true, private: true },
+          },
+        },
+        'shared.seo': { attributes: { metaTitle: { required: false } } },
+        'api::empty.empty': {},
+      })
+    ).toEqual([{ uid: 'api::article.article', fields: ['title'] }]);
   });
 });
 

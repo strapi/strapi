@@ -4,7 +4,8 @@ import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';
 import type { Database } from '@strapi/database';
 
-import { ACCOUNT_UID, PLUGIN_ID, PROFILE_UID, USER_UID } from '../constants';
+import { ACCOUNT_UID, PLUGIN_ID, PROFILE_UID, USER_UID, VERIFICATION_UID } from '../constants';
+import { PENDING_LINK_PREFIX } from '../utils/pending-link';
 import type { MigrationContext, MigrationStepFn } from './control';
 import { readRecord, updateRecord } from './record';
 import type { MigrationRecord } from './record';
@@ -433,6 +434,27 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
   }
 };
 
+/**
+ * Drops the pending links the migration recorded (`utils/pending-link`), and answers how many. A
+ * rollback drops them because Users & Permissions has no use for them, and a later migration
+ * records them again from its own state; the cleanup after the compatibility mode drops them
+ * because they last only as long as the mode. A user a pending link was spent for keeps the account
+ * it made, which a rollback reads as their provider.
+ */
+export const dropPendingLinks = async (trx: Knex, db: Database): Promise<number> => {
+  const verification = modelOf(db, VERIFICATION_UID);
+  const identifier = columnOf(db, VERIFICATION_UID, 'identifier') ?? 'identifier';
+
+  // A migration that stopped early has none of end-users' own tables yet
+  if (!(await hasTable(trx, db, verification.tableName))) {
+    return 0;
+  }
+
+  return tableOf(trx, db, verification.tableName)
+    .where(identifier, 'like', `${PENDING_LINK_PREFIX}%`)
+    .del();
+};
+
 /** The users' roles: one each, the first by order and then by id, and the role types users-permissions keeps */
 const restoreRoles = async (
   { db, trx, lost, record }: Run,
@@ -804,6 +826,7 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
   const roles = await countOf(tableOf(trx, db, roleTable));
 
   await restoreUsers(run, userTable);
+  await dropPendingLinks(trx, db);
   await restoreRoles(run, roleTable, linkTable);
 
   run.lost.permissionRows = (await hasTable(trx, db, 'eu_permissions'))

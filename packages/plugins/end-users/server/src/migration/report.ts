@@ -6,6 +6,7 @@ import type {
   MigrationReportItem,
 } from '../../../shared/contracts/migration';
 import { UP_CONFIG_MAP } from '../compat/config-map';
+import { PROVIDERS_WITHOUT_EMAIL_VERIFICATION } from '../utils/pending-link';
 import { COMPAT_ROWS } from '../compat/rows';
 import { mapUpGrant } from './map-providers';
 import { mapRolePermissions } from './map-permissions';
@@ -24,6 +25,11 @@ export interface ReportContext {
   permissionContext: PermissionMapContext;
   requiredProviderFields: (id: string) => string[] | null;
   graphqlNullable: Array<{ uid: string; fields: string[] }>;
+  /**
+   * The project's own types with required fields, when it serves GraphQL and the plugin is in check
+   * mode: what the switch makes nullable in the schema. `null` when there is nothing to announce.
+   */
+  graphqlRequired: Array<{ uid: string; fields: string[] }> | null;
   /** U&P config keys the project sets (check only) */
   configKeys: string[];
   /** What `planProjectFiles` found (check only) */
@@ -45,6 +51,7 @@ export const ITEM_SEVERITY: Readonly<Record<MigrationItemKind, Severity>> = {
   'provider-needs-input': 'action',
   'provider-not-supported': 'action',
   'provider-users': 'info',
+  'provider-pending-links': 'info',
   'template-untranslated': 'action',
   'template-skipped': 'info',
   'email-sender': 'info',
@@ -256,18 +263,37 @@ const providerItems = (snapshot: UpSnapshot, ctx: ReportContext): MigrationRepor
       continue;
     }
 
-    items.push(
-      item(
-        'provider-users',
-        provider,
-        `${plural(users, 'user')} signed up with ${provider}. They are linked to their account when they next sign in with it, as long as ${provider} reports the address as verified and the user's address is confirmed here; ` +
-          `otherwise the sign-in is refused with account_not_linked. ${redirectNote(provider, ctx.compat)}`,
-        { count: users }
-      )
-    );
+    const message = PROVIDERS_WITHOUT_EMAIL_VERIFICATION.includes(provider)
+      ? `${plural(users, 'user')} signed up with ${provider}, which never says an address is verified. Each one who confirmed their address and is not blocked gets a pending link: their first sign-in with ${provider}, with the address they have here, links it to their account, until compatibility mode is turned off. ` +
+        `The others sign in with ${provider} once an administrator trusts it for account linking. ${redirectNote(provider, ctx.compat)}`
+      : `${plural(users, 'user')} signed up with ${provider}. They are linked to their account when they next sign in with it, as long as ${provider} reports the address as verified and the user's address is confirmed here; ` +
+        `otherwise the sign-in is refused with account_not_linked. ${redirectNote(provider, ctx.compat)}`;
+
+    items.push(item('provider-users', provider, message, { count: users }));
   }
 
   return items;
+};
+
+/**
+ * The item that says how many users the migration gave a pending link (`utils/pending-link`), by
+ * the counts of each provider, or `null` when it gave none. Provider ids and counts only.
+ */
+export const pendingLinkItem = (byProvider: Record<string, number>): MigrationReportItem | null => {
+  const providers = Object.keys(byProvider).sort();
+  const total = providers.reduce((sum, provider) => sum + byProvider[provider], 0);
+
+  if (total === 0) {
+    return null;
+  }
+
+  return item(
+    'provider-pending-links',
+    'all',
+    `${plural(total, 'user')} who signed up with a provider that never says an address is verified ${total === 1 ? 'has' : 'have'} a pending link (${providers.map((provider) => `${provider}: ${byProvider[provider]}`).join(', ')}). ` +
+      'Their first sign-in with that provider, with the address they have here, links it to their account. The links that are left are dropped when compatibility mode is turned off. Refs are the providers.',
+    { count: total, refs: providers }
+  );
 };
 
 const EMAIL_KEYS: UpEmailKey[] = ['reset_password', 'email_confirmation'];
@@ -508,20 +534,37 @@ const structureItems = (snapshot: UpSnapshot): MigrationReportItem[] => {
 };
 
 const graphqlItems = (ctx: ReportContext): MigrationReportItem[] => {
+  const items: MigrationReportItem[] = [];
   const fields = ctx.graphqlNullable.reduce((sum, type) => sum + type.fields.length, 0);
 
-  if (fields === 0) {
-    return [];
+  if (fields > 0) {
+    items.push(
+      item(
+        'graphql-nullable',
+        'all',
+        `${plural(fields, 'field')} on ${plural(ctx.graphqlNullable.length, 'type')} are nullable in the GraphQL schema. A client typed on a non-null value for them needs a check.`,
+        { count: fields, refs: ctx.graphqlNullable.map((type) => type.uid) }
+      )
+    );
   }
 
-  return [
-    item(
-      'graphql-nullable',
-      'all',
-      `${plural(fields, 'field')} on ${plural(ctx.graphqlNullable.length, 'type')} are nullable in the GraphQL schema. A client typed on a non-null value for them needs a check.`,
-      { count: fields, refs: ctx.graphqlNullable.map((type) => type.uid) }
-    ),
-  ];
+  if (ctx.graphqlRequired) {
+    const required = ctx.graphqlRequired.reduce((sum, type) => sum + type.fields.length, 0);
+    const types = ctx.graphqlRequired.length;
+
+    items.push(
+      item(
+        'graphql-nullable',
+        'required',
+        'Once the project switches to end-users, every output field that is required in the GraphQL schema becomes nullable, on every content type and component, because a field rule can hide a field from a caller. ' +
+          'Input types keep their required fields, and check mode changes nothing. ' +
+          `The project's own types have ${plural(required, 'required field')}${types > 0 ? ` on ${plural(types, 'type')}` : ''}; a client typed on a non-null value for them needs a check. Refs are those types.`,
+        { count: required, refs: ctx.graphqlRequired.map((type) => type.uid) }
+      )
+    );
+  }
+
+  return items;
 };
 
 const estimate = (client: DbClient, users: number): MigrationReport['estimate'] => {
@@ -572,6 +615,22 @@ export const buildReport = (snapshot: UpSnapshot, ctx: ReportContext): Migration
     items,
   };
 };
+
+/**
+ * The types with required attributes a client can read, with those attributes: what a GraphQL
+ * schema shows as non-null until end-users makes them nullable. A type with none is left out.
+ */
+export const requiredOnGraphql = (
+  types: Record<string, { attributes?: Record<string, { required?: boolean; private?: boolean }> }>
+): Array<{ uid: string; fields: string[] }> =>
+  Object.entries(types)
+    .map(([uid, type]) => ({
+      uid,
+      fields: Object.entries(type.attributes ?? {})
+        .filter(([, attribute]) => attribute.required === true && attribute.private !== true)
+        .map(([name]) => name),
+    }))
+    .filter((type) => type.fields.length > 0);
 
 /**
  * The content types whose attributes are not required, with those attributes: what a GraphQL schema

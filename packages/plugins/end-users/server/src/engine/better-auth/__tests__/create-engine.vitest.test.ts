@@ -274,10 +274,27 @@ describe('buildAuthOptions', () => {
       'strapi-profile',
       'strapi-email',
       'lockout',
+      'banned-reset',
+      'totp-replay',
       'password-policy',
       'last-sign-in',
       'provider-profile',
+      'pending-link',
     ]);
+  });
+
+  it('installs pending-link after the generic OAuth plugin, whose providers it wraps', () => {
+    const ids =
+      buildAuthOptions(fakeStrapi(), undefined, {
+        ...emptyStartupInputs(),
+        providers: {
+          ...emptyStartupInputs().providers,
+          genericOAuth: [{ providerId: 'fake-idp', discoveryUrl: 'https://idp.example.com' }],
+        },
+      } as never).plugins?.map((plugin) => plugin.id) ?? [];
+
+    expect(ids.indexOf('generic-oauth')).toBeGreaterThanOrEqual(0);
+    expect(ids.indexOf('pending-link')).toBe(ids.indexOf('generic-oauth') + 1);
   });
 
   it('puts two-factor before bearer, so the token is not for a session two-factor deleted', () => {
@@ -313,9 +330,12 @@ describe('buildAuthOptions', () => {
       'strapi-profile',
       'strapi-email',
       'lockout',
+      'banned-reset',
+      'totp-replay',
       'password-policy',
       'last-sign-in',
       'provider-profile',
+      'pending-link',
       'project-plugin',
     ]);
   });
@@ -638,7 +658,7 @@ describe('buildAuthOptions', () => {
       expect(options.emailAndPassword?.enabled).toBe(false);
     });
 
-    it('are merged into groups, not swapped for them', () => {
+    it('are merged into groups, not swapped for them', async () => {
       const sendResetPassword = sender();
       const options = buildAuthOptions(
         fakeStrapi(),
@@ -653,7 +673,15 @@ describe('buildAuthOptions', () => {
       expect(options.advanced?.useSecureCookies).toBe(true);
       expect(options.emailAndPassword?.enabled).toBe(true);
       expect(options.emailAndPassword?.password?.verify).toBeTypeOf('function');
-      expect(options.emailAndPassword?.sendResetPassword).toBe(sendResetPassword);
+      // The project's sender is the one that mails, and never to a banned user
+      const send = options.emailAndPassword?.sendResetPassword as (input: unknown) => unknown;
+      const user = { id: 'u1', email: 'user@example.com', name: 'User' };
+
+      await send({ user: { ...user, banned: true }, url: 'https://x.test', token: 't' });
+      expect(sendResetPassword).not.toHaveBeenCalled();
+
+      await send({ user: { ...user, banned: false }, url: 'https://x.test', token: 't' });
+      expect(sendResetPassword).toHaveBeenCalledTimes(1);
     });
 
     it('cannot replace the secret, the database or the base path, even without defineAuth', () => {

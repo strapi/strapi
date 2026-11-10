@@ -9,6 +9,7 @@ export type MigrationItemKind =
   | 'provider-needs-input'
   | 'provider-not-supported'
   | 'provider-users'
+  | 'provider-pending-links'
   | 'template-untranslated'
   | 'template-skipped'
   | 'email-sender'

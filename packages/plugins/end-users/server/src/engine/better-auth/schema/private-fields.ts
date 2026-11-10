@@ -24,7 +24,7 @@ export const PRIVATE_FIELDS: Readonly<Record<string, readonly string[]>> = {
   session: ['token'],
   account: ['password', 'accessToken', 'refreshToken', 'idToken'],
   verification: ['identifier', 'value'],
-  'two-factor': ['secret', 'backupCodes'],
+  'two-factor': ['secret', 'backupCodes', 'lastTotpStep'],
   passkey: ['publicKey'],
   jwk: ['privateKey'],
 };

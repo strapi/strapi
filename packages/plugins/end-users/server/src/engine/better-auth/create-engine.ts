@@ -58,7 +58,10 @@ import { clearAttempts } from './lockout-counter';
 import { passwordPolicy } from './plugins/password-policy';
 import { backgroundTaskHandler } from './background-tasks';
 import { strapiCompat } from './plugins/strapi-compat';
+import { bannedReset, withoutBannedRecipients } from './plugins/banned-reset';
+import { totpReplay } from './plugins/totp-replay';
 import { resolvePreset } from './presets';
+import { pendingLink } from './plugins/pending-link';
 import { providerProfile } from './plugins/provider-profile';
 import { strapiProfile } from './plugins/strapi-profile';
 import { fromAuthTables } from './schema/from-auth-tables';
@@ -104,7 +107,9 @@ const betterAuthPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
  *                         Document Service middleware, in the same create, whoever creates it)
  *   3. `strapi-profile`   (sign-up fields go to the profile), installed
  *   4. `strapi-email`     (redirects from the settings, the welcome at sign-up), installed
- *   5. `lockout`          (failed password sign-ins lock the account), installed
+ *   5. `lockout`          (failed password sign-ins lock the account), installed, then
+ *      `banned-reset`     (a banned user gets no reset link and can't redeem one), and
+ *      `totp-replay`      (an authenticator code is taken once)
  *   6. `password-policy`  (the admin's password rules on every way a password is set), installed
  *   7. `last-sign-in`, `provider-profile` (the email guard, the every-sign-in profile mappings)
  *   8. `legacy-jwt`, when it exists
@@ -117,6 +122,8 @@ const strapiPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
   strapiProfile(strapi),
   strapiEmail(strapi),
   lockout(strapi),
+  bannedReset(),
+  totpReplay(strapi),
   passwordPolicy(strapi),
   lastSignIn(strapi),
   providerProfile(strapi),
@@ -465,6 +472,17 @@ export const buildAuthOptions = (
 
   const projectOptions = withoutProtectedOptions((project?.options ?? {}) as Plain);
   const merged = mergeOptions(base, projectOptions);
+  const emailAndPassword = merged.emailAndPassword as Plain | undefined;
+
+  // The sender in use, the plugin's or the project's, mails nothing to a banned user
+  if (typeof emailAndPassword?.sendResetPassword === 'function') {
+    merged.emailAndPassword = {
+      ...emailAndPassword,
+      sendResetPassword: withoutBannedRecipients(
+        emailAndPassword.sendResetPassword as Parameters<typeof withoutBannedRecipients>[0]
+      ),
+    };
+  }
 
   // The plugin configuration's list, validated at boot, is the only one: the project has none
   const trustedOrigins = configured<string[]>(strapi, 'trustedOrigins') ?? [];
@@ -477,6 +495,14 @@ export const buildAuthOptions = (
       ...betterAuthPlugins(strapi),
       ...strapiPlugins(strapi),
       ...(genericOAuth.length > 0 ? [genericOAuthPlugin({ config: genericOAuth as never })] : []),
+      // A social provider that a generic one of the same id shadows is not one it may wrap
+      pendingLink(
+        strapi,
+        Object.keys(socialProviders).filter(
+          (id) =>
+            !genericOAuth.some((config) => (config as { providerId?: unknown }).providerId === id)
+        )
+      ),
       ...(projectPlugins as BetterAuthPlugin[]),
     ],
   } as BetterAuthOptions;

@@ -4,11 +4,24 @@ import { randomUUID } from 'node:crypto';
 import type { Core } from '@strapi/types';
 
 import { readCompatConfig } from '../compat/config';
-import { ACCOUNT_UID, PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../constants';
+import {
+  ACCOUNT_UID,
+  PLUGIN_ID,
+  PROFILE_UID,
+  ROLE_UID,
+  USER_UID,
+  VERIFICATION_UID,
+} from '../constants';
 import type permissionService from '../services/permission';
+import {
+  PENDING_LINK_LIFETIME_MS,
+  PROVIDERS_WITHOUT_EMAIL_VERIFICATION,
+  pendingLinkIdentifier,
+} from '../utils/pending-link';
 import { readableFields, writableFields } from '../utils/writable-fields';
 import type { PermissionMapContext } from './map-permissions';
 import { mapRolePermissions } from './map-permissions';
+import { endUsersProviderOf } from './map-providers';
 import {
   addReportItems,
   claimMigration,
@@ -20,7 +33,7 @@ import {
   writeReport,
 } from './record';
 import type { MigrationRecord, MigrationStep } from './record';
-import { permissionItems } from './report';
+import { pendingLinkItem, permissionItems } from './report';
 import { adminStep } from './admin-side';
 import { keepHold, storesStep } from './post-sync-stores';
 import { waitForClaim } from './pre-sync';
@@ -743,6 +756,113 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
   }
 
   strapi.log.info(`${PLUGIN_ID}: created ${created} credential accounts`);
+
+  const linked = await recordPendingLinks(strapi, owner);
+  const item = pendingLinkItem(linked);
+
+  if (item) {
+    await addReportItems(strapi, [item]);
+  }
+
+  strapi.log.info(
+    `${PLUGIN_ID}: recorded a pending link for ${item?.count ?? 0} users of providers that never say an address is verified`
+  );
+};
+
+/**
+ * A pending link (`utils/pending-link`) for each user who signed up with a provider that never
+ * asserts a verified address, had confirmed their address and was not blocked: the `users` step has
+ * carried both into `emailVerified` and `banned`. Users & Permissions never stored the provider's
+ * account id, so there is no account to write, and their first sign-in with that provider links it
+ * instead. A user whose address is a placeholder (none, or a rewritten duplicate) is never
+ * confirmed. A run that stopped part-way finds the links it wrote and adds the rest. Answers how
+ * many users each provider has a link for.
+ */
+const recordPendingLinks = async (
+  strapi: Core.Strapi,
+  owner: string
+): Promise<Record<string, number>> => {
+  const db = strapi.db;
+  const verification = meta(strapi, VERIFICATION_UID);
+  const column = (attribute: string) => verification.attributes[attribute]?.columnName as string;
+  const makeId = verification.attributes.documentId.default as () => string;
+  const withPublished =
+    Boolean(verification.attributes.publishedAt) &&
+    (await hasColumn(strapi, verification.tableName, 'published_at'));
+  const identifier = column('identifier');
+  const emailVerified = columnOf(strapi, USER_UID, 'emailVerified') ?? 'email_verified';
+  const banned = columnOf(strapi, USER_UID, 'banned') ?? 'banned';
+  const expiresAt = new Date(Date.now() + PENDING_LINK_LIFETIME_MS);
+  const width = 7;
+  const byProvider: Record<string, number> = {};
+  let lastId = 0;
+
+  for (;;) {
+    await keepHold(strapi, owner);
+
+    const page = (await db
+      .getConnection(USERS_TABLE)
+      .whereIn('provider', [...PROVIDERS_WITHOUT_EMAIL_VERIFICATION])
+      .where(emailVerified, true)
+      .where(banned, false)
+      .whereNotNull('email')
+      .where('id', '>', lastId)
+      .orderBy('id')
+      .limit(PAGE)
+      .select('id', 'document_id', 'email', 'provider')) as Row[];
+
+    if (page.length === 0) {
+      break;
+    }
+
+    lastId = Number(page[page.length - 1].id);
+
+    const links = page.flatMap((user) => {
+      const providerId = endUsersProviderOf(user.provider);
+
+      if (providerId === null || typeof user.email !== 'string' || user.email === '') {
+        return [];
+      }
+
+      byProvider[providerId] = (byProvider[providerId] ?? 0) + 1;
+
+      return [
+        { identifier: pendingLinkIdentifier(providerId, user.email), userId: user.document_id },
+      ];
+    });
+
+    for (const chunk of chunksOf(links, Math.floor(VALUES_PER_STATEMENT / width))) {
+      const written = new Set(
+        (
+          (await db
+            .getConnection(verification.tableName)
+            .whereIn(
+              identifier,
+              chunk.map((link) => link.identifier)
+            )
+            .select(identifier)) as Row[]
+        ).map((row) => row[identifier])
+      );
+      const now = new Date();
+      const rows = chunk
+        .filter((link) => !written.has(link.identifier))
+        .map((link) => ({
+          document_id: makeId(),
+          [identifier]: link.identifier,
+          [column('value')]: link.userId,
+          [column('expiresAt')]: expiresAt,
+          created_at: now,
+          updated_at: now,
+          ...(withPublished ? { published_at: now } : {}),
+        }));
+
+      if (rows.length > 0) {
+        await db.getConnection(verification.tableName).insert(rows);
+      }
+    }
+  }
+
+  return byProvider;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -856,11 +976,11 @@ const withoutQuery = (strapi: Core.Strapi, step: string, error: unknown): Error 
 /**
  * The migration's second half, in the plugin's bootstrap and before anything creates profiles or
  * roles: the users' new columns, the roles' types, the roles' permissions with the fixes, a profile
- * for each user (with the user's id) and a credential account for each user with a password. Does
- * nothing unless the record is in progress with the pre-sync done. Each step runs once, is recorded
- * in `completedSteps`, and may run again after a stop without changing what it already wrote. The
- * last two carry the stores (settings, emails, providers) and the admin side; then the migration is
- * finished.
+ * for each user (with the user's id), a credential account for each user with a password and a
+ * pending link for each user of a provider. Does nothing unless the record is in progress with the
+ * pre-sync done. Each step runs once, is recorded in `completedSteps`, and may run again after a
+ * stop without changing what it already wrote. The last two carry the stores (settings, emails,
+ * providers) and the admin side; then the migration is finished.
  */
 export const runPostSync = async (strapi: Core.Strapi): Promise<void> => {
   const first = await readRecord(strapi);

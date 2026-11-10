@@ -210,6 +210,8 @@ const reportContext = (strapi: Core.Strapi, ctx: MigrationContext, client: DbCli
         : null;
     },
     graphqlNullable: [],
+    // Announced by the check; by now the switch has happened
+    graphqlRequired: null,
     configKeys: [],
     codeFindings: [],
   };

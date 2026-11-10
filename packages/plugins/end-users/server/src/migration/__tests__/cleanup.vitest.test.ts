@@ -5,11 +5,23 @@ import { runCleanup } from '../cleanup';
 import * as ops from '../schema-ops';
 import * as store from '../record';
 
+/** The rows the cleanup deletes from a table, with the `where` it gave */
+const deleted = vi.hoisted(() => ({ calls: [] as Array<{ table: string; where: unknown[] }> }));
+
 vi.mock('../schema-ops', () => ({
   hasTable: vi.fn().mockResolvedValue(true),
   dropTable: vi.fn().mockResolvedValue(undefined),
   columnsOf: vi.fn().mockResolvedValue(['id', 'company', 'password', 'notes']),
   dropColumn: vi.fn().mockResolvedValue(undefined),
+  tableOf: vi.fn((_trx: unknown, _db: unknown, table: string) => ({
+    where: (...where: unknown[]) => ({
+      async del() {
+        deleted.calls.push({ table, where });
+
+        return 2;
+      },
+    }),
+  })),
 }));
 
 let record: Record<string, unknown>;
@@ -27,7 +39,13 @@ vi.mock('../record', () => ({
 const db = {
   dialect: { client: 'sqlite' },
   metadata: {
-    get: () => ({ tableName: 'eu_users', attributes: {} }),
+    get: (uid: string) =>
+      uid === 'plugin::end-users.verification'
+        ? {
+            tableName: 'eu_verifications',
+            attributes: { identifier: { columnName: 'identifier' } },
+          }
+        : { tableName: 'eu_users', attributes: {} },
     values: () => [{ tableName: 'eu_users', attributes: { id: { columnName: 'id' } } }],
   },
 } as unknown as Database;
@@ -42,6 +60,7 @@ const ctx = (): Parameters<typeof runCleanup>[2] =>
 describe('runCleanup', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    deleted.calls = [];
     record = {
       cleanedUpAt: null,
       staged: {
@@ -99,5 +118,19 @@ describe('runCleanup', () => {
       }),
     ]);
     expect(record.cleanedUpAt).toBe('2026-11-09T10:00:00.000Z');
+  });
+
+  it('drops the pending provider links: they last only as long as the compatibility mode', async () => {
+    const strapiCtx = ctx();
+
+    await runCleanup({} as never, db, strapiCtx);
+
+    expect(deleted.calls).toEqual([
+      { table: 'eu_verifications', where: ['identifier', 'like', 'migrated-provider-link:%'] },
+    ]);
+    expect(
+      (strapiCtx as unknown as { strapi: { log: { info: ReturnType<typeof vi.fn> } } }).strapi.log
+        .info
+    ).toHaveBeenCalledWith(expect.stringContaining('2 pending provider links'));
   });
 });
