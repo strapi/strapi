@@ -28,7 +28,8 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
   let gqlEndpoint: string | undefined;
   if (strapi.plugin('graphql')) {
     const { config: gqlConfig } = strapi.plugin('graphql');
-    gqlEndpoint = gqlConfig('endpoint');
+    // Core does not load the GraphQL contracts, an optional plugin.
+    gqlEndpoint = gqlConfig<string | undefined>('endpoint');
   }
 
   return async (ctx, next) => {
