@@ -1,5 +1,6 @@
 import type { Attribute } from '../schema';
 import type * as UID from '../uid';
+import type { Simplify } from '../utils';
 
 export type ContentTypeKind = 'collectionType' | 'singleType';
 
@@ -130,6 +131,50 @@ export interface SchemaInfo {
  * These keys and values define the structure and characteristics of a Strapi schema.
  */
 export type SchemaAttributes = Record<string, Attribute.AnyAttribute>;
+
+/**
+ * The attributes Strapi adds to every content type when it loads it, as type generation writes
+ * them: timestamps, `publishedAt` (with or without draft and publish), the creator fields, and the
+ * i18n `locale` and `localizations` of a content type that is not localized.
+ *
+ * @template TContentTypeUID - The UID of the content type, the target of `localizations`.
+ */
+export type SystemAttributes<TContentTypeUID extends UID.ContentType> = {
+  createdAt: Attribute.DateTime;
+  updatedAt: Attribute.DateTime;
+  publishedAt: Attribute.DateTime;
+  createdBy: Attribute.Relation<'oneToOne', 'admin::user'> & Attribute.Private;
+  updatedBy: Attribute.Relation<'oneToOne', 'admin::user'> & Attribute.Private;
+  locale: Attribute.String & Attribute.Private;
+  localizations: Attribute.Relation<'oneToMany', TContentTypeUID> & Attribute.Private;
+};
+
+/**
+ * The attributes of a content type a package declares by hand: its own attributes plus the
+ * {@link SystemAttributes} Strapi adds to it, as one object type. An own attribute replaces the
+ * system attribute of the same name, e.g. `locale` for a localized content type, or `createdBy`
+ * with `populateCreatorFields`.
+ *
+ * @template TContentTypeUID - The UID of the content type.
+ * @template TAttributes - The attributes the content type defines.
+ *
+ * @example
+ * ```typescript
+ * import type { Schema, Struct } from '@strapi/types';
+ *
+ * export interface TagSchema extends Struct.CollectionTypeSchema {
+ *   // ...
+ *   attributes: Struct.WithSystemAttributes<
+ *     'plugin::catalog.tag',
+ *     { name: Schema.Attribute.String & Schema.Attribute.Required }
+ *   >;
+ * }
+ * ```
+ */
+export type WithSystemAttributes<
+  TContentTypeUID extends UID.ContentType,
+  TAttributes extends SchemaAttributes,
+> = Simplify<Omit<SystemAttributes<TContentTypeUID>, keyof TAttributes> & TAttributes>;
 
 /**
  * Contains various options employed during runtime to tweak certain aspects of Strapi features.
