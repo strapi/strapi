@@ -1,9 +1,61 @@
 import type * as Utils from '../../utils';
 import type * as UID from '../../uid';
+import type { IsStrict } from '../../core/strictness';
 
 import type { IsDraftAndPublishEnabled } from './draft-and-publish';
-import type * as Params from './params/document-engine';
+import type * as EngineParams from './params/document-engine';
 import type * as Result from './result/document-engine';
+
+/**
+ * The params of a Document Service method. With strict types, `lookup` is typed `undefined`: the
+ * service builds the lookup itself, from `status` and `locale`, and every method rejects one from the
+ * caller (a truthy `lookup` throws `ValidationError("Invalid params: 'lookup'")`). Without strict
+ * types, the params themselves, as on develop.
+ */
+type MethodParams<TParams> = IsStrict extends false ? TParams : TParams & { lookup?: undefined };
+
+/**
+ * The engine params of each method, wrapped in {@link MethodParams}. The method constraints below
+ * keep develop's text (`Params.Publish<TContentTypeUID>`): TypeScript prints a generic constraint
+ * from its source text, so a wrapper written in the constraint would print by name with strict
+ * types off.
+ */
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare namespace Params {
+  export type FindMany<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.FindMany<TContentTypeUID>
+  >;
+  export type FindFirst<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.FindFirst<TContentTypeUID>
+  >;
+  export type FindOne<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.FindOne<TContentTypeUID>
+  >;
+  export type Delete<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.Delete<TContentTypeUID>
+  >;
+  export type Create<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.Create<TContentTypeUID>
+  >;
+  export type Update<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.Update<TContentTypeUID>
+  >;
+  export type Count<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.Count<TContentTypeUID>
+  >;
+  export type Clone<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.Clone<TContentTypeUID>
+  >;
+  export type Publish<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.Publish<TContentTypeUID>
+  >;
+  export type Unpublish<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.Unpublish<TContentTypeUID>
+  >;
+  export type DiscardDraft<TContentTypeUID extends UID.ContentType> = MethodParams<
+    EngineParams.DiscardDraft<TContentTypeUID>
+  >;
+}
 
 export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.ContentType> = {
   findMany<const TParams extends Params.FindMany<TContentTypeUID>>(
