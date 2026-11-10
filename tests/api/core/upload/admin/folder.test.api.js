@@ -222,6 +222,25 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('parent folder does not exist');
     });
 
+    test('Cannot create a folder inside a folder deleted after the request was validated', async () => {
+      const parent = await createFolder('parent deleted during create');
+
+      const { res, deleteRes } = await deleteFolderOnceValidated(parent.id, () =>
+        rq({
+          method: 'POST',
+          url: '/upload/folders',
+          body: { name: 'child of a deleted folder', parent: parent.id },
+        })
+      );
+
+      expect(deleteRes.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'parent folder does not exist',
+      });
+    });
+
     test('Cannot create a folder with name containing a slash', async () => {
       const res = await rq({
         method: 'POST',

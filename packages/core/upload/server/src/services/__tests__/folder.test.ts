@@ -42,6 +42,21 @@ describe('folder', () => {
         path: expect.stringMatching(expectedPath),
       });
     });
+
+    test('rejects with a ValidationError when the parent folder does not exist', async () => {
+      const { db } = global.strapi;
+      global.strapi = {
+        db: { ...db, query: () => ({ findOne: jest.fn(async () => null) }) },
+      } as any;
+
+      try {
+        await expect(folderService.setPathIdAndPath({ parent: 1 })).rejects.toThrow(
+          new errors.ValidationError('parent folder does not exist')
+        );
+      } finally {
+        global.strapi = { db } as any;
+      }
+    });
   });
 
   describe('update', () => {

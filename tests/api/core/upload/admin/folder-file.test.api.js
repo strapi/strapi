@@ -37,6 +37,32 @@ const createAFile = async (parent = null) => {
   return res.body[0];
 };
 
+// Delete the folder (as another admin would) right after the request validation has checked
+// that it exists, so the request handler looks up a folder that is gone.
+const deleteFolderOnceValidated = async (folderId, request) => {
+  const folderService = strapi.plugin('upload').service('folder');
+  const originalExists = folderService.exists;
+  let deleteRes;
+  folderService.exists = async (...args) => {
+    const exists = await originalExists.apply(folderService, args);
+    if (exists === true && deleteRes === undefined) {
+      deleteRes = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { folderIds: [folderId] },
+      });
+    }
+    return exists;
+  };
+
+  try {
+    const res = await request();
+    return { res, deleteRes };
+  } finally {
+    folderService.exists = originalExists;
+  }
+};
+
 describe('Bulk actions for folders & files', () => {
   const builder = createTestBuilder();
 
@@ -696,6 +722,57 @@ describe('Bulk actions for folders & files', () => {
       });
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('some folders already exists: folder-g-1a');
+    });
+
+    test('Cannot move files into a folder deleted after the request was validated', async () => {
+      const destination = await createFolder('folder-h-1', null);
+      const file = await createAFile(null);
+
+      const { res, deleteRes } = await deleteFolderOnceValidated(destination.id, () =>
+        rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-move',
+          body: { destinationFolderId: destination.id, fileIds: [file.id] },
+        })
+      );
+
+      expect(deleteRes.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'destination folder does not exist',
+      });
+
+      const { body: fileAfter } = await rq({ method: 'GET', url: `/upload/files/${file.id}` });
+      expect(fileAfter).toMatchObject({ folder: null, folderPath: '/' });
+    });
+
+    test('Cannot move folders into a folder deleted after the request was validated', async () => {
+      const destination = await createFolder('folder-i-1', null);
+      const folder = await createFolder('folder-i-2', null);
+      data.folders.push(folder);
+
+      const { res, deleteRes } = await deleteFolderOnceValidated(destination.id, () =>
+        rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-move',
+          body: { destinationFolderId: destination.id, folderIds: [folder.id] },
+        })
+      );
+
+      expect(deleteRes.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'destination folder does not exist',
+      });
+
+      const { body: folderAfter } = await rq({
+        method: 'GET',
+        url: `/upload/folders/${folder.id}`,
+        qs: { populate: 'parent' },
+      });
+      expect(folderAfter.data).toMatchObject({ parent: null, path: folder.path });
     });
   });
 });
