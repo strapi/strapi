@@ -4,6 +4,7 @@
  * completed migration is recorded. The instance has compat on, the legacy secret and a cut-off in
  * the future; the migration record is written through the plugin store, as the migration will.
  */
+import { createHmac } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { createAuthRequest, createRequest } from 'api-tests/request';
 
@@ -166,6 +167,69 @@ describe('end-users compat: legacy tokens', () => {
     expect(
       (await call(jwt.sign({ id: user.id }, LEGACY_SECRET, { algorithm: 'HS256' }))).status
     ).toBe(200);
+  });
+
+  it('answers 401 for a token signed with the right secret and another algorithm', async () => {
+    const user = await seedUpUser(strapi, { email: 'legacy-alg@example.com' });
+
+    for (const algorithm of ['HS384', 'HS512'] as const) {
+      // eslint-disable-next-line no-await-in-loop
+      const res = await call(signLegacyJwt(LEGACY_SECRET, { id: user.id }, { algorithm }));
+
+      expect({ algorithm, status: res.status }).toEqual({ algorithm, status: 401 });
+    }
+  });
+
+  it('answers 401 for a token whose header names an asymmetric algorithm but is signed with the secret', async () => {
+    const user = await seedUpUser(strapi, { email: 'legacy-confusion@example.com' });
+    const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+
+    // The classic confusion: the server holds a key for RS256, the attacker signs with it as an
+    // HMAC secret. Here the secret is the HMAC key, so only the algorithm in the header is wrong.
+    for (const alg of ['RS256', 'ES256']) {
+      const unsigned = `${encode({ alg, typ: 'JWT' })}.${encode({
+        id: user.id,
+        iat: Math.floor(Date.now() / 1000),
+      })}`;
+      const signature = createHmac('sha256', LEGACY_SECRET).update(unsigned).digest('base64url');
+
+      // eslint-disable-next-line no-await-in-loop
+      const res = await call(`${unsigned}.${signature}`);
+
+      expect({ alg, status: res.status }).toEqual({ alg, status: 401 });
+    }
+  });
+
+  it('answers 401 for a token with no issue date, which the cutover cannot place', async () => {
+    const user = await seedUpUser(strapi, { email: 'legacy-noiat@example.com' });
+    const token = jwt.sign({ id: user.id }, LEGACY_SECRET, {
+      algorithm: 'HS256',
+      noTimestamp: true,
+    });
+
+    expect((await call(token)).status).toBe(401);
+  });
+
+  it('refuses an unconfirmed user holding a valid token while confirmation is required, and lets them in when it is not', async () => {
+    const settings = strapi.plugin('end-users').service('settings');
+    const user = await seedUpUser(strapi, {
+      email: 'legacy-unconfirmed@example.com',
+      confirmed: false,
+    });
+    const token = signLegacyJwt(LEGACY_SECRET, { id: user.id });
+
+    await settings.set({ signUp: { requireEmailVerification: true } });
+
+    try {
+      const refused = await call(token);
+
+      expect(refused.status).toBe(403);
+      expect(refused.body.error.details.code).toBe('EMAIL_NOT_VERIFIED');
+    } finally {
+      await settings.set({ signUp: { requireEmailVerification: false } });
+    }
+
+    expect((await call(token)).status).toBe(200);
   });
 
   it('refuses a banned user holding a valid token with 403 USER_BANNED', async () => {
