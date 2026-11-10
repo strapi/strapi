@@ -34,6 +34,9 @@ export const appPort = (suite: Suite, index: number) =>
 export const strapiBin = () =>
   path.join(path.dirname(require.resolve('@strapi/strapi/package.json')), 'bin', 'strapi.js');
 
+/** NODE_ENV of the test apps. The config scaffolders write to `config/env/<APP_NODE_ENV>`. */
+export const APP_NODE_ENV = 'development';
+
 /**
  * The env of the runner, without its `DATABASE_*` variables. Every spawn of a test app (generation,
  * admin build, server) starts from it: the database env comes from `startServer({ database })`
@@ -57,5 +60,5 @@ export const inheritedEnv = (): NodeJS.ProcessEnv => {
 export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
   STRAPI_TELEMETRY_DISABLED: 'true',
-  NODE_ENV: 'development',
+  NODE_ENV: APP_NODE_ENV,
 });
