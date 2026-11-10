@@ -391,8 +391,10 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
 
       expect(enabled.statusCode).toBe(200);
 
+      // Confirmed with the code of the period before, as an authenticator a little behind shows it:
+      // a code is taken once, and the sign-in below uses the current one
       const verified = await rq.post('/api/auth/two-factor/verify-totp', {
-        body: { code: totpFromUri(enabled.body.totpURI) },
+        body: { code: totpFromUri(enabled.body.totpURI, -1) },
         headers: { cookie, ...FROM_FRONT_END },
       });
 
@@ -1230,8 +1232,10 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
 
       const uri = enabled.body.totpURI as string;
 
+      // The previous period's code: a code is taken once, and the tests sign in with the current one
       expect(
-        (await post('/two-factor/verify-totp', { code: totpFromUri(uri) }, user.cookie)).statusCode
+        (await post('/two-factor/verify-totp', { code: totpFromUri(uri, -1) }, user.cookie))
+          .statusCode
       ).toBe(200);
 
       return { ...user, uri };
@@ -1294,29 +1298,59 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       return post('/two-factor/verify-totp', { code: totpFromUri(uri, periodOffset) }, challenge);
     };
 
-    it('takes a code from the period before this one, and refuses one from two periods back', async () => {
-      const { email, uri } = await withTwoFactor();
+    /** As if the authenticator was confirmed long ago: no period of it has been used */
+    const forgetUsedPeriod = (documentId: string) =>
+      strapi.db
+        .query(TWO_FACTOR_UID)
+        .update({ where: { userId: documentId }, data: { lastTotpStep: null } });
+
+    it('takes a code from the period before this one once, and refuses one from two periods back', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+
+      await forgetUsedPeriod(documentId);
+
       const tooOld = await verifyWith(email, uri, -2);
 
       expect(tooOld.statusCode).toBe(401);
       expect(tooOld.body.code).toBe('INVALID_CODE');
 
-      // Better Auth allows one period of clock drift either way, and the plugin keeps that
+      // Better Auth allows one period of clock drift either way, and the plugin keeps that, once
       expect((await verifyWith(email, uri, -1)).statusCode).toBe(200);
+
+      const again = await verifyWith(email, uri, -1);
+
+      expect(again.statusCode).toBe(401);
+      expect(again.body.code).toBe('INVALID_CODE');
     });
 
-    it('takes the same code a second time inside its window, as Better Auth does: a code is not single-use', async () => {
-      const { email, uri } = await withTwoFactor();
+    it('takes a code once: the same code is refused on a second sign-in inside its window', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
       const challenges = [await challengeOf(email), await challengeOf(email)];
+      const sessions = await count(SESSION_UID, { userId: documentId });
       const code = totpFromUri(uri);
 
-      // Two sign-ins, the same code: nothing remembers that it was spent
-      for (const challenge of challenges) {
-        // eslint-disable-next-line no-await-in-loop
-        const res = await post('/two-factor/verify-totp', { code }, challenge);
+      expect((await post('/two-factor/verify-totp', { code }, challenges[0])).statusCode).toBe(200);
 
-        expect(res.statusCode).toBe(200);
-      }
+      const replayed = await post('/two-factor/verify-totp', { code }, challenges[1]);
+
+      expect(replayed.statusCode).toBe(401);
+      expect(replayed.body.code).toBe('INVALID_CODE');
+      expect(replayed.headers['set-auth-token']).toBeUndefined();
+      expect(await count(SESSION_UID, { userId: documentId })).toBe(sessions + 1);
+    });
+
+    it('refuses the previous period`s code once the current one has been used', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+
+      // Only the current code has been used: the previous period's would otherwise be taken
+      await forgetUsedPeriod(documentId);
+
+      expect((await verifyWith(email, uri, 0)).statusCode).toBe(200);
+
+      const previous = await verifyWith(email, uri, -1);
+
+      expect(previous.statusCode).toBe(401);
+      expect(previous.body.code).toBe('INVALID_CODE');
     });
 
     it('locks the second factor after ten wrong codes, refuses the right one until the lock ends, and lets it in after', async () => {

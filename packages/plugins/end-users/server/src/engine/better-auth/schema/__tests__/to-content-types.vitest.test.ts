@@ -10,6 +10,7 @@ import { identifiers } from '@strapi/database/dist/utils/identifiers';
 import type { Core } from '@strapi/types';
 
 import { lockout } from '../../plugins/lockout';
+import { totpReplay } from '../../plugins/totp-replay';
 import type { EngineTable } from '../../../types';
 import {
   ACCOUNT_UID,
@@ -33,12 +34,19 @@ const naming = { identifiers, naming: attributeNaming };
 
 /**
  * Better Auth's own `getAuthTables` output for the core tables and the username, twoFactor, admin,
- * jwt and lockout plugins, with the database rate limiter on, so that every table the plugin generates is
- * covered (apart from passkey, below).
+ * jwt, lockout and totp-replay plugins, with the database rate limiter on, so that every table the
+ * plugin generates is covered (apart from passkey, below).
  */
 const authTables = fromAuthTables(
   getAuthTables({
-    plugins: [username(), twoFactor(), admin(), jwt(), lockout({} as Core.Strapi)],
+    plugins: [
+      username(),
+      twoFactor(),
+      admin(),
+      jwt(),
+      lockout({} as Core.Strapi),
+      totpReplay({} as Core.Strapi),
+    ],
     rateLimit: { storage: 'database' },
   })
 );
