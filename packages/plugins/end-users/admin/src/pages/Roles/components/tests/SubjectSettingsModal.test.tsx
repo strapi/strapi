@@ -170,8 +170,13 @@ describe('SubjectSettingsModal', () => {
 
     const [find, create] = rows(dialog);
 
-    expect(within(find).queryByText('Set on create')).not.toBeInTheDocument();
-    expect(within(create).getByText('Set on create')).toBeVisible();
+    expect(within(find).queryByText('Set the owner on create')).not.toBeInTheDocument();
+    expect(within(create).getByText('Set the owner on create')).toBeVisible();
+    // It says what it sets, and its toggle reads Enabled and Disabled
+    expect(
+      within(create).getByText('Set the owner to the signed-in user when an entry is created.')
+    ).toBeVisible();
+    expect(within(create).queryByText(/^(true|false)$/i)).not.toBeInTheDocument();
   });
 
   it("lists only the type's attributes that a field input accepts", async () => {

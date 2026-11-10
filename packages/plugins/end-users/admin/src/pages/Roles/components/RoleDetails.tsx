@@ -113,12 +113,12 @@ const RoleDetails = ({ mode, role, disabled }: RoleDetailsProps) => {
                 onChange={twoFactor.onChange}
                 disabled={disabled || isPublic}
                 onLabel={formatMessage({
-                  id: getTranslation('roles.edit.two-factor.on'),
-                  defaultMessage: 'On',
+                  id: 'app.components.ToggleCheckbox.enabled-label',
+                  defaultMessage: 'Enabled',
                 })}
                 offLabel={formatMessage({
-                  id: getTranslation('roles.edit.two-factor.off'),
-                  defaultMessage: 'Off',
+                  id: 'app.components.ToggleCheckbox.disabled-label',
+                  defaultMessage: 'Disabled',
                 })}
               />
               <Field.Hint />

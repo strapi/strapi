@@ -20,7 +20,7 @@
   "roles.import.file": "Role file",
   "roles.import.invalid": "That file is not a role file: it is not valid JSON.",
   "Settings.conditions.link": "Conditions",
-  "roles.edit.tab.custom-routes": "Custom routes",
+  "roles.edit.tab.custom-routes": "Custom Routes",
   "roles.edit.rules": "This action's route has policies or middlewares.",
   "roles.edit.copy-name": "{name} (copy)",
   "roles.review.title": "Review changes",
@@ -146,8 +146,8 @@
   "conditions.view.where.as-written": "The query is more than rows that are all true, so it is shown as it is written.",
   "conditions.view.where.computed": "Computed in code when it runs",
   "conditions.view.param-value": "the {name} param",
-  "conditions.view.params": "Parameters",
-  "conditions.view.params.none": "This condition takes no parameters.",
+  "conditions.view.params": "Inputs",
+  "conditions.view.params.none": "This condition takes no inputs.",
   "conditions.view.params.type": "Type",
   "conditions.view.params.required": "Required",
   "conditions.view.params.required-value": "{required, select, true {Yes} other {No}}",
@@ -477,5 +477,7 @@
   "migration.items.column.affected": "Affected",
   "migration.items.column.resolved": "Resolved",
   "migration.check.run": "Run the check",
-  "migration.check.minutes": "{count, plural, one {# minute} other {# minutes}}"
+  "migration.check.minutes": "{count, plural, one {# minute} other {# minutes}}",
+  "conditions.param.set-on-create": "Set the owner on create",
+  "conditions.param.set-on-create.hint": "Set the owner to the signed-in user when an entry is created."
 }

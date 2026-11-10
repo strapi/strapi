@@ -99,7 +99,7 @@ describe('EditPage', () => {
       'Collection Types',
       'Single Types',
       'Plugins',
-      'Custom routes',
+      'Custom Routes',
     ]);
 
     // Find, Find one, Create, Update, Delete, and the two this plugin adds
@@ -896,7 +896,7 @@ describe('EditPage', () => {
 
       const dialog = await screen.findByRole('alertdialog');
 
-      expect(dialog).toHaveTextContent('Grant Find on 3 collection types?');
+      expect(dialog).toHaveTextContent('Grant Find on 2 more collection types?');
       expect(dialog).toHaveTextContent("You'll review every change before saving.");
 
       // Nothing is ticked until it is confirmed

@@ -25,6 +25,7 @@ import { pluginId } from '../../pluginId';
 import { useGetBuilderLayoutQuery, useGetConditionsQuery } from '../../services/conditions';
 import { useGetPermissionLayoutQuery } from '../../services/permissions';
 import { getTranslation } from '../../utils/getTranslation';
+import { describeParam } from '../../utils/paramWords';
 import { withOccurrenceKeys } from '../../utils/withOccurrenceKeys';
 
 import { QueryChips } from './components/QueryChips';
@@ -207,7 +208,7 @@ const BuilderSections = ({ builder }: { builder: BuilderConditionV2 }) => {
           <Typography textColor="neutral600">
             {formatMessage({
               id: getTranslation('conditions.view.params.none'),
-              defaultMessage: 'This condition takes no parameters.',
+              defaultMessage: 'This condition takes no inputs.',
             })}
           </Typography>
         ) : (
@@ -604,14 +605,14 @@ const ConditionView = ({ condition, layout, canReadRoles }: ConditionViewProps) 
               <Section
                 title={formatMessage({
                   id: getTranslation('conditions.view.params'),
-                  defaultMessage: 'Parameters',
+                  defaultMessage: 'Inputs',
                 })}
               >
                 {params.length === 0 ? (
                   <Typography textColor="neutral600">
                     {formatMessage({
                       id: getTranslation('conditions.view.params.none'),
-                      defaultMessage: 'This condition takes no parameters.',
+                      defaultMessage: 'This condition takes no inputs.',
                     })}
                   </Typography>
                 ) : (
@@ -649,8 +650,8 @@ const ConditionView = ({ condition, layout, canReadRoles }: ConditionViewProps) 
                       {params.map((param) => (
                         <Tr key={param.name}>
                           <Td>
-                            <Typography textColor="neutral800">
-                              <code>{param.name}</code>
+                            <Typography textColor="neutral800" title={param.name}>
+                              {describeParam(param.name, formatMessage).label}
                               {param.createOnly && (
                                 <Typography textColor="neutral600">
                                   {' '}

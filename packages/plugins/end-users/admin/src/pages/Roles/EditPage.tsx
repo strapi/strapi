@@ -46,7 +46,7 @@ import { describeSave } from './utils/saveReview';
 import { findSelfWritableWarnings } from './utils/selfWritableWarnings';
 import { useQuestion } from './utils/useQuestion';
 
-import type { BulkChange } from './components/BulkChangeDialog';
+import type { BulkQuestion } from './components/BulkChangeDialog';
 import type { RenameQuestion } from './components/RenameRoleDialog';
 import type { RoleDetailsValues } from './components/RoleDetails';
 import type { ChangeGroup, EditorModel, SubjectSettings } from './utils/editorModel';
@@ -86,7 +86,7 @@ type SaveFailure = { kind: 'conflict' } | { kind: 'error'; message: string };
 const TAB_LABELS: PermissionsProps['tabLabels'] = {
   settings: {
     id: getTranslation('roles.edit.tab.custom-routes'),
-    defaultMessage: 'Custom routes',
+    defaultMessage: 'Custom Routes',
   },
 };
 
@@ -422,7 +422,7 @@ const RoleEditor = ({ mode, layout, role, canSave, onReload }: RoleEditorProps) 
 
   // Two questions the admin answers in a dialog, which what asked them waits for: a column change
   // that touches many content types, and the review of a save
-  const bulk = useQuestion<BulkChange>();
+  const bulk = useQuestion<BulkQuestion>();
   const review = useQuestion<{
     title: string;
     groups: ChangeGroup[];
@@ -432,9 +432,22 @@ const RoleEditor = ({ mode, layout, role, canSave, onReload }: RoleEditorProps) 
   const askBulk = bulk.ask;
 
   const confirmBulkChange = React.useCallback<NonNullable<PermissionsProps['confirmBulkChange']>>(
-    (change) =>
-      change.subjects.length < BULK_CONFIRM_FROM ? Promise.resolve(true) : askBulk(change),
-    [askBulk]
+    (change) => {
+      if (change.subjects.length < BULK_CONFIRM_FROM) {
+        return Promise.resolve(true);
+      }
+
+      // The question counts the content types the column changes: the ones that already are as it
+      // asks are left out, as the review that follows leaves them out
+      const subjects = change.subjects.filter(
+        (uid) => rows.grantedKey(uid).split(',').includes(change.actionId) !== change.value
+      );
+
+      return subjects.length === 0
+        ? Promise.resolve(true)
+        : askBulk({ ...change, subjects, unchanged: change.subjects.length - subjects.length });
+    },
+    [askBulk, rows]
   );
 
   const [failure, setFailure] = React.useState<SaveFailure | null>(null);

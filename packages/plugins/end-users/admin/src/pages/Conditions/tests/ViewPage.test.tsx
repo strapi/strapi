@@ -195,7 +195,7 @@ describe('ViewPage', () => {
     expect((await section('Where')).getByText('Computed in code when it runs')).toBeInTheDocument();
 
     // The declared params, one row each
-    const params = await section('Parameters');
+    const params = await section('Inputs');
     const rows = params.getAllByRole('row').map((row) =>
       within(row)
         .getAllByRole('gridcell')
@@ -204,8 +204,8 @@ describe('ViewPage', () => {
 
     expect(rows).toEqual([
       ['Name', 'Type', 'Required', 'Default', 'Relation to'],
-      ['field', 'attribute', 'No', '—', 'End user'],
-      ['setOnCreate', 'boolean', 'No', 'true', '—'],
+      ['Field', 'attribute', 'No', '—', 'End user'],
+      ['Set the owner on create', 'boolean', 'No', 'true', '—'],
     ]);
 
     const writes = await section('When entries are written');
@@ -244,7 +244,7 @@ describe('ViewPage', () => {
 
     // It declares no params and stamps nothing, but locks fields
     expect(
-      (await section('Parameters')).getByText('This condition takes no parameters.')
+      (await section('Inputs')).getByText('This condition takes no inputs.')
     ).toBeInTheDocument();
     expect(screen.queryByText('Sets fields when an entry is created')).not.toBeInTheDocument();
     expect(screen.getByText("Some fields can't change on update")).toBeInTheDocument();
@@ -297,13 +297,13 @@ describe('ViewPage', () => {
     expect((await section('About')).getByText('Plugin')).toBeInTheDocument();
     expect((await section('Where')).getByText('tier $eq the tier param')).toBeInTheDocument();
 
-    const [, row] = (await section('Parameters')).getAllByRole('row');
+    const [, row] = (await section('Inputs')).getAllByRole('row');
 
     expect(
       within(row)
         .getAllByRole('gridcell')
         .map((cell) => cell.textContent)
-    ).toEqual(['tier', 'string', 'Yes', '—', '—']);
+    ).toEqual(['Tier', 'string', 'Yes', '—', '—']);
   });
 
   it('names a content type the layout lacks by its uid, and says where a code condition is changed', async () => {
