@@ -26,6 +26,56 @@ const BlueText = (children: React.ReactNode) => (
 );
 
 /* -------------------------------------------------------------------------------------------------
+ * TruncatedName
+ * -----------------------------------------------------------------------------------------------*/
+
+const TruncatedName = ({
+  name,
+  isTooltipOpen,
+  onTooltipOpenChange,
+}: {
+  name: string;
+  isTooltipOpen?: boolean;
+  onTooltipOpenChange?: (open: boolean) => void;
+}) => {
+  const nameRef = React.useRef<HTMLSpanElement | null>(null);
+  const [isNameCut, setIsNameCut] = React.useState(false);
+
+  const measureName = React.useCallback(() => {
+    if (nameRef.current) {
+      setIsNameCut(nameRef.current.scrollWidth > nameRef.current.clientWidth);
+    }
+  }, []);
+
+  const attachName = React.useCallback(
+    (node: HTMLSpanElement | null) => {
+      nameRef.current = node;
+      measureName();
+    },
+    [measureName]
+  );
+
+  React.useEffect(() => {
+    if (isTooltipOpen) {
+      measureName();
+    }
+  }, [isTooltipOpen, measureName]);
+
+  return (
+    <Tooltip
+      side="bottom"
+      label={isNameCut ? name : undefined}
+      open={isTooltipOpen}
+      onOpenChange={onTooltipOpenChange}
+    >
+      <Typography ref={attachName} tag="span" variant="pi" ellipsis onPointerEnter={measureName}>
+        {name}
+      </Typography>
+    </Tooltip>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * VersionAuthorName
  * -----------------------------------------------------------------------------------------------*/
 
@@ -87,16 +137,11 @@ const VersionAuthorName = ({
         </AccessibleIcon>
       </Flex>
       {author.name ? (
-        <Tooltip
-          side="bottom"
-          label={author.name}
-          open={isNameTooltipOpen}
-          onOpenChange={onNameTooltipOpenChange}
-        >
-          <Typography tag="span" variant="pi" ellipsis>
-            {author.name}
-          </Typography>
-        </Tooltip>
+        <TruncatedName
+          name={author.name}
+          isTooltipOpen={isNameTooltipOpen}
+          onTooltipOpenChange={onNameTooltipOpenChange}
+        />
       ) : (
         <ItalicName tag="span" variant="pi" textColor="neutral500">
           {formatMessage(DELETED_AUTHOR_LABELS[author.type])}
