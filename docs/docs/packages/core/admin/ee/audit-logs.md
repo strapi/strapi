@@ -42,6 +42,10 @@ When the license loses the `audit-logs` feature, the two actions are not registe
 
 The admin panel follows the same condition. `window.strapi.features` (from `/admin/project-type`) only carries the license, so the config state comes from the authenticated `GET /admin/license-limit-information`, as `auditLogs: { enabled }` (`isAuditLogsEnabled`). `useIsAuditLogsDisabledByConfig` (`packages/core/admin/ee/admin/src/hooks/`) reads it; when the config is off the admin hides the Settings "Audit Logs" link (`useSettingsMenu`), shows the not found page on `/settings/audit-logs` (`ProtectedListPage`), and drops the homepage "Last activity" widget (`hideAuditLogsWidgetWhenDisabled` in `widgetVisibility.ts`). Until that response arrives, the license alone decides.
 
+### Strict types
+
+With strict types, the controller is registered as `Core.Licensed<'audit-logs', Contract>`: an application that lists `audit-logs` in `licensedFeatures` gets the contract. The types do not model `admin.auditLogs.enabled`. The two action IDs are declared in `PermissionActions`. The admin declares the `admin::audit-log` schema in `PackageContentTypeSchemas`, because every edition registers it. Read [License-gated contracts](../../../../contributing/05-typescript.md#license-gated-contracts).
+
 ### Subscribing to all events
 
 The Audit Logs feature adds a subscriber to the [EventHub](../../core/event-hub.md), allowing it to listen to all events in the application. However, we don't save every event in the audit logs; we only save the default ones (see the defaultEvents array in the service file).

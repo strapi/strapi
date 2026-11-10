@@ -64,6 +64,8 @@ Strongly typed schema attributes allows the Type System to infer actual entities
 
 For instance, a string attribute will resolve to a primitive string in an entity, whereas a repeatable component attribute will resolve to an array of objects.
 
+Attribute modifiers also shape write inputs. With strict types, the Document Service reads `Schema.Attribute.Required` and `Schema.Attribute.DefaultTo` to decide which keys `create` needs and where `data` accepts `null`, per status and operation (`Modules.Documents.Params.Write`). The [document write path](../../../../../architecture/05-document-write-path.md#validation) describes the validator rules these inputs follow.
+
 ### Usage
 
 import Tabs from '@theme/Tabs';
