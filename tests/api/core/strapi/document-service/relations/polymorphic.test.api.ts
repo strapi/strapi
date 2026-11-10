@@ -779,5 +779,61 @@ describe('Document Service polymorphic relations', () => {
         await deleteMorphBoxDoc(cDocId);
       }
     });
+
+    it('creates documents with connect for morphOne and morphMany relations', async () => {
+      let aDocId: string | undefined;
+      let bDocId: string | undefined;
+      let cDocId: string | undefined;
+      try {
+        const b = await strapi.documents(MORPH_BOX_UID).create({ data: { name: 'B' } });
+        const c = await strapi.documents(MORPH_BOX_UID).create({ data: { name: 'C' } });
+        bDocId = b.documentId;
+        cDocId = c.documentId;
+
+        const bRow = await getMorphBoxDraft(b.documentId);
+        const cRow = await getMorphBoxDraft(c.documentId);
+        if (!bRow || !cRow) {
+          throw new Error('Expected draft rows for B and C');
+        }
+
+        // Create document A with connect on mto (morphToOne) and mtm (morphToMany)
+        const a = await strapi.documents(MORPH_BOX_UID).create({
+          data: {
+            name: 'A-connect',
+            // @ts-expect-error test schema is defined at runtime via the api-tests builder
+            mto: { connect: [{ id: bRow.id, __type: MORPH_BOX_UID }] },
+            mtm: { connect: [{ id: cRow.id, __type: MORPH_BOX_UID }] },
+          },
+        });
+        aDocId = a.documentId;
+
+        const aEntry = await strapi.db.query(MORPH_BOX_UID).findOne({
+          where: { documentId: a.documentId, publishedAt: null },
+          populate: {
+            mto: true,
+            mtm: { on: { [MORPH_BOX_UID]: { fields: ['name', 'documentId'] } } },
+          },
+        } as any);
+
+        expect(aEntry?.mto).toMatchObject({
+          documentId: b.documentId,
+          name: 'B',
+          __type: MORPH_BOX_UID,
+        });
+        expect(aEntry?.mtm).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              documentId: c.documentId,
+              name: 'C',
+              __type: MORPH_BOX_UID,
+            }),
+          ])
+        );
+      } finally {
+        await deleteMorphBoxDoc(aDocId);
+        await deleteMorphBoxDoc(bDocId);
+        await deleteMorphBoxDoc(cDocId);
+      }
+    });
   });
 });
