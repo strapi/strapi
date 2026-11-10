@@ -1,16 +1,20 @@
 /**
- * Users who signed up with a provider under Users & Permissions have no account row after the
- * move: Users & Permissions never stored the provider's account id. A provider that does not say
- * the address is verified (Facebook, X, VK and others) would then never be linked to their account,
- * so the migration records a pending link that their first sign-in with that provider spends.
+ * Users who signed up under Users & Permissions with a provider that never says an address is
+ * verified (Facebook, VK and others) have no account row after the move: Users & Permissions never
+ * stored the provider's account id, and Better Auth links such a provider to an existing account
+ * only when it is trusted. The migration records a pending link instead, which their first sign-in
+ * with that provider spends, once, while the compatibility mode is on.
  *
- * Over the whole stack, against a fake OpenID Connect issuer that stands in for Keycloak (a
- * provider Users & Permissions had, which keeps its id) and for a second provider. The sign-ins go
- * through `/api/connect/:provider`, as a front end written for Users & Permissions does.
+ * Over the whole stack. Facebook is Better Auth's own provider, with the Graph API it calls answered
+ * by the test (`withMockedFetch`); Keycloak is a generic OpenID Connect provider, against a fake
+ * issuer. The sign-ins go through `/api/connect/:provider`, as a front end written for Users &
+ * Permissions does.
  */
 import { createAuthRequest, createRequest } from 'api-tests/request';
+import { createMockResponse, withMockedFetch } from 'api-tests/mock-fetch';
 import type { Core } from '@strapi/types';
 
+import { pendingLinkIdentifier } from '../../../../../packages/plugins/end-users/server/src/utils/pending-link';
 import { startFakeOidc } from '../utils/fake-oidc';
 import type { FakeOidc, FakeOidcUser } from '../utils/fake-oidc';
 import { TEST_PASSWORD } from '../utils/permissions';
@@ -27,12 +31,17 @@ import type { FixtureUser, UsersPermissionsProject } from '../utils/users-permis
 const USER_UID = 'plugin::end-users.user';
 const ACCOUNT_UID = 'plugin::end-users.account';
 const SESSION_UID = 'plugin::end-users.session';
+const VERIFICATION_UID = 'plugin::end-users.verification';
 const PROVIDERS = '/end-users/providers';
 const CLIENT_SECRET = 'fake-client-secret-value';
+const FACEBOOK_APP = 'facebook-app-id';
 const PENDING = 'migrated-provider-link:%';
 
-/** Users who signed up with Keycloak under Users & Permissions, each for one of the cases below */
-const KEYCLOAK_USERS: FixtureUser[] = ['erin', 'frank', 'alice', 'dave', 'bob'];
+/**
+ * Who signed up with Facebook under Users & Permissions. Erin and frank are confirmed; dave was
+ * blocked and bob never confirmed his address. Alice used Keycloak, carol stays a GitHub user.
+ */
+const FACEBOOK_USERS: FixtureUser[] = ['erin', 'frank', 'dave', 'bob'];
 
 type Res = Awaited<ReturnType<ReturnType<typeof createRequest>['get']>>;
 
@@ -49,6 +58,29 @@ const errorOf = (res: Res): string | null => {
   const url = new URL(res.headers.location as string);
 
   return url.searchParams.get('error_description') ?? url.searchParams.get('error');
+};
+
+const json = (body: unknown) =>
+  createMockResponse({
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+/** The Graph API, as Facebook answers this app for the user whose profile is given */
+const graphApi = (profile: Record<string, unknown>) => (url: string) => {
+  if (url.startsWith('https://graph.facebook.com/v24.0/oauth/access_token')) {
+    return json({ access_token: 'facebook-access', token_type: 'bearer', expires_in: 3600 });
+  }
+
+  if (url.startsWith('https://graph.facebook.com/debug_token')) {
+    return json({ data: { is_valid: true, app_id: FACEBOOK_APP, user_id: profile.id } });
+  }
+
+  if (url.startsWith('https://graph.facebook.com/me')) {
+    return json({ ...profile, picture: { data: { url: 'https://example.com/picture.png' } } });
+  }
+
+  return undefined;
 };
 
 describe('migration from users-permissions: provider users are linked on their first sign-in', () => {
@@ -78,15 +110,38 @@ describe('migration from users-permissions: provider users are linked on their f
       return Number(row?.c);
     });
 
-  /** A browser signing in through `/api/connect/:provider`, as the issuer's user, to the callback */
-  const signInWith = async (
-    provider: string,
-    user: { sub: string; email: string; name: string; email_verified?: boolean }
-  ) => {
-    // Left out, the claim is not sent at all, as some providers never send it
+  /**
+   * A browser signing in with Facebook through `/api/connect/facebook`, to the response of the
+   * connect callback. Facebook's own pages are skipped: the browser comes back with a code at once.
+   */
+  const signInWithFacebook = async (profile: Record<string, unknown>) => {
+    const start = await rq.get('/api/connect/facebook');
+
+    expect(start.status).toBe(302);
+
+    const authorize = new URL(start.headers.location as string);
+    const back = new URL(authorize.searchParams.get('redirect_uri') as string);
+
+    back.searchParams.set('code', 'facebook-code');
+    back.searchParams.set('state', authorize.searchParams.get('state') as string);
+
+    let callback: Res | undefined;
+
+    await withMockedFetch(graphApi(profile), async () => {
+      callback = await rq.get(`${back.pathname}${back.search}`, {
+        headers: { cookie: cookiesOf(start) },
+      });
+    });
+
+    return callback as Res;
+  };
+
+  /** The same through the fake issuer that stands in for Keycloak */
+  const signInWithKeycloak = async (user: { sub: string; email: string; name: string }) => {
+    // No `email_verified`: the claim is not sent at all
     oidc.user = user as FakeOidcUser;
 
-    const start = await rq.get(`/api/connect/${provider}`);
+    const start = await rq.get('/api/connect/keycloak');
 
     expect(start.status).toBe(302);
 
@@ -98,9 +153,9 @@ describe('migration from users-permissions: provider users are linked on their f
     }) as Res;
   };
 
-  const expectRefused = (callback: Res, error = 'account_not_linked') => {
+  const expectRefused = (callback: Res) => {
     expect(callback.status).toBe(302);
-    expect(errorOf(callback)).toBe(error);
+    expect(errorOf(callback)).toBe('account_not_linked');
     expect(hasSession(callback)).toBe(false);
   };
 
@@ -110,26 +165,38 @@ describe('migration from users-permissions: provider users are linked on their f
     expect(hasSession(callback)).toBe(true);
   };
 
+  const stop = async () => {
+    await strapi?.destroy();
+    strapi = undefined;
+  };
+
   beforeAll(async () => {
     await resetDatabase();
     project = await seedUsersPermissionsProject();
 
-    // They signed up with Keycloak; carol stays a GitHub user
-    await inspectDatabase((db) =>
-      db('up_users')
+    await inspectDatabase(async (db) => {
+      await db('up_users')
         .whereIn(
           'id',
-          KEYCLOAK_USERS.map((key) => project.users[key].id)
+          FACEBOOK_USERS.map((key) => project.users[key].id)
         )
-        .update({ provider: 'keycloak' })
-    );
+        .update({ provider: 'facebook' });
+      await db('up_users').where('id', project.users.alice.id).update({ provider: 'keycloak' });
+    });
 
     oidc = await startFakeOidc();
     strapi = await migratedInstance(project, { instance: { fakeOidc: oidc } });
     rq = createRequest({ strapi });
     rqAdmin = await createAuthRequest({ strapi });
 
-    // The provider as an administrator sets it up after the move, and a second one
+    // The providers as an administrator sets them up after the move
+    const facebook = await rqAdmin.put(`${PROVIDERS}/facebook`, {
+      body: { enabled: true, clientId: FACEBOOK_APP, clientSecret: CLIENT_SECRET },
+    });
+
+    expect(facebook.status).toBe(200);
+    expect(facebook.body.data).toMatchObject({ status: 'ready', trustForLinking: false });
+
     const keycloak = await rqAdmin.put(`${PROVIDERS}/keycloak`, {
       body: {
         enabled: true,
@@ -140,33 +207,28 @@ describe('migration from users-permissions: provider users are linked on their f
     });
 
     expect(keycloak.status).toBe(200);
-    expect(keycloak.body.data).toMatchObject({ status: 'ready', trustForLinking: false });
-
-    const other = await rqAdmin.post(PROVIDERS, {
-      body: {
-        id: 'other-idp',
-        name: 'Other IdP',
-        discoveryUrl: oidc.discoveryUrl,
-        clientId: 'other-client',
-        clientSecret: CLIENT_SECRET,
-      },
-    });
-
-    expect(other.status).toBe(200);
   });
 
   afterAll(async () => {
-    await strapi?.destroy();
+    await stop();
     await forgetMigration();
     removeProjectTypes();
     await resetDatabase();
   });
 
-  it('records a pending link for each provider user, with no account, and reports how many', async () => {
-    // The five Keycloak users and carol
-    expect(await pendingLinks()).toBe(KEYCLOAK_USERS.length + 1);
+  it('records a pending link only for confirmed, unblocked users of a provider that never verifies an address', async () => {
+    expect(await pendingLinks('erin')).toBe(1);
+    expect(await pendingLinks('frank')).toBe(1);
 
-    for (const key of [...KEYCLOAK_USERS, 'carol' as const]) {
+    // Blocked, unconfirmed, a generic provider, and a provider that says what it verified
+    for (const key of ['dave', 'bob', 'alice', 'carol'] as const) {
+      // eslint-disable-next-line no-await-in-loop
+      expect({ key, links: await pendingLinks(key) }).toEqual({ key, links: 0 });
+    }
+
+    expect(await pendingLinks()).toBe(2);
+
+    for (const key of [...FACEBOOK_USERS, 'alice' as const, 'carol' as const]) {
       // eslint-disable-next-line no-await-in-loop
       expect(await accountsOf(key)).toBe(0);
     }
@@ -176,29 +238,25 @@ describe('migration from users-permissions: provider users are linked on their f
       (entry: { kind: string }) => entry.kind === 'provider-pending-links'
     );
 
-    expect(item).toMatchObject({
-      severity: 'info',
-      count: KEYCLOAK_USERS.length + 1,
-      refs: expect.arrayContaining(['keycloak', 'github']),
-    });
+    expect(item).toMatchObject({ severity: 'info', count: 2, refs: ['facebook'] });
     // Ids and counts, never an address
     expect(JSON.stringify(item)).not.toContain('@');
   });
 
-  it('links the provider on the first sign-in with the recorded address, though the provider never says it is verified', async () => {
-    // No `email_verified` at all, and the address in other capitals than the one stored
-    const callback = await signInWith('keycloak', {
-      sub: 'erin-keycloak',
-      email: 'Erin@Example.com',
+  it('links Facebook on the first sign-in with the recorded address, though Facebook never says it is verified', async () => {
+    // The address in other capitals than the one stored
+    const callback = await signInWithFacebook({
+      id: 'fb-erin',
       name: 'Erin',
+      email: 'Erin@Example.com',
     });
 
     expectSignedIn(callback);
     expect(
       await count(ACCOUNT_UID, {
         userId: documentIdOf('erin'),
-        providerId: 'keycloak',
-        accountId: 'erin-keycloak',
+        providerId: 'facebook',
+        accountId: 'fb-erin',
       })
     ).toBe(1);
     expect(await sessionsOf('erin')).toBe(1);
@@ -206,67 +264,67 @@ describe('migration from users-permissions: provider users are linked on their f
     expect(await pendingLinks('erin')).toBe(0);
     expect(await count(USER_UID, { email: 'erin@example.com' })).toBe(1);
 
-    // From now on the provider signs her in through the account the link made
+    // From now on Facebook signs her in through the account the link made
     expectSignedIn(
-      await signInWith('keycloak', { sub: 'erin-keycloak', email: 'erin@example.com', name: 'E' })
+      await signInWithFacebook({ id: 'fb-erin', name: 'Erin', email: 'erin@example.com' })
     );
   });
 
-  it('links once: another account of the same provider with that address is refused', async () => {
-    const callback = await signInWith('keycloak', {
-      sub: 'someone-else',
-      email: 'erin@example.com',
-      name: 'Not Erin',
-      email_verified: false,
-    });
-
-    expectRefused(callback);
-    expect(await count(ACCOUNT_UID, { accountId: 'someone-else' })).toBe(0);
+  it('links once: another Facebook account with that address is refused', async () => {
+    expectRefused(
+      await signInWithFacebook({ id: 'fb-someone', name: 'Not Erin', email: 'erin@example.com' })
+    );
+    expect(await count(ACCOUNT_UID, { accountId: 'fb-someone' })).toBe(0);
     expect(await accountsOf('erin')).toBe(1);
   });
 
-  it('refuses another provider, and leaves the link for the provider it was recorded for', async () => {
-    const callback = await signInWith('other-idp', {
-      sub: 'alice-other',
-      email: 'alice@example.com',
-      name: 'Alice',
-      email_verified: false,
-    });
-
-    expectRefused(callback);
-    expect(await accountsOf('alice')).toBe(0);
-    expect(await pendingLinks('alice')).toBe(1);
-
-    // An explicit `false` from the provider it was recorded for is no different from no claim
-    expectSignedIn(
-      await signInWith('keycloak', {
-        sub: 'alice-keycloak',
-        email: 'alice@example.com',
-        name: 'Alice',
+  it('never overrules a provider that says the address is not verified', async () => {
+    expectRefused(
+      await signInWithFacebook({
+        id: 'fb-frank',
+        name: 'Frank',
+        email: 'frank@example.com',
         email_verified: false,
       })
     );
-    expect(await pendingLinks('alice')).toBe(0);
+    expect(await accountsOf('frank')).toBe(0);
+    // Not spent by a sign-in that did not link
+    expect(await pendingLinks('frank')).toBe(1);
   });
 
   it('refuses an address other than the one recorded', async () => {
     // Frank's address changed after the move; the link holds the one he had then
-    await strapi!.db
-      .query(USER_UID)
-      .update({
-        where: { documentId: documentIdOf('frank') },
-        data: { email: 'frank.new@example.com' },
-      });
-
-    const callback = await signInWith('keycloak', {
-      sub: 'frank-keycloak',
-      email: 'frank.new@example.com',
-      name: 'Frank',
+    await strapi!.db.query(USER_UID).update({
+      where: { documentId: documentIdOf('frank') },
+      data: { email: 'frank.new@example.com' },
     });
 
-    expectRefused(callback);
+    expectRefused(
+      await signInWithFacebook({ id: 'fb-frank', name: 'Frank', email: 'frank.new@example.com' })
+    );
     expect(await accountsOf('frank')).toBe(0);
     expect(await sessionsOf('frank')).toBe(0);
+  });
+
+  it('never spends a link through a generic OpenID Connect provider, or through another provider', async () => {
+    // No migration records a link for a generic provider: this one is written by hand
+    await strapi!.db.query(VERIFICATION_UID).create({
+      data: {
+        identifier: pendingLinkIdentifier('keycloak', 'alice@example.com'),
+        value: documentIdOf('alice'),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+
+    expectRefused(
+      await signInWithKeycloak({ sub: 'kc-alice', email: 'alice@example.com', name: 'Alice' })
+    );
+    // Facebook never verifies an address either, but the link is Keycloak's
+    expectRefused(
+      await signInWithFacebook({ id: 'fb-alice', name: 'Alice', email: 'alice@example.com' })
+    );
+    expect(await accountsOf('alice')).toBe(0);
+    expect(await pendingLinks('alice')).toBe(1);
   });
 
   it('refuses a user who has no pending link, as before', async () => {
@@ -285,40 +343,29 @@ describe('migration from users-permissions: provider users are linked on their f
       },
     });
 
-    expectRefused(await signInWith('keycloak', { sub: 'nm-keycloak', email, name: 'NM' }));
+    expectRefused(await signInWithFacebook({ id: 'fb-nm', name: 'NM', email }));
     expect(await count(ACCOUNT_UID, { userId: user.documentId })).toBe(1);
     expect(await count(SESSION_UID, { userId: user.documentId })).toBe(0);
   });
 
-  it('keeps refusing a migrated user whose own address was never confirmed', async () => {
-    // Bob never confirmed his address under Users & Permissions
+  it('gives no link to a user who was blocked or never confirmed their address, and no session', async () => {
     expectRefused(
-      await signInWith('keycloak', { sub: 'bob-keycloak', email: 'bob@example.com', name: 'Bob' })
+      await signInWithFacebook({ id: 'fb-dave', name: 'Dave', email: 'dave@example.com' })
     );
-    expect(await accountsOf('bob')).toBe(0);
-    // Not spent by a sign-in that did not link
-    expect(await pendingLinks('bob')).toBe(1);
-  });
+    expectRefused(
+      await signInWithFacebook({ id: 'fb-bob', name: 'Bob', email: 'bob@example.com' })
+    );
 
-  it('creates no session for a banned migrated user', async () => {
-    // Dave was blocked under Users & Permissions
-    const callback = await signInWith('keycloak', {
-      sub: 'dave-keycloak',
-      email: 'dave@example.com',
-      name: 'Dave',
-    });
-
-    // Linked as a trusted provider would link him, and refused when the session is made
-    expect(callback.status).toBe(302);
-    // The ban's own message, which the connect callback passes on as the error description
-    expect(errorOf(callback)).toMatch(/you have been banned/i);
-    expect(hasSession(callback)).toBe(false);
-    expect(await sessionsOf('dave')).toBe(0);
+    for (const key of ['dave', 'bob'] as const) {
+      // eslint-disable-next-line no-await-in-loop
+      expect(await accountsOf(key)).toBe(0);
+      // eslint-disable-next-line no-await-in-loop
+      expect(await sessionsOf(key)).toBe(0);
+    }
   });
 
   it('drops the pending links on a rollback, and takes a user linked through one back with that provider', async () => {
-    await strapi!.destroy();
-    strapi = undefined;
+    await stop();
 
     await expect(migratedInstance(project, { migration: { rollback: true } })).rejects.toThrow(
       /migration\.rollback/
@@ -338,7 +385,7 @@ describe('migration from users-permissions: provider users are linked on their f
           await db('up_users')
             .whereIn(
               'id',
-              (['erin', 'alice', 'bob', 'carol'] as const).map((key) => project.users[key].id)
+              (['erin', 'frank', 'alice'] as const).map((key) => project.users[key].id)
             )
             .select('id', 'provider')
         ).map((row) => [row.id, row.provider])
@@ -346,13 +393,30 @@ describe('migration from users-permissions: provider users are linked on their f
     }));
 
     expect(after.pending).toBe(0);
-    // Linked through the pending link: the account is their first, so it names the provider. Bob
-    // and carol were never linked and keep the provider they had
+    // Linked through the pending link: the account is her first, so it names the provider. Frank
+    // and alice were never linked and keep the provider they had
     expect(after.providers).toEqual({
-      [project.users.erin.id]: 'keycloak',
+      [project.users.erin.id]: 'facebook',
+      [project.users.frank.id]: 'facebook',
       [project.users.alice.id]: 'keycloak',
-      [project.users.bob.id]: 'keycloak',
-      [project.users.carol.id]: 'github',
     });
+  });
+
+  it('drops the pending links when compatibility mode is turned off and the cleanup runs', async () => {
+    // A second migration records them again
+    strapi = await migratedInstance(project);
+    expect(await pendingLinks()).toBeGreaterThan(0);
+    await stop();
+
+    strapi = await migratedInstance(project, {
+      instance: { pluginConfig: { compat: { usersPermissions: false } } },
+    });
+
+    const record = await inspectDatabase((db) =>
+      db('strapi_core_store_settings').where('key', 'plugin_end-users_migration').first('value')
+    );
+
+    expect(JSON.parse(record.value).cleanedUpAt).toEqual(expect.any(String));
+    expect(await pendingLinks()).toBe(0);
   });
 });

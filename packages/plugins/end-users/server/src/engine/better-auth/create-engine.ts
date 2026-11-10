@@ -478,8 +478,14 @@ export const buildAuthOptions = (
       ...betterAuthPlugins(strapi),
       ...strapiPlugins(strapi),
       ...(genericOAuth.length > 0 ? [genericOAuthPlugin({ config: genericOAuth as never })] : []),
-      // After the generic OAuth plugin: it wraps every provider, the ones that plugin adds included
-      pendingLink(strapi),
+      // A social provider that a generic one of the same id shadows is not one it may wrap
+      pendingLink(
+        strapi,
+        Object.keys(socialProviders).filter(
+          (id) =>
+            !genericOAuth.some((config) => (config as { providerId?: unknown }).providerId === id)
+        )
+      ),
       ...(projectPlugins as BetterAuthPlugin[]),
     ],
   } as BetterAuthOptions;

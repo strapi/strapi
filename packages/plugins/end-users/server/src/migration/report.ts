@@ -6,6 +6,7 @@ import type {
   MigrationReportItem,
 } from '../../../shared/contracts/migration';
 import { UP_CONFIG_MAP } from '../compat/config-map';
+import { PROVIDERS_WITHOUT_EMAIL_VERIFICATION } from '../utils/pending-link';
 import { COMPAT_ROWS } from '../compat/rows';
 import { mapUpGrant } from './map-providers';
 import { mapRolePermissions } from './map-permissions';
@@ -262,15 +263,13 @@ const providerItems = (snapshot: UpSnapshot, ctx: ReportContext): MigrationRepor
       continue;
     }
 
-    items.push(
-      item(
-        'provider-users',
-        provider,
-        `${plural(users, 'user')} signed up with ${provider}. Each is linked to their account on their first sign-in with ${provider}, when it sends the address they have here and that address is confirmed, even if ${provider} does not say the address is verified. ` +
-          `After that, another ${provider} account with the same address is linked only if ${provider} says the address is verified. ${redirectNote(provider, ctx.compat)}`,
-        { count: users }
-      )
-    );
+    const message = PROVIDERS_WITHOUT_EMAIL_VERIFICATION.includes(provider)
+      ? `${plural(users, 'user')} signed up with ${provider}, which never says an address is verified. Each one who confirmed their address and is not blocked gets a pending link: their first sign-in with ${provider}, with the address they have here, links it to their account, until compatibility mode is turned off. ` +
+        `The others sign in with ${provider} once an administrator trusts it for account linking. ${redirectNote(provider, ctx.compat)}`
+      : `${plural(users, 'user')} signed up with ${provider}. They are linked to their account when they next sign in with it, as long as ${provider} reports the address as verified and the user's address is confirmed here; ` +
+        `otherwise the sign-in is refused with account_not_linked. ${redirectNote(provider, ctx.compat)}`;
+
+    items.push(item('provider-users', provider, message, { count: users }));
   }
 
   return items;
@@ -291,8 +290,8 @@ export const pendingLinkItem = (byProvider: Record<string, number>): MigrationRe
   return item(
     'provider-pending-links',
     'all',
-    `${plural(total, 'user')} who signed up with a provider ${total === 1 ? 'has' : 'have'} a pending link (${providers.map((provider) => `${provider}: ${byProvider[provider]}`).join(', ')}). ` +
-      'Their first sign-in with that provider, with the address they have here, links it to their account. Refs are the providers.',
+    `${plural(total, 'user')} who signed up with a provider that never says an address is verified ${total === 1 ? 'has' : 'have'} a pending link (${providers.map((provider) => `${provider}: ${byProvider[provider]}`).join(', ')}). ` +
+      'Their first sign-in with that provider, with the address they have here, links it to their account. The links that are left are dropped when compatibility mode is turned off. Refs are the providers.',
     { count: total, refs: providers }
   );
 };

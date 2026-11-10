@@ -13,7 +13,11 @@ import {
   VERIFICATION_UID,
 } from '../constants';
 import type permissionService from '../services/permission';
-import { PENDING_LINK_LIFETIME_MS, pendingLinkIdentifier } from '../utils/pending-link';
+import {
+  PENDING_LINK_LIFETIME_MS,
+  PROVIDERS_WITHOUT_EMAIL_VERIFICATION,
+  pendingLinkIdentifier,
+} from '../utils/pending-link';
 import { readableFields, writableFields } from '../utils/writable-fields';
 import type { PermissionMapContext } from './map-permissions';
 import { mapRolePermissions } from './map-permissions';
@@ -761,16 +765,18 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
   }
 
   strapi.log.info(
-    `${PLUGIN_ID}: recorded a pending link for ${item?.count ?? 0} users who signed up with a provider`
+    `${PLUGIN_ID}: recorded a pending link for ${item?.count ?? 0} users of providers that never say an address is verified`
   );
 };
 
 /**
- * A pending link for each user who signed up with a provider (`utils/pending-link`): Users &
- * Permissions never stored the provider's account id, so there is no account to write, and their
- * first sign-in with that provider links it instead. A user whose address is a placeholder (none,
- * or a rewritten duplicate) never signs in with it and gets none. A run that stopped part-way finds
- * the links it wrote and adds the rest. Answers how many users each provider has a link for.
+ * A pending link (`utils/pending-link`) for each user who signed up with a provider that never
+ * asserts a verified address, had confirmed their address and was not blocked: the `users` step has
+ * carried both into `emailVerified` and `banned`. Users & Permissions never stored the provider's
+ * account id, so there is no account to write, and their first sign-in with that provider links it
+ * instead. A user whose address is a placeholder (none, or a rewritten duplicate) is never
+ * confirmed. A run that stopped part-way finds the links it wrote and adds the rest. Answers how
+ * many users each provider has a link for.
  */
 const recordPendingLinks = async (
   strapi: Core.Strapi,
@@ -784,6 +790,8 @@ const recordPendingLinks = async (
     Boolean(verification.attributes.publishedAt) &&
     (await hasColumn(strapi, verification.tableName, 'published_at'));
   const identifier = column('identifier');
+  const emailVerified = columnOf(strapi, USER_UID, 'emailVerified') ?? 'email_verified';
+  const banned = columnOf(strapi, USER_UID, 'banned') ?? 'banned';
   const expiresAt = new Date(Date.now() + PENDING_LINK_LIFETIME_MS);
   const width = 7;
   const byProvider: Record<string, number> = {};
@@ -794,10 +802,10 @@ const recordPendingLinks = async (
 
     const page = (await db
       .getConnection(USERS_TABLE)
-      .whereNotNull('provider')
-      .whereNot('provider', 'local')
+      .whereIn('provider', [...PROVIDERS_WITHOUT_EMAIL_VERIFICATION])
+      .where(emailVerified, true)
+      .where(banned, false)
       .whereNotNull('email')
-      .whereRaw('LOWER(??) NOT LIKE ?', ['email', `%${NO_ADDRESS_DOMAIN}`])
       .where('id', '>', lastId)
       .orderBy('id')
       .limit(PAGE)

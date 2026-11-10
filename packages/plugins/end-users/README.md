@@ -223,10 +223,11 @@ To migrate again after a rollback, switch the project to end-users again with `m
 - Providers registered through `providers-registry`. They are listed as items, and you register them as end-users
   providers.
 - Signing in through a provider to an existing account with the same address when the provider does not say the address
-  is verified (Facebook, X and VK never do). That sign-in is refused until an administrator turns on Trust for account
-  linking for the provider (Settings, End users, Providers). Users who signed up with a provider under Users &
-  Permissions are the exception: the migration records a pending link for each, and their first sign-in with that
-  provider, with the address they have here, links it to their account.
+  is verified (Facebook, VK, LINE, TikTok, Notion and Spotify never do). That sign-in is refused until an administrator
+  turns on Trust for account linking for the provider (Settings, End users, Providers). Users who signed up with one of
+  those providers under Users & Permissions, had confirmed their address and were not blocked are the exception: the
+  migration records a pending link for each, and their first sign-in with that provider, with the address they have
+  here, links it to their account. The links last until compatibility mode is turned off.
 - Extensions in `strapi-server` for `users-permissions`. Move what they do to the end-users plugin or to your own routes.
 - `GET /api/users/:id` answering 204 for a missing user. It answers 404.
 - The GraphQL role mutations (create, update and delete a role) and the `UsersPermissionsPermission` type. Roles are

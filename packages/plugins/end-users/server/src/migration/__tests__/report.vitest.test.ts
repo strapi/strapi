@@ -135,35 +135,43 @@ describe('buildReport', () => {
     expect(report.counts.providerUsers).toEqual({ github: 2, twitter: 1, instagram: 0 });
   });
 
-  it('says a provider`s users are linked on their first sign-in with it, once', () => {
+  it('says the users of a provider that never verifies an address get a pending link, and the others do not', () => {
     const snapshot = emptySnapshot();
-    snapshot.users.byProvider = { local: 1, facebook: 3 };
+    snapshot.users.byProvider = { local: 1, facebook: 3, github: 2 };
 
-    const message = find(buildReport(snapshot, context()), 'provider-users:facebook')?.message;
+    const report = buildReport(snapshot, context());
+    const facebook = find(report, 'provider-users:facebook')?.message;
+    const github = find(report, 'provider-users:github')?.message;
 
-    expect(message).toContain('first sign-in with facebook');
-    expect(message).toContain('even if facebook does not say the address is verified');
+    expect(facebook).toContain('never says an address is verified');
+    expect(facebook).toContain(
+      'Each one who confirmed their address and is not blocked gets a pending link'
+    );
+    expect(facebook).toContain('until compatibility mode is turned off');
+    expect(github).toContain('as long as github reports the address as verified');
+    expect(github).not.toContain('pending link');
   });
 
   it('counts the pending links by provider, as information with no address in it', () => {
     expect(pendingLinkItem({})).toBeNull();
     expect(pendingLinkItem({ github: 0 })).toBeNull();
 
-    const pending = pendingLinkItem({ keycloak: 5, github: 1 });
+    const pending = pendingLinkItem({ vk: 5, facebook: 1 });
 
     expect(pending).toMatchObject({
       id: 'provider-pending-links:all',
       kind: 'provider-pending-links',
       severity: 'info',
       count: 6,
-      refs: ['github', 'keycloak'],
+      refs: ['facebook', 'vk'],
       resolved: false,
     });
-    expect(pending?.message).toContain('6 users who signed up with a provider have a pending link');
-    expect(pending?.message).toContain('github: 1, keycloak: 5');
-    expect(pendingLinkItem({ github: 1 })?.message).toContain(
-      '1 user who signed up with a provider has'
+    expect(pending?.message).toContain(
+      '6 users who signed up with a provider that never says an address is verified have a pending link'
     );
+    expect(pending?.message).toContain('facebook: 1, vk: 5');
+    expect(pending?.message).toContain('dropped when compatibility mode is turned off');
+    expect(pendingLinkItem({ facebook: 1 })?.message).toContain('verified has a pending link');
   });
 
   it('reports the permissions each role loses or changes', () => {

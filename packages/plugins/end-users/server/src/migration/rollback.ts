@@ -435,21 +435,24 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
 };
 
 /**
- * The pending links the migration recorded for provider users (`utils/pending-link`) go: Users &
- * Permissions has no use for them, and a later migration records them again from its own state. A
- * user a pending link was spent for has the account it made, which `restoreUsers` has read as their
- * provider already.
+ * Drops the pending links the migration recorded (`utils/pending-link`), and answers how many. A
+ * rollback drops them because Users & Permissions has no use for them, and a later migration
+ * records them again from its own state; the cleanup after the compatibility mode drops them
+ * because they last only as long as the mode. A user a pending link was spent for keeps the account
+ * it made, which a rollback reads as their provider.
  */
-const dropPendingLinks = async ({ db, trx }: Run) => {
+export const dropPendingLinks = async (trx: Knex, db: Database): Promise<number> => {
   const verification = modelOf(db, VERIFICATION_UID);
   const identifier = columnOf(db, VERIFICATION_UID, 'identifier') ?? 'identifier';
 
   // A migration that stopped early has none of end-users' own tables yet
-  if (await hasTable(trx, db, verification.tableName)) {
-    await tableOf(trx, db, verification.tableName)
-      .where(identifier, 'like', `${PENDING_LINK_PREFIX}%`)
-      .del();
+  if (!(await hasTable(trx, db, verification.tableName))) {
+    return 0;
   }
+
+  return tableOf(trx, db, verification.tableName)
+    .where(identifier, 'like', `${PENDING_LINK_PREFIX}%`)
+    .del();
 };
 
 /** The users' roles: one each, the first by order and then by id, and the role types users-permissions keeps */
@@ -823,7 +826,7 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
   const roles = await countOf(tableOf(trx, db, roleTable));
 
   await restoreUsers(run, userTable);
-  await dropPendingLinks(run);
+  await dropPendingLinks(trx, db);
   await restoreRoles(run, roleTable, linkTable);
 
   run.lost.permissionRows = (await hasTable(trx, db, 'eu_permissions'))

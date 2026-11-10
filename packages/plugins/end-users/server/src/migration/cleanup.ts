@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 import { PLUGIN_ID, USER_UID } from '../constants';
 import type { MigrationStepFn } from './control';
-import { leftoverColumns } from './rollback';
+import { dropPendingLinks, leftoverColumns } from './rollback';
 import { addReportItems, readRecord, readReport, updateRecord } from './record';
 import { columnsOf, dropColumn, dropTable, hasTable } from './schema-ops';
 import type { DbClient } from './snapshot';
@@ -112,6 +112,9 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
       }))
     );
   }
+  // A pending link is for the users of the migration's window, which ends with the mode
+  const links = await dropPendingLinks(trx, db);
+
   await updateRecord(strapi, { cleanedUpAt: ctx.now().toISOString() });
 
   const keptNote = [
@@ -127,6 +130,6 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
     .join('');
 
   strapi.log.info(
-    `${PLUGIN_ID}: cleaned up after the migration: dropped ${dropping.length} staged tables and ${dropped.length} columns (${dropped.join(', ') || 'none'})${keptNote}`
+    `${PLUGIN_ID}: cleaned up after the migration: dropped ${dropping.length} staged tables, ${dropped.length} columns (${dropped.join(', ') || 'none'}) and ${links} pending provider links${keptNote}`
   );
 };
