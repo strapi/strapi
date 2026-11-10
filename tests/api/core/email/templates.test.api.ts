@@ -73,8 +73,15 @@ describe('Email templates (admin API)', () => {
   test('an admin with templates.update edits a template and a GET returns it', async () => {
     const body = { subject: 'Hello {{ user.name }}', html: '<b>{{ url }}</b>', text: '{{ url }}' };
 
+    const me = await admin({ method: 'GET', url: '/admin/users/me' });
+    const info = jest.spyOn(strapi.log, 'info');
+
     const put = await admin({ method: 'PUT', url: `/email/templates/${KEY}?locale=en`, body });
     expect(put.statusCode).toBe(200);
+    expect(info).toHaveBeenCalledWith(
+      `Email template "${KEY}" (en) was saved by admin user ${me.body.data.id}`
+    );
+    info.mockRestore();
     expect(put.body.data).toMatchObject({ key: KEY, locale: 'en', ...body, isDefault: false });
     expect(put.body.data).not.toHaveProperty('id');
 
