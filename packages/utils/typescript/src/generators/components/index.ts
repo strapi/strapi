@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { sortBy } from 'lodash';
 
 import { models } from '../common';
+import { resolveInterfaceNames } from '../common/interface-names';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
 import type { GeneratorOptions } from '../utils';
 
@@ -18,16 +19,23 @@ const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
 export const generateComponentsDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi } = options;
+  const { strapi, strict = false } = options;
 
   const { components } = strapi;
 
-  const componentsDefinitions = sortBy(
-    Object.values<models.utils.Schema>(components ?? {}),
-    'uid'
-  ).map((component) => ({
+  const schemas = sortBy(Object.values<models.utils.Schema>(components ?? {}), 'uid');
+  const interfaceNames = resolveInterfaceNames(
+    schemas.map(({ uid }) => uid),
+    options.logger,
+    { strict }
+  );
+  const componentsDefinitions = schemas.map((component) => ({
     uid: component.uid,
-    definition: models.schema.generateSchemaDefinition(component),
+    definition: models.schema.generateSchemaDefinition(
+      component,
+      interfaceNames.get(component.uid),
+      { strict }
+    ),
   }));
 
   options.logger.debug(`Found ${componentsDefinitions.length} components.`);
@@ -59,7 +67,13 @@ export const generateComponentsDefinitions = async (
     ...formattedSchemasDefinitions,
 
     // Global
-    generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions),
+    generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions, { strict }),
+
+    // Public: strict programs ignore it. A program without strict.d.ts (a frontend, a types-only
+    // package, a tsconfig that excludes types/generated) reads it, as with strict types off.
+    ...(strict === true
+      ? [generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions)]
+      : []),
   ];
 
   const output = emitDefinitions(allDefinitions);
