@@ -13,6 +13,7 @@ import { buildReport, nullableOnGraphql } from './report';
 import type { ReportContext } from './report';
 import { readUpSnapshot } from './snapshot';
 import type { DbClient } from './snapshot';
+import { isPlain } from '../utils/is-plain';
 
 const UP_CONFIG = 'plugin::users-permissions';
 const UP_USER_UID = 'plugin::users-permissions.user';
@@ -33,9 +34,6 @@ type TypeLike = {
   options?: { draftAndPublish?: boolean };
   attributes?: Record<string, { private?: boolean; required?: boolean }>;
 };
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** Flat dotted keys and their values; recursion stops at a key the migration map knows */
 const flatten = (config: Record<string, unknown>): Map<string, unknown> => {

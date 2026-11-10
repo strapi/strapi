@@ -12,12 +12,12 @@ import {
   attributeOf,
   filterableType,
   hasOwn,
-  isPlain,
   isPrivate,
   schemaOf,
   userRelationTypes,
 } from './check';
 import type { Plain } from './check';
+import { isPlain } from '../is-plain';
 import type {
   AppliesTo,
   BuilderConditionV2,

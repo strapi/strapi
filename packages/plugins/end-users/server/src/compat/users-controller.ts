@@ -9,6 +9,7 @@ import { invalidParameters, missingFieldBody } from './errors';
 import { toUpRole, toUpUser, translateRoleQuery } from './shapes';
 import type { UpRole, UpUser, UpUserSource } from './shapes';
 import { loadUserExtras, splitUserWrites } from './user-extras';
+import { isPlain } from '../utils/is-plain';
 
 type Plain = Record<string, unknown>;
 
@@ -30,9 +31,6 @@ interface UserEntries {
 }
 
 type QueryAction = 'find' | 'findOne' | 'count' | 'create';
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** A numeric id as a URL gives it; a `documentId` is never this short a run of digits. */
 const NUMERIC_ID = /^\d{1,15}$/;

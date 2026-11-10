@@ -7,11 +7,8 @@ import { RoleChangedError } from '../../services/role';
 import type roleService from '../../services/role';
 import type { RoleInput, RoleUpdateBody } from '../../services/role';
 import { toPermissionDiff } from '../../utils/permission-row';
+import { isPlain } from '../../utils/is-plain';
 
-type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const refuse = (message: string): never => {
   throw new errors.ValidationError(message);

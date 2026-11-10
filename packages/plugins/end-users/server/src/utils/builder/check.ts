@@ -18,6 +18,7 @@ import type {
 import { VALUE_KINDS, valueProblem } from '../../../../shared/builder/values';
 import { PROFILE_UID, USER_UID } from '../../constants';
 import { layoutContentTypeUids } from '../layout-content-types';
+import { isPlain } from '../is-plain';
 
 export type Plain = Record<string, unknown>;
 
@@ -27,9 +28,6 @@ type ValueKind = 'string' | 'number' | 'boolean';
 
 /** What `contentTypes.isPrivateAttribute` reads: a schema, content type or component */
 type Model = Parameters<typeof contentTypes.isPrivateAttribute>[0];
-
-export const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 export const hasOwn = (object: object, key: string) =>
   Object.prototype.hasOwnProperty.call(object, key);

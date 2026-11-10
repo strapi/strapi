@@ -5,6 +5,7 @@ import { PERMISSION_UID, PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../c
 import type permissionService from './permission';
 import type { StoredPermission } from './permission';
 import type { RoleSummary } from './role';
+import { isPlain } from '../utils/is-plain';
 
 type ContentApiAbility = Modules.ContentAPI.ContentApiAbility;
 type ConditionUser = Modules.ContentAPI.ConditionUser;
@@ -28,9 +29,6 @@ export interface CallerRole {
 export interface CallerPermissions extends Modules.ContentAPI.PermissionsDescription {
   roles: CallerRole[];
 }
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const toCallerRole = ({ documentId, name, type }: CallerRole): CallerRole => ({
   documentId,

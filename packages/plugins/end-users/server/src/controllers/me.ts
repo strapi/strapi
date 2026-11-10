@@ -6,6 +6,7 @@ import { PER_USER_CACHE_CONTROL, PLUGIN_ID, PROFILE_UID, USER_UID } from '../con
 import type profileService from '../services/profile';
 import type userService from '../services/user';
 import { createUsersCompat, isUsersCompat } from '../compat/users-controller';
+import { isPlain } from '../utils/is-plain';
 
 /**
  * What the core controllers of the user type give: the query and input checks and the output
@@ -20,9 +21,6 @@ interface CoreController {
   sanitizeOutput(data: unknown, ctx: Koa.Context): Promise<unknown>;
   transformResponse(data: unknown, meta?: unknown): unknown;
 }
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * `GET /api/users/me`, `GET|PUT /api/users/me/profile`: the signed-in user and their own profile,

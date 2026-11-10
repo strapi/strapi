@@ -26,6 +26,7 @@ import { conditionsNaming } from '../utils/builder/usage';
 import type { TransactionHooks } from '../utils/transaction-hooks';
 import type abilityService from './ability';
 import type permissionService from './permission';
+import { isPlain } from '../utils/is-plain';
 
 /** A role as the services hand it out: no database id, only the `documentId`. */
 export interface RoleRow {
@@ -123,9 +124,6 @@ const USERS_PAGE_SIZE = 500;
 const MAX_HOLDERS_ON_DELETE = 5_000;
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const refuse = (message: string): never => {
   throw new errors.ValidationError(message);

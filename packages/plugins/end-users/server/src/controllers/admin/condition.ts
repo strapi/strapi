@@ -8,14 +8,11 @@ import { ConditionsUpdatingError } from '../../services/condition';
 import type builderLayoutService from '../../services/builder-layout';
 import type conditionService from '../../services/condition';
 import type { ValidateRead } from '../../services/condition';
+import { isPlain } from '../../utils/is-plain';
 
-type Plain = Record<string, unknown>;
 
 /** What the Content Manager asks of an admin to list a content type's entries */
 const CONTENT_MANAGER_READ = 'plugin::content-manager.explorer.read';
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const refuse = (message: string): never => {
   throw new errors.ValidationError(message);

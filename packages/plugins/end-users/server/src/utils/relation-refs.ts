@@ -1,3 +1,5 @@
+import { isPlain } from './is-plain';
+
 /**
  * What a relation value in Document Service data points at, in every shape the service accepts for
  * it: a documentId, a numeric id, `{ documentId }` or `{ id }`, a list of those, and an object with
@@ -12,10 +14,6 @@ export interface RelationRef {
   id?: number;
 }
 
-type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 export const relationRefs = (value: unknown): RelationRef[] => {
   if (Array.isArray(value)) {

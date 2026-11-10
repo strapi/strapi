@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 
 import { MIN_SECRET_LENGTH, PLUGIN_ID } from './constants';
 import { hasWildcard, originsFromEnv, TRUSTED_ORIGINS_ENV } from './config/trusted-origins';
+import { isPlain } from './utils/is-plain';
 
 /** Plain code-unit order, the same order `Array.prototype.sort` gives strings by default. */
 const byCodeUnit = (a: string, b: string): number => {
@@ -16,9 +17,6 @@ const byCodeUnit = (a: string, b: string): number => {
  */
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const CORS = 'strapi::cors';
 

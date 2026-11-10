@@ -34,14 +34,12 @@ import type { Core } from '@strapi/types';
 import { PLUGIN_ID, PROFILE_UID } from '../../../constants';
 import { hasRequestState, setPendingProfile } from '../../../utils/pending-profile';
 import type settingsService from '../../../services/settings';
+import { isPlain } from '../../../utils/is-plain';
 
 const SIGN_UP_PATH = '/sign-up/email';
 
 /** What the sign-up endpoint reads from the body besides the user fields. */
 const SIGN_UP_KEYS = ['name', 'email', 'password', 'image', 'callbackURL', 'rememberMe'];
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const signUpDisabled = () =>
   new APIError('FORBIDDEN', {

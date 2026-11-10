@@ -20,6 +20,7 @@ import {
 import type { PermissionDiff, PermissionRow } from '../utils/permission-row';
 import type { TransactionHooks } from '../utils/transaction-hooks';
 import type abilityService from './ability';
+import { isPlain } from '../utils/is-plain';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
 type ContentApiConditionParam = Modules.ContentAPI.ContentApiConditionParam;
@@ -47,9 +48,6 @@ const chunksOf = <T>(items: readonly T[]): T[][] => {
 type Row = Record<string, unknown>;
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const hasOwn = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
 

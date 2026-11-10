@@ -8,11 +8,9 @@ import {
   TRUSTED_ORIGINS_ENV,
   trustsEveryOrigin,
 } from './trusted-origins';
+import { isPlain } from '../utils/is-plain';
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const invalid = (key: string, expected: string, value: unknown): never => {
   throw new Error(

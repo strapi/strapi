@@ -32,6 +32,7 @@ import type { ConfiguredProvider } from '../providers/registry';
 import { registry } from '../providers/registry';
 import { writableProfileAttributes } from '../utils/writable-profile-attributes';
 import { PERMISSIONS_TTL_MS } from './ability';
+import { isPlain } from '../utils/is-plain';
 
 /** Where the providers are kept: the core store, as `plugin_end-users_providers`. */
 const STORE_KEY = 'providers';
@@ -93,9 +94,6 @@ interface Entry {
   stored?: StoredProvider;
   configured?: ConfiguredProvider;
 }
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isMissing = (value: unknown) => value === undefined || value === null || value === '';
 

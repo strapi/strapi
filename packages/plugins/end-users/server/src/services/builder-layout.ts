@@ -6,11 +6,11 @@ import {
   attributeOf,
   enumOf,
   filterableType,
-  isPlain,
   isPrivate,
   relationOf,
   schemaOf,
 } from '../utils/builder/check';
+import { isPlain } from '../utils/is-plain';
 import { layoutContentTypeUids } from '../utils/layout-content-types';
 
 type Plain = Record<string, unknown>;

@@ -3,6 +3,7 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { PROFILE_UID } from '../constants';
+import { isPlain } from '../utils/is-plain';
 
 type Plain = Record<string, unknown>;
 
@@ -16,9 +17,6 @@ interface Documents {
   findFirst(params: Plain): Promise<{ documentId: string } | null>;
   update(params: Plain): Promise<unknown>;
 }
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * The core service of the profile type, with the two methods the `me/profile` routes use: the

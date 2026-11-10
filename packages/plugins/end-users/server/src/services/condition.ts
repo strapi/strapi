@@ -34,6 +34,7 @@ import type { ParamExtras, WriteGrant } from '../utils/builder/usage';
 import { layoutContentTypeUids, registerTimeContentTypeUids } from '../utils/layout-content-types';
 import type abilityService from './ability';
 import type providerService from './provider';
+import { isPlain } from '../utils/is-plain';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
 type ConditionSource = NonNullable<ContentApiConditionDefinition['source']>;
@@ -84,9 +85,6 @@ export interface PreviewScope {
    */
   profileQuery: () => object;
 }
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const conditionProvider = (strapi: Core.Strapi) =>
   strapi.contentAPI.permissions.providers.condition;

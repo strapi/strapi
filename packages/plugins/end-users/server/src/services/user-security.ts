@@ -13,6 +13,7 @@ import type abilityService from './ability';
 import type { CallerPermissions } from './ability';
 import type roleService from './role';
 import type settingsService from './settings';
+import { isPlain } from '../utils/is-plain';
 
 type Plain = Record<string, unknown>;
 
@@ -100,9 +101,6 @@ const coversEveryField = (ability: unknown, action: string, names: string[]): bo
 
   return names.every((name) => named.has(name));
 };
-
-const isPlainQuery = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** Whether any rule for `action` names the fields it covers (one without a list covers every field). */
 const hasFieldList = (ability: unknown, action: string): boolean => {
@@ -205,12 +203,12 @@ const userSecurityService = ({ strapi }: { strapi: Core.Strapi }) => {
         const narrowing = [
           ...new Map(
             perField
-              .filter((one) => isPlainQuery(one) && Object.keys(one).length > 0)
+              .filter((one) => isPlain(one) && Object.keys(one).length > 0)
               .map((one) => [JSON.stringify(one), one])
           ).values(),
         ];
 
-        if (!perField.every(isPlainQuery)) {
+        if (!perField.every(isPlain)) {
           query = undefined;
         } else {
           query = narrowing.length > 0 ? { $and: narrowing } : {};

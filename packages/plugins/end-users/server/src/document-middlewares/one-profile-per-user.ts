@@ -5,6 +5,7 @@ import { PROFILE_UID, USER_UID } from '../constants';
 import { inProfileLifecycle } from '../utils/profile-lifecycle';
 import { relationRefs } from '../utils/relation-refs';
 import type { RelationRef } from '../utils/relation-refs';
+import { isPlain } from '../utils/is-plain';
 
 const MESSAGE = 'This user already has a profile';
 
@@ -28,9 +29,6 @@ const lockOrder = (refs: RelationRef[]) =>
     // eslint-disable-next-line no-nested-ternary
     return left < right ? -1 : left > right ? 1 : 0;
   });
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** What the gate could read of a relation value, and whether anything in it was beyond it */
 interface StrictRefs {

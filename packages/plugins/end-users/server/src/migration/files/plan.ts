@@ -17,6 +17,7 @@ import {
 import type { UsersPermissionsSettings } from './config-plugins';
 import { scanCode } from './code';
 import { planSchemaChanges } from './schemas';
+import { isPlain } from '../../utils/is-plain';
 
 const UP_PLUGIN = 'users-permissions';
 const UP_CONFIG = `plugin::${UP_PLUGIN}`;
@@ -75,9 +76,6 @@ const readSource = async (srcDir: string): Promise<Map<string, string>> => {
 
   return files;
 };
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** Users & Permissions' live settings, as `endUsersConfigBlock` reads them */
 const readSettings = async (strapi: Core.Strapi): Promise<UsersPermissionsSettings> => {

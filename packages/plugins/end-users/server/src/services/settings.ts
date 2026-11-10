@@ -18,6 +18,7 @@ import { readMigrationConfig } from '../migration/config';
 import type { AuthEngine } from '../engine/types';
 import { writableProfileAttributes } from '../utils/writable-profile-attributes';
 import { PERMISSIONS_TTL_MS } from './ability';
+import { isPlain } from '../utils/is-plain';
 
 /** Where the document is kept: the core store, as `plugin_end-users_settings`. */
 const SETTINGS_KEY = 'settings';
@@ -60,9 +61,6 @@ const defaults = (): EndUsersSettings => ({
 });
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isStringList = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');

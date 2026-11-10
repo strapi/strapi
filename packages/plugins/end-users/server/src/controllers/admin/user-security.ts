@@ -4,11 +4,9 @@ import type { Core } from '@strapi/types';
 import { PLUGIN_ID } from '../../constants';
 import type userSecurityService from '../../services/user-security';
 import type { SecurityAccess } from '../../services/user-security';
+import { isPlain } from '../../utils/is-plain';
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * `/end-users/users/:documentId/security` and its actions: the Content Manager's Security panel of

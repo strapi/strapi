@@ -9,6 +9,7 @@ import type {
 } from '../../../shared/contracts/migration';
 import { PLUGIN_ID } from '../constants';
 import { MIGRATION_KEY } from '../compat/legacy-jwt';
+import { isPlain } from '../utils/is-plain';
 
 export type {
   MigrationRecord,
@@ -33,10 +34,6 @@ const STATUSES: ReadonlySet<string> = new Set<MigrationStatus>([
   'rolled-back',
 ]);
 
-type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const text = (value: unknown): string | null => (typeof value === 'string' ? value : null);
 

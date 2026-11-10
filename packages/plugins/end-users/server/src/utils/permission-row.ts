@@ -2,6 +2,7 @@ import { errors } from '@strapi/utils';
 
 import type { PermissionRow } from '../../../shared/contracts/permissions';
 import type { PermissionDiff, PermissionProblem } from '../../../shared/contracts/roles';
+import { isPlain, isPlainObject } from './is-plain';
 
 /**
  * What a role's permission is, as the plugin stores it in `eu_permissions` and as an export file
@@ -11,9 +12,6 @@ import type { PermissionDiff, PermissionProblem } from '../../../shared/contract
 export type { PermissionDiff, PermissionRow };
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const refuse = (message: string): never => {
   throw new errors.ValidationError(message);
@@ -69,16 +67,6 @@ const UNSAFE_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'p
 
 /** How deep the params of a condition may nest. */
 const MAX_PARAMS_DEPTH = 16;
-
-const isPlainObject = (value: unknown): value is Plain => {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-
-  return prototype === Object.prototype || prototype === null;
-};
 
 /**
  * A copy of a JSON value, made of new objects and arrays, without the keys that mean something to
