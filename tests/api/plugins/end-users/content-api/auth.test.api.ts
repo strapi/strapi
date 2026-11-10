@@ -325,6 +325,62 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect((await reset('token-unknown', 'N3w-password-long')).statusCode).toBe(400);
     });
 
+    it('refuses a banned user`s reset before the password changes, and mails a banned user no reset link', async () => {
+      const { email, documentId } = await signedUp();
+
+      await strapi.documents(VERIFICATION_UID).create({
+        data: {
+          identifier: 'reset-password:token-of-banned',
+          value: documentId,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        },
+      });
+      await strapi
+        .documents(USER_UID)
+        .update({ documentId, data: { banned: true, banReason: 'spam' } });
+
+      const refused = await rq.post('/api/auth/reset-password', {
+        body: { token: 'token-of-banned', newPassword: 'N3w-password-long' },
+      });
+
+      // What the native sign-in answers a banned user
+      expect(refused.statusCode).toBe(403);
+      expect(refused.body.code).toBe('BANNED_USER');
+      // Refused before anything was spent or changed
+      expect(await count(VERIFICATION_UID, { identifier: 'reset-password:token-of-banned' })).toBe(
+        1
+      );
+
+      clearSentEmails();
+
+      const requested = await rq.post('/api/auth/request-password-reset', {
+        body: { email, redirectTo: `${TEST_ORIGIN}/reset` },
+        headers: FROM_FRONT_END,
+      });
+      const unknown = await rq.post('/api/auth/request-password-reset', {
+        body: { email: 'nobody-banned@example.com', redirectTo: `${TEST_ORIGIN}/reset` },
+        headers: FROM_FRONT_END,
+      });
+
+      // Answered as for an address with no account
+      expect(requested.statusCode).toBe(200);
+      expect(requested.body).toEqual(unknown.body);
+
+      await strapi.documents(USER_UID).update({ documentId, data: { banned: false } });
+
+      expect((await signIn(email, PASSWORD)).statusCode).toBe(200);
+      expect((await signIn(email, 'N3w-password-long')).statusCode).toBe(401);
+
+      // A later reset, once the ban is lifted, is mailed, and is the only mail
+      const later = await rq.post('/api/auth/request-password-reset', {
+        body: { email, redirectTo: `${TEST_ORIGIN}/reset` },
+        headers: FROM_FRONT_END,
+      });
+
+      expect(later.statusCode).toBe(200);
+      expect((await emailsAfter(1)).map((sent) => sent.to)).toEqual([email]);
+    });
+
     it('asks for the second factor, counts failed codes and forgives them after a good one', async () => {
       const { email, documentId } = await signedUp();
       const cookie = cookieOf(await signIn(email), 'strapi.session_token');
