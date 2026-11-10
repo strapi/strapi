@@ -3,6 +3,7 @@
 import { createTestBuilder } from 'api-tests/builder';
 import { createAuthRequest } from 'api-tests/request';
 import { createStrapiInstance } from 'api-tests/strapi';
+import { createUtils } from 'api-tests/utils';
 
 const measureUid = 'api::measure.measure';
 const measureModel = {
@@ -12,7 +13,7 @@ const measureModel = {
   pluralName: 'measures',
   displayName: 'Measure',
   description: '',
-  draftAndPublish: false,
+  draftAndPublish: true,
   attributes: {
     name: { type: 'string' },
     rank: { type: 'integer' },
@@ -26,12 +27,16 @@ const measureModel = {
 /**
  * The recent documents widgets render `title` as text. The configured main field can be any
  * listable attribute (integer, decimal, date, boolean…), so the endpoint must return the main
- * field value as a string, and fall back to the document id when the value is empty.
+ * field value as a string. An empty value returns an empty string, which the widgets render as
+ * a translated "Untitled". A main field the user cannot read falls back to the document id.
  */
 describe('Homepage API - recent documents title with a non-string main field', () => {
   const builder = createTestBuilder();
   let strapi;
+  let utils;
   let rq;
+  let restrictedUser;
+  let restrictedRole;
   let filled;
   let empty;
 
@@ -50,10 +55,10 @@ describe('Homepage API - recent documents title with a non-string main field', (
     expect(response.statusCode).toBe(200);
   };
 
-  const getTitles = async () => {
-    const response = await rq({
+  const getTitles = async (action: 'update' | 'publish', request = rq) => {
+    const response = await request({
       method: 'GET',
-      url: '/content-manager/homepage/recent-documents?action=update',
+      url: `/content-manager/homepage/recent-documents?action=${action}`,
     });
     expect(response.statusCode).toBe(200);
 
@@ -70,6 +75,7 @@ describe('Homepage API - recent documents title with a non-string main field', (
   beforeAll(async () => {
     await builder.addContentTypes([measureModel]).build();
     strapi = await createStrapiInstance();
+    utils = createUtils(strapi);
     rq = await createAuthRequest({ strapi });
 
     filled = await strapi.documents(measureUid).create({
@@ -81,29 +87,72 @@ describe('Homepage API - recent documents title with a non-string main field', (
         startsAt: '2026-11-09T10:30:00.000Z',
         active: false,
       },
+      status: 'published',
     });
-    empty = await strapi.documents(measureUid).create({ data: { name: '' } });
+    empty = await strapi.documents(measureUid).create({
+      data: { name: '' },
+      status: 'published',
+    });
   });
 
   afterAll(async () => {
+    if (restrictedUser !== undefined) {
+      await utils.deleteUsersById([restrictedUser.id]);
+    }
+    if (restrictedRole !== undefined) {
+      await utils.deleteRolesById([restrictedRole.id]);
+    }
     await strapi.destroy();
     await builder.cleanup();
   });
 
-  test.each([
-    ['name', 'Filled'],
-    ['rank', '42'],
-    ['price', '9.5'],
-    ['day', '2026-11-09'],
-    ['startsAt', '2026-11-09T10:30:00.000Z'],
-    ['active', 'false'],
-  ])('returns main field %s as a string title', async (mainField, expectedTitle) => {
-    await setMainField(mainField);
+  describe.each([
+    ['Last edited', 'update'],
+    ['Last published', 'publish'],
+  ] as const)('%s', (_widget, action) => {
+    test.each([
+      ['name', 'Filled'],
+      ['rank', '42'],
+      ['price', '9.5'],
+      ['day', '2026-11-09'],
+      ['startsAt', '2026-11-09T10:30:00.000Z'],
+      ['active', 'false'],
+    ])('returns main field %s as a string title', async (mainField, expectedTitle) => {
+      await setMainField(mainField);
 
-    const titles = await getTitles();
+      const titles = await getTitles(action);
 
-    expect(titles.filled).toBe(expectedTitle);
-    // An empty main field value falls back to the document id
+      expect(titles.filled).toBe(expectedTitle);
+      // An empty main field value returns an empty title, rendered as "Untitled" by the widgets
+      expect(titles.empty).toBe('');
+    });
+  });
+
+  test('returns the document id when the user cannot read the main field', async () => {
+    await setMainField('name');
+
+    restrictedRole = await utils.createRole({
+      name: 'role-recent-documents-title',
+      description: 'Can read measures without their name',
+    });
+    await utils.assignPermissionsToRole(restrictedRole.id, [
+      {
+        action: 'plugin::content-manager.explorer.read',
+        subject: measureUid,
+        properties: { fields: ['rank'] },
+      },
+    ]);
+    restrictedUser = await utils.createUser({
+      firstname: 'restricted',
+      lastname: 'User',
+      email: 'recent-documents-title.restricted@strapi.io',
+      roles: [restrictedRole.id],
+    });
+    const restrictedRq = await createAuthRequest({ strapi, userInfo: restrictedUser });
+
+    const titles = await getTitles('update', restrictedRq);
+
+    expect(titles.filled).toBe(filled.documentId);
     expect(titles.empty).toBe(empty.documentId);
   });
 });

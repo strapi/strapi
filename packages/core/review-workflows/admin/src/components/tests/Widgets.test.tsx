@@ -41,6 +41,17 @@ describe('AssignedWidget', () => {
     expect(editLink).toHaveAttribute('href', expect.stringContaining(mockDocuments[0].documentId));
   });
 
+  it('renders "Untitled" for an empty title', () => {
+    (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
+      data: [{ ...mockDocuments[0], title: '' }],
+      isLoading: false,
+      error: null,
+    });
+
+    render(<AssignedWidget />);
+    expect(screen.getByText('Untitled')).toBeInTheDocument();
+  });
+
   it('renders a dash for a document without a stage', () => {
     (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
       data: [{ ...mockDocuments[0], strapi_stage: null }],
