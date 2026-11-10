@@ -351,6 +351,29 @@ describe('metadata', () => {
               );
             }
           );
+
+          // A manyToMany without a join table builds no join table either, so it must check its target on its own
+          test('throws error on missing target of a manyToMany relation without a join table', () => {
+            const badModels = [
+              {
+                uid: 'api::article.article',
+                singularName: 'article',
+                tableName: 'articles',
+                attributes: {
+                  contributors: {
+                    type: 'relation',
+                    relation: 'manyToMany',
+                    useJoinTable: false,
+                    target: 'plugin::users-permissions.user',
+                  },
+                },
+              },
+            ] as any;
+
+            expect(() => createMetadata(badModels)).toThrow(
+              'Error on attribute contributors in model article(api::article.article): Metadata for "plugin::users-permissions.user" not found'
+            );
+          });
         });
 
         describe('inverse side relations', () => {
