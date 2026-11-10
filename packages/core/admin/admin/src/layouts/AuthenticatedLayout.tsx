@@ -19,7 +19,6 @@ import { useConfiguration } from '../features/Configuration';
 import { useMenu } from '../hooks/useMenu';
 import { useInformationQuery } from '../services/admin';
 import { getStrapiUpdateInfo } from '../utils/strapiUpdate';
-import { hashAdminUserEmail } from '../utils/users';
 
 import { useAuthenticatedAccessTracking } from './useAuthenticatedAccessTracking';
 import { useHashedAdminUserId } from './useHashedAdminUserId';
@@ -58,14 +57,6 @@ const AdminLayout = () => {
         });
     }
   }, [showReleaseNotification]);
-
-  React.useEffect(() => {
-    hashAdminUserEmail(userInfo).then((id) => {
-      if (id) {
-        setUserId(id);
-      }
-    });
-  }, [userInfo]);
 
   const strapiUpdate = getStrapiUpdateInfo(strapiVersion, tagName);
 
