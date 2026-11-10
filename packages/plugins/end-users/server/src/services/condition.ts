@@ -35,6 +35,7 @@ import { layoutContentTypeUids, registerTimeContentTypeUids } from '../utils/lay
 import type abilityService from './ability';
 import type providerService from './provider';
 import { isPlain } from '../utils/is-plain';
+import { documentsOf, type PluginDocuments } from '../utils/typed-strapi';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
 type ConditionSource = NonNullable<ContentApiConditionDefinition['source']>;
@@ -1097,8 +1098,8 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
         user,
         uid: subject,
       });
-      const documents = strapi.documents(subject as UID.ContentType);
-      const count = (filters: object) => documents.count({ filters } as never);
+      const documents = documentsOf<PluginDocuments>(strapi, subject as UID.ContentType);
+      const count = (filters: object) => documents.count({ filters });
 
       // A condition that denies the sample user keeps nothing: there is no filter to count with
       const [total, matching] = await Promise.all([

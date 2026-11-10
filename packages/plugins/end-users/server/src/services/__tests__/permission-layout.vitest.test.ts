@@ -968,7 +968,9 @@ describe('permission layout service', () => {
       });
 
       it('hides a config that is a list whole, whatever strings it holds', async () => {
-        expect(await servedConfig([['https://user', 'hunter2@db.internal'].join(':')])).toEqual({ value: SECRET });
+        expect(await servedConfig([['https://user', 'hunter2@db.internal'].join(':')])).toEqual({
+          value: SECRET,
+        });
       });
     });
 
@@ -977,7 +979,13 @@ describe('permission layout service', () => {
         key = ['sk', 'live', '123'].join('_');
       }
 
-      for (const config of [['sk', 'live', '123'].join('_'), 42, true, ['a', { token: 't' }], new Settings()]) {
+      for (const config of [
+        ['sk', 'live', '123'].join('_'),
+        42,
+        true,
+        ['a', { token: 't' }],
+        new Settings(),
+      ]) {
         expect(await servedConfig(config), String(config)).toEqual({ value: SECRET });
       }
 

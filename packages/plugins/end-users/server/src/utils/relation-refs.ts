@@ -14,7 +14,6 @@ export interface RelationRef {
   id?: number;
 }
 
-
 export const relationRefs = (value: unknown): RelationRef[] => {
   if (Array.isArray(value)) {
     return value.flatMap(relationRefs);

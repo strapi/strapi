@@ -12,6 +12,7 @@ import type { MigrationRecord } from './record';
 import { columnsOf, dropTable, hasTable, qualified, renameBack, tableOf } from './schema-ops';
 import type { DbClient } from './snapshot';
 import { RENAMED, upJoinTableName, upLinkColumn } from './tables';
+import { contentTypesOf } from '../utils/typed-strapi';
 
 const UP = 'plugin::users-permissions';
 const EU = `plugin::${PLUGIN_ID}`;
@@ -243,9 +244,8 @@ const OWN_COLUMNS = new Set([
 /** The profile's scalar attributes, as the column each is stored in */
 const profileScalars = (strapi: Core.Strapi): string[] => {
   const attributes =
-    (strapi.contentTypes as unknown as Record<string, { attributes?: Record<string, any> }>)[
-      PROFILE_UID
-    ]?.attributes ?? {};
+    contentTypesOf<Record<string, { attributes?: Record<string, any> }>>(strapi)[PROFILE_UID]
+      ?.attributes ?? {};
 
   return Object.entries(attributes)
     .filter(([name, attribute]) => !NON_SCALAR.has(attribute.type) && name !== 'user')

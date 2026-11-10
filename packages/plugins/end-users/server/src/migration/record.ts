@@ -34,7 +34,6 @@ const STATUSES: ReadonlySet<string> = new Set<MigrationStatus>([
   'rolled-back',
 ]);
 
-
 const text = (value: unknown): string | null => (typeof value === 'string' ? value : null);
 
 const textList = (value: unknown): string[] =>

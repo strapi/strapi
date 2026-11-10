@@ -6,12 +6,12 @@ import {
   REQUEST_NEVER_WRITES_USER_RELATIONS,
 } from './engine-owned-user-fields';
 import { USER_UID } from '../constants';
+import { contentTypesOf } from './typed-strapi';
 
 type Attributes = Record<string, { private?: boolean; writable?: boolean }>;
 
 const attributesOf = (strapi: Core.Strapi, uid: string): Attributes =>
-  (strapi.contentTypes as unknown as Record<string, { attributes?: Attributes }>)[uid]
-    ?.attributes ?? {};
+  contentTypesOf<Record<string, { attributes?: Attributes }>>(strapi)[uid]?.attributes ?? {};
 
 const ENGINE_OWNED: ReadonlySet<string> = new Set([
   ...ENGINE_OWNED_USER_FIELDS,

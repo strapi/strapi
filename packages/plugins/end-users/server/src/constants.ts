@@ -1,23 +1,25 @@
+import type { UID } from '@strapi/types';
+
 export const PLUGIN_ID = 'end-users';
 
 /** A secret shorter than this is reported as too short (boot warning and the admin's summary) */
 export const MIN_SECRET_LENGTH = 32;
 
-export const USER_UID = 'plugin::end-users.user';
-export const ROLE_UID = 'plugin::end-users.role';
+export const USER_UID = 'plugin::end-users.user' as const satisfies UID.ContentType;
+export const ROLE_UID = 'plugin::end-users.role' as const satisfies UID.ContentType;
 /**
  * The one Content API action the role type has: reading a role through a relation of another type
  * (`user.roles`). There is no route for it. A role of the editor grants it as a `find` row on the
  * role type, and core's field rules for a relation to the type read it (see `registerRoleReadAction`).
  */
 export const ROLE_FIND_ACTION = `${ROLE_UID}.find`;
-export const PERMISSION_UID = 'plugin::end-users.permission';
-export const PROFILE_UID = 'plugin::end-users.profile';
-export const SESSION_UID = 'plugin::end-users.session';
-export const ACCOUNT_UID = 'plugin::end-users.account';
-export const VERIFICATION_UID = 'plugin::end-users.verification';
-export const TWO_FACTOR_UID = 'plugin::end-users.two-factor';
-export const RATE_LIMIT_UID = 'plugin::end-users.rate-limit';
+export const PERMISSION_UID = 'plugin::end-users.permission' as const satisfies UID.ContentType;
+export const PROFILE_UID = 'plugin::end-users.profile' as const satisfies UID.ContentType;
+export const SESSION_UID = 'plugin::end-users.session' as const satisfies UID.ContentType;
+export const ACCOUNT_UID = 'plugin::end-users.account' as const satisfies UID.ContentType;
+export const VERIFICATION_UID = 'plugin::end-users.verification' as const satisfies UID.ContentType;
+export const TWO_FACTOR_UID = 'plugin::end-users.two-factor' as const satisfies UID.ContentType;
+export const RATE_LIMIT_UID = 'plugin::end-users.rate-limit' as const satisfies UID.ContentType;
 
 /**
  * The GraphQL type names of the plugin's public types, set as `pluginOptions.graphql.typeName` (the

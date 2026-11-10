@@ -184,7 +184,8 @@ const mergeOptions = (base: Plain, override: Plain): Plain => {
 
     const current = merged[key];
 
-    merged[key] = isPlainObject(current) && isPlainObject(value) ? mergeOptions(current, value) : value;
+    merged[key] =
+      isPlainObject(current) && isPlainObject(value) ? mergeOptions(current, value) : value;
   }
 
   return merged;
@@ -395,7 +396,8 @@ export const buildAuthOptions = (
     withClaims(strapi, (config as { providerId: string }).providerId, resolvePreset(config))
   );
   const compat = readCompatConfig(strapi);
-  const projectPlugins = (isPlainObject(project?.options) ? project?.options.plugins : undefined) ?? [];
+  const projectPlugins =
+    (isPlainObject(project?.options) ? project?.options.plugins : undefined) ?? [];
   const senders = emailSenders(strapi);
 
   const base: Plain = {

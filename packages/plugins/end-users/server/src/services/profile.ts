@@ -4,6 +4,7 @@ import type { Core } from '@strapi/types';
 
 import { PROFILE_UID } from '../constants';
 import { isPlain } from '../utils/is-plain';
+import { documentsOf } from '../utils/typed-strapi';
 
 type Plain = Record<string, unknown>;
 
@@ -23,7 +24,7 @@ interface Documents {
  * caller's own profile, found by who the caller is and never by an id the request sent.
  */
 export default factories.createCoreService(PROFILE_UID, ({ strapi }: { strapi: Core.Strapi }) => {
-  const documents = () => strapi.documents(PROFILE_UID) as unknown as Documents;
+  const documents = () => documentsOf<Documents>(strapi, PROFILE_UID);
 
   /**
    * An empty value would be dropped from the filter, and the filter would then match the first

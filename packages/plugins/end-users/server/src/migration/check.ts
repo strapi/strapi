@@ -14,6 +14,7 @@ import type { ReportContext } from './report';
 import { readUpSnapshot } from './snapshot';
 import type { DbClient } from './snapshot';
 import { isPlain } from '../utils/is-plain';
+import { contentTypesOf } from '../utils/typed-strapi';
 
 const UP_CONFIG = 'plugin::users-permissions';
 const UP_USER_UID = 'plugin::users-permissions.user';
@@ -106,7 +107,7 @@ const reportContext = (
   now: Date,
   codeFindings: ReportContext['codeFindings']
 ): ReportContext => {
-  const types = strapi.contentTypes as unknown as Record<string, TypeLike>;
+  const types = contentTypesOf<Record<string, TypeLike>>(strapi);
   const compat = readCompatConfig(strapi).usersPermissions;
   const upUser = types[UP_USER_UID];
   const providers = strapi.contentAPI.permissions.providers.action;

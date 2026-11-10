@@ -26,6 +26,7 @@ import { adminStep } from './admin-side';
 import { keepHold, storesStep } from './post-sync-stores';
 import { waitForClaim } from './pre-sync';
 import { upJoinTableName, upLinkColumn } from './tables';
+import { contentTypesOf, metadataOf } from '../utils/typed-strapi';
 
 const PAGE = 1000;
 /** Rows per insert: SQLite takes at most 999 values in one statement */
@@ -81,10 +82,10 @@ const targetSingularName = (strapi: Core.Strapi, attribute: { target?: string })
     : undefined;
 
 const meta = (strapi: Core.Strapi, uid: string) => {
-  const found = strapi.db.metadata.get(uid) as unknown as {
+  const found = metadataOf<{
     tableName: string;
     attributes: Record<string, any>;
-  };
+  }>(strapi.db, uid);
 
   return found;
 };
@@ -182,9 +183,9 @@ const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: s
   }
 
   // Every other column the engine added, with the default its model gives a new user
-  const attributes = (
-    strapi.contentTypes as unknown as Record<string, { attributes?: Record<string, any> }>
-  )[USER_UID]?.attributes;
+  const attributes =
+    contentTypesOf<Record<string, { attributes?: Record<string, any> }>>(strapi)[USER_UID]
+      ?.attributes;
 
   for (const [name, attribute] of Object.entries(attributes ?? {})) {
     const value = plainDefault(attribute.default);
@@ -278,10 +279,7 @@ const rolesStep = async (strapi: Core.Strapi, record: MigrationRecord, owner: st
  * -----------------------------------------------------------------------------------------------*/
 
 const permissionContext = (strapi: Core.Strapi): PermissionMapContext => {
-  const types = strapi.contentTypes as unknown as Record<
-    string,
-    { options?: { draftAndPublish?: boolean } }
-  >;
+  const types = contentTypesOf<Record<string, { options?: { draftAndPublish?: boolean } }>>(strapi);
   const { action } = strapi.contentAPI.permissions.providers;
 
   return {
@@ -380,9 +378,8 @@ const OWN_COLUMNS = new Set([
 /** The profile's scalar attributes, as the column each is stored in */
 const profileScalars = (strapi: Core.Strapi): string[] => {
   const attributes =
-    (strapi.contentTypes as unknown as Record<string, { attributes?: Record<string, any> }>)[
-      PROFILE_UID
-    ]?.attributes ?? {};
+    contentTypesOf<Record<string, { attributes?: Record<string, any> }>>(strapi)[PROFILE_UID]
+      ?.attributes ?? {};
 
   return Object.entries(attributes)
     .filter(([name, attribute]) => !NON_SCALAR.has(attribute.type) && name !== 'user')

@@ -13,6 +13,7 @@ import type roleService from './services/role';
 import { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow } from './utils/default-permissions';
 import { asProfileLifecycle } from './utils/profile-lifecycle';
 import { writableFields } from './utils/writable-fields';
+import { contentTypesOf, documentsOf, type PluginDocuments } from './utils/typed-strapi';
 
 export { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow };
 
@@ -125,9 +126,9 @@ export const ensureEveryUserHasAProfile = async (
       try {
         // eslint-disable-next-line no-await-in-loop
         await asProfileLifecycle(() =>
-          strapi.documents(PROFILE_UID).create({
+          documentsOf<PluginDocuments>(strapi, PROFILE_UID).create({
             data: { user: { connect: [documentId] } },
-          } as never)
+          })
         );
         result.created += 1;
       } catch (error) {
@@ -153,12 +154,13 @@ export const ensureEveryUserHasAProfile = async (
  * field (a registration field) can. It is named at start so the cause is not found in a failure.
  */
 export const warnAboutRequiredProfileAttributes = (strapi: Core.Strapi): string[] => {
-  const attributes = (
-    strapi.contentTypes as unknown as Record<
-      string,
-      { attributes?: Record<string, { required?: boolean; default?: unknown; type?: string }> }
-    >
-  )[PROFILE_UID]?.attributes;
+  const attributes =
+    contentTypesOf<
+      Record<
+        string,
+        { attributes?: Record<string, { required?: boolean; default?: unknown; type?: string }> }
+      >
+    >(strapi)[PROFILE_UID]?.attributes;
 
   const names = Object.entries(attributes ?? {})
     .filter(
@@ -222,9 +224,8 @@ export const writeUserListLayout = async (strapi: Core.Strapi): Promise<boolean>
     return false;
   }
 
-  const attributes = (strapi.contentTypes as unknown as Record<string, { attributes?: object }>)[
-    USER_UID
-  ]?.attributes;
+  const attributes =
+    contentTypesOf<Record<string, { attributes?: object }>>(strapi)[USER_UID]?.attributes;
   const list = USER_LIST_LAYOUT.filter((name) => name in (attributes ?? {}));
 
   await manager.set({

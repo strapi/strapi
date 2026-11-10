@@ -10,6 +10,7 @@ import { toUpRole, toUpUser, translateRoleQuery } from './shapes';
 import type { UpRole, UpUser, UpUserSource } from './shapes';
 import { loadUserExtras, splitUserWrites } from './user-extras';
 import { isPlain } from '../utils/is-plain';
+import { controllerOf, documentsOf, serviceOf } from '../utils/typed-strapi';
 
 type Plain = Record<string, unknown>;
 
@@ -109,14 +110,14 @@ export const splitRoleQuery = (
  * entry points.
  */
 export const createUsersCompat = (strapi: Core.Strapi) => {
-  const core = () => strapi.controller(USER_UID as never) as unknown as CoreController;
+  const core = () => controllerOf<CoreController>(strapi, USER_UID);
   const profiles = () =>
     strapi.plugin(PLUGIN_ID).service('profile') as ReturnType<typeof profileService>;
   const userSchema = () => strapi.contentType(USER_UID) as Struct.ContentTypeSchema;
   const profileSchema = () => strapi.contentType(PROFILE_UID) as Struct.ContentTypeSchema;
   const roleSchema = () => strapi.contentType(ROLE_UID) as Struct.ContentTypeSchema;
-  const documents = () => strapi.documents(USER_UID as never) as unknown as Documents;
-  const entries = () => strapi.service(USER_UID as never) as unknown as UserEntries;
+  const documents = () => documentsOf<Documents>(strapi, USER_UID);
+  const entries = () => serviceOf<UserEntries>(strapi, USER_UID);
 
   /** What the core controllers hand the content API: the caller, the route and the action. */
   const options = (ctx: Koa.Context, action: string) => {

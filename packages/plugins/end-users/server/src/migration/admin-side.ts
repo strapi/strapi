@@ -7,6 +7,7 @@ import { keepHold } from './post-sync-stores';
 import type { PostSyncStep } from './post-sync';
 import { addReportItems, readReport } from './record';
 import { ITEM_SEVERITY } from './report';
+import { contentTypesOf } from '../utils/typed-strapi';
 
 const UP = 'plugin::users-permissions';
 const UP_USER = `${UP}.user`;
@@ -54,8 +55,7 @@ const rootOf = (field: string) => field.split('.')[0];
 
 const attributesOf = (strapi: Core.Strapi, uid: string): string[] =>
   Object.keys(
-    (strapi.contentTypes as unknown as Record<string, { attributes?: object }>)[uid]?.attributes ??
-      {}
+    contentTypesOf<Record<string, { attributes?: object }>>(strapi)[uid]?.attributes ?? {}
   );
 
 /** The user's `role` is the end user's `roles` */

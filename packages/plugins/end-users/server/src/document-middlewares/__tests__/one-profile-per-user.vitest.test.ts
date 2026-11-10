@@ -20,7 +20,9 @@ const setup = ({
         : { id: 5, documentId: params.where.documentId, user: current };
     }
 
-    events.push(`checked ${JSON.stringify(params.where.user)} (in transaction: ${inTransaction()})`);
+    events.push(
+      `checked ${JSON.stringify(params.where.user)} (in transaction: ${inTransaction()})`
+    );
 
     return existing;
   });

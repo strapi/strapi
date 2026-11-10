@@ -5,7 +5,6 @@ import { strapiAdapter } from '../adapter';
 import { transformFilters } from '../transformers/filters';
 import { createTransaction } from '../../../../__tests__/utils/fake-strapi';
 
-
 /**
  * Better Auth only knows `user`, `session`, `account` and `verification` out of the box. The other
  * models the plugin stores (two-factor, rate limit, passkey, jwks) are declared here the way the

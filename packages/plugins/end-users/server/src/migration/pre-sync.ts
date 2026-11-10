@@ -32,6 +32,7 @@ import {
   tableOf,
 } from './schema-ops';
 import { RENAMED, planStaging } from './tables';
+import { contentTypesOf } from '../utils/typed-strapi';
 
 export { RENAMED, stagingName, upJoinTableName } from './tables';
 
@@ -171,10 +172,15 @@ const SYSTEM_FIELDS = new Set([
 ]);
 
 const reportContext = (strapi: Core.Strapi, ctx: MigrationContext, client: DbClient) => {
-  const types = strapi.contentTypes as unknown as Record<
-    string,
-    { options?: { draftAndPublish?: boolean }; attributes?: Record<string, { private?: boolean }> }
-  >;
+  const types = contentTypesOf<
+    Record<
+      string,
+      {
+        options?: { draftAndPublish?: boolean };
+        attributes?: Record<string, { private?: boolean }>;
+      }
+    >
+  >(strapi);
 
   const context: ReportContext = {
     source: 'migration',
