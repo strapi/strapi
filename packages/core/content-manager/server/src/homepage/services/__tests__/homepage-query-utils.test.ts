@@ -125,6 +125,7 @@ describe('Homepage query utils', () => {
       ['an integer', 42, '42'],
       ['zero', 0, '0'],
       ['a decimal', 9.5, '9.5'],
+      ['a bigint', BigInt('9007199254740993'), '9007199254740993'],
       ['false', false, 'false'],
       ['true', true, 'true'],
       ['a date string', '2026-11-09', '2026-11-09'],
@@ -137,6 +138,9 @@ describe('Homepage query utils', () => {
       ['null', null],
       ['undefined', undefined],
       ['an empty string', ''],
+      // No main field type returns an object, so it has no text form to show
+      ['a plain object', { id: 1, name: 'Related' }],
+      ['an array', ['a', 'b']],
     ])('returns an empty string for %s', (_label, value) => {
       // The widgets render an empty title as a translated "Untitled"
       expect(formatRecentDocumentTitle(value)).toBe('');
