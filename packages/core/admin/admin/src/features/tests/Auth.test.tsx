@@ -191,7 +191,7 @@ const RbacProbe = () => {
 
 const QueryStringMenuProbe = () => {
   const navigate = useNavigate();
-  const mainMenu = useMenu(false);
+  const mainMenu = useMenu('none');
   const settingsMenu = useSettingsMenu();
 
   return (
