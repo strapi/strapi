@@ -82,13 +82,9 @@ export const mapRolePermissions = (
   };
 
   if (roleType === 'authenticated') {
-    add(
-      ...DEFAULT_AUTHENTICATED_PERMISSIONS.map((defaults) =>
-        defaults.action === `${PROFILE_UID}.update`
-          ? { ...defaults, properties: { fields: profileFields('write') } }
-          : defaults
-      )
-    );
+    // The own-profile update row is left out on purpose: the role gets it only when it held
+    // Users & Permissions' user.update (see the `update` branch below).
+    add(...DEFAULT_AUTHENTICATED_PERMISSIONS.filter((d) => d.action !== `${PROFILE_UID}.update`));
   }
 
   const drop = (action: string, reason: DroppedReason) => dropped.push({ action, reason });

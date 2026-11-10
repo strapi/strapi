@@ -255,6 +255,27 @@ describe('end-users compat: every must-keep behavior on a migrated database', ()
     await rq.put(`/api/users/${alice().id}`, { headers, body: { company: 'Acme' } });
   });
 
+  it('lets a role that could update users edit its own profile and refuses one that could not', async () => {
+    const allowed = await rq.put('/api/users/me/profile', {
+      headers: bearer(await aliceToken()),
+      body: { data: { company: 'Acme' } },
+    });
+
+    expect(allowed.status).toBe(200);
+
+    // The editors role never held the user update in Users & Permissions
+    const editor = await signIn('erin.upper@example.com');
+
+    expect(editor.status).toBe(200);
+
+    const refused = await rq.put('/api/users/me/profile', {
+      headers: bearer(editor.body.jwt as string),
+      body: { data: { company: 'Elsewhere' } },
+    });
+
+    expect(refused.status).toBe(403);
+  });
+
   it('shows the migrated role with its old id on /users/me?populate=role', async () => {
     const res = await rq.get('/api/users/me?populate=role', {
       headers: bearer(await aliceToken()),

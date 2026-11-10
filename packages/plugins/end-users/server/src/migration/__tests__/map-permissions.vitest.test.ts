@@ -167,21 +167,33 @@ describe('mapRolePermissions', () => {
     ).toEqual([]);
   });
 
-  it('adds the default Authenticated rows once and collapses a duplicated row', () => {
+  it('adds the default Authenticated rows once, minus the own-profile update, and collapses a duplicate', () => {
     const { rows } = map(
       [`${UP}.user.me`, `${UP}.user.me`, 'api::note.note.find', 'api::note.note.find'],
       'authenticated'
     );
 
     expect(rows.map((row) => row.action).sort((a, b) => a.localeCompare(b))).toEqual(
-      [...DEFAULT_AUTHENTICATED_PERMISSIONS.map((row) => row.action), 'api::note.note.find'].sort(
-        (a, b) => a.localeCompare(b)
-      )
+      [
+        ...DEFAULT_AUTHENTICATED_PERMISSIONS.map((row) => row.action).filter(
+          (action) => action !== `${PROFILE_UID}.update`
+        ),
+        'api::note.note.find',
+      ].sort((a, b) => a.localeCompare(b))
     );
+    expect(find(rows, `${PROFILE_UID}.find`)).toBeDefined();
+    expect(find(rows, `${PROFILE_UID}.findOne`)).toBeDefined();
+    expect(find(rows, `${PROFILE_UID}.update`)).toBeUndefined();
+    // Other roles get no defaults
+    expect(map([], 'public').rows).toEqual([]);
+  });
+
+  it('gives an Authenticated role the own-profile update only when it held user.update', () => {
+    const { rows } = map([`${UP}.user.update`], 'authenticated');
+
     expect(find(rows, `${PROFILE_UID}.update`)?.properties).toEqual({
       fields: [`${PROFILE_UID}:write`],
     });
-    // Other roles get no defaults
-    expect(map([], 'public').rows).toEqual([]);
+    expect(find(rows, `${PROFILE_UID}.find`)).toBeDefined();
   });
 });

@@ -191,3 +191,5 @@ To migrate again after a rollback, switch the project to end-users again with `m
   managed in the admin panel.
 - Changing `email` through `PUT /api/users/:id`. The request is refused, and the address changes through
   `/change-email`, which proves the new one belongs to the user.
+- Editing their own profile, for the users of a role that could not update users in Users & Permissions. To let a
+  role's users edit their profile, grant it in the admin panel (Settings, End users, Roles).
