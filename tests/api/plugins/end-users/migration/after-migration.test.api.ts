@@ -263,17 +263,31 @@ describe('end-users compat: every must-keep behavior on a migrated database', ()
 
     expect(allowed.status).toBe(200);
 
-    // The editors role never held the user update in Users & Permissions
-    const editor = await signIn('erin.upper@example.com');
+    // The editors role never held the user update in Users & Permissions. Erin is in every seed
+    // (the upper-case twin is not, on MySQL), so she is moved to that role for the request
+    const erin = project.users.erin;
+    const asEditor = (roleId: number) =>
+      strapi.db
+        .connection('eu_users_roles_lnk')
+        .where({ user_id: erin.id })
+        .update({ role_id: roleId });
 
-    expect(editor.status).toBe(200);
+    await asEditor(project.roles.editors.id);
 
-    const refused = await rq.put('/api/users/me/profile', {
-      headers: bearer(editor.body.jwt as string),
-      body: { data: { company: 'Elsewhere' } },
-    });
+    try {
+      const editor = await signIn(erin.email);
 
-    expect(refused.status).toBe(403);
+      expect(editor.status).toBe(200);
+
+      const refused = await rq.put('/api/users/me/profile', {
+        headers: bearer(editor.body.jwt as string),
+        body: { data: { company: 'Elsewhere' } },
+      });
+
+      expect(refused.status).toBe(403);
+    } finally {
+      await asEditor(project.roles.authenticated.id);
+    }
   });
 
   it('shows the migrated role with its old id on /users/me?populate=role', async () => {
