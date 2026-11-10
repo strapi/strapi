@@ -5,8 +5,18 @@ import { act, fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { Permissions, type PermissionsAPI, type PermissionsLayout } from '../Permissions';
 
-// The empty state reads the server's auto-reload flag; the test providers always turn it on
+// The empty state reads the server's auto-reload flag (the test providers always turn it on) and
+// whether the admin can read the Content-Type Builder
 let mockAutoReload = true;
+let mockCanReadBuilder = true;
+
+jest.mock('../../../../../../hooks/useRBAC', () => ({
+  useRBAC: () => ({
+    allowedActions: { canRead: mockCanReadBuilder },
+    isLoading: false,
+    permissions: [],
+  }),
+}));
 
 jest.mock('../../../../../../features/AppInfo', () => {
   const actual = jest.requireActual('../../../../../../features/AppInfo');
@@ -875,14 +885,9 @@ describe('Permissions options', () => {
     const expectNoSearch = (kind: SearchKind) =>
       expect(screen.queryByRole('button', { name: searchLabel(kind) })).not.toBeInTheDocument();
 
-    // The test providers' admin holds every permission; this one holds all but the builder's read
-    const withoutBuilderRead = {
-      permissions: (defaults: Array<{ action: string }>) =>
-        defaults.filter(({ action }) => action !== 'plugin::content-type-builder.read'),
-    };
-
     beforeEach(() => {
       mockAutoReload = true;
+      mockCanReadBuilder = true;
     });
 
     it('says there are no collection types or single types, and links to the Content-Type Builder', async () => {
@@ -908,32 +913,23 @@ describe('Permissions options', () => {
       expectNoSearch('content-types');
     });
 
-    it('leaves the link out for an admin who cannot read the Content-Type Builder', async () => {
-      render(<Permissions layout={emptyLayout} searchable />, {
-        providerOptions: withoutBuilderRead as never,
-      });
+    it('leaves the link out for an admin who cannot read the Content-Type Builder', () => {
+      mockCanReadBuilder = false;
+
+      render(<Permissions layout={emptyLayout} searchable />);
 
       expect(screen.getByText('No collection types yet')).toBeInTheDocument();
-
-      // Let the permission check settle before asserting an absence
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      });
       expect(
         screen.queryByRole('link', { name: 'Open the Content-Type Builder' })
       ).not.toBeInTheDocument();
     });
 
-    it('leaves the link out when the server does not auto-reload, even for an admin who can read the builder', async () => {
+    it('leaves the link out when the server does not auto-reload, even for an admin who can read the builder', () => {
       mockAutoReload = false;
 
       render(<Permissions layout={emptyLayout} searchable />);
 
       expect(screen.getByText('No collection types yet')).toBeInTheDocument();
-
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      });
       expect(
         screen.queryByRole('link', { name: 'Open the Content-Type Builder' })
       ).not.toBeInTheDocument();

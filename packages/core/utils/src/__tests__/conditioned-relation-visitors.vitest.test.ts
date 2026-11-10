@@ -59,12 +59,23 @@ describe('throwConditionedRelationUnderNot', () => {
     traverseQueryFilters(throwConditionedRelationUnderNot(isRestricted), ctx, filters as object);
 
   it('refuses a filter on a restricted to-many relation under a $not', async () => {
-    const filters = { folder: { notes: { id: { $notNull: true } } } };
+    const isRestricted = (uid: string) => uid === TAG_UID;
+    const filters = { $not: { tags: { label: 'x' } } };
 
-    await expect(run({ $not: filters })).rejects.toThrow(ValidationError);
-    await expect(run({ $not: filters })).rejects.toThrow(
+    await expect(run(filters, isRestricted)).rejects.toThrow(ValidationError);
+    await expect(run(filters, isRestricted)).rejects.toThrow(
       'filtering through this relation inside $not is not allowed'
     );
+  });
+
+  it('refuses a restricted relation reached below the first hop of a $not', async () => {
+    const isRestricted = (uid: string) => uid === NOTE_UID;
+    const filters = { $not: { folder: { notes: { title: 'a' } } } };
+
+    const error = await run(filters, isRestricted).catch((e) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error.details).toMatchObject({ key: 'notes', path: 'folder.notes' });
   });
 
   it('refuses a restricted relation under a $not even when it is to-one', async () => {
@@ -79,7 +90,7 @@ describe('throwConditionedRelationUnderNot', () => {
     await expect(run({ $not: [{ folder: { name: 'a' } }] })).rejects.toThrow(ValidationError);
   });
 
-  it('refuses a $not that sits above the restricted relation at any depth', async () => {
+  it('refuses a restricted relation among sibling keys under the same $not', async () => {
     await expect(run({ $not: { tags: { label: 'x' }, folder: { name: 'a' } } })).rejects.toThrow(
       ValidationError
     );

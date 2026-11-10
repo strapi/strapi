@@ -60,7 +60,7 @@ These rules apply to the content types that ask for them: with none of these pro
 
 ### Empty tabs
 
-A tab with nothing in it says so instead of drawing an empty list, with no search and no column checkboxes. The collection types and single types tabs say `No collection types yet` and `No single types yet`, with a link to the Content-Type Builder; the plugins and settings tabs say `Nothing to set here`. It follows the layout: a tab is empty when the layout lists no content type, no plugin action or no settings action for it.
+A tab with nothing in it says so instead of drawing an empty list, with no search and no column checkboxes. The collection types and single types tabs say `No collection types yet` and `No single types yet`, with a link to the Content-Type Builder only for an admin who can read the builder, and only while the server auto-reloads (development); the plugins and settings tabs say `Nothing to set here`. It follows the layout: a tab is empty when the layout lists no content type, no plugin action or no settings action for it.
 
 ## Layout shape
 
