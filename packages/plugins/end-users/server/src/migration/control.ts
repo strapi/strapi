@@ -187,6 +187,40 @@ export interface MigrationSteps {
   cleanup: MigrationStepFn;
 }
 
+/**
+ * Gives the claim back on the way out of a start that failed, and waits for it. The failed start
+ * closes the database once the error reaches it, which cuts off a release still in flight: on
+ * MySQL and MariaDB the next start then waited 15 minutes for the claim to run out. A release that
+ * fails is logged, and the start's own error is the one that goes on.
+ */
+const giveClaimBack = async (strapi: Core.Strapi, owner: string): Promise<void> => {
+  try {
+    await releaseMigration(strapi, owner);
+  } catch (releaseError) {
+    strapi.log.warn(
+      `${PLUGIN_ID}: the migration claim could not be released (${String(releaseError instanceof Error ? releaseError.name : 'error')}); it runs out by itself`
+    );
+  }
+};
+
+/**
+ * Ends the migration's transaction before its error is thrown. The release needs a connection of
+ * its own, and the transaction holds the only one on SQLite, and on the other databases a lock on
+ * the record's row: waited for inside it, the release would wait forever. The internal migration
+ * runner rolls back a transaction only if it is still open, so ending it here changes nothing else.
+ */
+const endTransaction = async (trx: Knex.Transaction): Promise<void> => {
+  if (trx.isCompleted()) {
+    return;
+  }
+
+  try {
+    await trx.rollback();
+  } catch {
+    // The database ended it already (a MySQL deadlock rolls the whole transaction back)
+  }
+};
+
 const readState = async (strapi: Core.Strapi): Promise<MigrationState> => {
   // A schema builder accumulates what is called on it: each question gets its own
   const hasTable = (name: string) => strapi.db.getSchemaConnection().hasTable(name);
@@ -252,13 +286,8 @@ export const registerMigrationControl = (
             try {
               await run.preSync(trx, db, ctx);
             } catch (error) {
-              // Not awaited: the transaction still holds the only SQLite connection, and on
-              // Postgres the row it wrote, so the release can only finish after the rollback
-              releaseMigration(strapi, ctx.owner).catch((releaseError: unknown) => {
-                strapi.log.warn(
-                  `${PLUGIN_ID}: the migration claim could not be released (${String(releaseError instanceof Error ? releaseError.name : 'error')}); it runs out by itself`
-                );
-              });
+              await endTransaction(trx);
+              await giveClaimBack(strapi, ctx.owner);
               throw error;
             }
           },
@@ -277,11 +306,8 @@ export const registerMigrationControl = (
         try {
           await strapi.db.transaction(({ trx }) => run.rollback(trx, strapi.db, ctx));
         } catch (error) {
-          releaseMigration(strapi, ctx.owner).catch((releaseError: unknown) => {
-            strapi.log.warn(
-              `${PLUGIN_ID}: the migration claim could not be released (${String(releaseError instanceof Error ? releaseError.name : 'error')}); it runs out by itself`
-            );
-          });
+          // The transaction has ended by now, so the release can be waited for
+          await giveClaimBack(strapi, ctx.owner);
           throw error;
         }
 
