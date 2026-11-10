@@ -102,4 +102,15 @@ describe('entity-manager createMany inserted ids', () => {
     ).resolves.toEqual({ count: 2, ids: [1, 2] });
     expect(raw).not.toHaveBeenCalled();
   });
+
+  it('keeps explicit ids and only expands the generated holes on MySQL', async () => {
+    const { em } = setup({ useReturning: false });
+    execute.mockResolvedValue([20]);
+
+    await expect(
+      em.createMany('api::article.article', {
+        data: [{ id: 5, title: 'a' }, { title: 'b' }, { id: 9, title: 'c' }, { title: 'd' }],
+      })
+    ).resolves.toEqual({ count: 4, ids: [5, 20, 9, 22] });
+  });
 });

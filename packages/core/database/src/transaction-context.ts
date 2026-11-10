@@ -267,7 +267,12 @@ const transactionCtx = {
 
     // Knex runs a transaction started from a transaction as a savepoint
     const trx = await parent.trx.transaction();
-    const store: Store = { trx, commitCallbacks: [], rollbackCallbacks: [] };
+    const store: Store = {
+      trx,
+      owner: parent.owner,
+      commitCallbacks: [],
+      rollbackCallbacks: [],
+    };
 
     let result: T;
     try {

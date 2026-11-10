@@ -62,7 +62,9 @@ const readAutoIncrementStep = async (connection: {
 
 /**
  * Rows that already carry a primary key must keep those ids. MySQL reports
- * one insert id for the whole statement, and expanding it invents the rest.
+ * one insert id for the whole statement: the first generated value. Expanding
+ * that id across every row invents ids for rows that supplied their own, and
+ * skips the holes where an explicit id sits between generated ones.
  */
 const idsForInsertedRows = (
   rows: Array<Record<string, unknown>>,
@@ -70,11 +72,33 @@ const idsForInsertedRows = (
   useReturning: boolean,
   increment = 1
 ): ID[] => {
-  if (!useReturning && rows.length > 0 && rows.every((row) => row.id != null)) {
+  if (useReturning || rows.length === 0) {
+    return idsFromInsertResult(chunkResult, rows.length, useReturning, increment);
+  }
+
+  const explicit = rows.map((row) => row.id != null);
+  const explicitCount = explicit.filter(Boolean).length;
+
+  if (explicitCount === rows.length) {
     return rows.map((row) => row.id as ID);
   }
 
-  return idsFromInsertResult(chunkResult, rows.length, useReturning, increment);
+  if (explicitCount === 0) {
+    return idsFromInsertResult(chunkResult, rows.length, false, increment);
+  }
+
+  const generated = idsFromInsertResult(chunkResult, rows.length - explicitCount, false, increment);
+  let nextGenerated = 0;
+
+  return rows.map((row) => {
+    if (row.id != null) {
+      return row.id as ID;
+    }
+
+    const id = generated[nextGenerated];
+    nextGenerated += 1;
+    return id;
+  });
 };
 
 export { idsForInsertedRows, idsFromInsertResult, readAutoIncrementStep };

@@ -14,7 +14,8 @@ jestOptions=($JEST_OPTIONS)
 node --test \
   tests/scripts/__tests__/resolve-database-config.test.js \
   tests/scripts/__tests__/database-assurance.test.js \
-  tests/api/utils/__tests__/raw-rows.test.js || exit 1
+  tests/api/utils/__tests__/raw-rows.test.js \
+  packages/utils/api-tests/release-after-destroy.test.js || exit 1
 
 # Expected client comes from raw DB_OPTIONS (--dbclient), not from the generator or the app.
 node tests/scripts/verify-api-database-client.js expected || exit 1
