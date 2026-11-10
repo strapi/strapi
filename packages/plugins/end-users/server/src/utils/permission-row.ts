@@ -237,8 +237,7 @@ export const toPermissionRows = (values: readonly unknown[]): PermissionRow[] =>
 /**
  * What a `documentId` is: Strapi's are lowercase letters and digits. Anything else is refused rather
  * than matched, because the database compares ids by its own collation (case-insensitively on MySQL),
- * so `ABC` could reach the row the code knows as `abc` without being the id the checks looked at
- *.
+ * so `ABC` could reach the row the code knows as `abc` without being the id the checks looked at.
  */
 const CANONICAL_DOCUMENT_ID = /^[a-z0-9]{1,64}$/;
 

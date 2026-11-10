@@ -320,8 +320,8 @@ interface Built {
 }
 
 /**
- * `strapi.plugin('end-users').service('permission-layout')`: what the role editor is drawn from
- *. Built from the content types, the Content API route registry and the
+ * `strapi.plugin('end-users').service('permission-layout')`: what the role editor is drawn from.
+ * Built from the content types, the Content API route registry and the
  * condition registry, all of which are final once Strapi has started, so it is built on the first
  * call and kept until the server restarts (which is also how a condition the builder writes, or a
  * content type the Content-Type Builder changes, gets in).

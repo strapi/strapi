@@ -92,8 +92,8 @@ const conditionProvider = (strapi: Core.Strapi) =>
   strapi.contentAPI.permissions.providers.condition;
 
 /**
- * Where a definition came from is decided by whoever registers it, never by the definition
- *: a `source` it names is replaced. Anything that is not a definition is passed on as
+ * Where a definition came from is decided by whoever registers it, never by the definition: a
+ * `source` it names is replaced. Anything that is not a definition is passed on as
  * it is, for core to refuse.
  */
 const withSource = (definition: unknown, source: ConditionSource): unknown =>
@@ -984,8 +984,8 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     /**
-     * Registers a condition for Content API permissions, as a plugin's: its `source` is `plugin`
-     *, whatever the definition says. Core's registry stores a validated, frozen copy,
+     * Registers a condition for Content API permissions, as a plugin's: its `source` is `plugin`,
+     * whatever the definition says. Core's registry stores a validated, frozen copy,
      * and rejects a malformed definition, a name it already holds, and any registration once Strapi
      * has loaded: a plugin calls this from an async `register()` and awaits it.
      */
@@ -1042,8 +1042,8 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
-     * How many entries of `subject` a condition keeps for a sample user, out of how many there are
-     *, with the values the admin gave its inputs. The condition is checked first, as a
+     * How many entries of `subject` a condition keeps for a sample user, out of how many there are,
+     * with the values the admin gave its inputs. The condition is checked first, as a
      * save would (`checkBuilderConditionV2`), and nothing is counted before it holds. Counts the
      * Content Manager's own way: draft versions in the default locale, which the Document Service
      * does unless told otherwise, so a document counts once.

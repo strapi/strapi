@@ -20,8 +20,8 @@ const isPlain = (value: unknown): value is Plain =>
  * anything. The check is the service's `authorize`, run first on every route, and it also limits
  * which users the admin reaches to the ones they may read.
  *
- * Every change tells `strapi.eventHub` once it has been made, so a refused one is never reported
- *: `end-users.user.<change>`, with the admin who did it and the user's `documentId`.
+ * Every change tells `strapi.eventHub` once it has been made, so a refused one is never reported:
+ * `end-users.user.<change>`, with the admin who did it and the user's `documentId`.
  */
 const userSecurityController = ({ strapi }: { strapi: Core.Strapi }) => {
   const security = () =>
