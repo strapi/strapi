@@ -3,7 +3,7 @@ import _, { snakeCase } from 'lodash';
 import { identifiers } from '../utils/identifiers';
 import { attributeNaming } from './attribute-naming';
 import type { Meta, Metadata } from './metadata';
-import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
+import type { Attribute, RelationalAttribute, Relation, MorphJoinTable } from '../types';
 
 interface JoinColumnOptions {
   attribute: (Relation.OneToOne | Relation.ManyToOne) & Relation.Owner;
@@ -69,6 +69,42 @@ export const hasInverseOrderColumn = (attribute: RelationalAttribute) =>
   isBidirectional(attribute) && isManyToAny(attribute);
 
 /**
+ * An inverse (mappedBy) side stores nothing itself: it reads the join column or join table that its
+ * owner side assigns through `inversedBy`. With no owner pointing back, writes to it are dropped and
+ * reads return nothing, so fail instead of loading a dead relation.
+ */
+const assertInverseSideHasOwner = (
+  attributeName: string,
+  attribute: Relation.Bidirectional,
+  meta: Meta,
+  metadata: Metadata
+) => {
+  const targetMeta = metadata.get(attribute.target);
+
+  const pointsBack = (candidate: Attribute | undefined) =>
+    candidate !== undefined &&
+    candidate.type === 'relation' &&
+    'target' in candidate &&
+    candidate.target === meta.uid &&
+    'inversedBy' in candidate &&
+    candidate.inversedBy === attributeName;
+
+  if (attribute.mappedBy !== undefined && pointsBack(targetMeta.attributes[attribute.mappedBy])) {
+    return;
+  }
+
+  // An owner that points back under another name still builds the relation: the mappedBy name is
+  // never read at runtime, so apps relying on it keep booting.
+  if (Object.values(targetMeta.attributes).some(pointsBack)) {
+    return;
+  }
+
+  throw new Error(
+    `mappedBy attribute ${attribute.mappedBy} in ${targetMeta.uid} must be a relation to ${meta.uid} with inversedBy "${attributeName}"`
+  );
+};
+
+/**
  * Creates a oneToOne relation metadata
  *
  * if owner then
@@ -103,7 +139,7 @@ const createOneToOne = (
       });
     }
   } else {
-    // TODO: verify other side is valid
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
   }
 };
 
@@ -130,6 +166,8 @@ const createOneToMany = (
     });
   } else if (isOwner(attribute)) {
     throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
+  } else {
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
   }
 };
 
@@ -192,7 +230,9 @@ const createManyToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  if (shouldUseJoinTable(attribute) && (!isBidirectional(attribute) || isOwner(attribute))) {
+  if (!isOwner(attribute)) {
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
+  } else if (shouldUseJoinTable(attribute)) {
     createJoinTable(metadata, {
       attribute,
       attributeName,
