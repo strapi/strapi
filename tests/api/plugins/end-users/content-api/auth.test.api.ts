@@ -291,7 +291,7 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
 
       await seedToken('token-used-twice');
 
-      const first = await reset('token-used-twice', 'N3w-password-long');
+      const first = await reset('token-used-twice', NEW_PASSWORD);
 
       expect(first.statusCode).toBe(200);
       expect(first.body).toEqual({ status: true });
@@ -304,7 +304,7 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
         0
       );
       // The first password took, the second attempt changed nothing
-      expect((await signIn(email, 'N3w-password-long')).statusCode).toBe(200);
+      expect((await signIn(email, NEW_PASSWORD)).statusCode).toBe(200);
       expect((await signIn(email, 'Another-password-1')).statusCode).toBe(401);
       expect((await signIn(email, PASSWORD)).statusCode).toBe(401);
 
@@ -321,8 +321,8 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       // An expired token and one that never existed
       await seedToken('token-expired', new Date(Date.now() - 1000));
 
-      expect((await reset('token-expired', 'N3w-password-long')).statusCode).toBe(400);
-      expect((await reset('token-unknown', 'N3w-password-long')).statusCode).toBe(400);
+      expect((await reset('token-expired', NEW_PASSWORD)).statusCode).toBe(400);
+      expect((await reset('token-unknown', NEW_PASSWORD)).statusCode).toBe(400);
     });
 
     it('refuses a banned user`s reset before the password changes, and mails a banned user no reset link', async () => {
@@ -340,7 +340,7 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
         .update({ documentId, data: { banned: true, banReason: 'spam' } });
 
       const refused = await rq.post('/api/auth/reset-password', {
-        body: { token: 'token-of-banned', newPassword: 'N3w-password-long' },
+        body: { token: 'token-of-banned', newPassword: NEW_PASSWORD },
       });
 
       // What the native sign-in answers a banned user
@@ -369,7 +369,7 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       await strapi.documents(USER_UID).update({ documentId, data: { banned: false } });
 
       expect((await signIn(email, PASSWORD)).statusCode).toBe(200);
-      expect((await signIn(email, 'N3w-password-long')).statusCode).toBe(401);
+      expect((await signIn(email, NEW_PASSWORD)).statusCode).toBe(401);
 
       // A later reset, once the ban is lifted, is mailed, and is the only mail
       const later = await rq.post('/api/auth/request-password-reset', {
@@ -1281,12 +1281,11 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
     });
 
     /**
-     * Signs in, and only then works out the code, so a period that ends during the sign-in (which
-     * hashes a password) does not move it. Out of the last two seconds of a period first, for the
+     * The code of a period, worked out after the sign-ins that came before it (they hash a password,
+     * so a period could end during them), and out of the last two seconds of a period first, for the
      * offsets that sit at the edge of what is accepted.
      */
-    const verifyWith = async (email: string, uri: string, periodOffset: number) => {
-      const challenge = await challengeOf(email);
+    const settledCode = async (uri: string, periodOffset: number) => {
       const left = 30_000 - (Date.now() % 30_000);
 
       if (left < 2000) {
@@ -1295,7 +1294,17 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
         });
       }
 
-      return post('/two-factor/verify-totp', { code: totpFromUri(uri, periodOffset) }, challenge);
+      return totpFromUri(uri, periodOffset);
+    };
+
+    const verifyWith = async (email: string, uri: string, periodOffset: number) => {
+      const challenge = await challengeOf(email);
+
+      return post(
+        '/two-factor/verify-totp',
+        { code: await settledCode(uri, periodOffset) },
+        challenge
+      );
     };
 
     /** As if the authenticator was confirmed long ago: no period of it has been used */
@@ -1314,10 +1323,14 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect(tooOld.statusCode).toBe(401);
       expect(tooOld.body.code).toBe('INVALID_CODE');
 
-      // Better Auth allows one period of clock drift either way, and the plugin keeps that, once
-      expect((await verifyWith(email, uri, -1)).statusCode).toBe(200);
+      // Better Auth allows one period of clock drift either way, and the plugin keeps that, once.
+      // One code, worked out once after both challenges, so no period can end between the two tries
+      const challenges = [await challengeOf(email), await challengeOf(email)];
+      const code = await settledCode(uri, -1);
 
-      const again = await verifyWith(email, uri, -1);
+      expect((await post('/two-factor/verify-totp', { code }, challenges[0])).statusCode).toBe(200);
+
+      const again = await post('/two-factor/verify-totp', { code }, challenges[1]);
 
       expect(again.statusCode).toBe(401);
       expect(again.body.code).toBe('INVALID_CODE');
@@ -1337,6 +1350,46 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect(replayed.body.code).toBe('INVALID_CODE');
       expect(replayed.headers['set-auth-token']).toBeUndefined();
       expect(await count(SESSION_UID, { userId: documentId })).toBe(sessions + 1);
+    });
+
+    it('takes a code once when two sign-ins send it at the same time', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+      const challenges = [await challengeOf(email), await challengeOf(email)];
+      const sessions = await count(SESSION_UID, { userId: documentId });
+      const code = await settledCode(uri, 0);
+
+      const results = await Promise.all(
+        challenges.map((challenge) => post('/two-factor/verify-totp', { code }, challenge))
+      );
+
+      // The conditional update gives the code to one request; the other is refused as a wrong code
+      expect(results.map(({ statusCode }) => statusCode).sort()).toEqual([200, 401]);
+      expect(results.find(({ statusCode }) => statusCode === 401)?.body.code).toBe('INVALID_CODE');
+      expect(await count(SESSION_UID, { userId: documentId })).toBe(sessions + 1);
+    });
+
+    it('takes a code once for a secret stored with the base32 prefix, as Better Auth reads one imported from elsewhere', async () => {
+      const { email, documentId, uri } = await withTwoFactor();
+      const { symmetricEncrypt } = await importEsm('better-auth/crypto');
+      const secret = new URL(uri).searchParams.get('secret');
+
+      await strapi.db.query(TWO_FACTOR_UID).update({
+        where: { userId: documentId },
+        data: {
+          secret: await symmetricEncrypt({ key: TEST_SECRET, data: `base32:${secret}` }),
+          lastTotpStep: null,
+        },
+      });
+
+      const challenges = [await challengeOf(email), await challengeOf(email)];
+      const code = await settledCode(uri, 0);
+
+      expect((await post('/two-factor/verify-totp', { code }, challenges[0])).statusCode).toBe(200);
+
+      const replayed = await post('/two-factor/verify-totp', { code }, challenges[1]);
+
+      expect(replayed.statusCode).toBe(401);
+      expect(replayed.body.code).toBe('INVALID_CODE');
     });
 
     it('refuses the previous period`s code once the current one has been used', async () => {
