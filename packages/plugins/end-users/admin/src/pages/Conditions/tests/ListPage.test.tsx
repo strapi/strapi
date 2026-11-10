@@ -69,7 +69,22 @@ describe('ListPage', () => {
   beforeEach(() => {
     mockAutoReload = true;
 
-    server.use(http.get('/end-users/conditions', () => HttpResponse.json({ data: CONDITIONS })));
+    server.use(
+      http.get('/end-users/conditions', () => HttpResponse.json({ data: CONDITIONS })),
+      http.get('/end-users/permissions/layout', () =>
+        HttpResponse.json({
+          data: {
+            contentTypes: [
+              { uid: 'api::article.article', label: 'Article' },
+              { uid: 'api::comment.comment', label: 'Comment' },
+              { uid: 'api::page.page', label: 'Page' },
+              { uid: 'api::post.post', label: 'Post' },
+            ],
+            groups: [],
+          },
+        })
+      )
+    );
   });
 
   it('lists conditions with source and use', async () => {
@@ -87,10 +102,10 @@ describe('ListPage', () => {
 
     expect(textOfCells(header)).toEqual(['Name', 'Content types', 'Source', 'Used by']);
     expect(rows.map(textOfCells)).toEqual([
-      ['Is owner', 'api::article.article, api::comment.comment', 'Built-in', '3 roles'],
-      ['Is published', 'api::article.article', 'Code', '1 role'],
+      ['Is owner', 'Article, Comment', 'Built-in', '3 roles'],
+      ['Is published', 'Article', 'Code', '1 role'],
       ['Is buyer', 'None', 'Plugin', '0 roles'],
-      ['Mine', 'api::article.article, api::comment.comment and 2 more', 'Builder', '2 roles'],
+      ['Mine', 'Article, Comment and 2 more', 'Builder', '2 roles'],
     ]);
   });
 
