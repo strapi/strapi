@@ -623,6 +623,99 @@ describe('Bulk actions for folders & files', () => {
       data.files.push(...fileResults);
     });
 
+    test('Can move a folder together with its descendants', async () => {
+      const destination = await createFolder('folder-parent-child-destination', null);
+      const parent = await createFolder('folder-parent-child-parent', null);
+      const child = await createFolder('folder-parent-child-child', parent.id);
+      const grandchild = await createFolder('folder-parent-child-grandchild', child.id);
+      const childFile = await createAFile(child.id);
+
+      data.folders.push(destination);
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-move',
+        body: {
+          destinationFolderId: destination.id,
+          folderIds: [parent.id, child.id],
+        },
+      });
+
+      expect(res.status).toBe(200);
+
+      const getFolder = async (id) => {
+        const { body } = await rq({ method: 'GET', url: `/upload/folders/${id}` });
+
+        return body.data;
+      };
+      const childPath = `${destination.path}/${child.pathId}`;
+
+      expect((await getFolder(parent.id)).path).toBe(`${destination.path}/${parent.pathId}`);
+      expect((await getFolder(child.id)).path).toBe(childPath);
+      expect((await getFolder(grandchild.id)).path).toBe(`${childPath}/${grandchild.pathId}`);
+
+      const resFile = await rq({ method: 'GET', url: `/upload/files/${childFile.id}` });
+
+      expect(resFile.body.folderPath).toBe(childPath);
+
+      // The child is not inside the parent any more, so deleting the parent must leave it alone
+      const resDelete = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { folderIds: [parent.id] },
+      });
+
+      expect(resDelete.status).toBe(200);
+      expect((await getFolder(child.id)).path).toBe(childPath);
+
+      const resFileAfterDelete = await rq({ method: 'GET', url: `/upload/files/${childFile.id}` });
+
+      expect(resFileAfterDelete.status).toBe(200);
+    });
+
+    test('Can move a folder together with its grandchild', async () => {
+      const destination = await createFolder('folder-grandchild-destination', null);
+      const parent = await createFolder('folder-grandchild-parent', null);
+      const child = await createFolder('folder-grandchild-child', parent.id);
+      const grandchild = await createFolder('folder-grandchild-grandchild', child.id);
+      const childFile = await createAFile(child.id);
+      const grandchildFile = await createAFile(grandchild.id);
+
+      data.folders.push(destination);
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-move',
+        body: {
+          destinationFolderId: destination.id,
+          folderIds: [parent.id, grandchild.id],
+        },
+      });
+
+      expect(res.status).toBe(200);
+
+      const getFolder = async (id) => {
+        const { body } = await rq({ method: 'GET', url: `/upload/folders/${id}` });
+
+        return body.data;
+      };
+      const parentPath = `${destination.path}/${parent.pathId}`;
+      const grandchildPath = `${destination.path}/${grandchild.pathId}`;
+
+      expect((await getFolder(parent.id)).path).toBe(parentPath);
+      expect((await getFolder(child.id)).path).toBe(`${parentPath}/${child.pathId}`);
+      expect((await getFolder(grandchild.id)).path).toBe(grandchildPath);
+
+      const resChildFile = await rq({ method: 'GET', url: `/upload/files/${childFile.id}` });
+      const resGrandchildFile = await rq({
+        method: 'GET',
+        url: `/upload/files/${grandchildFile.id}`,
+      });
+
+      expect(resChildFile.body.folderPath).toBe(`${parentPath}/${child.pathId}`);
+      expect(resGrandchildFile.body.folderPath).toBe(grandchildPath);
+    });
+
     test('Cannot move a folder inside itself (0 level)', async () => {
       const folder1 = await createFolder('folder-d-1', null);
       data.folders.push(folder1);
@@ -696,6 +789,46 @@ describe('Bulk actions for folders & files', () => {
       });
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('some folders already exists: folder-g-1a');
+    });
+
+    test('Cannot move folders with the same name into the same folder', async () => {
+      const destination = await createFolder('folder-h-destination', null);
+      const parent1 = await createFolder('folder-h-1', null);
+      const parent2 = await createFolder('folder-h-2', null);
+      const twin1 = await createFolder('folder-h-twin', parent1.id);
+      const twin2 = await createFolder('folder-h-twin', parent2.id);
+      data.folders.push(destination, parent1, parent2);
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-move',
+        body: {
+          destinationFolderId: destination.id,
+          folderIds: [twin1.id, twin2.id],
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('some folders already exists: folder-h-twin');
+    });
+
+    test('Cannot move a folder and its child with the same name into the same folder', async () => {
+      const destination = await createFolder('folder-i-destination', null);
+      const parent = await createFolder('folder-i-same', null);
+      const child = await createFolder('folder-i-same', parent.id);
+      data.folders.push(destination, parent);
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-move',
+        body: {
+          destinationFolderId: destination.id,
+          folderIds: [parent.id, child.id],
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('some folders already exists: folder-i-same');
     });
   });
 });
