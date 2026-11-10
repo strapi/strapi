@@ -49,10 +49,10 @@ const migrationService = ({ strapi }: { strapi: Core.Strapi }) => {
   const templateIsSaved = async (key: string): Promise<boolean> => {
     const templates = (await strapi.plugin('email').service('templates').list(key)) as Array<{
       key: string;
-      customised: boolean;
+      customized: boolean;
     }>;
 
-    return templates.some((template) => template.key === key && template.customised);
+    return templates.some((template) => template.key === key && template.customized);
   };
 
   /** True once no user holds the placeholder address: one count, whatever the item's refs hold */

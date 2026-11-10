@@ -194,7 +194,7 @@ const isRulesQuery = (caslQuery: unknown): caslQuery is { $or: unknown[] } =>
  * condition would not be written as it says (see {@link isWritableCondition}) is dropped as if its
  * condition failed: the other rules still give what they give, and only when no rule
  * remains is it a fresh deny filter. Any other query is judged whole, and denied when it fails. The
- * filters it gives are normalised: where objects whose keys would collide at the query layer are
+ * filters it gives are normalized: where objects whose keys would collide at the query layer are
  * split into an explicit `$and`.
  */
 export const fromCaslQuery = (caslQuery: unknown, uid?: string): Record<string, unknown> | null => {
@@ -260,7 +260,7 @@ export const fromCaslQuery = (caslQuery: unknown, uid?: string): Record<string, 
  *   the query layer then refuses; either way the condition would match more than it says. REST,
  *   GraphQL and `assertEntry` all read their filters from here.
  *
- * The filters it gives are normalised for the query layer: a where object whose keys would collide
+ * The filters it gives are normalized for the query layer: a where object whose keys would collide
  * (two relation filters that each hold an `$or`) is split into an explicit `$and`.
  */
 export const toFilters = (

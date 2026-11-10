@@ -843,7 +843,7 @@ export const applyConditions = async (
 
   /**
    * Between the two passes: core's stock relation-scope check (`removeRestrictedRelations`, the
-   * caller must hold the target's `find`) over the normalised map. The stock step of
+   * caller must hold the target's `find`) over the normalized map. The stock step of
    * `sanitize.query` runs before this one, and its traversal walks a dynamic zone's `on` fragments
    * only, so what a zone's nested `populate`, `'*'` or a dotted path reaches is checked here, once
    * {@link normalizePopulate} has made it `on` fragments. Elsewhere it decides what the

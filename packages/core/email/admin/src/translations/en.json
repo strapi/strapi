@@ -46,7 +46,7 @@
   "Templates.list.subtitle": "Edit the emails your project sends, per locale",
   "Templates.list.empty": "There are no email templates",
   "Templates.list.actions": "Actions",
-  "Templates.list.customised": "Customized",
+  "Templates.list.customized": "Customized",
   "Templates.list.edit": "Edit {key}",
   "Templates.edit.saved": "Template saved",
   "Templates.edit.resetDone": "Template reset to default",

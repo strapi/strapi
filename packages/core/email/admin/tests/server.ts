@@ -8,19 +8,19 @@ export const SUMMARIES: TemplateSummary[] = [
     key: 'end-users.confirm-email',
     description: 'Asks a new user to confirm their email address',
     locales: ['en', 'fr'],
-    customised: true,
+    customized: true,
   },
   {
     key: 'end-users.reset-password',
     description: 'Sends a password reset link',
     locales: ['en'],
-    customised: false,
+    customized: false,
   },
   {
     key: 'orders.receipt',
     description: 'Receipt for an order',
     locales: ['en'],
-    customised: false,
+    customized: false,
   },
 ];
 

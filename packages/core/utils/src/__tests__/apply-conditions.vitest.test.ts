@@ -559,7 +559,7 @@ describe('applyConditions: populate', () => {
       expect(q.populate).toEqual({ blocks });
     }
 
-    // Through a relation too: each populate map is normalised
+    // Through a relation too: each populate map is normalized
     expect(
       (await sanitize.query({ populate: 'folder.blocks.notes' }, note, find)).populate
     ).toEqual({ folder: { populate: { blocks } } });

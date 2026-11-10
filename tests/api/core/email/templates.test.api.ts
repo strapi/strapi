@@ -85,12 +85,12 @@ describe('Email templates (admin API)', () => {
     const list = await admin({ method: 'GET', url: '/email/templates?prefix=api-test.' });
     expect(list.statusCode).toBe(200);
     expect(list.body.data).toEqual([
-      { key: KEY, description: 'API test template', locales: ['en'], customised: true },
+      { key: KEY, description: 'API test template', locales: ['en'], customized: true },
       {
         key: SECRET_KEY,
         description: secretDefinition.description,
         locales: ['en'],
-        customised: false,
+        customized: false,
       },
     ]);
 

@@ -150,7 +150,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
           key,
           description: registry.get(key)?.description ?? '',
           locales: [...new Set([DEFAULT_LOCALE, ...locales])].sort(byCodeUnit),
-          customised: locales.length > 0,
+          customized: locales.length > 0,
         };
       });
     },
