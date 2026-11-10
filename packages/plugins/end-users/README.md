@@ -225,9 +225,12 @@ To migrate again after a rollback, switch the project to end-users again with `m
 - Signing in through a provider to an existing account with the same address when the provider does not say the address
   is verified (Facebook, VK, LINE and Spotify never do). That sign-in is refused until an administrator turns on Trust
   for account linking for the provider (Settings, End users, Providers). Users who signed up with Facebook under Users &
-  Permissions, had confirmed their address and were not blocked are the exception, since Facebook only gives an address
-  its owner confirmed: the migration records a pending link for each, and their first sign-in with Facebook, with the
-  address they have here, links it to their account. The links last until compatibility mode is turned off.
+  Permissions, had confirmed their address and were not blocked are the exception, and Facebook is the only provider that
+  is. It does not say whether an address is verified, but according to a third-party integration article and Meta's
+  documentation, Facebook returns no address that it has not confirmed. The plugin relies on that. While compatibility
+  mode is on, the migration records a pending link for each of these users, and their first sign-in with Facebook, with
+  the address they have here, links it to their account, once. The links exist only while compatibility mode is on: a
+  migration that runs with it off records none, and the first start with it off removes any that remain.
 - Extensions in `strapi-server` for `users-permissions`. Move what they do to the end-users plugin or to your own routes.
 - `GET /api/users/:id` answering 204 for a missing user. It answers 404.
 - The GraphQL role mutations (create, update and delete a role) and the `UsersPermissionsPermission` type. Roles are
