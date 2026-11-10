@@ -38,6 +38,14 @@ describe('plugin::end-users.has-role', () => {
     expect(() => run(holding(EDITORS), { roles: ['custom'] })).toThrow(refusal('ROLE_REQUIRED'));
   });
 
+  it('refuses a role name with spaces around it, so one that could never match does not pass the check', () => {
+    expect(() => hasRole.validator({ roles: [' Editors'] })).toThrow();
+    expect(() => hasRole.validator({ roles: ['Editors '] })).toThrow();
+    expect(() => run(holding(EDITORS), { roles: [' Editors '] })).toThrow(
+      'Invalid config passed to "plugin::end-users.has-role" policy.'
+    );
+  });
+
   it('needs every role with mode all', () => {
     const config = { roles: ['Editors', 'role-reviewers'], mode: 'all' };
 
