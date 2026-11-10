@@ -531,9 +531,10 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
 
           return count === 1 ? asRow(rowMapper(target)(row)) : null;
         } catch (error) {
-          // MariaDB's snapshot isolation refuses a delete of a row that another transaction changed
-          // after this one read it (error 1020), where other databases delete nothing: the same
-          // lost race, so the same answer
+          // Only MySQL-family drivers raise this error, so no dialect check: MariaDB's snapshot
+          // isolation refuses a delete of a row that another transaction changed after this one
+          // read it (error 1020), where other databases delete nothing: the same lost race, so the
+          // same answer
           if (isSnapshotConflict(error)) {
             return null;
           }

@@ -704,6 +704,17 @@ describe('strapiAdapter', () => {
       ).toBeNull();
     });
 
+    it('returns null for the driver code of that error when it carries no number', async () => {
+      db.findOne.mockResolvedValue(verification);
+      db.deleteMany.mockRejectedValue(
+        Object.assign(new Error('Record has changed'), { code: 'ER_CHECKREAD' })
+      );
+
+      expect(
+        await adapter.consumeOne({ model: 'verification', where: [{ field: 'id', value: 'v1' }] })
+      ).toBeNull();
+    });
+
     it('lets any other database error out', async () => {
       db.findOne.mockResolvedValue(verification);
       db.deleteMany.mockRejectedValue(Object.assign(new Error('disk full'), { errno: 1114 }));
