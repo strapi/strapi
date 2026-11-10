@@ -34,11 +34,13 @@ interface StagePermission extends Omit<Entity, 'createdAt' | 'updatedAt'> {
   role: number;
 }
 
-interface Stage extends Entity {
+// An intersection, not an interface: in an application program with generated schemas, `Entity` is a
+// union of the results of every content type, which an interface cannot extend (TS2312).
+type Stage = Entity & {
   color: string;
   name: string;
   permissions?: StagePermission[];
-}
+};
 
 /**
  * GET /content-manager/<collection-type | single-type>/:model/:id/stages

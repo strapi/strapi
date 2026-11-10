@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import workflowsFactory from '../workflows';
 import { ERRORS, WORKFLOW_POPULATE } from '../../constants/workflows';
+import type { PopulatedWorkflow, WorkflowStage } from '../../types/services';
 
 const {
   validateWorkflowCount,
@@ -62,11 +63,31 @@ vi.mock('../workflow-content-types', () => ({
   }),
 }));
 
-const workflow = {
+const TIMESTAMP = '2026-01-01T00:00:00.000Z';
+
+// A stage row as the database returns it
+const createStage = (id: number, name: string): WorkflowStage => ({
+  id,
+  documentId: `stage-${id}`,
+  name,
+  color: '#4945FF',
+  locale: null,
+  createdAt: TIMESTAMP,
+  updatedAt: TIMESTAMP,
+  publishedAt: TIMESTAMP,
+});
+
+// The workflow as `findById` reads it with its stages
+const workflow: PopulatedWorkflow<'stages'> = {
   id: 1,
+  documentId: 'workflow-1',
   name: 'Default',
   contentTypes: ['api::article.article'],
-  stages: [{ id: 10, name: 'Todo' }],
+  locale: null,
+  createdAt: TIMESTAMP,
+  updatedAt: TIMESTAMP,
+  publishedAt: TIMESTAMP,
+  stages: [createStage(10, 'Todo')],
 };
 
 const createStrapiMock = ({ releaseActionService }: { releaseActionService?: unknown }) => {
@@ -154,10 +175,7 @@ describe('review-workflows workflows service', () => {
   describe('stageRequiredToPublishName', () => {
     const workflowWithStages = {
       ...workflow,
-      stages: [
-        { id: 10, name: 'Todo' },
-        { id: 11, name: 'Done' },
-      ],
+      stages: [createStage(10, 'Todo'), createStage(11, 'Done')],
     };
 
     const getUpdateData = (strapi: ReturnType<typeof createStrapiMock>) => {
@@ -362,7 +380,7 @@ describe('review-workflows workflows service', () => {
   describe('audit log events', () => {
     const populatedWorkflow = {
       ...workflow,
-      stages: [{ id: 10, name: 'Todo', color: '#4945FF', permissions: [] }],
+      stages: [{ ...createStage(10, 'Todo'), permissions: [] }],
       stageRequiredToPublish: null,
     };
 

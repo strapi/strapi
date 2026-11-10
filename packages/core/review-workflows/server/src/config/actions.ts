@@ -38,5 +38,5 @@ export default {
       pluginName: 'admin',
       section: 'internal',
     },
-  ],
+  ] as const,
 };

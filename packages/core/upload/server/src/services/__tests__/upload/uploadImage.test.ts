@@ -15,6 +15,12 @@ const defaultConfig = {
   },
 };
 
+// Mutable service mocks; `mockUploadProvider` swaps their members per test.
+const providerService: { upload: unknown } = { upload: jest.fn() };
+const uploadSettingsService = {
+  getSettings: () => ({ responsiveDimensions: false }),
+};
+
 // Set up initial mock before service creation
 global.strapi = {
   config: {
@@ -23,12 +29,8 @@ global.strapi = {
   plugins: {
     upload: {
       services: {
-        provider: {
-          upload: jest.fn(),
-        },
-        upload: {
-          getSettings: () => ({ responsiveDimensions: false }),
-        },
+        provider: providerService,
+        upload: uploadSettingsService,
         'image-manipulation': imageManipulation,
       },
     },
@@ -45,8 +47,8 @@ function mockUploadProvider(uploadFunc: any, props?: any) {
   const { responsiveDimensions = false } = props || {};
 
   // Only mutate the parts that depend on the parameters
-  global.strapi.plugins.upload.services.provider.upload = uploadFunc;
-  global.strapi.plugins.upload.services.upload.getSettings = () => ({ responsiveDimensions });
+  providerService.upload = uploadFunc;
+  uploadSettingsService.getSettings = () => ({ responsiveDimensions });
 }
 
 const getFileData = (filePath: string) => ({
