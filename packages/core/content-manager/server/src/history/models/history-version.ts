@@ -2,8 +2,8 @@ import type { Model } from '@strapi/database';
 import {
   HISTORY_VERSION_AUTHOR_TYPES,
   HISTORY_VERSION_SOURCES,
-  HISTORY_VERSION_UID,
-} from '../constants';
+} from '../../../../shared/constants';
+import { HISTORY_VERSION_UID } from '../constants';
 
 const historyVersion: Model = {
   uid: HISTORY_VERSION_UID,

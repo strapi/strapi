@@ -1,9 +1,11 @@
 import type { Data, Modules, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
-export type HistoryVersionSource = 'admin-panel' | 'admin-api';
+import type { HISTORY_VERSION_AUTHOR_TYPES, HISTORY_VERSION_SOURCES } from '../constants';
 
-export type HistoryVersionAuthorType = 'person' | 'token';
+export type HistoryVersionSource = (typeof HISTORY_VERSION_SOURCES)[number];
+
+export type HistoryVersionAuthorType = (typeof HISTORY_VERSION_AUTHOR_TYPES)[number];
 
 export interface HistoryVersionAuthorReference {
   type: HistoryVersionAuthorType;
