@@ -75,7 +75,7 @@ describe('Local File Destination Provider - Utils', () => {
           tarEntryStream.write(chunk);
         });
 
-      expect(write()).resolves.not.toBe(null);
+      await expect(write()).resolves.not.toBe(null);
     });
 
     const writeChunk = (writer: Writable, chunk: string) =>
