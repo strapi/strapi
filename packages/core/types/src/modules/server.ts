@@ -1,5 +1,5 @@
 import type * as http from 'http';
-import type Router from '@koa/router';
+import type { Layer, Router, RouterMiddleware } from '@koa/router';
 import type Koa from 'koa';
 import type * as Core from '../core';
 
@@ -7,11 +7,15 @@ export interface HTTPServer extends http.Server {
   destroy: () => Promise<void>;
 }
 
+/** A route layer Strapi registered. Its path is always a string. */
+export type RouteLayer = Omit<Layer, 'path'> & { path: string };
+
 export interface API {
-  listRoutes(): Router.Layer[];
-  use(fn: Router.Middleware): API;
+  listRoutes(): RouteLayer[];
+  use(fn: RouterMiddleware): API;
   routes(routes: Core.Router | Omit<Core.Route, 'info'>[]): this;
-  mount(router: Router): this;
+  /** Accepts any router that can `use()` middleware, including `@koa/router` 12. */
+  mount(router: { use(...middleware: Koa.Middleware[]): unknown }): this;
 }
 
 export interface Server {
@@ -25,7 +29,7 @@ export interface Server {
   mount(): this;
   initRouting(): this;
   initMiddlewares(): Promise<this>;
-  listRoutes(): Router.Layer[];
+  listRoutes(): RouteLayer[];
   listen: HTTPServer['listen'];
   destroy(): Promise<void>;
 }

@@ -157,7 +157,7 @@ const AddActionToReleaseModal = ({
       </Field.Label>
       <ReleaseActionOptions
         selected={values.type}
-        handleChange={(e) => onInputChange('type', e.target.value)}
+        onChange={(type) => onInputChange('type', type)}
         name="type"
       />
     </Flex>
