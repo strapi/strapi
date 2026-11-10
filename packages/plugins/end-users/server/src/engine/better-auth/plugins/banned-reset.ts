@@ -150,14 +150,14 @@ export const bannedReset = (): BetterAuthPlugin => ({
         handler: createAuthMiddleware(async (ctx) => {
           const body = isPlain(ctx.body) ? ctx.body : {};
           const context = ctx.context as unknown as AuthContext;
-          const user =
-            ctx.path === EMAIL_OTP_RESET_PATH
-              ? typeof body.email === 'string'
-                ? await userByEmail(context, body.email)
-                : null
-              : typeof body.phoneNumber === 'string'
-                ? await userByPhoneNumber(context, body.phoneNumber)
-                : null;
+          const { email, phoneNumber } = body;
+          let user: Plain | null = null;
+
+          if (ctx.path === EMAIL_OTP_RESET_PATH && typeof email === 'string') {
+            user = await userByEmail(context, email);
+          } else if (ctx.path === PHONE_NUMBER_RESET_PATH && typeof phoneNumber === 'string') {
+            user = await userByPhoneNumber(context, phoneNumber);
+          }
 
           if (user && banState(user) === 'active') {
             throw new APIError('FORBIDDEN', REFUSED);
