@@ -239,7 +239,10 @@ describe('strapi-email: in the engine options', () => {
     // The reset sender is the project's, behind the check that mails no banned user
     const input = { user: { id: 'u1', email: 'user@example.com', banned: false }, url: 'u' };
 
-    await (options.emailAndPassword?.sendResetPassword as (data: unknown) => Promise<void>)(input);
+    const sendReset = options.emailAndPassword?.sendResetPassword;
+
+    expect(typeof sendReset).toBe('function');
+    await (sendReset as (data: unknown) => Promise<void>)(input);
     expect(sendResetPassword).toHaveBeenCalledWith(input, undefined);
     expect(options.emailVerification?.sendVerificationEmail).toBe(sendVerificationEmail);
   });
