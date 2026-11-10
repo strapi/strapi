@@ -55,12 +55,12 @@ const SignInContent = () => {
 };
 
 const SignInPage = () => (
-  <Page.Protect permissions={PERMISSIONS.settings.read}>
-    <MigrationBanner />
-    <CheckModeNotice>
+  <CheckModeNotice page="sign-in">
+    <Page.Protect permissions={PERMISSIONS.settings.read}>
+      <MigrationBanner />
       <SignInContent />
-    </CheckModeNotice>
-  </Page.Protect>
+    </Page.Protect>
+  </CheckModeNotice>
 );
 
 export { SignInPage };

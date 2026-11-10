@@ -303,12 +303,12 @@ const ProvidersContent = () => {
 };
 
 const ProvidersPage = () => (
-  <Page.Protect permissions={PERMISSIONS.providers.read}>
-    <MigrationBanner />
-    <CheckModeNotice>
+  <CheckModeNotice page="providers">
+    <Page.Protect permissions={PERMISSIONS.providers.read}>
+      <MigrationBanner />
       <ProvidersContent />
-    </CheckModeNotice>
-  </Page.Protect>
+    </Page.Protect>
+  </CheckModeNotice>
 );
 
 export { ProvidersPage };

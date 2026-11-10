@@ -16,17 +16,17 @@ import { ViewPage } from './ViewPage';
  */
 const ConditionsPage = () => {
   return (
-    <Page.Protect permissions={PERMISSIONS.conditions.read}>
-      <MigrationBanner />
-      <CheckModeNotice>
+    <CheckModeNotice page="conditions">
+      <Page.Protect permissions={PERMISSIONS.conditions.read}>
+        <MigrationBanner />
         <Routes>
           <Route index element={<ListPage />} />
           <Route path="new" element={<BuilderPage />} />
           <Route path="view/:name" element={<ViewPage />} />
           <Route path=":slug" element={<BuilderPage />} />
         </Routes>
-      </CheckModeNotice>
-    </Page.Protect>
+      </Page.Protect>
+    </CheckModeNotice>
   );
 };
 
