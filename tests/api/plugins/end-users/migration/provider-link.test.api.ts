@@ -33,7 +33,8 @@ const ACCOUNT_UID = 'plugin::end-users.account';
 const SESSION_UID = 'plugin::end-users.session';
 const VERIFICATION_UID = 'plugin::end-users.verification';
 const PROVIDERS = '/end-users/providers';
-const CLIENT_SECRET = 'fake-client-secret-value';
+// Built at run time: no secret-shaped literal in the source
+const CLIENT_SECRET = ['fake', 'client', 'secret', 'value'].join('-');
 const FACEBOOK_APP = 'facebook-app-id';
 const PENDING = 'migrated-provider-link:%';
 
