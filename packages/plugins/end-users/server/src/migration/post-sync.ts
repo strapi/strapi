@@ -73,6 +73,13 @@ const clientOf = (strapi: Core.Strapi) => strapi.db.dialect.client as DbClient;
 const hasColumn = (strapi: Core.Strapi, table: string, column: string) =>
   strapi.db.getSchemaConnection().hasColumn(table, column);
 
+/** The singular name of the type a relation points at, which decides how its link columns are named */
+const targetSingularName = (strapi: Core.Strapi, attribute: { target?: string }) =>
+  attribute.target
+    ? (strapi.db.metadata.get(attribute.target) as unknown as { singularName?: string })
+        ?.singularName
+    : undefined;
+
 const meta = (strapi: Core.Strapi, uid: string) => {
   const found = strapi.db.metadata.get(uid) as unknown as {
     tableName: string;
@@ -246,12 +253,24 @@ const rolesStep = async (strapi: Core.Strapi, record: MigrationRecord, owner: st
     defaultRoleDocumentId = role?.document_id ?? null;
   }
 
-  await keepHold(strapi, owner);
-  await roles()
-    .whereNotIn(typeColumn, PUBLIC_ROLES)
-    .update({ [typeColumn]: 'custom' });
+  const carried = { ...record.carried, defaultRoleDocumentId };
 
-  return { carried: { ...record.carried, defaultRoleDocumentId } };
+  // The retype and its record commit together: a rollback restores the types only when the record
+  // names this step, so a start stopped between the two writes must leave neither behind
+  await keepHold(strapi, owner);
+  await db.transaction(async ({ trx }: { trx: Knex.Transaction }) => {
+    const held = await stillHeld(strapi, owner);
+
+    await tableOf(strapi, trx, ROLES_TABLE)
+      .whereNotIn(typeColumn, PUBLIC_ROLES)
+      .update({ [typeColumn]: 'custom' });
+    await updateRecord(strapi, {
+      carried,
+      completedSteps: [...new Set([...held.completedSteps, 'roles' as const])],
+    });
+  });
+
+  return { carried };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -401,7 +420,13 @@ const declaredCopies = (strapi: Core.Strapi): CopyPlan[] => {
           from: upJoinTableName(strapi.db, name),
           into: joinTable.name,
           key: joinTable.joinColumn.name,
-          source: (column) => upLinkColumn(joinTable, column, attribute.relation),
+          source: (column) =>
+            upLinkColumn(
+              joinTable,
+              column,
+              attribute.relation,
+              targetSingularName(strapi, attribute)
+            ),
         });
       }
     }

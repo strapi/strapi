@@ -23,7 +23,7 @@ const PUBLIC_ROLES: ReadonlySet<string> = new Set(['public', 'authenticated']);
 const PAGE = 1000;
 
 type Row = Record<string, unknown>;
-type Model = { tableName: string; attributes: Record<string, any> };
+type Model = { tableName: string; singularName?: string; attributes: Record<string, any> };
 
 /* -------------------------------------------------------------------------------------------------
  * Pure helpers
@@ -150,18 +150,24 @@ const linkCopies = (db: Database, copied: Set<string>): Copy[] => {
       joinTable.joinColumn?.referencedTable === profile.tableName &&
       copied.has(to)
     ) {
+      const targetName = modelOf(db, attribute.target)?.singularName;
       const toUser =
         joinTable.inverseJoinColumn.referencedTable === modelOf(db, USER_UID).tableName;
       const columns: Column[] = [
         {
           from: joinTable.joinColumn.name,
-          to: upLinkColumn(joinTable, joinTable.joinColumn.name, attribute.relation),
+          to: upLinkColumn(joinTable, joinTable.joinColumn.name, attribute.relation, targetName),
           type: 'integer',
           references: UP_USERS,
         },
         {
           from: joinTable.inverseJoinColumn.name,
-          to: upLinkColumn(joinTable, joinTable.inverseJoinColumn.name, attribute.relation),
+          to: upLinkColumn(
+            joinTable,
+            joinTable.inverseJoinColumn.name,
+            attribute.relation,
+            targetName
+          ),
           type: 'integer',
           references: toUser ? UP_USERS : joinTable.inverseJoinColumn.referencedTable,
         },
@@ -170,7 +176,7 @@ const linkCopies = (db: Database, copied: Set<string>): Copy[] => {
       if (joinTable.orderColumnName) {
         columns.push({
           from: joinTable.orderColumnName,
-          to: upLinkColumn(joinTable, joinTable.orderColumnName, attribute.relation),
+          to: upLinkColumn(joinTable, joinTable.orderColumnName, attribute.relation, targetName),
           type: 'float',
         });
       }
@@ -178,7 +184,12 @@ const linkCopies = (db: Database, copied: Set<string>): Copy[] => {
       if (joinTable.inverseOrderColumnName) {
         columns.push({
           from: joinTable.inverseOrderColumnName,
-          to: upLinkColumn(joinTable, joinTable.inverseOrderColumnName, attribute.relation),
+          to: upLinkColumn(
+            joinTable,
+            joinTable.inverseOrderColumnName,
+            attribute.relation,
+            targetName
+          ),
           type: 'float',
         });
       }

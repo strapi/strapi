@@ -157,3 +157,52 @@ describe('runPostSync', () => {
     expect(records.releaseMigration).toHaveBeenCalled();
   });
 });
+
+describe('the roles step', () => {
+  it('retypes the roles and records the step in one transaction', async () => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.mocked(records.claimMigration).mockResolvedValue(true);
+
+    const events: string[] = [];
+    const update = vi.fn(async () => {
+      events.push('retype');
+    });
+    const trx = vi.fn(() => ({ whereNotIn: () => ({ update }) }));
+    const transaction = vi.fn(async (run: (args: { trx: unknown }) => Promise<void>) => {
+      events.push('begin');
+      await run({ trx });
+      events.push('commit');
+    });
+    const db = {
+      getSchemaName: () => null,
+      metadata: {
+        get: () => ({ tableName: 'eu_roles', attributes: { type: { columnName: 'type' } } }),
+      },
+      getConnection: () => ({
+        where: () => ({ orderBy: () => ({ first: async () => ({ document_id: 'doc-1' }) }) }),
+      }),
+      transaction,
+    };
+    const withDb = {
+      ...strapi,
+      db,
+      store: () => ({ get: async () => ({ default_role: 'authenticated' }) }),
+      contentTypes: {},
+    } as unknown as Core.Strapi;
+
+    store(record());
+    vi.mocked(records.updateRecord).mockImplementation(async (_strapi, patch) => {
+      events.push(`record:${(patch.completedSteps ?? []).join(',')}`);
+
+      return record(patch);
+    });
+
+    const step = POST_SYNC_STEPS.find(({ name }) => name === 'roles')!;
+    const patch = await step.run(withDb, record(), OWNER);
+
+    expect(events).toEqual(['begin', 'retype', 'record:pre-sync,roles', 'commit']);
+    expect(update).toHaveBeenCalledWith({ type: 'custom' });
+    expect(patch).toMatchObject({ carried: { defaultRoleDocumentId: 'doc-1' } });
+  });
+});

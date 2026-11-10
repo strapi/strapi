@@ -91,8 +91,18 @@ describe('upLinkColumn', () => {
     };
 
     expect(upLinkColumn(l, 'profile_id', 'manyToMany')).toBe('user_id');
-    expect(upLinkColumn(l, 'inv_profile_id', 'manyToMany')).toBe('profile_id');
-    expect(upLinkColumn(l, 'profile_order', 'manyToMany')).toBe('profile_order');
-    expect(upLinkColumn(l, 'inv_profile_order', 'manyToMany')).toBe('user_order');
+    expect(upLinkColumn(l, 'inv_profile_id', 'manyToMany', 'profile')).toBe('profile_id');
+    expect(upLinkColumn(l, 'profile_order', 'manyToMany', 'profile')).toBe('profile_order');
+    expect(upLinkColumn(l, 'inv_profile_order', 'manyToMany', 'profile')).toBe('user_order');
+  });
+
+  it('leaves inv_profile_id alone when the target is a type whose own name is inv_profile', () => {
+    const l = {
+      joinColumn: { name: 'profile_id' },
+      inverseJoinColumn: { name: 'inv_profile_id' },
+    };
+
+    expect(upLinkColumn(l, 'profile_id', 'manyToMany', 'inv-profile')).toBe('user_id');
+    expect(upLinkColumn(l, 'inv_profile_id', 'manyToMany', 'inv-profile')).toBe('inv_profile_id');
   });
 });

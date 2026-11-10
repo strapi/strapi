@@ -60,6 +60,14 @@ export interface LinkTable {
   inverseOrderColumnName?: string;
 }
 
+/** The snake case the metadata layer gives a singular name, enough for the kebab-case ones */
+const snake = (name: string): string =>
+  name
+    .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+    .replace(/[^a-zA-Z\d]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase();
+
 /**
  * The column of Users & Permissions' link table that matches a column of the profile's link table
  * for the same relation. The profile owns the relation, so its own side is `user_id` there. When the
@@ -69,15 +77,26 @@ export interface LinkTable {
  * called profile is the profile's own two sides, `profile_id` and `inv_profile_id`, which Users &
  * Permissions' table calls `user_id` and `profile_id`.
  */
-export const upLinkColumn = (link: LinkTable, column: string, relation?: string): string => {
+export const upLinkColumn = (
+  link: LinkTable,
+  column: string,
+  relation?: string,
+  targetSingularName?: string
+): string => {
   if (column === link.joinColumn.name) {
     return 'user_id';
   }
 
   if (column === link.inverseJoinColumn.name) {
-    // A target that is also called profile: its table names the other side `inv_<join column>`,
-    // Users & Permissions' table names it like the join column of the profile (`profile_id`)
-    if (column === `inv_${link.joinColumn.name}`) {
+    // A target that is also called profile: the metadata layer prefixes the other side with `inv_`
+    // because its plain name equals the join column, and Users & Permissions' table names it like
+    // that join column (`profile_id`). The prefix is not enough to tell: a target whose own name is
+    // `inv_profile` has a plain inverse column spelled the same way.
+    if (
+      targetSingularName !== undefined &&
+      `${snake(targetSingularName)}_id` === link.joinColumn.name &&
+      column === `inv_${link.joinColumn.name}`
+    ) {
       return link.joinColumn.name;
     }
 
