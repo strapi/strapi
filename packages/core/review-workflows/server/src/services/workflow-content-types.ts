@@ -84,7 +84,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         await updateContentTypeConfig(uid, false);
-        await stagesService.deleteAllEntitiesStage(uid, {});
+        await stagesService.deleteAllEntitiesStage(uid);
       });
 
       return [...transfers.values()];

@@ -8,11 +8,13 @@ import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 import fse from 'fs-extra';
 import { cloneDeep } from 'lodash';
 import { async, errors, file as fileUtils } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 
 import { Config, type File } from '../types';
+import type { FileService } from '../types/services';
 
 const { ApplicationError, ValidationError } = errors;
 const { bytesToHumanReadable } = fileUtils;
@@ -320,4 +322,19 @@ const signFileUrls = async (file: File) => {
 };
 
 export type { UrlFetchedFile, FetchUrlResult, UrlFetchProgress };
-export default { getFolderPath, deleteByIds, signFileUrls, fetchUrlToInputFile };
+export default {
+  getFolderPath,
+  /**
+   * Deletes the files with these IDs, from the provider too.
+   *
+   * @internal
+   */
+  deleteByIds,
+  signFileUrls,
+  /**
+   * Streams a URL to a temporary file for the upload pipeline.
+   *
+   * @internal
+   */
+  fetchUrlToInputFile,
+} satisfies Core.Implements<FileService>;

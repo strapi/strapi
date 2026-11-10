@@ -1,3 +1,5 @@
+import type { Controllers } from '../types/controllers';
+
 import adminFile from './admin-file';
 import adminFolder from './admin-folder';
 import adminFolderFile from './admin-folder-file';
@@ -18,4 +20,10 @@ export const controllers = {
   // uses the same action as the folders list.
   folder: contentApiFolder,
   'view-configuration': viewConfiguration,
+  // `content-api` and `folder` are factories: the registry calls them with `{ strapi }`. They are
+  // checked here and not on their returned objects, since the `content-api` `upload` action calls
+  // its sibling actions with `ctx` only.
+} satisfies Omit<Controllers, 'content-api' | 'folder'> & {
+  'content-api': import('@strapi/types').Core.ControllerFactory<'plugin::upload.content-api'>;
+  folder: import('@strapi/types').Core.ControllerFactory<'plugin::upload.folder'>;
 };

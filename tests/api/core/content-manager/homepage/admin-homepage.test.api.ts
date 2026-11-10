@@ -202,6 +202,10 @@ describe('Homepage API', () => {
       expect(response.body.data[1].contentTypeUid).toBe('api::global.global');
       expect(response.body.data[2].contentTypeUid).toBe('api::article.article');
       expect(response.body.data[3].contentTypeUid).toBe('api::author.author');
+      // Assert the document locales: a string for a localized type, null for a non-localized one
+      expect(response.body.data[0].locale).toBe('en');
+      expect(response.body.data[1].locale).toBe(null);
+      expect(response.body.data[2].locale).toBe('en');
       // Assert the document statuses
       expect(response.body.data[0].status).toBe(undefined);
       expect(response.body.data[1].status).toBe('modified');
