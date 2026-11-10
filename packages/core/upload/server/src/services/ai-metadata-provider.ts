@@ -14,9 +14,26 @@ export type AiMetadataProvider = Modules.AI.AiProvider & {
 };
 
 export interface AiMetadataProviderService {
+  /**
+   * Whether a provider is registered and AI is available on this instance.
+   *
+   * @internal
+   */
   hasProvider(): boolean;
   registerProvider(params: { provider: AiMetadataProvider }): void;
+  /**
+   * Registers the Strapi-managed provider when the license includes the `cms-ai` feature. Throws
+   * when a provider is already registered.
+   *
+   * @internal
+   */
   registerStrapiManagedProvider(): void;
+  /**
+   * Generates an alternative text and a caption per image with the registered provider. Throws
+   * when no provider is available.
+   *
+   * @internal
+   */
   generateMetadata(params: GenerateMetadataParams): Promise<GenerateMetadataResult>;
 }
 

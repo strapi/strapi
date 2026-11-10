@@ -15,6 +15,7 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
+import type { FindPageQuery } from '../services/release-action';
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -71,8 +72,9 @@ const releaseActionController = {
     delete ctx.query.groupBy;
 
     // `filter` passes the sanitizer untouched: it's validated above, and the service builds the
-    // condition it stands for
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
+    // condition it stands for. The admin permissions manager returns sanitized queries as
+    // `unknown`; sanitizing keeps a subset of the validated query.
+    const query = (await permissionsManager.sanitizeQuery(ctx.query)) as FindPageQuery;
 
     const releaseActionService = getService('release-action', { strapi });
     const { results, pagination } = await releaseActionService.findPage(releaseId, {

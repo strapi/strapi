@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Modules, Struct, UID } from '@strapi/types';
+import type { Core, Data, Modules, Struct, UID } from '@strapi/types';
 
 type PaginatedDocuments = Modules.Documents.PaginatedResult<UID.Schema>;
 type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & string;
@@ -10,10 +10,30 @@ type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
 
 export type AvailableLocaleDocument = Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>;
-export type AvailableStatusDocument = Pick<
-  Document,
-  'id' | 'documentId' | 'locale' | BY_FIELDS | AT_FIELDS
->;
+/** An admin user as the available status populates it. The admin user schema does not require names. */
+type AvailableStatusUser = {
+  id: Data.ID;
+  firstname: string | null;
+  lastname: string | null;
+};
+/**
+ * The other publication status of a document in the same locale. `locale` is `null` for a
+ * non-localized content type, dates are ISO strings, and the authors are `null` for a version
+ * written without an admin user.
+ */
+type AvailableStatusRow = {
+  id: Data.ID;
+  documentId: string;
+  locale: string | null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  createdBy: AvailableStatusUser | null;
+  updatedBy: AvailableStatusUser | null;
+};
+export type AvailableStatusDocument = Core.IsStrict extends true
+  ? AvailableStatusRow
+  : Pick<Document, 'id' | 'documentId' | 'locale' | BY_FIELDS | AT_FIELDS>;
 export type DocumentMetadata = {
   // All status of the returned locale
   availableStatus: AvailableStatusDocument[];
