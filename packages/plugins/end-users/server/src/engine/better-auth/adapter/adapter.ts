@@ -532,7 +532,7 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
         try {
           const { count } = await dbOf(target).deleteMany({ where: guardedBy(row.id, filters) });
 
-          return count === 1 ? asRow(rowMapper(target)(row)) : null;
+          return count === 1 ? await asRow(rowMapper(target)(row)) : null;
         } catch (error) {
           // Only MySQL-family drivers raise this error, so no dialect check: MariaDB's snapshot
           // isolation refuses a delete of a row that another transaction changed after this one
