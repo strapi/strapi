@@ -20,7 +20,8 @@ export default {
         type: 'string',
         required: true,
       },
-      // The i18n plugin owns `locale` on every content type and sets its required and default rules.
+      // i18n replaces `locale` on every content type with an optional string, so `required` and
+      // `default` would never apply here. The templates service always writes a locale.
       locale: {
         type: 'string',
       },
