@@ -26,7 +26,6 @@ describe('SSO', () => {
     providerRegistry.clear();
   });
 
-  // @ts-expect-error - providerRegistry is a mock
   const register = vi.spyOn(providerRegistry, 'register');
 
   describe('Sync Provider Registry with Config', () => {
