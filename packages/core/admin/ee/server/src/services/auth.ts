@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import { isSsoLocked } from '../utils/sso-lock';
+import type { EmailService } from '../../../../server/src/types/plugin-services';
 import {
   assignResetPasswordToken,
   assertResetPasswordTokenIsValid,
@@ -30,7 +31,7 @@ const forgotPassword = async ({ email }: any = {}) => {
   )}/auth/reset-password?code=${resetPasswordToken}`;
   return strapi
     .plugin('email')
-    .service('email')
+    .service<EmailService>('email')
     .sendTemplatedEmail(
       {
         to: user.email,
