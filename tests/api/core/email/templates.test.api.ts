@@ -15,6 +15,18 @@ const definition = {
   description: 'API test template',
 };
 
+const SECRET_KEY = 'api-test.secret-link';
+
+const secretDefinition = {
+  defaults: {
+    subject: 'Your link',
+    html: '<p><a href="{{ url }}">Open</a></p>',
+    text: '{{ url }}',
+  },
+  variables: [{ name: 'url', secret: true }],
+  description: 'API test template with a secret variable',
+};
+
 // No existing API file covers the email plugin, so templates get their own file.
 describe('Email templates (admin API)', () => {
   let strapi: Core.Strapi;
@@ -30,7 +42,10 @@ describe('Email templates (admin API)', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({
       bootstrap: ({ strapi: instance }: { strapi: Core.Strapi }) => {
-        instance.plugin('email').service('templates').register(KEY, definition);
+        const templates = instance.plugin('email').service('templates');
+
+        templates.register(KEY, definition);
+        templates.register(SECRET_KEY, secretDefinition);
       },
     });
     utils = createUtils(strapi);
@@ -47,7 +62,9 @@ describe('Email templates (admin API)', () => {
   });
 
   afterAll(async () => {
-    await strapi.db.query('plugin::email.template').deleteMany({ where: { key: KEY } });
+    await strapi.db
+      .query('plugin::email.template')
+      .deleteMany({ where: { key: { $in: [KEY, SECRET_KEY] } } });
     await utils.deleteUserById((user as any)?.id);
     await utils.deleteRolesById([role.id]);
     await strapi.destroy();
@@ -69,6 +86,12 @@ describe('Email templates (admin API)', () => {
     expect(list.statusCode).toBe(200);
     expect(list.body.data).toEqual([
       { key: KEY, description: 'API test template', locales: ['en'], customised: true },
+      {
+        key: SECRET_KEY,
+        description: secretDefinition.description,
+        locales: ['en'],
+        customised: false,
+      },
     ]);
 
     const reset = await admin({ method: 'DELETE', url: `/email/templates/${KEY}?locale=en` });
@@ -115,5 +138,106 @@ describe('Email templates (admin API)', () => {
     const res = await admin({ method: 'GET', url: '/email/templates/api-test.nope' });
 
     expect(res.statusCode).toBe(404);
+  });
+  describe('hardening', () => {
+    const body = { subject: 'Your link', text: '{{ url }}' };
+
+    afterEach(async () => {
+      await strapi.db.query('plugin::email.template').deleteMany({ where: { key: SECRET_KEY } });
+      send.mockClear();
+    });
+
+    test('refuses a secret variable in an image source and names it', async () => {
+      const put = await admin({
+        method: 'PUT',
+        url: `/email/templates/${SECRET_KEY}?locale=en`,
+        body: { ...body, html: '<p><img src="{{ url }}" alt=""></p>' },
+      });
+
+      expect(put.statusCode).toBe(400);
+      expect(put.body.error.message).toContain('{{ url }}');
+
+      const stored = await strapi.db
+        .query('plugin::email.template')
+        .findOne({ where: { key: SECRET_KEY } });
+      expect(stored).toBeNull();
+    });
+
+    test('refuses a secret variable in an attribute other than the href of a link', async () => {
+      const put = await admin({
+        method: 'PUT',
+        url: `/email/templates/${SECRET_KEY}?locale=en`,
+        body: { ...body, html: '<a href="https://example.com" title="{{ url }}">Open</a>' },
+      });
+
+      expect(put.statusCode).toBe(400);
+      expect(put.body.error.message).toContain('{{ url }}');
+    });
+
+    test('accepts a secret variable in text and in the href of a link', async () => {
+      const html = '<p>{{ url }}</p><a href="{{ url }}">Open</a>';
+
+      const put = await admin({
+        method: 'PUT',
+        url: `/email/templates/${SECRET_KEY}?locale=en`,
+        body: { ...body, html },
+      });
+
+      expect(put.statusCode).toBe(200);
+      expect(put.body.data.html).toBe(html);
+    });
+
+    test('strips a script element and an event handler when a template is saved', async () => {
+      const put = await admin({
+        method: 'PUT',
+        url: `/email/templates/${KEY}?locale=en`,
+        body: {
+          subject: 'Hello',
+          html: '<p onclick="steal()">Hi</p><script>alert(1)</script><a href="javascript:alert(1)">x</a>',
+          text: '{{ url }}',
+        },
+      });
+
+      expect(put.statusCode).toBe(200);
+      expect(put.body.data.html).not.toMatch(/script|onclick|javascript:|alert/i);
+      expect(put.body.data.html).toContain('Hi');
+
+      const row = await strapi.db.query('plugin::email.template').findOne({ where: { key: KEY } });
+      expect(row.html).toBe(put.body.data.html);
+
+      await admin({ method: 'DELETE', url: `/email/templates/${KEY}?locale=en` });
+    });
+
+    test('sends the registered default when a stored template puts a secret where it could leak', async () => {
+      // Written to the table, as a row saved before the checks, or by something other than the route, would be
+      await strapi.db.query('plugin::email.template').create({
+        data: {
+          key: SECRET_KEY,
+          locale: 'en',
+          subject: 'Stored subject',
+          html: '<p><img src="{{ url }}" alt=""></p>',
+          text: '{{ url }}',
+        },
+      });
+      const warn = jest.spyOn(strapi.log, 'warn').mockImplementation(() => strapi.log);
+
+      try {
+        const res = await admin({
+          method: 'POST',
+          url: `/email/templates/${SECRET_KEY}/test?locale=en`,
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(send).toHaveBeenCalledTimes(1);
+
+        const sent = send.mock.calls[0][0];
+        expect(sent.subject).toBe(secretDefinition.defaults.subject);
+        expect(sent.html).toContain('<a href=');
+        expect(sent.html).not.toContain('<img');
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining(SECRET_KEY));
+      } finally {
+        warn.mockRestore();
+      }
+    });
   });
 });
