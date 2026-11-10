@@ -12,3 +12,5 @@ tests/e2e/data/**
 **/tmp-dts-export/**
 /docs/.docusaurus
 /packages/generators/generators/src/templates/**/*.hbs
+# Type generation output as `strapi ts:generate-types` writes it, compared byte for byte
+tests/types/strict-off-parity/snapshot/**
