@@ -153,8 +153,7 @@ const isGeneratedLayout = (strapi: Core.Strapi, uid: string, edit: EditCell[][])
 
   const sizes = (
     strapi.plugin?.('content-manager')?.service?.('field-sizes') as
-      | { getFieldSize: (type: string) => { default: number } }
-      | undefined
+      { getFieldSize: (type: string) => { default: number } } | undefined
   )?.getFieldSize;
 
   const expected: EditCell[][] = [[]];
@@ -178,8 +177,10 @@ const isGeneratedLayout = (strapi: Core.Strapi, uid: string, edit: EditCell[][])
     used += width;
   }
 
-  return JSON.stringify(expected.map((row) => row.map(({ name }) => name))) ===
-    JSON.stringify(edit.map((row) => row.map(({ name }) => name)));
+  return (
+    JSON.stringify(expected.map((row) => row.map(({ name }) => name))) ===
+    JSON.stringify(edit.map((row) => row.map(({ name }) => name)))
+  );
 };
 
 const writeDefaults = async (strapi: Core.Strapi, uid: string, withLayout: boolean) => {
@@ -202,8 +203,8 @@ const writeDefaults = async (strapi: Core.Strapi, uid: string, withLayout: boole
   // An edit layout an administrator arranged is theirs: the labels are written, the layout is not
   const layouts =
     withLayout && isGeneratedLayout(strapi, uid, configuration.layouts?.edit ?? [])
-    ? { ...configuration.layouts, edit: toEditLayout(configuration.layouts?.edit ?? []) }
-    : configuration.layouts;
+      ? { ...configuration.layouts, edit: toEditLayout(configuration.layouts?.edit ?? []) }
+      : configuration.layouts;
 
   await manager.set({
     key,

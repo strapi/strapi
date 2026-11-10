@@ -14,7 +14,9 @@ const setup = (attributeNames: string[] = names) => {
     contentTypes: Object.fromEntries(
       [USER_UID, PROFILE_UID].map((uid) => [
         uid,
-        { attributes: Object.fromEntries(attributeNames.map((name) => [name, { type: 'string' }])) },
+        {
+          attributes: Object.fromEntries(attributeNames.map((name) => [name, { type: 'string' }])),
+        },
       ])
     ),
     store: ({ name }: { name: string }) => ({
@@ -51,15 +53,14 @@ const configuration = (attributes: string[]) => ({
   // What the Content Manager generates: two fields of size 6 to a row, in schema order
   layouts: {
     list: [],
-    edit: attributes
-      .reduce<{ name: string; size: number }[][]>((rows, name, index) => {
-        if (index % 2 === 0) {
-          rows.push([]);
-        }
-        rows[rows.length - 1].push({ name, size: 6 });
+    edit: attributes.reduce<{ name: string; size: number }[][]>((rows, name, index) => {
+      if (index % 2 === 0) {
+        rows.push([]);
+      }
+      rows[rows.length - 1].push({ name, size: 6 });
 
-        return rows;
-      }, []),
+      return rows;
+    }, []),
   },
 });
 
