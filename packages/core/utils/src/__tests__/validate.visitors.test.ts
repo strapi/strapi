@@ -200,6 +200,36 @@ describe('Validate visitors util', () => {
       });
     });
 
+    // qs turns a REST list longer than its arrayLimit (100 by default) into an object keyed by index
+    const indexKeyedList = Object.fromEntries(
+      Array.from({ length: 101 }, (_, index) => [String(index), String(index + 1)])
+    );
+
+    test.each([
+      ['$in on id', { id: { $in: indexKeyedList } }, '$in', 'id'],
+      ['$notIn on a scalar attribute', { rank: { $notIn: indexKeyedList } }, '$notIn', 'rank'],
+      ['$in under $not', { title: { $not: { $in: { 0: 'a', 1: 'b' } } } }, '$in', 'title'],
+    ])(
+      'throws an arrayLimit error on an index-keyed operand: %s',
+      async (_, filters, key, path) => {
+        const error = await validate(filters).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ValidationError);
+        expect(error).toMatchObject({
+          message: `Invalid operand for ${key} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+          details: { key, path },
+        });
+      }
+    );
+
+    test('keeps the generic message when an operand mixes index and other keys', async () => {
+      const error = await validate({ title: { $in: { 0: 'a', b: 'c' } } }).catch((e: unknown) => e);
+
+      expect(error).toMatchObject({
+        message: 'Invalid operand for $in at title: expected a value, not an object',
+      });
+    });
+
     test.each([
       ['a scalar operand', { title: { $eq: 'x' } }],
       ['an implicit $eq', { title: 'x' }],

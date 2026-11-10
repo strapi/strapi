@@ -57,12 +57,21 @@ const BOOLEAN_CAST_OPERATORS = new Set(['$null', '$notNull']);
 const LOGICAL_OPERATORS = new Set(['$not', '$and', '$or']);
 
 /**
- * Returns the first operator, in the filter of a scalar attribute, whose operand is a non-empty plain object.
+ * True when every key of the object is a non-negative integer. The query string parser (`qs`) turns
+ * a list longer than its `arrayLimit` into such an object, keyed by index.
+ */
+const hasOnlyIndexKeys = (value: Record<string, unknown>) =>
+  Object.keys(value).every((key) => /^\d+$/.test(key));
+
+/**
+ * Returns the first operator, and its operand, in the filter of a scalar attribute, whose operand is a non-empty plain object.
  * The filters traversal does not walk such operands, and query conversion drops them along with their
  * condition, so letting one through makes the query match every row.
  * Empty objects are not reported: they hold no condition, and sanitization removes them.
  */
-const findObjectOperand = (filter: Record<string, unknown>): string | undefined => {
+const findObjectOperand = (
+  filter: Record<string, unknown>
+): { operator: string; operand: Record<string, unknown> } | undefined => {
   for (const [operator, operand] of Object.entries(filter)) {
     if (
       isOperator(operator) === false ||
@@ -74,13 +83,13 @@ const findObjectOperand = (filter: Record<string, unknown>): string | undefined 
     }
 
     if (LOGICAL_OPERATORS.has(operator) === false) {
-      return operator;
+      return { operator, operand };
     }
 
-    const nestedOperator = findObjectOperand(operand);
+    const nested = findObjectOperand(operand);
 
-    if (nestedOperator !== undefined) {
-      return nestedOperator;
+    if (nested !== undefined) {
+      return nested;
     }
   }
 
@@ -104,13 +113,23 @@ export const validateFilters = asyncCurry(
           const isIdKey = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key);
 
           if ((isIdKey || isScalarAttribute(attribute) === true) && isPlainRecord(value)) {
-            const operator = findObjectOperand(value);
+            const objectOperand = findObjectOperand(value);
 
-            if (operator !== undefined) {
+            if (objectOperand !== undefined) {
+              const { operator, operand } = objectOperand;
               // id and documentId are not schema attributes, so the attribute path stops at their parent
               let operandPath = path.attribute ?? key;
               if (attribute === undefined && path.attribute !== null) {
                 operandPath = `${path.attribute}.${key}`;
+              }
+
+              // A REST list longer than the `strapi::query` middleware's `arrayLimit` reaches us as an
+              // object keyed by index, so name the limit instead of the object
+              if (hasOnlyIndexKeys(operand) === true) {
+                throw new ValidationError(
+                  `Invalid operand for ${operator} at ${operandPath}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+                  { key: operator, path: operandPath }
+                );
               }
 
               throw new ValidationError(

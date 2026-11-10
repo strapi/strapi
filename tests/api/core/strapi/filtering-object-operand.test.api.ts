@@ -113,6 +113,30 @@ describe('Filtering with object operands on scalar and JSON attributes', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.error).toMatchObject({ status: 400, name: 'ValidationError' });
     });
+
+    // The strapi::query middleware parses the query string with an arrayLimit of 100,
+    // so a longer list reaches validation as an object keyed by index
+    test('returns a 400 naming arrayLimit for an $in list of 101 items', async () => {
+      const ids = Array.from({ length: 101 }, (_, index) => index + 1);
+      const res = await getNotes({ rank: { $in: ids } });
+
+      expect(res.body.data).toBeNull();
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        status: 400,
+        name: 'ValidationError',
+        message:
+          "Invalid operand for $in at rank: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config",
+      });
+    });
+
+    test('accepts an $in list of 100 items', async () => {
+      const ids = Array.from({ length: 100 }, (_, index) => index + 1);
+      const res = await getNotes({ rank: { $in: ids } });
+
+      expect(res.statusCode).toBe(200);
+      expect(titles(res.body.data)).toEqual(['Note 1', 'Note 2']);
+    });
   });
 
   // Operands that are not plain objects, and the operator map of $not, keep working.
