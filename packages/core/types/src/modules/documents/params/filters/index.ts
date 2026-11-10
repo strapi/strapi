@@ -97,6 +97,15 @@ type HasKnownAttributeNames<TSchemaUID extends UID.Schema> = And<
 >;
 
 /**
+ * Identifier keys a filter accepts on top of the schema's attributes. Components have no documentId.
+ */
+type IdentifierKeys<TSchemaUID extends UID.Schema> = If<
+  StrictEqual<Schema.ModelType<TSchemaUID>, 'component'>,
+  IDKey,
+  IDKey | DocumentIDKey
+>;
+
+/**
  * Tree representation of a Strapi filter for a given schema UID
  */
 export type ObjectNotation<TSchemaUID extends UID.Schema> = {
@@ -113,10 +122,18 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         HasKnownAttributeNames<TSchemaUID>,
         // Strongly typed representation of the filter object tree
         {
-          [TIter in IDKey | DocumentIDKey | TScalarKeys]?: AttributeCondition<TSchemaUID, TIter>;
-        } & {
-          [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter>;
-        },
+          [TIter in IdentifierKeys<TSchemaUID> | TScalarKeys]?: AttributeCondition<
+            TSchemaUID,
+            TIter
+          >;
+        } & If<
+          IsNotNever<TNestedKeys>,
+          { [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter> },
+          // Not an empty object type: intersected with `{}`, the filter type is no longer a weak type,
+          // so TypeScript would accept an inferred filter (e.g. a direct `findMany` call) that has no
+          // known key
+          unknown
+        >,
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
         {
           [TKey in string]?:
