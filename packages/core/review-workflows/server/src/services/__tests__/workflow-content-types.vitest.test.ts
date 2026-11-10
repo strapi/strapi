@@ -132,7 +132,7 @@ describe('Review workflows - Workflow content types service', () => {
     ).resolves.toEqual([]);
 
     expect(deleteAllEntitiesStage).toHaveBeenCalledTimes(1);
-    expect(deleteAllEntitiesStage).toHaveBeenCalledWith(ARTICLE_UID, {});
+    expect(deleteAllEntitiesStage).toHaveBeenCalledWith(ARTICLE_UID);
     expect(contentManagerService.updateConfiguration).toHaveBeenCalledTimes(1);
     expect(contentManagerService.updateConfiguration).toHaveBeenCalledWith(
       { uid: ARTICLE_UID },

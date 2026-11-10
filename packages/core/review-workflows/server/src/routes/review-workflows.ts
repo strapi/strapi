@@ -1,10 +1,15 @@
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
 import { enableFeatureMiddleware } from './utils';
 
 const contentManagerEntryRoute = (
   method: 'GET' | 'PUT',
   action: 'stage' | 'stages' | 'assignee',
-  handler: string,
-  policies: Array<string | { name: string; config?: { actions: string[] } }>
+  handler: 'stages.updateEntity' | 'stages.listAvailableStages' | 'assignees.updateEntity',
+  // With strict types, the policies of the route contract. Without, a policy object names its config.
+  policies: Core.IsStrict extends true
+    ? Core.PolicyReference<'plugin::review-workflows'>[]
+    : Array<string | { name: string; config: { actions: string[] } }>
 ) => ({
   method,
   path: `/content-manager/(collection|single)-types/:model_uid/:id/${action}`,
@@ -15,7 +20,33 @@ const contentManagerEntryRoute = (
   },
 });
 
-export default {
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const reviewWorkflowsRouter: {
+  type: string;
+  routes: (
+    | {
+        method: 'GET' | 'PUT';
+        path: string;
+        handler: string;
+        config: {
+          middlewares: ((ctx: any, next: any) => any)[];
+          // Without strict types, develop's type. With strict types, the policies of the helper.
+          policies: Core.IsStrict extends true
+            ? Core.PolicyReference<'plugin::review-workflows'>[]
+            : (string | { name: string; config?: { actions: string[] } })[];
+        };
+      }
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          middlewares: ((ctx: any, next: any) => any)[];
+          policies: (string | { name: string; config: { actions: string[] } })[];
+        };
+      }
+  )[];
+} = {
   type: 'admin',
   routes: [
     // Review workflow
@@ -137,4 +168,6 @@ export default {
       },
     ]),
   ],
-};
+} satisfies Core.RouterInputFor<Controllers, 'plugin::review-workflows'>;
+
+export default reviewWorkflowsRouter;
