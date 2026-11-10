@@ -240,6 +240,7 @@ describe('MCP OAuth authentication (api)', () => {
       expect(res.body.response_types_supported).toEqual(['code']);
       expect(res.body.grant_types_supported).toEqual(['authorization_code', 'refresh_token']);
       expect(res.body.code_challenge_methods_supported).toEqual(['S256']);
+      expect(res.body.authorization_response_iss_parameter_supported).toBe(true);
     });
 
     test('unauthenticated /mcp requests point at the resource metadata', async () => {

@@ -37,5 +37,8 @@ export const createAuthorizationServerMetadataHandler =
       grant_types_supported: [...SUPPORTED_GRANT_TYPES],
       code_challenge_methods_supported: ['S256'],
       token_endpoint_auth_methods_supported: [...SUPPORTED_TOKEN_ENDPOINT_AUTH_METHODS],
+      // RFC 9207: the consent redirect always carries `iss`, and a server that sends it
+      // must say so here, so clients know to reject a response without it.
+      authorization_response_iss_parameter_supported: true,
     };
   };
