@@ -56,22 +56,28 @@ const SessionsModal = ({ open, onClose, sessions, canSignOut, onSignOut }: Sessi
               <Thead>
                 <Tr>
                   <Th>
-                    {formatMessage({
-                      id: getTranslation('security-panel.sessions.started'),
-                      defaultMessage: 'Signed in',
-                    })}
+                    <Typography variant="sigma" tag="span" textColor="neutral600">
+                      {formatMessage({
+                        id: getTranslation('security-panel.sessions.started'),
+                        defaultMessage: 'Signed in',
+                      })}
+                    </Typography>
                   </Th>
                   <Th>
-                    {formatMessage({
-                      id: getTranslation('security-panel.sessions.expires'),
-                      defaultMessage: 'Expires',
-                    })}
+                    <Typography variant="sigma" tag="span" textColor="neutral600">
+                      {formatMessage({
+                        id: getTranslation('security-panel.sessions.expires'),
+                        defaultMessage: 'Expires',
+                      })}
+                    </Typography>
                   </Th>
                   <Th>
-                    {formatMessage({
-                      id: getTranslation('security-panel.sessions.device'),
-                      defaultMessage: 'Device',
-                    })}
+                    <Typography variant="sigma" tag="span" textColor="neutral600">
+                      {formatMessage({
+                        id: getTranslation('security-panel.sessions.device'),
+                        defaultMessage: 'Device',
+                      })}
+                    </Typography>
                   </Th>
                   <Th>
                     <Typography variant="sigma" tag="span" textColor="neutral600">
@@ -92,11 +98,18 @@ const SessionsModal = ({ open, onClose, sessions, canSignOut, onSignOut }: Sessi
                     <Td>
                       <Typography>{when(session.expiresAt)}</Typography>
                     </Td>
-                    <Td>
+                    <Td maxWidth="24rem">
                       <Flex direction="column" alignItems="flex-start" gap={1}>
                         <Typography>{session.ipAddress ?? '-'}</Typography>
                         {session.userAgent && (
-                          <Typography variant="pi" textColor="neutral600">
+                          // The whole string is the title: it is long, and must not widen the modal
+                          <Typography
+                            variant="pi"
+                            textColor="neutral600"
+                            ellipsis
+                            title={session.userAgent}
+                            maxWidth="100%"
+                          >
                             {session.userAgent}
                           </Typography>
                         )}

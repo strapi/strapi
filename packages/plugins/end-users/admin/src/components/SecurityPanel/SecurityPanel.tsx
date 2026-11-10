@@ -49,7 +49,7 @@ const CAN_UPDATE = [{ action: 'plugin::content-manager.explorer.update', subject
 interface SecurityPanelProps {
   model: string;
   documentId?: string;
-  document?: { documentId?: string };
+  document?: { documentId?: string; emailVerified?: boolean };
 }
 
 const isForbidden = (error: unknown) =>
@@ -83,7 +83,14 @@ interface Confirmation {
   run: () => Promise<unknown>;
 }
 
-const SecurityContent = ({ documentId }: { documentId: string }) => {
+const SecurityContent = ({
+  documentId,
+  emailVerified,
+}: {
+  documentId: string;
+  /** The saved email is verified: there is nothing to resend */
+  emailVerified: boolean;
+}) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -535,27 +542,29 @@ const SecurityContent = ({ documentId }: { documentId: string }) => {
                 defaultMessage: 'Send password reset',
               })}
             </Button>
-            <Button
-              variant="tertiary"
-              size="S"
-              loading={sending === 'verification'}
-              disabled={sending !== null}
-              onClick={() =>
-                sendEmail(
-                  'verification',
-                  () => sendVerification(documentId),
-                  formatMessage({
-                    id: getTranslation('security-panel.emails.verification-sent'),
-                    defaultMessage: 'Verification email sent.',
-                  })
-                )
-              }
-            >
-              {formatMessage({
-                id: getTranslation('security-panel.emails.verification'),
-                defaultMessage: 'Resend verification',
-              })}
-            </Button>
+            {!emailVerified && (
+              <Button
+                variant="tertiary"
+                size="S"
+                loading={sending === 'verification'}
+                disabled={sending !== null}
+                onClick={() =>
+                  sendEmail(
+                    'verification',
+                    () => sendVerification(documentId),
+                    formatMessage({
+                      id: getTranslation('security-panel.emails.verification-sent'),
+                      defaultMessage: 'Verification email sent.',
+                    })
+                  )
+                }
+              >
+                {formatMessage({
+                  id: getTranslation('security-panel.emails.verification'),
+                  defaultMessage: 'Resend verification',
+                })}
+              </Button>
+            )}
           </Flex>
         </Row>
       )}
@@ -679,7 +688,9 @@ const SecurityPanel = ({ model, documentId, document }: SecurityPanelProps) => {
       id: getTranslation('security-panel.title'),
       defaultMessage: 'Security',
     }),
-    content: <SecurityContent documentId={documentId} />,
+    content: (
+      <SecurityContent documentId={documentId} emailVerified={document.emailVerified === true} />
+    ),
   };
 };
 

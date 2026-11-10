@@ -235,6 +235,14 @@ describe('SecurityPanel', () => {
     expect(screen.queryByRole('button', { name: 'Ban' })).not.toBeInTheDocument();
   });
 
+  it('offers no resend for an email that is verified', async () => {
+    serve();
+    renderPanel({ ...SAVED, document: { documentId: 'u1', emailVerified: true } });
+
+    expect(await screen.findByRole('button', { name: 'Send password reset' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Resend verification' })).not.toBeInTheDocument();
+  });
+
   it('hides actions without explorer.update', async () => {
     serve();
     renderAdmin(<Panel {...SAVED} />, { providerOptions: { permissions: [READ] } });
