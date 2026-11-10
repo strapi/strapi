@@ -252,6 +252,82 @@ describe('Validate visitors util', () => {
     });
   });
 
+  describe('validateFilters - object operands on $or and $and', () => {
+    const ctx = { schema: articleModel, getModel };
+
+    const validate = (filters: unknown) =>
+      validators.validateFilters(ctx, filters, ['nonAttributesOperators']);
+
+    const conditions = (length: number) =>
+      Array.from({ length }, (_, index) => ({ title: `title ${index}` }));
+
+    // qs turns a REST list longer than its arrayLimit (100 by default), or a list with an index
+    // of 100 or more, into an object keyed by index
+    const indexKeyed = (length: number) => ({ ...conditions(length) });
+    const sparse = { 100: { title: 'x' } };
+
+    test.each([
+      ['$or with 101 conditions', { $or: indexKeyed(101) }, '$or', '$or'],
+      ['$and with 101 conditions', { $and: indexKeyed(101) }, '$and', '$and'],
+      ['a sparse $or', { $or: sparse }, '$or', '$or'],
+      ['a sparse $and', { $and: sparse }, '$and', '$and'],
+      ['$or in a relation filter', { createdBy: { $or: indexKeyed(101) } }, '$or', 'createdBy.$or'],
+      [
+        'a sparse $and in a relation filter',
+        { createdBy: { $and: sparse } },
+        '$and',
+        'createdBy.$and',
+      ],
+      ['$or under $not', { $not: { $or: indexKeyed(101) } }, '$or', '$not.$or'],
+      ['a sparse $and under $not', { $not: { $and: sparse } }, '$and', '$not.$and'],
+      ['$or inside an $and list', { $and: [{ $or: sparse }] }, '$or', '$and[0].$or'],
+      ['$or on a scalar attribute', { title: { $or: { 0: { $eq: 'a' } } } }, '$or', 'title.$or'],
+    ])(
+      'throws an arrayLimit error on an index-keyed operand: %s',
+      async (_, filters, key, path) => {
+        const error = await validate(filters).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ValidationError);
+        expect(error).toMatchObject({
+          message: `Invalid operand for ${key} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+          details: { key, path },
+        });
+      }
+    );
+
+    test.each([
+      ['an operand keyed by an attribute name', { $or: { title: 'x' } }, '$or', '$or'],
+      [
+        'an operand mixing index and other keys',
+        { $and: { 0: { title: 'x' }, title: 'y' } },
+        '$and',
+        '$and',
+      ],
+    ])('throws on any other object operand: %s', async (_, filters, key, path) => {
+      const error = await validate(filters).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toMatchObject({
+        message: `Invalid operand for ${key} at ${path}: expected an array of filters, not an object`,
+        details: { key, path },
+      });
+    });
+
+    test.each([
+      ['$or with 100 conditions', { $or: conditions(100) }],
+      ['$and with 100 conditions', { $and: conditions(100) }],
+      ['$or in a relation filter', { createdBy: { $or: [{ firstname: 'a' }, { lastname: 'b' }] } }],
+      ['$and under $not', { $not: { $and: [{ title: 'a' }, { title: 'b' }] } }],
+      ['nested $or and $and lists', { $and: [{ $or: [{ title: 'a' }] }, { title: 'b' }] }],
+      // The operator map form is validated by the scalar attribute checks
+      ['the operator map of $and on a scalar attribute', { title: { $and: { $eq: 'x' } } }],
+      // Empty objects hold no condition and are sanitized out
+      ['an empty operand', { $or: {}, createdBy: { $and: {} } }],
+    ])('accepts %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toEqual(filters);
+    });
+  });
+
   describe('defaultValidatePopulate - nested filters/sort/fields within populate', () => {
     const categoryModel: any = {
       uid: 'api::category.category',
