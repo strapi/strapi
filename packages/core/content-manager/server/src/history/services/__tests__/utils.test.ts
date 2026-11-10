@@ -218,12 +218,17 @@ describe('History utils', () => {
       id,
     });
 
-    it('getAuthorNameDictionary finds the display names of a model with one query', async () => {
-      const findMany = jest.fn().mockResolvedValue([
-        { id: 1, username: 'kai', firstname: 'Kai', lastname: 'Doe', email: 'kai@test.com' },
-        { id: 2, username: null, firstname: 'John', lastname: 'Doe', email: 'john@test.com' },
-        { id: 3, username: null, firstname: null, lastname: null, email: 'jane@test.com' },
-      ]);
+    it('getAuthorNameDictionary finds the current names with one query per model', async () => {
+      const findMany = jest.fn(({ select }) =>
+        select.includes('email')
+          ? [
+              { id: 1, username: 'kai', firstname: 'Kai', lastname: 'Doe', email: 'kai@test.com' },
+              { id: 2, username: null, firstname: 'John', lastname: 'Doe', email: 'john@test.com' },
+              { id: 3, username: null, firstname: 'Ana', lastname: null, email: 'ana@test.com' },
+              { id: 4, username: null, firstname: null, lastname: null, email: 'jane@test.com' },
+            ]
+          : [{ id: 5, name: 'CI token' }]
+      );
       const strapi = { db: { query: jest.fn(() => ({ findMany })) } } as unknown as Core.Strapi;
       const { getAuthorNameDictionary } = createServiceUtils({ strapi });
 
@@ -232,17 +237,24 @@ describe('History utils', () => {
           adminUser('1'),
           adminUser('2'),
           adminUser('3'),
+          adminUser('4'),
           adminUser('1'),
           adminUser(null),
+          { type: 'token', model: 'admin::api-token', id: '5' },
           null,
         ])
       ).resolves.toEqual({
-        'admin::user': { 1: 'kai', 2: 'John Doe', 3: 'jane@test.com' },
+        'admin::user': { 1: 'kai', 2: 'John Doe', 3: 'Ana', 4: 'jane@test.com' },
+        'admin::api-token': { 5: 'CI token' },
       });
-      expect(findMany).toHaveBeenCalledTimes(1);
+      expect(findMany).toHaveBeenCalledTimes(2);
       expect(findMany).toHaveBeenCalledWith({
         select: ['id', 'username', 'firstname', 'lastname', 'email'],
-        where: { id: { $in: ['1', '2', '3'] } },
+        where: { id: { $in: ['1', '2', '3', '4'] } },
+      });
+      expect(findMany).toHaveBeenCalledWith({
+        select: ['id', 'name'],
+        where: { id: { $in: ['5'] } },
       });
     });
 
