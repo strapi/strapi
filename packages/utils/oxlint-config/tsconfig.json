@@ -2,8 +2,9 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
   },
-  "include": ["*.ts", "__tests__"],
+  "include": ["*.ts", "plugins/*.ts", "__tests__"],
   "exclude": ["node_modules"]
 }
