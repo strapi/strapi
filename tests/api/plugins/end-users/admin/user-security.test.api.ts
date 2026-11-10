@@ -16,7 +16,7 @@ import {
   emptyTables,
   resetRoles,
 } from '../utils/permissions';
-import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
+import { clearSentEmails } from '../utils/email-capture-provider';
 import { totpFromUri } from '../utils/totp';
 import { emailsAfter } from '../utils/wait';
 
@@ -178,7 +178,10 @@ describe('end-users: admin user security API', () => {
     const security = await rqAdmin.get(`${base(documentId)}/security`);
 
     expect(security.body.data.status).toMatchObject({ banned: true, banReason: 'cooling off' });
-    expect(new Date(security.body.data.status.banExpires).getTime()).toBe(until.getTime());
+    // To the second: a database may keep a date to less than a millisecond
+    expect(Math.floor(new Date(security.body.data.status.banExpires).getTime() / 1000)).toBe(
+      Math.floor(until.getTime() / 1000)
+    );
     expect((await signIn(email)).statusCode).toBe(403);
 
     // Time passing is the date going by: the ban is for the engine to lift, not for an admin
@@ -209,23 +212,16 @@ describe('end-users: admin user security API', () => {
     clearSentEmails();
 
     expect((await rqAdmin.post(`${base(documentId)}/send-password-reset`)).status).toBe(200);
-
-    const [reset] = await emailsAfter(1);
-
-    expect(sentEmails()).toHaveLength(1);
-    expect(reset.to).toBe(email);
-    expect(reset.text).toMatch(/https?:\/\/\S+/);
-
-    clearSentEmails();
-
     // The user signed up with confirmation off, so their address is not confirmed
     expect((await rqAdmin.post(`${base(documentId)}/send-verification`)).status).toBe(200);
 
-    const [verify] = await emailsAfter(1);
+    // Both have landed before anything is counted, so a duplicate of the first would show
+    const sent = await emailsAfter(2);
 
-    expect(sentEmails()).toHaveLength(1);
-    expect(verify.to).toBe(email);
-    expect(verify.subject).not.toBe(reset.subject);
+    expect(sent.map(({ to }) => to)).toEqual([email, email]);
+    expect(sent[0].text).toContain('/reset-password/');
+    expect(sent[1].text).toContain('/verify-email');
+    expect(sent[0].subject).not.toBe(sent[1].subject);
   });
 
   it('signs the user out everywhere, and the tokens stop naming a session', async () => {

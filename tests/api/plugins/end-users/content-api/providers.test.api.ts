@@ -302,6 +302,7 @@ describe('end-users: sign-in providers', () => {
       }
     });
   });
+
   describe('who a provider may sign in as', () => {
     let strapi;
     let oidc: FakeOidc;

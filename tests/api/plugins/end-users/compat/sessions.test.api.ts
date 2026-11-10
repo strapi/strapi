@@ -5,11 +5,10 @@
  * the second has them off: one instance at a time per file.
  */
 import { createRequest } from 'api-tests/request';
-import { emailsAfter } from '../utils/wait';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
-import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
+import { clearSentEmails } from '../utils/email-capture-provider';
 import { makeLegacySecret, mintOldRefreshToken } from '../utils/legacy-tokens';
 import {
   ENGINE_UIDS,
@@ -20,6 +19,7 @@ import {
   resetRoles,
 } from '../utils/permissions';
 import { resetDatabase } from '../utils/reset-database';
+import { emailsAfter } from '../utils/wait';
 
 const LEGACY_ROUTE = '/api/end-users-test/legacy';
 const COOKIE = 'strapi_up_refresh';

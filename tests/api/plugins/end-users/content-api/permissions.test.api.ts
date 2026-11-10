@@ -1942,8 +1942,8 @@ describe('end-users: the Content API rules, over REST', () => {
     const titles = () => delivered.map((payload) => payload.entry?.title);
 
     // Delivery is queued after the commit, so "nothing was sent" is shown by a later create that
-    // is let through: once its webhook has arrived, one a refused create would have queued before
-    // it has had its turn
+    // is let through: once its webhook has arrived, one that a refused create queued earlier
+    // would (in practice, deliveries leave in the order they were queued) be here too
     let markers = 0;
     const settle = async () => {
       markers += 1;
@@ -1952,6 +1952,8 @@ describe('end-users: the Content API rules, over REST', () => {
 
       expect((await post(title)).statusCode).toBe(201);
       await until(() => titles().includes(title), { what: `the webhook of "${title}"` });
+
+      return title;
     };
 
     beforeAll(async () => {
@@ -2016,8 +2018,9 @@ describe('end-users: the Content API rules, over REST', () => {
 
     it('sends no webhook for a refused create, and one for a create that goes through', async () => {
       expect((await post('nope')).statusCode).toBe(403);
-      await settle();
-      expect(titles()).toEqual(['ok-settled-1']);
+      const marker = await settle();
+
+      expect(titles()).toEqual([marker]);
 
       expect((await post('ok-webhook')).statusCode).toBe(201);
       await until(() => titles().includes('ok-webhook'), { what: 'the webhook of "ok-webhook"' });

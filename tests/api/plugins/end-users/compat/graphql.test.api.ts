@@ -6,11 +6,10 @@
  */
 import { randomBytes } from 'node:crypto';
 import { createRequest } from 'api-tests/request';
-import { emailsAfter } from '../utils/wait';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
-import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
+import { clearSentEmails } from '../utils/email-capture-provider';
 import {
   ENGINE_UIDS,
   PROFILE_UID,
@@ -22,6 +21,7 @@ import {
   setRolePermissions,
   unconditioned,
 } from '../utils/permissions';
+import { emailsAfter } from '../utils/wait';
 import { DEFAULT_AUTHENTICATED_PERMISSIONS } from '../../../../../packages/plugins/end-users/server/src/bootstrap';
 
 const USER_UID = 'plugin::end-users.user';
