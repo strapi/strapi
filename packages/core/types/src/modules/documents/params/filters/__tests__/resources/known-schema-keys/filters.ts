@@ -7,6 +7,8 @@
  */
 import type { Modules, UID } from '../../../../../../..';
 
+declare const articles: Modules.Documents.ServiceInstance<'api::article.article'>;
+
 type Filters<TSchemaUID extends UID.Schema> =
   Modules.Documents.Params.Filters.ObjectNotation<TSchemaUID>;
 
@@ -43,12 +45,20 @@ export const seo: Filters<'shared.seo'>[] = [
     // @ts-expect-error Unknown operator
     metaTitle: { $unknown: 'a' },
   },
+  {
+    // @ts-expect-error Components have no documentId
+    documentId: 'a',
+  },
 ];
 
 /**
  * A schema with nested attributes only
  */
 export const link: Filters<'shared.link'>[] = [
+  {
+    // @ts-expect-error Components have no documentId
+    documentId: { $eq: 'a' },
+  },
   { id: { $in: [1, 2] }, article: { title: { $eq: 'a' } } },
   {
     // @ts-expect-error Unknown attribute
@@ -74,3 +84,32 @@ export const nested: Filters<'api::article.article'>[] = [
     },
   },
 ];
+
+/**
+ * Filters passed straight to a Document Service method, without an annotation
+ *
+ * The method infers its params, so TypeScript does not check excess properties. A filter object
+ * whose keys are all unknown is still rejected, because it has no property in common with the filter
+ * type.
+ */
+articles.findMany({ filters: { title: 'a', documentId: 'b' } });
+articles.findMany({ filters: { seo: { metaTitle: 'a' }, links: { article: { title: 'b' } } } });
+
+articles.findMany({
+  // @ts-expect-error Unknown attribute
+  filters: { titel: 'a' },
+});
+
+articles.findMany({
+  filters: {
+    // @ts-expect-error Unknown attribute in a component filter
+    seo: { metaTitel: 'a' },
+  },
+});
+
+articles.findMany({
+  filters: {
+    // @ts-expect-error Unknown attribute in a repeatable component filter
+    links: { artcle: { title: 'a' } },
+  },
+});
