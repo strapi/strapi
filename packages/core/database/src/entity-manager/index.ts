@@ -667,8 +667,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             // re-points those of the old published version to the new one. Every other caller is
             // rejected here: discardDraft, clone, and the draft & publish migration, which then
             // fails at boot on every start. Skipping the value would commit and drop the links of
-            // the deleted version. What discardDraft should do with these links is an open
-            // question.
+            // the deleted version. What discardDraft and clone should do with these links is an
+            // open question.
             // An InvalidRelationError reaches the client as a 400 with this message, not a 500
             if (dataset.length === 0) {
               throw new InvalidRelationError(

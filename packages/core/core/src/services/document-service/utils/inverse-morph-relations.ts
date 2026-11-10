@@ -1,3 +1,4 @@
+import { errors } from '@strapi/database';
 import type { Data, UID } from '@strapi/types';
 
 /**
@@ -73,24 +74,37 @@ const load = async (uid: UID.ContentType, ids: Data.ID[]): Promise<InverseMorphL
 };
 
 /**
- * Re-points the target rows loaded by `load` to the new version of their owner, matched by
- * locale. Run it after the old versions are deleted (which cleared these rows) and the new
- * versions are created.
+ * Re-points the target rows loaded by `load` to the new published version of their owner,
+ * matched by locale. Run it after the old versions are deleted (which cleared these rows) and the
+ * new versions are created.
+ *
+ * The new versions are read from the database, not taken from the publish response: the caller's
+ * `fields` param can leave `locale` out of the response.
  */
 const sync = async (
   uid: UID.ContentType,
+  documentId: string,
   oldVersions: { id: Data.ID; locale?: string | null }[],
-  newVersions: { id: Data.ID; locale?: string | null }[],
   links: InverseMorphLinks[]
 ) => {
   if (links.length === 0) {
     return;
   }
 
+  // The old published versions are deleted, so the published rows are the new versions
+  const newVersions: { id: Data.ID; locale: string | null }[] = await strapi.db
+    .query(uid)
+    .findMany({
+      where: { documentId, publishedAt: { $ne: null } },
+      select: ['id', 'locale'],
+    });
+
   const newIdsByOldId = new Map<string, Data.ID>();
 
   for (const oldVersion of oldVersions) {
-    const newVersion = newVersions.find((entry) => entry.locale === oldVersion.locale);
+    const newVersion = newVersions.find(
+      (entry) => (entry.locale ?? null) === (oldVersion.locale ?? null)
+    );
 
     if (newVersion !== undefined) {
       newIdsByOldId.set(String(oldVersion.id), newVersion.id);
@@ -104,8 +118,9 @@ const sync = async (
       for (const row of rows) {
         const newId = newIdsByOldId.get(String(row.ownerId));
 
+        // An InvalidRelationError reaches the client as a 400 with this message, not a 500
         if (newId === undefined) {
-          throw new Error(
+          throw new errors.InvalidRelationError(
             `Cannot keep the ${uid}.${attributeName} links of entry ${row.ownerId}: it has no new version`
           );
         }
@@ -119,6 +134,9 @@ const sync = async (
           .from(tableName)
           .update({ [idColumnName]: newId, [typeColumnName]: uid })
           .whereIn('id', rowIds)
+          // Deleting the old version cleared these rows. Another write may have re-owned one
+          // since `load`: leave it to its new owner.
+          .where(idColumnName, null)
           .transacting(trx);
       }
     }
