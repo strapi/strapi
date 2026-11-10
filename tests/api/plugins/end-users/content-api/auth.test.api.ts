@@ -11,7 +11,8 @@
 import { randomBytes } from 'node:crypto';
 import request from 'supertest';
 import { createAuthRequest, createContentAPIRequest, createRequest } from 'api-tests/request';
-import { createEndUsersInstance } from '../utils/create-end-users-instance';
+import { TEST_SECRET, createEndUsersInstance } from '../utils/create-end-users-instance';
+import { importEsm } from '../utils/import-esm';
 import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
 import { extendProfile } from '../utils/extend-profile';
 import { totpFromUri } from '../utils/totp';
@@ -1883,6 +1884,7 @@ describe('end-users: the emails the engine sends', () => {
   });
 
   afterAll(async () => {
+    await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
     await strapi.destroy();
   });
 
@@ -2038,5 +2040,216 @@ describe('end-users: the emails the engine sends', () => {
     expect(sentEmails()[0].subject).toBe('Your email address was changed');
     expect(sentEmails()[0].text).toContain('m***@example.com');
     expect(sentEmails()[0].text).not.toContain('masked-target');
+  });
+  describe('what a mail scanner does to the links', () => {
+    it('lets a reset link be fetched any number of times, and spends the token on the POST only', async () => {
+      const { email } = await signedUp();
+
+      clearSentEmails();
+      await rq.post('/api/auth/request-password-reset', {
+        body: { email },
+        headers: FROM_FRONT_END,
+      });
+
+      const [mail] = await emailsSent(1);
+      const link = linkOf(mail);
+      const tokens: Array<string | null> = [];
+
+      // A scanner, a prefetching client and the person: each GET lands on the reset page with the
+      // same token, and none of them uses it up
+      for (let visit = 0; visit < 3; visit += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const visited = await rq.get(link);
+
+        expect(visited.statusCode).toBe(302);
+        tokens.push(
+          new URL(visited.headers.location, 'http://localhost').searchParams.get('token')
+        );
+      }
+
+      expect(tokens[0]).toEqual(expect.any(String));
+      expect(new Set(tokens).size).toBe(1);
+
+      const reset = (newPassword: string) =>
+        rq.post('/api/auth/reset-password', {
+          body: { token: tokens[0], newPassword },
+          headers: FROM_FRONT_END,
+        });
+
+      expect((await reset('An0ther!password')).statusCode).toBe(200);
+      expect((await reset('Yet-an0ther!password')).statusCode).toBe(400);
+      expect(
+        (
+          await rq.post('/api/auth/sign-in/email', {
+            body: { email, password: 'An0ther!password' },
+          })
+        ).statusCode
+      ).toBe(200);
+    });
+
+    it('lets a verification link be fetched twice: the token is signed, not spent', async () => {
+      await settings.set({ signUp: { requireEmailVerification: true } });
+      await strapi.plugin('end-users').service('engine').reload();
+
+      const email = 'scanned-verify@example.com';
+
+      expect(
+        (
+          await rq.post('/api/auth/sign-up/email', {
+            body: { email, password: PASSWORD, name: 'Test' },
+            headers: FROM_FRONT_END,
+          })
+        ).statusCode
+      ).toBe(200);
+
+      const [mail] = await emailsSent(1);
+      const link = linkOf(mail);
+      const first = await rq.get(link);
+      const second = await rq.get(link);
+
+      expect([first.statusCode, second.statusCode]).toEqual([302, 302]);
+      expect([first.headers.location, second.headers.location]).toEqual(['/verified', '/verified']);
+      expect(await strapi.db.query(USER_UID).count({ where: { email, emailVerified: true } })).toBe(
+        1
+      );
+    });
+  });
+
+  describe('changing the email address', () => {
+    /** Asks for the change, and answers the link in the email that goes to the new address */
+    const requestChange = async (cookie: string, newEmail: string, sendsMail = true) => {
+      clearSentEmails();
+
+      const res = await rq.post('/api/auth/change-email', {
+        body: { newEmail },
+        headers: { ...FROM_FRONT_END, Cookie: cookie },
+      });
+
+      return { res, mail: sendsMail ? (await emailsSent(1))[0] : undefined };
+    };
+
+    const emailOf = async (email: string) => strapi.db.query(USER_UID).count({ where: { email } });
+
+    it('leaves the address as it was until the link is followed, so the old one still signs in', async () => {
+      const { email, cookie } = await signedUp();
+      const { res, mail } = await requestChange(cookie, 'later@example.com');
+
+      expect(res.statusCode).toBe(200);
+      expect(mail?.to).toBe('later@example.com');
+      expect(await emailOf(email)).toBe(1);
+      expect(await emailOf('later@example.com')).toBe(0);
+      expect(
+        (await rq.post('/api/auth/sign-in/email', { body: { email, password: PASSWORD } }))
+          .statusCode
+      ).toBe(200);
+      expect(
+        (
+          await rq.post('/api/auth/sign-in/email', {
+            body: { email: 'later@example.com', password: PASSWORD },
+          })
+        ).statusCode
+      ).toBe(401);
+    });
+
+    it('changes nothing for a link whose token was tampered with, and for one that expired, and sends no notice', async () => {
+      const { email, cookie } = await signedUp();
+      const { mail } = await requestChange(cookie, 'tampered@example.com');
+      const link = new URL(linkOf(mail as { text: string }), 'http://localhost');
+      const token = link.searchParams.get('token') as string;
+      const [header, payload, signature] = token.split('.');
+      // The first character of the signature carries all its six bits, unlike the last
+      const forged = [
+        header,
+        payload,
+        `${signature[0] === 'A' ? 'B' : 'A'}${signature.slice(1)}`,
+      ].join('.');
+
+      const { createEmailVerificationToken } = await importEsm('better-auth/api');
+      const expired = await createEmailVerificationToken(
+        TEST_SECRET,
+        email,
+        'expired@example.com',
+        -60,
+        { requestType: 'change-email-verification' }
+      );
+
+      for (const [name, bad] of [
+        ['tampered', forged],
+        ['expired', expired],
+      ]) {
+        const url = new URL(link);
+
+        url.searchParams.set('token', bad);
+
+        // eslint-disable-next-line no-await-in-loop
+        const res = await rq.get(`${url.pathname}${url.search}`, { headers: { Cookie: cookie } });
+
+        expect({
+          name,
+          error: /error=/.test(res.headers.location ?? '') || res.statusCode >= 400,
+        }).toEqual({
+          name,
+          error: true,
+        });
+      }
+
+      expect(await emailOf(email)).toBe(1);
+      expect(await emailOf('tampered@example.com')).toBe(0);
+      expect(await emailOf('expired@example.com')).toBe(0);
+
+      // The real link still works, and is the only one that sent the notice: had a refused one
+      // sent it, it would have come first
+      clearSentEmails();
+      expect(
+        (await rq.get(linkOf(mail as { text: string }), { headers: { Cookie: cookie } })).statusCode
+      ).toBe(302);
+      await emailsSent(1);
+      expect(sentEmails().map((sent) => sent.subject)).toEqual(['Your email address was changed']);
+    });
+
+    it('refuses a change to an address another user holds, and sends nothing to it', async () => {
+      const mine = await signedUp();
+      const theirs = await signedUp();
+
+      const { res } = await requestChange(mine.cookie, theirs.email, false);
+
+      // The answer is the one a free address gets, so the endpoint does not say which exist
+      expect(res.statusCode).toBe(200);
+      expect(await emailOf(mine.email)).toBe(1);
+      expect(await emailOf(theirs.email)).toBe(1);
+
+      // Nothing went out: a change that is let through afterwards is the first mail there is
+      const { mail } = await requestChange(mine.cookie, 'free-address@example.com');
+
+      expect(sentEmails()).toHaveLength(1);
+      expect(mail?.to).toBe('free-address@example.com');
+    });
+
+    it('does nothing the second time the same link is followed', async () => {
+      const { email, cookie } = await signedUp();
+      const { mail } = await requestChange(cookie, 'once@example.com');
+      const link = linkOf(mail as { text: string });
+      const notices = () =>
+        sentEmails().filter((sent) => sent.subject === 'Your email address was changed');
+
+      expect((await rq.get(link, { headers: { Cookie: cookie } })).statusCode).toBe(302);
+      await until(() => notices().length === 1, { what: 'the notice of the change' });
+
+      await rq.get(link, { headers: { Cookie: cookie } });
+
+      expect(await emailOf('once@example.com')).toBe(1);
+
+      // Mail goes out in the order it was asked for: once this one has landed, a second notice
+      // from the second visit would be in the list already
+      await rq.post('/api/auth/request-password-reset', {
+        body: { email: 'once@example.com' },
+        headers: FROM_FRONT_END,
+      });
+      await until(() => sentEmails().some((sent) => sent.to === 'once@example.com'), {
+        what: 'the reset email',
+      });
+      expect(notices()).toHaveLength(1);
+      expect(await emailOf(email)).toBe(0);
+    });
   });
 });
