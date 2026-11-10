@@ -3,12 +3,12 @@
 The new test suites of the Test Infrastructure Overhaul. They replace `/tests` domain by domain,
 and the folder is renamed `/tests` at the cutover.
 
-| Workspace | Package                | Runner                                                       |
-| --------- | ---------------------- | ------------------------------------------------------------ |
-| `shared/` | `@strapi/tests-shared` | Foundation: app generation and server lifecycle, test plugin |
-| `ui/`     | `@strapi/tests-e2e`    | Playwright, `*.ui-test.ts`                                   |
-| `api/`    | `@strapi/tests-api`    | Vitest, `*.api-test.ts`                                      |
-| `cli/`    | `@strapi/tests-cli`    | Vitest, `*.cli-test.ts`                                      |
+| Workspace | Package                | Runner                                                                  |
+| --------- | ---------------------- | ----------------------------------------------------------------------- |
+| `shared/` | `@strapi/tests-shared` | Foundation: app lifecycle, scaffolders, seeders, DB resets, test plugin |
+| `ui/`     | `@strapi/tests-e2e`    | Playwright, `*.ui-test.ts`                                              |
+| `api/`    | `@strapi/tests-api`    | Vitest, `*.api-test.ts`                                                 |
+| `cli/`    | `@strapi/tests-cli`    | Vitest, `*.cli-test.ts`                                                 |
 
 ## Run
 
@@ -34,6 +34,40 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
 - **Resets** (RFC D4): api and cli start one instance per file on an empty database. The ui
   suite snapshots its SQLite database when the worker starts, then restores it before each spec
   file (`resetScope: 'file'`, default) or each test (`test.use({ resetScope: 'test' })`).
-  doesn't reach the test apps.
 - **One ui worker** for now: each worker will need its own app and database first.
 - **Windows** is not supported yet: stopping a server signals its process group.
+
+## Set up an app
+
+Write the schema and config before boot, seed, then boot once. No step restarts Strapi.
+
+```ts
+const app = await generateApp({ name: `api-articles-${worker}` });
+await resetDatabase(app, database);
+
+// Scaffolders: files in the app, synced by Strapi on boot.
+scaffoldContentType(app, { singularName: 'article', attributes: { title: { type: 'string' } } });
+scaffoldComponent(app, { uid: 'shared.seo', attributes: { title: { type: 'string' } } });
+scaffoldConfig(app, 'features', { future: { adminTokens: true } }); // config/env/development/
+scaffoldPlugin(app, 'users-permissions', { config: { jwt: { expiresIn: '1h' } } });
+
+// Seeders, before boot: one Strapi load for the whole plan (about 2.5 s).
+const { apiTokens } = await seedApp(
+  app,
+  {
+    adminUsers: [{ email, password, firstname, lastname, roles: ['strapi-editor'] }],
+    entries: [{ uid: 'api::article.article', data: { title: 'Hello' }, status: 'published' }],
+    apiTokens: [{ name: 'full', type: 'full-access' }],
+  },
+  { database }
+);
+
+const server = await startServer(app, { port, database });
+
+// Seeders, in the running server: data a test adds on top, without a restart.
+await seed(server, { entries: [{ uid: 'api::article.article', data: { title: 'Live' } }] });
+```
+
+A seed plan (`SeedPlan`) is JSON: locales, admin roles and users, end users, media, entries and
+API tokens (content API and admin). The test plugin runs it in that order, so `seedApp` and
+`seed` behave the same. Examples: `api/tests/seed/` and `api/tests/scenarios/settings-spike`.
