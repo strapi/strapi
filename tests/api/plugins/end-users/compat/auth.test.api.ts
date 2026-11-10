@@ -6,6 +6,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import { createRequest } from 'api-tests/request';
+import { emailsAfter } from '../utils/wait';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
@@ -46,20 +47,6 @@ const resetState = async () => {
     methods: { emailPassword: true, username: true },
     signUp: { enabled: true, requireEmailVerification: false, registrationFields: [] },
   });
-};
-
-/** The emails sent so far, once `count` of them have been: they leave after the response. */
-const emailsAfter = async (count: number) => {
-  const deadline = Date.now() + 3000;
-
-  while (sentEmails().length < count && Date.now() < deadline) {
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise((resolve) => {
-      setTimeout(resolve, 20);
-    });
-  }
-
-  return sentEmails();
 };
 
 describe('end-users compat: sign-in', () => {
@@ -651,6 +638,79 @@ describe('end-users compat: sign-in', () => {
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ status: true });
         expect((await signIn('native@example.com', NEW_PASSWORD)).status).toBe(200);
+      });
+    });
+
+    describe('a blocked user and the reset', () => {
+      const sessionsOf = (documentId: string) =>
+        strapi.db.query('plugin::end-users.session').count({ where: { userId: documentId } });
+
+      it('gets no jwt and no session from a code asked for before the block, though the reset itself has gone through', async () => {
+        const seeded = await seedUpUser(strapi, { email: 'blocked-reset@example.com' });
+        const code = await requestCode('blocked-reset@example.com');
+
+        await strapi
+          .documents(USER_UID)
+          .update({ documentId: seeded.documentId, data: { banned: true, banReason: 'spam' } });
+
+        const res = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body.error.message).toBe('Your account has been blocked by an administrator');
+        expect(res.body).not.toHaveProperty('jwt');
+        expect(await sessionsOf(seeded.documentId)).toBe(0);
+
+        // The reset runs first and the sign-in after it, so the block is told to the caller only
+        // then: the password has changed all the same, as the code says it does
+        await strapi
+          .documents(USER_UID)
+          .update({ documentId: seeded.documentId, data: { banned: false } });
+
+        expect((await signIn('blocked-reset@example.com', PASSWORD)).status).toBe(400);
+        expect((await signIn('blocked-reset@example.com', NEW_PASSWORD)).status).toBe(200);
+      });
+
+      it('gets no jwt and no session from a code asked for after the block', async () => {
+        const seeded = await seedUpUser(strapi, { email: 'blocked-later@example.com' });
+
+        await strapi
+          .documents(USER_UID)
+          .update({ documentId: seeded.documentId, data: { banned: true, banReason: 'spam' } });
+        clearSentEmails();
+
+        expect((await forgot({ email: 'blocked-later@example.com' })).status).toBe(200);
+
+        // The answer is the same for everyone; whether an email goes out is up to the engine
+        const sent = await emailsAfter(1);
+        const code = sent.length > 0 ? linkOf(sent[0]).searchParams.get('code') : 'no-code';
+        const res = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+
+        expect(res.status).toBeGreaterThanOrEqual(400);
+        expect(res.body).not.toHaveProperty('jwt');
+        expect(await sessionsOf(seeded.documentId)).toBe(0);
+      });
+
+      it('creates no session from a native reset either', async () => {
+        const seeded = await seedUpUser(strapi, { email: 'blocked-native@example.com' });
+        const token = await requestCode('blocked-native@example.com');
+
+        await strapi
+          .documents(USER_UID)
+          .update({ documentId: seeded.documentId, data: { banned: true, banReason: 'spam' } });
+
+        const res = await reset({ token, newPassword: NEW_PASSWORD });
+
+        expect(res.body).not.toHaveProperty('jwt');
+        expect(res.headers['set-auth-token']).toBeUndefined();
+        expect(await sessionsOf(seeded.documentId)).toBe(0);
       });
     });
 

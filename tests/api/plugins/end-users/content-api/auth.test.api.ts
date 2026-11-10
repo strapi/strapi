@@ -14,6 +14,7 @@ import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
 import { extendProfile } from '../utils/extend-profile';
 import { totpFromUri } from '../utils/totp';
+import { emailsAfter, until } from '../utils/wait';
 import {
   ENGINE_UIDS,
   PROFILE_UID,
@@ -1328,17 +1329,7 @@ describe('end-users: the emails the engine sends', () => {
    * Emails go out once the transaction commits and without holding the response, so they land a
    * moment after it: wait (up to 5 s) until `count` have arrived
    */
-  const emailsSent = async (count: number) => {
-    const deadline = Date.now() + 5000;
-
-    while (sentEmails().length < count && Date.now() < deadline) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 25);
-      });
-    }
-
-    return sentEmails();
-  };
+  const emailsSent = (count: number) => emailsAfter(count);
 
   /** The first link in the text of an email, as a path on this server */
   const linkOf = (email: { text: string }) => {
@@ -1506,16 +1497,10 @@ describe('end-users: the emails the engine sends', () => {
     });
 
     // The sign-up may have sent its own email: the confirmation is the one sent last, once it lands
-    const deadline = Date.now() + 5000;
-
-    while (
-      !sentEmails().some((email) => email.subject === 'Confirm your new email address') &&
-      Date.now() < deadline
-    ) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 25);
-      });
-    }
+    await until(
+      () => sentEmails().some((email) => email.subject === 'Confirm your new email address'),
+      { what: 'the change-email confirmation' }
+    );
 
     const confirmation = sentEmails()[sentEmails().length - 1];
 

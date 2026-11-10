@@ -6,6 +6,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import { createRequest } from 'api-tests/request';
+import { emailsAfter } from '../utils/wait';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
@@ -42,20 +43,6 @@ const LOGIN = `mutation ($identifier: String!, $password: String!) {
 
 const signIn = (identifier: string, password: string = PASSWORD) =>
   gql(LOGIN, { identifier, password });
-
-/** The emails sent so far, once `count` of them have been: they leave after the response. */
-const emailsAfter = async (count: number) => {
-  const deadline = Date.now() + 3000;
-
-  while (sentEmails().length < count && Date.now() < deadline) {
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise((resolve) => {
-      setTimeout(resolve, 20);
-    });
-  }
-
-  return sentEmails();
-};
 
 const linkOf = (email: { text: string }) =>
   new URL(email.text.match(/https?:\/\/\S+/)?.[0] as string);
