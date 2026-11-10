@@ -63,6 +63,29 @@ const LOGICAL_OPERATORS = new Set(['$not', '$and', '$or']);
 const hasOnlyIndexKeys = (value: Record<string, unknown>) =>
   Object.keys(value).every((key) => /^\d+$/.test(key));
 
+const arrayLimitMessage = (operator: string, path: string) =>
+  `Invalid operand for ${operator} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`;
+
+/**
+ * Operators whose operand is a list of filters.
+ */
+const GROUP_OPERATORS = new Set(['$and', '$or']);
+
+/**
+ * True when a `$and` / `$or` operand is a non-empty plain object with a key that is not an operator,
+ * such as an index or an attribute name. Query conversion drops such an operand along with its
+ * condition (or the database layer rejects it), so letting one through can make the query match
+ * every row. An operator map, e.g. `{ title: { $and: { $eq: 'x' } } }`, is left to the scalar
+ * attribute checks, and empty objects hold no condition and are sanitized out.
+ */
+const isObjectGroupOperand = (
+  operator: string,
+  operand: unknown
+): operand is Record<string, unknown> =>
+  GROUP_OPERATORS.has(operator) === true &&
+  isPlainRecord(operand) === true &&
+  Object.keys(operand).some((key) => isOperator(key) === false);
+
 /**
  * Returns the first operator, and its operand, in the filter of a scalar attribute, whose operand is a non-empty plain object.
  * The filters traversal does not walk such operands, and query conversion drops them along with their
@@ -126,10 +149,10 @@ export const validateFilters = asyncCurry(
               // A REST list longer than the `strapi::query` middleware's `arrayLimit` reaches us as an
               // object keyed by index, so name the limit instead of the object
               if (hasOnlyIndexKeys(operand) === true) {
-                throw new ValidationError(
-                  `Invalid operand for ${operator} at ${operandPath}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
-                  { key: operator, path: operandPath }
-                );
+                throw new ValidationError(arrayLimitMessage(operator, operandPath), {
+                  key: operator,
+                  path: operandPath,
+                });
               }
 
               throw new ValidationError(
@@ -137,6 +160,25 @@ export const validateFilters = asyncCurry(
                 { key: operator, path: operandPath }
               );
             }
+          }
+
+          if (isObjectGroupOperand(key, value) === true) {
+            // $and and $or have no attribute path, so name the raw path, e.g. `category.$or`
+            const operandPath = path.raw ?? key;
+
+            // A REST list longer than the `strapi::query` middleware's `arrayLimit`, or with an index
+            // of `arrayLimit` or more, reaches us as an object keyed by index
+            if (hasOnlyIndexKeys(value) === true) {
+              throw new ValidationError(arrayLimitMessage(key, operandPath), {
+                key,
+                path: operandPath,
+              });
+            }
+
+            throw new ValidationError(
+              `Invalid operand for ${key} at ${operandPath}: expected an array of filters, not an object`,
+              { key, path: operandPath }
+            );
           }
 
           // ID is not an attribute per se, so we need to make
