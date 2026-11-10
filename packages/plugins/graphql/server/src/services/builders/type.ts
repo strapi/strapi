@@ -24,7 +24,7 @@ export default (context: Context) => {
   // a hidden field into an error that nulls its whole parent. Input types keep `required`, and
   // `documentId` stays non-null. This is read once per schema build (a builders instance is made
   // for each), so the schema is the same for every request.
-  const relaxRequired = extension.isRequiredOutputNullable();
+  const relaxRequired = extension.isRequiredOutputRelaxed();
 
   /**
    * Add a scalar attribute to the type definition

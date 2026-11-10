@@ -7,7 +7,7 @@ const makeStrapi = (optedIn: boolean) => {
   const services: Record<string, any> = {
     extension: {
       shadowCRUD: () => ({ field: () => ({ hasOutputEnabled: () => true }) }),
-      isRequiredOutputNullable: () => optedIn,
+      isRequiredOutputRelaxed: () => optedIn,
     },
     utils: {
       naming: {
@@ -118,7 +118,7 @@ describe('relation fields where the association resolver hides the relation', ()
           isDisabled: () => false,
         }),
         use: vi.fn(),
-        isRequiredOutputNullable: () => false,
+        isRequiredOutputRelaxed: () => false,
       },
       utils: {
         naming: {

@@ -119,7 +119,7 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
 
   hideEngineTypesFromGraphQL(strapi, registerGeneratedContentTypes(strapi, engine));
   // Only the full register opts in; check mode keeps the plugin dormant, so its schema is unchanged
-  strapi.plugin('graphql')?.service('extension').nullableRequiredOutput();
+  strapi.plugin('graphql')?.service('extension').relaxRequiredOutput();
   // Decides at the start whether to migrate from Users & Permissions, before the schema is synced
   registerMigrationControl(strapi);
 

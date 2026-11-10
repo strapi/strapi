@@ -37,7 +37,7 @@ The `content-api` service ([`services/content-api/`](https://github.com/strapi/s
 
 ### Extension service
 
-`strapi.plugin('graphql').service('extension')` is the public hook. `use(config)` takes an object or a factory `({ strapi, nexus, typeRegistry })`. The config can hold `types`, `typeDefs`, `resolvers`, `resolversConfig` and Nexus `plugins`. `shadowCRUD(uid)` returns a manager. Its methods include `disable`, `disableQueries`, `disableMutations`, `disableActions` and `field(name)`. The schema is built once, so plugins call the service in `register`, before this plugin's `bootstrap`. The [users-permissions](../users-permissions/index.md) and [i18n](../i18n/index.md) plugins do this.
+`strapi.plugin('graphql').service('extension')` is the public hook. `use(config)` takes an object or a factory `({ strapi, nexus, typeRegistry })`. The config can hold `types`, `typeDefs`, `resolvers`, `resolversConfig` and Nexus `plugins`. `shadowCRUD(uid)` returns a manager. Its methods include `disable`, `disableQueries`, `disableMutations`, `disableActions` and `field(name)`. `relaxRequiredOutput()` makes the required fields of output types nullable, for a plugin that hides fields from some callers (a hidden field is `null`, and a non-null type would null its parent); input types keep `required`, `documentId` stays non-null, and `isRequiredOutputRelaxed()` reads the switch. The end-users plugin calls it from its full register. The schema is built once, so plugins call the service in `register`, before this plugin's `bootstrap`. The [users-permissions](../users-permissions/index.md) and [i18n](../i18n/index.md) plugins do this.
 
 ### Resolver wrapping
 

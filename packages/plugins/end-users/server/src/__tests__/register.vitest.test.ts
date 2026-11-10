@@ -48,8 +48,8 @@ const setup = ({
   const disable = vi.fn();
   const disableQueries = vi.fn();
   const shadowCRUD = vi.fn(() => ({ disable, disableQueries }));
-  const nullableRequiredOutput = vi.fn();
-  const graphqlService = vi.fn(() => ({ shadowCRUD, nullableRequiredOutput }));
+  const relaxRequiredOutput = vi.fn();
+  const graphqlService = vi.fn(() => ({ shadowCRUD, relaxRequiredOutput }));
   const plugin = vi.fn((name: string) => {
     if (name !== 'graphql') {
       return { service };
@@ -115,7 +115,7 @@ const setup = ({
     disable,
     disableQueries,
     graphqlService,
-    nullableRequiredOutput,
+    relaxRequiredOutput,
   };
 };
 
@@ -257,11 +257,11 @@ describe('register', () => {
     });
 
     it('asks the GraphQL plugin for nullable required output fields', () => {
-      const { strapi, nullableRequiredOutput } = setup({ tables });
+      const { strapi, relaxRequiredOutput } = setup({ tables });
 
       register({ strapi });
 
-      expect(nullableRequiredOutput).toHaveBeenCalledTimes(1);
+      expect(relaxRequiredOutput).toHaveBeenCalledTimes(1);
     });
 
     it('does nothing when the GraphQL plugin is not installed', () => {

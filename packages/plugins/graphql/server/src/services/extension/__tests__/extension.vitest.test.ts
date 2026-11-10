@@ -42,22 +42,20 @@ describe('GraphQL extension merging', () => {
   });
 
   describe('required output fields', () => {
-    it('stay non-null until a plugin asks for them to be nullable', () => {
+    it('stay non-null until a plugin asks for them to be relaxed', () => {
       const extension = createExtension({ strapi: {} as Core.Strapi });
 
-      expect(extension.isRequiredOutputNullable()).toBe(false);
+      expect(extension.isRequiredOutputRelaxed()).toBe(false);
 
-      extension.nullableRequiredOutput();
-      expect(extension.isRequiredOutputNullable()).toBe(true);
+      extension.relaxRequiredOutput();
+      expect(extension.isRequiredOutputRelaxed()).toBe(true);
 
-      extension.nullableRequiredOutput(false);
-      expect(extension.isRequiredOutputNullable()).toBe(false);
     });
 
     it('are not changed by another instance', () => {
-      createExtension({ strapi: {} as Core.Strapi }).nullableRequiredOutput();
+      createExtension({ strapi: {} as Core.Strapi }).relaxRequiredOutput();
 
-      expect(createExtension({ strapi: {} as Core.Strapi }).isRequiredOutputNullable()).toBe(false);
+      expect(createExtension({ strapi: {} as Core.Strapi }).isRequiredOutputRelaxed()).toBe(false);
     });
   });
 });
