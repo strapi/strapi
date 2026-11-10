@@ -6,6 +6,8 @@ import routes from './routes';
 import register from './register';
 import * as middlewares from './middlewares';
 
+export type * from './types';
+
 export default () => ({
   config,
   bootstrap,
