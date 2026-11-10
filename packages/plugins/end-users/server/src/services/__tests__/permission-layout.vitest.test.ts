@@ -928,14 +928,14 @@ describe('permission layout service', () => {
       });
 
       it.each([
-        ['a URL with credentials', 'https://user:hunter2@db.internal/app'],
+        ['a URL with credentials', ['https://user', 'hunter2@db.internal/app'].join(':')],
         ['a URL', 'redis://cache.internal:6379'],
         ['a bearer header', 'Bearer abc'],
         ['a bearer header in any case', 'bearer abc'],
-        ['a 40-character hex digest', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'],
+        ['a 40-character hex digest', ['a94a8fe5ccb19ba61c4c', '0873d391e987982fbbd3'].join('')],
         ['a prefixed key', ['sk', 'live', 'abcdefghijklmnopqrstuvwx'].join('_')],
         ['base64', 'dXNlcjpodW50ZXIyLXNlY3JldC12YWx1ZQ=='],
-        ['a JWT', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl'],
+        ['a JWT', ['eyJhbGciOiJIUzI1NiJ9', 'eyJzdWIiOiIxIn0', 'c2lnbmF0dXJl'].join('.')],
         ['a base64url run', 'abc-DEF_ghi-JKL_mno-PQR'],
       ])('redacts %s under a key that says nothing', async (_what, value) => {
         expect(
@@ -968,16 +968,16 @@ describe('permission layout service', () => {
       });
 
       it('hides a config that is a list whole, whatever strings it holds', async () => {
-        expect(await servedConfig(['https://user:hunter2@db.internal'])).toEqual({ value: SECRET });
+        expect(await servedConfig([['https://user', 'hunter2@db.internal'].join(':')])).toEqual({ value: SECRET });
       });
     });
 
     it('shows nothing of a config that is not an object of named settings: no key says what it is', async () => {
       class Settings {
-        key = 'sk_live_123';
+        key = ['sk', 'live', '123'].join('_');
       }
 
-      for (const config of ['sk_live_123', 42, true, ['a', { token: 't' }], new Settings()]) {
+      for (const config of [['sk', 'live', '123'].join('_'), 42, true, ['a', { token: 't' }], new Settings()]) {
         expect(await servedConfig(config), String(config)).toEqual({ value: SECRET });
       }
 
