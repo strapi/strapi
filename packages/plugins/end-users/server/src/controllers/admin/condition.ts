@@ -9,37 +9,17 @@ import type builderLayoutService from '../../services/builder-layout';
 import type conditionService from '../../services/condition';
 import type { ValidateRead } from '../../services/condition';
 import { isPlain } from '../../utils/is-plain';
-
+import { validateConditionPreview } from '../../validation/condition';
 
 /** What the Content Manager asks of an admin to list a content type's entries */
 const CONTENT_MANAGER_READ = 'plugin::content-manager.explorer.read';
-
-const refuse = (message: string): never => {
-  throw new errors.ValidationError(message);
-};
 
 /**
  * The parts of a preview. The condition is left as it is: the service checks it, and only for an
  * admin who may read what it counts.
  */
-const toPreviewRequest = (body: unknown): ConditionPreviewRequest => {
-  if (!isPlain(body)) {
-    return refuse('A preview is an object: { condition, subject, userDocumentId, inputs }');
-  }
-
-  const { condition, subject, userDocumentId, inputs = {} } = body;
-
-  if (typeof subject !== 'string' || subject === '') {
-    refuse('subject is the uid of a content type');
-  }
-
-  if (typeof userDocumentId !== 'string' || userDocumentId === '') {
-    refuse('userDocumentId is the documentId of an end user');
-  }
-
-  if (!isPlain(inputs)) {
-    refuse('inputs is an object: the value of each input');
-  }
+const toPreviewRequest = async (body: unknown): Promise<ConditionPreviewRequest> => {
+  const { condition, subject, userDocumentId, inputs = {} } = await validateConditionPreview(body);
 
   return { condition, subject, userDocumentId, inputs } as ConditionPreviewRequest;
 };
@@ -133,7 +113,7 @@ const conditionController = ({ strapi }: { strapi: Core.Strapi }) => {
      * nothing about it.
      */
     async preview(ctx: Koa.Context) {
-      const request = toPreviewRequest(ctx.request.body);
+      const request = await toPreviewRequest(ctx.request.body);
       const subject = readScope(ctx, request.subject);
       const user = readScope(ctx, USER_UID);
 

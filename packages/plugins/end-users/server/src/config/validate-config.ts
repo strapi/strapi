@@ -12,6 +12,10 @@ import { isPlain } from '../utils/is-plain';
 
 type Plain = Record<string, unknown>;
 
+// Written by hand rather than with a yup schema: the messages are the product. A project owner
+// reads them at boot and in the migration report, each names the key and the value it got, and the
+// tests and docs quote them word for word. A schema would give them its own wording.
+
 const invalid = (key: string, expected: string, value: unknown): never => {
   throw new Error(
     `Invalid end-users configuration: \`${key}\` must be ${expected}, got ${JSON.stringify(value)}.`

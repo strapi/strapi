@@ -1,8 +1,8 @@
-import { errors } from '@strapi/utils';
 import type Koa from 'koa';
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../../constants';
+import { validateRoutesSubject } from '../../validation/permission-layout';
 import type permissionLayoutService from '../../services/permission-layout';
 
 /**
@@ -22,13 +22,7 @@ const permissionLayoutController = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /** `?subject=<content type uid or route group id>`: one string, never a list */
     async routes(ctx: Koa.Context) {
-      const { subject } = ctx.query;
-
-      if (typeof subject !== 'string') {
-        throw new errors.ValidationError(
-          'subject is one string: a content type uid or a route group id'
-        );
-      }
+      const subject = (await validateRoutesSubject(ctx.query.subject)) as string;
 
       ctx.body = { data: await layout().getRoutesFor(subject) };
     },
