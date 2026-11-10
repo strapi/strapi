@@ -8,12 +8,14 @@
  * - the redeem (`POST /reset-password`) is refused before anything changes, the token included,
  *   with the answer Better Auth's own ban check gives the native sign-in: 403 `BANNED_USER`. The
  *   Users & Permissions reset goes through this endpoint too, and its route turns the code into the
- *   400 that plugin gave a blocked user;
- * - no reset link is mailed to a banned user (`withoutBannedRecipients`). The request is answered
- *   as for any address, so the ban is not told to whoever asks.
+ *   400 that plugin gave a blocked user. So are the redeems of the email OTP and phone number
+ *   plugins (`/email-otp/reset-password`, `/phone-number/reset-password`), which the project opts
+ *   into and which change the password on a code alone;
+ * - no reset link or code is sent to a banned user (`withoutBannedRecipients`,
+ *   `withoutBannedOtpRecipients`, `withoutBannedPhoneRecipients`). The request is answered as for
+ *   any address, so the ban is not told to whoever asks.
  *
- * A ban that has run out is no ban. The resets of the opt-in sign-in plugins (email OTP, phone
- * number) are theirs.
+ * A ban that has run out is no ban.
  */
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
@@ -27,6 +29,8 @@ export const BANNED_MESSAGE =
   'You have been banned from this application. Please contact support if you believe this is an error.';
 
 const RESET_PASSWORD_PATH = '/reset-password';
+const EMAIL_OTP_RESET_PATH = '/email-otp/reset-password';
+const PHONE_NUMBER_RESET_PATH = '/phone-number/reset-password';
 
 type Plain = Record<string, unknown>;
 
@@ -54,6 +58,65 @@ export const withoutBannedRecipients =
     return send(input, request);
   };
 
+type OtpSender = (
+  input: { email: string; otp: string; type: string },
+  ctx?: { context?: AuthContext } | null
+) => unknown;
+
+type PhoneSender = (
+  input: { phoneNumber: string; code: string },
+  ctx?: { context?: AuthContext } | null
+) => unknown;
+
+interface AuthContext {
+  internalAdapter: { findUserByEmail(email: string): Promise<{ user: Plain } | null> };
+  adapter: { findOne(query: unknown): Promise<unknown> };
+}
+
+const userByEmail = async (context: AuthContext, email: string) =>
+  (await context.internalAdapter.findUserByEmail(email.toLowerCase()))?.user ?? null;
+
+const userByPhoneNumber = async (context: AuthContext, phoneNumber: string) =>
+  (await context.adapter.findOne({
+    model: 'user',
+    where: [{ field: 'phoneNumber', value: phoneNumber }],
+  })) as Plain | null;
+
+/**
+ * The email OTP sender, sending no password reset code to a banned user. Codes for anything else
+ * (a sign-in, a verification) go as before: the ban is refused where they are redeemed.
+ */
+export const withoutBannedOtpRecipients =
+  (send: OtpSender): OtpSender =>
+  async (input, ctx) => {
+    if (input.type === 'forget-password' && ctx?.context) {
+      const user = await userByEmail(ctx.context, input.email);
+
+      if (user && banState(user) === 'active') {
+        return undefined;
+      }
+    }
+
+    return send(input, ctx);
+  };
+
+/** The phone number plugin's reset code sender, sending nothing to a banned user */
+export const withoutBannedPhoneRecipients =
+  (send: PhoneSender): PhoneSender =>
+  async (input, ctx) => {
+    if (ctx?.context) {
+      const user = await userByPhoneNumber(ctx.context, input.phoneNumber);
+
+      if (user && banState(user) === 'active') {
+        return undefined;
+      }
+    }
+
+    return send(input, ctx);
+  };
+
+const REFUSED = { code: 'BANNED_USER', message: BANNED_MESSAGE };
+
 export const bannedReset = (): BetterAuthPlugin => ({
   id: 'banned-reset',
 
@@ -77,7 +140,27 @@ export const bannedReset = (): BetterAuthPlugin => ({
             : null;
 
           if (user && banState(user) === 'active') {
-            throw new APIError('FORBIDDEN', { code: 'BANNED_USER', message: BANNED_MESSAGE });
+            throw new APIError('FORBIDDEN', REFUSED);
+          }
+        }),
+      },
+      {
+        matcher: (context) =>
+          context.path === EMAIL_OTP_RESET_PATH || context.path === PHONE_NUMBER_RESET_PATH,
+        handler: createAuthMiddleware(async (ctx) => {
+          const body = isPlain(ctx.body) ? ctx.body : {};
+          const context = ctx.context as unknown as AuthContext;
+          const { email, phoneNumber } = body;
+          let user: Plain | null = null;
+
+          if (ctx.path === EMAIL_OTP_RESET_PATH && typeof email === 'string') {
+            user = await userByEmail(context, email);
+          } else if (ctx.path === PHONE_NUMBER_RESET_PATH && typeof phoneNumber === 'string') {
+            user = await userByPhoneNumber(context, phoneNumber);
+          }
+
+          if (user && banState(user) === 'active') {
+            throw new APIError('FORBIDDEN', REFUSED);
           }
         }),
       },

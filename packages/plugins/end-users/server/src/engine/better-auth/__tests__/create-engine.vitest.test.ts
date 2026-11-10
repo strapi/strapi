@@ -279,19 +279,32 @@ describe('buildAuthOptions', () => {
       'password-policy',
       'last-sign-in',
       'provider-profile',
-      'pending-link',
     ]);
   });
 
-  it('installs pending-link after the generic OAuth plugin, whose providers it wraps', () => {
+  it('installs pending-link only with the compatibility mode on, after the generic OAuth plugin, whose providers it wraps', () => {
+    const idsOf = (strapi: ReturnType<typeof fakeStrapi>) =>
+      buildAuthOptions(strapi)
+        .plugins?.map((plugin) => plugin.id)
+        .filter((id) => id === 'pending-link');
+
+    expect(idsOf(fakeStrapi())).toEqual([]);
+    expect(idsOf(fakeStrapi({ 'plugin::end-users.compat.usersPermissions': true }))).toEqual([
+      'pending-link',
+    ]);
+
     const ids =
-      buildAuthOptions(fakeStrapi(), undefined, {
-        ...emptyStartupInputs(),
-        providers: {
-          ...emptyStartupInputs().providers,
-          genericOAuth: [{ providerId: 'fake-idp', discoveryUrl: 'https://idp.example.com' }],
-        },
-      } as never).plugins?.map((plugin) => plugin.id) ?? [];
+      buildAuthOptions(
+        fakeStrapi({ 'plugin::end-users.compat.usersPermissions': true }),
+        undefined,
+        {
+          ...emptyStartupInputs(),
+          providers: {
+            ...emptyStartupInputs().providers,
+            genericOAuth: [{ providerId: 'fake-idp', discoveryUrl: 'https://idp.example.com' }],
+          },
+        } as never
+      ).plugins?.map((plugin) => plugin.id) ?? [];
 
     expect(ids.indexOf('generic-oauth')).toBeGreaterThanOrEqual(0);
     expect(ids.indexOf('pending-link')).toBe(ids.indexOf('generic-oauth') + 1);
@@ -335,7 +348,6 @@ describe('buildAuthOptions', () => {
       'password-policy',
       'last-sign-in',
       'provider-profile',
-      'pending-link',
       'project-plugin',
     ]);
   });

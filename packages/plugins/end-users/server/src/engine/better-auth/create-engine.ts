@@ -495,14 +495,21 @@ export const buildAuthOptions = (
       ...betterAuthPlugins(strapi),
       ...strapiPlugins(strapi),
       ...(genericOAuth.length > 0 ? [genericOAuthPlugin({ config: genericOAuth as never })] : []),
-      // A social provider that a generic one of the same id shadows is not one it may wrap
-      pendingLink(
-        strapi,
-        Object.keys(socialProviders).filter(
-          (id) =>
-            !genericOAuth.some((config) => (config as { providerId?: unknown }).providerId === id)
-        )
-      ),
+      // The links exist only while compat is on. A social provider that a generic one of the same
+      // id shadows is not one it may wrap
+      ...(compat.usersPermissions
+        ? [
+            pendingLink(
+              strapi,
+              Object.keys(socialProviders).filter(
+                (id) =>
+                  !genericOAuth.some(
+                    (config) => (config as { providerId?: unknown }).providerId === id
+                  )
+              )
+            ),
+          ]
+        : []),
       ...(projectPlugins as BetterAuthPlugin[]),
     ],
   } as BetterAuthOptions;

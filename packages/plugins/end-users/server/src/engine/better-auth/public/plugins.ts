@@ -11,12 +11,15 @@ import '../../../assert-node-version';
 import {
   emailOTP as betterAuthEmailOTP,
   magicLink as betterAuthMagicLink,
+  phoneNumber as betterAuthPhoneNumber,
 } from 'better-auth/plugins';
 
+import { withoutBannedOtpRecipients, withoutBannedPhoneRecipients } from '../plugins/banned-reset';
 import { sendEmailOtp, sendMagicLinkEmail } from '../plugins/strapi-email';
 
 type MagicLinkOptions = Parameters<typeof betterAuthMagicLink>[0];
 type EmailOtpOptions = Parameters<typeof betterAuthEmailOTP>[0];
+type PhoneNumberOptions = Parameters<typeof betterAuthPhoneNumber>[0];
 
 /**
  * Sends the link through the `end-users.magic-link` email template. A `sendMagicLink` of the
@@ -29,15 +32,42 @@ export const magicLink = (
 
 /**
  * Sends the code through the `end-users.email-otp` email template. A `sendVerificationOTP` of the
- * project's own replaces it.
+ * project's own replaces it. Either one sends no password reset code to a banned user.
  */
 export const emailOTP = (
   options: Partial<EmailOtpOptions> = {}
-): ReturnType<typeof betterAuthEmailOTP> =>
-  betterAuthEmailOTP({ sendVerificationOTP: sendEmailOtp, ...options });
+): ReturnType<typeof betterAuthEmailOTP> => {
+  const send = (options.sendVerificationOTP ?? sendEmailOtp) as Parameters<
+    typeof withoutBannedOtpRecipients
+  >[0];
+
+  return betterAuthEmailOTP({
+    ...options,
+    sendVerificationOTP: withoutBannedOtpRecipients(send) as EmailOtpOptions['sendVerificationOTP'],
+  });
+};
+
+/**
+ * Better Auth's `phoneNumber`, whose `sendPasswordResetOTP` sends nothing to a banned user. Sending
+ * the code is the project's: the plugin has no default sender.
+ */
+export const phoneNumber = (
+  options?: PhoneNumberOptions
+): ReturnType<typeof betterAuthPhoneNumber> => {
+  const send = options?.sendPasswordResetOTP as
+    Parameters<typeof withoutBannedPhoneRecipients>[0] | undefined;
+
+  return betterAuthPhoneNumber(
+    send
+      ? ({
+          ...options,
+          sendPasswordResetOTP: withoutBannedPhoneRecipients(send),
+        } as PhoneNumberOptions)
+      : options
+  );
+};
 
 export {
-  phoneNumber,
   jwt,
   oneTap,
   anonymous,

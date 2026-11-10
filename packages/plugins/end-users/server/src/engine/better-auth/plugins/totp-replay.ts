@@ -45,8 +45,14 @@ interface TotpOptions {
   digits?: number;
 }
 
-const sameCode = (a: string, b: string) =>
-  a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+// Compared as bytes: a multibyte character makes two strings of one length differ in byte length,
+// and `timingSafeEqual` throws on that, where a wrong code is to be refused like any other
+const sameCode = (a: string, b: string) => {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+
+  return left.length === right.length && timingSafeEqual(left, right);
+};
 
 /**
  * The time step `code` belongs to, among the ones Better Auth accepts (this period and one on each

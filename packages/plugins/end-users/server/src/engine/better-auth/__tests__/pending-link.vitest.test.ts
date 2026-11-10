@@ -22,9 +22,11 @@ const USER = {
   banned: false,
   banExpires: null,
 };
+// Built at run time: no secret-shaped literal in the source
+const SECRET = ['engine', 'secret', 'of', 'the', 'test'].join('-');
 const LINK = {
   id: 'link-1',
-  identifier: pendingLinkIdentifier('facebook', USER.email),
+  identifier: pendingLinkIdentifier('facebook', USER.email, SECRET),
   value: USER.id,
   expiresAt: new Date(Date.now() + 60_000),
 };
@@ -32,7 +34,13 @@ const LINK = {
 type Link = typeof LINK | null;
 type User = Record<string, unknown> | null;
 
-const fakeStrapi = () => ({ log: { warn: vi.fn() } }) as unknown as Core.Strapi;
+const fakeStrapi = () =>
+  ({
+    log: { warn: vi.fn() },
+    config: {
+      get: vi.fn((key: string) => (key === 'plugin::end-users.secret' ? SECRET : undefined)),
+    },
+  }) as unknown as Core.Strapi;
 
 /**
  * A request's auth context: the trusted providers, the stored link and the stored user. `shared`
@@ -79,12 +87,10 @@ const install = (
 ) => {
   const adapter = { deleteMany: vi.fn(async () => 1) };
   const plugin = pendingLink(strapi, socialProviderIds);
-  const result = (plugin.init as (context: unknown) => any)({
-    socialProviders: providers,
-    adapter,
-  });
+  const shared = { socialProviders: providers, adapter };
+  const result = (plugin.init as (context: unknown) => any)(shared);
 
-  return { plugin, strapi, adapter, hooks: result.options.databaseHooks.account.create };
+  return { plugin, strapi, adapter, shared, hooks: result.options.databaseHooks.account.create };
 };
 
 /** The provider's user lookup, run inside a request with this context */
@@ -125,7 +131,10 @@ describe('pending-link', () => {
     expect(auth.adapter.findOne).toHaveBeenCalledWith({
       model: 'verification',
       where: [
-        { field: 'identifier', value: pendingLinkIdentifier('facebook', 'erin@example.com') },
+        {
+          field: 'identifier',
+          value: pendingLinkIdentifier('facebook', 'erin@example.com', SECRET),
+        },
       ],
     });
   });
@@ -233,6 +242,20 @@ describe('pending-link', () => {
     expect(auth.trustedProviders).toEqual(['facebook']);
   });
 
+  it('trusts nothing when the request runs on the context every request shares', async () => {
+    const provider = providerAnswering('facebook', facebookAnswer());
+    const { auth } = requestContext();
+    const { shared } = install([provider]);
+
+    // The same object `init` received: a trust there would hold for every later request
+    Object.assign(shared, auth);
+
+    await lookUp(shared as Record<string, any>, provider);
+
+    expect(shared).not.toHaveProperty('trustedProviders', ['facebook']);
+    expect(auth.adapter.findOne).not.toHaveBeenCalled();
+  });
+
   it('trusts nothing outside a request', async () => {
     const provider = providerAnswering('facebook', facebookAnswer());
 
@@ -323,6 +346,15 @@ describe('pending-link', () => {
         hooks.before({ userId: USER.id, providerId: 'credential' }, ctx)
       ).resolves.toBeUndefined();
       expect(auth.adapter.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('runs no delete for an account of a provider that has no links', async () => {
+      const { adapter, hooks } = install([]);
+
+      await hooks.after({ userId: USER.id, providerId: 'github' });
+      await hooks.after({ userId: USER.id, providerId: 'credential' });
+
+      expect(adapter.deleteMany).not.toHaveBeenCalled();
     });
 
     it('removes the user`s pending link of a provider once they have its account, whatever made it', async () => {

@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
+import { base32 } from '@better-auth/utils/base32';
 import type { Core } from '@strapi/types';
 
 import { TWO_FACTOR_UID } from '../../../constants';
@@ -52,6 +53,20 @@ describe('stepOfCode', () => {
     await expect(stepOfCode(SECRET, codeAt(STEP - 2), {}, NOW)).resolves.toBeNull();
     await expect(stepOfCode(SECRET, '000000', {}, NOW)).resolves.toBeNull();
     await expect(stepOfCode(SECRET, '12345', {}, NOW)).resolves.toBeNull();
+  });
+
+  it('answers null, never throws, for a code that is not six ASCII digits', async () => {
+    // Six characters, seven bytes: the lengths of the two strings differ once encoded
+    for (const code of [
+      '12345\u00e9',
+      '\u0661\u0662\u0663\u0664\u0665\u0666',
+      '12 456',
+      '12345a',
+      '',
+    ]) {
+      // eslint-disable-next-line no-await-in-loop
+      await expect(stepOfCode(SECRET, code, {}, NOW), code).resolves.toBeNull();
+    }
   });
 });
 
@@ -160,6 +175,25 @@ describe('totp-replay', () => {
         await expect(run(code)).resolves.toBeUndefined();
         expect(updateMany).not.toHaveBeenCalled();
       }
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('reads a secret imported as base32, which Better Auth stores with a prefix, as it does', async () => {
+    vi.useFakeTimers({ now: NOW });
+
+    try {
+      const imported = `base32:${base32.encode(Buffer.from(SECRET), { padding: false }).toLowerCase()}`;
+      const { run, updateMany } = setup({
+        row: { secret: imported, verified: true, lockedUntil: null },
+      });
+
+      await run(codeAt(STEP));
+
+      expect(updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({ data: { lastTotpStep: STEP } })
+      );
     } finally {
       vi.useRealTimers();
     }

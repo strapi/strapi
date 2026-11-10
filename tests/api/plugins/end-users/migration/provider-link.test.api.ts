@@ -14,7 +14,10 @@ import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createMockResponse, withMockedFetch } from 'api-tests/mock-fetch';
 import type { Core } from '@strapi/types';
 
-import { pendingLinkIdentifier } from '../../../../../packages/plugins/end-users/server/src/utils/pending-link';
+import {
+  pendingLinkIdentifier,
+  pendingLinkSecret,
+} from '../../../../../packages/plugins/end-users/server/src/utils/pending-link';
 import { startFakeOidc } from '../utils/fake-oidc';
 import type { FakeOidc, FakeOidcUser } from '../utils/fake-oidc';
 import { TEST_PASSWORD } from '../utils/permissions';
@@ -136,6 +139,98 @@ describe('migration from users-permissions: provider users are linked on their f
 
     return callback as Res;
   };
+
+  /**
+   * Several browsers signing in with Facebook at once, one per profile, each with a code and an
+   * access token of its own so the Graph API's answers tell them apart. The callbacks are sent
+   * together.
+   */
+  const signInsWithFacebook = async (profiles: Array<Record<string, unknown>>) => {
+    const starts = await Promise.all(profiles.map(() => rq.get('/api/connect/facebook')));
+    const indexOf = (name: string, url: string, init?: RequestInit) => {
+      const text = [
+        url,
+        String(init?.body ?? ''),
+        JSON.stringify(Object.fromEntries(new Headers(init?.headers).entries())),
+      ].join(' ');
+      const found = new RegExp(`${name}-(\\d+)`).exec(text);
+
+      return found ? Number(found[1]) : -1;
+    };
+    let callbacks: Res[] = [];
+
+    await withMockedFetch(
+      (url, init) => {
+        const code = indexOf('facebook-code', url, init);
+        const token = indexOf('facebook-access', url, init);
+
+        if (url.startsWith('https://graph.facebook.com/v24.0/oauth/access_token') && code >= 0) {
+          return json({ access_token: `facebook-access-${code}`, token_type: 'bearer' });
+        }
+
+        if (token < 0) {
+          return undefined;
+        }
+
+        if (url.startsWith('https://graph.facebook.com/debug_token')) {
+          return json({
+            data: { is_valid: true, app_id: FACEBOOK_APP, user_id: profiles[token].id },
+          });
+        }
+
+        return url.startsWith('https://graph.facebook.com/me')
+          ? json({ ...profiles[token], picture: { data: { url: 'https://example.com/p.png' } } })
+          : undefined;
+      },
+      async () => {
+        callbacks = await Promise.all(
+          starts.map((start, index) => {
+            const authorize = new URL(start.headers.location as string);
+            const back = new URL(authorize.searchParams.get('redirect_uri') as string);
+
+            back.searchParams.set('code', `facebook-code-${index}`);
+            back.searchParams.set('state', authorize.searchParams.get('state') as string);
+
+            return rq.get(`${back.pathname}${back.search}`, {
+              headers: { cookie: cookiesOf(start) },
+            }) as Promise<Res>;
+          })
+        );
+      }
+    );
+
+    return callbacks;
+  };
+
+  /** A user of the new engine with a pending link of Facebook for their address, as a migration leaves one */
+  const userWithLink = async (email: string) => {
+    const user = await strapi!.documents(USER_UID).create({
+      data: { email, name: 'Linked', emailVerified: true },
+    });
+
+    await strapi!.db.query(VERIFICATION_UID).create({
+      data: {
+        identifier: pendingLinkIdentifier('facebook', email, pendingLinkSecret(strapi!)),
+        value: user.documentId,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return user.documentId as string;
+  };
+
+  const linksOf = (documentId: string) =>
+    inspectDatabase(async (db) =>
+      Number(
+        (
+          await db('eu_verifications')
+            .where('identifier', 'like', PENDING)
+            .where('value', documentId)
+            .count({ c: '*' })
+            .first()
+        )?.c
+      )
+    );
 
   /** The same through the fake issuer that stands in for Keycloak */
   const signInWithKeycloak = async (user: { sub: string; email: string; name: string }) => {
@@ -311,7 +406,11 @@ describe('migration from users-permissions: provider users are linked on their f
     // No migration records a link for a generic provider: this one is written by hand
     await strapi!.db.query(VERIFICATION_UID).create({
       data: {
-        identifier: pendingLinkIdentifier('keycloak', 'alice@example.com'),
+        identifier: pendingLinkIdentifier(
+          'keycloak',
+          'alice@example.com',
+          pendingLinkSecret(strapi!)
+        ),
         value: documentIdOf('alice'),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
@@ -363,6 +462,43 @@ describe('migration from users-permissions: provider users are linked on their f
       // eslint-disable-next-line no-await-in-loop
       expect(await sessionsOf(key)).toBe(0);
     }
+  });
+
+  it('links once when two sign-ins with the address arrive at the same time', async () => {
+    const documentId = await userWithLink('parallel@example.com');
+
+    const callbacks = await signInsWithFacebook([
+      { id: 'fb-parallel-a', name: 'A', email: 'parallel@example.com' },
+      { id: 'fb-parallel-b', name: 'B', email: 'parallel@example.com' },
+    ]);
+
+    // Exactly one of the two got the link: the other is refused, and no second account is made
+    expect(callbacks.filter(hasSession)).toHaveLength(1);
+    expect(callbacks.filter((callback) => !hasSession(callback))).toHaveLength(1);
+    expect(await count(ACCOUNT_UID, { userId: documentId, providerId: 'facebook' })).toBe(1);
+    expect(await linksOf(documentId)).toBe(0);
+  });
+
+  it('removes the pending link of a user who gets the provider`s account another way', async () => {
+    const email = 'another-way@example.com';
+    const documentId = await userWithLink(email);
+
+    expect(await linksOf(documentId)).toBe(1);
+
+    // An administrator trusts Facebook for linking, so the sign-in links without the pending link
+    expect(
+      (await rqAdmin.put(`${PROVIDERS}/facebook`, { body: { trustForLinking: true } })).status
+    ).toBe(200);
+
+    try {
+      expectSignedIn(await signInWithFacebook({ id: 'fb-another-way', name: 'Way', email }));
+    } finally {
+      await rqAdmin.put(`${PROVIDERS}/facebook`, { body: { trustForLinking: false } });
+    }
+
+    expect(await count(ACCOUNT_UID, { userId: documentId, providerId: 'facebook' })).toBe(1);
+    // The link is gone with the account, so it never outlives its purpose
+    expect(await linksOf(documentId)).toBe(0);
   });
 
   it('drops the pending links on a rollback, and takes a user linked through one back with that provider', async () => {
