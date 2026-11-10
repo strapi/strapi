@@ -2,9 +2,15 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node", "@strapi/types/strict"]
   },
   "include": ["src", "vitest.config.ts"],
-  // Fixtures compiled on their own by the tests, with their own registry augmentation
-  "exclude": ["node_modules", "src/**/__tests__/resources/**"]
+  "exclude": [
+    "node_modules",
+    // Fixtures compiled on their own by the tests, with their own registry augmentation
+    "src/**/__tests__/resources/**",
+    // Declares its schemas in the `Public` registries, which strict mode ignores: the strict-off
+    // program checks it.
+    "src/modules/documents/params/__tests__/nullable-scalar-input.test.ts"
+  ]
 }

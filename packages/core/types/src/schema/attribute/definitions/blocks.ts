@@ -98,6 +98,8 @@ export interface ListBlockNode extends BaseNode {
 
 interface ImageBlockNode extends BaseNode {
   type: 'image';
-  image: Attribute.MediaValue<false>;
+  // A copy of some fields of the file, taken when the image was inserted (`IMAGE_SCHEMA_FIELDS` in the
+  // content-manager blocks editor), not a populated media value: it has no `id` nor `documentId`.
+  image: any;
   children: [{ type: 'text'; text: '' }];
 }
