@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    // Enables strict mode only. Each package loads the contracts of the packages it looks up
+    // from `src/registries.ts`, so its program follows its declared dependencies.
+    "types": ["node", "jest", "@strapi/types/strict"]
+  }
+}
