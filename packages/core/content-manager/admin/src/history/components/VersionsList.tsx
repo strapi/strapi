@@ -60,6 +60,13 @@ const ItalicName = styled(Typography)`
   font-style: italic;
 `;
 
+const VersionDescription = styled(Typography)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spaces[1]};
+  white-space: nowrap;
+`;
+
 const VersionAuthorName = ({
   author,
   isNameTooltipOpen,
@@ -73,10 +80,12 @@ const VersionAuthorName = ({
   const Icon = AUTHOR_TYPE_ICONS[author.type];
 
   return (
-    <Flex tag="span" display="inline-flex" gap={1} maxWidth="100%">
-      <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
-        <Icon />
-      </AccessibleIcon>
+    <Flex tag="span" gap={1} minWidth={0}>
+      <Flex tag="span" shrink={0}>
+        <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
+          <Icon />
+        </AccessibleIcon>
+      </Flex>
       {author.name ? (
         <Tooltip
           label={author.name}
@@ -232,14 +241,14 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
             minute: '2-digit',
           })}
         </Typography>
-        <Typography tag="p" variant="pi" textColor="neutral600" maxWidth="100%">
+        <VersionDescription tag="p" variant="pi" textColor="neutral600" maxWidth="100%">
           <VersionAuthor
             version={version}
             isCurrent={isCurrent}
             isNameTooltipOpen={isNameTooltipOpen}
             onNameTooltipOpenChange={setIsNameTooltipOpen}
           />
-        </Typography>
+        </VersionDescription>
       </Flex>
       <Flex gap={2} wrap="wrap">
         {version.status && <DocumentStatus status={version.status} size="XS" />}
