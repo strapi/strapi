@@ -88,7 +88,7 @@ type SaveFailure = { kind: 'conflict' } | { kind: 'error'; message: string };
 const TAB_LABELS: PermissionsProps['tabLabels'] = {
   settings: {
     id: getTranslation('roles.edit.tab.custom-routes'),
-    defaultMessage: 'Custom Routes',
+    defaultMessage: 'Custom routes',
   },
 };
 

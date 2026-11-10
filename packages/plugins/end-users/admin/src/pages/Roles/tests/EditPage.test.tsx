@@ -118,7 +118,7 @@ describe('EditPage', () => {
       'Collection Types',
       'Single Types',
       'Plugins',
-      'Custom Routes',
+      'Custom routes',
     ]);
 
     // Find, Find one, Create, Update, Delete, and the two this plugin adds
