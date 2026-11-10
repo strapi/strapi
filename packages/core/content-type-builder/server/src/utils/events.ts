@@ -1,5 +1,14 @@
 import { inspect } from 'node:util';
 
+/** The content-type and component events the Content-Type Builder emits. */
+type SchemaEventName =
+  | 'content-type.create'
+  | 'content-type.update'
+  | 'content-type.delete'
+  | 'component.create'
+  | 'component.update'
+  | 'component.delete';
+
 /**
  * How long the request waits for the listeners of one schema event. A listener that
  * never settles (e.g. a `fetch` with no timeout) must not keep the save, and the
@@ -32,11 +41,16 @@ const formatError = (error: unknown) => {
  * A listener still running after `SCHEMA_EVENT_TIMEOUT_MS` is left running and the
  * request moves on.
  */
-export const emitSchemaEvent = async (eventName: string, payload: Record<string, unknown>) => {
+export const emitSchemaEvent = async <TName extends SchemaEventName>(
+  eventName: TName,
+  payload: Strapi.Registries.Events[TName][0]
+) => {
   let timeout: NodeJS.Timeout | undefined;
 
   const emit = Promise.resolve()
-    .then(() => strapi.eventHub.emit(eventName, payload))
+    // The parameters check the payload against the registered event. The hub cannot resolve the
+    // registered arguments of a generic name, so it reads the name as a plain string.
+    .then(() => strapi.eventHub.emit(eventName as string, payload))
     .catch((error: unknown) => {
       strapi.log.error(`A ${eventName} listener failed: ${formatError(error)}`);
     });
