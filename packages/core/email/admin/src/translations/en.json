@@ -44,7 +44,7 @@
   "Settings.capabilities.feature.requireTLS": "Require TLS",
   "Templates.list.title": "Email templates",
   "Templates.list.subtitle": "Edit the emails your project sends, per locale",
-  "Templates.list.empty": "There are no email templates",
+  "Templates.list.empty": "No plugin has registered email templates yet.",
   "Templates.list.actions": "Actions",
   "Templates.list.customised": "Customized",
   "Templates.list.edit": "Edit {key}",

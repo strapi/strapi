@@ -1,6 +1,7 @@
 import { Layouts, Page } from '@strapi/admin/strapi-admin';
 import {
   Badge,
+  EmptyStateLayout,
   Flex,
   LinkButton,
   Table,
@@ -12,6 +13,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { NavLink, useSearchParams } from 'react-router-dom';
 
@@ -54,12 +56,14 @@ export const ListPage = () => {
       />
       <Layouts.Content>
         {data.length === 0 ? (
-          <Typography textColor="neutral600">
-            {formatMessage({
+          // The link is in the settings menu of every project: this says why there is nothing to edit
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="160px" />}
+            content={formatMessage({
               id: 'email.Templates.list.empty',
-              defaultMessage: 'There are no email templates',
+              defaultMessage: 'No plugin has registered email templates yet.',
             })}
-          </Typography>
+          />
         ) : (
           <Table colCount={5} rowCount={data.length + 1}>
             <Thead>

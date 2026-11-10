@@ -1,4 +1,5 @@
-import { render, screen } from '@tests/utils';
+import { render, screen, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { ListPage } from '../ListPage';
 
@@ -21,5 +22,15 @@ describe('Templates ListPage', () => {
 
     expect(await screen.findByText('orders.receipt')).toBeInTheDocument();
     expect(screen.getByText('end-users.confirm-email')).toBeInTheDocument();
+  });
+
+  it('says no plugin has registered templates, in place of an empty page', async () => {
+    server.use(http.get('/email/templates', () => HttpResponse.json({ data: [] })));
+    render(<ListPage />);
+
+    expect(
+      await screen.findByText('No plugin has registered email templates yet.')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Email templates' })).toBeInTheDocument();
   });
 });
