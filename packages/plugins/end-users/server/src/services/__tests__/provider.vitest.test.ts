@@ -707,7 +707,7 @@ describe('provider service', () => {
     });
   });
 
-  describe('secrets follow every field that shapes where the provider talks (I-1)', () => {
+  describe('secrets follow every field that shapes where the provider talks', () => {
     const builtIn = (id: string) =>
       BUILT_IN_PROVIDERS.find((definition) => definition.id === id) as ProviderDefinition;
 
@@ -844,7 +844,7 @@ describe('provider service', () => {
     });
   });
 
-  describe('a discovery document is checked on save (I-3)', () => {
+  describe('a discovery document is checked on save', () => {
     let server: Server;
     let origin = '';
     let hits: string[] = [];

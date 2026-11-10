@@ -331,7 +331,7 @@ describe('lockout', () => {
     expect(userRow()).toMatchObject({ failedSignIns: 0, lockedUntil: null });
   });
 
-  describe('writes to the user (M-2)', () => {
+  describe('writes to the user', () => {
     /** The columns each write to the user row names, in order (the adapter assigns them in place). */
     const watch = () => {
       const writes: string[][] = [];
