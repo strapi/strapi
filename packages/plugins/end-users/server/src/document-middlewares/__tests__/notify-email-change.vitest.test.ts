@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import { USER_UID } from '../../constants';
+import { createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 import { notifyEmailChangeMiddleware } from '../notify-email-change';
 
 const flush = () =>
@@ -20,24 +21,14 @@ const setup = ({
   });
   const warn = vi.fn();
   const findOne = vi.fn(async () => stored);
-  const commits: Array<() => void> = [];
-  // Runs the callback, then the commit hooks it registered, as a transaction that commits does
-  const transaction = vi.fn(
-    async (work: (hooks: { onCommit: (fn: () => void) => void }) => Promise<unknown>) => {
-      const result = await work({ onCommit: (fn) => commits.push(fn) });
-
-      commits.forEach((fn) => fn());
-
-      return result;
-    }
-  );
+  const { transaction, commits } = createTransaction();
   const config: Record<string, unknown> = { 'info.name': 'my-app' };
-  const strapi = {
+  const strapi = fakeStrapi({
     db: { transaction, query: () => ({ findOne }) },
     plugin: () => ({ service: () => ({ sendTemplate }) }),
     config: { get: (path: string) => config[path] },
     log: { warn },
-  } as unknown as Core.Strapi;
+  });
 
   const run = async (email: unknown, written: unknown = { documentId: 'user-1' }) => {
     const ctx = {

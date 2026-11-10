@@ -3,8 +3,8 @@ import type { BetterAuthOptions } from 'better-auth';
 
 import { strapiAdapter } from '../adapter';
 import { transformFilters } from '../transformers/filters';
+import { createTransaction } from '../../../../__tests__/utils/fake-strapi';
 
-type Callback = (...args: unknown[]) => unknown;
 
 /**
  * Better Auth only knows `user`, `session`, `account` and `verification` out of the box. The other
@@ -109,7 +109,7 @@ describe('strapiAdapter', () => {
       getModel: vi.fn(() => ({ attributes: anyAttribute })),
       config: { get: vi.fn(() => false) },
       db: {
-        transaction: vi.fn(async (work: Callback) => work({})),
+        transaction: createTransaction().transaction,
         query: vi.fn(() => db),
         queryBuilder: vi.fn(() => queryBuilder),
       },
