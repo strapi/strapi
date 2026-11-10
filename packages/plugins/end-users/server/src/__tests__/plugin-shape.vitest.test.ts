@@ -52,8 +52,15 @@ describe('end-users plugin shape', () => {
     ]);
   });
 
-  it('ships the policies the admin layout routes and the builder`s writes check with', () => {
-    expect(Object.keys(plugin.policies)).toEqual(['has-any-admin-permission', 'is-development']);
+  it('ships the policies of its admin routes, and the ones a project puts on its own routes', () => {
+    expect(Object.keys(plugin.policies)).toEqual([
+      'has-any-admin-permission',
+      'is-development',
+      'is-authenticated',
+      'has-role',
+      'is-verified',
+      'has-two-factor',
+    ]);
   });
 
   it('uses the decided names', () => {

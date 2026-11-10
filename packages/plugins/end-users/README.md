@@ -3,6 +3,43 @@
 This plugin adds authentication for the end users of your application (sign-up, sign-in, sessions, roles and
 permissions), built on [Better Auth](https://www.better-auth.com).
 
+## Route policies
+
+Four policies gate a project's own REST routes on the signed-in end user:
+
+| Policy                               | Config                                       | Refuses with              |
+| ------------------------------------ | -------------------------------------------- | ------------------------- |
+| `plugin::end-users.is-authenticated` | none                                         | `AUTHENTICATION_REQUIRED` |
+| `plugin::end-users.has-role`         | `{ roles: string[], mode?: 'any' \| 'all' }` | `ROLE_REQUIRED`           |
+| `plugin::end-users.is-verified`      | none                                         | `EMAIL_NOT_VERIFIED`      |
+| `plugin::end-users.has-two-factor`   | none                                         | `TWO_FACTOR_REQUIRED`     |
+
+```ts
+// src/api/report/routes/custom-report.ts
+export default {
+  routes: [
+    {
+      method: 'GET',
+      path: '/reports/summary',
+      handler: 'report.summary',
+      config: {
+        policies: [
+          'plugin::end-users.is-verified',
+          { name: 'plugin::end-users.has-role', config: { roles: ['Editors', 'Reviewers'] } },
+        ],
+      },
+    },
+  ],
+};
+```
+
+`has-role` names roles by name or `documentId`; `mode: 'any'` (the default) needs one of them, `mode: 'all'` every
+one. A `has-role` with no roles stops the start. A refusal is a 403 whose `error.name` is `PolicyError` and whose
+`error.details.code` is the code above. A caller who is not signed in, an API token included, is refused with
+`AUTHENTICATION_REQUIRED` by all four. The route still needs its action granted to the roles that call it, and it must
+not set `auth: false`, since then nobody is signed in. GraphQL does not run route policies, so a rule that must hold
+on both APIs belongs in a condition.
+
 ## Moving a project from Users & Permissions
 
 The move works the same on Strapi Cloud and on a self-hosted project. No step needs a command. What you change reaches
