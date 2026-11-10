@@ -679,18 +679,36 @@ describe('migration from users-permissions: a start that stops part way', () => 
   let project: UsersPermissionsProject;
   let strapi: Core.Strapi | undefined;
 
-  const counts = async () => {
-    const connection = strapi!.db.connection;
-    const count = async (table: string) =>
-      Number((await connection(table).count({ c: '*' }).first())?.c);
+  /** What the database holds, a table that is not there counting as nothing */
+  const counts = () =>
+    inspectDatabase(async (db) => {
+      const count = async (table: string, where: Record<string, unknown> = {}) =>
+        (await db.schema.hasTable(table))
+          ? Number((await db(table).where(where).count({ c: '*' }).first())?.c)
+          : 0;
+      const roles = (await db.schema.hasTable('eu_roles'))
+        ? await db('eu_roles').orderBy('id').select('id', 'type')
+        : [];
 
-    return {
-      users: await count('eu_users'),
-      profiles: await count('eu_profiles'),
-      accounts: await count('eu_accounts'),
-      links: await count('eu_profiles_user_lnk'),
-      permissions: await count('eu_permissions'),
-    };
+      return {
+        users: await count('eu_users'),
+        profiles: await count('eu_profiles'),
+        accounts: await count('eu_accounts'),
+        links: await count('eu_profiles_user_lnk'),
+        permissions: await count('eu_permissions'),
+        components: await count('eu_profiles_cmps'),
+        media: await count('files_related_mph', { related_type: 'plugin::end-users.profile' }),
+        roleTypes: roles.map((role) => `${role.id}:${role.type}`),
+      };
+    });
+
+  /** The migration record's steps, as the stopped start left them */
+  const stepsDone = async (): Promise<string[]> => {
+    const stored = await inspectDatabase((db) =>
+      db('strapi_core_store_settings').where('key', 'plugin_end-users_migration').first('value')
+    );
+
+    return stored ? (JSON.parse(stored.value).completedSteps ?? []) : [];
   };
 
   /** A start that fails on a statement, then one that does not */
@@ -703,15 +721,17 @@ describe('migration from users-permissions: a start that stops part way', () => 
       restore();
     }
 
-    // A start that stops gives its claim back without waiting for the answer, and the database
-    // closing can cut that short: the claim then runs out by itself, which is made to have happened
+    // Works around a held-claim defect, fixed separately: a start that stops gives its claim back
+    // without waiting for the answer, and the database closing can cut that short, so the next
+    // start waits out the 15 minutes. The claim is made to have run out
     await inspectDatabase(async (db) => {
       const stored = await db('strapi_core_store_settings')
         .where('key', 'plugin_end-users_migration')
         .first('value');
-      const record = JSON.parse(stored.value);
+      // A start that stopped before it wrote the record has none to lapse
+      const record = stored ? JSON.parse(stored.value) : null;
 
-      if (record.claim) {
+      if (record?.claim) {
         record.claim = { ...record.claim, until: new Date(Date.now() - 1000).toISOString() };
         await db('strapi_core_store_settings')
           .where('key', 'plugin_end-users_migration')
@@ -727,6 +747,8 @@ describe('migration from users-permissions: a start that stops part way', () => 
 
     // What an uninterrupted start makes, to compare each resumed one with
     reference = await counts();
+    expect(reference.components).toBeGreaterThan(0);
+    expect(reference.media).toBeGreaterThan(0);
     await strapi.destroy();
     strapi = undefined;
   });
@@ -762,11 +784,22 @@ describe('migration from users-permissions: a start that stops part way', () => 
       .havingRaw('count(*) > 1');
 
     expect(duplicated).toEqual([]);
+
+    const twice = await strapi.db
+      .connection('eu_profiles_user_lnk')
+      .select('user_id')
+      .groupBy('user_id')
+      .havingRaw('count(*) > 1');
+
+    expect(twice).toEqual([]);
   };
 
   it('finishes on the next start when the staging of the tables stopped', async () => {
     await resumes();
     await stopAt(/^(alter|rename) .*eu_stg_/is);
+    // Before the first step was recorded, and nothing of the post-sync is there
+    expect(await stepsDone()).not.toContain('pre-sync');
+    expect((await counts()).profiles).toBe(0);
     await finishes();
   });
 
@@ -774,29 +807,35 @@ describe('migration from users-permissions: a start that stops part way', () => 
     await resumes();
     await stopAt(insertInto('eu_profiles'));
 
-    const record = await inspectDatabase((db) =>
-      db('strapi_core_store_settings').where('key', 'plugin_end-users_migration').first('value')
-    );
-
-    expect(JSON.parse(record.value).completedSteps).not.toContain('profiles');
+    expect(await stepsDone()).toEqual(expect.arrayContaining(['pre-sync', 'permissions']));
+    expect(await stepsDone()).not.toContain('profiles');
+    expect((await counts()).profiles).toBe(0);
     await finishes();
   });
 
   it('finishes on the next start when the copy of a staged table stopped', async () => {
     await resumes();
     await stopAt(insertInto('eu_profiles_cmps'));
+    expect(await stepsDone()).not.toContain('profiles');
+    expect((await counts()).components).toBeLessThan(reference.components);
     await finishes();
   });
 
   it('finishes on the next start when it stopped between the accounts and the roles', async () => {
     await resumes();
     await stopAt(insertInto('eu_accounts'));
+    expect(await stepsDone()).toContain('profiles');
+    expect(await stepsDone()).not.toContain('accounts');
+    expect((await counts()).accounts).toBeLessThan(reference.accounts);
     await finishes();
   });
 
   it('finishes on the next start when the retyping of the roles stopped', async () => {
     await resumes();
     await stopAt(/^update\s+[^\s(]*eu_roles\W?\s+set\b.*\btype\b/is);
+    expect(await stepsDone()).toContain('users');
+    expect(await stepsDone()).not.toContain('roles');
+    expect((await counts()).roleTypes).not.toEqual(reference.roleTypes);
     await finishes();
   });
 });
