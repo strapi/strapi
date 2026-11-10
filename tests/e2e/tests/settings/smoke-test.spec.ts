@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from '../../../fixtures';
 
 import { loginWithApi } from '../../../utils/login';
 import { describeOnCondition, navToHeader } from '../../../utils/shared';

@@ -1,4 +1,5 @@
-import { test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { test } from '../fixtures';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../e2e/constants';
 
 /**

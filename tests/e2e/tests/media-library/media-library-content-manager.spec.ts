@@ -1,6 +1,7 @@
 import path from 'path';
 
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import { type APIRequestContext, type Page } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
 import { loginWithApi } from '../../../utils/login';

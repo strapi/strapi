@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { ADMIN_EMAIL_ADDRESS, TITLE_HOME } from '../../constants';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
