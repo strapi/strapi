@@ -6,7 +6,7 @@ import { http, HttpResponse } from 'msw';
 import { PERMISSIONS } from '../../../constants';
 import { SignInPage } from '../SignInPage';
 
-import { refuseOn, serveSettings } from './fixtures';
+import { refuseOn, serveSettings, SETTINGS } from './fixtures';
 
 const renderPage = () =>
   render(<SignInPage />, { initialEntries: ['/settings/end-users/sign-in'] });
@@ -66,9 +66,33 @@ describe('SignInPage', () => {
 
     await screen.findByRole('heading', { name: 'Sign-in' });
 
+    // Off and out of reach, whatever is stored: it can't work without its package
     expect(screen.getByRole('checkbox', { name: 'Passkeys' })).toBeDisabled();
+    expect(screen.getByRole('checkbox', { name: 'Passkeys' })).not.toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Username' })).toBeEnabled();
-    expect(screen.getAllByText('Add it in `config/plugins.ts`')).toHaveLength(4);
+    expect(screen.getAllByText(/^Not installed\./)).toHaveLength(4);
+    expect(screen.queryByText(/`/)).not.toBeInTheDocument();
+  });
+
+  it('shows a stored method that is not installed as off, and keeps the stored value', async () => {
+    const saved = serveSettings({
+      ...SETTINGS,
+      data: { ...SETTINGS.data, methods: { ...SETTINGS.data.methods, passkey: true } },
+    });
+    const { user } = renderPage();
+
+    expect(await screen.findByRole('checkbox', { name: 'Passkeys' })).not.toBeChecked();
+
+    const min = screen.getByRole('textbox', { name: /Minimum length/ });
+
+    await user.clear(min);
+    await user.type(min, '10');
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Saved')).toBeInTheDocument();
+    // The save leaves a method that is not installed out, so the server keeps what it has
+    expect(saved[0]).toMatchObject({ methods: { emailPassword: true, username: false } });
+    expect(saved[0]).not.toHaveProperty('methods.passkey');
   });
 
   it('shows server validation errors on their fields', async () => {

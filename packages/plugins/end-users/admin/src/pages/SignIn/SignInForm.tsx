@@ -106,6 +106,43 @@ const ListField = ({
   );
 };
 
+/**
+ * A method whose package is not installed cannot work, so it reads as off whatever is stored: the
+ * stored value is kept (a save leaves it out), and turns on again once the package is added.
+ */
+const NotInstalledMethod = ({ name, label }: { name: string; label: string }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Field.Root
+      name={name}
+      maxWidth="320px"
+      hint={formatMessage(
+        {
+          id: getTranslation('settings.sign-in.not-installed'),
+          defaultMessage: 'Not installed. Add it in <code>config/plugins.ts</code>.',
+        },
+        { code: (chunks: React.ReactNode) => <code>{chunks}</code> }
+      )}
+    >
+      <Field.Label>{label}</Field.Label>
+      <Toggle
+        checked={false}
+        disabled
+        onLabel={formatMessage({
+          id: 'app.components.ToggleCheckbox.enabled-label',
+          defaultMessage: 'Enabled',
+        })}
+        offLabel={formatMessage({
+          id: 'app.components.ToggleCheckbox.disabled-label',
+          defaultMessage: 'Disabled',
+        })}
+      />
+      <Field.Hint />
+    </Field.Root>
+  );
+};
+
 const SignInForm = ({
   settings,
   roles,
@@ -196,24 +233,19 @@ const SignInForm = ({
                 })}
               >
                 <Grid.Root gap={4}>
-                  {METHODS.map(({ id, label }) => {
+                  {METHODS.map(({ id, label: methodLabel }) => {
                     const isInstalled = installed.has(id);
+                    const label = formatMessage({
+                      id: getTranslation(`settings.sign-in.method.${id}`),
+                      defaultMessage: methodLabel,
+                    });
 
                     return (
                       <Grid.Item key={id} xs={12} col={6} direction="column" alignItems="stretch">
-                        {toggle(
-                          `methods.${id}`,
-                          formatMessage({
-                            id: getTranslation(`settings.sign-in.method.${id}`),
-                            defaultMessage: label,
-                          }),
-                          isInstalled
-                            ? undefined
-                            : formatMessage({
-                                id: getTranslation('settings.sign-in.not-installed'),
-                                defaultMessage: 'Add it in `config/plugins.ts`',
-                              }),
-                          disabled || !isInstalled
+                        {isInstalled ? (
+                          toggle(`methods.${id}`, label)
+                        ) : (
+                          <NotInstalledMethod name={`methods.${id}`} label={label} />
                         )}
                       </Grid.Item>
                     );

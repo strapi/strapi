@@ -264,7 +264,7 @@
   "settings.off": "Off",
   "settings.sign-in.subtitle": "How end users register and sign in",
   "settings.sign-in.methods": "Methods",
-  "settings.sign-in.not-installed": "Add it in `config/plugins.ts`",
+  "settings.sign-in.not-installed": "Not installed. Add it in <code>config/plugins.ts</code>.",
   "settings.sign-in.registration": "Registration",
   "settings.sign-in.sign-up": "Allow sign-up",
   "settings.sign-in.require-verification": "Require email verification",
