@@ -59,18 +59,21 @@ const AddOidcModal = ({ open, onClose, onCreated }: AddOidcModalProps) => {
     const result = await create({ ...values, name: values.name.trim() });
 
     if ('error' in result) {
-      const fieldErrors = getFormErrors(result.error);
-      const hasFieldErrors = Object.keys(fieldErrors).length > 0;
+      const { errors, unshown } = getFormErrors(result.error, {
+        isShown: (path) => (FIELDS as string[]).includes(path),
+      });
 
-      setErrors(fieldErrors as FormErrors<OidcValues>);
+      setErrors(errors as FormErrors<OidcValues>);
+      // What a field shows is pointed to; what no field reads (the id made from the name) is said
       toggleNotification({
         type: 'danger',
-        message: hasFieldErrors
-          ? formatMessage({
-              id: getTranslation('providers.save-failed'),
-              defaultMessage: 'Check the fields marked with an error.',
-            })
-          : formatAPIError(result.error),
+        message:
+          !unshown && Object.keys(errors).length > 0
+            ? formatMessage({
+                id: getTranslation('providers.save-failed'),
+                defaultMessage: 'Check the fields marked with an error.',
+              })
+            : formatAPIError(result.error),
       });
 
       return;

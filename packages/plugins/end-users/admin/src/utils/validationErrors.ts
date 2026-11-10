@@ -34,11 +34,33 @@ export { getFieldErrors };
 const describeFieldError = (message: string): FieldError =>
   /\bis missing$/.test(message) ? translatedErrors.required : message.replace(/`/g, '');
 
-/** The errors of a refused save as a form holds them: nested by the path of each field */
-const getFormErrors = (error: unknown): FormErrors => {
-  const errors: Record<string, unknown> = {};
+interface FormErrorsOptions {
+  /** Whether a field of the form reads this dotted path: an error for any other has nowhere to show */
+  isShown: (path: string) => boolean;
+  /** Names a path as the form does, where the server names it differently (a secret field) */
+  rename?: (path: string) => string;
+}
 
-  for (const [path, message] of Object.entries(getFieldErrors(error))) {
+/**
+ * The errors of a refused save as a form holds them: nested by the path of each field, and only
+ * those a rendered field reads. `unshown` says some error was left over (a path the form has no
+ * field for, such as the whole provider), so the caller tells the server's own message instead.
+ */
+const getFormErrors = (
+  error: unknown,
+  { isShown, rename = (path) => path }: FormErrorsOptions
+): { errors: FormErrors; unshown: boolean } => {
+  const errors: Record<string, unknown> = {};
+  let unshown = false;
+
+  for (const [serverPath, message] of Object.entries(getFieldErrors(error))) {
+    const path = rename(serverPath);
+
+    if (path === '' || !isShown(path)) {
+      unshown = true;
+      continue;
+    }
+
     const steps = path.split('.');
     let at = errors;
 
@@ -48,7 +70,15 @@ const getFormErrors = (error: unknown): FormErrors => {
     at[steps[steps.length - 1]] = describeFieldError(message);
   }
 
-  return errors as FormErrors;
+  return { errors: errors as FormErrors, unshown };
 };
 
-export { describeFieldError, getFormErrors };
+/** The dotted paths of every value of a patch (an array is one value): what a form has fields for */
+const leafPaths = (value: unknown, prefix = ''): string[] =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? Object.entries(value).flatMap(([key, child]) =>
+        leafPaths(child, prefix === '' ? key : `${prefix}.${key}`)
+      )
+    : [prefix];
+
+export { describeFieldError, getFormErrors, leafPaths };

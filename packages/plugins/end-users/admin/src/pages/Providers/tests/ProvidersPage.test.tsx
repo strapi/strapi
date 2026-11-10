@@ -450,6 +450,99 @@ describe('ProvidersPage', () => {
     expect(screen.queryByText(/cannot be saved/)).not.toBeInTheDocument();
   });
 
+  it('tells a refusal that names no field in the toast', async () => {
+    serveProviders();
+    server.use(
+      http.put('/end-users/providers/github', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'The discovery document could not be read',
+              details: {
+                errors: [{ path: [], message: 'The discovery document could not be read' }],
+              },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('The discovery document could not be read')).toBeInTheDocument();
+    expect(screen.queryByText('Check the fields marked with an error.')).not.toBeInTheDocument();
+  });
+
+  it('tells a refusal of the id of a custom provider, which has no field, in the toast', async () => {
+    serveProviders();
+    server.use(
+      http.post('/end-users/providers', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'There is a provider "acme-sso" already',
+              details: {
+                errors: [{ path: ['id'], message: 'There is a provider "acme-sso" already' }],
+              },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderPage();
+
+    await user.click(await openPicker(user));
+    await user.click(await screen.findByRole('option', { name: 'Custom OIDC' }));
+
+    const dialog = await screen.findByRole('dialog');
+
+    await user.type(within(dialog).getByRole('textbox', { name: /Name/ }), 'Acme SSO');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: /Discovery URL/ }),
+      'https://sso.acme.test'
+    );
+    await user.type(within(dialog).getByRole('textbox', { name: /Client ID/ }), 'acme');
+    await user.type(within(dialog).getByLabelText(/Client secret/), OIDC_SECRET);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add provider' }));
+
+    expect(await screen.findByText('There is a provider "acme-sso" already')).toBeInTheDocument();
+  });
+
+  it('shows a refusal of a secret field under it', async () => {
+    serveProviders();
+    server.use(
+      http.put('/end-users/providers/github', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'bad',
+              details: { errors: [{ path: ['fields', 'webhookSecret'], message: 'Too short' }] },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Save' }));
+
+    expect(await within(dialog).findByText('Too short')).toBeInTheDocument();
+  });
+
   it('asks before closing a provider with changes that are not saved', async () => {
     serveProviders();
     const { user } = renderPage();

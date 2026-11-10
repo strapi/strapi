@@ -119,7 +119,11 @@ describe('SignInPage', () => {
     await user.type(min, '500');
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText('minLength cannot exceed maxLength')).toBeInTheDocument();
+    // The message is under the field, which is then marked invalid
+    expect(await screen.findByText('minLength cannot exceed maxLength')).toHaveAttribute(
+      'data-strapi-field-error'
+    );
+    expect(min).toBeInvalid();
   });
 
   it('is read-only without settings.update', async () => {

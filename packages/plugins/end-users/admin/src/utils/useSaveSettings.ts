@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 
 import { useUpdateSettingsMutation } from '../services/settings';
 
-import { getFieldErrors } from './validationErrors';
+import { getFormErrors, leafPaths } from './validationErrors';
 
 import type { EndUsersSettingsPatch } from '../../../shared/contracts/settings';
 
@@ -24,8 +24,14 @@ const useSaveSettings = () => {
     const result = await update(patch);
 
     if ('error' in result) {
-      // The form names its fields by dotted path, which is what the errors are keyed by
-      helpers.setErrors(getFieldErrors(result.error) as Parameters<typeof helpers.setErrors>[0]);
+      // The form reads its errors by nested path; the fields are the values of what was sent. What
+      // no field reads has nowhere to show, so the toast says it.
+      const leaves = leafPaths(patch);
+      const { errors } = getFormErrors(result.error, {
+        isShown: (path) => leaves.some((leaf) => leaf === path || leaf.startsWith(`${path}.`)),
+      });
+
+      helpers.setErrors(errors as Parameters<typeof helpers.setErrors>[0]);
       toggleNotification({ type: 'danger', message: formatAPIError(result.error) });
 
       return;

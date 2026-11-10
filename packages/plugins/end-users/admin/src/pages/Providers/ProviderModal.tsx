@@ -618,28 +618,52 @@ const ProviderForm = ({
     const result = await update({ id: detail.id, body });
 
     if ('error' in result) {
-      const errors = getFormErrors(result.error) as { fields?: Record<string, unknown> };
-      const secretErrors: Record<string, unknown> = {};
+      const secrets = new Set(
+        Object.entries(detail.definition.fields)
+          .filter(([, field]) => field.type === 'secret')
+          .map(([name]) => name)
+      );
+      const fieldNames = new Set(Object.keys(detail.definition.fields));
+      const { errors, unshown } = getFormErrors(result.error, {
+        // The server names a secret field like any other; the form keeps what was typed apart
+        rename: (path) => {
+          const [head, name] = path.split('.');
 
-      // The server names a secret field like any other; the form keeps what was typed apart
-      for (const [name, field] of Object.entries(detail.definition.fields)) {
-        if (field.type === 'secret' && errors.fields?.[name] !== undefined) {
-          secretErrors[name] = errors.fields[name];
-          delete errors.fields[name];
-        }
-      }
+          return head === 'fields' && secrets.has(name) ? `secretFields.${name}` : path;
+        },
+        isShown: (path) => {
+          const [head, second, third] = path.split('.');
 
-      const hasFieldErrors = Object.keys(errors).length > 0 || Object.keys(secretErrors).length > 0;
+          if (head === 'fields' || head === 'secretFields') {
+            return fieldNames.has(second) && third === undefined;
+          }
 
-      setErrors({ ...errors, secretFields: secretErrors } as FormErrors<ProviderFormValues>);
+          if (head === 'profileMapping') {
+            return /^\d+$/.test(second ?? '') && ['attribute', 'claim', 'when'].includes(third);
+          }
+
+          return [
+            'enabled',
+            'clientId',
+            'clientSecret',
+            'scopes',
+            'trustForLinking',
+            'updateUserOnSignIn',
+            ...(isCustom ? ['discoveryUrl'] : []),
+          ].includes(path);
+        },
+      });
+
+      setErrors(errors as FormErrors<ProviderFormValues>);
       toggleNotification({
         type: 'danger',
-        message: hasFieldErrors
-          ? formatMessage({
-              id: getTranslation('providers.save-failed'),
-              defaultMessage: 'Check the fields marked with an error.',
-            })
-          : formatAPIError(result.error),
+        message:
+          !unshown && Object.keys(errors).length > 0
+            ? formatMessage({
+                id: getTranslation('providers.save-failed'),
+                defaultMessage: 'Check the fields marked with an error.',
+              })
+            : formatAPIError(result.error),
       });
 
       return;

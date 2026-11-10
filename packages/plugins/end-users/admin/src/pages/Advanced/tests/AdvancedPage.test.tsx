@@ -36,7 +36,10 @@ describe('AdvancedPage', () => {
     await user.type(verified, 'x');
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText('Not a trusted origin')).toBeInTheDocument();
+    expect(await screen.findByText('Not a trusted origin')).toHaveAttribute(
+      'data-strapi-field-error'
+    );
+    expect(verified).toBeInvalid();
   });
 
   it('shows the config/plugins.ts settings read-only, and never a secret value', async () => {
