@@ -18,23 +18,28 @@ import { normalizeEmail } from './normalize-email';
 export const PENDING_LINK_PREFIX = 'migrated-provider-link:';
 
 /**
- * The providers a pending link is for: Better Auth's built-in social providers that never assert a
- * verified address, so that a user they signed up under Users & Permissions has no other way back
- * to their account. Better Auth's mapper of each answers `emailVerified: false` whatever the
- * provider sent (Facebook reads `email_verified` only when the Graph API answers with it, which it
- * does not by default; TikTok sends no address, so its placeholder never matches one).
+ * The providers a pending link is for: Better Auth's built-in social providers whose mapper answers
+ * `emailVerified: false` whatever the provider sent, and that only ever give an address they have
+ * confirmed. A user they signed up under Users & Permissions has no other way back to their account.
+ * A provider that may give an address nobody confirmed is not one, nor is one that gives none:
  *
- * X (Twitter) is not one: Better Auth asks it for the confirmed address and calls that verified,
- * so its users are linked by Better Auth's own rule. A generic OAuth or OpenID Connect provider
- * never is, whatever its id: its claims are whatever its issuer says.
+ * - VK and LINE: their docs say nothing on whether the address is confirmed.
+ * - Notion: it sends `person.email_verified`, which Better Auth does not read, so its address may
+ *   be one Notion has not verified.
+ * - Spotify: its docs call the address unverified.
+ * - TikTok: Better Auth gets no address from it.
+ * - X (Twitter): Better Auth asks it for the confirmed address and calls that verified, so its users
+ *   are linked by Better Auth's own rule.
+ *
+ * A generic OAuth or OpenID Connect provider never is, whatever its id: its claims are whatever its
+ * issuer says. An administrator can still trust any provider for linking.
  */
 export const PROVIDERS_WITHOUT_EMAIL_VERIFICATION: readonly string[] = Object.freeze([
+  // Better Auth reads `email` from the Graph API's /me. Meta: the field "will not be returned if no
+  // valid email address is available" (developers.facebook.com/docs/graph-api/reference/user), and
+  // Facebook gives no address until its confirmation link was clicked (Auth0: support.auth0.com,
+  // "Facebook Social Connection Does Not Return User Email Address")
   'facebook',
-  'vk',
-  'line',
-  'tiktok',
-  'notion',
-  'spotify',
 ]);
 
 /**

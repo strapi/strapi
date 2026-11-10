@@ -92,15 +92,22 @@ const lookUp = (auth: Record<string, any>, provider: { getUserInfo: () => Promis
   runWithEndpointContext({ context: auth } as never, () => provider.getUserInfo());
 
 describe('pending-link', () => {
-  it('lists the built-in social providers that never assert a verified address, and not X', () => {
-    expect(PROVIDERS_WITHOUT_EMAIL_VERIFICATION).toEqual([
-      'facebook',
-      'vk',
-      'line',
-      'tiktok',
-      'notion',
-      'spotify',
-    ]);
+  it('lists only the built-in social providers that never say an address is verified and give only confirmed ones', () => {
+    expect(PROVIDERS_WITHOUT_EMAIL_VERIFICATION).toEqual(['facebook']);
+
+    // An address nobody confirmed, no address at all, or a claim Better Auth reads itself
+    for (const id of ['vk', 'line', 'notion', 'spotify', 'tiktok', 'twitter']) {
+      expect(PROVIDERS_WITHOUT_EMAIL_VERIFICATION).not.toContain(id);
+    }
+  });
+
+  it('never wraps a provider that is not on the list, though the engine passes it as social', () => {
+    const spotify = providerAnswering('spotify', facebookAnswer());
+    const original = spotify.getUserInfo;
+
+    install([spotify], ['facebook', 'spotify']);
+
+    expect(spotify.getUserInfo).toBe(original);
   });
 
   it('trusts the provider in this request alone when a pending link holds the address it answered with', async () => {
@@ -167,10 +174,10 @@ describe('pending-link', () => {
     expect(keycloak.getUserInfo).toBe(originals[2]);
 
     // A generic provider with the id of a listed one: the engine leaves the id out
-    const shadow = providerAnswering('spotify', facebookAnswer());
+    const shadow = providerAnswering('facebook', facebookAnswer());
     const shadowed = shadow.getUserInfo;
 
-    install([shadow], ['facebook']);
+    install([shadow], ['github']);
 
     expect(shadow.getUserInfo).toBe(shadowed);
   });
