@@ -127,8 +127,8 @@ const ContentTypeCollapses = ({
             key={uid}
             direction="column"
             // A block, so the rows leave no line-box gap below them: with the trailing cell the card scrolls
-            display={renderSubjectActions ? 'flex' : 'inline-flex'}
-            width={renderSubjectActions ? 'fit-content' : undefined}
+            display={renderSubjectActions !== undefined ? 'flex' : 'inline-flex'}
+            width={renderSubjectActions !== undefined ? 'fit-content' : undefined}
             alignItems="stretch"
             minWidth="100%"
             borderColor={isActive ? 'primary600' : undefined}
@@ -143,6 +143,7 @@ const ContentTypeCollapses = ({
               pathToData={[pathToData, uid].join('..')}
               renderActionIndicator={renderActionIndicator}
               subject={uid}
+              hasTrailingCell={renderSubjectActions !== undefined}
               subjectActions={renderSubjectActions?.({
                 tab: kind,
                 subject: uid,
@@ -194,6 +195,8 @@ interface CollapseProps extends Pick<
    * Rendered next to the conditions button.
    */
   subjectActions?: React.ReactNode;
+  /** The rows have a trailing cell: the content types are drawn with the actions after them */
+  hasTrailingCell?: boolean;
 }
 
 const Collapse = ({
@@ -207,6 +210,7 @@ const Collapse = ({
   renderActionIndicator,
   subject,
   subjectActions,
+  hasTrailingCell = false,
 }: CollapseProps) => {
   const { formatMessage } = useIntl();
   const {
@@ -248,7 +252,7 @@ const Collapse = ({
     <BoxWrapper
       data-testid="permissions-row-box"
       $isActive={isActive}
-      $hasTrailingCell={Boolean(subjectActions)}
+      $hasTrailingCell={hasTrailingCell}
     >
       <Wrapper
         height={rowHeight}
@@ -267,7 +271,7 @@ const Collapse = ({
           value={hasAllActionsSelected}
           isActive={isActive}
           // The name stays on screen when the card scrolls sideways
-          sticky={Boolean(subjectActions)}
+          sticky={hasTrailingCell}
         >
           <Chevron paddingLeft={2}>{isActive ? <ChevronUp /> : <ChevronDown />}</Chevron>
         </RowLabelWithCheckbox>
@@ -377,7 +381,7 @@ const Collapse = ({
             }
           )}
         </Flex>
-        {subjectActions && (
+        {hasTrailingCell && (
           // The buttons below sit over the end of the row: this cell keeps them off the last action
           <Flex data-testid="subject-actions-cell" width={trailingCellWidth} shrink={0} />
         )}

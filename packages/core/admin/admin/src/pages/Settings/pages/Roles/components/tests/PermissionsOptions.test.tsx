@@ -649,6 +649,24 @@ describe('Permissions options', () => {
       expect(name).toHaveStyle({ position: 'sticky', left: '0' });
     });
 
+    it('leaves the admin table as it was without it: no cell variable, no sticky name, inline rows', () => {
+      render(<Permissions layout={layout} />);
+
+      expect(screen.queryByTestId('sticky-row-label')).not.toBeInTheDocument();
+
+      const css = document.head.textContent ?? '';
+      const box = screen.getAllByTestId('permissions-row-box')[0];
+      const rule = box.className
+        .split(' ')
+        .map((name) => new RegExp(`\\.${name}\\{([^}]*)\\}`).exec(css)?.[1] ?? '')
+        .join(';');
+
+      expect(rule).toMatch(/(^|[;\s])display:\s*inline-flex/);
+      expect(rule).not.toMatch(/max-content/);
+      // The rows' own width is the default one: no wrapper sets the variable
+      expect(document.body.innerHTML).not.toContain('--permissions-cell-width');
+    });
+
     it('adds no scroll container without it', () => {
       render(<Permissions layout={layout} />);
 
