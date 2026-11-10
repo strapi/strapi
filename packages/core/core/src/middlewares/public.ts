@@ -2,7 +2,11 @@ import { defaultsDeep } from 'lodash';
 import koaStatic from 'koa-static';
 import type { Core } from '@strapi/types';
 
-type Config = koaStatic.Options;
+/** Options the `strapi::public` middleware reads. */
+export type Config = {
+  /** Browser cache max-age of the served files, in milliseconds. */
+  maxAge?: number;
+};
 
 const defaults = {
   maxAge: 60000,
