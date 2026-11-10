@@ -166,6 +166,7 @@ describe(`rehearsal: ${USERS} users`, () => {
 
       expect(migrated[0]).toBe(before[0]);
       expect(profiles).toBe(before[0]);
+      expect(migrated[1]).toBe(before[1]);
       expect(accounts).toBe(before[1]);
       expect(migrated[2]).toBe(before[2]);
     } finally {
