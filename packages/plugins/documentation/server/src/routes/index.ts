@@ -1,6 +1,41 @@
+import type Koa from 'koa';
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
 import restrictAccess from '../middlewares/restrict-access';
 
-export default [
+// The published type stays the one develop infers; `satisfies` checks the literals.
+const routes: (
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        auth: boolean;
+        middlewares: ((ctx: Koa.Context, next: Koa.Next) => Promise<any>)[];
+        policies?: undefined;
+      };
+    }
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        auth: boolean;
+        middlewares?: undefined;
+        policies?: undefined;
+      };
+    }
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        policies: { name: string; config: { actions: string[] } }[];
+        auth?: undefined;
+        middlewares?: undefined;
+      };
+    }
+)[] = [
   {
     method: 'GET',
     path: '/',
@@ -79,4 +114,6 @@ export default [
       policies: [],
     },
   },
-];
+] satisfies Core.RouteInputFor<Controllers, 'plugin::documentation'>[];
+
+export default routes;

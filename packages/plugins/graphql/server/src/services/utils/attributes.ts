@@ -9,7 +9,11 @@ export default ({ strapi }: Context) => {
    * @return {boolean}
    */
   const isStrapiScalar = (attribute: Schema.Attribute.AnyAttribute) => {
-    return strapi.plugin('graphql').service('constants').STRAPI_SCALARS.includes(attribute.type);
+    // Untyped, as the lookup was on develop: the published return type stays develop's `any`.
+    return strapi
+      .plugin('graphql')
+      .service<any>('constants')
+      .STRAPI_SCALARS.includes(attribute.type);
   };
 
   /**
@@ -18,7 +22,10 @@ export default ({ strapi }: Context) => {
    * @return {boolean}
    */
   const isGraphQLScalar = (attribute: Schema.Attribute.AnyAttribute) => {
-    return strapi.plugin('graphql').service('constants').GRAPHQL_SCALARS.includes(attribute.type);
+    return strapi
+      .plugin('graphql')
+      .service<any>('constants')
+      .GRAPHQL_SCALARS.includes(attribute.type);
   };
 
   /**

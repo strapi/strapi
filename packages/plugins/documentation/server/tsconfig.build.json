@@ -1,10 +1,10 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": ["./tsconfig.json", "tsconfig/declarations.json"],
   "compilerOptions": {
     "rootDir": "../",
     "outDir": "../dist",
     "noEmit": false
   },
   "include": ["./src"],
-  "exclude": ["**/*.test.ts"]
+  "exclude": ["**/*.test.ts", "./src/registries.ts"]
 }

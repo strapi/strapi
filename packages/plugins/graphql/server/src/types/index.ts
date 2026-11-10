@@ -1,0 +1,67 @@
+import type createBuilders from '../services/builders';
+import type createConstants from '../services/constants';
+import type createContentAPI from '../services/content-api';
+import type createFormat from '../services/format';
+import type createInternals from '../services/internals';
+import type createUtils from '../services/utils';
+import type { ExtensionService, TypeRegistryService } from './services';
+
+export type * from './services';
+
+/**
+ * `strapi.config.get('plugin::graphql')`: the plugin config merged with its defaults
+ * (`server/src/config/default-config.ts`). The other keys are optional.
+ */
+export type GraphQLConfig = {
+  shadowCRUD: boolean;
+  endpoint: string;
+  subscriptions: boolean;
+  /** `-1` for no limit. */
+  maxLimit: number;
+  apolloServer: Record<string, unknown>;
+  /** From `STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE` when the config does not set it. */
+  v4CompatibilityMode: boolean | string;
+  defaultLimit?: number;
+  depthLimit?: number;
+  playgroundAlways?: boolean;
+  /** A function receives the Strapi instance and returns an Apollo plugin or a boolean. */
+  landingPage?: boolean | ((strapi?: never) => unknown);
+  generateArtifacts?: boolean;
+  artifacts?: { schema?: string | boolean; typegen?: string | boolean };
+};
+
+/** GraphQL services by name, as registered by the plugin. */
+export type Services = {
+  builders: ReturnType<typeof createBuilders>;
+  constants: ReturnType<typeof createConstants>;
+  'content-api': ReturnType<typeof createContentAPI>;
+  extension: ExtensionService;
+  format: ReturnType<typeof createFormat>;
+  internals: ReturnType<typeof createInternals>;
+  'type-registry': TypeRegistryService;
+  utils: ReturnType<typeof createUtils>;
+};
+
+/** Default contracts loaded with the GraphQL server types. */
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface PackageConfigs {
+        'plugin::graphql': GraphQLConfig;
+      }
+
+      interface PackageServices {
+        'plugin::graphql.builders': Services['builders'];
+        'plugin::graphql.constants': Services['constants'];
+        'plugin::graphql.content-api': Services['content-api'];
+        'plugin::graphql.extension': Services['extension'];
+        'plugin::graphql.format': Services['format'];
+        'plugin::graphql.internals': Services['internals'];
+        'plugin::graphql.type-registry': Services['type-registry'];
+        'plugin::graphql.utils': Services['utils'];
+      }
+    }
+  }
+}

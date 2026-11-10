@@ -23,10 +23,21 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
   const overrideService = getService('override');
 
   return {
+    /**
+     * The documentation version of the plugin config (`info.version`).
+     *
+     * @internal
+     */
     getDocumentationVersion() {
       return config.info.version;
     },
 
+    /**
+     * The folder that holds one folder per generated version, each with its
+     * `full_documentation.json`.
+     *
+     * @internal
+     */
     getFullDocumentationPath() {
       // In production, documentation files live under dist/src/extensions/
       // after the build step. Use dist.extensions for reading.
@@ -38,6 +49,11 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       return path.join(extensionsDir, 'documentation', 'documentation');
     },
 
+    /**
+     * The generated versions. A version whose file cannot be read is left out.
+     *
+     * @internal
+     */
     getDocumentationVersions(): Version[] {
       return fs
         .readdirSync(this.getFullDocumentationPath())
@@ -63,6 +79,8 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Returns settings stored in core-store
+     *
+     * @internal
      */
     async getDocumentationAccess() {
       const { restrictedAccess } = (await strapi.store!({
@@ -75,6 +93,11 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       return { restrictedAccess };
     },
 
+    /**
+     * The documentation folder of an API (`getter: 'api'`) or of a plugin (`getter: 'plugin'`).
+     *
+     * @internal
+     */
     getApiDocumentationPath(api: { name: string; getter: string }) {
       const isProduction = strapi.config.environment === 'production';
 
@@ -89,6 +112,11 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       return path.join(apiDir, api.name, 'documentation');
     },
 
+    /**
+     * Removes the files of a version. A version that was never generated resolves without error.
+     *
+     * @internal
+     */
     async deleteDocumentation(version: string) {
       const apis = this.getPluginAndApiInfo();
       for (const api of apis) {
@@ -98,6 +126,11 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       await fs.remove(path.join(this.getFullDocumentationPath(), version));
     },
 
+    /**
+     * The APIs, then the documented plugins, with the names of their content types.
+     *
+     * @internal
+     */
     getPluginAndApiInfo() {
       const pluginsToDocument = pluginsThatNeedDocumentation.map((plugin) => {
         return {
@@ -120,6 +153,8 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * @description - Creates the Swagger json files
+     *
+     * @internal
      */
     async generateFullDoc(versionOpt?: string) {
       const version = versionOpt ?? this.getDocumentationVersion();
