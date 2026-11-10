@@ -93,31 +93,54 @@ describe('VersionsList', () => {
     expect(within(screen.getAllByRole('link')[1]).getByText(label)).toBeInTheDocument();
   });
 
-  it('shows the full author name in a tooltip on hover', async () => {
-    const { user } = render(
-      // @ts-expect-error we don't need all the context
-      <HistoryProvider page={1} versions={mockHistoryVersionsData.historyVersions}>
-        <VersionsList />
-      </HistoryProvider>
-    );
+  describe('author name tooltip', () => {
+    const mockNameWidth = (scrollWidth: number) => [
+      jest.spyOn(Element.prototype, 'scrollWidth', 'get').mockReturnValue(scrollWidth),
+      jest.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(100),
+    ];
+    let widthMocks: jest.SpyInstance[] = [];
 
-    await user.hover(within(screen.getAllByRole('link')[1]).getByText('Deploy token'));
+    afterEach(() => {
+      widthMocks.forEach((mock) => mock.mockRestore());
+    });
 
-    expect(await screen.findByRole('tooltip', { name: 'Deploy token' })).toBeInTheDocument();
-  });
+    const renderVersions = () =>
+      render(
+        // @ts-expect-error we don't need all the context
+        <HistoryProvider page={1} versions={mockHistoryVersionsData.historyVersions}>
+          <VersionsList />
+        </HistoryProvider>
+      );
 
-  it('shows the full author name in a tooltip on keyboard focus', async () => {
-    const { user } = render(
-      // @ts-expect-error we don't need all the context
-      <HistoryProvider page={1} versions={mockHistoryVersionsData.historyVersions}>
-        <VersionsList />
-      </HistoryProvider>
-    );
+    it('shows the full name of a cut name on hover', async () => {
+      widthMocks = mockNameWidth(200);
+      const { user } = renderVersions();
 
-    await user.tab();
-    await user.tab();
+      await user.hover(within(screen.getAllByRole('link')[1]).getByText('Deploy token'));
 
-    expect(screen.getAllByRole('link')[1]).toHaveFocus();
-    expect(await screen.findByRole('tooltip', { name: 'Deploy token' })).toBeInTheDocument();
+      expect(await screen.findByRole('tooltip', { name: 'Deploy token' })).toBeInTheDocument();
+    });
+
+    it('shows the full name of a cut name on keyboard focus', async () => {
+      widthMocks = mockNameWidth(200);
+      const { user } = renderVersions();
+
+      await user.tab();
+      await user.tab();
+
+      expect(screen.getAllByRole('link')[1]).toHaveFocus();
+      expect(await screen.findByRole('tooltip', { name: 'Deploy token' })).toBeInTheDocument();
+    });
+
+    it('shows no tooltip for a name that fits', async () => {
+      widthMocks = mockNameWidth(100);
+      const { user } = renderVersions();
+
+      await user.hover(within(screen.getAllByRole('link')[1]).getByText('Deploy token'));
+
+      await expect(
+        waitFor(() => expect(screen.getByRole('tooltip')).toBeInTheDocument(), { timeout: 1500 })
+      ).rejects.toThrow();
+    });
   });
 });
