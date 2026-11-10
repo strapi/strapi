@@ -49,7 +49,6 @@ describe('GraphQL extension merging', () => {
 
       extension.relaxRequiredOutput();
       expect(extension.isRequiredOutputRelaxed()).toBe(true);
-
     });
 
     it('are not changed by another instance', () => {
