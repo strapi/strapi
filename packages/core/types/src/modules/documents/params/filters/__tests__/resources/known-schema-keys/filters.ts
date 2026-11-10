@@ -115,12 +115,14 @@ articles.findMany({
 });
 
 /**
- * The id shortcut on a nested attribute of a component: the target's id, or one operator object on
- * it. The database applies it to the target's id.
+ * One operator object on a nested attribute of a component. The database applies it to the target's
+ * id.
  */
 export const shortcut: Filters<'shared.link'>[] = [
-  { article: 5 },
-  { article: 'a' },
+  {
+    // @ts-expect-error A bare id is not accepted, use `{ id: 5 }` or `{ $eq: 5 }`
+    article: 5,
+  },
   { article: { $in: [1, 2] } },
   { article: { $eq: 1 } },
   { article: { $null: true } },
@@ -151,7 +153,10 @@ export const shortcut: Filters<'shared.link'>[] = [
 ];
 
 export const nestedComponentShortcut: Filters<'shared.card'>[] = [
-  { seo: 1 },
+  {
+    // @ts-expect-error A bare id is not accepted
+    seo: 1,
+  },
   { seo: { $null: true } },
   { seo: { metaTitle: 'a' } },
   {
@@ -163,7 +168,7 @@ export const nestedComponentShortcut: Filters<'shared.card'>[] = [
 ];
 
 export const shortcutFromContentType: Filters<'api::article.article'>[] = [
-  { links: { article: 5 } },
+  { links: { article: { $eq: 5 } } },
   { links: { article: { $in: [1, 2] } } },
   {
     // @ts-expect-error The shortcut is not accepted on content type attributes
@@ -181,3 +186,21 @@ articles.findMany({
     },
   },
 });
+
+/**
+ * Reading back the filter of a nested attribute inside a component keeps the target's filter type
+ */
+export const componentReadBack = (filters: Filters<'shared.link'>) => {
+  const article: Filters<'api::article.article'> | undefined = filters.article;
+  const title = filters.article?.title;
+  const nestedSeo: Filters<'shared.seo'> | undefined = filters.article?.seo;
+
+  return { article, title, nestedSeo };
+};
+
+export const componentReadBackFromContentType = (filters: Filters<'api::article.article'>) => {
+  const article: Filters<'api::article.article'> | undefined = filters.links?.article;
+  const card: Filters<'shared.seo'> | undefined = filters.links?.article?.$not?.seo;
+
+  return { article, card };
+};
