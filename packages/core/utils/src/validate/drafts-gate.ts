@@ -84,6 +84,8 @@ const populates = (value: unknown): boolean => {
  * for writes: their root is not gated, the types they reach are.
  * `sanitize.query` removes what this refuses at the root and denies what it refuses below, for
  * controllers that skip `validate.query`.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const assertDraftAccess = async (
   query: Record<string, unknown>,

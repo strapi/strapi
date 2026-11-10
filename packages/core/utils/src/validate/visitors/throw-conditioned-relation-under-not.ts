@@ -20,6 +20,8 @@ const isUnderNot = (raw: string | null) =>
  *
  * Run it on the filters alone (`path.raw` starting at them), with `isRestricted` from
  * `createRelationRestriction`. It is asked about a target uid with the visited key's `path`.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export default (isRestricted: (uid: string, path?: Path) => boolean): Visitor =>
   ({ key, attribute, path }) => {
