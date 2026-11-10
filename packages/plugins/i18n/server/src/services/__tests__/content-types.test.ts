@@ -74,12 +74,12 @@ describe('content-types service', () => {
             relation: {
               type: 'relation',
               relation: 'oneToOne',
-              target: 'user',
+              target: 'admin::user',
             },
             secondRelation: {
               type: 'relation',
               relation: 'oneToMany',
-              target: 'user',
+              target: 'admin::user',
             },
           },
         })
@@ -112,7 +112,7 @@ describe('content-types service', () => {
             localizations: {
               type: 'relation',
               relation: 'oneToMany',
-              target: 'test-model',
+              target: 'api::test-model.test-model',
               visible: false,
             },
             publishedAt: {
@@ -204,7 +204,13 @@ describe('content-types service', () => {
 
   describe('copyNonLocalizedAttributes', () => {
     test('Does not copy locale, localizations & publishedAt', () => {
-      const model = {
+      const model: Struct.ContentTypeSchema = {
+        modelType: 'contentType',
+        uid: 'api::test-model.test-model',
+        kind: 'collectionType',
+        modelName: 'test-model',
+        globalId: 'TestModel',
+        info: { displayName: 'Test model', singularName: 'test-model', pluralName: 'test-models' },
         attributes: {
           title: {
             type: 'string',
@@ -217,6 +223,8 @@ describe('content-types service', () => {
           },
           relation: {
             type: 'relation',
+            relation: 'oneToOne',
+            target: 'api::test-model.test-model',
           },
           description: {
             type: 'string',
@@ -226,7 +234,9 @@ describe('content-types service', () => {
             visible: false,
           },
           localizations: {
-            collection: 'test-model',
+            type: 'relation',
+            relation: 'oneToMany',
+            target: 'api::test-model.test-model',
             visible: false,
           },
           publishedAt: {
@@ -255,7 +265,13 @@ describe('content-types service', () => {
     });
 
     test('picks only non localized attributes', () => {
-      const model = {
+      const model: Struct.ContentTypeSchema = {
+        modelType: 'contentType',
+        uid: 'api::test-model.test-model',
+        kind: 'collectionType',
+        modelName: 'test-model',
+        globalId: 'TestModel',
+        info: { displayName: 'Test model', singularName: 'test-model', pluralName: 'test-models' },
         attributes: {
           title: {
             type: 'string',
@@ -268,6 +284,8 @@ describe('content-types service', () => {
           },
           relation: {
             type: 'relation',
+            relation: 'oneToOne',
+            target: 'api::test-model.test-model',
           },
           description: {
             type: 'string',
@@ -299,11 +317,17 @@ describe('content-types service', () => {
 
       global.strapi = {
         components: {
-          compo: compoModel,
+          'default.compo': compoModel,
         },
       } as any;
 
-      const model = {
+      const model: Struct.ContentTypeSchema = {
+        modelType: 'contentType',
+        uid: 'api::test-model.test-model',
+        kind: 'collectionType',
+        modelName: 'test-model',
+        globalId: 'TestModel',
+        info: { displayName: 'Test model', singularName: 'test-model', pluralName: 'test-models' },
         attributes: {
           title: {
             type: 'string',
@@ -316,10 +340,12 @@ describe('content-types service', () => {
           },
           relation: {
             type: 'relation',
+            relation: 'oneToOne',
+            target: 'api::test-model.test-model',
           },
           component: {
             type: 'component',
-            component: 'compo',
+            component: 'default.compo',
           },
         },
       } as unknown as Struct.ContentTypeSchema;
@@ -391,7 +417,7 @@ describe('content-types service', () => {
       const getModel = jest.fn(() => modelDef);
       global.strapi = { getModel } as any;
 
-      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'api::model.model' });
 
       expect(entry).toEqual({
         a: 'a',

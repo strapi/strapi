@@ -60,6 +60,24 @@ describe('Content type validator', () => {
     });
   });
 
+  describe('validateContentTypeInput', () => {
+    test('Accepts a content type that names a plugin', async () => {
+      const data = {
+        contentType: {
+          singularName: 'plugin-test',
+          pluralName: 'plugin-tests',
+          displayName: 'Plugin test',
+          plugin: 'example',
+          attributes: {},
+        },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateContentTypeInput(data)).resolves.toMatchObject({
+        contentType: { plugin: 'example' },
+      });
+    });
+  });
+
   describe('Prevents use of reservedNames in attributes', () => {
     test('Throws when reserved names are used', async () => {
       const data = {

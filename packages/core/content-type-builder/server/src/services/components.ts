@@ -1,4 +1,4 @@
-import type { Internal, Struct } from '@strapi/types';
+import type { Core, Internal, Struct } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { get, has } from 'lodash';
 
@@ -6,11 +6,12 @@ import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import { emitSchemaEvent } from '../utils/events';
 import createBuilder from './schema-builder';
 import type { SchemaHandler } from './schema-builder/schema-handler';
+import type { ComponentsService, EditComponentPayload } from '../types/services';
 
 /**
  * Formats a component attributes
  */
-export const formatComponent = (component: any) => {
+export const formatComponent = ((component) => {
   const { uid, modelName, connection, collectionName, info, category } = component;
 
   return {
@@ -27,15 +28,15 @@ export const formatComponent = (component: any) => {
       attributes: formatAttributes(component),
     },
   };
-};
+}) satisfies Core.Implements<ComponentsService['formatComponent']>;
 
 /**
  * Creates a component and handle the nested components sent with it
  */
-export const createComponent = async ({
+export const createComponent = (async ({
   component,
   components = [],
-}: any): Promise<SchemaHandler<Internal.UID.Component>> => {
+}): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -56,7 +57,7 @@ export const createComponent = async ({
   await emitSchemaEvent('component.create', { component: newComponent });
 
   return newComponent;
-};
+}) satisfies Core.Implements<ComponentsService['createComponent']>;
 
 /**
  * A component in a Content-Type Builder payload: the `info` fields sit at the top level,
@@ -85,9 +86,12 @@ type ComponentToCreate = {
   components?: NestedComponentInput[];
 };
 
-export const editComponent = async (
+export const editComponent = (async (
   uid: Internal.UID.Component,
-  { component, components = [] }: ComponentToCreate
+  {
+    component,
+    components = [],
+  }: Core.IsStrict extends true ? EditComponentPayload : ComponentToCreate
 ): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
@@ -117,9 +121,9 @@ export const editComponent = async (
   await emitSchemaEvent('component.update', { component: updatedComponent });
 
   return updatedComponent;
-};
+}) satisfies Core.Implements<ComponentsService['editComponent']>;
 
-export const deleteComponent = async (uid: Internal.UID.Component) => {
+export const deleteComponent = (async (uid: Internal.UID.Component) => {
   const builder = createBuilder();
 
   const deletedComponent = builder.deleteComponent(uid);
@@ -129,4 +133,4 @@ export const deleteComponent = async (uid: Internal.UID.Component) => {
   await emitSchemaEvent('component.delete', { component: deletedComponent });
 
   return deletedComponent;
-};
+}) satisfies Core.Implements<ComponentsService['deleteComponent']>;
