@@ -1,4 +1,5 @@
 import type { Context } from 'koa';
+import type { Modules } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateUpdateAssigneeOnEntity, validateLocale } from '../validation/review-workflows';
@@ -32,11 +33,13 @@ export default {
       .create({ userAbility: ctx.state.userAbility, model });
 
     // Retrieve the entity so we can get its current stage
-    const entity = await strapi.documents(model).findOne({
-      documentId,
-      locale,
-      populate: [ENTITY_STAGE_ATTRIBUTE],
-    });
+    const entity:
+      (Modules.Documents.AnyDocument & { strapi_stage?: { id: number } | null }) | null =
+      await strapi.documents(model).findOne({
+        documentId,
+        locale,
+        populate: [ENTITY_STAGE_ATTRIBUTE],
+      });
 
     if (!entity) {
       ctx.throw(404, 'Entity not found');
@@ -60,7 +63,12 @@ export default {
 
     await workflowService.assertContentTypeBelongsToWorkflow(model);
 
-    const updatedEntity = await assigneeService.updateEntityAssignee(entity, model, assigneeId);
+    const updatedEntity = await assigneeService.updateEntityAssignee(
+      // A document has the fields the service reads; its published parameter type is develop's.
+      entity as Parameters<typeof assigneeService.updateEntityAssignee>[0],
+      model,
+      assigneeId
+    );
 
     ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },

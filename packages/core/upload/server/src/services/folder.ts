@@ -1,4 +1,5 @@
 import { map, sortBy } from 'lodash';
+import type { Core } from '@strapi/types';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
@@ -6,6 +7,7 @@ import { isIntegerId } from '../utils/integer-id';
 import { AUDITED_EVENTS } from '../audit-logs';
 
 import type { File, Folder } from '../types';
+import type { FolderService } from '../types/services';
 
 /**
  * A node of the folder tree: `Folder.children` holds ids, a node's children hold nodes.
@@ -361,10 +363,21 @@ const getStructure = async () => {
 
 export default {
   create,
+  /**
+   * Whether a folder matches these `where` parameters.
+   *
+   * @internal
+   */
   exists,
   deleteByIds,
   update,
   setPathIdAndPath,
   getStructure,
   getNamePaths,
-};
+  // setPathIdAndPath and getStructure are checked by name only until develop types them as the
+  // contract does: setPathIdAndPath returns the folder it is given (generic), and getStructure
+  // resolves to FolderStructureNode[] (D02).
+} satisfies Core.Implements<
+  Omit<FolderService, 'setPathIdAndPath' | 'getStructure'> &
+    Record<'setPathIdAndPath' | 'getStructure', unknown>
+>;

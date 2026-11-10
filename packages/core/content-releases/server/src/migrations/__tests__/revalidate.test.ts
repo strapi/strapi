@@ -80,12 +80,12 @@ describe('revalidateChangedContentTypes', () => {
   });
 
   // The core store table exists but has no saved schemas, e.g. after a first start that failed
-  // before saving them. Core then passes `null`, which the input type does not declare.
+  // before saving them.
   it('skips revalidation without saved schemas', async () => {
     await expect(
       revalidateChangedContentTypes(
         {
-          oldContentTypes: null as unknown as Record<string, Schema.ContentType>,
+          oldContentTypes: null,
           contentTypes: { 'api::a.a': contentType({ title: { type: 'string' } }) },
         },
         { strapi }

@@ -3,6 +3,7 @@ import { async } from '@strapi/utils';
 import { isEmpty } from 'lodash';
 
 import type { Core, UID, Modules } from '@strapi/types';
+import type { PermissionChecker, PermissionCheckerAction } from '../types/services';
 
 export const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -21,27 +22,30 @@ const ACTION_NAMES = Object.keys(ACTIONS) as ActionName[];
 type SanitizedQueryOptions = { action?: string } | string;
 
 type Entity = Modules.EntityService.Result<UID.ContentType>;
+/** The entity the contract accepts with strict types: callers also pass `null` and partial objects. */
+type CheckedEntity = Core.IsStrict extends true ? unknown : Entity;
 type Query = {
   page?: string;
   pageSize?: string;
   sort?: string;
 };
+/** The query the contract accepts with strict types. */
+type CheckedQuery = Core.IsStrict extends true ? unknown : Query;
 
 const createPermissionChecker =
   (strapi: Core.Strapi) =>
   ({ userAbility, model }: { userAbility: Ability; model: string }) => {
-    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
-      ability: userAbility,
-      model,
-    });
+    const permissionsManager = strapi
+      .service('admin::permission')
+      .createPermissionsManager({ ability: userAbility, model });
 
     const { actionProvider } = strapi.service('admin::permission');
 
-    const toSubject = (entity?: Entity) => {
+    const toSubject = (entity?: CheckedEntity) => {
       return entity ? permissionsManager.toSubject(entity, model) : model;
     };
 
-    const can = (action: string, entity?: Entity, field?: string) => {
+    const can = (action: string, entity?: CheckedEntity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -53,7 +57,7 @@ const createPermissionChecker =
       );
     };
 
-    const cannot = (action: string, entity?: Entity, field?: string) => {
+    const cannot = (action: string, entity?: CheckedEntity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -65,7 +69,12 @@ const createPermissionChecker =
       );
     };
 
-    const sanitizeOutput = (data: Entity, { action = ACTIONS.read }: { action?: string } = {}) => {
+    const sanitizeOutput: Core.IsStrict extends true
+      ? PermissionChecker['sanitizeOutput']
+      : (data: Entity, { action }?: { action?: string }) => any = (
+      data,
+      { action = ACTIONS.read } = {}
+    ) => {
       return permissionsManager.sanitizeOutput(data, { subject: toSubject(data), action });
     };
 
@@ -91,11 +100,14 @@ const createPermissionChecker =
       return rules.some((rule: any) => rule.conditions && !isEmpty(rule.conditions));
     };
 
-    const sanitizeQuery = (query: Query, { action = ACTIONS.read }: { action?: string } = {}) => {
+    const sanitizeQuery = (
+      query: CheckedQuery,
+      { action = ACTIONS.read }: { action?: string } = {}
+    ) => {
       return permissionsManager.sanitizeQuery(query, { subject: model, action });
     };
 
-    const sanitizeInput = (action: string, data: any, entity?: Entity) => {
+    const sanitizeInput = <TData>(action: string, data: TData, entity?: CheckedEntity) => {
       return permissionsManager.sanitizeInput(data, {
         subject: entity ? toSubject(entity) : model,
         action,
@@ -106,15 +118,20 @@ const createPermissionChecker =
       return permissionsManager.validateQuery(query, { subject: model, action });
     };
 
-    const validateInput = (action: string, data: any, entity?: Entity) => {
+    const validateInput = ((action: string, data, entity?: CheckedEntity) => {
       return permissionsManager.validateInput(data, {
         subject: entity ? toSubject(entity) : model,
         action,
       });
-    };
+    }) satisfies Core.Implements<PermissionChecker['validateInput']>;
 
-    const sanitizeCreateInput = (data: any) => sanitizeInput(ACTIONS.create, data);
-    const sanitizeUpdateInput = (entity: Entity) => (data: any) =>
+    const sanitizeCreateInput = ((data) =>
+      sanitizeInput(ACTIONS.create, data)) satisfies Core.Implements<
+      PermissionChecker['sanitizeCreateInput']
+    >;
+    const sanitizeUpdateInput: Core.IsStrict extends true
+      ? PermissionChecker['sanitizeUpdateInput']
+      : (entity: Entity) => (data: any) => any = (entity) => (data) =>
       sanitizeInput(ACTIONS.update, data, entity);
 
     const buildPermissionQuery = (query: Query, action: string) => {
@@ -127,11 +144,11 @@ const createPermissionChecker =
      * The action can also be given as a plain string, the v4 signature
      * `sanitizedQuery(query, actionUID)`, which untyped plugin code may still use.
      */
-    const sanitizedQueryForAction = (query: Query, options: SanitizedQueryOptions = {}) => {
+    const sanitizedQueryForAction = (query: CheckedQuery, options: SanitizedQueryOptions = {}) => {
       const action = typeof options === 'string' ? options : (options.action ?? ACTIONS.read);
 
       return async.pipe(
-        (q: Query) => sanitizeQuery(q, { action }),
+        (q: CheckedQuery) => sanitizeQuery(q, { action }),
         (q: Query) => buildPermissionQuery(q, action)
       )(query);
     };
@@ -140,27 +157,57 @@ const createPermissionChecker =
     const sanitizedQueryShortcuts = Object.fromEntries(
       ACTION_NAMES.map((name) => [
         name,
-        (query: Query) => sanitizedQueryForAction(query, { action: ACTIONS[name] }),
+        (query: CheckedQuery) => sanitizedQueryForAction(query, { action: ACTIONS[name] }),
       ])
-    ) as Record<ActionName, (query: Query) => ReturnType<typeof sanitizedQueryForAction>>;
+    ) as Record<ActionName, (query: CheckedQuery) => ReturnType<typeof sanitizedQueryForAction>>;
 
     const sanitizedQuery = Object.assign(sanitizedQueryForAction, sanitizedQueryShortcuts);
 
-    // Permission utils shortcuts
-    Object.keys(ACTIONS).forEach((action) => {
-      // @ts-expect-error TODO
-      can[action] = (...args: any) => can(ACTIONS[action], ...args);
-      // @ts-expect-error TODO
-      cannot[action] = (...args: any) => cannot(ACTIONS[action], ...args);
-      // @ts-expect-error TODO
-      requiresEntity[action] = () => requiresEntity(ACTIONS[action]);
-    });
+    /** One shortcut per Content Manager action, e.g. `can.read(entity)`. */
+    const actionShortcuts = <TShortcut>(
+      toShortcut: (action: (typeof ACTIONS)[PermissionCheckerAction]) => TShortcut
+    ) => {
+      const shortcuts = {} as Record<PermissionCheckerAction, TShortcut>;
+      for (const name of Object.keys(ACTIONS) as PermissionCheckerAction[]) {
+        shortcuts[name] = toShortcut(ACTIONS[name]);
+      }
+      return shortcuts;
+    };
+
+    // Permission utils shortcuts. `Object.assign` returns the function it extends, so with
+    // strict types its result carries the shortcuts; without, the published type stays develop's.
+    const canWithShortcuts: Core.IsStrict extends true
+      ? PermissionChecker['can']
+      : (action: string, entity?: Entity, field?: string) => boolean = Object.assign(
+      can,
+      actionShortcuts(
+        (action) =>
+          (...args: [entity?: CheckedEntity, field?: string]) =>
+            can(action, ...args)
+      )
+    );
+    const cannotWithShortcuts: Core.IsStrict extends true
+      ? PermissionChecker['cannot']
+      : (action: string, entity?: Entity, field?: string) => boolean = Object.assign(
+      cannot,
+      actionShortcuts(
+        (action) =>
+          (...args: [entity?: CheckedEntity, field?: string]) =>
+            cannot(action, ...args)
+      )
+    );
+    const requiresEntityWithShortcuts: Core.IsStrict extends true
+      ? PermissionChecker['requiresEntity']
+      : (action: string) => boolean = Object.assign(
+      requiresEntity,
+      actionShortcuts((action) => () => requiresEntity(action))
+    );
 
     return {
       // Permission utils
-      can, // check if you have the permission
-      cannot, // check if you don't have the permission
-      requiresEntity, // check if entity data is needed for permission evaluation
+      can: canWithShortcuts, // check if you have the permission
+      cannot: cannotWithShortcuts, // check if you don't have the permission
+      requiresEntity: requiresEntityWithShortcuts, // check if entity data is needed for permission evaluation
       // Sanitizers
       sanitizeOutput,
       sanitizeQuery,
@@ -174,6 +221,8 @@ const createPermissionChecker =
     };
   };
 
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
+// The published type stays the inferred one, as on develop. With strict types, the factory is
+// checked against `PermissionCheckerService`, the action shortcuts included.
+export default (({ strapi }: { strapi: Core.Strapi }) => ({
   create: createPermissionChecker(strapi),
-});
+})) satisfies Core.ServiceImplementation<'plugin::content-manager.permission-checker'>;

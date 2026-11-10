@@ -1,4 +1,5 @@
 import metricsService from '../weekly-metrics';
+import trackUsageService from '../metrics';
 
 describe('metrics', () => {
   describe('computeMetrics', () => {
@@ -101,6 +102,56 @@ describe('metrics', () => {
         maxDepth,
         averageDeviationDepth: expect.closeTo(averageDeviationDepth, 3),
       });
+    });
+  });
+});
+
+const createTrackUsageStrapi = ({ hasProvider }: { hasProvider: boolean }) => {
+  const send = jest.fn(() => Promise.resolve(true));
+  // `getService` reads the global `strapi`; the unit setup resolves `plugin(…).service(…)` from it.
+  const strapi = {
+    telemetry: { send },
+    plugins: {
+      upload: {
+        services: {
+          aiMetadataProvider: { hasProvider: () => hasProvider },
+          aiMetadata: { isEnabled: () => Promise.resolve(true) },
+        },
+      },
+    },
+  } as any;
+
+  return { strapi, send };
+};
+
+describe('metrics service', () => {
+  describe('trackUsage', () => {
+    test('merges isAiMediaLibraryConfigured into the eventProperties the caller passes', async () => {
+      const { strapi, send } = createTrackUsageStrapi({ hasProvider: true });
+      global.strapi = strapi;
+
+      await trackUsageService({ strapi }).trackUsage('didBulkMoveMediaLibraryElements', {
+        eventProperties: { rootFolderNumber: 1, rootAssetNumber: 2 },
+        groupProperties: { uploadProvider: 'local' },
+      });
+
+      expect(send).toHaveBeenCalledWith('didBulkMoveMediaLibraryElements', {
+        eventProperties: {
+          rootFolderNumber: 1,
+          rootAssetNumber: 2,
+          isAiMediaLibraryConfigured: true,
+        },
+        groupProperties: { uploadProvider: 'local' },
+      });
+    });
+
+    test('keeps the eventProperties as passed without an AI provider', async () => {
+      const { strapi, send } = createTrackUsageStrapi({ hasProvider: false });
+      global.strapi = strapi;
+
+      await trackUsageService({ strapi }).trackUsage('didUploadImage');
+
+      expect(send).toHaveBeenCalledWith('didUploadImage', { eventProperties: {} });
     });
   });
 });

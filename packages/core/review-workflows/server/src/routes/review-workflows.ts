@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
 import { enableFeatureMiddleware } from './utils';
 
 /**
@@ -7,8 +9,11 @@ import { enableFeatureMiddleware } from './utils';
 const contentManagerEntryRoute = (
   method: 'GET' | 'PUT',
   action: 'stage' | 'stages' | 'assignee',
-  handler: string,
-  policies: Array<string | { name: string; config?: Record<string, unknown> }>
+  handler: 'stages.updateEntity' | 'stages.listAvailableStages' | 'assignees.updateEntity',
+  // With strict types, the policies of the route contract. Without, a policy object names its config.
+  policies: Core.IsStrict extends true
+    ? Core.PolicyReference<'plugin::review-workflows'>[]
+    : Array<string | { name: string; config: Record<string, unknown> }>
 ) =>
   (['collection', 'single'] as const).map((kind) => ({
     method,
@@ -20,7 +25,30 @@ const contentManagerEntryRoute = (
     },
   }));
 
-export default {
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const reviewWorkflowsRouter: {
+  type: string;
+  routes: (
+    | {
+        method: 'GET' | 'PUT';
+        path: string;
+        handler: string;
+        config: {
+          middlewares: ((ctx: any, next: any) => any)[];
+          policies: (string | { name: string; config?: Record<string, unknown> })[];
+        };
+      }
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          middlewares: ((ctx: any, next: any) => any)[];
+          policies: (string | { name: string; config: { actions: string[] } })[];
+        };
+      }
+  )[];
+} = {
   type: 'admin',
   routes: [
     // Review workflow
@@ -142,4 +170,6 @@ export default {
       },
     ]),
   ],
-};
+} satisfies Core.RouterInputFor<Controllers, 'plugin::review-workflows'>;
+
+export default reviewWorkflowsRouter;

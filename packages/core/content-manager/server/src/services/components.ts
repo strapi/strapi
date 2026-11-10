@@ -2,6 +2,7 @@ import { mapValues } from 'lodash';
 
 import type { UID, Struct, Core } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
+import type { ComponentModelConfiguration } from '../types/services';
 import type { ConfigurationUpdate } from './configuration';
 
 import { getService } from '../utils';
@@ -37,7 +38,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async findConfiguration(component: Struct.ComponentSchema) {
-    const configuration: Configuration = await configurationService.getConfiguration(component.uid);
+    // The stored configuration holds the UID once synced, and never a category.
+    const configuration: Core.IsStrict extends true
+      ? Omit<ComponentModelConfiguration, 'category' | 'uid'> &
+          Partial<Pick<ComponentModelConfiguration, 'uid'>>
+      : Configuration = await configurationService.getConfiguration(component.uid);
 
     return {
       uid: component.uid,
@@ -149,6 +154,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return componentsMap;
   },
 
+  /** @internal */
   syncConfigurations() {
     return configurationService.syncConfigurations();
   },

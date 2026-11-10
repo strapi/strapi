@@ -153,7 +153,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const formatDocuments = (
-    documents: Modules.Documents.AnyDocument[],
+    // A recent document's `locale` is a string for a localized type, `null` otherwise
+    documents: (Modules.Documents.AnyDocument & { locale?: string | null })[],
     meta: ContentTypeMeta,
     populate?: string[]
   ) => {
@@ -299,6 +300,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         .slice(0, MAX_DOCUMENTS);
     },
 
+    /** @internal */
     async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
       const recentlyPublishedDocuments = await this.queryLastDocuments(
         {
@@ -311,6 +313,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return this.addStatusToDocuments(recentlyPublishedDocuments);
     },
 
+    /** @internal */
     async getRecentlyUpdatedDocuments(): Promise<GetRecentDocuments.Response['data']> {
       const recentlyUpdatedDocuments = await this.queryLastDocuments({
         sort: 'updatedAt:desc',
@@ -319,6 +322,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return this.addStatusToDocuments(recentlyUpdatedDocuments);
     },
 
+    /** @internal */
     async getCountDocuments(): Promise<GetCountDocuments.Response['data']> {
       const permittedContentTypes = await getPermittedContentTypes();
       // Fetch the configuration for each content type in a single query
