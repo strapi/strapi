@@ -104,6 +104,35 @@ describe('rollback and cleanup', () => {
       delete: [],
     });
 
+    // Erin picks up two more roles, and frank signs in with GitHub and Google as well: end-users
+    // holds several of each, users-permissions one
+    const erinKey = project.users.erin.id;
+    const [primary, second, third] = [
+      project.roles.authenticated.id,
+      project.roles.editors.id,
+      project.roles.editorsLower.id,
+    ];
+
+    await strapi.db.connection('eu_users_roles_lnk').insert([
+      { user_id: erinKey, role_id: second, role_ord: 2 },
+      { user_id: erinKey, role_id: third, role_ord: 3 },
+    ]);
+    await strapi.db
+      .connection('eu_users_roles_lnk')
+      .where({ user_id: erinKey, role_id: primary })
+      .update({ role_ord: 1 });
+
+    for (const provider of ['github', 'google']) {
+      // eslint-disable-next-line no-await-in-loop
+      await strapi.db.query('plugin::end-users.account').create({
+        data: {
+          providerId: provider,
+          accountId: `frank-${provider}`,
+          userId: project.users.frank.documentId,
+        },
+      });
+    }
+
     await stop();
   });
 
@@ -164,7 +193,8 @@ describe('rollback and cleanup', () => {
       const populate = ['role', 'seo', 'avatar', 'organization', 'favorites'];
       const users = (await up.db.connection('up_users').count({ c: '*' }).first()) as Row;
 
-      expect(Number(users.c)).toBe(9);
+      // The seeded users and the one who signed up after the cutover
+      expect(Number(users.c)).toBe(Object.keys(project.users).length + 1);
 
       const alice = (await up.documents(UP_USER).findOne({
         documentId: project.users.alice.documentId,
@@ -193,6 +223,28 @@ describe('rollback and cleanup', () => {
       expect(gina).toMatchObject({ company: 'Gina Co', provider: 'local' });
       expect(gina.role.type).toBe('authenticated');
       expect(stored.password).toEqual(expect.stringMatching(/^\$2[aby]\$/));
+    });
+
+    it('takes a user with several roles back with the first, and one with linked providers back with the password', async () => {
+      const erinRoles = await up.db
+        .connection('up_users_role_lnk')
+        .where({ user_id: project.users.erin.id });
+
+      expect(erinRoles.map((link) => link.role_id)).toEqual([project.roles.authenticated.id]);
+
+      // One role each, so the link table holds one row per user
+      const links = (await up.db.connection('up_users_role_lnk').count({ c: '*' }).first()) as Row;
+      const users = (await up.db.connection('up_users').count({ c: '*' }).first()) as Row;
+
+      expect(Number(links.c)).toBe(Number(users.c));
+
+      const frank = await up.db
+        .connection('up_users')
+        .where({ id: project.users.frank.id })
+        .first();
+
+      expect(frank.provider).toBe('local');
+      expect(frank.password).toEqual(expect.stringMatching(/^\$2[aby]\$/));
     });
 
     it('restores the role permissions as they were at the cutover', async () => {

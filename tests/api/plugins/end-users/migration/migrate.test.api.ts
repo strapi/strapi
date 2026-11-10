@@ -10,6 +10,7 @@ import {
 } from '../utils/users-permissions-project';
 import type { Core } from '@strapi/types';
 import type { FixtureUser, UsersPermissionsProject } from '../utils/users-permissions-project';
+import { readRecord } from '../../../../../packages/plugins/end-users/server/src/migration/record';
 import { resetDatabase } from '../utils/reset-database';
 
 describe('migration from users-permissions: start control', () => {
@@ -29,16 +30,8 @@ describe('migration from users-permissions: start control', () => {
     ).rejects.toThrow(/migration\.fromUsersPermissions/);
 
     const state = await inspectDatabase(async (db) => {
-      const client = String(db.client.config.client);
-      const listing = client.includes('sqlite')
-        ? await db.raw(
-            "select name from sqlite_master where type = 'table' and name like 'eu_stg_%'"
-          )
-        : await db.raw(
-            "select table_name as name from information_schema.tables where table_name like 'eu\\_stg\\_%'"
-          );
-      const stagingTables = (Array.isArray(listing) ? listing : (listing.rows ?? listing[0]))
-        .length;
+      // MySQL answers with the rows and the column descriptions in one array, which is not the rows
+      const stagingTables = (await tablesLike(db, 'eu_stg_')).length;
 
       return {
         users: Number((await db('up_users').count({ c: '*' }).first())?.c),
@@ -46,7 +39,7 @@ describe('migration from users-permissions: start control', () => {
       };
     });
 
-    expect(state).toEqual({ users: 8, stagingTables: 0 });
+    expect(state).toEqual({ users: Object.keys(project.users).length, stagingTables: 0 });
   });
 
   it('aborts before any change when duplicates are set to abort', async () => {
@@ -68,7 +61,7 @@ describe('migration from users-permissions: start control', () => {
         .first(),
     }));
 
-    expect(state.users).toBe(8 - (mysql ? 1 : 0));
+    expect(state.users).toBe(Object.keys(project.users).length);
     expect(state.renamed).toBe(false);
     expect(state.record).toBeUndefined();
   });
@@ -650,5 +643,160 @@ describe('migration from users-permissions: after the schema sync', () => {
 
     expect(await counts()).toEqual(before);
     expect((await readRecord(strapi)).completedSteps).toContain('accounts');
+  });
+});
+
+/**
+ * Makes every statement that matches fail, until the returned function is called. Patched on
+ * knex's client, since the statements run inside the start (the sync and the bootstrap), where a
+ * test has no hook of its own.
+ */
+const failStatements = (pattern: RegExp): (() => void) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+  const Client = require('knex/lib/client');
+  const original = Client.prototype.query;
+
+  Client.prototype.query = function query(connection: unknown, queryParam: unknown) {
+    const sql = typeof queryParam === 'string' ? queryParam : (queryParam as { sql?: string })?.sql;
+
+    if (typeof sql === 'string' && pattern.test(sql)) {
+      return Promise.reject(new Error('injected stop'));
+    }
+
+    return original.call(this, connection, queryParam);
+  };
+
+  return () => {
+    Client.prototype.query = original;
+  };
+};
+
+/** An insert into this table, however the database quotes it: not one that only mentions it */
+const insertInto = (table: string): RegExp =>
+  new RegExp(`^insert\\s+into\\s+[^\\s(]*\\b${table}\\W?\\s*\\(`, 'i');
+
+describe('migration from users-permissions: a start that stops part way', () => {
+  let project: UsersPermissionsProject;
+  let strapi: Core.Strapi | undefined;
+
+  const counts = async () => {
+    const connection = strapi!.db.connection;
+    const count = async (table: string) =>
+      Number((await connection(table).count({ c: '*' }).first())?.c);
+
+    return {
+      users: await count('eu_users'),
+      profiles: await count('eu_profiles'),
+      accounts: await count('eu_accounts'),
+      links: await count('eu_profiles_user_lnk'),
+      permissions: await count('eu_permissions'),
+    };
+  };
+
+  /** A start that fails on a statement, then one that does not */
+  const stopAt = async (pattern: RegExp) => {
+    const restore = failStatements(pattern);
+
+    try {
+      await expect(migratedInstance(project)).rejects.toThrow(/injected stop/);
+    } finally {
+      restore();
+    }
+
+    // A start that stops gives its claim back without waiting for the answer, and the database
+    // closing can cut that short: the claim then runs out by itself, which is made to have happened
+    await inspectDatabase(async (db) => {
+      const stored = await db('strapi_core_store_settings')
+        .where('key', 'plugin_end-users_migration')
+        .first('value');
+      const record = JSON.parse(stored.value);
+
+      if (record.claim) {
+        record.claim = { ...record.claim, until: new Date(Date.now() - 1000).toISOString() };
+        await db('strapi_core_store_settings')
+          .where('key', 'plugin_end-users_migration')
+          .update({ value: JSON.stringify(record) });
+      }
+    });
+  };
+
+  beforeAll(async () => {
+    await resetAfterMigration();
+    project = await seedUsersPermissionsProject();
+    strapi = await migratedInstance(project);
+
+    // What an uninterrupted start makes, to compare each resumed one with
+    reference = await counts();
+    await strapi.destroy();
+    strapi = undefined;
+  });
+
+  let reference: Awaited<ReturnType<typeof counts>>;
+
+  afterEach(async () => {
+    await strapi?.destroy();
+    strapi = undefined;
+  });
+
+  afterAll(async () => {
+    removeProjectTypes();
+    await resetDatabase();
+  });
+
+  const resumes = async () => {
+    await resetAfterMigration();
+    project = await seedUsersPermissionsProject();
+  };
+
+  const finishes = async () => {
+    strapi = await migratedInstance(project);
+
+    expect(await readRecord(strapi)).toMatchObject({ status: 'completed' });
+    expect(await counts()).toEqual(reference);
+
+    // One account per user and provider, and one profile per user
+    const duplicated = await strapi.db
+      .connection('eu_accounts')
+      .select('provider_id', 'account_id')
+      .groupBy('provider_id', 'account_id')
+      .havingRaw('count(*) > 1');
+
+    expect(duplicated).toEqual([]);
+  };
+
+  it('finishes on the next start when the staging of the tables stopped', async () => {
+    await resumes();
+    await stopAt(/^(alter|rename) .*eu_stg_/is);
+    await finishes();
+  });
+
+  it('finishes on the next start when it stopped after the staging and before the profiles', async () => {
+    await resumes();
+    await stopAt(insertInto('eu_profiles'));
+
+    const record = await inspectDatabase((db) =>
+      db('strapi_core_store_settings').where('key', 'plugin_end-users_migration').first('value')
+    );
+
+    expect(JSON.parse(record.value).completedSteps).not.toContain('profiles');
+    await finishes();
+  });
+
+  it('finishes on the next start when the copy of a staged table stopped', async () => {
+    await resumes();
+    await stopAt(insertInto('eu_profiles_cmps'));
+    await finishes();
+  });
+
+  it('finishes on the next start when it stopped between the accounts and the roles', async () => {
+    await resumes();
+    await stopAt(insertInto('eu_accounts'));
+    await finishes();
+  });
+
+  it('finishes on the next start when the retyping of the roles stopped', async () => {
+    await resumes();
+    await stopAt(/^update\s+[^\s(]*eu_roles\W?\s+set\b.*\btype\b/is);
+    await finishes();
   });
 });
