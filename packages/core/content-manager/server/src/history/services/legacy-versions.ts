@@ -11,7 +11,8 @@ import {
 /**
  * Versions saved before the source and the author existed have a `null` source.
  * We do not backfill them as the data migration can be very slow at startup
- * on MySQL. They expire with the retention.
+ * on MySQL. They expire with the retention, which has no maximum when the license sets
+ * no limit, so they can stay for a long time.
  */
 
 /**
