@@ -419,6 +419,106 @@ describe('metadata', () => {
             }
           );
 
+          const inverseModels = (
+            inverseRelation: string,
+            mappedBy: string,
+            writerAttributes: Record<string, unknown>
+          ) =>
+            [
+              {
+                uid: 'api::article.article',
+                singularName: 'article',
+                tableName: 'articles',
+                attributes: {
+                  contributors: {
+                    type: 'relation',
+                    relation: inverseRelation,
+                    target: 'api::writer.writer',
+                    mappedBy,
+                  },
+                },
+              },
+              {
+                uid: 'api::writer.writer',
+                singularName: 'writer',
+                tableName: 'writers',
+                attributes: { name: { type: 'string' }, ...writerAttributes },
+              },
+              {
+                uid: 'api::category.category',
+                singularName: 'category',
+                tableName: 'categories',
+                attributes: {},
+              },
+            ] as any;
+
+          const ownerRelationOf = {
+            oneToOne: 'oneToOne',
+            oneToMany: 'manyToOne',
+            manyToMany: 'manyToMany',
+          } as const;
+
+          // Nothing on the target points back with inversedBy, so the inverse side gets no join column or table
+          const unownedInverseSides = [
+            ['an attribute the target does not have', 'article', {}],
+            ['a scalar attribute', 'name', {}],
+            [
+              'a relation to another model',
+              'article',
+              {
+                article: {
+                  type: 'relation',
+                  relation: 'manyToOne',
+                  target: 'api::category.category',
+                },
+              },
+            ],
+            [
+              'a unidirectional relation',
+              'article',
+              {
+                article: {
+                  type: 'relation',
+                  relation: 'manyToOne',
+                  target: 'api::article.article',
+                },
+              },
+            ],
+          ] as const;
+
+          describe.each(['oneToOne', 'oneToMany', 'manyToMany'] as const)(
+            '%s inverse side',
+            (inverseRelation) => {
+              test.each(unownedInverseSides)(
+                'throws when mappedBy names %s',
+                (_case, mappedBy, writerAttributes) => {
+                  expect(() =>
+                    createMetadata(inverseModels(inverseRelation, mappedBy, writerAttributes))
+                  ).toThrow(
+                    `Error on attribute contributors in model article(api::article.article): mappedBy attribute ${mappedBy} in api::writer.writer must be a relation to api::article.article with inversedBy "contributors"`
+                  );
+                }
+              );
+
+              test('loads when an owner points back under another name than mappedBy', () => {
+                const metadata = createMetadata(
+                  inverseModels(inverseRelation, 'misnamed', {
+                    article: {
+                      type: 'relation',
+                      relation: ownerRelationOf[inverseRelation],
+                      target: 'api::article.article',
+                      inversedBy: 'contributors',
+                    },
+                  })
+                );
+
+                expect(metadata.get('api::article.article').attributes.contributors).toHaveProperty(
+                  'joinTable'
+                );
+              });
+            }
+          );
+
           test('does not look up a target for a morphToOne relation', () => {
             const models = [
               {
