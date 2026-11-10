@@ -276,7 +276,7 @@ describe('buildReport', () => {
 });
 
 describe('estimate', () => {
-  it('estimates the time from the measured rate for the database', () => {
+  it('estimates the time from the measured rate for the database, and for none that has no rate', () => {
     const snapshot = emptySnapshot();
 
     snapshot.users.total = 100_000;
