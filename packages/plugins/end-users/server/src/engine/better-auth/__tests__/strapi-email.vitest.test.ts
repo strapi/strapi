@@ -307,7 +307,7 @@ describe('strapi-email: redirects', () => {
   });
 });
 
-describe('strapi-email: the error redirect (M-1)', () => {
+describe('strapi-email: the error redirect', () => {
   /** What the flow remembers of the request: Better Auth keeps it in the verification row. */
   const stateOf = (db: { verification: Array<Record<string, unknown>> }) =>
     JSON.parse(String(db.verification.at(-1)?.value)) as { errorURL?: string; callbackURL: string };

@@ -137,10 +137,10 @@ export const assertConnectCallbacks = async (
 ): Promise<void> => {
   const { callbacks } = readCompatConfig(strapi).connect;
 
+  /* eslint-disable no-await-in-loop -- the first origin that is not trusted is the one reported */
   for (const [provider, url] of Object.entries(callbacks)) {
     const { origin } = new URL(url);
 
-    // eslint-disable-next-line no-await-in-loop
     if (!(await isTrusted(origin))) {
       throw new Error(
         `Invalid end-users configuration: \`compat.connect.callbacks[${JSON.stringify(provider)}]\` ` +
@@ -149,4 +149,5 @@ export const assertConnectCallbacks = async (
       );
     }
   }
+  /* eslint-enable no-await-in-loop */
 };

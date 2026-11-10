@@ -145,6 +145,12 @@ const inTransaction = async <T>(work: () => Promise<T>): Promise<T> => {
   return result;
 };
 
+const isSnapshotConflict = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  ((error as { errno?: unknown }).errno === 1020 ||
+    (error as { code?: unknown }).code === 'ER_CHECKREAD');
+
 /** `{ id } AND <filters>`: the one row that was read, and only while the filters still hold. */
 const guardedBy = (id: unknown, filters: StrapiFilters): StrapiFilters => ({
   $and: [{ id }, filters],
@@ -409,13 +415,14 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
           const documents = documentsOf(target);
           let updated = 0;
 
+          /* eslint-disable no-await-in-loop -- one at a time: they share the transaction, which is a single connection */
           for (const documentId of await findDocumentIds(target, where)) {
             // One at a time: they share the transaction, which is a single connection.
-            // eslint-disable-next-line no-await-in-loop
             if (await documents.update({ documentId, data: update })) {
               updated += 1;
             }
           }
+          /* eslint-enable no-await-in-loop */
 
           return updated;
         });
@@ -434,9 +441,9 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
         const accounts = await dbOf(target).findMany({ where: filters });
         const { count } = await dbOf(target).updateMany({ where: filters, data: update });
 
+        /* eslint-disable no-await-in-loop -- one at a time: they share the transaction, which is a single connection */
         for (const account of accounts) {
           // One at a time: they share the transaction, which is a single connection.
-          // eslint-disable-next-line no-await-in-loop
           await mirrorToUser(
             target,
             account,
@@ -444,6 +451,7 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
             update as Row
           );
         }
+        /* eslint-enable no-await-in-loop */
 
         return count;
       });
@@ -483,9 +491,9 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
           const documents = documentsOf(target);
           let deleted = 0;
 
+          /* eslint-disable no-await-in-loop -- one at a time: they share the transaction, which is a single connection */
           for (const documentId of await findDocumentIds(target, where)) {
             // One at a time: they share the transaction, which is a single connection.
-            // eslint-disable-next-line no-await-in-loop
             const result = await documents.delete({ documentId });
 
             // `entries` lists what the delete removed; a document that vanished first is not counted.
@@ -493,6 +501,7 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
               deleted += 1;
             }
           }
+          /* eslint-enable no-await-in-loop */
 
           return deleted;
         });
@@ -520,9 +529,21 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
           return null;
         }
 
-        const { count } = await dbOf(target).deleteMany({ where: guardedBy(row.id, filters) });
+        try {
+          const { count } = await dbOf(target).deleteMany({ where: guardedBy(row.id, filters) });
 
-        return count === 1 ? asRow(rowMapper(target)(row)) : null;
+          return count === 1 ? asRow(rowMapper(target)(row)) : null;
+        } catch (error) {
+          // Only MySQL-family drivers raise this error, so no dialect check: MariaDB's snapshot
+          // isolation refuses a delete of a row that another transaction changed after this one
+          // read it (error 1020), where other databases delete nothing: the same lost race, so the
+          // same answer
+          if (isSnapshotConflict(error)) {
+            return null;
+          }
+
+          throw error;
+        }
       });
     },
 

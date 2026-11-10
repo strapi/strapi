@@ -541,11 +541,11 @@ const createAPIValidators = (opts: APIOptions) => {
     const restrictionAt = relationRestrictionFor(auth, draftReadOf(query));
 
     if (filters) {
-      await validateFilters(filters, schema, { auth, action }, restrictionAt);
+      await validateFiltersAt(filters, schema, { auth, action }, restrictionAt);
     }
 
     if (sort) {
-      await validateSort(sort, schema, { auth, action }, restrictionAt);
+      await validateSortAt(sort, schema, { auth, action }, restrictionAt);
     }
 
     if (fields) {
@@ -554,7 +554,7 @@ const createAPIValidators = (opts: APIOptions) => {
 
     // a wildcard is always valid; its conversion will be handled by the entity service and can be optimized with sanitizer
     if (populate && populate !== '*') {
-      await validatePopulate(populate, schema, { auth, action }, restrictionAt);
+      await validatePopulateAt(populate, schema, { auth, action }, restrictionAt);
     }
 
     // How deep the caller's rows let a populate go: `*` is a level, so a wildcard counts too
@@ -563,7 +563,7 @@ const createAPIValidators = (opts: APIOptions) => {
     }
   };
 
-  const validateFilters = async (
+  const validateFiltersAt = async (
     filters: unknown,
     schema: Model,
     { auth, action }: Options = {},
@@ -574,7 +574,7 @@ const createAPIValidators = (opts: APIOptions) => {
     }
     if (Array.isArray(filters)) {
       await Promise.all(
-        filters.map((filter) => validateFilters(filter, schema, { auth, action }, restrictionAt))
+        filters.map((filter) => validateFiltersAt(filter, schema, { auth, action }, restrictionAt))
       );
       return;
     }
@@ -625,7 +625,7 @@ const createAPIValidators = (opts: APIOptions) => {
     }
   };
 
-  const validateSort = async (
+  const validateSortAt = async (
     sort: unknown,
     schema: Model,
     { auth, action }: Options = {},
@@ -697,7 +697,7 @@ const createAPIValidators = (opts: APIOptions) => {
     }
   };
 
-  const validatePopulate = async (
+  const validatePopulateAt = async (
     populate: unknown,
     schema: Model,
     { auth, action }: Options = {},
@@ -738,6 +738,15 @@ const createAPIValidators = (opts: APIOptions) => {
       throw e;
     }
   };
+
+  // The public signatures stay `(data, schema, options)`. The restriction a whole query shares is
+  // an internal parameter of the `At` variants, which validateQuery calls directly.
+  const validateFilters: ValidateFunc = (filters, schema, options) =>
+    validateFiltersAt(filters, schema, options);
+  const validateSort: ValidateFunc = (sort, schema, options) =>
+    validateSortAt(sort, schema, options);
+  const validatePopulate: ValidateFunc = (populate, schema, options) =>
+    validatePopulateAt(populate, schema, options);
 
   return {
     input: validateInput,

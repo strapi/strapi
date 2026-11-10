@@ -1,4 +1,5 @@
 import { bootstrap } from './bootstrap';
+import { register } from './register';
 import { services } from './services';
 import { routes } from './routes';
 import { controllers } from './controllers';
@@ -7,6 +8,7 @@ import { contentTypes } from './content-types';
 import middlewares from './middlewares';
 
 export default {
+  register,
   bootstrap,
   services,
   routes,

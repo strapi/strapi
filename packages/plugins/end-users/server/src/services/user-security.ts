@@ -1,5 +1,5 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Core, Struct, UID } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import type {
   UserSecurity,
@@ -13,6 +13,8 @@ import type abilityService from './ability';
 import type { CallerPermissions } from './ability';
 import type roleService from './role';
 import type settingsService from './settings';
+import { isPlain } from '../utils/is-plain';
+import { contentTypesOf, documentsOf, type PluginDocuments } from '../utils/typed-strapi';
 
 type Plain = Record<string, unknown>;
 
@@ -101,9 +103,6 @@ const coversEveryField = (ability: unknown, action: string, names: string[]): bo
   return names.every((name) => named.has(name));
 };
 
-const isPlainQuery = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 /** Whether any rule for `action` names the fields it covers (one without a list covers every field). */
 const hasFieldList = (ability: unknown, action: string): boolean => {
   const rules = (ability as { rulesFor: (a: string, s: string) => AbilityRule[] }).rulesFor(
@@ -132,9 +131,9 @@ const userSecurityService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   /** The user the check let through, for the others to read the address and flags of */
   const userOf = async (documentId: string): Promise<Plain> => {
-    const user = (await strapi.documents(USER_UID as UID.ContentType).findFirst({
+    const user = await documentsOf<PluginDocuments>(strapi, USER_UID).findFirst({
       filters: { documentId },
-    } as never)) as Plain | null;
+    });
 
     if (!user) {
       throw new errors.NotFoundError('User not found');
@@ -147,7 +146,7 @@ const userSecurityService = ({ strapi }: { strapi: Core.Strapi }) => {
     const uid = `plugin::${PLUGIN_ID}.${singularNameOf('passkey')}`;
 
     // Without the passkey plugin there is no such table, and so no passkeys
-    if (!(strapi.contentTypes as unknown as Plain)[uid]) {
+    if (!contentTypesOf<Plain>(strapi)[uid]) {
       return 0;
     }
 
@@ -173,9 +172,7 @@ const userSecurityService = ({ strapi }: { strapi: Core.Strapi }) => {
      */
     async authorize(ability: unknown, access: SecurityAccess, documentId: string): Promise<void> {
       const action = SECURITY_ACTIONS[access];
-      const model = (strapi.contentTypes as unknown as Record<string, Struct.ContentTypeSchema>)[
-        USER_UID
-      ];
+      const model = contentTypesOf<Record<string, Struct.ContentTypeSchema>>(strapi)[USER_UID];
       // `model` is not there only when the type is not (the permissions manager refuses first)
       const names = model ? contentTypesUtils.getVisibleAttributes(model) : [];
       const manager = (given: unknown) =>
@@ -205,12 +202,12 @@ const userSecurityService = ({ strapi }: { strapi: Core.Strapi }) => {
         const narrowing = [
           ...new Map(
             perField
-              .filter((one) => isPlainQuery(one) && Object.keys(one).length > 0)
+              .filter((one) => isPlain(one) && Object.keys(one).length > 0)
               .map((one) => [JSON.stringify(one), one])
           ).values(),
         ];
 
-        if (!perField.every(isPlainQuery)) {
+        if (!perField.every(isPlain)) {
           query = undefined;
         } else {
           query = narrowing.length > 0 ? { $and: narrowing } : {};
@@ -228,10 +225,10 @@ const userSecurityService = ({ strapi }: { strapi: Core.Strapi }) => {
         );
       }
 
-      const found = await strapi.documents(USER_UID as UID.ContentType).findFirst({
+      const found = await documentsOf<PluginDocuments>(strapi, USER_UID).findFirst({
         filters: { $and: [{ documentId }, query] },
         fields: ['documentId'],
-      } as never);
+      });
 
       if (!found) {
         throw new errors.NotFoundError('User not found');

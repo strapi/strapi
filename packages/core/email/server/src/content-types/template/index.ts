@@ -1,6 +1,6 @@
 export default {
   schema: {
-    collectionName: 'email_templates',
+    collectionName: 'strapi_email_templates',
     info: {
       singularName: 'template',
       pluralName: 'templates',
@@ -20,10 +20,10 @@ export default {
         type: 'string',
         required: true,
       },
+      // i18n replaces `locale` on every content type with an optional string, so `required` and
+      // `default` would never apply here. The templates service always writes a locale.
       locale: {
         type: 'string',
-        required: true,
-        default: 'en',
       },
       subject: {
         type: 'string',

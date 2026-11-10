@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type Koa from 'koa';
-import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID, PROFILE_UID, USER_UID } from '../../constants';
 import meController from '../me';
+import { createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 
 const makeCore = (name: string) => ({
   validateQuery: vi.fn(async () => {}),
@@ -70,17 +70,17 @@ const setup = (strictParams: unknown = undefined) => {
   const service = vi.fn((name: string) => (name === 'user' ? userService : profileService));
   const plugin = vi.fn(() => ({ service }));
   const controller = vi.fn((uid: string) => (uid === USER_UID ? users : profiles));
-  const strapi = {
+  const strapi = fakeStrapi({
     plugin,
     controller,
     contentAPI,
     contentType: vi.fn(() => PROFILE_SCHEMA),
     // Runs the callback as the real one does: a throw inside it rejects the whole write
-    db: { transaction: vi.fn(async (callback: () => Promise<unknown>) => callback()) },
+    db: { transaction: createTransaction().transaction },
     config: {
       get: vi.fn((key: string) => (key === 'api.rest.strictParams' ? strictParams : undefined)),
     },
-  } as unknown as Core.Strapi;
+  });
 
   const me = meController({ strapi });
 

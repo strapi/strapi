@@ -3,8 +3,7 @@ import type { BetterAuthOptions } from 'better-auth';
 
 import { strapiAdapter } from '../adapter';
 import { transformFilters } from '../transformers/filters';
-
-type Callback = (...args: unknown[]) => unknown;
+import { createTransaction } from '../../../../__tests__/utils/fake-strapi';
 
 /**
  * Better Auth only knows `user`, `session`, `account` and `verification` out of the box. The other
@@ -109,7 +108,7 @@ describe('strapiAdapter', () => {
       getModel: vi.fn(() => ({ attributes: anyAttribute })),
       config: { get: vi.fn(() => false) },
       db: {
-        transaction: vi.fn(async (work: Callback) => work({})),
+        transaction: createTransaction().transaction,
         query: vi.fn(() => db),
         queryBuilder: vi.fn(() => queryBuilder),
       },
@@ -690,6 +689,38 @@ describe('strapiAdapter', () => {
       expect(
         await adapter.consumeOne({ model: 'verification', where: [{ field: 'id', value: 'v1' }] })
       ).toBeNull();
+    });
+
+    it('returns null when the database refuses the DELETE because the row changed since it was read', async () => {
+      // MariaDB with snapshot isolation: error 1020 instead of a count of 0
+      db.findOne.mockResolvedValue(verification);
+      db.deleteMany.mockRejectedValue(
+        Object.assign(new Error('Record has changed'), { errno: 1020 })
+      );
+
+      expect(
+        await adapter.consumeOne({ model: 'verification', where: [{ field: 'id', value: 'v1' }] })
+      ).toBeNull();
+    });
+
+    it('returns null for the driver code of that error when it carries no number', async () => {
+      db.findOne.mockResolvedValue(verification);
+      db.deleteMany.mockRejectedValue(
+        Object.assign(new Error('Record has changed'), { code: 'ER_CHECKREAD' })
+      );
+
+      expect(
+        await adapter.consumeOne({ model: 'verification', where: [{ field: 'id', value: 'v1' }] })
+      ).toBeNull();
+    });
+
+    it('lets any other database error out', async () => {
+      db.findOne.mockResolvedValue(verification);
+      db.deleteMany.mockRejectedValue(Object.assign(new Error('disk full'), { errno: 1114 }));
+
+      await expect(
+        adapter.consumeOne({ model: 'verification', where: [{ field: 'id', value: 'v1' }] })
+      ).rejects.toThrow('disk full');
     });
 
     it('refuses the user model and an empty where', async () => {

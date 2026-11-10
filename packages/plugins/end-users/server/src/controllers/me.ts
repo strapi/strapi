@@ -6,6 +6,7 @@ import { PER_USER_CACHE_CONTROL, PLUGIN_ID, PROFILE_UID, USER_UID } from '../con
 import type profileService from '../services/profile';
 import type userService from '../services/user';
 import { createUsersCompat, isUsersCompat } from '../compat/users-controller';
+import { validateProfileBody } from '../validation/me';
 
 /**
  * What the core controllers of the user type give: the query and input checks and the output
@@ -20,9 +21,6 @@ interface CoreController {
   sanitizeOutput(data: unknown, ctx: Koa.Context): Promise<unknown>;
   transformResponse(data: unknown, meta?: unknown): unknown;
 }
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * `GET /api/users/me`, `GET|PUT /api/users/me/profile`: the signed-in user and their own profile,
@@ -142,12 +140,8 @@ const meController = ({ strapi }: { strapi: Core.Strapi }) => {
       await contentAPI.validate.query(ctx.query, schema, options);
 
       const query = await contentAPI.sanitize.query(ctx.query, schema, options);
-      const body = (ctx.request as { body?: unknown }).body;
-      const data = isPlain(body) ? body.data : undefined;
-
-      if (!isPlain(data)) {
-        throw new errors.ValidationError('Missing "data" payload in the request body');
-      }
+      const body = await validateProfileBody((ctx.request as { body?: unknown }).body);
+      const data = body.data as Record<string, unknown>;
 
       // The caller's own profile, which the rules of the update must let them write: found before
       // the body is held to the update's fields, so a 400 never tells who has a profile

@@ -2,6 +2,7 @@ import type * as TS from 'typescript';
 
 import type { CodeFinding } from '../../../../shared/contracts/migration';
 import { UP_CONFIG_MAP } from '../../compat/config-map';
+import { isPlain } from '../../utils/is-plain';
 
 type Typescript = typeof TS;
 
@@ -155,9 +156,6 @@ const LIVE_DEFAULT_KEYS = new Set([
   'jwtManagement',
 ]);
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 /** Flat dotted keys; recursion stops at the keys the map knows */
 const flattenLive = (config: Record<string, unknown>): Entries => {
   const entries: Entries = new Map();
@@ -167,7 +165,7 @@ const flattenLive = (config: Record<string, unknown>): Entries => {
       const path = prefix ? `${prefix}.${key}` : key;
       const known = Object.hasOwn(UP_CONFIG_MAP, path) && path !== 'jwt';
 
-      if (isPlainObject(item) && !known) {
+      if (isPlain(item) && !known) {
         walk(item, path);
       } else if (typeof item === 'function') {
         entries.set(path, { text: '', value: item, line: null, origin: 'live' });

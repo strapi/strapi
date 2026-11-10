@@ -8,7 +8,7 @@ import { createRequest } from 'api-tests/request';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
-import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
+import { clearSentEmails } from '../utils/email-capture-provider';
 import { makeLegacySecret, mintOldRefreshToken } from '../utils/legacy-tokens';
 import {
   ENGINE_UIDS,
@@ -19,6 +19,7 @@ import {
   resetRoles,
 } from '../utils/permissions';
 import { resetDatabase } from '../utils/reset-database';
+import { emailsAfter } from '../utils/wait';
 
 const LEGACY_ROUTE = '/api/end-users-test/legacy';
 const COOKIE = 'strapi_up_refresh';
@@ -325,16 +326,9 @@ describe('end-users compat: refresh, logout and sessions', () => {
         (await rq.post('/api/auth/forgot-password', { body: { email: user.email } })).status
       ).toBe(200);
 
-      const deadline = Date.now() + 3000;
-
-      while (sentEmails().length < 1 && Date.now() < deadline) {
-        // eslint-disable-next-line no-await-in-loop
-        await new Promise((resolve) => {
-          setTimeout(resolve, 20);
-        });
-      }
-
-      const link = new URL(sentEmails()[0].text.match(/https?:\/\/\S+/)?.[0] as string);
+      const link = new URL(
+        (await emailsAfter(1, 3000))[0].text.match(/https?:\/\/\S+/)?.[0] as string
+      );
       const reset = await rq.post('/api/auth/reset-password', {
         body: {
           code: link.searchParams.get('code'),

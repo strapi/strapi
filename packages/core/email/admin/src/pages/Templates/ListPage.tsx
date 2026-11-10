@@ -105,10 +105,10 @@ export const ListPage = () => {
                     <Typography textColor="neutral800">{template.locales.join(', ')}</Typography>
                   </Td>
                   <Td>
-                    {template.customised ? (
+                    {template.customized ? (
                       <Badge>
                         {formatMessage({
-                          id: 'email.Templates.list.customised',
+                          id: 'email.Templates.list.customized',
                           defaultMessage: 'Customized',
                         })}
                       </Badge>

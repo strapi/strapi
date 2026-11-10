@@ -60,46 +60,16 @@ const basePluginsConfig = ({
   },
 });
 
-/**
- * The migration end-to-end run (`end-users-frontend/playwright.migration.config.ts`) starts this
- * application twice on one database: first as a project that still uses Users & Permissions
- * (`seed`), then migrated (`migrate`). Left unset, which is every other start, nothing changes.
- */
+type Harness = typeof import('../e2e-migration/harness');
+
 const pluginsConfig = (params: Core.Config.Shared.ConfigParams): Core.Config.Plugin => {
   const config = basePluginsConfig(params);
-  const stage = params.env('END_USERS_E2E_MIGRATION');
-  const endUsers = config['end-users'];
 
-  if (stage === 'seed') {
-    return {
-      ...config,
-      'end-users': { ...endUsers, enabled: false },
-      // The plugin is not an installed dependency of the example: it is resolved from the workspace
-      'users-permissions': {
-        enabled: true,
-        resolve: require.resolve('@strapi/plugin-users-permissions/package.json'),
-        // Given, or the plugin writes a secret of its own to `.env`
-        config: { jwtSecret: params.env('JWT_SECRET') },
-      },
-    };
-  }
-
-  if (stage === 'migrate') {
-    return {
-      ...config,
-      'end-users': {
-        ...endUsers,
-        config: {
-          ...endUsers.config,
-          compat: { usersPermissions: true },
-          migration: { fromUsersPermissions: true },
-        },
-      },
-      'users-permissions': { enabled: false },
-    };
-  }
-
-  return config;
+  // The migration test harness is loaded only when a run asks for it, so this file works when it
+  // is copied without the `e2e-migration` folder
+  return params.env('END_USERS_E2E_MIGRATION')
+    ? (require('../e2e-migration/harness') as Harness).withMigrationHarness(config, params)
+    : config;
 };
 
 export default pluginsConfig;

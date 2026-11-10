@@ -1,11 +1,9 @@
 import type { Modules, UID } from '@strapi/types';
 
 import { USER_UID } from '../constants';
+import { isPlain } from '../utils/is-plain';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * The relation attributes of `uid` whose target is `target`, in the schema's order, of any relation

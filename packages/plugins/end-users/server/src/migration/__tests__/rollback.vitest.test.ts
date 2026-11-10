@@ -138,7 +138,6 @@ const byUid: Record<string, unknown> = {
 /** A project that migrated: tables under the names `renamed` says, three users, one admin role */
 const project = async (renamed: boolean, permissions: Row[]) => {
   // knex is Strapi's own database layer (hoisted); the test runs it on an in-memory SQLite
-  // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
   const knex = (await import('knex')).default({
     client: 'better-sqlite3',
     connection: { filename: ':memory:' },

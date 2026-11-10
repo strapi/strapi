@@ -3,6 +3,8 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { PROFILE_UID } from '../constants';
+import { isPlain } from '../utils/is-plain';
+import { documentsOf } from '../utils/typed-strapi';
 
 type Plain = Record<string, unknown>;
 
@@ -17,15 +19,12 @@ interface Documents {
   update(params: Plain): Promise<unknown>;
 }
 
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 /**
  * The core service of the profile type, with the two methods the `me/profile` routes use: the
  * caller's own profile, found by who the caller is and never by an id the request sent.
  */
 export default factories.createCoreService(PROFILE_UID, ({ strapi }: { strapi: Core.Strapi }) => {
-  const documents = () => strapi.documents(PROFILE_UID) as unknown as Documents;
+  const documents = () => documentsOf<Documents>(strapi, PROFILE_UID);
 
   /**
    * An empty value would be dropped from the filter, and the filter would then match the first

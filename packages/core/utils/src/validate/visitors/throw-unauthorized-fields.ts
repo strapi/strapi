@@ -8,6 +8,8 @@ import { throwInvalidKey } from '../utils';
  * Refuses the keys the caller's field rules deny, with a `ValidationError` naming the key:
  * the counterpart of `removeUnauthorizedFields`, with the same arguments. `sanitize` drops them
  * where validation is not asked for.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export default (
   checker: PermissionChecker,

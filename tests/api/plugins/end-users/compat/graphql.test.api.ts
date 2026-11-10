@@ -9,7 +9,7 @@ import { createRequest } from 'api-tests/request';
 
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
-import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
+import { clearSentEmails } from '../utils/email-capture-provider';
 import {
   ENGINE_UIDS,
   PROFILE_UID,
@@ -21,6 +21,7 @@ import {
   setRolePermissions,
   unconditioned,
 } from '../utils/permissions';
+import { emailsAfter } from '../utils/wait';
 import { DEFAULT_AUTHENTICATED_PERMISSIONS } from '../../../../../packages/plugins/end-users/server/src/bootstrap';
 
 const USER_UID = 'plugin::end-users.user';
@@ -42,20 +43,6 @@ const LOGIN = `mutation ($identifier: String!, $password: String!) {
 
 const signIn = (identifier: string, password: string = PASSWORD) =>
   gql(LOGIN, { identifier, password });
-
-/** The emails sent so far, once `count` of them have been: they leave after the response. */
-const emailsAfter = async (count: number) => {
-  const deadline = Date.now() + 3000;
-
-  while (sentEmails().length < count && Date.now() < deadline) {
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise((resolve) => {
-      setTimeout(resolve, 20);
-    });
-  }
-
-  return sentEmails();
-};
 
 const linkOf = (email: { text: string }) =>
   new URL(email.text.match(/https?:\/\/\S+/)?.[0] as string);

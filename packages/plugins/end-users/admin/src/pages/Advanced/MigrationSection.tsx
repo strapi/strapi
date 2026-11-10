@@ -222,10 +222,8 @@ const MigrationBody = ({ status }: { status: MigrationStatus }) => {
                   'Estimated time',
                   format(
                     'migration.check.minutes',
-                    '{count, plural, one {# minute} other {# minutes}}',
-                    {
-                      count: report.estimate.minutes,
-                    }
+                    'At least {count, plural, one {# minute} other {# minutes}}',
+                    { count: report.estimate.minutes }
                   )
                 )}
             </ReadOnlyList>

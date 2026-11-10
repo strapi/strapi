@@ -3,6 +3,7 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { USER_UID } from '../constants';
+import { documentsOf } from '../utils/typed-strapi';
 
 /** What a `me` route passes on of the request's query: the parts that shape one entry. */
 export interface MeQuery {
@@ -32,7 +33,7 @@ export default factories.createCoreService(USER_UID, ({ strapi }: { strapi: Core
 
     const { fields, populate } = query;
 
-    return (strapi.documents(USER_UID) as unknown as Documents).findOne({
+    return documentsOf<Documents>(strapi, USER_UID).findOne({
       documentId: userDocumentId,
       ...(fields !== undefined && { fields }),
       ...(populate !== undefined && { populate }),

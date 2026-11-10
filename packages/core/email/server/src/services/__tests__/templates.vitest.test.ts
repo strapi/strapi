@@ -181,13 +181,13 @@ describe('Templates service', () => {
           key: 'end-users.reset-password',
           description: 'Reset password',
           locales: ['en', 'fr'],
-          customised: true,
+          customized: true,
         },
       ]);
 
       expect(await service.list()).toEqual([
         expect.objectContaining({ key: 'end-users.reset-password' }),
-        { key: 'other.welcome', description: '', locales: ['en'], customised: false },
+        { key: 'other.welcome', description: '', locales: ['en'], customized: false },
       ]);
     });
   });

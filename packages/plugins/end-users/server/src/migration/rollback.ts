@@ -1,5 +1,4 @@
-// knex is Strapi's own database layer (hoisted); only its types are used here
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 import type { Knex } from 'knex';
 import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';
@@ -12,6 +11,7 @@ import type { MigrationRecord } from './record';
 import { columnsOf, dropTable, hasTable, qualified, renameBack, tableOf } from './schema-ops';
 import type { DbClient } from './snapshot';
 import { RENAMED, upJoinTableName, upLinkColumn } from './tables';
+import { contentTypesOf } from '../utils/typed-strapi';
 
 const UP = 'plugin::users-permissions';
 const EU = `plugin::${PLUGIN_ID}`;
@@ -243,9 +243,8 @@ const OWN_COLUMNS = new Set([
 /** The profile's scalar attributes, as the column each is stored in */
 const profileScalars = (strapi: Core.Strapi): string[] => {
   const attributes =
-    (strapi.contentTypes as unknown as Record<string, { attributes?: Record<string, any> }>)[
-      PROFILE_UID
-    ]?.attributes ?? {};
+    contentTypesOf<Record<string, { attributes?: Record<string, any> }>>(strapi)[PROFILE_UID]
+      ?.attributes ?? {};
 
   return Object.entries(attributes)
     .filter(([name, attribute]) => !NON_SCALAR.has(attribute.type) && name !== 'user')
@@ -328,7 +327,6 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
 
   // Users Permissions' username is required: one without gets the start of the address and the id
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     const page = (await users().whereNull('username').limit(PAGE).select('id', 'email')) as Row[];
 
     if (page.length === 0) {
@@ -336,7 +334,6 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
     }
 
     for (const { id, email } of page) {
-      // eslint-disable-next-line no-await-in-loop
       await users()
         .where({ id })
         .update({ username: `${String(email ?? '').split('@')[0] || 'user'}_${id}` });
@@ -362,7 +359,6 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
         .whereRaw('?? <> ??', ['o.id', 'u.id']);
 
     for (;;) {
-      // eslint-disable-next-line no-await-in-loop
       const ids = (
         (await candidates().whereNotExists(holders()).limit(PAGE).select('u.id')) as Row[]
       ).map((row) => row.id as number);
@@ -371,7 +367,6 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
         break;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       await users()
         .whereIn('id', ids)
         .update({ username: trx.raw('??', ['display_username']) });
@@ -459,7 +454,6 @@ const restoreRoles = async (
   const hasOrder = (await columnsOf(trx, db, linkName)).includes(order);
 
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     const users = (await link()
       .select(userKey)
       .groupBy(userKey)
@@ -470,7 +464,6 @@ const restoreRoles = async (
       break;
     }
 
-    // eslint-disable-next-line no-await-in-loop
     const rows = (await link()
       .whereIn(
         userKey,
@@ -494,7 +487,6 @@ const restoreRoles = async (
       .filter((row) => first.get(row[userKey]) !== row)
       .map((row) => row.id as number);
 
-    // eslint-disable-next-line no-await-in-loop
     await link().whereIn('id', extra).del();
     lost.roleLinks += extra.length;
   }
@@ -512,7 +504,6 @@ const restoreRoles = async (
     const type = upRoleType(role.name ?? '', taken);
 
     taken.add(type);
-    // eslint-disable-next-line no-await-in-loop
     await tableOf(trx, db, roleTable).where({ id: role.id }).update({ type });
   }
 };
@@ -609,9 +600,7 @@ const restoreMedia = async ({ db, trx }: Run) => {
     ]);
 
   for (const table of tables) {
-    // eslint-disable-next-line no-await-in-loop
     if (await hasTable(trx, db, table)) {
-      // eslint-disable-next-line no-await-in-loop
       await tableOf(trx, db, table)
         .where({ related_type: PROFILE_UID })
         .whereExists(ofProfile('e', table).select(trx.raw('1')))
@@ -626,14 +615,11 @@ const restoreMedia = async ({ db, trx }: Run) => {
 /** The staged tables the move did not copy go back to the names they had; rows of roles that are gone go */
 const restoreStaged = async ({ db, trx, client, record }: Run) => {
   for (const [staged, original] of Object.entries(record.staged)) {
-    // eslint-disable-next-line no-await-in-loop
     if (await hasTable(trx, db, staged)) {
       if (record.carried.copied.includes(staged)) {
         // Copied into the profile's table, which the rollback has just read back: nothing to keep
-        // eslint-disable-next-line no-await-in-loop
         await dropTable(trx, db, client, staged);
       } else {
-        // eslint-disable-next-line no-await-in-loop
         await renameBack(trx, db, client, staged, original);
       }
     }
@@ -692,16 +678,13 @@ const restoreAdmin = async ({ strapi, db, trx, lost }: Run) => {
       continue;
     }
 
-    // eslint-disable-next-line no-await-in-loop
     const existing = await query.findOne({
       where: { action: target, role: row.role!.id, subject: row.subject },
     });
 
     if (existing) {
-      // eslint-disable-next-line no-await-in-loop
       await query.delete({ where: { id: row.id } });
     } else {
-      // eslint-disable-next-line no-await-in-loop
       await query.update({ where: { id: row.id }, data: { action: target } });
     }
   }
@@ -714,7 +697,6 @@ const restoreAdmin = async ({ strapi, db, trx, lost }: Run) => {
   for (const row of users.filter((entry) => entry.role)) {
     const fields = fieldsOf(row)?.map((field) => RENAMED_FIELDS[field] ?? field);
 
-    // eslint-disable-next-line no-await-in-loop
     await query.update({
       where: { id: row.id },
       data: {
@@ -731,13 +713,11 @@ const restoreAdmin = async ({ strapi, db, trx, lost }: Run) => {
   })) as PermissionRow[];
 
   for (const row of profiles.filter((entry) => entry.role)) {
-    // eslint-disable-next-line no-await-in-loop
     const into = (await query.findOne({
       where: { action: row.action, subject: UP_USER, role: row.role!.id },
     })) as PermissionRow | null;
 
     if (!into) {
-      // eslint-disable-next-line no-await-in-loop
       await query.update({ where: { id: row.id }, data: { subject: UP_USER } });
       continue;
     }
@@ -757,7 +737,6 @@ const restoreAdmin = async ({ strapi, db, trx, lost }: Run) => {
       const union = [...new Set([...have, ...add])];
 
       if (union.length > have.length) {
-        // eslint-disable-next-line no-await-in-loop
         await query.update({
           where: { id: into.id },
           data: { properties: { ...into.properties, fields: union } },
@@ -765,7 +744,6 @@ const restoreAdmin = async ({ strapi, db, trx, lost }: Run) => {
       }
     }
 
-    // eslint-disable-next-line no-await-in-loop
     await query.delete({ where: { id: row.id } });
   }
 
@@ -838,16 +816,13 @@ export const runRollback: MigrationStepFn = async (trx, db, ctx: MigrationContex
 
   // The three tables the move renamed take their names back, so the keys that point at them follow
   for (const [up, eu] of Object.entries(RENAMED)) {
-    // eslint-disable-next-line no-await-in-loop
     await renameBack(trx, db, run.client, eu, up, up === UP_USERS ? unwantedName : undefined);
   }
 
   // What the profile holds that Users & Permissions' user had its own tables for
   for (const copy of [...linkCopies(db, run.copied), componentCopy(db, run.copied)]) {
     if (copy && (await hasTable(trx, db, copy.from))) {
-      // eslint-disable-next-line no-await-in-loop
       await createUpTable(run, copy);
-      // eslint-disable-next-line no-await-in-loop
       await fillUpTable(run, copy);
     }
   }

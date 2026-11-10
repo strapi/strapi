@@ -11,6 +11,8 @@ import { throwInvalidKey } from '../utils';
  * `isRestricted` answers for a target uid, reached at the visited key's `path` (a type's drafts
  * restrict where the rows a sort joins from link to them); `createRelationRestriction` makes one
  * that asks the checker once per uid for the whole request.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export default (isRestricted: (uid: string, path?: Path) => boolean): Visitor =>
   ({ key, attribute, path }) => {

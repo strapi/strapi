@@ -4,11 +4,9 @@ import type { Core } from '@strapi/types';
 import { PLUGIN_ID } from '../../constants';
 import type userSecurityService from '../../services/user-security';
 import type { SecurityAccess } from '../../services/user-security';
+import { isPlain } from '../../utils/is-plain';
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * `/end-users/users/:documentId/security` and its actions: the Content Manager's Security panel of
@@ -20,8 +18,8 @@ const isPlain = (value: unknown): value is Plain =>
  * anything. The check is the service's `authorize`, run first on every route, and it also limits
  * which users the admin reaches to the ones they may read.
  *
- * Every change tells `strapi.eventHub` once it has been made, so a refused one is never reported
- *: `end-users.user.<change>`, with the admin who did it and the user's `documentId`.
+ * Every change tells `strapi.eventHub` once it has been made, so a refused one is never reported:
+ * `end-users.user.<change>`, with the admin who did it and the user's `documentId`.
  */
 const userSecurityController = ({ strapi }: { strapi: Core.Strapi }) => {
   const security = () =>

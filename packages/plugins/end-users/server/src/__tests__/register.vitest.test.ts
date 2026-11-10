@@ -18,6 +18,7 @@ import profile from '../content-types/profile';
 import { normalizeEmailMiddleware } from '../document-middlewares/normalize-email';
 import register from '../register';
 import { engineOwnedUserFieldsValidator } from '../utils/engine-owned-user-fields';
+import { createTransaction } from './utils/fake-strapi';
 
 type Table = { name: string; fields: Record<string, { type: string }> };
 
@@ -48,7 +49,8 @@ const setup = ({
   const disable = vi.fn();
   const disableQueries = vi.fn();
   const shadowCRUD = vi.fn(() => ({ disable, disableQueries }));
-  const graphqlService = vi.fn(() => ({ shadowCRUD }));
+  const relaxRequiredOutput = vi.fn();
+  const graphqlService = vi.fn(() => ({ shadowCRUD, relaxRequiredOutput }));
   const plugin = vi.fn((name: string) => {
     if (name !== 'graphql') {
       return { service };
@@ -114,6 +116,7 @@ const setup = ({
     disable,
     disableQueries,
     graphqlService,
+    relaxRequiredOutput,
   };
 };
 
@@ -254,6 +257,14 @@ describe('register', () => {
       ]);
     });
 
+    it('asks the GraphQL plugin for nullable required output fields', () => {
+      const { strapi, relaxRequiredOutput } = setup({ tables });
+
+      register({ strapi });
+
+      expect(relaxRequiredOutput).toHaveBeenCalledTimes(1);
+    });
+
     it('does nothing when the GraphQL plugin is not installed', () => {
       const { strapi, shadowCRUD, graphqlService } = setup({ tables, graphql: false });
 
@@ -317,7 +328,7 @@ describe('register', () => {
       documents: Object.assign(() => ({ create: vi.fn(async () => ({})) }), { use }),
       db: Object.assign((strapi as unknown as { db: object }).db, {
         query: () => ({ findOne: async () => null }),
-        transaction: async (callback: () => Promise<unknown>) => callback(),
+        transaction: createTransaction().transaction,
       }),
     });
 

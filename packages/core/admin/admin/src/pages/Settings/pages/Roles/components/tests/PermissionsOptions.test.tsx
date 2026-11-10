@@ -5,6 +5,29 @@ import { act, fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { Permissions, type PermissionsAPI, type PermissionsLayout } from '../Permissions';
 
+// The empty state reads the server's auto-reload flag (the test providers always turn it on) and
+// whether the admin can read the Content-Type Builder
+let mockAutoReload = true;
+let mockCanReadBuilder = true;
+
+jest.mock('../../../../../../hooks/useRBAC', () => ({
+  useRBAC: () => ({
+    allowedActions: { canRead: mockCanReadBuilder },
+    isLoading: false,
+    permissions: [],
+  }),
+}));
+
+jest.mock('../../../../../../features/AppInfo', () => {
+  const actual = jest.requireActual('../../../../../../features/AppInfo');
+
+  return {
+    ...actual,
+    useAppInfo: (name: string, selector: (state: Record<string, unknown>) => unknown) =>
+      selector({ autoReload: mockAutoReload }),
+  };
+});
+
 import layout from './test-data.json';
 
 const ADDRESS = 'api::address.address';
@@ -877,14 +900,18 @@ describe('Permissions options', () => {
     const expectNoSearch = (kind: SearchKind) =>
       expect(screen.queryByRole('button', { name: searchLabel(kind) })).not.toBeInTheDocument();
 
+    beforeEach(() => {
+      mockAutoReload = true;
+      mockCanReadBuilder = true;
+    });
+
     it('says there are no collection types or single types, and links to the Content-Type Builder', async () => {
       const { user } = render(<Permissions layout={emptyLayout} searchable />);
 
       expect(screen.getByText('No collection types yet')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Open the Content-Type Builder' })).toHaveAttribute(
-        'href',
-        '/plugins/content-type-builder'
-      );
+      expect(
+        await screen.findByRole('link', { name: 'Open the Content-Type Builder' })
+      ).toHaveAttribute('href', '/plugins/content-type-builder');
       // Nothing to search or to tick
       expectNoSearch('content-types');
       expect(
@@ -896,9 +923,31 @@ describe('Permissions options', () => {
       expect(screen.getByText('No single types yet')).toBeInTheDocument();
       expect(screen.queryByText('No collection types yet')).not.toBeInTheDocument();
       expect(
-        screen.getByRole('link', { name: 'Open the Content-Type Builder' })
+        await screen.findByRole('link', { name: 'Open the Content-Type Builder' })
       ).toBeInTheDocument();
       expectNoSearch('content-types');
+    });
+
+    it('leaves the link out for an admin who cannot read the Content-Type Builder', () => {
+      mockCanReadBuilder = false;
+
+      render(<Permissions layout={emptyLayout} searchable />);
+
+      expect(screen.getByText('No collection types yet')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('link', { name: 'Open the Content-Type Builder' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('leaves the link out when the server does not auto-reload, even for an admin who can read the builder', () => {
+      mockAutoReload = false;
+
+      render(<Permissions layout={emptyLayout} searchable />);
+
+      expect(screen.getByText('No collection types yet')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('link', { name: 'Open the Content-Type Builder' })
+      ).not.toBeInTheDocument();
     });
 
     it('says there is nothing to set in a plugins or settings tab with no action', async () => {

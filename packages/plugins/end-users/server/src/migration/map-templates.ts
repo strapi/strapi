@@ -56,7 +56,7 @@ const SEEDED: Record<UpEmailKey, { object: string; message: string }> = {
 
 const SEEDED_SENDER = { name: 'Administration Panel', email: 'no-reply@strapi.io' };
 
-const normalise = (value: string) => value.replace(/\s+/g, ' ').trim();
+const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
 
 const TAG = '<%[=-]?\\s*';
 const END = '\\s*%>';
@@ -71,7 +71,7 @@ const rewrite = (value: string): { value: string; left: string[] } => {
     .replace(LINK, '{{ url }}')
     .replace(EMAIL, '{{ user.email }}')
     .replace(USERNAME, '{{ user.name }}');
-  const left = [...mapped.matchAll(ANY_TAG)].map((match) => normalise(match[1]));
+  const left = [...mapped.matchAll(ANY_TAG)].map((match) => normalize(match[1]));
 
   return { value: mapped, left };
 };
@@ -122,9 +122,9 @@ export const translateUpTemplate = (
     (from.email !== undefined && from.email !== SEEDED_SENDER.email);
 
   if (
-    !normalise(message) ||
-    (normalise(message) === normalise(seeded.message) &&
-      normalise(subject) === normalise(seeded.object))
+    !normalize(message) ||
+    (normalize(message) === normalize(seeded.message) &&
+      normalize(subject) === normalize(seeded.object))
   ) {
     return { kind: 'default', key, sender };
   }

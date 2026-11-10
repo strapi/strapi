@@ -5,6 +5,7 @@ import { takePendingProfile } from '../utils/pending-profile';
 import { readProviderClaims } from '../utils/provider-claims';
 import { asProfileLifecycle } from '../utils/profile-lifecycle';
 import type providerService from '../services/provider';
+import { documentsOf, type PluginDocuments } from '../utils/typed-strapi';
 
 type Plain = Record<string, unknown>;
 
@@ -61,9 +62,9 @@ export const createProfileMiddleware =
       if (documentId) {
         // `user` last: nothing a sign-up sent can name another owner
         await asProfileLifecycle(() =>
-          strapi.documents(PROFILE_UID).create({
+          documentsOf<PluginDocuments>(strapi, PROFILE_UID).create({
             data: { ...fields, user: { connect: [documentId] } },
-          } as never)
+          })
         );
       }
 

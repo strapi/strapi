@@ -807,6 +807,54 @@ describe('end-users: admin API', () => {
     });
   });
 
+  describe('a save larger than one chunk', () => {
+    const rowsOf = (count: number, prefix: string) =>
+      Array.from({ length: count }, (_, index) => row(`api::bulk.bulk.${prefix}${index}`));
+
+    const stored = (documentId: string) =>
+      strapi.db.query(PERMISSION_UID).count({ where: { role: { documentId } } });
+
+    it('writes every row of a diff that spans three chunks', async () => {
+      const role = await roles.create({ name: 'Bulk save', permissions: [row(ME)] });
+
+      await permissions.applyDiff(role.documentId, {
+        create: rowsOf(1250, 'ok'),
+        update: [],
+        delete: [],
+      });
+
+      expect(await stored(role.documentId)).toBe(1251);
+    });
+
+    it('writes none of them when a row of the last chunk makes a duplicate', async () => {
+      const role = await roles.create({ name: 'Bulk refused', permissions: [row(ME)] });
+      // Nothing in the diff repeats itself: the last row repeats what the role already has, which is
+      // only found once the earlier chunks are written
+      const create = [...rowsOf(1249, 'late'), row(ME)];
+
+      await expect(
+        permissions.applyDiff(role.documentId, { create, update: [], delete: [] })
+      ).rejects.toThrow();
+
+      expect(await stored(role.documentId)).toBe(1);
+    });
+
+    it('exports a role with more than a thousand rows whole', async () => {
+      const role = await roles.create({ name: 'Bulk export', permissions: [row(ME)] });
+
+      await permissions.applyDiff(role.documentId, {
+        create: rowsOf(1100, 'file'),
+        update: [],
+        delete: [],
+      });
+
+      const exported = await rqAdmin.get(`/end-users/roles/${role.documentId}/export`);
+
+      expect(exported.status).toBe(200);
+      expect(exported.body.permissions).toHaveLength(1101);
+    });
+  });
+
   describe('export and import', () => {
     it('round-trips a role through export and import', async () => {
       // Rows an import accepts (`checkRows`): actions this installation's routes have, fields its

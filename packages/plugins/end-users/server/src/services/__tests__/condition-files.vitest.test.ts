@@ -16,6 +16,7 @@ import type { Core, Modules } from '@strapi/types';
 import { USER_UID } from '../../constants';
 import { layoutContentTypeUids } from '../../utils/layout-content-types';
 import conditionService, { ConditionsUpdatingError } from '../condition';
+import { createTransaction } from '../../__tests__/utils/fake-strapi';
 
 /**
  * The file functions the builder writes with are spies that do what the real ones do, so a test
@@ -210,7 +211,7 @@ describe('condition files', () => {
       reload,
       db: {
         query: vi.fn(() => ({ findMany, update, findOne })),
-        transaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+        transaction: createTransaction().transaction,
       },
       log: { warn: vi.fn() },
       contentTypes: SCHEMAS,

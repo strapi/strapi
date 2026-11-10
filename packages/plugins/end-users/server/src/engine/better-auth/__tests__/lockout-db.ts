@@ -3,7 +3,6 @@
  * statement against `eu_rate_limits`, so it needs a database. SQLite in memory, through knex, with
  * the table laid out as Strapi lays out the generated rate-limit type (snake_case columns).
  */
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import knex, { type Knex } from 'knex';
 
 export interface LockoutDb {

@@ -459,7 +459,7 @@
   "migration.items.column.affected": "Affected",
   "migration.items.column.resolved": "Resolved",
   "migration.check.run": "Run the check",
-  "migration.check.minutes": "{count, plural, one {# minute} other {# minutes}}",
+  "migration.check.minutes": "At least {count, plural, one {# minute} other {# minutes}}",
   "conditions.param.set-on-create": "Set the owner on create",
   "conditions.param.set-on-create.hint": "Set the owner to the signed-in user when an entry is created.",
   "conditions.builder.choose-types-first": "Choose a content type first.",

@@ -1,45 +1,35 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Core } from '@strapi/types';
 
 import { PROFILE_UID, USER_UID } from '../../constants';
 import { setPendingProfile } from '../../utils/pending-profile';
 import { inProfileLifecycle } from '../../utils/profile-lifecycle';
 import { createProfileMiddleware } from '../create-profile';
+import { createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 
 const setup = ({ state = {} as Record<string, unknown> | null } = {}) => {
   const events: string[] = [];
-  let inTransaction = false;
-
   const marked: boolean[] = [];
   const create = vi.fn(async () => {
     marked.push(inProfileLifecycle());
-    events.push(`profile created (in transaction: ${inTransaction})`);
+    events.push(`profile created (in transaction: ${inTransaction()})`);
 
     return { documentId: 'profile-1' };
   });
   const documents = vi.fn(() => ({ create }));
-  const transaction = vi.fn(async (callback: () => Promise<unknown>) => {
-    inTransaction = true;
-
-    try {
-      return await callback();
-    } finally {
-      inTransaction = false;
-    }
-  });
+  const { transaction, inTransaction } = createTransaction();
   const warn = vi.fn();
   const profileValues = vi.fn(async () => ({}));
-  const strapi = {
+  const strapi = fakeStrapi({
     documents,
     db: { transaction },
     log: { warn },
     plugin: () => ({ service: () => ({ profileValues }) }),
     requestContext: { get: () => (state ? { state } : undefined) },
-  } as unknown as Core.Strapi;
+  });
 
   const run = async (ctx: Record<string, unknown>, user: unknown = { documentId: 'user-1' }) => {
     const next = vi.fn(async () => {
-      events.push(`user written (in transaction: ${inTransaction})`);
+      events.push(`user written (in transaction: ${inTransaction()})`);
 
       return user;
     });

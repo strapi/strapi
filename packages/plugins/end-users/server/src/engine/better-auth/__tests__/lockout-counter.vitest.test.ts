@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import knex from 'knex';
 import type { Core } from '@strapi/types';
 

@@ -10,7 +10,7 @@ export interface TemplateSummary {
   /** Locales that can be served: `en` (the defaults) plus every locale with a stored override. */
   locales: string[];
   /** True when at least one locale has a stored override. */
-  customised: boolean;
+  customized: boolean;
 }
 
 export interface TemplateDetail extends TemplateContent {

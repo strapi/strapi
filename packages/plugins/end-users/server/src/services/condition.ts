@@ -34,6 +34,8 @@ import type { ParamExtras, WriteGrant } from '../utils/builder/usage';
 import { layoutContentTypeUids, registerTimeContentTypeUids } from '../utils/layout-content-types';
 import type abilityService from './ability';
 import type providerService from './provider';
+import { isPlain } from '../utils/is-plain';
+import { documentsOf, type PluginDocuments } from '../utils/typed-strapi';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
 type ConditionSource = NonNullable<ContentApiConditionDefinition['source']>;
@@ -85,15 +87,12 @@ export interface PreviewScope {
   profileQuery: () => object;
 }
 
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 const conditionProvider = (strapi: Core.Strapi) =>
   strapi.contentAPI.permissions.providers.condition;
 
 /**
- * Where a definition came from is decided by whoever registers it, never by the definition
- *: a `source` it names is replaced. Anything that is not a definition is passed on as
+ * Where a definition came from is decided by whoever registers it, never by the definition: a
+ * `source` it names is replaced. Anything that is not a definition is passed on as
  * it is, for core to refuse.
  */
 const withSource = (definition: unknown, source: ConditionSource): unknown =>
@@ -314,13 +313,13 @@ const staleDefinition = (
 export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> => {
   const files = await conditionFiles(join(strapi.dirs.dist.src, PROJECT_CONDITIONS_DIR));
 
+  /* eslint-disable no-await-in-loop -- registered one at a time: core's registry refuses a name it holds, and the order is the files' */
   for (const file of files) {
     try {
       let registering: ContentApiConditionDefinition;
       let record: BuilderRecord | undefined;
 
       if (file.endsWith('.json')) {
-        // eslint-disable-next-line no-await-in-loop
         record = readBuilderFile(strapi, await readFile(file, 'utf8'));
 
         const compiled = compileBuilderCondition(strapi, record.condition);
@@ -334,7 +333,6 @@ export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> 
       }
 
       // One at a time: core's registry refuses a name it holds, and the order is the files'
-      // eslint-disable-next-line no-await-in-loop
       await conditionProvider(strapi).register(registering);
 
       if (record) {
@@ -354,6 +352,7 @@ export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> 
       });
     }
   }
+  /* eslint-enable no-await-in-loop */
 };
 
 /**
@@ -361,10 +360,11 @@ export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> 
  * plugin's `register()`: core's registry refuses a registration once Strapi has loaded.
  */
 export const registerConditions = async (strapi: Core.Strapi): Promise<void> => {
+  /* eslint-disable no-await-in-loop -- registered one at a time, in the order of the list, for the same reason */
   for (const definition of BUILT_IN_CONDITIONS) {
-    // eslint-disable-next-line no-await-in-loop
     await conditionProvider(strapi).register(definition);
   }
+  /* eslint-enable no-await-in-loop */
 
   await loadProjectConditions(strapi);
 };
@@ -526,35 +526,38 @@ const refuseUnreadableReads = async (
   const reads = readsOf(condition, inputs);
   const seen = new Set<string>();
 
+  /* eslint-disable no-await-in-loop -- the first refusal is the answer, so the reads are checked in order */
   for (const path of reads.paths) {
     const field = path.join('.');
 
     if (!seen.has(field)) {
       seen.add(field);
 
-      // eslint-disable-next-line no-await-in-loop
       await refuseUnreadable(
         () => scope.validateSubject({ filters: nested(path, { $notNull: true }) as object }),
         `A preview can't filter on ${field}: it needs Content Manager read access to that field of ${subject}`
       );
     }
   }
+  /* eslint-enable no-await-in-loop */
 
+  /* eslint-disable no-await-in-loop -- the first refusal is the answer, so the reads are checked in order */
   for (const attribute of reads.user) {
-    // eslint-disable-next-line no-await-in-loop
     await refuseUnreadable(
       () => scope.validateUser({ fields: [attribute] }),
       `A preview can't read the user's ${attribute}: it needs Content Manager read access to that attribute of end users`
     );
   }
+  /* eslint-enable no-await-in-loop */
 
+  /* eslint-disable no-await-in-loop -- the first refusal is the answer, so the reads are checked in order */
   for (const attribute of reads.profile) {
-    // eslint-disable-next-line no-await-in-loop
     await refuseUnreadable(
       () => scope.validateProfile({ fields: [attribute] }),
       `A preview can't read the profile's ${attribute}: it needs Content Manager read access to that attribute of profiles`
     );
   }
+  /* eslint-enable no-await-in-loop */
 };
 
 /** A 400 that names the input the refusal is about */
@@ -847,6 +850,7 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
       })) as Array<{ id: number; conditions?: unknown; role?: { id?: number } | null }>;
       const changedRoles = new Set<number>();
 
+      /* eslint-disable no-await-in-loop -- one row at a time: they share the transaction's single connection */
       for (const { id, conditions, role } of rows) {
         if (!Array.isArray(conditions)) {
           continue;
@@ -872,7 +876,6 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         if (changed) {
-          // eslint-disable-next-line no-await-in-loop
           await strapi.db
             .query(PERMISSION_UID)
             .update({ where: { id }, data: { conditions: stripped } });
@@ -882,19 +885,20 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
           }
         }
       }
+      /* eslint-enable no-await-in-loop */
 
       // As a role save does: an editor opened before this gets the 409 and can't save the old value back
+      /* eslint-disable no-await-in-loop -- one at a time: they share the transaction's single connection */
       for (const id of changedRoles) {
-        // eslint-disable-next-line no-await-in-loop
         const current = (await strapi.db
           .query(ROLE_UID)
           .findOne({ where: { id }, select: ['revision'] })) as { revision?: number | null } | null;
 
-        // eslint-disable-next-line no-await-in-loop
         await strapi.db
           .query(ROLE_UID)
           .update({ where: { id }, data: { revision: (current?.revision ?? 0) + 1 } });
       }
+      /* eslint-enable no-await-in-loop */
     });
   };
 
@@ -984,8 +988,8 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     /**
-     * Registers a condition for Content API permissions, as a plugin's: its `source` is `plugin`
-     *, whatever the definition says. Core's registry stores a validated, frozen copy,
+     * Registers a condition for Content API permissions, as a plugin's: its `source` is `plugin`,
+     * whatever the definition says. Core's registry stores a validated, frozen copy,
      * and rejects a malformed definition, a name it already holds, and any registration once Strapi
      * has loaded: a plugin calls this from an async `register()` and awaits it.
      */
@@ -1042,8 +1046,8 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
-     * How many entries of `subject` a condition keeps for a sample user, out of how many there are
-     *, with the values the admin gave its inputs. The condition is checked first, as a
+     * How many entries of `subject` a condition keeps for a sample user, out of how many there are,
+     * with the values the admin gave its inputs. The condition is checked first, as a
      * save would (`checkBuilderConditionV2`), and nothing is counted before it holds. Counts the
      * Content Manager's own way: draft versions in the default locale, which the Document Service
      * does unless told otherwise, so a document counts once.
@@ -1099,8 +1103,8 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
         user,
         uid: subject,
       });
-      const documents = strapi.documents(subject as UID.ContentType);
-      const count = (filters: object) => documents.count({ filters } as never);
+      const documents = documentsOf<PluginDocuments>(strapi, subject as UID.ContentType);
+      const count = (filters: object) => documents.count({ filters });
 
       // A condition that denies the sample user keeps nothing: there is no filter to count with
       const [total, matching] = await Promise.all([

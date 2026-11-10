@@ -10,7 +10,7 @@ import { createRequest } from 'api-tests/request';
 import { createEndUsersInstance } from '../utils/create-end-users-instance';
 import { compatConfig, seedUpUser } from '../utils/compat';
 import { createFixtureBuilder } from '../utils/fixtures';
-import { clearSentEmails, sentEmails } from '../utils/email-capture-provider';
+import { clearSentEmails } from '../utils/email-capture-provider';
 import {
   ENGINE_UIDS,
   PROFILE_UID,
@@ -23,6 +23,7 @@ import {
   row,
   setRolePermissions,
 } from '../utils/permissions';
+import { emailsAfter } from '../utils/wait';
 
 const USER_UID = 'plugin::end-users.user';
 const WRONG = 'not-the-password';
@@ -46,20 +47,6 @@ const resetState = async () => {
     methods: { emailPassword: true, username: true },
     signUp: { enabled: true, requireEmailVerification: false, registrationFields: [] },
   });
-};
-
-/** The emails sent so far, once `count` of them have been: they leave after the response. */
-const emailsAfter = async (count: number) => {
-  const deadline = Date.now() + 3000;
-
-  while (sentEmails().length < count && Date.now() < deadline) {
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise((resolve) => {
-      setTimeout(resolve, 20);
-    });
-  }
-
-  return sentEmails();
 };
 
 describe('end-users compat: sign-in', () => {
@@ -651,6 +638,92 @@ describe('end-users compat: sign-in', () => {
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ status: true });
         expect((await signIn('native@example.com', NEW_PASSWORD)).status).toBe(200);
+      });
+    });
+
+    describe('a blocked user and the reset', () => {
+      const sessionsOf = (documentId: string) =>
+        strapi.db.query('plugin::end-users.session').count({ where: { userId: documentId } });
+
+      it('gets no jwt and no session from a code asked for before the block, though the reset itself has gone through', async () => {
+        const seeded = await seedUpUser(strapi, { email: 'blocked-reset@example.com' });
+        const code = await requestCode('blocked-reset@example.com');
+
+        await strapi
+          .documents(USER_UID)
+          .update({ documentId: seeded.documentId, data: { banned: true, banReason: 'spam' } });
+
+        const res = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body.error.message).toBe('Your account has been blocked by an administrator');
+        expect(res.body).not.toHaveProperty('jwt');
+        expect(await sessionsOf(seeded.documentId)).toBe(0);
+
+        // The reset runs first and the sign-in after it, so the block is told to the caller only
+        // then: the password has changed all the same, as the code says it does
+        await strapi
+          .documents(USER_UID)
+          .update({ documentId: seeded.documentId, data: { banned: false } });
+
+        expect((await signIn('blocked-reset@example.com', PASSWORD)).status).toBe(400);
+        expect((await signIn('blocked-reset@example.com', NEW_PASSWORD)).status).toBe(200);
+      });
+
+      it('gets no jwt and no session from a code asked for after the block', async () => {
+        const seeded = await seedUpUser(strapi, { email: 'blocked-later@example.com' });
+
+        await strapi
+          .documents(USER_UID)
+          .update({ documentId: seeded.documentId, data: { banned: true, banReason: 'spam' } });
+        clearSentEmails();
+
+        expect((await forgot({ email: 'blocked-later@example.com' })).status).toBe(200);
+
+        // The request is answered as for anyone, and the email goes out all the same: a block is
+        // not told to the person asking
+        const sent = await emailsAfter(1);
+
+        expect(sent[0].to).toBe('blocked-later@example.com');
+
+        const code = linkOf(sent[0]).searchParams.get('code') as string;
+        const res = await reset({
+          code,
+          password: NEW_PASSWORD,
+          passwordConfirmation: NEW_PASSWORD,
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body.error.message).toBe('Your account has been blocked by an administrator');
+        expect(res.body).not.toHaveProperty('jwt');
+        expect(await sessionsOf(seeded.documentId)).toBe(0);
+      });
+
+      it('answers a native reset as it does for anyone, and opens no session', async () => {
+        const answers = [];
+
+        for (const blocked of [true, false]) {
+          const email = `native-${blocked ? 'blocked' : 'open'}@example.com`;
+          // eslint-disable-next-line no-await-in-loop
+          const seeded = await seedUpUser(strapi, { email, blocked });
+          // eslint-disable-next-line no-await-in-loop
+          const token = await requestCode(email);
+          // eslint-disable-next-line no-await-in-loop
+          const res = await reset({ token, newPassword: NEW_PASSWORD });
+
+          expect(res.headers['set-auth-token']).toBeUndefined();
+          // eslint-disable-next-line no-await-in-loop
+          expect(await sessionsOf(seeded.documentId)).toBe(0);
+          answers.push({ status: res.status, body: res.body });
+        }
+
+        // The native endpoint never signs a user in, so a block changes nothing about its answer
+        expect(answers[0]).toEqual({ status: 200, body: { status: true } });
+        expect(answers[1]).toEqual(answers[0]);
       });
     });
 

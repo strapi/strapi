@@ -87,7 +87,8 @@ export const CODE_FINDING_SEVERITY: Readonly<Record<CodeFindingRule, Severity>> 
 /**
  * Milliseconds the migrated start took per 1,000 users in the rehearsal
  * (`tests/api/plugins/end-users/migration/rehearsal.test.api.ts`), by database. `null` where it has
- * not been measured: the report then gives no estimate rather than a guess.
+ * not been measured: the report then gives no estimate rather than a guess. The rates come from a
+ * fast workstation, so what they give is a lower bound, and the admin words it as one.
  */
 export const MEASURED_MS_PER_1000_USERS: Record<DbClient, number | null> = {
   sqlite: 780,

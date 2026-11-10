@@ -20,6 +20,8 @@ export type FieldRuleOptions = Pick<
  *
  * Make one for each traversal. A removed key is recorded as `field-removed`; which roles hold the
  * action is the checker's to say, so `roles` is empty here, as for the conditions.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export default (
   checker: PermissionChecker,

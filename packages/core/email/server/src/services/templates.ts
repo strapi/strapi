@@ -7,6 +7,7 @@ import type {
   TemplateDetail,
   TemplateSummary,
 } from '../../../shared/contracts/templates';
+import { TEMPLATE_UID } from '../constants';
 import { render } from './render';
 import { cleanTemplateHtml, findMisplacedSecrets } from './sanitize';
 
@@ -19,7 +20,6 @@ const byCodeUnit = (a: string, b: string): number => {
 
 const { ApplicationError, NotFoundError, ValidationError } = errors;
 
-const TEMPLATE_UID = 'plugin::email.template';
 const DEFAULT_LOCALE = 'en';
 const MAX_LOCALE_LENGTH = 16;
 const LOCALE_PATTERN = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
@@ -150,7 +150,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
           key,
           description: registry.get(key)?.description ?? '',
           locales: [...new Set([DEFAULT_LOCALE, ...locales])].sort(byCodeUnit),
-          customised: locales.length > 0,
+          customized: locales.length > 0,
         };
       });
     },

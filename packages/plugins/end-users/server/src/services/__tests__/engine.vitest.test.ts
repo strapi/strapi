@@ -45,7 +45,7 @@ describe('engine service', () => {
     expect(createEngine).toHaveBeenCalledWith(strapi, undefined, emptyStartupInputs());
   });
 
-  it('does not rebuild on the first request when nothing is configured (I-2)', async () => {
+  it('does not rebuild on the first request when nothing is configured', async () => {
     const service = engineService({ strapi });
 
     // What `service('provider').options()` answers with nothing configured: the three lists,

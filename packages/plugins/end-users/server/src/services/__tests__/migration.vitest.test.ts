@@ -34,7 +34,7 @@ interface World {
   record?: Record<string, unknown> | null;
   from?: boolean | 'check' | null;
   providers?: Array<{ id: string; status: string }>;
-  customised?: string[];
+  customized?: string[];
   leftWithPlaceholder?: number;
 }
 
@@ -64,7 +64,7 @@ const setup = (world: World = {}) => {
         name === 'email'
           ? {
               list: async (key: string) => [
-                { key, customised: (world.customised ?? []).includes(key) },
+                { key, customized: (world.customized ?? []).includes(key) },
               ],
             }
           : services[service],
@@ -103,7 +103,7 @@ describe('migration service', () => {
     expect(first.set).not.toHaveBeenCalled();
 
     world.providers = [{ id: 'github', status: 'ready' }];
-    world.customised = ['end-users.reset-password'];
+    world.customized = ['end-users.reset-password'];
     world.leftWithPlaceholder = 0;
     const second = setup(world);
     const status = await second.service.status();

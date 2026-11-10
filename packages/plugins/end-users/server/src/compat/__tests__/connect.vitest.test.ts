@@ -1,5 +1,5 @@
 /**
- * What the connect routes rely on in Better Auth 1.7.14, read from its source:
+ * What the connect routes rely on in Better Auth 1.7.14.
  */
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { betterAuth } from 'better-auth/minimal';
@@ -9,19 +9,6 @@ import type { Core } from '@strapi/types';
 import { BUILT_IN_PROVIDERS } from '../../providers/built-in';
 import providerService from '../../services/provider';
 import { connectRedirectUri, frontendCallback, resolveFrontendCallback } from '../connect';
-
-// The sign-in's state is a row in the `verification` table plus a signed `state` cookie, so it
-// survives the forward from the connect callback: the browser sends the cookie back to the same
-// host, and the route hands the request's cookies on.
-it.todo('keeps the OAuth state in a verification row and a signed cookie the browser sends back');
-// `redirectURI` in a provider's own options is what the authorize URL and the token request
-// carry, ahead of the `/callback/<id>` address Better Auth derives.
-it.todo('sends the provider options.redirectURI to the authorize and the token endpoints');
-// Generic OAuth providers sign in through `POST /sign-in/social` like the built-in ones, and the
-// callback is `GET /callback/:id` with the same query.
-it.todo('starts every provider at POST /sign-in/social and finishes it at GET /callback/:id');
-// A failure is a redirect to the errorCallbackURL of the sign-in, with `?error=`.
-it.todo('redirects an OAuth failure to the errorCallbackURL with ?error=');
 
 vi.mock('../../providers/registry', () => ({
   registry() {

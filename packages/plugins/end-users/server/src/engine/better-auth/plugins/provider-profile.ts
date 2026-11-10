@@ -24,6 +24,7 @@ import type { Core } from '@strapi/types';
 import { PLUGIN_ID, PROFILE_UID } from '../../../constants';
 import { readProviderClaims } from '../../../utils/provider-claims';
 import type providerService from '../../../services/provider';
+import { documentsOf, type PluginDocuments } from '../../../utils/typed-strapi';
 
 /** The endpoints where a provider ends in a user being updated: the callbacks and the ID token one. */
 const PROVIDER_SIGN_IN_PATH =
@@ -73,9 +74,9 @@ export const providerProfile = (strapi: Core.Strapi): BetterAuthPlugin => ({
                 const provider = strapi.plugin(PLUGIN_ID).service('provider') as ReturnType<
                   typeof providerService
                 >;
-                const profile = (await strapi.documents(PROFILE_UID).findFirst({
+                const profile = (await documentsOf<PluginDocuments>(strapi, PROFILE_UID).findFirst({
                   filters: { user: { documentId: session.userId } },
-                } as never)) as { id?: number; documentId: string } | null;
+                })) as { id?: number; documentId: string } | null;
 
                 if (!profile) {
                   return;
@@ -92,10 +93,10 @@ export const providerProfile = (strapi: Core.Strapi): BetterAuthPlugin => ({
                   return;
                 }
 
-                await strapi.documents(PROFILE_UID).update({
+                await documentsOf<PluginDocuments>(strapi, PROFILE_UID).update({
                   documentId: profile.documentId,
                   data: values,
-                } as never);
+                });
               } catch (error) {
                 strapi.log.warn(
                   `${PLUGIN_ID}: could not write the provider's claims to the profile of user ${session.userId} ` +

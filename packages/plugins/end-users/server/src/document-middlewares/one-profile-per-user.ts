@@ -5,6 +5,7 @@ import { PROFILE_UID, USER_UID } from '../constants';
 import { inProfileLifecycle } from '../utils/profile-lifecycle';
 import { relationRefs } from '../utils/relation-refs';
 import type { RelationRef } from '../utils/relation-refs';
+import { isPlain } from '../utils/is-plain';
 
 const MESSAGE = 'This user already has a profile';
 
@@ -28,9 +29,6 @@ const lockOrder = (refs: RelationRef[]) =>
     // eslint-disable-next-line no-nested-ternary
     return left < right ? -1 : left > right ? 1 : 0;
   });
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** What the gate could read of a relation value, and whether anything in it was beyond it */
 interface StrictRefs {
@@ -223,8 +221,8 @@ export const oneProfilePerUserMiddleware =
     return strapi.db.transaction(async () => {
       // Lock first, check second: the check must see what the transaction that held the lock wrote.
       // A user that is not there has no row to lock, and the write fails on its own connecting it.
+      /* eslint-disable no-await-in-loop -- locks are taken in a fixed order, so two writers never wait on each other in a circle */
       for (const ref of lockOrder(refs)) {
-        // eslint-disable-next-line no-await-in-loop
         await strapi.db
           .queryBuilder(USER_UID)
           .select('id')
@@ -233,9 +231,10 @@ export const oneProfilePerUserMiddleware =
           .forUpdate()
           .execute();
       }
+      /* eslint-enable no-await-in-loop */
 
+      /* eslint-disable no-await-in-loop -- the check runs in order, and the first profile it finds refuses the write */
       for (const ref of refs) {
-        // eslint-disable-next-line no-await-in-loop
         const existing = await strapi.db
           .query(PROFILE_UID)
           .findOne({ where: { user: keyOf(ref) }, select: ['id'] });
@@ -244,6 +243,7 @@ export const oneProfilePerUserMiddleware =
           throw refused(MESSAGE);
         }
       }
+      /* eslint-enable no-await-in-loop */
 
       return next();
     });

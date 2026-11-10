@@ -14,6 +14,7 @@ import { builderRecordsOf } from '../../utils/builder/registry';
 import type { PermissionRow } from '../../utils/permission-row';
 import permissionService from '../permission';
 import { appliesTo } from './utils/applies-to';
+import { createTransaction } from '../../__tests__/utils/fake-strapi';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
 
@@ -243,10 +244,7 @@ const setup = () => {
   };
   const roles = { findOne: vi.fn(async () => ({ id: 7 })) };
   const query = vi.fn((uid: string) => (uid === PERMISSION_UID ? permissions : roles));
-  const transaction = vi.fn(
-    async (work: (hooks: { onCommit: (cb: () => void) => void }) => Promise<unknown>) =>
-      work({ onCommit() {} })
-  );
+  const { transaction } = createTransaction();
   const plugin = vi.fn(() => ({ service: () => ({ invalidate() {} }) }));
 
   const contentType = (uid: string) => CONTENT_TYPES[uid];

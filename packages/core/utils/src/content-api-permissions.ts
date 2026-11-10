@@ -10,6 +10,8 @@ import { isEmpty, isEqual, isPlainObject } from 'lodash';
  * The key under which an ability built by the Content API's `generateAbility` carries its data
  * rules. A registered symbol, so the same key is found whichever copy of a package built or reads
  * the ability. `@strapi/types` declares its type only.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const DATA_ABILITY: unique symbol = Symbol.for('strapi.content-api.data-ability');
 
@@ -19,6 +21,8 @@ export const DATA_ABILITY: unique symbol = Symbol.for('strapi.content-api.data-a
  *
  * Frozen: it is shared, and a caller that merged its own filters into it would change what every
  * later denial matches. {@link withDeny} hands out copies.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const DENY_ALL_FILTER: { readonly id: { readonly $null: true } } = Object.freeze({
   id: Object.freeze({ $null: true as const }),
@@ -28,6 +32,8 @@ export const DENY_ALL_FILTER: { readonly id: { readonly $null: true } } = Object
  * The filters to apply for a `toFilters` result: the filters themselves, or a fresh copy of
  * {@link DENY_ALL_FILTER} when there is no rule (`null`). Anything that is not a plain object
  * denies too: a list, a class instance, a string.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const withDeny = (filters: Record<string, unknown> | null): Record<string, unknown> => {
   if (isPlainObject(filters)) {
@@ -45,6 +51,8 @@ export const withDeny = (filters: Record<string, unknown> | null): Record<string
  *
  * `false` means the filter may match entries, not that it does: a filter that is narrower than the
  * deny filter and not equal to it is `false`.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const deniesAll = (filters: Record<string, unknown> | null): boolean =>
   !isPlainObject(filters) || isEqual(filters, DENY_ALL_FILTER);
@@ -52,6 +60,8 @@ export const deniesAll = (filters: Record<string, unknown> | null): boolean =>
 /**
  * Whether a `filtersFor` answer restricts entries: anything but `{}` (a plain empty object).
  * `null`, the deny filter and every condition restrict.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const restrictsEntries = (filters: unknown): boolean =>
   !(isPlainObject(filters) && isEmpty(filters));
@@ -64,6 +74,8 @@ export const restrictsEntries = (filters: unknown): boolean =>
  * `roles` and `conditions` name the caller's own roles and the conditions of their rows, never
  * their parameters. The sanitizers only see the filter, so they record both empty and the checker
  * fills them in.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export type ExplainEntry =
   | { kind: 'field-removed'; uid: string; action: string; path: string; roles: string[] }
@@ -98,6 +110,8 @@ export type ExplainEntry =
 /**
  * The fields some entries get on top of {@link FieldRules.always}: those of the caller's
  * conditioned rows whose `filter` they match.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export interface ConditionalFields {
   /** The resolved condition filter (Strapi query syntax) an entry must match. Never sanitize it */
@@ -120,6 +134,8 @@ export interface ConditionalFields {
  * entry has in common, say) must read zero groups with `always: []` as no field too: an
  * intersection over no groups is every field by convention, but here `always` is the union of the
  * unconditioned rules' fields, so `[]` is none.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export interface FieldRules {
   /** The fields of the rows that restrict no entry. null for every field, [] for none */
@@ -143,6 +159,8 @@ export interface FieldRules {
  * populate limit, except `read-drafts` and `publish`, which need their own row. A held row that
  * gives the caller no data rule (its conditions all fail, its action is not registered, or it is
  * stored under another content type) denies.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export interface PermissionChecker {
   /** Whether the caller's ability carries data rules */
@@ -181,6 +199,8 @@ export interface PermissionChecker {
 /**
  * The action whose rules decide what a response may show: `findOne` for `findOne`, `create` and
  * `update` responses, `find` for everything else, custom routes included.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const readActionFor = (action: string | undefined): 'find' | 'findOne' =>
   action === 'findOne' || action === 'create' || action === 'update' ? 'findOne' : 'find';
@@ -189,6 +209,8 @@ export const readActionFor = (action: string | undefined): 'find' | 'findOne' =>
  * The action whose rules narrow the root of a request's query: `update` and `delete` by their own
  * rules (the query picks the entries the write changes), every other action by
  * {@link readActionFor}.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const queryActionFor = (
   action: string | undefined
@@ -199,6 +221,8 @@ export const queryActionFor = (
  * Whether reading a type through a relation is restricted for the caller: its `find` filters
  * restrict entries ({@link restrictsEntries}). Each uid is asked once for the life of the returned
  * function, so make one per request.
+ *
+ * @experimental Public for now, shared with `@strapi/plugin-end-users`. May change in a minor release.
  */
 export const createRelationRestriction = (
   checker: PermissionChecker,

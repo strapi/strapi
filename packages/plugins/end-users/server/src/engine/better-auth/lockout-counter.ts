@@ -25,6 +25,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import type { Core } from '@strapi/types';
 
 import { RATE_LIMIT_UID } from '../../constants';
+import { metadataOf } from '../../utils/typed-strapi';
 
 const MINUTE = 60_000;
 
@@ -50,10 +51,10 @@ interface Names {
 
 /** The table and column names Strapi gave the generated type, so naming rules are never repeated here. */
 const namesOf = (strapi: Core.Strapi): Names => {
-  const meta = strapi.db.metadata.get(RATE_LIMIT_UID) as unknown as {
+  const meta = metadataOf<{
     tableName: string;
     attributes: Record<string, { columnName?: string } | undefined>;
-  };
+  }>(strapi.db, RATE_LIMIT_UID);
   const column = (attribute: string) => meta.attributes[attribute]?.columnName ?? attribute;
 
   return {

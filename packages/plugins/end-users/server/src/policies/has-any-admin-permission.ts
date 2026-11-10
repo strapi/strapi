@@ -1,5 +1,7 @@
 import { policy } from '@strapi/utils';
 
+import { validateHasAnyAdminPermissionConfig } from '../validation/policies';
+
 const { createPolicy } = policy;
 
 /**
@@ -11,15 +13,7 @@ const { createPolicy } = policy;
 export const hasAnyAdminPermission = createPolicy({
   name: 'plugin::end-users.has-any-admin-permission',
   validator(config: unknown) {
-    const actions = (config as { actions?: unknown } | undefined)?.actions;
-
-    if (
-      !Array.isArray(actions) ||
-      actions.length === 0 ||
-      actions.some((action) => typeof action !== 'string' || action === '')
-    ) {
-      throw new Error('actions is a list of one or more action names');
-    }
+    validateHasAnyAdminPermissionConfig(config);
   },
   handler(
     ctx: { state: { userAbility?: { can(action: string): boolean } } },

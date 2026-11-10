@@ -91,7 +91,10 @@ describe('migration from users-permissions: check mode', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({
       mode: 'check',
-      report: { source: 'check', counts: { users: 8, providerUsers: { github: 1 } } },
+      report: {
+        source: 'check',
+        counts: { users: Object.keys(project.users).length, providerUsers: { github: 1 } },
+      },
     });
 
     const after = await databaseState();

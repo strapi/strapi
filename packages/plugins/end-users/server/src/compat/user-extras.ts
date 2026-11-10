@@ -1,8 +1,9 @@
 import { contentTypes } from '@strapi/utils';
-import type { Core, Struct, UID } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import { ACCOUNT_UID, PROFILE_UID, USER_UID } from '../constants';
 import { writableProfileAttributes } from '../utils/writable-profile-attributes';
+import { documentsOf } from '../utils/typed-strapi';
 
 export interface UserExtras {
   profile: Record<string, unknown> | null;
@@ -48,11 +49,11 @@ export const loadUserExtras = async (
   const schema = strapi.contentType(PROFILE_UID) as Struct.ContentTypeSchema;
 
   const [profiles, accounts] = await Promise.all([
-    (strapi.documents(PROFILE_UID as UID.ContentType) as unknown as Documents).findMany({
+    documentsOf<Documents>(strapi, PROFILE_UID).findMany({
       filters: { user: { documentId: { $in: ids } } },
       populate: { user: { fields: ['documentId'] } },
     }),
-    (strapi.documents(ACCOUNT_UID as UID.ContentType) as unknown as Documents).findMany({
+    documentsOf<Documents>(strapi, ACCOUNT_UID).findMany({
       filters: { userId: { $in: ids } },
       fields: ['userId', 'providerId'],
       sort: 'createdAt:asc',

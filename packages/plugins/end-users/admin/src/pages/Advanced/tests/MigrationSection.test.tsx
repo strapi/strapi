@@ -69,7 +69,7 @@ describe('MigrationSection', () => {
     });
     render(<MigrationSection />);
 
-    expect(await screen.findByText('1 minute')).toBeInTheDocument();
+    expect(await screen.findByText('At least 1 minute')).toBeInTheDocument();
   });
 
   it('lists every item and marks an acknowledged one resolved', async () => {

@@ -90,10 +90,10 @@ export const uniqueUserFieldsMiddleware =
 
     const taken: UniqueField[] = [];
 
+    /* eslint-disable no-await-in-loop -- checked in order: the answer lists the taken fields in the order of UNIQUE_FIELDS */
     for (const field of UNIQUE_FIELDS) {
       const value = values[field];
 
-      // eslint-disable-next-line no-await-in-loop
       if (
         value !== undefined &&
         (await users().findOne({ where: { [field]: value, ...others }, select: ['id'] }))
@@ -101,6 +101,7 @@ export const uniqueUserFieldsMiddleware =
         taken.push(field);
       }
     }
+    /* eslint-enable no-await-in-loop */
 
     if (taken.length > 0) {
       throw new errors.ValidationError(takenMessage(taken[0]), {
