@@ -611,6 +611,21 @@ describe('Permissions options', () => {
       ).toBeGreaterThan(0);
     });
 
+    it('narrows the cells and keeps the content type name at the left edge when the cell is reserved', () => {
+      render(
+        <Permissions
+          layout={layout}
+          renderSubjectActions={({ subject }) => <button type="button">Settings {subject}</button>}
+        />
+      );
+
+      const scroller = screen.getAllByTestId('permissions-scroll')[0];
+      expect(scroller.style.getPropertyValue('--permissions-cell-width')).toBe('9rem');
+
+      const [name] = within(scroller).getAllByTestId('sticky-row-label');
+      expect(name).toHaveStyle({ position: 'sticky', left: '0' });
+    });
+
     it('adds no scroll container without it', () => {
       render(<Permissions layout={layout} />);
 
