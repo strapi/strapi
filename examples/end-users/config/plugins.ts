@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import type { Core } from '@strapi/strapi';
 
+import { withMigrationHarness } from '../e2e-migration/harness';
+
 /**
  * Where the email plugin finds the example's provider (`providers/file-email.js`). The plugin turns
  * the provider name to lower case and, when no `@strapi/provider-email-<name>` package exists,
@@ -60,46 +62,8 @@ const basePluginsConfig = ({
   },
 });
 
-/**
- * The migration end-to-end run (`end-users-frontend/playwright.migration.config.ts`) starts this
- * application twice on one database: first as a project that still uses Users & Permissions
- * (`seed`), then migrated (`migrate`). Left unset, which is every other start, nothing changes.
- */
-const pluginsConfig = (params: Core.Config.Shared.ConfigParams): Core.Config.Plugin => {
-  const config = basePluginsConfig(params);
-  const stage = params.env('END_USERS_E2E_MIGRATION');
-  const endUsers = config['end-users'];
-
-  if (stage === 'seed') {
-    return {
-      ...config,
-      'end-users': { ...endUsers, enabled: false },
-      // The plugin is not an installed dependency of the example: it is resolved from the workspace
-      'users-permissions': {
-        enabled: true,
-        resolve: require.resolve('@strapi/plugin-users-permissions/package.json'),
-        // Given, or the plugin writes a secret of its own to `.env`
-        config: { jwtSecret: params.env('JWT_SECRET') },
-      },
-    };
-  }
-
-  if (stage === 'migrate') {
-    return {
-      ...config,
-      'end-users': {
-        ...endUsers,
-        config: {
-          ...endUsers.config,
-          compat: { usersPermissions: true },
-          migration: { fromUsersPermissions: true },
-        },
-      },
-      'users-permissions': { enabled: false },
-    };
-  }
-
-  return config;
-};
+const pluginsConfig = (params: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
+  // Changes nothing unless the migration end-to-end run (or `check`) starts the example
+  withMigrationHarness(basePluginsConfig(params), params);
 
 export default pluginsConfig;

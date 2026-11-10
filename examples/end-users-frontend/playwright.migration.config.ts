@@ -16,7 +16,7 @@ process.env.E2E_END_USERS_SECRET ??= randomBytes(32).toString('base64');
  * The migration end to end, apart from the other specs: its own database, and Strapi started twice
  * on it. `e2e/migration/seed-users-permissions.mjs` first makes a project that still uses Users &
  * Permissions, with a user, a provider and an administrator; then Strapi starts with the end-users
- * plugin migrating it (`END_USERS_E2E_MIGRATION` in `config/plugins.ts`).
+ * plugin migrating it (`END_USERS_E2E_MIGRATION` in `e2e-migration/harness.ts`).
  *
  * Run it with `yarn playwright test -c playwright.migration.config.ts`.
  */
