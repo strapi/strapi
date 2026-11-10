@@ -244,8 +244,23 @@ const findHeading = (name: string) => screen.findByRole('heading', { name });
 
 const saveButton = () => screen.getByRole('button', { name: 'Save' });
 
+/**
+ * Clicks Save once it is enabled. It stays disabled until the permissions and the restart status
+ * have loaded, and a click on a disabled button does nothing.
+ */
+const clickSave = async () => {
+  await waitFor(() => expect(saveButton()).toBeEnabled());
+  fireEvent.click(saveButton());
+};
+
 /** The restart overlay's title, with or without the dots the admin's own copy ends with */
 const OVERLAY = /^Waiting for restart/;
+
+/**
+ * Waits for the restart overlay. It shows only while the page polls the status, so on a slow runner
+ * it can be gone again before an assertion on the found element runs: finding it is the check.
+ */
+const overlayShown = () => screen.findByText(OVERLAY);
 
 const expectBackAtTheList = () =>
   waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent(AT_THE_LIST));
@@ -540,9 +555,9 @@ describe('BuilderPage', () => {
       // A new group starts with one check, which a nested group needs
       await user.type(screen.getByRole('textbox', { name: 'Which group 2 check 1 value' }), 'x');
 
-      fireEvent.click(saveButton());
+      await clickSave();
 
-      expect(await screen.findByText(OVERLAY)).toBeInTheDocument();
+      await overlayShown();
       await expectBackAtTheList();
 
       expect(body).toMatchObject({
@@ -625,9 +640,9 @@ describe('BuilderPage', () => {
       await user.click(await screen.findByRole('option', { name: 'Editor' }));
       await user.keyboard('{Escape}');
 
-      fireEvent.click(saveButton());
+      await clickSave();
 
-      expect(await screen.findByText(OVERLAY)).toBeInTheDocument();
+      await overlayShown();
       await expectBackAtTheList();
       expect(body?.who).toEqual({
         match: 'all',
@@ -654,9 +669,9 @@ describe('BuilderPage', () => {
 
       expect(screen.getByText('Set to the signed-in user')).toBeInTheDocument();
 
-      fireEvent.click(saveButton());
+      await clickSave();
 
-      expect(await screen.findByText(OVERLAY)).toBeInTheDocument();
+      await overlayShown();
       await expectBackAtTheList();
       expect(body?.onSave).toEqual({
         stamp: [{ field: 'author', value: { kind: 'user' } }],
@@ -764,10 +779,10 @@ describe('BuilderPage', () => {
 
       await user.clear(name);
       await user.type(name, 'Mine, renamed');
-      fireEvent.click(saveButton());
+      await clickSave();
 
       // Locked from the write until the server answers again
-      expect(await screen.findByText(OVERLAY)).toBeInTheDocument();
+      await overlayShown();
 
       await waitFor(() => expect(screen.queryByText(OVERLAY)).not.toBeInTheDocument());
       await expectBackAtTheList();
@@ -792,7 +807,7 @@ describe('BuilderPage', () => {
       const { user } = await openCondition('mine', 'Mine');
 
       await user.type(screen.getByRole('textbox', { name: /Display name/ }), '!');
-      fireEvent.click(saveButton());
+      await clickSave();
 
       expect(
         await screen.findByText(
@@ -819,7 +834,7 @@ describe('BuilderPage', () => {
       const { user } = await openCondition('mine', 'Mine');
 
       await user.type(screen.getByRole('textbox', { name: /Display name/ }), '!');
-      fireEvent.click(saveButton());
+      await clickSave();
 
       expect(await screen.findByText('Users can change these values themselves:')).toBeVisible();
       expect(screen.getByText('profile.plan (Authenticated)')).toBeVisible();
@@ -840,7 +855,7 @@ describe('BuilderPage', () => {
 
       await user.clear(name);
       await user.type(name, 'Used, renamed');
-      fireEvent.click(saveButton());
+      await clickSave();
 
       const dialog = await screen.findByRole('alertdialog');
 
@@ -856,7 +871,7 @@ describe('BuilderPage', () => {
       // Still on the page, with the edit
       expect(screen.getByTestId('location')).toHaveTextContent(`${LIST_PATH}/used`);
 
-      fireEvent.click(saveButton());
+      await clickSave();
       await user.click(
         within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Confirm' })
       );
@@ -873,7 +888,7 @@ describe('BuilderPage', () => {
       const { user } = await openCondition('mine', 'Mine');
 
       await user.type(screen.getByRole('textbox', { name: /Display name/ }), '!');
-      fireEvent.click(saveButton());
+      await clickSave();
 
       await waitFor(() => expect(seen.calls).toBe(1));
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
@@ -891,7 +906,7 @@ describe('BuilderPage', () => {
       const { user } = renderAt('new');
 
       await startNew(user);
-      fireEvent.click(saveButton());
+      await clickSave();
 
       expect(await screen.findByText('The slug is taken')).toBeInTheDocument();
       expect(screen.queryByText(OVERLAY)).not.toBeInTheDocument();
@@ -906,7 +921,7 @@ describe('BuilderPage', () => {
       const { user } = await openCondition('mine', 'Mine');
 
       await user.type(screen.getByRole('textbox', { name: /Display name/ }), '!');
-      fireEvent.click(saveButton());
+      await clickSave();
 
       expect(await screen.findByText('Another change waits for its restart')).toBeInTheDocument();
       expect(screen.queryByText(OVERLAY)).not.toBeInTheDocument();
@@ -948,7 +963,7 @@ describe('BuilderPage', () => {
         within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Confirm' })
       );
 
-      expect(await screen.findByText(OVERLAY)).toBeInTheDocument();
+      await overlayShown();
       await waitFor(() => expect(screen.queryByText(OVERLAY)).not.toBeInTheDocument());
       await expectBackAtTheList();
 
