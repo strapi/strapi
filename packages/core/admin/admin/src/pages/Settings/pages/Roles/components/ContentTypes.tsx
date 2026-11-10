@@ -6,6 +6,8 @@ import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { ContentPermission } from '../../../../../../../shared/contracts/permissions';
+import { useAppInfo } from '../../../../../features/AppInfo';
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { normalizeSearch, subjectMatchesSearch } from '../utils/search';
 
 import { ContentTypeCollapses } from './ContentTypeCollapses';
@@ -30,11 +32,19 @@ interface ContentTypesProps
   layout: ContentPermission;
 }
 
+const CONTENT_TYPE_BUILDER_READ = [{ action: 'plugin::content-type-builder.read', subject: null }];
+
 /**
- * What a tab with no content type of its kind shows, with the way to make one.
+ * What a tab with no content type of its kind shows. The way to make one, a link to the
+ * Content-Type Builder, is there only for an admin who can open the builder, and only while the
+ * server auto-reloads: the builder is read-only anywhere else.
  */
 const NoContentTypes = ({ kind }: Pick<ContentTypesProps, 'kind'>) => {
   const { formatMessage } = useIntl();
+  const autoReload = useAppInfo('NoContentTypes', (state) => state.autoReload);
+  const {
+    allowedActions: { canRead },
+  } = useRBAC(CONTENT_TYPE_BUILDER_READ);
 
   return (
     <EmptyStateLayout
@@ -51,12 +61,14 @@ const NoContentTypes = ({ kind }: Pick<ContentTypesProps, 'kind'>) => {
             })
       }
       action={
-        <LinkButton tag={Link} variant="secondary" to="/plugins/content-type-builder">
-          {formatMessage({
-            id: 'Settings.permissions.empty.content-type-builder',
-            defaultMessage: 'Open the Content-Type Builder',
-          })}
-        </LinkButton>
+        autoReload && canRead ? (
+          <LinkButton tag={Link} variant="secondary" to="/plugins/content-type-builder">
+            {formatMessage({
+              id: 'Settings.permissions.empty.content-type-builder',
+              defaultMessage: 'Open the Content-Type Builder',
+            })}
+          </LinkButton>
+        ) : undefined
       }
     />
   );
