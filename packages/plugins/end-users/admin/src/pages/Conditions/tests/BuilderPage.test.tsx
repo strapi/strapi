@@ -691,6 +691,43 @@ describe('BuilderPage', () => {
       expect(screen.queryByText('This condition restricts nothing.')).not.toBeInTheDocument();
     });
 
+    it('shows what is wrong with a field under it once it is left, in words without keys', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+
+      const name = screen.getByRole('textbox', { name: /^Name/ });
+      const displayName = screen.getByRole('textbox', { name: /Display name/ });
+
+      await user.type(name, 'Bad Name');
+      // Typing is not leaving: nothing is said yet, and nothing about the fields not reached
+      expect(screen.queryByText(/^Use lowercase letters/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/displayName|types is a list/)).not.toBeInTheDocument();
+
+      await user.tab();
+
+      expect(await screen.findByText(/^Use lowercase letters, digits and hyphens/)).toBeVisible();
+      expect(name).toBeInvalid();
+      expect(displayName).not.toBeInvalid();
+
+      await user.click(displayName);
+      await user.tab();
+
+      expect(await screen.findByText('This value is required.')).toBeVisible();
+      expect(displayName).toBeInvalid();
+      expect(screen.queryByText(/displayName|types is a list/)).not.toBeInTheDocument();
+    });
+
+    it('says a content type is needed on its field once the choice is closed with none', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+      await user.click(screen.getByRole('combobox', { name: /Content types/ }));
+      await user.keyboard('{Escape}');
+
+      expect(await screen.findByText('Choose at least one content type.')).toBeVisible();
+    });
+
     it('locks a saved input name', async () => {
       const { user } = await openCondition('with-input', 'With input');
 

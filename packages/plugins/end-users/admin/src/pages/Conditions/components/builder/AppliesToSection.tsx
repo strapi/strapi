@@ -23,7 +23,9 @@ interface AppliesToSectionProps {
   isEditing: boolean;
   disabled: boolean;
   /** What the server refused about each part */
-  errors: { slug?: string; displayName?: string };
+  errors: { slug?: string; displayName?: string; types?: string };
+  /** The admin has left a field: what is wrong with it can show */
+  onTouch: (part: 'slug' | 'displayName' | 'types') => void;
   onChange: (patch: Partial<{ slug: string; displayName: string; appliesTo: AppliesTo }>) => void;
 }
 
@@ -35,6 +37,7 @@ export const AppliesToSection = ({
   isEditing,
   disabled,
   errors,
+  onTouch,
   onChange,
 }: AppliesToSectionProps) => {
   const { formatMessage } = useIntl();
@@ -64,6 +67,7 @@ export const AppliesToSection = ({
             <TextInput
               disabled={disabled || isEditing}
               value={slug}
+              onBlur={() => onTouch('slug')}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 onChange({ slug: event.target.value })
               }
@@ -91,6 +95,7 @@ export const AppliesToSection = ({
             <TextInput
               disabled={disabled}
               value={displayName}
+              onBlur={() => onTouch('displayName')}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 onChange({ displayName: event.target.value })
               }
@@ -140,6 +145,7 @@ export const AppliesToSection = ({
             {appliesTo.kind === 'types' && (
               <Field.Root
                 name="types"
+                error={errors.types}
                 required
                 hint={formatMessage({
                   id: 'end-users.conditions.builder.applies-to.hint',
@@ -156,6 +162,7 @@ export const AppliesToSection = ({
                   value={appliesTo.types}
                   onChange={(types: string[]) => onChange({ appliesTo: { kind: 'types', types } })}
                   disabled={disabled}
+                  onOpenChange={(open: boolean) => !open && onTouch('types')}
                   withTags
                   placeholder={formatMessage({
                     id: 'end-users.conditions.builder.applies-to.placeholder',
@@ -169,6 +176,7 @@ export const AppliesToSection = ({
                   ))}
                 </MultiSelect>
                 <Field.Hint />
+                <Field.Error />
               </Field.Root>
             )}
           </Flex>

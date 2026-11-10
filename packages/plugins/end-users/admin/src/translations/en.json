@@ -453,5 +453,8 @@
   "migration.banner.link": "Open the migration report",
   "migration.banner.message": "{count, plural, one {# migration item needs attention} other {# migration items need attention}}",
   "migration.check-mode.link": "Open the migration check",
-  "migration.check-mode.message": "End users turns on when the migration runs"
+  "migration.check-mode.message": "End users turns on when the migration runs",
+  "conditions.builder.errors.slug": "Use lowercase letters, digits and hyphens, starting with a letter. Up to 63 characters.",
+  "conditions.builder.errors.slug-reserved": "The name \"{slug}\" is reserved. Choose another.",
+  "conditions.builder.errors.types": "Choose at least one content type."
 }

@@ -399,6 +399,8 @@ const PROFILE_UID = 'plugin::end-users.profile';
 
 const SLUG = /^[a-z][a-z0-9-]{0,62}$/;
 const RESERVED_SLUGS = new Set<string>(['new']);
+
+export const isReservedSlug = (slug: string): boolean => RESERVED_SLUGS.has(slug);
 const INPUT_NAME = /^[a-z][a-zA-Z0-9]{0,31}$/;
 
 const KIND_TEXT: Record<ValueType, string> = {

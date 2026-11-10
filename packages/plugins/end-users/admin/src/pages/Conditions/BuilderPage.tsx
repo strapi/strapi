@@ -44,6 +44,7 @@ import { WhoSection } from './components/builder/WhoSection';
 import { PreviewPanel } from './components/PreviewPanel';
 import { SelfWritableAlert } from './components/SelfWritableAlert';
 import { fieldsFor, formProblems, toCondition, toForm } from './utils/builderForm';
+import { splitProblems } from './utils/fieldProblems';
 import { toFormErrors } from './utils/toFormErrors';
 import { useConditionsRestartWatcher } from './utils/useConditionsRestartWatcher';
 import { useConfirmation } from './utils/useConfirmation';
@@ -127,6 +128,10 @@ const ConditionBuilder = ({
   const [failure, setFailure] = React.useState<Failure>(null);
   // What the server refused about the name and the display name, which show on their fields
   const [fieldErrors, setFieldErrors] = React.useState<{ slug?: string; displayName?: string }>({});
+  // The fields the admin has left: what is wrong with one shows from then on, not while it is untouched
+  const [touched, setTouched] = React.useState<
+    Partial<Record<'slug' | 'displayName' | 'types', true>>
+  >({});
   // The inputs a save took out that roles had bound a value to: the page stays to say so
   const [removedInputs, setRemovedInputs] = React.useState<
     NonNullable<NonNullable<ConditionWriteResponse['warnings']>['removedInputs']>
@@ -301,6 +306,21 @@ const ConditionBuilder = ({
           const setForm = (next: BuilderForm) => onChange('form', next);
           const fields = fieldsFor(layout, form.appliesTo);
           const problems = formProblems(form, layout);
+          const { fields: fieldProblems, rest: otherProblems } = splitProblems(problems, form);
+          const fieldError = (part: 'slug' | 'displayName' | 'types') => {
+            const server = part === 'types' ? undefined : fieldErrors[part];
+            const found = touched[part] ? fieldProblems[part] : undefined;
+
+            return (
+              server ??
+              (found
+                ? formatMessage(
+                    { id: found.id, defaultMessage: found.defaultMessage },
+                    found.values
+                  )
+                : undefined)
+            );
+          };
           // The preview takes a condition as it is now, whatever its name: only the rest has to hold up
           const previewProblems = formProblems(
             { ...form, slug: 'preview', displayName: 'Preview' },
@@ -475,7 +495,7 @@ const ConditionBuilder = ({
                       </Typography>
                     </Flex>
                   )}
-                  {problems.length > 0 && (modified || isEditing) && (
+                  {otherProblems.length > 0 && (modified || isEditing) && (
                     <Alert
                       variant="danger"
                       title={formatMessage({
@@ -484,7 +504,7 @@ const ConditionBuilder = ({
                       })}
                       closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
                     >
-                      {problems.map(({ path, message }) => (
+                      {otherProblems.map(({ path, message }) => (
                         <Typography key={`${path}:${message}`} tag="span" display="block">
                           {message}
                         </Typography>
@@ -501,7 +521,14 @@ const ConditionBuilder = ({
                           layout={layout}
                           isEditing={isEditing}
                           disabled={!canEdit}
-                          errors={fieldErrors}
+                          errors={{
+                            slug: fieldError('slug'),
+                            displayName: fieldError('displayName'),
+                            types: fieldError('types'),
+                          }}
+                          onTouch={(part) =>
+                            setTouched((current) => ({ ...current, [part]: true }))
+                          }
                           onChange={(patch) => setForm({ ...form, ...patch })}
                         />
                         <InputsSection
