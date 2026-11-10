@@ -446,9 +446,16 @@ const DocumentActionsMenu = ({
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+  /**
+   * Set synchronously when an item that opens a dialog is selected. The menu closes right away,
+   * before `onClick` resolves and `dialogId` is set, so the state can't tell it yet.
+   */
+  const opensDialogRef = React.useRef(false);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
     const { onClick = () => false, dialog, id } = action;
+
+    opensDialogRef.current = dialog?.type === 'dialog' || dialog?.type === 'modal';
 
     const muteDialog = await onClick(e);
 
@@ -477,6 +484,11 @@ const DocumentActionsMenu = ({
 
   const handleOpenChange = (open: boolean) => {
     if (!isDisabled) {
+      if (open) {
+        // In case the menu stayed open after a selection, a later close returns the focus as usual
+        opensDialogRef.current = false;
+      }
+
       setIsOpen(open);
     }
   };
@@ -497,7 +509,18 @@ const DocumentActionsMenu = ({
         icon={<More />}
         variant={variant}
       />
-      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end" maxWidth="25rem">
+      <Menu.Content
+        maxHeight={undefined}
+        popoverPlacement="bottom-end"
+        maxWidth="25rem"
+        // Giving the focus back to the trigger would take it from the dialog that just opened
+        onCloseAutoFocus={(event: Event) => {
+          if (opensDialogRef.current) {
+            opensDialogRef.current = false;
+            event.preventDefault();
+          }
+        }}
+      >
         {actions.map((action, index) => {
           const hasSeparator = index > 0 && actions[index - 1].group !== action.group;
 
