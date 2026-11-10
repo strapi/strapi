@@ -15536,11 +15536,11 @@ async function traverseEntity(
   - `getModel` _(Function)_: A function to retrieve the schema of a model by its UID.
 
 - **`entity`**:  
-  The data entity to be traversed. Any object is accepted, including a document whose values are `unknown`. A value that is not an object is returned unchanged.
+  The data entity to be traversed. Any plain object type is accepted, including a document whose values are `unknown`. A value typed with an `interface` (no implicit index signature) or a class instance is rejected at compile time. At runtime, a value that is not an object is returned unchanged.
 
 #### Returns
 
-A `Promise<Entry>` that resolves with the transformed entity. Traversal copies each object it visits before the visitor runs, so the input entity is not mutated.
+A `Promise<Entry>` that resolves with the transformed entity. Traversal works on shallow copies: it copies each object it visits before the visitor runs, so `remove` and `set` never change the input entity. A visitor still receives the caller's nested objects as `value`, so a visitor that mutates `value` in place mutates the input entity.
 
 ### Related Types
 
