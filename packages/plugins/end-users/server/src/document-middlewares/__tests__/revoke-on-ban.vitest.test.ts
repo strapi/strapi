@@ -1,37 +1,27 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID, USER_UID } from '../../constants';
 import { revokeOnBanMiddleware } from '../revoke-on-ban';
+import { createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 
 const setup = () => {
   const events: string[] = [];
-  let inTransaction = false;
-
   const revokeSessions = vi.fn(async () => {
-    events.push(`sessions revoked (in transaction: ${inTransaction})`);
+    events.push(`sessions revoked (in transaction: ${inTransaction()})`);
   });
   const get = vi.fn(() => ({ revokeSessions }));
   const service = vi.fn(() => ({ get }));
   const plugin = vi.fn(() => ({ service }));
-  const transaction = vi.fn(async (callback: () => Promise<unknown>) => {
-    inTransaction = true;
-
-    try {
-      return await callback();
-    } finally {
-      inTransaction = false;
-    }
-  });
+  const { transaction, inTransaction } = createTransaction();
   // What the database holds for the user, read when the write's result leaves `banned` out
   let stored: Record<string, unknown> | null = { banned: true };
   const findOne = vi.fn(async () => {
-    events.push(`user read again (in transaction: ${inTransaction})`);
+    events.push(`user read again (in transaction: ${inTransaction()})`);
 
     return stored;
   });
   const query = vi.fn(() => ({ findOne }));
-  const strapi = { plugin, db: { transaction, query } } as unknown as Core.Strapi;
+  const strapi = fakeStrapi({ plugin, db: { transaction, query } });
   const store = (row: Record<string, unknown> | null) => {
     stored = row;
   };
@@ -41,7 +31,7 @@ const setup = () => {
     written: unknown = { documentId: 'user-1', banned: true }
   ) => {
     const next = vi.fn(async () => {
-      events.push(`user written (in transaction: ${inTransaction})`);
+      events.push(`user written (in transaction: ${inTransaction()})`);
 
       return written;
     });

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import compatService from '../compat';
+import { createTransaction } from '../../__tests__/utils/fake-strapi';
 
 const tokenFor = (email: string) =>
   `h.${Buffer.from(JSON.stringify({ email })).toString('base64url')}.s`;
@@ -18,7 +19,6 @@ interface Row {
 
 const setup = (row: Row | null, opts: { verifies?: boolean; verifyThrows?: unknown } = {}) => {
   const state = row ? { ...row } : null;
-  let queue: Promise<unknown> = Promise.resolve();
   const callNative = vi.fn(async () => {
     if (opts.verifyThrows) {
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
@@ -60,13 +60,7 @@ const setup = (row: Row | null, opts: { verifies?: boolean; verifyThrows?: unkno
 
         return builder;
       },
-      transaction(work: () => Promise<unknown>) {
-        const turn = queue.then(work, work);
-
-        queue = turn.catch(() => undefined);
-
-        return turn;
-      },
+      transaction: createTransaction({ serialize: true }).transaction,
     },
   } as unknown as Core.Strapi;
 

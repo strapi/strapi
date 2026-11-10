@@ -5,6 +5,8 @@ import { PERMISSION_UID, PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../c
 import type permissionService from './permission';
 import type { StoredPermission } from './permission';
 import type { RoleSummary } from './role';
+import { isPlain } from '../utils/is-plain';
+import { documentsOf, type PluginDocuments } from '../utils/typed-strapi';
 
 type ContentApiAbility = Modules.ContentAPI.ContentApiAbility;
 type ConditionUser = Modules.ContentAPI.ConditionUser;
@@ -28,9 +30,6 @@ export interface CallerRole {
 export interface CallerPermissions extends Modules.ContentAPI.PermissionsDescription {
   roles: CallerRole[];
 }
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const toCallerRole = ({ documentId, name, type }: CallerRole): CallerRole => ({
   documentId,
@@ -233,12 +232,12 @@ const abilityService = ({ strapi }: { strapi: Core.Strapi }) => {
       (name) => isPublic(name) && isToOne(attributes[name])
     );
 
-    const found = (await strapi.documents(PROFILE_UID as UID.ContentType).findFirst({
+    const found = (await documentsOf<PluginDocuments>(strapi, PROFILE_UID).findFirst({
       filters: scope
         ? { $and: [{ user: { documentId: userDocumentId } }, scope] }
         : { user: { documentId: userDocumentId } },
       populate: Object.fromEntries(toOne.map((name) => [name, { fields: ['documentId'] }])),
-    } as never)) as Record<string, unknown> | null;
+    })) as Record<string, unknown> | null;
 
     if (!found) {
       return null;
@@ -368,10 +367,10 @@ const abilityService = ({ strapi }: { strapi: Core.Strapi }) => {
       userQuery: object,
       { profile = false, profileQuery }: { profile?: boolean; profileQuery?: object } = {}
     ): Promise<ConditionUser> {
-      const user = (await strapi.documents(USER_UID as UID.ContentType).findFirst({
+      const user = (await documentsOf<PluginDocuments>(strapi, USER_UID).findFirst({
         filters: { $and: [{ documentId: userDocumentId }, userQuery] },
         populate: { roles: { fields: ['documentId', 'name', 'type'] } },
-      } as never)) as Record<string, unknown> | null;
+      })) as Record<string, unknown> | null;
 
       if (!user) {
         throw new errors.NotFoundError('User not found');

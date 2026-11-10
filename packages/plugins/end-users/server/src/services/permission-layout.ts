@@ -23,13 +23,11 @@ import { paramExtras } from '../utils/builder/usage';
 import { ENGINE_OWNED_USER_FIELDS } from '../utils/engine-owned-user-fields';
 import { dataActionOf, isEngineType, layoutContentTypeUids } from '../utils/layout-content-types';
 import type conditionService from './condition';
+import { isPlain, isPlainObject } from '../utils/is-plain';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** What `contentTypes.isPrivateAttribute` reads: a schema, content type or component */
 type UtilsModel = Parameters<typeof contentTypesUtils.isPrivateAttribute>[0];
@@ -157,16 +155,6 @@ const isShownString = (value: string): boolean =>
 
 /** How deep a config is copied: what is deeper is not shown, which also ends a cycle */
 const MAX_CONFIG_DEPTH = 8;
-
-const isPlainObject = (value: unknown): value is Plain => {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-
-  return prototype === Object.prototype || prototype === null;
-};
 
 /**
  * A copy of a config value made only of new objects and arrays, finite numbers, booleans, null and
@@ -320,8 +308,8 @@ interface Built {
 }
 
 /**
- * `strapi.plugin('end-users').service('permission-layout')`: what the role editor is drawn from
- *. Built from the content types, the Content API route registry and the
+ * `strapi.plugin('end-users').service('permission-layout')`: what the role editor is drawn from.
+ * Built from the content types, the Content API route registry and the
  * condition registry, all of which are final once Strapi has started, so it is built on the first
  * call and kept until the server restarts (which is also how a condition the builder writes, or a
  * content type the Content-Type Builder changes, gets in).

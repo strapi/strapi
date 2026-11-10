@@ -1,15 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { errors } from '@strapi/utils';
-import type { Core } from '@strapi/types';
 
 import { PERMISSION_UID, PLUGIN_ID, ROLE_UID, USER_UID } from '../../constants';
 import type { BuilderConditionV2 } from '../../../../shared/builder/types';
 import type { PermissionRow } from '../../utils/permission-row';
 import { builderRecordsOf } from '../../utils/builder/registry';
 import roleService from '../role';
+import {
+  createDocumentsMap,
+  createQueryMap,
+  createTransaction,
+  fakeStrapi,
+} from '../../__tests__/utils/fake-strapi';
 
 type Row = Record<string, unknown>;
-type Mock = ReturnType<typeof vi.fn>;
 type Problem = { index: number; action: string; key: string; reason: string };
 
 const stored = (overrides: Row = {}) => ({
@@ -29,36 +33,21 @@ const stored = (overrides: Row = {}) => ({
  * every time), the Document Service, and the permission service.
  */
 const setup = () => {
-  const queries = new Map<string, Record<string, Mock>>();
+  const query = createQueryMap(() => ({
+    findOne: vi.fn(async () => null),
+    findMany: vi.fn(async () => []),
+    count: vi.fn(async () => 0),
+    update: vi.fn(async () => ({})),
+    // The revision step of a save: one row changed unless a test says the revision is stale
+    updateMany: vi.fn(async () => ({ count: 1 })),
+    deleteMany: vi.fn(async () => ({ count: 0 })),
+  }));
 
-  const query = vi.fn((uid: string) => {
-    if (!queries.has(uid)) {
-      queries.set(uid, {
-        findOne: vi.fn(async () => null),
-        findMany: vi.fn(async () => []),
-        count: vi.fn(async () => 0),
-        update: vi.fn(async () => ({})),
-        // The revision step of a save: one row changed unless a test says the revision is stale
-        updateMany: vi.fn(async () => ({ count: 1 })),
-        deleteMany: vi.fn(async () => ({ count: 0 })),
-      });
-    }
-
-    return queries.get(uid) as Record<string, Mock>;
-  });
-
-  const documentsByUid = new Map<string, Record<string, Mock>>();
-  const documents = vi.fn((uid: string) => {
-    if (!documentsByUid.has(uid)) {
-      documentsByUid.set(uid, {
-        create: vi.fn(async ({ data }: { data: Row }) => ({ documentId: 'new-role', ...data })),
-        update: vi.fn(async () => ({})),
-        delete: vi.fn(async () => ({ entries: [{}] })),
-      });
-    }
-
-    return documentsByUid.get(uid) as Record<string, Mock>;
-  });
+  const documents = createDocumentsMap(() => ({
+    create: vi.fn(async ({ data }: { data: Row }) => ({ documentId: 'new-role', ...data })),
+    update: vi.fn(async () => ({})),
+    delete: vi.fn(async () => ({ entries: [{}] })),
+  }));
 
   const permission = {
     applyDiff: vi.fn(async () => {}),
@@ -71,28 +60,7 @@ const setup = () => {
   // What happened, in order, so a test can say what came after the commit
   const events: string[] = [];
 
-  /**
-   * A transaction like Strapi's: the callback gets `onCommit`, and what it registers runs once the
-   * callback has resolved and the transaction has committed, and never when the callback throws.
-   */
-  const transaction = vi.fn(
-    async (work: (hooks: { onCommit: (cb: () => void) => void }) => Promise<unknown>) => {
-      const afterCommit: Array<() => void> = [];
-
-      try {
-        const result = await work({ onCommit: (cb) => afterCommit.push(cb) });
-
-        events.push('commit');
-        afterCommit.forEach((cb) => cb());
-
-        return result;
-      } catch (error) {
-        events.push('rollback');
-
-        throw error;
-      }
-    }
-  );
+  const { transaction } = createTransaction({ onSettle: (outcome) => events.push(outcome) });
 
   const invalidate = vi.fn(() => {
     events.push('invalidate');
@@ -110,12 +78,12 @@ const setup = () => {
     action.startsWith('api::note.note.') ? 'api::note.note' : null
   );
 
-  const strapi = {
+  const strapi = fakeStrapi({
     db: { query, transaction },
     documents,
     plugin,
     contentAPI: { permissions: { subjectOf } },
-  } as unknown as Core.Strapi;
+  });
 
   return {
     role: roleService({ strapi }),

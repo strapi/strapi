@@ -28,15 +28,13 @@ import type settingsService from '../../../services/settings';
 import type { TransactionHooks } from '../../../utils/transaction-hooks';
 import { resolveBasePath } from '../base-path';
 import { resolveServerOrigin } from '../server-origin';
+import { isPlain } from '../../../utils/is-plain';
 
 interface EmailUser {
   name?: string | null;
   email: string;
   preferredLocale?: unknown;
 }
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** What the email plugin accepts as a locale (`en`, `pt-BR`); anything else is left to `en`. */
 const LOCALE = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;

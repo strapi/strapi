@@ -20,6 +20,7 @@ import {
 import type { PermissionDiff, PermissionRow } from '../utils/permission-row';
 import type { TransactionHooks } from '../utils/transaction-hooks';
 import type abilityService from './ability';
+import { isPlain } from '../utils/is-plain';
 
 type ContentApiConditionDefinition = Modules.ContentAPI.ContentApiConditionDefinition;
 type ContentApiConditionParam = Modules.ContentAPI.ContentApiConditionParam;
@@ -47,9 +48,6 @@ const chunksOf = <T>(items: readonly T[]): T[][] => {
 type Row = Record<string, unknown>;
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const hasOwn = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
 
@@ -529,14 +527,15 @@ const permissionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const scope = { role: { id: role.id } };
 
+        /* eslint-disable no-await-in-loop -- the writes share the transaction's single connection, so they run one at a time */
         for (const ids of chunksOf(toDelete)) {
-          // eslint-disable-next-line no-await-in-loop
           await permissions().deleteMany({ where: { ...scope, documentId: { $in: ids } } });
         }
+        /* eslint-enable no-await-in-loop */
 
         // One at a time: each row has its own values, and they share the transaction's connection
+        /* eslint-disable no-await-in-loop -- the writes share the transaction's single connection, so they run one at a time */
         for (const { documentId, ...changes } of toUpdate) {
-          // eslint-disable-next-line no-await-in-loop
           const updated = await permissions().update({
             where: { ...scope, documentId },
             data: changes,
@@ -546,13 +545,15 @@ const permissionService = ({ strapi }: { strapi: Core.Strapi }) => {
             throw new errors.NotFoundError(`Permission ${documentId} not found on this role`);
           }
         }
+        /* eslint-enable no-await-in-loop */
 
+        /* eslint-disable no-await-in-loop -- the writes share the transaction's single connection, so they run one at a time */
         for (const rows of chunksOf(toCreate)) {
-          // eslint-disable-next-line no-await-in-loop
           await permissions().createMany({
             data: rows.map((row) => ({ ...row, role: role.id, publishedAt })),
           });
         }
+        /* eslint-enable no-await-in-loop */
 
         const changesWhatARowIs =
           toCreate.length > 0 ||

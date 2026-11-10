@@ -194,7 +194,7 @@ const MigrationBody = ({ status }: { status: MigrationStatus }) => {
                 row(
                   'migration.check.estimate',
                   'Estimated time',
-                  format('migration.check.minutes', '{count} minutes', {
+                  format('migration.check.minutes', 'At least about {count} minutes', {
                     count: report.estimate.minutes,
                   })
                 )}

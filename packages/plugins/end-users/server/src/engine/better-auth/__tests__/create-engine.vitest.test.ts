@@ -7,7 +7,6 @@ import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import bcrypt from 'bcryptjs';
 // The merge Strapi's plugin loader applies (core/core loaders/plugins); a dev-only import of a hoisted package
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import { defaultsDeep } from 'lodash';
 import { errors, importDefault } from '@strapi/utils';
 import { createAuthEndpoint } from 'better-auth/api';

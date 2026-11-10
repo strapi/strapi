@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
@@ -90,7 +91,6 @@ const settingsItems = async (
     for (const value of [advanced.email_confirmation_redirection, advanced.email_reset_password]) {
       const url = typeof value === 'string' ? value.trim() : '';
 
-      // eslint-disable-next-line no-await-in-loop
       if (url && (isRelative(url) || (await engine.isTrustedOrigin(url)))) {
         allowed.add(url);
       }
@@ -206,9 +206,7 @@ const templateItems = async (
 
     if (translation.kind === 'translated') {
       try {
-        // eslint-disable-next-line no-await-in-loop
         await keepHold(strapi, owner);
-        // eslint-disable-next-line no-await-in-loop
         await templates.update(translation.key, translation.locale, {
           subject: translation.subject,
           html: translation.html,
@@ -334,9 +332,7 @@ const providerItems = async (
     }
 
     try {
-      // eslint-disable-next-line no-await-in-loop
       await keepHold(strapi, owner);
-      // eslint-disable-next-line no-await-in-loop
       await providers.update(upId, mapping.body);
     } catch (error) {
       if (/no longer holds the migration/.test(messageOf(error))) {

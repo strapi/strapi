@@ -4,6 +4,7 @@ import type { ExplainEntry } from '@strapi/utils';
 import { PLUGIN_ID } from '../constants';
 import { readCompatConfig } from '../compat/config';
 import { isEndUsersStrategy } from '../strategies/end-users';
+import { isPlainObject } from '../utils/is-plain';
 
 /** The response header that says what the permission checks did to a request */
 export const EXPLAIN_HEADER = 'x-strapi-permissions-explain';
@@ -53,11 +54,6 @@ export const toHeaderValue = (entries: ExplainEntry[], max = MAX_HEADER_BYTES): 
 
   return `[${[...kept, marker(entries.length - kept.length)].join(',')}]`;
 };
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  value !== null &&
-  typeof value === 'object' &&
-  (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null);
 
 interface RouteState {
   info?: { type?: string };

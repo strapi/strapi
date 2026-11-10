@@ -31,6 +31,7 @@ import { normalizeEmail } from '../../../utils/normalize-email';
 import { normalizeUsername } from '../../../utils/normalize-username';
 import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 import { clearAttempts, lockoutKey, releaseAttempt, reserveAttempt } from '../lockout-counter';
+import { isPlain } from '../../../utils/is-plain';
 
 const SIGN_IN_PATHS = new Set<string>(['/sign-in/email', '/sign-in/username']);
 const RESET_PASSWORD_PATH = '/reset-password';
@@ -74,9 +75,6 @@ interface LockoutContext {
     returned?: unknown;
   };
 }
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** The user a password sign-in names, by its address or its username (both are stored lowercase). */
 const findUser = async (ctx: LockoutContext, identifier: string): Promise<LockoutUser | null> =>

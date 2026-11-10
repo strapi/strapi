@@ -18,6 +18,7 @@ import profile from '../content-types/profile';
 import { normalizeEmailMiddleware } from '../document-middlewares/normalize-email';
 import register from '../register';
 import { engineOwnedUserFieldsValidator } from '../utils/engine-owned-user-fields';
+import { createTransaction } from './utils/fake-strapi';
 
 type Table = { name: string; fields: Record<string, { type: string }> };
 
@@ -327,7 +328,7 @@ describe('register', () => {
       documents: Object.assign(() => ({ create: vi.fn(async () => ({})) }), { use }),
       db: Object.assign((strapi as unknown as { db: object }).db, {
         query: () => ({ findOne: async () => null }),
-        transaction: async (callback: () => Promise<unknown>) => callback(),
+        transaction: createTransaction().transaction,
       }),
     });
 

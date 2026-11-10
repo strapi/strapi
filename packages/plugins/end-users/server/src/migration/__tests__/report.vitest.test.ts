@@ -1,5 +1,3 @@
-// knex is Strapi's own database layer (hoisted), not a dependency of this plugin
-/* eslint-disable import/no-extraneous-dependencies, node/no-extraneous-import */
 import knex, { type Knex } from 'knex';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -278,7 +276,7 @@ describe('buildReport', () => {
 });
 
 describe('estimate', () => {
-  it('estimates the time from the measured rate for the database', () => {
+  it('estimates the time from the measured rate for the database, and for none that has no rate', () => {
     const snapshot = emptySnapshot();
 
     snapshot.users.total = 100_000;

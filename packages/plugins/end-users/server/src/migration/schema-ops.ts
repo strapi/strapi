@@ -1,5 +1,4 @@
-// knex is Strapi's own database layer (hoisted); only its types are used here
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 import type { Knex } from 'knex';
 import type { Database } from '@strapi/database';
 
@@ -43,7 +42,6 @@ const sqliteIndexesOn = async (trx: Knex, table: string, column: string): Promis
 
   for (const index of indexes) {
     if (index.origin === 'c') {
-      // eslint-disable-next-line no-await-in-loop
       const columns = (await trx.raw('pragma index_info(??)', [String(index.name)])) as Row[];
 
       if (columns.some((entry) => entry.name === column)) {
@@ -68,7 +66,6 @@ export const dropColumn = async (
 ) => {
   if (client === 'sqlite') {
     for (const index of await sqliteIndexesOn(trx, table, column)) {
-      // eslint-disable-next-line no-await-in-loop
       await trx.raw('drop index ??', [index]);
     }
   }
@@ -134,23 +131,18 @@ export const moveSchemaObjects = async (
   for (const name of new Set(names)) {
     if (dropped(name)) {
       if (client === 'postgres') {
-        // eslint-disable-next-line no-await-in-loop
         await trx.raw('alter table ?? drop constraint if exists ??', [qualified(db, to), name]);
-        // eslint-disable-next-line no-await-in-loop
         await trx.raw('drop index if exists ??', [name]);
       } else {
-        // eslint-disable-next-line no-await-in-loop
         await db.dialect.dropSchemaObject(trx, { table: to, name });
       }
     } else if (db.dialect.canRenameSchemaObjects()) {
-      // eslint-disable-next-line no-await-in-loop
       await db.dialect.renameSchemaObject(trx, {
         table: to,
         from: name,
         to: `${to}_${name.slice(prefix.length)}`,
       });
     } else {
-      // eslint-disable-next-line no-await-in-loop
       await db.dialect.dropSchemaObject(trx, { table: to, name });
     }
   }

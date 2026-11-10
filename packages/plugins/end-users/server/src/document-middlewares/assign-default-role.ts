@@ -3,11 +3,9 @@ import type { Core, Modules } from '@strapi/types';
 import { PLUGIN_ID, ROLE_UID, USER_UID } from '../constants';
 import type roleService from '../services/role';
 import type settingsService from '../services/settings';
+import { isPlain } from '../utils/is-plain';
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * Whether a value can be the id of a role: a string that is not empty, or a positive whole number.

@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import { PLUGIN_ID } from '../../constants';
+import { validateResolved } from '../../validation/migration';
 import { runCheck } from '../../migration/check';
 import { isCheckMode } from '../../migration/config';
 import {
@@ -27,11 +28,7 @@ const migrationController = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async updateItem(ctx: Koa.Context) {
-      const resolved = ctx.request.body?.resolved;
-
-      if (typeof resolved !== 'boolean') {
-        throw new errors.ValidationError('resolved must be true or false');
-      }
+      const resolved = (await validateResolved(ctx.request.body?.resolved)) as boolean;
 
       ctx.body = { data: await migration().updateItem(ctx.params.id, resolved) };
     },

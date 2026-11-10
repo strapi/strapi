@@ -4,6 +4,7 @@ import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../../constants';
 import { compatOr, createUsersCompat, splitRoleQuery } from '../users-controller';
+import { createTransaction } from '../../__tests__/utils/fake-strapi';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -100,7 +101,7 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
     contentAPI: { sanitize, validate, permissions },
     db: {
       query: dbQuery,
-      transaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      transaction: createTransaction().transaction,
     },
   } as unknown as Core.Strapi;
 

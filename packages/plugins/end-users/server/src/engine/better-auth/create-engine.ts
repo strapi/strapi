@@ -63,6 +63,7 @@ import { providerProfile } from './plugins/provider-profile';
 import { strapiProfile } from './plugins/strapi-profile';
 import { fromAuthTables } from './schema/from-auth-tables';
 import { resolveServerOrigin } from './server-origin';
+import { isPlainObject } from '../../utils/is-plain';
 
 const CONFIG = `plugin::${PLUGIN_ID}`;
 
@@ -170,16 +171,6 @@ const passwordHashing = (usersPermissions: boolean) =>
 
 type Plain = Record<string, unknown>;
 
-const isPlain = (value: unknown): value is Plain => {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-
-  return prototype === Object.prototype || prototype === null;
-};
-
 const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 /** Project values win; groups of options are merged, anything else is replaced. */
@@ -193,7 +184,8 @@ const mergeOptions = (base: Plain, override: Plain): Plain => {
 
     const current = merged[key];
 
-    merged[key] = isPlain(current) && isPlain(value) ? mergeOptions(current, value) : value;
+    merged[key] =
+      isPlainObject(current) && isPlainObject(value) ? mergeOptions(current, value) : value;
   }
 
   return merged;
@@ -218,7 +210,7 @@ const withoutProtectedOptions = (options: Plain): Plain => {
   } = options;
   const result: Plain = { ...rest };
 
-  if (isPlain(result.user)) {
+  if (isPlainObject(result.user)) {
     const { additionalFields: _additionalFields, ...user } = result.user;
     result.user = user;
   }
@@ -227,7 +219,7 @@ const withoutProtectedOptions = (options: Plain): Plain => {
   for (const group of ['user', 'session', 'account', 'verification']) {
     const groupOptions = result[group];
 
-    if (isPlain(groupOptions)) {
+    if (isPlainObject(groupOptions)) {
       const { fields: _fields, modelName: _modelName, ...kept } = groupOptions;
       result[group] = kept;
     }
@@ -235,12 +227,12 @@ const withoutProtectedOptions = (options: Plain): Plain => {
 
   // A hashed identifier hides the trusted-device rows from the two-factor reset; the rate limit
   // table is locked like the others
-  if (isPlain(result.verification)) {
+  if (isPlainObject(result.verification)) {
     const { storeIdentifier: _storeIdentifier, ...verification } = result.verification;
     result.verification = verification;
   }
 
-  if (isPlain(result.rateLimit)) {
+  if (isPlainObject(result.rateLimit)) {
     const { fields: _fields, modelName: _modelName, ...rateLimit } = result.rateLimit;
     result.rateLimit = rateLimit;
   }
@@ -249,7 +241,7 @@ const withoutProtectedOptions = (options: Plain): Plain => {
   // and the two-factor reset delete from, so it is never passed on
   delete result.secondaryStorage;
 
-  if (isPlain(result.rateLimit) && result.rateLimit.storage === 'secondary-storage') {
+  if (isPlainObject(result.rateLimit) && result.rateLimit.storage === 'secondary-storage') {
     // The plugin's own choice (memory or database) stays
     const { storage: _storage, ...rateLimit } = result.rateLimit;
     result.rateLimit = rateLimit;
@@ -257,7 +249,7 @@ const withoutProtectedOptions = (options: Plain): Plain => {
 
   // The origin and CSRF checks stay on: the base sets both, and nothing the project passes turns
   // them off
-  if (isPlain(result.advanced)) {
+  if (isPlainObject(result.advanced)) {
     const {
       database: _advancedDatabase,
       disableOriginCheck: _disableOriginCheck,
@@ -404,7 +396,8 @@ export const buildAuthOptions = (
     withClaims(strapi, (config as { providerId: string }).providerId, resolvePreset(config))
   );
   const compat = readCompatConfig(strapi);
-  const projectPlugins = (isPlain(project?.options) ? project?.options.plugins : undefined) ?? [];
+  const projectPlugins =
+    (isPlainObject(project?.options) ? project?.options.plugins : undefined) ?? [];
   const senders = emailSenders(strapi);
 
   const base: Plain = {
@@ -539,7 +532,7 @@ const isPrefixOfSupportedPath = (path: string[]) =>
  * experimental.
  */
 export const experimentalAuthOptions = (project?: DefineAuthResult): string[] => {
-  const options = isPlain(project?.options) ? (project?.options as Plain) : {};
+  const options = isPlainObject(project?.options) ? (project?.options as Plain) : {};
 
   const walk = (value: Plain, path: string[]): string[] =>
     Object.keys(value).flatMap((key) => {
@@ -550,7 +543,7 @@ export const experimentalAuthOptions = (project?: DefineAuthResult): string[] =>
         return [];
       }
 
-      if (isPrefixOfSupportedPath(here) && isPlain(value[key])) {
+      if (isPrefixOfSupportedPath(here) && isPlainObject(value[key])) {
         return walk(value[key] as Plain, here);
       }
 

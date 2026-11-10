@@ -15,11 +15,9 @@ import { createAuthMiddleware } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 
 import { normalizeEmail } from '../../../utils/normalize-email';
+import { isPlain } from '../../../utils/is-plain';
 
 const EMAIL_FIELDS = ['email', 'newEmail'] as const;
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 export const strapiNormalize = (): BetterAuthPlugin => ({
   id: 'strapi-normalize',

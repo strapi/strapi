@@ -1,5 +1,6 @@
 import type { RoleRow } from '../services/role';
 import type { UserExtras } from './user-extras';
+import { isPlain } from '../utils/is-plain';
 
 export interface UpRole {
   id: number;
@@ -85,9 +86,6 @@ export const toUpUser = (
 
 const ROLE = 'role';
 const ROLES = 'roles';
-
-const isPlain = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const renameKey = (key: string): string => {
   if (key === ROLE) {

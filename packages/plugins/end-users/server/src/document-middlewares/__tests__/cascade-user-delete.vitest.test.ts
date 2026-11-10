@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Core } from '@strapi/types';
 
 import { PROFILE_UID, USER_UID, VERIFICATION_UID } from '../../constants';
 import { inProfileLifecycle } from '../../utils/profile-lifecycle';
 import { cascadeUserDeleteMiddleware } from '../cascade-user-delete';
+import { createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 
 const SESSION = 'plugin::end-users.session';
 const ACCOUNT = 'plugin::end-users.account';
@@ -53,10 +53,8 @@ const setup = ({
   } as Record<string, unknown>,
 } = {}) => {
   const events: string[] = [];
-  let inTransaction = false;
-
   const deleteMany = vi.fn(async ({ where }: { where: Record<string, unknown> }) => {
-    events.push(`deleteMany ${JSON.stringify(where)} (in transaction: ${inTransaction})`);
+    events.push(`deleteMany ${JSON.stringify(where)} (in transaction: ${inTransaction()})`);
   });
   const query = vi.fn((uid: string) => ({
     deleteMany(params: never) {
@@ -69,31 +67,23 @@ const setup = ({
   const marked: boolean[] = [];
   const remove = vi.fn(async ({ documentId }: { documentId: string }) => {
     marked.push(inProfileLifecycle());
-    events.push(`profile ${documentId} deleted (in transaction: ${inTransaction})`);
+    events.push(`profile ${documentId} deleted (in transaction: ${inTransaction()})`);
   });
   const documents = vi.fn(() => ({ findMany, delete: remove }));
   const schema = vi.fn(() => engineTables);
   const get = vi.fn(() => ({ schema }));
   const plugin = vi.fn(() => ({ service: () => ({ get }) }));
-  const transaction = vi.fn(async (callback: () => Promise<unknown>) => {
-    inTransaction = true;
-
-    try {
-      return await callback();
-    } finally {
-      inTransaction = false;
-    }
-  });
-  const strapi = {
+  const { transaction, inTransaction } = createTransaction();
+  const strapi = fakeStrapi({
     plugin,
     documents,
     contentTypes,
     db: { query, transaction },
-  } as unknown as Core.Strapi;
+  });
 
   const run = async (ctx: Record<string, unknown>) => {
     const next = vi.fn(async () => {
-      events.push(`user deleted (in transaction: ${inTransaction})`);
+      events.push(`user deleted (in transaction: ${inTransaction()})`);
 
       return { documentId: 'user-1', entries: [] };
     });

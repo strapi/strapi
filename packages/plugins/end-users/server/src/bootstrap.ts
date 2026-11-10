@@ -13,6 +13,7 @@ import type roleService from './services/role';
 import { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow } from './utils/default-permissions';
 import { asProfileLifecycle } from './utils/profile-lifecycle';
 import { writableFields } from './utils/writable-fields';
+import { contentTypesOf, documentsOf, type PluginDocuments } from './utils/typed-strapi';
 
 export { DEFAULT_AUTHENTICATED_PERMISSIONS, ownProfileRow };
 
@@ -99,8 +100,8 @@ export const ensureEveryUserHasAProfile = async (
 
   let lastId = 0;
 
+  /* eslint-disable no-await-in-loop -- pages are read in turn, and a profile is made one at a time so a race with another instance is seen */
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     const page = (await users.findMany({
       select: ['id', 'documentId'],
       where: { id: { $gt: lastId } },
@@ -114,7 +115,6 @@ export const ensureEveryUserHasAProfile = async (
 
     lastId = page[page.length - 1].id;
 
-    // eslint-disable-next-line no-await-in-loop
     const withProfile = (await profiles.findMany({
       where: { user: { documentId: { $in: page.map((user) => user.documentId) } } },
       populate: { user: { select: ['documentId'] } },
@@ -123,16 +123,14 @@ export const ensureEveryUserHasAProfile = async (
 
     for (const { documentId } of page.filter((user) => !covered.has(user.documentId))) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         await asProfileLifecycle(() =>
-          strapi.documents(PROFILE_UID).create({
+          documentsOf<PluginDocuments>(strapi, PROFILE_UID).create({
             data: { user: { connect: [documentId] } },
-          } as never)
+          })
         );
         result.created += 1;
       } catch (error) {
         // Another instance starting at the same moment made it first: nothing is missing
-        // eslint-disable-next-line no-await-in-loop
         if (!(await hasProfile(documentId))) {
           const reason = reasonOf(error);
 
@@ -145,6 +143,7 @@ export const ensureEveryUserHasAProfile = async (
       }
     }
   }
+  /* eslint-enable no-await-in-loop */
 };
 
 /**
@@ -153,12 +152,13 @@ export const ensureEveryUserHasAProfile = async (
  * field (a registration field) can. It is named at start so the cause is not found in a failure.
  */
 export const warnAboutRequiredProfileAttributes = (strapi: Core.Strapi): string[] => {
-  const attributes = (
-    strapi.contentTypes as unknown as Record<
-      string,
-      { attributes?: Record<string, { required?: boolean; default?: unknown; type?: string }> }
-    >
-  )[PROFILE_UID]?.attributes;
+  const attributes =
+    contentTypesOf<
+      Record<
+        string,
+        { attributes?: Record<string, { required?: boolean; default?: unknown; type?: string }> }
+      >
+    >(strapi)[PROFILE_UID]?.attributes;
 
   const names = Object.entries(attributes ?? {})
     .filter(
@@ -222,9 +222,8 @@ export const writeUserListLayout = async (strapi: Core.Strapi): Promise<boolean>
     return false;
   }
 
-  const attributes = (strapi.contentTypes as unknown as Record<string, { attributes?: object }>)[
-    USER_UID
-  ]?.attributes;
+  const attributes =
+    contentTypesOf<Record<string, { attributes?: object }>>(strapi)[USER_UID]?.attributes;
   const list = USER_LIST_LAYOUT.filter((name) => name in (attributes ?? {}));
 
   await manager.set({

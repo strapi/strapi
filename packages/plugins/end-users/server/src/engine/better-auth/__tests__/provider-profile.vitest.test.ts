@@ -11,6 +11,7 @@ import type { AuthEngine } from '../../types';
 import { providerProfile } from '../plugins/provider-profile';
 import { emptyStartupInputs } from '../../startup-inputs';
 import { createEngine } from '../create-engine';
+import { createTransaction } from '../../../__tests__/utils/fake-strapi';
 
 /**
  * What a provider writes on sign-in: the user's fields, with the per-provider toggle
@@ -152,7 +153,7 @@ const setup = (storedProvider?: Record<string, unknown>) => {
     service: () => ({ encrypt: (v: string) => `v1:${v}`, decrypt: (v: string) => v.slice(3) }),
     entityValidator: { validateEntityUpdate },
     documents,
-    db: { transaction: async (run: () => Promise<unknown>) => run() },
+    db: { transaction: createTransaction().transaction },
     plugin: () => ({ service: (name: string) => services()[name] }),
   } as unknown as Core.Strapi;
 
@@ -354,19 +355,9 @@ describe('what a provider writes on sign-in', () => {
 
     it('writes sign-up mappings with the profile, in the user’s transaction', async () => {
       const { strapi, state, events, profiles } = setup(stored([signUpMapping, everyMapping]));
-      let inTransaction = false;
+      const { transaction, inTransaction } = createTransaction();
 
-      (strapi.db as unknown as { transaction: unknown }).transaction = async (
-        run: () => Promise<unknown>
-      ) => {
-        inTransaction = true;
-
-        try {
-          return await run();
-        } finally {
-          inTransaction = false;
-        }
-      };
+      (strapi.db as unknown as { transaction: unknown }).transaction = transaction;
 
       // What the provider wrapper leaves on the request; then Strapi makes the user
       state.endUsersProviderClaims = {
@@ -377,7 +368,7 @@ describe('what a provider writes on sign-in', () => {
       await createProfileMiddleware(strapi)(
         { uid: USER_UID, action: 'create', params: {} } as never,
         (async () => {
-          events.push(`user written (in transaction: ${inTransaction})`);
+          events.push(`user written (in transaction: ${inTransaction()})`);
 
           return { documentId: 'user-1' };
         }) as never

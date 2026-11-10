@@ -26,6 +26,7 @@ import { conditionsNaming } from '../utils/builder/usage';
 import type { TransactionHooks } from '../utils/transaction-hooks';
 import type abilityService from './ability';
 import type permissionService from './permission';
+import { isPlain } from '../utils/is-plain';
 
 /** A role as the services hand it out: no database id, only the `documentId`. */
 export interface RoleRow {
@@ -123,9 +124,6 @@ const USERS_PAGE_SIZE = 500;
 const MAX_HOLDERS_ON_DELETE = 5_000;
 
 type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const refuse = (message: string): never => {
   throw new errors.ValidationError(message);
@@ -394,8 +392,8 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
     let released = 0;
     let movedToDefault = 0;
 
+    /* eslint-disable no-await-in-loop -- pages are read in turn, and each write shares the transaction's single connection */
     for (;;) {
-      // eslint-disable-next-line no-await-in-loop
       const holders = (await userQuery().findMany({
         where: { roles: { id: role.id } },
         select: ['id'],
@@ -419,12 +417,10 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         // Only a user left with no role needs the default one
         if (!keepsARole && defaultRole === undefined) {
-          // eslint-disable-next-line no-await-in-loop
           defaultRole = await findDefault();
         }
 
         // One at a time: they share the transaction, which is a single connection
-        // eslint-disable-next-line no-await-in-loop
         await userQuery().update({
           where: { id: user.id },
           data: {
@@ -440,6 +436,7 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
     }
+    /* eslint-enable no-await-in-loop */
   };
 
   return {
@@ -457,25 +454,24 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
     async ensureDefaults(): Promise<EnsureDefaultsResult> {
       const created: EnsureDefaultsResult['created'] = { public: false, authenticated: false };
 
+      /* eslint-disable no-await-in-loop -- a role another instance made first has to be found before the next one is tried */
       for (const { type, name, description } of BUILT_IN_ROLES) {
-        // eslint-disable-next-line no-await-in-loop
         if (await findByType(type)) {
           // eslint-disable-next-line no-continue
           continue;
         }
 
         try {
-          // eslint-disable-next-line no-await-in-loop
           await roleDocuments().create({ data: { name, description, type } });
 
           created[type] = true;
         } catch (error) {
-          // eslint-disable-next-line no-await-in-loop
           if (!(await findByType(type))) {
             throw error;
           }
         }
       }
+      /* eslint-enable no-await-in-loop */
 
       return { created };
     },

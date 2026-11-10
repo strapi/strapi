@@ -11587,8 +11587,10 @@ __metadata:
     eslint-config-custom: "npm:5.61.1"
     jest: "npm:29.6.0"
     jsonwebtoken: "npm:9.0.3"
+    knex: "npm:3.3.0"
     koa: "npm:2.16.4"
     kysely: "npm:0.29.7"
+    lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
     nanostores: "npm:1.5.5"
     react: "npm:18.3.1"
@@ -11604,7 +11606,6 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
-    "@strapi/utils": ^5.0.0
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3

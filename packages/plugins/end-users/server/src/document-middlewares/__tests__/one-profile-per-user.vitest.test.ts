@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Core } from '@strapi/types';
 
 import { PROFILE_UID, USER_UID } from '../../constants';
 import { asProfileLifecycle } from '../../utils/profile-lifecycle';
 import { oneProfilePerUserMiddleware } from '../one-profile-per-user';
+import { createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 
 const REFUSAL = 'A profile is created and deleted with its user';
 
@@ -12,8 +12,6 @@ const setup = ({
   current = { id: 1, documentId: 'user-1' } as unknown,
 } = {}) => {
   const events: string[] = [];
-  let inTransaction = false;
-
   const findOne = vi.fn(async (params: { where: Record<string, unknown> }) => {
     // The profile being updated, with the user it has now
     if (!('user' in params.where)) {
@@ -22,7 +20,9 @@ const setup = ({
         : { id: 5, documentId: params.where.documentId, user: current };
     }
 
-    events.push(`checked ${JSON.stringify(params.where.user)} (in transaction: ${inTransaction})`);
+    events.push(
+      `checked ${JSON.stringify(params.where.user)} (in transaction: ${inTransaction()})`
+    );
 
     return existing;
   });
@@ -62,7 +62,7 @@ const setup = ({
       }),
       execute: vi.fn(async () => {
         call.calls.push('execute');
-        events.push(`locked ${JSON.stringify(call.where)} (in transaction: ${inTransaction})`);
+        events.push(`locked ${JSON.stringify(call.where)} (in transaction: ${inTransaction()})`);
 
         return { id: 1 };
       }),
@@ -73,16 +73,8 @@ const setup = ({
     return chain;
   });
 
-  const transaction = vi.fn(async (callback: () => Promise<unknown>) => {
-    inTransaction = true;
-
-    try {
-      return await callback();
-    } finally {
-      inTransaction = false;
-    }
-  });
-  const strapi = { db: { query, queryBuilder, transaction } } as unknown as Core.Strapi;
+  const { transaction, inTransaction } = createTransaction();
+  const strapi = fakeStrapi({ db: { query, queryBuilder, transaction } });
 
   // `own`: the call is the plugin's own (`create-profile`, `cascade-user-delete`, the start)
   const run = async (
@@ -91,7 +83,7 @@ const setup = ({
     { own = true } = {}
   ) => {
     const wrapped = vi.fn(async () => {
-      events.push(`written (in transaction: ${inTransaction})`);
+      events.push(`written (in transaction: ${inTransaction()})`);
 
       return next();
     });

@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Core, Modules } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 import { PERMISSION_UID, ROLE_UID } from '../../constants';
 import permissionService from '../permission';
+import { createQueryMap, createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 
 type Row = Record<string, unknown>;
 type Definition = Modules.ContentAPI.ContentApiConditionDefinition;
@@ -23,51 +24,22 @@ const setup = ({
   role = { id: 7 } as { id: number } | null,
   conditions = new Map<string, { definition: Definition }>(),
 } = {}) => {
-  const queries = new Map<string, Record<string, ReturnType<typeof vi.fn>>>();
-
-  const query = vi.fn((uid: string) => {
-    if (!queries.has(uid)) {
-      queries.set(uid, {
-        findOne: vi.fn(),
-        findMany: vi.fn(async () => []),
-        createMany: vi.fn(async ({ data }: { data: Row[] }) => ({ count: data.length, ids: [] })),
-        update: vi.fn(async () => ({ id: 1 })),
-        deleteMany: vi.fn(async ({ where }: { where: Where }) => ({
-          count: ((where.documentId as { $in: string[] }).$in ?? []).length,
-        })),
-      });
-    }
-
-    return queries.get(uid) as Record<string, ReturnType<typeof vi.fn>>;
-  });
+  const query = createQueryMap(() => ({
+    findOne: vi.fn(),
+    findMany: vi.fn(async () => []),
+    createMany: vi.fn(async ({ data }: { data: Row[] }) => ({ count: data.length, ids: [] })),
+    update: vi.fn(async () => ({ id: 1 })),
+    deleteMany: vi.fn(async ({ where }: { where: Where }) => ({
+      count: ((where.documentId as { $in: string[] }).$in ?? []).length,
+    })),
+  }));
 
   query(ROLE_UID).findOne.mockResolvedValue(role);
 
   // What happened, in order, so a test can say what came after the commit
   const events: string[] = [];
 
-  /**
-   * A transaction like Strapi's: the callback gets `onCommit`, and what it registers runs once the
-   * callback has resolved and the transaction has committed, and never when the callback throws.
-   */
-  const transaction = vi.fn(
-    async (work: (hooks: { onCommit: (cb: () => void) => void }) => Promise<unknown>) => {
-      const afterCommit: Array<() => void> = [];
-
-      try {
-        const result = await work({ onCommit: (cb) => afterCommit.push(cb) });
-
-        events.push('commit');
-        afterCommit.forEach((cb) => cb());
-
-        return result;
-      } catch (error) {
-        events.push('rollback');
-
-        throw error;
-      }
-    }
-  );
+  const { transaction } = createTransaction({ onSettle: (outcome) => events.push(outcome) });
 
   const invalidate = vi.fn(() => {
     events.push('invalidate');
@@ -83,7 +55,7 @@ const setup = ({
   const subjectOf = (action: string) =>
     action.startsWith('api::note.note.') ? 'api::note.note' : null;
 
-  const strapi = {
+  const strapi = fakeStrapi({
     db: { query, transaction },
     plugin,
     contentAPI: {
@@ -92,7 +64,7 @@ const setup = ({
         providers: { condition: { get: (name: string) => conditions.get(name) } },
       },
     },
-  } as unknown as Core.Strapi;
+  });
   const permission = permissionService({ strapi });
 
   return {

@@ -3,6 +3,9 @@ import { dirname, join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { COMPAT_ROWS } from '../rows';
+import { COMPAT_ROW_TESTS } from './utils/compat-row-tests';
+
+const testsOf = (row: number) => COMPAT_ROW_TESTS[row] ?? [];
 
 /** The repository root: the nearest folder above this one that holds the API tests. */
 const repositoryRoot = (): string => {
@@ -64,10 +67,10 @@ describe('the compat coverage ledger', () => {
   it('has a passing test name for every must-keep row and a test or note for every shim and major row', () => {
     for (const entry of COMPAT_ROWS) {
       if (entry.class === 'must-keep') {
-        expect(entry.tests.length, `row ${entry.row} has no test`).toBeGreaterThan(0);
+        expect(testsOf(entry.row).length, `row ${entry.row} has no test`).toBeGreaterThan(0);
       } else {
         expect(
-          entry.tests.length > 0 || Boolean(entry.note),
+          testsOf(entry.row).length > 0 || Boolean(entry.note),
           `row ${entry.row} has neither a test nor a note`
         ).toBe(true);
       }
@@ -93,7 +96,7 @@ describe('the compat coverage ledger', () => {
 
   it('names only tests that are in their files', () => {
     const missing = COMPAT_ROWS.flatMap((entry) =>
-      entry.tests
+      testsOf(entry.row)
         .filter(({ file, title }) => !hasTitle(file, title))
         .map(({ file, title }) => `row ${entry.row}: ${file}: ${title}`)
     );
@@ -105,14 +108,18 @@ describe('the compat coverage ledger', () => {
     const missing = COMPAT_ROWS.filter(
       (entry) =>
         entry.class === 'must-keep' &&
-        !entry.tests.some(({ file }) => file.startsWith('tests/api/plugins/end-users/migration/'))
+        !testsOf(entry.row).some(({ file }) =>
+          file.startsWith('tests/api/plugins/end-users/migration/')
+        )
     ).map((entry) => entry.row);
 
     expect(missing).toEqual([]);
   });
 
   it('points at files that exist under the API tests or the package', () => {
-    const files = new Set(COMPAT_ROWS.flatMap((entry) => entry.tests.map(({ file }) => file)));
+    const files = new Set(
+      Object.values(COMPAT_ROW_TESTS).flatMap((tests) => tests.map(({ file }) => file))
+    );
 
     for (const file of files) {
       expect(
@@ -165,7 +172,7 @@ describe('the compat coverage ledger', () => {
     const texts = COMPAT_ROWS.flatMap((entry) => [
       entry.break ?? '',
       entry.note ?? '',
-      ...entry.tests.map(({ title }) => title),
+      ...testsOf(entry.row).map(({ title }) => title),
     ]);
 
     for (const text of texts) {

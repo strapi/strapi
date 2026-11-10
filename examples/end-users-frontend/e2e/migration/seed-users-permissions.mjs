@@ -2,7 +2,7 @@
 // run the project it migrates. It removes the throwaway SQLite database of the previous run
 // (`DATABASE_FILENAME`, relative to the Strapi application, the directory this is run from), starts
 // the example as a project that still uses Users & Permissions (`END_USERS_E2E_MIGRATION=seed`, see
-// `config/plugins.ts`), writes what the specs need, and stops. The next start is the migrated one.
+// `e2e-migration/harness.ts`), writes what the specs need, and stops. The next start is the migrated one.
 //
 // What it writes:
 // - the user the first spec signs in as, through Users & Permissions' own `user.add` so the password

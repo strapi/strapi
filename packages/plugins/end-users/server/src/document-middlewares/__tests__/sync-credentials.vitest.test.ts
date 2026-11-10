@@ -1,38 +1,28 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID, USER_UID } from '../../constants';
 import { syncCredentialsMiddleware } from '../sync-credentials';
+import { createTransaction, fakeStrapi } from '../../__tests__/utils/fake-strapi';
 
 const setup = () => {
   const events: string[] = [];
-  let inTransaction = false;
-
   const setPassword = vi.fn(async () => {
-    events.push(`password set (in transaction: ${inTransaction})`);
+    events.push(`password set (in transaction: ${inTransaction()})`);
   });
   const revokeSessions = vi.fn(async () => {
-    events.push(`sessions revoked (in transaction: ${inTransaction})`);
+    events.push(`sessions revoked (in transaction: ${inTransaction()})`);
   });
   const get = vi.fn(() => ({ setPassword, revokeSessions }));
   const service = vi.fn(() => ({ get }));
   const plugin = vi.fn(() => ({ service }));
-  const transaction = vi.fn(async (callback: () => Promise<unknown>) => {
-    inTransaction = true;
-
-    try {
-      return await callback();
-    } finally {
-      inTransaction = false;
-    }
-  });
-  const strapi = { plugin, db: { transaction } } as unknown as Core.Strapi;
+  const { transaction, inTransaction } = createTransaction();
+  const strapi = fakeStrapi({ plugin, db: { transaction } });
 
   const run = async (ctx: Record<string, unknown>, written: unknown = { documentId: 'user-1' }) => {
     const seen: { data?: unknown } = {};
     const next = vi.fn(async () => {
       seen.data = (ctx.params as { data?: unknown } | undefined)?.data;
-      events.push(`user written (in transaction: ${inTransaction})`);
+      events.push(`user written (in transaction: ${inTransaction()})`);
 
       return written;
     });

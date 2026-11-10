@@ -391,7 +391,7 @@ describe('user-security service', () => {
       ).rejects.toThrow(/every field/);
     });
 
-    describe('a field-limited permission beside a full one (M-5)', () => {
+    describe('a field-limited permission beside a full one', () => {
       type Rule = { fields?: string[] | null; conditions?: Record<string, unknown> };
 
       /** A CASL-like ability: `rulesFor` with a field answers the rules that cover it. */

@@ -4,6 +4,7 @@ import { PLUGIN_ID, PROFILE_UID, USER_UID, VERIFICATION_UID } from '../constants
 import { singularNameOf } from '../engine/better-auth/model-names';
 import type { AuthEngine } from '../engine/types';
 import { asProfileLifecycle } from '../utils/profile-lifecycle';
+import { contentTypesOf, documentsOf, queryOf, type PluginDocuments } from '../utils/typed-strapi';
 
 interface Reference {
   uid: string;
@@ -39,9 +40,8 @@ const userReferences = (strapi: Core.Strapi, engine: AuthEngine): Reference[] =>
         field.references.field === 'id' &&
         // Never a delete on a column Strapi would not know: it drops a filter on an unknown
         // attribute, and the delete would then match every row
-        (
-          strapi.contentTypes as unknown as Record<string, { attributes?: Record<string, unknown> }>
-        )[uid]?.attributes?.[attribute]
+        contentTypesOf<Record<string, { attributes?: Record<string, unknown> }>>(strapi)[uid]
+          ?.attributes?.[attribute]
       ) {
         references.push({ uid, attribute });
       }
@@ -82,25 +82,27 @@ export const cascadeUserDeleteMiddleware =
     }
 
     const engine = strapi.plugin(PLUGIN_ID).service('engine').get() as AuthEngine;
-    const query = (uid: string) => strapi.db.query(uid as never) as unknown as Query;
+    const query = (uid: string) => queryOf<Query>(strapi, uid);
 
     return strapi.db.transaction(async () => {
-      const profiles = (await strapi.documents(PROFILE_UID).findMany({
+      const profiles = (await documentsOf<PluginDocuments>(strapi, PROFILE_UID).findMany({
         filters: { user: { documentId } },
         fields: ['documentId'],
-      } as never)) as Array<{ documentId: string }>;
+      })) as Array<{ documentId: string }>;
 
+      /* eslint-disable no-await-in-loop -- deleted in order, inside one transaction on a single connection */
       for (const profile of profiles) {
-        // eslint-disable-next-line no-await-in-loop
         await asProfileLifecycle(() =>
           strapi.documents(PROFILE_UID).delete({ documentId: profile.documentId })
         );
       }
+      /* eslint-enable no-await-in-loop */
 
+      /* eslint-disable no-await-in-loop -- deleted in order, inside one transaction on a single connection */
       for (const { uid, attribute } of userReferences(strapi, engine)) {
-        // eslint-disable-next-line no-await-in-loop
         await query(uid).deleteMany({ where: { [attribute]: documentId } });
       }
+      /* eslint-enable no-await-in-loop */
 
       await query(VERIFICATION_UID).deleteMany({ where: { value: documentId } });
 

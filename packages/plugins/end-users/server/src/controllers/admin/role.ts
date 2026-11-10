@@ -7,11 +7,7 @@ import { RoleChangedError } from '../../services/role';
 import type roleService from '../../services/role';
 import type { RoleInput, RoleUpdateBody } from '../../services/role';
 import { toPermissionDiff } from '../../utils/permission-row';
-
-type Plain = Record<string, unknown>;
-
-const isPlain = (value: unknown): value is Plain =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+import { validateRoleBody } from '../../validation/role';
 
 const refuse = (message: string): never => {
   throw new errors.ValidationError(message);
@@ -21,12 +17,8 @@ const refuse = (message: string): never => {
  * What a client may set on a role: its name, description, two-factor rule and permissions. The role's
  * `type` is not among them, and the service ignores it, so a client cannot make a second Public.
  */
-const toRoleInput = (body: unknown): RoleInput => {
-  if (!isPlain(body)) {
-    return refuse('A role is an object');
-  }
-
-  const { name, description, requireTwoFactor, permissions } = body;
+const toRoleInput = async (body: unknown): Promise<RoleInput> => {
+  const { name, description, requireTwoFactor, permissions } = await validateRoleBody(body);
 
   return { name, description, requireTwoFactor, permissions } as RoleInput;
 };
@@ -37,12 +29,9 @@ const toRoleInput = (body: unknown): RoleInput => {
  * a client that sends a list, or a key this does not know, is not told its permissions were saved
  * when nothing changed.
  */
-const toRoleUpdate = (body: unknown): RoleUpdateBody => {
-  if (!isPlain(body)) {
-    return refuse('A role is an object');
-  }
-
-  const { revision, name, description, requireTwoFactor, permissions } = body;
+const toRoleUpdate = async (body: unknown): Promise<RoleUpdateBody> => {
+  const { revision, name, description, requireTwoFactor, permissions } =
+    await validateRoleBody(body);
 
   return {
     revision,
@@ -104,7 +93,7 @@ const roleController = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async create(ctx: Koa.Context) {
-      const role = await roles().create(toRoleInput(ctx.request.body));
+      const role = await roles().create(await toRoleInput(ctx.request.body));
 
       emit(ctx, 'create', role, created(role.permissions));
       ctx.created({ data: role });
@@ -122,7 +111,7 @@ const roleController = ({ strapi }: { strapi: Core.Strapi }) => {
       // A role that is not there is a 404 whatever the body is: found before it is judged
       await roles().assertExists(documentId);
 
-      const input = toRoleUpdate(ctx.request.body);
+      const input = await toRoleUpdate(ctx.request.body);
 
       try {
         const role = await roles().update(documentId, input);

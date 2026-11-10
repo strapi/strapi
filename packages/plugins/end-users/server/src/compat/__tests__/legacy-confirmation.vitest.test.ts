@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import { confirmLegacyToken, isLegacyConfirmationToken } from '../legacy-confirmation';
+import { createTransaction } from '../../__tests__/utils/fake-strapi';
 
 // Built at run time: a secret-shaped literal does not belong in a test file
 const hex = (char: string, length = 40) => char.repeat(length);
@@ -11,7 +12,7 @@ const setup = (row: { id: number; documentId: string; emailVerified: boolean; to
   const locked: string[] = [];
   const strapi = {
     db: {
-      transaction: async (work: () => Promise<unknown>) => work(),
+      transaction: createTransaction().transaction,
       queryBuilder() {
         let wanted: string | undefined;
         const builder = {

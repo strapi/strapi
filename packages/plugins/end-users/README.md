@@ -99,10 +99,10 @@ production through your repository and a deploy, and what you need to read is sh
    picks up where it stopped, after waiting up to 15 minutes for the stopped start's hold on the migration to expire.
 
    A project with 100,008 users migrated in about 87 seconds on SQLite and in about 166 seconds on Postgres 17, both
-   on the same 16-core workstation, start to finish. The rollback on SQLite took about 2 seconds. MySQL times are added
-   here once they are measured. Time it on a copy of your own data before you plan a window, because the figures depend
-   on the database server and its disk. Once the rate for your database is measured, the Migration section also shows
-   an estimate of the time.
+   on the same 16-core workstation, start to finish. The rollback on SQLite took about 2 seconds. Time it on a copy of
+   your own data before you plan a window, because the figures depend on the database server and its disk. For a
+   database with a measured rate, the Migration section also shows an estimate. Read it as a lower bound: the rates
+   come from a fast workstation.
 
    After the migration, the end-users part of your `config/plugins.ts` reads like this. Your file also holds the keys
    you set yourself, and the Users & Permissions entry is switched off.

@@ -1,5 +1,4 @@
-// knex is Strapi's own database layer (hoisted); only its types are used here
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
+/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
 import type { Knex } from 'knex';
 
 import { groupDuplicates } from './dedupe';
@@ -200,7 +199,6 @@ const scanUsernames = async (knex: Knex): Promise<UpSnapshot['usernames']> => {
   let last = 0;
 
   for (;;) {
-    // eslint-disable-next-line no-await-in-loop
     const page: Row[] = await knex('up_users')
       .select('id', 'username')
       .whereNotNull('username')
@@ -301,7 +299,6 @@ const readApiTokens = async (knex: Knex): Promise<UpSnapshot['apiTokens']> => {
   ];
 
   for (const table of tables) {
-    // eslint-disable-next-line no-await-in-loop
     if (!(await knex.schema.hasTable(table))) {
       return [];
     }
