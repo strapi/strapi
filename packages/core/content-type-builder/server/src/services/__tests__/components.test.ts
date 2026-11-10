@@ -52,9 +52,10 @@ describe('Content Type Builder - Components service', () => {
     );
   });
 
-  it('edits a component from the admin payload', async () => {
-    // The body the admin sends to PUT /content-type-builder/components/:uid
-    // (see tests/api/core/content-type-builder/components.test.api.js)
+  it('edits a component from the payload modifyComponent and PUT /components/:uid pass', async () => {
+    // The payload the modifyComponent API test helper (packages/utils/api-tests/models.js)
+    // and PUT /content-type-builder/components/:uid pass to editComponent.
+    // modifyComponent only sends `component`; the nested `components` list comes from the route body.
     const payload = {
       component: {
         category: 'default',
