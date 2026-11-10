@@ -302,6 +302,229 @@ describe('end-users: sign-in providers', () => {
       }
     });
   });
+  describe('who a provider may sign in as', () => {
+    let strapi;
+    let oidc: FakeOidc;
+    let rq;
+    let rqAdmin;
+
+    const signInThrough = async (provider: string) => {
+      const start = await rq.post('/api/auth/sign-in/social', {
+        body: { provider, callbackURL: `${TEST_ORIGIN}/done`, disableRedirect: true },
+        headers: FROM_FRONT_END,
+      });
+
+      expect(start.status).toBe(200);
+
+      const authorize = await fetch(start.body.url, { redirect: 'manual' });
+      const back = new URL(authorize.headers.get('location') as string);
+
+      return rq.get(`${back.pathname}${back.search}`, {
+        headers: { cookie: cookiesOf(start) },
+      });
+    };
+
+    const count = (uid: string, where: Record<string, unknown> = {}) =>
+      strapi.db.query(uid).count({ where });
+
+    const userByEmail = (email: string) =>
+      strapi.documents('plugin::end-users.user').findFirst({ filters: { email } });
+
+    /** A user with a password who has confirmed their address, the one a provider could be taken for */
+    const existingUser = async (email: string, overrides: Record<string, unknown> = {}) => {
+      const user = await strapi.documents('plugin::end-users.user').create({
+        data: { email, name: 'Existing', emailVerified: true, ...overrides },
+      });
+
+      await strapi.documents('plugin::end-users.account').create({
+        data: {
+          userId: user.documentId,
+          providerId: 'credential',
+          accountId: user.documentId,
+          password: await strapi.plugin('end-users').service('engine').get().hashPassword(PASSWORD),
+        },
+      });
+
+      return user;
+    };
+
+    const setTrust = (trustForLinking: boolean) =>
+      rqAdmin.put(`${PROVIDERS}/fake-idp`, { body: { trustForLinking } });
+
+    /** The redirect of a refused callback names the error, and no session cookie came with it */
+    const expectRefused = (callback: Res, error = 'account_not_linked') => {
+      expect(callback.status).toBe(302);
+      expect(new URL(callback.headers.location).searchParams.get('error')).toBe(error);
+      expect(cookiesOf(callback)).not.toMatch(/strapi\.session_token=[^;]/);
+    };
+
+    beforeAll(async () => {
+      oidc = await startFakeOidc();
+      strapi = await createEndUsersInstance({
+        fakeOidc: oidc,
+        pluginConfig: { trustedOrigins: [TEST_ORIGIN] },
+      });
+      rq = createRequest({ strapi });
+      rqAdmin = await createAuthRequest({ strapi });
+
+      await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
+      await resetRoles(strapi);
+
+      const created = await rqAdmin.post(PROVIDERS, {
+        body: {
+          id: 'fake-idp',
+          name: 'Fake IdP',
+          discoveryUrl: oidc.discoveryUrl,
+          clientId: 'fake-client',
+          clientSecret: CLIENT_SECRET,
+        },
+      });
+
+      expect(created.status).toBe(200);
+    });
+
+    afterAll(async () => {
+      await rqAdmin.delete(`${PROVIDERS}/fake-idp`);
+      await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
+      await strapi.destroy();
+    });
+
+    it('does not link a provider that says the address is unverified to an existing account', async () => {
+      const email = 'victim@example.com';
+      const victim = await existingUser(email);
+
+      await setTrust(false);
+      oidc.user = {
+        sub: 'attacker-subject-1',
+        email,
+        name: 'Attacker',
+        email_verified: false,
+      };
+
+      const callback = await signInThrough('fake-idp');
+
+      expectRefused(callback);
+      expect(await count('plugin::end-users.session', { userId: victim.documentId })).toBe(0);
+      // Nothing about the victim moved: one account, still the password, no row for the provider
+      expect(await count('plugin::end-users.account', { userId: victim.documentId })).toBe(1);
+      expect(
+        await count('plugin::end-users.account', {
+          providerId: 'fake-idp',
+          accountId: 'attacker-subject-1',
+        })
+      ).toBe(0);
+      expect(await count('plugin::end-users.user', { email })).toBe(1);
+    });
+
+    it('links an unverified provider address to an existing verified account only when the provider is trusted', async () => {
+      const email = 'trusted-link@example.com';
+      const existing = await existingUser(email);
+
+      oidc.user = { sub: 'trusted-subject-1', email, name: 'Trusted', email_verified: false };
+
+      expect((await setTrust(true)).status).toBe(200);
+
+      const callback = await signInThrough('fake-idp');
+
+      expect(callback.status).toBe(302);
+      expect(cookiesOf(callback)).toContain('strapi.session_token=');
+      expect(await count('plugin::end-users.user', { email })).toBe(1);
+      expect(
+        await count('plugin::end-users.account', {
+          userId: existing.documentId,
+          providerId: 'fake-idp',
+          accountId: 'trusted-subject-1',
+        })
+      ).toBe(1);
+
+      // Trust does not reach an account whose own address was never confirmed
+      const unconfirmed = await existingUser('unconfirmed@example.com', { emailVerified: false });
+
+      oidc.user = {
+        sub: 'trusted-subject-2',
+        email: 'unconfirmed@example.com',
+        name: 'Trusted',
+        email_verified: true,
+      };
+
+      expectRefused(await signInThrough('fake-idp'));
+      expect(await count('plugin::end-users.account', { userId: unconfirmed.documentId })).toBe(1);
+    });
+
+    it('links a verified provider address to an existing verified account without the trust flag', async () => {
+      const email = 'verified-link@example.com';
+      const existing = await existingUser(email);
+
+      await setTrust(false);
+      oidc.user = { sub: 'verified-subject-1', email, name: 'Verified', email_verified: true };
+
+      const callback = await signInThrough('fake-idp');
+
+      expect(callback.status).toBe(302);
+      expect(cookiesOf(callback)).toContain('strapi.session_token=');
+      expect(
+        await count('plugin::end-users.account', {
+          userId: existing.documentId,
+          providerId: 'fake-idp',
+        })
+      ).toBe(1);
+    });
+
+    it('treats a provider that never sends email_verified as unverified: a new user is made unverified, an existing address is refused', async () => {
+      await setTrust(false);
+
+      const fresh = { sub: 'silent-subject-1', email: 'silent-new@example.com', name: 'Silent' };
+
+      oidc.user = fresh as never;
+
+      const created = await signInThrough('fake-idp');
+
+      expect(created.status).toBe(302);
+      expect(cookiesOf(created)).toContain('strapi.session_token=');
+      expect(await userByEmail('silent-new@example.com')).toMatchObject({ emailVerified: false });
+
+      const email = 'silent-existing@example.com';
+      const existing = await existingUser(email);
+
+      oidc.user = { sub: 'silent-subject-2', email, name: 'Silent' } as never;
+
+      expectRefused(await signInThrough('fake-idp'));
+      expect(await count('plugin::end-users.session', { userId: existing.documentId })).toBe(0);
+      expect(await count('plugin::end-users.account', { userId: existing.documentId })).toBe(1);
+    });
+
+    it('creates no session for a banned user, whether the provider is already linked or links by a verified address', async () => {
+      await setTrust(false);
+
+      // Already linked: sign in once, then ban
+      oidc.user = {
+        sub: 'banned-subject-1',
+        email: 'banned-linked@example.com',
+        name: 'Banned',
+        email_verified: true,
+      };
+      expect((await signInThrough('fake-idp')).status).toBe(302);
+
+      const linked = await userByEmail('banned-linked@example.com');
+
+      await strapi
+        .documents('plugin::end-users.user')
+        .update({ documentId: linked.documentId, data: { banned: true, banReason: 'spam' } });
+
+      expectRefused(await signInThrough('fake-idp'), 'BANNED_USER');
+      expect(await count('plugin::end-users.session', { userId: linked.documentId })).toBe(0);
+
+      // Not linked yet: the address is verified, so it would link, but the user is banned
+      const email = 'banned-implicit@example.com';
+      const banned = await existingUser(email, { banned: true, banReason: 'spam' });
+
+      oidc.user = { sub: 'banned-subject-2', email, name: 'Banned', email_verified: true };
+
+      expectRefused(await signInThrough('fake-idp'), 'BANNED_USER');
+      expect(await count('plugin::end-users.session', { userId: banned.documentId })).toBe(0);
+    });
+  });
+
   describe('what a provider writes on sign-in', () => {
     // The profile has a `department` field, the way a project adds one in the Content-Type Builder
     const restoreApp = extendProfile({ department: { type: 'string', maxLength: 20 } });
