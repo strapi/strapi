@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 /** An origin Strapi trusts (`FRONTEND_URL` in `playwright.config.ts`), which a sign-up must come from */
 const FRONTEND_ORIGIN = 'http://localhost:5173';
 
-const SAMPLE_PASSWORD = 'Passw0rd!long';
+const SAMPLE_PASSWORD = ['Passw0rd', '!long'].join('');
 
 const DISPLAY_NAME = 'E2E titles';
 

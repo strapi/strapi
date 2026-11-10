@@ -36,7 +36,10 @@ describe('AdvancedPage', () => {
     await user.type(verified, 'x');
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText('Not a trusted origin')).toBeInTheDocument();
+    expect(await screen.findByText('Not a trusted origin')).toHaveAttribute(
+      'data-strapi-field-error'
+    );
+    expect(verified).toBeInvalid();
   });
 
   it('shows the config/plugins.ts settings read-only, and never a secret value', async () => {
@@ -54,7 +57,11 @@ describe('AdvancedPage', () => {
     expect(screen.getByText(/shorter than 32 characters/)).toBeInTheDocument();
     expect(screen.getByText('https://app.example.com')).toBeInTheDocument();
     expect(screen.getByText('end-users.welcome')).toBeInTheDocument();
-    expect(screen.getByText('database')).toBeInTheDocument();
+    // Words a person reads: the config's `database` and `7d`
+    expect(screen.getByText('Database')).toBeInTheDocument();
+    expect(screen.getByText('7 days')).toBeInTheDocument();
+    expect(screen.getByText('1 day')).toBeInTheDocument();
+    expect(screen.getByText('Session cookie cache')).toBeInTheDocument();
   });
 
   it('shows refresh mode, the cookie name and the legacy cut-off, read-only', async () => {

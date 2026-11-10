@@ -12,6 +12,7 @@ import {
 import { Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { getTranslation } from '../../../../utils/getTranslation';
 import { newKey } from '../../utils/builderForm';
 import {
   USER_UID,
@@ -73,11 +74,11 @@ export const OnSaveSection = ({
   return (
     <Section
       title={formatMessage({
-        id: 'end-users.conditions.builder.on-save',
+        id: getTranslation('conditions.builder.on-save'),
         defaultMessage: 'When an entry is saved',
       })}
       description={formatMessage({
-        id: 'end-users.conditions.builder.on-save.description',
+        id: getTranslation('conditions.builder.on-save.description'),
         defaultMessage:
           'Fields set when an entry is created, and fields that cannot change afterwards.',
       })}
@@ -102,7 +103,7 @@ export const OnSaveSection = ({
               disabled={disabled}
               value={rule.field === '' ? null : rule.field}
               placeholder={formatMessage({
-                id: 'end-users.conditions.builder.on-save.choose-field',
+                id: getTranslation('conditions.builder.on-save.choose-field'),
                 defaultMessage: 'Choose a field',
               })}
               onChange={(next) =>
@@ -122,7 +123,7 @@ export const OnSaveSection = ({
             {rule.field !== '' && !slot && (
               <Typography>
                 {formatMessage({
-                  id: 'end-users.conditions.builder.on-save.to-user',
+                  id: getTranslation('conditions.builder.on-save.to-user'),
                   defaultMessage: 'Set to the signed-in user',
                 })}
               </Typography>
@@ -145,13 +146,13 @@ export const OnSaveSection = ({
                 >
                   <SingleSelectOption value="fixed">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.value.fixed',
+                      id: getTranslation('conditions.builder.value.fixed'),
                       defaultMessage: 'A value',
                     })}
                   </SingleSelectOption>
                   <SingleSelectOption value="input">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.value.input',
+                      id: getTranslation('conditions.builder.value.input'),
                       defaultMessage: 'An input',
                     })}
                   </SingleSelectOption>
@@ -186,7 +187,7 @@ export const OnSaveSection = ({
             )}
             <IconButton
               label={formatMessage({
-                id: 'end-users.conditions.builder.on-save.remove-stamp',
+                id: getTranslation('conditions.builder.on-save.remove-stamp'),
                 defaultMessage: 'Remove field',
               })}
               disabled={disabled}
@@ -200,7 +201,7 @@ export const OnSaveSection = ({
           </Flex>
         );
       })}
-      <Flex>
+      <Flex gap={3}>
         <Button
           type="button"
           variant="tertiary"
@@ -215,15 +216,23 @@ export const OnSaveSection = ({
           }
         >
           {formatMessage({
-            id: 'end-users.conditions.builder.on-save.add-stamp',
+            id: getTranslation('conditions.builder.on-save.add-stamp'),
             defaultMessage: 'Set a field on create',
           })}
         </Button>
+        {options.length === 0 && !disabled && (
+          <Typography textColor="neutral600" variant="pi">
+            {formatMessage({
+              id: getTranslation('conditions.builder.choose-types-first'),
+              defaultMessage: 'Choose a content type first.',
+            })}
+          </Typography>
+        )}
       </Flex>
       <Field.Root name="locked">
         <Field.Label>
           {formatMessage({
-            id: 'end-users.conditions.builder.on-save.locked',
+            id: getTranslation('conditions.builder.on-save.locked'),
             defaultMessage: 'Fields that cannot change after create',
           })}
         </Field.Label>
@@ -232,7 +241,7 @@ export const OnSaveSection = ({
           disabled={disabled}
           withTags
           placeholder={formatMessage({
-            id: 'end-users.conditions.builder.on-save.locked-placeholder',
+            id: getTranslation('conditions.builder.on-save.locked-placeholder'),
             defaultMessage: 'Choose fields',
           })}
           onChange={(locked: string[]) => onChange({ ...onSave, locked })}

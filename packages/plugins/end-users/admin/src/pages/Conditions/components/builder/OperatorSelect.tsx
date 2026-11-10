@@ -2,6 +2,7 @@ import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { operatorsFor } from '../../../../../../shared/builder/operators';
+import { getTranslation } from '../../../../utils/getTranslation';
 
 import type { ValueSlot } from '../../utils/builderOptions';
 
@@ -16,7 +17,7 @@ interface OperatorSelectProps {
 /** The operators a field of this type offers, and no others */
 export const OperatorSelect = ({ label, slot, value, disabled, onChange }: OperatorSelectProps) => {
   const { formatMessage } = useIntl();
-  const id = (key: string) => `end-users.conditions.builder.operator.${key}`;
+  const id = (key: string) => getTranslation(`conditions.builder.operator.${key}`);
 
   const labels: Record<string, string> = {
     $eq: formatMessage({ id: id('eq'), defaultMessage: 'is' }),
@@ -51,7 +52,7 @@ export const OperatorSelect = ({ label, slot, value, disabled, onChange }: Opera
       disabled={disabled || !slot}
       onChange={(next) => onChange(String(next))}
       placeholder={formatMessage({
-        id: 'end-users.conditions.builder.operator.choose',
+        id: getTranslation('conditions.builder.operator.choose'),
         defaultMessage: 'Choose',
       })}
     >

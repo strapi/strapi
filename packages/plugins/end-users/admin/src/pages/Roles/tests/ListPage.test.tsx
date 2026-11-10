@@ -43,22 +43,10 @@ describe('ListPage', () => {
     expect(within(rows[1]).getByText('1,240 users')).toBeInTheDocument();
     expect(within(rows[2]).getByText('212 users')).toBeInTheDocument();
 
-    // Public and Authenticated stay: their Delete is disabled and says why
-    expect(screen.getByRole('button', { name: 'Delete Public' })).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
-    expect(screen.getByRole('button', { name: 'Delete Authenticated' })).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
-    expect(
-      screen.getAllByRole('group', { name: "Public and Authenticated can't be deleted" })
-    ).toHaveLength(2);
-    expect(screen.getByRole('button', { name: 'Delete Premium member' })).toHaveAttribute(
-      'aria-disabled',
-      'false'
-    );
+    // Public and Authenticated stay: there is nothing to delete, so they have no Delete
+    expect(screen.queryByRole('button', { name: 'Delete Public' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete Authenticated' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete Premium member' })).toBeEnabled();
 
     expect(screen.getByRole('button', { name: 'Duplicate Premium member' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Edit Premium member' })).toBeInTheDocument();

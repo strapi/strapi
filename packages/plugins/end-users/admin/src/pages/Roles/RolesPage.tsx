@@ -15,17 +15,17 @@ import { ListPage } from './ListPage';
  */
 const RolesPage = () => {
   return (
-    <Page.Protect permissions={PERMISSIONS.roles.read}>
-      <MigrationBanner />
-      <CheckModeNotice>
+    <CheckModeNotice page="roles">
+      <Page.Protect permissions={PERMISSIONS.roles.read}>
+        <MigrationBanner />
         <Routes>
           <Route index element={<ListPage />} />
           <Route path="new" element={<CreatePage />} />
           <Route path="duplicate/:documentId" element={<CreatePage />} />
           <Route path=":documentId" element={<EditPage />} />
         </Routes>
-      </CheckModeNotice>
-    </Page.Protect>
+      </Page.Protect>
+    </CheckModeNotice>
   );
 };
 

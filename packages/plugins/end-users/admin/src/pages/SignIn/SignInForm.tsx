@@ -21,7 +21,9 @@ import {
 import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { ReadOnlyRow } from '../../components/ReadOnlyRow';
+import { ToggleField } from '../../components/FormFields';
+import { ReadOnlyList, ReadOnlyRow } from '../../components/ReadOnlyRow';
+import { formatDuration } from '../../utils/configWords';
 import { getTranslation } from '../../utils/getTranslation';
 import { useSaveSettings } from '../../utils/useSaveSettings';
 
@@ -106,6 +108,43 @@ const ListField = ({
   );
 };
 
+/**
+ * A method whose package is not installed cannot work, so it reads as off whatever is stored: the
+ * stored value is kept (a save leaves it out), and turns on again once the package is added.
+ */
+const NotInstalledMethod = ({ name, label }: { name: string; label: string }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Field.Root
+      name={name}
+      maxWidth="320px"
+      hint={formatMessage(
+        {
+          id: getTranslation('settings.sign-in.not-installed'),
+          defaultMessage: 'Not installed. Add it in <code>config/plugins.ts</code>.',
+        },
+        { code: (chunks: React.ReactNode) => <code>{chunks}</code> }
+      )}
+    >
+      <Field.Label>{label}</Field.Label>
+      <Toggle
+        checked={false}
+        disabled
+        onLabel={formatMessage({
+          id: 'app.components.ToggleCheckbox.enabled-label',
+          defaultMessage: 'Enabled',
+        })}
+        offLabel={formatMessage({
+          id: 'app.components.ToggleCheckbox.disabled-label',
+          defaultMessage: 'Disabled',
+        })}
+      />
+      <Field.Hint />
+    </Field.Root>
+  );
+};
+
 const SignInForm = ({
   settings,
   roles,
@@ -136,8 +175,14 @@ const SignInForm = ({
     }
   });
 
-  const on = formatMessage({ id: getTranslation('settings.on'), defaultMessage: 'On' });
-  const off = formatMessage({ id: getTranslation('settings.off'), defaultMessage: 'Off' });
+  const on = formatMessage({
+    id: 'app.components.ToggleCheckbox.enabled-label',
+    defaultMessage: 'Enabled',
+  });
+  const off = formatMessage({
+    id: 'app.components.ToggleCheckbox.disabled-label',
+    defaultMessage: 'Disabled',
+  });
 
   const handleSubmit = (values: SignInValues, helpers: FormHelpers<SignInValues>) => {
     // A method that is not installed cannot be turned on: it is left as it is stored
@@ -149,14 +194,7 @@ const SignInForm = ({
   };
 
   const toggle = (name: string, label: string, hint?: string, isDisabled = disabled) => (
-    <InputRenderer
-      type="boolean"
-      name={name}
-      label={label}
-      hint={hint}
-      disabled={isDisabled}
-      required
-    />
+    <ToggleField name={name} label={label} hint={hint} disabled={isDisabled} />
   );
 
   const number = (name: string, label: string) => (
@@ -196,24 +234,19 @@ const SignInForm = ({
                 })}
               >
                 <Grid.Root gap={4}>
-                  {METHODS.map(({ id, label }) => {
+                  {METHODS.map(({ id, label: methodLabel }) => {
                     const isInstalled = installed.has(id);
+                    const label = formatMessage({
+                      id: getTranslation(`settings.sign-in.method.${id}`),
+                      defaultMessage: methodLabel,
+                    });
 
                     return (
                       <Grid.Item key={id} xs={12} col={6} direction="column" alignItems="stretch">
-                        {toggle(
-                          `methods.${id}`,
-                          formatMessage({
-                            id: getTranslation(`settings.sign-in.method.${id}`),
-                            defaultMessage: label,
-                          }),
-                          isInstalled
-                            ? undefined
-                            : formatMessage({
-                                id: getTranslation('settings.sign-in.not-installed'),
-                                defaultMessage: 'Add it in `config/plugins.ts`',
-                              }),
-                          disabled || !isInstalled
+                        {isInstalled ? (
+                          toggle(`methods.${id}`, label)
+                        ) : (
+                          <NotInstalledMethod name={`methods.${id}`} label={label} />
                         )}
                       </Grid.Item>
                     );
@@ -329,10 +362,11 @@ const SignInForm = ({
                       })
                     )}
                   </Grid.Item>
-                  <Grid.Item xs={12} direction="column" alignItems="stretch">
+                  <Grid.Item xs={12} col={4} direction="column" alignItems="stretch">
                     {/* Installed in code, so read-only */}
                     <Field.Root
                       name="breachedPasswordCheck"
+                      maxWidth="320px"
                       hint={formatMessage(
                         {
                           id: getTranslation('settings.sign-in.breached.hint'),
@@ -412,35 +446,37 @@ const SignInForm = ({
                     { code: (chunks: React.ReactNode) => <code>{chunks}</code> }
                   )}
                 </Typography>
-                <ReadOnlyRow
-                  label={formatMessage({
-                    id: getTranslation('settings.sessions.expires-in'),
-                    defaultMessage: 'Session lasts',
-                  })}
-                >
-                  {meta.config.session.expiresIn}
-                </ReadOnlyRow>
-                <ReadOnlyRow
-                  label={formatMessage({
-                    id: getTranslation('settings.sessions.update-age'),
-                    defaultMessage: 'Session renewed after',
-                  })}
-                >
-                  {meta.config.session.updateAge}
-                </ReadOnlyRow>
-                <ReadOnlyRow
-                  label={formatMessage({
-                    id: getTranslation('settings.sessions.cookie-cache'),
-                    defaultMessage: 'Cookie cache',
-                  })}
-                >
-                  {meta.config.session.cookieCache === false
-                    ? formatMessage({
-                        id: getTranslation('settings.sessions.cookie-cache.off'),
-                        defaultMessage: 'Off',
-                      })
-                    : meta.config.session.cookieCache}
-                </ReadOnlyRow>
+                <ReadOnlyList>
+                  <ReadOnlyRow
+                    label={formatMessage({
+                      id: getTranslation('settings.sessions.expires-in'),
+                      defaultMessage: 'Session lasts',
+                    })}
+                  >
+                    {formatDuration(meta.config.session.expiresIn, formatMessage)}
+                  </ReadOnlyRow>
+                  <ReadOnlyRow
+                    label={formatMessage({
+                      id: getTranslation('settings.sessions.update-age'),
+                      defaultMessage: 'Session renewed after',
+                    })}
+                  >
+                    {formatDuration(meta.config.session.updateAge, formatMessage)}
+                  </ReadOnlyRow>
+                  <ReadOnlyRow
+                    label={formatMessage({
+                      id: getTranslation('settings.sessions.cookie-cache'),
+                      defaultMessage: 'Session cookie cache',
+                    })}
+                  >
+                    {meta.config.session.cookieCache === false
+                      ? formatMessage({
+                          id: getTranslation('settings.config.off'),
+                          defaultMessage: 'Off',
+                        })
+                      : formatDuration(meta.config.session.cookieCache, formatMessage)}
+                  </ReadOnlyRow>
+                </ReadOnlyList>
               </Section>
             </Flex>
           </Layouts.Content>

@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Layouts, Page, SearchInput, useQueryParams, useRBAC } from '@strapi/admin/strapi-admin';
 import {
-  Box,
   Button,
   Flex,
   IconButton,
@@ -12,7 +11,6 @@ import {
   TFooter,
   Th,
   Thead,
-  Tooltip,
   Tr,
   Typography,
   VisuallyHidden,
@@ -70,10 +68,6 @@ const ListPage = () => {
   const addLabel = formatMessage({
     id: getTranslation('roles.list.add'),
     defaultMessage: 'Add new role',
-  });
-  const cantDeleteLabel = formatMessage({
-    id: getTranslation('roles.list.delete.built-in'),
-    defaultMessage: "Public and Authenticated can't be deleted",
   });
 
   const handleAdd = () => navigate('new');
@@ -240,36 +234,16 @@ const ListPage = () => {
                           <Pencil />
                         </IconButton>
                       )}
-                      {canDelete &&
-                        (isBuiltIn ? (
-                          // A disabled button takes no hover or focus: the tooltip hangs on a wrapper
-                          <Tooltip label={cantDeleteLabel}>
-                            <Box
-                              tag="span"
-                              display="inline-flex"
-                              tabIndex={0}
-                              role="group"
-                              aria-label={cantDeleteLabel}
-                            >
-                              <IconButton
-                                variant="ghost"
-                                disabled
-                                withTooltip={false}
-                                label={deleteLabel}
-                              >
-                                <Trash />
-                              </IconButton>
-                            </Box>
-                          </Tooltip>
-                        ) : (
-                          <IconButton
-                            variant="ghost"
-                            label={deleteLabel}
-                            onClick={() => setRoleToDelete(role)}
-                          >
-                            <Trash />
-                          </IconButton>
-                        ))}
+                      {/* Public and Authenticated stay: there is nothing to delete, so no button */}
+                      {canDelete && !isBuiltIn && (
+                        <IconButton
+                          variant="ghost"
+                          label={deleteLabel}
+                          onClick={() => setRoleToDelete(role)}
+                        >
+                          <Trash />
+                        </IconButton>
+                      )}
                     </Flex>
                   </Td>
                 </Tr>

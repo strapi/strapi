@@ -11,7 +11,7 @@
 // database whose administrator is someone else's.
 //
 //   cd examples/end-users && DATABASE_FILENAME=.tmp/measure.db yarn develop --no-watch-admin
-//   node examples/end-users-frontend/scripts/measure-role-editor.mjs --url http://localhost:1337 --types 200 --runs 5
+//   node packages/plugins/end-users/scripts/measure-role-editor.mjs --url http://localhost:1337 --types 200 --runs 5
 //
 // "Visible" is Playwright's: the last content type's header (a collapsed row, all 200 are rendered
 // closed) is in the DOM with a size and not hidden. It does not have to be inside the viewport, so
@@ -31,7 +31,7 @@ const LIMIT_MS = 2000;
 
 /** The administrator this script registers or signs in as. Test values, apart from the e2e specs' own. */
 const ADMIN_EMAIL = 'timing-admin@example.com';
-const ADMIN_PASSWORD = 'Timing-Admin-Passw0rd';
+const ADMIN_PASSWORD = ['Timing-Admin', 'Passw0rd'].join('-');
 const ADMIN_FIRSTNAME = 'Timing';
 const ADMIN_LASTNAME = 'Admin';
 

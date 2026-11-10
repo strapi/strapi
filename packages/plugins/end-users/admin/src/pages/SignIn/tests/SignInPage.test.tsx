@@ -6,7 +6,7 @@ import { http, HttpResponse } from 'msw';
 import { PERMISSIONS } from '../../../constants';
 import { SignInPage } from '../SignInPage';
 
-import { refuseOn, serveSettings } from './fixtures';
+import { refuseOn, serveSettings, SETTINGS } from './fixtures';
 
 const renderPage = () =>
   render(<SignInPage />, { initialEntries: ['/settings/end-users/sign-in'] });
@@ -66,9 +66,46 @@ describe('SignInPage', () => {
 
     await screen.findByRole('heading', { name: 'Sign-in' });
 
+    // Off and out of reach, whatever is stored: it can't work without its package
     expect(screen.getByRole('checkbox', { name: 'Passkeys' })).toBeDisabled();
+    expect(screen.getByRole('checkbox', { name: 'Passkeys' })).not.toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Username' })).toBeEnabled();
-    expect(screen.getAllByText('Add it in `config/plugins.ts`')).toHaveLength(4);
+    expect(screen.getAllByText(/^Not installed\./)).toHaveLength(4);
+    expect(screen.queryByText(/`/)).not.toBeInTheDocument();
+  });
+
+  it('words every toggle as Enabled and Disabled, and marks none as required', async () => {
+    serveSettings();
+    renderPage();
+
+    await screen.findByRole('heading', { name: 'Sign-in' });
+
+    expect(screen.getAllByText('Enabled').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Disabled').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/^(true|false)$/i)).not.toBeInTheDocument();
+    // A toggle can't be empty: only the numbers carry the asterisk
+    expect(screen.getAllByText('*')).toHaveLength(4);
+  });
+
+  it('shows a stored method that is not installed as off, and keeps the stored value', async () => {
+    const saved = serveSettings({
+      ...SETTINGS,
+      data: { ...SETTINGS.data, methods: { ...SETTINGS.data.methods, passkey: true } },
+    });
+    const { user } = renderPage();
+
+    expect(await screen.findByRole('checkbox', { name: 'Passkeys' })).not.toBeChecked();
+
+    const min = screen.getByRole('textbox', { name: /Minimum length/ });
+
+    await user.clear(min);
+    await user.type(min, '10');
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Saved')).toBeInTheDocument();
+    // The save leaves a method that is not installed out, so the server keeps what it has
+    expect(saved[0]).toMatchObject({ methods: { emailPassword: true, username: false } });
+    expect(saved[0]).not.toHaveProperty('methods.passkey');
   });
 
   it('shows server validation errors on their fields', async () => {
@@ -82,7 +119,11 @@ describe('SignInPage', () => {
     await user.type(min, '500');
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText('minLength cannot exceed maxLength')).toBeInTheDocument();
+    // The message is under the field, which is then marked invalid
+    expect(await screen.findByText('minLength cannot exceed maxLength')).toHaveAttribute(
+      'data-strapi-field-error'
+    );
+    expect(min).toBeInvalid();
   });
 
   it('is read-only without settings.update', async () => {
@@ -101,7 +142,9 @@ describe('SignInPage', () => {
     serveSettings();
     renderPage();
 
-    expect(await screen.findByText('7d')).toBeInTheDocument();
+    expect(await screen.findByText('7 days')).toBeInTheDocument();
+    expect(screen.getByText('Session cookie cache')).toBeInTheDocument();
+    expect(screen.getByText('Off')).toBeInTheDocument();
     expect(screen.getByText('Session lasts')).toBeInTheDocument();
   });
 });

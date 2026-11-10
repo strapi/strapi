@@ -13,6 +13,7 @@ import { Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { BUILDER_LIMITS } from '../../../../../../shared/builder/types';
+import { getTranslation } from '../../../../utils/getTranslation';
 import { newKey } from '../../utils/builderForm';
 
 import { useLabels } from './labels';
@@ -48,9 +49,12 @@ export const InputsSection = ({
 
   return (
     <Section
-      title={formatMessage({ id: 'end-users.conditions.builder.inputs', defaultMessage: 'Inputs' })}
+      title={formatMessage({
+        id: getTranslation('conditions.builder.inputs'),
+        defaultMessage: 'Inputs',
+      })}
       description={formatMessage({
-        id: 'end-users.conditions.builder.inputs.description',
+        id: getTranslation('conditions.builder.inputs.description'),
         defaultMessage:
           'Values a role gives when it uses this condition. A check can compare with an input, or be about the field an input names.',
       })}
@@ -74,7 +78,7 @@ export const InputsSection = ({
               hint={
                 saved
                   ? formatMessage({
-                      id: 'end-users.conditions.builder.inputs.name-locked',
+                      id: getTranslation('conditions.builder.inputs.name-locked'),
                       defaultMessage: "Input names can't change once saved",
                     })
                   : undefined
@@ -82,7 +86,7 @@ export const InputsSection = ({
             >
               <Field.Label>
                 {formatMessage({
-                  id: 'end-users.conditions.builder.inputs.name',
+                  id: getTranslation('conditions.builder.inputs.name'),
                   defaultMessage: 'Input name',
                 })}
               </Field.Label>
@@ -114,25 +118,25 @@ export const InputsSection = ({
             >
               <SingleSelectOption value="text">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.inputs.kind-text',
+                  id: getTranslation('conditions.builder.inputs.kind-text'),
                   defaultMessage: 'Text',
                 })}
               </SingleSelectOption>
               <SingleSelectOption value="number">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.inputs.kind-number',
+                  id: getTranslation('conditions.builder.inputs.kind-number'),
                   defaultMessage: 'Number',
                 })}
               </SingleSelectOption>
               <SingleSelectOption value="boolean">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.inputs.kind-boolean',
+                  id: getTranslation('conditions.builder.inputs.kind-boolean'),
                   defaultMessage: 'True or false',
                 })}
               </SingleSelectOption>
               <SingleSelectOption value="field">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.inputs.kind-field',
+                  id: getTranslation('conditions.builder.inputs.kind-field'),
                   defaultMessage: 'A field',
                 })}
               </SingleSelectOption>
@@ -157,31 +161,31 @@ export const InputsSection = ({
                 >
                   <SingleSelectOption value="text">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.inputs.accepts-text',
+                      id: getTranslation('conditions.builder.inputs.accepts-text'),
                       defaultMessage: 'A text field',
                     })}
                   </SingleSelectOption>
                   <SingleSelectOption value="number">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.inputs.accepts-number',
+                      id: getTranslation('conditions.builder.inputs.accepts-number'),
                       defaultMessage: 'A number field',
                     })}
                   </SingleSelectOption>
                   <SingleSelectOption value="date">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.inputs.accepts-date',
+                      id: getTranslation('conditions.builder.inputs.accepts-date'),
                       defaultMessage: 'A date field',
                     })}
                   </SingleSelectOption>
                   <SingleSelectOption value="boolean">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.inputs.accepts-boolean',
+                      id: getTranslation('conditions.builder.inputs.accepts-boolean'),
                       defaultMessage: 'A true or false field',
                     })}
                   </SingleSelectOption>
                   <SingleSelectOption value="relation">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.inputs.accepts-relation',
+                      id: getTranslation('conditions.builder.inputs.accepts-relation'),
                       defaultMessage: 'A relation',
                     })}
                   </SingleSelectOption>
@@ -208,11 +212,11 @@ export const InputsSection = ({
                 disabled={disabled || input.kind === 'field'}
                 checked={input.required || input.kind === 'field'}
                 onLabel={formatMessage({
-                  id: 'end-users.conditions.builder.inputs.required',
+                  id: getTranslation('conditions.builder.inputs.required'),
                   defaultMessage: 'Required',
                 })}
                 offLabel={formatMessage({
-                  id: 'end-users.conditions.builder.inputs.optional',
+                  id: getTranslation('conditions.builder.inputs.optional'),
                   defaultMessage: 'Optional',
                 })}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -225,7 +229,7 @@ export const InputsSection = ({
                 aria-label={labels.suffix(label, 'default')}
                 disabled={disabled}
                 placeholder={formatMessage({
-                  id: 'end-users.conditions.builder.inputs.default',
+                  id: getTranslation('conditions.builder.inputs.default'),
                   defaultMessage: 'Default',
                 })}
                 value={
@@ -245,7 +249,7 @@ export const InputsSection = ({
                 aria-label={labels.suffix(label, 'default')}
                 disabled={disabled}
                 placeholder={formatMessage({
-                  id: 'end-users.conditions.builder.inputs.default',
+                  id: getTranslation('conditions.builder.inputs.default'),
                   defaultMessage: 'Default',
                 })}
                 value={input.default ?? null}
@@ -260,7 +264,7 @@ export const InputsSection = ({
                 aria-label={labels.suffix(label, 'default')}
                 disabled={disabled}
                 placeholder={formatMessage({
-                  id: 'end-users.conditions.builder.inputs.default',
+                  id: getTranslation('conditions.builder.inputs.default'),
                   defaultMessage: 'Default',
                 })}
                 value={input.default ?? ''}
@@ -276,7 +280,7 @@ export const InputsSection = ({
             )}
             <IconButton
               label={formatMessage({
-                id: 'end-users.conditions.builder.inputs.remove',
+                id: getTranslation('conditions.builder.inputs.remove'),
                 defaultMessage: 'Remove input',
               })}
               disabled={disabled}
@@ -300,7 +304,7 @@ export const InputsSection = ({
           }
         >
           {formatMessage({
-            id: 'end-users.conditions.builder.inputs.add',
+            id: getTranslation('conditions.builder.inputs.add'),
             defaultMessage: 'Add input',
           })}
         </Button>

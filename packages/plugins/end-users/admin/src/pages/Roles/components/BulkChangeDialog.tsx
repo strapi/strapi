@@ -11,9 +11,12 @@ import type { PermissionsProps } from '@strapi/admin/strapi-admin';
 /** The change of a column of the editor, as the editor asks about it */
 type BulkChange = Parameters<NonNullable<PermissionsProps['confirmBulkChange']>>[0];
 
+/** The change to ask about: only the content types it changes, and how many already had it */
+type BulkQuestion = BulkChange & { unchanged: number };
+
 interface BulkChangeDialogProps {
   /** The change to ask about. The dialog is open while there is one. */
-  change: BulkChange | null;
+  change: BulkQuestion | null;
   onAnswer: (confirmed: boolean) => void;
 }
 
@@ -39,7 +42,7 @@ const BulkChangeDialog = ({ change, onAnswer }: BulkChangeDialogProps) => {
                   ? {
                       id: getTranslation('roles.bulk.grant'),
                       defaultMessage:
-                        'Grant <b>{label}</b> on <b>{count}</b> {kind}{filtered, select, yes { matching your search} other {}}?',
+                        'Grant <b>{label}</b> on <b>{count}</b>{more, select, yes { more} other {}} {kind}{filtered, select, yes { matching your search} other {}}?',
                     }
                   : {
                       id: getTranslation('roles.bulk.remove'),
@@ -49,6 +52,7 @@ const BulkChangeDialog = ({ change, onAnswer }: BulkChangeDialogProps) => {
                 {
                   label: change.label,
                   count: change.subjects.length,
+                  more: change.unchanged > 0 ? 'yes' : 'no',
                   kind:
                     change.tab === 'singleTypes'
                       ? formatMessage({
@@ -78,4 +82,4 @@ const BulkChangeDialog = ({ change, onAnswer }: BulkChangeDialogProps) => {
 };
 
 export { BulkChangeDialog };
-export type { BulkChange, BulkChangeDialogProps };
+export type { BulkChange, BulkChangeDialogProps, BulkQuestion };

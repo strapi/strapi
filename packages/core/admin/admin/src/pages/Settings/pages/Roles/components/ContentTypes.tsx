@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { ContentPermission } from '../../../../../../../shared/contracts/permissions';
 import { useAppInfo } from '../../../../../features/AppInfo';
 import { useRBAC } from '../../../../../hooks/useRBAC';
+import { compactCellWidth } from '../utils/constants';
 import { normalizeSearch, subjectMatchesSearch } from '../utils/search';
 
 import { ContentTypeCollapses } from './ContentTypeCollapses';
@@ -83,7 +84,10 @@ const ScrollWithinCard = ({
   children: React.ReactNode;
 }) =>
   enabled ? (
-    <div data-testid="permissions-scroll" style={{ overflowX: 'auto' }}>
+    <div
+      data-testid="permissions-scroll"
+      style={{ overflowX: 'auto', ['--permissions-cell-width' as string]: compactCellWidth }}
+    >
       {children}
     </div>
   ) : (

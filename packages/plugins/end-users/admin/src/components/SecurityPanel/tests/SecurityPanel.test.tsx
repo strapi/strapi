@@ -1,4 +1,5 @@
 import { render as renderAdmin } from '@strapi/admin/strapi-admin/test';
+import { fireEvent, within } from '@testing-library/react';
 import { screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -173,6 +174,18 @@ describe('SecurityPanel', () => {
     );
   });
 
+  it('asks before closing the ban dialog with a reason that is not sent', async () => {
+    const calls = serve();
+    const { user } = renderPanel();
+
+    await user.click(await screen.findByRole('button', { name: 'Ban' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Reason' }), 'Spam');
+    await user.keyboard('{Escape}');
+
+    expect(await screen.findByText(/You have unsaved changes/)).toBeInTheDocument();
+    expect(calls).toHaveLength(0);
+  });
+
   it('bans with a reason and an expiry', async () => {
     const calls = serve();
     const { user } = renderPanel();
@@ -187,7 +200,13 @@ describe('SecurityPanel', () => {
 
     const before = Date.now();
 
-    await user.click(screen.getByRole('button', { name: 'Ban', hidden: false }));
+    const confirmBan = within(modal).getByRole('button', { name: 'Ban' });
+
+    // A submit button inside the form of the fields, so that Enter in the reason bans
+    expect(confirmBan).toHaveAttribute('type', 'submit');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(confirmBan.closest('form')).not.toBeNull();
+    fireEvent.click(confirmBan);
 
     await waitFor(() => expect(calls).toHaveLength(1));
 
@@ -220,6 +239,14 @@ describe('SecurityPanel', () => {
     expect(screen.getByText('Spam')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Unban' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Ban' })).not.toBeInTheDocument();
+  });
+
+  it('offers no resend for an email that is verified', async () => {
+    serve();
+    renderPanel({ ...SAVED, document: { documentId: 'u1', emailVerified: true } });
+
+    expect(await screen.findByRole('button', { name: 'Send password reset' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Resend verification' })).not.toBeInTheDocument();
   });
 
   it('hides actions without explorer.update', async () => {

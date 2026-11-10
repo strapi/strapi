@@ -9,6 +9,8 @@ import {
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { getTranslation } from '../../../../utils/getTranslation';
+
 import { Section } from './Section';
 
 import type { AppliesTo } from '../../../../../../shared/builder/types';
@@ -23,7 +25,9 @@ interface AppliesToSectionProps {
   isEditing: boolean;
   disabled: boolean;
   /** What the server refused about each part */
-  errors: { slug?: string; displayName?: string };
+  errors: { slug?: string; displayName?: string; types?: string };
+  /** The admin has left a field: what is wrong with it can show */
+  onTouch: (part: 'slug' | 'displayName' | 'types') => void;
   onChange: (patch: Partial<{ slug: string; displayName: string; appliesTo: AppliesTo }>) => void;
 }
 
@@ -35,6 +39,7 @@ export const AppliesToSection = ({
   isEditing,
   disabled,
   errors,
+  onTouch,
   onChange,
 }: AppliesToSectionProps) => {
   const { formatMessage } = useIntl();
@@ -42,7 +47,7 @@ export const AppliesToSection = ({
   return (
     <Section
       title={formatMessage({
-        id: 'end-users.conditions.builder.name-and-types',
+        id: getTranslation('conditions.builder.name-and-types'),
         defaultMessage: 'Name and content types',
       })}
     >
@@ -53,9 +58,9 @@ export const AppliesToSection = ({
             error={errors.slug}
             required
             hint={formatMessage({
-              id: 'end-users.conditions.builder.name.hint',
+              id: getTranslation('conditions.builder.name.hint'),
               defaultMessage:
-                'Lowercase letters, digits and hyphens. It names the condition api::name, and cannot change once it is created.',
+                'Lowercase letters, digits and hyphens. Code refers to the condition as api::your-name. It cannot change once it is created.',
             })}
           >
             <Field.Label>
@@ -64,6 +69,7 @@ export const AppliesToSection = ({
             <TextInput
               disabled={disabled || isEditing}
               value={slug}
+              onBlur={() => onTouch('slug')}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 onChange({ slug: event.target.value })
               }
@@ -78,19 +84,20 @@ export const AppliesToSection = ({
             error={errors.displayName}
             required
             hint={formatMessage({
-              id: 'end-users.conditions.builder.display-name.hint',
+              id: getTranslation('conditions.builder.display-name.hint'),
               defaultMessage: 'What a role editor shows.',
             })}
           >
             <Field.Label>
               {formatMessage({
-                id: 'end-users.conditions.builder.display-name',
+                id: getTranslation('conditions.builder.display-name'),
                 defaultMessage: 'Display name',
               })}
             </Field.Label>
             <TextInput
               disabled={disabled}
               value={displayName}
+              onBlur={() => onTouch('displayName')}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 onChange({ displayName: event.target.value })
               }
@@ -104,7 +111,7 @@ export const AppliesToSection = ({
             <Radio.Group
               name="appliesToKind"
               aria-label={formatMessage({
-                id: 'end-users.conditions.builder.applies-to',
+                id: getTranslation('conditions.builder.applies-to'),
                 defaultMessage: 'Applies to',
               })}
               value={appliesTo.kind}
@@ -120,19 +127,19 @@ export const AppliesToSection = ({
             >
               <Radio.Item value="types">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.types',
+                  id: getTranslation('conditions.builder.applies-to.types'),
                   defaultMessage: 'Chosen content types',
                 })}
               </Radio.Item>
               <Radio.Item value="user-relation">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.user-relation',
+                  id: getTranslation('conditions.builder.applies-to.user-relation'),
                   defaultMessage: 'Every content type that has a relation to the end user',
                 })}
               </Radio.Item>
               <Radio.Item value="all">
                 {formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.all',
+                  id: getTranslation('conditions.builder.applies-to.all'),
                   defaultMessage: 'Every content type',
                 })}
               </Radio.Item>
@@ -140,15 +147,16 @@ export const AppliesToSection = ({
             {appliesTo.kind === 'types' && (
               <Field.Root
                 name="types"
+                error={errors.types}
                 required
                 hint={formatMessage({
-                  id: 'end-users.conditions.builder.applies-to.hint',
+                  id: getTranslation('conditions.builder.applies-to.hint'),
                   defaultMessage: 'The content types a role can use this condition on.',
                 })}
               >
                 <Field.Label>
                   {formatMessage({
-                    id: 'end-users.conditions.builder.content-types',
+                    id: getTranslation('conditions.builder.content-types'),
                     defaultMessage: 'Content types',
                   })}
                 </Field.Label>
@@ -156,9 +164,10 @@ export const AppliesToSection = ({
                   value={appliesTo.types}
                   onChange={(types: string[]) => onChange({ appliesTo: { kind: 'types', types } })}
                   disabled={disabled}
+                  onOpenChange={(open: boolean) => !open && onTouch('types')}
                   withTags
                   placeholder={formatMessage({
-                    id: 'end-users.conditions.builder.applies-to.placeholder',
+                    id: getTranslation('conditions.builder.applies-to.placeholder'),
                     defaultMessage: 'Choose content types',
                   })}
                 >
@@ -169,6 +178,7 @@ export const AppliesToSection = ({
                   ))}
                 </MultiSelect>
                 <Field.Hint />
+                <Field.Error />
               </Field.Root>
             )}
           </Flex>

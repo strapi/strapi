@@ -20,11 +20,13 @@ import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useParams } from 'react-router-dom';
 
+import { NotFound } from '../../components/NotFound';
 import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
 import { useGetBuilderLayoutQuery, useGetConditionsQuery } from '../../services/conditions';
 import { useGetPermissionLayoutQuery } from '../../services/permissions';
 import { getTranslation } from '../../utils/getTranslation';
+import { describeParam } from '../../utils/paramWords';
 import { withOccurrenceKeys } from '../../utils/withOccurrenceKeys';
 
 import { QueryChips } from './components/QueryChips';
@@ -207,7 +209,7 @@ const BuilderSections = ({ builder }: { builder: BuilderConditionV2 }) => {
           <Typography textColor="neutral600">
             {formatMessage({
               id: getTranslation('conditions.view.params.none'),
-              defaultMessage: 'This condition takes no parameters.',
+              defaultMessage: 'This condition takes no inputs.',
             })}
           </Typography>
         ) : (
@@ -477,7 +479,7 @@ const ConditionView = ({ condition, layout, canReadRoles }: ConditionViewProps) 
                 {
                   id: getTranslation('conditions.view.read-only'),
                   defaultMessage:
-                    "{source, select, builtin {It is built into the end-users plugin, so it can't be changed.} plugin {A plugin registers it: change it in that plugin.} code {It is written in your project's code, in <code>src/end-users/conditions</code>: change it there.} other {It is a file in <code>src/end-users/conditions</code> that the builder did not write: change the file.}}",
+                    "{source, select, builtin {It is built into the End users plugin, so it can't be changed.} plugin {A plugin registers it: change it in that plugin.} code {It is written in your project's code, in <code>src/end-users/conditions</code>: change it there.} other {It is a file in <code>src/end-users/conditions</code> that the builder did not write: change the file.}}",
                 },
                 {
                   source,
@@ -604,14 +606,14 @@ const ConditionView = ({ condition, layout, canReadRoles }: ConditionViewProps) 
               <Section
                 title={formatMessage({
                   id: getTranslation('conditions.view.params'),
-                  defaultMessage: 'Parameters',
+                  defaultMessage: 'Inputs',
                 })}
               >
                 {params.length === 0 ? (
                   <Typography textColor="neutral600">
                     {formatMessage({
                       id: getTranslation('conditions.view.params.none'),
-                      defaultMessage: 'This condition takes no parameters.',
+                      defaultMessage: 'This condition takes no inputs.',
                     })}
                   </Typography>
                 ) : (
@@ -649,8 +651,8 @@ const ConditionView = ({ condition, layout, canReadRoles }: ConditionViewProps) 
                       {params.map((param) => (
                         <Tr key={param.name}>
                           <Td>
-                            <Typography textColor="neutral800">
-                              <code>{param.name}</code>
+                            <Typography textColor="neutral800" title={param.name}>
+                              {describeParam(param.name, formatMessage).label}
                               {param.createOnly && (
                                 <Typography textColor="neutral600">
                                   {' '}
@@ -794,7 +796,7 @@ const ViewPage = () => {
   const condition = conditions.find((each) => each.name === name);
 
   if (!condition) {
-    return <Page.NoData />;
+    return <NotFound kind="condition" backPath={CONDITIONS_PATH} />;
   }
 
   return <ConditionView condition={condition} layout={layout} canReadRoles={canReadRoles} />;

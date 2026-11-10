@@ -1,3 +1,5 @@
+import { getTranslation } from '../../../utils/getTranslation';
+
 import type {
   BuilderConditionV2,
   BuilderValue,
@@ -44,7 +46,7 @@ type Say = (id: string, defaultMessage: string, values?: Record<string, string |
 export const sayWith =
   (formatMessage: SummaryFormatter): Say =>
   (id, defaultMessage, values) =>
-    formatMessage({ id: `end-users.conditions.summary.${id}`, defaultMessage }, values);
+    formatMessage({ id: getTranslation(`conditions.summary.${id}`), defaultMessage }, values);
 
 /** The wording of values and operators, shared by the summary and the read-only page */
 export const createValueDescriber = (say: Say) => {
@@ -201,7 +203,10 @@ export const summarize = (
       (uid) => layout.contentTypes.find((type) => type.uid === uid)?.displayName ?? uid
     );
 
-    sentences.push(say('appliesTypes', 'Applies to {types}.', { types: list(names) }));
+    // Nothing is said until a content type is chosen: "Applies to ." says nothing
+    if (names.length > 0) {
+      sentences.push(say('appliesTypes', 'Applies to {types}.', { types: list(names) }));
+    }
   }
 
   if (condition.inputs.length > 0) {

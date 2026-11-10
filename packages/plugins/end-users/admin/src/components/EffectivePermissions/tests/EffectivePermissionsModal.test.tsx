@@ -86,6 +86,7 @@ const EFFECTIVE: EffectivePermissions = {
         populateDepth: 2,
       },
       'read-drafts': { fields: null, conditions: [], populateDepth: null },
+      update: { fields: null, conditions: [], populateDepth: null },
     },
     [CATEGORY]: { find: { fields: ['name'], conditions: [], populateDepth: null } },
   },
@@ -133,8 +134,13 @@ describe('EffectivePermissionsModal', () => {
 
     const readDrafts = within(article).getByRole('row', { name: /Read drafts/ });
 
-    expect(within(readDrafts).getByText('Every field')).toBeVisible();
     expect(within(readDrafts).getByText('Unlimited')).toBeVisible();
+    // Fields apply to Update, and mean nothing for an action that has none
+    expect(
+      within(within(article).getByRole('row', { name: /Update/ })).getByText('Every field')
+    ).toBeVisible();
+    expect(within(readDrafts).queryByText('Every field')).not.toBeInTheDocument();
+    expect(within(readDrafts).getByText('—')).toBeVisible();
 
     // The other role grants the other type
     expect(await within(category).findByText('Category reader')).toBeVisible();
@@ -154,6 +160,17 @@ describe('EffectivePermissionsModal', () => {
     ).toBeVisible();
     // A condition of code or the plugin is named, not quoted
     expect(within(article).getByText('Is owner')).toBeVisible();
+  });
+
+  it('has a Close in its footer, like the sessions dialog', async () => {
+    serve();
+    const onClose = jest.fn();
+    const { user } = renderModal({ onClose });
+
+    await screen.findByRole('region', { name: 'Article' });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('reads nothing while it is closed', async () => {

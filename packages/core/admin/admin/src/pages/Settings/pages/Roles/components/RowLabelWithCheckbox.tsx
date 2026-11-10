@@ -18,6 +18,8 @@ interface RowLabelWithCheckboxProps {
   onChange: PermissionsDataManagerContextValue['onChangeParentCheckbox'];
   onClick: () => void;
   someChecked?: boolean;
+  /** Stays at the left edge while the table scrolls sideways */
+  sticky?: boolean;
   value: boolean;
 }
 
@@ -31,6 +33,7 @@ const RowLabelWithCheckbox = ({
   onChange,
   onClick,
   someChecked = false,
+  sticky = false,
   value,
 }: RowLabelWithCheckboxProps) => {
   const { formatMessage } = useIntl();
@@ -56,7 +59,15 @@ const RowLabelWithCheckbox = ({
   }
 
   return (
-    <Flex alignItems="center" paddingLeft={6} width={firstRowWidth} shrink={0}>
+    <Flex
+      alignItems="center"
+      paddingLeft={6}
+      width={firstRowWidth}
+      shrink={0}
+      data-testid={sticky ? 'sticky-row-label' : undefined}
+      // Takes the row's own background (grey, active, hovered) so the cells scrolling under it are hidden
+      style={sticky ? { position: 'sticky', left: 0, zIndex: 2, background: 'inherit' } : undefined}
+    >
       <Box paddingRight={2}>
         <Checkbox
           name={checkboxName}

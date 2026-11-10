@@ -18,6 +18,7 @@ import {
   takesList,
   takesNoValue,
 } from '../../../../../../shared/builder/operators';
+import { getTranslation } from '../../../../utils/getTranslation';
 import {
   emptyValue,
   inputValueOptions,
@@ -79,7 +80,7 @@ const ListText = ({
       disabled={disabled}
       value={text}
       placeholder={formatMessage({
-        id: 'end-users.conditions.builder.value.list',
+        id: getTranslation('conditions.builder.value.list'),
         defaultMessage: 'Values, separated by commas',
       })}
       onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,7 +230,7 @@ export const FixedValueInput = ({
       placeholder={
         slot.type === 'time'
           ? formatMessage({
-              id: 'end-users.conditions.builder.value.time',
+              id: getTranslation('conditions.builder.value.time'),
               defaultMessage: 'HH:mm',
             })
           : undefined
@@ -288,7 +289,7 @@ export const ValueInput = ({
     {
       kind: 'fixed',
       label: formatMessage({
-        id: 'end-users.conditions.builder.value.fixed',
+        id: getTranslation('conditions.builder.value.fixed'),
         defaultMessage: 'A value',
       }),
     },
@@ -298,7 +299,7 @@ export const ValueInput = ({
     kinds.push({
       kind: 'input',
       label: formatMessage({
-        id: 'end-users.conditions.builder.value.input',
+        id: getTranslation('conditions.builder.value.input'),
         defaultMessage: 'An input',
       }),
     });
@@ -308,7 +309,7 @@ export const ValueInput = ({
     kinds.push({
       kind: 'user',
       label: formatMessage({
-        id: 'end-users.conditions.builder.value.user',
+        id: getTranslation('conditions.builder.value.user'),
         defaultMessage: 'The signed-in user',
       }),
     });
@@ -318,7 +319,7 @@ export const ValueInput = ({
     kinds.push({
       kind: 'profile',
       label: formatMessage({
-        id: 'end-users.conditions.builder.value.profile',
+        id: getTranslation('conditions.builder.value.profile'),
         defaultMessage: "The user's profile",
       }),
     });
@@ -327,7 +328,10 @@ export const ValueInput = ({
   if (nowAllowed(slot, operator)) {
     kinds.push({
       kind: 'now',
-      label: formatMessage({ id: 'end-users.conditions.builder.value.now', defaultMessage: 'Now' }),
+      label: formatMessage({
+        id: getTranslation('conditions.builder.value.now'),
+        defaultMessage: 'Now',
+      }),
     });
   }
 
@@ -417,7 +421,7 @@ export const ValueInput = ({
             aria-label={labels.suffix(label, 'offset')}
             disabled={disabled}
             placeholder={formatMessage({
-              id: 'end-users.conditions.builder.value.now-offset',
+              id: getTranslation('conditions.builder.value.now-offset'),
               defaultMessage: 'Offset, negative for before',
             })}
             value={

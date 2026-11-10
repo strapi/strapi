@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   Alert,
   Box,
+  Button,
   Flex,
   Loader,
   Modal,
@@ -16,7 +17,7 @@ import {
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { DATA_ACTIONS } from '../../../../shared/contracts/permissions';
+import { DATA_ACTIONS, FIELD_ACTIONS } from '../../../../shared/contracts/permissions';
 import { summarize } from '../../pages/Conditions/utils/summarize';
 import { ACTION_MESSAGES } from '../../pages/Roles/utils/actionLabels';
 import { useGetBuilderLayoutQuery, useGetConditionsQuery } from '../../services/conditions';
@@ -194,32 +195,42 @@ const Content = ({ documentId }: { documentId: string }) => {
             <Typography tag="h3" variant="delta" paddingBottom={2}>
               {label}
             </Typography>
-            <Table colCount={5} rowCount={Object.keys(actions).length + 1}>
+            {/* Fixed columns, so Fields, From role and Conditions start at the same place in every content type */}
+            <Table
+              colCount={5}
+              rowCount={Object.keys(actions).length + 1}
+              style={{ tableLayout: 'fixed' }}
+            >
               <Thead>
                 <Tr>
                   {[
                     {
                       id: getTranslation('effective-permissions.action'),
                       defaultMessage: 'Action',
+                      width: '14%',
                     },
                     {
                       id: getTranslation('effective-permissions.fields'),
                       defaultMessage: 'Fields',
+                      width: '24%',
                     },
                     {
                       id: getTranslation('effective-permissions.from'),
                       defaultMessage: 'From role',
+                      width: '18%',
                     },
                     {
                       id: getTranslation('effective-permissions.conditions'),
                       defaultMessage: 'Conditions',
+                      width: '30%',
                     },
                     {
                       id: getTranslation('effective-permissions.depth'),
                       defaultMessage: 'Populate depth',
+                      width: '14%',
                     },
-                  ].map((header) => (
-                    <Th key={header.id}>
+                  ].map(({ width, ...header }) => (
+                    <Th key={header.id} style={{ width }}>
                       <Typography variant="sigma" textColor="neutral600">
                         {formatMessage(header)}
                       </Typography>
@@ -243,17 +254,20 @@ const Content = ({ documentId }: { documentId: string }) => {
                         </Td>
                         <Td>
                           <Typography>
-                            {held.fields === null
-                              ? formatMessage({
-                                  id: getTranslation('effective-permissions.every-field'),
-                                  defaultMessage: 'Every field',
-                                })
-                              : held.fields.length === 0
+                            {!FIELD_ACTIONS.includes(action as DataAction)
+                              ? // Fields don't apply to Delete or Publish: "every field" would mean nothing
+                                '—'
+                              : held.fields === null
                                 ? formatMessage({
-                                    id: getTranslation('effective-permissions.no-field'),
-                                    defaultMessage: 'No field',
+                                    id: getTranslation('effective-permissions.every-field'),
+                                    defaultMessage: 'Every field',
                                   })
-                                : held.fields.join(', ')}
+                                : held.fields.length === 0
+                                  ? formatMessage({
+                                      id: getTranslation('effective-permissions.no-field'),
+                                      defaultMessage: 'No field',
+                                    })
+                                  : held.fields.join(', ')}
                           </Typography>
                         </Td>
                         <Td>
@@ -340,6 +354,13 @@ const EffectivePermissionsModal = ({
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>{open && <Content documentId={documentId} />}</Modal.Body>
+        <Modal.Footer>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+            </Button>
+          </Modal.Close>
+        </Modal.Footer>
       </Modal.Content>
     </Modal.Root>
   );

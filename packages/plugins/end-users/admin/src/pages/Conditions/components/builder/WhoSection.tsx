@@ -11,6 +11,7 @@ import { Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { operatorsFor, takesNoValue } from '../../../../../../shared/builder/operators';
+import { getTranslation } from '../../../../utils/getTranslation';
 import { newKey } from '../../utils/builderForm';
 import { isFilterable, reshapeValue } from '../../utils/builderOptions';
 
@@ -106,13 +107,13 @@ const AttributeRow = ({
       >
         <SingleSelectOption value="user">
           {formatMessage({
-            id: 'end-users.conditions.builder.who.source-user',
+            id: getTranslation('conditions.builder.who.source-user'),
             defaultMessage: 'The user',
           })}
         </SingleSelectOption>
         <SingleSelectOption value="profile">
           {formatMessage({
-            id: 'end-users.conditions.builder.who.source-profile',
+            id: getTranslation('conditions.builder.who.source-profile'),
             defaultMessage: 'Their profile',
           })}
         </SingleSelectOption>
@@ -156,7 +157,7 @@ const AttributeRow = ({
       )}
       <IconButton
         label={formatMessage({
-          id: 'end-users.conditions.builder.who.remove-check',
+          id: getTranslation('conditions.builder.who.remove-check'),
           defaultMessage: 'Remove check',
         })}
         disabled={disabled}
@@ -184,11 +185,11 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
   return (
     <Section
       title={formatMessage({
-        id: 'end-users.conditions.builder.who',
+        id: getTranslation('conditions.builder.who'),
         defaultMessage: 'Who it applies to',
       })}
       description={formatMessage({
-        id: 'end-users.conditions.builder.who.description',
+        id: getTranslation('conditions.builder.who.description'),
         defaultMessage:
           'Checks on the signed-in user. A condition that reads the user is false for Public.',
       })}
@@ -196,7 +197,7 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
       {who.checks.length > 1 && (
         <SingleSelect
           aria-label={formatMessage({
-            id: 'end-users.conditions.builder.who.match',
+            id: getTranslation('conditions.builder.who.match'),
             defaultMessage: 'Who match',
           })}
           disabled={disabled}
@@ -205,13 +206,13 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
         >
           <SingleSelectOption value="all">
             {formatMessage({
-              id: 'end-users.conditions.builder.who.match-all',
+              id: getTranslation('conditions.builder.who.match-all'),
               defaultMessage: 'All of these are true',
             })}
           </SingleSelectOption>
           <SingleSelectOption value="any">
             {formatMessage({
-              id: 'end-users.conditions.builder.who.match-any',
+              id: getTranslation('conditions.builder.who.match-any'),
               defaultMessage: 'Any of these is true',
             })}
           </SingleSelectOption>
@@ -249,13 +250,13 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
                 >
                   <SingleSelectOption value="any">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.who.roles-any',
+                      id: getTranslation('conditions.builder.who.roles-any'),
                       defaultMessage: 'Holds any of',
                     })}
                   </SingleSelectOption>
                   <SingleSelectOption value="none">
                     {formatMessage({
-                      id: 'end-users.conditions.builder.who.roles-none',
+                      id: getTranslation('conditions.builder.who.roles-none'),
                       defaultMessage: 'Holds none of',
                     })}
                   </SingleSelectOption>
@@ -266,7 +267,7 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
                   withTags
                   value={check.roles}
                   placeholder={formatMessage({
-                    id: 'end-users.conditions.builder.who.roles-placeholder',
+                    id: getTranslation('conditions.builder.who.roles-placeholder'),
                     defaultMessage: 'Choose roles',
                   })}
                   onChange={(roles: string[]) => setCheck(index, { ...check, roles })}
@@ -287,13 +288,13 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
               >
                 <SingleSelectOption value="yes">
                   {formatMessage({
-                    id: 'end-users.conditions.builder.who.email-verified',
+                    id: getTranslation('conditions.builder.who.email-verified'),
                     defaultMessage: 'Has a verified email',
                   })}
                 </SingleSelectOption>
                 <SingleSelectOption value="no">
                   {formatMessage({
-                    id: 'end-users.conditions.builder.who.email-not-verified',
+                    id: getTranslation('conditions.builder.who.email-not-verified'),
                     defaultMessage: 'Has an email that is not verified',
                   })}
                 </SingleSelectOption>
@@ -301,7 +302,7 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
             )}
             <IconButton
               label={formatMessage({
-                id: 'end-users.conditions.builder.who.remove-check',
+                id: getTranslation('conditions.builder.who.remove-check'),
                 defaultMessage: 'Remove check',
               })}
               disabled={disabled}
@@ -323,7 +324,7 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
           onClick={() => addCheck({ key: newKey(), kind: 'roles', match: 'any', roles: [] })}
         >
           {formatMessage({
-            id: 'end-users.conditions.builder.who.add-roles',
+            id: getTranslation('conditions.builder.who.add-roles'),
             defaultMessage: 'Add roles check',
           })}
         </Button>
@@ -336,7 +337,7 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
           onClick={() => addCheck({ key: newKey(), kind: 'email-verified', value: true })}
         >
           {formatMessage({
-            id: 'end-users.conditions.builder.who.add-email-verified',
+            id: getTranslation('conditions.builder.who.add-email-verified'),
             defaultMessage: 'Add verified email check',
           })}
         </Button>
@@ -368,7 +369,7 @@ export const WhoSection = ({ who, layout, inputs, disabled, onChange }: WhoSecti
           }}
         >
           {formatMessage({
-            id: 'end-users.conditions.builder.who.add-attribute',
+            id: getTranslation('conditions.builder.who.add-attribute'),
             defaultMessage: 'Add attribute check',
           })}
         </Button>

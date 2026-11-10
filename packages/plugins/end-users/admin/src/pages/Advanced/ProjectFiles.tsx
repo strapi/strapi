@@ -34,7 +34,7 @@ const REASONS: Record<
   'config-not-editable': {
     id: 'migration.files.reason.config-not-editable',
     defaultMessage:
-      'The config/plugins file cannot be edited automatically. Add the block below by hand.',
+      'The config/plugins.ts file cannot be edited automatically. Add the block above by hand.',
   },
 };
 
@@ -213,7 +213,7 @@ const ProjectFiles = () => {
       <CopyBlock
         title={formatMessage({
           id: getTranslation('migration.files.config-block'),
-          defaultMessage: 'Add to config/plugins',
+          defaultMessage: 'Add to config/plugins.ts',
         })}
         copyLabel={formatMessage({
           id: getTranslation('migration.files.config-block.copy'),

@@ -16,7 +16,7 @@ import {
   usePermissionsDataManager,
 } from '../hooks/usePermissionsDataManager';
 import { useReportOpenSubject } from '../hooks/useReportOpenSubject';
-import { cellWidth, rowHeight } from '../utils/constants';
+import { cellWidth, rowHeight, trailingCellWidth } from '../utils/constants';
 import { createArrayOfValues } from '../utils/createArrayOfValues';
 import { ConditionForm } from '../utils/forms';
 import { getCheckboxState } from '../utils/getCheckboxState';
@@ -126,7 +126,9 @@ const ContentTypeCollapses = ({
           <Flex
             key={uid}
             direction="column"
-            display="inline-flex"
+            // A block, so the rows leave no line-box gap below them: with the trailing cell the card scrolls
+            display={renderSubjectActions !== undefined ? 'flex' : 'inline-flex'}
+            width={renderSubjectActions !== undefined ? 'fit-content' : undefined}
             alignItems="stretch"
             minWidth="100%"
             borderColor={isActive ? 'primary600' : undefined}
@@ -141,6 +143,7 @@ const ContentTypeCollapses = ({
               pathToData={[pathToData, uid].join('..')}
               renderActionIndicator={renderActionIndicator}
               subject={uid}
+              hasTrailingCell={renderSubjectActions !== undefined}
               subjectActions={renderSubjectActions?.({
                 tab: kind,
                 subject: uid,
@@ -192,6 +195,8 @@ interface CollapseProps extends Pick<
    * Rendered next to the conditions button.
    */
   subjectActions?: React.ReactNode;
+  /** The rows have a trailing cell: the content types are drawn with the actions after them */
+  hasTrailingCell?: boolean;
 }
 
 const Collapse = ({
@@ -205,6 +210,7 @@ const Collapse = ({
   renderActionIndicator,
   subject,
   subjectActions,
+  hasTrailingCell = false,
 }: CollapseProps) => {
   const { formatMessage } = useIntl();
   const {
@@ -246,7 +252,7 @@ const Collapse = ({
     <BoxWrapper
       data-testid="permissions-row-box"
       $isActive={isActive}
-      $hasTrailingCell={Boolean(subjectActions)}
+      $hasTrailingCell={hasTrailingCell}
     >
       <Wrapper
         height={rowHeight}
@@ -264,6 +270,8 @@ const Collapse = ({
           someChecked={hasSomeActionsSelected}
           value={hasAllActionsSelected}
           isActive={isActive}
+          // The name stays on screen when the card scrolls sideways
+          sticky={hasTrailingCell}
         >
           <Chevron paddingLeft={2}>{isActive ? <ChevronUp /> : <ChevronDown />}</Chevron>
         </RowLabelWithCheckbox>
@@ -373,9 +381,9 @@ const Collapse = ({
             }
           )}
         </Flex>
-        {subjectActions && (
+        {hasTrailingCell && (
           // The buttons below sit over the end of the row: this cell keeps them off the last action
-          <Flex data-testid="subject-actions-cell" width={cellWidth} shrink={0} />
+          <Flex data-testid="subject-actions-cell" width={trailingCellWidth} shrink={0} />
         )}
       </Wrapper>
       <Box bottom="10px" right="9px" position="absolute">
@@ -498,7 +506,7 @@ const Wrapper = styled<FlexComponent>(Flex)`
 `;
 
 const BoxWrapper = styled.div<{ $isActive: boolean; $hasTrailingCell: boolean }>`
-  display: inline-flex;
+  display: ${({ $hasTrailingCell }) => ($hasTrailingCell ? 'flex' : 'inline-flex')};
   /* With a trailing cell, as wide as the row's cells: the buttons are placed from its right edge */
   ${({ $hasTrailingCell }) => ($hasTrailingCell ? 'width: max-content;' : '')}
   min-width: 100%;

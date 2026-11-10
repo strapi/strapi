@@ -434,7 +434,7 @@ describe('BuilderPage', () => {
       // No content type is chosen yet
       expect(screen.getByRole('button', { name: 'Preview' })).toBeDisabled();
       expect(
-        screen.getByText('Fix the problems listed above to preview this condition.')
+        screen.getByText('Fix the problems with this condition to preview it.')
       ).toBeInTheDocument();
     });
 
@@ -683,12 +683,81 @@ describe('BuilderPage', () => {
       const { user } = renderAt('new');
 
       await findHeading('New condition');
-      expect(screen.getByText('This condition restricts nothing.')).toBeInTheDocument();
+      // An untouched form has nothing to warn about yet
+      expect(screen.queryByText('This condition restricts nothing.')).not.toBeInTheDocument();
 
       await startNew(user);
+      expect(screen.getByText('This condition restricts nothing.')).toBeInTheDocument();
+
       await user.click(screen.getByRole('button', { name: 'Add check' }));
 
       expect(screen.queryByText('This condition restricts nothing.')).not.toBeInTheDocument();
+    });
+
+    it('shows what is wrong with a field under it once it is left, in words without keys', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+
+      const name = screen.getByRole('textbox', { name: /^Name/ });
+      const displayName = screen.getByRole('textbox', { name: /Display name/ });
+
+      await user.type(name, 'Bad Name');
+      // Typing is not leaving: nothing is said yet, and nothing about the fields not reached
+      expect(screen.queryByText(/^Use lowercase letters/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/displayName|types is a list/)).not.toBeInTheDocument();
+
+      await user.tab();
+
+      expect(await screen.findByText(/^Use lowercase letters, digits and hyphens/)).toBeVisible();
+      expect(name).toBeInvalid();
+      expect(displayName).not.toBeInvalid();
+
+      await user.click(displayName);
+      await user.tab();
+
+      expect(await screen.findByText('This value is required.')).toBeVisible();
+      expect(displayName).toBeInvalid();
+      expect(screen.queryByText(/displayName|types is a list/)).not.toBeInTheDocument();
+    });
+
+    it('says what is missing once a later section has been filled in, though no field was left', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+      expect(screen.queryByText('This value is required.')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Add input' }));
+
+      // The name and the display name are what stops the save now: they say so
+      expect(await screen.findAllByText('This value is required.')).toHaveLength(2);
+      expect(screen.getByText('Choose at least one content type.')).toBeInTheDocument();
+    });
+
+    it('says a content type is needed on its field once the choice is closed with none', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+      await user.click(screen.getByRole('combobox', { name: /Content types/ }));
+      await user.keyboard('{Escape}');
+
+      expect(await screen.findByText('Choose at least one content type.')).toBeVisible();
+    });
+
+    it('says why Add check is unavailable until a content type is chosen, and leaves the summary empty', async () => {
+      const { user } = renderAt('new');
+
+      await findHeading('New condition');
+
+      expect(screen.getByRole('button', { name: 'Add check' })).toBeDisabled();
+      expect(screen.getAllByText('Choose a content type first.').length).toBeGreaterThan(0);
+      expect(screen.queryByText(/^Applies to \./)).not.toBeInTheDocument();
+
+      await startNew(user);
+
+      expect(screen.getByRole('button', { name: 'Add check' })).toBeEnabled();
+      expect(screen.queryByText('Choose a content type first.')).not.toBeInTheDocument();
+      expect(screen.getByText('Applies to Article.')).toBeInTheDocument();
     });
 
     it('locks a saved input name', async () => {
@@ -862,6 +931,11 @@ describe('BuilderPage', () => {
       expect(
         within(dialog).getByText('2 roles use this condition. Saving changes what they grant.')
       ).toBeInTheDocument();
+      // The save is waiting for the answer, not running: its button is not busy
+      expect(screen.getByRole('button', { name: 'Save', hidden: true })).toHaveAttribute(
+        'aria-disabled',
+        'false'
+      );
 
       await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
@@ -1031,13 +1105,17 @@ describe('BuilderPage', () => {
     it('opens only builder conditions', async () => {
       renderAt('by-code');
 
-      expect(await screen.findByText('No content found')).toBeInTheDocument();
+      expect(await screen.findByText(/This condition doesn't exist/)).toBeInTheDocument();
     });
 
     it('opens nothing for a name no condition has', async () => {
       renderAt('missing');
 
-      expect(await screen.findByText('No content found')).toBeInTheDocument();
+      // The same page as a role that does not exist: its header, and the way back
+      expect(
+        await screen.findByRole('heading', { name: 'Condition not found' })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/This condition doesn't exist/)).toBeInTheDocument();
     });
   });
 

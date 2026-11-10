@@ -22,6 +22,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../constants';
 import { useGetConditionsQuery } from '../../services/conditions';
+import { useGetPermissionLayoutQuery } from '../../services/permissions';
 import { getTranslation } from '../../utils/getTranslation';
 
 import { SOURCE_LABELS } from './utils/sourceLabels';
@@ -43,7 +44,14 @@ const getBuilderSlug = (condition: ConditionListItem) =>
 /** Every condition without a builder opens the read-only page, which takes its name as it is */
 const getViewPath = (condition: ConditionListItem) => `view/${encodeURIComponent(condition.name)}`;
 
-const ContentTypes = ({ subjects }: { subjects: string[] }) => {
+/** The content types of a condition by their display names, as its own page lists them */
+const ContentTypes = ({
+  subjects,
+  labels,
+}: {
+  subjects: string[];
+  labels: Map<string, string>;
+}) => {
   const { formatMessage } = useIntl();
 
   if (subjects.length === 0) {
@@ -57,12 +65,14 @@ const ContentTypes = ({ subjects }: { subjects: string[] }) => {
     );
   }
 
-  const shown = subjects.slice(0, MAX_CONTENT_TYPES).join(', ');
-  const more = subjects.length - MAX_CONTENT_TYPES;
+  // A content type the layout does not know (it was removed) keeps its uid
+  const names = subjects.map((uid) => labels.get(uid) ?? uid);
+  const shown = names.slice(0, MAX_CONTENT_TYPES).join(', ');
+  const more = names.length - MAX_CONTENT_TYPES;
 
   return (
     // The whole list is the tooltip of the shortened one
-    <Typography ellipsis textColor="neutral800" title={subjects.join(', ')}>
+    <Typography ellipsis textColor="neutral800" title={names.join(', ')}>
       {more > 0
         ? formatMessage(
             {
@@ -85,8 +95,9 @@ const ListPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC(PERMISSIONS.conditions);
   const { data: conditions, isLoading, error } = useGetConditionsQuery();
+  const { data: layout, isLoading: isLoadingLayout } = useGetPermissionLayoutQuery();
 
-  if (isLoading || isLoadingPermissions) {
+  if (isLoading || isLoadingPermissions || isLoadingLayout) {
     return <Page.Loading />;
   }
 
@@ -94,6 +105,7 @@ const ListPage = () => {
     return <Page.Error />;
   }
 
+  const labels = new Map((layout?.contentTypes ?? []).map(({ uid, label }) => [uid, label]));
   const staleCount = conditions.filter((condition) => (condition.stale?.length ?? 0) > 0).length;
 
   const title = formatMessage({
@@ -115,7 +127,7 @@ const ListPage = () => {
             <LinkButton tag={Link} to="new" startIcon={<Plus />} size="S">
               {formatMessage({
                 id: getTranslation('conditions.list.add'),
-                defaultMessage: 'New condition',
+                defaultMessage: 'Add new condition',
               })}
             </LinkButton>
           ) : null
@@ -213,7 +225,7 @@ const ListPage = () => {
                       </Typography>
                     </Td>
                     <Td maxWidth="25rem">
-                      <ContentTypes subjects={condition.subjects} />
+                      <ContentTypes subjects={condition.subjects} labels={labels} />
                     </Td>
                     <Td>
                       <Flex gap={2}>

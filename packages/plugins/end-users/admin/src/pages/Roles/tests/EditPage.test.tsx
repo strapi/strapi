@@ -89,6 +89,25 @@ const save = async () => {
 };
 
 describe('EditPage', () => {
+  it('says a role the server does not have is not found, with the page header', async () => {
+    serveRoles();
+    server.use(
+      http.get('/end-users/roles/gone', () =>
+        HttpResponse.json(
+          { error: { status: 404, name: 'NotFoundError', message: 'Not Found' } },
+          { status: 404 }
+        )
+      )
+    );
+    renderRoles('gone');
+
+    expect(await findHeading('Role not found')).toBeInTheDocument();
+    expect(
+      screen.getByText("This role doesn't exist. It may have been deleted.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Something went wrong/i)).not.toBeInTheDocument();
+  });
+
   it('shows the four tabs, the content API columns and a dot where a route has rules', async () => {
     serveRoles();
     renderRoles('p1');
@@ -111,18 +130,16 @@ describe('EditPage', () => {
       }
     );
 
-    // Article's Update route has a policy: one dot, in the cell of that action
+    // Article's Update route has a policy: one dot, in the cell of that action. The cell has no
+    // role to find it by, so it is told by the order of the page: after the checkbox before Update's
+    // and before Update's own
     const dot = screen.getByRole('img', { name: RULES });
-    // The dot sits in a slot of the cell, beside the checkbox: there is no role to find it by
-    // eslint-disable-next-line testing-library/no-node-access
-    const cell = dot.parentElement?.parentElement;
+    const checkboxes = screen.getAllByRole('checkbox');
+    const update = screen.getByRole('checkbox', { name: 'Select Update Article permission' });
+    const before = checkboxes[checkboxes.indexOf(update) - 1];
 
-    expect(cell).toBeTruthy();
-    expect(
-      within(cell as HTMLElement).getByRole('checkbox', {
-        name: 'Select Update Article permission',
-      })
-    ).toBeInTheDocument();
+    expect(before.compareDocumentPosition(dot) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(dot.compareDocumentPosition(update) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
     // The role's own details
     expect(screen.getByRole('textbox', { name: /^Name/ })).toHaveValue('Premium member');
@@ -896,7 +913,7 @@ describe('EditPage', () => {
 
       const dialog = await screen.findByRole('alertdialog');
 
-      expect(dialog).toHaveTextContent('Grant Find on 3 collection types?');
+      expect(dialog).toHaveTextContent('Grant Find on 2 more collection types?');
       expect(dialog).toHaveTextContent("You'll review every change before saving.");
 
       // Nothing is ticked until it is confirmed

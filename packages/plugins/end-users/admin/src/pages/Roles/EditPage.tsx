@@ -17,6 +17,7 @@ import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { NotFound } from '../../components/NotFound';
 import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
 import { useLazyGetConditionsQuery } from '../../services/conditions';
@@ -27,6 +28,7 @@ import {
   useUpdateRoleMutation,
 } from '../../services/roles';
 import { getTranslation } from '../../utils/getTranslation';
+import { useQuestion } from '../../utils/useQuestion';
 
 import { BulkChangeDialog } from './components/BulkChangeDialog';
 import { DetailsPane } from './components/DetailsPane';
@@ -34,6 +36,7 @@ import { ProblemsBanner } from './components/ProblemsBanner';
 import { RenameRoleDialog } from './components/RenameRoleDialog';
 import { ReviewChangesModal } from './components/ReviewChangesModal';
 import { RoleDetails } from './components/RoleDetails';
+import { RulesDot } from './components/RulesDot';
 import { SubjectSettingsModal } from './components/SubjectSettingsModal';
 import { toEditorModel, toPermissionDiff, toPermissionRows } from './utils/editorModel';
 import {
@@ -44,9 +47,8 @@ import {
 } from './utils/editorRows';
 import { describeSave } from './utils/saveReview';
 import { findSelfWritableWarnings } from './utils/selfWritableWarnings';
-import { useQuestion } from './utils/useQuestion';
 
-import type { BulkChange } from './components/BulkChangeDialog';
+import type { BulkQuestion } from './components/BulkChangeDialog';
 import type { RenameQuestion } from './components/RenameRoleDialog';
 import type { RoleDetailsValues } from './components/RoleDetails';
 import type { ChangeGroup, EditorModel, SubjectSettings } from './utils/editorModel';
@@ -92,6 +94,10 @@ const TAB_LABELS: PermissionsProps['tabLabels'] = {
 
 /** A column ticked or unticked on this many content types or more is asked about first */
 const BULK_CONFIRM_FROM = 3;
+
+/** The server answered 404: nothing has this id */
+const isNotFound = (error: unknown) =>
+  typeof error === 'object' && error !== null && (error as { status?: unknown }).status === 404;
 
 /** 409 `ROLE_CHANGED`: the role was saved by someone else after this editor loaded it */
 const isRoleChanged = (error: unknown) => {
@@ -250,18 +256,6 @@ const SubjectDetails = ({
  * PermissionsPanel
  * -----------------------------------------------------------------------------------------------*/
 
-const RulesDot = (props: React.ComponentProps<typeof Box>) => (
-  <Box
-    tag="span"
-    display="block"
-    width="6px"
-    height="6px"
-    borderRadius="20px"
-    background="primary600"
-    {...props}
-  />
-);
-
 interface PermissionsPanelProps {
   layout: PermissionLayout;
   model: EditorModel;
@@ -285,6 +279,9 @@ const PermissionsPanelBase = ({
   const { formatMessage } = useIntl();
   const setFormValue = useForm('PermissionsPanel', (state) => state.onChange);
 
+  // The editor takes the admin's `Permission`, which also has an id, timestamps and
+  // `actionParameters`; it reads only the action, subject, conditions and properties, and these
+  // rows have no more. The input is typed as the admin's entity, the output (`onChange`) is not.
   const permissions = React.useMemo(
     () => model.rows as unknown as NonNullable<PermissionsProps['permissions']>,
     [model]
@@ -422,7 +419,7 @@ const RoleEditor = ({ mode, layout, role, canSave, onReload }: RoleEditorProps) 
 
   // Two questions the admin answers in a dialog, which what asked them waits for: a column change
   // that touches many content types, and the review of a save
-  const bulk = useQuestion<BulkChange>();
+  const bulk = useQuestion<BulkQuestion>();
   const review = useQuestion<{
     title: string;
     groups: ChangeGroup[];
@@ -432,9 +429,22 @@ const RoleEditor = ({ mode, layout, role, canSave, onReload }: RoleEditorProps) 
   const askBulk = bulk.ask;
 
   const confirmBulkChange = React.useCallback<NonNullable<PermissionsProps['confirmBulkChange']>>(
-    (change) =>
-      change.subjects.length < BULK_CONFIRM_FROM ? Promise.resolve(true) : askBulk(change),
-    [askBulk]
+    (change) => {
+      if (change.subjects.length < BULK_CONFIRM_FROM) {
+        return Promise.resolve(true);
+      }
+
+      // The question counts the content types the column changes: the ones that already are as it
+      // asks are left out, as the review that follows leaves them out
+      const subjects = change.subjects.filter(
+        (uid) => rows.grantedKey(uid).split(',').includes(change.actionId) !== change.value
+      );
+
+      return subjects.length === 0
+        ? Promise.resolve(true)
+        : askBulk({ ...change, subjects, unchanged: change.subjects.length - subjects.length });
+    },
+    [askBulk, rows]
   );
 
   const [failure, setFailure] = React.useState<SaveFailure | null>(null);
@@ -794,7 +804,12 @@ const EditPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC(PERMISSIONS.roles);
   const { data: layout, isLoading: isLoadingLayout } = useGetPermissionLayoutQuery();
-  const { data: role, isLoading: isLoadingRole, refetch } = useGetRoleQuery(documentId);
+  const {
+    data: role,
+    error: roleError,
+    isLoading: isLoadingRole,
+    refetch,
+  } = useGetRoleQuery(documentId);
   const [reloads, setReloads] = React.useState(0);
 
   const revision = role?.revision;
@@ -823,6 +838,11 @@ const EditPage = () => {
 
   if (isLoadingPermissions || isLoadingLayout || isLoadingRole) {
     return <Page.Loading />;
+  }
+
+  // A role the server does not have is not a failure to load: it says so, with the way back
+  if (!role && isNotFound(roleError)) {
+    return <NotFound kind="role" backPath={ROLES_PATH} />;
   }
 
   if (!layout || !role) {

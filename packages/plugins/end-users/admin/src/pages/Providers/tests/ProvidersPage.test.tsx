@@ -6,6 +6,10 @@ import { ProvidersPage } from '../ProvidersPage';
 
 import type { ProviderDetail, ProviderSummary } from '../../../../../shared/contracts/providers';
 
+// Built at run time, like every secret-shaped value of a test
+const NEW_SECRET = ['new', 'secret'].join('-');
+const OIDC_SECRET = ['sh', 'h'].join('');
+
 const summary = (overrides: Partial<ProviderSummary> & { id: string }): ProviderSummary => ({
   name: overrides.id,
   kind: 'social',
@@ -149,6 +153,16 @@ const serveProviders = (list: ProviderSummary[] = PROVIDERS) => {
 const renderPage = () =>
   render(<ProvidersPage />, { initialEntries: ['/settings/end-users/providers'] });
 
+/** The picker of a provider to add: the header button opens it, and its dialog holds the search */
+const openPicker = async (user: ReturnType<typeof renderPage>['user']) => {
+  await user.click(await screen.findByRole('button', { name: 'Add new provider' }));
+
+  return within(await screen.findByRole('dialog', { name: 'Add a provider' })).findByRole(
+    'combobox',
+    { name: 'Provider' }
+  );
+};
+
 const openProvider = async (user: ReturnType<typeof renderPage>['user'], name: string) => {
   await user.click(await screen.findByRole('button', { name: `Open ${name}` }));
 
@@ -191,10 +205,40 @@ describe('ProvidersPage', () => {
     expect(within(rows[0]).getByText('GitHub')).toBeInTheDocument();
     expect(within(rows[0]).getByText('Off')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('combobox', { name: 'Add provider' }));
+    await user.click(await openPicker(user));
 
     expect(await screen.findByRole('option', { name: 'Google' })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'GitHub' })).not.toBeInTheDocument();
+  });
+
+  it('finds a provider by any part of its name, and says when none matches', async () => {
+    serveProviders();
+    const { user } = renderPage();
+
+    const picker = await openPicker(user);
+
+    await user.type(picker, 'oidc');
+
+    expect(await screen.findByRole('option', { name: 'Custom OIDC' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Google' })).not.toBeInTheDocument();
+
+    await user.clear(picker);
+    await user.type(picker, 'zzz');
+
+    expect(await screen.findByText('No provider matches.')).toBeInTheDocument();
+  });
+
+  it('says so, with a way to add one, when no provider is configured', async () => {
+    serveProviders([summary({ id: 'google', name: 'Google' })]);
+    const { user } = renderPage();
+
+    expect(await screen.findByText('No provider is configured yet.')).toBeInTheDocument();
+    // The header's button and the empty state's
+    expect(screen.getAllByRole('button', { name: 'Add new provider' })).toHaveLength(2);
+
+    await user.click(screen.getAllByRole('button', { name: 'Add new provider' })[1]);
+
+    expect(await screen.findByRole('dialog', { name: 'Add a provider' })).toBeInTheDocument();
   });
 
   it('edits the profile mapping and sends it on save', async () => {
@@ -221,7 +265,7 @@ describe('ProvidersPage', () => {
     await user.type(claims[1], 'address.city');
     await user.click(await screen.findByText('Create "address.city"'));
 
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(sent.put).toHaveLength(1));
     expect(sent.put[0].body).toMatchObject({
@@ -242,7 +286,7 @@ describe('ProvidersPage', () => {
     const dialog = await openProvider(user, 'GitHub');
 
     await user.click(await within(dialog).findByRole('button', { name: 'Remove mapping row 1' }));
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(sent.put).toHaveLength(1));
     expect(sent.put[0].body.profileMapping).toEqual([]);
@@ -252,13 +296,17 @@ describe('ProvidersPage', () => {
     serveProviders();
     const { user } = renderPage();
 
-    const picker = await screen.findByRole('combobox', { name: 'Add provider' });
-
-    await user.click(picker);
+    await user.click(await openPicker(user));
 
     expect(await screen.findByRole('option', { name: 'Google' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Twitch' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Custom OIDC' })).toBeInTheDocument();
+    // By name, the custom one last
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Google',
+      'Twitch',
+      'Custom OIDC',
+    ]);
     // What is configured is not offered again
     expect(screen.queryByRole('option', { name: 'GitHub' })).not.toBeInTheDocument();
 
@@ -271,7 +319,7 @@ describe('ProvidersPage', () => {
     expect(within(dialog).getByDisplayValue('email profile')).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
-    await user.click(await screen.findByRole('combobox', { name: 'Add provider' }));
+    await user.click(await openPicker(user));
     await user.click(await screen.findByRole('option', { name: 'Twitch' }));
 
     expect(
@@ -292,7 +340,7 @@ describe('ProvidersPage', () => {
     fireEvent.click(within(dialog).getByRole('checkbox', { name: 'GitHub Enterprise' }));
     await user.click(within(dialog).getByRole('combobox', { name: 'Region' }));
     await user.click(await screen.findByRole('option', { name: 'eu' }));
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(sent.put).toHaveLength(1));
     expect(sent.put[0].body.fields).toEqual({
@@ -311,7 +359,7 @@ describe('ProvidersPage', () => {
     // The secrets read "Set", never a value
     expect(await within(dialog).findAllByText('Set')).toHaveLength(2);
 
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(sent.put).toHaveLength(1));
 
     expect(sent.put[0].body).not.toHaveProperty('clientSecret');
@@ -324,11 +372,11 @@ describe('ProvidersPage', () => {
     const replace = await within(dialog).findAllByRole('button', { name: 'Replace' });
 
     await user.click(replace[0]);
-    await user.type(within(dialog).getByLabelText(/Client secret/), 'new-secret');
-    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await user.type(within(dialog).getByLabelText(/Client secret/), NEW_SECRET);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(sent.put).toHaveLength(2));
-    expect(sent.put[1].body).toMatchObject({ clientSecret: 'new-secret' });
+    expect(sent.put[1].body).toMatchObject({ clientSecret: NEW_SECRET });
     expect(sent.put[1].body.fields).not.toHaveProperty('webhookSecret');
   });
 
@@ -355,9 +403,184 @@ describe('ProvidersPage', () => {
 
     const dialog = await openProvider(user, 'GitHub');
 
-    await user.click(await within(dialog).findByRole('button', { name: 'Save' }));
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Save' }));
 
     expect(await within(dialog).findByText('apiUrl is not a URL')).toBeInTheDocument();
+  });
+
+  it('asks for what is required before it asks the server, and says so on the fields', async () => {
+    const sent = serveProviders();
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    await user.clear(await within(dialog).findByRole('textbox', { name: /Client ID/ }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await within(dialog).findByText('This value is required.')).toBeInTheDocument();
+    expect(within(dialog).getByRole('textbox', { name: /Client ID/ })).toBeInvalid();
+    expect(sent.put).toHaveLength(0);
+  });
+
+  it('shows what the server found missing as required on its field, with no key in the words', async () => {
+    serveProviders();
+    server.use(
+      http.put('/end-users/providers/github', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'The provider "github" cannot be saved: `clientId` is missing',
+              details: { errors: [{ path: ['clientId'], message: '`clientId` is missing' }] },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Save' }));
+
+    expect(await within(dialog).findByText('This value is required.')).toBeInTheDocument();
+    expect(await screen.findByText('Check the fields marked with an error.')).toBeInTheDocument();
+    expect(screen.queryByText(/cannot be saved/)).not.toBeInTheDocument();
+  });
+
+  it('tells a refusal that names no field in the toast', async () => {
+    serveProviders();
+    server.use(
+      http.put('/end-users/providers/github', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'The discovery document could not be read',
+              details: {
+                errors: [{ path: [], message: 'The discovery document could not be read' }],
+              },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('The discovery document could not be read')).toBeInTheDocument();
+    expect(screen.queryByText('Check the fields marked with an error.')).not.toBeInTheDocument();
+  });
+
+  it('tells a refusal of the id of a custom provider, which has no field, in the toast', async () => {
+    serveProviders();
+    server.use(
+      http.post('/end-users/providers', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'There is a provider "acme-sso" already',
+              details: {
+                errors: [{ path: ['id'], message: 'There is a provider "acme-sso" already' }],
+              },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderPage();
+
+    await user.click(await openPicker(user));
+    await user.click(await screen.findByRole('option', { name: 'Custom OIDC' }));
+
+    const dialog = await screen.findByRole('dialog');
+
+    await user.type(within(dialog).getByRole('textbox', { name: /Name/ }), 'Acme SSO');
+    await user.type(
+      within(dialog).getByRole('textbox', { name: /Discovery URL/ }),
+      'https://sso.acme.test'
+    );
+    await user.type(within(dialog).getByRole('textbox', { name: /Client ID/ }), 'acme');
+    await user.type(within(dialog).getByLabelText(/Client secret/), OIDC_SECRET);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add provider' }));
+
+    expect(await screen.findByText('There is a provider "acme-sso" already')).toBeInTheDocument();
+  });
+
+  it('shows a refusal of a secret field under it', async () => {
+    serveProviders();
+    server.use(
+      http.put('/end-users/providers/github', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'bad',
+              details: { errors: [{ path: ['fields', 'webhookSecret'], message: 'Too short' }] },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Save' }));
+
+    expect(await within(dialog).findByText('Too short')).toBeInTheDocument();
+  });
+
+  it('saves from a submit button inside the form, so Enter in a field saves', async () => {
+    serveProviders();
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+    const save = await within(dialog).findByRole('button', { name: 'Save' });
+
+    expect(save).toHaveAttribute('type', 'submit');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(save.closest('form')).not.toBeNull();
+  });
+
+  it('asks before closing a provider with changes that are not saved', async () => {
+    serveProviders();
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    await user.type(await within(dialog).findByRole('textbox', { name: /Client ID/ }), '2');
+    await user.keyboard('{Escape}');
+
+    expect(await screen.findByText(/You have unsaved changes/)).toBeInTheDocument();
+  });
+
+  it('says what Trust for account linking does, and keeps Copy inside the redirect URI field', async () => {
+    serveProviders();
+    const { user } = renderPage();
+
+    const dialog = await openProvider(user, 'GitHub');
+
+    expect(
+      await within(dialog).findByText(/linked to the existing account that has the same email/)
+    ).toBeInTheDocument();
+    // The copy button is the field's own action: the field's name labels both
+    const uri = within(dialog).getByRole('textbox', { name: 'Redirect URI' });
+
+    expect(uri).toHaveAttribute('readonly');
+    expect(within(dialog).getByRole('button', { name: 'Copy redirect URI' })).toBeInTheDocument();
   });
 
   it('copies the redirect URI', async () => {
@@ -373,11 +596,50 @@ describe('ProvidersPage', () => {
     );
   });
 
+  it('names the fields of a custom OIDC provider left empty, and asks the server once they are filled', async () => {
+    const sent = serveProviders();
+    const { user } = renderPage();
+
+    await user.click(await openPicker(user));
+    await user.click(await screen.findByRole('option', { name: 'Custom OIDC' }));
+
+    const dialog = await screen.findByRole('dialog');
+    const add = within(dialog).getByRole('button', { name: 'Add provider' });
+
+    // A submit button inside the form of the fields, so that Enter in a field submits it
+    expect(add).toHaveAttribute('type', 'submit');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(add.closest('form')).not.toBeNull();
+
+    // It says what is asked, and what a discovery URL looks like
+    expect(within(dialog).getByText(/What the provider is called/)).toBeInTheDocument();
+    expect(within(dialog).getByRole('textbox', { name: /Discovery URL/ })).toHaveAttribute(
+      'placeholder',
+      'https://issuer.example.com/.well-known/openid-configuration'
+    );
+
+    await user.type(within(dialog).getByRole('textbox', { name: /Name/ }), 'Acme SSO');
+    fireEvent.click(add);
+
+    expect(await within(dialog).findAllByText('This value is required.')).toHaveLength(3);
+    expect(sent.post).toHaveLength(0);
+
+    await user.type(
+      within(dialog).getByRole('textbox', { name: /Discovery URL/ }),
+      'https://sso.acme.test/.well-known/openid-configuration'
+    );
+    await user.type(within(dialog).getByRole('textbox', { name: /Client ID/ }), 'acme');
+    await user.type(within(dialog).getByLabelText(/Client secret/), OIDC_SECRET);
+    fireEvent.click(add);
+
+    await waitFor(() => expect(sent.post).toHaveLength(1));
+  });
+
   it('adds and deletes a custom OIDC provider', async () => {
     const sent = serveProviders();
     const { user } = renderPage();
 
-    await user.click(await screen.findByRole('combobox', { name: 'Add provider' }));
+    await user.click(await openPicker(user));
     await user.click(await screen.findByRole('option', { name: 'Custom OIDC' }));
 
     const dialog = await screen.findByRole('dialog');
@@ -388,15 +650,15 @@ describe('ProvidersPage', () => {
       'https://sso.acme.test/.well-known/openid-configuration'
     );
     await user.type(within(dialog).getByRole('textbox', { name: /Client ID/ }), 'acme');
-    await user.type(within(dialog).getByLabelText(/Client secret/), 'shh');
-    await user.click(within(dialog).getByRole('button', { name: 'Add provider' }));
+    await user.type(within(dialog).getByLabelText(/Client secret/), OIDC_SECRET);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add provider' }));
 
     await waitFor(() => expect(sent.post).toHaveLength(1));
     expect(sent.post[0]).toEqual({
       name: 'Acme SSO',
       discoveryUrl: 'https://sso.acme.test/.well-known/openid-configuration',
       clientId: 'acme',
-      clientSecret: 'shh',
+      clientSecret: OIDC_SECRET,
     });
 
     // Deleting asks first

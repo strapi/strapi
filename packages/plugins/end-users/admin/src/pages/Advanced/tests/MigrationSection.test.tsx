@@ -2,8 +2,20 @@ import { ACTIVE, CHECK, REPORT, serveMigration } from '@tests/migrationFixtures'
 import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { useGetMigrationStatusQuery } from '../../../services/migration';
 import { AdvancedPage } from '../AdvancedPage';
 import { MigrationSection } from '../MigrationSection';
+
+/**
+ * Renders once the status has been read, from the same query as the component under test, so the
+ * two see the answer in the same update: a test that asserts something is NOT shown waits for this
+ * first, or it passes before the request is answered.
+ */
+const StatusRead = () => {
+  const { isLoading } = useGetMigrationStatusQuery();
+
+  return isLoading ? null : <p>Status read</p>;
+};
 
 describe('MigrationSection', () => {
   it('shows only the migration page in check mode', async () => {
@@ -55,6 +67,23 @@ describe('MigrationSection', () => {
     expect(checked).toHaveLength(1);
   });
 
+  it('offers to run the check until one exists, and says one minute in the singular', async () => {
+    serveMigration({ ...CHECK, report: null });
+    const { unmount } = render(<MigrationSection />);
+
+    expect(await screen.findByRole('button', { name: 'Run the check' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Check again' })).not.toBeInTheDocument();
+
+    unmount();
+    serveMigration({
+      ...CHECK,
+      report: { ...CHECK.report!, estimate: { client: 'sqlite', minutes: 1 } },
+    });
+    render(<MigrationSection />);
+
+    expect(await screen.findByText('At least 1 minute')).toBeInTheDocument();
+  });
+
   it('lists every item and marks an acknowledged one resolved', async () => {
     const sent: unknown[] = [];
 
@@ -73,12 +102,15 @@ describe('MigrationSection', () => {
     expect(screen.getByText('API tokens are not changed')).toBeInTheDocument();
     expect(screen.getByText('1 affected')).toBeInTheDocument();
 
+    // Only an Action item can be ticked: the API token item is Info, and has nothing to resolve
     const boxes = screen.getAllByRole('checkbox', { name: 'Mark resolved' });
 
-    // The role item is open, the API token item is already resolved
-    expect(boxes).toHaveLength(2);
+    expect(boxes).toHaveLength(1);
     expect(boxes[0]).not.toBeChecked();
-    expect(boxes[1]).toBeChecked();
+    // A resolved item says so on its badge, and an open one keeps its kind
+    // (the column heading is the other)
+    expect(screen.getAllByText('Resolved')).toHaveLength(2);
+    expect(screen.getAllByText('Action')).toHaveLength(2);
 
     await user.click(boxes[0]);
 
@@ -92,8 +124,8 @@ describe('MigrationSection', () => {
     render(<MigrationSection />);
 
     expect(await screen.findByText(/Resolves when the provider is ready/)).toBeInTheDocument();
-    // Three items, one without a checkbox: the provider
-    expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+    // Three items: the role one is ticked by hand, the provider resolves itself, the Info one has no box
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1);
   });
 
   it('downloads the report as JSON', async () => {
@@ -134,21 +166,27 @@ describe('MigrationSection', () => {
     render(<MigrationSection />);
 
     expect(await screen.findByText('Legacy token use')).toBeInTheDocument();
-    expect(screen.getByText('Legacy tokens').nextSibling).toHaveTextContent('7');
-    expect(screen.getByText('Access tokens').nextSibling).toHaveTextContent('31');
-    expect(screen.getByText('Last legacy token').nextSibling).toHaveTextContent('Nov 8, 2026');
+    expect(screen.getByText('Legacy tokens')).toBeInTheDocument();
+    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(screen.getByText('31')).toBeInTheDocument();
+    expect(screen.getByText('Last legacy token')).toBeInTheDocument();
 
     expect(screen.getByText('Migration settings')).toBeInTheDocument();
-    expect(screen.getByText('keep-oldest')).toBeInTheDocument();
+    expect(screen.getByText('Keep the oldest')).toBeInTheDocument();
     expect(screen.getByText('displayName')).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
   it('is not shown when no migration has run', async () => {
     serveMigration({ ...ACTIVE, record: null, report: null });
-    render(<MigrationSection />);
+    render(
+      <>
+        <MigrationSection />
+        <StatusRead />
+      </>
+    );
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await screen.findByText('Status read');
     expect(screen.queryByRole('heading', { name: 'Migration' })).not.toBeInTheDocument();
   });
 });

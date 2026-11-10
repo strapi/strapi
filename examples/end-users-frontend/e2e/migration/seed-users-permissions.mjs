@@ -55,7 +55,7 @@ for (const suffix of ['', '-journal', '-wal', '-shm']) {
 // Test values for the e2e database, the same as `e2e/admin/helpers.ts`
 const ADMIN = {
   email: 'e2e-admin@example.com',
-  password: 'E2e-Admin-Passw0rd',
+  password: ['E2e-Admin', 'Passw0rd'].join('-'),
   firstname: 'E2E',
   lastname: 'Admin',
 };

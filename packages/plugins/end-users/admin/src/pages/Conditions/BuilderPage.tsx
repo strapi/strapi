@@ -22,6 +22,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { NotFound } from '../../components/NotFound';
 import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
 import { endUsersApi } from '../../services/api';
@@ -34,6 +35,7 @@ import {
   useUpdateConditionMutation,
 } from '../../services/conditions';
 import { getTranslation } from '../../utils/getTranslation';
+import { useQuestion } from '../../utils/useQuestion';
 
 import { AppliesToSection } from './components/builder/AppliesToSection';
 import { InputsSection } from './components/builder/InputsSection';
@@ -44,9 +46,9 @@ import { WhoSection } from './components/builder/WhoSection';
 import { PreviewPanel } from './components/PreviewPanel';
 import { SelfWritableAlert } from './components/SelfWritableAlert';
 import { fieldsFor, formProblems, toCondition, toForm } from './utils/builderForm';
+import { splitProblems } from './utils/fieldProblems';
 import { toFormErrors } from './utils/toFormErrors';
 import { useConditionsRestartWatcher } from './utils/useConditionsRestartWatcher';
-import { useConfirmation } from './utils/useConfirmation';
 import { isRestartTimeout } from './utils/watchConditionsRestart';
 
 import type { BuilderForm, FormGroup } from './utils/builderForm';
@@ -117,7 +119,8 @@ const ConditionBuilder = ({
     skip: !canEdit,
     refetchOnMountOrArgChange: true,
   });
-  const confirmation = useConfirmation();
+  // Saving a condition roles use asks first: the question has nothing to say but yes or no
+  const confirmation = useQuestion<true>();
 
   const isEditing = condition !== undefined;
   const slugOfCondition = condition?.name.slice(BUILDER_NAME_PREFIX.length) ?? '';
@@ -127,6 +130,10 @@ const ConditionBuilder = ({
   const [failure, setFailure] = React.useState<Failure>(null);
   // What the server refused about the name and the display name, which show on their fields
   const [fieldErrors, setFieldErrors] = React.useState<{ slug?: string; displayName?: string }>({});
+  // The fields the admin has left: what is wrong with one shows from then on, not while it is untouched
+  const [touched, setTouched] = React.useState<
+    Partial<Record<'slug' | 'displayName' | 'types', true>>
+  >({});
   // The inputs a save took out that roles had bound a value to: the page stays to say so
   const [removedInputs, setRemovedInputs] = React.useState<
     NonNullable<NonNullable<ConditionWriteResponse['warnings']>['removedInputs']>
@@ -224,7 +231,7 @@ const ConditionBuilder = ({
     });
 
     // The roles that use it get what the new condition keeps, from the next start on
-    if (condition && condition.usedBy > 0 && !(await confirmation.ask())) {
+    if (condition && condition.usedBy > 0 && !(await confirmation.ask(true))) {
       return;
     }
 
@@ -301,6 +308,28 @@ const ConditionBuilder = ({
           const setForm = (next: BuilderForm) => onChange('form', next);
           const fields = fieldsFor(layout, form.appliesTo);
           const problems = formProblems(form, layout);
+          const { fields: fieldProblems, rest: otherProblems } = splitProblems(problems, form);
+          const laterSectionsEdited =
+            form.inputs.length > 0 ||
+            form.who.checks.length > 0 ||
+            countChecks(form.which) > 0 ||
+            form.onSave.stamp.length > 0 ||
+            form.onSave.locked.length > 0;
+          const fieldError = (part: 'slug' | 'displayName' | 'types') => {
+            const server = part === 'types' ? undefined : fieldErrors[part];
+            // Once a section after them has been filled in, a missing name is what stops the save
+            const found = touched[part] || laterSectionsEdited ? fieldProblems[part] : undefined;
+
+            return (
+              server ??
+              (found
+                ? formatMessage(
+                    { id: found.id, defaultMessage: found.defaultMessage },
+                    found.values
+                  )
+                : undefined)
+            );
+          };
           // The preview takes a condition as it is now, whatever its name: only the rest has to hold up
           const previewProblems = formProblems(
             { ...form, slug: 'preview', displayName: 'Preview' },
@@ -325,7 +354,7 @@ const ConditionBuilder = ({
                     startIcon={<Check />}
                     disabled={!canSave || isDeleting}
                     // The form is submitting while the confirmation waits for its answer
-                    loading={isSubmitting && !confirmation.asking}
+                    loading={isSubmitting && confirmation.question === null}
                     fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
@@ -458,7 +487,7 @@ const ConditionBuilder = ({
                       )}
                     </Typography>
                   )}
-                  {restrictsNothing && (
+                  {restrictsNothing && (modified || isEditing) && (
                     <Flex
                       gap={3}
                       padding={4}
@@ -475,7 +504,7 @@ const ConditionBuilder = ({
                       </Typography>
                     </Flex>
                   )}
-                  {problems.length > 0 && (modified || isEditing) && (
+                  {otherProblems.length > 0 && (modified || isEditing) && (
                     <Alert
                       variant="danger"
                       title={formatMessage({
@@ -484,7 +513,7 @@ const ConditionBuilder = ({
                       })}
                       closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
                     >
-                      {problems.map(({ path, message }) => (
+                      {otherProblems.map(({ path, message }) => (
                         <Typography key={`${path}:${message}`} tag="span" display="block">
                           {message}
                         </Typography>
@@ -501,7 +530,14 @@ const ConditionBuilder = ({
                           layout={layout}
                           isEditing={isEditing}
                           disabled={!canEdit}
-                          errors={fieldErrors}
+                          errors={{
+                            slug: fieldError('slug'),
+                            displayName: fieldError('displayName'),
+                            types: fieldError('types'),
+                          }}
+                          onTouch={(part) =>
+                            setTouched((current) => ({ ...current, [part]: true }))
+                          }
                           onChange={(patch) => setForm({ ...form, ...patch })}
                         />
                         <InputsSection
@@ -536,7 +572,13 @@ const ConditionBuilder = ({
                       </Flex>
                     </Grid.Item>
                     <Grid.Item col={4} xs={12} direction="column" alignItems="stretch">
-                      <Flex direction="column" alignItems="stretch" gap={6}>
+                      {/* Stays in view while the sections below it are edited */}
+                      <Flex
+                        direction="column"
+                        alignItems="stretch"
+                        gap={6}
+                        style={{ position: 'sticky', top: '10rem' }}
+                      >
                         <SummaryCard condition={toCondition(form)} layout={layout} />
                         <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                           <PreviewPanel
@@ -555,7 +597,7 @@ const ConditionBuilder = ({
                 </Flex>
               </Layouts.Content>
               <Dialog.Root
-                open={confirmation.asking}
+                open={confirmation.question !== null}
                 onOpenChange={(open) => !open && confirmation.answer(false)}
               >
                 <ConfirmDialog
@@ -642,7 +684,7 @@ const BuilderLoader = () => {
 
   // The builder opens builder conditions only: the others are in code, a plugin or the plugin itself
   if (slug !== undefined && condition?.source !== 'builder') {
-    return <Page.NoData />;
+    return <NotFound kind="condition" backPath={CONDITIONS_PATH} />;
   }
 
   return (

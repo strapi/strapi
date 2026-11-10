@@ -14,6 +14,7 @@ import { useIntl } from 'react-intl';
 
 import { isParamNeeded } from '../../../../../../shared/conditions/params';
 import { getTranslation } from '../../../../utils/getTranslation';
+import { describeParam } from '../../../../utils/paramWords';
 
 import type { FieldAccepts } from '../../../../../../shared/builder/types';
 import type {
@@ -144,16 +145,6 @@ const isMissing = (
   return value === undefined || value === null || value === '';
 };
 
-const humanize = (name: string) => {
-  const words = name
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[-_.]+/g, ' ')
-    .trim()
-    .toLowerCase();
-
-  return words.charAt(0).toUpperCase() + words.slice(1);
-};
-
 /* -------------------------------------------------------------------------------------------------
  * ParamInput
  * -----------------------------------------------------------------------------------------------*/
@@ -168,26 +159,27 @@ interface ParamInputProps {
 /** The control of one param of a condition: a choice of field, a toggle or an input */
 const ParamInput = ({ param, contentType, value, onChange }: ParamInputProps) => {
   const { formatMessage } = useIntl();
-  const label = humanize(param.name);
+  const { label, hint } = describeParam(param.name, formatMessage);
   const candidates = getCandidates(param, contentType);
   const required = isNeeded(param, candidates);
 
   if (param.type === 'boolean') {
     return (
-      <Field.Root>
+      <Field.Root hint={hint}>
         <Field.Label>{label}</Field.Label>
         <Toggle
           checked={Boolean(value)}
           onLabel={formatMessage({
-            id: 'app.components.ToggleCheckbox.on-label',
-            defaultMessage: 'True',
+            id: 'app.components.ToggleCheckbox.enabled-label',
+            defaultMessage: 'Enabled',
           })}
           offLabel={formatMessage({
-            id: 'app.components.ToggleCheckbox.off-label',
-            defaultMessage: 'False',
+            id: 'app.components.ToggleCheckbox.disabled-label',
+            defaultMessage: 'Disabled',
           })}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.checked)}
         />
+        <Field.Hint />
       </Field.Root>
     );
   }
