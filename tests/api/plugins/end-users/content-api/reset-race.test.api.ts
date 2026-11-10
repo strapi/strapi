@@ -68,6 +68,32 @@ describe('end-users: redeeming a password reset token at the same time', () => {
         200,
         ...Array(CONTENDERS - 1).fill(400),
       ]);
+
+      // The token is spent, and the password of the one request that won is the only one that works
+      // eslint-disable-next-line no-await-in-loop
+      expect(
+        await strapi.db
+          .query(VERIFICATION_UID)
+          .count({ where: { identifier: `reset-password:${token}` } })
+      ).toBe(0);
+
+      const winner = results.findIndex(({ statusCode }) => statusCode === 200);
+      const works: boolean[] = [];
+
+      for (let index = 0; index < CONTENDERS; index += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const signedIn = await rq.post('/api/auth/sign-in/email', {
+          body: {
+            email: 'reset-race@example.com',
+            password: `Race-password-long-${round}-${index}`,
+          },
+        });
+
+        works.push(signedIn.statusCode === 200);
+      }
+
+      expect(works.filter(Boolean)).toHaveLength(1);
+      expect(works[winner]).toBe(true);
     }
   });
 });
