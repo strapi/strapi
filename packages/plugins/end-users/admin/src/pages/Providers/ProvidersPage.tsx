@@ -10,9 +10,9 @@ import {
 } from '@strapi/admin/strapi-admin';
 import {
   Badge,
-  Combobox,
-  ComboboxOption,
+  Button,
   Dialog,
+  EmptyStateLayout,
   Flex,
   IconButton,
   Table,
@@ -24,7 +24,8 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Pencil, Trash } from '@strapi/icons';
+import { Pencil, Plus, Trash } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { CheckModeNotice } from '../../components/CheckModeNotice';
@@ -35,11 +36,9 @@ import { getTranslation } from '../../utils/getTranslation';
 
 import { AddOidcModal } from './AddOidcModal';
 import { ProviderModal } from './ProviderModal';
+import { CUSTOM_OIDC, ProviderPicker } from './ProviderPicker';
 
 import type { ProviderSummary } from '../../../../shared/contracts/providers';
-
-/** The picker's choice for a provider that is not in the list */
-const CUSTOM_OIDC = '__custom-oidc__';
 
 const ProvidersContent = () => {
   const { formatMessage } = useIntl();
@@ -53,8 +52,7 @@ const ProvidersContent = () => {
   const [deleteProvider] = useDeleteProviderMutation();
   const [openId, setOpenId] = React.useState<string | null>(null);
   const [isAddingOidc, setIsAddingOidc] = React.useState(false);
-  // The picker is made anew after each choice, so it starts empty and unfiltered again
-  const [pickerKey, setPickerKey] = React.useState(0);
+  const [isPicking, setIsPicking] = React.useState(false);
   const [toDelete, setToDelete] = React.useState<ProviderSummary | null>(null);
 
   if (isLoading || isLoadingPermissions) {
@@ -85,15 +83,20 @@ const ProvidersContent = () => {
     }),
   };
 
-  const handlePick = (value: string | number | null | undefined) => {
-    setPickerKey((key) => key + 1);
+  const handlePick = (value: string) => {
+    setIsPicking(false);
 
     if (value === CUSTOM_OIDC) {
       setIsAddingOidc(true);
-    } else if (typeof value === 'string' && value !== '') {
+    } else {
       setOpenId(value);
     }
   };
+
+  const addLabel = formatMessage({
+    id: getTranslation('providers.add'),
+    defaultMessage: 'Add new provider',
+  });
 
   const handleDelete = async () => {
     if (!toDelete) {
@@ -121,167 +124,155 @@ const ProvidersContent = () => {
           id: getTranslation('providers.subtitle'),
           defaultMessage: 'The identity providers end users can sign in with',
         })}
+        primaryAction={
+          canUpdate && (
+            <Button startIcon={<Plus />} size="S" onClick={() => setIsPicking(true)}>
+              {addLabel}
+            </Button>
+          )
+        }
       />
-      {canUpdate && (
-        <Layouts.Action
-          startActions={
-            <Combobox
-              key={pickerKey}
-              aria-label={formatMessage({
-                id: getTranslation('providers.add'),
-                defaultMessage: 'Add provider',
-              })}
-              placeholder={formatMessage({
-                id: getTranslation('providers.add'),
-                defaultMessage: 'Add provider',
-              })}
-              onChange={handlePick}
-            >
-              {available.map((provider) => (
-                <ComboboxOption key={provider.id} value={provider.id}>
-                  {provider.name}
-                </ComboboxOption>
-              ))}
-              <ComboboxOption value={CUSTOM_OIDC}>
-                {formatMessage({
-                  id: getTranslation('providers.custom-oidc'),
-                  defaultMessage: 'Custom OIDC',
-                })}
-              </ComboboxOption>
-            </Combobox>
-          }
-        />
-      )}
       <Layouts.Content>
-        <Table colCount={5} rowCount={configured.length + 1}>
-          <Thead>
-            <Tr>
-              <Th>
-                <Typography variant="sigma" textColor="neutral600">
-                  {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma" textColor="neutral600">
-                  {formatMessage({
-                    id: getTranslation('providers.column.source'),
-                    defaultMessage: 'Source',
-                  })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma" textColor="neutral600">
-                  {formatMessage({
-                    id: getTranslation('providers.column.enabled'),
-                    defaultMessage: 'Enabled',
-                  })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma" textColor="neutral600">
-                  {formatMessage({
-                    id: getTranslation('providers.column.status'),
-                    defaultMessage: 'Status',
-                  })}
-                </Typography>
-              </Th>
-              <Th>
-                <VisuallyHidden>
-                  {formatMessage({ id: 'global.actions', defaultMessage: 'Actions' })}
-                </VisuallyHidden>
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {configured.length === 0 && (
+        {configured.length === 0 ? (
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="160px" />}
+            content={formatMessage({
+              id: getTranslation('providers.empty'),
+              defaultMessage: 'No provider is configured yet.',
+            })}
+            action={
+              canUpdate ? (
+                <Button variant="secondary" startIcon={<Plus />} onClick={() => setIsPicking(true)}>
+                  {addLabel}
+                </Button>
+              ) : null
+            }
+          />
+        ) : (
+          <Table colCount={5} rowCount={configured.length + 1}>
+            <Thead>
               <Tr>
-                <Td colSpan={5}>
-                  <Typography textColor="neutral600">
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: getTranslation('providers.empty'),
-                      defaultMessage: 'No provider is configured yet.',
+                      id: getTranslation('providers.column.source'),
+                      defaultMessage: 'Source',
                     })}
                   </Typography>
-                </Td>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: getTranslation('providers.column.enabled'),
+                      defaultMessage: 'Enabled',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: getTranslation('providers.column.status'),
+                      defaultMessage: 'Status',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <VisuallyHidden>
+                    {formatMessage({ id: 'global.actions', defaultMessage: 'Actions' })}
+                  </VisuallyHidden>
+                </Th>
               </Tr>
-            )}
-            {configured.map((provider) => (
-              <Tr key={provider.id} cursor="pointer" onClick={() => setOpenId(provider.id)}>
-                <Td>
-                  <Typography textColor="neutral800">{provider.name}</Typography>
-                </Td>
-                <Td>
-                  {provider.source === 'config' ? (
-                    <Badge>
-                      {formatMessage({
-                        id: getTranslation('providers.source.config'),
-                        defaultMessage: 'Configured in config/plugins.ts',
-                      })}
-                    </Badge>
-                  ) : (
-                    <Typography textColor="neutral600">
-                      {formatMessage({
-                        id: getTranslation('providers.source.admin'),
-                        defaultMessage: 'Admin',
-                      })}
-                    </Typography>
-                  )}
-                </Td>
-                <Td>
-                  <Typography textColor="neutral800">
-                    {provider.enabled
-                      ? formatMessage({ id: getTranslation('settings.on'), defaultMessage: 'On' })
-                      : formatMessage({
-                          id: getTranslation('settings.off'),
-                          defaultMessage: 'Off',
+            </Thead>
+            <Tbody>
+              {configured.map((provider) => (
+                <Tr key={provider.id} cursor="pointer" onClick={() => setOpenId(provider.id)}>
+                  <Td>
+                    <Typography textColor="neutral800">{provider.name}</Typography>
+                  </Td>
+                  <Td>
+                    {provider.source === 'config' ? (
+                      <Badge>
+                        {formatMessage({
+                          id: getTranslation('providers.source.config'),
+                          defaultMessage: 'Configured in config/plugins.ts',
                         })}
-                  </Typography>
-                </Td>
-                <Td>
-                  <Typography
-                    textColor={provider.status === 'needs-secret' ? 'danger600' : 'neutral800'}
-                  >
-                    {statusLabels[provider.status]}
-                  </Typography>
-                </Td>
-                <Td onClick={(event: React.MouseEvent) => event.stopPropagation()}>
-                  <Flex gap={1} justifyContent="flex-end">
-                    <IconButton
-                      variant="ghost"
-                      label={formatMessage(
-                        {
-                          id: getTranslation('providers.edit'),
-                          defaultMessage: 'Open {name}',
-                        },
-                        { name: provider.name }
-                      )}
-                      onClick={() => setOpenId(provider.id)}
+                      </Badge>
+                    ) : (
+                      <Typography textColor="neutral600">
+                        {formatMessage({
+                          id: getTranslation('providers.source.admin'),
+                          defaultMessage: 'Admin',
+                        })}
+                      </Typography>
+                    )}
+                  </Td>
+                  <Td>
+                    <Typography textColor="neutral800">
+                      {provider.enabled
+                        ? formatMessage({ id: getTranslation('settings.on'), defaultMessage: 'On' })
+                        : formatMessage({
+                            id: getTranslation('settings.off'),
+                            defaultMessage: 'Off',
+                          })}
+                    </Typography>
+                  </Td>
+                  <Td>
+                    <Typography
+                      textColor={provider.status === 'needs-secret' ? 'danger600' : 'neutral800'}
                     >
-                      <Pencil />
-                    </IconButton>
-                    {canUpdate && provider.source === 'admin' && (
+                      {statusLabels[provider.status]}
+                    </Typography>
+                  </Td>
+                  <Td onClick={(event: React.MouseEvent) => event.stopPropagation()}>
+                    <Flex gap={1} justifyContent="flex-end">
                       <IconButton
                         variant="ghost"
                         label={formatMessage(
                           {
-                            id: getTranslation('providers.delete'),
-                            defaultMessage: 'Delete {name}',
+                            id: getTranslation('providers.edit'),
+                            defaultMessage: 'Open {name}',
                           },
                           { name: provider.name }
                         )}
-                        onClick={() => setToDelete(provider)}
+                        onClick={() => setOpenId(provider.id)}
                       >
-                        <Trash />
+                        <Pencil />
                       </IconButton>
-                    )}
-                  </Flex>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+                      {canUpdate && provider.source === 'admin' && (
+                        <IconButton
+                          variant="ghost"
+                          label={formatMessage(
+                            {
+                              id: getTranslation('providers.delete'),
+                              defaultMessage: 'Delete {name}',
+                            },
+                            { name: provider.name }
+                          )}
+                          onClick={() => setToDelete(provider)}
+                        >
+                          <Trash />
+                        </IconButton>
+                      )}
+                    </Flex>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        )}
       </Layouts.Content>
 
+      <ProviderPicker
+        open={isPicking}
+        available={available}
+        onClose={() => setIsPicking(false)}
+        onPick={handlePick}
+      />
       <ProviderModal id={openId} canUpdate={canUpdate} onClose={() => setOpenId(null)} />
       <AddOidcModal
         open={isAddingOidc}

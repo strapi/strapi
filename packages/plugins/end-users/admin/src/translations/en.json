@@ -298,7 +298,7 @@
   "providers.status.needs-secret": "Needs a new secret",
   "providers.status.disabled": "Disabled",
   "providers.subtitle": "The identity providers end users can sign in with",
-  "providers.add": "Add provider",
+  "providers.add": "Add new provider",
   "providers.custom-oidc": "Custom OIDC",
   "providers.column.source": "Source",
   "providers.column.enabled": "Enabled",
@@ -456,5 +456,10 @@
   "migration.check-mode.message": "End users turns on when the migration runs",
   "conditions.builder.errors.slug": "Use lowercase letters, digits and hyphens, starting with a letter. Up to 63 characters.",
   "conditions.builder.errors.slug-reserved": "The name \"{slug}\" is reserved. Choose another.",
-  "conditions.builder.errors.types": "Choose at least one content type."
+  "conditions.builder.errors.types": "Choose at least one content type.",
+  "providers.picker.title": "Add a provider",
+  "providers.picker.label": "Provider",
+  "providers.picker.placeholder": "Search providers",
+  "providers.picker.no-match": "No provider matches.",
+  "providers.save-failed": "Check the fields marked with an error."
 }

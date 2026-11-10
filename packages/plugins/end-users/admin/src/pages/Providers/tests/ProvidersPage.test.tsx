@@ -149,6 +149,16 @@ const serveProviders = (list: ProviderSummary[] = PROVIDERS) => {
 const renderPage = () =>
   render(<ProvidersPage />, { initialEntries: ['/settings/end-users/providers'] });
 
+/** The picker of a provider to add: the header button opens it, and its dialog holds the search */
+const openPicker = async (user: ReturnType<typeof renderPage>['user']) => {
+  await user.click(await screen.findByRole('button', { name: 'Add new provider' }));
+
+  return within(await screen.findByRole('dialog', { name: 'Add a provider' })).findByRole(
+    'combobox',
+    { name: 'Provider' }
+  );
+};
+
 const openProvider = async (user: ReturnType<typeof renderPage>['user'], name: string) => {
   await user.click(await screen.findByRole('button', { name: `Open ${name}` }));
 
@@ -191,10 +201,40 @@ describe('ProvidersPage', () => {
     expect(within(rows[0]).getByText('GitHub')).toBeInTheDocument();
     expect(within(rows[0]).getByText('Off')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('combobox', { name: 'Add provider' }));
+    await user.click(await openPicker(user));
 
     expect(await screen.findByRole('option', { name: 'Google' })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'GitHub' })).not.toBeInTheDocument();
+  });
+
+  it('finds a provider by any part of its name, and says when none matches', async () => {
+    serveProviders();
+    const { user } = renderPage();
+
+    const picker = await openPicker(user);
+
+    await user.type(picker, 'oidc');
+
+    expect(await screen.findByRole('option', { name: 'Custom OIDC' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Google' })).not.toBeInTheDocument();
+
+    await user.clear(picker);
+    await user.type(picker, 'zzz');
+
+    expect(await screen.findByText('No provider matches.')).toBeInTheDocument();
+  });
+
+  it('says so, with a way to add one, when no provider is configured', async () => {
+    serveProviders([summary({ id: 'google', name: 'Google' })]);
+    const { user } = renderPage();
+
+    expect(await screen.findByText('No provider is configured yet.')).toBeInTheDocument();
+    // The header's button and the empty state's
+    expect(screen.getAllByRole('button', { name: 'Add new provider' })).toHaveLength(2);
+
+    await user.click(screen.getAllByRole('button', { name: 'Add new provider' })[1]);
+
+    expect(await screen.findByRole('dialog', { name: 'Add a provider' })).toBeInTheDocument();
   });
 
   it('edits the profile mapping and sends it on save', async () => {
@@ -252,13 +292,17 @@ describe('ProvidersPage', () => {
     serveProviders();
     const { user } = renderPage();
 
-    const picker = await screen.findByRole('combobox', { name: 'Add provider' });
-
-    await user.click(picker);
+    await user.click(await openPicker(user));
 
     expect(await screen.findByRole('option', { name: 'Google' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Twitch' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Custom OIDC' })).toBeInTheDocument();
+    // By name, the custom one last
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Google',
+      'Twitch',
+      'Custom OIDC',
+    ]);
     // What is configured is not offered again
     expect(screen.queryByRole('option', { name: 'GitHub' })).not.toBeInTheDocument();
 
@@ -271,7 +315,7 @@ describe('ProvidersPage', () => {
     expect(within(dialog).getByDisplayValue('email profile')).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
-    await user.click(await screen.findByRole('combobox', { name: 'Add provider' }));
+    await user.click(await openPicker(user));
     await user.click(await screen.findByRole('option', { name: 'Twitch' }));
 
     expect(
@@ -431,7 +475,7 @@ describe('ProvidersPage', () => {
     const sent = serveProviders();
     const { user } = renderPage();
 
-    await user.click(await screen.findByRole('combobox', { name: 'Add provider' }));
+    await user.click(await openPicker(user));
     await user.click(await screen.findByRole('option', { name: 'Custom OIDC' }));
 
     const dialog = await screen.findByRole('dialog');
@@ -461,7 +505,7 @@ describe('ProvidersPage', () => {
     const sent = serveProviders();
     const { user } = renderPage();
 
-    await user.click(await screen.findByRole('combobox', { name: 'Add provider' }));
+    await user.click(await openPicker(user));
     await user.click(await screen.findByRole('option', { name: 'Custom OIDC' }));
 
     const dialog = await screen.findByRole('dialog');
