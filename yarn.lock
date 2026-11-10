@@ -31718,6 +31718,7 @@ __metadata:
     prettier: "npm:3.9.9"
     prettier-2: "npm:prettier@^2"
     qs: "npm:6.16.2"
+    reselect: "npm:^4.1.8"
     rimraf: "npm:6.1.3"
     rollup: "npm:4.60.4"
     rollup-plugin-html: "npm:0.2.1"
