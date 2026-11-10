@@ -1,5 +1,5 @@
 import { ACTIVE, CHECK, REPORT, serveMigration } from '@tests/migrationFixtures';
-import { render, screen, server, waitFor } from '@tests/utils';
+import { answered, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { AdvancedPage } from '../AdvancedPage';
@@ -167,9 +167,11 @@ describe('MigrationSection', () => {
 
   it('is not shown when no migration has run', async () => {
     serveMigration({ ...ACTIVE, record: null, report: null });
+    const statusRead = answered('/end-users/migration');
+
     render(<MigrationSection />);
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await statusRead();
     expect(screen.queryByRole('heading', { name: 'Migration' })).not.toBeInTheDocument();
   });
 });

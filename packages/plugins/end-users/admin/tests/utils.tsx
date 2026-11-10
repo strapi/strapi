@@ -35,4 +35,35 @@ const renderHook: typeof renderHookAdmin = (hook, options) =>
     providerOptions: { permissions: ALL_PERMISSIONS },
   });
 
-export { render, renderHook, waitFor, server, act, screen };
+/**
+ * Resolves once the mock server has answered the next request to `path`, and the page has had the
+ * answer: for a test that asserts something is not shown, which passes before the request is
+ * answered unless it waits for it. Call it before rendering.
+ */
+const answered = (path: string): (() => Promise<void>) => {
+  let isAnswered: () => void = () => {};
+  const done = new Promise<void>((resolve) => {
+    isAnswered = resolve;
+  });
+  const onResponse = ({ request }: { request: Request }) => {
+    if (new URL(request.url).pathname === path) {
+      server.events.removeListener('response:mocked', onResponse);
+      isAnswered();
+    }
+  };
+
+  server.events.on('response:mocked', onResponse);
+
+  return async () => {
+    await done;
+    // The answer reaches the store, and the store reaches the page, in the turns that follow
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+};
+
+export { answered, render, renderHook, waitFor, server, act, screen };

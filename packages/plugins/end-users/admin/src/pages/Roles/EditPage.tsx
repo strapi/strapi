@@ -28,6 +28,7 @@ import {
   useUpdateRoleMutation,
 } from '../../services/roles';
 import { getTranslation } from '../../utils/getTranslation';
+import { useQuestion } from '../../utils/useQuestion';
 
 import { BulkChangeDialog } from './components/BulkChangeDialog';
 import { DetailsPane } from './components/DetailsPane';
@@ -35,6 +36,7 @@ import { ProblemsBanner } from './components/ProblemsBanner';
 import { RenameRoleDialog } from './components/RenameRoleDialog';
 import { ReviewChangesModal } from './components/ReviewChangesModal';
 import { RoleDetails } from './components/RoleDetails';
+import { RulesDot } from './components/RulesDot';
 import { SubjectSettingsModal } from './components/SubjectSettingsModal';
 import { toEditorModel, toPermissionDiff, toPermissionRows } from './utils/editorModel';
 import {
@@ -45,7 +47,6 @@ import {
 } from './utils/editorRows';
 import { describeSave } from './utils/saveReview';
 import { findSelfWritableWarnings } from './utils/selfWritableWarnings';
-import { useQuestion } from './utils/useQuestion';
 
 import type { BulkQuestion } from './components/BulkChangeDialog';
 import type { RenameQuestion } from './components/RenameRoleDialog';
@@ -255,18 +256,6 @@ const SubjectDetails = ({
  * PermissionsPanel
  * -----------------------------------------------------------------------------------------------*/
 
-const RulesDot = (props: React.ComponentProps<typeof Box>) => (
-  <Box
-    tag="span"
-    display="block"
-    width="6px"
-    height="6px"
-    borderRadius="20px"
-    background="primary600"
-    {...props}
-  />
-);
-
 interface PermissionsPanelProps {
   layout: PermissionLayout;
   model: EditorModel;
@@ -290,6 +279,9 @@ const PermissionsPanelBase = ({
   const { formatMessage } = useIntl();
   const setFormValue = useForm('PermissionsPanel', (state) => state.onChange);
 
+  // The editor takes the admin's `Permission`, which also has an id, timestamps and
+  // `actionParameters`; it reads only the action, subject, conditions and properties, and these
+  // rows have no more. The input is typed as the admin's entity, the output (`onChange`) is not.
   const permissions = React.useMemo(
     () => model.rows as unknown as NonNullable<PermissionsProps['permissions']>,
     [model]

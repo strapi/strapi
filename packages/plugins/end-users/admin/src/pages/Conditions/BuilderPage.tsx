@@ -35,6 +35,7 @@ import {
   useUpdateConditionMutation,
 } from '../../services/conditions';
 import { getTranslation } from '../../utils/getTranslation';
+import { useQuestion } from '../../utils/useQuestion';
 
 import { AppliesToSection } from './components/builder/AppliesToSection';
 import { InputsSection } from './components/builder/InputsSection';
@@ -48,7 +49,6 @@ import { fieldsFor, formProblems, toCondition, toForm } from './utils/builderFor
 import { splitProblems } from './utils/fieldProblems';
 import { toFormErrors } from './utils/toFormErrors';
 import { useConditionsRestartWatcher } from './utils/useConditionsRestartWatcher';
-import { useConfirmation } from './utils/useConfirmation';
 import { isRestartTimeout } from './utils/watchConditionsRestart';
 
 import type { BuilderForm, FormGroup } from './utils/builderForm';
@@ -119,7 +119,8 @@ const ConditionBuilder = ({
     skip: !canEdit,
     refetchOnMountOrArgChange: true,
   });
-  const confirmation = useConfirmation();
+  // Saving a condition roles use asks first: the question has nothing to say but yes or no
+  const confirmation = useQuestion<true>();
 
   const isEditing = condition !== undefined;
   const slugOfCondition = condition?.name.slice(BUILDER_NAME_PREFIX.length) ?? '';
@@ -230,7 +231,7 @@ const ConditionBuilder = ({
     });
 
     // The roles that use it get what the new condition keeps, from the next start on
-    if (condition && condition.usedBy > 0 && !(await confirmation.ask())) {
+    if (condition && condition.usedBy > 0 && !(await confirmation.ask(true))) {
       return;
     }
 
@@ -346,7 +347,7 @@ const ConditionBuilder = ({
                     startIcon={<Check />}
                     disabled={!canSave || isDeleting}
                     // The form is submitting while the confirmation waits for its answer
-                    loading={isSubmitting && !confirmation.asking}
+                    loading={isSubmitting && !confirmation.question !== null}
                     fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
@@ -589,7 +590,7 @@ const ConditionBuilder = ({
                 </Flex>
               </Layouts.Content>
               <Dialog.Root
-                open={confirmation.asking}
+                open={confirmation.question !== null}
                 onOpenChange={(open) => !open && confirmation.answer(false)}
               >
                 <ConfirmDialog

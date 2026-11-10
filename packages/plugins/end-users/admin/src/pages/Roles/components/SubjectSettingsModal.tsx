@@ -19,6 +19,7 @@ import { useIntl } from 'react-intl';
 import { DATA_ACTIONS } from '../../../../../shared/contracts/permissions';
 import { getTranslation } from '../../../utils/getTranslation';
 
+import { RulesDot } from './RulesDot';
 import { ConditionActionRow } from './settings/ConditionActionRow';
 import { ConditionInputs, isMissing, toConditionRef } from './settings/ConditionInputs';
 
@@ -326,7 +327,7 @@ const SubjectSettingsModal = ({
     <Modal.Root open={open} onOpenChange={setOpen}>
       <Box position="relative">
         {hasSettings(value) && (
-          <Box
+          <RulesDot
             role="img"
             aria-label={formatMessage({
               id: getTranslation('roles.settings.set'),
@@ -335,10 +336,6 @@ const SubjectSettingsModal = ({
             position="absolute"
             top="-3px"
             left="-10px"
-            width="6px"
-            height="6px"
-            borderRadius="20px"
-            background="primary600"
           />
         )}
         <Modal.Trigger>

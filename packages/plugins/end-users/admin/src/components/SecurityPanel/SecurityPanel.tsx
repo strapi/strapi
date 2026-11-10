@@ -1,11 +1,6 @@
 import * as React from 'react';
 
-import {
-  ConfirmDialog,
-  useAPIErrorHandler,
-  useNotification,
-  useRBAC,
-} from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, useRBAC } from '@strapi/admin/strapi-admin';
 import {
   Badge,
   Box,
@@ -37,6 +32,7 @@ import { EffectivePermissionsModal } from '../EffectivePermissions/EffectivePerm
 
 import { BanModal } from './BanModal';
 import { SessionsModal } from './SessionsModal';
+import { isForbidden, useSecurityActions } from './useSecurityActions';
 
 import type { UserSecurity } from '../../../../shared/contracts/user-security';
 
@@ -51,9 +47,6 @@ interface SecurityPanelProps {
   documentId?: string;
   document?: { documentId?: string; emailVerified?: boolean };
 }
-
-const isForbidden = (error: unknown) =>
-  typeof error === 'object' && error !== null && (error as { status?: unknown }).status === 403;
 
 interface RowProps {
   label: string;
@@ -78,11 +71,6 @@ const Row = ({ label, children, actions }: RowProps) => (
   </Flex>
 );
 
-interface Confirmation {
-  message: string;
-  run: () => Promise<unknown>;
-}
-
 const SecurityContent = ({
   documentId,
   emailVerified,
@@ -92,8 +80,6 @@ const SecurityContent = ({
   emailVerified: boolean;
 }) => {
   const { formatMessage, formatDate } = useIntl();
-  const { toggleNotification } = useNotification();
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const {
     allowedActions: { canUpdate },
   } = useRBAC(CAN_UPDATE);
@@ -111,64 +97,14 @@ const SecurityContent = ({
   const [sendPasswordReset] = useSendUserPasswordResetMutation();
   const [sendVerification] = useSendUserVerificationMutation();
 
-  const [forbidden, setForbidden] = React.useState(false);
-  const [confirmation, setConfirmation] = React.useState<Confirmation | null>(null);
+  const { forbidden, confirmation, setConfirmation, sending, perform, sendEmail, confirm } =
+    useSecurityActions();
   const [sessionsOpen, setSessionsOpen] = React.useState(false);
   const [banOpen, setBanOpen] = React.useState(false);
   const [permissionsOpen, setPermissionsOpen] = React.useState(false);
 
-  // The email in flight, if any: its buttons stay disabled until the server has answered
-  const [sending, setSending] = React.useState<'reset' | 'verification' | null>(null);
-  const sendingRef = React.useRef(false);
-
   const readForbidden = isForbidden(error);
   const canAct = canUpdate && !forbidden && !readForbidden;
-
-  /** Runs a change: tells what happened, and falls back to read-only when the server forbids it */
-  const perform = async (
-    result: PromiseLike<{ data?: unknown; error?: unknown }>,
-    success: string
-  ): Promise<boolean> => {
-    const outcome = await result;
-
-    if ('error' in outcome && outcome.error) {
-      if (isForbidden(outcome.error)) {
-        setForbidden(true);
-      } else {
-        toggleNotification({ type: 'danger', message: formatAPIError(outcome.error as never) });
-      }
-
-      return false;
-    }
-
-    toggleNotification({ type: 'success', message: success });
-
-    return true;
-  };
-
-  /** One email at a time: a second click while one is on its way sends nothing */
-  const sendEmail = async (
-    kind: 'reset' | 'verification',
-    send: () => PromiseLike<{ data?: unknown; error?: unknown }>,
-    success: string
-  ) => {
-    if (sendingRef.current) {
-      return;
-    }
-
-    sendingRef.current = true;
-    setSending(kind);
-
-    try {
-      await perform(send(), success);
-    } finally {
-      sendingRef.current = false;
-      setSending(null);
-    }
-  };
-
-  const confirm = (message: string, run: () => Promise<unknown>) =>
-    setConfirmation({ message, run });
 
   if (isLoading) {
     return (

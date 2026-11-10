@@ -1,5 +1,5 @@
 import { ACTIVE, serveMigration } from '@tests/migrationFixtures';
-import { render, screen, server, waitFor } from '@tests/utils';
+import { answered, render, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { MigrationBanner } from '../MigrationBanner';
@@ -36,11 +36,12 @@ describe('MigrationBanner', () => {
 
     for (const arrange of cases) {
       arrange();
+      // The status is read before the banner decides: what it shows is checked once it is answered
+      const statusRead = answered('/end-users/migration');
       const { container, unmount } = render(<MigrationBanner />);
 
-      // The status is read before the banner decides: give the request time to settle
-      await waitFor(() => expect(screen.queryByText(/need attention/)).not.toBeInTheDocument());
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await statusRead();
+      expect(screen.queryByText(/need attention/)).not.toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
       expect(container).toHaveTextContent('');
       unmount();
