@@ -1139,10 +1139,11 @@ describe('Role', () => {
     const expectAccepted = async (
       requester: Parameters<typeof checkPermissionsCeiling>[0],
       permissions: any[]
-    ) =>
-      expect(checkPermissionsCeiling(requester, ROLE_ID, permissions)).resolves.toEqual(
-        permissions
-      );
+    ) => {
+      const sent = structuredClone(permissions);
+
+      await expect(checkPermissionsCeiling(requester, ROLE_ID, permissions)).resolves.toEqual(sent);
+    };
 
     const expectForbidden = async (promise: Promise<unknown>, rejectedPermissions: unknown[]) => {
       let error: any;
@@ -1682,6 +1683,115 @@ describe('Role', () => {
 
           setup(['title', 'socialLinks'], [readTitleEn, createEn]);
           await expectAccepted({ user }, [createTitle(['en'])]);
+        });
+
+        test('Accepts the row narrowed to fewer conditions, and keeps its stored locales', async () => {
+          setupStrapi({
+            userPermissions: [readTitleEn],
+            rolePermissions: [
+              {
+                ...storedRow(),
+                conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+              },
+            ],
+            localizedSubjects: [ARTICLE],
+          });
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        test('Lists only the other permission when it is rejected with the row', async () => {
+          setup();
+
+          await expectForbidden(
+            checkPermissionsCeiling({ user }, ROLE_ID, [
+              createTitle(['en']),
+              { action: CREATE, subject: AUTHOR },
+            ]),
+            [{ action: CREATE, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+        });
+
+        describe('with another willValidateUpdatePermissions handler', () => {
+          const bodyDe = {
+            id: 3,
+            role: ROLE_ID,
+            action: CREATE,
+            subject: ARTICLE,
+            properties: { fields: ['body'], locales: ['de'] },
+            conditions: ['admin::is-creator'],
+          };
+
+          const withHandler = async (
+            handler: (permissions: any[]) => any,
+            run: () => Promise<void>
+          ) => {
+            roleService.hooks.willValidateUpdatePermissions.register(handler);
+
+            try {
+              await run();
+            } finally {
+              roleService.hooks.willValidateUpdatePermissions.delete(handler);
+            }
+          };
+
+          test('Pairs each row with its own reading when the handler reorders rows', async () => {
+            setupStrapi({
+              userPermissions: [readTitleEn],
+              rolePermissions: [storedRow(), bodyDe],
+              localizedSubjects: [ARTICLE],
+            });
+
+            await withHandler(
+              async (permissions) => [...permissions].reverse(),
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+
+          test('Pairs each row with its own reading when the handler drops rows', async () => {
+            setupStrapi({
+              userPermissions: [readTitleEn],
+              rolePermissions: [bodyDe, storedRow()],
+              localizedSubjects: [ARTICLE],
+            });
+
+            await withHandler(
+              async (permissions) => permissions.slice(1),
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+
+          test('Keeps the stored rows unchanged when the handler mutates its input', async () => {
+            setup();
+            roleService.hooks.willValidateUpdatePermissions.delete(giveDefaultLocale);
+
+            await withHandler(
+              async (permissions) => {
+                permissions.forEach((permission) => {
+                  if (permission.subject === ARTICLE && !permission.properties?.locales?.length) {
+                    permission.properties.locales = [defaultLocale];
+                  }
+                });
+
+                return permissions;
+              },
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
         });
 
         test('Grants no locale when the default locale changed', async () => {

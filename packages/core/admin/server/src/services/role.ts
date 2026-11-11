@@ -1,4 +1,5 @@
 import _, {
+  cloneDeep,
   omit,
   pick,
   differenceWith,
@@ -480,15 +481,42 @@ const checkPermissionsCeiling = async (
     isEmpty(stored.actionParameters) &&
     permissionDomain.ceiling.isPermissionWithinCeiling(stored, existingEnforced);
 
-  // The role's rows that the hook gives a locale they do not grant, with that hooked reading
+  // The role's rows that grant no locale (no or empty `locales`) and that the hook gives one, with
+  // that hooked reading. The hook gets copies, and each row is paired with the hooked row of the
+  // same id that differs from it in `locales` only, whatever the handlers return.
   const hookedPermissions = (await hooks.willValidateUpdatePermissions.call(
-    existingPermissions.map((permission) => ({ ...permission }))
-  )) as Permission[];
+    cloneDeep(existingPermissions)
+  )) as unknown;
+
+  const grantsNoLocale = (permission: Permission) => {
+    const locales = permission.properties?.locales;
+
+    return locales === undefined || (Array.isArray(locales) && locales.length === 0);
+  };
+
+  const findHookedReading = (row: Permission) => {
+    const hooked =
+      row.id !== undefined && Array.isArray(hookedPermissions)
+        ? (hookedPermissions as Permission[]).find((permission) => permission?.id === row.id)
+        : undefined;
+
+    const isLocalesOnlyChange =
+      hooked !== undefined &&
+      hooked.action === row.action &&
+      (hooked.subject ?? null) === (row.subject ?? null) &&
+      isEqual(hooked.conditions ?? [], row.conditions ?? []) &&
+      isEqual(hooked.actionParameters ?? {}, row.actionParameters ?? {}) &&
+      isEqual(omit(hooked.properties ?? {}, 'locales'), omit(row.properties ?? {}, 'locales')) &&
+      !isEqual(hooked.properties?.locales, row.properties?.locales);
+
+    return isLocalesOnlyChange ? hooked : undefined;
+  };
 
   const unlocalizedRows = await Promise.all(
     existingPermissions
-      .map((row, index) => ({ row, hooked: hookedPermissions[index] }))
-      .filter(({ row, hooked }) => !isEqual(row.properties?.locales, hooked?.properties?.locales))
+      .filter(grantsNoLocale)
+      .map((row) => ({ row, hooked: findHookedReading(row) }))
+      .filter((pair): pair is { row: Permission; hooked: Permission } => pair.hooked !== undefined)
       .map(async ({ row, hooked }) => ({
         row,
         hooked,
