@@ -94,17 +94,17 @@ describe('translateRoutePath', () => {
     expect(translateRoutePath('/f/:id(\\d+)').generatedParams).toEqual([]);
     expect(translateRoutePath('/f/:id(\\d+)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/:id(\\d+)').constraints).toEqual([
-      { key: 'id', pattern: '\\d+', split: [], required: true },
+      { key: 'id', pattern: '\\d+', split: [], required: true, occurrence: 0 },
     ]);
     expect(translateRoutePath('/(collection|single)').constraints).toEqual([
-      { key: 'v6Group1', pattern: 'collection|single', split: [], required: true },
+      { key: 'v6Group1', pattern: 'collection|single', split: [], required: true, occurrence: 0 },
     ]);
     expect(translateRoutePath('/files/(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files/:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files-:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/(\\d+)/(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/(\\d+)/(.*)').constraints).toEqual([
-      { key: 'v6Group1', pattern: '\\d+', split: [], required: true },
+      { key: 'v6Group1', pattern: '\\d+', split: [], required: true, occurrence: 0 },
     ]);
     expect(translateRoutePath('/:a([a-z]+):b(\\d*)').constraints).toEqual([
       {
@@ -129,6 +129,7 @@ describe('translateRoutePath', () => {
           },
         ],
         required: true,
+        occurrence: 0,
       },
     ]);
     expect(translateRoutePath('/x/:a(\\d+)?:b([a-z]+)').constraints).toEqual([
@@ -154,6 +155,7 @@ describe('translateRoutePath', () => {
           },
         ],
         required: true,
+        occurrence: 0,
       },
     ]);
   });
@@ -208,8 +210,18 @@ describe('translateRoutePath', () => {
     ['/a/:id(\\d+)/*"x (y)"', 'it is not a valid path-to-regexp v6 path'],
     ['/users/:id(\\d+', 'is unclosed'],
     ['/users/:id(\\d{2,1})', 'the custom pattern for ":id" is invalid'],
+    ['/users/:id((a+)+)', 'Capturing groups are not allowed'],
+    ['/users/((a|b)+)', 'Capturing groups are not allowed'],
+    ['/users{/:id((\\d)+)}?', 'Capturing groups are not allowed'],
   ])('fails for %s, which v6 rejected too', (path, reason) => {
     expect(() => translateRoutePath(path)).toThrow(RoutePathMigrationError);
     expect(() => translateRoutePath(path)).toThrow(reason);
   });
+
+  it.each(['/users/:id((?:a|b)+)', '/users/:id(\\(\\d+\\))', '/files/((?!uploads/).+)'])(
+    'accepts a non-capturing group or an escaped parenthesis in %s, as v6 did',
+    (path) => {
+      expect(() => translateRoutePath(path)).not.toThrow();
+    }
+  );
 });

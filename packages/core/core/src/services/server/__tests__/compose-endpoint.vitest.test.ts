@@ -311,6 +311,29 @@ describe.each([
     await request(server).get('/xab12').expect(404);
   });
 
+  it('checks each optional parameter against its own value', async () => {
+    const { server } = createServer('/o/:a(\\d+)?/:b([a-z]+)?');
+
+    await expectReply(request(server).get('/o/1/x'), {
+      route: '/o/:a(\\d+)?/:b([a-z]+)?',
+      params: { a: '1', b: 'x' },
+    });
+    await expectReply(request(server).get('/o/1'), {
+      route: '/o/:a(\\d+)?/:b([a-z]+)?',
+      params: { a: '1' },
+    });
+    await expectReply(request(server).get('/o'), {
+      route: '/o/:a(\\d+)?/:b([a-z]+)?',
+      params: {},
+    });
+    await expectReply(request(server).get('/o/x'), {
+      route: '/o/:a(\\d+)?/:b([a-z]+)?',
+      params: { b: 'x' },
+    });
+    await request(server).get('/o/x/1').expect(404);
+    await request(server).get('/o/1/2').expect(404);
+  });
+
   it('splits a plain parameter joined to a patterned one', async () => {
     const { server } = createServer('/x/:a:b(\\d+)');
 
@@ -892,6 +915,24 @@ describe('router path registration', () => {
 
     await expectReply(request(server).get('/d/1/a'), { id: 'a' });
     await request(server).get('/d/a/1').expect(404);
+  });
+
+  it('checks a required and an optional parameter that share a name', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/m/:id(\\d+)/s/:id([a-z]+)?', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/m/1/s/a'), { id: 'a' });
+    await expectReply(request(server).get('/m/1/s'), { id: '1' });
+    await request(server).get('/m/x/s').expect(404);
+    await request(server).get('/m/1/s/2').expect(404);
   });
 
   it('gives pathless middleware the parameters of a v6 router prefix', async () => {

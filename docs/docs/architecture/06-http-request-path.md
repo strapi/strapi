@@ -122,7 +122,7 @@ Strapi translates:
 
 A router that a plugin creates itself is not wrapped up front. When a route object with v6 syntax is composed onto it, `registerTranslatedRoute` wraps that router first.
 
-Matching uses path-to-regexp v8. A custom pattern is tested against the raw captured text, at that parameter's position, with the router's case sensitivity. Two parameters that share a name, one on a prefix and one on the route, are tested separately. A value the pattern rejects is not a match, so a later route can run, and another method answers 404. The check uses the encoded text, as it did in v6, so `/users/%31` does not match `:id(\d+)`.
+Matching uses path-to-regexp v8. A custom pattern is tested against the raw captured text, at that parameter's position, with the router's case sensitivity. Two parameters that share a name, one on a prefix and one on the route, are tested separately. v8 compiles optional groups to one alternative per combination and takes the first that matches. When its values fail a pattern, the later alternatives are tried in order, so `/o/:a(\d+)?/:b([a-z]+)?` reads `/o/x` as `b`, as v6 did by backtracking. A value the pattern rejects is not a match, so a later route can run, and another method answers 404. The check uses the encoded text, as it did in v6, so `/users/%31` does not match `:id(\d+)`.
 
 A pattern that can match `/` becomes a wildcard and is not tested, so that route can match a request the v6 path rejected. A negated class that excludes `/`, such as `[^/]+`, stays on one segment and is tested.
 
@@ -153,7 +153,9 @@ Each layer stores its parts under a symbol. `@koa/router` copies the layers of a
 
 Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. When a custom pattern other than `.*` cannot be applied, it logs a second warning that names the parameter and the pattern, because the route may now match a request meant for a later route. A pattern that is tested against its capture does not get that warning. A `.*` pattern becomes a wildcard that matches the same text, so it does not get that warning either. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip both warnings.
 
-Boot fails with `RoutePathMigrationError` for a path v6 rejected too, such as `/:a:b` or a repeated parameter with no prefix and suffix, for a group that starts with `?`, and for one path that mixes v6 syntax with a v8 quoted name.
+Boot fails with `RoutePathMigrationError` for a path v6 rejected too, such as `/:a:b`, a repeated parameter with no prefix and suffix, or a capturing group inside a custom pattern such as `:id((a+)+)`, for a group that starts with `?`, and for one path that mixes v6 syntax with a v8 quoted name.
+
+A custom pattern is tested with a regular expression of the same shape v6 compiled into the route, so its matching cost is the same as in v6. The v8 route regexp itself stays linear. Trying the alternatives again costs one linear test per alternative, and the alternatives come from the route's own optional groups. Rejecting capturing groups keeps nested quantifiers that v6 never booted from reaching a request. A pattern the project writes with a non-capturing nested quantifier, such as `(?:a+)+`, backtracks as it did in v6.
 
 The public files route is still `'/((?!uploads/).+)'`. v8 cannot express that lookahead, so the handler skips a path under `/uploads/` instead. The documentation version route keeps `major`, `minor` and `patch`, and its controller rejects a part that is not a number. Review-workflow stage and assignee routes are registered twice, once for `collection-types` and once for `single-types`, so another kind does not match.
 

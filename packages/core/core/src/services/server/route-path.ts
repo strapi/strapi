@@ -50,6 +50,8 @@ export type RoutePathConstraint = {
   split: RoutePathSplit[];
   /** When false, a capture that v8 left out is still a match. */
   required: boolean;
+  /** How many parameters named `key` come before this one on the same path. */
+  occurrence: number;
 };
 
 export type TranslatedRoutePath = {
@@ -340,7 +342,7 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     optional: boolean;
     /** The pattern matches `''`, so v8 wraps the token in braces. The parameter is still required. */
     matchesEmpty: boolean;
-    constraint?: RoutePathConstraint;
+    constraint?: Omit<RoutePathConstraint, 'occurrence'>;
   }[] = [];
 
   const fail = (reason: string): never => {
@@ -799,9 +801,28 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     }
   };
 
+  // v6 rejected a capturing group inside a custom pattern, with the same scan: only `\` escapes.
+  // Keeping that rule stops a nested quantifier such as `((a+)+)` from booting.
+  const failOnCapturingGroup = (pattern: string | undefined) => {
+    if (pattern === undefined) {
+      return;
+    }
+
+    for (let index = 0; index < pattern.length; index += 1) {
+      if (pattern[index] === '\\') {
+        index += 1;
+      } else if (pattern[index] === '(' && pattern[index + 1] !== '?') {
+        fail(
+          `it is not a valid path-to-regexp v6 path: Capturing groups are not allowed in the custom pattern "(${pattern})"`
+        );
+      }
+    }
+  };
+
   const emitGroup = (group: V6Group) => {
     changed = true;
     failOnLookaround(group.pattern);
+    failOnCapturingGroup(group.pattern);
 
     if (!group.name && group.pattern === undefined) {
       emitLiteralGroup(group);
@@ -877,6 +898,7 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         failOnLookaround(pattern);
         name = generateName('Group');
       }
+      failOnCapturingGroup(pattern);
 
       if (isParameter && pattern === undefined && !modifier) {
         writeParameter('', '', `:${formatParameterName(name, path[cursor])}`, false, true, name);
@@ -934,14 +956,22 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     );
   }
 
+  const seenNames = new Map<string, number>();
+  const nextOccurrence = (name: string) => {
+    const occurrence = seenNames.get(name) ?? 0;
+    seenNames.set(name, occurrence + 1);
+    return occurrence;
+  };
+
   for (const span of spans) {
     if (span.constraint) {
-      constraints.push(span.constraint);
+      constraints.push({ ...span.constraint, occurrence: nextOccurrence(span.constraint.key) });
       continue;
     }
 
     for (const key of span.keys) {
       const recorded = recordedPatterns.get(key);
+      const occurrence = nextOccurrence(recorded?.parameter ?? key);
       if (!recorded) {
         continue;
       }
@@ -959,6 +989,7 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
           pattern: recorded.pattern,
           split: [],
           required: !span.optional && !span.matchesEmpty,
+          occurrence,
         });
       }
     }
@@ -1043,9 +1074,11 @@ type CompiledConstraint = {
   key: string;
   regexp: RegExp;
   split: RoutePathSplit[];
-  /** Index into `layer.captures()`, so two parameters that share a name are tested separately. */
-  captureIndex: number;
   required: boolean;
+  /** Position among the layer's parameters named `key`, prefix and mount path included. */
+  occurrence: number;
+  /** For each parameter named `key` on the layer, in order, whether it can be left out. */
+  optional: boolean[];
 };
 
 type TranslatedLayer = RouterLayer & {
@@ -1156,7 +1189,7 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
     for (const name of generated) {
       const split = splits.get(name);
       if (split) {
-        const raw = (layer.captures(ctx.path) as (string | null | undefined)[])[split.captureIndex];
+        const raw = constraintValue(layer, layer.captures(ctx.path), split);
         const found = raw ? split.regexp.exec(raw) : null;
         if (found) {
           for (const [index, part] of split.split.entries()) {
@@ -1218,32 +1251,107 @@ const decodeParam = (value: string) => {
   }
 };
 
+/** The parameter names in a v8 path, in order, and whether each sits inside an optional `{…}`. */
+const scanPathParams = (path: string) => {
+  const params: { name: string; optional: boolean }[] = [];
+  let depth = 0;
+
+  for (let index = 0; index < path.length; index += 1) {
+    const character = path[index];
+
+    if (character === '\\') {
+      index += 1;
+    } else if (character === '{') {
+      depth += 1;
+    } else if (character === '}') {
+      depth -= 1;
+    } else if ((character === ':' || character === '*') && path[index + 1] === '"') {
+      const end = readQuotedNameEnd(path, index + 1);
+      params.push({
+        name: path.slice(index + 2, end - 1).replace(/\\(.)/g, '$1'),
+        optional: depth > 0,
+      });
+      index = end - 1;
+    } else if (character === ':' || character === '*') {
+      const characters = [...path.slice(index + 1)];
+      let name = '';
+      for (const [position, next] of characters.entries()) {
+        if (!(position === 0 ? ID_START : ID_CONTINUE).test(next)) {
+          break;
+        }
+        name += next;
+      }
+
+      if (name) {
+        params.push({ name, optional: depth > 0 });
+        index += name.length;
+      }
+    }
+  }
+
+  return params;
+};
+
 const compileConstraints = (
   layer: TranslatedLayer,
   parts: RoutePathPart[]
 ): CompiledConstraint[] => {
   const flags = layer.regexp instanceof RegExp && layer.regexp.flags.includes('i') ? 'i' : '';
-  const names = layer.paramNames ?? [];
-  let cursor = 0;
+  const optional = new Map<string, boolean[]>();
+  const compiled: CompiledConstraint[] = [];
 
-  return parts.flatMap((part) =>
-    part.constraints.map((constraint) => {
-      const captureIndex = names.findIndex(
-        (param, index) => index >= cursor && param.name === constraint.key
-      );
-      if (captureIndex !== -1) {
-        cursor = captureIndex + 1;
-      }
+  for (const part of parts) {
+    const before = new Map([...optional].map(([name, flagsSoFar]) => [name, flagsSoFar.length]));
 
-      return {
+    for (const param of scanPathParams(part.path)) {
+      optional.set(param.name, [...(optional.get(param.name) ?? []), param.optional]);
+    }
+
+    for (const constraint of part.constraints) {
+      compiled.push({
         key: constraint.key,
         regexp: new RegExp(`^(?:${constraint.pattern})$`, flags),
         split: constraint.split,
-        captureIndex,
         required: constraint.required,
-      };
-    })
-  );
+        occurrence: (before.get(constraint.key) ?? 0) + constraint.occurrence,
+        optional: [],
+      });
+    }
+  }
+
+  for (const constraint of compiled) {
+    constraint.optional = optional.get(constraint.key) ?? [];
+  }
+
+  return compiled;
+};
+
+/**
+ * The raw text a constraint applies to. v8 writes one alternative per combination of optional
+ * groups, each with its own captures, so the value is found among the captures that matched.
+ */
+const constraintValue = (
+  layer: TranslatedLayer,
+  captures: readonly (string | null | undefined)[],
+  constraint: CompiledConstraint
+) => {
+  const names = layer.paramNames ?? [];
+  const present = captures.filter(
+    (value, index) => value != null && names[index]?.name === constraint.key
+  ) as string[];
+
+  if (present.length === constraint.optional.length) {
+    return present[constraint.occurrence];
+  }
+
+  // A parameter that is left out is optional. With only the required ones present, skip the rest.
+  const required = constraint.optional.flatMap((isOptional, index) => (isOptional ? [] : [index]));
+  if (present.length === required.length) {
+    const position = required.indexOf(constraint.occurrence);
+    return position === -1 ? undefined : present[position];
+  }
+
+  return present[constraint.occurrence];
 };
 
 /**
@@ -1251,32 +1359,145 @@ const compileConstraints = (
  * pattern does not match, so a later route can run and another method stays 404.
  */
 const installConstraintMatch = (layer: TranslatedLayer) => {
-  const prototypeMatch = Object.getPrototypeOf(layer).match as TranslatedLayer['match'] | undefined;
+  const prototype = Object.getPrototypeOf(layer) as Partial<TranslatedLayer>;
+  const prototypeMatch = prototype.match;
+  const prototypeCaptures = prototype.captures;
   const constraints = layer[LAYER_CONSTRAINTS] ?? [];
 
-  if (typeof prototypeMatch !== 'function' || constraints.length === 0) {
+  if (
+    typeof prototypeMatch !== 'function' ||
+    typeof prototypeCaptures !== 'function' ||
+    constraints.length === 0
+  ) {
     if (typeof prototypeMatch === 'function') {
       layer.match = prototypeMatch;
+    }
+    if (typeof prototypeCaptures === 'function') {
+      layer.captures = prototypeCaptures;
     }
     return;
   }
 
-  layer.match = function match(this: TranslatedLayer, path: string) {
-    if (!prototypeMatch.call(this, path)) {
-      return false;
-    }
+  const alternatives = new WeakMap<RegExp, RegExpAlternative[]>();
 
-    // Raw captures, in parameter order. `params()` decodes and keeps one value per name.
-    const captures = this.captures(path) as (string | null | undefined)[];
-    return (this[LAYER_CONSTRAINTS] ?? []).every((constraint) => {
-      const value = captures[constraint.captureIndex];
+  const passes = (current: TranslatedLayer, captures: readonly (string | null | undefined)[]) =>
+    (current[LAYER_CONSTRAINTS] ?? []).every((constraint) => {
+      const value = constraintValue(current, captures, constraint);
       if (value == null) {
         return !constraint.required;
       }
 
       return constraint.regexp.test(value);
     });
+
+  // Raw captures, in parameter order, of the first v8 alternative whose values pass. v6 found the
+  // same match by backtracking into its optional groups.
+  const constrainedCaptures = (current: TranslatedLayer, path: string) => {
+    const { regexp } = current;
+    const found = regexp ? regexp.exec(path) : null;
+    if (!regexp || !found) {
+      return null;
+    }
+
+    const captures: (string | undefined)[] = found.slice(1);
+    if (passes(current, captures)) {
+      return captures;
+    }
+
+    if (!alternatives.has(regexp)) {
+      alternatives.set(regexp, splitAlternatives(regexp));
+    }
+
+    for (const alternative of alternatives.get(regexp) ?? []) {
+      const match = alternative.regexp.exec(path);
+      if (!match) {
+        continue;
+      }
+
+      const candidate = captures.map(() => undefined as string | undefined);
+      match.slice(1).forEach((value, index) => {
+        candidate[alternative.offset + index] = value;
+      });
+      if (passes(current, candidate)) {
+        return candidate;
+      }
+    }
+
+    return null;
   };
+
+  layer.match = function match(this: TranslatedLayer, path: string) {
+    return prototypeMatch.call(this, path) && constrainedCaptures(this, path) !== null;
+  };
+
+  layer.captures = function captures(this: TranslatedLayer, path: string) {
+    const prototypeValue = prototypeCaptures.call(this, path);
+    if (prototypeValue.length === 0) {
+      return prototypeValue;
+    }
+
+    return (constrainedCaptures(this, path) ?? prototypeValue) as string[];
+  };
+};
+
+type RegExpAlternative = { regexp: RegExp; offset: number };
+
+/**
+ * v8 compiles optional groups to `^(?:all|fewer|…)tail`, one alternative per combination. Returns
+ * each alternative as its own regexp, with the index of its first capture in the full match.
+ */
+const splitAlternatives = (regexp: RegExp): RegExpAlternative[] => {
+  const { source, flags } = regexp;
+  if (!source.startsWith('^(?:')) {
+    return [];
+  }
+
+  const bodies: { body: string; captures: number }[] = [];
+  let depth = 0;
+  let start = 4;
+  let captures = 0;
+  let inClass = false;
+
+  for (let index = 4; index < source.length; index += 1) {
+    const character = source[index];
+
+    if (character === '\\') {
+      index += 1;
+    } else if (inClass) {
+      inClass = character !== ']';
+    } else if (character === '[') {
+      inClass = true;
+    } else if (character === '(') {
+      depth += 1;
+      if (source[index + 1] !== '?') {
+        captures += 1;
+      }
+    } else if (character === ')' && depth > 0) {
+      depth -= 1;
+    } else if ((character === '|' || character === ')') && depth === 0) {
+      bodies.push({ body: source.slice(start, index), captures });
+      captures = 0;
+      start = index + 1;
+
+      if (character === ')') {
+        const tail = source.slice(index + 1);
+        let offset = 0;
+
+        return bodies.length < 2
+          ? []
+          : bodies.map((alternative) => {
+              const compiled = {
+                regexp: new RegExp(`^(?:${alternative.body})${tail}`, flags),
+                offset,
+              };
+              offset += alternative.captures;
+              return compiled;
+            });
+      }
+    }
+  }
+
+  return [];
 };
 
 const setLayerParts = (layer: TranslatedLayer, parts: RoutePathPart[]) => {
