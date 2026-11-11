@@ -30,6 +30,8 @@ describe('translateRoutePath', () => {
     ['/a/:id(\\d+)suffix', '/a/:"id"suffix'],
     ['/img/:w(\\d+)x:h(\\d+)', '/img/:"w"x:h'],
     ['/:a([a-z]+):b(\\d*)', '/:"v6Joined1"'],
+    ['/x/:a(\\d+)?:b([a-z]+)', '/x{*"v6Joined1"}'],
+    ['/x/:a([a-z]+):b(\\d+)?', '/x/{*"v6Joined1"}'],
     ['/:slug/:year(\\d{4}):month(\\d{2})', '/:slug/:"v6Joined1"'],
     ['/:a/(\\d+)(\\w+)', '/:a/:"v6Joined1"'],
     ['/:lang-:region/:id(\\d+)', '/:lang-:region/:id'],
@@ -75,6 +77,9 @@ describe('translateRoutePath', () => {
     ['\\d+', ':'],
     ['\\w+', ':'],
     ['[a-z-]+', ':'],
+    ['[^/]+', ':'],
+    ['[^/.-]+', ':'],
+    ['[^ -~]+', ':'],
     ['a|b', ':'],
     ['[0-9]{2}', ':'],
     ['(?:a|b)+', ':'],
@@ -89,26 +94,66 @@ describe('translateRoutePath', () => {
     expect(translateRoutePath('/f/:id(\\d+)').generatedParams).toEqual([]);
     expect(translateRoutePath('/f/:id(\\d+)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/:id(\\d+)').constraints).toEqual([
-      { key: 'id', pattern: '\\d+', split: [] },
+      { key: 'id', pattern: '\\d+', split: [], required: true },
     ]);
     expect(translateRoutePath('/(collection|single)').constraints).toEqual([
-      { key: 'v6Group1', pattern: 'collection|single', split: [] },
+      { key: 'v6Group1', pattern: 'collection|single', split: [], required: true },
     ]);
     expect(translateRoutePath('/files/(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files/:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files-:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/(\\d+)/(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/(\\d+)/(.*)').constraints).toEqual([
-      { key: 'v6Group1', pattern: '\\d+', split: [] },
+      { key: 'v6Group1', pattern: '\\d+', split: [], required: true },
     ]);
     expect(translateRoutePath('/:a([a-z]+):b(\\d*)').constraints).toEqual([
       {
         key: 'v6Joined1',
         pattern: '([a-z]+)(\\d*)',
         split: [
-          { parameter: 'a', pattern: '[a-z]+', unnamed: false },
-          { parameter: 'b', pattern: '\\d*', unnamed: false },
+          {
+            parameter: 'a',
+            pattern: '[a-z]+',
+            unnamed: false,
+            prefix: '',
+            suffix: '',
+            optional: false,
+          },
+          {
+            parameter: 'b',
+            pattern: '\\d*',
+            unnamed: false,
+            prefix: '',
+            suffix: '',
+            optional: false,
+          },
         ],
+        required: true,
+      },
+    ]);
+    expect(translateRoutePath('/x/:a(\\d+)?:b([a-z]+)').constraints).toEqual([
+      {
+        key: 'v6Joined1',
+        pattern: '(?:/(\\d+))?([a-z]+)',
+        split: [
+          {
+            parameter: 'a',
+            pattern: '\\d+',
+            unnamed: false,
+            prefix: '/',
+            suffix: '',
+            optional: true,
+          },
+          {
+            parameter: 'b',
+            pattern: '[a-z]+',
+            unnamed: false,
+            prefix: '',
+            suffix: '',
+            optional: false,
+          },
+        ],
+        required: true,
       },
     ]);
   });

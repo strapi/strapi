@@ -247,16 +247,95 @@ describe.each([
     await request(server).get('/files').expect(404);
   });
 
-  it('treats a negated class as a wildcard, so it spans segments', async () => {
-    const { server } = createServer('/files/:name([^/]+)');
+  it('keeps a negated class that excludes "/" on one segment', async () => {
+    const { server } = createServer('/files/:name([^/]+)', '/files/:a/:b');
 
+    await expectReply(request(server).get('/files/ab'), {
+      route: '/files/:name([^/]+)',
+      params: { name: 'ab' },
+    });
     await expectReply(request(server).get('/files/a%2Fb'), {
       route: '/files/:name([^/]+)',
       params: { name: 'a/b' },
     });
     await expectReply(request(server).get('/files/a/b'), {
-      route: '/files/:name([^/]+)',
-      params: { name: 'a/b' },
+      route: '/files/:a/:b',
+      params: { a: 'a', b: 'b' },
+    });
+  });
+
+  it('splits optional parameters that have no text between them', async () => {
+    const { server } = createServer('/x/:a(\\d+)?:b([a-z]+)');
+
+    await expectReply(request(server).get('/x/12ab'), {
+      route: '/x/:a(\\d+)?:b([a-z]+)',
+      params: { a: '12', b: 'ab' },
+    });
+    await expectReply(request(server).get('/xab'), {
+      route: '/x/:a(\\d+)?:b([a-z]+)',
+      params: { b: 'ab' },
+    });
+    await request(server).get('/x12ab').expect(404);
+    await request(server).get('/x/ab').expect(404);
+  });
+
+  it('splits a required parameter joined to an optional one', async () => {
+    const { server } = createServer('/x/:a([a-z]+):b(\\d+)?');
+
+    await expectReply(request(server).get('/x/ab'), {
+      route: '/x/:a([a-z]+):b(\\d+)?',
+      params: { a: 'ab' },
+    });
+    await expectReply(request(server).get('/x/ab12'), {
+      route: '/x/:a([a-z]+):b(\\d+)?',
+      params: { a: 'ab', b: '12' },
+    });
+    await request(server).get('/x').expect(404);
+  });
+
+  it('matches when every joined parameter is optional', async () => {
+    const { server } = createServer('/x/:a([a-z]+)?:b(\\d+)?');
+
+    await expectReply(request(server).get('/x'), {
+      route: '/x/:a([a-z]+)?:b(\\d+)?',
+      params: {},
+    });
+    await expectReply(request(server).get('/x/ab12'), {
+      route: '/x/:a([a-z]+)?:b(\\d+)?',
+      params: { a: 'ab', b: '12' },
+    });
+    await expectReply(request(server).get('/x12'), {
+      route: '/x/:a([a-z]+)?:b(\\d+)?',
+      params: { b: '12' },
+    });
+    await request(server).get('/xab12').expect(404);
+  });
+
+  it('splits a plain parameter joined to a patterned one', async () => {
+    const { server } = createServer('/x/:a:b(\\d+)');
+
+    await expectReply(request(server).get('/x/ab12'), {
+      route: '/x/:a:b(\\d+)',
+      params: { a: 'ab', b: '12' },
+    });
+    await expectReply(request(server).get('/x/abc123'), {
+      route: '/x/:a:b(\\d+)',
+      params: { a: 'abc', b: '123' },
+    });
+    await request(server).get('/x/ab').expect(404);
+    await request(server).get('/x/ab/12').expect(404);
+  });
+
+  it('tests a custom pattern against the encoded path, as v6 did', async () => {
+    const { server } = createServer('/users/:id(\\d+)', '/users/:slug');
+
+    await expectReply(request(server).get('/users/12'), {
+      route: '/users/:id(\\d+)',
+      params: { id: '12' },
+    });
+    await expectReply(request(server).get('/users/%31%32'), {
+      route: '/users/:slug',
+      params: { slug: '12' },
     });
   });
 
@@ -585,7 +664,7 @@ describe('router path registration', () => {
     await request(server).post('/users/abc').expect(404);
   });
 
-  it('translates a v6 router prefix without enforcing its custom pattern', async () => {
+  it('enforces a custom pattern on a v6 router prefix', async () => {
     const strapi = createStrapi();
     const router = new Router({ prefix: '/pre/:v(\\d+)' });
     installRoutePathTranslation(router, strapi);
@@ -779,6 +858,40 @@ describe('router path registration', () => {
 
     await expectReply(request(server).get('/m/1/2'), { id: '2' });
     await request(server).get('/m/1/x').expect(404);
+    await request(server).get('/m/x/1').expect(404);
+  });
+
+  it('checks a prefix pattern and a route pattern that share a name against their own values', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/s/:id(\\d+)' });
+    installRoutePathTranslation(router, strapi);
+    router.get('/t/:id([a-z]+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/s/1/t/a'), { id: 'a' });
+    await request(server).get('/s/x/t/a').expect(404);
+    await request(server).get('/s/1/t/2').expect(404);
+  });
+
+  it('checks two parameters that share a name on one path against their own values', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/d/:id(\\d+)/:id([a-z]+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/d/1/a'), { id: 'a' });
+    await request(server).get('/d/a/1').expect(404);
   });
 
   it('gives pathless middleware the parameters of a v6 router prefix', async () => {

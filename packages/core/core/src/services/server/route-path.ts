@@ -5,10 +5,12 @@ import type Router from '@koa/router';
  * Remove this translator in Strapi 6, when route paths are v8 only.
  *
  * Matching uses path-to-regexp v8. A custom pattern that stays on one parameter is tested against
- * that captured value, so a value the pattern rejects is not a match. A pattern that can match `/`
- * becomes a wildcard and is not tested. Parameters with no text between them become one parameter.
- * When each of them has a custom pattern that cannot match `/`, those patterns are tested against
- * that one value and the pieces are written back. Otherwise the separate values are not recovered.
+ * the raw captured text, at that parameter's own position, so a value the pattern rejects is not a
+ * match. A pattern that can match `/` becomes a wildcard and is not tested. A negated class that
+ * excludes `/`, such as `[^/]+`, stays on one segment and is tested. Parameters with no text
+ * between them become one parameter. When each piece stays on one segment, including an optional
+ * piece, those patterns are tested against that one value and the pieces are written back.
+ * Otherwise the separate values are not recovered.
  */
 
 export class RoutePathMigrationError extends Error {
@@ -30,6 +32,12 @@ export type RoutePathSplit = {
   parameter: string;
   pattern: string;
   unnamed: boolean;
+  /** Literal from inside an optional v6 token. It is part of the capture, and absent with the piece. */
+  prefix: string;
+  /** Literal that followed the parameter inside an optional v6 token. */
+  suffix: string;
+  /** Set when the v6 parameter was optional, so this piece and its prefix may be absent. */
+  optional: boolean;
 };
 
 /** A custom pattern tested against one capture of the translated path. */
@@ -40,6 +48,8 @@ export type RoutePathConstraint = {
   pattern: string;
   /** Set when `key` stands for several v6 parameters. Empty when the pattern belongs to `key`. */
   split: RoutePathSplit[];
+  /** When false, a capture that v8 left out is still a match. */
+  required: boolean;
 };
 
 export type TranslatedRoutePath = {
@@ -158,15 +168,29 @@ const findPatternEnd = (path: string, start: number): number => {
 
 const CONTROL_ESCAPES: Record<string, number> = { n: 10, r: 13, t: 9, f: 12, v: 11 };
 
-/** The index of the `]` closing a character class that cannot match `/`, or -1 when it may. */
+/**
+ * The index of the `]` closing a character class that cannot match `/`, or -1 when it may.
+ * A negated class cannot match `/` when `/` is one of the characters it excludes.
+ */
 const scanSlashFreeClass = (pattern: string, start: number) => {
   let index = start + 1;
-  if (pattern[index] === '^') {
-    return -1;
+  const negated = pattern[index] === '^';
+  if (negated) {
+    index += 1;
   }
 
   let previous: number | undefined;
   let inRange = false;
+  let excludesSlash = false;
+
+  const slashSeen = () => {
+    if (negated) {
+      excludesSlash = true;
+      return false;
+    }
+
+    return true;
+  };
 
   while (index < pattern.length && pattern[index] !== ']') {
     let code: number | undefined;
@@ -203,12 +227,18 @@ const scanSlashFreeClass = (pattern: string, start: number) => {
       }
     }
 
-    if (code === SLASH) {
+    if (code === SLASH && slashSeen()) {
       return -1;
     }
 
     if (inRange) {
-      if (previous !== undefined && code !== undefined && previous <= SLASH && SLASH <= code) {
+      if (
+        previous !== undefined &&
+        code !== undefined &&
+        previous <= SLASH &&
+        SLASH <= code &&
+        slashSeen()
+      ) {
         return -1;
       }
       inRange = false;
@@ -219,7 +249,11 @@ const scanSlashFreeClass = (pattern: string, start: number) => {
     previous = code;
   }
 
-  return index < pattern.length ? index : -1;
+  if (index >= pattern.length) {
+    return -1;
+  }
+
+  return !negated || excludesSlash ? index : -1;
 };
 
 /**
@@ -299,6 +333,13 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     keys: string[];
     /** Original parameter names this span stands for, in order. */
     sourceKeys: string[];
+    /** Literal inside an optional token. A required parameter keeps its prefix outside the span. */
+    innerPrefix: string;
+    suffix: string;
+    /** The v6 `?` or `*` modifier: the prefix is inside the token and the piece may be absent. */
+    optional: boolean;
+    /** The pattern matches `''`, so v8 wraps the token in braces. The parameter is still required. */
+    matchesEmpty: boolean;
     constraint?: RoutePathConstraint;
   }[] = [];
 
@@ -348,10 +389,20 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     });
   };
 
+  const escapeForRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  /** v6's default for a parameter with no custom pattern: one segment, giving the next piece the rest. */
+  const PLAIN_PATTERN = '[^/]+?';
+
+  const pieceSource = (piece: RoutePathSplit) => {
+    const body = `${escapeForRegExp(piece.prefix)}(${piece.pattern})${escapeForRegExp(piece.suffix)}`;
+    return piece.optional ? `(?:${body})?` : body;
+  };
+
   /**
    * Writes `outside`, then the parameter's `text`. Parameters with no text between them become one
-   * parameter. When each of them has a custom pattern that cannot match `/`, that parameter keeps
-   * one segment and the patterns are applied to it. Otherwise it is a wildcard.
+   * parameter. When each piece stays on one segment, that parameter keeps the patterns and an
+   * optional piece keeps its prefix. Otherwise it is a wildcard.
    */
   const writeParameter = (
     outside: string,
@@ -359,7 +410,13 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     text: string,
     wildcard: boolean,
     plain: boolean,
-    key: string
+    key: string,
+    meta: { innerPrefix: string; suffix: string; optional: boolean; matchesEmpty: boolean } = {
+      innerPrefix: '',
+      suffix: '',
+      optional: false,
+      matchesEmpty: false,
+    }
   ) => {
     const last = spans.at(-1);
 
@@ -386,10 +443,33 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
 
       const pieces: RoutePathSplit[] = [];
       let canSplit = !wildcard && chain.every((span) => !span.wildcard);
-      const take = (sourceKey: string, fromWildcard: boolean) => {
+      const take = (
+        sourceKey: string,
+        fromWildcard: boolean,
+        spanMeta: { innerPrefix: string; suffix: string; optional: boolean; matchesEmpty: boolean },
+        plainSpan: boolean
+      ) => {
         const recorded = recordedPatterns.get(sourceKey);
-        if (!recorded || recorded.spansSegments || fromWildcard) {
+        if (fromWildcard || recorded?.spansSegments) {
           canSplit = false;
+          return;
+        }
+
+        // A plain parameter has v6's one-segment pattern, so it can be split back out.
+        if (!recorded) {
+          if (!plainSpan) {
+            canSplit = false;
+            return;
+          }
+
+          pieces.push({
+            parameter: sourceKey,
+            pattern: PLAIN_PATTERN,
+            unnamed: false,
+            prefix: spanMeta.innerPrefix,
+            suffix: spanMeta.suffix,
+            optional: spanMeta.optional,
+          });
           return;
         }
 
@@ -397,6 +477,9 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
           parameter: recorded.unnamed ? '' : recorded.parameter,
           pattern: recorded.pattern,
           unnamed: recorded.unnamed,
+          prefix: spanMeta.innerPrefix,
+          suffix: spanMeta.suffix,
+          optional: spanMeta.optional,
         });
       };
 
@@ -408,10 +491,10 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
             pieces.push(...span.constraint.split);
           }
         } else {
-          span.sourceKeys.forEach((sourceKey) => take(sourceKey, span.wildcard));
+          span.sourceKeys.forEach((sourceKey) => take(sourceKey, span.wildcard, span, span.plain));
         }
       }
-      take(key, wildcard);
+      take(key, wildcard, meta, plain);
 
       const joined = chain.find((span) => span.joined)?.joined ?? generateName('Joined');
       changed = true;
@@ -427,12 +510,15 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         }
         recordedPatterns.delete(key);
 
+        // An optional piece can match with or without its prefix, including glued to the text before it.
+        const anyOptional = pieces.some((piece) => piece.optional);
         const constraint = {
           key: joined,
-          pattern: pieces.map((piece) => `(${piece.pattern})`).join(''),
+          pattern: pieces.map((piece) => pieceSource(piece)).join(''),
           split: pieces,
+          required: pieces.some((piece) => !piece.optional),
         };
-        translated = `${translated.slice(0, start)}:${quoted}`;
+        translated = `${translated.slice(0, start)}${anyOptional ? `{*${quoted}}` : `:${quoted}`}`;
         spans.push({
           start,
           end: translated.length,
@@ -441,6 +527,10 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
           plain: false,
           keys: [joined],
           sourceKeys: pieces.map((piece) => piece.parameter),
+          innerPrefix: '',
+          suffix: '',
+          optional: anyOptional,
+          matchesEmpty: false,
           constraint,
         });
         return;
@@ -470,6 +560,10 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         plain: false,
         keys: [joined],
         sourceKeys: [joined],
+        innerPrefix: '',
+        suffix: '',
+        optional: false,
+        matchesEmpty: false,
       });
       return;
     }
@@ -484,6 +578,10 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
       plain,
       keys: [key],
       sourceKeys: [key],
+      innerPrefix: meta.innerPrefix,
+      suffix: meta.suffix,
+      optional: meta.optional,
+      matchesEmpty: meta.matchesEmpty,
     });
   };
 
@@ -529,8 +627,11 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     const spansSegments = repeated || (pattern !== undefined && patternMayMatchSlash(pattern));
 
     // `.*` becomes a wildcard that matches the same text, including an empty capture.
+    // The map key is unique per occurrence, so two `:id` parameters do not share one pattern.
+    let recordKey = name;
     if (pattern !== undefined && pattern !== '.*') {
-      recordedPatterns.set(name, { parameter: name, pattern, unnamed, spansSegments });
+      recordKey = `${name}\u0000${recordedPatterns.size}`;
+      recordedPatterns.set(recordKey, { parameter: name, pattern, unnamed, spansSegments });
     }
     const token = `${spansSegments ? '*' : ':'}${quoted}`;
     const escapedPrefix = escapeLiteral(prefix);
@@ -543,18 +644,32 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         `{${escapedPrefix}${token}${escapedSuffix}}`,
         spansSegments,
         plain,
-        name
+        recordKey,
+        { innerPrefix: prefix, suffix, optional: true, matchesEmpty: false }
       );
       return;
     }
 
     // A v8 parameter matches at least one character, and a pattern such as `.*` may match none.
     if (pattern !== undefined && new RegExp(`^(?:${pattern})$`, 'i').test('')) {
-      writeParameter(escapedPrefix, '', `{${token}}${escapedSuffix}`, spansSegments, plain, name);
+      writeParameter(
+        escapedPrefix,
+        '',
+        `{${token}}${escapedSuffix}`,
+        spansSegments,
+        plain,
+        recordKey,
+        {
+          innerPrefix: '',
+          suffix: '',
+          optional: false,
+          matchesEmpty: true,
+        }
+      );
       return;
     }
 
-    writeParameter(escapedPrefix, '', `${token}${escapedSuffix}`, spansSegments, plain, name);
+    writeParameter(escapedPrefix, '', `${token}${escapedSuffix}`, spansSegments, plain, recordKey);
   };
 
   /**
@@ -839,7 +954,12 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
           unnamed: recorded.unnamed,
         });
       } else {
-        constraints.push({ key, pattern: recorded.pattern, split: [] });
+        constraints.push({
+          key: recorded.parameter,
+          pattern: recorded.pattern,
+          split: [],
+          required: !span.optional && !span.matchesEmpty,
+        });
       }
     }
   }
@@ -923,6 +1043,9 @@ type CompiledConstraint = {
   key: string;
   regexp: RegExp;
   split: RoutePathSplit[];
+  /** Index into `layer.captures()`, so two parameters that share a name are tested separately. */
+  captureIndex: number;
+  required: boolean;
 };
 
 type TranslatedLayer = RouterLayer & {
@@ -1033,8 +1156,8 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
     for (const name of generated) {
       const split = splits.get(name);
       if (split) {
-        const value = paramText(ctx.params[name]);
-        const found = value ? split.regexp.exec(value) : null;
+        const raw = (layer.captures(ctx.path) as (string | null | undefined)[])[split.captureIndex];
+        const found = raw ? split.regexp.exec(raw) : null;
         if (found) {
           for (const [index, part] of split.split.entries()) {
             const piece = found[index + 1];
@@ -1042,11 +1165,12 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
               continue;
             }
 
+            const decoded = decodeParam(piece);
             if (part.unnamed) {
-              ctx.params[group] = piece;
+              ctx.params[group] = decoded;
               group += 1;
             } else {
-              ctx.params[part.parameter] = piece;
+              ctx.params[part.parameter] = decoded;
             }
           }
         }
@@ -1086,18 +1210,39 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
 const isShim = (middleware: LayerMiddleware) =>
   (middleware as unknown as { [LAYER_SHIM]?: boolean })[LAYER_SHIM] === true;
 
+const decodeParam = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
 const compileConstraints = (
   layer: TranslatedLayer,
   parts: RoutePathPart[]
 ): CompiledConstraint[] => {
   const flags = layer.regexp instanceof RegExp && layer.regexp.flags.includes('i') ? 'i' : '';
+  const names = layer.paramNames ?? [];
+  let cursor = 0;
 
   return parts.flatMap((part) =>
-    part.constraints.map((constraint) => ({
-      key: constraint.key,
-      regexp: new RegExp(`^(?:${constraint.pattern})$`, flags),
-      split: constraint.split,
-    }))
+    part.constraints.map((constraint) => {
+      const captureIndex = names.findIndex(
+        (param, index) => index >= cursor && param.name === constraint.key
+      );
+      if (captureIndex !== -1) {
+        cursor = captureIndex + 1;
+      }
+
+      return {
+        key: constraint.key,
+        regexp: new RegExp(`^(?:${constraint.pattern})$`, flags),
+        split: constraint.split,
+        captureIndex,
+        required: constraint.required,
+      };
+    })
   );
 };
 
@@ -1121,10 +1266,15 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       return false;
     }
 
-    const params = this.params(path, this.captures(path), {});
+    // Raw captures, in parameter order. `params()` decodes and keeps one value per name.
+    const captures = this.captures(path) as (string | null | undefined)[];
     return (this[LAYER_CONSTRAINTS] ?? []).every((constraint) => {
-      const text = paramText(params[constraint.key]);
-      return !text || constraint.regexp.test(text);
+      const value = captures[constraint.captureIndex];
+      if (value == null) {
+        return !constraint.required;
+      }
+
+      return constraint.regexp.test(value);
     });
   };
 };

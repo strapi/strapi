@@ -4,7 +4,7 @@ description: How Strapi handles an HTTP request from Koa to the response, for th
 status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.
-  - Custom patterns on a single parameter are applied again after the `@koa/router` 15 upgrade. A pattern that can match `/`, and a pattern that included the separator before the next parameter, still do not match as they did in path-to-regexp v6.
+  - Custom patterns are applied again after the `@koa/router` 15 upgrade, against the raw capture at that parameter's position. A pattern that can match `/`, and a pattern that included the separator before the next parameter, still do not match as they did in path-to-regexp v6. A negated class that excludes `/` stays on one segment. Optional parameters with no text between them keep their prefix.
   - The statement that `strapi::session` adds `koa-session` before every listed middleware comes from reading `registerApplicationMiddlewares` and the session factory. No test confirms it.
   - The page does not cover the GraphQL plugin request path or the upload plugin `/uploads` route.
 ---
@@ -122,21 +122,25 @@ Strapi translates:
 
 A router that a plugin creates itself is not wrapped up front. When a route object with v6 syntax is composed onto it, `registerTranslatedRoute` wraps that router first.
 
-Matching uses path-to-regexp v8. A custom pattern that stays on one parameter is tested against the captured value, with the router's case sensitivity. A value the pattern rejects is not a match, so a later route can run, and another method answers 404. A pattern that can match `/` becomes a wildcard and is not tested, so that route can match a request the v6 path rejected.
+Matching uses path-to-regexp v8. A custom pattern is tested against the raw captured text, at that parameter's position, with the router's case sensitivity. Two parameters that share a name, one on a prefix and one on the route, are tested separately. A value the pattern rejects is not a match, so a later route can run, and another method answers 404. The check uses the encoded text, as it did in v6, so `/users/%31` does not match `:id(\d+)`.
 
-Two parameters with no text between them become one parameter. When each of them has a custom pattern that cannot match `/`, those patterns are tested against that one value and the pieces are written back to `ctx.params`. Otherwise the capture is a wildcard and the separate values are not recovered. v8 can also reject a request the v6 path accepted, when a custom pattern contained the text that separates it from the previous parameter. `/:a-:b(\d+-)` used to match `/x-1-` and no longer does.
+A pattern that can match `/` becomes a wildcard and is not tested, so that route can match a request the v6 path rejected. A negated class that excludes `/`, such as `[^/]+`, stays on one segment and is tested.
 
-| v6                                                | v8                                     | Notes                                                                                                                       |
-| ------------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `/users/:id(\\d+)`                                | `/users/:id`                           | The pattern is tested against `:id`. A pattern that may match `/`, such as `.+\\.js`, becomes a wildcard and is not tested. |
-| `/users/:id?`                                     | `/users{/:id}`                         |                                                                                                                             |
-| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`       |                                                                                                                             |
-| `/uploads/(.*)`                                   | `/uploads/{*v6Group1}`                 | The value is in `ctx.params[0]`. `v6Group1` is not in `ctx.params`.                                                         |
-| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:v6Group1-types/:id` | The pattern is tested. The value is in `ctx.params[0]`.                                                                     |
-| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/:"w"x:h`                         | Both patterns are tested. `x` is still the separator, and `w` is quoted.                                                    |
-| `/:a([a-z]+):b(\\d+)`                             | `/:"v6Joined1"`                        | v8 needs text between two parameters. The patterns are tested and `a` and `b` are restored.                                 |
-| `/:lang-:region/:id(\\d+)`                        | `/:lang-:region/:id`                   | The pattern on `:id` is tested. `-` stays between the parameters.                                                           |
-| `/x{-y}+`                                         | `/x:v6Literal1`                        | v8 cannot repeat a literal, so a parameter stands for the repetitions.                                                      |
+Two parameters with no text between them become one parameter. When each piece stays on one segment, those patterns are tested against that one value and the pieces are written back to `ctx.params`, including when a piece is optional. A plain parameter uses the v6 one-segment pattern. A pattern that can match `/`, or a repeated pattern, is still not recovered. v8 can also reject a request the v6 path accepted, when a custom pattern contained the text that separates it from the previous parameter. `/:a-:b(\d+-)` used to match `/x-1-` and no longer does.
+
+| v6                                                | v8                                     | Notes                                                                                                                                       |
+| ------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/users/:id(\\d+)`                                | `/users/:id`                           | The pattern is tested against the raw `:id` capture. A pattern that may match `/`, such as `.+\\.js`, becomes a wildcard and is not tested. |
+| `/files/:name([^/]+)`                             | `/files/:name`                         | The class excludes `/`, so the parameter stays on one segment and the pattern is tested.                                                    |
+| `/users/:id?`                                     | `/users{/:id}`                         |                                                                                                                                             |
+| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`       |                                                                                                                                             |
+| `/uploads/(.*)`                                   | `/uploads/{*v6Group1}`                 | The value is in `ctx.params[0]`. `v6Group1` is not in `ctx.params`.                                                                         |
+| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:v6Group1-types/:id` | The pattern is tested. The value is in `ctx.params[0]`.                                                                                     |
+| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/:"w"x:h`                         | Both patterns are tested. `x` is still the separator, and `w` is quoted.                                                                    |
+| `/:a([a-z]+):b(\\d+)`                             | `/:"v6Joined1"`                        | v8 needs text between two parameters. The patterns are tested and `a` and `b` are restored.                                                 |
+| `/x/:a(\\d+)?:b([a-z]+)`                          | `/x{*"v6Joined1"}`                     | An optional piece keeps its prefix. `/x/12ab` restores `a` and `b`. `/xab` restores `b` only.                                               |
+| `/:lang-:region/:id(\\d+)`                        | `/:lang-:region/:id`                   | The pattern on `:id` is tested. `-` stays between the parameters.                                                                           |
+| `/x{-y}+`                                         | `/x:v6Literal1`                        | v8 cannot repeat a literal, so a parameter stands for the repetitions.                                                                      |
 
 What stays as it was in v6:
 
