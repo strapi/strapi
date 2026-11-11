@@ -1,5 +1,6 @@
-import { curry, isString, isObject, isEmpty, cloneDeep } from 'lodash';
+import { isString, isObject, isEmpty, cloneDeep } from 'lodash';
 
+import { curry } from '../curry';
 import { hasSort } from '../sort-query';
 import traverseFactory, { type Parent } from './factory';
 

@@ -1,4 +1,4 @@
-import { DesignSystemProvider } from '@strapi/design-system';
+import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { fireEvent, render as renderTL, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -21,7 +21,9 @@ const render = () =>
   renderTL(
     <IntlProvider locale="en" messages={messages}>
       <DesignSystemProvider>
-        <FromUrlForm onClose={jest.fn()} onAddAsset={jest.fn()} />
+        <Modal.Root open>
+          <FromUrlForm onAddAsset={jest.fn()} />
+        </Modal.Root>
       </DesignSystemProvider>
     </IntlProvider>
   );

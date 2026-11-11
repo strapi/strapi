@@ -37,7 +37,7 @@ async function isFirstRun() {
 
 async function setPublicPermissions(newPermissions) {
   // Find the ID of the public role
-  const publicRole = await strapi.query('plugin::users-permissions.role').findOne({
+  const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
     where: {
       type: 'public',
     },
@@ -48,7 +48,7 @@ async function setPublicPermissions(newPermissions) {
   Object.keys(newPermissions).map((controller) => {
     const actions = newPermissions[controller];
     const permissionsToCreate = actions.map((action) => {
-      return strapi.query('plugin::users-permissions.permission').create({
+      return strapi.db.query('plugin::users-permissions.permission').create({
         data: {
           action: `api::${controller}.${controller}.${action}`,
           role: publicRole.id,
@@ -75,7 +75,7 @@ function getFileData(fileName) {
 
   return {
     filepath: filePath,
-    originalFileName: fileName,
+    originalFilename: fileName,
     size,
     mimetype: mimeType,
   };
@@ -86,7 +86,7 @@ async function uploadFile(file, name) {
     .plugin('upload')
     .service('upload')
     .upload({
-      files: file,
+      files: [file],
       data: {
         fileInfo: {
           alternativeText: `An image uploaded to Strapi called ${name}`,
@@ -101,7 +101,9 @@ async function uploadFile(file, name) {
 async function createEntry({ model, entry }) {
   try {
     // Actually create the entry in Strapi
-    await strapi.documents(`api::${model}.${model}`).create({
+    // Content-type UIDs follow `api::<name>.<name>` for every seeded model
+    const uid = /** @type {import('@strapi/strapi').UID.ContentType} */ (`api::${model}.${model}`);
+    await strapi.documents(uid).create({
       data: entry,
     });
   } catch (error) {
@@ -116,7 +118,7 @@ async function checkFileExistsBeforeUpload(files) {
 
   for (const fileName of filesCopy) {
     // Check if the file already exists in Strapi
-    const fileWhereName = await strapi.query('plugin::upload.file').findOne({
+    const fileWhereName = await strapi.db.query('plugin::upload.file').findOne({
       where: {
         name: fileName.replace(/\..*$/, ''),
       },

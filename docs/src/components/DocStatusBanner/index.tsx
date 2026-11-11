@@ -40,6 +40,8 @@ export default function DocStatusBanner({ status, reviewNotes }: Props): ReactNo
       {reviewNotes.length > 0 && (
         <ul className={styles.notes}>
           {reviewNotes.map((note, index) => (
+            // Static, never reordered notes that may repeat: the position disambiguates.
+            // eslint-disable-next-line react/no-array-index-key
             <li key={`${index}-${note}`}>{note}</li>
           ))}
         </ul>

@@ -1,4 +1,6 @@
-import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
+import { withEncodedUserParams } from '@strapi/admin/strapi-admin';
+
+import { useListQueryParams } from './useListQueryParams';
 
 /**
  * Filter state for the assets list, backed by a single `?filters=` query param
@@ -203,7 +205,7 @@ export interface ListFilters {
 }
 
 export const useListFilters = (): ListFilters => {
-  const [{ query }, setQuery] = useQueryParams<{ filters?: string; _q?: string }>();
+  const [{ query }, setQuery] = useListQueryParams<{ filters?: string; _q?: string }>();
 
   const filters = parseFiltersParam(query?.filters);
 

@@ -2,6 +2,7 @@ import type { Internal, Struct } from '@strapi/types';
 import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import { emitSchemaEvent } from '../utils/events';
 import createBuilder from './schema-builder';
 import type { SchemaHandler } from './schema-builder/schema-handler';
 
@@ -33,7 +34,7 @@ export const formatComponent = (component: any) => {
 export const createComponent = async ({
   component,
   components = [],
-}: any): Promise<SchemaHandler> => {
+}: any): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -51,20 +52,42 @@ export const createComponent = async ({
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('component.create', { component: newComponent });
+  await emitSchemaEvent('component.create', { component: newComponent });
 
   return newComponent;
 };
 
+/**
+ * A component in a Content-Type Builder payload: the `info` fields sit at the top level,
+ * unlike the loaded `Struct.ComponentSchema`.
+ */
+type ComponentInput = {
+  category: string;
+  displayName: string;
+  icon?: string;
+  description?: string;
+  options?: Struct.SchemaOptions;
+  pluginOptions?: Struct.SchemaPluginOptions;
+  collectionName?: string;
+  attributes: Record<string, unknown>;
+};
+
+/**
+ * A component sent along with the edited one: an existing component to update (by `uid`),
+ * or a new one with a temporary uid that attributes in the same payload can reference.
+ */
+type NestedComponentInput = ComponentInput &
+  ({ uid: Internal.UID.Component; tmpUID?: never } | { tmpUID: string; uid?: never });
+
 type ComponentToCreate = {
-  component: Struct.ComponentSchema;
-  components?: Struct.ComponentSchema[];
+  component: ComponentInput;
+  components?: NestedComponentInput[];
 };
 
 export const editComponent = async (
   uid: Internal.UID.Component,
   { component, components = [] }: ComponentToCreate
-): Promise<SchemaHandler> => {
+): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -85,7 +108,7 @@ export const editComponent = async (
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('component.update', { component: updatedComponent });
+  await emitSchemaEvent('component.update', { component: updatedComponent });
 
   return updatedComponent;
 };
@@ -97,7 +120,7 @@ export const deleteComponent = async (uid: Internal.UID.Component) => {
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('component.delete', { component: deletedComponent });
+  await emitSchemaEvent('component.delete', { component: deletedComponent });
 
   return deletedComponent;
 };

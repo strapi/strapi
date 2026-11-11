@@ -48,6 +48,12 @@ import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './Confirm
 import type { BulkActionComponent } from '../../../../content-manager';
 import type { Document } from '../../../../hooks/useDocument';
 
+const EMPTY_ROWS_TO_DISPLAY: NonNullable<SelectedEntriesTableContentProps['rowsToDisplay']> = [];
+const EMPTY_ENTRIES_TO_PUBLISH: NonNullable<SelectedEntriesTableContentProps['entriesToPublish']> =
+  [];
+const EMPTY_VALIDATION_ERRORS: NonNullable<SelectedEntriesTableContentProps['validationErrors']> =
+  {};
+
 type ContentManagerQueryPlugins = {
   i18n?: {
     locale?: string;
@@ -205,9 +211,9 @@ const TABLE_HEADERS = [
 
 const SelectedEntriesTableContent = ({
   isPublishing,
-  rowsToDisplay = [],
-  entriesToPublish = [],
-  validationErrors = {},
+  rowsToDisplay = EMPTY_ROWS_TO_DISPLAY,
+  entriesToPublish = EMPTY_ENTRIES_TO_PUBLISH,
+  validationErrors = EMPTY_VALIDATION_ERRORS,
 }: SelectedEntriesTableContentProps) => {
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();

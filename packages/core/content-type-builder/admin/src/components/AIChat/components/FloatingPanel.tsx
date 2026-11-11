@@ -1,10 +1,12 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import { Box, Flex, IconButton } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { styled } from 'styled-components';
 
 import { ANIMATIONS } from './animations';
+
+const DEFAULT_ON_TOGGLE: NonNullable<RootProps['onToggle']> = () => {};
 
 type PanelSize = 'sm' | 'md' | 'lg';
 type PanelPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
@@ -94,11 +96,16 @@ const Root = ({
   size = 'md',
   position = 'bottom-right',
   isOpen = false,
-  onToggle = () => {},
+  onToggle = DEFAULT_ON_TOGGLE,
   toggleIcon,
 }: RootProps) => {
+  const contextValue = useMemo(
+    () => ({ size, position, isOpen, onToggle }),
+    [size, position, isOpen, onToggle]
+  );
+
   return (
-    <PanelContext.Provider value={{ size, position, isOpen, onToggle }}>
+    <PanelContext.Provider value={contextValue}>
       <FixedWrapper $position={position}>
         {isOpen ? (
           <PanelContainer

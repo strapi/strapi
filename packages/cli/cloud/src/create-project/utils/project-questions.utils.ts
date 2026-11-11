@@ -8,8 +8,7 @@ import type { ProjectAnswers } from '../../types';
 export function questionDefaultValuesMapper(
   questionsMap: Partial<{
     [K in keyof ProjectAnswers]:
-      | ((question: DistinctQuestion<ProjectAnswers>) => ProjectAnswers[K])
-      | ProjectAnswers[K];
+      ((question: DistinctQuestion<ProjectAnswers>) => ProjectAnswers[K]) | ProjectAnswers[K];
   }>
 ) {
   return (

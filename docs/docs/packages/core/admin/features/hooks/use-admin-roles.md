@@ -42,7 +42,7 @@ import { useAdminRoles } from 'path/to/hooks';
 const MyComponent = ({ onMoveItem }) => {
   const { roles, isLoading, refetch } = useAdminRoles();
 
-  return /* ... */;
+  // ...
 };
 ```
 
@@ -60,6 +60,6 @@ const MyComponent = ({ onMoveItem }) => {
     refetch,
   } = useAdminRoles({ id: 1 });
 
-  return /* ... */;
+  // ...
 };
 ```

@@ -125,4 +125,16 @@ describe('Preview', () => {
       `/preview/${singleTypeUid}/${singleTypeEntry.documentId}?locale=en&status=draft`
     );
   });
+
+  test('Reject an unknown status', async () => {
+    const { body, statusCode } = await getPreviewUrl({
+      uid: collectionTypeUid,
+      documentId: '1',
+      locale: 'en',
+      status: 'foo',
+    });
+
+    expect(statusCode).toBe(400);
+    expect(body.error.name).toBe('ValidationError');
+  });
 });

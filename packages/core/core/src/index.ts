@@ -11,6 +11,8 @@ import type {
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
 export * as ai from './ai';
+/** @internal For `strapi routes:list`. */
+export { getRouteSourcePath } from './services/server/route-path';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
   const strapi = new Strapi({
@@ -50,6 +52,5 @@ declare module 'koa' {
   // `BaseResponse` and `BaseContext` both extend `DefaultContextDelegatedResponse`, so augmenting it
   // once covers `ctx.*` and `ctx.response.*`.
   export interface DefaultContextDelegatedResponse
-    extends ContextDelegatedResponseErrorMethods,
-      ContextDelegatedResponseSuccessMethods {}
+    extends ContextDelegatedResponseErrorMethods, ContextDelegatedResponseSuccessMethods {}
 }

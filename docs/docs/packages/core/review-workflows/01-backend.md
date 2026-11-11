@@ -58,6 +58,8 @@ This code is separated into several elements:
 
 This content type stores the workflow information and is responsible for holding all the information about stages and their order. In MVP, only one workflow is stored inside the Strapi database.
 
+The workflow `name` is unique. The `workflows` service checks it on create and on rename, because `db.query` does not enforce the `unique` attribute option.
+
 #### strapi_workflows_stages
 
 This content type store the stage information such as its name.
@@ -112,21 +114,21 @@ This route returns a list of all stages associated with a specific workflow iden
 
 #### GET `/review-workflows/workflows/:workflow_id/stages/:id`
 
-This route returns the details of a specific stage identified by the id parameter and associated with the workflow identified by the workflow_id parameter.
+This route returns the details of a specific stage identified by the id parameter and associated with the workflow identified by the workflow_id parameter. It returns a 404 when the stage does not exist or belongs to another workflow.
 
 #### PUT `/review-workflows/workflows/:workflow_id/stages`
 
 This route updates the stages associated with a specific workflow identified by the workflow_id parameter. The updated stages are passed in the request body.
 
-#### PUT `/content-manager/(collection|single)-types/:model_uid/:id/stage`
+#### PUT `/content-manager/collection-types/:model_uid/:id/stage` and `/content-manager/single-types/:model_uid/:id/stage`
 
-This route updates the stage of a specific entity identified by the id parameter and belonging to a specific collection identified by the model_uid parameter. The new stage value is passed in the request body.
+This route updates the stage of a specific entity identified by the id parameter and belonging to a specific collection identified by the model_uid parameter. The new stage value is passed in the request body. Collection types and single types are separate routes, so another kind does not match.
 
-#### GET `/content-manager/(collection|single)-types/:model_uid/:id/stages`
+#### GET `/content-manager/collection-types/:model_uid/:id/stages` and `/content-manager/single-types/:model_uid/:id/stages`
 
 Returns a list of stages that a user has permission to transition into (based on the permission settings of a stage).
 
-#### PUT `/content-manager/(collection|single)-types/:model_uid/:id/assignee`
+#### PUT `/content-manager/collection-types/:model_uid/:id/assignee` and `/content-manager/single-types/:model_uid/:id/assignee`
 
 This route updates the assignee of the entity identified by the model_uid and id parameters. The updated entity is passed to the request body.
 

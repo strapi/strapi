@@ -74,9 +74,8 @@ const getInitialRoutes = (): RouteObject[] => [
       {
         path: 'application-infos',
         lazy: async () => {
-          const { ApplicationInfoPage } = await import(
-            './pages/Settings/pages/ApplicationInfo/ApplicationInfoPage'
-          );
+          const { ApplicationInfoPage } =
+            await import('./pages/Settings/pages/ApplicationInfo/ApplicationInfoPage');
 
           return {
             Component: ApplicationInfoPage,

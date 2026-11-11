@@ -56,7 +56,11 @@ const AutoCloneFailureModalBody = ({ prohibitedFields }: AutoCloneFailureModalBo
           >
             <Flex direction="row" tag="ol">
               {fieldPath.map((pathSegment, index) => (
-                <Typography fontWeight="semiBold" tag="li" key={index}>
+                <Typography
+                  fontWeight="semiBold"
+                  tag="li"
+                  key={fieldPath.slice(0, index + 1).join('.')}
+                >
                   {pathSegment}
                   {index !== fieldPath.length - 1 && (
                     <ChevronRight

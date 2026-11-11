@@ -210,13 +210,16 @@ describe('uploadFiles worker pool', () => {
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(5));
     });
 
-    it('resolves with the whole batch, not just the merged leg', async () => {
+    it('resolves with the files this call uploaded, not the whole batch', async () => {
       const { inFlight, result } = setup(2);
 
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
 
-      // The merge call's promise is the one the caller awaits, so it is the one
-      // that has to carry all 3 files — 2 from the first drop plus 1 merged in.
+      // The merge call's promise settles only once the whole batch has, which is
+      // what a caller awaiting completion needs. What it resolves *with* is this
+      // call's own file — a caller that attaches the result (the Content Manager
+      // field) would otherwise re-attach the 2 the first drop already added.
+      // The accumulated list is still chained internally for the next merged leg.
       let merged: Promise<{ data?: unknown[] }>;
       act(() => {
         merged = (result.current[0] as (arg: unknown) => Promise<{ data?: unknown[] }>)({
@@ -232,7 +235,35 @@ describe('uploadFiles worker pool', () => {
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(3));
 
       await expect(merged!).resolves.toEqual(expect.objectContaining({ data: expect.any(Array) }));
-      await expect(merged!.then((r) => r.data?.length)).resolves.toBe(3);
+      await expect(merged!.then((r) => r.data?.length)).resolves.toBe(1);
+    });
+
+    it('resolves with no files when the batch is cancelled before this call starts', async () => {
+      const { inFlight, result } = setup(3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+      await settle(inFlight, 1);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+      let merged: Promise<{ data?: unknown[] }>;
+      act(() => {
+        merged = (result.current[0] as (arg: unknown) => Promise<{ data?: unknown[] }>)({
+          formData: buildFormData(1),
+          totalFiles: 1,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await act(async () => {
+        abortUpload(1);
+        inFlight[1].reject(new UploadAbortedError());
+      });
+
+      // The first drop already attached its uploaded file; handing it to this
+      // caller too would attach it twice.
+      await expect(merged!.then((r) => r.data)).resolves.toEqual([]);
+      expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2);
     });
 
     it('cancelling the batch also cancels the files that were merged in', async () => {
@@ -252,6 +283,71 @@ describe('uploadFiles worker pool', () => {
       });
 
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  describe('retrying cancelled files', () => {
+    it('hands the retried files to the original caller', async () => {
+      const inFlight: Deferred[] = [];
+
+      mockUploadFileViaXHR.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            const id = inFlight.length + 1;
+            inFlight.push({
+              resolve: () => resolve({ id, name: `uploaded-${id}` } as never),
+              reject,
+            });
+          })
+      );
+
+      const onFileUploaded = jest.fn();
+
+      const { result } = renderHook(
+        () => ({
+          upload: useUploadFilesMutation()[0],
+          retry: useRetryCancelledFilesMutation()[0],
+          dispatch: useTypedDispatch(),
+        }),
+        { providerOptions: { storeConfig } }
+      );
+
+      let upload: Promise<unknown>;
+      act(() => {
+        upload = result.current.upload({
+          formData: buildFormData(3),
+          totalFiles: 3,
+          concurrency: undefined,
+          generateAiMetadata: false,
+          onFileUploaded,
+        });
+      });
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+      await settle(inFlight, 1);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+      await act(async () => {
+        abortUpload(1);
+        result.current.dispatch(cancelUpload());
+        inFlight[1].reject(new UploadAbortedError());
+      });
+      await act(async () => {
+        await upload!;
+      });
+
+      expect(onFileUploaded.mock.calls.map(([file]) => file.id)).toEqual([1]);
+
+      act(() => {
+        result.current.retry();
+      });
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(3));
+      await settle(inFlight, 3);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(4));
+      await settle(inFlight, 4);
+
+      expect(onFileUploaded.mock.calls.map(([file]) => file.id)).toEqual([1, 3, 4]);
     });
   });
 
