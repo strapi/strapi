@@ -1205,6 +1205,9 @@ describe('router path registration', () => {
     router.get('/ac/:a(\\d+):b(\\w+(?=\\.json))\\.json', (ctx) => {
       reply(ctx, { a: ctx.params.a, b: ctx.params.b });
     });
+    router.get('/af/:a([a-z]{2})-:b([A-Za-z-]+(?=\\.json))\\.json', (ctx) => {
+      reply(ctx, { a: ctx.params.a, b: ctx.params.b });
+    });
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
     app.use(router.routes());
@@ -1213,6 +1216,8 @@ describe('router path registration', () => {
     await expectReply(request(server).get('/ae/zh-Hant-TW'), { a: 'zh', b: 'Hant-TW' });
     await expectReply(request(server).get('/ac/5abc.json'), { a: '5', b: 'abc' });
     await request(server).get('/ac/5abc.txt').expect(404);
+    await expectReply(request(server).get('/af/zh-Hant-TW.json'), { a: 'zh', b: 'Hant-TW' });
+    await request(server).get('/af/zh-Hant-TW.txt').expect(404);
   });
 
   it('keeps a sibling lookbehind when a joined route drops its trailing slash', async () => {

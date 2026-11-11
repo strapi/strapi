@@ -1879,20 +1879,30 @@ const realignSameSegment = (
       })
       .join('');
 
+    // The segment text is the captured values with their separators, so when it appears at that
+    // place in the path, the segment is searched in the whole path. A lookaround on its last piece
+    // can then read the text after the segment, and each value has its position in the path.
+    const segmentStart = spans?.[slots[0]]?.[0];
+    const placed = segmentStart !== undefined && path.startsWith(text, segmentStart);
+
     let found: (RegExpExecArray & { indices?: (CaptureSpan | undefined)[] }) | null = null;
     try {
-      found = execIndexed(new RegExp(`^(?:${source})$`, flags), text);
+      found =
+        placed && segmentStart !== undefined
+          ? execIndexed(
+              new RegExp(
+                `^[\\s\\S]{${segmentStart}}(?:${source})(?=[\\s\\S]{${path.length - segmentStart - text.length}}$)`,
+                flags
+              ),
+              path
+            )
+          : execIndexed(new RegExp(`^(?:${source})$`, flags), text);
     } catch {
       continue;
     }
     if (!found) {
       continue;
     }
-
-    // The segment text is the captured values with their separators, so when it appears at that
-    // place in the path, each realigned value has a known position and its context can be checked.
-    const segmentStart = spans?.[slots[0]]?.[0];
-    const placed = segmentStart !== undefined && path.startsWith(text, segmentStart);
 
     for (let position = 0; position < slots.length; position += 1) {
       const value = found[position + 1];
@@ -1903,8 +1913,8 @@ const realignSameSegment = (
       }
 
       const indexed = found.indices?.[position + 1];
-      if (placed && nextSpans && value !== undefined && indexed && segmentStart !== undefined) {
-        nextSpans[slot] = [segmentStart + indexed[0], segmentStart + indexed[1]];
+      if (placed && nextSpans && value !== undefined && indexed) {
+        nextSpans[slot] = [indexed[0], indexed[1]];
       }
     }
   }
