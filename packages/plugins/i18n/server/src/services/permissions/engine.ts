@@ -13,14 +13,14 @@ import { getService } from '../../utils';
  * @param {WillRegisterPermissionContext} context
  */
 const willRegisterPermission = (context: any) => {
-  const { permission, condition, user } = context;
-  const { subject, properties } = permission;
-
-  const isSuperAdmin = strapi.service('admin::role').hasSuperAdminRole(user);
+  const isSuperAdmin = strapi.service('admin::role').hasSuperAdminRole(context.user ?? context);
 
   if (isSuperAdmin) {
     return;
   }
+
+  const { permission, condition } = context;
+  const { subject, properties } = permission;
 
   const { locales } = properties || {};
   const { isLocalizedContentType } = getService('content-types');
@@ -30,7 +30,7 @@ const willRegisterPermission = (context: any) => {
     return;
   }
 
-  const ct = strapi.contentTypes[subject];
+  const ct = strapi.contentType(subject);
 
   // If the subject exists but isn't localized, ignore the permission
   if (!isLocalizedContentType(ct)) {
