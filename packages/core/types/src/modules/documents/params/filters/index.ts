@@ -41,7 +41,7 @@ type NestedAttributeCondition<
   > extends infer TTargetUID extends UID.Schema
     ? If<
         IsComponent<TSchemaUID>,
-        | (ObjectNotation<TTargetUID> & { [TIter in IdOperator]?: undefined })
+        | (ObjectNotation<TTargetUID> & { [TIter in IdOperator]?: Forbidden })
         | IdOperatorCondition<TTargetUID>,
         ObjectNotation<TTargetUID>
       >
@@ -55,16 +55,13 @@ type NestedAttributeCondition<
  * with an operator next to other keys. So each operator object forbids the other operators and the
  * target's filter keys, and the filter object member forbids the id operators.
  *
- * The forbidden keys are optional `undefined` properties:
- * - They keep the type assignable to `ObjectNotation<Target>`, so reading a filter back keeps the
- *   target's keys. A bare id would break that, so it is not accepted: write `{ id: 5 }` or
- *   `{ $eq: 5 }`.
- * - They also hold without `strictNullChecks`. With `never`, TypeScript discards every member when it
- *   narrows the union on the `$null` key, and `{ $between: [1, 5] }` loses its tuple type.
+ * The forbidden keys are optional {@link Forbidden} properties, so the type stays assignable to
+ * `ObjectNotation<Target>` and reading a filter back keeps the target's keys. A bare id would break
+ * that, so it is not accepted: write `{ id: 5 }` or `{ $eq: 5 }`.
  */
 type IdOperatorCondition<TTargetUID extends UID.Schema> = {
   [TOperator in IdOperator]: { [TIter in TOperator]: IdOperatorValue<TOperator> } & {
-    [TIter in Exclude<Operator.Where, TOperator> | FilterKeys<TTargetUID>]?: undefined;
+    [TIter in Exclude<Operator.Where, TOperator> | FilterKeys<TTargetUID>]?: Forbidden;
   };
 }[IdOperator];
 
@@ -164,6 +161,21 @@ type IsComponent<TSchemaUID extends UID.Schema> = StrictEqual<
 >;
 
 /**
+ * Value type of a key that a filter object forbids: `undefined` without `strictNullChecks`, `never`
+ * with it.
+ *
+ * - Without `strictNullChecks`, TypeScript narrows the id operator union on the `$null` key and
+ *   compares a missing key (`undefined`) with each member. With `never`, it discards every member and
+ *   `{ $between: [1, 5] }` loses its tuple type. A component filter (`documentId`) and the id operator
+ *   object must also forbid keys the same way, or the operator object is not assignable to the
+ *   component filter and reading a nested component filter back fails.
+ * - With `exactOptionalPropertyTypes`, `?: undefined` is a key that can be present, so a filter
+ *   object member with `$in?: undefined` is not assignable to the target's filter and reading a
+ *   nested filter back fails. `?: never` keeps it assignable.
+ */
+type Forbidden = null extends string ? undefined : never;
+
+/**
  * Tree representation of a Strapi filter for a given schema UID
  */
 export type ObjectNotation<TSchemaUID extends UID.Schema> = {
@@ -184,10 +196,8 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         } & If<
           IsComponent<TSchemaUID>,
           // Components have no documentId. The key stays in the mapped type above, so it resolves
-          // while the UID is generic. `undefined`, not `never`: without strictNullChecks, the id
-          // operator object (`documentId?: undefined`) would not be assignable to the component's
-          // filter type, and reading a nested component filter back would fail.
-          { [TIter in DocumentIDKey]?: undefined },
+          // while the UID is generic.
+          { [TIter in DocumentIDKey]?: Forbidden },
           unknown
         > &
           If<

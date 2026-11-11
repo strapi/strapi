@@ -29,6 +29,19 @@ describe('Filters.ObjectNotation attribute keys', () => {
   );
 
   test(
+    'rejects the same shapes with exactOptionalPropertyTypes',
+    () => {
+      const { status, signal, output } = compileFixture('known-schema-keys', [
+        '--exactOptionalPropertyTypes',
+        'true',
+      ]);
+
+      expect({ status, signal }, output).toEqual({ status: 0, signal: null });
+    },
+    COMPILE_TIMEOUT_MS + 10_000
+  );
+
+  test(
     'accepts any attribute when the schema registries are not extended',
     () => {
       const { status, signal, output } = compileFixture('no-schema-registry');

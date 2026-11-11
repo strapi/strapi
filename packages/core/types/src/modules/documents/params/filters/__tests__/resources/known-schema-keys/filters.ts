@@ -209,6 +209,23 @@ export const nestedComponentReadBack = (filters: Filters<'shared.card'>) => {
   return { seo };
 };
 
+export const mixedComponentReadBack = (filters: Filters<'shared.mixed'>) => {
+  const article: Filters<'api::article.article'> | undefined = filters.article;
+
+  return { article };
+};
+
+export const mixedComponent: Filters<'shared.mixed'>[] = [
+  { label: 'a', article: { title: 'b' } },
+  { article: { $in: [1, 2] } },
+  {
+    // @ts-expect-error Unknown attribute
+    lable: 'a',
+  },
+  // @ts-expect-error An operator next to attribute keys throws at runtime
+  { article: { $in: [1], title: 'a' } },
+];
+
 export const componentReadBackFromContentType = (filters: Filters<'api::article.article'>) => {
   const article: Filters<'api::article.article'> | undefined = filters.links?.article;
   const card: Filters<'shared.seo'> | undefined = filters.links?.article?.$not?.seo;
