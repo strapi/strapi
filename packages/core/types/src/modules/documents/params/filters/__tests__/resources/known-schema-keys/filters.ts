@@ -203,7 +203,6 @@ export const contentTypeShortcut: Filters<'api::article.article'>[] = [
   { links: { $null: true } },
   { links: { article: { author: { $in: [1] } } } },
   { $or: [{ author: { $null: true } }, { cover: { $null: true } }] },
-  { author: { $not: { name: 'a' } } },
   { author: { name: 'a' } },
   { author: { id: { $in: [1, 2] } } },
   { author: { documentId: 'a' } },
@@ -269,6 +268,10 @@ articles.findMany({
     author: { $null: true, $notNull: true },
   },
 });
+
+// Known gap, as on develop: `{ author: { $not: { name: 'a' } } }` type-checks, because `$not` is part
+// of the author's filter type, but the database throws. It reads a lone `$not` on a relation as an
+// operator on the id (`id: { $not: { name: 'a' } }`), and `name` is not an operator.
 
 // Not rejected in a direct call: `{ author: { $eq: 1, name: 'a' } }`. The method infers its params,
 // so TypeScript does not check excess properties, and the object matches the author's filter type.
@@ -339,3 +342,20 @@ export const contentTypeReadBack = (filters: Filters<'api::article.article'>) =>
 
   return { author, authorName, coauthors, cover, seo, notAuthor };
 };
+
+/**
+ * Reading back the filter of a relation whose target is not in the registries keeps the target's
+ * loose filter type, with any key
+ */
+export const unknownTargetReadBack = (filters: Filters<'api::article.article'>) => {
+  const legacy: Filters<'api::legacy.legacy'> | undefined = filters.legacy;
+  const legacyName = filters.legacy?.name;
+  const notLegacy = filters.$and?.[0]?.legacy?.$not?.anything;
+
+  return { legacy, legacyName, notLegacy };
+};
+
+export const unknownTarget: Filters<'api::article.article'>[] = [
+  { legacy: { name: 'a', anything: { $in: [1] } } },
+  { legacy: { $null: true } },
+];

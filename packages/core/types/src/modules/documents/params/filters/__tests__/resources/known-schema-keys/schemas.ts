@@ -59,6 +59,8 @@ interface Article extends Struct.CollectionTypeSchema {
     author: Schema.Attribute.Relation<'manyToOne', 'api::author.author'>;
     coauthors: Schema.Attribute.Relation<'manyToMany', 'api::author.author'>;
     cover: Schema.Attribute.Media<'images'>;
+    // The target is not in the registries, so its attribute names are unknown
+    legacy: Schema.Attribute.Relation<'manyToOne', 'api::legacy.legacy'>;
   };
 }
 
