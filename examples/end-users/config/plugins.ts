@@ -29,7 +29,7 @@ const basePluginsConfig = ({
   'end-users': {
     enabled: true,
     config: {
-      // Signs the sessions. Required in production; set it in `.env` (see `.env.example`).
+      // Signs the sessions. Required outside development; set it in `.env` (see `.env.example`).
       secret: env('END_USERS_SECRET'),
 
       // The front end runs on another origin (`localhost:5173`), so Better Auth must trust it:

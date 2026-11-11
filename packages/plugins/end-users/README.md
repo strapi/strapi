@@ -127,8 +127,8 @@ production through your repository and a deploy, and what you need to read is sh
 6. Set `END_USERS_SECRET` where the project runs, to a long random string (the plugin warns below 32 characters). It signs the new
    sessions. On Strapi Cloud that is an environment variable of the project. Set `JWT_SECRET` to the secret Users &
    Permissions signs its tokens with, so tokens issued before the move keep working. In development the plugin generates
-   a secret and stores it in `.env` when none is set; it never does so in production, and a start without one is
-   refused.
+   a secret and stores it in `.env` when none is set. Any other `NODE_ENV` (production, staging, test) refuses to start
+   without one, or with a published placeholder such as the one in an `.env.example`.
 
 7. Commit the files and deploy with one instance running, as Strapi's own migrations need. The migration runs while
    the application starts, before the database schema is synchronized. If a second instance starts during that time, it

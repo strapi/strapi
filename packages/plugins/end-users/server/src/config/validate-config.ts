@@ -314,6 +314,15 @@ const validateMigration = (migration: Plain) => {
 };
 
 /**
+ * Secrets anyone can read: Better Auth's built-in fallback, and the placeholder in the example
+ * project's `.env.example`.
+ */
+const PUBLIC_SECRETS = new Set([
+  'better-auth-secret-12345678901234567890',
+  'change-me-to-a-long-random-string',
+]);
+
+/**
  * Checks the plugin configuration after the defaults are merged in. Keys it
  * does not know are left alone: a project may add its own.
  *
@@ -331,11 +340,24 @@ export const validateConfig = (
     invalid('secret', 'a string', secret);
   }
 
-  if (envVars.NODE_ENV === 'production' && !secret) {
+  // Strapi treats an unset NODE_ENV as development. Only development generates a missing secret
+  // (see `register.ts`): anywhere else Better Auth would fall back to its public default secret, so
+  // a missing secret, or one that is published, refuses the start.
+  const environment = envVars.NODE_ENV || 'development';
+
+  if (environment !== 'development' && !secret) {
     throw new Error(
-      'Invalid end-users configuration: `secret` is required in production. It signs the ' +
-        'sessions, so set the END_USERS_SECRET environment variable (a long random string), or ' +
-        '`secret` in config/plugins.js.'
+      `Invalid end-users configuration: \`secret\` is required when NODE_ENV is "${environment}" ` +
+        '(only development generates one). It signs the sessions, so set the END_USERS_SECRET ' +
+        'environment variable (a long random string), or `secret` in config/plugins.js.'
+    );
+  }
+
+  if (environment !== 'development' && PUBLIC_SECRETS.has(secret as string)) {
+    throw new Error(
+      'Invalid end-users configuration: `secret` is a published placeholder, so anyone could sign ' +
+        'sessions and tokens with it. Set END_USERS_SECRET to a long random string (for example: ' +
+        'openssl rand -base64 32).'
     );
   }
 

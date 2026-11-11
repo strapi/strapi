@@ -61,7 +61,7 @@ export const pendingLinkPrefix = (providerId: string): string =>
 
 /**
  * The key of the pending links' hash: the plugin's `secret`, the one the engine signs with. It is
- * required in production; without it the key is empty, as the hash then only keeps the address out of
+ * required outside development; without it the key is empty, as the hash then only keeps the address out of
  * the identifier.
  */
 export const pendingLinkSecret = (strapi: Core.Strapi): string =>

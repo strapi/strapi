@@ -24,10 +24,27 @@ describe('validateConfig', () => {
     expect(() => validateConfig({ secret: SECRET }, production)).not.toThrow();
   });
 
-  it('starts without a secret outside production', () => {
+  it('starts without a secret in development only, where the plugin generates one', () => {
     expect(() => validateConfig({}, { NODE_ENV: 'development' })).not.toThrow();
-    expect(() => validateConfig({}, { NODE_ENV: 'test' })).not.toThrow();
+    // Strapi treats an unset NODE_ENV as development
     expect(() => validateConfig({}, {})).not.toThrow();
+  });
+
+  it('refuses to start without a secret in any other environment', () => {
+    // Nothing generates a secret there, and Better Auth would fall back to its public default
+    expect(() => validateConfig({}, { NODE_ENV: 'staging' })).toThrow(/END_USERS_SECRET/);
+    expect(() => validateConfig({}, { NODE_ENV: 'test' })).toThrow(/END_USERS_SECRET/);
+    expect(() => validateConfig({ secret: '' }, { NODE_ENV: 'qa' })).toThrow(/END_USERS_SECRET/);
+  });
+
+  it('refuses a publicly known secret outside development', () => {
+    const known = ['better-auth-secret-12345678901234567890', 'change-me-to-a-long-random-string'];
+
+    for (const secret of known) {
+      expect(() => validateConfig({ secret }, production)).toThrow(/END_USERS_SECRET/);
+      expect(() => validateConfig({ secret }, { NODE_ENV: 'staging' })).toThrow(/END_USERS_SECRET/);
+      expect(() => validateConfig({ secret }, { NODE_ENV: 'development' })).not.toThrow();
+    }
   });
 
   it('refuses a secret that is not a string', () => {
@@ -35,8 +52,9 @@ describe('validateConfig', () => {
   });
 
   it('reads the environment of the process when it is not given one', () => {
-    // vitest runs with NODE_ENV=test
-    expect(() => validateConfig({})).not.toThrow();
+    // vitest runs with NODE_ENV=test, where a secret is required
+    expect(() => validateConfig({})).toThrow(/"test"/);
+    expect(() => validateConfig({ secret: SECRET })).not.toThrow();
   });
 
   it('accepts what the defaults are made of', () => {
@@ -350,7 +368,7 @@ describe('validateConfig', () => {
     it('is read from the environment of the process when none is given', () => {
       vi.stubEnv('BETTER_AUTH_TRUSTED_ORIGINS', '*');
 
-      expect(() => validateConfig({})).toThrow(/BETTER_AUTH_TRUSTED_ORIGINS/);
+      expect(() => validateConfig({ secret: SECRET })).toThrow(/BETTER_AUTH_TRUSTED_ORIGINS/);
     });
   });
 
