@@ -46,6 +46,7 @@ import {
 } from '../content-api-drafts';
 import { assertDraftAccess } from './drafts-gate';
 import { assertPopulateDepth, splitPopulateLists } from './populate-depth';
+import { assertRelationTargetsReadable, collectRelationTargets } from './relation-targets';
 
 /**
  * Whether reading a type (by uid) through a relation is restricted for the caller, the relation
@@ -415,6 +416,41 @@ const createAPIValidators = (opts: APIOptions) => {
           getModel,
         })
       );
+    }
+
+    // the entries the write links to: each one the caller may read, under its conditions
+    const relationChecker = activeChecker(auth);
+
+    if (relationChecker) {
+      (transforms as Array<(data: unknown) => unknown>).push(async (value: unknown) => {
+        const references: Parameters<typeof collectRelationTargets>[0] = [];
+
+        await traverseEntity(
+          collectRelationTargets(references),
+          { schema, getModel },
+          value as Data
+        );
+
+        if (references.length === 0) {
+          return value;
+        }
+
+        // Core always provides it; without it nothing can be checked, so nothing is linked
+        if (!opts.matchEntries) {
+          throw new Error('Checking the entries a write links to needs matchEntries');
+        }
+
+        await assertRelationTargetsReadable({
+          references,
+          checker: relationChecker,
+          auth,
+          matcher: opts.matchEntries,
+          getModel,
+          locale,
+        });
+
+        return value;
+      });
     }
 
     // Apply validators from registry if exists

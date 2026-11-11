@@ -819,7 +819,9 @@ describe('Content API permissions: field rules', () => {
       const open = apiOf(
         checkerOf({
           [`create|${NOTE_UID}`]: { always: ['title', 'folder'], conditional: [] },
-        })
+        }),
+        // the folder it links to is one the caller may read
+        async ({ documentIds }) => documentIds
       );
 
       await expect(
