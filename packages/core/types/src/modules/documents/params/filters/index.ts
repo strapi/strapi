@@ -184,8 +184,10 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         } & If<
           IsComponent<TSchemaUID>,
           // Components have no documentId. The key stays in the mapped type above, so it resolves
-          // while the UID is generic.
-          { [TIter in DocumentIDKey]?: never },
+          // while the UID is generic. `undefined`, not `never`: without strictNullChecks, the id
+          // operator object (`documentId?: undefined`) would not be assignable to the component's
+          // filter type, and reading a nested component filter back would fail.
+          { [TIter in DocumentIDKey]?: undefined },
           unknown
         > &
           If<

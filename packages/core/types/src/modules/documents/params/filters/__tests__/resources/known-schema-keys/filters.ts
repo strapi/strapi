@@ -203,6 +203,12 @@ export const componentReadBack = (filters: Filters<'shared.link'>) => {
   return { article, title, nestedSeo };
 };
 
+export const nestedComponentReadBack = (filters: Filters<'shared.card'>) => {
+  const seo: Filters<'shared.seo'> | undefined = filters.seo;
+
+  return { seo };
+};
+
 export const componentReadBackFromContentType = (filters: Filters<'api::article.article'>) => {
   const article: Filters<'api::article.article'> | undefined = filters.links?.article;
   const card: Filters<'shared.seo'> | undefined = filters.links?.article?.$not?.seo;
