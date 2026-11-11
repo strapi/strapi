@@ -1195,6 +1195,25 @@ describe('router path registration', () => {
     await request(server).get('/b/x-5').expect(404);
   });
 
+  it('takes the whole value a context pattern matches, not its first match', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/aa/:id(\\b\\d+?).json', (ctx) => {
+      reply(ctx, { id: ctx.params.id });
+    });
+    router.get('/ab/:id(\\b(?:a|ab))-x', (ctx) => {
+      reply(ctx, { id: ctx.params.id });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/aa/123.json'), { id: '123' });
+    await expectReply(request(server).get('/ab/ab-x'), { id: 'ab' });
+  });
+
   it('splits two patterned parameters in one segment the way v6 did', async () => {
     const strapi = createStrapi();
     const router = new Router();

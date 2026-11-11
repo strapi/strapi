@@ -1662,8 +1662,13 @@ const matchesInContext = (
 ) => {
   let found: RegExpExecArray | null = null;
 
+  // The lookahead makes the engine backtrack to the exact end, rather than stop at the first
+  // way the pattern matches, e.g. `\d+?` or `(?:a|ab)`.
   try {
-    found = new RegExp(`^[\\s\\S]{${start}}(?:${pattern})`, flags).exec(path);
+    found = new RegExp(
+      `^[\\s\\S]{${start}}(?:${pattern})(?=[\\s\\S]{${path.length - end}}$)`,
+      flags
+    ).exec(path);
   } catch {
     return false;
   }
