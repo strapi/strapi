@@ -7,6 +7,7 @@ jest.mock('../utils/draft', () => ({
 }));
 
 jest.mock('../utils/populate', () => ({
+  buildDeepPopulate: jest.fn(),
   getDeepPopulateDraftCount: jest.fn(),
 }));
 
@@ -66,6 +67,36 @@ describe('document-manager', () => {
 
       expect(total).toBe(0);
       expect(findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('clone', () => {
+    const clone = jest.fn();
+
+    beforeEach(() => {
+      clone.mockReset();
+      clone.mockResolvedValue({ documentId: 'clone-1', entries: [{ documentId: 'clone-1' }] });
+
+      global.strapi = {
+        documents: jest.fn(() => ({ clone })),
+      } as any;
+    });
+
+    it.each([
+      ['a string', 'fr', 'fr'],
+      ['null', null, undefined],
+      ['absent', undefined, undefined],
+    ])('passes the body locale when it is %s', async (_name, bodyLocale, expectedLocale) => {
+      const service = documentManager({ strapi: global.strapi });
+      const body =
+        bodyLocale === undefined ? { title: 'Clone' } : { title: 'Clone', locale: bodyLocale };
+
+      const result = await service.clone('doc-1', body as any, RELATION_LAB_UID);
+
+      expect(result).toEqual({ documentId: 'clone-1' });
+      expect(clone).toHaveBeenCalledTimes(1);
+      expect(clone.mock.calls[0][0].documentId).toBe('doc-1');
+      expect(clone.mock.calls[0][0].locale).toBe(expectedLocale);
     });
   });
 
