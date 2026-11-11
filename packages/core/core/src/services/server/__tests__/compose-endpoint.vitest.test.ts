@@ -230,7 +230,7 @@ describe.each([
   });
 
   it('matches one or more segments of a repeated custom pattern', async () => {
-    const { server } = createServer('/files/:path(\\d+)+');
+    const { server, strapi } = createServer('/files/:path(\\d+)+');
 
     await expectReply(request(server).get('/files/12'), {
       route: '/files/:path(\\d+)+',
@@ -245,6 +245,9 @@ describe.each([
       params: { path: '12/ab' },
     });
     await request(server).get('/files').expect(404);
+
+    const messages = strapi.log.warn.mock.calls.map(([message]) => String(message)).join('\n');
+    expect(messages).toContain('pattern `\\d+` on `:path` is no longer enforced');
   });
 
   it('keeps a negated class that excludes "/" on one segment', async () => {
@@ -271,7 +274,15 @@ describe.each([
       route: '/x/:a(\\d+)?:b([a-z]+)',
       params: { a: '12', b: 'ab' },
     });
+    await expectReply(request(server).get('/x/12ab/'), {
+      route: '/x/:a(\\d+)?:b([a-z]+)',
+      params: { a: '12', b: 'ab' },
+    });
     await expectReply(request(server).get('/xab'), {
+      route: '/x/:a(\\d+)?:b([a-z]+)',
+      params: { b: 'ab' },
+    });
+    await expectReply(request(server).get('/xab/'), {
       route: '/x/:a(\\d+)?:b([a-z]+)',
       params: { b: 'ab' },
     });
@@ -290,6 +301,15 @@ describe.each([
       route: '/x/:a([a-z]+):b(\\d+)?',
       params: { a: 'ab', b: '12' },
     });
+    await expectReply(request(server).get('/x/ab12/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?',
+      params: { a: 'ab', b: '12' },
+    });
+    await expectReply(request(server).get('/x/ab/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?',
+      params: { a: 'ab' },
+    });
+    await request(server).get('/x/ab12/extra').expect(404);
     await request(server).get('/x').expect(404);
   });
 
@@ -581,6 +601,29 @@ describe('router path registration', () => {
     await expectReply(request(server).get('/users/12'), { id: '12' });
     await expectReply(request(server).get('/users/me'), { me: true });
     await request(server).get('/users/abc').expect(404);
+  });
+
+  it('warns when a pattern that can match a slash is not enforced', () => {
+    const { strapi, router } = createRouterApp();
+
+    router.get('/static/:file(.+\\.js)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const messages = strapi.log.warn.mock.calls.map(([message]) => String(message)).join('\n');
+    expect(messages).toContain('pattern `.+\\.js` on `:file` is no longer enforced');
+  });
+
+  it('warns when a group suffix becomes the next optional prefix', async () => {
+    const { strapi, router, server } = createRouterApp();
+
+    router.get('/a/{:x(\\d+)/}:y(\\d+)?', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const messages = strapi.log.warn.mock.calls.map(([message]) => String(message)).join('\n');
+    expect(messages).toContain('pattern `\\d+` on `:x` is no longer enforced');
+    await expectReply(request(server).get('/a/abc/5'), { x: 'abc', y: '5' });
   });
 
   it('does not warn that .* is no longer enforced', () => {

@@ -591,8 +591,21 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     const last = translated.at(-1);
     if (last !== undefined && OPTIONAL_PREFIXES.has(last) && translated.at(-2) !== '\\') {
       translated = translated.slice(0, -1);
-      if ((spans.at(-1)?.end ?? 0) > translated.length) {
+      const span = spans.at(-1);
+      if ((span?.end ?? 0) > translated.length) {
         spans.pop();
+        // The span's text lost its last character, so the final pass never sees it.
+        // Report its pattern as ignored, which is what a pattern that cannot be applied does.
+        if (span?.constraint) {
+          for (const piece of span.constraint.split) {
+            ignoredPatterns.push({
+              parameter: piece.parameter,
+              pattern: piece.pattern,
+              unnamed: piece.unnamed,
+            });
+          }
+        }
+        span?.keys.forEach((key) => dropRecorded(key));
       }
       return last;
     }
@@ -1339,7 +1352,15 @@ const constraintValue = (
 ) => {
   // `null` means the plan could not be read. `undefined` means this parameter was left out.
   const planned = fromCapturePlan(layer, captures, constraint);
-  return planned === null ? fromPresentValues(layer, captures, constraint) : planned;
+  const value = planned === null ? fromPresentValues(layer, captures, constraint) : planned;
+
+  // A joined wildcard swallows the optional trailing slash of a non-strict route.
+  // Split patterns cannot match `/`, so that slash is not part of the captured value.
+  if (typeof value === 'string' && constraint.split.length > 0 && value.endsWith('/')) {
+    return value.slice(0, -1);
+  }
+
+  return value;
 };
 
 /**

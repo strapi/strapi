@@ -103,6 +103,19 @@ describe('translateRoutePath', () => {
     expect(translateRoutePath('/files/:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files-:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/(\\d+)/(.*)').ignoredPatterns).toEqual([]);
+    expect(translateRoutePath('/static/:file(.+\\.js)').ignoredPatterns).toEqual([
+      { parameter: 'file', pattern: '.+\\.js', unnamed: false },
+    ]);
+    expect(translateRoutePath('/files/:path(\\d+)+').ignoredPatterns).toEqual([
+      { parameter: 'path', pattern: '\\d+', unnamed: false },
+    ]);
+    expect(translateRoutePath('/:a(.+):b(\\d+)').ignoredPatterns).toEqual([
+      { parameter: 'a', pattern: '.+', unnamed: false },
+      { parameter: 'b', pattern: '\\d+', unnamed: false },
+    ]);
+    expect(translateRoutePath('/a/{:x(\\d+)/}:y(\\d+)?').ignoredPatterns).toEqual([
+      { parameter: 'x', pattern: '\\d+', unnamed: false },
+    ]);
     expect(translateRoutePath('/f/(\\d+)/(.*)').constraints).toEqual([
       { key: 'v6Group1', pattern: '\\d+', split: [], required: true, occurrence: 0 },
     ]);
