@@ -1212,15 +1212,19 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
         .map((constraint) => [constraint.key, constraint])
     );
     let group = 0;
+    // One call, so the captures array is the one whose piece values were recorded.
+    const captured = current.captures(ctx.path);
 
     for (const name of generated) {
       const split = splits.get(name);
       if (split) {
-        const raw = constraintValue(current, current.captures(ctx.path), split);
-        const found = raw ? split.regexp.exec(raw) : null;
-        if (found) {
+        const raw = constraintValue(current, captured, split);
+        const pieces =
+          contextualParts.get(captured)?.get(name) ??
+          (raw ? split.regexp.exec(raw)?.slice(1) : undefined);
+        if (pieces) {
           for (const [index, part] of split.split.entries()) {
-            const piece = found[index + 1];
+            const piece = pieces[index];
             if (!piece) {
               continue;
             }
@@ -1400,7 +1404,7 @@ const trimJoinedTrailingSlash = (
   captures: readonly (string | undefined)[],
   spans: readonly (CaptureSpan | undefined)[] | undefined,
   pathLength: number
-): (string | undefined)[] | null => {
+): { captures: (string | undefined)[]; spans: (CaptureSpan | undefined)[] } | null => {
   if (!spans || layer.opts.strict === true) {
     return null;
   }
@@ -1425,7 +1429,9 @@ const trimJoinedTrailingSlash = (
     if (!constraint.regexp.test(value) && constraint.regexp.test(withoutTrailingSlash)) {
       const candidate = captures.slice();
       candidate[slot] = withoutTrailingSlash;
-      return candidate;
+      const candidateSpans = spans.slice();
+      candidateSpans[slot] = [span[0], span[1] - 1];
+      return { captures: candidate, spans: candidateSpans };
     }
   }
 
@@ -1676,6 +1682,38 @@ const matchesInContext = (
   return found !== null && found[0].length === end;
 };
 
+/**
+ * The piece values of a joined capture, matched against the whole request path. A piece with a
+ * lookaround can depend on text outside the joined value, so it cannot be split from the value alone.
+ * Keyed by the captures array an accepted match returned, for the shim that splits the value.
+ */
+const contextualParts = new WeakMap<object, Map<string, (string | undefined)[]>>();
+
+/**
+ * Returns `undefined` when the value's position in the path is unknown, so the caller falls back to
+ * the value alone. Returns `null` when the pieces do not match at that position.
+ */
+const contextualSplitParts = (
+  constraint: CompiledConstraint,
+  value: string,
+  span: CaptureSpan | undefined,
+  path: string
+): (string | undefined)[] | null | undefined => {
+  if (!span || path.slice(span[0], span[1]) !== value) {
+    return undefined;
+  }
+
+  try {
+    const found = new RegExp(
+      `^[\\s\\S]{${span[0]}}(?:${constraint.pattern})(?=[\\s\\S]{${path.length - span[1]}}$)`,
+      constraint.regexp.flags
+    ).exec(path);
+    return found ? found.slice(1) : null;
+  } catch {
+    return null;
+  }
+};
+
 const execIndexed = (regexp: RegExp, path: string) => {
   const flags = regexp.flags.includes('d') ? regexp.flags : `${regexp.flags}d`;
   const indexed = flags === regexp.flags ? regexp : new RegExp(regexp.source, flags);
@@ -1754,8 +1792,10 @@ const tokenizePath = (path: string): PathToken[] => {
  */
 const realignSameSegment = (
   layer: TranslatedLayer,
-  captures: readonly (string | null | undefined)[]
-) => {
+  captures: readonly (string | null | undefined)[],
+  path: string,
+  spans: readonly (CaptureSpan | undefined)[] | undefined
+): { captures: (string | undefined)[]; spans: (CaptureSpan | undefined)[] | undefined } | null => {
   const plan = capturePlan(layer);
   const layoutIndex = plan ? activeLayout(plan, captures) : -1;
   if (!plan || layoutIndex === -1 || typeof layer.path !== 'string') {
@@ -1804,7 +1844,8 @@ const realignSameSegment = (
     groups.push(group);
   }
 
-  const next = captures.slice();
+  const next: (string | undefined)[] = captures.map((value) => value ?? undefined);
+  const nextSpans = spans?.slice();
   let changed = false;
   const flags = layer.regexp?.flags.includes('i') ? 'i' : '';
 
@@ -1838,15 +1879,20 @@ const realignSameSegment = (
       })
       .join('');
 
-    let found: RegExpExecArray | null = null;
+    let found: (RegExpExecArray & { indices?: (CaptureSpan | undefined)[] }) | null = null;
     try {
-      found = new RegExp(`^(?:${source})$`, flags).exec(text);
+      found = execIndexed(new RegExp(`^(?:${source})$`, flags), text);
     } catch {
       continue;
     }
     if (!found) {
       continue;
     }
+
+    // The segment text is the captured values with their separators, so when it appears at that
+    // place in the path, each realigned value has a known position and its context can be checked.
+    const segmentStart = spans?.[slots[0]]?.[0];
+    const placed = segmentStart !== undefined && path.startsWith(text, segmentStart);
 
     for (let position = 0; position < slots.length; position += 1) {
       const value = found[position + 1];
@@ -1855,10 +1901,15 @@ const realignSameSegment = (
         next[slot] = value;
         changed = true;
       }
+
+      const indexed = found.indices?.[position + 1];
+      if (placed && nextSpans && value !== undefined && indexed && segmentStart !== undefined) {
+        nextSpans[slot] = [segmentStart + indexed[0], segmentStart + indexed[1]];
+      }
     }
   }
 
-  return changed ? next : null;
+  return changed ? { captures: next, spans: nextSpans } : null;
 };
 
 /**
@@ -1916,8 +1967,51 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
         );
       }
 
+      if (constraint.split.length > 0 && patternNeedsContext(constraint.pattern)) {
+        const slot = captureSlot(current, captures, constraint);
+        const parts = contextualSplitParts(
+          constraint,
+          value,
+          slot == null ? undefined : spans?.[slot],
+          path
+        );
+        if (parts !== undefined) {
+          return parts !== null;
+        }
+      }
+
       return constraint.regexp.test(value);
     });
+
+  // Remember the piece values of a joined capture that needs context, so the shim can split it.
+  const rememberParts = (
+    current: TranslatedLayer,
+    captures: (string | undefined)[],
+    path: string,
+    spans: readonly (CaptureSpan | undefined)[] | undefined
+  ) => {
+    const parts = new Map<string, (string | undefined)[]>();
+    for (const constraint of current[LAYER_CONSTRAINTS] ?? []) {
+      if (constraint.split.length === 0 || !patternNeedsContext(constraint.pattern)) {
+        continue;
+      }
+
+      const value = constraintValue(current, captures, constraint);
+      const slot = captureSlot(current, captures, constraint);
+      const found =
+        value == null
+          ? undefined
+          : contextualSplitParts(constraint, value, slot == null ? undefined : spans?.[slot], path);
+      if (found) {
+        parts.set(constraint.key, found);
+      }
+    }
+
+    if (parts.size > 0) {
+      contextualParts.set(captures, parts);
+    }
+    return captures;
+  };
 
   const accept = (
     current: TranslatedLayer,
@@ -1926,17 +2020,17 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     spans: readonly (CaptureSpan | undefined)[] | undefined
   ) => {
     if (passes(current, captures, path, spans)) {
-      return captures;
+      return rememberParts(current, captures, path, spans);
     }
 
     const trimmed = trimJoinedTrailingSlash(current, captures, spans, path.length);
-    if (trimmed && passes(current, trimmed, path, spans)) {
-      return trimmed;
+    if (trimmed && passes(current, trimmed.captures, path, trimmed.spans)) {
+      return rememberParts(current, trimmed.captures, path, trimmed.spans);
     }
 
-    const realigned = realignSameSegment(current, captures);
-    if (realigned && passes(current, realigned, path, spans)) {
-      return realigned;
+    const realigned = realignSameSegment(current, captures, path, spans);
+    if (realigned && passes(current, realigned.captures, path, realigned.spans)) {
+      return rememberParts(current, realigned.captures, path, realigned.spans);
     }
 
     return null;

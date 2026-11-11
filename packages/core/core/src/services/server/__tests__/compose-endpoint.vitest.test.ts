@@ -1195,6 +1195,26 @@ describe('router path registration', () => {
     await request(server).get('/b/x-5').expect(404);
   });
 
+  it('checks a lookahead on a split piece against the text after it', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/ae/:a([a-z]{2}(?=-))-:b([A-Za-z-]+)', (ctx) => {
+      reply(ctx, { a: ctx.params.a, b: ctx.params.b });
+    });
+    router.get('/ac/:a(\\d+):b(\\w+(?=\\.json))\\.json', (ctx) => {
+      reply(ctx, { a: ctx.params.a, b: ctx.params.b });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/ae/zh-Hant-TW'), { a: 'zh', b: 'Hant-TW' });
+    await expectReply(request(server).get('/ac/5abc.json'), { a: '5', b: 'abc' });
+    await request(server).get('/ac/5abc.txt').expect(404);
+  });
+
   it('keeps a sibling lookbehind when a joined route drops its trailing slash', async () => {
     const strapi = createStrapi();
     const router = new Router();
