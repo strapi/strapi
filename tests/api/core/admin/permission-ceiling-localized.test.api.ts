@@ -149,27 +149,37 @@ describe('Permission ceiling on a localized content type (api)', () => {
     });
 
     // Default roles created when a localized content type exists at first boot store their rows
-    // with no `locales` key. The role editor shows them with the default locale ticked.
-    describe('A role row stored with no locales key', () => {
+    // with no `locales` key. A row with no or empty `locales` grants no locale, and the role editor
+    // shows it with the default locale ticked.
+    describe.each([
+      ['no locales key', {}],
+      ['empty locales', { locales: [] }],
+    ])('A role row stored with %s', (_, storedLocales) => {
       const CREATE = 'plugin::content-manager.explorer.create';
-      const createTitle = (locales?: string[] | null) => ({
+      const createTitle = (
+        locales?: string[] | null,
+        { fields = ['title'], conditions = ['admin::is-creator'] } = {}
+      ) => ({
         action: CREATE,
         subject: ARTICLE,
-        properties: locales === undefined ? { fields: ['title'] } : { fields: ['title'], locales },
-        conditions: ['admin::is-creator'],
+        properties: locales === undefined ? { fields, ...storedLocales } : { fields, locales },
+        conditions,
       });
 
       // The requester holds no create permission on the content type
-      beforeEach(async () => {
-        await utils.assignPermissionsToRole(targetRole.id, [
+      const seedTargetRole = (fields = ['title']) =>
+        utils.assignPermissionsToRole(targetRole.id, [
           {
             action: READ,
             subject: ARTICLE,
             conditions: [],
             properties: { fields: ['title'], locales: ['en'] },
           },
-          createTitle(),
+          createTitle(undefined, { fields }),
         ]);
+
+      beforeEach(async () => {
+        await seedTargetRole();
       });
 
       // What the role editor sends back: the role's rows without their ids and dates
@@ -192,46 +202,63 @@ describe('Permission ceiling on a localized content type (api)', () => {
       const findTargetCreateRow = async () =>
         (await findTargetRolePermissions()).find((row: any) => row.action === CREATE);
 
-      test('Can be saved unchanged, and is stored with the default locale', async () => {
-        expect((await findTargetCreateRow()).properties).toEqual({ fields: ['title'] });
+      test('Can be saved unchanged, and keeps its stored locales', async () => {
+        expect((await findTargetCreateRow()).properties).toEqual({
+          fields: ['title'],
+          ...storedLocales,
+        });
 
         const res = await updateTargetRolePermissions(await getTargetRolePermissionsAsSent());
 
         expect(res.statusCode).toBe(200);
         expect((await findTargetCreateRow()).properties).toEqual({
           fields: ['title'],
-          locales: ['en'],
+          ...storedLocales,
+        });
+      });
+
+      test('Can be saved with the default locale, and keeps its stored locales', async () => {
+        const sent = (await getTargetRolePermissionsAsSent()).map((permission: any) =>
+          permission.action === CREATE ? createTitle(['en']) : permission
+        );
+
+        const res = await updateTargetRolePermissions(sent);
+
+        expect(res.statusCode).toBe(200);
+        expect((await findTargetCreateRow()).properties).toEqual({
+          fields: ['title'],
+          ...storedLocales,
         });
       });
 
       // The role editor drops a field it has nothing to show for, such as an empty component
-      test('Can be saved with fewer fields and the default locale', async () => {
-        await utils.assignPermissionsToRole(targetRole.id, [
-          { ...createTitle(), properties: { fields: ['title', 'body'] } },
-        ]);
+      test('Can be saved with fewer fields and the default locale, and keeps its stored locales', async () => {
+        await seedTargetRole(['title', 'body']);
 
         const res = await updateTargetRolePermissions([createTitle(['en'])]);
 
         expect(res.statusCode).toBe(200);
         expect((await findTargetCreateRow()).properties).toEqual({
           fields: ['title'],
-          locales: ['en'],
+          ...storedLocales,
         });
       });
 
       test.each([
-        ['another locale', ['fr']],
-        ['every locale', null],
-      ])('Cannot be widened to %s', async (_, locales) => {
+        ['another locale', createTitle(['fr'])],
+        ['every locale', createTitle(null)],
+        ['an added field', createTitle(['en'], { fields: ['title', 'body'] })],
+        ['a dropped condition', createTitle(['en'], { conditions: [] })],
+      ])('Cannot be saved with %s', async (__, requested) => {
         const sent = (await getTargetRolePermissionsAsSent()).map((permission: any) =>
-          permission.action === CREATE ? createTitle(locales) : permission
+          permission.action === CREATE ? requested : permission
         );
         const before = await findTargetRolePermissions();
 
         const res = await updateTargetRolePermissions(sent);
 
         expect(res.statusCode).toBe(403);
-        expect(res.body.error.details.permissions).toEqual([createTitle(locales)]);
+        expect(res.body.error.details.permissions).toEqual([requested]);
         expect(await findTargetRolePermissions()).toEqual(before);
       });
     });

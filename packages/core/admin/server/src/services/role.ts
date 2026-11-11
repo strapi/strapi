@@ -435,23 +435,27 @@ const assignPermissions = async (
  * atom by atom (field × locale × condition), by one of the role's own rows read the way the
  * engine enforces them, so fewer fields, locales or conditions are accepted, but recombining two
  * rows or dropping the last condition (unconditional) is checked against the requester.
+ * A localized row stored with no or empty `locales` grants no locale, but the role editor and
+ * i18n's `willValidateUpdatePermissions` hook give it the default locale. Resending or narrowing
+ * that row is accepted, and it keeps its stored `locales`, so the save grants nothing new.
  * A permission with action parameters is a separate ability for the engine
  * (`<action>?<parameters>`): it is only covered by held permissions with the same action, subject
  * and action parameters.
  * @param requester - the admin user or admin token performing the update
  * @param roleId - the role being updated
- * @param permissions - the permissions requested for the role
+ * @param permissions - the permissions requested for the role, after `willValidateUpdatePermissions`
+ * @returns the permissions to store
  */
 const checkPermissionsCeiling = async (
   requester: CeilingRequester,
   roleId: Data.ID,
   permissions: CreatePermissionPayload[] = []
-): Promise<void> => {
+): Promise<CreatePermissionPayload[]> => {
   const ceilings = await findRequesterCeilings(requester);
 
   // Super admins hold every permission
   if (ceilings.length === 0) {
-    return;
+    return permissions;
   }
 
   const permissionService = getService('permission');
@@ -464,18 +468,10 @@ const checkPermissionsCeiling = async (
     where: { role: { id: roleId } },
   });
 
-  // Read the role's rows the way the request was read: i18n's hook gives a localized row stored
-  // without `locales` the default locale, as the role editor shows it and as the save stores it.
-  // The hook only fills a missing or empty `locales`, so these rows cover all the stored ones do.
-  const existingAsRequested = (await hooks.willValidateUpdatePermissions.call(
-    existingPermissions.map((permission) => ({ ...permission }))
-  )) as Permission[];
-
   const isOnRole = (permission: Permission) =>
-    existingPermissions.some((existing) => arePermissionsEqual(permission, existing)) ||
-    existingAsRequested.some((existing) => arePermissionsEqual(permission, existing));
+    existingPermissions.some((existing) => arePermissionsEqual(permission, existing));
 
-  const existingEnforced = await toEnforcedCeilingPermissions(existingAsRequested);
+  const existingEnforced = await toEnforcedCeilingPermissions(existingPermissions);
 
   // Parameterized permissions are registered as `<action>?<parameters>`, which the atom rule
   // does not describe, so they are never treated as a narrowing
@@ -483,20 +479,76 @@ const checkPermissionsCeiling = async (
     isEmpty(stored.actionParameters) &&
     permissionDomain.ceiling.isPermissionWithinCeiling(stored, existingEnforced);
 
+  // The role's rows that the hook gives a locale they do not grant, with that hooked reading
+  const hookedPermissions = (await hooks.willValidateUpdatePermissions.call(
+    existingPermissions.map((permission) => ({ ...permission }))
+  )) as Permission[];
+
+  const unlocalizedRows = await Promise.all(
+    existingPermissions
+      .map((row, index) => ({ row, hooked: hookedPermissions[index] }))
+      .filter(({ row, hooked }) => !isEqual(row.properties?.locales, hooked?.properties?.locales))
+      .map(async ({ row, hooked }) => ({
+        row,
+        hooked,
+        hookedEnforced: await toEnforcedCeilingPermissions([hooked]),
+      }))
+  );
+
+  // The row a permission resends or narrows once the row is given the default locale
+  const findUnlocalizedRow = (permission: Permission, stored: Permission) =>
+    unlocalizedRows.find(
+      ({ hooked, hookedEnforced }) =>
+        hooked.action === stored.action &&
+        (hooked.subject ?? null) === (stored.subject ?? null) &&
+        (arePermissionsEqual(permission, hooked) ||
+          arePermissionsEqual(stored, hooked) ||
+          (isEmpty(stored.actionParameters) &&
+            permissionDomain.ceiling.isPermissionWithinCeiling(stored, hookedEnforced)))
+    )?.row;
+
+  const withRowLocales = (
+    permission: CreatePermissionPayload,
+    row: Permission
+  ): CreatePermissionPayload => {
+    const { locales, ...properties } = permission.properties ?? {};
+
+    return {
+      ...permission,
+      properties:
+        row.properties && 'locales' in row.properties
+          ? { ...properties, locales: row.properties.locales }
+          : properties,
+    };
+  };
+
   // The requested locales need no rewrite: i18n's `willValidateUpdatePermissions` hook has already
-  // turned a missing or empty `locales` on a localized subject into the default locale. The role's
-  // rows went through the same hook, so a row stored without `locales` still matches, or is
-  // narrowed by, its resent copy with the default locale.
+  // turned a missing or empty `locales` on a localized subject into the default locale.
   // The requested conditions are checked as they will be stored, without the unregistered ones.
   // A permission equal to a row of the role, as sent or as stored, leaves that row unchanged, and
   // one covered by the role's own rows only narrows them.
-  const newPermissions = permissions
-    .map((permission) => permissionDomain.create(permission))
-    .map((permission) => ({ permission, stored: sanitizeConditions(permission) as Permission }))
-    .filter(
-      ({ permission, stored }) =>
-        !isOnRole(permission) && !isOnRole(stored) && !narrowsRolePermission(stored)
-    );
+  const toStore: CreatePermissionPayload[] = [];
+  const newPermissions: { permission: Permission; stored: Permission }[] = [];
+
+  for (const payload of permissions) {
+    const permission = permissionDomain.create(payload);
+    const stored = sanitizeConditions(permission) as Permission;
+
+    if (isOnRole(permission) || isOnRole(stored) || narrowsRolePermission(stored)) {
+      toStore.push(payload);
+      continue;
+    }
+
+    const unlocalizedRow = findUnlocalizedRow(permission, stored);
+
+    if (unlocalizedRow) {
+      toStore.push(withRowLocales(payload, unlocalizedRow));
+      continue;
+    }
+
+    toStore.push(payload);
+    newPermissions.push({ permission, stored });
+  }
 
   // The held permissions with action parameters, only loaded when a new permission has some
   const parameterizedCeilings = newPermissions.some(
@@ -523,6 +575,8 @@ const checkPermissionsCeiling = async (
       ),
     });
   }
+
+  return toStore;
 };
 
 /**
