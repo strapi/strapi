@@ -1129,6 +1129,95 @@ describe('router path registration', () => {
     await request(server).get('/t/1/a/x').expect(404);
   });
 
+  it('matches a lookaround against the text around the capture', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/a/x-:id((?<=-)\\d+)', (ctx) => {
+      reply(ctx, { route: 'id', id: ctx.params.id });
+    });
+    router.get('/a/:file(\\d+(?=\\.json)).json', (ctx) => {
+      reply(ctx, { file: ctx.params.file });
+    });
+    router.get('/b/x:id(\\B\\d+)', (ctx) => {
+      reply(ctx, { id: ctx.params.id });
+    });
+    router.get('/a/:s', (ctx) => {
+      reply(ctx, { route: 's', s: ctx.params.s });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/a/x-5'), { route: 'id', id: '5' });
+    await expectReply(request(server).get('/a/5.json'), { file: '5' });
+    await expectReply(request(server).get('/b/x5'), { id: '5' });
+    await request(server).get('/b/x-5').expect(404);
+  });
+
+  it('splits two patterned parameters in one segment the way v6 did', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/l/:lang([a-z]{2})-:region([A-Za-z-]+)', (ctx) => {
+      reply(ctx, { route: 'lang', lang: ctx.params.lang, region: ctx.params.region });
+    });
+    router.get('/l/:any', (ctx) => {
+      reply(ctx, { route: 'any', any: ctx.params.any });
+    });
+    router.get('/f/:name([a-z]+).:ext([a-z.]+)', (ctx) => {
+      reply(ctx, { route: 'file', name: ctx.params.name, ext: ctx.params.ext });
+    });
+    router.get('/f/:any', (ctx) => {
+      reply(ctx, { route: 'any', any: ctx.params.any });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/l/zh-Hant-TW'), {
+      route: 'lang',
+      lang: 'zh',
+      region: 'Hant-TW',
+    });
+    await expectReply(request(server).get('/l/zh-TW'), { route: 'lang', lang: 'zh', region: 'TW' });
+    await expectReply(request(server).get('/f/archive.tar.gz'), {
+      route: 'file',
+      name: 'archive',
+      ext: 'tar.gz',
+    });
+    await expectReply(request(server).get('/f/readme.txt'), {
+      route: 'file',
+      name: 'readme',
+      ext: 'txt',
+    });
+  });
+
+  it('runs a pathless guard when a plain parent reuses the prefix parameter name', async () => {
+    const strapi = createStrapi();
+    const child = new Router({ prefix: '/p/:id(\\d+)' });
+    installRoutePathTranslation(child, strapi);
+    child.use((ctx) => {
+      ctx.status = 401;
+    });
+    child.get('/r', (ctx) => {
+      reply(ctx, { ok: true });
+    });
+
+    const parent = new Router();
+    parent.use('/t/:id', child.routes());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(parent.routes());
+    const server = app.callback();
+
+    await request(server).get('/t/abc/p/5/r').expect(401);
+    await request(server).get('/t/1/p/5/r').expect(401);
+    await request(server).get('/t/abc/p/x/r').expect(404);
+  });
+
   it('splits a joined route mounted on a router that does not translate paths', async () => {
     const strapi = createStrapi();
     const child = new Router();

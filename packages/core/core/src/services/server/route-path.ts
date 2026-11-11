@@ -1085,6 +1085,8 @@ const LAYER_CONSTRAINTS = Symbol('strapi.routePath.constraints');
 
 type CompiledConstraint = {
   key: string;
+  /** The custom pattern, without the `^(?:…)$` wrapper. */
+  pattern: string;
   regexp: RegExp;
   split: RoutePathSplit[];
   required: boolean;
@@ -1335,6 +1337,7 @@ const compileConstraints = (
     for (const constraint of part.constraints) {
       compiled.push({
         key: constraint.key,
+        pattern: constraint.pattern,
         regexp: new RegExp(`^(?:${constraint.pattern})$`, flags),
         split: constraint.split,
         required: constraint.required,
@@ -1467,6 +1470,8 @@ const untranslatedPrefix = (layer: TranslatedLayer) => {
   }
 
   let rest = layer.path;
+  let matched = true;
+
   for (let index = parts.length - 1; index >= 0; index -= 1) {
     const part = parts[index].path;
     const droppedSlash = part === '/' && !rest.endsWith('/');
@@ -1475,13 +1480,25 @@ const untranslatedPrefix = (layer: TranslatedLayer) => {
       continue;
     }
     if (!rest.endsWith(part)) {
-      return undefined;
+      matched = false;
+      break;
     }
 
     rest = rest.slice(0, rest.length - part.length);
   }
 
-  return rest;
+  if (matched) {
+    return rest;
+  }
+
+  // A pathless middleware keeps a wildcard after the parts, so they are not the path's suffix.
+  const joined = parts
+    .map((part) => part.path)
+    .filter((part) => part !== '' && part !== '/')
+    .join('');
+  const at = joined ? layer.path.lastIndexOf(joined) : -1;
+
+  return at === -1 ? undefined : layer.path.slice(0, at);
 };
 
 /**
@@ -1534,8 +1551,8 @@ const activeLayout = (plan: CapturePlan, captures: readonly (string | null | und
   return -1;
 };
 
-/** The capture for this constraint, or `null` when this path has no usable plan. */
-const fromCapturePlan = (
+/** Index of this constraint's capture, `null` when the plan cannot be read, `undefined` when it is absent. */
+const captureSlot = (
   layer: TranslatedLayer,
   captures: readonly (string | null | undefined)[],
   constraint: CompiledConstraint
@@ -1552,7 +1569,21 @@ const fromCapturePlan = (
   }
 
   const position = plan.layouts[layout].indexOf(index);
-  return position === -1 ? undefined : captures[plan.offsets[layout] + position];
+  return position === -1 ? undefined : plan.offsets[layout] + position;
+};
+
+/** The capture for this constraint, or `null` when this path has no usable plan. */
+const fromCapturePlan = (
+  layer: TranslatedLayer,
+  captures: readonly (string | null | undefined)[],
+  constraint: CompiledConstraint
+) => {
+  const slot = captureSlot(layer, captures, constraint);
+  if (slot == null) {
+    return slot;
+  }
+
+  return captures[slot];
 };
 
 /** A path whose alternatives we could not read. Right when every parameter, or only the required ones, matched. */
@@ -1561,10 +1592,14 @@ const fromPresentValues = (
   captures: readonly (string | null | undefined)[],
   constraint: CompiledConstraint
 ) => {
-  const names = layer.paramNames ?? [];
-  const present = captures.filter(
-    (value, index) => value != null && names[index]?.name === constraint.key
-  );
+  // Parameters a router without translation added are in front. This constraint's
+  // occurrence counts only the parameters the translated parts named `key`.
+  const prefix = untranslatedPrefix(layer);
+  const leading = prefix ? scanPathParams(prefix).length : 0;
+  const names = (layer.paramNames ?? []).slice(leading);
+  const present = captures
+    .slice(leading)
+    .filter((value, index) => value != null && names[index]?.name === constraint.key);
 
   if (present.length === constraint.optional.length) {
     return present[constraint.occurrence];
@@ -1577,6 +1612,214 @@ const fromPresentValues = (
   }
 
   return present[constraint.occurrence];
+};
+
+type CaptureSpan = [number, number];
+
+/** Lookahead, lookbehind, and word boundaries need the characters around the capture. */
+const patternNeedsContext = (pattern: string) => /\(\?<[=!]|\(\?=|\(\?!|\\[bB]/.test(pattern);
+
+const matchesInContext = (
+  path: string,
+  start: number,
+  end: number,
+  pattern: string,
+  flags: string
+) => {
+  let found: RegExpExecArray | null = null;
+
+  try {
+    found = new RegExp(`^[\\s\\S]{${start}}(?:${pattern})`, flags).exec(path);
+  } catch {
+    return false;
+  }
+
+  return found !== null && found[0].length === end;
+};
+
+const execIndexed = (regexp: RegExp, path: string) => {
+  const flags = regexp.flags.includes('d') ? regexp.flags : `${regexp.flags}d`;
+  const indexed = flags === regexp.flags ? regexp : new RegExp(regexp.source, flags);
+
+  return indexed.exec(path) as (RegExpExecArray & { indices?: (CaptureSpan | undefined)[] }) | null;
+};
+
+type PathToken = { kind: 'text'; text: string } | { kind: 'param'; paramIndex: number };
+
+/** Literals and parameters of a v8 path, in order. `{` and `}` are grouping, not text. */
+const tokenizePath = (path: string): PathToken[] => {
+  const tokens: PathToken[] = [];
+  let text = '';
+  let paramIndex = 0;
+
+  const pushText = () => {
+    if (text) {
+      tokens.push({ kind: 'text', text });
+      text = '';
+    }
+  };
+
+  for (let index = 0; index < path.length; index += 1) {
+    const character = path[index];
+
+    if (character === '\\') {
+      text += path[index + 1] ?? '';
+      index += 1;
+      continue;
+    }
+
+    if (character === '{' || character === '}') {
+      continue;
+    }
+
+    if ((character === ':' || character === '*') && path[index + 1] === '"') {
+      pushText();
+      const end = readQuotedNameEnd(path, index + 1);
+      tokens.push({ kind: 'param', paramIndex });
+      paramIndex += 1;
+      index = end - 1;
+      continue;
+    }
+
+    if (character === ':' || character === '*') {
+      const characters = Array.from(path.slice(index + 1));
+      let name = '';
+
+      for (const [position, next] of characters.entries()) {
+        if (!(position === 0 ? ID_START : ID_CONTINUE).test(next)) {
+          break;
+        }
+        name += next;
+      }
+
+      if (name) {
+        pushText();
+        tokens.push({ kind: 'param', paramIndex });
+        paramIndex += 1;
+        index += name.length;
+        continue;
+      }
+    }
+
+    text += character;
+  }
+
+  pushText();
+  return tokens;
+};
+
+/**
+ * v8 splits a segment on the last separator it can. v6's patterns can split it earlier, as in
+ * `zh-Hant-TW` for `([a-z]{2})-([A-Za-z-]+)`. When the separate patterns reject v8's captures,
+ * try those patterns against the whole segment.
+ */
+const realignSameSegment = (
+  layer: TranslatedLayer,
+  captures: readonly (string | null | undefined)[]
+) => {
+  const plan = capturePlan(layer);
+  const layoutIndex = plan ? activeLayout(plan, captures) : -1;
+  if (!plan || layoutIndex === -1 || typeof layer.path !== 'string') {
+    return null;
+  }
+
+  const layout = plan.layouts[layoutIndex];
+  const offset = plan.offsets[layoutIndex];
+  const byIndex = new Map<number, CompiledConstraint>();
+
+  for (const constraint of layer[LAYER_CONSTRAINTS] ?? []) {
+    if (constraint.split.length > 0) {
+      continue;
+    }
+    const index = logicalIndex(layer, plan, constraint);
+    if (index !== undefined) {
+      byIndex.set(index, constraint);
+    }
+  }
+
+  const tokens = tokenizePath(layer.path);
+  const groups: { paramIndexes: number[]; betweens: string[] }[] = [];
+  let group: { paramIndexes: number[]; betweens: string[] } | undefined;
+  let pending = '';
+
+  for (const token of tokens) {
+    if (token.kind === 'text') {
+      pending += token.text;
+      continue;
+    }
+
+    if (!group || pending.includes('/')) {
+      if (group && group.paramIndexes.length > 1) {
+        groups.push(group);
+      }
+      group = { paramIndexes: [token.paramIndex], betweens: [] };
+    } else {
+      group.betweens.push(pending);
+      group.paramIndexes.push(token.paramIndex);
+    }
+
+    pending = '';
+  }
+
+  if (group && group.paramIndexes.length > 1) {
+    groups.push(group);
+  }
+
+  const next = captures.slice();
+  let changed = false;
+  const flags = layer.regexp?.flags.includes('i') ? 'i' : '';
+
+  for (const segment of groups) {
+    if (!segment.paramIndexes.some((index) => byIndex.has(index))) {
+      continue;
+    }
+
+    const slots = segment.paramIndexes.map((index) => {
+      const position = layout.indexOf(index);
+      return position === -1 ? -1 : offset + position;
+    });
+    if (slots.some((slot) => slot === -1 || next[slot] == null)) {
+      continue;
+    }
+
+    const source = segment.paramIndexes
+      .map((index, position) => {
+        const pattern = byIndex.get(index)?.pattern ?? '[^/]+?';
+        const between =
+          position === 0
+            ? ''
+            : segment.betweens[position - 1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return `${between}(${pattern})`;
+      })
+      .join('');
+    const text = slots
+      .map((slot, position) => {
+        const between = position === 0 ? '' : segment.betweens[position - 1];
+        return `${between}${next[slot]}`;
+      })
+      .join('');
+
+    let found: RegExpExecArray | null = null;
+    try {
+      found = new RegExp(`^(?:${source})$`, flags).exec(text);
+    } catch {
+      continue;
+    }
+    if (!found) {
+      continue;
+    }
+
+    for (let position = 0; position < slots.length; position += 1) {
+      const value = found[position + 1];
+      const slot = slots[position];
+      if (value !== undefined && next[slot] !== value) {
+        next[slot] = value;
+        changed = true;
+      }
+    }
+  }
+
+  return changed ? next : null;
 };
 
 /**
@@ -1605,28 +1848,70 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
 
   const alternatives = new WeakMap<RegExp, RegExpAlternative[]>();
 
-  const passes = (current: TranslatedLayer, captures: readonly (string | null | undefined)[]) =>
+  const passes = (
+    current: TranslatedLayer,
+    captures: readonly (string | null | undefined)[],
+    path: string,
+    spans: readonly (CaptureSpan | undefined)[] | undefined
+  ) =>
     (current[LAYER_CONSTRAINTS] ?? []).every((constraint) => {
       const value = constraintValue(current, captures, constraint);
       if (value == null) {
         return !constraint.required;
       }
 
+      const slot = captureSlot(current, captures, constraint);
+      const span = slot == null ? undefined : spans?.[slot];
+      if (
+        constraint.split.length === 0 &&
+        span &&
+        patternNeedsContext(constraint.pattern) &&
+        path.slice(span[0], span[1]) === value
+      ) {
+        return matchesInContext(
+          path,
+          span[0],
+          span[1],
+          constraint.pattern,
+          constraint.regexp.flags
+        );
+      }
+
       return constraint.regexp.test(value);
     });
+
+  const accept = (
+    current: TranslatedLayer,
+    captures: (string | undefined)[],
+    path: string,
+    spans: readonly (CaptureSpan | undefined)[] | undefined
+  ) => {
+    if (passes(current, captures, path, spans)) {
+      return captures;
+    }
+
+    const realigned = realignSameSegment(current, captures);
+    if (realigned && passes(current, realigned, path, spans)) {
+      return realigned;
+    }
+
+    return null;
+  };
 
   // Raw captures, in parameter order, of the first v8 alternative whose values pass. v6 found the
   // same match by backtracking into its optional groups.
   const constrainedCaptures = (current: TranslatedLayer, path: string) => {
     const { regexp } = current;
-    const found = regexp ? regexp.exec(path) : null;
+    const found = regexp ? execIndexed(regexp, path) : null;
     if (!regexp || !found) {
       return null;
     }
 
     const captures: (string | undefined)[] = found.slice(1);
-    if (passes(current, captures)) {
-      return captures;
+    const spans = found.indices?.slice(1);
+    const accepted = accept(current, captures, path, spans);
+    if (accepted) {
+      return accepted;
     }
 
     if (!alternatives.has(regexp)) {
@@ -1634,17 +1919,20 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     }
 
     for (const alternative of alternatives.get(regexp) ?? []) {
-      const match = alternative.regexp.exec(path);
+      const match = execIndexed(alternative.regexp, path);
       if (!match) {
         continue;
       }
 
       const candidate = captures.map(() => undefined as string | undefined);
+      const candidateSpans: (CaptureSpan | undefined)[] = captures.map(() => undefined);
       match.slice(1).forEach((value, index) => {
         candidate[alternative.offset + index] = value;
+        candidateSpans[alternative.offset + index] = match.indices?.[index + 1];
       });
-      if (passes(current, candidate)) {
-        return candidate;
+      const alternativeAccepted = accept(current, candidate, path, candidateSpans);
+      if (alternativeAccepted) {
+        return alternativeAccepted;
       }
     }
 
