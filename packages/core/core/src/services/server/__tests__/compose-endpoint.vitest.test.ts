@@ -350,6 +350,37 @@ describe.each([
     await request(server).get('/x/ab//y/').expect(404);
   });
 
+  it('does not treat a repeated ending as the trailing slash', async () => {
+    const { server } = createServer('/x/:a([a-z]+):b(\\d+)?/y', '/x/(.*)');
+
+    await expectReply(request(server).get('/x/ab/y/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?/y',
+      params: { a: 'ab' },
+    });
+    await expectReply(request(server).get('/x/y//y/'), {
+      route: '/x/(.*)',
+      params: { 0: 'y//y/' },
+    });
+    await expectReply(request(server).get('/x/ab//y/'), {
+      route: '/x/(.*)',
+      params: { 0: 'ab//y/' },
+    });
+  });
+
+  it('does not match a repeated separator before a trailing slash', async () => {
+    const { server } = createServer('/x/:a([a-z]+):b(\\d+)?-y');
+
+    await expectReply(request(server).get('/x/ab-y'), {
+      route: '/x/:a([a-z]+):b(\\d+)?-y',
+      params: { a: 'ab' },
+    });
+    await expectReply(request(server).get('/x/ab-y/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?-y',
+      params: { a: 'ab' },
+    });
+    await request(server).get('/x/y/-y/').expect(404);
+  });
+
   it('matches when every joined parameter is optional', async () => {
     const { server } = createServer('/x/:a([a-z]+)?:b(\\d+)?');
 
@@ -1096,6 +1127,34 @@ describe('router path registration', () => {
     await expectReply(request(server).get('/t/abc/a/5'), { id: '5' });
     await expectReply(request(server).get('/t/1/a/5'), { id: '5' });
     await request(server).get('/t/1/a/x').expect(404);
+  });
+
+  it('splits a joined route mounted on a router that does not translate paths', async () => {
+    const strapi = createStrapi();
+    const child = new Router();
+    installRoutePathTranslation(child, strapi);
+    createEndpointComposer(strapi)(
+      {
+        method: 'GET',
+        path: '/x/:a([a-z]+):b(\\d+)?',
+        handler(ctx) {
+          reply(ctx, { ...ctx.params });
+        },
+        info: {},
+      },
+      { router: child }
+    );
+
+    const parent = new Router();
+    parent.use('/p', child.routes());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(parent.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/p/x/ab12'), { a: 'ab', b: '12' });
+    await expectReply(request(server).get('/p/x/ab12/'), { a: 'ab', b: '12' });
+    await expectReply(request(server).get('/p/x/ab/'), { a: 'ab' });
   });
 
   it('matches a required parameter when a later optional segment is omitted', async () => {
