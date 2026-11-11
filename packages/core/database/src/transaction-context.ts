@@ -15,6 +15,52 @@ const isTransactorComplete = (trx: Knex.Transaction) => {
   return typeof t.isCompleted === 'function' && t.isCompleted();
 };
 
+const isDeadlockError = (error: unknown) => {
+  const seen = new Set<unknown>();
+
+  const matches = (candidate: unknown): boolean => {
+    if (!candidate || typeof candidate !== 'object' || seen.has(candidate)) {
+      return false;
+    }
+
+    seen.add(candidate);
+    const current = candidate as {
+      code?: string;
+      errno?: number;
+      message?: string;
+      original?: unknown;
+      cause?: unknown;
+    };
+
+    if (current.code === '40P01' || current.code === 'ER_LOCK_DEADLOCK' || current.errno === 1213) {
+      return true;
+    }
+
+    // A driver error often keeps the SQL text after the code is stripped.
+    // A plain Error whose message happens to mention a deadlock is not one.
+    const message = current.message ?? '';
+    const driverError = 'sql' in current || 'sqlState' in current || 'sqlMessage' in current;
+    if (
+      driverError &&
+      (message.includes('deadlock detected') || message.includes('Deadlock found'))
+    ) {
+      return true;
+    }
+
+    return matches(current.original) || matches(current.cause);
+  };
+
+  return matches(error);
+};
+
+/** Short pause so two retried transactions do not collide again immediately. */
+const DEADLOCK_RETRY_DELAY_MS = 25;
+
+const waitForDeadlockRetry = (attempt: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, DEADLOCK_RETRY_DELAY_MS * attempt);
+  });
+
 /**
  * Releases (`commit`) or rolls back to (`rollback`) a savepoint, returning what the database
  * rejected it with. Knex resolves the savepoint's `commit()`/`rollback()` even when the database
@@ -300,4 +346,4 @@ const transactionCtx = {
   },
 };
 
-export { HOOK_DRAIN_TIMEOUT_MS, transactionCtx };
+export { HOOK_DRAIN_TIMEOUT_MS, isDeadlockError, transactionCtx, waitForDeadlockRetry };
