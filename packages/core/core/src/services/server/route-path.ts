@@ -1273,7 +1273,7 @@ const scanPathParams = (path: string) => {
       });
       index = end - 1;
     } else if (character === ':' || character === '*') {
-      const characters = [...path.slice(index + 1)];
+      const characters = Array.from(path.slice(index + 1));
       let name = '';
       for (const [position, next] of characters.entries()) {
         if (!(position === 0 ? ID_START : ID_CONTINUE).test(next)) {
