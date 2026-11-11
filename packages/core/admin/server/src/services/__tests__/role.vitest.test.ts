@@ -1,4 +1,4 @@
-import { describe, test, expect, expectTypeOf, vi } from 'vitest';
+import { describe, test, expect, expectTypeOf, vi, beforeEach, afterEach } from 'vitest';
 import _ from 'lodash';
 import { queryParams, errors } from '@strapi/utils';
 import constants from '../constants';
@@ -1600,6 +1600,89 @@ describe('Role', () => {
         });
 
         await expect(checkPermissionsCeiling({ user }, ROLE_ID, [])).resolves.toBeUndefined();
+      });
+
+      describe('a localized row stored with no locales', () => {
+        // Default roles are stored like this when a localized content type exists at first boot
+        const storedRow = {
+          id: 1,
+          role: ROLE_ID,
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields: ['title'] },
+          conditions: ['admin::is-creator'],
+        };
+        const createTitle = (locales: string[] | null) => ({
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields: ['title'], locales },
+          conditions: ['admin::is-creator'],
+        });
+
+        // What i18n's hook does: a missing or empty `locales` becomes the default locale
+        const giveDefaultLocale = async (permissions: any[]) =>
+          permissions.map((permission) =>
+            permission.subject === ARTICLE &&
+            permission.properties?.locales !== null &&
+            !permission.properties?.locales?.length
+              ? { ...permission, properties: { ...permission.properties, locales: ['en'] } }
+              : permission
+          );
+
+        beforeEach(() => {
+          roleService.hooks.willValidateUpdatePermissions.register(giveDefaultLocale);
+        });
+
+        afterEach(() => {
+          roleService.hooks.willValidateUpdatePermissions.delete(giveDefaultLocale);
+        });
+
+        test('Accepts the row resent with the default locale, as the role editor shows it', async () => {
+          setupStrapi({
+            userPermissions: [{ action: READ, subject: ARTICLE }],
+            rolePermissions: [storedRow],
+            localizedSubjects: [ARTICLE],
+          });
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toBeUndefined();
+        });
+
+        test('Rejects the row widened to another locale or to all locales', async () => {
+          setupStrapi({
+            userPermissions: [{ action: READ, subject: ARTICLE }],
+            rolePermissions: [storedRow],
+            localizedSubjects: [ARTICLE],
+          });
+
+          await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['fr'])]), [
+            createTitle(['fr']),
+          ]);
+          await expectForbidden(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en', 'fr'])]),
+            [createTitle(['en', 'fr'])]
+          );
+          await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(null)]), [
+            createTitle(null),
+          ]);
+        });
+
+        // The role editor drops a field it has nothing to show for, such as an empty component
+        test('Accepts the row narrowed to fewer fields with the default locale', async () => {
+          setupStrapi({
+            userPermissions: [{ action: READ, subject: ARTICLE }],
+            rolePermissions: [{ ...storedRow, properties: { fields: ['title', 'socialLinks'] } }],
+            localizedSubjects: [ARTICLE],
+          });
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toBeUndefined();
+          await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['fr'])]), [
+            createTitle(['fr']),
+          ]);
+        });
       });
     });
 

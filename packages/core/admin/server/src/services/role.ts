@@ -464,10 +464,18 @@ const checkPermissionsCeiling = async (
     where: { role: { id: roleId } },
   });
 
-  const isOnRole = (permission: Permission) =>
-    existingPermissions.some((existing) => arePermissionsEqual(permission, existing));
+  // Read the role's rows the way the request was read: i18n's hook gives a localized row stored
+  // without `locales` the default locale, as the role editor shows it and as the save stores it.
+  // The hook only fills a missing or empty `locales`, so these rows cover all the stored ones do.
+  const existingAsRequested = (await hooks.willValidateUpdatePermissions.call(
+    existingPermissions.map((permission) => ({ ...permission }))
+  )) as Permission[];
 
-  const existingEnforced = await toEnforcedCeilingPermissions(existingPermissions);
+  const isOnRole = (permission: Permission) =>
+    existingPermissions.some((existing) => arePermissionsEqual(permission, existing)) ||
+    existingAsRequested.some((existing) => arePermissionsEqual(permission, existing));
+
+  const existingEnforced = await toEnforcedCeilingPermissions(existingAsRequested);
 
   // Parameterized permissions are registered as `<action>?<parameters>`, which the atom rule
   // does not describe, so they are never treated as a narrowing
@@ -476,7 +484,9 @@ const checkPermissionsCeiling = async (
     permissionDomain.ceiling.isPermissionWithinCeiling(stored, existingEnforced);
 
   // The requested locales need no rewrite: i18n's `willValidateUpdatePermissions` hook has already
-  // turned a missing or empty `locales` on a localized subject into the default locale.
+  // turned a missing or empty `locales` on a localized subject into the default locale. The role's
+  // rows went through the same hook, so a row stored without `locales` still matches, or is
+  // narrowed by, its resent copy with the default locale.
   // The requested conditions are checked as they will be stored, without the unregistered ones.
   // A permission equal to a row of the role, as sent or as stored, leaves that row unchanged, and
   // one covered by the role's own rows only narrows them.
