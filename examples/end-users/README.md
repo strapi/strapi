@@ -44,7 +44,10 @@ yarn dev
 
 The same trusted origins guard the Content API: a write that is signed in by the cookie (such as `POST /api/articles`
 or `PUT /api/users/me/profile`) is refused with a 403 `ORIGIN_NOT_TRUSTED` unless its `Origin` is in `trustedOrigins`
-(here, `FRONTEND_URL`). A request that sends `Authorization: Bearer` is not checked.
+(here, `FRONTEND_URL`). So is a read signed in by the cookie that a page of an untrusted origin sends (a cross-origin
+`fetch` sends `Origin`): `/api/auth/get-session` answers as if signed out, and the Content API refuses it the same way.
+A link followed or a page loaded sends no `Origin` and is not checked. A request that sends `Authorization: Bearer` is
+not checked.
 
 Bearer mode needs none of the cookie settings: the front end keeps the token Strapi returns in the
 `set-auth-token` header and sends it back in `Authorization`.

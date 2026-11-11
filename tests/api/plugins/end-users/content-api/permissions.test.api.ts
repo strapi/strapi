@@ -728,7 +728,7 @@ describe('end-users: the Content API rules, over REST', () => {
       expect((await rq.get('/api/notes', { headers: bearer(token) })).statusCode).toBe(200);
     });
 
-    it('refuses a write made with the session cookie from an origin that is not trusted, and lets the rest through', async () => {
+    it('refuses a write, or a read, made with the session cookie from an origin that is not trusted, and lets the rest through', async () => {
       await setRoles([], [FIND, 'api::note.note.create']);
 
       try {
@@ -760,11 +760,20 @@ describe('end-users: the Content API rules, over REST', () => {
 
         expect((await createNote({ Cookie: cookie, Origin: TEST_ORIGIN })).statusCode).toBe(201);
         expect((await createNote({ Cookie: cookie, Origin: self })).statusCode).toBe(201);
-        // A Bearer token is not checked: no other site can make a browser send one. Nor is a read
+        // A Bearer token is not checked: no other site can make a browser send one
         expect((await createNote({ ...bearer(token), Origin: FOREIGN })).statusCode).toBe(201);
-        expect(
-          (await rq.get('/api/notes', { headers: { Cookie: cookie, Origin: FOREIGN } })).statusCode
-        ).toBe(200);
+
+        // A read with the cookie sent by a page of a foreign origin is refused too: what it reads
+        // must not reach that page. One with no Origin (a link followed) or a trusted one is not
+        const readNotes = (headers: Record<string, string>) => rq.get('/api/notes', { headers });
+        const foreignRead = await readNotes({ Cookie: cookie, Origin: FOREIGN });
+
+        expect(foreignRead.statusCode).toBe(403);
+        expect(foreignRead.body.error?.details?.code).toBe('ORIGIN_NOT_TRUSTED');
+        expect((await readNotes({ Cookie: cookie, Referer: `${FOREIGN}/page` })).statusCode).toBe(
+          200
+        );
+        expect((await readNotes({ Cookie: cookie, Origin: TEST_ORIGIN })).statusCode).toBe(200);
       } finally {
         await setRoles();
       }

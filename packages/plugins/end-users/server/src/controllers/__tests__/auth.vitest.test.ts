@@ -4,6 +4,11 @@ import type { Core } from '@strapi/types';
 import { koaCtx } from '../../engine/better-auth/__tests__/utils/koa-ctx';
 import authController from '../auth';
 
+const TRUSTED = 'https://app.example.com';
+const UNTRUSTED = 'https://evil.example';
+
+const isTrustedOrigin = async (origin: string) => origin === TRUSTED;
+
 const fakeStrapi = (
   handle: (request: Request) => Promise<Response>,
   ensureCurrent: () => Promise<void> = async () => undefined
@@ -19,7 +24,7 @@ const fakeStrapi = (
         service(service: string) {
           expect(service).toBe('engine');
 
-          return { ensureCurrent, get: () => ({ handle }) };
+          return { ensureCurrent, get: () => ({ handle, isTrustedOrigin }) };
         },
       };
     },
@@ -58,6 +63,41 @@ describe('auth controller', () => {
     const request = (handle.mock.calls[0] as unknown as [Request])[0];
 
     expect(new URL(request.url).origin).toBe('http://localhost:1337');
+  });
+
+  describe('the session cookie on a read', () => {
+    const COOKIE = 'strapi.session_token=good.sig';
+
+    const cookieSent = async (method: string, headers: Record<string, string>) => {
+      const handle = vi.fn(async () => Response.json({}));
+      const ctx = koaCtx({
+        method,
+        url: '/api/auth/get-session',
+        headers: { cookie: COOKIE, ...headers },
+      });
+
+      await authController({ strapi: fakeStrapi(handle) }).handle(ctx);
+
+      return (handle.mock.calls[0] as unknown as [Request])[0].headers.get('cookie');
+    };
+
+    it.each(['GET', 'HEAD'])(
+      'is not sent on for a %s from a page of an origin that is not trusted',
+      async (method) => {
+        // The answer (get-session holds the session token) must not reach that page
+        expect(await cookieSent(method, { origin: UNTRUSTED })).toBeNull();
+        expect(await cookieSent(method, { origin: 'null' })).toBeNull();
+      }
+    );
+
+    it('is sent on from a trusted origin, or with no Origin (a link followed)', async () => {
+      expect(await cookieSent('GET', { origin: TRUSTED })).toBe(COOKIE);
+      expect(await cookieSent('GET', { referer: `${UNTRUSTED}/page` })).toBe(COOKIE);
+    });
+
+    it('is sent on for a write: the engine checks the origin of those itself', async () => {
+      expect(await cookieSent('POST', { origin: UNTRUSTED })).toBe(COOKIE);
+    });
   });
 
   it('lets an error of the engine reach Strapi’s error handling', async () => {

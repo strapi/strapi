@@ -757,17 +757,55 @@ describe('the end-users strategy', () => {
         expect(isTrustedOrigin).not.toHaveBeenCalled();
       });
 
-      it.each(['GET', 'HEAD', 'OPTIONS'])(
-        'does not check a %s, which changes nothing',
+      it('does not check an OPTIONS, which carries no cookie', async () => {
+        const { strategy, isTrustedOrigin } = setup({ lookup: signedIn() });
+
+        const result = await strategy.authenticate(post({ origin: UNTRUSTED }, 'OPTIONS'));
+
+        expect(result).toMatchObject({ authenticated: true });
+        expect(isTrustedOrigin).not.toHaveBeenCalled();
+      });
+
+      it.each(['GET', 'HEAD'])(
+        'refuses a %s sent by a page of an origin that is not trusted',
         async (method) => {
-          const { strategy, isTrustedOrigin } = setup({ lookup: signedIn() });
+          // A cross-origin fetch always sends Origin. Were the CORS rules to let that page read
+          // the answer, it would read what the cookie's user may read.
+          const { strategy, findOne } = setup({ lookup: signedIn() });
 
-          const result = await strategy.authenticate(post({ origin: UNTRUSTED }, method));
+          const outcome = await outcomeOf(
+            strategy.authenticate(post({ origin: UNTRUSTED }, method))
+          );
 
-          expect(result).toMatchObject({ authenticated: true });
-          expect(isTrustedOrigin).not.toHaveBeenCalled();
+          expect(codeOf(outcome)).toEqual({ code: 'ORIGIN_NOT_TRUSTED' });
+          expect(findOne).not.toHaveBeenCalled();
         }
       );
+
+      it('refuses a GET with the Origin null', async () => {
+        const { strategy } = setup({ lookup: signedIn() });
+
+        const outcome = await outcomeOf(strategy.authenticate(post({ origin: 'null' }, 'GET')));
+
+        expect(codeOf(outcome)).toEqual({ code: 'ORIGIN_NOT_TRUSTED' });
+      });
+
+      it('lets a GET from a trusted origin through', async () => {
+        const { strategy } = setup({ lookup: signedIn() });
+
+        const result = await strategy.authenticate(post({ origin: TRUSTED }, 'GET'));
+
+        expect(result).toMatchObject({ authenticated: true });
+      });
+
+      it('lets a GET with no Origin through, whatever the Referer: a link followed from anywhere', async () => {
+        const { strategy, isTrustedOrigin } = setup({ lookup: signedIn() });
+
+        const result = await strategy.authenticate(post({ referer: `${UNTRUSTED}/page` }, 'GET'));
+
+        expect(result).toMatchObject({ authenticated: true });
+        expect(isTrustedOrigin).not.toHaveBeenCalled();
+      });
 
       it('does not check a Bearer request: no other site can make a browser send one', async () => {
         const { strategy, isTrustedOrigin } = setup({ lookup: signedIn({ source: 'bearer' }) });

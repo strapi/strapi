@@ -110,8 +110,8 @@ const toHeaders = (ctx: Context) => {
  *   `EMAIL_NOT_VERIFIED`
  * - a user holding a role that requires two-factor authentication, without it enabled: 403
  *   `TWO_FACTOR_REQUIRED`
- * - a request that writes with the session cookie, from an origin that is not trusted: 403
- *   `ORIGIN_NOT_TRUSTED`
+ * - a request made with the session cookie from an origin that is not trusted (a write, or a read
+ *   that sends `Origin`): 403 `ORIGIN_NOT_TRUSTED`
  *
  * `verify` then asks the ability whether the route's scope is allowed.
  */
@@ -154,7 +154,24 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
    * `PolicyError` is shown publicly on a 403. It is still a 403.
    */
   const assertTrustedOrigin = async (ctx: Context) => {
-    if (SAFE_METHODS.has(ctx.method.toUpperCase())) {
+    const method = ctx.method.toUpperCase();
+
+    // A read changes nothing, but its answer must not reach a page of another origin: a browser
+    // sends the cookie with a cross-origin fetch (`SameSite=None`), and CORS rules that let any
+    // origin read with credentials would hand that page what the user may read. Such a fetch always
+    // sends `Origin`; a link followed or a page loaded sends none, and is let through whatever its
+    // Referer says. A preflight carries no cookie.
+    if (SAFE_METHODS.has(method)) {
+      const { origin } = ctx.request.headers;
+
+      if (method === 'OPTIONS' || origin === undefined) {
+        return;
+      }
+
+      if (origin === '' || origin === 'null' || !(await engine().isTrustedOrigin(origin))) {
+        throw new errors.PolicyError('Origin not trusted', { code: 'ORIGIN_NOT_TRUSTED' });
+      }
+
       return;
     }
 
