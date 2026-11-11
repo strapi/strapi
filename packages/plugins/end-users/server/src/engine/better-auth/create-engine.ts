@@ -73,6 +73,17 @@ const CONFIG = `plugin::${PLUGIN_ID}`;
 /** What the two-factor plugin starts the verification identifier of a trusted device with. */
 const TRUST_DEVICE_PREFIX = 'trust-device-';
 
+/**
+ * How verification identifiers are stored. A password-reset row's identifier is the emailed token
+ * itself (`reset-password:<token>`), so it is stored hashed: a database read must not hand out
+ * tokens that reset passwords. Better Auth hashes on every lookup with the same rule. The rest stay
+ * plain: a two-factor reset finds a user's trusted devices by the `trust-device-` identifier.
+ */
+const STORE_IDENTIFIER = {
+  default: 'plain',
+  overrides: { 'reset-password:': 'hashed' },
+} as const;
+
 /** How long a session stays open to the one exchange that follows its provider sign-in. */
 const PROVIDER_SESSION_MARK_MS = 5 * 60 * 1000;
 
@@ -432,6 +443,7 @@ export const buildAuthOptions = (
       backgroundTasks: { handler: backgroundTaskHandler(strapi) },
     },
     rateLimit: rateLimitOptions(strapi),
+    verification: { storeIdentifier: STORE_IDENTIFIER },
     // There is no hosted service to report to. (See `turnTelemetryOff` for the environment.)
     telemetry: { enabled: false },
     emailAndPassword: {

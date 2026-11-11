@@ -747,7 +747,11 @@ describe('buildAuthOptions', () => {
       } as unknown as ReturnType<typeof defineAuth>;
       const options = buildAuthOptions(fakeStrapi(), forged);
 
-      expect(options.verification).not.toHaveProperty('storeIdentifier');
+      // the plugin's own rule stands: reset tokens hashed, the rest (trusted devices) plain
+      expect(options.verification?.storeIdentifier).toEqual({
+        default: 'plain',
+        overrides: { 'reset-password:': 'hashed' },
+      });
       expect(options.rateLimit).not.toHaveProperty('modelName');
       expect(options.rateLimit).not.toHaveProperty('fields');
       expect(options.secondaryStorage).toBeUndefined();
@@ -1083,6 +1087,29 @@ describe('createEngine', () => {
       expect(res.status).toBe(200);
       expect(sendResetPassword).toHaveBeenCalledTimes(1);
       expect(sendResetPassword.mock.calls[0][0].user.email).toBe('carol@example.com');
+    });
+
+    it('stores a reset token only hashed, and the emailed token still resets the password', async () => {
+      await signUp(engine, 'erin@example.com');
+      await engine.handle(
+        json('/request-password-reset', {
+          email: 'erin@example.com',
+          redirectTo: 'http://localhost:1337/reset',
+        })
+      );
+      const { token } = sendResetPassword.mock.calls[0][0] as { token: string };
+
+      // Whoever reads the database must not find a token they could redeem
+      expect(token).toEqual(expect.any(String));
+      expect(rowsOf('verification').map((row) => String(row.identifier))).not.toEqual(
+        expect.arrayContaining([expect.stringContaining(token)])
+      );
+
+      const newPassword = 'a-brand-new-password-2';
+      const reset = await engine.handle(json('/reset-password', { token, newPassword }));
+
+      expect(reset.status).toBe(200);
+      expect((await signIn(engine, 'erin@example.com', newPassword)).status).toBe(200);
     });
 
     it('keeps the rest of the body as it was', async () => {
