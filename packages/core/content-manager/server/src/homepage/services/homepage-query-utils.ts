@@ -76,3 +76,20 @@ export const resolveTitleField = (
 
   return FALLBACK_MAIN_FIELD;
 };
+
+/**
+ * Formats the main field value as the recent document title.
+ * The main field can be any listable attribute (integer, boolean, date…), but the widgets render
+ * the title as text. An empty value falls back to the document id.
+ */
+export const formatRecentDocumentTitle = (value: unknown, documentId: string): string => {
+  if (value === null || value === undefined || value === '') {
+    return documentId;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  return String(value);
+};

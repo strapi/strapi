@@ -57,9 +57,31 @@ export const createComponent = async ({
   return newComponent;
 };
 
+/**
+ * A component in a Content-Type Builder payload: the `info` fields sit at the top level,
+ * unlike the loaded `Struct.ComponentSchema`.
+ */
+type ComponentInput = {
+  category: string;
+  displayName: string;
+  icon?: string;
+  description?: string;
+  options?: Struct.SchemaOptions;
+  pluginOptions?: Struct.SchemaPluginOptions;
+  collectionName?: string;
+  attributes: Record<string, unknown>;
+};
+
+/**
+ * A component sent along with the edited one: an existing component to update (by `uid`),
+ * or a new one with a temporary uid that attributes in the same payload can reference.
+ */
+type NestedComponentInput = ComponentInput &
+  ({ uid: Internal.UID.Component; tmpUID?: never } | { tmpUID: string; uid?: never });
+
 type ComponentToCreate = {
-  component: Struct.ComponentSchema;
-  components?: Struct.ComponentSchema[];
+  component: ComponentInput;
+  components?: NestedComponentInput[];
 };
 
 export const editComponent = async (

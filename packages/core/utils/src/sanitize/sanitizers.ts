@@ -21,7 +21,7 @@ import {
 } from './visitors';
 import { isOperator } from '../operators';
 
-import type { Model, Data } from '../types';
+import type { Model, Entry } from '../types';
 import type { Parent } from '../traverse/factory';
 
 interface Context {
@@ -32,7 +32,7 @@ interface Context {
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
-const sanitizePasswords = (ctx: Context) => async (entity: Data) => {
+const sanitizePasswords = (ctx: Context) => async (entity: Entry) => {
   if (!ctx.schema) {
     throw new Error('Missing schema in sanitizePasswords');
   }
@@ -40,7 +40,7 @@ const sanitizePasswords = (ctx: Context) => async (entity: Data) => {
   return traverseEntity(removePassword, ctx, entity);
 };
 
-const defaultSanitizeOutput = async (ctx: Context, entity: Data) => {
+const defaultSanitizeOutput = async (ctx: Context, entity: Entry) => {
   if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizeOutput');
   }
