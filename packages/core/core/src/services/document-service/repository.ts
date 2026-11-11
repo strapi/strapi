@@ -25,7 +25,7 @@ import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import * as selfReferentialRelations from './utils/self-referential-relations';
-import * as droppedRelations from './utils/dropped-relations';
+import * as pendingRelations from './utils/pending-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
@@ -404,6 +404,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);
 
+    if (hasDraftAndPublish) {
+      await pendingRelations.removeRecordsOfDocument(
+        uid,
+        documentId,
+        entriesToDelete.map((entry: any) => entry.locale)
+      );
+    }
+
     const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
       entries.delete(entryToDelete.id, selectionQuery)
     );
@@ -699,6 +707,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       publishedLocales.has(draft.locale)
     );
 
+    // Locales whose published row inherited its non-localized fields from a sibling
+    const inheritedLocales: string[] = [];
+
     // Transform draft entry data and create published versions
     const publishedEntries = await async.map(updatedDraft, async (draft: any) => {
       const isFirstPublishForLocale = !publishedLocales.has(draft.locale);
@@ -715,6 +726,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           status: 'published',
           strategy: 'replace',
         });
+        inheritedLocales.push(draft.locale);
       }
 
       return await entries.publish(entryToPublish, queryParams);
@@ -740,7 +752,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       selfRelationsToSync
     );
 
-    await droppedRelations.restore(uid, updatedDraft, publishedEntries);
+    // Remember the links the published entries lost to targets without a published version,
+    // then restore the ones recorded earlier that target this document
+    await pendingRelations.record(uid, updatedDraft, publishedEntries, {
+      inheritedLocales,
+    });
+    await pendingRelations.restore(uid, publishedEntries);
 
     publishedEntries.forEach(emitEvent('entry.publish'));
 
@@ -761,6 +778,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     // Delete all published versions
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
+
+    // Live links to the versions being deleted are recorded so publishing again restores them,
+    // the links these versions have are forgotten
+    await pendingRelations.recordIncoming(uid, versionsToDelete);
+    await pendingRelations.removeRecordsOfRoot(
+      uid,
+      documentId,
+      versionsToDelete.map((entry: any) => entry.locale)
+    );
+
     await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
     versionsToDelete.forEach(emitEvent('entry.unpublish'));

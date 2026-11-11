@@ -132,6 +132,13 @@ const deleteAllLocalizedEntriesFor = async ({ locale }: any) => {
     // FIXME: delete many content & their associations
     await strapi.db.query(model.uid).deleteMany({ where: { locale } });
   }
+
+  // These rows bypass the Document Service, so the records of links that lost a published
+  // version (strapi::pending-relation, owned by core) about this locale are cleared here.
+  // Prototype: queries the core model directly instead of going through a core helper.
+  await strapi.db
+    .query('strapi::pending-relation' as any)
+    .deleteMany({ where: { $or: [{ rootLocale: locale }, { targetLocale: locale }] } });
 };
 
 const locales = () => ({

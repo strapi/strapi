@@ -108,19 +108,19 @@ If the caller passed `status: 'published'` and a row was written, `update` then 
 4. sets `firstPublishedAt` on each draft if the content type has that field and the value is empty;
 5. creates a new published row from each draft, with `publishedAt` set to the current date;
 6. points the loaded relations to the new published rows;
-7. adds links from other published entries whose drafts link to the published drafts (see below);
+7. records the links the new published rows lost, and adds the recorded links that target them (see below);
 8. schedules one `entry.publish` per new row.
 
 The draft rows stay. After a publish, the document has a draft row and a published row with the same content.
 
-A published row only links to published rows. When a draft links to an entry that has no published version, publishing the draft drops that link from the new published row. Every later publish of the target puts it back:
+A published row only links to published rows. When a draft links to an entry that has no published version, publishing the draft drops that link from the new published row. `publish` records each dropped link in the internal table `strapi_pending_relations` (model `strapi::pending-relation`), and publishing the target puts it back:
 
-- For each unidirectional relation to the published content type, in content types with D&P and in components, `publish` reads the links from draft rows to the drafts it just published. It adds the same link from the published version of the source to the new published row. The link comes from the source's draft, so a link the source added after its last publish is published too, as bidirectional relations already are.
-- A component instance is matched to the instance at the same position in the same field of the published version. The match is kept only when that field holds the same component types in the same order on both versions. When the entry's draft was edited after the last publish (its `updatedAt` differs from the published version's), both instances must also have the same scalar values, and no other instance of the same type in the draft field may have them. Otherwise the link is not added, for example after the draft components were reordered.
-- An xToOne relation is skipped when the published source already links to another entry. The xToMany links of a source are renumbered to follow the order of its draft.
-- Bidirectional relations and relations of a content type to itself come back through their own sync, so this step skips them. It does not schedule an `entry.publish` or `entry.update` for the source entries.
+- After the new published rows are created, `publish` deletes the records of the document's previous publish (same `uid`, `documentId` and locales). It then reads the relation join rows of each draft and of its component instances, including nested components and dynamic zones. Each draft component instance is paired with the published instance just created from it, by position in each field of the `_cmps` join tables. This pairing is exact because both sides were written in the same transaction. A draft link that the published source did not get is stored as a record: the root entry (`rootUid`, `rootDocumentId`, `rootLocale`), the published row that lost the link (`sourceUid`, `sourceId`), the attribute (`field`), the target (`targetUid`, `targetDocumentId`, `targetLocale`) and, for xToMany relations, the `documentId` of the link before it in the draft (`afterDocumentId`, `null` for the first one).
+- Records cover unidirectional relations with a join table, from a content type to other content types with D&P, and from components to any content type with D&P (including the root's own). Bidirectional relations and relations of a content type to itself come back through their own sync. Polymorphic relations and media are not recorded.
+- When a target is published, `publish` loads the records for its `uid`, `documentId` and locale, adds the link to each source row that still exists and deletes the records. An xToOne relation is skipped when the source already links to another entry, and a link the source already has is not added again. An xToMany link goes after the published version of `afterDocumentId` in the source's links, or first. The step does not schedule an `entry.publish` or `entry.update` for the source entries.
+- A link that the draft only gained after the last publish has no record, so publishing the target does not publish it. Publishing the root again replaces its records.
+- `unpublish` records the links that published entries of other content types (and their published components) have to the published rows it deletes, so publishing the document again restores them. It deletes the records whose root is the unpublished document and locales. The root of a nested component is found by following the `_cmps` tables up. `delete` removes the records where the document is the root or the target. `discardDraft` and draft updates do not touch records.
 
-:::caution
 When `create` or `update` calls the inner `publish` function, the call does not pass through the middlewares again. A middleware sees one call with `action: 'create'` or `action: 'update'`, not a separate `publish` call.
 :::
 

@@ -234,7 +234,7 @@ describe('Document Service relations to entries published later', () => {
     }
   });
 
-  it('does not add the link to another component after the draft components are reordered', async () => {
+  it('adds the link to the published component that had it, after the draft components are reordered', async () => {
     const kept = await createLabel('kept');
     await strapi.documents(LABEL_UID).publish({ documentId: kept });
     const moved = await createLabel('moved');
@@ -265,11 +265,11 @@ describe('Document Service relations to entries published later', () => {
     const published = await findArticle(article.documentId, 'published');
     expect(published.links.map((link: any) => [link.marker, link.label?.name ?? null])).toEqual([
       ['first', 'kept'],
-      ['second', null],
+      ['second', 'moved'],
     ]);
   });
 
-  it('does not add the link to a component that cannot be told apart from the reordered one', async () => {
+  it('adds the link to the published component that had it, when the draft components are twins', async () => {
     const kept = await createLabel('kept twin');
     await strapi.documents(LABEL_UID).publish({ documentId: kept });
     const moved = await createLabel('moved twin');
@@ -295,7 +295,10 @@ describe('Document Service relations to entries published later', () => {
     await strapi.documents(LABEL_UID).publish({ documentId: moved });
 
     const published = await findArticle(article.documentId, 'published');
-    expect(published.links.map((link: any) => names(link.labels))).toEqual([['kept twin'], []]);
+    expect(published.links.map((link: any) => names(link.labels))).toEqual([
+      ['kept twin'],
+      ['moved twin'],
+    ]);
   });
 
   it('does not duplicate links when a target is published again', async () => {

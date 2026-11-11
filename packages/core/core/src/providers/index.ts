@@ -4,6 +4,7 @@ import contentStructure from './content-structure';
 import coreStore from './coreStore';
 import cron from './cron';
 import mcp from './mcp';
+import pendingRelations from './pendingRelations';
 import registries from './registries';
 import sessionManager from './session-manager';
 import telemetry from './telemetry';
@@ -17,6 +18,7 @@ export const providers: Provider[] = [
   ai,
   contentStructure,
   coreStore,
+  pendingRelations,
   sessionManager,
   webhooks,
   telemetry,
