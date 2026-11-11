@@ -1135,6 +1135,15 @@ describe('Role', () => {
       return { findUserPermissions, findMany };
     };
 
+    // Accepted permissions are stored as sent
+    const expectAccepted = async (
+      requester: Parameters<typeof checkPermissionsCeiling>[0],
+      permissions: any[]
+    ) =>
+      expect(checkPermissionsCeiling(requester, ROLE_ID, permissions)).resolves.toEqual(
+        permissions
+      );
+
     const expectForbidden = async (promise: Promise<unknown>, rejectedPermissions: unknown[]) => {
       let error: any;
 
@@ -1152,11 +1161,7 @@ describe('Role', () => {
     test('Super admins are not checked', async () => {
       const { findUserPermissions, findMany } = setupStrapi();
 
-      await expect(
-        checkPermissionsCeiling({ user: superAdminUser }, ROLE_ID, [
-          { action: READ, subject: ARTICLE },
-        ])
-      ).resolves.toEqual(expect.any(Array));
+      await expectAccepted({ user: superAdminUser }, [{ action: READ, subject: ARTICLE }]);
 
       expect(findUserPermissions).not.toHaveBeenCalled();
       expect(findMany).not.toHaveBeenCalled();
@@ -1192,9 +1197,7 @@ describe('Role', () => {
     test('Matches null and undefined subjects', async () => {
       setupStrapi({ userPermissions: [{ action: 'admin::roles.read', subject: null }] });
 
-      await expect(
-        checkPermissionsCeiling({ user }, ROLE_ID, [{ action: 'admin::roles.read' }])
-      ).resolves.toEqual(expect.any(Array));
+      await expectAccepted({ user }, [{ action: 'admin::roles.read' }]);
     });
 
     test('Checks the other properties when a property lists no value', async () => {
@@ -1243,9 +1246,7 @@ describe('Role', () => {
       test('Ignores locales on a subject that is not localized', async () => {
         setupStrapi({ userPermissions: [heldTitle] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [requestTitle(['fr'])])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [requestTitle(['fr'])]);
       });
 
       test('Holds no locale on a token whose owner is a super admin', async () => {
@@ -1312,9 +1313,7 @@ describe('Role', () => {
       test('Ignores a requested unregistered condition next to a held one', async () => {
         setup({ userPermissions: [readTitle([IS_CREATOR])] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([IS_CREATOR, UNKNOWN])])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [readTitle([IS_CREATOR, UNKNOWN])]);
       });
 
       test('Does not count a held permission with action parameters', async () => {
@@ -1330,18 +1329,14 @@ describe('Role', () => {
         // Regression guard: the row is left unchanged
         setup({ rolePermissions: [readTitle([UNKNOWN])] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([UNKNOWN])])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [readTitle([UNKNOWN])]);
       });
 
       test('Lets a permission be resent when it is stored as a row the role carries', async () => {
         // Stored without the unregistered condition, so the row is deleted and re-added as it was
         setup({ rolePermissions: [readTitle([IS_CREATOR])] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([IS_CREATOR, UNKNOWN])])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [readTitle([IS_CREATOR, UNKNOWN])]);
       });
     });
 
@@ -1378,16 +1373,10 @@ describe('Role', () => {
         test('Allows permissions the token holds', async () => {
           const { findUserPermissions } = setupStrapi();
 
-          await expect(
-            checkPermissionsCeiling(
-              { tokenPermissions: superAdminLikeTokenPermissions, owner },
-              ROLE_ID,
-              [
-                { action: READ, subject: ARTICLE },
-                { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
-              ]
-            )
-          ).resolves.toEqual(expect.any(Array));
+          await expectAccepted({ tokenPermissions: superAdminLikeTokenPermissions, owner }, [
+            { action: READ, subject: ARTICLE },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]);
 
           expect(findUserPermissions).not.toHaveBeenCalled();
         });
@@ -1454,13 +1443,9 @@ describe('Role', () => {
         test('Allows a permission both the token and its owner hold', async () => {
           setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
 
-          await expect(
-            checkPermissionsCeiling(
-              { tokenPermissions: superAdminLikeTokenPermissions, owner },
-              ROLE_ID,
-              [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }]
-            )
-          ).resolves.toEqual(expect.any(Array));
+          await expectAccepted({ tokenPermissions: superAdminLikeTokenPermissions, owner }, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]);
         });
       });
     });
@@ -1480,12 +1465,10 @@ describe('Role', () => {
           ],
         });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: READ, subject: ARTICLE },
-            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
-          ])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE },
+          { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+        ]);
 
         await expectForbidden(
           checkPermissionsCeiling({ user }, ROLE_ID, [
@@ -1541,16 +1524,14 @@ describe('Role', () => {
           ],
         });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            {
-              action: CREATE,
-              subject: ARTICLE,
-              properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
-              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
-            },
-          ])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [
+          {
+            action: CREATE,
+            subject: ARTICLE,
+            properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
+            conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+          },
+        ]);
 
         await expectForbidden(
           checkPermissionsCeiling({ user }, ROLE_ID, [
@@ -1586,11 +1567,9 @@ describe('Role', () => {
           ],
         });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'title'] } },
-          ])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [
+          { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'title'] } },
+        ]);
       });
 
       test('Allows removing an existing out-of-scope permission', async () => {
@@ -1599,9 +1578,7 @@ describe('Role', () => {
           rolePermissions: [{ id: 1, role: ROLE_ID, action: CREATE, subject: ARTICLE }],
         });
 
-        await expect(checkPermissionsCeiling({ user }, ROLE_ID, [])).resolves.toEqual(
-          expect.any(Array)
-        );
+        await expectAccepted({ user }, []);
       });
 
       // Default roles are stored with no `locales` when a localized content type exists at first
@@ -1649,10 +1626,17 @@ describe('Role', () => {
               : permission
           );
 
-        const setup = (fields?: string[]) =>
+        const readTitleEn = {
+          action: READ,
+          subject: ARTICLE,
+          properties: { fields: ['title'], locales: ['en'] },
+          conditions: [],
+        };
+
+        const setup = (fields?: string[], userPermissions: any[] = [readTitleEn]) =>
           setupStrapi({
-            userPermissions: [{ action: READ, subject: ARTICLE }],
-            rolePermissions: [storedRow(fields)],
+            userPermissions,
+            rolePermissions: [storedRow(fields), { id: 2, role: ROLE_ID, ...readTitleEn }],
             localizedSubjects: [ARTICLE],
           });
 
@@ -1680,6 +1664,24 @@ describe('Role', () => {
           await expect(
             checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
           ).resolves.toEqual([asStored()]);
+        });
+
+        test('Keeps the stored locales next to an unchanged localized row', async () => {
+          setup();
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [readTitleEn, createTitle(['en'])])
+          ).resolves.toEqual([readTitleEn, asStored()]);
+        });
+
+        test('Stores the default locale when the requester holds it', async () => {
+          const createEn = { action: CREATE, subject: ARTICLE, properties: { locales: ['en'] } };
+
+          setup(undefined, [readTitleEn, createEn]);
+          await expectAccepted({ user }, [createTitle(['en'])]);
+
+          setup(['title', 'socialLinks'], [readTitleEn, createEn]);
+          await expectAccepted({ user }, [createTitle(['en'])]);
         });
 
         test('Grants no locale when the default locale changed', async () => {
@@ -1730,11 +1732,9 @@ describe('Role', () => {
       test('Allows removing a field from a row', async () => {
         setupRole([rolePermission(1, { properties: { fields: ['title', 'body'] } })]);
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
-          ])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+        ]);
       });
 
       test('Rejects a narrowed row that adds a field', async () => {
@@ -1787,16 +1787,14 @@ describe('Role', () => {
           }),
         ]);
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            {
-              action: READ,
-              subject: ARTICLE,
-              properties: { fields: ['body'] },
-              conditions: [IS_CREATOR],
-            },
-          ])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [
+          {
+            action: READ,
+            subject: ARTICLE,
+            properties: { fields: ['body'] },
+            conditions: [IS_CREATOR],
+          },
+        ]);
       });
 
       test('Rejects removing the last condition, which makes the row unconditional', async () => {
@@ -1815,11 +1813,9 @@ describe('Role', () => {
       test('Allows resending a row without the stale locales of a type no longer localized', async () => {
         setupRole([rolePermission(1, { properties: { fields: ['body'], locales: ['en'] } })]);
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
-          ])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+        ]);
       });
 
       test('Does not treat a parameterized permission as a narrowing', async () => {
@@ -1856,9 +1852,7 @@ describe('Role', () => {
           ],
         });
 
-        await expect(checkPermissionsCeiling({ user }, ROLE_ID, [request])).resolves.toEqual(
-          expect.any(Array)
-        );
+        await expectAccepted({ user }, [request]);
       });
 
       test('Rejects one the requester only holds as the plain action', async () => {
@@ -1925,9 +1919,7 @@ describe('Role', () => {
       test('Allows it for super admins', async () => {
         setupStrapi();
 
-        await expect(
-          checkPermissionsCeiling({ user: superAdminUser }, ROLE_ID, [request])
-        ).resolves.toEqual(expect.any(Array));
+        await expectAccepted({ user: superAdminUser }, [request]);
       });
     });
   });

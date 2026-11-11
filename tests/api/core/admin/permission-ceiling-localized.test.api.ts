@@ -208,13 +208,12 @@ describe('Permission ceiling on a localized content type (api)', () => {
           ...storedLocales,
         });
 
+        const before = await findTargetRolePermissions();
+
         const res = await updateTargetRolePermissions(await getTargetRolePermissionsAsSent());
 
         expect(res.statusCode).toBe(200);
-        expect((await findTargetCreateRow()).properties).toEqual({
-          fields: ['title'],
-          ...storedLocales,
-        });
+        expect(await findTargetRolePermissions()).toEqual(before);
       });
 
       test('Can be saved with the default locale, and keeps its stored locales', async () => {
@@ -242,6 +241,38 @@ describe('Permission ceiling on a localized content type (api)', () => {
           fields: ['title'],
           ...storedLocales,
         });
+      });
+
+      test('Is stored with the default locale when the requester holds it', async () => {
+        const requesterPermissions = await strapi.db
+          .query('admin::permission')
+          .findMany({ where: { role: { id: requesterRole.id } } });
+        const toPayload = ({ action, subject, properties, conditions }: any) => ({
+          action,
+          subject,
+          properties,
+          conditions,
+        });
+
+        await utils.assignPermissionsToRole(requesterRole.id, [
+          ...requesterPermissions.map(toPayload),
+          { action: CREATE, subject: ARTICLE, properties: { locales: ['en'] }, conditions: [] },
+        ]);
+
+        try {
+          const res = await updateTargetRolePermissions(await getTargetRolePermissionsAsSent());
+
+          expect(res.statusCode).toBe(200);
+          expect((await findTargetCreateRow()).properties).toEqual({
+            fields: ['title'],
+            locales: ['en'],
+          });
+        } finally {
+          await utils.assignPermissionsToRole(
+            requesterRole.id,
+            requesterPermissions.map(toPayload)
+          );
+        }
       });
 
       test.each([
