@@ -41,30 +41,49 @@ type NestedAttributeCondition<
   > extends infer TTargetUID extends UID.Schema
     ? If<
         IsComponent<TSchemaUID>,
-        ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>,
+        | (ObjectNotation<TTargetUID> & { [TIter in IdOperator]?: undefined })
+        | IdOperatorCondition<TTargetUID>,
         ObjectNotation<TTargetUID>
       >
     : never;
 
 /**
- * Filter on the id of a nested attribute's target: an object with exactly one operator (e.g.
- * `{ $in: [1, 2] }`, `{ $null: true }`).
+ * Filter on the id of a nested attribute's target: an object with exactly one comparison, list or
+ * null operator (e.g. `{ $in: [1, 2] }`, `{ $null: true }`).
  *
  * The database applies it to the target's id. It throws for an object with several operators, or
- * with an operator next to other keys, so each operator object forbids the other operators and the
- * target's filter keys.
+ * with an operator next to other keys. So each operator object forbids the other operators and the
+ * target's filter keys, and the filter object member forbids the id operators.
  *
- * The forbidden keys are optional `never` properties, so the type stays assignable to
- * `ObjectNotation<Target>` and reading a filter back keeps the target's keys. A bare id would break
- * that, so it is not accepted: write `{ id: 5 }` or `{ $eq: 5 }`.
+ * The forbidden keys are optional `undefined` properties:
+ * - They keep the type assignable to `ObjectNotation<Target>`, so reading a filter back keeps the
+ *   target's keys. A bare id would break that, so it is not accepted: write `{ id: 5 }` or
+ *   `{ $eq: 5 }`.
+ * - They also hold without `strictNullChecks`. With `never`, TypeScript discards every member when it
+ *   narrows the union on the `$null` key, and `{ $between: [1, 5] }` loses its tuple type.
  */
 type IdOperatorCondition<TTargetUID extends UID.Schema> = {
-  [TOperator in Operator.Where]: { [TIter in TOperator]: IdOperatorValue<TOperator> } & {
-    [TIter in Exclude<Operator.Where, TOperator> | FilterKeys<TTargetUID>]?: never;
+  [TOperator in IdOperator]: { [TIter in TOperator]: IdOperatorValue<TOperator> } & {
+    [TIter in Exclude<Operator.Where, TOperator> | FilterKeys<TTargetUID>]?: undefined;
   };
-}[Operator.Where];
+}[IdOperator];
 
-type IdOperatorValue<TOperator extends Operator.Where> = TOperator extends Operator.BooleanValue
+/**
+ * Operators that make sense on an id. Text operators (e.g. `$contains`) are left out.
+ */
+type IdOperator =
+  | '$eq'
+  | '$ne'
+  | '$lt'
+  | '$lte'
+  | '$gt'
+  | '$gte'
+  | '$in'
+  | '$notIn'
+  | '$between'
+  | Operator.BooleanValue;
+
+type IdOperatorValue<TOperator extends IdOperator> = TOperator extends Operator.BooleanValue
   ? boolean
   : TOperator extends Operator.DynamicArrayValue
     ? Params.Attribute.ID[]
@@ -78,7 +97,8 @@ type IdOperatorValue<TOperator extends Operator.Where> = TOperator extends Opera
 type FilterKeys<TSchemaUID extends UID.Schema> =
   | Operator.Group
   | Operator.Logical
-  | IdentifierKeys<TSchemaUID>
+  | IDKey
+  | DocumentIDKey
   | If<HasKnownAttributeNames<TSchemaUID>, Schema.AttributeNames<TSchemaUID>, never>;
 
 /**
@@ -138,15 +158,6 @@ type HasKnownAttributeNames<TSchemaUID extends UID.Schema> = And<
   DoesNotExtends<string, Schema.AttributeNames<TSchemaUID>>
 >;
 
-/**
- * Identifier keys a filter accepts on top of the schema's attributes. Components have no documentId.
- */
-type IdentifierKeys<TSchemaUID extends UID.Schema> = If<
-  IsComponent<TSchemaUID>,
-  IDKey,
-  IDKey | DocumentIDKey
->;
-
 type IsComponent<TSchemaUID extends UID.Schema> = StrictEqual<
   Schema.ModelType<TSchemaUID>,
   'component'
@@ -169,18 +180,22 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         HasKnownAttributeNames<TSchemaUID>,
         // Strongly typed representation of the filter object tree
         {
-          [TIter in IdentifierKeys<TSchemaUID> | TScalarKeys]?: AttributeCondition<
-            TSchemaUID,
-            TIter
-          >;
+          [TIter in IDKey | DocumentIDKey | TScalarKeys]?: AttributeCondition<TSchemaUID, TIter>;
         } & If<
-          IsNotNever<TNestedKeys>,
-          { [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter> },
-          // Not an empty object type: intersected with `{}`, the filter type is no longer a weak type,
-          // so TypeScript would accept an inferred filter (e.g. a direct `findMany` call) that has no
-          // known key
+          IsComponent<TSchemaUID>,
+          // Components have no documentId. The key stays in the mapped type above, so it resolves
+          // while the UID is generic.
+          { [TIter in DocumentIDKey]?: never },
           unknown
-        >,
+        > &
+          If<
+            IsNotNever<TNestedKeys>,
+            { [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter> },
+            // Not an empty object type: intersected with `{}`, the filter type is no longer a weak type,
+            // so TypeScript would accept an inferred filter (e.g. a direct `findMany` call) that has no
+            // known key
+            unknown
+          >,
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
         {
           [TKey in string]?:

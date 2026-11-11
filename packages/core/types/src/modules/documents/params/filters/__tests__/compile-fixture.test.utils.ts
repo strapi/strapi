@@ -9,7 +9,7 @@ export const COMPILE_TIMEOUT_MS = 60_000;
 /**
  * Type-checks the fixture in `resources/<fixtureName>` on its own, with a capped heap
  */
-export const compileFixture = (fixtureName: string) => {
+export const compileFixture = (fixtureName: string, compilerArgs: string[] = []) => {
   const result = spawnSync(
     process.execPath,
     [
@@ -18,6 +18,7 @@ export const compileFixture = (fixtureName: string) => {
       '--project',
       path.join(__dirname, 'resources', fixtureName, 'tsconfig.json'),
       '--extendedDiagnostics',
+      ...compilerArgs,
     ],
     { encoding: 'utf8', timeout: COMPILE_TIMEOUT_MS }
   );
