@@ -29,9 +29,9 @@ describe('translateRoutePath', () => {
     ['/users/:café', '/users/:"caf"é'],
     ['/a/:id(\\d+)suffix', '/a/:"id"suffix'],
     ['/img/:w(\\d+)x:h(\\d+)', '/img/:"w"x:h'],
-    ['/:a([a-z]+):b(\\d*)', '/{*v6Joined1}'],
-    ['/:slug/:year(\\d{4}):month(\\d{2})', '/:slug/{*v6Joined1}'],
-    ['/:a/(\\d+)(\\w+)', '/:a/{*v6Joined1}'],
+    ['/:a([a-z]+):b(\\d*)', '/:"v6Joined1"'],
+    ['/:slug/:year(\\d{4}):month(\\d{2})', '/:slug/:"v6Joined1"'],
+    ['/:a/(\\d+)(\\w+)', '/:a/:"v6Joined1"'],
     ['/:lang-:region/:id(\\d+)', '/:lang-:region/:id'],
     ['/a/:id(\\d+)/b', '/a/:id/b'],
     ['/:v6Group1/(.*)', '/:v6Group1/{*v6Group2}'],
@@ -60,6 +60,7 @@ describe('translateRoutePath', () => {
       changed: false,
       generatedParams: [],
       ignoredPatterns: [],
+      constraints: [],
     });
   });
 
@@ -86,17 +87,29 @@ describe('translateRoutePath', () => {
   it('lists the names it creates, which the v6 path does not have', () => {
     expect(translateRoutePath('/f/(\\d+)/(.*)').generatedParams).toEqual(['v6Group1', 'v6Group2']);
     expect(translateRoutePath('/f/:id(\\d+)').generatedParams).toEqual([]);
-    expect(translateRoutePath('/f/:id(\\d+)').ignoredPatterns).toEqual([
-      { parameter: 'id', pattern: '\\d+', unnamed: false },
+    expect(translateRoutePath('/f/:id(\\d+)').ignoredPatterns).toEqual([]);
+    expect(translateRoutePath('/f/:id(\\d+)').constraints).toEqual([
+      { key: 'id', pattern: '\\d+', split: [] },
     ]);
-    expect(translateRoutePath('/(collection|single)').ignoredPatterns).toEqual([
-      { parameter: '', pattern: 'collection|single', unnamed: true },
+    expect(translateRoutePath('/(collection|single)').constraints).toEqual([
+      { key: 'v6Group1', pattern: 'collection|single', split: [] },
     ]);
     expect(translateRoutePath('/files/(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files/:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files-:path(.*)').ignoredPatterns).toEqual([]);
-    expect(translateRoutePath('/f/(\\d+)/(.*)').ignoredPatterns).toEqual([
-      { parameter: '', pattern: '\\d+', unnamed: true },
+    expect(translateRoutePath('/f/(\\d+)/(.*)').ignoredPatterns).toEqual([]);
+    expect(translateRoutePath('/f/(\\d+)/(.*)').constraints).toEqual([
+      { key: 'v6Group1', pattern: '\\d+', split: [] },
+    ]);
+    expect(translateRoutePath('/:a([a-z]+):b(\\d*)').constraints).toEqual([
+      {
+        key: 'v6Joined1',
+        pattern: '([a-z]+)(\\d*)',
+        split: [
+          { parameter: 'a', pattern: '[a-z]+', unnamed: false },
+          { parameter: 'b', pattern: '\\d*', unnamed: false },
+        ],
+      },
     ]);
   });
 

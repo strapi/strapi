@@ -4,6 +4,7 @@ description: How Strapi handles an HTTP request from Koa to the response, for th
 status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.
+  - Custom patterns on a single parameter are applied again after the `@koa/router` 15 upgrade. A pattern that can match `/`, and a pattern that included the separator before the next parameter, still do not match as they did in path-to-regexp v6.
   - The statement that `strapi::session` adds `koa-session` before every listed middleware comes from reading `registerApplicationMiddlewares` and the session factory. No test confirms it.
   - The page does not cover the GraphQL plugin request path or the upload plugin `/uploads` route.
 ---
@@ -121,21 +122,21 @@ Strapi translates:
 
 A router that a plugin creates itself is not wrapped up front. When a route object with v6 syntax is composed onto it, `registerTranslatedRoute` wraps that router first.
 
-Matching uses path-to-regexp v8 only. A custom pattern is not applied. A pattern that cannot match `/` becomes an ordinary parameter, and one that can becomes a wildcard, so the route can match requests the v6 path rejected. A request the translated path does match is a path match: another method then answers 405, not 404.
+Matching uses path-to-regexp v8. A custom pattern that stays on one parameter is tested against the captured value, with the router's case sensitivity. A value the pattern rejects is not a match, so a later route can run, and another method answers 404. A pattern that can match `/` becomes a wildcard and is not tested, so that route can match a request the v6 path rejected.
 
-Two parameters with no text between them become one wildcard, and their separate values are not recovered. v8 can also reject a request the v6 path accepted, when a custom pattern contained the text that separates it from the previous parameter. `/:a-:b(\d+-)` used to match `/x-1-` and no longer does.
+Two parameters with no text between them become one parameter. When each of them has a custom pattern that cannot match `/`, those patterns are tested against that one value and the pieces are written back to `ctx.params`. Otherwise the capture is a wildcard and the separate values are not recovered. v8 can also reject a request the v6 path accepted, when a custom pattern contained the text that separates it from the previous parameter. `/:a-:b(\d+-)` used to match `/x-1-` and no longer does.
 
-| v6                                                | v8                                     | Notes                                                                        |
-| ------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
-| `/users/:id(\\d+)`                                | `/users/:id`                           | A pattern that may match `/`, such as `.+\\.js`, becomes a wildcard instead. |
-| `/users/:id?`                                     | `/users{/:id}`                         |                                                                              |
-| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`       |                                                                              |
-| `/uploads/(.*)`                                   | `/uploads/{*v6Group1}`                 | The value is in `ctx.params[0]`. `v6Group1` is not in `ctx.params`.          |
-| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:v6Group1-types/:id` | The value is in `ctx.params[0]`.                                             |
-| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/:"w"x:h`                         | The pattern is dropped. `x` is still the separator, and `w` is quoted.       |
-| `/:a([a-z]+):b(\\d+)`                             | `/{*v6Joined1}`                        | v8 needs text between two parameters, so one wildcard stands for both.       |
-| `/:lang-:region/:id(\\d+)`                        | `/:lang-:region/:id`                   | The pattern is dropped. `-` stays between the parameters.                    |
-| `/x{-y}+`                                         | `/x:v6Literal1`                        | v8 cannot repeat a literal, so a parameter stands for the repetitions.       |
+| v6                                                | v8                                     | Notes                                                                                                                       |
+| ------------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `/users/:id(\\d+)`                                | `/users/:id`                           | The pattern is tested against `:id`. A pattern that may match `/`, such as `.+\\.js`, becomes a wildcard and is not tested. |
+| `/users/:id?`                                     | `/users{/:id}`                         |                                                                                                                             |
+| `/admin/:path*`, `/files/:path+`                  | `/admin{/*path}`, `/files/*path`       |                                                                                                                             |
+| `/uploads/(.*)`                                   | `/uploads/{*v6Group1}`                 | The value is in `ctx.params[0]`. `v6Group1` is not in `ctx.params`.                                                         |
+| `/content-manager/(collection\|single)-types/:id` | `/content-manager/:v6Group1-types/:id` | The pattern is tested. The value is in `ctx.params[0]`.                                                                     |
+| `/img/:w(\\d+)x:h(\\d+)`                          | `/img/:"w"x:h`                         | Both patterns are tested. `x` is still the separator, and `w` is quoted.                                                    |
+| `/:a([a-z]+):b(\\d+)`                             | `/:"v6Joined1"`                        | v8 needs text between two parameters. The patterns are tested and `a` and `b` are restored.                                 |
+| `/:lang-:region/:id(\\d+)`                        | `/:lang-:region/:id`                   | The pattern on `:id` is tested. `-` stays between the parameters.                                                           |
+| `/x{-y}+`                                         | `/x:v6Literal1`                        | v8 cannot repeat a literal, so a parameter stands for the repetitions.                                                      |
 
 What stays as it was in v6:
 
@@ -146,7 +147,7 @@ What stays as it was in v6:
 
 Each layer stores its parts under a symbol. `@koa/router` copies the layers of a nested router with `Object.assign`, which keeps symbol properties. The layer is re-described when it is mounted.
 
-Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. When that translation drops a custom pattern other than `.*`, it logs a second warning that names the parameter and the pattern, because the route may now match a request meant for a later route. A `.*` pattern becomes a wildcard that matches the same text, so it does not get that warning. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip both warnings.
+Strapi logs a warning for each translated path, for example `Route "GET /users/:id(\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".`. When a custom pattern other than `.*` cannot be applied, it logs a second warning that names the parameter and the pattern, because the route may now match a request meant for a later route. A pattern that is tested against its capture does not get that warning. A `.*` pattern becomes a wildcard that matches the same text, so it does not get that warning either. Strapi's own routes that keep their v6 path, such as `/uploads/(.*)`, set `[Symbol.for('strapi.route.keepV6Path')]: true` on the route object to skip both warnings.
 
 Boot fails with `RoutePathMigrationError` for a path v6 rejected too, such as `/:a:b` or a repeated parameter with no prefix and suffix, for a group that starts with `?`, and for one path that mixes v6 syntax with a v8 quoted name.
 

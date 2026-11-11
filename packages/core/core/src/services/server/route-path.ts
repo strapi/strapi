@@ -4,10 +4,11 @@ import type Router from '@koa/router';
  * Boots routes written for path-to-regexp v6 on v8.
  * Remove this translator in Strapi 6, when route paths are v8 only.
  *
- * Matching uses path-to-regexp v8 only. A custom pattern is not applied: a pattern that cannot
- * match `/` becomes an ordinary parameter, and one that can becomes a wildcard. The translated
- * path can match requests the v6 path rejected. Two parameters with no text between them become
- * one wildcard, and their separate values are not recovered.
+ * Matching uses path-to-regexp v8. A custom pattern that stays on one parameter is tested against
+ * that captured value, so a value the pattern rejects is not a match. A pattern that can match `/`
+ * becomes a wildcard and is not tested. Parameters with no text between them become one parameter.
+ * When each of them has a custom pattern that cannot match `/`, those patterns are tested against
+ * that one value and the pieces are written back. Otherwise the separate values are not recovered.
  */
 
 export class RoutePathMigrationError extends Error {
@@ -24,6 +25,23 @@ export type IgnoredRoutePattern = {
   unnamed: boolean;
 };
 
+export type RoutePathSplit = {
+  /** Original parameter name. Empty when the group had no name. */
+  parameter: string;
+  pattern: string;
+  unnamed: boolean;
+};
+
+/** A custom pattern tested against one capture of the translated path. */
+export type RoutePathConstraint = {
+  /** Capture name on the translated path. */
+  key: string;
+  /** RegExp source for the whole capture. A split pattern has one capturing group per part. */
+  pattern: string;
+  /** Set when `key` stands for several v6 parameters. Empty when the pattern belongs to `key`. */
+  split: RoutePathSplit[];
+};
+
 export type TranslatedRoutePath = {
   path: string;
   changed: boolean;
@@ -31,6 +49,8 @@ export type TranslatedRoutePath = {
   generatedParams: string[];
   /** Custom patterns the translation does not apply, so the route can match more than it used to. */
   ignoredPatterns: IgnoredRoutePattern[];
+  /** Custom patterns applied to captures of the translated path. */
+  constraints: RoutePathConstraint[];
 };
 
 // v6 only made `/` and `.` optional along with a parameter.
@@ -260,6 +280,11 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
   let changed = false;
   const generatedParams: string[] = [];
   const ignoredPatterns: IgnoredRoutePattern[] = [];
+  const constraints: RoutePathConstraint[] = [];
+  const recordedPatterns = new Map<
+    string,
+    { parameter: string; pattern: string; unnamed: boolean; spansSegments: boolean }
+  >();
   const usedNames = new Set(
     [...path.matchAll(/[:*]([$\w]+)/g)].map(([, name]) => name).filter(Boolean)
   );
@@ -270,6 +295,11 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     wildcard: boolean;
     joined?: string;
     plain: boolean;
+    /** Capture names this span wrote onto the translated path. */
+    keys: string[];
+    /** Original parameter names this span stands for, in order. */
+    sourceKeys: string[];
+    constraint?: RoutePathConstraint;
   }[] = [];
 
   const fail = (reason: string): never => {
@@ -304,16 +334,32 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
   /** v8 rejects two parameters with no text between them, so one wildcard stands for both. */
   const hasNoTextBetween = (between: string) => between === '';
 
+  const dropRecorded = (key: string) => {
+    const recorded = recordedPatterns.get(key);
+    if (!recorded) {
+      return;
+    }
+
+    recordedPatterns.delete(key);
+    ignoredPatterns.push({
+      parameter: recorded.unnamed ? '' : recorded.parameter,
+      pattern: recorded.pattern,
+      unnamed: recorded.unnamed,
+    });
+  };
+
   /**
    * Writes `outside`, then the parameter's `text`. Parameters with no text between them become one
-   * wildcard. v8 matches that wildcard; the original parameter values are not split back out.
+   * parameter. When each of them has a custom pattern that cannot match `/`, that parameter keeps
+   * one segment and the patterns are applied to it. Otherwise it is a wildcard.
    */
   const writeParameter = (
     outside: string,
     inside: string,
     text: string,
     wildcard: boolean,
-    plain: boolean
+    plain: boolean,
+    key: string
   ) => {
     const last = spans.at(-1);
 
@@ -324,7 +370,8 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         );
       }
 
-      let { start, joined } = last;
+      const chain = [last];
+      let start = last.start;
       spans.pop();
 
       for (
@@ -333,21 +380,111 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         before = spans.at(-1)
       ) {
         start = before.start;
-        joined ??= before.joined;
+        chain.unshift(before);
         spans.pop();
       }
 
-      joined ??= generateName('Joined');
+      const pieces: RoutePathSplit[] = [];
+      let canSplit = !wildcard && chain.every((span) => !span.wildcard);
+      const take = (sourceKey: string, fromWildcard: boolean) => {
+        const recorded = recordedPatterns.get(sourceKey);
+        if (!recorded || recorded.spansSegments || fromWildcard) {
+          canSplit = false;
+          return;
+        }
+
+        pieces.push({
+          parameter: recorded.unnamed ? '' : recorded.parameter,
+          pattern: recorded.pattern,
+          unnamed: recorded.unnamed,
+        });
+      };
+
+      for (const span of chain) {
+        if (span.constraint) {
+          if (span.wildcard) {
+            canSplit = false;
+          } else {
+            pieces.push(...span.constraint.split);
+          }
+        } else {
+          span.sourceKeys.forEach((sourceKey) => take(sourceKey, span.wildcard));
+        }
+      }
+      take(key, wildcard);
+
+      const joined = chain.find((span) => span.joined)?.joined ?? generateName('Joined');
       changed = true;
-      translated = `${translated.slice(0, start)}{*${formatParameterName(joined, undefined)}}`;
-      spans.push({ start, end: translated.length, wildcard: true, joined, plain: false });
+      // Quote the name so the next character cannot become part of it.
+      const quoted = `"${joined.replace(/["\\]/g, '\\$&')}"`;
+
+      if (
+        canSplit &&
+        pieces.length === chain.reduce((count, span) => count + span.sourceKeys.length, 0) + 1
+      ) {
+        for (const span of chain) {
+          span.sourceKeys.forEach((sourceKey) => recordedPatterns.delete(sourceKey));
+        }
+        recordedPatterns.delete(key);
+
+        const constraint = {
+          key: joined,
+          pattern: pieces.map((piece) => `(${piece.pattern})`).join(''),
+          split: pieces,
+        };
+        translated = `${translated.slice(0, start)}:${quoted}`;
+        spans.push({
+          start,
+          end: translated.length,
+          wildcard: false,
+          joined,
+          plain: false,
+          keys: [joined],
+          sourceKeys: pieces.map((piece) => piece.parameter),
+          constraint,
+        });
+        return;
+      }
+
+      for (const span of chain) {
+        if (span.constraint) {
+          span.constraint.split.forEach((piece) => {
+            ignoredPatterns.push({
+              parameter: piece.parameter,
+              pattern: piece.pattern,
+              unnamed: piece.unnamed,
+            });
+          });
+        } else {
+          span.sourceKeys.forEach((sourceKey) => dropRecorded(sourceKey));
+        }
+      }
+      dropRecorded(key);
+
+      translated = `${translated.slice(0, start)}{*${quoted}}`;
+      spans.push({
+        start,
+        end: translated.length,
+        wildcard: true,
+        joined,
+        plain: false,
+        keys: [joined],
+        sourceKeys: [joined],
+      });
       return;
     }
 
     translated += outside;
     const start = translated.length;
     translated += text;
-    spans.push({ start, end: translated.length, wildcard, plain });
+    spans.push({
+      start,
+      end: translated.length,
+      wildcard,
+      plain,
+      keys: [key],
+      sourceKeys: [key],
+    });
   };
 
   const detachOptionalPrefix = () => {
@@ -380,11 +517,6 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         const reason = error instanceof Error ? error.message : String(error);
         fail(`the custom pattern for ":${name}" is invalid: ${reason}`);
       }
-
-      // `.*` becomes a wildcard that matches the same text, including an empty capture.
-      if (pattern !== '.*') {
-        ignoredPatterns.push({ parameter: unnamed ? '' : name, pattern, unnamed });
-      }
     }
 
     if ((modifier === '+' || modifier === '*') && prefix === '' && suffix === '') {
@@ -395,6 +527,11 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     const plain = pattern === undefined;
     const repeated = modifier === '*' || modifier === '+';
     const spansSegments = repeated || (pattern !== undefined && patternMayMatchSlash(pattern));
+
+    // `.*` becomes a wildcard that matches the same text, including an empty capture.
+    if (pattern !== undefined && pattern !== '.*') {
+      recordedPatterns.set(name, { parameter: name, pattern, unnamed, spansSegments });
+    }
     const token = `${spansSegments ? '*' : ':'}${quoted}`;
     const escapedPrefix = escapeLiteral(prefix);
     const escapedSuffix = escapeLiteral(suffix);
@@ -405,18 +542,19 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
         escapedPrefix,
         `{${escapedPrefix}${token}${escapedSuffix}}`,
         spansSegments,
-        plain
+        plain,
+        name
       );
       return;
     }
 
     // A v8 parameter matches at least one character, and a pattern such as `.*` may match none.
     if (pattern !== undefined && new RegExp(`^(?:${pattern})$`, 'i').test('')) {
-      writeParameter(escapedPrefix, '', `{${token}}${escapedSuffix}`, spansSegments, plain);
+      writeParameter(escapedPrefix, '', `{${token}}${escapedSuffix}`, spansSegments, plain, name);
       return;
     }
 
-    writeParameter(escapedPrefix, '', `${token}${escapedSuffix}`, spansSegments, plain);
+    writeParameter(escapedPrefix, '', `${token}${escapedSuffix}`, spansSegments, plain, name);
   };
 
   /**
@@ -527,14 +665,16 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     }
 
     // v8 cannot repeat a literal, so a parameter stands for the repetitions.
-    const name = formatParameterName(generateName('Literal'), undefined);
+    const rawName = generateName('Literal');
+    const name = formatParameterName(rawName, undefined);
     const token = literal.includes('/') ? `*${name}` : `:${name}`;
     writeParameter(
       '',
       '',
       group.modifier === '*' ? `{${token}}` : token,
       token.startsWith('*'),
-      false
+      false,
+      rawName
     );
   };
 
@@ -624,7 +764,7 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
       }
 
       if (isParameter && pattern === undefined && !modifier) {
-        writeParameter('', '', `:${formatParameterName(name, path[cursor])}`, false, true);
+        writeParameter('', '', `:${formatParameterName(name, path[cursor])}`, false, true, name);
       } else {
         changed = true;
         addParameter(
@@ -679,7 +819,32 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     );
   }
 
-  return { path: translated, changed, generatedParams, ignoredPatterns };
+  for (const span of spans) {
+    if (span.constraint) {
+      constraints.push(span.constraint);
+      continue;
+    }
+
+    for (const key of span.keys) {
+      const recorded = recordedPatterns.get(key);
+      if (!recorded) {
+        continue;
+      }
+
+      recordedPatterns.delete(key);
+      if (span.wildcard || recorded.spansSegments) {
+        ignoredPatterns.push({
+          parameter: recorded.unnamed ? '' : recorded.parameter,
+          pattern: recorded.pattern,
+          unnamed: recorded.unnamed,
+        });
+      } else {
+        constraints.push({ key, pattern: recorded.pattern, split: [] });
+      }
+    }
+  }
+
+  return { path: translated, changed, generatedParams, ignoredPatterns, constraints };
 };
 
 export const translateRoutePath = (
@@ -744,6 +909,7 @@ type RoutePathPart = {
   source: string;
   path: string;
   generatedParams: string[];
+  constraints: RoutePathConstraint[];
 };
 
 // State lives on the layer under symbols. Koa copies a nested router's layers with Object.assign,
@@ -751,10 +917,26 @@ type RoutePathPart = {
 const LAYER_PARTS = Symbol('strapi.routePath.parts');
 const LAYER_PATHLESS = Symbol('strapi.routePath.pathless');
 const LAYER_SHIM = Symbol('strapi.routePath.shim');
+const LAYER_CONSTRAINTS = Symbol('strapi.routePath.constraints');
+
+type CompiledConstraint = {
+  key: string;
+  regexp: RegExp;
+  split: RoutePathSplit[];
+};
 
 type TranslatedLayer = RouterLayer & {
   [LAYER_PARTS]?: RoutePathPart[];
   [LAYER_PATHLESS]?: boolean;
+  [LAYER_CONSTRAINTS]?: CompiledConstraint[];
+  regexp?: RegExp;
+  match: (path: string) => boolean;
+  params: (
+    path: string,
+    captures: readonly string[],
+    existing: Record<string, unknown>
+  ) => Record<string, unknown>;
+  captures: (path: string) => string[];
 };
 type LayerMiddleware = RouterLayer['stack'][number];
 type ShimContext = ParamsContext & {
@@ -768,6 +950,7 @@ const toPart = (source: string, translated: TranslatedRoutePath): RoutePathPart 
   source,
   path: translated.path,
   generatedParams: translated.generatedParams,
+  constraints: translated.constraints,
 });
 
 const isTranslatedPart = (part: RoutePathPart) => part.source !== part.path;
@@ -829,7 +1012,8 @@ const paramText = (value: unknown) => {
 
 /**
  * Runs first in a layer's stack. Drops names the translation created, numbers unnamed groups from
- * 0, and reports the route as written in `_matchedRoute`. It does not apply custom patterns.
+ * 0, splits a joined capture back into the parameters it stands for, and reports the route as
+ * written in `_matchedRoute`. Custom patterns are applied by `layer.match`, before this runs.
  */
 const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
   const shim = (ctx: ShimContext, next: () => Promise<unknown>) => {
@@ -839,9 +1023,38 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
     }
 
     const generated = (layer[LAYER_PARTS] ?? []).flatMap((part) => part.generatedParams);
+    const splits = new Map(
+      (layer[LAYER_CONSTRAINTS] ?? [])
+        .filter((constraint) => constraint.split.length > 0)
+        .map((constraint) => [constraint.key, constraint])
+    );
     let group = 0;
 
     for (const name of generated) {
+      const split = splits.get(name);
+      if (split) {
+        const value = paramText(ctx.params[name]);
+        const found = value ? split.regexp.exec(value) : null;
+        if (found) {
+          for (const [index, part] of split.split.entries()) {
+            const piece = found[index + 1];
+            if (!piece) {
+              continue;
+            }
+
+            if (part.unnamed) {
+              ctx.params[group] = piece;
+              group += 1;
+            } else {
+              ctx.params[part.parameter] = piece;
+            }
+          }
+        }
+
+        delete ctx.params[name];
+        continue;
+      }
+
       const value = paramText(ctx.params[name]);
 
       if (GROUP_PARAM_NAME.test(name) && value) {
@@ -873,8 +1086,53 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
 const isShim = (middleware: LayerMiddleware) =>
   (middleware as unknown as { [LAYER_SHIM]?: boolean })[LAYER_SHIM] === true;
 
+const compileConstraints = (
+  layer: TranslatedLayer,
+  parts: RoutePathPart[]
+): CompiledConstraint[] => {
+  const flags = layer.regexp instanceof RegExp && layer.regexp.flags.includes('i') ? 'i' : '';
+
+  return parts.flatMap((part) =>
+    part.constraints.map((constraint) => ({
+      key: constraint.key,
+      regexp: new RegExp(`^(?:${constraint.pattern})$`, flags),
+      split: constraint.split,
+    }))
+  );
+};
+
+/**
+ * A translated path is only a candidate. `layer.match` still rejects a capture whose custom
+ * pattern does not match, so a later route can run and another method stays 404.
+ */
+const installConstraintMatch = (layer: TranslatedLayer) => {
+  const prototypeMatch = Object.getPrototypeOf(layer).match as TranslatedLayer['match'] | undefined;
+  const constraints = layer[LAYER_CONSTRAINTS] ?? [];
+
+  if (typeof prototypeMatch !== 'function' || constraints.length === 0) {
+    if (typeof prototypeMatch === 'function') {
+      layer.match = prototypeMatch;
+    }
+    return;
+  }
+
+  layer.match = function match(this: TranslatedLayer, path: string) {
+    if (!prototypeMatch.call(this, path)) {
+      return false;
+    }
+
+    const params = this.params(path, this.captures(path), {});
+    return (this[LAYER_CONSTRAINTS] ?? []).every((constraint) => {
+      const text = paramText(params[constraint.key]);
+      return !text || constraint.regexp.test(text);
+    });
+  };
+};
+
 const setLayerParts = (layer: TranslatedLayer, parts: RoutePathPart[]) => {
   layer[LAYER_PARTS] = parts;
+  layer[LAYER_CONSTRAINTS] = compileConstraints(layer, parts);
+  installConstraintMatch(layer);
 
   // A copied layer still holds the shim of the layer it was copied from, so it gets its own.
   const stack = layer.stack.filter((middleware) => !isShim(middleware));
@@ -890,7 +1148,7 @@ const untranslatedRest = (layer: TranslatedLayer, head: RoutePathPart[]): RouteP
   }
 
   const rest = layer.path.slice(start.length);
-  return rest ? [{ source: rest, path: rest, generatedParams: [] }] : [];
+  return rest ? [{ source: rest, path: rest, generatedParams: [], constraints: [] }] : [];
 };
 
 const isNestedRouter = (middleware: unknown): middleware is { router: object } =>
@@ -981,7 +1239,7 @@ export const installRoutePathTranslation = (router: Router, strapi: Logger) => {
 
       // A list of paths registers each path through this method, and returns the router.
       if (insideUse === 0 && prefixParts.has(router) && (result as unknown) !== router) {
-        setLayerParts(result as RouterLayer, currentPrefixParts());
+        setLayerParts(result as TranslatedLayer, currentPrefixParts());
       }
 
       return result;
@@ -994,7 +1252,12 @@ export const installRoutePathTranslation = (router: Router, strapi: Logger) => {
     const source = pending?.source ?? path;
 
     // For a string path, koa-router returns the layer it just added; the `Router` branch is for chaining.
-    const layer = originalRegister(translated.path, methods, middleware, options) as RouterLayer;
+    const layer = originalRegister(
+      translated.path,
+      methods,
+      middleware,
+      options
+    ) as TranslatedLayer;
     setLayerParts(layer, [...currentPrefixParts(), toPart(source, translated)]);
 
     return layer;

@@ -82,11 +82,9 @@ describe.each([
   it('warns when a route path uses path-to-regexp v6 syntax', () => {
     const { strapi } = createServer('/users/:id(\\d+)');
 
+    expect(strapi.log.warn).toHaveBeenCalledTimes(1);
     expect(strapi.log.warn).toHaveBeenCalledWith(
       'Route "GET /users/:id(\\d+)" uses path-to-regexp v6 syntax and was migrated to "/users/:id".'
-    );
-    expect(strapi.log.warn).toHaveBeenCalledWith(
-      'Route "GET /users/:id(\\d+)": pattern `\\d+` on `:id` is no longer enforced. This route may now match requests meant for later routes.'
     );
   });
 
@@ -110,14 +108,13 @@ describe.each([
       route: '/content-manager/(collection|single)-types/:id',
       params: { 0: 'single', id: '2' },
     });
-    // The alternation is not enforced, so this route wins over the one registered after it.
     await expectReply(request(server).get('/content-manager/other-types/1'), {
-      route: '/content-manager/(collection|single)-types/:id',
-      params: { 0: 'other', id: '1' },
+      route: '/content-manager/:kind-types/:id',
+      params: { kind: 'other', id: '1' },
     });
   });
 
-  it('does not enforce a custom letter pattern, so the route also matches other text', async () => {
+  it('enforces a custom letter pattern, and the router is not case sensitive', async () => {
     const { server } = createServer('/posts/:slug([a-z0-9-]+)', '/posts/:slug');
 
     await expectReply(request(server).get('/posts/Hello'), {
@@ -125,7 +122,7 @@ describe.each([
       params: { slug: 'Hello' },
     });
     await expectReply(request(server).get('/posts/Hello_World'), {
-      route: '/posts/:slug([a-z0-9-]+)',
+      route: '/posts/:slug',
       params: { slug: 'Hello_World' },
     });
   });
@@ -151,25 +148,22 @@ describe.each([
     });
   });
 
-  it('does not enforce a custom pattern', async () => {
+  it('enforces a custom pattern', async () => {
     const { server } = createServer('/users/:id(\\d+)');
 
     await expectReply(request(server).get('/users/12'), {
       route: '/users/:id(\\d+)',
       params: { id: '12' },
     });
-    await expectReply(request(server).get('/users/abc'), {
-      route: '/users/:id(\\d+)',
-      params: { id: 'abc' },
-    });
+    await request(server).get('/users/abc').expect(404);
   });
 
-  it('does not fall through to the next route when a custom pattern would have rejected the value', async () => {
+  it('falls through to the next route when a custom pattern rejects the value', async () => {
     const { server } = createServer('/users/:id(\\d+)', '/users/me');
 
     await expectReply(request(server).get('/users/me'), {
-      route: '/users/:id(\\d+)',
-      params: { id: 'me' },
+      route: '/users/me',
+      params: {},
     });
   });
 
@@ -178,10 +172,7 @@ describe.each([
 
     await request(server).get('/users').expect(200);
     await request(server).get('/users/12').expect(200);
-    await expectReply(request(server).get('/users/abc'), {
-      route: '/users/:id(\\d+)?',
-      params: { id: 'abc' },
-    });
+    await request(server).get('/users/abc').expect(404);
   });
 
   it('keeps the text before a named wildcard', async () => {
@@ -210,10 +201,7 @@ describe.each([
       route: '/items/(\\d+)',
       params: { 0: '12' },
     });
-    await expectReply(request(server).get('/items/ab'), {
-      route: '/items/(\\d+)',
-      params: { 0: 'ab' },
-    });
+    await request(server).get('/items/ab').expect(404);
   });
 
   it('exposes an unnamed (.*) as ctx.params[0]', async () => {
@@ -360,33 +348,29 @@ describe.each([
       route: '/a/:id(\\d+)suffix',
       params: { id: '12' },
     });
-    await expectReply(request(server).get('/a/xxsuffix'), {
-      route: '/a/:id(\\d+)suffix',
-      params: { id: 'xx' },
-    });
+    await request(server).get('/a/xxsuffix').expect(404);
   });
 
   it.each([
     ['/img/:w(\\d+)x:h(\\d+)', '/img/100x200', { w: '100', h: '200' }],
-    ['/img/:w(\\d+)x:h(\\d+)', '/img/axb', { w: 'a', h: 'b' }],
-    // No text between the parameters, so v8 keeps one wildcard and the names are not recovered.
-    ['/:a([a-z]+):b(\\d*)', '/abc123', {}],
-    ['/:a([a-z]+):b(\\d*)', '/abc', {}],
-    ['/:a(\\d):b(\\d):c(\\d)', '/123', {}],
-  ])(
-    'keeps separate parameters only when text stands between them in %s',
-    async (route, url, params) => {
-      const { server } = createServer(route);
+    ['/:a([a-z]+):b(\\d*)', '/abc123', { a: 'abc', b: '123' }],
+    ['/:a([a-z]+):b(\\d*)', '/abc', { a: 'abc' }],
+    ['/:a(\\d):b(\\d):c(\\d)', '/123', { a: '1', b: '2', c: '3' }],
+  ])('keeps separate parameters for %s', async (route, url, params) => {
+    const { server } = createServer(route);
 
-      await expectReply(request(server).get(url), { route, params });
-    }
-  );
+    await expectReply(request(server).get(url), { route, params });
+  });
 
   it.each([
-    ['/:slug/:year(\\d{4}):month(\\d{2})', '/news/202611', { slug: 'news' }],
-    ['/:a.:b(\\d):c(\\d)', '/x.12', { a: 'x' }],
+    [
+      '/:slug/:year(\\d{4}):month(\\d{2})',
+      '/news/202611',
+      { slug: 'news', year: '2026', month: '11' },
+    ],
+    ['/:a.:b(\\d):c(\\d)', '/x.12', { a: 'x', b: '1', c: '2' }],
     ['/o/:id(a\\57b)', '/o/a/b', { id: 'a/b' }],
-  ])('drops parameter values v8 joins into one wildcard for %s', async (route, url, params) => {
+  ])('splits joined custom patterns back into parameters for %s', async (route, url, params) => {
     const { server } = createServer(route);
 
     await expectReply(request(server).get(url), { route, params });
@@ -480,7 +464,7 @@ describe('router path registration', () => {
     expect(seen).toEqual([undefined, 'api::article.article']);
   });
 
-  it('translates router.get, including a named route, without enforcing the custom pattern', async () => {
+  it('translates router.get, including a named route, and enforces the custom pattern', async () => {
     const { strapi, server, router } = createRouterApp();
 
     router.get('user', '/users/:id(\\d+)', (ctx) => {
@@ -490,14 +474,11 @@ describe('router path registration', () => {
       reply(ctx, { me: true });
     });
 
-    expect(strapi.log.warn).toHaveBeenCalledTimes(2);
-    expect(strapi.log.warn).toHaveBeenCalledWith(
-      'Route "GET /users/:id(\\d+)": pattern `\\d+` on `:id` is no longer enforced. This route may now match requests meant for later routes.'
-    );
+    expect(strapi.log.warn).toHaveBeenCalledTimes(1);
     expect(router.route('user')).toMatchObject({ path: '/users/:id' });
     await expectReply(request(server).get('/users/12'), { id: '12' });
-    await expectReply(request(server).get('/users/me'), { id: 'me' });
-    await expectReply(request(server).get('/users/abc'), { id: 'abc' });
+    await expectReply(request(server).get('/users/me'), { me: true });
+    await request(server).get('/users/abc').expect(404);
   });
 
   it('does not warn that .* is no longer enforced', () => {
@@ -536,10 +517,7 @@ describe('router path registration', () => {
       { router }
     );
 
-    expect(strapi.log.warn).toHaveBeenCalledTimes(2);
-    expect(strapi.log.warn).toHaveBeenCalledWith(
-      'Route "GET /users/:id(\\d+)": pattern `\\d+` on `:id` is no longer enforced. This route may now match requests meant for later routes.'
-    );
+    expect(strapi.log.warn).toHaveBeenCalledTimes(1);
   });
 
   it('leaves a v8 brace path unchanged', () => {
@@ -586,7 +564,7 @@ describe('router path registration', () => {
     await expectReply(request(app.callback()).get('/v/1/child'), { ok: true });
   });
 
-  it('answers 405 for another method, because a custom pattern is not a path constraint', async () => {
+  it('answers 404 for another method when the custom pattern rejects the path', async () => {
     const strapi = createStrapi();
     const router = new Router();
     installRoutePathTranslation(router, strapi);
@@ -603,8 +581,8 @@ describe('router path registration', () => {
 
     await expectReply(request(server).get('/users/12'), { ok: true });
     expect(seen).toEqual(['12']);
-    await expectReply(request(server).get('/users/abc'), { ok: true });
-    await request(server).post('/users/abc').expect(405);
+    await request(server).get('/users/abc').expect(404);
+    await request(server).post('/users/abc').expect(404);
   });
 
   it('translates a v6 router prefix without enforcing its custom pattern', async () => {
@@ -618,16 +596,13 @@ describe('router path registration', () => {
     expect(strapi.log.warn).toHaveBeenCalledWith(
       'Router prefix "/pre/:v(\\d+)" uses path-to-regexp v6 syntax and was migrated to "/pre/:v".'
     );
-    expect(strapi.log.warn).toHaveBeenCalledWith(
-      'Router prefix "/pre/:v(\\d+)": pattern `\\d+` on `:v` is no longer enforced. This prefix may now match requests meant for later routes.'
-    );
 
     const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
     app.use(router.routes());
     const server = app.callback();
 
     await expectReply(request(server).get('/pre/1/x'), { v: '1' });
-    await expectReply(request(server).get('/pre/abc/x'), { v: 'abc' });
+    await request(server).get('/pre/abc/x').expect(404);
   });
 
   it('translates an optional parameter in a router prefix', async () => {
@@ -662,10 +637,7 @@ describe('router path registration', () => {
       params: { 0: '12', 1: 'a/b' },
       matchedRoute: '/p/(\\d+)/(.*)',
     });
-    await expectReply(request(server).get('/p/abc/a'), {
-      params: { 0: 'abc', 1: 'a' },
-      matchedRoute: '/p/(\\d+)/(.*)',
-    });
+    await request(server).get('/p/abc/a').expect(404);
   });
 
   it('leaves an empty prefix group out and hides a repeated prefix literal', async () => {
@@ -707,14 +679,11 @@ describe('router path registration', () => {
       params: { 0: '3' },
       matchedRoute: '/v/(\\d+)/x',
     });
-    await expectReply(request(server).get('/v/abc/x'), {
-      params: { 0: 'abc' },
-      matchedRoute: '/v/(\\d+)/x',
-    });
+    await request(server).get('/v/abc/x').expect(404);
     await request(server).get('/old/1/x').expect(404);
   });
 
-  it('translates a v6 mount path without enforcing its custom pattern', async () => {
+  it('enforces a custom pattern on a v6 mount path', async () => {
     const { router } = createRouterApp();
     const nested = new Router();
     nested.get('/child', (ctx) => {
@@ -727,7 +696,7 @@ describe('router path registration', () => {
     const server = app.callback();
 
     await expectReply(request(server).get('/v/1/child'), { ok: true });
-    await expectReply(request(server).get('/v/abc/child'), { ok: true });
+    await request(server).get('/v/abc/child').expect(404);
   });
 
   it('registers a v6 route under a prefix that uses a v8 quoted name', () => {
@@ -758,7 +727,7 @@ describe('router path registration', () => {
     const server = app.callback();
 
     await expectReply(request(server).get('/api/en/x/y/1'), { lang: 'en', a: 'x/y', b: '1' });
-    await expectReply(request(server).get('/api/en/x/y'), { lang: 'en', a: 'x', b: 'y' });
+    await request(server).get('/api/en/x/y').expect(404);
   });
 
   it('registers a list of paths under a v6 router prefix', async () => {
@@ -775,11 +744,11 @@ describe('router path registration', () => {
 
     await expectReply(request(server).get('/p/1/a'), { pid: '1' });
     await expectReply(request(server).get('/p/1/b/2'), { pid: '1', id: '2' });
-    await expectReply(request(server).get('/p/1/b/x'), { pid: '1', id: 'x' });
-    await expectReply(request(server).get('/p/x/a'), { pid: 'x' });
+    await request(server).get('/p/1/b/x').expect(404);
+    await request(server).get('/p/x/a').expect(404);
   });
 
-  it('does not apply a custom pattern on a case-sensitive router', async () => {
+  it('applies a custom pattern with the router case sensitivity', async () => {
     const strapi = createStrapi();
     const router = new Router({ sensitive: true });
     installRoutePathTranslation(router, strapi);
@@ -792,7 +761,7 @@ describe('router path registration', () => {
     const server = app.callback();
 
     await expectReply(request(server).get('/s/abc'), { id: 'abc' });
-    await expectReply(request(server).get('/s/ABC'), { id: 'ABC' });
+    await request(server).get('/s/ABC').expect(404);
   });
 
   it('checks a mount path parameter and a route parameter that share a name', async () => {
@@ -809,7 +778,7 @@ describe('router path registration', () => {
     const server = app.callback();
 
     await expectReply(request(server).get('/m/1/2'), { id: '2' });
-    await expectReply(request(server).get('/m/1/x'), { id: 'x' });
+    await request(server).get('/m/1/x').expect(404);
   });
 
   it('gives pathless middleware the parameters of a v6 router prefix', async () => {
@@ -856,8 +825,8 @@ describe('router path registration', () => {
 
     await expectReply(request(server).get('/api/users/12'), { ok: true });
     expect(seen).toEqual(['12']);
-    await expectReply(request(server).get('/api/users/abc'), { ok: true });
-    await request(server).post('/api/users/abc').expect(405);
+    await request(server).get('/api/users/abc').expect(404);
+    await request(server).post('/api/users/abc').expect(404);
     await expectReply(request(server).get('/api/files/a%2Fb'), { name: 'a/b' });
   });
 });
@@ -887,10 +856,7 @@ describe('mount paths and matched routes', () => {
       params: { 0: '1', 1: 'a/b' },
       matchedRoute: '/v/(\\d+)/child/(.*)',
     });
-    await expectReply(request(server).get('/v/x/child/a'), {
-      params: { 0: 'x', 1: 'a' },
-      matchedRoute: '/v/(\\d+)/child/(.*)',
-    });
+    await request(server).get('/v/x/child/a').expect(404);
   });
 
   it('exposes an unnamed group on a middleware mount path as ctx.params[0]', async () => {
@@ -1058,7 +1024,7 @@ describe("Strapi's own v6 route paths", () => {
     await expectReply(request(server).get('/admin'), { params: {}, matchedRoute: '/admin/:path*' });
   });
 
-  it('keeps the three parts of a documentation version, without checking that they are numbers', async () => {
+  it('keeps the three parts of a documentation version and checks that they are numbers', async () => {
     const { server } = createStrapiServer([
       { prefix: '/documentation', paths: ['/v:major(\\d+).:minor(\\d+).:patch(\\d+)'] },
     ]);
@@ -1067,13 +1033,10 @@ describe("Strapi's own v6 route paths", () => {
       params: { major: '1', minor: '2', patch: '3' },
       matchedRoute: '/documentation/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
     });
-    await expectReply(request(server).get('/documentation/v1.2.3foo'), {
-      params: { major: '1', minor: '2', patch: '3foo' },
-      matchedRoute: '/documentation/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
-    });
+    await request(server).get('/documentation/v1.2.3foo').expect(404);
   });
 
-  it('does not enforce an unnamed alternation, so another value matches as ctx.params[0]', async () => {
+  it('enforces an unnamed alternation', async () => {
     const { server } = createStrapiServer([
       {
         prefix: '/admin',
@@ -1092,9 +1055,6 @@ describe("Strapi's own v6 route paths", () => {
       params: { 0: 'single', model_uid: 'api::a.a', id: '1' },
       matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
     });
-    await expectReply(request(server).get('/admin/content-manager/other-types/api::a.a/1/stage'), {
-      params: { 0: 'other', model_uid: 'api::a.a', id: '1' },
-      matchedRoute: '/admin/content-manager/(collection|single)-types/:model_uid/:id/stage',
-    });
+    await request(server).get('/admin/content-manager/other-types/api::a.a/1/stage').expect(404);
   });
 });
