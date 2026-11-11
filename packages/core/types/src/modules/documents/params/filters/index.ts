@@ -26,8 +26,8 @@ type DocumentIDKey = 'documentId';
  * The target UID is resolved through `infer` before recursing. When `TSchemaUID` is a type
  * parameter, the conditional type stays deferred, so TypeScript does not build an endless chain of
  * new `ObjectNotation<Target<...>>` instantiations, which would exhaust the heap on nested filters.
- * When `TSchemaUID` is known, the type is the target's filter object, or one operator on the target's
- * id ({@link IdOperatorCondition}).
+ * When the target's attributes are known, the type is the target's filter object, or one operator on
+ * the target's id ({@link IdOperatorCondition}). Otherwise it is the target's loose filter object.
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
@@ -37,7 +37,13 @@ type NestedAttributeCondition<
     Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TAttributeName>>,
     UID.Schema
   > extends infer TTargetUID extends UID.Schema
-    ? ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>
+    ? If<
+        HasKnownAttributeNames<TTargetUID>,
+        ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>,
+        // The loose filter of an unknown target already accepts any operator. A union with the
+        // operator objects would make TypeScript narrow on the operator key and drop it.
+        ObjectNotation<TTargetUID>
+      >
     : never;
 
 /**

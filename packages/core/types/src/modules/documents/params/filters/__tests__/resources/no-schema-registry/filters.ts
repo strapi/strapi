@@ -35,3 +35,13 @@ export const toWideComponent = <TSchemaUID extends UID.Component>(
 export const toWideSchema = <TSchemaUID extends UID.Schema>(
   filters: Filters<TSchemaUID>
 ): Filters<UID.Schema> => filters;
+
+declare const documents: Modules.Documents.ServiceInstance<UID.ContentType>;
+declare const documentIds: (string | undefined)[];
+
+/**
+ * Operators on an unknown attribute stay accepted in a Document Service call with a content type UID
+ * read at runtime, with any operand (e.g. `$in` with a possibly undefined item)
+ */
+documents.findMany({ filters: { documentId: { $in: documentIds } } });
+documents.findMany({ filters: { author: { $in: documentIds }, cover: { $null: true } } });
