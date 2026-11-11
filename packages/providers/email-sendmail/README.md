@@ -67,7 +67,7 @@ module.exports = ({ env }) => ({
 
 ### Example with DKIM
 
-Using **DKIM** (DomainKeys Identified Mail) can prevent emails from being considered as spam. More details about this subject can be found in the discussion on the Strapi forum: [Unsolved problem: emails goes to spam!](https://forum.strapi.io/t/unsolved-problem-emails-goes-to-spam/512?u=soringfs)
+Using **DKIM** (DomainKeys Identified Mail) can prevent emails from being considered as spam. More details about this subject can be found in the discussion on the Strapi forum: [Unsolved problem: emails goes to spam!](https://discord.com/invite/strapi)
 
 #### Generate the keys using OpenSSL
 

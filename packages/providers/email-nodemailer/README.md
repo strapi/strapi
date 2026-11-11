@@ -156,7 +156,7 @@ The following fields are supported:
 | html               | HTML version of the message                                                   |
 | watchHtml          | Apple Watch specific HTML version                                             |
 | amp                | AMP4Email content for interactive emails                                      |
-| attachments        | Array of attachment objects. See: https://nodemailer.com/message/attachments/ |
+| attachments        | Array of attachment objects. See: https://nodemailer.com/message/attachments |
 | alternatives       | Array of alternative content (e.g. Markdown alongside HTML)                   |
 | **Headers & Meta** |                                                                               |
 | headers            | Custom SMTP headers object (e.g. `{ 'X-Custom': 'value' }`)                   |
@@ -505,7 +505,7 @@ await strapi
   });
 ```
 
-See [nodemailer OAuth2 documentation](https://nodemailer.com/smtp/oauth2/) for details.
+See [nodemailer OAuth2 documentation](https://nodemailer.com/smtp/oauth2) for details.
 
 ### Connection pooling
 
