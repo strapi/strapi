@@ -1930,7 +1930,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     }
 
     const trimmed = trimJoinedTrailingSlash(current, captures, spans, path.length);
-    if (trimmed && passes(current, trimmed, path, undefined)) {
+    if (trimmed && passes(current, trimmed, path, spans)) {
       return trimmed;
     }
 

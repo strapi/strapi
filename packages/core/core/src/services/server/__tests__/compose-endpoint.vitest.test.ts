@@ -1195,6 +1195,25 @@ describe('router path registration', () => {
     await request(server).get('/b/x-5').expect(404);
   });
 
+  it('keeps a sibling lookbehind when a joined route drops its trailing slash', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/x:id((?<=x)\\d+)/:a([a-z]+):b(\\d+)?', (ctx) => {
+      reply(ctx, { id: ctx.params.id, a: ctx.params.a, b: ctx.params.b });
+    });
+    router.get('/(.*)', (ctx) => {
+      reply(ctx, { route: 'fallback' });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/x12/ab12/'), { id: '12', a: 'ab', b: '12' });
+    await expectReply(request(server).get('/x12/ab/'), { id: '12', a: 'ab' });
+  });
+
   it('takes the whole value a context pattern matches, not its first match', async () => {
     const strapi = createStrapi();
     const router = new Router();
