@@ -219,7 +219,6 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
 
   let head: RelationNode | null = null;
   let tail: RelationNode | null = null;
-  let size = 0;
   const nodesById = new Map<ID, RelationNode[]>();
 
   const linkNode = (relation: OrderedLink, before: RelationNode | null) => {
@@ -238,8 +237,6 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     } else {
       head = node;
     }
-
-    size += 1;
 
     const nodes = nodesById.get(relation.id);
     if (nodes) {
@@ -261,8 +258,6 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     } else {
       tail = node.prev;
     }
-
-    size -= 1;
 
     const nodes = nodesById.get(node.relation.id)!;
     nodes.splice(nodes.indexOf(node), 1);
@@ -290,11 +285,9 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
   };
 
   const toArray = () => {
-    const relations: OrderedLink[] = new Array(size);
-    let idx = 0;
+    const relations: OrderedLink[] = [];
     for (let node = head; node; node = node.next) {
-      relations[idx] = node.relation;
-      idx += 1;
+      relations.push(node.relation);
     }
     return relations;
   };
