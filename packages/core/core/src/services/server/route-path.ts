@@ -7,11 +7,14 @@ import type Router from '@koa/router';
  * Matching uses path-to-regexp v8. A custom pattern that stays on one parameter is tested against
  * the raw captured text, at that parameter's own position, so a value the pattern rejects is not a
  * match. A pattern that can match `/`, or a repeated pattern, becomes a wildcard, and the wildcard's
- * text is tested with the v6 shape of the pattern. A negated class that excludes `/`, such as
- * `[^/]+`, stays on one segment and is tested. Parameters with no text
- * between them become one parameter. When each piece stays on one segment, including an optional
- * piece, those patterns are tested against that one value and the pieces are written back.
- * Otherwise the separate values are not recovered.
+ * text is tested with the v6 shape of the pattern. On a `use()` layer that text is the declared
+ * shape at the start of the request, ending at `/` or at the end of the path, not the rest of the
+ * path the wildcard also captured. A wildcard followed by a literal is tested again where that
+ * literal starts. A negated class that excludes `/`, such as `[^/]+`, stays on one segment and is
+ * tested. Parameters with no text between them become one parameter. When each piece stays on one
+ * segment, including an optional piece, those patterns are tested against that one value and the
+ * pieces are written back. Otherwise the separate values are not recovered. A plain parameter after
+ * a separator cannot contain that separator, so splitting one segment does not try every cut.
  */
 
 export class RoutePathMigrationError extends Error {
@@ -96,6 +99,8 @@ const isV8Identifier = (name: string) => {
 };
 
 const escapeLiteral = (value: string) => value.replace(/[{}()[\]+?!*:\\]/g, '\\$&');
+
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const readParameterName = (path: string, start: number) => {
   let end = start;
@@ -405,13 +410,11 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     });
   };
 
-  const escapeForRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
   /** v6's default for a parameter with no custom pattern: one segment, giving the next piece the rest. */
   const PLAIN_PATTERN = '[^/]+?';
 
   const pieceSource = (piece: RoutePathSplit) => {
-    const body = `${escapeForRegExp(piece.prefix)}(${piece.pattern})${escapeForRegExp(piece.suffix)}`;
+    const body = `${escapeRegExp(piece.prefix)}(${piece.pattern})${escapeRegExp(piece.suffix)}`;
     return piece.optional ? `(?:${body})?` : body;
   };
 
@@ -660,7 +663,7 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     let recordKey = name;
     if (pattern !== undefined && pattern !== '.*') {
       recordKey = `${name}\u0000${recordedPatterns.size}`;
-      const separator = `${escapeForRegExp(suffix)}${escapeForRegExp(prefix)}`;
+      const separator = `${escapeRegExp(suffix)}${escapeRegExp(prefix)}`;
       recordedPatterns.set(recordKey, {
         parameter: name,
         pattern,
@@ -1400,22 +1403,32 @@ const compileConstraints = (
  * second `id`.
  */
 /**
- * True when only optional groups follow this wildcard, so the wildcard is the last thing the
- * route can match. Such a wildcard can swallow the router's optional trailing slash.
+ * True when only optional groups follow one of the parameters named `key`, so it is the last thing
+ * the layer can match. A wildcard there can swallow the router's optional trailing slash, and on a
+ * prefix layer it swallows the rest of the request path.
  */
-const wildcardEndsPath = (layer: TranslatedLayer, key: string) => {
+const paramEndsPath = (layer: TranslatedLayer, key: string, { wildcardOnly = true } = {}) => {
   if (typeof layer.path !== 'string') {
     return false;
   }
 
-  for (const token of [`*"${key.replace(/["\\]/g, '\\$&')}"`, `*${key}`]) {
-    const at = layer.path.lastIndexOf(token);
-    const rest = at === -1 ? undefined : layer.path.slice(at + token.length);
-    if (rest === undefined || (token === `*${key}` && ID_CONTINUE.test(rest[0] ?? ''))) {
-      continue;
-    }
+  const quoted = `"${key.replace(/["\\]/g, '\\$&')}"`;
+  const tokens = (wildcardOnly ? ['*'] : ['*', ':']).flatMap((sigil) => [
+    { token: `${sigil}${quoted}`, bare: false },
+    { token: `${sigil}${key}`, bare: true },
+  ]);
 
-    return rest.replace(/^\}/, '').replace(/\{[^{}]*\}/g, '') === '';
+  for (const { token, bare } of tokens) {
+    for (let at = layer.path.indexOf(token); at !== -1; at = layer.path.indexOf(token, at + 1)) {
+      const rest = layer.path.slice(at + token.length);
+      if (bare && ID_CONTINUE.test(rest[0] ?? '')) {
+        continue;
+      }
+
+      if (rest.replace(/^\}/, '').replace(/\{[^{}]*\}/g, '') === '') {
+        return true;
+      }
+    }
   }
 
   return false;
@@ -1447,7 +1460,7 @@ const trimTrailingSlash = (
   }
 
   for (const constraint of layer[LAYER_CONSTRAINTS] ?? []) {
-    if (!wildcardEndsPath(layer, constraint.key)) {
+    if (!paramEndsPath(layer, constraint.key)) {
       continue;
     }
 
@@ -1767,19 +1780,31 @@ const execIndexed = (regexp: RegExp, path: string) => {
   return indexed.exec(path) as (RegExpExecArray & { indices?: (CaptureSpan | undefined)[] }) | null;
 };
 
-type PathToken = { kind: 'text'; text: string } | { kind: 'param'; paramIndex: number };
+type PathToken =
+  | { kind: 'text'; text: string; optional: boolean }
+  | { kind: 'param'; paramIndex: number; wildcard: boolean; optional: boolean };
 
-/** Literals and parameters of a v8 path, in order. `{` and `}` are grouping, not text. */
+/**
+ * Literals and parameters of a v8 path, in order. `{` and `}` are grouping, not text, and end a
+ * literal, so each literal is either inside an optional group or not.
+ */
 const tokenizePath = (path: string): PathToken[] => {
   const tokens: PathToken[] = [];
   let text = '';
   let paramIndex = 0;
+  let depth = 0;
 
   const pushText = () => {
     if (text) {
-      tokens.push({ kind: 'text', text });
+      tokens.push({ kind: 'text', text, optional: depth > 0 });
       text = '';
     }
+  };
+
+  const pushParam = (sigil: string) => {
+    pushText();
+    tokens.push({ kind: 'param', paramIndex, wildcard: sigil === '*', optional: depth > 0 });
+    paramIndex += 1;
   };
 
   for (let index = 0; index < path.length; index += 1) {
@@ -1792,15 +1817,14 @@ const tokenizePath = (path: string): PathToken[] => {
     }
 
     if (character === '{' || character === '}') {
+      pushText();
+      depth += character === '{' ? 1 : -1;
       continue;
     }
 
     if ((character === ':' || character === '*') && path[index + 1] === '"') {
-      pushText();
-      const end = readQuotedNameEnd(path, index + 1);
-      tokens.push({ kind: 'param', paramIndex });
-      paramIndex += 1;
-      index = end - 1;
+      pushParam(character);
+      index = readQuotedNameEnd(path, index + 1) - 1;
       continue;
     }
 
@@ -1816,9 +1840,7 @@ const tokenizePath = (path: string): PathToken[] => {
       }
 
       if (name) {
-        pushText();
-        tokens.push({ kind: 'param', paramIndex });
-        paramIndex += 1;
+        pushParam(character);
         index += name.length;
         continue;
       }
@@ -1908,13 +1930,14 @@ const realignSameSegment = (
       continue;
     }
 
+    // A parameter without a pattern after a separator cannot contain that separator, as in
+    // path-to-regexp 6.3. Without that rule, the lazy pieces backtrack over every way to split a
+    // long segment such as `1-1-…-x`.
     const source = segment.paramIndexes
       .map((index, position) => {
-        const pattern = byIndex.get(index)?.pattern ?? '[^/]+?';
-        const between =
-          position === 0
-            ? ''
-            : segment.betweens[position - 1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const between = position === 0 ? '' : escapeRegExp(segment.betweens[position - 1]);
+        const pattern =
+          byIndex.get(index)?.pattern ?? (between ? `(?:(?!${between})[^/])+?` : '[^/]+?');
         return `${between}(${pattern})`;
       })
       .join('');
@@ -1968,6 +1991,125 @@ const realignSameSegment = (
   return changed ? { captures: next, spans: nextSpans } : null;
 };
 
+/** The most ends {@link installConstraintMatch} tries for one wildcard before it gives up. */
+const MAX_SHORTER_SPLITS = 32;
+
+/**
+ * A copy of `regexp` with the content of some capture groups replaced, keyed by group number, or
+ * `null`. v8 groups do not nest, so each group's content is the text up to its own `)`.
+ */
+const replaceCaptures = (regexp: RegExp, contents: Map<number, string>) => {
+  const { source } = regexp;
+  let result = '';
+  let copied = 0;
+  let count = 0;
+  let inClass = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+
+    if (character === '\\') {
+      index += 1;
+    } else if (inClass) {
+      inClass = character !== ']';
+    } else if (character === '[') {
+      inClass = true;
+    } else if (character === '(' && source[index + 1] !== '?') {
+      count += 1;
+      const content = contents.get(count);
+      if (content !== undefined) {
+        const close = findPatternEnd(source, index + 1);
+        if (close === -1) {
+          return null;
+        }
+
+        result += `${source.slice(copied, index + 1)}${content}`;
+        copied = close;
+        index = close - 1;
+      }
+    }
+  }
+
+  try {
+    return new RegExp(result + source.slice(copied), regexp.flags);
+  } catch {
+    return null;
+  }
+};
+
+/** A `router.use()` layer: it matches the start of the request path, not all of it. */
+const isPrefixLayer = (layer: TranslatedLayer) =>
+  layer[LAYER_PATHLESS] === true || layer.opts.end === false;
+
+/**
+ * On a prefix layer, a wildcard that ends the path captures the rest of the request, as in
+ * `/f/1/x` for `router.use('/f/:p(\d+)+')`. v6 matched the declared shape at the start: the
+ * longest text the pattern accepts that ends at a `/` or at the end of the path. Under a router
+ * prefix, a pathless middleware was `prefix([^/]*)` in v6, so its last parameter only has to
+ * start the segment, as `5` does in `/p/5.json` for the prefix `/p/:id(\d+)`.
+ */
+const matchPathPrefix = (
+  layer: TranslatedLayer,
+  captures: readonly (string | undefined)[],
+  path: string,
+  spans: readonly (CaptureSpan | undefined)[] | undefined
+): {
+  captures: (string | undefined)[];
+  spans: (CaptureSpan | undefined)[];
+  unchecked?: boolean;
+} | null => {
+  const pathless = layer[LAYER_PATHLESS] === true;
+  if (!spans || !isPrefixLayer(layer)) {
+    return null;
+  }
+
+  const boundary = pathless ? '(?=[^/]*(?:/|$))' : '(?=/|$)';
+  const next = captures.slice();
+  const nextSpans = spans.slice();
+  let changed = false;
+
+  for (const constraint of layer[LAYER_CONSTRAINTS] ?? []) {
+    if (!paramEndsPath(layer, constraint.key, { wildcardOnly: !pathless })) {
+      continue;
+    }
+
+    const slot = captureSlot(layer, next, constraint);
+    const span = typeof slot === 'number' ? nextSpans[slot] : undefined;
+    const value = typeof slot === 'number' ? next[slot] : undefined;
+    if (
+      typeof slot !== 'number' ||
+      !span ||
+      typeof value !== 'string' ||
+      path.slice(span[0], span[1]) !== value
+    ) {
+      continue;
+    }
+
+    let found: RegExpExecArray | null = null;
+    try {
+      const sticky = new RegExp(
+        `(?:${constraint.pattern})${boundary}`,
+        `${constraint.regexp.flags}y`
+      );
+      sticky.lastIndex = span[0];
+      found = sticky.exec(path);
+    } catch {
+      // The guard cannot be checked, so the layer matches and the handler behind it does not run
+      // without the guard.
+      return { captures: captures.slice(), spans: spans.slice(), unchecked: true };
+    }
+
+    const end = found ? span[0] + found[0].length : span[1];
+    if (end > span[0] && end < span[1]) {
+      next[slot] = path.slice(span[0], end);
+      nextSpans[slot] = [span[0], end];
+      changed = true;
+    }
+  }
+
+  return changed ? { captures: next, spans: nextSpans } : null;
+};
+
 /**
  * A translated path is only a candidate. `layer.match` still rejects a capture whose custom
  * pattern does not match, so a later route can run and another method stays 404.
@@ -1994,50 +2136,54 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
 
   const alternatives = new WeakMap<RegExp, RegExpAlternative[]>();
 
+  const constraintPasses = (
+    current: TranslatedLayer,
+    constraint: CompiledConstraint,
+    captures: readonly (string | null | undefined)[],
+    path: string,
+    spans: readonly (CaptureSpan | undefined)[] | undefined
+  ) => {
+    const value = constraintValue(current, captures, constraint);
+    if (value == null) {
+      return !constraint.required;
+    }
+
+    const slot = captureSlot(current, captures, constraint);
+    const span = slot == null ? undefined : spans?.[slot];
+    if (
+      constraint.split.length === 0 &&
+      span &&
+      patternNeedsContext(constraint.pattern) &&
+      path.slice(span[0], span[1]) === value
+    ) {
+      return matchesInContext(path, span[0], span[1], constraint.pattern, constraint.regexp.flags);
+    }
+
+    if (constraint.split.length > 0 && patternNeedsContext(constraint.pattern)) {
+      const slot = captureSlot(current, captures, constraint);
+      const parts = contextualSplitParts(
+        constraint,
+        value,
+        slot == null ? undefined : spans?.[slot],
+        path
+      );
+      if (parts !== undefined) {
+        return parts !== null;
+      }
+    }
+
+    return constraint.regexp.test(value);
+  };
+
   const passes = (
     current: TranslatedLayer,
     captures: readonly (string | null | undefined)[],
     path: string,
     spans: readonly (CaptureSpan | undefined)[] | undefined
   ) =>
-    (current[LAYER_CONSTRAINTS] ?? []).every((constraint) => {
-      const value = constraintValue(current, captures, constraint);
-      if (value == null) {
-        return !constraint.required;
-      }
-
-      const slot = captureSlot(current, captures, constraint);
-      const span = slot == null ? undefined : spans?.[slot];
-      if (
-        constraint.split.length === 0 &&
-        span &&
-        patternNeedsContext(constraint.pattern) &&
-        path.slice(span[0], span[1]) === value
-      ) {
-        return matchesInContext(
-          path,
-          span[0],
-          span[1],
-          constraint.pattern,
-          constraint.regexp.flags
-        );
-      }
-
-      if (constraint.split.length > 0 && patternNeedsContext(constraint.pattern)) {
-        const slot = captureSlot(current, captures, constraint);
-        const parts = contextualSplitParts(
-          constraint,
-          value,
-          slot == null ? undefined : spans?.[slot],
-          path
-        );
-        if (parts !== undefined) {
-          return parts !== null;
-        }
-      }
-
-      return constraint.regexp.test(value);
-    });
+    (current[LAYER_CONSTRAINTS] ?? []).every((constraint) =>
+      constraintPasses(current, constraint, captures, path, spans)
+    );
 
   // Remember the piece values of a joined capture that needs context, so the shim can split it.
   const rememberParts = (
@@ -2089,6 +2235,141 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       return rememberParts(current, realigned.captures, path, realigned.spans);
     }
 
+    const prefixed = matchPathPrefix(current, captures, path, spans);
+    if (
+      prefixed &&
+      (prefixed.unchecked || passes(current, prefixed.captures, path, prefixed.spans))
+    ) {
+      return rememberParts(current, prefixed.captures, path, prefixed.spans);
+    }
+
+    return null;
+  };
+
+  /**
+   * v8 gives a wildcard the most text it can, and v6 backtracked into the custom pattern for a
+   * shorter capture. When a literal follows the wildcard, as the `/` in `/:a([a-z/]+)/:b(.+)`, the
+   * capture can only end where that literal starts, so only those ends are tried, longest first.
+   * Every other capture is then read again from the layer's own regexp, with this one pinned to
+   * the shorter length. `'untestable'` when there are more ends than {@link MAX_SHORTER_SPLITS}.
+   */
+  const shorterSplit = (
+    current: TranslatedLayer,
+    regexp: RegExp,
+    offset: number,
+    captures: (string | undefined)[],
+    path: string,
+    spans: readonly (CaptureSpan | undefined)[] | undefined
+  ): (string | undefined)[] | 'untestable' | null => {
+    const plan = capturePlan(current);
+    if (!spans || !plan || typeof current.path !== 'string') {
+      return null;
+    }
+
+    const tokens = tokenizePath(current.path);
+
+    for (const constraint of current[LAYER_CONSTRAINTS] ?? []) {
+      const slot = captureSlot(current, captures, constraint);
+      const span = typeof slot === 'number' ? spans[slot] : undefined;
+      const index = logicalIndex(current, plan, constraint);
+      const at = tokens.findIndex((token) => token.kind === 'param' && token.paramIndex === index);
+      const token = tokens[at];
+      const following = tokens[at + 1];
+      if (
+        typeof slot !== 'number' ||
+        !span ||
+        token?.kind !== 'param' ||
+        !token.wildcard ||
+        following?.kind !== 'text' ||
+        (following.optional && !token.optional) ||
+        constraintPasses(current, constraint, captures, path, spans)
+      ) {
+        continue;
+      }
+
+      const after = tokens[at + 2];
+      const layout = activeLayout(plan, captures);
+      const nextPosition =
+        after?.kind === 'param' && after.wildcard && layout !== -1
+          ? plan.layouts[layout].indexOf(after.paramIndex)
+          : -1;
+      const nextWildcard = nextPosition === -1 ? -1 : plan.offsets[layout] + nextPosition;
+
+      // The pattern, ending where the following literal starts, is one match. It finds the longest
+      // cut the pattern accepts even when that literal occurs many times. Further cuts are only
+      // the places the literal itself starts, and only up to {@link MAX_SHORTER_SPLITS} of them.
+      const ends: number[] = [];
+      try {
+        const direct = new RegExp(
+          `(?:${constraint.pattern})(?=${escapeRegExp(following.text)})`,
+          `${constraint.regexp.flags}y`
+        );
+        direct.lastIndex = span[0];
+        const directFound = direct.exec(path);
+        const directEnd = directFound ? span[0] + directFound[0].length : 0;
+        if (directEnd > span[0] && directEnd < span[1]) {
+          ends.push(directEnd);
+        }
+      } catch {
+        return 'untestable';
+      }
+
+      let bounded = true;
+      for (
+        let end = path.lastIndexOf(following.text, span[1] - 1);
+        end > span[0];
+        end = path.lastIndexOf(following.text, end - 1)
+      ) {
+        if (ends.length > MAX_SHORTER_SPLITS) {
+          bounded = false;
+          break;
+        }
+        if (!ends.includes(end)) {
+          ends.push(end);
+        }
+      }
+
+      for (const end of ends) {
+        const shorter = captures.slice();
+        shorter[slot] = path.slice(span[0], end);
+        const shorterSpans = spans.slice();
+        shorterSpans[slot] = [span[0], end];
+        if (!constraintPasses(current, constraint, shorter, path, shorterSpans)) {
+          continue;
+        }
+
+        // v8 keeps a wildcard that follows another wildcard on one segment, so the two cannot
+        // backtrack against each other. With this one at a fixed length, the next one can take
+        // the rest of the text, as it did in v6.
+        const group = slot - offset + 1;
+        const contents = new Map([[group, `[\\s\\S]{${end - span[0]}}`]]);
+        if (nextWildcard === slot + 1) {
+          contents.set(group + 1, '[\\s\\S]+');
+        }
+        const pinned = replaceCaptures(regexp, contents);
+        const found = pinned ? execIndexed(pinned, path) : null;
+        if (!found) {
+          continue;
+        }
+
+        const candidate: (string | undefined)[] = captures.map(() => undefined);
+        const candidateSpans: (CaptureSpan | undefined)[] = captures.map(() => undefined);
+        for (let position = 1; position < found.length; position += 1) {
+          candidate[offset + position - 1] = found[position];
+          candidateSpans[offset + position - 1] = found.indices?.[position];
+        }
+
+        const accepted = accept(current, candidate, path, candidateSpans);
+        if (accepted) {
+          return accepted;
+        }
+      }
+
+      if (!bounded) {
+        return 'untestable';
+      }
+    }
+
     return null;
   };
 
@@ -2112,6 +2393,13 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       alternatives.set(regexp, splitAlternatives(regexp));
     }
 
+    const tries: {
+      regexp: RegExp;
+      offset: number;
+      captures: (string | undefined)[];
+      spans?: (CaptureSpan | undefined)[];
+    }[] = [{ regexp, offset: 0, captures, spans }];
+
     for (const alternative of alternatives.get(regexp) ?? []) {
       const match = execIndexed(alternative.regexp, path);
       if (!match) {
@@ -2128,9 +2416,34 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       if (alternativeAccepted) {
         return alternativeAccepted;
       }
+      tries.push({
+        regexp: alternative.regexp,
+        offset: alternative.offset,
+        captures: candidate,
+        spans: candidateSpans,
+      });
     }
 
-    return null;
+    let untestable = false;
+    for (const attempt of tries) {
+      const split = shorterSplit(
+        current,
+        attempt.regexp,
+        attempt.offset,
+        attempt.captures,
+        path,
+        attempt.spans
+      );
+      if (split === 'untestable') {
+        untestable = true;
+      } else if (split) {
+        return split;
+      }
+    }
+
+    // A middleware layer that cannot be tested still runs, so a guard is never skipped for a
+    // route behind it.
+    return untestable && isPrefixLayer(current) ? captures : null;
   };
 
   layer.match = function match(this: TranslatedLayer, path: string) {

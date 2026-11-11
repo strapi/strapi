@@ -1488,6 +1488,107 @@ describe('router path registration', () => {
     expect(seen).toEqual([{ 0: '7' }]);
   });
 
+  it('runs a prefix guard whose pattern can match a slash or repeat', async () => {
+    const { server, router } = createRouterApp();
+    const guard = (ctx: { status: number }) => {
+      ctx.status = 401;
+    };
+
+    router.use('/f/:p(\\d+)+', guard);
+    router.get('/f/:p(\\d+)+/x', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.use('/g/:p(.+\\.d)', guard);
+    router.get('/g/:p(.+\\.d)/x', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    await request(server).get('/f/1/x').expect(401);
+    await request(server).get('/f/1/2/x').expect(401);
+    await request(server).get('/g/a.d/x').expect(401);
+    await request(server).get('/f/ab/x').expect(404);
+    await request(server).get('/g/ab/x').expect(404);
+  });
+
+  it('runs a pathless guard when the route adds a suffix to a patterned prefix', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ prefix: '/p/:id(\\d+)' });
+    installRoutePathTranslation(router, strapi);
+    router.use((ctx) => {
+      ctx.status = 401;
+    });
+    router.get('.json', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+
+    await request(app.callback()).get('/p/5.json').expect(401);
+    await request(app.callback()).get('/p/ab.json').expect(404);
+  });
+
+  it('runs a guard on a joined optional parameter', async () => {
+    const { server, router } = createRouterApp();
+
+    router.use('/t/:a([a-z]+):id(\\d+)?', (ctx) => {
+      ctx.status = 401;
+    });
+    router.get('/t/:a([a-z]+):id(\\d+)?/r', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    await request(server).get('/t/ab5/r').expect(401);
+    await request(server).get('/t/ab/r').expect(401);
+    await request(server).get('/t/5/r').expect(404);
+  });
+
+  it('rejects a long hyphenated segment without trying every split', async () => {
+    const { server, router } = createRouterApp();
+
+    router.get('/a/:w-:x-:y-:id(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    await expectReply(request(server).get('/a/a-b-c-12'), { w: 'a', x: 'b', y: 'c', id: '12' });
+
+    const segment = `${'1-'.repeat(200)}x`;
+    const started = performance.now();
+    await request(server).get(`/a/${segment}`).expect(404);
+    expect(performance.now() - started).toBeLessThan(250);
+  });
+
+  it('matches a greedy wildcard again when a later literal bounds the split', async () => {
+    const { server, router } = createRouterApp();
+
+    router.get('/w/:a([a-z/]+)/:b(.+)', (ctx) => {
+      reply(ctx, { route: 'w', ...ctx.params });
+    });
+    router.get('/s/:file(.+\\.js)/:rest(.*)', (ctx) => {
+      reply(ctx, { route: 's', ...ctx.params });
+    });
+
+    await expectReply(request(server).get('/w/x/y/1/2'), { route: 'w', a: 'x/y', b: '1/2' });
+    await expectReply(request(server).get('/s/a.js/b/c'), {
+      route: 's',
+      file: 'a.js',
+      rest: 'b/c',
+    });
+  });
+
+  it('matches a repeated pattern when a later optional wildcard is absent', async () => {
+    const { server, router } = createRouterApp();
+
+    router.get('/:path(\\d+)+/:pathx(\\d+)*', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    await expectReply(request(server).get('/1/'), { path: '1' });
+    await expectReply(request(server).get('/1'), { path: '1' });
+    await expectReply(request(server).get('/1/2'), { path: '1', pathx: '2' });
+    await expectReply(request(server).get('/1/2/'), { path: '1', pathx: '2' });
+  });
+
   it('matches a custom pattern value on an API router mounted on the server', async () => {
     const strapi = createStrapi();
     const router = new Router();
