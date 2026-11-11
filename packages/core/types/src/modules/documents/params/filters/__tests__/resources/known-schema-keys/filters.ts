@@ -129,13 +129,8 @@ export const shortcut: Filters<'shared.link'>[] = [
   { article: { $notNull: true } },
   { article: { title: 'a' } },
   { article: { id: { $in: [1, 2] } } },
-  {
-    article: {
-      // @ts-expect-error An operator next to attribute keys throws at runtime
-      $in: [1],
-      title: 'a',
-    },
-  },
+  // @ts-expect-error An operator next to attribute keys throws at runtime
+  { article: { $in: [1], title: 'a' } },
   {
     // @ts-expect-error Two operators throw at runtime
     article: { $gt: 1, $lt: 5 },
@@ -149,6 +144,16 @@ export const shortcut: Filters<'shared.link'>[] = [
   {
     // @ts-expect-error Wrong value type for $null
     article: { $null: 'a' },
+  },
+  { article: { $between: [1, 5] } },
+  { article: { $notIn: [1] } },
+  {
+    // @ts-expect-error A text operator on an id
+    article: { $contains: 1 },
+  },
+  {
+    // @ts-expect-error A text operator on an id
+    article: { $startsWithi: 'a' },
   },
 ];
 
