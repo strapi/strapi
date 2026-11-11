@@ -1328,9 +1328,182 @@ const compileConstraints = (
 
 /**
  * The raw text a constraint applies to. v8 writes one alternative per combination of optional
- * groups, each with its own captures, so the value is found among the captures that matched.
+ * groups, each with its own captures, so counting the values that matched loses which parameter
+ * a value belongs to. `/a/:id(\d+)?/b/:id` requested as `/a/b/x` has one value, and it is the
+ * second `id`.
  */
 const constraintValue = (
+  layer: TranslatedLayer,
+  captures: readonly (string | null | undefined)[],
+  constraint: CompiledConstraint
+) => {
+  // `null` means the plan could not be read. `undefined` means this parameter was left out.
+  const planned = fromCapturePlan(layer, captures, constraint);
+  return planned === null ? fromPresentValues(layer, captures, constraint) : planned;
+};
+
+/**
+ * v8's alternatives, in its order: every combination of optional groups, with the last group
+ * varying first. `undefined` when that order does not reproduce `layer.paramNames`, so the caller
+ * uses the count of present values instead.
+ */
+type CapturePlan = {
+  params: { name: string; optional: boolean }[];
+  /** Logical parameter indexes included in each alternative, in v8's order. */
+  layouts: number[][];
+  offsets: number[];
+};
+
+const MAX_OPTIONAL_GROUPS = 12;
+const capturePlans = new WeakMap<TranslatedLayer, { path: string; plan?: CapturePlan }>();
+
+const layoutsFor = (params: CapturePlan['params']): number[][] => {
+  const expand = (index: number): number[][] => {
+    if (index === params.length) {
+      return [[]];
+    }
+
+    const rest = expand(index + 1);
+    const included = rest.map((layout) => [index, ...layout]);
+
+    return params[index].optional ? [...included, ...rest] : included;
+  };
+
+  return expand(0);
+};
+
+const capturePlan = (layer: TranslatedLayer): CapturePlan | undefined => {
+  const path = typeof layer.path === 'string' ? layer.path : '';
+  const cached = capturePlans.get(layer);
+  if (cached?.path === path) {
+    return cached.plan;
+  }
+
+  const params = scanPathParams(path);
+  const names = (layer.paramNames ?? []).map((param) => param.name);
+  const optionalCount = params.filter((param) => param.optional).length;
+  let plan: CapturePlan | undefined;
+
+  if (optionalCount <= MAX_OPTIONAL_GROUPS) {
+    const layouts = layoutsFor(params);
+    const expected = layouts.flat();
+    const matches =
+      expected.length === names.length &&
+      expected.every((index, position) => params[index]?.name === names[position]);
+
+    if (matches) {
+      const offsets: number[] = [];
+      let cursor = 0;
+      for (const layout of layouts) {
+        offsets.push(cursor);
+        cursor += layout.length;
+      }
+      plan = { params, layouts, offsets };
+    }
+  }
+
+  capturePlans.set(layer, { path, plan });
+  return plan;
+};
+
+/** The part of `layer.path` added by a router that does not translate paths, in front of the parts. */
+const untranslatedPrefix = (layer: TranslatedLayer) => {
+  const parts = layer[LAYER_PARTS];
+  if (!parts?.length || typeof layer.path !== 'string') {
+    return undefined;
+  }
+
+  let rest = layer.path;
+  for (let index = parts.length - 1; index >= 0; index -= 1) {
+    const part = parts[index].path;
+    const droppedSlash = part === '/' && !rest.endsWith('/');
+
+    if (part === '' || droppedSlash) {
+      continue;
+    }
+    if (!rest.endsWith(part)) {
+      return undefined;
+    }
+
+    rest = rest.slice(0, rest.length - part.length);
+  }
+
+  return rest;
+};
+
+/**
+ * Index of this constraint in the whole path. A mount path from a router without translation is
+ * not one of the parts, and its parameters come first.
+ */
+const logicalIndex = (
+  layer: TranslatedLayer,
+  plan: CapturePlan,
+  constraint: CompiledConstraint
+) => {
+  const prefix = untranslatedPrefix(layer);
+  if (prefix === undefined) {
+    return undefined;
+  }
+
+  const leading = scanPathParams(prefix).filter((param) => param.name === constraint.key).length;
+  const wanted = leading + constraint.occurrence;
+  let seen = 0;
+
+  for (let index = 0; index < plan.params.length; index += 1) {
+    if (plan.params[index].name !== constraint.key) {
+      continue;
+    }
+    if (seen === wanted) {
+      return index;
+    }
+    seen += 1;
+  }
+
+  return undefined;
+};
+
+const activeLayout = (plan: CapturePlan, captures: readonly (string | null | undefined)[]) => {
+  for (let index = 0; index < plan.layouts.length; index += 1) {
+    const offset = plan.offsets[index];
+    const end = offset + plan.layouts[index].length;
+    let matches = end <= captures.length;
+
+    for (let slot = 0; matches && slot < captures.length; slot += 1) {
+      const inside = slot >= offset && slot < end;
+      matches = (captures[slot] != null) === inside;
+    }
+
+    if (matches) {
+      return index;
+    }
+  }
+
+  return -1;
+};
+
+/** The capture for this constraint, or `null` when this path has no usable plan. */
+const fromCapturePlan = (
+  layer: TranslatedLayer,
+  captures: readonly (string | null | undefined)[],
+  constraint: CompiledConstraint
+) => {
+  const plan = capturePlan(layer);
+  if (!plan) {
+    return null;
+  }
+
+  const layout = activeLayout(plan, captures);
+  const index = layout === -1 ? undefined : logicalIndex(layer, plan, constraint);
+  if (layout === -1 || index === undefined) {
+    return null;
+  }
+
+  const position = plan.layouts[layout].indexOf(index);
+  return position === -1 ? undefined : captures[plan.offsets[layout] + position];
+};
+
+/** A path whose alternatives we could not read. Right when every parameter, or only the required ones, matched. */
+const fromPresentValues = (
   layer: TranslatedLayer,
   captures: readonly (string | null | undefined)[],
   constraint: CompiledConstraint
@@ -1338,13 +1511,12 @@ const constraintValue = (
   const names = layer.paramNames ?? [];
   const present = captures.filter(
     (value, index) => value != null && names[index]?.name === constraint.key
-  ) as string[];
+  );
 
   if (present.length === constraint.optional.length) {
     return present[constraint.occurrence];
   }
 
-  // A parameter that is left out is optional. With only the required ones present, skip the rest.
   const required = constraint.optional.flatMap((isOptional, index) => (isOptional ? [] : [index]));
   if (present.length === required.length) {
     const position = required.indexOf(constraint.occurrence);

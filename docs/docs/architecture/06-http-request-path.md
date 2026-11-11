@@ -4,7 +4,7 @@ description: How Strapi handles an HTTP request from Koa to the response, for th
 status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.
-  - Custom patterns are applied again after the `@koa/router` 15 upgrade, against the raw capture at that parameter's position. A pattern that can match `/`, and a pattern that included the separator before the next parameter, still do not match as they did in path-to-regexp v6. A negated class that excludes `/` stays on one segment. Optional parameters with no text between them keep their prefix.
+  - Custom patterns are applied again after the `@koa/router` 15 upgrade, against the raw capture at that parameter's position. A pattern that can match `/`, and a pattern that included the separator before the next parameter, still do not match as they did in path-to-regexp v6. A negated class that excludes `/` stays on one segment. Optional parameters with no text between them keep their prefix. Parameters that share a name are tested separately, including an omitted optional and a mount path from a router that does not translate paths.
   - The statement that `strapi::session` adds `koa-session` before every listed middleware comes from reading `registerApplicationMiddlewares` and the session factory. No test confirms it.
   - The page does not cover the GraphQL plugin request path or the upload plugin `/uploads` route.
 ---
@@ -122,7 +122,7 @@ Strapi translates:
 
 A router that a plugin creates itself is not wrapped up front. When a route object with v6 syntax is composed onto it, `registerTranslatedRoute` wraps that router first.
 
-Matching uses path-to-regexp v8. A custom pattern is tested against the raw captured text, at that parameter's position, with the router's case sensitivity. Two parameters that share a name, one on a prefix and one on the route, are tested separately. v8 compiles optional groups to one alternative per combination and takes the first that matches. When its values fail a pattern, the later alternatives are tried in order, so `/o/:a(\d+)?/:b([a-z]+)?` reads `/o/x` as `b`, as v6 did by backtracking. A value the pattern rejects is not a match, so a later route can run, and another method answers 404. The check uses the encoded text, as it did in v6, so `/users/%31` does not match `:id(\d+)`.
+Matching uses path-to-regexp v8. A custom pattern is tested against the raw captured text, at that parameter's position, with the router's case sensitivity. Two parameters that share a name are tested against their own captures. That includes a prefix, a mount path, and a mount path added by a router that does not translate paths. v8 compiles optional groups to one alternative per combination and takes the first that matches. When its values fail a pattern, the later alternatives are tried in order, so `/o/:a(\d+)?/:b([a-z]+)?` reads `/o/x` as `b`, as v6 did by backtracking. An omitted optional parameter is skipped, so `/a/:id(\d+)?/b/:id` reads `/a/b/x` as the second `id`. A value the pattern rejects is not a match, so a later route can run, and another method answers 404. The check uses the encoded text, as it did in v6, so `/users/%31` does not match `:id(\d+)`.
 
 A pattern that can match `/` becomes a wildcard and is not tested, so that route can match a request the v6 path rejected. A negated class that excludes `/`, such as `[^/]+`, stays on one segment and is tested.
 

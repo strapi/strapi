@@ -935,6 +935,118 @@ describe('router path registration', () => {
     await request(server).get('/m/1/s/2').expect(404);
   });
 
+  it('reads the second optional parameter when the first one is omitted', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/a/:id(\\d+)?/b/:id?', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/a/b/x'), { id: 'x' });
+    await expectReply(request(server).get('/a/5/b/x'), { id: 'x' });
+    await expectReply(request(server).get('/a/5/b'), { id: '5' });
+    await expectReply(request(server).get('/a/b'), {});
+    await request(server).get('/a/x/b/y').expect(404);
+  });
+
+  it('checks two optional parameters that share a name against their own patterns', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/x/:id(\\d+)?/y/:id([a-z]+)?', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/x/y/abc'), { id: 'abc' });
+    await expectReply(request(server).get('/x/5/y/abc'), { id: 'abc' });
+    await expectReply(request(server).get('/x/5/y'), { id: '5' });
+    await expectReply(request(server).get('/x/y'), {});
+    await request(server).get('/x/y/5').expect(404);
+  });
+
+  it('checks a route pattern separately from an untranslated mount path that shares its name', async () => {
+    const child = new Router();
+    installRoutePathTranslation(child, createStrapi());
+    child.get('/a/:id(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const parent = new Router();
+    parent.use('/t/:id', child.routes());
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(parent.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/t/abc/a/5'), { id: '5' });
+    await expectReply(request(server).get('/t/1/a/5'), { id: '5' });
+    await request(server).get('/t/1/a/x').expect(404);
+  });
+
+  it('matches a required parameter when a later optional segment is omitted', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/articles/:id(\\d+)/:slug?', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/articles/5'), { id: '5' });
+    await expectReply(request(server).get('/articles/5/my-post'), { id: '5', slug: 'my-post' });
+    await request(server).get('/articles/x').expect(404);
+  });
+
+  it('matches a pattern after an omitted optional segment', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/:lang?/posts/:id(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/posts/5'), { id: '5' });
+    await expectReply(request(server).get('/en/posts/5'), { lang: 'en', id: '5' });
+    await request(server).get('/posts/x').expect(404);
+  });
+
+  it('falls through an optional pattern to a later static route', async () => {
+    const strapi = createStrapi();
+    const router = new Router();
+    installRoutePathTranslation(router, strapi);
+    router.get('/posts/:id(\\d+)?/:page(\\d+)?', (ctx) => {
+      reply(ctx, { route: 'pattern', ...ctx.params });
+    });
+    router.get('/posts/drafts', (ctx) => {
+      reply(ctx, { route: 'drafts' });
+    });
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/posts/drafts'), { route: 'drafts' });
+    await expectReply(request(server).get('/posts/5'), { route: 'pattern', id: '5' });
+    await expectReply(request(server).get('/posts/5/2'), { route: 'pattern', id: '5', page: '2' });
+    await expectReply(request(server).get('/posts'), { route: 'pattern' });
+  });
+
   it('gives pathless middleware the parameters of a v6 router prefix', async () => {
     const strapi = createStrapi();
     const router = new Router({ prefix: '/p/(\\d+)' });
