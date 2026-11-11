@@ -173,7 +173,9 @@ describe('Role controller', () => {
           services: {
             role: {
               assignPermissions,
-              checkPermissionsCeiling: vi.fn(),
+              checkPermissionsCeiling: vi.fn((_requester, _roleID, permissions) =>
+                Promise.resolve(permissions)
+              ),
               findOne: findOneRole,
               getSuperAdmin: vi.fn(() => undefined),
               hooks: {
@@ -246,7 +248,9 @@ describe('Role controller', () => {
           services: {
             role: {
               assignPermissions,
-              checkPermissionsCeiling: vi.fn(),
+              checkPermissionsCeiling: vi.fn((_requester, _roleID, permissions) =>
+                Promise.resolve(permissions)
+              ),
               findOne: findOneRole,
               getSuperAdmin: vi.fn(() => undefined),
               hooks: {
@@ -359,7 +363,9 @@ describe('Role controller', () => {
       };
 
       test('Checks the requester holds the normalized permissions before assigning them', async () => {
-        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn((_requester, _roleID, permissions) =>
+          Promise.resolve(permissions)
+        );
         const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
 
         await roleController.updatePermissions(ctx);
@@ -375,8 +381,20 @@ describe('Role controller', () => {
         );
       });
 
+      test('Assigns the permissions the ceiling check returns', async () => {
+        const keptStored = [{ ...normalizedPermissions[0], properties: { fields: ['title'] } }];
+        const checkPermissionsCeiling = vi.fn(() => Promise.resolve(keptStored));
+        const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
+
+        await roleController.updatePermissions(ctx);
+
+        expect(assignPermissions).toHaveBeenCalledWith(roleID, keptStored);
+      });
+
       test('Checks an admin user session against the user', async () => {
-        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn((_requester, _roleID, permissions) =>
+          Promise.resolve(permissions)
+        );
         const { ctx } = setup(checkPermissionsCeiling, {
           auth: { strategy: { name: 'admin' }, credentials: user },
         });
@@ -392,7 +410,9 @@ describe('Role controller', () => {
 
       test('Checks an admin token request against the token permissions and its owner', async () => {
         const adminPermissions = [{ action: 'admin::roles.update', subject: null }];
-        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn((_requester, _roleID, permissions) =>
+          Promise.resolve(permissions)
+        );
         const { ctx } = setup(checkPermissionsCeiling, {
           auth: { strategy: { name: 'admin-token' }, credentials: { adminPermissions } },
         });
@@ -407,7 +427,9 @@ describe('Role controller', () => {
       });
 
       test('Checks an admin token request with no loaded permissions against nothing', async () => {
-        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn((_requester, _roleID, permissions) =>
+          Promise.resolve(permissions)
+        );
         const { ctx } = setup(checkPermissionsCeiling, {
           auth: { strategy: { name: 'admin-token' }, credentials: {} },
         });

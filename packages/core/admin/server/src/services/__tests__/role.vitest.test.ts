@@ -1,4 +1,4 @@
-import { describe, test, expect, expectTypeOf, vi } from 'vitest';
+import { describe, test, expect, expectTypeOf, vi, beforeEach, afterEach } from 'vitest';
 import _ from 'lodash';
 import { queryParams, errors } from '@strapi/utils';
 import constants from '../constants';
@@ -22,9 +22,15 @@ const {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   assignPermissions,
-  checkPermissionsCeiling,
   resetSuperAdminPermissions,
 } = roleService;
+
+// The permissions it returns are tested apart: here only whether it throws
+const checkPermissionsCeiling = async (
+  ...args: Parameters<typeof roleService.checkPermissionsCeiling>
+): Promise<void> => {
+  await roleService.checkPermissionsCeiling(...args);
+};
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -1600,6 +1606,136 @@ describe('Role', () => {
         });
 
         await expect(checkPermissionsCeiling({ user }, ROLE_ID, [])).resolves.toBeUndefined();
+      });
+    });
+
+    // Default roles are stored like this when a localized content type exists at first boot. The
+    // engine grants no locale for such a row, i18n's hook and the role editor read it as the
+    // default locale.
+    describe('a localized row stored with no locales', () => {
+      const storedRow = {
+        id: 1,
+        role: ROLE_ID,
+        action: CREATE,
+        subject: ARTICLE,
+        properties: { fields: ['title'] },
+        conditions: ['admin::is-creator'],
+      };
+      const createTitle = (locales: string[] | null) => ({
+        action: CREATE,
+        subject: ARTICLE,
+        properties: { fields: ['title'], locales },
+        conditions: ['admin::is-creator'],
+      });
+
+      // What i18n's hook does: a missing or empty `locales` becomes the default locale
+      const giveDefaultLocale = async (permissions: any[]) =>
+        permissions.map((permission) =>
+          permission.subject === ARTICLE &&
+          permission.properties?.locales !== null &&
+          !permission.properties?.locales?.length
+            ? { ...permission, properties: { ...permission.properties, locales: ['en'] } }
+            : permission
+        );
+
+      const setupUnlocalized = (rolePermissions: any[] = [storedRow]) =>
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions,
+          localizedSubjects: [ARTICLE],
+        });
+
+      beforeEach(() => {
+        roleService.hooks.willValidateUpdatePermissions.register(giveDefaultLocale);
+      });
+
+      afterEach(() => {
+        roleService.hooks.willValidateUpdatePermissions.delete(giveDefaultLocale);
+      });
+
+      test('Returns the row resent with the default locale as stored, without locales', async () => {
+        setupUnlocalized();
+
+        await expect(
+          roleService.checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+        ).resolves.toEqual([{ ...createTitle(['en']), properties: { fields: ['title'] } }]);
+      });
+
+      test('Returns the row narrowed to fewer fields as stored, without locales', async () => {
+        setupUnlocalized([{ ...storedRow, properties: { fields: ['title', 'socialLinks'] } }]);
+
+        await expect(
+          roleService.checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+        ).resolves.toEqual([{ ...createTitle(['en']), properties: { fields: ['title'] } }]);
+      });
+
+      test('Returns the row stored with empty locales as stored, without locales', async () => {
+        setupUnlocalized([{ ...storedRow, properties: { fields: ['title'], locales: [] } }]);
+
+        await expect(
+          roleService.checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+        ).resolves.toEqual([{ ...createTitle(['en']), properties: { fields: ['title'] } }]);
+      });
+
+      test('Rejects the row widened to another locale or to all locales', async () => {
+        setupUnlocalized();
+
+        for (const locales of [['fr'], ['en', 'fr'], null]) {
+          await expectForbidden(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(locales)]),
+            [createTitle(locales)]
+          );
+        }
+      });
+
+      test('Rejects the row with a field or a condition it does not store', async () => {
+        setupUnlocalized();
+
+        const extraField = {
+          ...createTitle(['en']),
+          properties: { fields: ['title', 'body'], locales: ['en'] },
+        };
+        const noCondition = { ...createTitle(['en']), conditions: [] };
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [extraField]), [
+          extraField,
+        ]);
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [noCondition]), [
+          noCondition,
+        ]);
+      });
+
+      test('Rejects the default locale on a row the role does not store', async () => {
+        setupUnlocalized([{ ...storedRow, action: READ }]);
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])]), [
+          createTitle(['en']),
+        ]);
+      });
+
+      test('Keeps the locales of a row the role stores with them', async () => {
+        setupUnlocalized([
+          storedRow,
+          { ...storedRow, id: 2, properties: { fields: ['body'], locales: ['en'] } },
+        ]);
+        const body = {
+          ...createTitle(['en']),
+          properties: { fields: ['body'], locales: ['en'] },
+        };
+
+        await expect(
+          roleService.checkPermissionsCeiling({ user }, ROLE_ID, [body, createTitle(['en'])])
+        ).resolves.toEqual([body, { ...createTitle(['en']), properties: { fields: ['title'] } }]);
+      });
+
+      test('Returns the requested permissions as they are for a super admin', async () => {
+        setupUnlocalized();
+
+        await expect(
+          roleService.checkPermissionsCeiling({ user: superAdminUser }, ROLE_ID, [
+            createTitle(['en']),
+          ])
+        ).resolves.toEqual([createTitle(['en'])]);
       });
     });
 

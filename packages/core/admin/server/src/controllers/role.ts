@@ -167,12 +167,14 @@ export default {
       input.permissions
     )) as typeof input.permissions;
 
+    let permissionsToAssign = normalizedPermissions;
+
     try {
-      await roleService.checkPermissionsCeiling(
+      permissionsToAssign = (await roleService.checkPermissionsCeiling(
         getCeilingRequester(ctx),
         role.id,
         normalizedPermissions
-      );
+      )) as typeof input.permissions;
     } catch (error) {
       // A ForbiddenError thrown from a controller is turned into a bare 403 by the auth
       // middleware, so respond here to keep the message and the rejected permissions.
@@ -183,7 +185,7 @@ export default {
       throw error;
     }
 
-    const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
+    const permissions = await roleService.assignPermissions(role.id, permissionsToAssign);
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
