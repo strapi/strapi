@@ -331,6 +331,25 @@ describe.each([
     await request(server).get('/x/ab12/').expect(404);
   });
 
+  it('does not treat a slash before later text as optional', async () => {
+    const { server } = createServer('/x/:a([a-z]+):b(\\d+)?/y');
+
+    await expectReply(request(server).get('/x/ab/y'), {
+      route: '/x/:a([a-z]+):b(\\d+)?/y',
+      params: { a: 'ab' },
+    });
+    await expectReply(request(server).get('/x/ab12/y'), {
+      route: '/x/:a([a-z]+):b(\\d+)?/y',
+      params: { a: 'ab', b: '12' },
+    });
+    await expectReply(request(server).get('/x/ab/y/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?/y',
+      params: { a: 'ab' },
+    });
+    await request(server).get('/x/ab//y').expect(404);
+    await request(server).get('/x/ab//y/').expect(404);
+  });
+
   it('matches when every joined parameter is optional', async () => {
     const { server } = createServer('/x/:a([a-z]+)?:b(\\d+)?');
 

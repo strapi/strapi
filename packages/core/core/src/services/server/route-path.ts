@@ -1202,7 +1202,7 @@ const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
     for (const name of generated) {
       const split = splits.get(name);
       if (split) {
-        const raw = constraintValue(layer, layer.captures(ctx.path), split);
+        const raw = constraintValue(layer, layer.captures(ctx.path), split, ctx.path);
         const found = raw ? split.regexp.exec(raw) : null;
         if (found) {
           for (const [index, part] of split.split.entries()) {
@@ -1348,20 +1348,22 @@ const compileConstraints = (
 const constraintValue = (
   layer: TranslatedLayer,
   captures: readonly (string | null | undefined)[],
-  constraint: CompiledConstraint
+  constraint: CompiledConstraint,
+  path: string
 ) => {
   // `null` means the plan could not be read. `undefined` means this parameter was left out.
   const planned = fromCapturePlan(layer, captures, constraint);
   const value = planned === null ? fromPresentValues(layer, captures, constraint) : planned;
 
   // A joined wildcard is greedy, so on a non-strict router it also takes the slash
-  // the router allows after the path. Drop that slash only when the pattern rejects
-  // the raw text and accepts the text without it. A pattern that already matches the
-  // slash, such as `{:a([a-z]+)/}?`, keeps it.
+  // the router allows after the path. Drop that slash only when it is the end of the
+  // request, the pattern rejects the raw text, and it accepts the text without it.
+  // A slash before later text stays, as does one the pattern itself matches.
   if (
     typeof value === 'string' &&
     constraint.split.length > 0 &&
     value.endsWith('/') &&
+    path.endsWith(value) &&
     layer.opts.strict !== true
   ) {
     const withoutTrailingSlash = value.slice(0, -1);
@@ -1583,9 +1585,13 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
 
   const alternatives = new WeakMap<RegExp, RegExpAlternative[]>();
 
-  const passes = (current: TranslatedLayer, captures: readonly (string | null | undefined)[]) =>
+  const passes = (
+    current: TranslatedLayer,
+    captures: readonly (string | null | undefined)[],
+    path: string
+  ) =>
     (current[LAYER_CONSTRAINTS] ?? []).every((constraint) => {
-      const value = constraintValue(current, captures, constraint);
+      const value = constraintValue(current, captures, constraint, path);
       if (value == null) {
         return !constraint.required;
       }
@@ -1603,7 +1609,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     }
 
     const captures: (string | undefined)[] = found.slice(1);
-    if (passes(current, captures)) {
+    if (passes(current, captures, path)) {
       return captures;
     }
 
@@ -1621,7 +1627,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       match.slice(1).forEach((value, index) => {
         candidate[alternative.offset + index] = value;
       });
-      if (passes(current, candidate)) {
+      if (passes(current, candidate, path)) {
         return candidate;
       }
     }
