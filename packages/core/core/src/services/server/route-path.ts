@@ -1360,14 +1360,24 @@ const compileConstraints = (
  * a value belongs to. `/a/:id(\d+)?/b/:id` requested as `/a/b/x` has one value, and it is the
  * second `id`.
  */
-/** A joined wildcard that is the last token can swallow the router's optional trailing slash. */
+/**
+ * True when only optional groups follow this joined wildcard, so the wildcard is the last thing
+ * the route can match. Such a wildcard can swallow the router's optional trailing slash.
+ */
 const joinedWildcardEndsPath = (layer: TranslatedLayer, key: string) => {
   if (typeof layer.path !== 'string') {
     return false;
   }
 
   const quoted = `"${key.replace(/["\\]/g, '\\$&')}"`;
-  return layer.path.endsWith(`{*${quoted}}`);
+  const token = `{*${quoted}}`;
+  const at = layer.path.indexOf(token);
+  if (at === -1) {
+    return false;
+  }
+
+  const rest = layer.path.slice(at + token.length);
+  return rest.replace(/\{[^{}]*\}/g, '') === '';
 };
 
 const constraintValue = (
@@ -1377,25 +1387,49 @@ const constraintValue = (
 ) => {
   // `null` means the plan could not be read. `undefined` means this parameter was left out.
   const planned = fromCapturePlan(layer, captures, constraint);
-  const value = planned === null ? fromPresentValues(layer, captures, constraint) : planned;
+  return planned === null ? fromPresentValues(layer, captures, constraint) : planned;
+};
 
-  // Drop the slash only when this wildcard is the end of the route. Text after it can
-  // repeat the captured value, and that slash is not the one the router allows at the end.
-  // A pattern that already matches the slash, such as `{:a([a-z]+)/}?`, keeps it.
-  if (
-    typeof value === 'string' &&
-    constraint.split.length > 0 &&
-    value.endsWith('/') &&
-    joinedWildcardEndsPath(layer, constraint.key) &&
-    layer.opts.strict !== true
-  ) {
+/**
+ * A joined wildcard that ends the route can take the router's optional trailing slash. Drop that
+ * slash only when the capture itself ends at the end of the request. The same text can appear
+ * earlier in the path, as in `/x/y//y/`, and that slash is then not the router's.
+ */
+const trimJoinedTrailingSlash = (
+  layer: TranslatedLayer,
+  captures: readonly (string | undefined)[],
+  spans: readonly (CaptureSpan | undefined)[] | undefined,
+  pathLength: number
+): (string | undefined)[] | null => {
+  if (!spans || layer.opts.strict === true) {
+    return null;
+  }
+
+  for (const constraint of layer[LAYER_CONSTRAINTS] ?? []) {
+    if (constraint.split.length === 0 || !joinedWildcardEndsPath(layer, constraint.key)) {
+      continue;
+    }
+
+    const slot = captureSlot(layer, captures, constraint);
+    if (typeof slot !== 'number') {
+      continue;
+    }
+
+    const value = captures[slot];
+    const span = spans[slot];
+    if (typeof value !== 'string' || !value.endsWith('/') || span?.[1] !== pathLength) {
+      continue;
+    }
+
     const withoutTrailingSlash = value.slice(0, -1);
     if (!constraint.regexp.test(value) && constraint.regexp.test(withoutTrailingSlash)) {
-      return withoutTrailingSlash;
+      const candidate = captures.slice();
+      candidate[slot] = withoutTrailingSlash;
+      return candidate;
     }
   }
 
-  return value;
+  return null;
 };
 
 /**
@@ -1888,6 +1922,11 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
   ) => {
     if (passes(current, captures, path, spans)) {
       return captures;
+    }
+
+    const trimmed = trimJoinedTrailingSlash(current, captures, spans, path.length);
+    if (trimmed && passes(current, trimmed, path, undefined)) {
+      return trimmed;
     }
 
     const realigned = realignSameSegment(current, captures);

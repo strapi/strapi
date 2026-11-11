@@ -367,6 +367,45 @@ describe.each([
     });
   });
 
+  it('keeps the trailing slash on a joined route followed by optional parts', async () => {
+    const { server } = createServer('/x/:a([a-z]+):b(\\d+)?/:c?', '/x/(.*)');
+
+    await expectReply(request(server).get('/x/ab12/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?/:c?',
+      params: { a: 'ab', b: '12' },
+    });
+    await expectReply(request(server).get('/x/ab/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?/:c?',
+      params: { a: 'ab' },
+    });
+    await expectReply(request(server).get('/x/ab12/9/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?/:c?',
+      params: { a: 'ab', b: '12', c: '9' },
+    });
+  });
+
+  it('keeps the trailing slash on a joined route followed by an optional extension', async () => {
+    const { server } = createServer('/x/:a([a-z]+):b(\\d+)?.:ext?');
+
+    await expectReply(request(server).get('/x/ab12/'), {
+      route: '/x/:a([a-z]+):b(\\d+)?.:ext?',
+      params: { a: 'ab', b: '12' },
+    });
+    await expectReply(request(server).get('/x/ab12.json'), {
+      route: '/x/:a([a-z]+):b(\\d+)?.:ext?',
+      params: { a: 'ab', b: '12', ext: 'json' },
+    });
+  });
+
+  it('does not take a repeated value before an optional part from a later route', async () => {
+    const { server } = createServer('/x/:a([a-z]+):b(\\d+)?/:c?', '/x/(.*)');
+
+    await expectReply(request(server).get('/x/y//y/'), {
+      route: '/x/(.*)',
+      params: { 0: 'y//y/' },
+    });
+  });
+
   it('does not match a repeated separator before a trailing slash', async () => {
     const { server } = createServer('/x/:a([a-z]+):b(\\d+)?-y');
 
