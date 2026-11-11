@@ -24,6 +24,18 @@ interface Link extends Struct.ComponentSchema {
 }
 
 /**
+ * A component with both scalar and nested attributes
+ */
+interface Mixed extends Struct.ComponentSchema {
+  collectionName: 'components_shared_mixed';
+  info: { displayName: 'Mixed' };
+  attributes: {
+    label: Schema.Attribute.String;
+    article: Schema.Attribute.Relation<'oneToOne', 'api::article.article'>;
+  };
+}
+
+/**
  * A component with a nested component attribute only
  */
 interface Card extends Struct.ComponentSchema {
@@ -55,5 +67,6 @@ declare module '../../../../../../../public/registries' {
     'shared.seo': Seo;
     'shared.link': Link;
     'shared.card': Card;
+    'shared.mixed': Mixed;
   }
 }
