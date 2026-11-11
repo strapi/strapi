@@ -201,9 +201,13 @@ describe('Scheduling service', () => {
         ...baseStrapiMock,
         db: {
           query: jest.fn(() => ({
-            findMany: jest
-              .fn()
-              .mockReturnValue([{ id: 1, scheduledAt: new Date(), releasedAt: null }]),
+            findMany: jest.fn().mockReturnValue([
+              {
+                id: 1,
+                scheduledAt: inAnHour,
+                releasedAt: null,
+              },
+            ]),
             findOne: jest.fn(
               () =>
                 new Promise((resolve) => {
