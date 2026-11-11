@@ -121,13 +121,14 @@ export const toIdArray = (
       return datum;
     });
 
-  const keptById = new Map<ID, typeof array>();
+  const keptById = new Map<string, typeof array>();
 
   return array.filter((datum) => {
-    const kept = keptById.get(datum.id);
+    const key = String(datum.id);
+    const kept = keptById.get(key);
 
     if (!kept) {
-      keptById.set(datum.id, [datum]);
+      keptById.set(key, [datum]);
       return true;
     }
 

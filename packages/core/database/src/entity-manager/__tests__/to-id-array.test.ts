@@ -52,6 +52,14 @@ describe('toIdArray', () => {
     ]);
   });
 
+  test('treats a boxed string id as equal to its primitive value', () => {
+    const boxed = Object('7') as unknown as string;
+
+    expect(toIdArray(['7', boxed, boxed, '7'])).toEqual([{ id: '7', __pivot: {} }]);
+    expect(toIdArray([boxed, '7'])).toHaveLength(1);
+    expect(toIdArray([7, boxed])).toHaveLength(2);
+  });
+
   test('throws on an invalid id', () => {
     expect(() => toIdArray([{ id: 1.5 }])).toThrow('Invalid id, expected a string or integer');
     expect(() => toIdArray([{ name: 'x' }])).toThrow('Invalid id, expected a string or integer');
