@@ -313,6 +313,24 @@ describe.each([
     await request(server).get('/x').expect(404);
   });
 
+  it('keeps a slash that an optional joined piece includes', async () => {
+    const { server } = createServer('/x/{:a([a-z]+)/}?:b(\\d+)?');
+
+    await expectReply(request(server).get('/x/ab/'), {
+      route: '/x/{:a([a-z]+)/}?:b(\\d+)?',
+      params: { a: 'ab' },
+    });
+    await expectReply(request(server).get('/x/ab/12'), {
+      route: '/x/{:a([a-z]+)/}?:b(\\d+)?',
+      params: { a: 'ab', b: '12' },
+    });
+    await expectReply(request(server).get('/x/ab/12/'), {
+      route: '/x/{:a([a-z]+)/}?:b(\\d+)?',
+      params: { a: 'ab', b: '12' },
+    });
+    await request(server).get('/x/ab12/').expect(404);
+  });
+
   it('matches when every joined parameter is optional', async () => {
     const { server } = createServer('/x/:a([a-z]+)?:b(\\d+)?');
 
@@ -624,6 +642,32 @@ describe('router path registration', () => {
     const messages = strapi.log.warn.mock.calls.map(([message]) => String(message)).join('\n');
     expect(messages).toContain('pattern `\\d+` on `:x` is no longer enforced');
     await expectReply(request(server).get('/a/abc/5'), { x: 'abc', y: '5' });
+  });
+
+  it('does not drop a trailing slash on a strict router', async () => {
+    const strapi = createStrapi();
+    const router = new Router({ strict: true });
+    const composeEndpoint = createEndpointComposer(strapi);
+
+    composeEndpoint(
+      {
+        method: 'GET',
+        path: '/x/:a([a-z]+):b(\\d+)?',
+        handler(ctx) {
+          reply(ctx, { ...ctx.params });
+        },
+        info: {},
+      },
+      { router }
+    );
+
+    const app = createKoaApp({ proxy: false, proxyIpHeader: '', maxIpsCount: 0, keys: [] });
+    app.use(router.routes());
+    const server = app.callback();
+
+    await expectReply(request(server).get('/x/ab12'), { a: 'ab', b: '12' });
+    await request(server).get('/x/ab12/').expect(404);
+    await request(server).get('/x/ab/').expect(404);
   });
 
   it('does not warn that .* is no longer enforced', () => {

@@ -1354,10 +1354,20 @@ const constraintValue = (
   const planned = fromCapturePlan(layer, captures, constraint);
   const value = planned === null ? fromPresentValues(layer, captures, constraint) : planned;
 
-  // A joined wildcard swallows the optional trailing slash of a non-strict route.
-  // Split patterns cannot match `/`, so that slash is not part of the captured value.
-  if (typeof value === 'string' && constraint.split.length > 0 && value.endsWith('/')) {
-    return value.slice(0, -1);
+  // A joined wildcard is greedy, so on a non-strict router it also takes the slash
+  // the router allows after the path. Drop that slash only when the pattern rejects
+  // the raw text and accepts the text without it. A pattern that already matches the
+  // slash, such as `{:a([a-z]+)/}?`, keeps it.
+  if (
+    typeof value === 'string' &&
+    constraint.split.length > 0 &&
+    value.endsWith('/') &&
+    layer.opts.strict !== true
+  ) {
+    const withoutTrailingSlash = value.slice(0, -1);
+    if (!constraint.regexp.test(value) && constraint.regexp.test(withoutTrailingSlash)) {
+      return withoutTrailingSlash;
+    }
   }
 
   return value;
