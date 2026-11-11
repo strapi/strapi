@@ -63,6 +63,7 @@ describe('translateRoutePath', () => {
       generatedParams: [],
       ignoredPatterns: [],
       constraints: [],
+      spanningPatterns: [],
     });
   });
 
@@ -103,12 +104,8 @@ describe('translateRoutePath', () => {
     expect(translateRoutePath('/files/:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/files-:path(.*)').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/f/(\\d+)/(.*)').ignoredPatterns).toEqual([]);
-    expect(translateRoutePath('/static/:file(.+\\.js)').ignoredPatterns).toEqual([
-      { parameter: 'file', pattern: '.+\\.js', unnamed: false },
-    ]);
-    expect(translateRoutePath('/files/:path(\\d+)+').ignoredPatterns).toEqual([
-      { parameter: 'path', pattern: '\\d+', unnamed: false },
-    ]);
+    expect(translateRoutePath('/static/:file(.+\\.js)').ignoredPatterns).toEqual([]);
+    expect(translateRoutePath('/files/:path(\\d+)+').ignoredPatterns).toEqual([]);
     expect(translateRoutePath('/:a(.+):b(\\d+)').ignoredPatterns).toEqual([
       { parameter: 'a', pattern: '.+', unnamed: false },
       { parameter: 'b', pattern: '\\d+', unnamed: false },
@@ -172,6 +169,41 @@ describe('translateRoutePath', () => {
       },
     ]);
   });
+
+  it('tests a pattern that can span segments against the wildcard capture', () => {
+    expect(translateRoutePath('/static/:file(.+\\.js)')).toMatchObject({
+      path: '/static/*file',
+      constraints: [{ key: 'file', pattern: '.+\\.js', split: [], required: true, occurrence: 0 }],
+      spanningPatterns: [{ parameter: 'file', pattern: '.+\\.js', unnamed: false }],
+    });
+    expect(translateRoutePath('/files/:path(\\d+)+')).toMatchObject({
+      path: '/files/*path',
+      constraints: [{ key: 'path', pattern: '(?:\\d+)(?:/(?:\\d+))*', required: true }],
+      spanningPatterns: [{ parameter: 'path', pattern: '\\d+', unnamed: false }],
+    });
+    expect(translateRoutePath('/f{/:id(\\d+).html}*').constraints).toEqual([
+      {
+        key: 'id',
+        pattern: '(?:\\d+)(?:\\.html/(?:\\d+))*',
+        split: [],
+        required: false,
+        occurrence: 0,
+      },
+    ]);
+    expect(translateRoutePath('/ai/:a((?<=/ai/)\\d+)').spanningPatterns).toEqual([
+      { parameter: 'a', pattern: '(?<=/ai/)\\d+', unnamed: false },
+    ]);
+    expect(translateRoutePath('/((?!uploads/).+)').spanningPatterns).toEqual([
+      { parameter: '', pattern: '(?!uploads/).+', unnamed: true },
+    ]);
+  });
+
+  it.each(['/users/:id(\\d+)', '/files/:name([^/]+)', '/files/(.*)', '/files/:path(.*)?'])(
+    'does not list %s as tested on text that spans segments',
+    (path) => {
+      expect(translateRoutePath(path).spanningPatterns).toEqual([]);
+    }
+  );
 
   it('namespaces the names it creates when asked, with a ":" so a prefix has parameters', () => {
     expect(translateRoutePath('/p/(\\d+)/x{ab}+', { namespace: 'v6Prefix1' }).path).toBe(

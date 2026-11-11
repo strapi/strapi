@@ -240,14 +240,18 @@ describe.each([
       route: '/files/:path(\\d+)+',
       params: { path: '12/34' },
     });
-    await expectReply(request(server).get('/files/12/ab'), {
+    await expectReply(request(server).get('/files/12/34/'), {
       route: '/files/:path(\\d+)+',
-      params: { path: '12/ab' },
+      params: { path: '12/34' },
     });
+    await request(server).get('/files/12/ab').expect(404);
     await request(server).get('/files').expect(404);
 
     const messages = strapi.log.warn.mock.calls.map(([message]) => String(message)).join('\n');
-    expect(messages).toContain('pattern `\\d+` on `:path` is no longer enforced');
+    expect(messages).not.toContain('no longer enforced');
+    expect(messages).toContain(
+      'pattern `\\d+` on `:path` is tested against text that can span several path segments.'
+    );
   });
 
   it('keeps a negated class that excludes "/" on one segment', async () => {
@@ -496,10 +500,7 @@ describe.each([
       route: '/tags/:tag(red|blue)+',
       params: { tag: 'red/blue' },
     });
-    await expectReply(request(server).get('/tags/red/green'), {
-      route: '/tags/:tag(red|blue)+',
-      params: { tag: 'red/green' },
-    });
+    await request(server).get('/tags/red/green').expect(404);
   });
 
   it('matches a v8 quoted wildcard and a $-named wildcard without rewriting them', async () => {
@@ -523,10 +524,7 @@ describe.each([
       route: '/files/:path(\\d+)*',
       params: { path: '12/34' },
     });
-    await expectReply(request(server).get('/files/12/ab'), {
-      route: '/files/:path(\\d+)*',
-      params: { path: '12/ab' },
-    });
+    await request(server).get('/files/12/ab').expect(404);
   });
 
   it('keeps a v6 custom prefix optional only when the group is optional', async () => {
@@ -625,6 +623,39 @@ describe.each([
     await expectReply(request(server).get(url), { route, params });
   });
 
+  it('tests a pattern that can match a slash against the wildcard text', async () => {
+    const { server } = createServer('/static/:file(.+\\.js)', '/static/:name');
+
+    await expectReply(request(server).get('/static/app.js'), {
+      route: '/static/:file(.+\\.js)',
+      params: { file: 'app.js' },
+    });
+    await expectReply(request(server).get('/static/app.js/'), {
+      route: '/static/:file(.+\\.js)',
+      params: { file: 'app.js' },
+    });
+    await expectReply(request(server).get('/static/notes.txt'), {
+      route: '/static/:name',
+      params: { name: 'notes.txt' },
+    });
+    await request(server).get('/static/a/notes.txt').expect(404);
+  });
+
+  it('tests a lookbehind that contains a slash at its place in the path', async () => {
+    const { server } = createServer('/ai/:a((?<=/ai/)\\d+)');
+
+    await expectReply(request(server).get('/ai/12'), {
+      route: '/ai/:a((?<=/ai/)\\d+)',
+      params: { a: '12' },
+    });
+    await expectReply(request(server).get('/ai/12/'), {
+      route: '/ai/:a((?<=/ai/)\\d+)',
+      params: { a: '12' },
+    });
+    await request(server).get('/ai/ab').expect(404);
+    await request(server).get('/ai/1/2').expect(404);
+  });
+
   it('splits values as v6 did when a pattern is lazy', async () => {
     const { server } = createServer('/:a(.+?)/:b(.+)');
 
@@ -650,10 +681,7 @@ describe.each([
       route: '/f{/:id(\\d+).html}+',
       params: { id: '1.html/2' },
     });
-    await expectReply(request(server).get('/f/1.html/a.html'), {
-      route: '/f{/:id(\\d+).html}+',
-      params: { id: '1.html/a' },
-    });
+    await request(server).get('/f/1.html/a.html').expect(404);
   });
 });
 
@@ -710,15 +738,51 @@ describe('router path registration', () => {
     await request(server).get('/users/abc').expect(404);
   });
 
-  it('warns when a pattern that can match a slash is not enforced', () => {
-    const { strapi, router } = createRouterApp();
+  it('warns that a pattern that can match a slash runs on text from several segments', async () => {
+    const { strapi, router, server } = createRouterApp();
 
     router.get('/static/:file(.+\\.js)', (ctx) => {
       reply(ctx, { ...ctx.params });
     });
 
+    expect(strapi.log.warn).toHaveBeenCalledTimes(2);
+    expect(strapi.log.warn).toHaveBeenLastCalledWith(
+      'Route "GET /static/:file(.+\\.js)": pattern `.+\\.js` on `:file` is tested against text that can span several path segments. This regular expression runs while matching requests, and a pattern with catastrophic backtracking can stall the server. Earlier 5.x releases (@koa/router 12) ran it the same way, so this is not a new risk.'
+    );
+    await expectReply(request(server).get('/static/a/b.js'), { file: 'a/b.js' });
+    await request(server).get('/static/notes.txt').expect(404);
+  });
+
+  it('names an unnamed group in the warning for a pattern that spans segments', () => {
+    const { strapi, router } = createRouterApp();
+
+    router.get('/f/(\\d+)+', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
     const messages = strapi.log.warn.mock.calls.map(([message]) => String(message)).join('\n');
-    expect(messages).toContain('pattern `.+\\.js` on `:file` is no longer enforced');
+    expect(messages).toContain('pattern `\\d+` on an unnamed group is tested against text');
+  });
+
+  it('does not give a one-segment pattern the warning for text that spans segments', async () => {
+    const { strapi, router, server } = createRouterApp();
+
+    router.get('/users/:id(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.get('/files/:name([^/]+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.get('/all/(.*)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    expect(strapi.log.warn).toHaveBeenCalledTimes(3);
+    expect(strapi.log.warn.mock.calls.map(([message]) => message).join('\n')).not.toContain(
+      'span several path segments'
+    );
+    await expectReply(request(server).get('/users/12'), { id: '12' });
+    await request(server).get('/users/ab').expect(404);
   });
 
   it('warns when a group suffix becomes the next optional prefix', async () => {
@@ -1616,6 +1680,34 @@ describe("Strapi's own v6 route paths", () => {
       matchedRoute: '/uploads/(.*)',
     });
     expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps the public files route off /uploads/ and serves other paths', async () => {
+    const { server, strapi } = createStrapiServer([{ paths: ['/((?!uploads/).+)'] }]);
+
+    await expectReply(request(server).get('/robots.txt'), {
+      params: { 0: 'robots.txt' },
+      matchedRoute: '/((?!uploads/).+)',
+    });
+    await expectReply(request(server).get('/assets/a/b.png'), {
+      params: { 0: 'assets/a/b.png' },
+      matchedRoute: '/((?!uploads/).+)',
+    });
+    await request(server).get('/uploads/a.png').expect(404);
+    await request(server).get('/Uploads/a.png').expect(404);
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  it('lets the uploads route serve what the public files route skips', async () => {
+    const { server } = createStrapiServer([
+      { paths: ['/((?!uploads/).+)'] },
+      { paths: ['/uploads/(.*)'] },
+    ]);
+
+    await expectReply(request(server).get('/uploads/a.png'), {
+      params: { 0: 'a.png' },
+      matchedRoute: '/uploads/(.*)',
+    });
   });
 
   it('serves documentation assets with the file path in ctx.params[0]', async () => {

@@ -31,8 +31,8 @@ export const publicStatic: Core.MiddlewareFactory = (
     {
       method: 'GET',
       path: '/((?!uploads/).+)',
-      // Kept in v6 syntax so ctx.params[0] and the route list stay as they were. v8 cannot express
-      // the negative lookahead, so the handler skips /uploads/ itself.
+      // Kept in v6 syntax so ctx.params[0] and the route list stay as they were. The lookahead is
+      // tested on the captured text while matching. The handler also skips /uploads/ itself.
       [Symbol.for('strapi.route.keepV6Path')]: true,
       handler(ctx, next) {
         if (/^\/uploads\//i.test(ctx.path)) {

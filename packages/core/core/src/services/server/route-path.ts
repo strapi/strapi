@@ -6,8 +6,9 @@ import type Router from '@koa/router';
  *
  * Matching uses path-to-regexp v8. A custom pattern that stays on one parameter is tested against
  * the raw captured text, at that parameter's own position, so a value the pattern rejects is not a
- * match. A pattern that can match `/` becomes a wildcard and is not tested. A negated class that
- * excludes `/`, such as `[^/]+`, stays on one segment and is tested. Parameters with no text
+ * match. A pattern that can match `/`, or a repeated pattern, becomes a wildcard, and the wildcard's
+ * text is tested with the v6 shape of the pattern. A negated class that excludes `/`, such as
+ * `[^/]+`, stays on one segment and is tested. Parameters with no text
  * between them become one parameter. When each piece stays on one segment, including an optional
  * piece, those patterns are tested against that one value and the pieces are written back.
  * Otherwise the separate values are not recovered.
@@ -26,6 +27,9 @@ export type IgnoredRoutePattern = {
   pattern: string;
   unnamed: boolean;
 };
+
+/** A custom pattern tested against a wildcard capture, which the client controls and can span `/`. */
+export type SpanningRoutePattern = IgnoredRoutePattern;
 
 export type RoutePathSplit = {
   /** Original parameter name. Empty when the group had no name. */
@@ -63,6 +67,8 @@ export type TranslatedRoutePath = {
   ignoredPatterns: IgnoredRoutePattern[];
   /** Custom patterns applied to captures of the translated path. */
   constraints: RoutePathConstraint[];
+  /** Constraints on a wildcard capture, so their regular expression runs on text that can span `/`. */
+  spanningPatterns: SpanningRoutePattern[];
 };
 
 // v6 only made `/` and `.` optional along with a parameter.
@@ -317,9 +323,17 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
   const generatedParams: string[] = [];
   const ignoredPatterns: IgnoredRoutePattern[] = [];
   const constraints: RoutePathConstraint[] = [];
+  const spanningPatterns: SpanningRoutePattern[] = [];
   const recordedPatterns = new Map<
     string,
-    { parameter: string; pattern: string; unnamed: boolean; spansSegments: boolean }
+    {
+      parameter: string;
+      pattern: string;
+      unnamed: boolean;
+      spansSegments: boolean;
+      /** What v6 compiled for the capture: the pattern, repeated with its prefix and suffix. */
+      capturePattern: string;
+    }
   >();
   const usedNames = new Set(
     [...path.matchAll(/[:*]([$\w]+)/g)].map(([, name]) => name).filter(Boolean)
@@ -646,7 +660,14 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
     let recordKey = name;
     if (pattern !== undefined && pattern !== '.*') {
       recordKey = `${name}\u0000${recordedPatterns.size}`;
-      recordedPatterns.set(recordKey, { parameter: name, pattern, unnamed, spansSegments });
+      const separator = `${escapeForRegExp(suffix)}${escapeForRegExp(prefix)}`;
+      recordedPatterns.set(recordKey, {
+        parameter: name,
+        pattern,
+        unnamed,
+        spansSegments,
+        capturePattern: repeated ? `(?:${pattern})(?:${separator}(?:${pattern}))*` : pattern,
+      });
     }
     const token = `${spansSegments ? '*' : ':'}${quoted}`;
     const escapedPrefix = escapeLiteral(prefix);
@@ -990,25 +1011,31 @@ const translate = (path: string, { namespace }: TranslateOptions): TranslatedRou
       }
 
       recordedPatterns.delete(key);
+      constraints.push({
+        key: recorded.parameter,
+        pattern: recorded.capturePattern,
+        split: [],
+        required: !span.optional && !span.matchesEmpty,
+        occurrence,
+      });
       if (span.wildcard || recorded.spansSegments) {
-        ignoredPatterns.push({
+        spanningPatterns.push({
           parameter: recorded.unnamed ? '' : recorded.parameter,
           pattern: recorded.pattern,
           unnamed: recorded.unnamed,
-        });
-      } else {
-        constraints.push({
-          key: recorded.parameter,
-          pattern: recorded.pattern,
-          split: [],
-          required: !span.optional && !span.matchesEmpty,
-          occurrence,
         });
       }
     }
   }
 
-  return { path: translated, changed, generatedParams, ignoredPatterns, constraints };
+  return {
+    path: translated,
+    changed,
+    generatedParams,
+    ignoredPatterns,
+    constraints,
+    spanningPatterns,
+  };
 };
 
 export const translateRoutePath = (
@@ -1029,6 +1056,7 @@ export const KEEP_V6_ROUTE_PATH = Symbol.for('strapi.route.keepV6Path');
 /**
  * Logs the migration, and a separate warning for each custom pattern the translation drops.
  * A dropped pattern is not a constraint anymore, so the route can catch a later route.
+ * A pattern tested against a wildcard capture gets its own warning, because its input can be long.
  */
 export const warnTranslatedRoutePath = (
   strapi: Logger,
@@ -1050,6 +1078,13 @@ export const warnTranslatedRoutePath = (
     const target = ignored.unnamed ? 'an unnamed group' : `\`:${ignored.parameter}\``;
     strapi.log.warn(
       `${subject}: pattern \`${ignored.pattern}\` on ${target} is no longer enforced. ${caughtBy} may now match requests meant for later routes.`
+    );
+  }
+
+  for (const spanning of translated.spanningPatterns) {
+    const target = spanning.unnamed ? 'an unnamed group' : `\`:${spanning.parameter}\``;
+    strapi.log.warn(
+      `${subject}: pattern \`${spanning.pattern}\` on ${target} is tested against text that can span several path segments. This regular expression runs while matching requests, and a pattern with catastrophic backtracking can stall the server. Earlier 5.x releases (@koa/router 12) ran it the same way, so this is not a new risk.`
     );
   }
 };
@@ -1365,23 +1400,25 @@ const compileConstraints = (
  * second `id`.
  */
 /**
- * True when only optional groups follow this joined wildcard, so the wildcard is the last thing
- * the route can match. Such a wildcard can swallow the router's optional trailing slash.
+ * True when only optional groups follow this wildcard, so the wildcard is the last thing the
+ * route can match. Such a wildcard can swallow the router's optional trailing slash.
  */
-const joinedWildcardEndsPath = (layer: TranslatedLayer, key: string) => {
+const wildcardEndsPath = (layer: TranslatedLayer, key: string) => {
   if (typeof layer.path !== 'string') {
     return false;
   }
 
-  const quoted = `"${key.replace(/["\\]/g, '\\$&')}"`;
-  const token = `{*${quoted}}`;
-  const at = layer.path.indexOf(token);
-  if (at === -1) {
-    return false;
+  for (const token of [`*"${key.replace(/["\\]/g, '\\$&')}"`, `*${key}`]) {
+    const at = layer.path.lastIndexOf(token);
+    const rest = at === -1 ? undefined : layer.path.slice(at + token.length);
+    if (rest === undefined || (token === `*${key}` && ID_CONTINUE.test(rest[0] ?? ''))) {
+      continue;
+    }
+
+    return rest.replace(/^\}/, '').replace(/\{[^{}]*\}/g, '') === '';
   }
 
-  const rest = layer.path.slice(at + token.length);
-  return rest.replace(/\{[^{}]*\}/g, '') === '';
+  return false;
 };
 
 const constraintValue = (
@@ -1395,22 +1432,22 @@ const constraintValue = (
 };
 
 /**
- * A joined wildcard that ends the route can take the router's optional trailing slash. Drop that
+ * A wildcard that ends the route can take the router's optional trailing slash. Drop that
  * slash only when the capture itself ends at the end of the request. The same text can appear
  * earlier in the path, as in `/x/y//y/`, and that slash is then not the router's.
  */
-const trimJoinedTrailingSlash = (
+const trimTrailingSlash = (
   layer: TranslatedLayer,
   captures: readonly (string | undefined)[],
   spans: readonly (CaptureSpan | undefined)[] | undefined,
-  pathLength: number
+  path: string
 ): { captures: (string | undefined)[]; spans: (CaptureSpan | undefined)[] } | null => {
   if (!spans || layer.opts.strict === true) {
     return null;
   }
 
   for (const constraint of layer[LAYER_CONSTRAINTS] ?? []) {
-    if (constraint.split.length === 0 || !joinedWildcardEndsPath(layer, constraint.key)) {
+    if (!wildcardEndsPath(layer, constraint.key)) {
       continue;
     }
 
@@ -1421,12 +1458,21 @@ const trimJoinedTrailingSlash = (
 
     const value = captures[slot];
     const span = spans[slot];
-    if (typeof value !== 'string' || !value.endsWith('/') || span?.[1] !== pathLength) {
+    if (typeof value !== 'string' || !value.endsWith('/') || span?.[1] !== path.length) {
       continue;
     }
 
     const withoutTrailingSlash = value.slice(0, -1);
-    if (!constraint.regexp.test(value) && constraint.regexp.test(withoutTrailingSlash)) {
+    const [start, end] = span;
+    const { pattern, regexp } = constraint;
+    const inContext = constraint.split.length === 0 && patternNeedsContext(pattern);
+    const acceptsValue = inContext
+      ? matchesInContext(path, start, end, pattern, regexp.flags)
+      : regexp.test(value);
+    const acceptsTrimmed = inContext
+      ? matchesInContext(path, start, end - 1, pattern, regexp.flags)
+      : regexp.test(withoutTrailingSlash);
+    if (!acceptsValue && acceptsTrimmed) {
       const candidate = captures.slice();
       candidate[slot] = withoutTrailingSlash;
       const candidateSpans = spans.slice();
@@ -2033,7 +2079,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       return rememberParts(current, captures, path, spans);
     }
 
-    const trimmed = trimJoinedTrailingSlash(current, captures, spans, path.length);
+    const trimmed = trimTrailingSlash(current, captures, spans, path);
     if (trimmed && passes(current, trimmed.captures, path, trimmed.spans)) {
       return rememberParts(current, trimmed.captures, path, trimmed.spans);
     }
