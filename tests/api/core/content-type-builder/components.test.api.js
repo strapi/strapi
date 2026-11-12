@@ -460,7 +460,7 @@ describe('Content Type Builder - Components', () => {
       });
     });
 
-    test('Returns the error message when the validation throws a native error', async () => {
+    test('Returns a validation error when the attributes are missing', async () => {
       const res = await rq({
         method: 'PUT',
         url: '/content-type-builder/components/default.some-component',
@@ -472,11 +472,17 @@ describe('Content Type Builder - Components', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
+      expect(res.body).toMatchObject({
         error: {
-          name: 'TypeError',
-          message: expect.stringContaining('undefined'),
-          details: {},
+          name: 'ValidationError',
+          details: {
+            errors: expect.arrayContaining([
+              expect.objectContaining({
+                path: ['component', 'attributes'],
+                message: 'attributes.required',
+              }),
+            ]),
+          },
         },
       });
     });

@@ -395,7 +395,7 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
-    test('Returns the error message when the validation of an update throws a native error', async () => {
+    test('Returns a validation error when the attributes of an update are missing', async () => {
       const res = await rq({
         method: 'PUT',
         url: `/content-type-builder/content-types/${ctWithDpUID}`,
@@ -407,11 +407,17 @@ describe('Content Type Builder - Content types', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
+      expect(res.body).toMatchObject({
         error: {
-          name: 'TypeError',
-          message: expect.stringContaining('undefined'),
-          details: {},
+          name: 'ValidationError',
+          details: {
+            errors: expect.arrayContaining([
+              expect.objectContaining({
+                path: ['contentType', 'attributes'],
+                message: 'attributes.required',
+              }),
+            ]),
+          },
         },
       });
     });
