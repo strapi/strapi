@@ -13,12 +13,6 @@ import { getService } from '../../utils';
  * @param {WillRegisterPermissionContext} context
  */
 const willRegisterPermission = (context: any) => {
-  const isSuperAdmin = strapi.service('admin::role').hasSuperAdminRole(context.user ?? context);
-
-  if (isSuperAdmin) {
-    return;
-  }
-
   const { permission, condition } = context;
   const { subject, properties } = permission;
 

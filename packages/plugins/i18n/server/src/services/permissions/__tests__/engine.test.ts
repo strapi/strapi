@@ -41,14 +41,6 @@ describe('i18n permissions engine', () => {
     }));
 
     global.strapi = {
-      admin: {
-        services: {
-          role: {
-            hasSuperAdminRole: (user: { roles?: Array<{ code: string }> }) =>
-              (user?.roles ?? []).some((role) => role.code === 'strapi-super-admin'),
-          },
-        },
-      },
       contentType,
       get contentTypes() {
         return contentTypes();
@@ -67,17 +59,20 @@ describe('i18n permissions engine', () => {
     expect(and).toHaveBeenCalledWith({ locale: { $in: ['en'] } });
   });
 
-  test('skips super admins without reading the permission', () => {
-    const { context, and, permissionGetter } = createContext(
-      { id: 1, roles: [{ code: 'strapi-super-admin' }] },
-      { locales: ['en'] }
-    );
+  test.each([
+    ['restricted to some locales', { locales: ['en'] }, ['en']],
+    ['without a locales key', {}, []],
+  ])(
+    'keeps the locale condition for a token owned by a super admin, %s',
+    (_, properties, expected) => {
+      const owner = { id: 1, roles: [{ code: 'strapi-super-admin' }] };
+      const { context, and } = createContext(owner, properties);
 
-    engine.willRegisterPermission(context);
+      engine.willRegisterPermission(context);
 
-    expect(and).not.toHaveBeenCalled();
-    expect(permissionGetter).not.toHaveBeenCalled();
-  });
+      expect(and).toHaveBeenCalledWith({ locale: { $in: expected } });
+    }
+  );
 
   test('looks up the subject without copying the content-type registry', () => {
     const { context } = createContext(

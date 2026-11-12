@@ -20,9 +20,8 @@ interface EnforcedPermissionsOptions {
  * localized subject. A permission with no subject or an unregistered action never is. A
  * condition is registered when the condition provider knows it.
  *
- * The holder's role does not matter: i18n's hook skips super admins by reading `context.user`,
- * which the engine never sets (the hook context spreads the user object itself), so a super
- * admin's or a super-admin-owned token's permission with no `locales` key holds no locale too.
+ * The holder's role does not matter: i18n's hook never looks at it, so a super admin's or a
+ * super-admin-owned token's permission with no `locales` key holds no locale too.
  */
 export const toEnforcedCeilingPermissions = async <T extends CeilingPermission>(
   permissions: T[],
