@@ -8,7 +8,8 @@ type Validator = validate.Validator;
 
 /**
  * The user's fields that only Better Auth and the plugin write: whether the email is
- * verified, whether two-factor is on, the ban, the sign-in lockout and the date of the last sign-in. Each one changes through its own flow (the
+ * verified, whether two-factor is on, the ban, the sign-in lockout, the date of the last sign-in and
+ * the moment old Users & Permissions tokens were revoked. Each one changes through its own flow (the
  * verification link, the two-factor endpoints, a ban in the Content Manager), never through a
  * request that writes the user.
  */
@@ -21,6 +22,7 @@ export const ENGINE_OWNED_USER_FIELDS = Object.freeze([
   'failedSignIns',
   'lockedUntil',
   'lastSignInAt',
+  'legacyTokensRevokedAt',
 ] as const);
 
 /**

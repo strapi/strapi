@@ -481,6 +481,10 @@ export const buildAuthOptions = (
         preferredLocale: { type: 'string', required: false, input: true },
         // Set when a session is created (`last-sign-in`); no request carries it
         lastSignInAt: { type: 'date', required: false, input: false },
+        // Set when the user's sessions are all revoked (`revokeLegacySessions`): an old Users &
+        // Permissions token issued at or before it is refused. Never returned, never written by a
+        // request.
+        legacyTokensRevokedAt: { type: 'date', required: false, input: false, returned: false },
       },
     },
     ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),

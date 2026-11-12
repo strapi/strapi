@@ -36,10 +36,16 @@ const naming = { identifiers, naming: attributeNaming };
 /**
  * Better Auth's own `getAuthTables` output for the core tables and the username, twoFactor, admin,
  * jwt, lockout, totp-replay and second-factor plugins, with the database rate limiter on, so that
- * every table the plugin generates is covered (apart from passkey, below).
+ * every table the plugin generates is covered (apart from passkey, below). The user carries the
+ * field the engine adds for the revoke of old tokens.
  */
 const authTables = fromAuthTables(
   getAuthTables({
+    user: {
+      additionalFields: {
+        legacyTokensRevokedAt: { type: 'date', required: false, input: false, returned: false },
+      },
+    },
     plugins: [
       username(),
       twoFactor(),
@@ -398,7 +404,7 @@ describe('toContentTypes', () => {
         expect(attributesOf('user')[field], field).not.toHaveProperty('visible');
       }
 
-      expect(READ_ONLY_FIELDS.user).toEqual(['role']);
+      expect(READ_ONLY_FIELDS.user).toEqual(['role', 'legacyTokensRevokedAt']);
     });
 
     it.each(['twoFactorEnabled', 'emailVerified', 'username', 'displayUsername'])(
@@ -420,12 +426,12 @@ describe('toContentTypes', () => {
       });
     });
 
-    it('is the only hidden attribute of the user', () => {
+    it('is hidden from the Content Manager with the revoke time of old tokens, and no other attribute of the user is', () => {
       const hidden = Object.entries(attributesOf('user'))
         .filter(([, attribute]) => attribute.visible === false)
         .map(([name]) => name);
 
-      expect(hidden).toEqual(['role']);
+      expect(hidden).toEqual(['role', 'legacyTokensRevokedAt']);
     });
 
     it('hides no attribute of any other type', () => {
@@ -442,14 +448,14 @@ describe('toContentTypes', () => {
       expect(attributesOf('user').role).toMatchObject({ writable: false });
     });
 
-    it('is read-only with only the second-factor mark of a session on top of it', () => {
+    it('is read-only with only the revoke time of old tokens and the second-factor mark of a session', () => {
       for (const name of Object.keys(cts)) {
         const readOnly = Object.entries(attributesOf(name))
           .filter(([, attribute]) => attribute.writable === false)
           .map(([attribute]) => attribute);
 
         expect(readOnly, name).toEqual(
-          { user: ['role'], session: ['twoFactorVerified'] }[name] ?? []
+          { user: ['role', 'legacyTokensRevokedAt'], session: ['twoFactorVerified'] }[name] ?? []
         );
       }
     });
@@ -552,6 +558,18 @@ describe('toContentTypes', () => {
       expect(attributesOf('session').twoFactorVerified).not.toHaveProperty('required');
       expect(PRIVATE_FIELDS.session).toContain('twoFactorVerified');
       expect(READ_ONLY_FIELDS.session).toContain('twoFactorVerified');
+    });
+  });
+
+  describe('the revoke time of old tokens', () => {
+    it('is private, hidden and read-only, and optional', () => {
+      expect(attributesOf('user').legacyTokensRevokedAt).toMatchObject({
+        type: 'datetime',
+        private: true,
+        visible: false,
+        writable: false,
+      });
+      expect(attributesOf('user').legacyTokensRevokedAt).not.toHaveProperty('required');
     });
   });
 

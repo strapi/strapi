@@ -11,6 +11,8 @@ export interface LockoutDb {
   db: {
     connection: Knex;
     metadata: { get: (uid: string) => unknown };
+    /** A user write, for the engine's revoke of old tokens: nothing is stored here. */
+    query: (uid: string) => { updateMany: (params: unknown) => Promise<{ count: number }> };
   };
 }
 
@@ -35,6 +37,7 @@ export const createLockoutDb = async (): Promise<LockoutDb> => {
     connection,
     db: {
       connection,
+      query: () => ({ updateMany: async () => ({ count: 0 }) }),
       metadata: {
         get: () => ({
           tableName: 'eu_rate_limits',

@@ -671,6 +671,7 @@ describe('the end-users strategy', () => {
         vi.mocked(verifyLegacyBearer).mockResolvedValue({
           kind: 'legacy',
           userId: '7',
+          issuedAt: 1,
         });
         vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
 
@@ -1190,7 +1191,7 @@ describe('the end-users strategy', () => {
     });
 
     it('falls through to the legacy bridge only when until is in the future', async () => {
-      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7' });
+      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7', issuedAt: 1 });
       vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
       const on = setup({ lookup: unknownBearer(), compat: true });
       const ctx = bearer();
@@ -1248,7 +1249,7 @@ describe('the end-users strategy', () => {
     });
 
     it('answers 401, and counts nothing, when the token names a user that is gone', async () => {
-      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7' });
+      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7', issuedAt: 1 });
       vi.mocked(resolveLegacyUserId).mockResolvedValue(null);
       const { strategy, recordLegacyHit } = setup({ lookup: unknownBearer(), compat: true });
 
@@ -1261,6 +1262,7 @@ describe('the end-users strategy', () => {
         kind: 'access',
         userId: '7',
         sessionId: 's-1',
+        issuedAt: 1,
       });
       vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
       const { strategy } = setup({

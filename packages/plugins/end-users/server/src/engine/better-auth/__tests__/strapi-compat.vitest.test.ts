@@ -761,6 +761,7 @@ describe('strapi-compat reset, through the engine', () => {
 
     const policy = { minLength: 8, maxLength: 128, requireMixedClasses: true };
     const invalidateLegacy = vi.fn(async () => undefined);
+    const markLegacyRevoked = vi.fn(async () => ({ count: 1 }));
     const strapi = {
       config: { get: () => undefined },
       sessionManager: Object.assign(() => ({ invalidateRefreshToken: invalidateLegacy }), {
@@ -770,6 +771,7 @@ describe('strapi-compat reset, through the engine', () => {
         query: () => ({
           findOne: async ({ where }: { where: { documentId: string } }) =>
             db.user.find((user) => user.id === where.documentId) ?? null,
+          updateMany: markLegacyRevoked,
         }),
       },
       plugin: () => ({
@@ -831,7 +833,7 @@ describe('strapi-compat reset, through the engine', () => {
         })
       );
 
-    return { auth, post, tokens, db, strapi, invalidateLegacy };
+    return { auth, post, tokens, db, strapi, invalidateLegacy, markLegacyRevoked };
   };
 
   beforeEach(() => {
@@ -932,8 +934,35 @@ describe('strapi-compat reset, through the engine', () => {
     expect(db.session.map((session) => session.token)).not.toContain(other.token);
   });
 
+  it('signs the user out of the old tokens when they change their password, revoke their other sessions or all of them', async () => {
+    for (const [path, body] of [
+      ['/change-password', { currentPassword: 'Old-Passw0rd!x', newPassword: STRONG }],
+      ['/revoke-other-sessions', {}],
+      ['/revoke-sessions', {}],
+    ] as const) {
+      const { auth, post, db, invalidateLegacy, markLegacyRevoked } = build();
+      const signedUp = await auth.api.signUpEmail({
+        body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
+        returnHeaders: true,
+      });
+
+      await auth.api.signInEmail({
+        body: { email: 'ann@example.com', password: 'Old-Passw0rd!x' },
+      });
+
+      // eslint-disable-next-line no-await-in-loop
+      const answered = await post(path, body, {
+        cookie: (signedUp.headers.get('set-cookie') ?? '').split(';')[0],
+      });
+
+      expect(answered.status, path).toBe(200);
+      expect(invalidateLegacy, path).toHaveBeenCalledWith(String(db.user[0].id), undefined);
+      expect(markLegacyRevoked, path).toHaveBeenCalledTimes(1);
+    }
+  });
+
   it('answers a compat change-password body with { jwt, user } and leaves a native one alone', async () => {
-    const { auth, post, db, invalidateLegacy } = build();
+    const { auth, post, db, invalidateLegacy, markLegacyRevoked } = build();
     const signedUp = await auth.api.signUpEmail({
       body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
       returnHeaders: true,
@@ -950,6 +979,7 @@ describe('strapi-compat reset, through the engine', () => {
 
     expect(wrong.status).toBe(400);
     expect(invalidateLegacy).not.toHaveBeenCalled();
+    expect(markLegacyRevoked).not.toHaveBeenCalled();
 
     const compat = await post(
       '/change-password',
@@ -962,6 +992,10 @@ describe('strapi-compat reset, through the engine', () => {
     expect(answer).toMatchObject({ jwt: expect.any(String), user: expect.anything() });
     // The old Users & Permissions sessions of the user go with the others
     expect(invalidateLegacy).toHaveBeenCalledWith(String(db.user[0].id), undefined);
+    expect(markLegacyRevoked).toHaveBeenCalledWith({
+      where: { documentId: db.user[0].id },
+      data: { legacyTokensRevokedAt: expect.any(Date) },
+    });
 
     // The other sessions were revoked, so the next calls carry the new one
     const renewed = { authorization: `Bearer ${answer.jwt}` };

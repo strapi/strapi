@@ -39,6 +39,13 @@ import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 const SIGN_IN_PATHS = new Set<string>(['/local', '/local/register']);
 const EMAIL_PATHS = new Set<string>(['/forgot-password', '/send-email-confirmation']);
 
+/** The native routes that end sessions of the caller's user other than, or including, the one in use */
+const SESSION_REVOKING_PATHS = new Set<string>([
+  '/change-password',
+  '/revoke-sessions',
+  '/revoke-other-sessions',
+]);
+
 const DEFAULT_WINDOW_SECONDS = 60;
 const SIGN_IN_MAX = 5;
 const EMAIL_MAX = 3;
@@ -274,9 +281,10 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
     ],
     after: [
       {
-        // A password change signs the user out of the old Users & Permissions sessions too, which
-        // the native `revokeOtherSessions` does not reach. The compat shape runs this route as well
-        matcher: (context) => context.path === '/change-password',
+        // A password change, or a revoke of the other sessions or of all of them, signs the user out
+        // of the old Users & Permissions sessions too, which Better Auth's own revoke does not
+        // reach. The compat shape of the change runs this route as well
+        matcher: (context) => SESSION_REVOKING_PATHS.has(context.path as string),
         handler: createAuthMiddleware(async (ctx) => {
           const userId = ctx.context.session?.user.id;
 

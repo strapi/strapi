@@ -18,6 +18,7 @@ const OWNED = [
   'failedSignIns',
   'lockedUntil',
   'lastSignInAt',
+  'legacyTokensRevokedAt',
 ] as const;
 
 /** The end-user type as far as these checks read it */
@@ -37,6 +38,7 @@ const USER_SCHEMA = {
     failedSignIns: { type: 'integer' },
     lockedUntil: { type: 'datetime' },
     lastSignInAt: { type: 'datetime' },
+    legacyTokensRevokedAt: { type: 'datetime' },
     roles: { type: 'relation', relation: 'manyToMany', target: 'plugin::end-users.role' },
   },
 } as unknown as Struct.ContentTypeSchema;
@@ -57,6 +59,7 @@ const VALUES: Record<(typeof OWNED)[number], unknown> = {
   failedSignIns: 0,
   lockedUntil: null,
   lastSignInAt: null,
+  legacyTokensRevokedAt: null,
 };
 
 /**
@@ -67,7 +70,7 @@ const run = (schema: Struct.ContentTypeSchema, data: unknown) =>
   engineOwnedUserFieldsValidator(schema)(data as never);
 
 describe('the engine-owned user fields', () => {
-  it('are the seven fields Better Auth and the plugin write', () => {
+  it('are the fields Better Auth and the plugin write', () => {
     expect(ENGINE_OWNED_USER_FIELDS).toEqual(OWNED);
     expect(Object.isFrozen(ENGINE_OWNED_USER_FIELDS)).toBe(true);
   });

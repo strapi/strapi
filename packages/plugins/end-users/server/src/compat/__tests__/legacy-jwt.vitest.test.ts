@@ -82,10 +82,13 @@ describe('verifyLegacyBearer', () => {
 
     const hit = await verifyLegacyBearer(strapi, sign({ id: 7 }), config(), NOW);
 
-    expect(hit).toEqual({ kind: 'legacy', userId: '7' });
+    expect(hit).toEqual({ kind: 'legacy', userId: '7', issuedAt: sec(NOW) });
     expect(await resolveLegacyUserId(strapi, hit!)).toBe('user-doc');
     expect(query).toHaveBeenCalledWith(USER_UID);
-    expect(findOne).toHaveBeenCalledWith({ where: { id: 7 }, select: ['documentId'] });
+    expect(findOne).toHaveBeenCalledWith({
+      where: { id: 7 },
+      select: ['documentId', 'legacyTokensRevokedAt'],
+    });
   });
 
   it('accepts the id as a string of digits and refuses one that is not a number', async () => {
@@ -94,6 +97,7 @@ describe('verifyLegacyBearer', () => {
     expect(await verifyLegacyBearer(strapi, sign({ id: '12' }), config(), NOW)).toEqual({
       kind: 'legacy',
       userId: '12',
+      issuedAt: sec(NOW),
     });
 
     for (const id of ['abc', -1, 1.5, 0, null, {}]) {
@@ -106,7 +110,9 @@ describe('verifyLegacyBearer', () => {
   it('answers null when no user has that numeric id', async () => {
     const { strapi } = strapiWith({ user: null });
 
-    expect(await resolveLegacyUserId(strapi, { kind: 'legacy', userId: '7' })).toBeNull();
+    expect(
+      await resolveLegacyUserId(strapi, { kind: 'legacy', userId: '7', issuedAt: sec(NOW) })
+    ).toBeNull();
   });
 
   it('refuses a token signed with another secret, an expired one, and one after until', async () => {
@@ -142,6 +148,7 @@ describe('verifyLegacyBearer', () => {
     expect(await verifyLegacyBearer(strapi, token, config({ algorithm: 'HS512' }), NOW)).toEqual({
       kind: 'legacy',
       userId: '7',
+      issuedAt: sec(NOW),
     });
     expect(await verifyLegacyBearer(strapi, token, config({ secret: null }), NOW)).toBeNull();
     expect(await verifyLegacyBearer(strapi, 'not-a-token', config(), NOW)).toBeNull();
@@ -155,6 +162,7 @@ describe('verifyLegacyBearer', () => {
       kind: 'access',
       userId: '7',
       sessionId: 'session-1',
+      issuedAt: sec(NOW),
     });
     expect(active.isSessionActive).toHaveBeenCalledWith('session-1');
 
@@ -281,7 +289,53 @@ describe('verifyLegacyBearer', () => {
     expect(await verifyLegacyBearer(strapi, sign({ id: '2147483647' }), config(), NOW)).toEqual({
       kind: 'legacy',
       userId: '2147483647',
+      issuedAt: sec(NOW),
     });
+  });
+});
+
+describe("resolveLegacyUserId and a revoke of the user's old tokens", () => {
+  const REVOKED_AT = new Date('2026-05-20T10:00:00.500Z');
+  const hit = (issuedAt: Date, kind: 'legacy' | 'access' = 'legacy') =>
+    kind === 'legacy'
+      ? ({ kind, userId: '7', issuedAt: sec(issuedAt) } as const)
+      : ({ kind, userId: '7', sessionId: 's', issuedAt: sec(issuedAt) } as const);
+
+  it('refuses a token issued at or before the moment, in the same second included', async () => {
+    const { strapi } = strapiWith({
+      user: { documentId: 'user-doc', legacyTokensRevokedAt: REVOKED_AT },
+    });
+
+    for (const kind of ['legacy', 'access'] as const) {
+      for (const issued of [
+        new Date('2026-05-19T00:00:00.000Z'),
+        new Date('2026-05-20T10:00:00.000Z'),
+      ]) {
+        // eslint-disable-next-line no-await-in-loop
+        expect(await resolveLegacyUserId(strapi, hit(issued, kind)), kind).toBeNull();
+      }
+    }
+  });
+
+  it('takes a token issued after it, and a user whose tokens were never revoked', async () => {
+    const revoked = strapiWith({
+      user: { documentId: 'user-doc', legacyTokensRevokedAt: REVOKED_AT },
+    });
+    const never = strapiWith({ user: { documentId: 'user-doc', legacyTokensRevokedAt: null } });
+    const later = new Date('2026-05-20T10:00:01.000Z');
+
+    expect(await resolveLegacyUserId(revoked.strapi, hit(later))).toBe('user-doc');
+    expect(await resolveLegacyUserId(never.strapi, hit(new Date('2020-01-01T00:00:00.000Z')))).toBe(
+      'user-doc'
+    );
+  });
+
+  it('refuses every token of a user whose revoke time cannot be read', async () => {
+    const { strapi } = strapiWith({
+      user: { documentId: 'user-doc', legacyTokensRevokedAt: 'not a date' },
+    });
+
+    expect(await resolveLegacyUserId(strapi, hit(NOW))).toBeNull();
   });
 });
 
