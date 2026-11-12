@@ -707,6 +707,22 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect((await rq.get('/api/users/me/profile')).statusCode).toBe(403);
     });
 
+    it('refuses the session token the database holds as a Bearer token: only the signed one is', async () => {
+      const { token, documentId } = await signedUp();
+      const [row] = (await strapi.db
+        .query(SESSION_UID)
+        .findMany({ where: { userId: documentId }, select: ['token'] })) as Array<{
+        token: string;
+      }>;
+
+      expect(decodeURIComponent(token).startsWith(`${row.token}.`)).toBe(true);
+      expect((await rq.get('/api/users/me', { headers: bearer(token) })).statusCode).toBe(200);
+      expect((await rq.get('/api/users/me', { headers: bearer(row.token) })).statusCode).toBe(401);
+      expect(
+        (await rq.get('/api/auth/get-session', { headers: bearer(row.token) })).body
+      ).toBeNull();
+    });
+
     it('names its strategy end-users and leaves no single role on the user while compat is off', async () => {
       const { token } = await signedUp();
 

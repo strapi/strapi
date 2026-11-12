@@ -10,7 +10,7 @@
 import bcrypt from 'bcryptjs';
 import { betterAuth } from 'better-auth/minimal';
 import type { Auth, BetterAuthOptions, BetterAuthPlugin } from 'better-auth';
-import { verifyPassword as scryptVerify } from 'better-auth/crypto';
+import { makeSignature, verifyPassword as scryptVerify } from 'better-auth/crypto';
 import { getAuthTables } from 'better-auth/db';
 import {
   admin,
@@ -36,6 +36,7 @@ import type {
   CredentialSource,
   EngineAccount,
   EngineSession,
+  IssuedSession,
   ID,
   InstalledMethod,
   NativeEndpoint,
@@ -102,6 +103,11 @@ const providerSessionMark = (provider: string, sessionId: string) =>
  * factor; `bearer` copies the session cookie into a `set-auth-token` header. With `bearer` first, a
  * two-factor user's password sign-in is answered with a token for a session that no longer exists.
  *
+ * `bearer` takes only the signed token, the form it hands out itself: unsigned, it would sign any
+ * value it is given, and a session token read from the database (a backup, a dump, a read-only
+ * account) would then be a working credential. Every token the plugin hands out is signed
+ * (`createSession` signs its own).
+ *
  * The `admin` plugin is here for its schema (ban fields, `user.role`, `session.impersonatedBy`)
  * and its hooks (the ban check when a session is created); its own endpoints are blocked by the
  * endpoint allow-list.
@@ -109,7 +115,7 @@ const providerSessionMark = (provider: string, sessionId: string) =>
 const betterAuthPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
   username(),
   twoFactor(twoFactorOptions(strapi)),
-  bearer(),
+  bearer({ requireSignature: true }),
   admin(),
 ];
 
@@ -658,6 +664,14 @@ const toEngineSession = (session: StoredSession): EngineSession => {
   };
 };
 
+/**
+ * A session token as a client holds it: the token, a dot and its signature with the secret,
+ * URL-encoded. It is the value of the session cookie, and of the `set-auth-token` header the bearer
+ * plugin answers sign-ins with, signed the way Better Auth signs its cookies.
+ */
+const signedToken = async (ctx: Context, token: string) =>
+  encodeURIComponent(`${token}.${await makeSignature(token, ctx.secret)}`);
+
 /** Only what the boundary promises: no password, no provider token. */
 const toEngineAccount = (account: StoredAccount): EngineAccount => ({
   id: account.id,
@@ -1126,7 +1140,7 @@ export const createEngine = (
 
     isTrustedOrigin,
 
-    async createSession(userId: ID, meta: RequestMeta) {
+    async createSession(userId: ID, meta: RequestMeta): Promise<IssuedSession> {
       const ctx = await context();
       const user = await requireUser(ctx, userId);
       const ban = banState(user as StoredUser & { banned?: unknown; banExpires?: unknown });
@@ -1162,7 +1176,11 @@ export const createEngine = (
         throw new Error('Better Auth did not create the session.');
       }
 
-      return toEngineSession(session as StoredSession);
+      // The caller hands the token to a client, and the bearer plugin takes only the signed form
+      return {
+        ...toEngineSession(session as StoredSession),
+        token: await signedToken(ctx, session.token),
+      };
     },
 
     async revokeSessions(userId: ID, opts?: { except?: ID }) {

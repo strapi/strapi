@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs';
 import { defaultsDeep } from 'lodash';
 import { errors, importDefault } from '@strapi/utils';
 import { createAuthEndpoint } from 'better-auth/api';
+import { serializeSignedCookie } from 'better-call';
 import { getBooleanEnvVar } from 'better-auth';
 import { decryptOAuthToken, setTokenUtil } from 'better-auth/oauth2';
 import type { BetterAuthPlugin } from 'better-auth';
@@ -1454,11 +1455,11 @@ describe('createEngine', () => {
       expect(session?.updatedAt).toBeInstanceOf(Date);
     });
 
-    it('reads a Bearer token, signed or raw', async () => {
+    it('reads a signed Bearer token, and not the raw token the database holds', async () => {
       const { userId, signed, token } = await signUp(engine);
 
       expect((await engine.getSession(bearer(signed)))?.userId).toBe(userId);
-      expect((await engine.getSession(bearer(token)))?.userId).toBe(userId);
+      expect(await engine.getSession(bearer(token))).toBeNull();
     });
 
     it('is null without a session, with a bad cookie and with a bad token', async () => {
@@ -2066,13 +2067,43 @@ describe('createEngine', () => {
       expect(rowsOf('session')).toHaveLength(before);
     });
 
-    it('reads a session token as a Bearer token with no signature on it, as the refresh route hands it out', async () => {
-      // The refresh routes answer with the token `createSession` makes, not the signed form the
-      // sign-in sets. This fails if the Bearer plugin is ever made to require a signature.
+    it('hands out the signed token, the form the sign-in sets, and it works as a Bearer token', async () => {
       const a = await signUp(engine, 'a@x.io');
       const made = await engine.createSession(a.userId, {});
+      const stored = rowsOf('session').find((row) => row.id === made.id)?.token as string;
 
+      expect(made.token).not.toBe(stored);
+      expect(decodeURIComponent(made.token).startsWith(`${stored}.`)).toBe(true);
       expect(await engine.getSession(bearer(made.token))).toMatchObject({ id: made.id });
+      // Decoded, as some clients send it, it is the same token
+      expect(await engine.getSession(bearer(decodeURIComponent(made.token)))).toMatchObject({
+        id: made.id,
+      });
+      // The same form as the sign-in's own `set-auth-token`
+      expect(decodeURIComponent(a.signed).startsWith(`${a.token}.`)).toBe(true);
+    });
+
+    it('refuses a session token read from the database as a Bearer token', async () => {
+      const a = await signUp(engine, 'a@x.io');
+      const made = await engine.createSession(a.userId, {});
+      const stored = (id: string) =>
+        rowsOf('session').find((row) => row.id === id)?.token as string;
+
+      // Both a session `createSession` made and one a sign-in made: neither is a credential unsigned
+      for (const raw of [stored(made.id), a.token]) {
+        // eslint-disable-next-line no-await-in-loop
+        const lookup = await engine.lookupSession(bearer(raw));
+
+        expect(lookup).toMatchObject({ session: null, credentials: true, source: 'bearer' });
+      }
+
+      // A token signed with another secret is refused too
+      const [token] = decodeURIComponent(made.token).split('.');
+      const forged = (
+        await serializeSignedCookie('', token, 'another-secret-long-enough-0123456789')
+      ).replace('=', '');
+
+      expect(await engine.getSession(bearer(forged))).toBeNull();
     });
 
     it('claims a session once: of five claims at the same time exactly one gets it', async () => {

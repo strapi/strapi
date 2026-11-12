@@ -86,7 +86,11 @@ export interface RequestMeta {
 export interface EngineSession {
   id: ID;
   userId: ID;
-  /** The secret session token. Callers must never serialize it into a response or a log line. */
+  /**
+   * The secret session token, as stored. It is not a credential on its own: a Bearer header takes
+   * only the signed form (`IssuedSession`). Callers must never serialize it into a response or a
+   * log line.
+   */
   token: string;
   expiresAt: Date;
   ipAddress?: string | null;
@@ -103,6 +107,15 @@ export interface EngineSession {
   passedSecondFactor: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/** A session `createSession` just made, for a caller to hand to its client. */
+export interface IssuedSession extends EngineSession {
+  /**
+   * The token as a client holds it: signed with the secret, the form of the session cookie and of
+   * the `set-auth-token` header, and the only one a Bearer header is accepted with.
+   */
+  token: string;
 }
 
 /**
@@ -236,7 +249,7 @@ export interface AuthEngine {
   isTrustedOrigin(origin: string): Promise<boolean>;
 
   /** Signs a user in without a credential check (legacy JWT exchange, compat routes). */
-  createSession(userId: ID, meta: RequestMeta): Promise<EngineSession>;
+  createSession(userId: ID, meta: RequestMeta): Promise<IssuedSession>;
 
   /** Signs the user out everywhere, or everywhere but the session `except`. */
   revokeSessions(userId: ID, opts?: { except?: ID }): Promise<void>;

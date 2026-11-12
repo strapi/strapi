@@ -3,6 +3,7 @@ import { errors } from '@strapi/utils';
 import { memoryAdapter } from 'better-auth/adapters/memory';
 import { createAuthMiddleware } from 'better-auth/api';
 import { betterAuth } from 'better-auth/minimal';
+import { serializeSignedCookie } from 'better-call';
 import { bearer, username } from 'better-auth/plugins';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
@@ -1132,7 +1133,8 @@ describe('strapi-compat refresh routes, through the engine', () => {
       telemetry: { enabled: false },
       database: memoryAdapter(db),
       emailAndPassword: { enabled: true },
-      plugins: [strapiCompat(strapi, cfg), bearer()],
+      // As the engine installs it: only a signed token is a Bearer credential
+      plugins: [strapiCompat(strapi, cfg), bearer({ requireSignature: true })],
     });
 
     const toSession = (row: any) => ({
@@ -1157,8 +1159,12 @@ describe('strapi-compat refresh routes, through the engine', () => {
 
         return found?.session ? toSession(found.session) : null;
       },
+      // Hands out the signed token, as the engine's own does
       async createSession(userId: string, meta: Record<string, unknown>) {
-        return toSession(await (await internal()).createSession(userId, false, meta as never));
+        const row = await (await internal()).createSession(userId, false, meta as never);
+        const signed = await serializeSignedCookie('', row.token, (await auth.$context).secret);
+
+        return { ...toSession(row), token: signed.replace('=', '') };
       },
       async revokeSession(userId: string, sessionId: string) {
         const row = (await (await internal()).listSessions(userId)).find((s) => s.id === sessionId);
@@ -1268,6 +1274,23 @@ describe('strapi-compat refresh routes, through the engine', () => {
     expect(await bodyOf(replay)).toMatchObject({ error: { message: 'Invalid refresh token' } });
     // The new token is a session token: it signs the caller in
     expect((await call('GET', '/sessions', { token: answer.jwt })).status).toBe(200);
+  });
+
+  it('answers a refresh with the signed token, and the raw one the database holds is no Bearer token', async () => {
+    const { call, signIn, db } = build();
+    const first = await signIn('ann@example.com', 'device-a');
+    const answer = await bodyOf(await call('POST', '/refresh', { body: { refreshToken: first } }));
+    const [row] = db.session;
+
+    expect(decodeURIComponent(answer.jwt).startsWith(`${row.token}.`)).toBe(true);
+    expect((await call('GET', '/sessions', { token: answer.jwt })).status).toBe(200);
+    expect((await call('GET', '/sessions', { token: row.token })).status).toBe(401);
+
+    // Nor is it a refresh token: the session it names is not rotated
+    const raw = await call('POST', '/refresh', { body: { refreshToken: row.token } });
+
+    expect(raw.status).toBe(401);
+    expect(db.session).toEqual([row]);
   });
 
   it('lets one of five refreshes with the same token win, and leaves one session', async () => {
