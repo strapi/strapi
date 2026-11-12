@@ -6,7 +6,6 @@ import { PLUGIN_ID } from '../constants';
 import { readCompatConfig } from '../compat/config';
 import { isEndUsersStrategy } from '../strategies/end-users';
 import { isPlainObject } from '../utils/is-plain';
-import { maskRequestLog } from './mask-request-log';
 
 /** The response header that says what the permission checks did to a request */
 export const EXPLAIN_HEADER = 'x-strapi-permissions-explain';
@@ -120,10 +119,6 @@ const contentTypeOf = (strapi: Core.Strapi, handler: unknown) => {
  * It never changes what a request does: a failure here is logged and the response goes out as it was.
  */
 export const createExplainMiddleware = (strapi: Core.Strapi): Core.MiddlewareHandler => {
-  // The plugin's one hook that runs in `register()` ahead of the application's middlewares, which
-  // is where the request log has to be masked
-  maskRequestLog(strapi);
-
   // One warning per route, so a busy route doesn't fill the log
   const warned = new Set<string>();
 

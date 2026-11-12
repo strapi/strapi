@@ -27,6 +27,7 @@ import type { AuthEngine } from './engine/types';
 import { registerEmailTemplates } from './emails/templates';
 import { registerMigrationControl } from './migration/control';
 import { createExplainMiddleware } from './middlewares/explain';
+import { maskRequestLog } from './middlewares/mask-request-log';
 import { registerConditions } from './services/condition';
 import createEndUsersStrategy from './strategies/end-users';
 import { engineOwnedUserFieldsValidator } from './utils/engine-owned-user-fields';
@@ -151,6 +152,10 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   // After core's API-token strategy, which registers first: a token keeps taking precedence, and
   // only a request that is not one reaches this strategy
   strapi.get('auth').register('content-api', createEndUsersStrategy(strapi, compat));
+
+  // Reset, magic-link and verification tokens ride in the URL, and the request log writes URLs:
+  // mask them before the application's middlewares, the logger among them, are set up
+  maskRequestLog(strapi);
 
   // Explain mode: what the permission checks did to an end user's Content API request,
   // in a header or the debug log. It wraps every request and only touches those of the strategy
