@@ -11,6 +11,7 @@ import { defaultsDeep } from 'lodash';
 import { errors, importDefault } from '@strapi/utils';
 import { createAuthEndpoint } from 'better-auth/api';
 import { getBooleanEnvVar } from 'better-auth';
+import { decryptOAuthToken, setTokenUtil } from 'better-auth/oauth2';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
@@ -457,6 +458,35 @@ describe('buildAuthOptions', () => {
 
       expect(options.advanced?.disableOriginCheck).toBe(false);
       expect(options.advanced?.disableCSRFCheck).toBe(false);
+    });
+  });
+
+  describe("a provider's tokens", () => {
+    const withTrusted = (trustedProviders: string[]) => ({
+      ...emptyStartupInputs(),
+      providers: { ...emptyStartupInputs().providers, trustedProviders },
+    });
+
+    it('are encrypted before they are stored, with or without trusted providers', () => {
+      expect(buildAuthOptions(fakeStrapi()).account?.encryptOAuthTokens).toBe(true);
+
+      const trusted = buildAuthOptions(fakeStrapi(), undefined, withTrusted(['github']));
+
+      expect(trusted.account?.encryptOAuthTokens).toBe(true);
+      expect(trusted.account?.accountLinking).toEqual({ trustedProviders: ['github'] });
+    });
+
+    it('are stored encrypted, and a row stored in clear text before is still read', async () => {
+      const ctx = { options: buildAuthOptions(fakeStrapi()), secretConfig: SECRET } as never;
+      const token = ['provider', 'access', 'token'].join('-');
+
+      const stored = await setTokenUtil(token, ctx);
+
+      expect(stored).not.toBe(token);
+      expect(stored).not.toContain(token);
+      expect(await decryptOAuthToken(stored as string, ctx)).toBe(token);
+      // A row from before the change: not encrypted, read as it is
+      expect(await decryptOAuthToken(token, ctx)).toBe(token);
     });
   });
 
