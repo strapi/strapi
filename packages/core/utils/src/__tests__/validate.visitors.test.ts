@@ -323,6 +323,12 @@ describe('Validate visitors util', () => {
       ['the operator map of $and on a scalar attribute', { title: { $and: { $eq: 'x' } } }],
       // Empty objects hold no condition and are sanitized out
       ['an empty operand', { $or: {}, createdBy: { $and: {} } }],
+      // Query conversion casts any $null / $notNull operand to a boolean, so a nested $or or $and
+      // there is not a filter
+      ['$or in a $null operand', { title: { $null: { $or: { a: 1 } } } }],
+      ['$and in a $notNull operand', { title: { $notNull: { $and: { a: 1 } } } }],
+      ['$or under $not in a $null operand', { id: { $null: { $not: { $or: { a: 1 } } } } }],
+      ['$and in a relation $notNull operand', { createdBy: { $notNull: { $and: { 0: 'x' } } } }],
     ])('accepts %s', async (_, filters) => {
       await expect(validate(filters)).resolves.toEqual(filters);
     });

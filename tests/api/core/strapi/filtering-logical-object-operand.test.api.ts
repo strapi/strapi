@@ -153,6 +153,13 @@ describe('Filtering with object-shaped $or and $and operands', () => {
       ['Note 1'],
     ],
     ['a $or list', { $or: [{ title: 'Note 1' }, { rank: { $gt: 1 } }] }, ['Note 1', 'Note 2']],
+    // Query conversion casts any $null / $notNull operand to a boolean, so these mean true
+    ['$or in a $null operand', { title: { $null: { $or: { a: 1 } } } }, []],
+    [
+      '$and in a $notNull operand',
+      { title: { $notNull: { $and: { a: 1 } } } },
+      ['Note 1', 'Note 2'],
+    ],
   ];
 
   test.each(acceptedFilters)('accepts %s', async (_, filters, expected) => {
