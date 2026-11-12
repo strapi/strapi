@@ -203,7 +203,7 @@ describe('end-users compat: every must-keep behavior on a migrated database', ()
     });
   });
 
-  it('keeps numeric ids and documentIds, and derives confirmed, blocked and provider from the migrated data', async () => {
+  it('keeps numeric ids and documentIds, and derives confirmed, provider and the caller`s own blocked from the migrated data', async () => {
     const res = await rq.get('/api/users', { headers: bearer(await aliceToken()) });
 
     expect(res.status).toBe(200);
@@ -220,17 +220,18 @@ describe('end-users compat: every must-keep behavior on a migrated database', ()
     expect(byId(users.bob.id)).toMatchObject({
       documentId: users.bob.documentId,
       confirmed: false,
-      blocked: false,
     });
     expect(byId(users.carol.id)).toMatchObject({
       documentId: users.carol.documentId,
       confirmed: true,
       provider: 'github',
     });
-    expect(byId(users.dave.id)).toMatchObject({
-      documentId: users.dave.documentId,
-      blocked: true,
-    });
+    expect(byId(users.dave.id)).toMatchObject({ documentId: users.dave.documentId });
+
+    // `blocked` follows the caller's right to read `banned`: their own record shows it, and
+    // another user's does not unless their role lists the field
+    expect(byId(users.bob.id)).not.toHaveProperty('blocked');
+    expect(byId(users.dave.id)).not.toHaveProperty('blocked');
   });
 
   it('merges the migrated custom fields into the user and writes them to the profile', async () => {

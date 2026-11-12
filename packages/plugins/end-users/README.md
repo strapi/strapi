@@ -146,7 +146,8 @@ end user's account.
   editor's, so it only lets an administrator look at the panel. An administrator who can also edit the `email` and
   `emailVerified` fields of end users can reach the same ends another way, so keep those fields out of such roles.
 - _Manage custom providers and account linking_ (`providers.custom`) is needed to add or edit a custom OpenID Connect
-  provider and to change "Trust for account linking". A provider an administrator points at an identity provider of
+  provider, to change "Trust for account linking", and to set or change a field a built-in provider's address is built
+  from (a domain, a tenant, an issuer), which includes the first setup of such a provider. A provider an administrator points at an identity provider of
   their own, or marks as trusted, lets an account at that provider attach to an existing user with the same email
   address. Updating a provider's client id, secret or enabled switch needs only the permission to update providers.
   That permission still lets the server request an address the administrator enters: the discovery URL of an OpenID
@@ -169,11 +170,14 @@ requires two-factor is only as strong as the mailboxes of its users.
 the person (a PIN, a fingerprint) proves only that the device was present, so it does not satisfy a role that requires
 two-factor.
 
-**After an upgrade, clients holding a session token from before it sign in again.** A token a client kept (in a
-cookie, or as a Bearer token) from before the upgrade is no longer accepted, and its user signs in once more.
+**Only the signed session token works as a Bearer token.** Send the value of the `set-auth-token` response header, or
+the `jwt` the compatibility routes answer with, in `Authorization: Bearer`. The `token` field in Better Auth's JSON
+answers is the stored form and is refused, so a copy of the database is not a set of working sessions. A client that
+kept that stored form from before this version signs in again.
 
-**Tokens from identity providers are encrypted at rest.** The access, refresh and ID tokens a provider returns are
-stored encrypted, as the provider client secrets are, and are not readable from a copy of the database alone.
+**Tokens from identity providers are encrypted at rest.** The access and refresh tokens a provider returns are stored
+encrypted with the plugin's secret, and are not readable from a copy of the database alone. The ID token is stored as
+the provider sent it. Changing the secret makes the stored tokens unreadable, and users sign in with the provider again.
 
 **A data transfer copies sessions and secrets on purpose.** `strapi transfer`, export and import move the plugin's
 tables whole, sessions, accounts and stored provider secrets included, because a transfer syncs one environment to
@@ -378,6 +382,8 @@ To migrate again after a rollback, switch the project to end-users again with `m
 - `GET /api/users/:id` answering 204 for a missing user. It answers 404.
 - The GraphQL role mutations (create, update and delete a role) and the `UsersPermissionsPermission` type. Roles are
   managed in the admin panel.
+- `blocked` on another user's record, for a caller whose role does not list the `banned` field. A user still sees it
+  on their own record.
 - Changing `email` through `PUT /api/users/:id`. The request is refused, and the address changes through
   `/change-email`, which proves the new one belongs to the user.
 - Editing their own profile, for the users of a role that could not update users in Users & Permissions. To let a
