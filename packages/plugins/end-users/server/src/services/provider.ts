@@ -984,8 +984,9 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Whether a save of `id` with this body needs more than the plain update: it edits a custom
-     * provider, or changes "trust for linking" (a provider trusted for linking signs in as any
-     * user whose email it vouches for). Resending the value that is stored changes nothing, so a
+     * provider, changes "trust for linking" (a provider trusted for linking signs in as any
+     * user whose email it vouches for), or changes a field a built-in provider's address is built
+     * from. Resending the value that is stored changes nothing, so a
      * form that always sends it does not need the extra right. An unknown provider is a 404.
      */
     async needsCustomAccess(id: string, body: unknown): Promise<boolean> {
@@ -995,10 +996,30 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
         return true;
       }
 
-      return (
-        isPlain(body) &&
+      if (!isPlain(body)) {
+        return false;
+      }
+
+      if (
         body.trustForLinking !== undefined &&
         body.trustForLinking !== (entry.stored?.trustForLinking ?? false)
+      ) {
+        return true;
+      }
+
+      // A built-in provider whose address is built from a field (a domain, a tenant, an issuer)
+      // becomes someone else's identity provider when that field changes: the same test `update`
+      // uses to tell that the endpoint moved
+      const given = isPlain(body.fields) ? body.fields : {};
+      const existing = plainOptions(entry).options;
+      const text = (value: unknown) => (isMissing(value) ? '' : value);
+
+      return Object.entries(entry.definition.fields ?? {}).some(
+        ([key, field]) =>
+          field.type !== 'secret' &&
+          field.type !== 'boolean' &&
+          Object.hasOwn(given, key) &&
+          text(given[key]) !== text(existing[key] ?? field.default)
       );
     },
 

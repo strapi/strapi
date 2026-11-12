@@ -447,6 +447,34 @@ describe('provider service', () => {
       ).toBe(false);
     });
 
+    it('is needed to change a field the provider`s address is built from, and not to resend it', async () => {
+      const { service } = setup();
+      const acmeBody = {
+        clientId: 'acme-id',
+        clientSecret: SECRET,
+        fields: { issuer: 'https://idp.example.com', signingKey: KEY_SECRET },
+      };
+
+      // Nothing is stored yet: the first issuer is a change of address
+      expect(await service.needsCustomAccess('acme', acmeBody)).toBe(true);
+
+      await service.update('acme', acmeBody);
+
+      expect(await service.needsCustomAccess('acme', acmeBody)).toBe(false);
+      // A secret field or the client id is the plain update
+      expect(
+        await service.needsCustomAccess('acme', {
+          clientId: 'other-id',
+          fields: { signingKey: [KEY_SECRET, '2'].join('-') },
+        })
+      ).toBe(false);
+      expect(
+        await service.needsCustomAccess('acme', {
+          fields: { issuer: 'https://elsewhere.example.com' },
+        })
+      ).toBe(true);
+    });
+
     it('is needed to turn trust for linking on, and to turn it off again', async () => {
       const { service } = setup();
 
