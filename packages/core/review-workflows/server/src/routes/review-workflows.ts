@@ -1,25 +1,5 @@
 import { enableFeatureMiddleware } from './utils';
 
-/**
- * One route per kind. A shared `(collection|single)` path is not a constraint on
- * path-to-regexp v8, so another kind would match and run authentication first.
- */
-const contentManagerEntryRoute = (
-  method: 'GET' | 'PUT',
-  action: 'stage' | 'stages' | 'assignee',
-  handler: string,
-  policies: Array<string | { name: string; config?: Record<string, unknown> }>
-) =>
-  (['collection', 'single'] as const).map((kind) => ({
-    method,
-    path: `/content-manager/${kind}-types/:model_uid/:id/${action}`,
-    handler,
-    config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
-      policies,
-    },
-  }));
-
 export default {
   type: 'admin',
   routes: [
@@ -126,20 +106,40 @@ export default {
         ],
       },
     },
-    ...contentManagerEntryRoute('PUT', 'stage', 'stages.updateEntity', [
-      'admin::isAuthenticatedAdmin',
-    ]),
-    ...contentManagerEntryRoute('GET', 'stages', 'stages.listAvailableStages', [
-      'admin::isAuthenticatedAdmin',
-    ]),
-    ...contentManagerEntryRoute('PUT', 'assignee', 'assignees.updateEntity', [
-      'admin::isAuthenticatedAdmin',
-      {
-        name: 'admin::hasPermissions',
-        config: {
-          actions: ['admin::users.read'],
-        },
+    {
+      method: 'PUT',
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/stage',
+      handler: 'stages.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: ['admin::isAuthenticatedAdmin'],
       },
-    ]),
+    },
+    {
+      method: 'GET',
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/stages',
+      handler: 'stages.listAvailableStages',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/assignee',
+      handler: 'assignees.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::users.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

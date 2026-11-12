@@ -5259,20 +5259,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@koa/router@npm:15.7.0":
-  version: 15.7.0
-  resolution: "@koa/router@npm:15.7.0"
+"@koa/router@npm:12.0.2":
+  version: 12.0.2
+  resolution: "@koa/router@npm:12.0.2"
   dependencies:
-    debug: "npm:^4.4.3"
-    http-errors: "npm:^2.0.1"
+    debug: "npm:^4.3.4"
+    http-errors: "npm:^2.0.0"
     koa-compose: "npm:^4.1.0"
-    path-to-regexp: "npm:^8.4.2"
-  peerDependencies:
-    koa: ^2.0.0 || ^3.0.0
-  peerDependenciesMeta:
-    koa:
-      optional: false
-  checksum: 10c0/da1f23f07684f5b39db5536cd6d4b77f7e38930786c2c0c13cf27d84ab90b6c9eea5ecf17f8f4c1b87ccc822a874f64c351b6e9b4c2e6c9324765564fce689cb
+    methods: "npm:^1.1.2"
+    path-to-regexp: "npm:^6.3.0"
+  checksum: 10c0/9d33af8b5cb7e80cf2a17e156fe1821ad31ad672ff8e9df62a3af2d2e4a6f49abbbb7038edaea45ef078cabdd8a1ce595ad7da810e96b17c5b954ee46f7e554d
   languageName: node
   linkType: hard
 
@@ -10107,7 +10103,7 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@koa/cors": "npm:5.0.0"
-    "@koa/router": "npm:15.7.0"
+    "@koa/router": "npm:12.0.2"
     "@modelcontextprotocol/client": "npm:2.3.1"
     "@modelcontextprotocol/node": "npm:2.1.1"
     "@modelcontextprotocol/server": "npm:2.3.1"
@@ -10133,6 +10129,7 @@ __metadata:
     "@types/koa-compress": "npm:4.0.3"
     "@types/koa-favicon": "npm:2.1.5"
     "@types/koa-static": "npm:4.0.2"
+    "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
     "@types/node": "npm:22.20.0"
@@ -11061,7 +11058,7 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@koa/cors": "npm:5.0.0"
-    "@koa/router": "npm:15.7.0"
+    "@koa/router": "npm:12.0.2"
     "@strapi/database": "npm:5.61.1"
     "@strapi/logger": "npm:5.61.1"
     "@strapi/permissions": "npm:5.61.1"
@@ -11069,6 +11066,7 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
+    "@types/koa__router": "npm:12.0.0"
     "@types/node": "npm:22.20.0"
     commander: "npm:8.3.0"
     croner: "npm:10.0.1"
@@ -12565,6 +12563,15 @@ __metadata:
   dependencies:
     "@types/koa": "npm:*"
   checksum: 10c0/2392b4ad63b8f730fee49f5c2104602613e77cac8e5aaac42cd74c60107563ad6e1194422b565519462eb5358746f59f19f5e890896494f7e7de1ac71566bbb2
+  languageName: node
+  linkType: hard
+
+"@types/koa__router@npm:12.0.0":
+  version: 12.0.0
+  resolution: "@types/koa__router@npm:12.0.0"
+  dependencies:
+    "@types/koa": "npm:*"
+  checksum: 10c0/e5a924254b0416ec929b148d39505e3084cfedd5043003baaf76db6e3e9a172a3373e0093e4668375c0e59e81dc7686f4abb201160e8614d84ed40c68b9b5c56
   languageName: node
   linkType: hard
 
@@ -20508,7 +20515,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-errors@npm:^2.0.1, http-errors@npm:~2.0.0, http-errors@npm:~2.0.1":
+"http-errors@npm:^2.0.0, http-errors@npm:~2.0.0, http-errors@npm:~2.0.1":
   version: 2.0.1
   resolution: "http-errors@npm:2.0.1"
   dependencies:
@@ -26232,7 +26239,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:8.4.2, path-to-regexp@npm:^8.4.2":
+"path-to-regexp@npm:8.4.2":
   version: 8.4.2
   resolution: "path-to-regexp@npm:8.4.2"
   checksum: 10c0/05b115c49b47ad252ce05faa32930f643f23769c68b8bcfe78ad833545140c48bbffb3266986d6c8d5db13a64cf12e07e0d72d9882cab830efeefa553533ebaf

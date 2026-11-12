@@ -43,8 +43,6 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
     {
       method: 'GET',
       path: `${strapi.config.admin.path}/:path*`,
-      // Kept in v6 syntax so ctx._matchedRoute and the route list stay as they were.
-      [Symbol.for('strapi.route.keepV6Path')]: true,
       handler: [
         serveAdminMiddleware,
         serveStatic(buildDir, {
