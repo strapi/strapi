@@ -38,7 +38,7 @@ import {
   deleteRelations,
   cleanOrderColumns,
 } from './regular-relations';
-import { idsForInsertedRows, readAutoIncrementStep } from './inserted-ids';
+import { idsForInsertedRows, readAutoIncrementStep, splitByIdSource } from './inserted-ids';
 import { isDeadlockError, transactionCtx, waitForDeadlockRetry } from '../transaction-context';
 import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
@@ -413,15 +413,20 @@ export const createEntityManager = (db: Database): EntityManager => {
       const trx = await db.transaction();
       let createdEntries: Array<ID | { id: ID }> = [];
       try {
-        for (let i = 0; i < dataToInsert.length; i += batchSize) {
-          const chunk = dataToInsert.slice(i, i + batchSize);
-          const chunkResult = await this.createQueryBuilder(uid)
-            .insert(chunk)
-            .transacting(trx.get())
-            .execute<Array<ID | { id: ID }>>();
-          createdEntries = createdEntries.concat(
-            idsForInsertedRows(chunk, chunkResult, db.dialect.useReturning(), increment)
-          );
+        // Mixed explicit and generated ids are separate statements. One MySQL
+        // INSERT reports only the first generated id, and an explicit id can
+        // jump the counter, so the rest cannot be derived from that value.
+        for (const run of splitByIdSource(dataToInsert)) {
+          for (let i = 0; i < run.length; i += batchSize) {
+            const chunk = run.slice(i, i + batchSize);
+            const chunkResult = await this.createQueryBuilder(uid)
+              .insert(chunk)
+              .transacting(trx.get())
+              .execute<Array<ID | { id: ID }>>();
+            createdEntries = createdEntries.concat(
+              idsForInsertedRows(chunk, chunkResult, db.dialect.useReturning(), increment)
+            );
+          }
         }
         await trx.commit();
       } catch (e) {

@@ -103,14 +103,33 @@ describe('entity-manager createMany inserted ids', () => {
     expect(raw).not.toHaveBeenCalled();
   });
 
-  it('keeps explicit ids and only expands the generated holes on MySQL', async () => {
+  it('inserts explicit and generated ids as separate statements on MySQL', async () => {
     const { em } = setup({ useReturning: false });
-    execute.mockResolvedValue([20]);
+    execute
+      .mockResolvedValueOnce([5])
+      .mockResolvedValueOnce([20])
+      .mockResolvedValueOnce([9])
+      .mockResolvedValueOnce([22]);
 
     await expect(
       em.createMany('api::article.article', {
         data: [{ id: 5, title: 'a' }, { title: 'b' }, { id: 9, title: 'c' }, { title: 'd' }],
       })
     ).resolves.toEqual({ count: 4, ids: [5, 20, 9, 22] });
+
+    expect(execute).toHaveBeenCalledTimes(4);
+  });
+
+  it('uses the next statement id when an explicit id jumps the counter', async () => {
+    const { em } = setup({ useReturning: false });
+    execute.mockResolvedValueOnce([4]).mockResolvedValueOnce([101]);
+
+    await expect(
+      em.createMany('api::article.article', {
+        data: [{ id: 4, title: 'a' }, { id: 100, title: 'b' }, { title: 'c' }],
+      })
+    ).resolves.toEqual({ count: 3, ids: [4, 100, 101] });
+
+    expect(execute).toHaveBeenCalledTimes(2);
   });
 });

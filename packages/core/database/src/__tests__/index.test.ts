@@ -398,6 +398,37 @@ describe('Database', () => {
       expect(closedBeforeHook).toBe(false);
     });
 
+    it('runs a commit hook write before lifecycle subscribers are cleared', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let cleared = false;
+      const clear = db.lifecycles.clear.bind(db.lifecycles);
+      db.lifecycles.clear = async () => {
+        cleared = true;
+        return clear();
+      };
+
+      let releaseHook: () => void = () => undefined;
+      const gate = new Promise<void>((resolve) => {
+        releaseHook = resolve;
+      });
+      let clearedBeforeWrite = true;
+
+      await db.transaction(async ({ onCommit }) => {
+        onCommit(async () => {
+          await gate;
+          clearedBeforeWrite = cleared;
+        });
+      });
+
+      const destroying = db.destroy();
+      releaseHook();
+      await destroying;
+
+      expect(clearedBeforeWrite).toBe(false);
+    });
+
     it('closes the pool when a commit hook is still running at the drain deadline', async () => {
       const db = new Database(configConnectionObject);
       await db.init({ models });

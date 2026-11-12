@@ -61,10 +61,34 @@ const readAutoIncrementStep = async (connection: {
 };
 
 /**
+ * One MySQL statement can be expanded from a single insert id only when every
+ * generated value stays on that sequence. An explicit id greater than the
+ * counter jumps the next generated value, and the driver does not report the
+ * jump. Keep each statement either all explicit or all generated.
+ */
+const splitByIdSource = (rows: Array<Record<string, unknown>>) => {
+  const runs: Array<Array<Record<string, unknown>>> = [];
+
+  for (const row of rows) {
+    const explicit = row.id != null;
+    const current = runs.at(-1);
+    const currentExplicit = current?.[0]?.id != null;
+
+    if (!current || currentExplicit !== explicit) {
+      runs.push([row]);
+      continue;
+    }
+
+    current.push(row);
+  }
+
+  return runs;
+};
+
+/**
  * Rows that already carry a primary key must keep those ids. MySQL reports
- * one insert id for the whole statement: the first generated value. Expanding
- * that id across every row invents ids for rows that supplied their own, and
- * skips the holes where an explicit id sits between generated ones.
+ * one insert id per statement: the first generated value. Callers pass rows
+ * from `splitByIdSource`, so a statement does not mix the two.
  */
 const idsForInsertedRows = (
   rows: Array<Record<string, unknown>>,
@@ -83,22 +107,13 @@ const idsForInsertedRows = (
     return rows.map((row) => row.id as ID);
   }
 
-  if (explicitCount === 0) {
-    return idsFromInsertResult(chunkResult, rows.length, false, increment);
+  if (explicitCount !== 0) {
+    throw new Error(
+      'MySQL createMany inserts explicit ids and generated ids as separate statements'
+    );
   }
 
-  const generated = idsFromInsertResult(chunkResult, rows.length - explicitCount, false, increment);
-  let nextGenerated = 0;
-
-  return rows.map((row) => {
-    if (row.id != null) {
-      return row.id as ID;
-    }
-
-    const id = generated[nextGenerated];
-    nextGenerated += 1;
-    return id;
-  });
+  return idsFromInsertResult(chunkResult, rows.length, false, increment);
 };
 
-export { idsForInsertedRows, idsFromInsertResult, readAutoIncrementStep };
+export { idsForInsertedRows, idsFromInsertResult, readAutoIncrementStep, splitByIdSource };

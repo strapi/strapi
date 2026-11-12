@@ -409,6 +409,17 @@ class Database {
   }
 
   async destroy() {
+    // A commit hook can still write. Timestamp and model subscribers have to
+    // stay registered until that write finishes. Clearing them first stores
+    // the row with NULL createdAt and updatedAt.
+    let drained = true;
+    let settleError: unknown;
+    try {
+      drained = await this.settleTransactionHooks();
+    } catch (error) {
+      settleError = error;
+    }
+
     try {
       await this.lifecycles.clear();
     } finally {
@@ -416,12 +427,14 @@ class Database {
     }
 
     try {
-      const drained = await this.settleTransactionHooks();
       if (!drained) {
         this.logger.warn('Closing the database connection with transaction hooks still running');
       }
-    } finally {
       await this.connection.destroy();
+    } finally {
+      if (settleError) {
+        throw settleError;
+      }
     }
   }
 }
