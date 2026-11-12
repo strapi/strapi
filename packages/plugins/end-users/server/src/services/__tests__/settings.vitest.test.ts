@@ -219,6 +219,7 @@ describe('settings service', () => {
           registrationFields: [],
         },
         redirects: { emailVerified: null, passwordReset: null, error: null },
+        account: { allowUnverifiedEmailChange: false },
         passwords: { minLength: 12, maxLength: 128, requireMixedClasses: false },
         lockout: { enabled: true, maxAttempts: 5, durationMinutes: 15 },
         methods: {
@@ -463,6 +464,11 @@ describe('settings service', () => {
         ],
         ['a setting that does not exist', { passwords: { nope: 1 } }, ['passwords', 'nope']],
         ['a value of the wrong type', { lockout: { enabled: 'yes' } }, ['lockout', 'enabled']],
+        [
+          'the email-change setting that is not a boolean',
+          { account: { allowUnverifiedEmailChange: 'yes' } },
+          ['account', 'allowUnverifiedEmailChange'],
+        ],
       ])('%s', async (_name, patch, path) => {
         const { service, set } = setup();
 
@@ -472,6 +478,16 @@ describe('settings service', () => {
         });
         expect(set).not.toHaveBeenCalled();
       });
+    });
+
+    it('stores the setting that lets unverified users change their email, off until set', async () => {
+      const { service } = setup();
+
+      expect((await service.get()).account.allowUnverifiedEmailChange).toBe(false);
+      expect(
+        (await service.set({ account: { allowUnverifiedEmailChange: true } })).account
+      ).toEqual({ allowUnverifiedEmailChange: true });
+      expect((await service.get()).account.allowUnverifiedEmailChange).toBe(true);
     });
 
     it('lets a method that is not installed be turned off', async () => {

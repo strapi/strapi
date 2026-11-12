@@ -33,10 +33,31 @@ describe('SignInPage', () => {
           requireEmailVerification: false,
           registrationFields: ['displayName'],
         },
+        account: { allowUnverifiedEmailChange: false },
         passwords: { minLength: 12, maxLength: 128, requireMixedClasses: false },
         lockout: { enabled: true, maxAttempts: 5, durationMinutes: 15 },
       },
     ]);
+  });
+
+  it('saves the switch that lets unverified users change their email', async () => {
+    const saved = serveSettings();
+    renderPage();
+
+    const toggle = await screen.findByRole('checkbox', {
+      name: /Let unverified users change their email/,
+    });
+
+    expect(toggle).not.toBeChecked();
+    expect(
+      screen.getByText(/someone holding the session of an unverified user/)
+    ).toBeInTheDocument();
+
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Saved')).toBeInTheDocument();
+    expect(saved[0]).toMatchObject({ account: { allowUnverifiedEmailChange: true } });
   });
 
   it('opens without roles.read, showing the stored default roles by id', async () => {
