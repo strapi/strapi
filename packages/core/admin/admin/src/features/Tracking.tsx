@@ -214,6 +214,7 @@ export interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
+    | 'didCreateRelease'
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
@@ -400,6 +401,15 @@ interface DidFilterEntriesEvent {
   };
 }
 
+interface DidPublishRelease {
+  name: 'didPublishRelease';
+  properties: {
+    totalEntries: number;
+    totalPublishedEntries: number;
+    totalUnpublishedEntries: number;
+  };
+}
+
 interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
@@ -505,6 +515,7 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidClickOnDocLink
+  | DidPublishRelease
   | MediaEvents
   | DidUpdateCTBSchema
   | DidSkipGuidedTour

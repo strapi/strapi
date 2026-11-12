@@ -1,9 +1,3 @@
-import {
-  DEFAULT_RELEASE_CONDITION,
-  RELEASE_CONDITIONS,
-  RELEASE_FAILURE_REASONS,
-  RELEASE_STATUSES,
-} from '../../../../shared/constants';
 import { RELEASE_ACTION_MODEL_UID } from '../../constants';
 
 export default {
@@ -40,29 +34,8 @@ export default {
     },
     status: {
       type: 'enumeration',
-      enum: [...RELEASE_STATUSES],
+      enum: ['ready', 'blocked', 'failed', 'done', 'empty'],
       required: true,
-    },
-    releaseCondition: {
-      type: 'enumeration',
-      enum: [...RELEASE_CONDITIONS],
-      default: DEFAULT_RELEASE_CONDITION,
-      required: true,
-    },
-    // What the run did with the release's entries, written when it runs. Null until then.
-    totalPublishedEntries: {
-      type: 'integer',
-    },
-    totalUnpublishedEntries: {
-      type: 'integer',
-    },
-    // Every entry the run didn't release, whatever the reason
-    totalSkippedEntries: {
-      type: 'integer',
-    },
-    failureReason: {
-      type: 'enumeration',
-      enum: [...RELEASE_FAILURE_REASONS],
     },
     actions: {
       type: 'relation',

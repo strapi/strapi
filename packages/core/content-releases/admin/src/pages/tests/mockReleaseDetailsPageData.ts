@@ -112,7 +112,6 @@ const RELEASE_WITH_ACTIONS_BODY_MOCK_DATA = {
           name: 'English (en)',
           code: 'en',
         },
-        entryDocumentId: 'entry-doc-1',
         entry: {
           id: 1,
         },
@@ -151,7 +150,6 @@ const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
           name: 'English (en)',
           code: 'en',
         },
-        entryDocumentId: 'entry-doc-2',
         entry: {
           id: 1,
           publishedAt: null,
@@ -171,7 +169,6 @@ const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
           name: 'English (en)',
           code: 'en',
         },
-        entryDocumentId: 'entry-doc-3',
         entry: {
           id: 2,
           publishedAt: '2023-12-05T09:03:57.155Z',
@@ -193,7 +190,6 @@ const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
           name: 'English (en)',
           code: 'en',
         },
-        entryDocumentId: 'entry-doc-4',
         entry: {
           id: 1,
           publishedAt: '2023-12-05T09:03:57.155Z',

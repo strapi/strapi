@@ -1,13 +1,36 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { Core, UID } from '@strapi/types';
+import type { Core, UID, Modules } from '@strapi/types';
 
-import { ALLOWED_WEBHOOK_EVENTS, OVERDUE_SWEEP_CRON_RULE } from './constants';
+import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { registerAuditEvents } from './audit-logs';
-import { getService, runAfterCommit } from './utils';
-import {
-  createDeleteActionsOnDelete,
-  createRevalidateActionsOnDraftChange,
-} from './middlewares/documents';
+import { getService, updateAffectedReleaseStatuses } from './utils';
+import { deleteActionsOnDelete, updateActionsOnUpdate } from './middlewares/documents';
+
+interface DeleteManyParams {
+  contentType: UID.ContentType;
+  locale: string | null;
+  entryDocumentId?: Modules.Documents.ID;
+}
+
+const deleteReleasesActionsAndUpdateReleaseStatus = async (
+  params: DeleteManyParams,
+  strapi: Core.Strapi
+) => {
+  const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+    where: {
+      // A released release is a record of what was published, its actions must stay
+      releasedAt: null,
+      actions: params,
+    },
+  });
+
+  await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+    where: { ...params, release: { releasedAt: null } },
+  });
+
+  // We update the status of each release after delete the actions
+  await updateAffectedReleaseStatuses(releases, { strapi });
+};
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
@@ -21,63 +44,44 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       /**
        * deleteMany is still used outside documents service, for example when deleting a locale
        */
-      afterDeleteMany(event) {
-        const model = strapi.getModel(event.model.uid as UID.Schema);
-        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind !== 'collectionType' || !model.options?.draftAndPublish) {
-          return;
+      async afterDeleteMany(event) {
+        try {
+          const model = strapi.getModel(event.model.uid as UID.Schema);
+          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+            const { where } = event.params;
+
+            await deleteReleasesActionsAndUpdateReleaseStatus(
+              {
+                contentType: model.uid,
+                locale: where?.locale ?? null,
+                ...(where?.documentId && { entryDocumentId: where.documentId }),
+              },
+              strapi
+            );
+          }
+        } catch (error) {
+          // If an error happens we don't want to block the delete entry flow, but we log the error
+          strapi.log.error('Error while deleting release actions after entry deleteMany', {
+            error,
+          });
         }
-
-        const { where } = event.params;
-
-        // Not awaited: the delete entry flow doesn't wait for its releases, and isn't blocked by
-        // their failure, which is logged
-        runAfterCommit(
-          () =>
-            getService('release-action', { strapi }).deletePlannedActions({
-              contentType: model.uid,
-              locale: where?.locale ?? null,
-              ...(where?.documentId && { entryDocumentId: where.documentId }),
-            }),
-          'Error while deleting release actions after entry deleteMany',
-          { strapi }
-        );
       },
     });
 
     // We register middleware to handle ReleaseActions when changes on documents are made
-    strapi.documents.use(createDeleteActionsOnDelete({ strapi }));
-    strapi.documents.use(createRevalidateActionsOnDraftChange({ strapi }));
+    strapi.documents.use(deleteActionsOnDelete);
+    strapi.documents.use(updateActionsOnUpdate);
 
-    const schedulingService = getService('scheduling', { strapi });
-    const freezeOverdueReleases = (now = new Date()) =>
-      schedulingService.freezeOverdueReleases({ now }).catch((error: unknown) => {
-        strapi.log.error('Error while freezing overdue releases in the content-releases plugin', {
-          error,
-        });
-      });
-
-    // Overdue releases are frozen before the jobs are armed: a release that failed before the
-    // upgrade must not be armed for a date it won't run on. Both use the same instant, so a release
-    // still within the grace period for the sweep is run right away by the sync, not left to the
-    // next sweep to freeze.
-    const startedAt = new Date();
-    freezeOverdueReleases(startedAt)
-      .then(() => schedulingService.syncFromDatabase({ now: startedAt }))
-      .catch((error: unknown) => {
+    getService('scheduling', { strapi })
+      .syncFromDatabase()
+      .catch((err: Error) => {
         strapi.log.error(
-          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.',
-          { error }
+          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
         );
-      });
 
-    // Then every minute: a release whose scheduled run didn't happen leaves Pending
-    strapi.cron.add({
-      'content-releases::freezeOverdueReleases': {
-        task: () => freezeOverdueReleases(),
-        options: OVERDUE_SWEEP_CRON_RULE,
-      },
-    });
+        throw err;
+      });
 
     Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
       strapi.get('webhookStore').addAllowedEvent(key, value);

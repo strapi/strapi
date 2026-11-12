@@ -37,7 +37,6 @@ import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
 import { handleInvisibleAttributes } from './utils/data';
-import { getPublishValidationErrors } from './utils/forms';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -151,6 +150,15 @@ const EditViewPage = () => {
     }
   };
 
+  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
+    const yupSchema = createYupSchema(schema?.attributes, components, {
+      status,
+      ...options,
+    });
+
+    return yupSchema.validateSync(values, { abortEarly: false });
+  };
+
   return (
     <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
@@ -184,11 +192,7 @@ const EditViewPage = () => {
 
             return yupSchema.validate(cleanedValues, { abortEarly: false });
           }}
-          initialErrors={
-            location?.state?.forceValidation
-              ? getPublishValidationErrors(initialValues, { schema, components })
-              : {}
-          }
+          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
         >
           <>
             <Header

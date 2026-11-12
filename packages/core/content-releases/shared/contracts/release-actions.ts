@@ -1,10 +1,7 @@
-import type { Schema, Modules, UID, Struct, Data } from '@strapi/types';
+import type { Schema, Modules, UID, Struct } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
-import type { ReleaseActionFilter, ReleaseActionOutcome } from '../constants';
-
-export type { ReleaseActionFilter, ReleaseActionOutcome };
 
 export type ReleaseActionEntryType = 'single-types' | 'collection-types';
 
@@ -15,44 +12,20 @@ export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   locale?: string;
 };
 
-export interface StageRef {
-  id: Data.ID;
-  name: string;
-}
-
-/** Why the entry wasn't released: what the run saw, kept as it was */
-export interface ReleaseActionReason {
-  /** Field paths and messages. Each error's `value` is dropped, and so is the value a type-mismatch message ends with */
-  validation?: { errors: { path: string[]; message: string }[] };
-  stage?: { entryStage: StageRef | null; requiredStage: StageRef };
-  /**
-   * The error's name, and its database driver's code when it has one (e.g. `23505`,
-   * `ER_DUP_ENTRY`): a driver's error name can be as vague as `error`. Its message only for an
-   * application error, which is meant for the client: any other error's message can carry row
-   * contents.
-   */
-  error?: { name: string; message?: string; code?: string };
-}
-
 export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
-  // Null when the entry was deleted after its release froze
-  entry: ReleaseActionEntry | null;
+  entry: ReleaseActionEntry;
   contentType: UID.ContentType;
   entryDocumentId: ReleaseActionEntry['documentId'];
   locale?: string;
   release: Release;
   isEntryValid: boolean;
-  // Null while the release is planned
-  outcome: ReleaseActionOutcome | null;
-  reason: ReleaseActionReason | null;
-  status: 'draft' | 'published' | 'modified' | null;
+  status: 'draft' | 'published' | 'modified';
 }
 
 export interface FormattedReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
-  entry: ReleaseActionEntry | null;
-  entryDocumentId: ReleaseAction['entryDocumentId'];
+  entry: ReleaseActionEntry;
   contentType: {
     uid: UID.ContentType;
     mainFieldValue?: string;
@@ -63,10 +36,7 @@ export interface FormattedReleaseAction extends Entity {
     code: string;
   };
   release: Release;
-  status: ReleaseAction['status'];
-  isEntryValid: boolean;
-  outcome: ReleaseActionOutcome | null;
-  reason: ReleaseActionReason | null;
+  status: 'draft' | 'published' | 'modified';
 }
 
 /**
@@ -134,9 +104,6 @@ export declare namespace GetReleaseActions {
     };
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
       groupBy?: ReleaseActionGroupBy;
-      filter?: ReleaseActionFilter;
-      // Any field of the release action, narrowing the result further
-      filters?: Modules.Documents.Params.Filters.Any<'plugin::content-releases.release-action'>;
     };
   }
 

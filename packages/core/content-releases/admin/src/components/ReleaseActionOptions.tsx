@@ -1,93 +1,139 @@
-import { cn } from '@strapi/design-system/next';
-import { Download, Upload } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import * as React from 'react';
 
-import type { ReleaseAction } from '../../../shared/contracts/release-actions';
+import { VisuallyHidden, Field, Flex } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
-/**
- * Per-entry release action selector (publish / unpublish), as a segmented control.
- *
- * Native radios styled like the `SegmentedControl` proposed for the design system
- * (strapi/design-system#2083). Swap this for
- * `import { SegmentedControl, SegmentedControlItem } from '@strapi/design-system/next'` once that PR
- * merges and publishes.
- *
- * Radio, not toggle: exactly one option is always selected and it never clears to empty. The icon +
- * label carry the meaning, so neither option is tinted with an action colour (an earlier version
- * painted unpublish danger-red, which read as a warning for a perfectly normal choice).
- */
+interface FieldWrapperProps extends Field.Props {
+  actionType: 'publish' | 'unpublish';
+}
 
-type ActionType = ReleaseAction['type'];
+const getBorderLeftRadiusValue = (actionType: FieldWrapperProps['actionType']) => {
+  return actionType === 'publish' ? 1 : 0;
+};
 
-const ACTION_TYPES = [
-  { type: 'publish', Icon: Upload },
-  { type: 'unpublish', Icon: Download },
-] as const;
+const getBorderRightRadiusValue = (actionType: FieldWrapperProps['actionType']) => {
+  return actionType === 'publish' ? 0 : 1;
+};
 
-const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
+const FieldWrapper = styled(Field.Root)<{
+  $actionType: 'publish' | 'unpublish';
+}>`
+  border-top-left-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderLeftRadiusValue($actionType)]};
+  border-bottom-left-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderLeftRadiusValue($actionType)]};
+  border-top-right-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderRightRadiusValue($actionType)]};
+  border-bottom-right-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderRightRadiusValue($actionType)]};
+
+  label {
+    color: inherit;
+    padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`};
+    text-align: center;
+    vertical-align: middle;
+    text-transform: capitalize;
+  }
+
+  &[data-checked='true'] {
+    color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
+    background-color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary100 : theme.colors.danger100};
+    border-color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
+  }
+
+  &[data-checked='false'] {
+    border-left: ${({ $actionType }) => $actionType === 'unpublish' && 'none'};
+    border-right: ${({ $actionType }) => $actionType === 'publish' && 'none'};
+  }
+
+  &[data-checked='false'][data-disabled='false']:hover {
+    color: ${({ theme }) => theme.colors.neutral700};
+    background-color: ${({ theme }) => theme.colors.neutral100};
+    border-color: ${({ theme }) => theme.colors.neutral200};
+
+    & > label {
+      cursor: pointer;
+    }
+  }
+
+  &[data-disabled='true'] {
+    color: ${({ theme }) => theme.colors.neutral600};
+    background-color: ${({ theme }) => theme.colors.neutral150};
+    border-color: ${({ theme }) => theme.colors.neutral300};
+  }
+`;
 
 interface ActionOptionProps {
-  selected: ActionType;
-  onChange: (type: ActionType) => void;
+  selected: 'publish' | 'unpublish';
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
   disabled?: boolean;
 }
 
-const optionClassName = cn(
-  'inline-flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-sm px-2.5 text-sm font-medium whitespace-nowrap',
-  'text-muted-foreground transition-colors select-none',
-  'hover:text-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
-  'has-[:checked]:cursor-default has-[:checked]:bg-background has-[:checked]:text-foreground has-[:checked]:shadow-xs',
-  // A read-only user still sees the current action at full contrast: only the other one dims
-  'has-[:disabled]:pointer-events-none has-[:disabled:not(:checked)]:opacity-50',
-  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-);
+interface OptionProps extends ActionOptionProps {
+  actionType: 'publish' | 'unpublish';
+}
+
+const ActionOption = ({
+  selected,
+  actionType,
+  handleChange,
+  name,
+  disabled = false,
+}: OptionProps) => {
+  return (
+    <FieldWrapper
+      $actionType={actionType}
+      background="primary0"
+      borderColor="neutral200"
+      color={selected === actionType ? 'primary600' : 'neutral600'}
+      position="relative"
+      cursor="pointer"
+      data-checked={selected === actionType}
+      data-disabled={disabled && selected !== actionType}
+    >
+      <Field.Label>
+        <VisuallyHidden>
+          <Field.Input
+            type="radio"
+            name={name}
+            checked={selected === actionType}
+            onChange={handleChange}
+            value={actionType}
+            disabled={disabled}
+          />
+        </VisuallyHidden>
+        {actionType}
+      </Field.Label>
+    </FieldWrapper>
+  );
+};
 
 export const ReleaseActionOptions = ({
   selected,
-  onChange,
+  handleChange,
   name,
   disabled = false,
 }: ActionOptionProps) => {
-  const { formatMessage } = useIntl();
-
   return (
-    <div
-      role="radiogroup"
-      aria-label={formatMessage({
-        id: 'content-releases.page.ReleaseDetails.table.header.label.action',
-        defaultMessage: 'action',
-      })}
-      className="inline-flex w-fit items-center gap-0.5 rounded-md border border-border bg-muted p-0.5"
-      // The details table moves its focus with the arrow keys and cancels them, which would stop
-      // the browser moving the radios' selection
-      onKeyDown={(event) => {
-        if (ARROW_KEYS.has(event.key)) {
-          event.stopPropagation();
-        }
-      }}
-    >
-      {ACTION_TYPES.map(({ type, Icon }) => (
-        <label key={type} className={optionClassName}>
-          <input
-            type="radio"
-            className="sr-only"
-            name={name}
-            value={type}
-            checked={selected === type}
-            onChange={() => onChange(type)}
-            disabled={disabled}
-          />
-          <Icon aria-hidden />
-          {formatMessage(
-            {
-              id: 'content-releases.pages.ReleaseDetails.table.action-type',
-              defaultMessage: '{isPublish, select, true {Publish} other {Unpublish}}',
-            },
-            { isPublish: type === 'publish' }
-          )}
-        </label>
-      ))}
-    </div>
+    <Flex>
+      <ActionOption
+        actionType="publish"
+        selected={selected}
+        handleChange={handleChange}
+        name={name}
+        disabled={disabled}
+      />
+      <ActionOption
+        actionType="unpublish"
+        selected={selected}
+        handleChange={handleChange}
+        name={name}
+        disabled={disabled}
+      />
+    </Flex>
   );
 };

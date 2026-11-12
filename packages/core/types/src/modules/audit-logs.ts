@@ -35,8 +35,7 @@ export interface Resource {
   name?: string;
 }
 
-/** `partial`: the action was carried out for only some of its items (e.g. a release run) */
-export type Outcome = 'success' | 'partial' | 'failure';
+export type Outcome = 'success' | 'failure';
 
 /**
  * A field's value on either side of a change, as recorded under `details.changes`.

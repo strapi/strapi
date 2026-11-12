@@ -1,14 +1,13 @@
 import { useQueryParams, usePersistentStateScope } from '@strapi/admin/strapi-admin';
 import { renderHook, waitFor } from '@tests/utils';
 import { parse, stringify } from 'qs';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { usePersistentPartialQueryParams } from '../usePersistentQueryParams';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(),
-  useNavigate: jest.fn(),
 }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
@@ -18,14 +17,6 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 const mockSetQuery = jest.fn();
-const mockNavigate = jest.fn();
-
-// The URL the hook restores the saved params into, keeping the history entry's state
-const expectHydratedWith = (query: Record<string, unknown>) =>
-  expect(mockNavigate).toHaveBeenCalledWith(
-    { search: stringify(query, { encode: false }) },
-    { replace: true, state: undefined }
-  );
 
 describe('usePersistentPartialQueryParams', () => {
   const keyPrefix = 'test-prefix-';
@@ -46,19 +37,16 @@ describe('usePersistentPartialQueryParams', () => {
     );
   };
 
-  const lastHydratedSearch = () => {
-    const [lastCall] = mockNavigate.mock.calls.slice(-1);
+  const lastFiltersPassedToSetQuery = () => {
+    const [lastCall] = mockSetQuery.mock.calls.slice(-1);
 
-    expect(lastCall).toBeDefined();
-
-    return (lastCall[0] as { search: string }).search;
+    return (lastCall?.[0] as { filters?: unknown } | undefined)?.filters;
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     window.localStorage.clear();
     (useLocation as jest.Mock).mockReturnValue({ pathname });
-    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
     (useQueryParams as jest.Mock).mockReturnValue([{ query: {} }, mockSetQuery]);
     (usePersistentStateScope as jest.Mock).mockReturnValue('test-uuid');
   });
@@ -70,7 +58,7 @@ describe('usePersistentPartialQueryParams', () => {
       })
     );
 
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
   it('should load query params from localStorage on mount', async () => {
@@ -84,7 +72,7 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expectHydratedWith(savedParams);
+      expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true);
     });
   });
 
@@ -99,7 +87,11 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expectHydratedWith({ page: 2, pageSize: 20, sort: 'name:asc' });
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        { page: 2, pageSize: 20, sort: 'name:asc' },
+        'push',
+        true
+      );
     });
   });
 
@@ -118,7 +110,7 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expectHydratedWith({ ...savedParams, ...existingQuery });
+      expect(mockSetQuery).toHaveBeenCalledWith({ ...existingQuery, ...savedParams }, 'push', true);
     });
   });
 
@@ -208,7 +200,7 @@ describe('usePersistentPartialQueryParams', () => {
       })
     );
 
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
   it('should handle empty object in localStorage', () => {
@@ -220,7 +212,7 @@ describe('usePersistentPartialQueryParams', () => {
       })
     );
 
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
   it('should load different params for different pathnames/keys', async () => {
@@ -239,10 +231,10 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expectHydratedWith(params1);
+      expect(mockSetQuery).toHaveBeenCalledWith(params1, 'push', true);
     });
 
-    mockNavigate.mockClear();
+    mockSetQuery.mockClear();
     renderHook(() =>
       usePersistentPartialQueryParams({
         [`${keyPrefix}${pathname2}`]: { paths: keysToPersist },
@@ -250,7 +242,7 @@ describe('usePersistentPartialQueryParams', () => {
     );
 
     await waitFor(() => {
-      expectHydratedWith(params2);
+      expect(mockSetQuery).toHaveBeenCalledWith(params2, 'push', true);
     });
   });
 
@@ -269,12 +261,16 @@ describe('usePersistentPartialQueryParams', () => {
     renderHook(() => usePersistentPartialQueryParams(config));
 
     await waitFor(() => {
-      expectHydratedWith({
-        page: 2,
-        pageSize: 20,
-        sort: 'name:asc',
-        plugins: { i18n: { locale: 'en' } },
-      });
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        {
+          page: 2,
+          pageSize: 20,
+          sort: 'name:asc',
+          plugins: { i18n: { locale: 'en' } },
+        },
+        'push',
+        true
+      );
     });
   });
 
@@ -294,7 +290,7 @@ describe('usePersistentPartialQueryParams', () => {
     renderHook(() => usePersistentPartialQueryParams(config));
 
     await waitFor(() => {
-      expectHydratedWith({ pageSize: 20, sort: 'name:asc' });
+      expect(mockSetQuery).toHaveBeenCalledWith({ pageSize: 20, sort: 'name:asc' }, 'push', true);
     });
   });
 
@@ -313,7 +309,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() => usePersistentPartialQueryParams(config));
 
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -328,7 +324,11 @@ describe('usePersistentPartialQueryParams', () => {
     renderWithQuery({ filters: filtersFor(decoded) });
 
     await waitFor(() => {
-      expectHydratedWith({ page: 2, filters: filtersFor(encoded) });
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        { page: 2, filters: filtersFor(encoded) },
+        'push',
+        true
+      );
     });
   });
 
@@ -338,13 +338,12 @@ describe('usePersistentPartialQueryParams', () => {
       renderWithQuery({ filters: filtersFor(value) });
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalled();
+        expect(mockSetQuery).toHaveBeenCalled();
       });
 
-      // What the URL -> useQueryParams would produce.
-      const reparsed = parse(lastHydratedSearch()) as {
-        filters: { $and: [{ name: { $eq: string } }] };
-      };
+      // Exactly what setQuery -> the URL -> useQueryParams would produce.
+      const url = stringify({ filters: lastFiltersPassedToSetQuery() }, { encode: false });
+      const reparsed = parse(url) as { filters: { $and: [{ name: { $eq: string } }] } };
 
       expect(reparsed.filters.$and[0].name.$eq).toBe(value);
     }
@@ -354,17 +353,22 @@ describe('usePersistentPartialQueryParams', () => {
     renderWithQuery({ filters: filtersFor('100%') });
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalled();
+      expect(mockSetQuery).toHaveBeenCalled();
     });
 
-    const reparsed = parse(lastHydratedSearch()) as { filters: unknown };
+    const url = stringify({ filters: lastFiltersPassedToSetQuery() }, { encode: false });
+    const reparsed = parse(url) as { filters: unknown };
 
     jest.clearAllMocks();
     window.localStorage.clear();
     renderWithQuery({ filters: reparsed.filters as Record<string, unknown> });
 
     await waitFor(() => {
-      expectHydratedWith({ page: 2, filters: filtersFor('100%25') });
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        { page: 2, filters: filtersFor('100%25') },
+        'push',
+        true
+      );
     });
   });
 
@@ -372,10 +376,11 @@ describe('usePersistentPartialQueryParams', () => {
     renderWithQuery({ filters: { $and: [{ id: { $eq: 5 } }, { active: { $eq: true } }] } });
 
     await waitFor(() => {
-      expectHydratedWith({
-        page: 2,
-        filters: { $and: [{ id: { $eq: 5 } }, { active: { $eq: true } }] },
-      });
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        { page: 2, filters: { $and: [{ id: { $eq: 5 } }, { active: { $eq: true } }] } },
+        'push',
+        true
+      );
     });
   });
 

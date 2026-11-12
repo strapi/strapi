@@ -9,7 +9,6 @@ import {
   screen,
   type RenderOptions,
   fireEvent,
-  defaultTestStoreConfig,
 } from '@strapi/admin/strapi-admin/test';
 
 import { PERMISSIONS, PERMISSIONS_SETTINGS } from '../src/constants';
@@ -21,9 +20,8 @@ const render = (
   renderAdmin(ui, {
     ...options,
     providerOptions: {
-      ...options.providerOptions,
       permissions: Object.values({ ...PERMISSIONS, ...PERMISSIONS_SETTINGS }).flat(),
     },
   });
 
-export { render, waitFor, act, screen, server, fireEvent, defaultTestStoreConfig };
+export { render, waitFor, act, screen, server, fireEvent };

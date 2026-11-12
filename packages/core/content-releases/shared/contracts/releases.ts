@@ -1,25 +1,15 @@
 import { errors } from '@strapi/utils';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
-import type { Modules } from '@strapi/types';
 import type { Entity, UserInfo } from '../types';
 import type { ReleaseAction } from './release-actions';
-import type { ReleaseCondition, ReleaseFailureReason, ReleaseStatus } from '../constants';
-
-export type { ReleaseCondition, ReleaseFailureReason, ReleaseStatus };
 
 export interface Release extends Entity {
   name: string;
   releasedAt: string | null;
   scheduledAt: string | null;
-  status: ReleaseStatus;
+  status: 'ready' | 'blocked' | 'failed' | 'done' | 'empty';
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
-  releaseCondition: ReleaseCondition;
-  // Null while the release is planned
-  totalPublishedEntries: number | null;
-  totalUnpublishedEntries: number | null;
-  totalSkippedEntries: number | null;
-  failureReason: ReleaseFailureReason | null;
   actions: ReleaseAction[];
 }
 
@@ -31,13 +21,7 @@ export type Pagination = {
 };
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
-  actions: {
-    meta: {
-      count: number;
-      // Planned releases only: the publish entries that aren't publishable now
-      notReadyCount?: number;
-    };
-  };
+  actions: { meta: { count: number } };
   createdBy: SanitizedAdminUser;
 }
 
@@ -53,12 +37,7 @@ export declare namespace GetReleases {
     state: {
       userAbility: {};
     };
-    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
-      // Any field of the release, e.g. filters[status][$in][0]=failed
-      filters?: Modules.Documents.Params.Filters.Any<'plugin::content-releases.release'>;
-      // e.g. 'updatedAt:desc'
-      sort?: string | string[];
-    };
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
   }
 
   export interface Response {
@@ -66,8 +45,6 @@ export declare namespace GetReleases {
     meta: {
       pagination?: Pagination;
       pendingReleasesCount?: number;
-      // How many releases have each status, whatever the filters
-      statusCounts: Record<ReleaseStatus, number>;
     };
     error?: errors.ApplicationError;
   }
@@ -83,7 +60,7 @@ export declare namespace GetReleasesByDocumentAttached {
     };
     query: {
       contentType: string;
-      entryDocumentId: ReleaseAction['entryDocumentId'];
+      entryDocumentId: ReleaseAction['entry']['entryDocumentId'];
       locale?: string;
       hasEntryAttached?: boolean;
     };
@@ -145,37 +122,12 @@ export declare namespace CreateRelease {
       name: string;
       scheduledAt: Date | null;
       timezone: string | null;
-      releaseCondition?: ReleaseCondition;
     };
   }
 
   export interface Response {
     data: ReleaseDataResponse;
     error?: errors.ApplicationError | errors.ValidationError;
-  }
-}
-
-/**
- * POST /content-releases/:id/create-from-skipped-entries - Create a release from the entries a
- * partial or failed release skipped
- */
-export declare namespace CreateReleaseFromSkippedEntries {
-  export interface Request {
-    state: {
-      user: UserInfo;
-    };
-    params: {
-      id: Release['id'];
-    };
-    body: CreateRelease.Request['body'] & {
-      // The skipped entries to carry over; all of them if omitted
-      actionIds?: ReleaseAction['id'][];
-    };
-  }
-
-  export interface Response {
-    data: ReleaseDataResponse;
-    error?: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
   }
 }
 
@@ -192,11 +144,9 @@ export declare namespace UpdateRelease {
     };
     body: {
       name: string;
-      // The schedule is replaced as a whole: an omitted or null scheduledAt unschedules the
-      // release, and an omitted or null timezone is cleared
+      // When editing a release, scheduledAt always need to be explicitly sended, so it can be null to unschedule it
       scheduledAt?: Date | null;
       timezone?: string | null;
-      releaseCondition?: ReleaseCondition;
     };
   }
 
@@ -244,13 +194,7 @@ export declare namespace PublishRelease {
       totalEntries: number;
       totalPublishedEntries: number;
       totalUnpublishedEntries: number;
-      totalSkippedEntries: number;
     };
-    // A run that failed sends the release it froze with its error, as a 400: a validation error
-    // keeps its details, an unexpected error is named but not quoted. Another application error is
-    // sent as is, without the release. A refused publish never ran, so it has no release.
-    error?:
-      | errors.ApplicationError
-      | errors.ValidationError<string, { release?: Omit<Release, 'actions'> }>;
+    error?: errors.ApplicationError | errors.ValidationError;
   }
 }

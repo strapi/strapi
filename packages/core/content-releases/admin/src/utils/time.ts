@@ -1,5 +1,3 @@
-import type { IntlShape } from 'react-intl';
-
 export const getTimezoneOffset = (timezone: string, date: Date) => {
   try {
     const offsetPart = new Intl.DateTimeFormat('en', {
@@ -26,77 +24,23 @@ export const getTimezoneOffset = (timezone: string, date: Date) => {
   }
 };
 
-/**
- * A release's date as its pages show it: in the release's timezone (the browser's for an
- * unscheduled release, which has none), with a 24-hour time and the UTC offset, for a
- * `{date} at {time} ({offset})` message
- */
-export const getReleaseDateParts = (
-  { formatDate, formatTime }: Pick<IntlShape, 'formatDate' | 'formatTime'>,
-  date: Date,
-  timezone?: string | null
-) => {
-  const timeZone = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  return {
-    date: formatDate(date, {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      timeZone,
-    }),
-    time: formatTime(date, { timeZone, hourCycle: 'h23' }),
-    offset: getTimezoneOffset(timeZone, date),
-  };
-};
-
-/**
- * An instant as the `yyyy-MM-dd` date and `HH:mm` time a clock in `timeZone` reads, without going
- * through a browser `Date`: one would move a time in the browser's DST gap (02:30 → 03:30)
- */
-export const getWallClock = (date: Date, timeZone: string) => {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23',
-    })
-      .formatToParts(date)
-      .map(({ type, value }) => [type, value])
-  );
-
-  return {
-    date: `${parts.year}-${parts.month}-${parts.day}`,
-    time: `${parts.hour}:${parts.minute}`,
-  };
-};
-
-// A value of the timezone list is `${offset}&${IANA name}`
-export interface TimezoneOption {
+interface ITimezoneOption {
   offset: string;
   value: string;
 }
 
-export const getTimezoneName = (timezone: string) => timezone.split('&')[1];
-
 export const getTimezones = (selectedDate: Date) => {
-  const timezoneList: TimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
+  const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
     // Timezone will be in the format GMT${OFFSET} where offset could be nothing,
     // a four digit string e.g. +05:00 or -08:00
     const utcOffset = getTimezoneOffset(timezone, selectedDate);
 
     // Offset and timezone are concatenated with '&', so to split and save the required timezone in DB
-    return { offset: utcOffset, value: `${utcOffset}&${timezone}` } satisfies TimezoneOption;
+    return { offset: utcOffset, value: `${utcOffset}&${timezone}` } satisfies ITimezoneOption;
   });
 
   const systemTimezone = timezoneList.find(
-    (timezone) =>
-      getTimezoneName(timezone.value) === Intl.DateTimeFormat().resolvedOptions().timeZone
+    (timezone) => timezone.value.split('&')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
   return { timezoneList, systemTimezone };

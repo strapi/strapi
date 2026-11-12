@@ -2,7 +2,6 @@ import { describeOnCondition, createUtils } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
-import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 /**
@@ -42,8 +41,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
   let rq: Awaited<ReturnType<typeof createAuthRequest>>;
   let utils: ReturnType<typeof createUtils>;
   let actingAdminId: number;
-  // Publishing one of these documents throws, through a test-only document middleware
-  const documentIdsFailingToPublish = new Set<string>();
 
   const actingAdmin = {
     email: 'releases-audit-actor@test.com',
@@ -116,7 +113,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     return res.body.data;
   };
 
-  // Sent with a locale, like the Content Manager does: Product isn't localized, so none is kept
   const releaseAction = (documentId: string, type = 'publish') => ({
     type,
     contentType: PRODUCT_UID,
@@ -150,16 +146,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     actingAdminId = actor.id;
 
     rq = await createAuthRequest({ strapi, userInfo: actingAdmin });
-
-    strapi.cron.remove('content-releases::freezeOverdueReleases');
-
-    strapi.documents.use((ctx, next) => {
-      if (ctx.action === 'publish' && documentIdsFailingToPublish.has(ctx.params?.documentId)) {
-        throw new errors.ValidationError('Test-only publish failure');
-      }
-
-      return next();
-    });
   });
 
   afterAll(async () => {
@@ -178,7 +164,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     await strapi.db.query('plugin::content-releases.release-action').deleteMany();
     await strapi.db.query('plugin::content-releases.release').deleteMany();
     await clearAuditLogs();
-    documentIdsFailingToPublish.clear();
   });
 
   describe('release', () => {
@@ -192,7 +177,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         actor: actingActor(),
         origin: 'admin-panel',
         resource: { type: 'release', id: release.id, name: 'Audited create' },
-        details: { isScheduled: false, releaseCondition: 'all_or_nothing' },
+        details: { isScheduled: false },
       });
       // The admin who made the request, not merely some admin
       expect(log.user.id).toBe(actingAdminId);
@@ -217,27 +202,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       });
       expect(log.payload.details.changes).toEqual({
         name: { before: 'Before rename', after: 'After rename' },
-      });
-    });
-
-    it('records a release condition change on its own', async () => {
-      const release = await createRelease({ name: 'Condition change', timezone: 'Europe/Paris' });
-      await clearAuditLogs();
-
-      const res = await rq({
-        url: `/content-releases/${release.id}`,
-        method: 'PUT',
-        body: {
-          name: 'Condition change',
-          timezone: 'Europe/Paris',
-          releaseCondition: 'allow_partial',
-        },
-      });
-      expect(res.statusCode).toBe(200);
-
-      const log = await expectExactlyOneLog('release.update');
-      expect(log.payload.details.changes).toEqual({
-        releaseCondition: { before: 'all_or_nothing', after: 'allow_partial' },
       });
     });
 
@@ -266,12 +230,11 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       const logs = await findLogs('release.update');
 
       expect(
-        // Sorted: Postgres stores the payload as jsonb, which reorders its keys
         logs.map((log: { payload: { details: { changes: object } } }) =>
-          Object.keys(log.payload.details.changes).sort()
+          Object.keys(log.payload.details.changes)
         )
       ).toEqual([
-        ['isScheduled', 'scheduledAt'],
+        ['scheduledAt', 'isScheduled'],
         // Resending the same values produces no entry
         ['name', 'timezone'],
       ]);
@@ -368,16 +331,9 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
 
     it('records a failed trigger with only the error name', async () => {
       const release = await createRelease({ name: 'Fails to publish', timezone: 'Europe/Paris' });
-      const entry = await createEntry('fails-to-publish');
-      await rq({
-        url: `/content-releases/${release.id}/actions`,
-        method: 'POST',
-        body: releaseAction(entry.documentId),
-      });
-      documentIdsFailingToPublish.add(entry.documentId);
       await clearAuditLogs();
 
-      // The only entry fails to publish, so the run fails inside the publish service
+      // Publishing a release with no entries fails inside the publish service
       const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
       expect(res.statusCode).toBe(400);
 
@@ -388,41 +344,10 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         actor: actingActor(),
         resource: { type: 'release', id: release.id, name: 'Fails to publish' },
       });
-      // The error's name and nothing else from it: no message, no driver properties, and no
-      // entry counts, since a failed run released nothing
+      // The error's name and nothing else from it: no message, no driver properties,
+      // and no entry counts, since a failed run is not atomic
       expect(log.payload.details).toEqual({ reason: 'ValidationError' });
       expect(log.user.id).toBe(actingAdminId);
-    });
-
-    it('records an allow_partial run that left an entry out as partial, with what it released', async () => {
-      const release = await createRelease({
-        name: 'Partly published',
-        timezone: 'Europe/Paris',
-        releaseCondition: 'allow_partial',
-      });
-      const published = await createEntry('goes-out');
-      const failing = await createEntry('left-out');
-      for (const entry of [published, failing]) {
-        await rq({
-          url: `/content-releases/${release.id}/actions`,
-          method: 'POST',
-          body: releaseAction(entry.documentId),
-        });
-      }
-      documentIdsFailingToPublish.add(failing.documentId);
-      await clearAuditLogs();
-
-      const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data.status).toBe('partial');
-
-      const log = await expectExactlyOneLog('release.trigger');
-      expect(log.payload).toMatchObject({
-        outcome: 'partial',
-        resource: { type: 'release', id: release.id, name: 'Partly published' },
-      });
-      // What the run released, not every entry of the release
-      expect(log.payload.details).toEqual({ published: 1, unpublished: 0, failed: 1 });
     });
 
     it('records nothing for a publish attempt on an already published release', async () => {
@@ -442,42 +367,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       const second = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
       expect(second.statusCode).toBe(400);
       await expectNoLog('release.trigger');
-    });
-
-    it('records nothing when writing what the run did fails, which rolls the run back', async () => {
-      const release = await createRelease({ name: 'Rolled back', timezone: 'Europe/Paris' });
-      const entry = await createEntry('rolled-back');
-      await rq({
-        url: `/content-releases/${release.id}/actions`,
-        method: 'POST',
-        body: releaseAction(entry.documentId),
-      });
-      await clearAuditLogs();
-      // The run records its entries' outcomes: failing that write loses the whole run
-      let armed = true;
-      const unsubscribe = strapi.db.lifecycles.subscribe({
-        models: ['plugin::content-releases.release-action'],
-        beforeUpdateMany() {
-          if (armed) {
-            armed = false;
-            throw new Error('Test-only write failure');
-          }
-        },
-      });
-
-      try {
-        const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
-        expect(res.statusCode).toBe(500);
-      } finally {
-        unsubscribe();
-      }
-
-      await expectNoLog('release.trigger');
-      expect(
-        await strapi.db
-          .query('plugin::content-releases.release')
-          .findOne({ where: { id: release.id } })
-      ).toMatchObject({ releasedAt: null });
     });
 
     it('records nothing for a publish of a release that never existed', async () => {
@@ -555,19 +444,12 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     });
 
     it('records a failed scheduled publish with a system actor', async () => {
+      // An empty release can be scheduled; publishing it fails inside the service
       const release = await createRelease({
         name: 'Scheduled to fail',
         timezone: 'Europe/Paris',
         scheduledAt: inFuture(60),
       });
-      const entry = await createEntry('scheduled-to-fail');
-      await rq({
-        url: `/content-releases/${release.id}/actions`,
-        method: 'POST',
-        body: releaseAction(entry.documentId),
-      });
-      // The only entry fails to publish, so the run fails inside the publish service
-      documentIdsFailingToPublish.add(entry.documentId);
       await clearAuditLogs();
 
       await expect(runScheduledJob(release.id)).rejects.toThrow();
@@ -581,80 +463,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         resource: { type: 'release', id: release.id, name: 'Scheduled to fail' },
       });
       expect(log.payload.details).toEqual({ reason: 'ValidationError' });
-    });
-
-    it('records a release that missed its schedule as a failure attributed to the scheduler', async () => {
-      const release = await createRelease({
-        name: 'Missed its schedule',
-        timezone: 'Europe/Paris',
-        scheduledAt: inFuture(60),
-      });
-      const entry = await createEntry('missed-its-schedule');
-      await rq({
-        url: `/content-releases/${release.id}/actions`,
-        method: 'POST',
-        body: releaseAction(entry.documentId),
-      });
-      await strapi.db.query('plugin::content-releases.release').update({
-        where: { id: release.id },
-        data: { scheduledAt: new Date(Date.now() - 10 * 60_000) },
-      });
-      await clearAuditLogs();
-
-      await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
-
-      const log = await expectExactlyOneLog('release.trigger');
-      expect(log.user).toBeNull();
-      expect(log.payload).toMatchObject({
-        actor: { type: 'system' },
-        origin: 'scheduler',
-        outcome: 'failure',
-        resource: { type: 'release', id: release.id, name: 'Missed its schedule' },
-      });
-      expect(log.payload.details).toEqual({ reason: 'MissedSchedule' });
-    });
-
-    it('records an empty release that missed its schedule as a success, like its run', async () => {
-      const release = await createRelease({
-        name: 'Empty and missed',
-        timezone: 'Europe/Paris',
-        scheduledAt: inFuture(60),
-      });
-      await strapi.db.query('plugin::content-releases.release').update({
-        where: { id: release.id },
-        data: { scheduledAt: new Date(Date.now() - 10 * 60_000) },
-      });
-      await clearAuditLogs();
-
-      await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
-
-      const log = await expectExactlyOneLog('release.trigger');
-      expect(log.user).toBeNull();
-      expect(log.payload).toMatchObject({
-        actor: { type: 'system' },
-        origin: 'scheduler',
-        outcome: 'success',
-        resource: { type: 'release', id: release.id, name: 'Empty and missed' },
-      });
-    });
-
-    it('records nothing when it freezes a release that failed before the upgrade', async () => {
-      const release = await createRelease({ name: 'Failed before', timezone: 'Europe/Paris' });
-      await strapi.db.query('plugin::content-releases.release').update({
-        where: { id: release.id },
-        data: { status: 'failed', scheduledAt: new Date(Date.now() - 10 * 60_000) },
-      });
-      await clearAuditLogs();
-
-      await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
-
-      expect(
-        await strapi.db
-          .query('plugin::content-releases.release')
-          .findOne({ where: { id: release.id } })
-      ).toMatchObject({ status: 'failed', failureReason: 'failed_before_upgrade' });
-
-      await expectNoLog('release.trigger');
     });
 
     it('reports the resource id as a number in every event', async () => {
@@ -710,7 +518,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         resource: { type: 'release', id: release.id, name: 'Add entry' },
         details: {
           actionType: 'publish',
-          entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: null },
+          entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: 'en' },
         },
       });
     });
@@ -896,96 +704,8 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       });
       // The entry alone identifies what was removed
       expect(log.payload.details).toEqual({
-        entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: null },
+        entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: 'en' },
       });
-    });
-  });
-
-  describe('release from skipped entries', () => {
-    // A partial release whose `left-out` entry was skipped; the logs of the run are cleared
-    const createPartialRelease = async () => {
-      const release = await createRelease({
-        name: 'Partly published',
-        timezone: 'Europe/Paris',
-        releaseCondition: 'allow_partial',
-      });
-      const published = await createEntry('goes-out');
-      const skipped = await createEntry('left-out');
-      for (const entry of [published, skipped]) {
-        await rq({
-          url: `/content-releases/${release.id}/actions`,
-          method: 'POST',
-          body: releaseAction(entry.documentId),
-        });
-      }
-      documentIdsFailingToPublish.add(skipped.documentId);
-      const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
-      expect(res.body.data.status).toBe('partial');
-      documentIdsFailingToPublish.delete(skipped.documentId);
-      await waitForLog('release.trigger');
-      await clearAuditLogs();
-
-      return { release, skipped };
-    };
-
-    const createFromSkippedEntries = (releaseId: number) =>
-      rq({
-        url: `/content-releases/${releaseId}/create-from-skipped-entries`,
-        method: 'POST',
-        body: { name: 'Second try', scheduledAt: null },
-      });
-
-    it('records the new release and each entry it carries over', async () => {
-      const { skipped, release } = await createPartialRelease();
-
-      const res = await createFromSkippedEntries(release.id);
-      expect(res.statusCode).toBe(201);
-      const newRelease = res.body.data;
-
-      const createLog = await expectExactlyOneLog('release.create');
-      expect(createLog.payload.resource).toEqual({
-        type: 'release',
-        id: newRelease.id,
-        name: 'Second try',
-      });
-      const addLog = await expectExactlyOneLog('release.entry.add');
-      expect(addLog.payload).toMatchObject({
-        resource: { type: 'release', id: newRelease.id, name: 'Second try' },
-        details: {
-          actionType: 'publish',
-          entry: { contentType: PRODUCT_UID, documentId: skipped.documentId, locale: null },
-        },
-      });
-    });
-
-    it('records nothing when the new release is rolled back', async () => {
-      const { release } = await createPartialRelease();
-      // The status update counts the new release's actions: failing it rolls everything back
-      let armed = true;
-      const unsubscribe = strapi.db.lifecycles.subscribe({
-        models: ['plugin::content-releases.release-action'],
-        beforeCount() {
-          if (armed) {
-            armed = false;
-            throw new Error('Test-only count failure');
-          }
-        },
-      });
-
-      try {
-        const res = await createFromSkippedEntries(release.id);
-        expect(res.statusCode).toBe(500);
-      } finally {
-        unsubscribe();
-      }
-
-      await expectNoLog('release.create');
-      await expectNoLog('release.entry.add');
-      expect(
-        await strapi.db
-          .query('plugin::content-releases.release')
-          .count({ where: { name: 'Second try' } })
-      ).toBe(0);
     });
   });
 

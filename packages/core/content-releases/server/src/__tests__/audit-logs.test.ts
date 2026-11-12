@@ -46,14 +46,13 @@ describe('transformers', () => {
     ]);
   });
 
-  it('release.create carries the condition, and the schedule when there is one', () => {
+  it('release.create carries the schedule when there is one', () => {
     expect(
       transformers['release.create']({
         releaseId: 1,
         name: 'March',
         scheduledAt: '2026-09-01T10:00:00.000Z',
         timezone: 'Europe/Paris',
-        releaseCondition: 'allow_partial',
       })
     ).toEqual({
       resource: { type: 'release', id: 1, name: 'March' },
@@ -61,19 +60,12 @@ describe('transformers', () => {
         isScheduled: true,
         scheduledAt: '2026-09-01T10:00:00.000Z',
         timezone: 'Europe/Paris',
-        releaseCondition: 'allow_partial',
       },
     });
 
-    expect(
-      transformers['release.create']({
-        releaseId: 1,
-        name: 'March',
-        releaseCondition: 'all_or_nothing',
-      })
-    ).toEqual({
+    expect(transformers['release.create']({ releaseId: 1, name: 'March' })).toEqual({
       resource: { type: 'release', id: 1, name: 'March' },
-      details: { isScheduled: false, releaseCondition: 'all_or_nothing' },
+      details: { isScheduled: false },
     });
   });
 
@@ -96,7 +88,7 @@ describe('transformers', () => {
     });
   });
 
-  it('release.trigger reports each outcome', () => {
+  it('release.trigger reports both outcomes', () => {
     expect(
       transformers['release.trigger']({
         releaseId: 1,
@@ -104,27 +96,11 @@ describe('transformers', () => {
         outcome: 'success',
         published: 2,
         unpublished: 1,
-        failed: 0,
       })
     ).toEqual({
       resource: { type: 'release', id: 1, name: 'March' },
       outcome: 'success',
       details: { published: 2, unpublished: 1, failed: 0 },
-    });
-
-    expect(
-      transformers['release.trigger']({
-        releaseId: 1,
-        name: 'March',
-        outcome: 'partial',
-        published: 7,
-        unpublished: 0,
-        failed: 3,
-      })
-    ).toEqual({
-      resource: { type: 'release', id: 1, name: 'March' },
-      outcome: 'partial',
-      details: { published: 7, unpublished: 0, failed: 3 },
     });
 
     expect(
@@ -149,6 +125,14 @@ describe('transformers', () => {
         reason: 'X'.repeat(500),
       }).details.reason
     ).toHaveLength(100);
+
+    // No counts, no claims: a success whose counts could not be read omits details
+    expect(
+      transformers['release.trigger']({ releaseId: 1, name: 'March', outcome: 'success' })
+    ).toEqual({
+      resource: { type: 'release', id: 1, name: 'March' },
+      outcome: 'success',
+    });
   });
 
   it('release.entry events carry the entry and the action type', () => {

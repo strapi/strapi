@@ -2,8 +2,6 @@ import { translatedErrors } from '@strapi/admin/strapi-admin';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import * as yup from 'yup';
 
-import { RELEASE_CONDITIONS } from '../../../shared/constants';
-
 /**
  * FormikErrors type enforce us to always return a string as error.
  * We need these errors to be translated, so we need to create a hook to be able to use the formatMessage function.
@@ -12,6 +10,7 @@ export const RELEASE_SCHEMA = yup
   .object()
   .shape({
     name: yup.string().trim().required(translatedErrors.required.id).nullable(),
+    scheduledAt: yup.string().nullable(),
     isScheduled: yup.boolean().optional(),
     time: yup
       .string()
@@ -24,16 +23,14 @@ export const RELEASE_SCHEMA = yup
         'time-in-future-if-today',
         'content-releases.modal.form.time.has-passed',
         function (time) {
-          const { date, timezone, isScheduled } = this.parent;
+          const { date, timezone } = this.parent;
 
-          // Timezone is in format "UTC&Europe/Paris", so we get the region part for the dates functions
-          const region = timezone?.split('&')[1];
-
-          // An invalid timezone is reported by the timezone field. Without a schedule, the hidden
-          // date and time are not submitted
-          if (!isScheduled || !date || !region || !time) {
+          if (!date || !timezone || !time) {
             return true;
           }
+
+          // Timezone is in format "UTC&Europe/Paris", so we get the region part for the dates functions
+          const region = timezone.split('&')[1];
 
           const selectedTime = zonedTimeToUtc(`${date} ${time}`, region);
           const now = new Date();
@@ -43,16 +40,7 @@ export const RELEASE_SCHEMA = yup
       ),
     timezone: yup.string().when('isScheduled', {
       is: true,
-      then: yup
-        .string()
-        .required(translatedErrors.required.id)
-        .nullable()
-        // A free-typed value that isn't one of the timezone options has no region part
-        .test(
-          'timezone-from-list',
-          'components.Input.error.validation.combobox.invalid',
-          (timezone) => Boolean(timezone?.split('&')[1])
-        ),
+      then: yup.string().required(translatedErrors.required.id).nullable(),
       otherwise: yup.string().nullable(),
     }),
     date: yup.string().when('isScheduled', {
@@ -60,7 +48,6 @@ export const RELEASE_SCHEMA = yup
       then: yup.string().required(translatedErrors.required.id).nullable(),
       otherwise: yup.string().nullable(),
     }),
-    releaseCondition: yup.string().oneOf([...RELEASE_CONDITIONS]),
   })
   .required()
   .noUnknown();
