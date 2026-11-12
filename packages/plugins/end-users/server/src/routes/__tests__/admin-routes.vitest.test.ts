@@ -6,13 +6,14 @@ import {
   PROVIDER_ACTIONS,
   ROLE_ACTIONS,
   SETTINGS_ACTIONS,
+  USER_SECURITY_ACTIONS,
 } from '../../admin-actions';
 import controllers from '../../controllers';
 import pluginPolicies from '../../policies';
 import routes from '../index';
 import admin from '../admin';
 import conditions from '../admin/conditions';
-import { guard, guardAny } from '../admin/guard';
+import { guard, guardAll, guardAny } from '../admin/guard';
 import migration from '../admin/migration';
 import permissions from '../admin/permissions';
 import providers from '../admin/providers';
@@ -47,10 +48,15 @@ describe('the admin routes', () => {
   });
 
   /**
-   * The user-security routes check their action in the controller, with the admin's ability and
-   * the user in hand, so they carry no `hasPermissions` policy of their own.
+   * The user-security reads check their Content Manager action in the controller, with the admin's
+   * ability and the user in hand, so they carry no `hasPermissions` policy of their own (the one
+   * policy they have is being signed in); the changes do carry one, for `security.manage`.
    */
-  const checkedByPolicy = admin.routes.filter((route) => !userSecurity.routes.includes(route));
+  const checkedByPolicy = admin.routes.filter(
+    (route) =>
+      !userSecurity.routes.includes(route) ||
+      (route.config?.policies as unknown[] | undefined)?.length === 2
+  );
 
   describe('every one of them', () => {
     it('is signed in first, then needs the action it checks: no route is open to an admin without it', () => {
@@ -129,13 +135,17 @@ describe('the admin routes', () => {
   });
 
   describe('the user security routes', () => {
-    it('are signed in only, the Content Manager action being checked by the controller, PUT or POST and never PATCH', () => {
+    const READS = [
+      'GET /users/:documentId/effective-permissions',
+      'GET /users/:documentId/security',
+    ];
+
+    it('are the documented ones, PUT or POST and never PATCH', () => {
       expect(userSecurity.routes.map(describeRoute).sort()).toEqual([
         'DELETE /users/:documentId/accounts/:accountId',
         'DELETE /users/:documentId/sessions',
         'DELETE /users/:documentId/sessions/:sessionId',
-        'GET /users/:documentId/effective-permissions',
-        'GET /users/:documentId/security',
+        ...READS,
         'POST /users/:documentId/ban',
         'POST /users/:documentId/send-password-reset',
         'POST /users/:documentId/send-verification',
@@ -145,10 +155,29 @@ describe('the admin routes', () => {
       ]);
 
       for (const route of userSecurity.routes) {
+        expect(route.handler as string, describeRoute(route)).toMatch(/^user-security\./);
+      }
+    });
+
+    it('lets a signed-in admin read, the Content Manager action being checked by the controller', () => {
+      const reads = userSecurity.routes.filter((route) => READS.includes(describeRoute(route)));
+
+      expect(reads).toHaveLength(2);
+
+      for (const route of reads) {
         expect(route.config, describeRoute(route)).toEqual({
           policies: ['admin::isAuthenticatedAdmin'],
         });
-        expect(route.handler as string, describeRoute(route)).toMatch(/^user-security\./);
+      }
+    });
+
+    it('needs security.manage for every change, before the controller runs', () => {
+      const changes = userSecurity.routes.filter((route) => !READS.includes(describeRoute(route)));
+
+      expect(changes).toHaveLength(9);
+
+      for (const route of changes) {
+        expect(route.config, describeRoute(route)).toEqual(guard(USER_SECURITY_ACTIONS.manage));
       }
     });
   });
@@ -167,7 +196,6 @@ describe('the admin routes', () => {
     it.each([
       ['GET /providers', 'provider.find', PROVIDER_ACTIONS.read],
       ['GET /providers/:id', 'provider.findOne', PROVIDER_ACTIONS.read],
-      ['POST /providers', 'provider.create', PROVIDER_ACTIONS.update],
       ['PUT /providers/:id', 'provider.update', PROVIDER_ACTIONS.update],
       ['DELETE /providers/:id', 'provider.delete', PROVIDER_ACTIONS.update],
     ])('%s is handled by %s and needs %s', (route, handler, action) => {
@@ -175,6 +203,15 @@ describe('the admin routes', () => {
 
       expect(found?.handler).toBe(handler);
       expect(found?.config).toEqual(guard(action));
+    });
+
+    it('makes a custom provider only for an admin who may also manage custom providers', () => {
+      const found = providers.routes.find(
+        (candidate) => describeRoute(candidate) === 'POST /providers'
+      );
+
+      expect(found?.handler).toBe('provider.create');
+      expect(found?.config).toEqual(guardAll([PROVIDER_ACTIONS.update, PROVIDER_ACTIONS.custom]));
     });
   });
 

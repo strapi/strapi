@@ -982,6 +982,26 @@ const providerService = ({ strapi }: { strapi: Core.Strapi }) => {
       return detail(await find(id));
     },
 
+    /**
+     * Whether a save of `id` with this body needs more than the plain update: it edits a custom
+     * provider, or changes "trust for linking" (a provider trusted for linking signs in as any
+     * user whose email it vouches for). Resending the value that is stored changes nothing, so a
+     * form that always sends it does not need the extra right. An unknown provider is a 404.
+     */
+    async needsCustomAccess(id: string, body: unknown): Promise<boolean> {
+      const entry = await find(id);
+
+      if (entry.custom) {
+        return true;
+      }
+
+      return (
+        isPlain(body) &&
+        body.trustForLinking !== undefined &&
+        body.trustForLinking !== (entry.stored?.trustForLinking ?? false)
+      );
+    },
+
     /** Saves a provider's credentials and settings; the secrets are encrypted. */
     async update(id: string, body: ProviderUpdateBody): Promise<ProviderDetail> {
       assertWritable(await find(id));

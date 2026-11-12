@@ -14,6 +14,7 @@ import {
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import { PERMISSIONS } from '../../constants';
 import {
   useBanUserMutation,
   useGetUserProfileQuery,
@@ -80,9 +81,14 @@ const SecurityContent = ({
   emailVerified: boolean;
 }) => {
   const { formatMessage, formatDate } = useIntl();
+  // The Content Manager's update on end users is not enough: the panel's changes need the plugin's
+  // own action too
   const {
     allowedActions: { canUpdate },
   } = useRBAC(CAN_UPDATE);
+  const {
+    allowedActions: { canManage },
+  } = useRBAC(PERMISSIONS.security);
 
   const { data, isLoading, error } = useGetUserSecurityQuery(documentId);
   const { data: profileId } = useGetUserProfileQuery(documentId);
@@ -104,7 +110,7 @@ const SecurityContent = ({
   const [permissionsOpen, setPermissionsOpen] = React.useState(false);
 
   const readForbidden = isForbidden(error);
-  const canAct = canUpdate && !forbidden && !readForbidden;
+  const canAct = canUpdate && canManage && !forbidden && !readForbidden;
 
   if (isLoading) {
     return (
@@ -171,10 +177,16 @@ const SecurityContent = ({
                 defaultMessage:
                   'Your role is limited to some fields of end users, so these cannot be changed from here.',
               })
-            : formatMessage({
-                id: getTranslation('security-panel.read-only'),
-                defaultMessage: 'You can look at these, but not change them.',
-              })}
+            : canUpdate && !canManage
+              ? formatMessage({
+                  id: getTranslation('security-panel.read-only-manage'),
+                  defaultMessage:
+                    'Changing these needs the permission to manage the Security panel of end users.',
+                })
+              : formatMessage({
+                  id: getTranslation('security-panel.read-only'),
+                  defaultMessage: 'You can look at these, but not change them.',
+                })}
         </Typography>
       )}
 

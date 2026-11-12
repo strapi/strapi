@@ -13,10 +13,11 @@ type Plain = Record<string, unknown>;
  * one end user. Answers are `{ data }`, as every admin route's are, and never carry a session
  * token.
  *
- * There is no admin action of the plugin's behind these routes: the admin needs the
- * Content Manager's `explorer.read` on the end-user type to read, and `explorer.update` to change
- * anything. The check is the service's `authorize`, run first on every route, and it also limits
- * which users the admin reaches to the ones they may read.
+ * The admin needs the Content Manager's `explorer.read` on the end-user type to read, and
+ * `explorer.update` to change anything; the changes also need the plugin's `security.manage`, which
+ * the route's policy checks before this runs. The Content Manager check is the service's
+ * `authorize`, run first on every route, and it also limits which users the admin reaches to the
+ * ones they may read.
  *
  * Every change tells `strapi.eventHub` once it has been made, so a refused one is never reported:
  * `end-users.user.<change>`, with the admin who did it and the user's `documentId`.

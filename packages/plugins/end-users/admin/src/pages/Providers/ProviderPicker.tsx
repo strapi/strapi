@@ -14,13 +14,21 @@ interface ProviderPickerProps {
   open: boolean;
   /** The providers that are not configured yet */
   available: ProviderSummary[];
+  /** Whether the admin may make a custom OIDC provider: without it the choice is not offered */
+  canAddCustom: boolean;
   onClose: () => void;
   /** The id of the provider chosen, or `CUSTOM_OIDC` */
   onPick: (value: string) => void;
 }
 
 /** Where a provider to add is chosen: a search over the ones the plugin knows, by name */
-const ProviderPicker = ({ open, available, onClose, onPick }: ProviderPickerProps) => {
+const ProviderPicker = ({
+  open,
+  available,
+  canAddCustom,
+  onClose,
+  onPick,
+}: ProviderPickerProps) => {
   const { formatMessage } = useIntl();
 
   const sorted = React.useMemo(
@@ -70,12 +78,14 @@ const ProviderPicker = ({ open, available, onClose, onPick }: ProviderPickerProp
                   {provider.name}
                 </ComboboxOption>
               ))}
-              <ComboboxOption value={CUSTOM_OIDC}>
-                {formatMessage({
-                  id: getTranslation('providers.custom-oidc'),
-                  defaultMessage: 'Custom OIDC',
-                })}
-              </ComboboxOption>
+              {canAddCustom && (
+                <ComboboxOption value={CUSTOM_OIDC}>
+                  {formatMessage({
+                    id: getTranslation('providers.custom-oidc'),
+                    defaultMessage: 'Custom OIDC',
+                  })}
+                </ComboboxOption>
+              )}
             </Combobox>
           </Field.Root>
         </Modal.Body>

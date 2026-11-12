@@ -16,6 +16,12 @@ export const PERMISSIONS = {
   providers: {
     read: [{ action: 'plugin::end-users.providers.read', subject: null }],
     update: [{ action: 'plugin::end-users.providers.update', subject: null }],
+    /** Custom providers and "trust for linking": what can sign in as another user */
+    custom: [{ action: 'plugin::end-users.providers.custom', subject: null }],
+  },
+  /** The Security panel of an end user in the Content Manager */
+  security: {
+    manage: [{ action: 'plugin::end-users.security.manage', subject: null }],
   },
   settings: {
     read: [{ action: 'plugin::end-users.settings.read', subject: null }],

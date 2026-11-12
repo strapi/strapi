@@ -28,10 +28,27 @@ export const SETTINGS_ACTIONS = {
   update: `plugin::${PLUGIN_ID}.settings.update`,
 } as const;
 
-/** The actions on the sign-in providers: `read` lists them, `update` saves, creates and deletes. */
+/**
+ * The actions on the sign-in providers: `read` lists them, `update` saves, creates and deletes.
+ * `custom` is for what can make an identity provider the admin controls sign in as an end user:
+ * making or editing a custom OpenID Connect provider, and changing "trust for linking". An admin
+ * who holds only `update` keeps to the plain settings (client id, secret, enabled) of a provider.
+ */
 export const PROVIDER_ACTIONS = {
   read: `plugin::${PLUGIN_ID}.providers.read`,
   update: `plugin::${PLUGIN_ID}.providers.update`,
+  custom: `plugin::${PLUGIN_ID}.providers.custom`,
+} as const;
+
+/**
+ * The action on one end user's Security panel in the Content Manager: resetting two-factor,
+ * unlinking sign-in methods, sending a password reset or verification email, signing the user out
+ * and banning. It is held beside the Content Manager's own update permission on the end-user type,
+ * which alone is not enough: that permission is a routine editor's, and these changes can take an
+ * account over.
+ */
+export const USER_SECURITY_ACTIONS = {
+  manage: `plugin::${PLUGIN_ID}.security.manage`,
 } as const;
 
 export const ADMIN_ACTIONS = [
@@ -103,6 +120,20 @@ export const ADMIN_ACTIONS = [
     displayName: 'Update',
     uid: 'providers.update',
     subCategory: 'providers',
+    pluginName: PLUGIN_ID,
+  },
+  {
+    section: 'plugins',
+    displayName: 'Manage custom providers and account linking',
+    uid: 'providers.custom',
+    subCategory: 'providers',
+    pluginName: PLUGIN_ID,
+  },
+  {
+    section: 'plugins',
+    displayName: 'Manage the Security panel of end users',
+    uid: 'security.manage',
+    subCategory: 'security',
     pluginName: PLUGIN_ID,
   },
 ];

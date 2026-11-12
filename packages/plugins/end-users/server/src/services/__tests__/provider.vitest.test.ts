@@ -436,6 +436,48 @@ describe('provider service', () => {
     });
   });
 
+  describe('what a save needs beyond the plain update', () => {
+    it('is nothing for a built-in provider whose body leaves trust for linking alone', async () => {
+      const { service } = setup();
+
+      expect(await service.needsCustomAccess('github', saveGithub)).toBe(false);
+      // Resending the stored value (a form always sends it) changes nothing
+      expect(
+        await service.needsCustomAccess('github', { ...saveGithub, trustForLinking: false })
+      ).toBe(false);
+    });
+
+    it('is needed to turn trust for linking on, and to turn it off again', async () => {
+      const { service } = setup();
+
+      expect(await service.needsCustomAccess('github', { trustForLinking: true })).toBe(true);
+
+      await service.update('github', { ...saveGithub, trustForLinking: true });
+
+      expect(await service.needsCustomAccess('github', { trustForLinking: false })).toBe(true);
+      expect(await service.needsCustomAccess('github', { trustForLinking: true })).toBe(false);
+    });
+
+    it('is needed for any save of a custom provider', async () => {
+      const { service } = setup();
+
+      await service.create({
+        name: 'My IdP',
+        discoveryUrl: 'https://idp.example.com/.well-known/openid-configuration',
+        clientId: 'oidc-id',
+        clientSecret: SECRET,
+      });
+
+      expect(await service.needsCustomAccess('my-idp', { enabled: false })).toBe(true);
+    });
+
+    it('answers 404 for a provider that is not there', async () => {
+      const { service } = setup();
+
+      expect((await refusal(service.needsCustomAccess('nope', {}))).name).toBe('NotFoundError');
+    });
+  });
+
   describe('a custom OIDC provider', () => {
     const body = {
       name: 'My IdP',
