@@ -1236,6 +1236,37 @@ describe('strapi-compat refresh routes, through the engine', () => {
     expect(db.session).toHaveLength(1);
   });
 
+  it('keeps a second factor the old session passed across a rotation, and gives none it lacked', async () => {
+    for (const passedSecondFactor of [true, false]) {
+      const { call, signIn, engine } = build();
+      const first = await signIn('ann@example.com', 'device-a');
+      const lookup = engine.getSession.bind(engine);
+      const claim = engine.claimSession.bind(engine);
+      const create = vi.spyOn(engine, 'createSession');
+
+      // The test engine has no second-factor plugin: the sessions it finds say what they say
+      engine.getSession = async (headers) => {
+        const found = await lookup(headers);
+
+        return found && { ...found, passedSecondFactor };
+      };
+      engine.claimSession = async (userId, sessionId) => {
+        const found = await claim(userId, sessionId);
+
+        return found && { ...found, passedSecondFactor };
+      };
+
+      // eslint-disable-next-line no-await-in-loop
+      const rotated = await call('POST', '/refresh', { body: { refreshToken: first } });
+
+      expect(rotated.status).toBe(200);
+      expect(create).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ passedSecondFactor })
+      );
+    }
+  });
+
   it('keeps the device across a rotation and answers 400 when there is no token', async () => {
     const { call, signIn, db } = build();
     const first = await signIn('ann@example.com', 'device-a');

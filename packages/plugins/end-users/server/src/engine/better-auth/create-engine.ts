@@ -60,6 +60,7 @@ import { backgroundTaskHandler } from './background-tasks';
 import { strapiCompat } from './plugins/strapi-compat';
 import { bannedReset, withoutBannedRecipients } from './plugins/banned-reset';
 import { totpReplay } from './plugins/totp-replay';
+import { secondFactor } from './plugins/second-factor';
 import { resolvePreset } from './presets';
 import { pendingLink } from './plugins/pending-link';
 import { providerProfile } from './plugins/provider-profile';
@@ -123,6 +124,8 @@ const betterAuthPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
  *      `totp-replay`      (an authenticator code is taken once)
  *   6. `password-policy`  (the admin's password rules on every way a password is set), installed
  *   7. `last-sign-in`, `provider-profile` (the email guard, the every-sign-in profile mappings)
+ *      `second-factor` (a session records whether a second factor made it); after `twoFactor`,
+ *      whose after-hook it reads the result of
  *   8. `legacy-jwt`, when it exists
  *
  * `strapi-compat` (the Users & Permissions routes) is installed before all of these when the
@@ -138,6 +141,7 @@ const strapiPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
   passwordPolicy(strapi),
   lastSignIn(strapi),
   providerProfile(strapi),
+  secondFactor(),
 ];
 
 /* ---------------------------------------------------------------------------------------------
@@ -610,10 +614,12 @@ type StoredAccount = Awaited<ReturnType<Context['internalAdapter']['findAccounts
 const toDate = (value: Date | string | number) => (value instanceof Date ? value : new Date(value));
 
 const toEngineSession = (session: StoredSession): EngineSession => {
-  const { impersonatedBy, ipAddress, userAgent, deviceId } = session as StoredSession & {
-    impersonatedBy?: string | null;
-    deviceId?: string | null;
-  };
+  const { impersonatedBy, ipAddress, userAgent, deviceId, twoFactorVerified } =
+    session as StoredSession & {
+      impersonatedBy?: string | null;
+      deviceId?: string | null;
+      twoFactorVerified?: boolean | null;
+    };
 
   return {
     id: session.id,
@@ -624,6 +630,7 @@ const toEngineSession = (session: StoredSession): EngineSession => {
     userAgent: userAgent ?? null,
     deviceId: deviceId ?? null,
     impersonatedBy: impersonatedBy ?? null,
+    passedSecondFactor: twoFactorVerified === true,
     createdAt: toDate(session.createdAt),
     updatedAt: toDate(session.updatedAt),
   };
@@ -1120,7 +1127,14 @@ export const createEngine = (
       if (meta.userAgent != null) request.userAgent = meta.userAgent;
       if (meta.deviceId) request.deviceId = meta.deviceId;
 
-      const session = await ctx.internalAdapter.createSession(userId, false, request);
+      // A session that replaces one that passed a second factor keeps that. Better Auth gives a new
+      // session the field's default over what is passed, unless asked for the passed values to win.
+      const session = await ctx.internalAdapter.createSession(
+        userId,
+        false,
+        meta.passedSecondFactor ? { ...request, twoFactorVerified: true } : request,
+        meta.passedSecondFactor === true
+      );
 
       if (!session) {
         throw new Error('Better Auth did not create the session.');

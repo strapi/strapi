@@ -11,6 +11,7 @@ import type { Core } from '@strapi/types';
 
 import { lockout } from '../../plugins/lockout';
 import { totpReplay } from '../../plugins/totp-replay';
+import { secondFactor } from '../../plugins/second-factor';
 import type { EngineTable } from '../../../types';
 import {
   ACCOUNT_UID,
@@ -34,8 +35,8 @@ const naming = { identifiers, naming: attributeNaming };
 
 /**
  * Better Auth's own `getAuthTables` output for the core tables and the username, twoFactor, admin,
- * jwt, lockout and totp-replay plugins, with the database rate limiter on, so that every table the
- * plugin generates is covered (apart from passkey, below).
+ * jwt, lockout, totp-replay and second-factor plugins, with the database rate limiter on, so that
+ * every table the plugin generates is covered (apart from passkey, below).
  */
 const authTables = fromAuthTables(
   getAuthTables({
@@ -46,6 +47,7 @@ const authTables = fromAuthTables(
       jwt(),
       lockout({} as Core.Strapi),
       totpReplay({} as Core.Strapi),
+      secondFactor(),
     ],
     rateLimit: { storage: 'database' },
   })
@@ -440,13 +442,15 @@ describe('toContentTypes', () => {
       expect(attributesOf('user').role).toMatchObject({ writable: false });
     });
 
-    it('is the only read-only attribute of any generated type', () => {
+    it('is read-only with only the second-factor mark of a session on top of it', () => {
       for (const name of Object.keys(cts)) {
         const readOnly = Object.entries(attributesOf(name))
           .filter(([, attribute]) => attribute.writable === false)
           .map(([attribute]) => attribute);
 
-        expect(readOnly, name).toEqual(name === 'user' ? ['role'] : []);
+        expect(readOnly, name).toEqual(
+          { user: ['role'], session: ['twoFactorVerified'] }[name] ?? []
+        );
       }
     });
 
@@ -534,6 +538,20 @@ describe('toContentTypes', () => {
           expect.objectContaining({ type: 'unique', columns: ['session_token'] }),
         ])
       );
+    });
+  });
+
+  describe('the second-factor mark of a session', () => {
+    it('is private, read-only and false until set', () => {
+      expect(attributesOf('session').twoFactorVerified).toMatchObject({
+        type: 'boolean',
+        default: false,
+        private: true,
+        writable: false,
+      });
+      expect(attributesOf('session').twoFactorVerified).not.toHaveProperty('required');
+      expect(PRIVATE_FIELDS.session).toContain('twoFactorVerified');
+      expect(READ_ONLY_FIELDS.session).toContain('twoFactorVerified');
     });
   });
 

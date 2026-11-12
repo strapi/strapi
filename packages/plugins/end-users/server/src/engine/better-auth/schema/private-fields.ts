@@ -21,7 +21,8 @@ export const PRIVATE_FIELDS: Readonly<Record<string, readonly string[]>> = {
   // (`returned`), its ban check (it reads the stored row) and the plugin's strategy are untouched,
   // and the Content Manager still shows these fields to administrators.
   user: ['role', 'banned', 'banReason', 'banExpires', 'failedSignIns', 'lockedUntil'],
-  session: ['token'],
+  // `twoFactorVerified` is the engine's record of how the session was made; a client never reads it
+  session: ['token', 'twoFactorVerified'],
   account: ['password', 'accessToken', 'refreshToken', 'idToken'],
   verification: ['identifier', 'value'],
   'two-factor': ['secret', 'backupCodes', 'lastTotpStep'],
@@ -77,6 +78,8 @@ export const isHiddenField = (
  */
 export const READ_ONLY_FIELDS: Readonly<Record<string, readonly string[]>> = {
   user: ['role'],
+  // Whether a session passed a second factor is set by the engine when it makes the session
+  session: ['twoFactorVerified'],
 };
 
 export const isReadOnlyField = (
