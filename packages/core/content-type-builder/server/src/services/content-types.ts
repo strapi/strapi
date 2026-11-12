@@ -121,17 +121,24 @@ type CreateContentTypeOptions = {
 };
 
 /**
+ * The HTTP validators require a non-empty `displayName`; direct service callers must provide
+ * one too, otherwise the schema builder writes a schema the core validator rejects at the
+ * next load and the app no longer boots. Run it before anything is written.
+ */
+export const assertValidDisplayName = (displayName: unknown): void => {
+  if (typeof displayName !== 'string' || displayName === '') {
+    throw new ApplicationError('A content type requires a displayName');
+  }
+};
+
+/**
  * Creates a content type and handle the nested components sent with it
  */
 export const createContentType = async (
   { contentType, components }: any,
   options: CreateContentTypeOptions = {}
 ) => {
-  // The HTTP validator requires `displayName`; direct service callers must provide it too,
-  // otherwise the schema builder writes a schema the core validator rejects at the next load.
-  if (typeof contentType?.displayName !== 'string' || contentType.displayName === '') {
-    throw new ApplicationError('A content type requires a displayName');
-  }
+  assertValidDisplayName(contentType?.displayName);
 
   const builder = options.defaultBuilder || createBuilder();
   const uidMap = builder.createNewComponentUIDMap(components || []);
@@ -278,6 +285,11 @@ export const editContentType = async (
   uid: UID.ContentType,
   { contentType, components = [] }: any
 ) => {
+  // Without `displayName` the builder keeps the stored one.
+  if (contentType.displayName !== undefined) {
+    assertValidDisplayName(contentType.displayName);
+  }
+
   const builder = createBuilder();
 
   if (builder.contentTypes.has(uid) === false) {
