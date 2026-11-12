@@ -359,3 +359,13 @@ export const unknownTarget: Filters<'api::article.article'>[] = [
   { legacy: { name: 'a', anything: { $in: [1] } } },
   { legacy: { $null: true } },
 ];
+
+/**
+ * A content-type relation filter read back can be spread into a new filter with another key (the
+ * component case is in the `component-spread` fixture)
+ */
+export const spreadRelationFilter = (filters: Filters<'api::article.article'>) => {
+  const next: Filters<'api::article.article'> = { author: { ...filters.author, name: 'x' } };
+
+  return next;
+};
