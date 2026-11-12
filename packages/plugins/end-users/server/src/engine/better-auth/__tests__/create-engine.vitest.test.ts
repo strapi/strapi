@@ -516,6 +516,52 @@ describe('buildAuthOptions', () => {
       });
     });
 
+    it('are Secure outside development when the server is on https', () => {
+      const https = { 'server.url': 'https://api.example.com' };
+
+      for (const env of ['production', 'staging', 'test']) {
+        vi.stubEnv('NODE_ENV', env);
+
+        expect(buildAuthOptions(fakeStrapi(https)).advanced?.useSecureCookies, env).toBe(true);
+      }
+
+      // Development keeps Better Auth's own reading of the address
+      vi.stubEnv('NODE_ENV', 'development');
+
+      expect(buildAuthOptions(fakeStrapi(https)).advanced?.useSecureCookies).toBeUndefined();
+    });
+
+    it('stay as they are on plain http, and say so once off a loopback host', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+
+      const loopback = fakeStrapi({ 'server.url': 'http://localhost:1337' });
+
+      expect(buildAuthOptions(loopback).advanced?.useSecureCookies).toBeUndefined();
+      expect(loopback.log.warn).not.toHaveBeenCalled();
+
+      const remote = fakeStrapi({ 'server.url': 'http://api.example.com' });
+
+      expect(buildAuthOptions(remote).advanced?.useSecureCookies).toBeUndefined();
+      // A rebuild (an admin change of settings) does not say it again
+      buildAuthOptions(remote);
+
+      expect(remote.log.warn).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(remote.log.warn).mock.calls[0][0]).toMatch(
+        /http:\/\/api\.example\.com, plain http, so the session cookie is not Secure/
+      );
+    });
+
+    it('leave the choice to a project that sets useSecureCookies itself', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+
+      const options = buildAuthOptions(
+        fakeStrapi({ 'server.url': 'https://api.example.com' }),
+        defineAuth({ advanced: { useSecureCookies: false } })
+      );
+
+      expect(options.advanced?.useSecureCookies).toBe(false);
+    });
+
     it('keep the cookie prefix and the id setting next to them', () => {
       const { advanced } = buildAuthOptions(
         fakeStrapi({
