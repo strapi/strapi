@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "notes": "Findings listed here are known. CI fails only on findings not present in accepted or known. Move fixed items out; add new holds to accepted with a reason. IDs must match kind:package (e.g. vulnerability:vite, deprecation:glob).",
+  "accepted": [
+    {
+      "id": "vulnerability:react-router",
+      "kind": "vulnerability",
+      "package": "react-router",
+      "reason": "Known hold — React Router major"
+    },
+    {
+      "id": "deprecation:prebuild-install",
+      "kind": "deprecation",
+      "package": "prebuild-install",
+      "reason": "Pulled by better-sqlite3; not Strapi-owned"
+    }
+  ],
+  "known": [
+    {
+      "id": "deprecation:inflight",
+      "kind": "deprecation",
+      "package": "inflight",
+      "reason": "Track: replace react-query with @tanstack/react-query"
+    },
+    {
+      "id": "deprecation:glob",
+      "kind": "deprecation",
+      "package": "glob",
+      "reason": "Track: replace react-query with @tanstack/react-query"
+    },
+    {
+      "id": "deprecation:rimraf",
+      "kind": "deprecation",
+      "package": "rimraf",
+      "reason": "Track: replace react-query with @tanstack/react-query"
+    },
+    {
+      "id": "deprecation:@koa/router",
+      "kind": "deprecation",
+      "package": "@koa/router",
+      "reason": "Track: bump @koa/router to v15 (path-to-regexp route audit)"
+    }
+  ]
+}
