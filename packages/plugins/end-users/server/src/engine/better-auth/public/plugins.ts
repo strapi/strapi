@@ -24,15 +24,21 @@ type PhoneNumberOptions = Parameters<typeof betterAuthPhoneNumber>[0];
 /**
  * Sends the link through the `end-users.magic-link` email template. A `sendMagicLink` of the
  * project's own replaces it.
+ *
+ * The token is stored hashed, whatever `storeToken` says: the stored value is what a link would be
+ * looked up by, so a database read must not hand out a link that signs someone in. The sender is
+ * given the plain token and link when they are made, and nothing reads the stored one back.
  */
 export const magicLink = (
   options: Partial<MagicLinkOptions> = {}
 ): ReturnType<typeof betterAuthMagicLink> =>
-  betterAuthMagicLink({ sendMagicLink: sendMagicLinkEmail, ...options });
+  betterAuthMagicLink({ sendMagicLink: sendMagicLinkEmail, ...options, storeToken: 'hashed' });
 
 /**
  * Sends the code through the `end-users.email-otp` email template. A `sendVerificationOTP` of the
  * project's own replaces it. Either one sends no password reset code to a banned user.
+ *
+ * The code is stored hashed, whatever `storeOTP` says, for the reason the magic link's token is.
  */
 export const emailOTP = (
   options: Partial<EmailOtpOptions> = {}
@@ -43,6 +49,7 @@ export const emailOTP = (
 
   return betterAuthEmailOTP({
     ...options,
+    storeOTP: 'hashed',
     sendVerificationOTP: withoutBannedOtpRecipients(send) as EmailOtpOptions['sendVerificationOTP'],
   });
 };

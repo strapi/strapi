@@ -254,6 +254,10 @@ export const twoFactorOptions = (strapi: Core.Strapi) => {
   return {
     issuer: appNameOf(strapi),
     otpOptions: {
+      // Better Auth stores the emailed code in plain text by default. It is compared by hash, so a
+      // database read does not hand out a code that signs someone in. Nothing reads it back: the
+      // sender is given the plain code when it is made.
+      storeOTP: 'hashed' as const,
       sendOTP: async ({ user, otp }: { user: EmailUser; otp: string }) =>
         send(
           strapi,
