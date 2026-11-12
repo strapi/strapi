@@ -32,6 +32,7 @@ const createTestDatabase = (options?: { runMigrations?: boolean; migrationsDir?:
     getConnection: (tableName?: string) => (tableName ? sqlite(tableName) : sqlite),
     transaction: (fn: (params: { trx: knex.Knex.Transaction }) => Promise<void>) =>
       sqlite.transaction((trx) => fn({ trx })),
+    runInPhase: (_phase: string, fn: () => Promise<unknown>) => fn(),
     logger,
     config: {
       settings: {

@@ -623,6 +623,13 @@ export const createRelation = (
   meta: Meta,
   metadata: Metadata
 ) => {
+  // Only owner sides look up their target while building join columns or tables, so check every
+  // declared target here: an inverse (mappedBy) side to a missing model must fail like an owner side.
+  // Polymorphic morphToOne / morphToMany relations declare no target.
+  if (attribute.relation !== 'morphToOne' && attribute.relation !== 'morphToMany') {
+    metadata.get(attribute.target);
+  }
+
   switch (attribute.relation) {
     case 'oneToOne':
       return createOneToOne(attributeName, attribute, meta, metadata);

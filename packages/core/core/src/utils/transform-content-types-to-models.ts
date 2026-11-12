@@ -72,11 +72,15 @@ export const transformAttribute = (
 ) => {
   switch (attribute.type) {
     case 'media': {
+      const multiple = attribute.multiple === true;
       return {
         type: 'relation',
-        relation: attribute.multiple === true ? 'morphMany' : 'morphOne',
+        relation: multiple ? 'morphMany' : 'morphOne',
         target: 'plugin::upload.file',
         morphBy: 'related',
+        // Single media is one row. The database layer reads this flag instead of
+        // the upload plugin UID, so a generic morphOne is not treated as media.
+        ...(multiple ? {} : { singleRow: true as const }),
       };
     }
     case 'component': {
@@ -275,6 +279,7 @@ export const transformContentTypesToModels = (
   identifiers: Identifiers
 ): Model[] => {
   const models: Model[] = [];
+  const reservedAttributeNames = new Set(['document_id', identifiers.ID_COLUMN]);
 
   contentTypes.forEach((contentType) => {
     assert(contentType.collectionName, 'Content type "collectionName" is required');
@@ -290,10 +295,9 @@ export const transformContentTypesToModels = (
 
     // TODO: this needs to be combined with getReservedNames, we should not be maintaining two lists
     // Prevent user from creating a documentId attribute
-    const reservedAttributeNames = ['document_id', identifiers.ID_COLUMN];
     Object.keys(contentType.attributes || {}).forEach((attributeName) => {
       const snakeCasedAttributeName = _.snakeCase(attributeName);
-      if (reservedAttributeNames.includes(snakeCasedAttributeName)) {
+      if (reservedAttributeNames.has(snakeCasedAttributeName)) {
         throw new Error(
           `The attribute "${attributeName}" is reserved and cannot be used in a model. Please rename "${contentType.modelName}" attribute "${attributeName}" to something else.`
         );

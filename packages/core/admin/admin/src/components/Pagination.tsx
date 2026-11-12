@@ -22,6 +22,8 @@ import { createContext } from './Context';
 
 import type { Pagination as PaginationApi } from '../../../shared/contracts/shared';
 
+const DEFAULT_OPTIONS: NonNullable<Pagination.PageSizeProps['options']> = ['10', '20', '50', '100'];
+
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -138,7 +140,7 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
  * the user to change the number of items displayed per page.
  * If the total number of items is less than the minimum option, this component will not render.
  */
-const PageSize = ({ options = ['10', '20', '50', '100'] }: Pagination.PageSizeProps) => {
+const PageSize = ({ options = DEFAULT_OPTIONS }: Pagination.PageSizeProps) => {
   const { formatMessage } = useIntl();
 
   const pageSize = usePagination('PageSize', (state) => state.pageSize);

@@ -30,12 +30,13 @@ import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
-import { buildValidParams } from '../../../../../exports';
 import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { I18nSharedFieldsLock } from '../../../../../features/I18nSharedFieldsLock';
 import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
+import { buildValidParams } from '../../../../../utils/api';
 import { setIn } from '../../../../../utils/objects';
 import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
@@ -616,7 +617,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                 >
                   <ArrowLeft />
                 </IconButton>
-                <Typography tag="span" fontWeight={600}>
+                <Modal.Title fontWeight={600}>
                   {isCreating
                     ? formatMessage({
                         id: 'content-manager.relation.create',
@@ -626,7 +627,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                         id: 'content-manager.components.RelationInputModal.modal-title',
                         defaultMessage: 'Edit a relation',
                       })}
-                </Typography>
+                </Modal.Title>
               </Flex>
               <IconButton
                 onClick={() => {
@@ -933,14 +934,17 @@ const RelationModalForm = () => {
 
   return (
     <DocumentRBAC permissions={permissions} model={currentDocumentMeta.model}>
-      <RelationModalFormBody
-        currentDocument={currentDocument}
-        documentTitle={documentTitle}
-        hasDraftAndPublished={hasDraftAndPublished}
-        layout={documentLayoutResponse.edit.layout}
-        plugins={plugins}
-        props={props}
-      />
+      {/* The edit view's unlock applies to its own entry, never to a related one. */}
+      <I18nSharedFieldsLock>
+        <RelationModalFormBody
+          currentDocument={currentDocument}
+          documentTitle={documentTitle}
+          hasDraftAndPublished={hasDraftAndPublished}
+          layout={documentLayoutResponse.edit.layout}
+          plugins={plugins}
+          props={props}
+        />
+      </I18nSharedFieldsLock>
     </DocumentRBAC>
   );
 };

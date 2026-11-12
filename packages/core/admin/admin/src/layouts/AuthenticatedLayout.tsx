@@ -5,8 +5,6 @@ import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import lt from 'semver/functions/lt';
-import valid from 'semver/functions/valid';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
@@ -18,18 +16,19 @@ import { TopBanners } from '../components/TopBanners';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
-import { useStrapiApp } from '../features/StrapiApp';
-import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
 import { useInformationQuery } from '../services/admin';
-import { hashAdminUserEmail } from '../utils/users';
+import { getStrapiUpdateInfo } from '../utils/strapiUpdate';
+
+import { useAuthenticatedAccessTracking } from './useAuthenticatedAccessTracking';
+import { useHashedAdminUserId } from './useHashedAdminUserId';
 
 const { version: strapiVersion } = packageInfo;
 
 const AdminLayout = () => {
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
-  const [userId, setUserId] = React.useState<string>();
+  const userId = useHashedAdminUserId(userInfo);
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
@@ -59,15 +58,7 @@ const AdminLayout = () => {
     }
   }, [showReleaseNotification]);
 
-  React.useEffect(() => {
-    hashAdminUserEmail(userInfo).then((id) => {
-      if (id) {
-        setUserId(id);
-      }
-    });
-  }, [userInfo]);
-
-  const { trackUsage } = useTracking();
+  const strapiUpdate = getStrapiUpdateInfo(strapiVersion, tagName);
 
   const {
     isLoading: isLoadingMenu,
@@ -75,18 +66,10 @@ const AdminLayout = () => {
     pluginsSectionLinks,
     topMobileNavigation,
     burgerMobileNavigation,
-  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName), appInfo?.currentEnvironment);
+  } = useMenu(strapiUpdate.severity, appInfo?.currentEnvironment);
 
-  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
   const projectId = appInfo?.projectId;
-  React.useEffect(() => {
-    if (projectId) {
-      trackUsage('didAccessAuthenticatedAdministration', {
-        registeredWidgets: getAllWidgets().map((widget) => widget.uid),
-        projectId,
-      });
-    }
-  }, [projectId, getAllWidgets, trackUsage]);
+  useAuthenticatedAccessTracking(projectId);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
@@ -99,7 +82,10 @@ const AdminLayout = () => {
       {...appInfo}
       userId={userId}
       latestStrapiReleaseTag={tagName}
-      shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
+      shouldUpdateStrapi={strapiUpdate.severity !== 'none'}
+      strapiUpdateSeverity={strapiUpdate.severity}
+      strapiReleasesBehind={strapiUpdate.releasesBehind}
+      isStrapiMajorBehind={strapiUpdate.isMajorBehind}
     >
       <NpsSurvey />
       <PluginsInitializer>
@@ -155,17 +141,6 @@ const PrivateAdminLayout = () => {
       <AdminLayout />
     </PrivateRoute>
   );
-};
-
-const checkLatestStrapiVersion = (
-  currentPackageVersion: string,
-  latestPublishedVersion: string = ''
-): boolean => {
-  if (!valid(currentPackageVersion) || !valid(latestPublishedVersion)) {
-    return false;
-  }
-
-  return lt(currentPackageVersion, latestPublishedVersion);
 };
 
 export { AdminLayout, PrivateAdminLayout };

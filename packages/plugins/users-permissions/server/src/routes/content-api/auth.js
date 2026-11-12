@@ -9,6 +9,8 @@ module.exports = (strapi) => {
     {
       method: 'GET',
       path: '/connect/(.*)',
+      // Kept in v6 syntax so ctx.params[0] and the API documentation stay as they were.
+      [Symbol.for('strapi.route.keepV6Path')]: true,
       handler: 'auth.connect',
       config: {
         middlewares: ['plugin::users-permissions.rateLimit'],

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "5.56.0",
+  "version": "5.61.1",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
@@ -38,6 +38,10 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./globals-admin": {
+      "types": "./dist/globals-admin.d.ts",
+      "source": "./src/globals-admin.ts"
+    },
     "./package.json": "./package.json",
     "./*": "./*"
   },
@@ -53,16 +57,19 @@
     "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc -p tsconfig.json",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
     "@casl/ability": "6.7.5",
     "@koa/cors": "5.0.0",
-    "@koa/router": "12.0.2",
-    "@strapi/database": "5.56.0",
-    "@strapi/logger": "5.56.0",
-    "@strapi/permissions": "5.56.0",
-    "@strapi/utils": "5.56.0",
+    "@koa/router": "15.7.0",
+    "@strapi/database": "5.61.1",
+    "@strapi/logger": "5.61.1",
+    "@strapi/permissions": "5.61.1",
+    "@strapi/utils": "5.61.1",
+    "@types/json-logic-js": "2.0.8",
     "commander": "8.3.0",
     "croner": "10.0.1",
     "json-logic-js": "2.0.5",
@@ -75,18 +82,18 @@
   },
   "devDependencies": {
     "@types/jest": "29.5.2",
-    "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.15.2",
-    "@types/koa__router": "12.0.0",
-    "@types/node": "20.19.41",
-    "eslint-config-custom": "5.56.0",
+    "@types/node": "22.20.0",
+    "eslint-config-custom": "5.61.1",
     "lodash": "4.18.1",
-    "tsconfig": "5.56.0",
+    "tsconfig": "5.61.1",
     "typescript": "5.9.3",
-    "undici": "6.29.0"
+    "undici": "8.12.4",
+    "vitest": "catalog:",
+    "vitest-config": "5.61.1"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -17,6 +17,21 @@ const componentModel = {
   },
 };
 
+const seoComponentModel = {
+  displayName: 'seo',
+  category: 'default',
+  attributes: {
+    metaTitle: {
+      type: 'string',
+    },
+    metaImage: {
+      allowedTypes: ['images'],
+      type: 'media',
+      multiple: false,
+    },
+  },
+};
+
 const componentToNest = {
   displayName: 'first-level-compo',
   category: 'tests',
@@ -165,6 +180,11 @@ const collectionTypeModel = {
       repeatable: false,
       component: 'tests.root-compo',
     },
+    seo: {
+      type: 'component',
+      repeatable: false,
+      component: 'default.seo',
+    },
   },
 };
 
@@ -218,6 +238,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
   let collectionTypeDocumentId;
   let singleTypeDocumentId;
   let relations;
+  // Hoisted so the deletion test can target this suite's own asset by id. Test files
+  // share a database within a CI shard, so upload ids are not stable across runs.
+  let imageA;
 
   const createEntry = async ({ uid, data, isCollectionType = true }: CreateEntryArgs) => {
     const type = isCollectionType ? 'collection-types' : 'single-types';
@@ -287,6 +310,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
   beforeAll(async () => {
     builder.addComponent(componentModel);
+    builder.addComponent(seoComponentModel);
     builder.addComponent(componentToNest);
     builder.addComponent(componentWithImageModel);
     builder.addContentTypes([relationModel, collectionTypeModel, singleTypeModel]);
@@ -323,7 +347,8 @@ describeOnCondition(edition === 'EE')('History API', () => {
     const relationIds = relations.map((relation) => relation.data.documentId);
 
     // Upload media assets to be added to versions
-    const [imageA, imageB] = await uploadFiles();
+    let imageB;
+    [imageA, imageB] = await uploadFiles();
     const nestedComposWithImages = {
       rootImage: imageA.id,
       rootImageSibling: imageB.id,
@@ -547,6 +572,25 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
+    test.each(['abc', '0', '-1'])(
+      'Falls back to the first page when the page param is %s',
+      async (page) => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=${page}&pageSize=1&locale=en`,
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.meta.pagination).toEqual({
+          page: 1,
+          pageSize: 1,
+          pageCount: 2,
+          total: 2,
+        });
+      }
+    );
+
     test('Finds many versions with sensitive data', async () => {
       const collectionType = await rq({
         method: 'GET',
@@ -636,6 +680,28 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
+    test.each(['999999', 'abc'])(
+      'Throws not found when the version id is %s',
+      async (versionId) => {
+        const res = await rq({
+          method: 'PUT',
+          url: `/content-manager/history-versions/${versionId}/restore`,
+          body: {
+            contentType: collectionTypeUid,
+          },
+        });
+
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            status: 404,
+            name: 'NotFoundError',
+          },
+        });
+      }
+    );
+
     test('Restores a history version in the default locale', async () => {
       const versions = await rq({
         method: 'GET',
@@ -715,10 +781,10 @@ describeOnCondition(edition === 'EE')('History API', () => {
         url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=3&locale=en`,
       });
 
-      // Delete an asset
+      // Delete an asset — target this suite's own upload rather than a hardcoded id.
       await rq({
         method: 'DELETE',
-        url: `/upload/files/1`,
+        url: `/upload/files/${imageA.id}`,
       });
 
       // Restore the initial version containing the deleted asset
@@ -795,6 +861,54 @@ describeOnCondition(edition === 'EE')('History API', () => {
         },
       });
       expect(res.statusCode).toBe(200);
+    });
+
+    test('Restores a version with a component that the draft no longer contains', async () => {
+      // Create a document that contains a component
+      const currentDocument = await createEntry({
+        uid: collectionTypeUid,
+        data: {
+          name: 'Product with components',
+          seo: { metaTitle: 'Initial title' },
+        },
+      });
+      const { documentId } = currentDocument.data;
+
+      // Publish, then discard the draft: the draft gets new component ids
+      await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${documentId}/actions/publish`,
+        body: {},
+        qs: { locale: 'en' },
+      });
+      await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${documentId}/actions/discard`,
+        body: {},
+        qs: { locale: 'en' },
+      });
+
+      // Restore the initial version
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${documentId}&locale=en`,
+      });
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/history-versions/${versions.body.data.at(-1).id}/restore`,
+        body: {
+          contentType: collectionTypeUid,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const restoredDocument = await strapi.documents(collectionTypeUid).findOne({
+        documentId,
+        populate: ['seo'],
+      });
+
+      expect(restoredDocument.seo).toMatchObject({ metaTitle: 'Initial title' });
     });
   });
 

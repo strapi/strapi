@@ -1,3 +1,4 @@
+import { useTracking as useStrapiTracking } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -5,9 +6,19 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
 import { pageSizes, sortOptions } from '../../../../../constants';
+import { useSettings } from '../../../../hooks/useSettings';
 import { ConfigureTheView } from '../ConfigureTheView';
 
 import type { Configuration } from '../../../../../../../shared/contracts/configuration';
+
+jest.unmock('../../../../hooks/useTracking');
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useTracking: jest.fn(),
+}));
+
+const trackUsage = jest.fn();
 
 const mutateAsync = jest.fn();
 jest.mock('../../../../hooks/useConfig', () => ({
@@ -39,6 +50,12 @@ const render = (
 describe('Upload - Configure', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useStrapiTracking).mockReturnValue({ trackUsage });
+    jest.spyOn(window.strapi.featureFlags, 'isEnabled').mockReturnValue(true);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
   describe('initial render', () => {
@@ -67,44 +84,54 @@ describe('Upload - Configure', () => {
   describe('user actions', () => {
     const testPageSize = pageSizes[1];
 
-    it('modify settings', async () => {
-      const { user, getByRole, getByText } = render();
+    it.each([true, false])(
+      'tracks configuration changes with AI metadata enabled: %s',
+      async (aiMetadata) => {
+        (useSettings as jest.Mock).mockReturnValue({
+          data: { aiMetadata, aiMetadataAvailable: true },
+        });
+        const { user, getByRole, getByText } = render();
 
-      expect(getByRole('combobox', { name: 'Entries per page' })).toHaveTextContent('10');
+        expect(getByRole('combobox', { name: 'Entries per page' })).toHaveTextContent('10');
 
-      await user.click(getByRole('combobox', { name: 'Entries per page' }));
-      await user.click(getByRole('option', { name: testPageSize.toString() }));
+        await user.click(getByRole('combobox', { name: 'Entries per page' }));
+        await user.click(getByRole('option', { name: testPageSize.toString() }));
 
-      expect(getByRole('combobox', { name: 'Entries per page' })).toHaveTextContent('20');
+        expect(getByRole('combobox', { name: 'Entries per page' })).toHaveTextContent('20');
 
-      expect(
-        getByRole('button', {
-          name: 'Save',
-        })
-      ).toBeEnabled();
+        expect(
+          getByRole('button', {
+            name: 'Save',
+          })
+        ).toBeEnabled();
 
-      /**
-       * using `userEvent.click` does not fire the submit event for the form :(
-       * see – https://github.com/testing-library/user-event/issues/1075
-       * see – https://github.com/testing-library/user-event/issues/1002
-       */
-      fireEvent.click(
-        getByRole('button', {
-          name: 'Save',
-        })
-      );
+        /**
+         * using `userEvent.click` does not fire the submit event for the form :(
+         * see – https://github.com/testing-library/user-event/issues/1075
+         * see – https://github.com/testing-library/user-event/issues/1002
+         */
+        fireEvent.click(
+          getByRole('button', {
+            name: 'Save',
+          })
+        );
 
-      await waitFor(() => {
-        expect(getByText('This will modify all your settings')).toBeInTheDocument();
-      });
+        await waitFor(() => {
+          expect(getByText('This will modify all your settings')).toBeInTheDocument();
+        });
 
-      await user.click(getByText('Confirm'));
+        await user.click(getByText('Confirm'));
 
-      expect(mutateAsync).toHaveBeenCalledTimes(1);
-      expect(mutateAsync).toHaveBeenCalledWith({
-        pageSize: testPageSize,
-        sort: 'createdAt:DESC',
-      });
-    });
+        expect(trackUsage).toHaveBeenCalledWith('willEditMediaLibraryConfig', {
+          mediaLibraryVersion: 'v1',
+          isAiMediaLibraryConfigured: aiMetadata,
+        });
+        expect(mutateAsync).toHaveBeenCalledTimes(1);
+        expect(mutateAsync).toHaveBeenCalledWith({
+          pageSize: testPageSize,
+          sort: 'createdAt:DESC',
+        });
+      }
+    );
   });
 });

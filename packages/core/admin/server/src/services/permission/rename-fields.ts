@@ -50,8 +50,7 @@ export const createPermissionFieldRenamer = ({
       .map((segment) => {
         const origin = originsOf[ownerUid]?.[segment] ?? segment;
         const attribute = owner?.attributes?.[segment] as
-          | { type?: string; component?: string }
-          | undefined;
+          { type?: string; component?: string } | undefined;
 
         if (attribute?.type === 'component' && attribute.component) {
           ownerUid = attribute.component;

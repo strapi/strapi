@@ -7,6 +7,8 @@ import {
   ConfirmDialog,
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
+  UnsavedChangesModal,
+  type StrapiApp,
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
 import get from 'lodash/get';
@@ -73,7 +75,59 @@ import type { AnyAttribute, ContentType } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
 import type { FolderSelection } from '../DataManager/utils/contentStructure';
 import type { Tab } from '../FormModalNavigation/FormModalNavigationProvider';
+import type { GenericInputType } from '../GenericInputs';
 import type { Internal, Struct } from '@strapi/types';
+
+/**
+ * Input renderers the Content-Type Builder form passes to `GenericInput` as `customInputs`,
+ * keyed by the input `type` they render. Plugins add theirs on top.
+ */
+const CUSTOM_INPUTS = {
+  'allowed-types-select': AllowedTypesSelect,
+  'boolean-radio-group': BooleanRadioGroup,
+  'checkbox-with-number-field': CheckboxWithNumberField,
+  'icon-picker': IconPicker,
+  'content-type-radio-group': ContentTypeRadioGroup,
+  'content-type-folder-select': FolderSelect,
+  'radio-group': CustomRadioGroup,
+  relation: Relation,
+  'select-category': SelectCategory,
+  'select-component': SelectComponent,
+  'select-components': SelectComponents,
+  'select-default-boolean': BooleanDefaultValueSelect,
+  'select-number': SelectNumber,
+  'select-date': SelectDateType,
+  'toggle-draft-publish': DraftAndPublishToggle,
+  'text-plural': PluralName,
+  'text-singular': SingularName,
+  'textarea-enum': TextareaEnum,
+  'condition-form': ConditionForm,
+};
+
+type RenderedInputType = keyof typeof CUSTOM_INPUTS | GenericInputType;
+
+type CustomField = NonNullable<ReturnType<StrapiApp['customFields']['get']>>;
+type CustomFieldOptionEntry = NonNullable<NonNullable<CustomField['options']>['base']>[number];
+type CustomFieldOption = Exclude<CustomFieldOptionEntry, { items: unknown }>;
+
+/**
+ * The option input types a custom field can declare (`CustomFieldOptionInput` in `@strapi/admin`).
+ */
+type CustomFieldOptionInput = CustomFieldOption['type'];
+
+type AssertRendered<TInputType extends RenderedInputType> = TInputType;
+
+/**
+ * Compile-time guard: every option input type `@strapi/admin` accepts for a custom field must
+ * have a renderer, either in `CUSTOM_INPUTS` or built into `GenericInput`.
+ * A type check error here names the option input type the form cannot render.
+ *
+ * `CustomFieldOptionInput` comes from the built `@strapi/admin` declarations (`dist`), not its
+ * source, because the package exports resolve types to `dist`. Rebuild the admin types
+ * (`yarn build:types:admin` in `packages/core/admin`) before you trust this check locally:
+ * a stale build makes it check old types. CI builds first.
+ */
+type _AssertCustomFieldOptionInputsAreRendered = AssertRendered<CustomFieldOptionInput>;
 
 const FormComponent = styled.form`
   overflow: auto;
@@ -179,6 +233,7 @@ export const FormModal = () => {
     initialData,
     isCreatingComponentWhileAddingAField,
     modifiedData,
+    pristineData,
   } = reducerState;
 
   const type =
@@ -202,21 +257,33 @@ export const FormModal = () => {
     return getRenameStorageChange(initialData, modifiedData, attributeRenameMigrationMode);
   };
 
-  const checkFieldNameChanges = (): AnyAttribute[] | false => {
-    // Only check when editing an attribute
+  /**
+   * Fields whose visibility condition depends on this field and references an
+   * enum value that this edit removes or changes. Renames are followed
+   * automatically, so only an enum value change can break a condition.
+   */
+  const getConditionsBrokenByEnumChange = (): AnyAttribute[] | false => {
     if (actionType !== 'edit' || modalType !== 'attribute') {
       return false;
     }
 
-    const oldName = initialData.name;
     const oldEnum = initialData.enum;
     const newEnum = modifiedData.enum;
 
-    // Get all attributes from the content type schema
+    if (!Array.isArray(oldEnum) || !Array.isArray(newEnum)) {
+      return false;
+    }
+
+    const removedValues = oldEnum.filter((value: string) => !newEnum.includes(value));
+
+    if (removedValues.length === 0) {
+      return false;
+    }
+
+    const fieldName = initialData.name;
     const contentTypeAttributes: AnyAttribute[] = type?.attributes ?? [];
 
-    // Find all fields that reference this field in their conditions
-    const referencedFields = contentTypeAttributes.filter((attr) => {
+    const brokenFields = contentTypeAttributes.filter((attr) => {
       const conditionEntry = getFirstVisibleConditionEntry(attr.conditions);
       if (conditionEntry === null) {
         return false;
@@ -224,28 +291,12 @@ export const FormModal = () => {
 
       const { fieldVar, value } = conditionEntry;
 
-      // Check if this condition references our field
-      if (fieldVar.var !== oldName) {
-        return false;
-      }
-
-      // If it's an enum field, also check if the value is being deleted/changed
-      if (oldEnum !== undefined && newEnum !== undefined) {
-        const deletedOrChangedValues = oldEnum.filter(
-          (oldValue: string) => !newEnum.includes(oldValue)
-        );
-        return typeof value === 'string' && deletedOrChangedValues.includes(value);
-      }
-
-      return true;
+      return (
+        fieldVar.var === fieldName && typeof value === 'string' && removedValues.includes(value)
+      );
     });
 
-    // If any fields reference this field, return them
-    if (referencedFields.length > 0) {
-      return referencedFields;
-    }
-
-    return false;
+    return brokenFields.length > 0 ? brokenFields : false;
   };
 
   React.useEffect(() => {
@@ -1086,9 +1137,9 @@ export const FormModal = () => {
   const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
     e.preventDefault();
 
-    // Check for field name changes when clicking Finish
-    const referencedFields = checkFieldNameChanges();
-    if (referencedFields) {
+    // Check for conditions broken by an enum value change when clicking Finish
+    const brokenFields = getConditionsBrokenByEnumChange();
+    if (brokenFields) {
       setPendingSubmit({ e, shouldContinue });
       setShowWarningDialog(true);
       return;
@@ -1097,30 +1148,11 @@ export const FormModal = () => {
     await continueSubmit(e, shouldContinue);
   };
 
-  const handleConfirmClose = () => {
-    // eslint-disable-next-line no-alert
-    const confirm = window.confirm(
-      formatMessage({
-        id: 'window.confirm.close-modal.file',
-        defaultMessage: 'Are you sure? Your changes will be lost.',
-      })
-    );
-
-    if (confirm) {
-      onCloseModal();
-      dispatch(actions.resetProps());
-    }
-  };
-
+  // Runs once UnsavedChangesModal has confirmed the close when there are unsaved changes.
   const handleClosed = () => {
-    // Close the modal
-    if (!isEqual(modifiedData, initialData)) {
-      handleConfirmClose();
-    } else {
-      onCloseModal();
-      // Reset the reducer
-      dispatch(actions.resetProps());
-    }
+    onCloseModal();
+    // Reset the reducer
+    dispatch(actions.resetProps());
   };
 
   const sendAdvancedTabEvent = (tab: string) => {
@@ -1187,25 +1219,7 @@ export const FormModal = () => {
 
   const genericInputProps = {
     customInputs: {
-      'allowed-types-select': AllowedTypesSelect,
-      'boolean-radio-group': BooleanRadioGroup,
-      'checkbox-with-number-field': CheckboxWithNumberField,
-      'icon-picker': IconPicker,
-      'content-type-radio-group': ContentTypeRadioGroup,
-      'content-type-folder-select': FolderSelect,
-      'radio-group': CustomRadioGroup,
-      relation: Relation,
-      'select-category': SelectCategory,
-      'select-component': SelectComponent,
-      'select-components': SelectComponents,
-      'select-default-boolean': BooleanDefaultValueSelect,
-      'select-number': SelectNumber,
-      'select-date': SelectDateType,
-      'toggle-draft-publish': DraftAndPublishToggle,
-      'text-plural': PluralName,
-      'text-singular': SingularName,
-      'textarea-enum': TextareaEnum,
-      'condition-form': ConditionForm,
+      ...CUSTOM_INPUTS,
       ...inputsFromPlugins,
     },
     componentToCreate,
@@ -1272,7 +1286,11 @@ export const FormModal = () => {
   };
 
   return (
-    <Modal.Root open={isOpen} onOpenChange={handleClosed}>
+    <UnsavedChangesModal
+      open={isOpen}
+      onOpenChange={handleClosed}
+      hasUnsavedChanges={!isEqual(modifiedData, pristineData)}
+    >
       <Modal.Content>
         <Dialog.Root open={showWarningDialog} onOpenChange={setShowWarningDialog}>
           <Dialog.Trigger />
@@ -1291,55 +1309,31 @@ export const FormModal = () => {
             }}
           >
             {(() => {
-              const referencedFields = checkFieldNameChanges();
-              if (referencedFields === false) return null;
+              const brokenFields = getConditionsBrokenByEnumChange();
+              if (brokenFields === false) return null;
 
-              const fieldNames = referencedFields.map((field) => field.name).join(', ');
-              const oldEnum = initialData.enum;
-              const newEnum = modifiedData.enum;
-              const isEnum = Array.isArray(oldEnum) && Array.isArray(newEnum);
-
-              if (isEnum === true) {
-                const deletedOrChangedValues = oldEnum.filter(
-                  (value: string) => !newEnum.includes(value)
-                );
-
-                return (
-                  <Box>
-                    <Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning',
-                        defaultMessage:
-                          'The following fields have conditions that depend on this field: ',
-                      })}
-                      <Typography fontWeight="bold">{fieldNames}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-values',
-                        defaultMessage: '. Changing or removing the enum values ',
-                      })}
-                      <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-end',
-                        defaultMessage: ' will break these conditions. Do you want to proceed?',
-                      })}
-                    </Typography>
-                  </Box>
-                );
-              }
+              const fieldNames = brokenFields.map((field) => field.name).join(', ');
+              const oldEnum = initialData.enum ?? [];
+              const newEnum = modifiedData.enum ?? [];
+              const deletedOrChangedValues = oldEnum.filter((value) => !newEnum.includes(value));
 
               return (
                 <Box>
                   <Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning',
+                      id: 'form.attribute.condition.enum-change-warning',
                       defaultMessage:
                         'The following fields have conditions that depend on this field: ',
                     })}
                     <Typography fontWeight="bold">{fieldNames}</Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning-end',
-                      defaultMessage:
-                        '. Renaming it will break these conditions. Do you want to proceed?',
+                      id: 'form.attribute.condition.enum-change-warning-values',
+                      defaultMessage: '. Changing or removing the enum values ',
+                    })}
+                    <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
+                    {formatMessage({
+                      id: 'form.attribute.condition.enum-change-warning-end',
+                      defaultMessage: ' will break these conditions. Do you want to proceed?',
                     })}
                   </Typography>
                 </Box>
@@ -1482,16 +1476,11 @@ export const FormModal = () => {
               </Tabs.Root>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                type="button"
-                variant="tertiary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleClosed();
-                }}
-              >
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
+              <Modal.Close>
+                <Button type="button" variant="tertiary">
+                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              </Modal.Close>
               {/* TODO: refactor this component. Nuf said. */}
               <FormModalEndActions
                 deleteContentType={() => deleteContentType(targetUid as Internal.UID.ContentType)}
@@ -1527,6 +1516,6 @@ export const FormModal = () => {
           </FormComponent>
         )}
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

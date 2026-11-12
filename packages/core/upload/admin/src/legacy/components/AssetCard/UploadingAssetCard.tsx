@@ -16,6 +16,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AssetType, ASSET_TYPES } from '../../../enums';
+import { UploadAbortedError } from '../../../services/uploadFileViaXHR';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
 import { UploadProgress } from '../UploadProgress/UploadProgress';
@@ -80,7 +81,16 @@ export const UploadingAssetCard = ({
 
   React.useEffect(() => {
     const uploadFile = async () => {
-      const files = await upload(asset, folderId ? Number(folderId) : null);
+      let files;
+
+      try {
+        files = await upload(asset, folderId ? Number(folderId) : null);
+      } catch (error) {
+        // The user cancelled the upload: nothing to report.
+        if (error instanceof UploadAbortedError) return;
+
+        throw error;
+      }
 
       if (addUploadedFiles) {
         addUploadedFiles(files);

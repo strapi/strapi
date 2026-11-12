@@ -68,8 +68,7 @@ type PopulateClause<
   TKeys extends Schema.PopulatableAttributeNames<TSchemaUID>,
 > = {
   [TKey in TKeys]?:
-    | boolean
-    | NestedParams<Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TKey>>>;
+    boolean | NestedParams<Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TKey>>>;
 };
 
 /**
@@ -127,6 +126,4 @@ export type NestedParams<TSchemaUID extends UID.Schema> = Params.Pick<
 >;
 
 export type Any<TSchemaUID extends UID.Schema> =
-  | StringNotation<TSchemaUID>
-  | ArrayNotation<TSchemaUID>
-  | ObjectNotation<TSchemaUID>;
+  StringNotation<TSchemaUID> | ArrayNotation<TSchemaUID> | ObjectNotation<TSchemaUID>;

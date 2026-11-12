@@ -1,3 +1,3 @@
 {
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ../packages/core/strapi/ && exit 0 || exit 1"
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ':(glob)../packages/**/package.json' && exit 0 || exit 1"
 }

@@ -24,6 +24,12 @@ export interface TrackingContextValue {
   uuid?: string | boolean;
   telemetryProperties?: TelemetryProperties;
   strapiVersion?: string | null;
+  /**
+   * True once the version that `trackUsage` will attach is known, or the
+   * information request has failed. Callers that must send a single event
+   * wait for this so a later version update does not send the event again.
+   */
+  isStrapiVersionReady: boolean;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -32,6 +38,7 @@ export interface TrackingContextValue {
 
 const TrackingContext = React.createContext<TrackingContextValue>({
   uuid: false,
+  isStrapiVersionReady: false,
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -51,10 +58,17 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
-  const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery(undefined, {
-    skip: !initData?.uuid || !token,
+  const versionQueryEnabled = Boolean(initData?.uuid && token);
+  const {
+    data: appInfo,
+    isLoading: isLoadingAppInfo,
+    isError: isInformationError,
+  } = useInformationQuery(undefined, {
+    skip: !versionQueryEnabled,
   });
   const strapiVersion = appInfo?.strapiVersion;
+  const isStrapiVersionReady =
+    Boolean(strapiVersion) || (versionQueryEnabled && isInformationError);
   React.useEffect(() => {
     if (uuid && data && !isLoadingAppInfo) {
       const event = 'didInitializeAdministration';
@@ -88,8 +102,9 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
       uuid,
       telemetryProperties: data,
       strapiVersion,
+      isStrapiVersionReady,
     }),
-    [uuid, data, strapiVersion]
+    [uuid, data, strapiVersion, isStrapiVersionReady]
   );
 
   return <TrackingContext.Provider value={value}>{children}</TrackingContext.Provider>;
@@ -199,7 +214,6 @@ export interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease'
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
@@ -386,22 +400,11 @@ interface DidFilterEntriesEvent {
   };
 }
 
-interface DidPublishRelease {
-  name: 'didPublishRelease';
-  properties: {
-    totalEntries: number;
-    totalPublishedEntries: number;
-    totalUnpublishedEntries: number;
-  };
-}
-
 interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
     promptType:
-      | 'generate-product-schema'
-      | 'tell-me-about-the-content-type-builder'
-      | 'tell-me-about-strapi';
+      'generate-product-schema' | 'tell-me-about-the-content-type-builder' | 'tell-me-about-strapi';
   };
 }
 
@@ -502,7 +505,6 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidClickOnDocLink
-  | DidPublishRelease
   | MediaEvents
   | DidUpdateCTBSchema
   | DidSkipGuidedTour
@@ -602,4 +604,9 @@ const useTracking = (): UseTrackingReturn => {
   return { trackUsage };
 };
 
-export { TrackingProvider, useTracking };
+/**
+ * Internal readiness signal for events that must wait for the provider's version.
+ */
+const useStrapiVersionReady = () => React.useContext(TrackingContext).isStrapiVersionReady;
+
+export { TrackingProvider, useTracking, useStrapiVersionReady };

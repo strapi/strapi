@@ -535,6 +535,48 @@ paths:
                     properties:
                       publishedAt:
                         type: datetime
+  /content-manager/collection-types/{model}/{id}/actions/move:
+    post:
+      tags:
+        - Collection Types content management
+      description: |
+        Move one entry right before or after another one in the custom order of the collection type.
+
+        Only available when the `unstableCustomOrder` future flag is on and custom order is enabled in the list view settings of the collection type.
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - $ref: '#/components/parameters/entity-id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required:
+                    - before
+                  properties:
+                    before:
+                      type: string
+                      description: documentId of the entry to place this entry before
+                - type: object
+                  required:
+                    - after
+                  properties:
+                    after:
+                      type: string
+                      description: documentId of the entry to place this entry after
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      documentId:
+                        type: string
   /content-manager/collection-types/{model}/{id}/actions/countDraftRelations:
     get:
       tags:

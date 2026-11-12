@@ -3,6 +3,8 @@ import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { isErrorMessageMessageDescriptor } from '../../utils/forms';
 
+const EMPTY_OPTIONS: NonNullable<TokenTypeSelectProps['options']> = [];
+
 interface TokenTypeSelectProps extends Pick<SingleSelectProps, 'onChange' | 'value'> {
   name?: string;
   options: Array<{
@@ -20,7 +22,7 @@ export const TokenTypeSelect = ({
   value,
   onChange,
   canEditInputs,
-  options = [],
+  options = EMPTY_OPTIONS,
   label,
 }: TokenTypeSelectProps) => {
   const { formatMessage } = useIntl();

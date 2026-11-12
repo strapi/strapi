@@ -84,8 +84,7 @@ export interface File {
 }
 
 export type UploadCommandOutput = (
-  | CompleteMultipartUploadCommandOutput
-  | AbortMultipartUploadCommandOutput
+  CompleteMultipartUploadCommandOutput | AbortMultipartUploadCommandOutput
 ) & {
   Location?: string;
   ETag?: string;

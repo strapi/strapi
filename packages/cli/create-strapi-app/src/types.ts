@@ -1,4 +1,7 @@
+import type { Invocation } from './utils/invocation';
+
 export interface Options {
+  agent?: string;
   useNpm?: boolean;
   usePnpm?: boolean;
   useYarn?: boolean;
@@ -65,6 +68,9 @@ export interface Scope {
   useExample?: boolean;
   gitInit?: boolean;
   shouldCreateGrowthSsoTrial: boolean;
+  /** How the CLI was started: by an agent, in CI, by a person at a terminal, or unknown. */
+  invocation: Invocation;
+  agentName: string | null;
   /** Resolved at scaffold time when packageManager is pnpm (npm_config_user_agent or pnpm --version). */
   pnpmVersion?: string | null;
 }

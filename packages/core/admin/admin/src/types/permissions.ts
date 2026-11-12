@@ -30,6 +30,7 @@ interface PermissionMap {
   settings: Record<SettingsPermissions, CRUDPermissions> &
     Partial<Record<EESettingsPermissions, CRUDPermissions>> & {
       plugins: Pick<CRUDPermissions, 'read' | 'main'>;
+      'debug-dump': Pick<CRUDPermissions, 'read' | 'main'>;
     };
 }
 

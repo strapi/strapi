@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Blocks editor', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
-  test('adds a code block and specifies the language', async ({ page, browserName }) => {
+  test('adds a code block and specifies the language', async ({ page }) => {
     // Write some text into a blocks editor
     const code = 'const problems = 99';
     await navToHeader(page, ['Content Manager', 'Homepage'], 'Homepage');
@@ -20,11 +20,6 @@ test.describe('Blocks editor', () => {
     await textbox.click();
     await textbox.fill(code);
     await expect(page.getByText(code)).toBeVisible();
-
-    test.skip(
-      browserName === 'firefox',
-      'Firefox loses focus when clicking the toolbar in Playwright, but not in a real environment'
-    );
 
     // Use the toolbar to convert the block to a code block and specify the language
     const toolbar = page.getByRole('toolbar');

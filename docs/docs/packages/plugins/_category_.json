@@ -1,0 +1,9 @@
+{
+  "label": "Plugins",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "slug": "/packages/plugins",
+    "description": "Workspace packages under packages/plugins/ in the monorepo."
+  }
+}

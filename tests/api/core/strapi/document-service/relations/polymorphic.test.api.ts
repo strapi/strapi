@@ -134,8 +134,7 @@ describe('Document Service polymorphic relations', () => {
   const getRawTableRowById = async (uid: string, id: number) => {
     const table = strapi.db.metadata.get(uid).tableName;
     return (await strapi.db.getConnection(table).where({ id }).first()) as unknown as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
   };
 
   const findTargetRow = async (args: { documentId: string; isDraft: boolean }) => {

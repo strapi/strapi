@@ -1,9 +1,9 @@
 ---
 title: Strapi server (WIP)
+description: 'Module that generates and configures the Strapi HTTP server.'
 slug: /api/strapi-server
 tags:
-  - module
-  - public
+  - public-api
 
 toc_min_heading_level: 2
 toc_max_heading_level: 5
@@ -42,9 +42,9 @@ Strapi projects are using KoaJS to run the NodeJS server.
 
 ### `StrapiServer.router`
 
-- [<Type>@koa/router</Type>](https://github.com/ZijianHe/koa-router#router-)
+- [<Type>@koa/router</Type>](https://github.com/koajs/router)
 
-Strapi projects are using a dependency of KoaJS called @koa/router.
+Strapi projects are using a dependency of KoaJS called @koa/router (version 15, with `path-to-regexp` v8). Strapi translates path-to-regexp v6 paths registered on this router. See [Route paths](../architecture/06-http-request-path.md#route-paths).
 
 ### `StrapiServer.httpServer`
 

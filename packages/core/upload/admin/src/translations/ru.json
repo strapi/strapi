@@ -126,8 +126,6 @@
   "list.table.header.sort": "Сортировка {label}",
   "list.table.content.empty-label": "Это поле пустое",
   "tabs.title": "Как вы хотите загрузить свои ресурсы?",
-  "window.confirm.close-modal.file": "Вы уверены? Изменения будут потеряны.",
-  "window.confirm.close-modal.files": "Вы уверены? Некоторые файлы ещё не загружены.",
   "config.back": "Назад",
   "config.subtitle": "Определите параметры просмотра медиабиблиотеки.",
   "config.entries.title": "Записей на странице",

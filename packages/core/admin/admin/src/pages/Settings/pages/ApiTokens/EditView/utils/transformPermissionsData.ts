@@ -18,28 +18,26 @@ export const transformPermissionsData = (data: ContentApiPermission) => {
   layout.permissions = Object.entries(data).map(([apiId, permission]) => ({
     apiId,
     label: apiId.split('::')[1],
-    controllers: Object.keys(permission.controllers)
-      .map((controller) => ({
-        controller,
-        actions:
-          controller in permission.controllers
-            ? permission.controllers[controller]
-                .map((action: ContentApiPermission['controllers']) => {
-                  const actionId = `${apiId}.${controller}.${action}`;
+    controllers: Object.keys(permission.controllers).flatMap((controller) => ({
+      controller,
+      actions:
+        controller in permission.controllers
+          ? permission.controllers[controller].flatMap(
+              (action: ContentApiPermission['controllers']) => {
+                const actionId = `${apiId}.${controller}.${action}`;
 
-                  if (apiId.includes('api::')) {
-                    layout.allActionsIds.push(actionId);
-                  }
+                if (apiId.includes('api::')) {
+                  layout.allActionsIds.push(actionId);
+                }
 
-                  return {
-                    action,
-                    actionId,
-                  };
-                })
-                .flat()
-            : [],
-      }))
-      .flat(),
+                return {
+                  action,
+                  actionId,
+                };
+              }
+            )
+          : [],
+    })),
   }));
 
   return layout;

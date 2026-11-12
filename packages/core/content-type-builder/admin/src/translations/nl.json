@@ -138,8 +138,6 @@
   "form.attribute.condition.enum-change-warning-end": " zal deze voorwaarden verbreken. Wil je doorgaan?",
   "form.attribute.condition.enum-change-warning-values": ". Het wijzigen of verwijderen van de enumeratiewaarden ",
   "form.attribute.condition.field": "Veld",
-  "form.attribute.condition.field-change-warning": "De volgende velden hebben voorwaarden die afhankelijk zijn van dit veld: {fieldNames}. Het hernoemen ervan zal deze voorwaarden verbreken. Wil je doorgaan?",
-  "form.attribute.condition.field-change-warning-end": ". Het hernoemen ervan zal deze voorwaarden verbreken. Wil je doorgaan?",
   "form.attribute.condition.label": "Voorwaarden",
   "form.attribute.condition.no-fields": "Geen boolean- of enumeratievelden beschikbaar om voorwaarden op in te stellen.",
   "form.attribute.condition.operator": "Operator",

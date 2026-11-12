@@ -20,6 +20,7 @@ export const createUserMigrationProvider = (db: Database): UserMigrationProvider
 
   const runner = createMigrationRunner({
     storage: createStorage({ db, tableName: 'strapi_migrations' }),
+    withPhase: (phase, fn) => db.runInPhase(phase, fn),
     logger: {
       info(message) {
         db.logger.info(transformLogMessage('info', message));

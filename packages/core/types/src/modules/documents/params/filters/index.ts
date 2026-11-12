@@ -14,16 +14,22 @@ type DocumentIDKey = 'documentId';
 
 /**
  * Filter representation for nested attributes
+ *
+ * The target UID is resolved through `infer` before recursing. When `TSchemaUID` is a type
+ * parameter, the conditional type stays deferred, so TypeScript does not build an endless chain of
+ * new `ObjectNotation<Target<...>>` instantiations, which would exhaust the heap on nested filters.
+ * When `TSchemaUID` is known, the type is the same as `ObjectNotation<Target>`.
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
   TAttributeName extends Schema.AttributeNames<TSchemaUID>,
-> = ObjectNotation<
+> =
   Guard.Never<
     Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TAttributeName>>,
     UID.Schema
-  >
->;
+  > extends infer TTargetUID extends UID.Schema
+    ? ObjectNotation<TTargetUID>
+    : never;
 
 /**
  * Filter representation for scalar attributes
@@ -51,21 +57,20 @@ type AttributeCondition<
     // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
     AttributeUtils.ScalarValues
   > extends infer TAttributeValue
-    ?
-        | TAttributeValue // Implicit $eq operator
-        | ({
-            [TIter in Operator.BooleanValue]?: boolean;
-          } & {
-            [TIter in Operator.DynamicValue]?: TAttributeValue;
-          } & {
-            [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
-          } & {
-            [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
-          } & {
-            [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
-          } & {
-            [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
-          })
+    ? | TAttributeValue // Implicit $eq operator
+      | ({
+          [TIter in Operator.BooleanValue]?: boolean;
+        } & {
+          [TIter in Operator.DynamicValue]?: TAttributeValue;
+        } & {
+          [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
+        } & {
+          [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
+        } & {
+          [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
+        } & {
+          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
+        })
     : never;
 
 /**
@@ -92,8 +97,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
         {
           [TKey in string]?:
-            | AttributeCondition<TSchemaUID, never>
-            | NestedAttributeCondition<TSchemaUID, never>;
+            AttributeCondition<TSchemaUID, never> | NestedAttributeCondition<TSchemaUID, never>;
         }
       >
     : never);

@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import { Button, Modal } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -8,6 +9,8 @@ import { BulkMoveDialog } from '../../../components/BulkMoveDialog/BulkMoveDialo
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder as FolderDefinition } from '../../../../../../shared/contracts/folders';
+
+const EMPTY_SELECTED: NonNullable<BulkMoveButtonProps['selected']> = [];
 
 interface FolderWithType extends FolderDefinition {
   type: string;
@@ -24,7 +27,7 @@ export interface BulkMoveButtonProps {
 }
 
 export const BulkMoveButton = ({
-  selected = [],
+  selected = EMPTY_SELECTED,
   onSuccess,
   currentFolder,
 }: BulkMoveButtonProps) => {
@@ -37,7 +40,7 @@ export const BulkMoveButton = ({
   };
 
   return (
-    <Modal.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+    <UnsavedChangesModal open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
       <Modal.Trigger>
         <Button variant="secondary" size="S" startIcon={<Folder />}>
           {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
@@ -48,6 +51,6 @@ export const BulkMoveButton = ({
         onClose={handleConfirmMove}
         selected={selected}
       />
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
