@@ -1,0 +1,18 @@
+{
+  "description": "API and module names mapped to the name their uid uses. The API loader of @strapi/core (src/loaders/apis.ts) and the type generators of @strapi/typescript-utils (src/generators/common/sources.ts) both run these cases, so the generated uids match the registered ones.",
+  "cases": [
+    ["article", "article"],
+    ["blogPost", "blog-post"],
+    ["BlogPost", "blog-post"],
+    ["blog_post", "blog-post"],
+    ["blog post", "blog-post"],
+    ["Blog-Post", "blog-post"],
+    ["ABTest", "ab-test"],
+    ["already-kebab", "already-kebab"],
+    ["article2", "article2"],
+    ["api-v2", "api-v2"],
+    ["v2-api", "v2-api"],
+    ["blogPost2", "blog-post-2"],
+    ["2fa", "2-fa"]
+  ]
+}

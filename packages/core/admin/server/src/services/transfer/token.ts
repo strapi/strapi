@@ -355,7 +355,7 @@ const hash = (accessKey: string): string => {
   }
 
   return crypto
-    .createHmac('sha512', strapi.config.get('admin.transfer.token.salt'))
+    .createHmac('sha512', strapi.config.get<string>('admin.transfer.token.salt'))
     .update(accessKey)
     .digest('hex');
 };

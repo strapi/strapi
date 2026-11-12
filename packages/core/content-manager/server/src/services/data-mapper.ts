@@ -2,7 +2,13 @@ import { pick, get } from 'lodash';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
-import type { Schema, Struct } from '@strapi/types';
+import type { Core, Schema, Struct } from '@strapi/types';
+
+import type {
+  ContentManagerAttribute,
+  ContentManagerModel,
+  DataMapperService,
+} from '../types/services';
 
 const dtoFields = [
   'uid',
@@ -17,8 +23,12 @@ const dtoFields = [
   'pluginOptions',
 ];
 
-export default () => ({
-  toContentManagerModel(contentType: Struct.ComponentSchema) {
+export default (() => ({
+  toContentManagerModel(
+    contentType: Core.IsStrict extends true
+      ? Struct.ComponentSchema | Struct.ContentTypeSchema
+      : Struct.ComponentSchema
+  ) {
     return {
       ...contentType,
       apiID: contentType.modelName,
@@ -35,31 +45,43 @@ export default () => ({
     };
   },
 
+  /** @internal */
   toDto: <T extends object>(model: T) => pick(model, dtoFields),
-});
+})) satisfies () => Core.Implements<
+  // The generic contract member cannot be met without a cast: the factory is checked against it
+  // at its constraint, both schema kinds.
+  Omit<DataMapperService, 'toContentManagerModel'> & {
+    toContentManagerModel(
+      model: Struct.ComponentSchema | Struct.ContentTypeSchema
+    ): ContentManagerModel<Struct.ComponentSchema | Struct.ContentTypeSchema>;
+  }
+>;
 
-const formatAttributes = (contentType: Struct.ComponentSchema) => {
+const formatAttributes = (contentType: Struct.ComponentSchema | Struct.ContentTypeSchema) => {
   const { getVisibleAttributes, getTimestamps, getCreatorFields } = contentTypesUtils;
 
   // only get attributes that can be seen in the auto generated Edit view or List view
   return getVisibleAttributes(contentType)
     .concat(getTimestamps(contentType))
     .concat(getCreatorFields(contentType))
-    .reduce((acc: any, key: string) => {
-      const attribute = contentType.attributes[key];
+    .reduce<Core.IsStrict extends true ? Record<string, ContentManagerAttribute> : any>(
+      (acc, key: string) => {
+        const attribute = contentType.attributes[key];
 
-      // ignore morph until they are handled in the front
-      if (attribute.type === 'relation' && attribute.relation.toLowerCase().includes('morph')) {
+        // ignore morph until they are handled in the front
+        if (attribute.type === 'relation' && attribute.relation.toLowerCase().includes('morph')) {
+          return acc;
+        }
+
+        acc[key] = formatAttribute(key, attribute);
         return acc;
-      }
-
-      acc[key] = formatAttribute(key, attribute);
-      return acc;
-    }, {});
+      },
+      {}
+    );
 };
 
 // FIXME: not needed
-const formatAttribute = (key: any, attribute: Schema.Attribute.AnyAttribute) => {
+const formatAttribute = (key: string, attribute: Schema.Attribute.AnyAttribute) => {
   if (attribute.type === 'relation') {
     return toRelation(attribute);
   }
@@ -68,7 +90,7 @@ const formatAttribute = (key: any, attribute: Schema.Attribute.AnyAttribute) => 
 };
 
 // FIXME: not needed
-const toRelation = (attribute: Schema.Attribute.Relation) => {
+const toRelation = (attribute: Schema.Attribute.Relation): ContentManagerAttribute => {
   return {
     ...attribute,
     type: 'relation',
@@ -77,5 +99,5 @@ const toRelation = (attribute: Schema.Attribute.Relation) => {
   };
 };
 
-const isVisible = (model: Struct.ComponentSchema): boolean =>
+const isVisible = (model: Struct.ComponentSchema | Struct.ContentTypeSchema): boolean =>
   get(model, 'pluginOptions.content-manager.visible', true) === true;

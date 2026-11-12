@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { async, errors } from '@strapi/utils';
+import { async, errors, type queryParams } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -72,7 +72,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
       const id = await resolveFileId(strapi, ctx.params.id);
-      const file = id ? await getService('upload').findOne(id, sanitizedQuery.populate!) : null;
+      const file = id
+        ? await getService('upload').findOne(
+            id,
+            sanitizedQuery.populate as queryParams.Params['populate'] | undefined
+          )
+        : null;
 
       if (!file) {
         return ctx.notFound('file.notFound');

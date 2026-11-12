@@ -1,19 +1,34 @@
+import type { Core } from '@strapi/types';
+import type { RouteControllers } from '../../types/controllers';
 import { enableFeatureMiddleware } from '../../routes/utils';
 
-const getRouteConfig = (actions: string[] = ['admin::audit-logs.read']) => ({
-  middlewares: [enableFeatureMiddleware('audit-logs')],
-  policies: [
-    'admin::isAuthenticatedAdmin',
-    {
-      name: 'admin::hasPermissions',
-      config: {
-        actions,
+const getRouteConfig = (actions: Core.PermissionActionReference[] = ['admin::audit-logs.read']) =>
+  ({
+    middlewares: [enableFeatureMiddleware('audit-logs')],
+    policies: [
+      'admin::isAuthenticatedAdmin',
+      {
+        name: 'admin::hasPermissions',
+        config: {
+          actions,
+        },
       },
-    },
-  ],
-});
+    ],
+  }) satisfies Core.RouteConfigFor;
 
-export default {
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const auditLogsRouter: {
+  type: string;
+  routes: {
+    method: string;
+    path: string;
+    handler: string;
+    config: {
+      middlewares: Core.MiddlewareHandler[];
+      policies: (string | { name: string; config: { actions: string[] } })[];
+    };
+  }[];
+} = {
   type: 'admin',
   routes: [
     {
@@ -41,4 +56,6 @@ export default {
       config: getRouteConfig(),
     },
   ],
-};
+} satisfies Core.RouterInputFor<RouteControllers>;
+
+export default auditLogsRouter;

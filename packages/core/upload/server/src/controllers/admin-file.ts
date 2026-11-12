@@ -1,5 +1,5 @@
 import { merge } from 'lodash';
-import { async } from '@strapi/utils';
+import { async, type queryParams } from '@strapi/utils';
 
 import type { Context } from 'koa';
 
@@ -38,7 +38,9 @@ export default {
       (q) => pm.addPermissionsQueryTo(q)
     )(ctx.query);
 
-    const { results: files, pagination } = await getService('upload').findPage(query);
+    const { results: files, pagination } = await getService('upload').findPage(
+      query as queryParams.Params
+    );
 
     // Sign file urls for private providers
     const signedFiles = await async.map(files, getService('file').signFileUrls);

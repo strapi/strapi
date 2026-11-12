@@ -1,7 +1,7 @@
 import { omit, pick, defaults, isEmpty, intersection, get, isObject, cloneDeep } from 'lodash';
 import { subject as asSubject } from '@casl/ability';
 
-import type { UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import {
   contentTypes,
@@ -13,6 +13,10 @@ import {
 } from '@strapi/utils';
 import { createPermissionFieldsCache } from './permission-fields';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
+import type {
+  PermissionsManagerSanitizeOptions,
+  PermissionsManagerSanitizers,
+} from '../../../types';
 
 const {
   visitors: { removePassword, expandWildcardPopulate },
@@ -38,7 +42,25 @@ const {
 const COMPONENT_FIELDS = ['__component'];
 const STATIC_FIELDS = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
 
-export default ({ action, ability, model }: any) => {
+/**
+ * With strict types, one wrapped sanitizer serves the three sanitizers of the contract, and the
+ * factory's result gives each its own signature. Without, as on develop.
+ */
+type WrappedSanitize = Core.IsStrict extends true
+  ? PermissionsManagerSanitizers['sanitizeOutput'] & PermissionsManagerSanitizers['sanitizeQuery']
+  : <T>(data: T, options?: any) => Promise<T>;
+
+/** With strict types, the sanitizers of the contract. Without, as on develop. */
+type SanitizeHelpers = Core.IsStrict extends true
+  ? PermissionsManagerSanitizers
+  : {
+      sanitizeOutput: <T>(data: T, options?: any) => Promise<T>;
+      sanitizeInput: <T>(data: T, options?: any) => Promise<T>;
+      // sanitizeQuery keeps its `unknown` result, so existing query callers keep their types
+      sanitizeQuery: (query: unknown, options?: any) => Promise<unknown>;
+    };
+
+export default ({ action, ability, model }: any): SanitizeHelpers => {
   const schema = strapi.getModel(model);
 
   const { removeDisallowedFields } = sanitize.visitors;
@@ -194,8 +216,10 @@ export default ({ action, ability, model }: any) => {
      * The result keeps the type of `data` (`unknown` stays `unknown`), so callers can type
      * their sanitized data. At runtime, fields the user is not allowed to see are removed.
      */
-    function wrappedSanitize<T>(data: T, options?: any): Promise<T>;
-    async function wrappedSanitize(data: unknown, options = {} as any): Promise<unknown> {
+    const wrappedSanitize: WrappedSanitize = async (
+      data: unknown,
+      options: PermissionsManagerSanitizeOptions = {}
+    ) => {
       if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
       }
@@ -219,7 +243,7 @@ export default ({ action, ability, model }: any) => {
       const sanitizeFunction = createSanitizeFunction(sanitizeOptions);
 
       return sanitizeFunction(data);
-    }
+    };
 
     return wrappedSanitize;
   };
@@ -319,13 +343,9 @@ export default ({ action, ability, model }: any) => {
     ];
   };
 
-  // sanitizeQuery keeps its `unknown` result, so existing query callers keep their types
-  const sanitizeQuery: (query: unknown, options?: any) => Promise<unknown> =
-    wrapSanitize(createSanitizeQuery);
-
   return {
     sanitizeOutput: wrapSanitize(createSanitizeOutput),
     sanitizeInput: wrapSanitize(createSanitizeInput),
-    sanitizeQuery,
+    sanitizeQuery: wrapSanitize(createSanitizeQuery),
   };
 };

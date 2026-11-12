@@ -3,18 +3,24 @@ import slugify from '@sindresorhus/slugify';
 
 import type { Core, Schema, UID } from '@strapi/types';
 
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
+import type { UIDService } from '../types/services';
+
+export default (({ strapi }: { strapi: Core.Strapi }) => ({
   async generateUIDField({
     contentTypeUID,
     field,
     data,
     locale,
-  }: {
-    contentTypeUID: UID.ContentType;
-    field: string;
-    data: Record<string, any>;
-    locale?: string;
-  }) {
+  }: Core.IsStrict extends true
+    ? Parameters<UIDService['generateUIDField']>[0]
+    : {
+        contentTypeUID: UID.ContentType;
+        field: string;
+        data: Record<string, any>;
+        locale?: string;
+      }): Core.IsStrict extends true
+    ? ReturnType<UIDService['generateUIDField']>
+    : Promise<string> {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
 
@@ -126,4 +132,4 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return true;
   },
-});
+})) satisfies Core.ServiceImplementation<'plugin::content-manager.uid'>;

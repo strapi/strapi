@@ -1,6 +1,32 @@
+import type { Context, Next } from 'koa';
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
 import isDevelopmentMode from '../middlewares/is-development-mode';
 
-export default {
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const routes: {
+  type: string;
+  routes: (
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          policies: { name: string; config: { actions: string[] } }[];
+          middlewares?: undefined;
+        };
+      }
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          policies: { name: string; config: { actions: string[] } }[];
+          middlewares: ((ctx: Context, next: Next) => Promise<void>)[];
+        };
+      }
+  )[];
+} = {
   type: 'admin',
   routes: [
     {
@@ -221,4 +247,6 @@ export default {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<Controllers, 'plugin::content-type-builder'>;
+
+export default routes;

@@ -30,7 +30,6 @@ describe('Sentry service', () => {
     // Reset Strapi state
     global.strapi = {
       config: {
-        // @ts-expect-error - ignore the generic type
         get: () => defaultConfig,
         set: vi.fn(),
         has: vi.fn(),
@@ -58,7 +57,6 @@ describe('Sentry service', () => {
   });
 
   it('disables Sentry when an invalid DSN is provided', () => {
-    // @ts-expect-error - ignore the generic type
     global.strapi.config.get = () => ({ dsn: INVALID_DSN });
     const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
@@ -75,7 +73,6 @@ describe('Sentry service', () => {
   });
 
   it('initializes and sends errors', () => {
-    // @ts-expect-error - ignore the generic type
     global.strapi.config.get = () => ({ dsn: VALID_DSN, sendMetadata: true });
     const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
@@ -97,7 +94,6 @@ describe('Sentry service', () => {
 
   it('does not send metadata when the option is disabled', () => {
     // Init with metadata option disabled
-    // @ts-expect-error - ignore the generic type
     global.strapi.config.get = () => ({ dsn: VALID_DSN, sendMetadata: false });
     const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();

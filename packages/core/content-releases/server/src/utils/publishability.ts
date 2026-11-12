@@ -1,10 +1,12 @@
 import { contentTypes, errors } from '@strapi/utils';
 
 import type { UID, Core, Modules, Schema } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 import type {
   ReleaseAction,
   ReleaseActionOutcome,
   ReleaseActionReason,
+  Stage,
   StageRef,
 } from '../../../shared/contracts/release-actions';
 import { getEntry } from './entries';
@@ -18,6 +20,17 @@ export interface EntryValidity {
 export const UNPUBLISH_VALIDITY: EntryValidity = { isEntryValid: true, reason: null };
 
 type WorkflowWithRequiredStage = { stageRequiredToPublish?: StageRef | null } | null | undefined;
+
+/**
+ * `plugin::review-workflows.workflows`. Content releases does not depend on review workflows, so its
+ * registered contract is not loaded here.
+ */
+export type WorkflowsService = {
+  getAssignedWorkflow(
+    contentTypeUid: string,
+    options: { populate: string }
+  ): Promise<{ stageRequiredToPublish?: Stage } | null>;
+};
 
 type DraftEntry = Modules.Documents.AnyDocument & { strapi_stage?: StageRef | null };
 
@@ -183,7 +196,9 @@ const getAssignedWorkflow = async (
   { strapi }: { strapi: Core.Strapi }
 ): Promise<WorkflowWithRequiredStage> => {
   // Workflows service may not be available depending on the license
-  const workflowsService = strapi.plugin('review-workflows')?.service('workflows');
+  const workflowsService = strapi
+    .plugin('review-workflows')
+    ?.service<WorkflowsService>('workflows');
 
   return workflowsService?.getAssignedWorkflow(contentTypeUid, {
     populate: 'stageRequiredToPublish',
@@ -402,7 +417,9 @@ const createPublishedVersionLookup = ({ strapi }: { strapi: Core.Strapi }) => {
 // Checks drafts, looking up the populate and the workflow once per content type and reading
 // each draft once (an entry in several planned releases has one action in each)
 const createDraftPublishabilityCheck = ({ strapi }: { strapi: Core.Strapi }) => {
-  const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+  const populateBuilderService = strapi
+    .plugin('content-manager')
+    .service<ContentManagerServices.PopulateBuilderService>('populate-builder');
   // Same strict relations rule as the document service's publish
   const strictRelations = strapi.config.get('api.documents.strictRelations', undefined) === true;
   const lookupsByContentType = new Map<
@@ -419,7 +436,6 @@ const createDraftPublishabilityCheck = ({ strapi }: { strapi: Core.Strapi }) => 
     let lookups = lookupsByContentType.get(draft.contentType);
     if (!lookups) {
       lookups = {
-        // @ts-expect-error - populateBuilderService should be a function but is returning service
         populate: await populateBuilderService(draft.contentType).populateDeep(Infinity).build(),
         workflow: await getAssignedWorkflow(draft.contentType, { strapi }),
       };

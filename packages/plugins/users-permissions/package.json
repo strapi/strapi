@@ -32,12 +32,20 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
+      "types": "./types/strapi-server.d.ts",
       "source": "./server/src/index.js",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
     "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "types/strapi-server.d.ts"
+      ]
+    }
   },
   "scripts": {
     "build": "run -T npm-run-all clean build:code",

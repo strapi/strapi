@@ -1,7 +1,9 @@
 import { get } from 'lodash';
+import type { Core } from '@strapi/types';
 import { getService } from '../../utils';
 
-const actions = [
+// `as const` so the IDs of the registered actions are checked against the declared ones.
+const registeredActions = [
   {
     section: 'settings',
     category: 'Internationalization',
@@ -37,7 +39,42 @@ const actions = [
     displayName: 'Delete',
     uid: 'locale.delete',
   },
-];
+] as const;
+
+// The declared permission action IDs match the registered actions.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type ActionIds = Core.Assert<
+  Core.SameNames<
+    Core.PermissionActionId<(typeof registeredActions)[number]>,
+    Extract<Core.RegisteredPermissionAction, `plugin::i18n.${string}`>
+  >
+>;
+
+// `actions` is published by the default export, so it keeps the type it had before the list was
+// `as const`: mutable, with `string` fields.
+const actions = registeredActions as unknown as (
+  | {
+      section: string;
+      category: string;
+      subCategory: string;
+      pluginName: string;
+      displayName: string;
+      uid: string;
+      aliases?: undefined;
+    }
+  | {
+      section: string;
+      category: string;
+      subCategory: string;
+      pluginName: string;
+      displayName: string;
+      uid: string;
+      aliases: {
+        actionId: string;
+        subjects: string[];
+      }[];
+    }
+)[];
 
 const addLocalesPropertyIfNeeded = ({ value: action }: any) => {
   const {
@@ -247,7 +284,8 @@ const syncSuperAdminPermissionsWithLocales = async () => {
 const registerI18nActions = async () => {
   const { actionProvider } = strapi.service('admin::permission');
 
-  await actionProvider.registerMany(actions);
+  // The `as const` list, so the action provider checks the IDs; `actions` is the same array.
+  await actionProvider.registerMany(registeredActions);
 };
 
 const registerI18nActionsHooks = () => {

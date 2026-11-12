@@ -1,4 +1,49 @@
-export default [
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
+
+/**
+ * The forgot-password route uses email's `plugin::email.rateLimit` middleware. Admin cannot see
+ * email's middleware contracts: email peer-depends on admin, so importing them would be a cycle.
+ * This route alone keeps its middleware names unchecked.
+ */
+type ForgotPasswordRoute = Omit<Core.RouteInputFor<Controllers>, 'handler' | 'config'> & {
+  handler: 'authentication.forgotPassword';
+  config?: Omit<Core.RouteConfigFor, 'middlewares'> & { middlewares?: string[] };
+};
+
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const routes: (
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        auth: boolean;
+        middlewares: string[];
+        policies?: undefined;
+      };
+    }
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        auth: boolean;
+        middlewares?: undefined;
+        policies?: undefined;
+      };
+    }
+  | {
+      method: string;
+      path: string;
+      handler: string;
+      config: {
+        policies: string[];
+        auth?: undefined;
+        middlewares?: undefined;
+      };
+    }
+)[] = [
   {
     method: 'POST',
     path: '/login',
@@ -60,4 +105,6 @@ export default [
       policies: ['admin::isAuthenticatedAdmin'],
     },
   },
-];
+] satisfies (Core.RouteInputFor<Controllers> | ForgotPasswordRoute)[];
+
+export default routes;

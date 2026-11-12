@@ -539,7 +539,7 @@ export default {
     }
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion!);
   },
 
   async clone(ctx: any) {
@@ -579,7 +579,11 @@ export default {
     // Clone with the request locale, which has no null or empty value, like the lookup above
     const clonedDocument = await documentManager.clone(
       document.documentId,
-      { ...sanitizedBody, locale },
+      // `async.pipe` types its result as its first stage's, here the request body as `unknown`.
+      {
+        ...(sanitizedBody as Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>),
+        locale,
+      },
       model
     );
 
@@ -589,7 +593,7 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
       availableStatus: false,
@@ -773,7 +777,9 @@ export default {
       status: 'draft',
     });
 
-    const results = await Promise.all(documents.map(permissionChecker.sanitizeOutput));
+    const results = await Promise.all(
+      documents.map((document) => permissionChecker.sanitizeOutput(document))
+    );
 
     ctx.body = { results };
   },

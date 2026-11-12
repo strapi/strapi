@@ -71,7 +71,7 @@ describe('i18n permissions actions', () => {
         },
       ]);
 
-      expect(result[0].properties.locales).toEqual(['en']);
+      expect(result[0].properties?.locales).toEqual(['en']);
     });
 
     test('fills in default locale for permissions with missing locales', async () => {
@@ -85,7 +85,7 @@ describe('i18n permissions actions', () => {
         },
       ]);
 
-      expect(result[0].properties.locales).toEqual(['en']);
+      expect(result[0].properties?.locales).toEqual(['en']);
     });
 
     test('leaves permissions with null locales unchanged', async () => {
@@ -99,7 +99,7 @@ describe('i18n permissions actions', () => {
 
       const result = await normalizeRolePermissionsLocales([permission]);
 
-      expect(result[0].properties.locales).toBeNull();
+      expect(result[0].properties?.locales).toBeNull();
     });
 
     test('leaves permissions unchanged when locales do not apply to the action', async () => {
@@ -117,7 +117,7 @@ describe('i18n permissions actions', () => {
 
       const result = await normalizeRolePermissionsLocales([permission]);
 
-      expect(result[0].properties.locales).toEqual([]);
+      expect(result[0].properties?.locales).toEqual([]);
     });
 
     test('leaves permissions with selected locales unchanged', async () => {
@@ -131,7 +131,7 @@ describe('i18n permissions actions', () => {
 
       const result = await normalizeRolePermissionsLocales([permission]);
 
-      expect(result[0].properties.locales).toEqual(['en']);
+      expect(result[0].properties?.locales).toEqual(['en']);
     });
 
     test('leaves non-localized content type permissions unchanged', async () => {

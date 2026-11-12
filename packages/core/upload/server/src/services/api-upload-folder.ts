@@ -1,6 +1,8 @@
 import { get } from 'lodash';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { FOLDER_MODEL_UID, API_UPLOAD_FOLDER_BASE_NAME } from '../constants';
+import type { APIUploadFolderService } from '../types/services';
 
 const getStore = () => strapi.store({ type: 'plugin', name: 'upload', key: 'api-folder' });
 
@@ -38,4 +40,4 @@ const getAPIUploadFolder = async () => {
 
 export default {
   getAPIUploadFolder,
-};
+} satisfies Core.Implements<APIUploadFolderService>;

@@ -116,5 +116,12 @@
     "kind": "plugin",
     "displayName": "Releases",
     "required": true
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "dist/server/src/index.d.ts"
+      ]
+    }
   }
 }

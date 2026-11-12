@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
@@ -60,6 +61,24 @@ describe('Email plugin bootstrap', () => {
       );
     } else {
       expect(warn).not.toHaveBeenCalled();
+    }
+  });
+
+  it('sets the plugin provider to the object that the provider module init returns', async () => {
+    // `bootstrap` loads the provider with `require`, which `vi.mock` does not intercept: spy on the
+    // module that `require` returns.
+    const sendmail = createRequire(__filename)('@strapi/provider-email-sendmail');
+    const instance = { send: vi.fn() };
+    const init = vi.spyOn(sendmail, 'init').mockReturnValue(instance);
+    const { strapi, emailPlugin } = createStrapiMock();
+
+    try {
+      await bootstrap({ strapi });
+
+      expect(init).toHaveBeenCalledTimes(1);
+      expect(emailPlugin.provider).toBe(instance);
+    } finally {
+      init.mockRestore();
     }
   });
 

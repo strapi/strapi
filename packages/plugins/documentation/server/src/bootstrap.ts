@@ -29,7 +29,16 @@ const RBAC_ACTIONS = [
     pluginName: 'documentation',
     category: 'documentation',
   },
-];
+] as const;
+
+// The declared permission action IDs match the registered actions.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type ActionIds = Core.Assert<
+  Core.SameNames<
+    Core.PermissionActionId<(typeof RBAC_ACTIONS)[number]>,
+    Extract<Core.RegisteredPermissionAction, `plugin::documentation.${string}`>
+  >
+>;
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await strapi.service('admin::permission').actionProvider.registerMany(RBAC_ACTIONS);

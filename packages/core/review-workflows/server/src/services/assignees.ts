@@ -1,4 +1,4 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 import { errors, emitAudit } from '@strapi/utils';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
 import { AUDITED_EVENTS } from '../audit-logs';
@@ -32,7 +32,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       },
       model: UID.ContentType,
       assigneeId: string | null
-    ) {
+    ): Promise<Modules.Documents.AnyDocument | null> {
       const { documentId, locale } = entityToUpdate;
 
       if (assigneeId != null) {
@@ -46,13 +46,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const oldAssigneeId = await this.findEntityAssigneeId(entityToUpdate.id, model);
       metrics.sendDidEditAssignee(oldAssigneeId, assigneeId || null);
 
-      const entity = await strapi.documents(model).update({
-        documentId,
-        locale,
-        data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId || null },
-        populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
-      });
+      const entity:
+        (Modules.Documents.AnyDocument & { strapi_assignee?: { id: number } | null }) | null =
+        await strapi.documents(model).update({
+          documentId,
+          locale,
+          data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId || null },
+          populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
+          fields: [],
+        });
 
       // Update the `updated_at` field of the entity, so that the `status` is not considered `Modified`
       // NOTE: `updatedAt` is a protected attribute that can not be modified directly from the query layer
