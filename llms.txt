@@ -32,6 +32,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Setup](https://contributor.strapi.io/contributing/testing/e2e/setup): Guide to setting up and running end-to-end tests with Playwright.
 - [App Template](https://contributor.strapi.io/contributing/testing/e2e/app-template): Template and configuration for e2e test applications.
 - [Data Transfer](https://contributor.strapi.io/contributing/testing/e2e/data-transfer): Guide to data transfer setup and usage in e2e testing.
+- [Enterprise plugins](https://contributor.strapi.io/contributing/testing/e2e/enterprise-plugins): How the e2e job checks that Strapi changes do not break the private Enterprise plugins.
 - [Testing](https://contributor.strapi.io/contributing/testing): The test types of the Strapi monorepo (unit, front-end, TypeScript, API integration, CLI and E2E) and the command that runs each one.
 - [FE Coding Guidelines](https://contributor.strapi.io/contributing/frontend-guidelines): Frontend coding guidelines and best practices for Strapi admin development.
 - [Typescript](https://contributor.strapi.io/contributing/typescript): TypeScript usage conventions and guidelines for Strapi codebase.
