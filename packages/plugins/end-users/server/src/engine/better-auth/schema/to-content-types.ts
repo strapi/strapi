@@ -17,7 +17,8 @@ import type { Struct } from '@strapi/types';
 
 import { LEGACY_USER_ATTRIBUTES } from '../../../compat/legacy-confirmation';
 import { graphqlTypeNames } from '../../../compat/graphql/names';
-import { ROLE_UID } from '../../../constants';
+import { PLUGIN_ID, ROLE_UID } from '../../../constants';
+import { ENGINE_OWNED_ATTRIBUTE_OPTION } from '../../../utils/engine-owned-user-fields';
 import type { EngineField, EngineTable } from '../../types';
 import { pluralNameOf, singularNameOf } from '../model-names';
 import { isHiddenField, isPrivateField, isReadOnlyField } from './private-fields';
@@ -216,6 +217,14 @@ const toAttribute = (
   if (isPrivateField(singularName, key, attribute, field)) result.private = true;
   if (isHiddenField(singularName, key, attribute)) result.visible = false;
   if (isReadOnlyField(singularName, key, attribute)) result.writable = false;
+
+  // A user field the engine declares `input: false` (a body never sets it) is one only the engine
+  // and the plugin write. Marked on the attribute, so the Content API's input check finds it from
+  // the type it is handed, whatever Better Auth plugins the project installed. A read-only field
+  // is stripped already.
+  if (singularName === USER_TYPE && field.input === false && result.writable !== false) {
+    result.pluginOptions = { [PLUGIN_ID]: { [ENGINE_OWNED_ATTRIBUTE_OPTION]: true } };
+  }
 
   if (
     field.defaultValue !== undefined &&

@@ -48,6 +48,8 @@ export interface EngineField {
   references?: EngineFieldReference;
   /** The attribute name to store the value under, when it differs from the field's key. */
   fieldName?: string;
+  /** `false` means a request body never sets the value: only the engine and the plugin write it. */
+  input?: boolean;
 }
 
 /** An index over one or more fields, named by field key. */

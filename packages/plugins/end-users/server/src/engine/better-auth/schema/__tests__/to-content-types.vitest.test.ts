@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { getAuthTables } from 'better-auth/db';
-import { admin, jwt, twoFactor, username } from 'better-auth/plugins';
+import { admin, anonymous, jwt, phoneNumber, twoFactor, username } from 'better-auth/plugins';
 // `@strapi/database` exports `Identifiers` as a type only: the singleton Strapi names every index
 // with is reachable at runtime as `strapi.db.metadata.identifiers`, and from a test only by path.
 // These are the real helpers, so the names asserted below are the ones Strapi would generate.
@@ -24,6 +24,7 @@ import {
   VERIFICATION_UID,
 } from '../../../../constants';
 import { fromAuthTables } from '../from-auth-tables';
+import { ENGINE_OWNED_ATTRIBUTE_OPTION } from '../../../../utils/engine-owned-user-fields';
 import { PRIVATE_FIELDS, READ_ONLY_FIELDS } from '../private-fields';
 import { LEGACY_USER_ATTRIBUTES } from '../../../../compat/legacy-confirmation';
 import { toContentTypes } from '../to-content-types';
@@ -570,6 +571,56 @@ describe('toContentTypes', () => {
         writable: false,
       });
       expect(attributesOf('user').legacyTokensRevokedAt).not.toHaveProperty('required');
+    });
+  });
+
+  describe('the engine-owned mark on the user type', () => {
+    const markOf = (attribute: Json) =>
+      (attribute.pluginOptions as Json | undefined)?.[PLUGIN_ID] as Json | undefined;
+
+    it('marks each user field Better Auth declares `input: false`, and no other', () => {
+      for (const field of [
+        'emailVerified',
+        'twoFactorEnabled',
+        'banned',
+        'banReason',
+        'banExpires',
+        'failedSignIns',
+        'lockedUntil',
+      ]) {
+        expect(markOf(attributesOf('user')[field]), field).toEqual({
+          [ENGINE_OWNED_ATTRIBUTE_OPTION]: true,
+        });
+      }
+
+      for (const field of ['name', 'email', 'username', 'displayUsername', 'image']) {
+        expect(attributesOf('user')[field], field).not.toHaveProperty('pluginOptions');
+      }
+    });
+
+    it('leaves a field that is read-only already to its own rule', () => {
+      expect(attributesOf('user').role).not.toHaveProperty('pluginOptions');
+      expect(attributesOf('user').legacyTokensRevokedAt).not.toHaveProperty('pluginOptions');
+    });
+
+    it('marks the fields a project plugin adds, and nothing on another type', () => {
+      const withPlugins = toContentTypes(
+        fromAuthTables(
+          getAuthTables({ plugins: [phoneNumber({ sendOTP: async () => undefined }), anonymous()] })
+        ),
+        naming
+      );
+      const user = withPlugins.user.schema.attributes as unknown as Record<string, Json>;
+
+      expect(markOf(user.phoneNumberVerified)).toEqual({ [ENGINE_OWNED_ATTRIBUTE_OPTION]: true });
+      expect(markOf(user.isAnonymous)).toEqual({ [ENGINE_OWNED_ATTRIBUTE_OPTION]: true });
+      expect(user.phoneNumber).not.toHaveProperty('pluginOptions');
+
+      for (const attribute of Object.values(
+        withPlugins.session.schema.attributes as unknown as Record<string, Json>
+      )) {
+        expect(attribute).not.toHaveProperty('pluginOptions');
+      }
     });
   });
 
