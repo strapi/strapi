@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import _, { has, toNumber } from 'lodash';
+import _ from 'lodash';
 import { extension } from 'mime-types';
 import {
   async,
@@ -11,13 +11,13 @@ import {
   errors,
   emitAudit,
   file as fileUtils,
-  pagination as paginationUtils,
 } from '@strapi/utils';
 
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, FOLDER_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
+import { findAndCountRestPage } from '../utils/rest-pagination';
 import { AUDITED_EVENTS, getUploadSettingsChanges, toAuditedFile } from '../audit-logs';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
@@ -48,7 +48,7 @@ const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 // The audit log records the folder of an updated file
 const FOLDER_REF_POPULATE = { folder: { fields: ['id', 'name'] } };
 
-const { ApplicationError, NotFoundError } = errors;
+const { ApplicationError, NotFoundError, ValidationError } = errors;
 const { bytesToKbytes } = fileUtils;
 
 /**
@@ -61,6 +61,29 @@ const { bytesToKbytes } = fileUtils;
 const queueConcurrentOperation = <T>(queue: Promise<T>[], operation: Promise<T>) => {
   Promise.resolve(operation).catch(() => undefined);
   queue.push(operation);
+};
+
+/**
+ * An all-digit value is a numeric id; anything else is a documentId. A documentId can
+ * start with a digit (e.g. `'3d52c864df72fcc68ab62ebe'`), so `parseInt` must not be used.
+ */
+const isNumericId = (id: Data.ID | Data.DocumentID) => /^\d+$/.test(String(id));
+
+/**
+ * Files can be addressed by numeric id or documentId (1:1, files have no draft & publish).
+ * A numeric id passes through untouched; a documentId resolves to the file's numeric id,
+ * or `undefined` when no file has it.
+ */
+export const resolveFileId = async (strapi: Core.Strapi, id: Data.ID | Data.DocumentID) => {
+  if (isNumericId(id)) {
+    return id;
+  }
+
+  const file = await strapi.db
+    .query(FILE_MODEL_UID)
+    .findOne({ where: { documentId: id }, select: ['id'] });
+
+  return file?.id;
 };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
@@ -132,6 +155,40 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.eventHub.emit(event, { media: sanitizedData });
   }
 
+  /**
+   * `refId` is either the numeric id of one entry row or an entry's documentId. A documentId
+   * maps to every row of `ref` that carries it — draft and published, every locale — the
+   * way the document service links a non-draft-and-publish source to a draft-and-publish
+   * target. Resolved before the file is persisted so an unknown documentId orphans nothing.
+   * `ref` is user input: it is only looked up when it names a registered model.
+   * A documentId is only accepted for content types; components need the numeric id.
+   */
+  async function resolveRefIds(ref: UID.Schema, refId: Data.ID | Data.DocumentID): Promise<ID[]> {
+    if (isNumericId(refId)) {
+      return [refId];
+    }
+
+    const model = strapi.getModel(ref);
+
+    if (!model) {
+      return [refId];
+    }
+
+    if (model.modelType !== 'contentType') {
+      throw new ValidationError('refId must be a numeric id when ref is not a content type');
+    }
+
+    const entries = await strapi.db
+      .query(ref)
+      .findMany({ where: { documentId: refId }, select: ['id'] });
+
+    if (entries.length === 0) {
+      throw new NotFoundError(`No ${ref} entry found with documentId "${refId}"`);
+    }
+
+    return entries.map((entry) => entry.id);
+  }
+
   async function formatFileInfo(
     { filename, type, size }: { filename: string; type: string; size: number },
     fileInfo: Partial<FileInfo> = {},
@@ -179,13 +236,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const { refId, ref, field } = metas;
 
     if (refId && ref && field) {
-      entity.related = [
-        {
-          id: refId,
-          __type: ref,
-          __pivot: { field },
-        },
-      ];
+      const ids = await resolveRefIds(ref as UID.Schema, refId);
+
+      entity.related = ids.map((id) => ({
+        id,
+        __type: ref,
+        __pivot: { field },
+      }));
     }
 
     if (metas.path) {
@@ -700,88 +757,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   /**
-   * Resolve whether the count query should run, mirroring core-api's `shouldCount`.
-   * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
-   */
-  function resolveWithCount(pagination: Record<string, unknown>): boolean {
-    if (has(pagination, 'withCount')) {
-      const withCount = pagination.withCount;
-
-      if (typeof withCount === 'boolean') {
-        return withCount;
-      }
-
-      if (typeof withCount === 'undefined') {
-        return false;
-      }
-
-      if (['true', 't', '1', 1].includes(withCount as string | number)) {
-        return true;
-      }
-
-      if (['false', 'f', '0', 0].includes(withCount as string | number)) {
-        return false;
-      }
-
-      throw new errors.ValidationError(
-        'Invalid withCount parameter. Expected "t","1","true","false","0","f"'
-      );
-    }
-
-    return Boolean(strapi.config.get('api.rest.withCount', true));
-  }
-
-  /**
-   * REST-aware paginated find for the content API.
-   *
-   * Unlike `findPage` (used by the admin API), this honors the standard nested
-   * `pagination` query object (`pagination[page]`, `pagination[pageSize]`,
-   * `pagination[start]`, `pagination[limit]`, `pagination[withCount]`) and the
-   * `api.rest.defaultLimit` / `api.rest.maxLimit` / `api.rest.withCount` config,
-   * exactly like every other Strapi REST collection-type endpoint.
+   * REST-aware paginated find for the content API files endpoint, with signed URLs.
    */
   async function findAndCountPage(query: any = {}) {
-    const { pagination = {} } = query;
-
-    const defaultLimit = toNumber(strapi.config.get('api.rest.defaultLimit', 25));
-    const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
-
-    // Whether the consumer used page-based pagination (default) vs offset-based.
-    const isOffset = has(pagination, 'start') || has(pagination, 'limit');
-    const isPaged = !isOffset;
-
-    // Resolve start/limit applying defaults and the maxLimit cap.
-    const { start, limit } = paginationUtils.withDefaultPagination(pagination, {
-      defaults: { offset: { limit: defaultLimit }, page: { pageSize: defaultLimit } },
-      maxLimit: maxLimit || -1,
-    });
-
-    // Feed the transform the resolved offset/limit so it ignores the nested
-    // `pagination` object (which it cannot read) and applies real bounds.
-    const transformed = strapi
-      .get('query-params')
-      .transform(FILE_MODEL_UID, { ...query, pagination: undefined, start, limit });
-
-    const shouldCount = resolveWithCount(pagination);
-
-    const [results, total] = await Promise.all([
-      strapi.db.query(FILE_MODEL_UID).findMany(transformed),
-      shouldCount ? strapi.db.query(FILE_MODEL_UID).count(transformed) : Promise.resolve(undefined),
-    ]);
+    const { results, pagination } = await findAndCountRestPage(strapi, FILE_MODEL_UID, query);
 
     const signedResults = await async.map(results, (file: File) => fileService.signFileUrls(file));
 
-    const transform = isPaged
-      ? paginationUtils.transformPagedPaginationInfo
-      : paginationUtils.transformOffsetPaginationInfo;
-
-    const paginationInfo = transform({ start, limit }, total as number);
-
-    return {
-      results: signedResults,
-      // Omit total & pageCount when counting is disabled (withCount=false).
-      pagination: total == null ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
-    };
+    return { results: signedResults, pagination };
   }
 
   async function remove(file: File) {

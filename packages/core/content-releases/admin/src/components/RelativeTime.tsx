@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Duration, intervalToDuration, isPast, isValid } from 'date-fns';
+import { Duration, differenceInCalendarDays, intervalToDuration, isPast, isValid } from 'date-fns';
 import { useIntl } from 'react-intl';
 
 const EMPTY_CUSTOM_INTERVALS: NonNullable<RelativeTimeProps['customIntervals']> = [];
@@ -59,8 +59,16 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
         return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
       }) ?? 'seconds';
 
-    const value = interval[unit] ?? 0;
-    const relativeTime = isPast(timestamp) ? -value : value;
+    /**
+     * Day labels follow the calendar in the user's timezone, not elapsed 24h periods:
+     * 33 hours from Thursday afternoon is Saturday, so it reads "in 2 days", not "tomorrow".
+     */
+    const relativeTime =
+      unit === 'days'
+        ? differenceInCalendarDays(timestamp, Date.now())
+        : isPast(timestamp)
+          ? -(interval[unit] ?? 0)
+          : (interval[unit] ?? 0);
 
     // Display custom text if interval is less than the threshold
     const customInterval = customIntervals.find(

@@ -4,6 +4,7 @@ import {
   buildHomepageQueryFields,
   compactSanitizedFields,
   FALLBACK_MAIN_FIELD,
+  formatRecentDocumentTitle,
   resolveReadableMainField,
   resolveTitleField,
   type HomepagePermissionChecker,
@@ -115,6 +116,28 @@ describe('Homepage query utils', () => {
 
     it('keeps the main field when it is still present after sanitization', () => {
       expect(resolveTitleField('title', ['documentId', 'title'])).toBe('title');
+    });
+  });
+
+  describe('formatRecentDocumentTitle', () => {
+    it.each([
+      ['a string', 'Article 1', 'Article 1'],
+      ['an integer', 42, '42'],
+      ['a decimal', 9.5, '9.5'],
+      ['false', false, 'false'],
+      ['true', true, 'true'],
+      ['a date string', '2026-11-09', '2026-11-09'],
+      ['a Date', new Date('2026-11-09T10:30:00.000Z'), '2026-11-09T10:30:00.000Z'],
+    ])('returns %s as a string', (_label, value, expected) => {
+      expect(formatRecentDocumentTitle(value, 'doc-1')).toBe(expected);
+    });
+
+    it.each([
+      ['null', null],
+      ['undefined', undefined],
+      ['an empty string', ''],
+    ])('falls back to the document id for %s', (_label, value) => {
+      expect(formatRecentDocumentTitle(value, 'doc-1')).toBe('doc-1');
     });
   });
 });

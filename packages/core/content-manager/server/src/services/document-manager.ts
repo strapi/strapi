@@ -121,8 +121,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const populate = await buildDeepPopulate(uid);
 
-      // Extract the locale to pass it as a plain param
-      const locale = body?.locale;
+      // Extract the locale to pass it as a plain param. The clone route accepts a null locale,
+      // which the document service handles like an absent one: pass undefined instead.
+      const locale = body?.locale ?? undefined;
       const params = {
         // Ensure id and documentId are not copied to the clone
         data: omit(body, ['id', 'documentId']),

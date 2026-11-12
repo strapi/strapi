@@ -26,7 +26,7 @@ Options meant for Playwright (for example `--grep`) are forwarded by the unified
 
 ### Environment variables
 
-Playwright is spawned from `tests/utils/runners/browser-runner.js` with a **small** `env` override (`PORT`, `HOST`, `TEST_APP_PATH`, `STRAPI_DISABLE_EE`). **execa** merges that with the parent environment by default, so other variables you export before `yarn test:e2e` still reach Playwright and the app under test. Details and the parallel Jest behaviour are in `tests/cli/README.md` → **Environment variables**.
+Playwright is spawned from `tests/utils/runners/browser-runner.js` with a **small** `env` override (`PORT`, `HOST`, `TEST_APP_PATH`). **execa** merges that with the parent environment by default, so other variables you export before `yarn test:e2e` still reach Playwright and the app under test. The edition (`STRAPI_E2E_EDITION`, `STRAPI_DISABLE_EE`) comes from that parent environment: `applyE2eEditionEnv()` in `tests/utils/e2e-edition.ts` sets it when `tests/scripts/run-tests.js` starts. Details and the parallel Jest behaviour are in `tests/cli/README.md` → **Environment variables**.
 
 ## Additional Documentation
 
