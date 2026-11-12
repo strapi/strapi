@@ -779,11 +779,10 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       ]);
     });
 
-    // The admin sends an empty delta for every relation field on save
-    // toAssocs drops a null set, so `{ set: null }` reaches this branch as an empty delta, like
-    // regular relations (a bare `null` still clears). What `{ set: null }` should mean for every
-    // relation kind is still open.
-    it('keeps every link on { set: null }', async () => {
+    // toAssocs drops a null set, so `{ set: null }` reaches this branch as an empty delta. It
+    // clears every link like a bare `null`, as in released Strapi. What `{ set: null }` should
+    // mean for every relation kind is still open (#27432).
+    it('unlinks every entry on { set: null }', async () => {
       const [r1, r2] = await createRemarks(2);
       const note = await strapi.db.query(NOTE_UID).create({
         data: { title: 'linked', remarks: [r1.id, r2.id] },
@@ -795,8 +794,8 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       });
 
       expect(await getRemarkSubjects()).toEqual([
-        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
-        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: null, subjectType: null },
       ]);
     });
 
@@ -820,6 +819,7 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       ]);
     });
 
+    // The admin sends an empty delta for every relation field on save
     it('keeps every link on an empty connect and disconnect', async () => {
       const [r1, r2] = await createRemarks(2);
       const note = await strapi.db.query(NOTE_UID).create({
@@ -850,6 +850,41 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       await strapi.db.query(NOTE_UID).update({
         where: { id: note.id },
         data: { remarks: value },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('applies the connect and disconnect given next to a null set', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { set: null, connect: [r3.id], disconnect: [r1.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('unlinks every entry on a null set through the document service', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] } as any,
+      });
+
+      await strapi.documents(NOTE_UID).update({
+        documentId: note.documentId,
+        data: { remarks: { set: null } } as any,
       });
 
       expect(await getRemarkSubjects()).toEqual([
@@ -983,15 +1018,15 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
         ]);
       });
 
-      it('keeps every link on { set: null }', async () => {
+      it('unlinks every entry on { set: null }', async () => {
         const [r1, r2] = await createRemarks(2);
         const note = await createNote([r1, r2]);
 
         await updateNote(note.documentId, { set: null });
 
         expect(await getRemarkSubjects()).toEqual([
-          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
-          { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r1.id, subjectId: null, subjectType: null },
+          { id: r2.id, subjectId: null, subjectType: null },
         ]);
       });
     });
