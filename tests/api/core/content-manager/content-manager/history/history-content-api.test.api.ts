@@ -1,5 +1,5 @@
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createRequest } from 'api-tests/request';
+import { createRequest, createAuthRequest } from 'api-tests/request';
 import { createTestBuilder } from 'api-tests/builder';
 import { describeOnCondition } from 'api-tests/utils';
 
@@ -137,6 +137,87 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
       authorType: null,
       authorModel: null,
       authorId: null,
+    });
+  });
+
+  describe('Writes made by an end user', () => {
+    let endUser;
+    let userRequest;
+
+    const allowAuthenticatedWrites = async () => {
+      const role = await strapi.db
+        .query('plugin::users-permissions.role')
+        .findOne({ where: { type: 'authenticated' } });
+      const roleService = strapi.service('plugin::users-permissions.role');
+      const { permissions } = await roleService.findOne(role.id);
+      permissions['api::note'] = {
+        controllers: { note: { create: { enabled: true, policy: '' } } },
+      };
+      await roleService.updateRole(role.id, { permissions });
+
+      return role;
+    };
+
+    const findNoteVersions = async (documentId: string) => {
+      const adminRequest = await createAuthRequest({ strapi });
+      const { body } = await adminRequest({
+        method: 'GET',
+        url: `/content-manager/history-versions/?contentType=${noteUid}&documentId=${documentId}`,
+      });
+
+      return body.data;
+    };
+
+    beforeAll(async () => {
+      const role = await allowAuthenticatedWrites();
+      endUser = await strapi.service('plugin::users-permissions.user').add({
+        role: role.id,
+        username: 'history-end-user',
+        email: 'history-end-user@strapi.io',
+        password: 'Test1234!',
+        provider: 'local',
+        confirmed: true,
+      });
+      const jwt = await strapi.service('plugin::users-permissions.jwt').issue({ id: endUser.id });
+      userRequest = createRequest({ strapi }).setToken(jwt);
+    });
+
+    test('Records a write with the end user as its author', async () => {
+      const created = await userRequest({
+        method: 'POST',
+        url: '/api/notes',
+        body: { data: { title: 'Hello' } },
+      });
+
+      const versions = await findNoteVersions(created.body.data.documentId);
+      expect(versions).toHaveLength(1);
+      expect(versions[0]).toMatchObject({
+        source: 'content-api',
+        author: {
+          type: 'person',
+          model: 'plugin::users-permissions.user',
+          id: endUser.documentId,
+          name: 'history-end-user',
+        },
+      });
+    });
+
+    test('Shows a deleted author when the end user is deleted', async () => {
+      const created = await userRequest({
+        method: 'POST',
+        url: '/api/notes',
+        body: { data: { title: 'Hello' } },
+      });
+
+      await strapi.db.query('plugin::users-permissions.user').delete({ where: { id: endUser.id } });
+
+      const versions = await findNoteVersions(created.body.data.documentId);
+      expect(versions[0].author).toEqual({
+        type: 'person',
+        model: 'plugin::users-permissions.user',
+        id: null,
+        name: null,
+      });
     });
   });
 });
