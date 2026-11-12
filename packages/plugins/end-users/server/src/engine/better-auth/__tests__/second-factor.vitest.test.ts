@@ -743,22 +743,63 @@ describe('the passkey sign-in', () => {
 
   const created = () => ({ session: { id: 'session-1' }, user: { twoFactorEnabled: false } });
 
-  it('marks the session a passkey sign-in makes, for a user with or without two-factor on', async () => {
+  /** The browser's answer, with authenticator data whose flags byte is `flags` */
+  const assertion = (flags: number, length = 37) => {
+    const data = Buffer.alloc(length);
+
+    if (length > 32) {
+      data[32] = flags;
+    }
+
+    return {
+      response: { id: 'credential', response: { authenticatorData: data.toString('base64url') } },
+    };
+  };
+
+  const USER_PRESENT = 0x01;
+  const USER_VERIFIED = 0x04;
+
+  it('marks the session a passkey sign-in makes when the authenticator verified the user, with or without two-factor on', async () => {
     for (const twoFactorEnabled of [false, true]) {
+      for (const flags of [USER_VERIFIED, USER_VERIFIED + USER_PRESENT]) {
+        // eslint-disable-next-line no-await-in-loop
+        const { written, matches } = await run({
+          path: '/passkey/verify-authentication',
+          body: assertion(flags),
+          context: { newSession: { ...created(), user: { twoFactorEnabled } } },
+        });
+
+        expect(matches).toBe(true);
+        expect(written).toEqual([
+          {
+            model: 'session',
+            where: [{ field: 'id', value: 'session-1' }],
+            update: { twoFactorVerified: true },
+          },
+        ]);
+      }
+    }
+  });
+
+  it('leaves the session unmarked when the authenticator only proved the passkey is present', async () => {
+    for (const body of [
+      assertion(USER_PRESENT),
+      assertion(0),
+      // not authenticator data at all, or too short to hold the flags
+      assertion(USER_VERIFIED, 20),
+      { response: { id: 'credential', response: { authenticatorData: 5 } } },
+      { response: { id: 'credential', response: {} } },
+      { response: 'x' },
+      undefined,
+    ]) {
       // eslint-disable-next-line no-await-in-loop
-      const { written, matches } = await run({
+      const { written } = await run({
         path: '/passkey/verify-authentication',
-        context: { newSession: { ...created(), user: { twoFactorEnabled } } },
+        body,
+        context: { newSession: created() },
       });
 
-      expect(matches).toBe(true);
-      expect(written).toEqual([
-        {
-          model: 'session',
-          where: [{ field: 'id', value: 'session-1' }],
-          update: { twoFactorVerified: true },
-        },
-      ]);
+      expect(written).toEqual([]);
     }
   });
 
@@ -771,8 +812,12 @@ describe('the passkey sign-in', () => {
         returned: new APIError('UNAUTHORIZED', { message: 'no' }),
         newSession: created(),
       },
+      body: assertion(USER_VERIFIED),
     });
-    const none = await run({ path: '/passkey/verify-authentication' });
+    const none = await run({
+      path: '/passkey/verify-authentication',
+      body: assertion(USER_VERIFIED),
+    });
 
     expect(failed.written).toEqual([]);
     expect(none.written).toEqual([]);
@@ -787,7 +832,11 @@ describe('the passkey sign-in', () => {
       '/sign-in/email-otp',
     ]) {
       // eslint-disable-next-line no-await-in-loop
-      const { written, matches } = await run({ path, context: { newSession: created() } });
+      const { written, matches } = await run({
+        path,
+        body: assertion(USER_VERIFIED),
+        context: { newSession: created() },
+      });
 
       expect(matches, path).toBe(false);
       expect(written, path).toEqual([]);

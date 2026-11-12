@@ -14,7 +14,9 @@
  * - was made by a password sign-in that a trusted device let skip the challenge: the two-factor
  *   plugin's own after-hook has run by then and has left a session in place for a user with
  *   two-factor on only when the trusted-device cookie was valid (this plugin is installed after it)
- * - was made by a passkey sign-in, which is possession and the device's own check in one
+ * - was made by a passkey sign-in in which the authenticator verified the user (a fingerprint, a face,
+ *   a PIN: the flag in the signed authenticator data), which is possession and the device's own
+ *   check in one. A passkey that only proved possession still signs in, but the session is not marked
  * - replaces a session that had it: changing a password makes a new session for the caller
  *
  * Nothing a signed-in session does can earn the mark for itself. A code given while signed in (an
@@ -50,6 +52,7 @@ import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../../../constants';
+import { isPlain } from '../../../utils/is-plain';
 import type settingsService from '../../../services/settings';
 import { clearAttempts, enrollmentKey, releaseAttempt, reserveAttempt } from '../lockout-counter';
 
@@ -130,6 +133,34 @@ const settings = (strapi: Core.Strapi) =>
 /** The attempt counted for a request that confirms an enrollment, from its before-hook to its after-hook. */
 const enrollmentAttempts = new WeakMap<object, string>();
 
+/** The authenticator data's flags: the bit worth 4 says the authenticator verified the user */
+const USER_VERIFIED_WEIGHT = 4;
+/** The flags come after the 32 bytes of the relying party id hash */
+const FLAGS_OFFSET = 32;
+
+/**
+ * Whether the authenticator verified the user in this passkey sign-in, as the browser's response
+ * reports it. The plugin verifies the signature over this very data before the session exists, and
+ * asks for no more than that (it never requires user verification), so the flag is read here.
+ * Anything that does not parse as authenticator data is not verified.
+ */
+const userVerified = (ctx: HookContext): boolean => {
+  const { body } = ctx as { body?: unknown };
+  const outer = isPlain(body) ? body.response : undefined;
+  const inner = isPlain(outer) ? outer.response : undefined;
+  const data = isPlain(inner) ? inner.authenticatorData : undefined;
+
+  if (typeof data !== 'string') {
+    return false;
+  }
+
+  const bytes = Buffer.from(data, 'base64url');
+
+  return (
+    bytes.length > FLAGS_OFFSET && Math.floor(bytes[FLAGS_OFFSET] / USER_VERIFIED_WEIGHT) % 2 === 1
+  );
+};
+
 const failed = (ctx: HookContext) => ctx.context.returned instanceof APIError;
 
 /** The session the endpoint left in place for the caller, if it made one. */
@@ -170,7 +201,7 @@ const markedSession = (ctx: HookContext): SessionRef | null => {
   }
 
   if (path === PASSKEY_SIGN_IN_PATH) {
-    return createdSession(ctx);
+    return userVerified(ctx) ? createdSession(ctx) : null;
   }
 
   if (PASSWORD_SIGN_IN_PATHS.has(path)) {
