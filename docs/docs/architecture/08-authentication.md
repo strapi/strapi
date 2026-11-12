@@ -102,7 +102,8 @@ The users-permissions (UP) plugin supports two modes, controlled by `plugin::use
 
 When `jwtManagement` is `refresh`:
 
-- Login/Register/Provider callback responses include `{ jwt, refreshToken }`.
+- Login, register, provider callback, change-password and reset-password responses include `{ jwt, refreshToken }`.
+- When `plugin::users-permissions.sessions.httpOnly` is `true`, or the request sends the `x-strapi-refresh-cookie: httpOnly` header, these responses set the refresh token in an httpOnly cookie (`strapi_up_refresh` by default, see `sessions.cookie.name`) and return only `{ jwt, user }`.
 - New endpoints:
   - `POST /api/auth/refresh` — body `{ refreshToken }`, returns `{ jwt }` and rotates the refresh token
   - `POST /api/auth/logout` — logs out the session backing the current request by default; optional body fields:
