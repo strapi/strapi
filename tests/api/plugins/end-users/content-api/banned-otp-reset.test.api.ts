@@ -15,7 +15,7 @@ import {
   TEST_PASSWORD as PASSWORD,
   emptyTables,
 } from '../utils/permissions';
-import { emailsAfter } from '../utils/wait';
+import { emailsAfter, until } from '../utils/wait';
 
 const USER_UID = 'plugin::end-users.user';
 const VERIFICATION_UID = 'plugin::end-users.verification';
@@ -164,6 +164,9 @@ describe('end-users: a banned user and the email OTP and phone number resets', (
     });
 
     expect(asked.statusCode).toBe(200);
+
+    // The code is sent after the answer, like an email
+    await until(() => phoneCodes.length >= 1, { what: 'the phone reset code' });
     expect(phoneCodes).toHaveLength(1);
 
     await setBanned(documentId, true);
