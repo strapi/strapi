@@ -10,6 +10,7 @@ const mockGetRequestContext = jest.fn<unknown, []>();
 const mockCreateVersion = jest.fn();
 const mockFindEntries = jest.fn().mockResolvedValue([]);
 const mockLogError = jest.fn();
+const mockConfigGet = jest.fn();
 const commitCallbacks: Promise<unknown>[] = [];
 
 const mockDocumentMetadata = {
@@ -80,7 +81,7 @@ const mockStrapi = {
     get: mockGetRequestContext,
   },
   config: {
-    get: () => undefined,
+    get: mockConfigGet,
   },
   cron: {
     add: jest.fn(),
@@ -168,6 +169,7 @@ describe('history lifecycles service', () => {
       commitCallbacks.length = 0;
       mockLogError.mockClear();
       mockCreateVersion.mockReset();
+      mockConfigGet.mockReset().mockImplementation((_key, defaultValue) => defaultValue);
       mockFindEntries.mockReset().mockResolvedValue([{ id: 1, documentId: 'doc-1', locale: 'en' }]);
       mockRequest();
     });
@@ -183,6 +185,33 @@ describe('history lifecycles service', () => {
             author: { type: 'person', model: 'admin::user', id: 'admin-document-id' },
           })
         );
+      });
+
+      it('records nothing for a Content API write when Content API history is turned off', async () => {
+        mockConfigGet.mockImplementation((key, defaultValue) =>
+          key === 'admin.history.contentApi.enabled' ? false : defaultValue
+        );
+        mockGetRequestContext.mockReturnValue({
+          state: {
+            route: { info: { type: 'content-api' } },
+            auth: { strategy: { name: 'content-api-token' }, credentials: { id: 5 } },
+          },
+          request: { url: '/api/articles/doc-1' },
+        });
+
+        await updateArticle();
+
+        expect(mockCreateVersion).not.toHaveBeenCalled();
+      });
+
+      it('still records a Content Manager write when Content API history is turned off', async () => {
+        mockConfigGet.mockImplementation((key, defaultValue) =>
+          key === 'admin.history.contentApi.enabled' ? false : defaultValue
+        );
+
+        await updateArticle();
+
+        expect(mockCreateVersion).toHaveBeenCalledTimes(1);
       });
 
       it('records nothing when the write has no origin', async () => {

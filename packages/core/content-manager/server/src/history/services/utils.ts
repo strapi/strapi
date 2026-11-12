@@ -41,7 +41,7 @@ export const computeRetentionDays = (
 
 export type RequestContext = NonNullable<ReturnType<Modules.RequestContext.RequestContext['get']>>;
 
-interface HistoryOrigin {
+export interface HistoryOrigin {
   source: HistoryVersionSource;
   author: HistoryVersionAuthorReference | null;
 }
@@ -348,6 +348,9 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
+  const isContentApiHistoryEnabled = () =>
+    strapi.config.get('admin.history.contentApi.enabled', true);
+
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
     document: Modules.Documents.AnyDocument | null
@@ -578,6 +581,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     findAuthorDocumentId,
     getAuthorNameDictionary,
     getRetentionDays,
+    isContentApiHistoryEnabled,
     getVersionStatus,
     resolveHistoryOrigin,
     getDeepPopulate,
