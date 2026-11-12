@@ -46,32 +46,76 @@ describe('folder', () => {
 
   describe('update', () => {
     const joinTableName = 'upload_folders_parent_lnk';
+
+    type Chain = Record<string, (...args: unknown[]) => unknown> & { calls: string[] };
+
     let trx: { get: jest.Mock; commit: jest.Mock; rollback: jest.Mock };
     let queryBuilder: jest.Mock;
+    let connectionChains: Chain[];
 
-    beforeEach(() => {
+    // `movedFolder` is what the locked lookup of the moved folder answers, `destinationFolder`
+    // what the lookup of the new parent answers (`undefined`: the row is gone).
+    const mockDatabase = ({
+      movedFolder,
+      destinationFolder,
+    }: {
+      movedFolder: { pathId: number; path: string } | undefined;
+      destinationFolder: { path: string } | undefined;
+    }) => {
       trx = { get: jest.fn(), commit: jest.fn(), rollback: jest.fn() };
+      connectionChains = [];
 
-      // The moved folder, then the destination folder: deleted after the request validation
-      // checked it, so the lookup (`first()`) answers nothing.
-      const folderResults: unknown[] = [{ pathId: 2, path: '/2' }, undefined];
-      queryBuilder = jest.fn((uid: string) => {
-        const chain: Record<string, unknown> = {
-          execute: jest.fn(async () => (uid === joinTableName ? 0 : folderResults.shift())),
-        };
-        ['select', 'where', 'transacting', 'forUpdate', 'first', 'delete', 'insert'].forEach(
-          (method) => {
-            chain[method] = () => chain;
-          }
-        );
+      const createChain = (resolve: (calls: string[]) => unknown): Chain => {
+        const chain = { calls: [] } as unknown as Chain;
+        [
+          'select',
+          'where',
+          'orWhere',
+          'transacting',
+          'forUpdate',
+          'forShare',
+          'first',
+          'delete',
+          'insert',
+          'update',
+          'execute',
+        ].forEach((method) => {
+          chain[method] = () => {
+            chain.calls.push(method);
+            if (method === 'execute') {
+              return Promise.resolve(resolve(chain.calls));
+            }
+            return chain;
+          };
+        });
+        // The knex chain is awaited directly, without `execute()`.
+        chain.then = (onFulfilled: unknown, onRejected: unknown) =>
+          Promise.resolve(resolve(chain.calls)).then(
+            onFulfilled as (value: unknown) => unknown,
+            onRejected as (reason: unknown) => unknown
+          );
         return chain;
-      });
+      };
+
+      queryBuilder = jest.fn((uid: string) =>
+        createChain(() => (uid === joinTableName ? 0 : movedFolder))
+      );
 
       global.strapi = {
+        getModel: (uid: string) => ({ collectionName: uid }),
         db: {
-          query: () => ({ findOne: jest.fn(async () => ({ id: 2, name: 'moved', parent: null })) }),
+          query: () => ({
+            findOne: jest.fn(async () => ({ id: 2, name: 'moved', parent: null })),
+            update: jest.fn(async () => ({ id: 2, name: 'moved' })),
+          }),
           transaction: jest.fn(async () => trx),
           queryBuilder,
+          getConnection: jest.fn(() => {
+            const chain = createChain((calls) => (calls.includes('first') ? destinationFolder : 1));
+            connectionChains.push(chain);
+            return chain;
+          }),
+          connection: { raw: jest.fn() },
           metadata: {
             get: () => ({
               attributes: {
@@ -82,14 +126,20 @@ describe('folder', () => {
                     inverseJoinColumn: { name: 'inv_folder_id' },
                   },
                 },
+                path: { columnName: 'path' },
+                folderPath: { columnName: 'folder_path' },
               },
             }),
           },
         },
+        eventHub: { emit: jest.fn() },
       } as any;
-    });
+    };
 
     test('rejects with a ValidationError when the destination folder no longer exists', async () => {
+      // Deleted after the request validation checked it: the lookup answers nothing.
+      mockDatabase({ movedFolder: { pathId: 2, path: '/2' }, destinationFolder: undefined });
+
       await expect(
         folderService.update(2, { name: 'moved', parent: 1 }, { user: { id: 1 } })
       ).rejects.toThrow(new errors.ValidationError('parent folder does not exist'));
@@ -98,6 +148,34 @@ describe('folder', () => {
       expect(trx.commit).not.toHaveBeenCalled();
       // The parent link is left untouched: no row points at the missing folder.
       expect(queryBuilder).not.toHaveBeenCalledWith(joinTableName);
+    });
+
+    test('answers nothing when the moved folder does not exist', async () => {
+      mockDatabase({ movedFolder: undefined, destinationFolder: { path: '/1' } });
+
+      await expect(
+        folderService.update(2, { name: 'moved', parent: 1 }, { user: { id: 1 } })
+      ).resolves.toBeUndefined();
+
+      expect(trx.rollback).toHaveBeenCalled();
+      expect(trx.commit).not.toHaveBeenCalled();
+      expect(queryBuilder).not.toHaveBeenCalledWith(joinTableName);
+      expect(connectionChains).toHaveLength(0);
+    });
+
+    test('takes a share lock on the destination folder, not an exclusive one', async () => {
+      mockDatabase({ movedFolder: { pathId: 2, path: '/2' }, destinationFolder: { path: '/1' } });
+
+      await folderService.update(2, { name: 'moved', parent: 1 }, { user: { id: 1 } });
+
+      expect(trx.commit).toHaveBeenCalled();
+      // A share lock keeps the destination from being deleted or moved until the move commits,
+      // and still lets other requests create subfolders or upload files into it.
+      const destinationLookup = connectionChains.find((chain) => chain.calls.includes('first'));
+      expect(destinationLookup?.calls).toEqual(
+        expect.arrayContaining(['transacting', 'forShare', 'first'])
+      );
+      expect(destinationLookup?.calls).not.toContain('forUpdate');
     });
   });
 
