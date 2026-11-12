@@ -179,6 +179,24 @@ describe('Directory source provider', () => {
     expect(chunks).toHaveLength(25);
   }, 8000);
 
+  test('rejects a malformed JSONL line', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-bad-jsonl-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'entities'));
+    await fs.writeFile(path.join(dir, 'entities', 'entities_00000.jsonl'), '{not json\n');
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createEntitiesReadStream();
+    const readAll = async () => {
+      for await (const chunk of stream) {
+        expect(chunk).toBeDefined();
+      }
+    };
+    await expect(readAll()).rejects.toThrow(/Error parsing JSONL/);
+  });
+
   test('streams entities from jsonl shards in order', async () => {
     const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-'));
     await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);

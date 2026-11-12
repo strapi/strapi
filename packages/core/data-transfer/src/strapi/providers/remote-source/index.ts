@@ -484,8 +484,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     });
 
     const res = (await query) as
-      | (Server.Payload<Server.InitMessage> & { checksums?: boolean })
-      | null;
+      (Server.Payload<Server.InitMessage> & { checksums?: boolean }) | null;
 
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');

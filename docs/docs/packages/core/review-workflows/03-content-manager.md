@@ -6,8 +6,8 @@ description: Guide for review workflows in the content-manager.
 ## Summary
 
 Review workflows are disabled for all content-types by default and have to be enabled for each of them individually. More about how to
-enable review-workflows for a content-type. The feature itself is visible in two places
-of the content-manager: list and edit view.
+enable review-workflows for a content-type. The feature itself is visible in three places
+of the content-manager: list view, edit view and preview.
 
 ### Nullish stages
 
@@ -56,5 +56,5 @@ Please refer to the [type definitions](./02-settings.md) for more information.
 
 #### License limits
 
-If the user has exceeded the license limit (based on their license) for either the number of workflows or the number of stages of the workflow assigned
-to the entities content-type, any stage update action will trigger a license-limit overlay and abort the request.
+If the workflow assigned to the entities content-type has more stages than the license limit, any stage update action will trigger a license-limit overlay and
+abort the request. The workflow limit does not block a stage update: it is enforced only when a workflow is created.

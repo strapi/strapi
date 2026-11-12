@@ -103,6 +103,8 @@ removeListener();
 
 Removes a listener function. You need to give it the name of the event it's listening to, as well as the reference of the listener as an argument.
 
+If the listener is not registered for this event, `off` does nothing.
+
 ```ts
 // Types
 type Listener = (args: any[]) => void | Promise<void>;
@@ -133,6 +135,19 @@ const removeListener = strapi.eventHub.once('some.event', () => {
 
 // Remove the single-use listener using the returned function
 removeListener();
+```
+
+#### `hasListeners`
+
+Tells whether emitting an event would reach anyone: a listener registered for that event with `on` or `once`, or a subscriber, which receives every event. Use it to skip work that only exists to build an event payload, such as the deep populate the Document Service runs before emitting `entry.*` events.
+
+```ts
+// Types
+type HasListeners = (eventName: string) => boolean;
+
+if (strapi.eventHub.hasListeners('entry.update')) {
+  // Build the payload, then emit
+}
 ```
 
 ## Tradeoffs

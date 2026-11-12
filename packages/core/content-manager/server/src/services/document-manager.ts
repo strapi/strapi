@@ -1,6 +1,6 @@
 import { omit, flow } from 'lodash';
 
-import { contentTypes, pagination } from '@strapi/utils';
+import { contentTypes, errors, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
@@ -18,6 +18,16 @@ const omitPublishedAtField = <T extends object>(document: T) =>
 const omitIdField = <T extends object>(document: T) => omit(document, 'id');
 
 const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
+  /**
+   * The document service has no publish, unpublish or discardDraft methods
+   * for content types without draft and publish
+   */
+  const assertDraftAndPublish = (uid: UID.ContentType) => {
+    if (contentTypes.hasDraftAndPublish(strapi.getModel(uid)) === false) {
+      throw new errors.ValidationError('Draft and publish is not enabled for this content type');
+    }
+  };
+
   return {
     async findOne(
       id: string,
@@ -111,8 +121,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const populate = await buildDeepPopulate(uid);
 
-      // Extract the locale to pass it as a plain param
-      const locale = body?.locale;
+      // Extract the locale to pass it as a plain param. The clone route accepts a null locale,
+      // which the document service handles like an absent one: pass undefined instead.
+      const locale = body?.locale ?? undefined;
       const params = {
         // Ensure id and documentId are not copied to the clone
         data: omit(body, ['id', 'documentId']),
@@ -171,6 +182,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'publish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
@@ -181,6 +194,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+      assertDraftAndPublish(uid);
+
       return strapi.db.transaction(async () => {
         const results = await Promise.all(
           documentIds.map((documentId) => this.publish(documentId, uid, { locale, populate: {} }))
@@ -196,6 +211,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const unpublishedEntries = await strapi.db.transaction(async () => {
         return Promise.all(
           documentIds.map((id) =>
@@ -218,6 +235,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
@@ -232,6 +251,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> & { populate?: object } = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 

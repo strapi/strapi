@@ -31,7 +31,7 @@ This security policy applies to the packages published from the [`strapi/strapi`
 
 ### Testing Requirements
 
-Reporters are expected to validate findings against a **properly configured production application** before submitting a report. Strapi ships a number of defaults that intentionally favor developer ergonomics during local development, and certain "vulnerabilities" only manifest when the application is run with development-mode defaults. Hardening an application for production deployment is the responsibility of the developer / operator and is documented in the Strapi deployment guides.
+Reporters are expected to validate findings against a **properly configured production application** before submitting a report. Strapi ships a number of defaults that intentionally favor developer ergonomics during local development, and certain "vulnerabilities" only manifest when the application is run with development-mode defaults. Hardening an application for production deployment is the responsibility of the developer / operator and is documented in the Strapi deployment guides. That means running with `NODE_ENV=production`, as the [deployment guide](https://docs.strapi.io/cms/deployment) does. `strapi start` does not set it, and without it Strapi runs in development mode.
 
 Examples of expected development-mode behavior that should **NOT** be reported as vulnerabilities:
 
@@ -39,7 +39,7 @@ Examples of expected development-mode behavior that should **NOT** be reported a
 - MIME type and file extension restrictions for uploads not being enforced by default
 - Verbose error responses, stack traces, or debug output that only appear in development mode
 - The default admin URL, default API token configuration, and similar deploy-time choices that are documented as requiring operator configuration
-- Any behavior that reproduces under `strapi develop` but does not reproduce under `strapi start` with a hardened production configuration
+- Any behavior that reproduces in development mode but not with `NODE_ENV=production` and a hardened production configuration
 
 If a report only reproduces in development mode or with default development configuration, it will be closed as out of scope.
 
@@ -170,6 +170,7 @@ Pursuant to the [CNA Operational Rules](https://www.cve.org/resourcessupport/all
   > 4.1.3 Well-documented or commonly understood non-default configuration or runtime changes made by an authorized user SHOULD NOT be determined to be Vulnerabilities.
 - Conditions or behaviors that do not lead to a security impact (CNA Operational Rule 4.1.2)
   > 4.1.2 Conditions or behaviors that do not lead to a security impact SHOULD NOT be determined to be Vulnerabilities. Examples of security impacts include an increase in access for an attacker, a decrease in availability of a target, or another violation of security policy.
+- Requests a webhook sends to a destination configured by an administrator with webhook permissions, including localhost, internal network addresses, and any address that destination redirects to or later resolves to, along with the responses shown when the webhook is triggered (CNA Operational Rules 4.1.3 and 4.1.2, quoted above). Internal destinations, such as a frontend on the same server or network, are a supported setup, and the webhook permissions are the security boundary. The URL check Strapi runs when a webhook is saved in production catches common mistakes but is not a security control, so getting around it is not a vulnerability, with or without `NODE_ENV=production`. This replaces the position Strapi took in [GHSA-v8wj-f5c7-pvxf](https://github.com/strapi/strapi/security/advisories/GHSA-v8wj-f5c7-pvxf) (CVE-2024-52588). It does not cover a user without webhook permissions creating, editing or triggering a webhook, or requests to a destination that did not come from a webhook an administrator configured.
 
 In addition to the CNA Operational Rules, the following classes of report are consistently low-signal and will typically be closed without remediation unless the reporter can demonstrate concrete, non-theoretical impact:
 

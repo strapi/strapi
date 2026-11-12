@@ -1,0 +1,20 @@
+{
+  "name": "@strapi/tests-api",
+  "private": true,
+  "description": "API integration test suite, run with Jest.",
+  "scripts": {
+    "lint": "run -T eslint . --max-warnings=0",
+    "test": "run -T jest --config jest.config.js",
+    "test:ts": "run -T tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@strapi/tests-shared": "workspace:*",
+    "@swc/jest": "0.2.39",
+    "@types/jest": "29.5.2",
+    "@types/node": "22.20.0",
+    "eslint-config-custom": "workspace:*",
+    "jest": "29.6.0",
+    "jest-junit": "16.0.0",
+    "tsconfig": "workspace:*"
+  }
+}

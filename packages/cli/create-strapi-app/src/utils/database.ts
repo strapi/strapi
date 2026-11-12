@@ -93,7 +93,10 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
       database: options.dbname,
       username: options.dbusername,
       password: options.dbpassword,
-      filename: options.dbfile,
+      filename:
+        options.dbclient === 'sqlite' && options.dbfile === undefined
+          ? DEFAULT_CONFIG.connection.filename
+          : options.dbfile,
     },
   };
 
@@ -107,7 +110,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
 const sqlClientModule = {
   mysql: { mysql2: '3.20.0' },
   postgres: { pg: '8.20.0' },
-  sqlite: { 'better-sqlite3': '12.8.0' },
+  sqlite: { 'better-sqlite3': '12.11.1' },
 };
 
 export function addDatabaseDependencies(scope: Scope) {

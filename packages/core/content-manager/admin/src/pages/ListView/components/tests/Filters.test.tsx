@@ -1,23 +1,33 @@
 import { render as renderRTL, screen } from '@tests/utils';
 import { IntlProvider } from 'react-intl';
 
-import { listViewFilters as Filters } from '../Filters';
+import { listViewFilters as Filters, useListViewFilterOptions } from '../Filters';
 
 import type { Schema } from '../../../../hooks/useDocument';
 import type { ListLayout } from '../../../../hooks/useDocumentLayout';
 
+type MockPermission = {
+  action: string;
+  subject: string | null;
+  properties?: { fields?: string[] };
+};
+
+const ARTICLE_READ_PERMISSIONS: MockPermission[] = [
+  {
+    action: 'plugin::content-manager.explorer.read',
+    subject: 'api::article.article',
+    properties: {
+      fields: ['title', 'period'],
+    },
+  },
+];
+
+let mockPermissions: MockPermission[] = ARTICLE_READ_PERMISSIONS;
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useAdminUsers: jest.fn(() => ({ data: { users: [] }, isLoading: false })),
-  useAuth: jest.fn(() => [
-    {
-      action: 'plugin::content-manager.explorer.read',
-      subject: 'api::article.article',
-      properties: {
-        fields: ['title', 'period'],
-      },
-    },
-  ]),
+  useAuth: jest.fn(() => mockPermissions),
   useQueryParams: jest.fn(() => [{ query: {} }]),
   useStrapiApp: jest.fn((_name, selector) =>
     selector({
@@ -47,6 +57,21 @@ jest.mock('../../../../services/contentTypes', () => ({
     },
   })),
 }));
+
+/**
+ * Wires the filters like `ListViewPage`: the options come from `useListViewFilterOptions`.
+ */
+const ListViewFilters = ({ schema, layout }: { schema: Schema; layout: ListLayout }) => {
+  const options = useListViewFilterOptions(schema, layout);
+
+  return (
+    <Filters.Root schema={schema} options={options}>
+      <Filters.Trigger />
+      <Filters.Popover />
+      <Filters.List />
+    </Filters.Root>
+  );
+};
 
 const enumerationSchema = {
   uid: 'api::article.article',
@@ -94,11 +119,7 @@ const enumerationLayout = {
 
 const renderEnumerationFilters = (messages?: Record<string, string>) =>
   renderRTL(
-    <Filters.Root schema={enumerationSchema} layout={enumerationLayout}>
-      <Filters.Trigger />
-      <Filters.Popover />
-      <Filters.List />
-    </Filters.Root>,
+    <ListViewFilters schema={enumerationSchema} layout={enumerationLayout} />,
     messages
       ? {
           renderOptions: {
@@ -113,6 +134,30 @@ const renderEnumerationFilters = (messages?: Record<string, string>) =>
   );
 
 describe('ListView Filters', () => {
+  beforeEach(() => {
+    mockPermissions = ARTICLE_READ_PERMISSIONS;
+  });
+
+  it('renders no attribute options when the model has no read permission', async () => {
+    mockPermissions = [
+      {
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::other.other',
+        properties: { fields: ['title', 'period'] },
+      },
+    ];
+
+    const { user } = renderEnumerationFilters();
+
+    const trigger = screen.getByRole('button', { name: 'Filters' });
+    await user.click(trigger);
+
+    // The popover is open, but it holds no attribute to filter on.
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByRole('combobox', { name: 'Select field' })).not.toBeInTheDocument();
+    expect(screen.queryAllByRole('option')).toHaveLength(0);
+  });
+
   it('does not crash when filterable field metadata is not loaded yet', async () => {
     const schema = {
       uid: 'api::article.article',
@@ -153,13 +198,7 @@ describe('ListView Filters', () => {
       },
     } satisfies ListLayout;
 
-    renderRTL(
-      <Filters.Root schema={schema} layout={layout}>
-        <Filters.Trigger />
-        <Filters.Popover />
-        <Filters.List />
-      </Filters.Root>
-    );
+    renderRTL(<ListViewFilters schema={schema} layout={layout} />);
 
     expect(screen.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
   });

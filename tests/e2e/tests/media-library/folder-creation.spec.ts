@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { AssetsPage } from './page-objects/AssetsPage';
 import { describeOnCondition } from '../../../utils/shared';
@@ -9,8 +9,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
     });
 
     test('should create a folder from the root', async ({ page }) => {
@@ -67,6 +67,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       await assetsPage.createFolderDialog.getByRole('textbox').fill('Cancelled Folder');
 
       await assetsPage.createFolderDialog.getByRole('button', { name: /cancel/i }).click();
+      await assetsPage.confirmDiscardChanges();
 
       await expect(assetsPage.createFolderDialog).not.toBeVisible();
       await expect(page.getByText('Cancelled Folder')).not.toBeVisible();
@@ -93,10 +94,12 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();
 
-      // Open dialog, type a name, then cancel
+      // Open dialog, type a name, then cancel and discard the typed name
       await assetsPage.openCreateFolderDialog();
       await assetsPage.createFolderDialog.getByRole('textbox').fill('Some Folder');
       await assetsPage.createFolderDialog.getByRole('button', { name: /cancel/i }).click();
+      await assetsPage.confirmDiscardChanges();
+      await expect(assetsPage.createFolderDialog).toBeHidden();
 
       // Reopen — input should be empty, no error visible
       await assetsPage.openCreateFolderDialog();

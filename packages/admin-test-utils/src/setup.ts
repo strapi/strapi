@@ -61,6 +61,14 @@ const patchedConsole = {
       })
       .join(' ');
 
+    // TODO(design-system): give each modal and dialog a description, as Radix expects
+    if (
+      /Missing `Description` or `aria-describedby=\{undefined\}`/.test(msg) ||
+      /requires a description for the component to be accessible/.test(msg)
+    ) {
+      return;
+    }
+
     /**
      * React Router emits dev-only warnings about upcoming v7 behavior when `future`
      * flags are left undefined. We don't want test log pollution or flaky failures
@@ -108,11 +116,18 @@ globalThis.console = patchedConsole as any;
  * Strapi
  * -----------------------------------------------------------------------------------------------*/
 
-window.strapi = {
+const browserStrapi: Window['strapi'] = {
   backendURL: 'http://localhost:1337',
   isEE: false,
+  isTrial: false,
+  isTrialLicense: false,
+  ai: {
+    enabled: false,
+  },
   features: {
     SSO: 'sso',
+    REVIEW_WORKFLOWS: 'review-workflows',
+    AUDIT_LOGS: 'audit-logs',
     isEnabled: () => false,
   },
   future: {
@@ -130,6 +145,9 @@ window.strapi = {
     promoteEE: true,
   },
 };
+
+// @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
+window.strapi = browserStrapi;
 
 /* -------------------------------------------------------------------------------------------------
  * matchMedia

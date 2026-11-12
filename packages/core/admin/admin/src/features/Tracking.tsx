@@ -214,7 +214,6 @@ export interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease'
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
@@ -401,22 +400,11 @@ interface DidFilterEntriesEvent {
   };
 }
 
-interface DidPublishRelease {
-  name: 'didPublishRelease';
-  properties: {
-    totalEntries: number;
-    totalPublishedEntries: number;
-    totalUnpublishedEntries: number;
-  };
-}
-
 interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
     promptType:
-      | 'generate-product-schema'
-      | 'tell-me-about-the-content-type-builder'
-      | 'tell-me-about-strapi';
+      'generate-product-schema' | 'tell-me-about-the-content-type-builder' | 'tell-me-about-strapi';
   };
 }
 
@@ -517,7 +505,6 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidClickOnDocLink
-  | DidPublishRelease
   | MediaEvents
   | DidUpdateCTBSchema
   | DidSkipGuidedTour

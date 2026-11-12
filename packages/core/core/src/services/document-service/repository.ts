@@ -28,7 +28,11 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
-import { copyCloneRelationRows, prepareCloneData } from './utils/clone-relations';
+import {
+  applyDeferredCloneRelationCopies,
+  applyPostCloneRelationUpdates,
+  prepareCloneData,
+} from './utils/clone-relations';
 
 const { validators } = validate;
 
@@ -337,7 +341,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params || {});
 
-    return strapi.db.query(uid).findMany(query);
+    return await strapi.db.query(uid).findMany(query);
   }
 
   async function findFirst(params = {} as any) {
@@ -352,7 +356,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
@@ -371,7 +375,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   async function deleteDocument(opts = {} as any) {
@@ -425,7 +429,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     emitEvent('entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId: doc.documentId,
       }).then((doc) => doc.entries[0]);
@@ -466,7 +470,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           string,
           unknown
         >;
-        const { data, relationsToCopy } = await prepareCloneData(
+        const { data, deferredCopies, postCloneUpdates } = await prepareCloneData(
           originalData,
           queryParams.data,
           contentType,
@@ -479,18 +483,52 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           status: 'draft',
         });
 
-        await copyCloneRelationRows(strapi, uid, sourceEntryId, doc.id, relationsToCopy);
-
-        if (relationsToCopy.length === 0) {
-          return doc;
-        }
+        const needsRelationFollowUp = deferredCopies.length > 0 || postCloneUpdates.length > 0;
 
         const selectionQuery = transformParamsToQuery(
           uid,
           pickSelectionParams({ ...queryParams, status: 'draft' }) as any
         );
 
-        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+        const clonedEntry = needsRelationFollowUp
+          ? await strapi.db.query(uid).findOne({
+              ...selectionQuery,
+              where: { id: doc.id },
+              populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
+            })
+          : doc;
+
+        if (clonedEntry) {
+          await applyDeferredCloneRelationCopies(
+            strapi,
+            uid,
+            sourceEntryId,
+            doc.id,
+            originalData,
+            clonedEntry as Record<string, unknown>,
+            deferredCopies
+          );
+
+          await applyPostCloneRelationUpdates(
+            strapi,
+            uid,
+            sourceEntryId,
+            doc.id,
+            {
+              ...(clonedEntry as Record<string, unknown>),
+              documentId: doc.documentId,
+              locale: entryToClone.locale ?? queryParams.locale ?? queryParams.data?.locale,
+            },
+            originalData,
+            postCloneUpdates
+          );
+        }
+
+        if (!needsRelationFollowUp) {
+          return doc;
+        }
+
+        return await strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
       }
     );
 
@@ -536,10 +574,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
-          ...queryParams.data,
+        const mergedData = await copyNonLocalizedFields(
+          contentType,
           documentId,
-        });
+          {
+            ...queryParams.data,
+            documentId,
+          },
+          { status: 'draft', strategy: 'fill' }
+        );
 
         updatedDraft = await entries.create({
           ...queryParams,
@@ -550,7 +593,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     }
 
     if (hasDraftAndPublish && updatedDraft && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId,
       }).then((doc) => doc.entries[0]);
@@ -570,7 +613,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).count(query);
+    return await strapi.db.query(uid).count(query);
   }
 
   async function publish(opts = {} as any) {
@@ -583,7 +626,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [draftsToPublish, oldPublishedVersions] = await Promise.all([
+    const [draftsToPublish, oldPublishedVersions, publishedVersions] = await Promise.all([
       strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
@@ -601,6 +644,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         },
         select: ['id', 'locale'],
       }),
+      // All published locales of this document (not scoped to the publish lookup).
+      // Used so a first publish of FR can inherit EN published shared fields.
+      strapi.db.query(uid).findMany({
+        where: {
+          documentId,
+          publishedAt: { $ne: null },
+        },
+        select: ['locale'],
+      }),
     ]);
 
     // Load any unidirectional relation targetting the old published entries
@@ -611,7 +663,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         oldVersions: oldPublishedVersions,
       },
       {
-        shouldPropagateRelation: components.createComponentRelationFilter(),
+        filterRelationsToPropagate: components.createComponentRelationFilter(),
       }
     );
 
@@ -634,10 +686,38 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       addFirstPublishedAtToDraft(draft, entries.update, contentType)
     );
 
-    // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(updatedDraft, (draft: any) =>
-      entries.publish(draft, queryParams)
+    // First publish of a locale must inherit shared fields from an existing
+    // published sibling. Copying the draft would publish unpublished shared
+    // edits and i18n sync would then overwrite every published locale.
+    const publishedLocales = new Set(
+      (publishedVersions as Array<{ locale?: string }>).map((entry) => entry.locale)
     );
+    // Republishing a locale in the same call publishes its draft shared values,
+    // and its old published row (an inheritance source) was deleted above.
+    const republishesALocale = updatedDraft.some((draft: any) =>
+      publishedLocales.has(draft.locale)
+    );
+
+    // Transform draft entry data and create published versions
+    const publishedEntries = await async.map(updatedDraft, async (draft: any) => {
+      const isFirstPublishForLocale = !publishedLocales.has(draft.locale);
+      const hasPublishedSibling = [...publishedLocales].some((locale) => locale !== draft.locale);
+
+      let entryToPublish = draft;
+      if (
+        hasDraftAndPublish &&
+        isFirstPublishForLocale &&
+        hasPublishedSibling &&
+        !republishesALocale
+      ) {
+        entryToPublish = await copyNonLocalizedFields(contentType, documentId, draft, {
+          status: 'published',
+          strategy: 'replace',
+        });
+      }
+
+      return await entries.publish(entryToPublish, queryParams);
+    });
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
@@ -722,7 +802,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         oldVersions: oldDrafts,
       },
       {
-        shouldPropagateRelation: components.createComponentRelationFilter(),
+        filterRelationsToPropagate: components.createComponentRelationFilter(),
       }
     );
 
@@ -766,7 +846,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function updateComponents(entry: any, data: any) {
-    return components.updateComponents(uid, entry, data);
+    return await components.updateComponents(uid, entry, data);
   }
 
   function omitComponentData(data: any) {

@@ -8,8 +8,13 @@ import { useField } from '../Form';
 
 import { EnumerationProps } from './types';
 
+const EMPTY_OPTIONS: NonNullable<EnumerationProps['options']> = [];
+
 const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
-  ({ name, required, label, hint, labelAction, options = [], placeholder, ...props }, ref) => {
+  (
+    { name, required, label, hint, labelAction, options = EMPTY_OPTIONS, placeholder, ...props },
+    ref
+  ) => {
     const { formatMessage } = useIntl();
     const field = useField<string | number | null>(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);

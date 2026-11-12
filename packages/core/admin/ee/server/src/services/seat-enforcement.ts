@@ -13,9 +13,7 @@ type DisabledUser = Pick<AdminUser, 'id' | 'isActive'>;
  */
 const getDisabledUserList = async (): Promise<DisabledUser[]> => {
   const disabledUsers = (await strapi.store.get({ type: 'ee', key: 'disabled_users' })) as
-    | DisabledUser[]
-    | null
-    | undefined;
+    DisabledUser[] | null | undefined;
 
   return disabledUsers ?? [];
 };

@@ -38,6 +38,17 @@ const isUsingTypeScript: TsUtilsModule['isUsingTypeScript'] = (
   return (lazyTsUtils as TsUtilsModule).isUsingTypeScript(...args);
 };
 
+// Core plugins are always enabled, so they are omitted from the plugins list.
+const CORE_PLUGINS = new Set([
+  'content-manager',
+  'content-type-builder',
+  'email',
+  'upload',
+  'i18n',
+  'content-releases',
+  'review-workflows',
+]);
+
 /**
  * A set of functions called "actions" for `Admin`
  */
@@ -127,8 +138,7 @@ export default {
     const getNumberOfFolders = async (): Promise<number> => {
       try {
         const contentStructure = strapi.get('content-structure') as
-          | { countGroups?: () => Promise<number> }
-          | undefined;
+          { countGroups?: () => Promise<number> } | undefined;
 
         return (await contentStructure?.countGroups?.()) ?? 0;
       } catch {
@@ -182,20 +192,8 @@ export default {
   async plugins(ctx: Context) {
     const enabledPlugins = strapi.config.get('enabledPlugins') as any;
 
-    // List of core plugins that are always enabled,
-    // and so it's not necessary to display them in the plugins list
-    const CORE_PLUGINS = [
-      'content-manager',
-      'content-type-builder',
-      'email',
-      'upload',
-      'i18n',
-      'content-releases',
-      'review-workflows',
-    ];
-
     const plugins = Object.entries(enabledPlugins)
-      .filter(([key]: any) => !CORE_PLUGINS.includes(key))
+      .filter(([key]: any) => !CORE_PLUGINS.has(key))
       .map(([key, plugin]: any) => ({
         name: plugin.info.name || key,
         displayName: plugin.info.displayName || plugin.info.name || key,

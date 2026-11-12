@@ -20,6 +20,8 @@ import { EditLocale, EditModal } from './EditLocale';
 
 import type { Locale } from '../../../shared/contracts/locales';
 
+const EMPTY_LOCALES: NonNullable<LocaleTableProps['locales']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * LocaleTable
  * -----------------------------------------------------------------------------------------------*/
@@ -32,7 +34,7 @@ type LocaleTableProps = {
   onEditLocale?: (locale: Locale) => void;
 };
 
-const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) => {
+const LocaleTable = ({ locales = EMPTY_LOCALES, canDelete, canUpdate }: LocaleTableProps) => {
   const [editLocaleId, setEditLocaleId] = React.useState<Locale['id']>();
   const { formatMessage } = useIntl();
 

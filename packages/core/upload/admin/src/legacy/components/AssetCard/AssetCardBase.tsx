@@ -57,8 +57,7 @@ export interface AssetCardBaseProps {
   onRemove?: () => void;
   onEdit?: (
     event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      React.MouseEvent<HTMLButtonElement, MouseEvent> | React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => void;
   selected?: boolean;
   subtitle?: string;

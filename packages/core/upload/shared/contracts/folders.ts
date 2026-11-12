@@ -45,11 +45,6 @@ export type FolderNode = Partial<Omit<Folder, 'children'>> & {
   children: FolderNode[];
 };
 
-type FolderNodeWithValue = Omit<FolderNode, 'children'> & {
-  value: string | number | null;
-  children: FolderNodeWithValue[];
-};
-
 /**
  * GET /upload/folders/:id - Get specific folder
  */
@@ -129,7 +124,7 @@ export declare namespace GetFolderStructure {
 
   export interface Response {
     data: {
-      data: number[] & FolderNodeWithValue[];
+      data: FolderNode[];
     };
     error?: errors.ApplicationError | errors.NotFoundError;
   }
