@@ -780,4 +780,74 @@ describe('Document Service polymorphic relations', () => {
       }
     });
   });
+
+  // The admin sends an empty delta for every relation field on save
+  describe('update with an empty connect and disconnect', () => {
+    it('keeps every morphToMany link', async () => {
+      const targets = [
+        await strapi.db.query(POLY_TARGET_UID).create({ data: { title: 't1' } }),
+        await strapi.db.query(POLY_TARGET_UID).create({ data: { title: 't2' } }),
+      ];
+      const source = await strapi.db.query(POLY_SOURCE_UID).create({
+        data: {
+          title: 'source',
+          [morphToManyAttributeName]: targets.map(({ id }) => ({ id, __type: POLY_TARGET_UID })),
+        },
+      });
+
+      try {
+        await strapi.db.query(POLY_SOURCE_UID).update({
+          where: { id: source.id },
+          data: { [morphToManyAttributeName]: { connect: [], disconnect: [] } },
+        });
+
+        const { morphColumn } = getMorphToManyMeta(POLY_SOURCE_UID);
+        const joinRows = await loadMorphToManyJoinRows(source.id);
+        expect(joinRows.map((row: any) => row[morphColumn.idColumn.name])).toEqual(
+          targets.map(({ id }) => id)
+        );
+      } finally {
+        await strapi.db.query(POLY_SOURCE_UID).delete({ where: { id: source.id } });
+        await strapi.db.query(POLY_TARGET_UID).deleteMany({
+          where: { id: targets.map(({ id }) => id) },
+        });
+      }
+    });
+
+    it('keeps every link of an inverse morphMany of a morphToMany', async () => {
+      const box = await strapi.db.query(MORPH_BOX_UID).create({ data: { name: 'A' } });
+      const linkedBoxes = [
+        await strapi.db.query(MORPH_BOX_UID).create({
+          data: { name: 'B', mtm: [{ id: box.id, __type: MORPH_BOX_UID }] },
+        }),
+        await strapi.db.query(MORPH_BOX_UID).create({
+          data: { name: 'C', mtm: [{ id: box.id, __type: MORPH_BOX_UID }] },
+        }),
+      ];
+
+      try {
+        await strapi.db.query(MORPH_BOX_UID).update({
+          where: { id: box.id },
+          data: { mtmInverse: { connect: [], disconnect: [] } },
+        });
+
+        const { joinTable } = strapi.db.metadata.get(MORPH_BOX_UID).attributes.mtm as any;
+        const { joinColumn, morphColumn } = joinTable;
+        const joinRows = await strapi.db
+          .getConnection(joinTable.name)
+          .where({
+            [morphColumn.idColumn.name]: box.id,
+            [morphColumn.typeColumn.name]: MORPH_BOX_UID,
+          })
+          .orderBy(joinColumn.name, 'asc');
+        expect(joinRows.map((row: any) => row[joinColumn.name])).toEqual(
+          linkedBoxes.map(({ id }) => id)
+        );
+      } finally {
+        for (const { id } of [box, ...linkedBoxes]) {
+          await strapi.db.query(MORPH_BOX_UID).delete({ where: { id } });
+        }
+      }
+    });
+  });
 });
