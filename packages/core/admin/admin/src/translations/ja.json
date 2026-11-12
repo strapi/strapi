@@ -154,6 +154,7 @@
   "Settings.application.link-pricing": "すべての料金プランを見る",
   "Settings.application.link-upgrade": "管理パネルをアップグレード",
   "Settings.application.node-version": "Nodeバージョン",
+  "Settings.application.plan-title": "現在のプラン",
   "Settings.application.strapi-version": "Strapiバージョン",
   "Settings.application.strapiVersion": "Strapiバージョン",
   "Settings.application.title": "概要",
