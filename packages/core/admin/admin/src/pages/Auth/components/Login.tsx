@@ -6,7 +6,8 @@ import { useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { Form } from '../../../components/Form';
+import { MFA_ERROR_CODES } from '../../../../../shared/utils/mfa-error-codes';
+import { Form, type FormHelpers } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
@@ -18,11 +19,17 @@ import {
 import { translatedErrors } from '../../../utils/translatedErrors';
 import { getRedirectTo } from '../utils';
 
+import type { MfaChallengeLocationState } from './MfaChallenge';
 import type { Login } from '../../../../../shared/contracts/authentication';
 
 interface LoginProps {
   children?: React.ReactNode;
 }
+
+/** A password login refused because the enrolment grace period expired (403 `MFA_LOCKED`). */
+export const isMfaLockedError = (error: object): boolean =>
+  'details' in error &&
+  (error.details as { code?: unknown } | undefined)?.code === MFA_ERROR_CODES.LOCKED;
 
 const LOGIN_SCHEMA = yup.object().shape({
   email: yup
@@ -45,12 +52,28 @@ const Login = ({ children }: LoginProps) => {
 
   const { login } = useAuth('Login', (auth) => auth);
 
-  const handleLogin = async (body: Parameters<typeof login>[0]) => {
+  const handleLogin = async (
+    body: Parameters<typeof login>[0],
+    { setErrors }: Pick<FormHelpers, 'setErrors'>
+  ) => {
     setApiError(undefined);
 
     const res = await login(body);
 
     if ('error' in res) {
+      if (isMfaLockedError(res.error)) {
+        // Under the password field, in its own error slot: the password was right, and this says
+        // why it still did not let the user in.
+        setErrors({
+          password: formatMessage({
+            id: 'Auth.form.mfa.locked.message',
+            defaultMessage:
+              'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
+          }),
+        });
+        return;
+      }
+
       const message = res.error.message ?? 'Something went wrong';
 
       if (camelCase(message).toLowerCase() === 'usernotactive') {
@@ -59,6 +82,20 @@ const Login = ({ children }: LoginProps) => {
       }
 
       setApiError(message);
+    } else if ('mfaRequired' in res.data) {
+      // No session yet: hand the challenge to the second-factor screen through router state.
+      // react-router's browser history keeps this in `window.history.state.usr` for the life of
+      // this history entry (and restores it on a full reload), so `MfaChallenge` is what
+      // actually clears it — by replacing the entry with `state: null` right after reading it —
+      // to make a refresh, direct visit, or back/forward land back on the login form.
+      const state: MfaChallengeLocationState = {
+        challengeToken: res.data.challengeToken,
+        expiresIn: res.data.expiresIn,
+        rememberMe: body.rememberMe,
+        trustedDeviceDays: res.data.trustedDeviceDays ?? null,
+        passkeyAvailable: res.data.passkeyAvailable === true,
+      };
+      navigate({ pathname: '/auth/mfa', search: searchString }, { state });
     } else {
       navigate(getRedirectTo(searchString));
     }
@@ -104,8 +141,8 @@ const Login = ({ children }: LoginProps) => {
               password: '',
               rememberMe: false,
             }}
-            onSubmit={(values) => {
-              handleLogin(values);
+            onSubmit={(values, helpers) => {
+              handleLogin(values, helpers);
             }}
             validationSchema={LOGIN_SCHEMA}
           >

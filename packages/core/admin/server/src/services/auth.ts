@@ -53,16 +53,61 @@ const assignResetPasswordToken = async (userId: AdminUser['id']): Promise<string
   return resetPasswordToken;
 };
 
+export interface PasswordResetResult {
+  user: AdminUser;
+  /**
+   * Set when the account has a second factor: the new password, hashed, staged on the login
+   * challenge and written by `commitStagedPasswordReset` once the second factor passes.
+   */
+  pendingPasswordHash: string | null;
+}
+
 /**
- * Set the new password and consume the reset token. Shared by the CE and EE auth
- * services, after each has validated the token.
+ * Consume the reset token, then set the new password, or stage it when the account has a second
+ * factor (see `PasswordResetResult`). Shared by the CE and EE auth services, after each has
+ * validated the token. The token is consumed either way, so a link is single use even when the
+ * second factor is never presented.
  */
-const completePasswordReset = async (user: AdminUser, password: string): Promise<AdminUser> => {
+const completePasswordReset = async (
+  user: AdminUser,
+  password: string
+): Promise<PasswordResetResult> => {
+  const mfa = getService('mfa');
+  if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
+    const pendingPasswordHash = await hashPassword(password);
+    const consumed = await getService('user').updateById(user.id, {
+      resetPasswordToken: null,
+      resetPasswordTokenExpiresAt: null,
+    });
+    return { user: consumed ?? user, pendingPasswordHash };
+  }
+
   const updatedUser = await getService('user').updateById(user.id, {
     password,
     resetPasswordToken: null,
     resetPasswordTokenExpiresAt: null,
   });
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CONFIRM, toAdminUserEvent(updatedUser));
+
+  return { user: updatedUser, pendingPasswordHash: null };
+};
+
+/**
+ * The second half of a reset staged by `completePasswordReset`, once the second factor passed:
+ * writes the password and does what a committed reset does, which is end every session (the
+ * reason for a reset is usually a password believed lost or leaked). Trusted devices go with the
+ * password change itself (the `admin::user` lifecycle in `bootstrap.ts`).
+ */
+const commitStagedPasswordReset = async (
+  userId: AdminUser['id'],
+  passwordHash: string
+): Promise<AdminUser> => {
+  const updatedUser = await getService('user').setPasswordHash(userId, passwordHash);
+
+  if (strapi.sessionManager?.hasOrigin('admin')) {
+    await strapi.sessionManager('admin').invalidateRefreshToken(String(userId));
+  }
 
   await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CONFIRM, toAdminUserEvent(updatedUser));
 
@@ -178,7 +223,7 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
  */
 const resetPassword = async (
   { resetPasswordToken, password } = {} as { resetPasswordToken: string; password: string }
-) => {
+): Promise<PasswordResetResult> => {
   const matchingUser: AdminUser | undefined = await strapi.db
     .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
@@ -192,10 +237,18 @@ const resetPassword = async (
   return completePasswordReset(matchingUser, password);
 };
 
-export default { checkCredentials, validatePassword, hashPassword, forgotPassword, resetPassword };
+export default {
+  checkCredentials,
+  validatePassword,
+  hashPassword,
+  forgotPassword,
+  resetPassword,
+  commitStagedPasswordReset,
+};
 export {
   getResetPasswordTokenTTL,
   assignResetPasswordToken,
   assertResetPasswordTokenIsValid,
   completePasswordReset,
+  commitStagedPasswordReset,
 };

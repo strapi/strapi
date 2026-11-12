@@ -15,6 +15,7 @@ The flags Strapi declares are listed in `FeaturesFutureFlags` ([`features.ts`](h
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `experimental_firstPublishedAt` | The `firstPublishedAt` attribute on draft and publish content                                                             |
 | `unstableCustomOrder`           | The [custom order](../packages/core/content-manager/07-custom-order.md) of collection type entries in the Content Manager |
+| `unstableAdminMfa`              | Admin two-factor authentication, trusted devices and passkeys                                                             |
 
 The type also accepts any other string key, so a plugin can read its own flag without changing `@strapi/types`.
 

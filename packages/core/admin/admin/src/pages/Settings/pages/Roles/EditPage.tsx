@@ -24,10 +24,12 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { isMfaFeatureEnabled } from '../../../../utils/mfaFeature';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
+import { RoleTwoFactorRequirement } from './components/RoleTwoFactorRequirement';
 import { isPermissionsCeilingError } from './utils/isPermissionsCeilingError';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
@@ -253,6 +255,9 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
+                {isMfaFeatureEnabled() ? (
+                  <RoleTwoFactorRequirement roleId={id} roleName={role.name} />
+                ) : null}
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}

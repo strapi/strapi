@@ -123,6 +123,12 @@ yargs
         if (type === 'e2e') {
           const { applyE2eEditionEnv } = require('../utils/e2e-edition.ts');
           applyE2eEditionEnv();
+
+          // The test app template leaves `unstableAdminMfa` off. The two-factor specs need it, and
+          // the flag is baked into the admin bundle, which is built once per run (see `buildAdmin`
+          // below), so the opt-in is per run rather than per spec. Set UNSTABLE_ADMIN_MFA=false to
+          // run without it; the two-factor specs then skip themselves.
+          process.env.UNSTABLE_ADMIN_MFA ??= 'true';
         }
 
         // Read domains

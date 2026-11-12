@@ -455,19 +455,77 @@ describe('Auth', () => {
             return { findOne };
           },
         },
-        admin: { services: { user: { updateById } } },
+        admin: {
+          services: {
+            user: { updateById },
+            mfa: { isEnabled: () => false, isEnrolled: vi.fn() },
+          },
+        },
         config: { get: (_key: string, defaultValue: unknown) => defaultValue },
       } as any;
       vi.mocked(emitAudit).mockClear();
 
       const input = { resetPasswordToken, password: 'Test1234' };
-      await resetPassword(input);
+      await expect(resetPassword(input)).resolves.toMatchObject({ pendingPasswordHash: null });
 
       expect(updateById).toHaveBeenCalledWith(user.id, {
         password: input.password,
         resetPasswordToken: null,
         resetPasswordTokenExpiresAt: null,
       });
+      expect(emitAudit).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'admin-user.password-reset.confirm',
+        { userId: 1, email: 'test@strapi.io' }
+      );
+    });
+
+    test('stages the password of an enrolled account instead of committing it', async () => {
+      // Someone holding only the mailbox must not be able to change the password of an account
+      // whose second factor they do not have: it commits at /login/mfa, after the factor.
+      const user = {
+        id: 1,
+        resetPasswordTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      };
+      const updateById = vi.fn(() => Promise.resolve({ id: 1, email: 'test@strapi.io' }));
+      global.strapi = {
+        db: { query: () => ({ findOne: vi.fn(() => Promise.resolve(user)) }) },
+        admin: {
+          services: {
+            user: { updateById },
+            mfa: { isEnabled: () => true, isEnrolled: vi.fn(() => Promise.resolve(true)) },
+          },
+        },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+      } as any;
+      vi.mocked(emitAudit).mockClear();
+
+      const result = await resetPassword({ resetPasswordToken: '123', password: 'Test1234' });
+
+      expect(result.pendingPasswordHash).toMatch(/^\$2[aby]\$/);
+      // The link is spent, but the password column is not touched.
+      expect(updateById).toHaveBeenCalledWith(user.id, {
+        resetPasswordToken: null,
+        resetPasswordTokenExpiresAt: null,
+      });
+      expect(emitAudit).not.toHaveBeenCalled();
+    });
+
+    test('commitStagedPasswordReset writes the hash, ends every session and audits the reset', async () => {
+      const setPasswordHash = vi.fn(() => Promise.resolve({ id: 1, email: 'test@strapi.io' }));
+      const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+      global.strapi = {
+        admin: { services: { user: { setPasswordHash } } },
+        sessionManager: Object.assign(() => ({ invalidateRefreshToken }), {
+          hasOrigin: () => true,
+        }),
+      } as any;
+      vi.mocked(emitAudit).mockClear();
+
+      await authService.commitStagedPasswordReset(1, '$2a$10$hash');
+
+      expect(setPasswordHash).toHaveBeenCalledWith(1, '$2a$10$hash');
+      expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
       expect(emitAudit).toHaveBeenCalledWith(
         { strapi: global.strapi },
         'admin-user.password-reset.confirm',

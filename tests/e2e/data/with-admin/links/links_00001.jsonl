@@ -240,6 +240,8 @@
 {"kind":"relation.basic","relation":"manyToOne","left":{"type":"admin::permission","field":"role","ref":454},"right":{"type":"admin::role","field":"permissions","ref":4,"pos":349}}
 {"kind":"relation.basic","relation":"manyToOne","left":{"type":"admin::permission","field":"role","ref":455},"right":{"type":"admin::role","field":"permissions","ref":4,"pos":350}}
 {"kind":"relation.basic","relation":"manyToOne","left":{"type":"admin::permission","field":"role","ref":456},"right":{"type":"admin::role","field":"permissions","ref":4,"pos":351}}
+{"kind":"relation.basic","relation":"manyToOne","left":{"type":"admin::permission","field":"role","ref":457},"right":{"type":"admin::role","field":"permissions","ref":4,"pos":352}}
+{"kind":"relation.basic","relation":"manyToOne","left":{"type":"admin::permission","field":"role","ref":458},"right":{"type":"admin::role","field":"permissions","ref":4,"pos":353}}
 {"kind":"relation.circular","relation":"oneToMany","left":{"type":"admin::permission","ref":451,"field":"localizations"},"right":{"type":"admin::permission","ref":"cat6zr2h1s8v9kq0j5m3y4na"}}
 {"kind":"relation.circular","relation":"oneToMany","left":{"type":"admin::permission","ref":452,"field":"localizations"},"right":{"type":"admin::permission","ref":"qv7n1m4x8d2p0s5k9r3h6tla"}}
 {"kind":"relation.circular","relation":"oneToMany","left":{"type":"admin::permission","ref":453,"field":"localizations"},"right":{"type":"admin::permission","ref":"p8k2n4t6w1r3y5m7s9d0qvax"}}

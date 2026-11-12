@@ -3,13 +3,27 @@ import { http, HttpResponse } from 'msw';
 
 import { ProfilePage } from '../ProfilePage';
 
+const MFA_STATUS = {
+  enabled: false,
+  enabledAt: null,
+  recoveryCodesRemaining: 0,
+  codesAcknowledged: false,
+  required: false,
+  graceUntil: null,
+  trustedDevicesEnabled: false,
+  passkeysEnabled: false,
+  hasLocalPassword: true,
+};
+
 describe('Profile page', () => {
   const originalIsEnabled = window.strapi.features.isEnabled;
   const originalIsEE = window.strapi.isEE;
+  const originalFuture = window.strapi.future;
 
   beforeAll(() => {
     window.strapi.isEE = true;
     window.strapi.features.isEnabled = () => true;
+    window.strapi.future = { isEnabled: (name) => name === 'unstableAdminMfa' };
 
     window.localStorage.setItem('jwtToken', JSON.stringify('token'));
   });
@@ -17,6 +31,27 @@ describe('Profile page', () => {
   afterAll(() => {
     window.strapi.isEE = originalIsEE;
     window.strapi.features.isEnabled = originalIsEnabled;
+    window.strapi.future = originalFuture;
+  });
+
+  it('has no two-factor section, and asks nothing about it, in a build without the feature', async () => {
+    window.strapi.future = { isEnabled: () => false };
+    const requested: string[] = [];
+    const record = ({ request }: { request: Request }) => {
+      requested.push(new URL(request.url).pathname);
+    };
+    server.events.on('request:start', record);
+
+    try {
+      const { findByText, queryByRole } = render(<ProfilePage />);
+      await findByText('Interface language');
+
+      expect(queryByRole('heading', { name: 'Two-factor authentication' })).not.toBeInTheDocument();
+      expect(requested.filter((path) => path.startsWith('/admin/mfa'))).toEqual([]);
+    } finally {
+      server.events.removeListener('request:start', record);
+      window.strapi.future = { isEnabled: (name) => name === 'unstableAdminMfa' };
+    }
   });
 
   beforeEach(() => {
@@ -74,5 +109,42 @@ describe('Profile page', () => {
     expect(queryByLabelText(/current password/i)).not.toBeInTheDocument();
     expect(queryByLabelText(/^password$/)).not.toBeInTheDocument();
     expect(queryByLabelText(/confirm password/i)).not.toBeInTheDocument();
+  });
+
+  it('should display the two-factor authentication section when the status endpoint is available', async () => {
+    server.use(http.get('/admin/mfa/me', () => HttpResponse.json({ data: MFA_STATUS })));
+
+    const { findByText, findByRole } = render(<ProfilePage />);
+
+    await findByText('Interface language');
+
+    expect(await findByRole('heading', { name: 'Two-factor authentication' })).toBeInTheDocument();
+  });
+
+  it('should not display the two-factor authentication section if the user role is Locked', async () => {
+    // The status endpoint answers, so the section *would* render. Without this the default handler
+    // 404s, the section is absent for that reason alone, and the test passed with the Locked check
+    // deleted.
+    let statusRequested = false;
+    server.use(
+      http.get('/admin/providers/isSSOLocked', () => {
+        return HttpResponse.json({
+          data: {
+            isSSOLocked: true,
+          },
+        });
+      }),
+      http.get('/admin/mfa/me', () => {
+        statusRequested = true;
+        return HttpResponse.json({ data: MFA_STATUS });
+      })
+    );
+
+    const { queryByRole, findByText } = render(<ProfilePage />);
+
+    await findByText('Interface language');
+
+    expect(queryByRole('heading', { name: 'Two-factor authentication' })).not.toBeInTheDocument();
+    expect(statusRequested).toBe(false);
   });
 });
