@@ -26,7 +26,7 @@ A `Dialect` class per client hides the differences between databases. The client
 
 ### Metadata
 
-`Metadata` is a map from a model UID to its `Meta`. `loadModels` builds the table names, the column-to-attribute map and the relations from the models. `@strapi/core` builds the models from content types and components with `transformContentTypesToModels`. The database never reads content type files itself. Code: [`src/metadata`](https://github.com/strapi/strapi/tree/develop/packages/core/database/src/metadata).
+`Metadata` is a map from a model UID to its `Meta`. `loadModels` builds the table names, the column-to-attribute map and the relations from the models. Every relation that declares a `target` must point to a loaded model, on the inverse (`mappedBy`) side too. Otherwise `loadModels` throws `Error on attribute <attribute> in model <name>(<uid>): Metadata for "<target>" not found`, and Strapi fails to boot. `@strapi/core` builds the models from content types and components with `transformContentTypesToModels`. The database never reads content type files itself. Code: [`src/metadata`](https://github.com/strapi/strapi/tree/develop/packages/core/database/src/metadata).
 
 ### Schema sync
 

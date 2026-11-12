@@ -1,5 +1,7 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
+import { RELEASE_ACTION_FILTERS } from '../../../../shared/constants';
+
 const RELEASE_ACTION_SCHEMA = yup.object().shape({
   contentType: yup.string().required(),
   entryDocumentId: yup.strapiID(),
@@ -13,6 +15,7 @@ const RELEASE_ACTION_UPDATE_SCHEMA = yup.object().shape({
 
 const FIND_MANY_ACTIONS_PARAMS = yup.object().shape({
   groupBy: yup.string().oneOf(['action', 'contentType', 'locale']),
+  filter: yup.string().oneOf([...RELEASE_ACTION_FILTERS]),
 });
 
 export const validateReleaseAction = validateYupSchema(RELEASE_ACTION_SCHEMA);

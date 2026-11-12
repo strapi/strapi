@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { getTrad } from '../../../../utils/getTrad';
+import { isImeComposing } from '../../../../utils/isImeComposing';
 
 const Row = styled(Flex)<{ $depth: number }>`
   padding-right: ${({ theme }) => theme.spaces[3]};
@@ -142,7 +143,7 @@ export const FolderNameField = ({
   };
 
   const onNameInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !isImeComposing(event)) {
       event.preventDefault();
       commitFromEnter();
     }

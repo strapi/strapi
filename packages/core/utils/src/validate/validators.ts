@@ -1,4 +1,4 @@
-import { isEmpty, isObject } from 'lodash';
+import { isEmpty, isObject, isPlainObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
 import {
@@ -16,6 +16,7 @@ import {
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
+import { ValidationError } from '../errors';
 import type { Attribute, Model } from '../types';
 import { isBooleanLike } from '../parse-type';
 import type { SHARED_QUERY_PARAM_KEYS } from '../content-api-constants';
@@ -43,6 +44,58 @@ export const FILTER_TRAVERSALS = [
   'private',
 ];
 
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
+
+/**
+ * Operators that take any operand: query conversion casts it to a boolean, so an object means true.
+ */
+const BOOLEAN_CAST_OPERATORS = new Set(['$null', '$notNull']);
+
+/**
+ * Operators whose object operand is a map of operators, searched in turn.
+ */
+const LOGICAL_OPERATORS = new Set(['$not', '$and', '$or']);
+
+/**
+ * True when every key of the object is a non-negative integer. The query string parser (`qs`) turns
+ * a list longer than its `arrayLimit` into such an object, keyed by index.
+ */
+const hasOnlyIndexKeys = (value: Record<string, unknown>) =>
+  Object.keys(value).every((key) => /^\d+$/.test(key));
+
+/**
+ * Returns the first operator, and its operand, in the filter of a scalar attribute, whose operand is a non-empty plain object.
+ * The filters traversal does not walk such operands, and query conversion drops them along with their
+ * condition, so letting one through makes the query match every row.
+ * Empty objects are not reported: they hold no condition, and sanitization removes them.
+ */
+const findObjectOperand = (
+  filter: Record<string, unknown>
+): { operator: string; operand: Record<string, unknown> } | undefined => {
+  for (const [operator, operand] of Object.entries(filter)) {
+    if (
+      isOperator(operator) === false ||
+      BOOLEAN_CAST_OPERATORS.has(operator) === true ||
+      isPlainRecord(operand) === false ||
+      Object.keys(operand).length === 0
+    ) {
+      continue;
+    }
+
+    if (LOGICAL_OPERATORS.has(operator) === false) {
+      return { operator, operand };
+    }
+
+    const nested = findObjectOperand(operand);
+
+    if (nested !== undefined) {
+      return nested;
+    }
+  }
+
+  return undefined;
+};
+
 export const validateFilters = asyncCurry(
   async (ctx: Context, filters: unknown, include: (typeof FILTER_TRAVERSALS)[number][]) => {
     // TODO: schema checks should check that it is a valid schema with yup
@@ -56,10 +109,39 @@ export const validateFilters = asyncCurry(
     // keys that are not attributes or valid operators
     if (include.includes('nonAttributesOperators')) {
       functionsToApply.push(
-        traverseQueryFilters(({ key, attribute, path }) => {
+        traverseQueryFilters(({ key, attribute, path, value }) => {
+          const isIdKey = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key);
+
+          if ((isIdKey || isScalarAttribute(attribute) === true) && isPlainRecord(value)) {
+            const objectOperand = findObjectOperand(value);
+
+            if (objectOperand !== undefined) {
+              const { operator, operand } = objectOperand;
+              // id and documentId are not schema attributes, so the attribute path stops at their parent
+              let operandPath = path.attribute ?? key;
+              if (attribute === undefined && path.attribute !== null) {
+                operandPath = `${path.attribute}.${key}`;
+              }
+
+              // A REST list longer than the `strapi::query` middleware's `arrayLimit` reaches us as an
+              // object keyed by index, so name the limit instead of the object
+              if (hasOnlyIndexKeys(operand) === true) {
+                throw new ValidationError(
+                  `Invalid operand for ${operator} at ${operandPath}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+                  { key: operator, path: operandPath }
+                );
+              }
+
+              throw new ValidationError(
+                `Invalid operand for ${operator} at ${operandPath}: expected a value, not an object`,
+                { key: operator, path: operandPath }
+              );
+            }
+          }
+
           // ID is not an attribute per se, so we need to make
           // an extra check to ensure we're not removing it
-          if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
+          if (isIdKey) {
             return;
           }
 
@@ -570,21 +652,18 @@ export const validatePopulate = asyncCurry(
             return;
           }
 
-          // Handle recursive nested `populate` validation with the same include object
+          // Nested `populate`. The populate traversal walks into it with this same visitor
+          // (the `isPopulateKeyword` handler in traverse/query-populate.ts), and the private
+          // attribute pass below walks into it the same way. Validating it here as well walked
+          // every nested level twice, so the work doubled with each level of nesting. The
+          // traversal does this even when the schema has an attribute named `populate`.
           if (key === 'populate') {
-            set(
-              key,
-              await validatePopulate(
-                {
-                  schema,
-                  getModel,
-                  parent: { key, path, schema, attribute },
-                  path,
-                },
-                value, // pass the nested populate value
-                includes // pass down the same includes object
-              )
-            );
+            // The traversal turns a dot-notation string into an object before it walks it, so
+            // the path checks `validatePopulate` runs on a string have to run here.
+            if (isDotNotationPopulate(value)) {
+              validatePopulateDotPaths({ schema, getModel }, value);
+            }
+
             return;
           }
 
