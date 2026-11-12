@@ -69,7 +69,8 @@ export const restrictsEntries = (filters: unknown): boolean =>
 /**
  * What a permission check did to a request, for explain mode: a field or relation it removed, a
  * condition it applied, a part of the query it narrowed, a draft status it removed or a write it
- * turned into a draft, or a route that ran with route-level permission only.
+ * turned into a draft, a route that ran with route-level permission only, or a conditioned write
+ * whose entry check never ran.
  *
  * `roles` and `conditions` name the caller's own roles and the conditions of their rows, never
  * their parameters. The sanitizers only see the filter, so they record both empty and the checker
@@ -105,7 +106,9 @@ export type ExplainEntry =
       roles: string[];
     }
   | { kind: 'draft-status-removed' | 'write-as-draft'; uid: string }
-  | { kind: 'route-only'; route: string };
+  | { kind: 'route-only'; route: string }
+  /** A write on an action with a condition that finished without the stored-entry or written-data check: the condition did not apply to it */
+  | { kind: 'entry-check-skipped'; uid: string; action: string };
 
 /**
  * The fields some entries get on top of {@link FieldRules.always}: those of the caller's

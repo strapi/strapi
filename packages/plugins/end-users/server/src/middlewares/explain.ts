@@ -113,7 +113,9 @@ const contentTypeOf = (strapi: Core.Strapi, handler: unknown) => {
  *
  * The entries name the caller's own roles and the conditions of their rows, never a parameter. A
  * request that ran no check (a custom route that skipped them) is `route-only`: it got the route's
- * permission and nothing else.
+ * permission and nothing else. A write on an action with a condition whose entry check never ran
+ * (a custom controller that wrote through the Document Service) is `entry-check-skipped`: the
+ * condition did not apply to it.
  *
  * It never changes what a request does: a failure here is logged and the response goes out as it was.
  */
@@ -126,11 +128,11 @@ export const createExplainMiddleware = (strapi: Core.Strapi): Core.MiddlewareHan
   const warned = new Set<string>();
 
   /**
-   * In development, says so once when an end user's write on an action with a condition succeeded
-   * and core's entry check never ran: a project's own controller wrote through the Document Service,
-   * so the ownership rule did not apply to it.
+   * Whether an end user's write on an action with a condition finished and core's entry check never
+   * ran: a project's own controller wrote through the Document Service, so the ownership rule did
+   * not apply to it. The answer names the type and action, and the route to warn about.
    */
-  const warnUnguardedWrite = (
+  const skippedEntryCheck = (
     ctx: Parameters<Core.MiddlewareHandler>[0],
     route: RouteState,
     auth: unknown,
@@ -138,30 +140,35 @@ export const createExplainMiddleware = (strapi: Core.Strapi): Core.MiddlewareHan
   ) => {
     const action = WRITE_ACTIONS[ctx.method];
 
-    if (
-      !action ||
-      entryChecked ||
-      ctx.status >= 400 ||
-      !strapi.config.get('autoReload') ||
-      process.env.NODE_ENV === 'production'
-    ) {
-      return;
+    if (!action || entryChecked || ctx.status >= 400) {
+      return undefined;
     }
 
     const uid = contentTypeOf(strapi, route.handler);
 
     if (uid === undefined) {
-      return;
+      return undefined;
     }
 
     const filters = strapi.contentAPI.permissions.checker.filtersFor(auth, action, uid);
 
     // No condition on the action: there was no ownership rule to skip
     if (!restrictsEntries(filters)) {
-      return;
+      return undefined;
     }
 
-    const key = `${ctx.method} ${routeOf(route)}`;
+    return { uid, action, key: `${ctx.method} ${routeOf(route)}` };
+  };
+
+  /** In development, says so once per route (see `skippedEntryCheck`). */
+  const warnUnguardedWrite = ({
+    uid,
+    action,
+    key,
+  }: NonNullable<ReturnType<typeof skippedEntryCheck>>) => {
+    if (!strapi.config.get('autoReload') || process.env.NODE_ENV === 'production') {
+      return;
+    }
 
     if (warned.has(key)) {
       return;
@@ -199,11 +206,23 @@ export const createExplainMiddleware = (strapi: Core.Strapi): Core.MiddlewareHan
       } = strapi.contentAPI.permissions.readExplain(auth);
       let entries = recorded;
 
-      warnUnguardedWrite(ctx, route, auth, entryChecked);
+      const skipped = skippedEntryCheck(ctx, route, auth, entryChecked);
+
+      if (skipped) {
+        warnUnguardedWrite(skipped);
+      }
 
       // A refusal is not a route that ran unchecked: the route's own permission said no
       if (!checked && ctx.status < 400) {
         entries = [{ kind: 'route-only', route: routeOf(route) }];
+      }
+
+      // Explain mode says the same as the development warning: the ownership rule did not apply
+      if (skipped) {
+        entries = [
+          ...entries,
+          { kind: 'entry-check-skipped', uid: skipped.uid, action: skipped.action },
+        ];
       }
 
       const explaining =

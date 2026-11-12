@@ -353,13 +353,21 @@ describe('explain middleware: a write that skipped the ownership check', () => {
   }
 
   /** One middleware, so a second request of the same route can be told from a first */
-  const setup = (options: Pick<Write, 'filters' | 'autoReload'> = {}) => {
-    const { filters = MINE, autoReload = true } = options;
+  const setup = (options: Pick<Write, 'filters' | 'autoReload'> & { explain?: boolean } = {}) => {
+    const { filters = MINE, autoReload = true, explain = false } = options;
     const warn = vi.fn();
     const filtersFor = vi.fn(() => filters);
     const readExplain = vi.fn();
     const strapi = {
-      config: { get: (path: string) => (path === 'autoReload' ? autoReload : undefined) },
+      config: {
+        get(path: string) {
+          if (path === 'autoReload') {
+            return autoReload;
+          }
+
+          return path === 'plugin::end-users.explain' ? explain : undefined;
+        },
+      },
       contentType: (uid: string) => (uid === NOTE ? { uid } : undefined),
       contentAPI: { permissions: { readExplain, checker: { filtersFor } } },
       log: { debug: vi.fn(), warn },
@@ -390,6 +398,8 @@ describe('explain middleware: a write that skipped the ownership check', () => {
       });
 
       process.env.NODE_ENV = previous;
+
+      return ctx.response.get(EXPLAIN_HEADER);
     };
 
     return { send, warn, filtersFor };
@@ -409,6 +419,17 @@ describe('explain middleware: a write that skipped the ownership check', () => {
     await send({ method: 'DELETE', handler: `${NOTE}.delete` });
 
     expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('says so in the explain output too, in production as well when explain is on', async () => {
+    const { send, warn } = setup({ explain: true, autoReload: false });
+
+    const header = await send({ nodeEnv: 'production' });
+
+    expect(JSON.parse(header)).toEqual([
+      { kind: 'entry-check-skipped', uid: NOTE, action: 'update' },
+    ]);
+    expect(warn).not.toHaveBeenCalled();
   });
 
   it.each([
