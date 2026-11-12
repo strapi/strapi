@@ -155,9 +155,23 @@ describe('develop open option', () => {
     expect(mockCluster.fork).toHaveBeenLastCalledWith();
 
     const [, onMessage] = mockCluster.on.mock.calls.find(([event]) => event === 'message')!;
+    await onMessage({ send: jest.fn() }, 'started');
     await onMessage({ send: jest.fn() }, 'killed');
 
     expect(mockCluster.fork).toHaveBeenCalledTimes(2);
     expect(mockCluster.fork).toHaveBeenLastCalledWith({ [RESTART_ENV]: 'true' });
+  });
+
+  it('keeps --open for the worker that replaces one that failed before starting', async () => {
+    mockCluster.isPrimary = true;
+    mockCluster.isWorker = false;
+
+    await runDevelop(true);
+
+    const [, onMessage] = mockCluster.on.mock.calls.find(([event]) => event === 'message')!;
+    await onMessage({ send: jest.fn() }, 'killed');
+
+    expect(mockCluster.fork).toHaveBeenCalledTimes(2);
+    expect(mockCluster.fork).toHaveBeenLastCalledWith();
   });
 });

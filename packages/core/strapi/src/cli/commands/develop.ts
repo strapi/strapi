@@ -41,7 +41,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--no-build-admin', 'Do not build the admin panel in case watch is disabled')
     .option(
       '--open',
-      'Open the admin in your browser when develop starts, even if an admin user exists'
+      'Open the admin in your browser when develop starts (development only), even if an admin user exists'
     )
     .option('--no-open', 'Do not open the admin in your browser, even on the first run')
     .option('--install-deps', 'Auto-install missing admin dependencies', true)

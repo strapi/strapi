@@ -24,7 +24,7 @@ Start your Strapi application in development mode
 Options:
   --polling         Watch for file changes in network directories (default: false)
   --watch-admin     Watch the admin panel for hot changes
-  --open            Open the admin in your browser when develop starts, even if an admin user exists
+  --open            Open the admin in your browser when develop starts (development only), even if an admin user exists
   --no-open         Do not open the admin in your browser, even on the first run
   -h, --help        Display help for command
 ```
@@ -33,9 +33,9 @@ Options:
 
 The admin opens in a browser from `Strapi.openAdmin()` after the server listens, and only in the `development` environment: with `NODE_ENV=production`, neither flag opens it. Without a flag, it opens only when no admin user exists and `admin.autoOpen` is not `false`.
 
-`--open` opens the admin once per `strapi develop` session, when the first worker starts, even if an admin user exists or `admin.autoOpen` is `false`. `--no-open` never opens it, including on the first run and on restarts.
+`--open` opens the admin when the first worker starts, even if an admin user exists or `admin.autoOpen` is `false`. `--no-open` never opens it, including on the first run and on restarts.
 
-On a restart after a file change (for example a Content-Type Builder save), the primary forks the new worker with `STRAPI_DEVELOP_RESTART=true`. That worker ignores `--open` and uses the default behaviour, so `--open` does not open a new tab on each reload. `--no-open` still applies.
+On a restart after a file change (for example a Content-Type Builder save), the primary forks the new worker with `STRAPI_DEVELOP_RESTART=true`, but only after a worker's server has listened. A worker that failed before that (for example a TypeScript error) does not count, so the worker that replaces it keeps `--open`. A restarted worker ignores `--open` and uses the default behaviour. Once an admin user exists, `--open` does not open a new tab on each reload. While no admin user exists, the default behaviour still opens a tab on every restart, with or without `--open`. `--no-open` still applies.
 
 The flag is passed to `createStrapi()` as the `open` option. It is kept on the Strapi instance, not in the app config, so a user `config/open.*` file still loads. Neither flag changes `config/admin`.
 

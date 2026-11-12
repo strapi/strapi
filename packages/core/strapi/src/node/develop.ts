@@ -95,7 +95,8 @@ const cleanupDistDirectory = async ({
   cleaningSpinner?.succeed();
 };
 
-// Set by the primary on workers it forks after a reload, so they know they are not the first start.
+// Set by the primary on workers it forks after a worker has started, so they know they are not the
+// first start. A worker that failed before its server listened does not count.
 const RESTART_ENV = 'STRAPI_DEVELOP_RESTART';
 
 /**
@@ -177,8 +178,16 @@ const develop = async ({
       adminSpinner.succeed();
     }
 
+    // Only a worker whose server listened opened the admin, so only that makes the next worker a
+    // restart. A worker that failed before start() leaves `--open` for the one that replaces it.
+    let hasStarted = false;
+
     cluster.on('message', async (worker, message) => {
       switch (message) {
+        case 'started': {
+          hasStarted = true;
+          break;
+        }
         case 'reload': {
           if (tsconfig?.config) {
             try {
@@ -197,7 +206,11 @@ const develop = async ({
         }
         case 'killed': {
           logger.debug('cluster has the killed message, forking the cluster');
-          cluster.fork({ [RESTART_ENV]: 'true' });
+          if (hasStarted) {
+            cluster.fork({ [RESTART_ENV]: 'true' });
+          } else {
+            cluster.fork();
+          }
           break;
         }
         case 'stop': {
@@ -334,7 +347,14 @@ const develop = async ({
 
       ensureWatcher();
 
-      strapiInstance.start();
+      const starting = strapiInstance.start();
+      // start() resolves after the server listens. Tell the primary, so the worker it forks after
+      // the next reload counts as a restart and drops `--open`.
+      if (starting instanceof Promise) {
+        starting.then(() => {
+          process.send?.('started');
+        });
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error(`Error during development: ${message}`);

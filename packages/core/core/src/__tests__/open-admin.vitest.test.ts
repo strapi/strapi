@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import Strapi from '../Strapi';
@@ -71,11 +74,24 @@ describe('Strapi.openAdmin', () => {
     expect(mockedOpenBrowser).not.toHaveBeenCalled();
   });
 
-  it('does not reopen the admin on a restart after --open once an admin user exists', async () => {
-    // The develop primary drops `--open` for workers it forks after a reload.
-    await openAdmin(createFakeStrapi({ open: undefined }), true);
+  it('opens the admin when the instance is created with open: true', async () => {
+    const appDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-open-admin-'));
+    fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify({ name: 'app' }));
 
-    expect(mockedOpenBrowser).not.toHaveBeenCalled();
+    // openAdmin() only opens in the development environment, and the config reads NODE_ENV.
+    const nodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+
+    try {
+      const instance = new Strapi({ appDir, distDir: appDir, open: true });
+
+      await instance.openAdmin({ isInitialized: true });
+
+      expect(mockedOpenBrowser).toHaveBeenCalledTimes(1);
+    } finally {
+      process.env.NODE_ENV = nodeEnv;
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
   });
 
   it('reports a tab that could not be opened', async () => {
