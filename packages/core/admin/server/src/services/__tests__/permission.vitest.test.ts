@@ -150,14 +150,13 @@ describe('Permission Service', () => {
       const cleanPermissionFields = vi.fn(() => toPermission(permsWithCleanFields as any));
       const dbDelete = vi.fn(() => Promise.resolve());
       const update = vi.fn(() => Promise.resolve());
-      const count = vi.fn(() => Promise.resolve(4));
 
       const registeredPerms = new Map();
       registeredPerms.set('action-1', {});
       registeredPerms.set('action-3', { subjects: ['country'] });
 
       global.strapi = merge({}, global.strapi, {
-        db: { query: () => ({ findMany, delete: dbDelete, update, count }) },
+        db: { query: () => ({ findMany, delete: dbDelete, update }) },
         admin: {
           services: {
             'content-type': { cleanPermissionFields },
@@ -177,8 +176,9 @@ describe('Permission Service', () => {
       await cleanPermissionsInDatabase();
 
       expect(findMany).toHaveBeenCalledWith({
+        where: {},
+        orderBy: { id: 'asc' },
         limit: 200,
-        offset: 0,
         populate: ['role', 'apiToken'],
       });
       expect(update).toHaveBeenNthCalledWith(1, {
@@ -231,10 +231,9 @@ describe('Permission Service', () => {
         Promise.resolve({ where: { id: where.id } })
       );
       const update = vi.fn(() => Promise.resolve());
-      const count = vi.fn(() => Promise.resolve(3));
 
       global.strapi = merge({}, global.strapi, {
-        db: { query: () => ({ findMany, delete: dbDelete, update, count }) },
+        db: { query: () => ({ findMany, delete: dbDelete, update }) },
         admin: {
           services: {
             'content-type': { cleanPermissionFields },
@@ -287,10 +286,9 @@ describe('Permission Service', () => {
         Promise.resolve({ where: { id: where.id } })
       );
       const update = vi.fn(() => Promise.resolve());
-      const count = vi.fn(() => Promise.resolve(2));
 
       global.strapi = merge({}, global.strapi, {
-        db: { query: () => ({ findMany, delete: dbDelete, update, count }) },
+        db: { query: () => ({ findMany, delete: dbDelete, update }) },
         admin: {
           services: {
             'content-type': { cleanPermissionFields },
@@ -317,25 +315,66 @@ describe('Permission Service', () => {
       expect(update).not.toHaveBeenCalled();
     });
 
+    type StoredPermission = { id: number } & Record<string, unknown>;
+
+    type FindManyParams = {
+      where?: { id?: { $gt?: number } };
+      orderBy?: { id?: 'asc' | 'desc' };
+      limit?: number;
+      offset?: number;
+    };
+
+    /**
+     * In-memory `admin::permission` table: a delete removes the row, so the rows after it
+     * shift down like they do in a real database
+     */
+    const createPermissionTable = (permsInDb: StoredPermission[]) => {
+      const rows = [...permsInDb];
+
+      const findMany = vi.fn(({ where, orderBy, limit, offset = 0 }: FindManyParams) => {
+        const afterId = where?.id?.$gt;
+        const matching = rows.filter((row) => afterId === undefined || row.id > afterId);
+        const sorted =
+          orderBy?.id === undefined
+            ? matching
+            : [...matching].sort((a, b) => (orderBy.id === 'asc' ? a.id - b.id : b.id - a.id));
+        const end = limit === undefined ? undefined : offset + limit;
+
+        return Promise.resolve(sorted.slice(offset, end));
+      });
+
+      const dbDelete = vi.fn(({ where }: { where: { id: number } }) => {
+        const index = rows.findIndex((row) => row.id === where.id);
+        const [deleted] = index === -1 ? [null] : rows.splice(index, 1);
+
+        return Promise.resolve(deleted);
+      });
+
+      return {
+        rows,
+        findMany,
+        dbDelete,
+        update: vi.fn(() => Promise.resolve()),
+      };
+    };
+
     describe('logging', () => {
       const setupCleanup = (
-        permsInDb: unknown[],
+        permsInDb: StoredPermission[],
         registeredActions: string[],
         actionSubjects: Record<string, string[]> = {}
       ) => {
         const warn = vi.fn();
-        const dbDelete = vi.fn(() => Promise.resolve());
+        const table = createPermissionTable(permsInDb);
+        const { dbDelete } = table;
 
         global.strapi = merge({}, global.strapi, {
           log: { warn },
           db: {
             query: () => ({
-              findMany: vi.fn(({ limit, offset }: { limit: number; offset: number }) =>
-                Promise.resolve(permsInDb.slice(offset, offset + limit))
-              ),
+              findMany: table.findMany,
               delete: dbDelete,
-              update: vi.fn(() => Promise.resolve()),
-              count: vi.fn(() => Promise.resolve(permsInDb.length)),
+              update: table.update,
             }),
           },
           admin: {
@@ -354,7 +393,7 @@ describe('Permission Service', () => {
           eventHub: { emit: vi.fn() },
         });
 
-        return { warn, dbDelete };
+        return { warn, dbDelete, table };
       };
 
       const perm = (id: number, action: string, owner: Record<string, unknown>) => ({
@@ -481,6 +520,40 @@ describe('Permission Service', () => {
         expect(message).not.toMatch(/[\r\n]/);
         expect(message).toContain('Roles: "Evil\\nRole \\"x\\"" (id 3). ');
         expect(message).toContain('Admin tokens: "evil\\r\\ntoken" (id 7). ');
+      });
+
+      test('removes every stale permission in one run when they span several pages', async () => {
+        // 450 rows, all of an unregistered action: 3 pages of 200
+        const permsInDb = Array.from({ length: 450 }, (_, index) =>
+          perm(index + 1, 'admin::legacy.read', { role: { id: 2, name: 'Editor' } })
+        );
+
+        const { warn, dbDelete, table } = setupCleanup(permsInDb, ['admin::users.read']);
+
+        await cleanPermissionsInDatabase();
+
+        expect(table.rows).toEqual([]);
+        expect(dbDelete).toHaveBeenCalledTimes(450);
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn.mock.calls[0][0]).toMatch(/^Removed 450 stored admin permission\(s\)/);
+      });
+
+      test('keeps only the valid permissions in one run when stale and valid ones are interleaved across pages', async () => {
+        // 450 rows, every odd id is of an unregistered action
+        const permsInDb = Array.from({ length: 450 }, (_, index) => {
+          const id = index + 1;
+          const action = id % 2 === 1 ? 'admin::legacy.read' : 'admin::users.read';
+
+          return perm(id, action, { role: { id: 2, name: 'Editor' } });
+        });
+
+        const { table } = setupCleanup(permsInDb, ['admin::users.read']);
+
+        await cleanPermissionsInDatabase();
+
+        expect(table.rows.map((row) => row.id)).toEqual(
+          permsInDb.filter((row) => row.id % 2 === 0).map((row) => row.id)
+        );
       });
 
       test('does not warn when nothing is removed', async () => {
