@@ -18,6 +18,7 @@ import {
 } from '../utils/permissions';
 
 const USER_UID = 'plugin::end-users.user';
+const SESSION_UID = 'plugin::end-users.session';
 const ROLE_UID = 'plugin::end-users.role';
 const PERMISSION_UID = 'plugin::end-users.permission';
 const BASE = '/end-users-test/policies';
@@ -195,9 +196,17 @@ describe('end-users: the route policies on a project`s own routes', () => {
     refused(await get('verified', bearer(unverified.token)), 'EMAIL_NOT_VERIFIED');
   });
 
-  it('lets a user with two-factor authentication through has-two-factor, and refuses one without', async () => {
+  it('lets a user through has-two-factor once their session passed a second factor, and refuses one without', async () => {
     const enrolled = await userWith({ twoFactorEnabled: true });
     const without = await userWith({ twoFactorEnabled: false });
+
+    // Two-factor is on, but this session never gave a second factor
+    refused(await get('two-factor', bearer(enrolled.token)), 'TWO_FACTOR_REQUIRED');
+
+    // Once the session has passed it, as a code at the challenge records, the user is let in
+    await strapi.db
+      .query(SESSION_UID)
+      .updateMany({ where: { userId: enrolled.documentId }, data: { twoFactorVerified: true } });
 
     expect((await get('two-factor', bearer(enrolled.token))).statusCode).toBe(200);
     refused(await get('two-factor', bearer(without.token)), 'TWO_FACTOR_REQUIRED');
