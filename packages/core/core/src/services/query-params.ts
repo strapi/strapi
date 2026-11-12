@@ -8,15 +8,33 @@ import type { Core, UID } from '@strapi/types';
 const MAX_WARNED_UNKNOWN_FILTER_KEYS = 1000;
 
 /**
- * Quotes a value for a log line. Filter keys come from the request, so control characters
- * (line breaks, ANSI escapes, C1 controls, line separators) are escaped to keep one warning
- * on one log line.
+ * Longest value, in code points, printed in a warning before it is truncated
  */
-const quoteForLog = (value: string): string =>
-  JSON.stringify(value).replace(
-    /[\u007f-\u009f\u2028\u2029]/g,
-    (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
-  );
+const MAX_LOGGED_VALUE_LENGTH = 100;
+
+const escapeCodePoint = (character: string): string => {
+  const codePoint = character.codePointAt(0) ?? 0;
+  const hex = codePoint.toString(16);
+
+  return codePoint > 0xffff ? `\\u{${hex}}` : `\\u${hex.padStart(4, '0')}`;
+};
+
+/**
+ * Quotes a value for a log line. Filter keys come from the request, so:
+ * - control characters (line breaks, ANSI escapes, C1 controls), format characters
+ *   (bidirectional overrides and isolates, zero-width characters) and line separators
+ *   are escaped, to keep one readable warning on one log line;
+ * - long values are truncated.
+ */
+const quoteForLog = (value: string): string => {
+  const codePoints = Array.from(value);
+  const truncated =
+    codePoints.length > MAX_LOGGED_VALUE_LENGTH
+      ? `${codePoints.slice(0, MAX_LOGGED_VALUE_LENGTH).join('')}…`
+      : value;
+
+  return JSON.stringify(truncated).replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, escapeCodePoint);
+};
 
 const formatUnknownFilterKeyWarning = ({
   key,
@@ -26,13 +44,11 @@ const formatUnknownFilterKeyWarning = ({
 }: queryParams.UnknownFilterKey): string => {
   const model = quoteForLog(uid ?? 'unknown');
   const consequence =
-    'was ignored: the query ran without this condition and may return more results than intended.';
+    'was ignored: the query ran without this condition and may return different results than intended.';
   const future = 'This will become an error in a future major version.';
 
   if (operator !== undefined) {
-    const attributePath = quoteForLog(path.slice(0, -1).join('.'));
-
-    return `[strapi] Unsupported object operand for ${quoteForLog(operator)} on ${attributePath} (model ${model}) ${consequence} ${future}`;
+    return `[strapi] Unsupported key ${quoteForLog(key)} in the object operand of ${quoteForLog(operator)} at ${quoteForLog(path.join('.'))} on model ${model} ${consequence} ${future}`;
   }
 
   return `[strapi] Unknown filter key ${quoteForLog(key)} at ${quoteForLog(path.join('.'))} on model ${model} ${consequence} Check for a typo. ${future}`;

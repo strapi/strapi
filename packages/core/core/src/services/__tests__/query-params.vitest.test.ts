@@ -52,7 +52,7 @@ describe('query-params service', () => {
       expect(query.where).toEqual({ title: { $eq: 'Hello' } });
       expect(warn).toHaveBeenCalledTimes(1);
       expect(warn).toHaveBeenCalledWith(
-        '[strapi] Unknown filter key "metaTitel" at "seo.metaTitel" on model "shared.seo" was ignored: the query ran without this condition and may return more results than intended. Check for a typo. This will become an error in a future major version.'
+        '[strapi] Unknown filter key "metaTitel" at "seo.metaTitel" on model "shared.seo" was ignored: the query ran without this condition and may return different results than intended. Check for a typo. This will become an error in a future major version.'
       );
     });
 
@@ -67,7 +67,21 @@ describe('query-params service', () => {
       expect(query.where).toEqual({});
       expect(warn).toHaveBeenCalledTimes(1);
       expect(warn).toHaveBeenCalledWith(
-        '[strapi] Unsupported object operand for "$eq" on "meta" (model "api::article.article") was ignored: the query ran without this condition and may return more results than intended. This will become an error in a future major version.'
+        '[strapi] Unsupported key "a" in the object operand of "$eq" at "meta.a" on model "api::article.article" was ignored: the query ran without this condition and may return different results than intended. This will become an error in a future major version.'
+      );
+    });
+
+    test('warns with the operand message when an object operand holds an attribute name', () => {
+      const { strapi, warn } = createStrapi('development');
+      const queryParams = createQueryParamService(strapi);
+
+      queryParams.transform(UID, { filters: { meta: { $eq: { title: { foo: 1 } } } } });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '[strapi] Unsupported key "foo" in the object operand of "$eq" at "meta.title.foo"'
+        )
       );
     });
 
@@ -99,9 +113,46 @@ describe('query-params service', () => {
 
       const message: string = warn.mock.calls[0][0];
 
-      expect(message).toContain('Unsupported object operand for "$eq" on "meta"');
+      expect(message).toContain(
+        'Unsupported key "a\\nb" in the object operand of "$eq" at "meta.a\\nb"'
+      );
       // eslint-disable-next-line no-control-regex
       expect(message).not.toMatch(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/);
+    });
+
+    test('escapes bidirectional and other format characters of filter keys in the warning', () => {
+      const { strapi, warn } = createStrapi('development');
+      const queryParams = createQueryParamService(strapi);
+
+      queryParams.transform(UID, {
+        filters: { 'a\u202eb\u2066c\u2069d\u200be\u00adf\ufeffg\u{e0001}h': 1 },
+      });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+
+      const message: string = warn.mock.calls[0][0];
+
+      expect(message).toContain(
+        'Unknown filter key "a\\u202eb\\u2066c\\u2069d\\u200be\\u00adf\\ufeffg\\u{e0001}h"'
+      );
+      expect(message).not.toMatch(/\p{Cf}/u);
+    });
+
+    test('truncates long filter keys in the warning', () => {
+      const { strapi, warn } = createStrapi('development');
+      const queryParams = createQueryParamService(strapi);
+      const key = 'k'.repeat(4000);
+
+      queryParams.transform(UID, { filters: { [key]: 1 } });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+
+      const message: string = warn.mock.calls[0][0];
+
+      expect(message).toContain(
+        `Unknown filter key "${'k'.repeat(100)}…" at "${'k'.repeat(100)}…"`
+      );
+      expect(message.length).toBeLessThan(600);
     });
 
     test.each([['production'], ['test'], [undefined]])(
