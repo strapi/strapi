@@ -95,6 +95,7 @@ const models = [
       displayUsername: col('display_username'),
       emailVerified: col('email_verified'),
       banned: col('banned'),
+      banExpires: col('ban_expires'),
       roles: {
         type: 'relation',
         joinTable: {
@@ -162,6 +163,7 @@ const project = async (renamed: boolean, permissions: Row[]) => {
     t.string('display_username');
     t.boolean('email_verified');
     t.boolean('banned');
+    t.string('ban_expires');
     t.boolean('confirmed');
     t.boolean('blocked');
     t.string('provider');
@@ -397,6 +399,26 @@ describe('runRollback', () => {
     expect(
       (await knex('up_users').orderBy('id').select('username')).map((u: Row) => u.username)
     ).toEqual(['Alice', 'Bob', 'Carl']);
+    await knex.destroy();
+  });
+
+  it('restores a ban as a block only while it lasts', async () => {
+    const { knex, db, ctx } = await project(true, []);
+    const day = 24 * 60 * 60 * 1000;
+
+    await knex('up_users').insert([
+      { id: 4, document_id: 'd4', banned: true, ban_expires: null },
+      { id: 5, document_id: 'd5', banned: true, ban_expires: new Date(Date.now() + day).toISOString() },
+      { id: 6, document_id: 'd6', banned: true, ban_expires: new Date(Date.now() - day).toISOString() },
+      { id: 7, document_id: 'd7', banned: false, ban_expires: new Date(Date.now() - day).toISOString() },
+    ]);
+
+    await runRollback(knex as never, db, ctx);
+
+    const users = await knex('up_users').whereIn('id', [4, 5, 6, 7]).orderBy('id').select('id', 'blocked');
+
+    // permanent, still running, already over, never banned
+    expect(users.map((u: Row) => u.blocked)).toEqual([1, 1, 0, 0]);
     await knex.destroy();
   });
 

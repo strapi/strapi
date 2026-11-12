@@ -208,7 +208,22 @@ const tryClaim = async (strapi: Core.Strapi, by: string, now: Date): Promise<boo
   return swap(strapi, current, { ...value, claim });
 };
 
-/** Inserts the first record. Two starts that insert together leave two rows: the older one wins. */
+/**
+ * How long an insert is given to become visible to the other start before the rows are read for
+ * the winner. Postgres lets a reader see only its own row while an older insert is not yet
+ * committed, so one read right after the insert can name both starts the winner.
+ */
+export const CLAIM_SETTLE_MS = 150;
+
+/**
+ * Inserts the first record. Two starts that insert together leave two rows: the older one wins.
+ *
+ * The store's table has no unique key a second insert could fail on, and adding one would be a
+ * schema change for every project. So the winner is read twice, one settle delay apart, and the
+ * start only wins when both reads name its own row as the oldest. A start that saw an older row
+ * only on the second read loses, and so may both starts of a very unlucky pair: the next start
+ * then claims the migration, which costs a wait and never a double run.
+ */
 const insertClaimed = async (strapi: Core.Strapi, record: MigrationRecord): Promise<boolean> => {
   const value = JSON.stringify(record);
 
@@ -220,17 +235,23 @@ const insertClaimed = async (strapi: Core.Strapi, record: MigrationRecord): Prom
     tag: null,
   });
 
-  const rows = (await strapi.db
-    .connection(STORE_TABLE)
-    .where({ key: rowKey(MIGRATION_KEY) })
-    .orderBy('id', 'asc')
-    .select('id', 'value')) as Array<{ id: number; value: string }>;
+  const read = async () =>
+    (await strapi.db
+      .connection(STORE_TABLE)
+      .where({ key: rowKey(MIGRATION_KEY) })
+      .orderBy('id', 'asc')
+      .select('id', 'value')) as Array<{ id: number; value: string }>;
 
-  if (rows.length < 2 || rows[0].value === value) {
+  await settle();
+  const before = await read();
+  await settle();
+  const after = await read();
+
+  if (before[0]?.value === value && after[0]?.id === before[0].id && after[0].value === value) {
     return true;
   }
 
-  const ours = rows.find((row) => row.value === value);
+  const ours = after.find((row) => row.value === value);
 
   if (ours) {
     await strapi.db.connection(STORE_TABLE).where({ id: ours.id }).delete();
@@ -238,6 +259,11 @@ const insertClaimed = async (strapi: Core.Strapi, record: MigrationRecord): Prom
 
   return false;
 };
+
+const settle = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, CLAIM_SETTLE_MS);
+  });
 
 /** Gives the claim up if it is `by`'s, so the next start need not wait for it to run out */
 export const releaseMigration = async (strapi: Core.Strapi, by: string): Promise<void> => {
