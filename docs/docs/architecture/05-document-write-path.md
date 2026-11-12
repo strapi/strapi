@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - 'Commit callbacks run one after another. The first runs up to its first await before the write returns. A failing commit callback is logged and later callbacks still run. A failing rollback callback is logged, skips the rest, and does not replace the write error. destroy() waits at most 10 seconds for that database. When the database rejects COMMIT, the commit callbacks do not run and the write fails.'
+  - 'Deadlock retry: the outermost transaction runs the handler at most 3 times in total (up to 2 retries). Commit callbacks run one after another. The first runs up to its first await before the write returns. A failing commit callback is logged and later callbacks still run. A failing rollback callback is logged, skips the rest, does not replace the write error, and does not cancel a deadlock retry. destroy() waits at most 10 seconds for that database. When the database rejects COMMIT, the commit callbacks do not run and the write fails.'
   - 'update locks the draft row of the locale being written with FOR NO KEY UPDATE on Postgres. MySQL and MariaDB lock an internal sentinel row for the document, removed on 404 updates and when the last row of the document is deleted. On MySQL the sentinel lock precedes every read of the transaction, including in the Content Manager publish routes. Checked against repository.ts, document-update-lock.ts, index.ts, transaction-context.ts, and the Content Manager collection-types.ts and single-types.ts controllers.'
   - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release-run.ts`. The rest of this page was not re-verified.
 ---
@@ -132,7 +132,7 @@ Database lifecycles run after the entity validator. Data that a `beforeCreate` o
 
 Each public repository method runs inside `strapi.db.transaction()`. The transaction context uses `AsyncLocalStorage`. A nested call reuses the open transaction and does not commit it. Only the outermost call commits or rolls back.
 
-Database lifecycles run inside the transaction. If the transaction rolls back later, a side effect in a lifecycle subscriber, such as an HTTP call, is not undone.
+Database lifecycles run inside the transaction. If the transaction rolls back later, a side effect in a lifecycle subscriber, such as an HTTP call, is not undone. A deadlock aborts the transaction and the outermost `strapi.db.transaction` runs the handler again, at most 3 times in total (up to 2 retries), with a short wait between tries, so those subscribers can run again too.
 
 ## Events and webhooks
 

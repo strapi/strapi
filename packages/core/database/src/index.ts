@@ -10,7 +10,15 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import {
+  Callback,
+  isDeadlockError,
+  isFinalisedTransactionError,
+  recordErrorIfTransactorFinalised,
+  transactionCtx,
+  TransactionObject,
+  waitForDeadlockRetry,
+} from './transaction-context';
 import { validateDatabase } from './validations';
 import { appendCallerStack } from './utils/async-stack';
 import type { Model } from './types';
@@ -309,6 +317,40 @@ class Database {
   async transaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
+    // Postgres and MySQL abort one transaction when two of them deadlock, and
+    // the caller has to run it again. Nested work is not retried on its own:
+    // the outer transaction is already aborted, so the outermost callback
+    // runs again. Commit and rollback hooks are not awaited here, so their
+    // errors never reach this loop. A deadlock after the handler has
+    // already called commit or rollback is not retried either.
+    const nested = !!transactionCtx.get();
+    const attempts = nested ? 1 : 3;
+
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await this.runTransaction(cb);
+      } catch (error) {
+        lastError = error;
+        if (
+          nested ||
+          attempt === attempts ||
+          isFinalisedTransactionError(error) ||
+          !isDeadlockError(error)
+        ) {
+          throw error;
+        }
+
+        await waitForDeadlockRetry(attempt);
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async runTransaction<TCallback extends Callback>(
+    cb?: TCallback
+  ): Promise<ReturnType<TCallback> | TransactionObject> {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
       ? await this.startTransaction()
@@ -354,6 +396,9 @@ class Database {
           await commit();
           return res;
         } catch (error) {
+          // Read this before rollback(). Rolling back an open transaction also
+          // completes it, and that path must stay retryable.
+          recordErrorIfTransactorFinalised(trx, error);
           await rollback();
           throw error;
         }
