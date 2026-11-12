@@ -468,6 +468,62 @@ describe('Database', () => {
       );
     });
 
+    it('closes the connection when settling transaction hooks fails', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const settleError = new Error('settle failed');
+      jest.spyOn(db, 'settleTransactionHooks').mockRejectedValue(settleError);
+
+      let closed = false;
+      const closePool = db.connection.destroy.bind(db.connection);
+      Object.defineProperty(db.connection, 'destroy', {
+        configurable: true,
+        async value() {
+          closed = true;
+          return closePool();
+        },
+      });
+
+      await expect(db.destroy()).rejects.toBe(settleError);
+      expect(closed).toBe(true);
+    });
+
+    it('reports the hook drain error when closing the connection also fails', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const settleError = new Error('settle failed');
+      jest.spyOn(db, 'settleTransactionHooks').mockRejectedValue(settleError);
+
+      const closePool = db.connection.destroy.bind(db.connection);
+      Object.defineProperty(db.connection, 'destroy', {
+        configurable: true,
+        value: () => Promise.reject(new Error('close failed')),
+      });
+
+      try {
+        await expect(db.destroy()).rejects.toBe(settleError);
+      } finally {
+        await closePool();
+      }
+    });
+
+    it('rejects with the connection close error when the hooks have settled', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const closeError = new Error('close failed');
+      const closePool = db.connection.destroy.bind(db.connection);
+      Object.defineProperty(db.connection, 'destroy', {
+        configurable: true,
+        value: () => Promise.reject(closeError),
+      });
+
+      try {
+        await expect(db.destroy()).rejects.toBe(closeError);
+      } finally {
+        await closePool();
+      }
+    });
+
     it('does not wait for commit hooks that belong to another database', async () => {
       const first = new Database(configConnectionObject);
       const second = new Database(configConnectionObject);

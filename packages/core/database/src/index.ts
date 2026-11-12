@@ -40,6 +40,10 @@ const formatHookError = (error: unknown): string => {
   }
 };
 
+/** Drivers and hooks can reject with any value. Callers receive an Error. */
+const asThrownError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error));
+
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
@@ -414,9 +418,11 @@ class Database {
     // the row with NULL createdAt and updatedAt.
     let drained = true;
     let settleError: unknown;
+    let failedToSettle = false;
     try {
       drained = await this.settleTransactionHooks();
     } catch (error) {
+      failedToSettle = true;
       settleError = error;
     }
 
@@ -426,15 +432,26 @@ class Database {
       this.poolDiagnostics?.dispose();
     }
 
+    // Close the pool before reporting a drain failure. Throwing from `finally`
+    // hides a close failure, and lint rejects that throw.
+    let closeError: unknown;
+    let failedToClose = false;
     try {
       if (!drained) {
         this.logger.warn('Closing the database connection with transaction hooks still running');
       }
       await this.connection.destroy();
-    } finally {
-      if (settleError) {
-        throw settleError;
-      }
+    } catch (error) {
+      failedToClose = true;
+      closeError = error;
+    }
+
+    if (failedToSettle) {
+      throw asThrownError(settleError);
+    }
+
+    if (failedToClose) {
+      throw asThrownError(closeError);
     }
   }
 }
