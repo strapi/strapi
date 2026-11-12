@@ -207,6 +207,7 @@ describe('Content API permissions: the checker', () => {
 
       expect(p.readExplain(auth)).toEqual({
         checked: true,
+        entryChecked: false,
         entries: [
           {
             kind: 'field-removed',
@@ -228,7 +229,7 @@ describe('Content API permissions: the checker', () => {
 
       p.checker.filtersFor(auth, 'find', NOTE);
 
-      expect(p.readExplain(auth)).toEqual({ checked: true, entries: [] });
+      expect(p.readExplain(auth)).toEqual({ checked: true, entryChecked: false, entries: [] });
     });
 
     it('explains nothing for a caller that is not active', async () => {
@@ -240,7 +241,7 @@ describe('Content API permissions: the checker', () => {
       p.checker.record(token, { kind: 'route-only', route: 'x' });
       p.checker.fieldsFor(token, 'find', NOTE);
 
-      expect(p.readExplain(token)).toEqual({ checked: false, entries: [] });
+      expect(p.readExplain(token)).toEqual({ checked: false, entryChecked: false, entries: [] });
     });
   });
 
