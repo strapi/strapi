@@ -153,7 +153,9 @@ export const knownUID: PostFilters[] = [
 ];
 
 /**
- * Reading back filters with a known UID keeps the attributes' types
+ * Reading back filters with a known UID does not widen them to `any`.
+ * This only checks that the read-backs are not `any`: the media and component read-backs
+ * (`cover`, `sections`) also accept attributes their schema does not have.
  */
 export const knownUIDReadBack = (filters: PostFilters) => {
   const tagFilters: Filters<'api::tag.tag'> | undefined = filters.tags;

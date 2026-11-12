@@ -192,7 +192,8 @@ export default ({ action, ability, model }: any) => {
 
     /**
      * The result keeps the type of `data` (`unknown` stays `unknown`), so callers can type
-     * their sanitized data. At runtime, fields the user is not allowed to see are removed.
+     * their sanitized data. At runtime, fields outside the user's permitted fields are removed:
+     * fields they may not write for `sanitizeInput`, fields they may not see for `sanitizeOutput`.
      */
     function wrappedSanitize<T>(data: T, options?: any): Promise<T>;
     async function wrappedSanitize(data: unknown, options = {} as any): Promise<unknown> {
