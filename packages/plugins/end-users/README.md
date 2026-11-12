@@ -103,6 +103,44 @@ checked against the role's conditions.
 refuses to start without a real `END_USERS_SECRET` (or `secret` in its config); a published placeholder such as the one
 in an `.env.example` does not count. In development it generates one and stores it in `.env`.
 
+**After an upgrade, users of a role that requires two-factor sign in once more.** Sessions that were open before the
+upgrade carry no record of a second factor, so a user whose role requires two-factor is asked to sign in again, and
+this time to complete the second factor. For such a role, a session made by a provider, a magic link or an email code
+is refused, because none of them proves a second factor; a trusted device and a passkey count.
+
+**Behind a reverse proxy, set `server.proxy` and `maxIpsCount`.** The rate limits count requests per client address.
+With `proxy: { koa: true }` and no `maxIpsCount` in `config/server.ts`, the address comes from the first entry of
+`X-Forwarded-For`, which the client writes, so anyone can pick the address the limits see and never reach one. Set
+`maxIpsCount` to the number of proxies in front of Strapi. Without `proxy`, every request has the proxy's address and
+the limits are shared by all clients. The plugin warns at start when the first of these is the case.
+
+**A change to a role's permissions reaches other instances within 30 seconds.** Each instance keeps what it has read
+of the permissions for 30 seconds, so a project that runs several instances sees a change on the one that took it at
+once, and on the others after the cache expires.
+
+**Sign-up and username availability show which accounts exist, unless email verification is required.** A sign-up with
+an address that is taken, and a check that a username is available, answer differently from a free one. Turn on
+"Require email verification" in the Sign-in settings if you do not want anyone to be able to find out whether an
+address or a username has an account.
+
+**Adding `anonymous()` gives the default role to anyone who asks.** The anonymous sign-in endpoint makes a user and a
+session without any credential, and the user gets the default role. Add the plugin only if that is what you want, and
+keep the default role to what a visitor may do.
+
+**A cookie domain shared across subdomains lets any of them set the session cookie.** With `cookies.domain` set, the
+session cookie is sent to every subdomain of that domain, and any application served from one of them can set it for
+the others. Use it only when every subdomain is yours and trusted.
+
+**Upload routes are not narrowed by role conditions.** A role's conditions apply to the entries of a content type. The
+upload routes (`plugin::upload`) are granted whole or not at all, so a role that may upload may reach every file its
+route permission covers, whatever conditions its other rows have.
+
+**An administrator who can update providers decides who can sign in.** On the Providers page an administrator can add
+an identity provider and mark it as trusted for linking, which lets an account at that provider attach to an existing
+user with the same email address. The discovery URL of an OpenID provider is fetched by the server when the provider is
+saved and when it is rebuilt, so the address an administrator enters is requested from your network. Give the
+permission to update providers only to administrators you trust with both.
+
 ## Moving a project from Users & Permissions
 
 The move works the same on Strapi Cloud and on a self-hosted project. No step needs a command. What you change reaches
@@ -242,6 +280,10 @@ production through your repository and a deploy, and what you need to read is sh
    an item resolved once you have dealt with it; providers, templates and rewritten addresses resolve themselves when
    you do what they ask. While compat is on, a Legacy token use block counts the requests that still arrive with a
    token Users & Permissions issued, and when the last one came.
+
+   While compat is on, new passwords are hashed with bcrypt at 10 rounds, the settings Users & Permissions used, so a
+   rollback still accepts them. With compat off, new passwords use Better Auth's own hashing; the bcrypt hashes you
+   migrated keep working.
 
 9. Set `compat.legacyJwt.until` from those counts: a date (`'2027-01-31'` lasts to the end of that day, in UTC) after
    which old tokens are no longer accepted. Move your front ends to the native endpoints while it runs. When the counts
