@@ -101,7 +101,7 @@ describe('document-manager', () => {
     });
   });
 
-  describe('body locale in the data', () => {
+  describe('request locale', () => {
     const create = jest.fn();
     const update = jest.fn();
     const clone = jest.fn();
@@ -120,7 +120,7 @@ describe('document-manager', () => {
       return documentManager({ strapi: global.strapi });
     };
 
-    // The data each action passes to the document service, for a body { title, locale }
+    // The params each action passes to the document service, for a body { title, locale }
     const actions = [
       [
         'create',
@@ -146,25 +146,29 @@ describe('document-manager', () => {
     ] as const;
 
     it.each(actions)(
-      '%s drops the body locale of a non-localized type',
+      '%s drops the request locale of a non-localized type',
       async (_name, callAction) => {
         const service = setup(false);
 
         const params = await callAction(service, { title: 'A', locale: 'fr' });
 
         expect(params.data).toEqual({ title: 'A' });
-        expect(params.locale).toBe('fr');
+        // The entity validator filters its unique check on this param
+        expect(params).not.toHaveProperty('locale');
       }
     );
 
-    it.each(actions)('%s keeps the body locale of a localized type', async (_name, callAction) => {
-      const service = setup(true);
+    it.each(actions)(
+      '%s keeps the request locale of a localized type',
+      async (_name, callAction) => {
+        const service = setup(true);
 
-      const params = await callAction(service, { title: 'A', locale: 'fr' });
+        const params = await callAction(service, { title: 'A', locale: 'fr' });
 
-      expect(params.data).toEqual({ title: 'A', locale: 'fr' });
-      expect(params.locale).toBe('fr');
-    });
+        expect(params.data).toEqual({ title: 'A', locale: 'fr' });
+        expect(params.locale).toBe('fr');
+      }
+    );
   });
 
   describe('publication actions without draft and publish', () => {

@@ -29,15 +29,19 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   /**
-   * A non-localized type has no locale, so the body locale must not be stored.
-   * The document service keeps it in the data, as its i18n transforms skip these types.
+   * A non-localized type has no locale, so the request locale is dropped from the data and the
+   * params. The i18n transforms of the document service skip these types: it would store a data
+   * locale, and the entity validator would filter its unique check on a locale the rows don't have.
    */
-  const omitLocaleOfNonLocalizedType = <T extends object>(uid: UID.ContentType, data: T) => {
+  const omitLocaleOfNonLocalizedType = <T extends { data: object; locale?: unknown }>(
+    uid: UID.ContentType,
+    params: T
+  ) => {
     if (strapi.localization.isLocalizedContentType(strapi.getModel(uid)) === true) {
-      return data;
+      return params;
     }
 
-    return omit(data, 'locale');
+    return { ...omit(params, 'locale'), data: omit(params.data, 'locale') };
   };
 
   return {
@@ -109,8 +113,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const data = omitLocaleOfNonLocalizedType(uid, opts.data ?? {});
-      const params = { ...opts, data, status: 'draft' as const, populate };
+      const params = omitLocaleOfNonLocalizedType(uid, {
+        ...opts,
+        data: opts.data ?? {},
+        status: 'draft' as const,
+        populate,
+      });
 
       return strapi.documents(uid).create(params);
     },
@@ -120,12 +128,14 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
     ) {
-      const publishData = omitLocaleOfNonLocalizedType(
-        uid,
-        flow(omitPublishedAtField, omitIdField)(opts.data || {})
-      );
+      const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, data: publishData, populate, status: 'draft' };
+      const params = omitLocaleOfNonLocalizedType(uid, {
+        ...opts,
+        data: publishData,
+        populate,
+        status: 'draft',
+      });
 
       return strapi.documents(uid).update({ ...params, documentId: id });
     },
@@ -139,12 +149,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Extract the locale to pass it as a plain param
       const locale = body?.locale;
-      const params = {
+      const params = omitLocaleOfNonLocalizedType(uid, {
         // Ensure id and documentId are not copied to the clone
-        data: omitLocaleOfNonLocalizedType(uid, omit(body, ['id', 'documentId'])),
+        data: omit(body, ['id', 'documentId']),
         locale,
         populate,
-      };
+      });
 
       return strapi
         .documents(uid)
