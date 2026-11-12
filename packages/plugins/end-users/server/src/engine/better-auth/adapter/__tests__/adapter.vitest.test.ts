@@ -1078,6 +1078,64 @@ describe('strapiAdapter', () => {
     });
   });
 
+  describe('database errors', () => {
+    const bound = ['SECRET', 'TOKEN'].join('-');
+    const failure = () =>
+      Object.assign(
+        new Error(
+          `insert into \`eu_sessions\` (\`token\`) values ('${bound}') - UNIQUE constraint failed`
+        ),
+        { code: 'SQLITE_CONSTRAINT', sql: 'insert into `eu_sessions` (`token`) values (?)' }
+      );
+
+    it('rethrows a failed write with its code and without the query or the bound values', async () => {
+      documents.create.mockRejectedValue(failure());
+
+      const error = await adapter
+        .create({ model: 'session', data: { token: 'x' } })
+        .catch((thrown: Error & { code?: string }) => thrown);
+
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain('SQLITE_CONSTRAINT');
+      expect((error as Error).message).not.toMatch(/SECRET|insert into|eu_sessions/);
+      expect((error as { code?: string }).code).toBe('SQLITE_CONSTRAINT');
+      expect((error as { sql?: string }).sql).toBeUndefined();
+      expect((error as { cause?: unknown }).cause).toBeUndefined();
+    });
+
+    it('does the same on the other write paths', async () => {
+      db.deleteMany.mockRejectedValue(failure());
+      db.findOne.mockResolvedValue({ id: 1, documentId: 'v1' });
+      db.updateMany.mockRejectedValue(failure());
+
+      for (const run of [
+        () => adapter.deleteMany({ model: 'session', where: [{ field: 'userId', value: 'u1' }] }),
+        () => adapter.consumeOne({ model: 'verification', where: [{ field: 'id', value: 'v1' }] }),
+        () =>
+          adapter.updateMany({
+            model: 'session',
+            where: [{ field: 'userId', value: 'u1' }],
+            update: { token: 'x' },
+          }),
+      ]) {
+        // eslint-disable-next-line no-await-in-loop
+        await expect(run()).rejects.toThrow(
+          /^The database refused .* \(error code SQLITE_CONSTRAINT\)\.$/
+        );
+      }
+    });
+
+    it('leaves an error that is not the database`s as it was', async () => {
+      const refused = new Error('Not allowed');
+
+      documents.create.mockRejectedValue(refused);
+
+      await expect(adapter.create({ model: 'session', data: { token: 'x' } })).rejects.toBe(
+        refused
+      );
+    });
+  });
+
   describe('transaction', () => {
     it('runs Better Auth multi-step work in a Strapi database transaction', async () => {
       const result = await adapter.transaction(async (trx) => {
