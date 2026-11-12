@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release.ts`. The rest of this page was not re-verified.
+  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release-run.ts`. The rest of this page was not re-verified.
 ---
 
 This page follows one write through the server. It explains the layers and the order in which they run. It is not an API reference for the Document Service.
@@ -38,7 +38,7 @@ Use `documentId` for stable references. Do not store a row `id` of a D&P content
 | 6     | Event manager   | `document-service/events.ts`         | After the commit, when something listens to the event, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                 |
 | 7     | Webhook runner  | `services/webhook-runner.ts`         | Queues the event and sends an HTTP `POST` to each enabled webhook for that event.                                                                             |
 
-The built-in middleware converts invalid date, time, datetime and relation errors from the database layer into `ValidationError`.
+The built-in middleware converts invalid date, time, datetime, relation and boolean errors from the database layer into `ValidationError`. The list of these input errors lives in `packages/core/core/src/utils/database-input-errors.ts`. The entity service uses the same list, and so does the global error middleware (`middlewares/errors.ts`). Routes that call `strapi.db.query` directly therefore also answer these errors with a 400 instead of a 500.
 
 ## A create, step by step
 

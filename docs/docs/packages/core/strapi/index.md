@@ -18,12 +18,11 @@ It runs in Node.js for the CLI and the build. The `@strapi/strapi/admin` export 
 
 ### Entry exports
 
-The `exports` field of `package.json` has four entries.
+The `exports` field of `package.json` has three entries.
 
 - `.` (`src/index.ts`) re-exports everything from `@strapi/core` and the types from `@strapi/types`.
 - `./admin` (`src/admin.ts`) exports `renderAdmin`, which mounts the admin application with the built-in admin plugins and the plugins of the application. It also exports hooks and helpers of `@strapi/admin` and `@strapi/content-manager`.
 - `./admin/test` re-exports the test helpers of `@strapi/admin`.
-- `./admin/styles.css` is the base stylesheet of the admin panel.
 
 ### The `strapi` binary
 

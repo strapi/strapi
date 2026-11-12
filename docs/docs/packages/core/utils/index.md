@@ -31,9 +31,25 @@ The `hooks` namespace creates hook objects: `createAsyncSeriesHook`, `createAsyn
 
 The `errors` namespace defines `ApplicationError` and its subclasses, for example `ValidationError`, `NotFoundError`, `ForbiddenError`, `UnauthorizedError` and `PolicyError`. Each error has a `name`, a `message` and `details`. The errors middleware in `@strapi/core` formats these errors into the HTTP error response.
 
+An app can load two copies of `@strapi/utils` when its Strapi packages are on different versions. `instanceof` on these errors still matches across copies: each class marks its prototype with a `Symbol.for('strapi.errors.class:<Id>')` key, and `ApplicationError` looks for that key on the error's prototype chain in `Symbol.hasInstance`. Both copies need this check for it to work.
+
 ### Schema traversal
 
 `traverseEntity` walks a data entity along its schema. It calls a `Visitor` for each attribute, and it recurses into relations, media, components and dynamic zones. The `traverse` namespace does the same for query parameters: fields, filters, sort and populate. See [traverseEntity](./traverse-entity.md).
+
+`traverseQueryPopulate` recurses into relations, media, components, `on` fragments of dynamic zones and polymorphic relations, and nested `populate` keys. It does not recurse into `sort`, `filters` and `fields` keys. A visitor that checks them runs the matching traversal itself, as the default validators and sanitizers do. A visitor must not recurse into a nested `populate`, because the traversal already visits it with the same visitor.
+
+Below a relation, media, component or `on` fragment, the keys of a populate value are query keywords, even when the schema also has an attribute with the same name. There, `populate` is always a nested populate of that schema, and `sort`, `filters` and `fields` are not walked. Elsewhere, a key that names an attribute is that attribute.
+
+#### Writing a populate visitor
+
+`traverseQueryPopulate` deep-copies the populate it is given once, before it walks it. The levels below are not copied again, and neither is a value a visitor sets. A custom visitor follows three rules:
+
+- Change the populate only with `set` and `remove`.
+- Never write into `value` or `data`. Build a new object or array and `set` it.
+- `set` a fresh value, not one that is shared with anything else, such as a module constant or the query of the caller.
+
+Earlier versions deep-copied every level, so a visitor that wrote into its `value` changed only the copy of that level. Now the write reaches the one copy that every later level and visitor reads. If a visitor sets a shared value, a later write also reaches the other owners of that value. [`populate-copy.vitest.test.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/utils/src/__tests__/populate-copy.vitest.test.ts) runs each built-in populate visitor with the values it is handed frozen.
 
 ### Sanitize and validate
 

@@ -1,10 +1,11 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, expectTypeOf, vi, beforeEach, afterEach } from 'vitest';
 import _ from 'lodash';
-import { queryParams } from '@strapi/utils';
+import { queryParams, errors } from '@strapi/utils';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 import roleContentType from '../../content-types/Role';
 import roleService from '../role';
+import * as permissionQueries from '../permission/queries';
 
 const {
   sanitizeRole,
@@ -21,6 +22,7 @@ const {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   assignPermissions,
+  checkPermissionsCeiling,
   resetSuperAdminPermissions,
 } = roleService;
 
@@ -1022,6 +1024,1014 @@ describe('Role', () => {
       expect(deleteByIds).toHaveBeenCalledTimes(0);
       expect(returnedPermissions).toEqual(permissions);
     });
+
+    test('Does not delete and recreate a permission that only changed order', async () => {
+      const createMany = vi.fn(() => Promise.resolve([]));
+      const deleteByIds = vi.fn();
+      const sendDidUpdateRolePermissions = vi.fn();
+      const syncPermissionsForRole = vi.fn();
+      const findMany = vi.fn(() =>
+        Promise.resolve([
+          {
+            id: 3,
+            action: 'action-0',
+            subject: 'api::article.article',
+            properties: { fields: ['body', 'title'] },
+            conditions: ['admin::has-same-role-as-creator', 'admin::is-creator'],
+            actionParameters: {},
+            role: { id: 1 },
+          },
+        ])
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            metrics: { sendDidUpdateRolePermissions },
+            role: { getSuperAdmin: vi.fn(() => Promise.resolve({ id: 0 })) },
+            'api-token-admin': { syncPermissionsForRole },
+            permission: {
+              findMany,
+              createMany,
+              deleteByIds,
+              actionProvider: {
+                values: vi.fn(() => [
+                  {
+                    actionId: 'action-0',
+                    section: 'contentTypes',
+                    subjects: ['api::article.article'],
+                  },
+                ]),
+              },
+            },
+          },
+        },
+        eventHub: {
+          emit: vi.fn(),
+        },
+      } as any;
+
+      await assignPermissions(1, [
+        {
+          action: 'action-0',
+          subject: 'api::article.article',
+          properties: { fields: ['title', 'body'] },
+          conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+        },
+      ] as any);
+
+      expect(deleteByIds).not.toHaveBeenCalled();
+      expect(createMany).not.toHaveBeenCalled();
+      expect(sendDidUpdateRolePermissions).not.toHaveBeenCalled();
+      expect(syncPermissionsForRole).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('checkPermissionsCeiling', () => {
+    const ROLE_ID = 7;
+    const READ = 'plugin::content-manager.explorer.read';
+    const CREATE = 'plugin::content-manager.explorer.create';
+    const ARTICLE = 'api::article.article';
+    const AUTHOR = 'api::author.author';
+
+    const user = { id: 1, roles: [{ code: 'strapi-editor' }] } as any;
+    const superAdminUser = { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] } as any;
+
+    const setupStrapi = ({
+      userPermissions = [],
+      rolePermissions = [],
+      localizedSubjects = [],
+      registeredConditions,
+    }: {
+      userPermissions?: any[];
+      rolePermissions?: any[];
+      localizedSubjects?: string[];
+      /** Every condition is registered when not given */
+      registeredConditions?: string[];
+    } = {}) => {
+      const findUserPermissions = vi.fn(() => Promise.resolve(toPermission(userPermissions)));
+      const findMany = vi.fn(() => Promise.resolve(toPermission(rolePermissions)));
+      const actionProvider = {
+        has: () => true,
+        appliesToProperty: vi.fn(
+          async (property: string, _action: string, subject?: string | null) =>
+            property === 'locales' && !!subject && localizedSubjects.includes(subject)
+        ),
+      };
+
+      const conditionProvider = {
+        has: (condition: string) =>
+          registeredConditions === undefined || registeredConditions.includes(condition),
+      };
+
+      global.strapi = {
+        admin: {
+          services: {
+            permission: { findUserPermissions, findMany, actionProvider, conditionProvider },
+          },
+        },
+      } as any;
+
+      return { findUserPermissions, findMany };
+    };
+
+    // Accepted permissions are stored as sent
+    const expectAccepted = async (
+      requester: Parameters<typeof checkPermissionsCeiling>[0],
+      permissions: any[]
+    ) => {
+      const sent = structuredClone(permissions);
+
+      await expect(checkPermissionsCeiling(requester, ROLE_ID, permissions)).resolves.toEqual(sent);
+    };
+
+    const expectForbidden = async (promise: Promise<unknown>, rejectedPermissions: unknown[]) => {
+      let error: any;
+
+      try {
+        await promise;
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).toBeInstanceOf(errors.ForbiddenError);
+      expect(error.message).toBe('You cannot grant permissions you do not hold yourself');
+      expect(error.details).toEqual({ permissions: rejectedPermissions });
+    };
+
+    test('Super admins are not checked', async () => {
+      const { findUserPermissions, findMany } = setupStrapi();
+
+      await expectAccepted({ user: superAdminUser }, [{ action: READ, subject: ARTICLE }]);
+
+      expect(findUserPermissions).not.toHaveBeenCalled();
+      expect(findMany).not.toHaveBeenCalled();
+    });
+
+    test('Loads the requester permissions and the current role permissions', async () => {
+      const { findUserPermissions, findMany } = setupStrapi({
+        userPermissions: [{ action: READ, subject: ARTICLE }],
+      });
+
+      await checkPermissionsCeiling({ user }, ROLE_ID, [{ action: READ, subject: ARTICLE }]);
+
+      expect(findUserPermissions).toHaveBeenCalledWith(user);
+      expect(findMany).toHaveBeenCalledWith({ where: { role: { id: ROLE_ID } } });
+    });
+
+    test('Rejects a permission the requester does not hold (action + subject)', async () => {
+      setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+      await expectForbidden(
+        checkPermissionsCeiling({ user }, ROLE_ID, [
+          { action: READ, subject: ARTICLE },
+          { action: READ, subject: AUTHOR },
+          { action: CREATE, subject: ARTICLE },
+        ]),
+        [
+          { action: READ, subject: AUTHOR, properties: {}, conditions: [] },
+          { action: CREATE, subject: ARTICLE, properties: {}, conditions: [] },
+        ]
+      );
+    });
+
+    test('Matches null and undefined subjects', async () => {
+      setupStrapi({ userPermissions: [{ action: 'admin::roles.read', subject: null }] });
+
+      await expectAccepted({ user }, [{ action: 'admin::roles.read' }]);
+    });
+
+    test('Checks the other properties when a property lists no value', async () => {
+      setupStrapi({
+        userPermissions: [
+          { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['en'] } },
+        ],
+      });
+
+      await expectForbidden(
+        checkPermissionsCeiling({ user }, ROLE_ID, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'], locales: [] } },
+        ]),
+        [
+          {
+            action: READ,
+            subject: ARTICLE,
+            properties: { fields: ['body'], locales: [] },
+            conditions: [],
+          },
+        ]
+      );
+    });
+
+    describe('a held permission with no locales key', () => {
+      // Stored without a `locales` key, as `assignPermissions` can leave it
+      const heldTitle = { action: READ, subject: ARTICLE, properties: { fields: ['title'] } };
+      const requestTitle = (locales: string[] | null) => ({
+        action: READ,
+        subject: ARTICLE,
+        properties: { fields: ['title'], locales },
+      });
+      const rejected = (locales: string[] | null) => ({ ...requestTitle(locales), conditions: [] });
+
+      test('Holds no locale on a localized subject, as i18n enforces it', async () => {
+        setupStrapi({ userPermissions: [heldTitle], localizedSubjects: [ARTICLE] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [requestTitle(null)]), [
+          rejected(null),
+        ]);
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [requestTitle(['fr'])]), [
+          rejected(['fr']),
+        ]);
+      });
+
+      test('Ignores locales on a subject that is not localized', async () => {
+        setupStrapi({ userPermissions: [heldTitle] });
+
+        await expectAccepted({ user }, [requestTitle(['fr'])]);
+      });
+
+      test('Holds no locale on a token whose owner is a super admin', async () => {
+        // i18n's super-admin skip reads `context.user`, which the engine never sets
+        setupStrapi({ localizedSubjects: [ARTICLE] });
+
+        await expectForbidden(
+          checkPermissionsCeiling(
+            { tokenPermissions: toPermission([heldTitle]), owner: superAdminUser },
+            ROLE_ID,
+            [requestTitle(['fr'])]
+          ),
+          [rejected(['fr'])]
+        );
+      });
+
+      test('Holds no locale on a token whose owner is not a super admin', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, properties: { locales: null } }],
+          localizedSubjects: [ARTICLE],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(
+            { tokenPermissions: toPermission([heldTitle]), owner: user },
+            ROLE_ID,
+            [requestTitle(['fr'])]
+          ),
+          [rejected(['fr'])]
+        );
+      });
+    });
+
+    describe('unregistered conditions', () => {
+      const UNKNOWN = 'admin::does-not-exist';
+      const IS_CREATOR = 'admin::is-creator';
+      const readTitle = (conditions: string[]) => ({
+        action: READ,
+        subject: ARTICLE,
+        properties: { fields: ['title'] },
+        conditions,
+      });
+
+      const setup = (options: { userPermissions?: any[]; rolePermissions?: any[] }) =>
+        setupStrapi({ ...options, registeredConditions: [IS_CREATOR] });
+
+      test('Does not count a held permission under an unregistered condition only', async () => {
+        setup({ userPermissions: [readTitle([UNKNOWN])] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([UNKNOWN])]), [
+          readTitle([UNKNOWN]),
+        ]);
+      });
+
+      test('Checks a requested unregistered condition as no condition', async () => {
+        // Regression guard: already rejected before, since the held condition differs
+        setup({ userPermissions: [readTitle([IS_CREATOR])] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([UNKNOWN])]), [
+          readTitle([UNKNOWN]),
+        ]);
+      });
+
+      test('Ignores a requested unregistered condition next to a held one', async () => {
+        setup({ userPermissions: [readTitle([IS_CREATOR])] });
+
+        await expectAccepted({ user }, [readTitle([IS_CREATOR, UNKNOWN])]);
+      });
+
+      test('Does not count a held permission with action parameters', async () => {
+        // The engine registers it as `<action>?from=1`, which grants nothing on the plain action
+        setup({ userPermissions: [{ ...readTitle([]), actionParameters: { from: 1 } }] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([])]), [
+          readTitle([]),
+        ]);
+      });
+
+      test('Lets a permission the role already carries be resent as it is', async () => {
+        // Regression guard: the row is left unchanged
+        setup({ rolePermissions: [readTitle([UNKNOWN])] });
+
+        await expectAccepted({ user }, [readTitle([UNKNOWN])]);
+      });
+
+      test('Lets a permission be resent when it is stored as a row the role carries', async () => {
+        // Stored without the unregistered condition, so the row is deleted and re-added as it was
+        setup({ rolePermissions: [readTitle([IS_CREATOR])] });
+
+        await expectAccepted({ user }, [readTitle([IS_CREATOR, UNKNOWN])]);
+      });
+    });
+
+    describe('admin token requesters', () => {
+      // Everything a super admin would hold on articles, but not on authors
+      const superAdminLikeTokenPermissions = toPermission([
+        { action: READ, subject: ARTICLE },
+        { action: CREATE, subject: ARTICLE },
+        { action: 'admin::roles.update' },
+      ]);
+
+      describe('owned by a super admin', () => {
+        const owner = superAdminUser;
+
+        test('Checks the token permissions only', async () => {
+          const { findUserPermissions, findMany } = setupStrapi();
+
+          await expectForbidden(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [
+                { action: READ, subject: ARTICLE },
+                { action: READ, subject: AUTHOR },
+              ]
+            ),
+            [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+
+          expect(findUserPermissions).not.toHaveBeenCalled();
+          expect(findMany).toHaveBeenCalledWith({ where: { role: { id: ROLE_ID } } });
+        });
+
+        test('Allows permissions the token holds', async () => {
+          const { findUserPermissions } = setupStrapi();
+
+          await expectAccepted({ tokenPermissions: superAdminLikeTokenPermissions, owner }, [
+            { action: READ, subject: ARTICLE },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]);
+
+          expect(findUserPermissions).not.toHaveBeenCalled();
+        });
+
+        test('Rejects everything when the token holds no permission', async () => {
+          setupStrapi();
+
+          await expectForbidden(
+            checkPermissionsCeiling({ tokenPermissions: [], owner }, ROLE_ID, [
+              { action: READ, subject: ARTICLE },
+            ]),
+            [{ action: READ, subject: ARTICLE, properties: {}, conditions: [] }]
+          );
+        });
+      });
+
+      describe('owned by another admin', () => {
+        const owner = user;
+
+        test('Rejects a permission the token holds but its owner no longer does', async () => {
+          const { findUserPermissions } = setupStrapi({
+            userPermissions: [{ action: READ, subject: ARTICLE }],
+          });
+
+          await expectForbidden(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [
+                { action: READ, subject: ARTICLE },
+                { action: CREATE, subject: ARTICLE },
+              ]
+            ),
+            [{ action: CREATE, subject: ARTICLE, properties: {}, conditions: [] }]
+          );
+
+          expect(findUserPermissions).toHaveBeenCalledWith(owner);
+        });
+
+        test('Rejects a permission the owner holds but the token does not', async () => {
+          setupStrapi({ userPermissions: [{ action: READ, subject: AUTHOR }] });
+
+          await expectForbidden(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [{ action: READ, subject: AUTHOR }]
+            ),
+            [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+        });
+
+        test('Lists a permission both lack once', async () => {
+          setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+          await expectForbidden(
+            checkPermissionsCeiling({ tokenPermissions: [], owner }, ROLE_ID, [
+              { action: READ, subject: AUTHOR },
+            ]),
+            [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+        });
+
+        test('Allows a permission both the token and its owner hold', async () => {
+          setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+          await expectAccepted({ tokenPermissions: superAdminLikeTokenPermissions, owner }, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]);
+        });
+      });
+    });
+
+    describe('permissions the role already holds', () => {
+      test('Preserves an existing out-of-scope permission and only rejects new ones', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+            },
+          ],
+        });
+
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE },
+          { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+        ]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+            { action: CREATE, subject: AUTHOR },
+          ]),
+          [{ action: CREATE, subject: AUTHOR, properties: {}, conditions: [] }]
+        );
+      });
+
+      test('Rejects a change to an existing out-of-scope permission', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+            },
+          ],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'body'] } },
+          ]),
+          [
+            {
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Treats a reordered existing permission as unchanged', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['body', 'title'], locales: ['fr', 'en'] },
+              conditions: ['admin::has-same-role-as-creator', 'admin::is-creator'],
+            },
+          ],
+        });
+
+        await expectAccepted({ user }, [
+          {
+            action: CREATE,
+            subject: ARTICLE,
+            properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
+            conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+          },
+        ]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            {
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body', 'slug'], locales: ['en', 'fr'] },
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ]),
+          [
+            {
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body', 'slug'], locales: ['en', 'fr'] },
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ]
+        );
+      });
+
+      test('Treats duplicated members as the same set', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+            },
+          ],
+        });
+
+        await expectAccepted({ user }, [
+          { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'title'] } },
+        ]);
+      });
+
+      test('Allows removing an existing out-of-scope permission', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [{ id: 1, role: ROLE_ID, action: CREATE, subject: ARTICLE }],
+        });
+
+        await expectAccepted({ user }, []);
+      });
+
+      // Default roles are stored with no `locales` when a localized content type exists at first
+      // boot. A row with no or empty `locales` grants no locale.
+      describe.each([
+        ['no locales key', {}],
+        ['empty locales', { locales: [] }],
+      ])('a localized row stored with %s', (_, storedLocales) => {
+        let defaultLocale = 'en';
+
+        const storedRow = (fields = ['title']) => ({
+          id: 1,
+          role: ROLE_ID,
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields, ...storedLocales },
+          conditions: ['admin::is-creator'],
+        });
+        const createTitle = (
+          locales: string[] | null,
+          { fields = ['title'], conditions = ['admin::is-creator'] } = {}
+        ) => ({
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields, locales },
+          conditions,
+        });
+        const asStored = (fields = ['title']) => ({
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields, ...storedLocales },
+          conditions: ['admin::is-creator'],
+        });
+
+        // What i18n's hook does: a missing or empty `locales` becomes the default locale
+        const giveDefaultLocale = async (permissions: any[]) =>
+          permissions.map((permission) =>
+            permission.subject === ARTICLE &&
+            permission.properties?.locales !== null &&
+            !permission.properties?.locales?.length
+              ? {
+                  ...permission,
+                  properties: { ...permission.properties, locales: [defaultLocale] },
+                }
+              : permission
+          );
+
+        const readTitleEn = {
+          action: READ,
+          subject: ARTICLE,
+          properties: { fields: ['title'], locales: ['en'] },
+          conditions: [],
+        };
+
+        const setup = (fields?: string[], userPermissions: any[] = [readTitleEn]) =>
+          setupStrapi({
+            userPermissions,
+            rolePermissions: [storedRow(fields), { id: 2, role: ROLE_ID, ...readTitleEn }],
+            localizedSubjects: [ARTICLE],
+          });
+
+        beforeEach(() => {
+          defaultLocale = 'en';
+          roleService.hooks.willValidateUpdatePermissions.register(giveDefaultLocale);
+        });
+
+        afterEach(() => {
+          roleService.hooks.willValidateUpdatePermissions.delete(giveDefaultLocale);
+        });
+
+        test('Accepts the row resent with the default locale, and keeps its stored locales', async () => {
+          setup();
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        // The role editor drops a field it has nothing to show for, such as an empty component
+        test('Accepts the row narrowed to fewer fields, and keeps its stored locales', async () => {
+          setup(['title', 'socialLinks']);
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        test('Keeps the stored locales next to an unchanged localized row', async () => {
+          setup();
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [readTitleEn, createTitle(['en'])])
+          ).resolves.toEqual([readTitleEn, asStored()]);
+        });
+
+        test('Stores the default locale when the requester holds it', async () => {
+          const createEn = { action: CREATE, subject: ARTICLE, properties: { locales: ['en'] } };
+
+          setup(undefined, [readTitleEn, createEn]);
+          await expectAccepted({ user }, [createTitle(['en'])]);
+
+          setup(['title', 'socialLinks'], [readTitleEn, createEn]);
+          await expectAccepted({ user }, [createTitle(['en'])]);
+        });
+
+        test('Accepts the row narrowed to fewer conditions, and keeps its stored locales', async () => {
+          setupStrapi({
+            userPermissions: [readTitleEn],
+            rolePermissions: [
+              {
+                ...storedRow(),
+                conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+              },
+            ],
+            localizedSubjects: [ARTICLE],
+          });
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        test('Lists only the other permission when it is rejected with the row', async () => {
+          setup();
+
+          await expectForbidden(
+            checkPermissionsCeiling({ user }, ROLE_ID, [
+              createTitle(['en']),
+              { action: CREATE, subject: AUTHOR },
+            ]),
+            [{ action: CREATE, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+        });
+
+        describe('with another willValidateUpdatePermissions handler', () => {
+          const bodyDe = {
+            id: 3,
+            role: ROLE_ID,
+            action: CREATE,
+            subject: ARTICLE,
+            properties: { fields: ['body'], locales: ['de'] },
+            conditions: ['admin::is-creator'],
+          };
+
+          const withHandler = async (
+            handler: (permissions: any[]) => any,
+            run: () => Promise<void>
+          ) => {
+            roleService.hooks.willValidateUpdatePermissions.register(handler);
+
+            try {
+              await run();
+            } finally {
+              roleService.hooks.willValidateUpdatePermissions.delete(handler);
+            }
+          };
+
+          test('Pairs each row with its own reading when the handler reorders rows', async () => {
+            setupStrapi({
+              userPermissions: [readTitleEn],
+              rolePermissions: [storedRow(), bodyDe],
+              localizedSubjects: [ARTICLE],
+            });
+
+            await withHandler(
+              async (permissions) => [...permissions].reverse(),
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+
+          test('Pairs each row with its own reading when the handler drops rows', async () => {
+            setupStrapi({
+              userPermissions: [readTitleEn],
+              rolePermissions: [bodyDe, storedRow()],
+              localizedSubjects: [ARTICLE],
+            });
+
+            await withHandler(
+              async (permissions) => permissions.slice(1),
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+
+          test('Keeps the stored rows unchanged when the handler mutates its input', async () => {
+            setup();
+            roleService.hooks.willValidateUpdatePermissions.delete(giveDefaultLocale);
+
+            await withHandler(
+              async (permissions) => {
+                permissions.forEach((permission) => {
+                  if (permission.subject === ARTICLE && !permission.properties?.locales?.length) {
+                    permission.properties.locales = [defaultLocale];
+                  }
+                });
+
+                return permissions;
+              },
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+        });
+
+        test('Grants no locale when the default locale changed', async () => {
+          setup();
+          defaultLocale = 'fr';
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['fr'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        test.each([
+          ['another locale', createTitle(['fr'])],
+          ['an added locale', createTitle(['en', 'fr'])],
+          ['every locale', createTitle(null)],
+          ['an added field', createTitle(['en'], { fields: ['title', 'body'] })],
+          ['a dropped condition', createTitle(['en'], { conditions: [] })],
+        ])('Rejects the row with %s', async (__, requested) => {
+          setup();
+
+          await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [requested]), [
+            requested,
+          ]);
+        });
+      });
+    });
+
+    // The requester holds `read [title]` unconditionally
+    describe('narrowing a permission the role already holds', () => {
+      const IS_CREATOR = 'admin::is-creator';
+      const SAME_ROLE = 'admin::has-same-role-as-creator';
+
+      const rolePermission = (id: number, overrides: Record<string, unknown>) => ({
+        id,
+        role: ROLE_ID,
+        action: READ,
+        subject: ARTICLE,
+        ...overrides,
+      });
+
+      const setupRole = (rolePermissions: any[], localizedSubjects: string[] = []) =>
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }],
+          rolePermissions,
+          localizedSubjects,
+        });
+
+      test('Allows removing a field from a row', async () => {
+        setupRole([rolePermission(1, { properties: { fields: ['title', 'body'] } })]);
+
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+        ]);
+      });
+
+      test('Rejects a narrowed row that adds a field', async () => {
+        setupRole([rolePermission(1, { properties: { fields: ['title', 'body'] } })]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['body', 'secret'] } },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['body', 'secret'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Does not combine the fields of one row with the locales of another', async () => {
+        setupRole(
+          [
+            rolePermission(1, { properties: { fields: ['title'], locales: ['en'] } }),
+            rolePermission(2, { properties: { fields: ['body'], locales: ['fr'] } }),
+          ],
+          [ARTICLE]
+        );
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['fr'] } },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['fr'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Allows removing one of several conditions', async () => {
+        setupRole([
+          rolePermission(1, {
+            properties: { fields: ['body'] },
+            conditions: [IS_CREATOR, SAME_ROLE],
+          }),
+        ]);
+
+        await expectAccepted({ user }, [
+          {
+            action: READ,
+            subject: ARTICLE,
+            properties: { fields: ['body'] },
+            conditions: [IS_CREATOR],
+          },
+        ]);
+      });
+
+      test('Rejects removing the last condition, which makes the row unconditional', async () => {
+        setupRole([
+          rolePermission(1, { properties: { fields: ['body'] }, conditions: [IS_CREATOR] }),
+        ]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['body'] }, conditions: [] },
+          ]),
+          [{ action: READ, subject: ARTICLE, properties: { fields: ['body'] }, conditions: [] }]
+        );
+      });
+
+      test('Allows resending a row without the stale locales of a type no longer localized', async () => {
+        setupRole([rolePermission(1, { properties: { fields: ['body'], locales: ['en'] } })]);
+
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+        ]);
+      });
+
+      test('Does not treat a parameterized permission as a narrowing', async () => {
+        setupRole([
+          rolePermission(1, {
+            properties: { fields: ['title', 'body'] },
+            actionParameters: { x: 1 },
+          }),
+        ]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['body'] },
+              actionParameters: { x: 1 },
+            },
+          ]),
+          [{ action: READ, subject: ARTICLE, properties: { fields: ['body'] }, conditions: [] }]
+        );
+      });
+    });
+
+    describe('permissions with action parameters', () => {
+      const PARAMETERS = { x: 1, ids: ['a', 'b'] };
+      const request = { action: READ, subject: ARTICLE, actionParameters: PARAMETERS };
+      const rejected = [{ action: READ, subject: ARTICLE, properties: {}, conditions: [] }];
+
+      test('Allows one the requester holds with the same parameters', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, actionParameters: { ids: ['b', 'a'], x: 1 } },
+          ],
+        });
+
+        await expectAccepted({ user }, [request]);
+      });
+
+      test('Rejects one the requester only holds as the plain action', async () => {
+        setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [request]), rejected);
+      });
+
+      test('Rejects one the requester holds with other parameters', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, actionParameters: { x: 2 } }],
+        });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [request]), rejected);
+      });
+
+      test('Rejects one wider than the permission held with the same parameters', async () => {
+        setupStrapi({
+          userPermissions: [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+              actionParameters: PARAMETERS,
+            },
+          ],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { ...request, properties: { fields: ['title', 'body'] } },
+          ]),
+          [{ ...rejected[0], properties: { fields: ['title', 'body'] } }]
+        );
+      });
+
+      test('Does not let a plain permission be covered by a parameterized one', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, actionParameters: PARAMETERS }],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [{ action: READ, subject: ARTICLE }]),
+          rejected
+        );
+      });
+
+      test('Checks the token and its owner for a token requester', async () => {
+        setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+        await expectForbidden(
+          checkPermissionsCeiling(
+            {
+              tokenPermissions: [{ action: READ, subject: ARTICLE, actionParameters: PARAMETERS }],
+              owner: user,
+            },
+            ROLE_ID,
+            [request]
+          ),
+          rejected
+        );
+      });
+
+      test('Allows it for super admins', async () => {
+        setupStrapi();
+
+        await expectAccepted({ user: superAdminUser }, [request]);
+      });
+    });
   });
 
   describe('addPermissions', () => {
@@ -1059,6 +2069,61 @@ describe('Role', () => {
       await addPermissions(roleId, input);
 
       expect(createMany).toHaveBeenCalledWith(expect.arrayContaining(expected));
+    });
+
+    test('Returns the stored permissions with their number id and action parameters', async () => {
+      const storedRows = [
+        {
+          id: 12,
+          documentId: 'stored-permission',
+          action: 'plugin::review-workflows.stage.transition',
+          actionParameters: { from: 3 },
+          subject: null,
+          properties: {},
+          conditions: [],
+          createdAt: '2026-11-09T00:00:00.000Z',
+          updatedAt: '2026-11-09T00:00:00.000Z',
+        },
+      ];
+      const dbCreate = vi.fn(async () => storedRows.shift());
+
+      global.strapi = {
+        db: { query: () => ({ create: dbCreate }) },
+        eventHub: { emit: vi.fn() },
+        admin: {
+          services: {
+            permission: { createMany: permissionQueries.createMany },
+          },
+        },
+      } as any;
+
+      const permissions = await addPermissions(1, [
+        { action: 'plugin::review-workflows.stage.transition', actionParameters: { from: 3 } },
+      ]);
+
+      expect(dbCreate).toHaveBeenCalledWith({
+        data: {
+          action: 'plugin::review-workflows.stage.transition',
+          actionParameters: { from: 3 },
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+      });
+      expect(permissions).toStrictEqual([
+        {
+          id: 12,
+          action: 'plugin::review-workflows.stage.transition',
+          actionParameters: { from: 3 },
+          subject: null,
+          properties: {},
+          conditions: [],
+        },
+      ]);
+      expectTypeOf(permissions[0].id).toEqualTypeOf<number>();
+      expectTypeOf(permissions[0].actionParameters).toEqualTypeOf<{ from: number }>();
+      expectTypeOf(permissions[0].subject).toEqualTypeOf<string | null>();
     });
   });
 

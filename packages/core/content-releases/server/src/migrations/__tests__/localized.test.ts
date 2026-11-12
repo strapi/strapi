@@ -1,4 +1,4 @@
-import type { Schema } from '@strapi/types';
+import type { Core, Schema } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID } from '../../constants';
 import { disableContentTypeLocalized, enableContentTypeLocalized } from '..';
@@ -20,11 +20,13 @@ const update = jest.fn(() => ({ where }));
 const queryBuilder = jest.fn(() => ({ update }));
 const getDefaultLocale = jest.fn();
 
+let strapi: Core.Strapi;
+
 // Without a provider, `strapi.localization` answers with inert defaults (not localized, no default locale)
 const setupStrapi = ({ withI18n }: { withI18n: boolean }) => {
   getDefaultLocale.mockResolvedValue(withI18n === true ? 'en' : null);
 
-  global.strapi = {
+  strapi = {
     db: { queryBuilder },
     plugins: {},
     localization: {
@@ -33,7 +35,7 @@ const setupStrapi = ({ withI18n }: { withI18n: boolean }) => {
         withI18n === true ? isI18nLocalized(model) : false,
       getDefaultLocale,
     },
-  } as unknown as typeof global.strapi;
+  } as unknown as Core.Strapi;
 };
 
 const expectLocaleUpdate = (locale: string | null) => {
@@ -52,10 +54,13 @@ describe('content-releases localized migrations', () => {
     it('resets action locales when a content type stops being localized', async () => {
       setupStrapi({ withI18n: true });
 
-      await disableContentTypeLocalized({
-        oldContentTypes: { [UID]: createContentType(true) },
-        contentTypes: { [UID]: createContentType(false) },
-      });
+      await disableContentTypeLocalized(
+        {
+          oldContentTypes: { [UID]: createContentType(true) },
+          contentTypes: { [UID]: createContentType(false) },
+        },
+        { strapi }
+      );
 
       expectLocaleUpdate(null);
     });
@@ -63,10 +68,13 @@ describe('content-releases localized migrations', () => {
     it('does nothing when localization is unchanged', async () => {
       setupStrapi({ withI18n: true });
 
-      await disableContentTypeLocalized({
-        oldContentTypes: { [UID]: createContentType(true) },
-        contentTypes: { [UID]: createContentType(true) },
-      });
+      await disableContentTypeLocalized(
+        {
+          oldContentTypes: { [UID]: createContentType(true) },
+          contentTypes: { [UID]: createContentType(true) },
+        },
+        { strapi }
+      );
 
       expect(queryBuilder).not.toHaveBeenCalled();
     });
@@ -74,10 +82,13 @@ describe('content-releases localized migrations', () => {
     it('does nothing without previous content types', async () => {
       setupStrapi({ withI18n: true });
 
-      await disableContentTypeLocalized({
-        oldContentTypes: undefined as unknown as Record<string, Schema.ContentType>,
-        contentTypes: { [UID]: createContentType(false) },
-      });
+      await disableContentTypeLocalized(
+        {
+          oldContentTypes: undefined as unknown as Record<string, Schema.ContentType>,
+          contentTypes: { [UID]: createContentType(false) },
+        },
+        { strapi }
+      );
 
       expect(queryBuilder).not.toHaveBeenCalled();
     });
@@ -85,10 +96,13 @@ describe('content-releases localized migrations', () => {
     it('does nothing without a localization plugin', async () => {
       setupStrapi({ withI18n: false });
 
-      await disableContentTypeLocalized({
-        oldContentTypes: { [UID]: createContentType(true) },
-        contentTypes: { [UID]: createContentType(false) },
-      });
+      await disableContentTypeLocalized(
+        {
+          oldContentTypes: { [UID]: createContentType(true) },
+          contentTypes: { [UID]: createContentType(false) },
+        },
+        { strapi }
+      );
 
       expect(queryBuilder).not.toHaveBeenCalled();
     });
@@ -98,10 +112,13 @@ describe('content-releases localized migrations', () => {
     it('sets action locales to the default locale when a content type becomes localized', async () => {
       setupStrapi({ withI18n: true });
 
-      await enableContentTypeLocalized({
-        oldContentTypes: { [UID]: createContentType(false) },
-        contentTypes: { [UID]: createContentType(true) },
-      });
+      await enableContentTypeLocalized(
+        {
+          oldContentTypes: { [UID]: createContentType(false) },
+          contentTypes: { [UID]: createContentType(true) },
+        },
+        { strapi }
+      );
 
       expect(getDefaultLocale).toHaveBeenCalledTimes(1);
       expectLocaleUpdate('en');
@@ -110,10 +127,13 @@ describe('content-releases localized migrations', () => {
     it('does nothing when localization is unchanged', async () => {
       setupStrapi({ withI18n: true });
 
-      await enableContentTypeLocalized({
-        oldContentTypes: { [UID]: createContentType(false) },
-        contentTypes: { [UID]: createContentType(false) },
-      });
+      await enableContentTypeLocalized(
+        {
+          oldContentTypes: { [UID]: createContentType(false) },
+          contentTypes: { [UID]: createContentType(false) },
+        },
+        { strapi }
+      );
 
       expect(getDefaultLocale).not.toHaveBeenCalled();
       expect(queryBuilder).not.toHaveBeenCalled();
@@ -122,10 +142,13 @@ describe('content-releases localized migrations', () => {
     it('does nothing without previous content types', async () => {
       setupStrapi({ withI18n: true });
 
-      await enableContentTypeLocalized({
-        oldContentTypes: undefined as unknown as Record<string, Schema.ContentType>,
-        contentTypes: { [UID]: createContentType(true) },
-      });
+      await enableContentTypeLocalized(
+        {
+          oldContentTypes: undefined as unknown as Record<string, Schema.ContentType>,
+          contentTypes: { [UID]: createContentType(true) },
+        },
+        { strapi }
+      );
 
       expect(queryBuilder).not.toHaveBeenCalled();
     });
@@ -133,10 +156,13 @@ describe('content-releases localized migrations', () => {
     it('does nothing without a localization plugin', async () => {
       setupStrapi({ withI18n: false });
 
-      await enableContentTypeLocalized({
-        oldContentTypes: { [UID]: createContentType(false) },
-        contentTypes: { [UID]: createContentType(true) },
-      });
+      await enableContentTypeLocalized(
+        {
+          oldContentTypes: { [UID]: createContentType(false) },
+          contentTypes: { [UID]: createContentType(true) },
+        },
+        { strapi }
+      );
 
       expect(getDefaultLocale).not.toHaveBeenCalled();
       expect(queryBuilder).not.toHaveBeenCalled();

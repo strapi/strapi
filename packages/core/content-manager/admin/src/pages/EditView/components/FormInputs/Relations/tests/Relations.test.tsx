@@ -601,13 +601,17 @@ describe('Relations', () => {
 
     await user.click(await screen.findByRole('combobox', { name: /relations/i }));
 
-    expect(
-      await screen.findByText(
-        'Whoops! Something went wrong. Please, try again.',
-        {},
-        { timeout: 3000 }
-      )
-    ).toBeInTheDocument();
+    // Opening the list searches again once the search debounce has passed. That search
+    // replaces the message with the loading state, then renders a new one when it fails,
+    // so query the message again rather than holding on to the first element found.
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('Whoops! Something went wrong. Please, try again.')
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
     expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
   });
 

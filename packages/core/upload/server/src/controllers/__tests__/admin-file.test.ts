@@ -3,6 +3,11 @@ import type { Context } from 'koa';
 import adminFileController from '../admin-file';
 import { getService } from '../../utils';
 
+import type {
+  AIMetadataJob,
+  GetLatestAIMetadataJob,
+} from '../../../../shared/contracts/ai-metadata-jobs';
+
 jest.mock('../../utils');
 
 const mockGetService = getService as jest.MockedFunction<typeof getService>;
@@ -95,5 +100,61 @@ describe('Admin File Controller - generateAIMetadata', () => {
     expect(mockAiMetadataService.generateForFiles).toHaveBeenCalledWith([1, 2], { id: 1 });
     expect(ctx.body).toEqual({ data: results });
     expect(ctx.badRequest).not.toHaveBeenCalled();
+  });
+});
+
+describe('Admin File Controller - getLatestAIMetadataJob', () => {
+  let ctx: Partial<Context>;
+  let mockAiMetadataService: { isEnabled: jest.Mock };
+  let mockAiMetadataJobsService: { getLatestActiveJob: jest.Mock };
+
+  const call = () => adminFileController.getLatestAIMetadataJob(ctx as Context);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockAiMetadataService = { isEnabled: jest.fn().mockResolvedValue(true) };
+    mockAiMetadataJobsService = { getLatestActiveJob: jest.fn().mockResolvedValue(null) };
+
+    mockGetService.mockImplementation((serviceName: string) => {
+      if (serviceName === 'aiMetadata') return mockAiMetadataService as any;
+      if (serviceName === 'aiMetadataJobs') return mockAiMetadataJobsService as any;
+      return {} as any;
+    });
+
+    ctx = { notFound: jest.fn() } as any;
+  });
+
+  it('sends the latest job as the bare response body, whatever its status', async () => {
+    const job: AIMetadataJob = {
+      id: 3,
+      status: 'completed',
+      createdAt: '2026-11-09T10:00:00.000Z',
+      completedAt: '2026-11-09T10:01:00.000Z',
+    };
+    mockAiMetadataJobsService.getLatestActiveJob.mockResolvedValue(job);
+
+    await call();
+
+    // Typed against the contract: fails type checking if the contract wraps the job in `{ data }`
+    const expected: GetLatestAIMetadataJob.Response = job;
+    expect(ctx.body).toEqual(expected);
+    expect(ctx.notFound).not.toHaveBeenCalled();
+  });
+
+  it('returns not found when no job exists', async () => {
+    await call();
+
+    expect(ctx.notFound).toHaveBeenCalledWith('No active job found');
+    expect(ctx.body).toBeUndefined();
+  });
+
+  it('returns not found when the AI metadata service is disabled', async () => {
+    mockAiMetadataService.isEnabled.mockResolvedValue(false);
+
+    await call();
+
+    expect(ctx.notFound).toHaveBeenCalled();
+    expect(mockAiMetadataJobsService.getLatestActiveJob).not.toHaveBeenCalled();
   });
 });

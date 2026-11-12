@@ -4,6 +4,8 @@ import InvalidTimeError from './invalid-time';
 import InvalidDateError from './invalid-date';
 import InvalidDateTimeError from './invalid-datetime';
 import InvalidRelationError from './invalid-relation';
+import SavepointError from './savepoint';
+import InvalidBooleanError from './invalid-boolean';
 
 export {
   DatabaseError,
@@ -12,4 +14,6 @@ export {
   InvalidDateError,
   InvalidDateTimeError,
   InvalidRelationError,
+  SavepointError,
+  InvalidBooleanError,
 };

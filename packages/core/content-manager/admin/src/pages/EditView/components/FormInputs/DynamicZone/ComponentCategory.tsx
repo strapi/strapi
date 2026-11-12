@@ -5,6 +5,7 @@ import {
   Box,
   Flex,
   FlexComponent,
+  Menu,
   Popover,
   Tooltip,
   Typography,
@@ -15,6 +16,7 @@ import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { resolvePreviewImageUrl } from '../../../../../utils/previewImage';
+import { AddComponentMenuContent } from '../Component/AddComponentMenu';
 
 import type { Struct } from '@strapi/types';
 
@@ -28,9 +30,11 @@ interface ComponentCategoryProps {
     icon?: string;
     preview?: Struct.PreviewImageValue;
   }>;
-  onAddComponent: (
-    componentUid: string
-  ) => React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
+  onAddComponent: (componentUid: string) => () => void;
+  /**
+   * When set, picking a component offers to add it empty or to copy it from another entry.
+   */
+  onCopyComponent?: (componentUid: string) => () => void;
   variant?: Accordion.Variant;
 }
 
@@ -122,6 +126,7 @@ const ComponentCategory = ({
   components = EMPTY_COMPONENTS,
   variant = 'primary',
   onAddComponent,
+  onCopyComponent,
 }: ComponentCategoryProps) => {
   const { formatMessage } = useIntl();
 
@@ -136,6 +141,45 @@ const ComponentCategory = ({
         <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           {components.map(({ uid, displayName, icon, preview }) => {
             const previewUrl = resolvePreviewImageUrl(preview);
+            const name = formatMessage({ id: uid, defaultMessage: displayName ?? uid });
+
+            const tile = (
+              <Flex
+                tag="span"
+                direction="column"
+                gap={1}
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                paddingLeft={2}
+                paddingRight={2}
+              >
+                <ComponentTileVisual
+                  previewUrl={previewUrl}
+                  icon={icon}
+                  displayName={displayName}
+                />
+
+                <Tooltip label={name}>
+                  <Typography tag="span" variant="pi" fontWeight="bold" ellipsis width="100%">
+                    {name}
+                  </Typography>
+                </Tooltip>
+              </Flex>
+            );
+
+            if (onCopyComponent) {
+              return (
+                <Menu.Root key={uid}>
+                  <ComponentMenuTrigger endIcon={null}>{tile}</ComponentMenuTrigger>
+                  <AddComponentMenuContent
+                    kind="component"
+                    onAddEmpty={onAddComponent(uid)}
+                    onCopy={onCopyComponent(uid)}
+                  />
+                </Menu.Root>
+              );
+            }
 
             return (
               <ComponentBox
@@ -150,27 +194,7 @@ const ComponentCategory = ({
                 shrink={0}
                 borderColor="neutral200"
               >
-                <Flex
-                  direction="column"
-                  gap={1}
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  paddingLeft={2}
-                  paddingRight={2}
-                >
-                  <ComponentTileVisual
-                    previewUrl={previewUrl}
-                    icon={icon}
-                    displayName={displayName}
-                  />
-
-                  <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
-                    <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
-                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
-                    </Typography>
-                  </Tooltip>
-                </Flex>
+                {tile}
               </ComponentBox>
             );
           })}
@@ -223,6 +247,42 @@ const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   &:focus,
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
+    background: ${({ theme }) => theme.colors.primary100};
+    color: ${({ theme }) => theme.colors.primary600};
+  }
+`;
+
+/**
+ * Same tile as `ComponentBox`, as the trigger of the menu offering to add the component empty or
+ * to copy it from another entry. The trigger is a button of the design system, hence the
+ * overrides.
+ */
+const ComponentMenuTrigger = styled(Menu.Trigger)`
+  && {
+    width: 100%;
+    height: 8.4rem;
+    padding: 0;
+    justify-content: center;
+    border: 1px solid ${({ theme }) => theme.colors.neutral200};
+    border-radius: ${({ theme }) => theme.borderRadius};
+    background: ${({ theme }) => theme.colors.neutral100};
+    color: ${({ theme }) => theme.colors.neutral600};
+  }
+
+  /* the wrapper of the tile content */
+  && > span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
+  }
+
+  &&:focus,
+  &&:hover,
+  &&[data-state='open'] {
+    border-color: ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
     color: ${({ theme }) => theme.colors.primary600};
   }

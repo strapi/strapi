@@ -12,6 +12,7 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
+import { appendCallerStack } from './utils/async-stack';
 import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
 import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
@@ -251,7 +252,7 @@ class Database {
   ): Promise<ReturnType<TCallback> | TransactionObject> {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
-      ? await this.connection.transaction()
+      ? await this.startTransaction()
       : (transactionCtx.get() as Knex.Transaction);
 
     async function commit() {
@@ -270,7 +271,7 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return transactionCtx.run(trx, async () => {
+    return await transactionCtx.run(trx, async () => {
       try {
         const callbackParams = {
           trx,
@@ -287,6 +288,31 @@ class Database {
         throw error;
       }
     });
+  }
+
+  /**
+   * Runs `cb` in a savepoint of the current transaction, so a failure undoes only `cb`'s writes.
+   * If `cb` throws, its writes are rolled back, the `onCommit` callbacks registered in it are
+   * dropped, its `onRollback` callbacks run, and the error is rethrown. The transaction stays
+   * usable, on Postgres also after a database error, but not after a MySQL deadlock, which rolls
+   * back the whole transaction: the savepoint then can't be rolled back to, and it throws an
+   * `errors.SavepointError`, as when it can't be released. Throws if called outside a transaction.
+   */
+  savepoint<T>(cb: () => Promise<T> | T): Promise<T> {
+    return transactionCtx.savepoint(cb);
+  }
+
+  /**
+   * Starts a top-level knex transaction. knex resolves it through a promise chain that async stack
+   * traces cannot follow, so on failure the stack is extended with the frames of our callers.
+   */
+  private async startTransaction(): Promise<Knex.Transaction> {
+    try {
+      return await this.connection.transaction();
+    } catch (error) {
+      appendCallerStack(error);
+      throw error;
+    }
   }
 
   getSchemaName(): string | undefined {

@@ -44,7 +44,9 @@ export default function createComponentBuilder() {
         throw new ApplicationError('component.alreadyExists');
       }
 
-      const handler = createSchemaHandler({
+      const handler = createSchemaHandler<Internal.UID.Component>({
+        uid,
+        isNew: true,
         dir: path.join(strapi.dirs.app.components, strings.nameToSlug(infos.category)),
         filename: `${strings.nameToSlug(infos.displayName)}.json`,
       });
@@ -62,7 +64,6 @@ export default function createComponentBuilder() {
       });
 
       handler
-        .setUID(uid)
         .set('collectionName', collectionName)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)

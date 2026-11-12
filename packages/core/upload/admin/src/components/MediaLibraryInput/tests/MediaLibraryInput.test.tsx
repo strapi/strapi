@@ -1092,11 +1092,13 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       await screen.findByText(/This file cannot be recovered/i);
       fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
-      await waitFor(() =>
-        expect(
-          screen.queryByRole('button', { name: 'More actions for one.png' })
-        ).not.toBeInTheDocument()
-      );
+      // Poll with a text query: `waitFor` reruns its callback on every DOM change
+      // the delete makes, and a role query there is slow enough in jsdom to
+      // starve the delete itself past the timeout on a loaded CI runner.
+      await waitFor(() => expect(screen.queryByText('one.png')).not.toBeInTheDocument());
+      expect(
+        screen.queryByRole('button', { name: 'More actions for one.png' })
+      ).not.toBeInTheDocument();
       expect(cardMenu('two.png')).toBeInTheDocument();
     });
 
@@ -1109,10 +1111,9 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       await screen.findByText(/This file cannot be recovered/i);
       fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
-      await waitFor(() =>
-        expect(screen.queryByRole('button', { name: 'Edit one.png' })).not.toBeInTheDocument()
-      );
-      expect(screen.queryByText('one.png')).not.toBeInTheDocument();
+      // A text query to poll, as in the multiple-field case above.
+      await waitFor(() => expect(screen.queryByText('one.png')).not.toBeInTheDocument());
+      expect(screen.queryByRole('button', { name: 'Edit one.png' })).not.toBeInTheDocument();
     });
 
     // Analytics split Media Library and Content Manager usage on `location`.
