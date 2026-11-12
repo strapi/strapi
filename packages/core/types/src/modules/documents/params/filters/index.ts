@@ -56,8 +56,7 @@ type NestedAttributeCondition<
  *
  * The filter object member does not forbid the operators, so spreading a filter read back from it
  * and adding a key (`{ ...filters.article, title: 'a' }`) compiles. The spread compiles even when the
- * value holds an operator object, and the database then throws. With `exactOptionalPropertyTypes`
- * the spread is rejected: out of scope for now.
+ * value holds an operator object, and the database then throws.
  *
  * The forbidden keys are optional {@link Forbidden} properties, so the type stays assignable to
  * `ObjectNotation<Target>` and reading a filter back keeps the target's keys. A bare id would break
