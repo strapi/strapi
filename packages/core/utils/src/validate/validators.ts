@@ -4,8 +4,11 @@ import { pipe as pipeAsync } from '../async';
 import {
   isScalarAttribute,
   constants,
+  isComponentAttribute,
   isDynamicZoneAttribute,
+  isMediaAttribute,
   isMorphToRelationalAttribute,
+  isRelationalAttribute,
 } from '../content-types';
 import {
   traverseQueryFilters,
@@ -107,37 +110,56 @@ const isInOperatorOperand = (rawPath: string | null) => {
 };
 
 /**
- * Returns the first operator, and its operand, in the filter of a scalar attribute, whose operand is a non-empty plain object.
+ * Returns the first operator, and its operand, in the filter of an attribute, whose operand is a non-empty plain object.
+ * The operand of a logical operator is an operator map, or a list of them, and is searched in turn.
  * The filters traversal does not walk such operands, and query conversion drops them along with their
- * condition, so letting one through makes the query match every row.
+ * condition (or empties the list holding them), so letting one through makes the query match every row.
  * Empty objects are not reported: they hold no condition, and sanitization removes them.
  */
 const findObjectOperand = (
   filter: Record<string, unknown>
 ): { operator: string; operand: Record<string, unknown> } | undefined => {
   for (const [operator, operand] of Object.entries(filter)) {
-    if (
-      isOperator(operator) === false ||
-      BOOLEAN_CAST_OPERATORS.has(operator) === true ||
-      isPlainRecord(operand) === false ||
-      Object.keys(operand).length === 0
-    ) {
+    if (isOperator(operator) === false || BOOLEAN_CAST_OPERATORS.has(operator) === true) {
       continue;
     }
 
     if (LOGICAL_OPERATORS.has(operator) === false) {
-      return { operator, operand };
+      if (isPlainRecord(operand) === true && Object.keys(operand).length > 0) {
+        return { operator, operand };
+      }
+
+      continue;
     }
 
-    const nested = findObjectOperand(operand);
+    const operatorMaps = Array.isArray(operand) === true ? operand : [operand];
 
-    if (nested !== undefined) {
-      return nested;
+    for (const operatorMap of operatorMaps) {
+      if (isPlainRecord(operatorMap) === false) {
+        continue;
+      }
+
+      const nested = findObjectOperand(operatorMap);
+
+      if (nested !== undefined) {
+        return nested;
+      }
     }
   }
 
   return undefined;
 };
+
+/**
+ * True for the attributes whose filter can hold operators: scalar, relation, media and component
+ * attributes. Dynamic zones and morph relations cannot be filtered and are rejected by their own checks.
+ */
+const isOperatorFilterableAttribute = (attribute: Attribute | undefined) =>
+  isScalarAttribute(attribute) === true ||
+  isMediaAttribute(attribute) === true ||
+  (isRelationalAttribute(attribute) === true &&
+    isMorphToRelationalAttribute(attribute) === false) ||
+  (isComponentAttribute(attribute) === true && isDynamicZoneAttribute(attribute) === false);
 
 export const validateFilters = asyncCurry(
   async (ctx: Context, filters: unknown, include: (typeof FILTER_TRAVERSALS)[number][]) => {
@@ -155,7 +177,10 @@ export const validateFilters = asyncCurry(
         traverseQueryFilters(({ key, attribute, path, value }) => {
           const isIdKey = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key);
 
-          if ((isIdKey || isScalarAttribute(attribute) === true) && isPlainRecord(value)) {
+          if (
+            (isIdKey || isOperatorFilterableAttribute(attribute) === true) &&
+            isPlainRecord(value)
+          ) {
             const objectOperand = findObjectOperand(value);
 
             if (objectOperand !== undefined) {
