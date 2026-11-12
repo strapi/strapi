@@ -5,6 +5,10 @@ import { logger } from './logger';
 
 const DBOptions = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
 
+// `--dbfile` is optional for sqlite and unused by other clients, so it is not in the required list,
+// but passing it still selects the flag-driven path
+const FlagDrivenDBOptions = [...DBOptions, 'dbfile'];
+
 const VALID_CLIENTS = ['sqlite', 'mysql', 'postgres'] as const;
 
 const DEFAULT_CONFIG: DBConfig = {
@@ -49,6 +53,9 @@ async function dbPrompt() {
   };
 }
 
+// An empty or whitespace-only `--dbfile` would be written as an empty `DATABASE_FILENAME`
+const isBlank = (value: string | undefined) => value === undefined || value.trim() === '';
+
 export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
   if (options.skipDb) {
     return DEFAULT_CONFIG;
@@ -71,7 +78,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
     logger.fatal(`Required database arguments are missing: ${missingArgs.join(', ')}.`);
   }
 
-  const hasDBOptions = DBOptions.some((key) => key in options);
+  const hasDBOptions = FlagDrivenDBOptions.some((key) => key in options);
 
   if (!hasDBOptions) {
     if (options.quickstart || options.nonInteractive) {
@@ -94,7 +101,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
       username: options.dbusername,
       password: options.dbpassword,
       filename:
-        options.dbclient === 'sqlite' && options.dbfile === undefined
+        options.dbclient === 'sqlite' && isBlank(options.dbfile) === true
           ? DEFAULT_CONFIG.connection.filename
           : options.dbfile,
     },
