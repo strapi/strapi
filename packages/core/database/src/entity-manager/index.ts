@@ -471,17 +471,20 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       const dataToUpdate = processData(metadata, data);
 
-      if (!isEmpty(dataToUpdate)) {
-        await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
-      }
-
       const trx = await strapi.db.transaction();
       try {
+        if (!isEmpty(dataToUpdate)) {
+          await this.createQueryBuilder(uid)
+            .where({ id })
+            .update(dataToUpdate)
+            .transacting(trx.get())
+            .execute();
+        }
+
         await this.updateRelations(uid, id, data, { transaction: trx.get() });
         await trx.commit();
       } catch (e) {
         await trx.rollback();
-        await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
         throw e;
       }
 
