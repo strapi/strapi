@@ -670,11 +670,9 @@ export const createEntityManager = (db: Database): EntityManager => {
             const dataset = cleanRelationData.set ?? cleanRelationData.connect ?? [];
 
             // Copy flows (publish, discardDraft, clone) pass the populated value of a morphMany,
-            // which can be empty:
-            // - the document service drops these ids, since inverse morph items carry no `__type`
-            //   (document-service/transform/relations/transform/data-ids.ts)
-            // - a populate with a field selection never selects the morph id column, so the
-            //   relation comes back empty (query/helpers/populate/apply.ts)
+            // and it comes back empty: they populate relations with a field selection
+            // (document-service/utils/populate.ts), which never selects the morph id column
+            // (query/helpers/populate/apply.ts).
             // An empty morphOne populates as null or undefined and is skipped above.
             // Publish omits an empty value: the links stay on the draft, and the document service
             // re-points those of the old published version to the new one. Every other caller is

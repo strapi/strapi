@@ -814,38 +814,88 @@ describe('Document Service polymorphic relations', () => {
       }
     });
 
+    // Seed through the inverse side: the replace path only deletes the join rows whose `field`
+    // is the inverse attribute, so links written from the owner side could not catch a wipe
     it('keeps every link of an inverse morphMany of a morphToMany', async () => {
-      const box = await strapi.db.query(MORPH_BOX_UID).create({ data: { name: 'A' } });
       const linkedBoxes = [
-        await strapi.db.query(MORPH_BOX_UID).create({
-          data: { name: 'B', mtm: [{ id: box.id, __type: MORPH_BOX_UID }] },
-        }),
-        await strapi.db.query(MORPH_BOX_UID).create({
-          data: { name: 'C', mtm: [{ id: box.id, __type: MORPH_BOX_UID }] },
-        }),
+        await strapi.db.query(MORPH_BOX_UID).create({ data: { name: 'B' } }),
+        await strapi.db.query(MORPH_BOX_UID).create({ data: { name: 'C' } }),
       ];
+      const box = await strapi.db.query(MORPH_BOX_UID).create({
+        data: { name: 'A', mtmInverse: linkedBoxes.map(({ id }) => id) },
+      });
+
+      const { joinTable } = strapi.db.metadata.get(MORPH_BOX_UID).attributes.mtm as any;
+      const { joinColumn, morphColumn } = joinTable;
+      const loadInverseJoinRows = () =>
+        strapi.db
+          .getConnection(joinTable.name)
+          .where({
+            [morphColumn.idColumn.name]: box.id,
+            [morphColumn.typeColumn.name]: MORPH_BOX_UID,
+            field: 'mtmInverse',
+          })
+          .orderBy(joinColumn.name, 'asc');
 
       try {
+        expect(await loadInverseJoinRows()).toHaveLength(2);
+
         await strapi.db.query(MORPH_BOX_UID).update({
           where: { id: box.id },
           data: { mtmInverse: { connect: [], disconnect: [] } },
         });
 
-        const { joinTable } = strapi.db.metadata.get(MORPH_BOX_UID).attributes.mtm as any;
-        const { joinColumn, morphColumn } = joinTable;
-        const joinRows = await strapi.db
-          .getConnection(joinTable.name)
-          .where({
-            [morphColumn.idColumn.name]: box.id,
-            [morphColumn.typeColumn.name]: MORPH_BOX_UID,
-          })
-          .orderBy(joinColumn.name, 'asc');
-        expect(joinRows.map((row: any) => row[joinColumn.name])).toEqual(
+        expect((await loadInverseJoinRows()).map((row: any) => row[joinColumn.name])).toEqual(
           linkedBoxes.map(({ id }) => id)
         );
       } finally {
         for (const { id } of [box, ...linkedBoxes]) {
           await strapi.db.query(MORPH_BOX_UID).delete({ where: { id } });
+        }
+      }
+    });
+  });
+  // An inverse morphMany of a morphToMany is a join-table relation: the copy flows copy its rows
+  // per version, like a regular relation, mapping each target to its version of the same status.
+  describe('inverse morphMany of a morphToMany in the copy flows', () => {
+    const namesOf = async (documentId: string, status: 'draft' | 'published') => {
+      const entry = await strapi.documents(MORPH_BOX_UID).findOne({
+        documentId,
+        status,
+        populate: { mtmInverse: { fields: ['name'] } },
+      } as any);
+      return ((entry as any)?.mtmInverse ?? []).map(({ name }: { name: string }) => name).sort();
+    };
+
+    it('copies the links on publish and restores them on discard draft', async () => {
+      const documentIds: string[] = [];
+
+      try {
+        for (const name of ['B', 'C']) {
+          const target = await strapi.documents(MORPH_BOX_UID).create({ data: { name } });
+          documentIds.push(target.documentId);
+          await strapi.documents(MORPH_BOX_UID).publish({ documentId: target.documentId });
+        }
+        const box = await strapi.documents(MORPH_BOX_UID).create({
+          data: {
+            name: 'A',
+            mtmInverse: documentIds.map((documentId) => ({ documentId })),
+          } as any,
+        });
+        documentIds.push(box.documentId);
+
+        await strapi.documents(MORPH_BOX_UID).publish({ documentId: box.documentId });
+
+        expect(await namesOf(box.documentId, 'draft')).toEqual(['B', 'C']);
+        expect(await namesOf(box.documentId, 'published')).toEqual(['B', 'C']);
+
+        await strapi.documents(MORPH_BOX_UID).discardDraft({ documentId: box.documentId });
+
+        expect(await namesOf(box.documentId, 'draft')).toEqual(['B', 'C']);
+        expect(await namesOf(box.documentId, 'published')).toEqual(['B', 'C']);
+      } finally {
+        for (const documentId of documentIds) {
+          await strapi.documents(MORPH_BOX_UID).delete({ documentId });
         }
       }
     });
