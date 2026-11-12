@@ -97,7 +97,7 @@ describe('admin:create-user', () => {
       await app.load();
 
       try {
-        return await app.admin.services['password-policy'].updatePolicy(policy);
+        return await app.service('admin::password-policy').updatePolicy(policy);
       } finally {
         await app.destroy();
       }
