@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createContentAPIRequest } from 'api-tests/request';
+import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
 import { createTestBuilder } from 'api-tests/builder';
 
 /**
@@ -50,6 +50,13 @@ let rq: (options: { method: string; url: string; qs?: Record<string, unknown> })
   statusCode: number;
   body: { data?: Note[]; error?: Record<string, unknown> };
 }>;
+let rqAdmin: (options: { method: string; url: string; body?: Record<string, unknown> }) => Promise<{
+  statusCode: number;
+  body: {
+    data?: { opNotes: Note[] | null } | null;
+    errors?: Array<{ message: string; extensions?: { code?: string } }>;
+  };
+}>;
 
 const findNotes = (filters: Record<string, unknown>) => {
   return strapi.documents(NOTE_UID).findMany({ filters } as any) as unknown as Promise<Note[]>;
@@ -67,6 +74,7 @@ describe('Filtering with object operands on scalar and JSON attributes', () => {
 
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
+    rqAdmin = await createAuthRequest({ strapi });
 
     const category = await strapi.documents(CATEGORY_UID).create({ data: { name: 'Cat A' } });
 
@@ -97,6 +105,9 @@ describe('Filtering with object operands on scalar and JSON attributes', () => {
     ['an object operand nested under $and', { meta: { $and: { $eq: { a: 999 } } } }],
     ['an object operand whose key is an attribute name', { meta: { $eq: { title: 'x' } } }],
     ['$eq with an object on documentId', { documentId: { $eq: { a: 1 } } }],
+    ['$eq with an object on id', { id: { $eq: { a: 1 } } }],
+    ['an object operand on a relation id', { category: { id: { $eq: { a: 1 } } } }],
+    ['an object operand on a relation documentId', { category: { documentId: { $eq: { a: 1 } } } }],
   ];
 
   describe('Document Service', () => {
@@ -136,6 +147,33 @@ describe('Filtering with object operands on scalar and JSON attributes', () => {
 
       expect(res.statusCode).toBe(200);
       expect(titles(res.body.data)).toEqual(['Note 1', 'Note 2']);
+    });
+  });
+
+  describe('GraphQL', () => {
+    const queryNotes = (filters: string) => {
+      return rqAdmin({
+        method: 'POST',
+        url: '/graphql',
+        body: { query: `query { opNotes(filters: ${filters}) { title } }` },
+      });
+    };
+
+    test('returns a BAD_USER_INPUT error for an object operand on a JSON attribute', async () => {
+      const res = await queryNotes('{ meta: { eq: { a: 999 } } }');
+
+      expect(res.body.data?.opNotes ?? null).toBeNull();
+      expect(res.body.errors?.[0]).toMatchObject({
+        message: 'Invalid operand for $eq at meta: expected a value, not an object',
+        extensions: { code: 'BAD_USER_INPUT' },
+      });
+    });
+
+    test('accepts a scalar operand', async () => {
+      const res = await queryNotes('{ title: { eq: "Note 1" } }');
+
+      expect(res.body.errors).toBeUndefined();
+      expect(titles(res.body.data?.opNotes ?? [])).toEqual(['Note 1']);
     });
   });
 
