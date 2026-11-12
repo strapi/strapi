@@ -50,10 +50,13 @@ type NestedAttributeCondition<
  * Filter on the id of a nested attribute's target: an object with exactly one comparison, list or
  * null operator (e.g. `{ $in: [1, 2] }`, `{ $null: true }`).
  *
- * The database applies it to the target's id, so `$ne` and `$notIn` do not match entries without a
- * related entry (their id is null). It throws for an object with several operators, or
- * with an operator next to other keys. So each operator object forbids the other operators and the
- * target's filter keys. A literal that mixes an operator with other keys matches no member.
+ * The database applies it to the target's numeric id, not to its documentId: a documentId operand
+ * type-checks (`ID` is `string | number`) but matches nothing, or fails on Postgres. `$ne` and
+ * `$notIn` do not match entries without a related entry (their id is null).
+ *
+ * The database throws for an object with several operators, or with an operator next to other keys.
+ * So each operator object forbids the other operators and the target's filter keys. A literal that
+ * mixes an operator with other keys matches no member.
  *
  * The filter object member does not forbid the operators, so spreading a filter read back from it
  * and adding a key (`{ ...filters.article, title: 'a' }`) compiles. The spread compiles even when the
