@@ -77,7 +77,7 @@ const engine = (settings: Settings = {}) => {
       ...senders.emailAndPassword,
     },
     emailVerification: senders.emailVerification,
-    user: { changeEmail: { enabled: true } },
+    user: { changeEmail: { enabled: true, ...senders.user.changeEmail } },
     socialProviders: { github: { clientId: 'id', clientSecret: 'secret' } },
     plugins: [strapiEmail(strapi)],
   });
@@ -260,6 +260,22 @@ describe('strapi-email: in the engine options', () => {
     expect(options.emailAndPassword?.sendResetPassword).toEqual(expect.any(Function));
     expect(options.emailVerification?.sendVerificationEmail).toEqual(expect.any(Function));
     expect(options.user?.changeEmail?.enabled).toBe(true);
+    // The current address approves a change before the new one is asked
+    expect(options.user?.changeEmail?.sendChangeEmailConfirmation).toEqual(expect.any(Function));
+  });
+
+  it("keeps the project's own approval sender over the template one", () => {
+    const { strapi } = setup();
+    const sendChangeEmailConfirmation = vi.fn();
+    const options = buildAuthOptions(
+      strapi,
+      defineAuth({ user: { changeEmail: { sendChangeEmailConfirmation } } } as never)
+    );
+
+    expect(options.user?.changeEmail?.sendChangeEmailConfirmation).toBe(
+      sendChangeEmailConfirmation
+    );
+    expect(options.user?.changeEmail?.enabled).toBe(true);
   });
 });
 
@@ -367,18 +383,35 @@ describe('strapi-email: the error redirect', () => {
 });
 
 describe('strapi-email: change of address', () => {
-  it('sends change-email to the new address', async () => {
-    const { auth, signUp, sendTemplate } = engine();
+  it('asks the current address to approve the change, and only then the new one to prove it', async () => {
+    const { auth, signUp, sendTemplate, db } = engine();
     const { headers } = await signUp();
     const cookie = (headers.getSetCookie() as string[]).map((c) => c.split(';')[0]).join('; ');
+
+    (db.user[0] as { emailVerified: boolean }).emailVerified = true;
 
     await auth.api.changeEmail({
       body: { newEmail: 'new@example.com' },
       headers: new Headers({ cookie }),
     });
 
+    // Nothing has gone to the new address yet: only a mailbox the user already owns was asked
     expect(calls(sendTemplate, 'end-users.change-email')).toHaveLength(1);
     expect(calls(sendTemplate, 'end-users.change-email')[0].slice(0, 3)).toEqual([
+      'end-users.change-email',
+      'ann@example.com',
+      expect.objectContaining({
+        newEmail: 'new@example.com',
+        user: { name: 'Ann', email: 'ann@example.com' },
+      }),
+    ]);
+
+    await auth.api.verifyEmail({
+      query: { token: tokenOf(calls(sendTemplate, 'end-users.change-email')[0][2].url) },
+    });
+
+    expect(calls(sendTemplate, 'end-users.change-email')).toHaveLength(2);
+    expect(calls(sendTemplate, 'end-users.change-email')[1].slice(0, 3)).toEqual([
       'end-users.change-email',
       'new@example.com',
       expect.objectContaining({
@@ -386,6 +419,28 @@ describe('strapi-email: change of address', () => {
         user: { name: 'Ann', email: 'ann@example.com' },
       }),
     ]);
+    expect((db.user[0] as { email: string }).email).toBe('ann@example.com');
+  });
+
+  it('sends the approval to the address the user has now, in their locale', async () => {
+    const { strapi, sendTemplate } = setup();
+
+    await emailSenders(strapi).user.changeEmail.sendChangeEmailConfirmation({
+      user: { name: 'Ann', email: 'ann@example.com', preferredLocale: 'fr' },
+      newEmail: 'new@example.com',
+      url: 'http://x/approve',
+    });
+
+    expect(sendTemplate).toHaveBeenCalledWith(
+      'end-users.change-email',
+      'ann@example.com',
+      {
+        user: { name: 'Ann', email: 'ann@example.com' },
+        newEmail: 'new@example.com',
+        url: 'http://x/approve',
+      },
+      { locale: 'fr' }
+    );
   });
 });
 

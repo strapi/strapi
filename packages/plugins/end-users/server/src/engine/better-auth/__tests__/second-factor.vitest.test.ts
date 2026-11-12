@@ -78,6 +78,8 @@ const build = (plugins: BetterAuthPlugin[] = []) => {
   } as Record<string, Row[]>;
   const codes: string[] = [];
   const links: string[] = [];
+  const approvals: string[] = [];
+  const proofs: string[] = [];
 
   const auth = betterAuth({
     secret: SECRET,
@@ -86,6 +88,19 @@ const build = (plugins: BetterAuthPlugin[] = []) => {
     telemetry: { enabled: false },
     database: memoryAdapter(db),
     emailAndPassword: { enabled: true },
+    emailVerification: {
+      async sendVerificationEmail({ token }: { token: string }) {
+        proofs.push(token);
+      },
+    },
+    user: {
+      changeEmail: {
+        enabled: true,
+        async sendChangeEmailConfirmation({ token }: { token: string }) {
+          approvals.push(token);
+        },
+      },
+    },
     plugins: [
       twoFactor({
         ...twoFactorOptions({
@@ -156,7 +171,7 @@ const build = (plugins: BetterAuthPlugin[] = []) => {
 
   const marks = () => db.session.map((session) => session.twoFactorVerified);
 
-  return { auth, db, codes, links, enroll, challenge, marks };
+  return { auth, db, codes, links, approvals, proofs, enroll, challenge, marks };
 };
 
 describe('second-factor', () => {
@@ -444,6 +459,27 @@ describe('second-factor', () => {
 
     expect(db.session).toHaveLength(1);
     expect(marks()).toEqual([false]);
+  });
+});
+
+describe('the session a verification link makes', () => {
+  it('is never marked, for a user with two-factor on who changes their address', async () => {
+    const { auth, db, approvals, proofs, enroll, marks } = build();
+    const { confirmed } = await enroll();
+
+    db.user[0].emailVerified = true;
+    await auth.api.changeEmail({
+      body: { newEmail: 'ann.new@example.com' },
+      headers: { cookie: confirmed },
+    });
+    await auth.api.verifyEmail({ query: { token: approvals[0] } });
+
+    // Opened with no session of its own: the link makes one, and no second factor stands behind it
+    await auth.api.verifyEmail({ query: { token: proofs[0] } });
+
+    expect(db.user[0].email).toBe('ann.new@example.com');
+    expect(db.session).toHaveLength(2);
+    expect(marks()).toEqual([true, false]);
   });
 });
 

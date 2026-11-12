@@ -2258,6 +2258,56 @@ describe('end-users: the emails the engine sends', () => {
     expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(0);
   });
 
+  it('asks the current address of a verified user first, the new one only once that is approved, and then ends the other sessions', async () => {
+    const { email, cookie } = await signedUp();
+
+    await strapi.db.query(USER_UID).update({ where: { email }, data: { emailVerified: true } });
+    clearSentEmails();
+
+    const changed = await rq.post('/api/auth/change-email', {
+      body: { newEmail: 'approved@example.com' },
+      headers: { ...FROM_FRONT_END, Cookie: cookie },
+    });
+
+    expect(changed.statusCode).toBe(200);
+    await emailsSent(1);
+    expect(sentEmails()).toHaveLength(1);
+    // Only the mailbox the user already owns is asked at first, so a stolen session cannot move
+    // the address to one of its own
+    expect(sentEmails()[0].to).toBe(email);
+
+    const approval = sentEmails()[0];
+
+    clearSentEmails();
+
+    // Opened from the mailbox, with no session
+    expect((await rq.get(linkOf(approval))).statusCode).toBe(302);
+    await emailsSent(1);
+    expect(sentEmails()[0].to).toBe('approved@example.com');
+    expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(1);
+
+    const proof = sentEmails()[0];
+
+    const proven = await rq.get(linkOf(proof));
+
+    expect(proven.statusCode).toBe(302);
+    expect(
+      await strapi.db.query(USER_UID).count({ where: { email: 'approved@example.com' } })
+    ).toBe(1);
+
+    // The session that asked for the change is gone; the one the link made is the only one left
+    const old = await rq.get('/api/auth/get-session', { headers: { cookie } });
+
+    expect(old.body).toBeNull();
+
+    const made = cookieOf(proven, 'strapi.session_token');
+
+    expect(made).toBeDefined();
+    expect(
+      (await rq.get('/api/auth/get-session', { headers: { cookie: made } })).body
+    ).not.toBeNull();
+  });
+
   it('tells the old address, naming the masked new one, once a verified change completes', async () => {
     const { email, cookie } = await signedUp();
 

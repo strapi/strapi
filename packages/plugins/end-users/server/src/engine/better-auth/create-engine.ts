@@ -474,9 +474,10 @@ export const buildAuthOptions = (
     },
     // Every email goes through the email plugin's templates; a sender the project sets wins
     emailVerification: senders.emailVerification,
-    // The confirmation goes to the new address, through `emailVerification.sendVerificationEmail`
+    // A change of address is approved from the current address first, then proven from the new one
+    // (`emailVerification.sendVerificationEmail`)
     user: {
-      changeEmail: { enabled: true },
+      changeEmail: { enabled: true, ...senders.user.changeEmail },
       // Strapi's default user fields. Only the plugin sets `additionalFields`: a
       // project's are refused by `defineAuth` and dropped by `withoutProtectedOptions`.
       additionalFields: {

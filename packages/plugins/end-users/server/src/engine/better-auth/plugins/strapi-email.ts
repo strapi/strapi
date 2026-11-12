@@ -101,7 +101,7 @@ const settings = (strapi: Core.Strapi) =>
  * is for and, for a change of address, the new one. Only used to pick a template and fill it in:
  * nothing here is trusted, Better Auth verifies the token when the link is followed.
  */
-const tokenPayload = (token: unknown): { email?: string; updateTo?: string } => {
+export const tokenPayload = (token: unknown): { email?: string; updateTo?: string } => {
   try {
     const part = typeof token === 'string' ? token.split('.')[1] : undefined;
     const payload: unknown = JSON.parse(Buffer.from(part ?? '', 'base64url').toString('utf8'));
@@ -217,11 +217,28 @@ const afterCommit = (strapi: Core.Strapi, work: () => Promise<void>): Promise<vo
 };
 
 /**
- * The senders of `emailVerification`, `emailAndPassword` and the welcome. `sendVerificationEmail`
- * also carries a change of address: Better Auth sends that confirmation through it, to the new
- * address, with a token that names it (`updateTo`).
+ * The senders of `emailVerification`, `emailAndPassword`, `user.changeEmail` and the welcome. A
+ * change of address takes two mails: `sendChangeEmailConfirmation` asks the address the user has
+ * now to approve it, and only then does `sendVerificationEmail` ask the new one to prove it is
+ * theirs, with a token that names it (`updateTo`). Without the first, whoever holds a session
+ * could move a verified account to a mailbox of their own with that mailbox's say-so alone.
  */
 export const emailSenders = (strapi: Core.Strapi) => ({
+  user: {
+    changeEmail: {
+      /** To the current address: `url` is the link that approves the change to `newEmail`. */
+      sendChangeEmailConfirmation: (input: { user: EmailUser; newEmail: string; url: string }) =>
+        afterCommit(strapi, () =>
+          send(
+            strapi,
+            'change-email',
+            input.user.email,
+            { user: person(input.user), newEmail: input.newEmail, url: input.url },
+            localeOf(input.user)
+          )
+        ),
+    },
+  },
   emailAndPassword: {
     sendResetPassword: (input: { user: EmailUser; url: string; token?: string }) =>
       afterCommit(strapi, () => sendReset(strapi, input)),
