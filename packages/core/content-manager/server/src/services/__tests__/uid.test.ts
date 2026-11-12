@@ -285,6 +285,8 @@ describe('Test uid service', () => {
       test.each([
         ['a string', 'Test title', 'test-title'],
         ['an empty string', '', 'my-test-model'],
+        ['a whitespace-only string', '   ', 'my-test-model'],
+        ['a string of tabs and newlines', '\t\n', 'my-test-model'],
         ['an object', { a: 'b' }, 'my-test-model'],
         ['an array', ['x'], 'my-test-model'],
         ['a number', 42, 'my-test-model'],

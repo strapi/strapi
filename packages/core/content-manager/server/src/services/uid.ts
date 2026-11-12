@@ -27,8 +27,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // @ts-expect-error targetField can be undefined
     const targetValue: unknown = _.get(data, targetField);
 
-    // Only strings can be slugified; any other value falls back like an empty one
-    if (typeof targetValue === 'string' && targetValue !== '') {
+    // Only non-blank strings can be slugified; any other value falls back like an empty one
+    if (typeof targetValue === 'string' && targetValue.trim() !== '') {
       return this.findUniqueUID({
         contentTypeUID,
         field,
