@@ -134,6 +134,31 @@ describe('render', () => {
   });
 });
 
+describe('render inside a style attribute', () => {
+  const renderStyle = (value: string) =>
+    render('<p style="color: {{ c }}">x</p>', ['c'], { c: value }, 'html');
+
+  it('keeps a plain value as it is', () => {
+    expect(renderStyle('#ff0000')).toBe('<p style="color: #ff0000">x</p>');
+    expect(renderStyle('12.5%')).toBe('<p style="color: 12.5%">x</p>');
+  });
+
+  it('writes the characters that could end the declaration as CSS escapes', () => {
+    expect(renderStyle('red; background: url(https://e.test/x)')).toBe(
+      '<p style="color: red\\3b  background\\3a  url\\28 https\\3a \\2f \\2f e.test\\2f x\\29 ">x</p>'
+    );
+    expect(renderStyle('a"b\'c\\d<e>f\ng')).toBe(
+      '<p style="color: a\\22 b\\27 c\\5c d\\3c e\\3e f\\a g">x</p>'
+    );
+  });
+
+  it('leaves a variable in another attribute with the usual HTML escaping', () => {
+    expect(render('<p title="{{ c }}">x</p>', ['c'], { c: 'a;b"' }, 'html')).toBe(
+      '<p title="a;b&quot;">x</p>'
+    );
+  });
+});
+
 describe('buildSampleData', () => {
   it('gives a URL variable a sample a link keeps, and the others a bracketed name', () => {
     const data = buildSampleData(['url', 'user.name', 'app.link'], ['url', 'app.link']);

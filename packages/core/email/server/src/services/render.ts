@@ -16,6 +16,11 @@ const HTML_ESCAPES: Record<string, string> = {
   "'": '&#39;',
 };
 
+const escapeCss = (value: string) =>
+  Array.from(value, (char) =>
+    CSS_SAFE.test(char) ? char : `\\${(char.codePointAt(0) as number).toString(16)} `
+  ).join('');
+
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 
 // An attribute of a tag, read from the start of what is left of it: a name and, optionally, a quoted or
@@ -29,6 +34,9 @@ const TAG_ATTRIBUTE = new RegExp(
   'y'
 );
 const URL_ATTRIBUTES = new Set(['href', 'src']);
+// What a value inside a `style` attribute may keep as it is. Every other character is written as a CSS escape
+// (`\3b `), so a value can't end its declaration, open a function or a string, or start another property.
+const CSS_SAFE = /[A-Za-z0-9 #.%_,\u0080-\uffff-]/;
 const ALLOWED_SCHEME = /^(?:https?:|mailto:)/i;
 
 // Browsers ignore whitespace and control characters at the start of a URL, so they are skipped before the scheme.
@@ -99,6 +107,16 @@ export const render = (
   const fillAttribute = (name: string, equals: string, raw: string): string => {
     const quote = /^["']/.test(raw) ? raw[0] : '';
     const inner = quote ? raw.slice(1, -1) : raw;
+
+    if (name.toLowerCase() === 'style') {
+      const filled = inner.replace(PLACEHOLDER, (placeholder, variable: string) =>
+        variables.includes(variable)
+          ? escapeHtml(escapeCss(stringify(readPath(data, variable))))
+          : placeholder
+      );
+
+      return `${name}${equals}${quote}${filled}${quote}`;
+    }
 
     if (!URL_ATTRIBUTES.has(name.toLowerCase())) {
       return `${name}${equals}${quote}${fill(inner)}${quote}`;
