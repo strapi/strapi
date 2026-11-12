@@ -2,17 +2,20 @@ import { map, sortBy } from 'lodash';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
+import { isIntegerId } from '../utils/integer-id';
+import { AUDITED_EVENTS } from '../audit-logs';
 
 import type { File, Folder } from '../types';
 
-type FolderMap = {
-  [key: string]: Partial<Folder> & {
-    children: FolderNode[];
-  };
+/**
+ * A node of the folder tree: `Folder.children` holds ids, a node's children hold nodes.
+ */
+type FolderNode = Partial<Omit<Folder, 'children'>> & {
+  children: FolderNode[];
 };
 
-type FolderNode = Partial<Folder> & {
-  children: FolderNode[];
+type FolderMap = {
+  [key: string]: FolderNode;
 };
 
 type DeleteByIdsOptions = {
@@ -106,6 +109,9 @@ const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOpt
   });
 
   strapi.eventHub.emit('media-folder.delete', { folders });
+  folders.forEach((folder: Folder) => {
+    strapi.eventHub.emit(AUDITED_EVENTS.FOLDER_DELETE_AUDIT, { folder });
+  });
 
   return {
     folders,
@@ -134,7 +140,9 @@ const update = async (
 ) => {
   // only name is updated
   if (parent === undefined) {
-    const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
+    const existingFolder = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id }, populate: { parent: { select: ['id', 'name'] } } });
 
     if (!existingFolder) {
       return undefined;
@@ -147,10 +155,19 @@ const update = async (
         .query(FOLDER_MODEL_UID)
         .update({ where: { id }, data: newFolder });
 
+      strapi.eventHub.emit('media-folder.update', {
+        folder: { ...folder, parent: existingFolder.parent ?? null },
+        previous: existingFolder,
+      });
+
       return folder;
     }
     // location is updated => using transaction
   } else {
+    const previous = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id }, populate: { parent: { select: ['id', 'name'] } } });
+
     const trx = await strapi.db.transaction();
     try {
       // fetch existing folder
@@ -246,7 +263,17 @@ const update = async (
       .query(FOLDER_MODEL_UID)
       .update({ where: { id }, data: newFolder });
 
-    strapi.eventHub.emit('media-folder.update', { folder });
+    const parentFolder =
+      parent === null
+        ? null
+        : await strapi.db
+            .query(FOLDER_MODEL_UID)
+            .findOne({ where: { id: parent }, select: ['id', 'name'] });
+
+    strapi.eventHub.emit('media-folder.update', {
+      folder: { ...folder, parent: parentFolder },
+      previous,
+    });
     return folder;
   }
 };
@@ -259,6 +286,34 @@ const update = async (
 const exists = async (params = {}) => {
   const count = await strapi.db.query(FOLDER_MODEL_UID).count({ where: params });
   return count > 0;
+};
+
+/**
+ * Maps each folder `path` (made of `pathId`s, e.g. `/1/4/7`) to the same path made of
+ * folder names (e.g. `/Clients/Acme/2026`), with a single query for all the ancestors.
+ */
+const getNamePaths = async (paths: (string | null)[]): Promise<Record<string, string>> => {
+  const validPaths = paths.filter((path): path is string => typeof path === 'string');
+  const segmentsByPath = validPaths.map((path) => path.split('/').filter(Boolean));
+  const pathIds = [...new Set(segmentsByPath.flat())].filter(isIntegerId).map(Number);
+
+  const ancestors: Pick<Folder, 'pathId' | 'name'>[] = pathIds.length
+    ? await strapi.db
+        .query(FOLDER_MODEL_UID)
+        .findMany({ select: ['pathId', 'name'], where: { pathId: { $in: pathIds } } })
+    : [];
+
+  const nameByPathId = new Map(ancestors.map(({ pathId, name }) => [String(pathId), name]));
+
+  return Object.fromEntries(
+    validPaths.map((path, index) => [
+      path,
+      `/${segmentsByPath[index]
+        .map((pathId) => nameByPathId.get(pathId))
+        .filter((name) => name !== undefined)
+        .join('/')}`,
+    ])
+  );
 };
 
 /**
@@ -311,4 +366,5 @@ export default {
   update,
   setPathIdAndPath,
   getStructure,
+  getNamePaths,
 };

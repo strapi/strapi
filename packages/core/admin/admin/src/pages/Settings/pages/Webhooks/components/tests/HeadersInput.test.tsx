@@ -1,4 +1,4 @@
-import { render, screen } from '@tests/utils';
+import { render, screen, waitFor } from '@tests/utils';
 
 import { Form } from '../../../../../../components/Form';
 import { HeadersInput } from '../HeadersInput';
@@ -44,5 +44,40 @@ describe('HeadersInput', () => {
     expect(screen.getByRole('textbox', { name: 'row 1 value' })).toBe(firstRowValue);
     expect(screen.getByRole('textbox', { name: 'row 2 value' })).toBe(thirdRowValue);
     expect(thirdRowValue).toHaveValue('third');
+  });
+
+  it('resets the key input when the last remaining header row is cleared', async () => {
+    const onSubmit = jest.fn();
+    const { user } = render(
+      <Form
+        method="POST"
+        initialValues={{ headers: [{ key: 'X-C', value: '33' }] }}
+        onSubmit={onSubmit}
+      >
+        {({ values }) => (
+          <>
+            <HeadersInput />
+            <output data-testid="form-headers">{JSON.stringify(values.headers)}</output>
+          </>
+        )}
+      </Form>
+    );
+
+    expect(screen.getByRole('combobox', { name: 'row 1 key' })).toHaveValue('X-C');
+
+    await user.click(screen.getByRole('button', { name: 'Remove header row 1' }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: 'row 1 key' })).toHaveValue('')
+    );
+
+    await user.type(screen.getByRole('combobox', { name: 'row 1 key' }), 'X-D');
+    await user.keyboard('{Enter}');
+    await user.type(screen.getByRole('textbox', { name: 'row 1 value' }), '4');
+
+    expect(screen.getByRole('combobox', { name: 'row 1 key' })).toHaveValue('X-D');
+    expect(screen.getByTestId('form-headers')).toHaveTextContent(
+      JSON.stringify([{ key: 'X-D', value: '4' }])
+    );
   });
 });

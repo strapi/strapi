@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "5.59.0",
+  "version": "5.61.1",
   "description": "Protect your API with a full-authentication process based on JWT",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -44,18 +44,16 @@
     "build:code": "run -T rollup -c",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint . --max-warnings=0",
-    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:front": "run -T jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T jest --config ./jest.config.front.js --watchAll",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.2.4",
-    "@strapi/icons": "2.2.4",
-    "@strapi/utils": "5.59.0",
+    "@strapi/design-system": "2.3.0",
+    "@strapi/icons": "2.3.0",
+    "@strapi/utils": "5.61.1",
     "bcryptjs": "2.4.3",
     "formik": "2.4.9",
     "immer": "9.0.21",
@@ -72,8 +70,8 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@strapi/admin": "5.59.0",
-    "@strapi/strapi": "5.59.0",
+    "@strapi/admin": "5.61.1",
+    "@strapi/strapi": "5.61.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -95,7 +93,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

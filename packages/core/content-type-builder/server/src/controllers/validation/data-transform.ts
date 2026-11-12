@@ -1,14 +1,13 @@
-import type { Struct } from '@strapi/types';
+import type { Schema, Struct } from '@strapi/types';
 import _ from 'lodash';
 import { hasDefaultAttribute } from '../../utils/typeguards';
 
-export const removeEmptyDefaults = (
-  data: Partial<Struct.ContentTypeSchema> | Partial<Struct.ComponentSchema> | undefined
-) => {
+// Runs before the payload is validated, so attributes are not yet known to be valid
+export const removeEmptyDefaults = (data: { attributes?: Record<string, unknown> } | undefined) => {
   const { attributes } = data || {};
 
   Object.keys(attributes!).forEach((attributeName) => {
-    const attribute = attributes![attributeName];
+    const attribute = attributes![attributeName] as Schema.Attribute.AnyAttribute;
 
     if (hasDefaultAttribute(attribute) && attribute.default === '') {
       attribute.default = undefined;

@@ -75,7 +75,7 @@ function getFileData(fileName) {
 
   return {
     filepath: filePath,
-    originalFileName: fileName,
+    originalFilename: fileName,
     size,
     mimetype: mimeType,
   };
@@ -86,7 +86,7 @@ async function uploadFile(file, name) {
     .plugin('upload')
     .service('upload')
     .upload({
-      files: file,
+      files: [file],
       data: {
         fileInfo: {
           alternativeText: `An image uploaded to Strapi called ${name}`,

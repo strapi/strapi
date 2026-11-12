@@ -61,18 +61,57 @@ const todoComponent = {
   },
 };
 
+const catModel = {
+  displayName: 'Cat',
+  singularName: 'cat',
+  pluralName: 'cats',
+  kind: 'collectionType',
+  draftAndPublish: true,
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    picture: {
+      type: 'media',
+    },
+  },
+};
+
+const birdModel = {
+  displayName: 'Bird',
+  singularName: 'bird',
+  pluralName: 'birds',
+  kind: 'collectionType',
+  draftAndPublish: true,
+  pluginOptions: { i18n: { localized: true } },
+  attributes: {
+    name: {
+      type: 'string',
+      pluginOptions: { i18n: { localized: true } },
+    },
+    picture: {
+      type: 'media',
+      pluginOptions: { i18n: { localized: true } },
+    },
+  },
+};
+
 describe('Upload plugin', () => {
   beforeAll(async () => {
     await builder
       .addContentType(dogModel)
+      .addContentType(catModel)
+      .addContentType(birdModel)
       .addComponent(todoComponent)
       .addContentType(todoListModel)
+      .addFixtures('plugin::i18n.locale', [{ name: 'French', code: 'fr' }])
       .build();
     strapi = await createStrapiInstance();
     rq = createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -232,6 +271,59 @@ describe('Upload plugin', () => {
       );
 
       await rq({ method: 'DELETE', url: `/upload/files/${id}` });
+    });
+
+    test('Rejects the top-level `where` query param when api.rest.strictParams is true', async () => {
+      expect(strapi.config.get('api.rest.strictParams')).toBe(true);
+
+      for (const url of ['/upload/files', '/upload/files/page', '/upload/files/1']) {
+        const res = await rq({
+          method: 'GET',
+          url,
+          qs: { where: { name: { $eq: 'does-not-match' } } },
+        });
+
+        expect(res.statusCode).toBe(400);
+      }
+    });
+
+    test('Ignores the top-level `where` query param when api.rest.strictParams is off', async () => {
+      const file = await strapi.db.query('plugin::upload.file').create({
+        data: {
+          name: 'where-ignored.png',
+          hash: 'where_ignored_hash',
+          ext: '.png',
+          mime: 'image/png',
+          size: 1,
+          url: '/uploads/where_ignored_hash.png',
+          provider: 'local',
+        },
+      });
+
+      const previousStrictParams = strapi.config.get('api.rest.strictParams');
+      strapi.config.set('api.rest.strictParams', false);
+
+      try {
+        for (const url of ['/upload/files', '/upload/files/page']) {
+          const res = await rq({
+            method: 'GET',
+            url,
+            qs: {
+              pagination: { pageSize: 100 },
+              where: { name: { $eq: 'does-not-match' } },
+            },
+          });
+
+          expect(res.statusCode).toBe(200);
+          const results = Array.isArray(res.body) ? res.body : res.body.data;
+          expect(results).toEqual(
+            expect.arrayContaining([expect.objectContaining({ id: file.id })])
+          );
+        }
+      } finally {
+        strapi.config.set('api.rest.strictParams', previousStrictParams);
+        await strapi.db.query('plugin::upload.file').delete({ where: { id: file.id } });
+      }
     });
 
     test('Get one file with an unknown documentId returns 404', async () => {
@@ -735,6 +827,268 @@ describe('Upload plugin', () => {
           })
         );
       });
+    });
+  });
+
+  describe('Upload with refId', () => {
+    const ref = 'api::dog.dog';
+    const field = 'profilePicture';
+
+    const uploadFor = (refId) =>
+      rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          refId,
+          ref,
+          field,
+        },
+      });
+
+    const findDog = (documentId, params = '') =>
+      rq({ method: 'GET', url: `/dogs/${documentId}?populate=${field}${params}` });
+
+    const countFiles = () => strapi.db.query('plugin::upload.file').count();
+
+    let dog;
+
+    beforeEach(async () => {
+      const res = await rq({ method: 'POST', url: '/dogs', body: { data: {} } });
+      dog = res.body.data;
+    });
+
+    afterEach(async () => {
+      await rq({ method: 'DELETE', url: `/dogs/${dog.documentId}` });
+    });
+
+    test('A numeric refId links the file to the entry', async () => {
+      const res = await uploadFor(dog.id);
+
+      expect(res.statusCode).toBe(201);
+
+      const dogRes = await findDog(dog.documentId);
+
+      expect(dogRes.statusCode).toBe(200);
+      expect(dogRes.body.data[field]).toMatchObject({ id: res.body[0].id });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+    });
+
+    test('A documentId refId links the file to the entry', async () => {
+      const res = await uploadFor(dog.documentId);
+
+      expect(res.statusCode).toBe(201);
+
+      const dogRes = await findDog(dog.documentId);
+
+      expect(dogRes.statusCode).toBe(200);
+      expect(dogRes.body.data[field]).toMatchObject({
+        id: res.body[0].id,
+        documentId: res.body[0].documentId,
+      });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+    });
+
+    test('An unknown documentId refId returns 404 and persists no file', async () => {
+      const filesBefore = await countFiles();
+
+      const res = await uploadFor('unknowndocumentid0000000');
+
+      expect(res.statusCode).toBe(404);
+      expect(await countFiles()).toBe(filesBefore);
+
+      const dogRes = await findDog(dog.documentId);
+
+      expect(dogRes.body.data[field]).toBeNull();
+    });
+  });
+
+  describe('Upload with refId on a draft & publish content type', () => {
+    const ref = 'api::cat.cat';
+    const field = 'picture';
+
+    test('A documentId refId links the file to both the draft and the published entry', async () => {
+      const catRes = await rq({
+        method: 'POST',
+        url: '/cats?status=published',
+        body: { data: { name: 'Tom' } },
+      });
+
+      expect(catRes.statusCode).toBe(201);
+
+      const { documentId } = catRes.body.data;
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          refId: documentId,
+          ref,
+          field,
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      const [published, draft] = await Promise.all([
+        rq({ method: 'GET', url: `/cats/${documentId}?populate=${field}` }),
+        rq({ method: 'GET', url: `/cats/${documentId}?populate=${field}&status=draft` }),
+      ]);
+
+      expect(published.body.data[field]).toMatchObject({ id: res.body[0].id });
+      expect(draft.body.data[field]).toMatchObject({ id: res.body[0].id });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+      await rq({ method: 'DELETE', url: `/cats/${documentId}` });
+    });
+
+    test('A documentId refId link survives a republish', async () => {
+      const catRes = await rq({
+        method: 'POST',
+        url: '/cats?status=published',
+        body: { data: { name: 'Tom' } },
+      });
+
+      expect(catRes.statusCode).toBe(201);
+
+      const { documentId } = catRes.body.data;
+
+      const findPublishedRow = () =>
+        strapi.db
+          .query(ref)
+          .findOne({ where: { documentId, publishedAt: { $notNull: true } }, select: ['id'] });
+
+      const publishedBefore = await findPublishedRow();
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          refId: documentId,
+          ref,
+          field,
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      await strapi.documents(ref).update({ documentId, data: { name: 'Tom 2' } });
+      await strapi.documents(ref).publish({ documentId });
+
+      const publishedAfter = await findPublishedRow();
+
+      // Publishing recreates the published row
+      expect(publishedAfter.id).not.toBe(publishedBefore.id);
+
+      const [published, draft] = await Promise.all([
+        rq({ method: 'GET', url: `/cats/${documentId}?populate=${field}` }),
+        rq({ method: 'GET', url: `/cats/${documentId}?populate=${field}&status=draft` }),
+      ]);
+
+      expect(published.body.data).toMatchObject({ name: 'Tom 2' });
+      expect(published.body.data[field]).toMatchObject({ id: res.body[0].id });
+      expect(draft.body.data[field]).toMatchObject({ id: res.body[0].id });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+      await rq({ method: 'DELETE', url: `/cats/${documentId}` });
+    });
+  });
+
+  describe('Upload with refId on a localized draft & publish content type', () => {
+    const ref = 'api::bird.bird';
+    const field = 'picture';
+
+    const findRows = (documentId) =>
+      strapi.db.query(ref).findMany({ where: { documentId }, populate: [field] });
+
+    test('A documentId refId links the file to every locale, draft and published', async () => {
+      const bird = await strapi
+        .documents(ref)
+        .create({ data: { name: 'Robin' }, locale: 'en', status: 'published' });
+      const { documentId } = bird;
+
+      await strapi
+        .documents(ref)
+        .update({ documentId, locale: 'fr', data: { name: 'Rouge-gorge' }, status: 'published' });
+
+      expect(await findRows(documentId)).toHaveLength(4);
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          refId: documentId,
+          ref,
+          field,
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      const fileId = res.body[0].id;
+      const rows = await findRows(documentId);
+
+      expect(rows).toHaveLength(4);
+      rows.forEach((row) => {
+        expect(row[field]).toMatchObject({ id: fileId });
+      });
+
+      const frDraft = await rq({
+        method: 'GET',
+        url: `/birds/${documentId}?locale=fr&status=draft&populate=${field}`,
+      });
+
+      expect(frDraft.statusCode).toBe(200);
+      expect(frDraft.body.data).toMatchObject({ locale: 'fr', name: 'Rouge-gorge' });
+      expect(frDraft.body.data[field]).toMatchObject({ id: fileId });
+
+      // Republishing a locale recreates its published row; the link must follow
+      const findFrPublished = () =>
+        strapi.db.query(ref).findOne({
+          where: { documentId, locale: 'fr', publishedAt: { $notNull: true } },
+          populate: [field],
+        });
+
+      const frPublishedBefore = await findFrPublished();
+
+      await strapi
+        .documents(ref)
+        .update({ documentId, locale: 'fr', data: { name: 'Rouge-gorge 2' } });
+      await strapi.documents(ref).publish({ documentId, locale: 'fr' });
+
+      const frPublishedAfter = await findFrPublished();
+
+      expect(frPublishedAfter.id).not.toBe(frPublishedBefore.id);
+      expect(frPublishedAfter.name).toBe('Rouge-gorge 2');
+      expect(frPublishedAfter[field]).toMatchObject({ id: fileId });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${fileId}` });
+      await strapi.documents(ref).delete({ documentId, locale: '*' });
+    });
+  });
+
+  describe('Upload with refId on a component', () => {
+    test('A documentId refId on a component ref returns 400 and persists no file', async () => {
+      const filesBefore = await strapi.db.query('plugin::upload.file').count();
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          ref: 'default.todo',
+          field: 'docs',
+          refId: 'unknowndocumentid0000000',
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(await strapi.db.query('plugin::upload.file').count()).toBe(filesBefore);
     });
   });
 

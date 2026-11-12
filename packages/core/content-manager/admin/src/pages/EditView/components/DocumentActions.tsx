@@ -10,6 +10,7 @@ import {
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
   useIsDesktop,
+  UnsavedChangesModal,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -34,6 +35,7 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
+import { useOmitLockedSharedFieldsOnLocaleCreate } from '../../../hooks/useI18nFieldLock';
 import { usePreviewContext } from '../../../preview/pages/Preview';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import {
@@ -646,8 +648,13 @@ const DocumentActionModal = ({
     onModalClose();
   };
 
+  /**
+   * Dismissing the modal (Escape, outside click, close button, `Modal.Close`) asks for
+   * confirmation when the content registered unsaved changes. The `onClose` handed to `content`
+   * and `footer` stays an unguarded close so that actions can close the modal after they succeed.
+   */
   return (
-    <Modal.Root open={isOpen} onOpenChange={handleClose}>
+    <UnsavedChangesModal open={isOpen ?? false} onOpenChange={handleClose}>
       <Modal.Content>
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
@@ -659,7 +666,7 @@ const DocumentActionModal = ({
         )}
         {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 
@@ -734,6 +741,7 @@ const PublishAction: DocumentActionComponent = ({
   const {
     currentDocument: { components },
   } = useDocumentContext('PublishAction');
+  const omitLockedSharedFields = useOmitLockedSharedFieldsOnLocaleCreate();
 
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
@@ -918,7 +926,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params: currentDocumentMeta.params,
         },
-        data
+        omitLockedSharedFields(data)
       );
 
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
@@ -1230,6 +1238,7 @@ const UpdateAction: DocumentActionComponent = ({
   const {
     currentDocument: { components },
   } = useDocumentContext('UpdateAction');
+  const omitLockedSharedFields = useOmitLockedSharedFieldsOnLocaleCreate();
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
 
@@ -1369,7 +1378,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId,
             params: currentDocumentMeta.params,
           },
-          data
+          omitLockedSharedFields(data)
         );
 
         if ('error' in res) {

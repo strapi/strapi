@@ -105,6 +105,7 @@ jest.mock('../../../../services/documents', () => ({
   useGetDraftRelationCountQuery: (...args: unknown[]) => mockUseDraftRelationCountQuery(...args),
   useLazyGetDraftRelationCountQuery: () => [mockCountDraftRelations, { isError: false }],
   useLazyGetDocumentQuery: () => [mockFetchDraftDocument],
+  useGetI18nLocalesQuery: () => ({ data: undefined }),
 }));
 jest.mock('../FormInputs/Relations/RelationModal', () => ({
   isAnyRelationModalOpen: () => mockIsAnyRelationModalOpen,
