@@ -103,6 +103,14 @@ describe('Templates EditPage', () => {
     expect(await screen.findByText('Could not save the template')).toBeInTheDocument();
   });
 
+  it('says near the HTML field what saving removes', async () => {
+    renderEdit();
+
+    const html = await screen.findByRole('textbox', { name: 'HTML' });
+
+    expect(html).toHaveAccessibleDescription(/Saving removes scripts/);
+  });
+
   it('inserts a variable at the cursor', async () => {
     const { user } = renderEdit();
 

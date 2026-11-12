@@ -310,7 +310,14 @@ export const EditPage = () => {
                   />
                 </Field.Root>
 
-                <Field.Root name="html">
+                <Field.Root
+                  name="html"
+                  hint={formatMessage({
+                    id: 'email.Templates.edit.htmlHint',
+                    defaultMessage:
+                      'Saving removes scripts, frames, forms, style blocks, event handlers such as onclick, and any link or image address that is not http, https or mailto.',
+                  })}
+                >
                   <Field.Label>{formatMessage(labels.html)}</Field.Label>
                   <Textarea
                     style={MONOSPACE}
@@ -320,6 +327,7 @@ export const EditPage = () => {
                     onChange={handleChange('html')}
                     onBlur={trackCursor('html')}
                   />
+                  <Field.Hint />
                 </Field.Root>
 
                 <Field.Root name="text">
