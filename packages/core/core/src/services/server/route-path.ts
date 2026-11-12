@@ -2028,6 +2028,33 @@ const realignSameSegment = (
 /** The most ends {@link installConstraintMatch} tries for one wildcard before it gives up. */
 const MAX_SHORTER_SPLITS = 32;
 
+/** The most shorter cuts one request tries across all wildcards of a layer before it gives up. */
+const MAX_SPLIT_ATTEMPTS = 128;
+
+/**
+ * Where `literal` starts inside `path`, after `from` and up to `to`, latest first. The search uses
+ * the layer's case sensitivity, so `/RAW` is found for `/raw` when the layer ignores case.
+ */
+const literalStarts = (
+  path: string,
+  literal: string,
+  ignoreCase: boolean,
+  from: number,
+  to: number
+) => {
+  const finder = new RegExp(escapeRegExp(literal), ignoreCase ? 'gi' : 'g');
+  const starts: number[] = [];
+  finder.lastIndex = from + 1;
+  let found = finder.exec(path);
+  while (found && found.index <= to) {
+    starts.push(found.index);
+    finder.lastIndex = found.index + 1;
+    found = finder.exec(path);
+  }
+
+  return starts.reverse();
+};
+
 /**
  * A copy of `regexp` with the content of some capture groups replaced, keyed by group number, or
  * `null`. v8 groups do not nest, so each group's content is the text up to its own `)`.
@@ -2301,22 +2328,21 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     offset: number,
     captures: (string | undefined)[],
     path: string,
-    spans: readonly (CaptureSpan | undefined)[] | undefined
+    spans: readonly (CaptureSpan | undefined)[] | undefined,
+    budget: { left: number },
+    fixed: ReadonlySet<number> = new Set()
   ): (string | undefined)[] | 'untestable' | null => {
-    const plan = capturePlan(current);
-    if (!spans || !plan || typeof current.path !== 'string') {
+    if (typeof current.path !== 'string') {
       return null;
     }
 
-    const tokens = tokenizePath(current.path);
-    const constrainedIndexes = new Set<number>();
-    for (const constraint of current[LAYER_CONSTRAINTS] ?? []) {
-      const index = logicalIndex(current, plan, constraint);
-      if (index !== undefined) {
-        constrainedIndexes.add(index);
-      }
+    // Without a capture plan the cuts cannot be tried, so a middleware layer must still match.
+    const plan = capturePlan(current);
+    if (!spans || !plan) {
+      return 'untestable';
     }
 
+    const tokens = tokenizePath(current.path);
     const tryLiteralEnds = (
       slot: number,
       span: CaptureSpan,
@@ -2343,21 +2369,25 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       }
 
       let bounded = true;
-      for (
-        let end = path.lastIndexOf(literal, span[1] - 1);
-        end > span[0];
-        end = path.lastIndexOf(literal, end - 1)
-      ) {
-        if (ends.length > MAX_SHORTER_SPLITS) {
+      const starts = literalStarts(path, literal, regexp.flags.includes('i'), span[0], span[1] - 1);
+      for (const start of starts) {
+        if (ends.includes(start)) {
+          continue;
+        }
+        if (ends.length >= MAX_SHORTER_SPLITS) {
           bounded = false;
           break;
         }
-        if (!ends.includes(end)) {
-          ends.push(end);
-        }
+        ends.push(start);
       }
 
+      let gaveUp = false;
       for (const end of ends) {
+        if (budget.left <= 0) {
+          return 'untestable';
+        }
+        budget.left -= 1;
+
         const shorter = captures.slice();
         shorter[slot] = path.slice(span[0], end);
         const shorterSpans = spans.slice();
@@ -2376,7 +2406,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
         }
         const pinned = replaceCaptures(regexp, contents);
         const found = pinned ? execIndexed(pinned, path) : null;
-        if (!found) {
+        if (!pinned || !found) {
           continue;
         }
 
@@ -2391,9 +2421,26 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
         if (accepted) {
           return accepted;
         }
+
+        // Another wildcard may need a shorter cut too, as `/:p(.*)/:q(.*)/:id(\\d+)` does.
+        const deeper = shorterSplit(
+          current,
+          pinned,
+          offset,
+          candidate,
+          path,
+          candidateSpans,
+          budget,
+          new Set(fixed).add(slot)
+        );
+        if (deeper === 'untestable') {
+          gaveUp = true;
+        } else if (deeper) {
+          return deeper;
+        }
       }
 
-      return bounded ? null : 'untestable';
+      return bounded && !gaveUp ? null : 'untestable';
     };
 
     const nextWildcardAt = (at: number) => {
@@ -2406,6 +2453,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       return nextPosition === -1 ? -1 : plan.offsets[layout] + nextPosition;
     };
 
+    let unproven = false;
     for (const constraint of current[LAYER_CONSTRAINTS] ?? []) {
       const slot = captureSlot(current, captures, constraint);
       const span = typeof slot === 'number' ? spans[slot] : undefined;
@@ -2415,6 +2463,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       const following = tokens[at + 1];
       if (
         typeof slot !== 'number' ||
+        fixed.has(slot) ||
         !span ||
         token?.kind !== 'param' ||
         !token.wildcard ||
@@ -2429,13 +2478,16 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       // cut the pattern accepts even when that literal occurs many times. Further cuts are only
       // the places the literal itself starts, and only up to {@link MAX_SHORTER_SPLITS} of them.
       const split = tryLiteralEnds(slot, span, following.text, constraint, nextWildcardAt(at));
-      if (split) {
+      if (split === 'untestable') {
+        unproven = true;
+      } else if (split) {
         return split;
       }
     }
 
-    // A `(.*)` wildcard has no constraint of its own. Shorten it at the following literal when a
-    // later constraint failed, as `:id(\\d+)` does for `/api/files/:path(.*)/:id(\\d+)`.
+    // A wildcard that passes its own pattern, or has none, as `(.*)` and `(.+)` do, is greedy.
+    // Shorten it at the following literal when a later constraint failed, as `:id(\\d+)` does for
+    // `/api/files/:path(.+)/:id(\\d+)`.
     const layout = activeLayout(plan, captures);
     for (let at = 0; at < tokens.length; at += 1) {
       const token = tokens[at];
@@ -2443,7 +2495,6 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       if (
         token?.kind !== 'param' ||
         !token.wildcard ||
-        constrainedIndexes.has(token.paramIndex) ||
         following?.kind !== 'text' ||
         (following.optional && !token.optional) ||
         layout === -1
@@ -2466,17 +2517,22 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
           break;
         }
       }
-      if (!laterFails || slot === -1 || !span) {
+      if (!laterFails || slot === -1 || !span || fixed.has(slot)) {
         continue;
       }
 
-      const split = tryLiteralEnds(slot, span, following.text, undefined, nextWildcardAt(at));
-      if (split) {
+      const own = (current[LAYER_CONSTRAINTS] ?? []).find(
+        (constraint) => logicalIndex(current, plan, constraint) === token.paramIndex
+      );
+      const split = tryLiteralEnds(slot, span, following.text, own, nextWildcardAt(at));
+      if (split === 'untestable') {
+        unproven = true;
+      } else if (split) {
         return split;
       }
     }
 
-    return null;
+    return unproven ? 'untestable' : null;
   };
 
   // Raw captures, in parameter order, of the first v8 alternative whose values pass. v6 found the
@@ -2531,6 +2587,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     }
 
     let untestable = false;
+    const budget = { left: MAX_SPLIT_ATTEMPTS };
     for (const attempt of tries) {
       const split = shorterSplit(
         current,
@@ -2538,7 +2595,8 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
         attempt.offset,
         attempt.captures,
         path,
-        attempt.spans
+        attempt.spans,
+        budget
       );
       if (split === 'untestable') {
         untestable = true;
@@ -2547,8 +2605,8 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       }
     }
 
-    // A middleware layer that cannot be tested still runs, so a guard is never skipped for a
-    // route behind it.
+    // A middleware layer whose split could not be proven still runs, so a guard is never skipped
+    // for a route behind it. A route does not match.
     return untestable && isPrefixLayer(current) ? captures : null;
   };
 

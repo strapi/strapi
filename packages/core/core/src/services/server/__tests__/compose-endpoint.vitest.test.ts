@@ -1559,6 +1559,69 @@ describe('router path registration', () => {
     await expectReply(request(server).get('/api/files/a/x/b'), { rest: 'a/x/b' });
   });
 
+  it('runs a guard when a wildcard with its own pattern precedes a constrained parameter', async () => {
+    const { server, router } = createRouterApp();
+
+    router.use('/api/files/:path(.+)/:id(\\d+)', (ctx) => {
+      ctx.status = 401;
+    });
+    router.get('/api/files/:rest(.*)', (ctx) => {
+      reply(ctx, { rest: ctx.params.rest });
+    });
+
+    await request(server).get('/api/files/a/5/b').expect(401);
+    await request(server).get('/api/files/a/5').expect(401);
+    await expectReply(request(server).get('/api/files/a/x/b'), { rest: 'a/x/b' });
+  });
+
+  it('runs a guard when two wildcards both need a shorter cut', async () => {
+    const { server, router } = createRouterApp();
+
+    router.use('/api/:p(.*)/:q(.*)/:id(\\d+)', (ctx) => {
+      ctx.status = 401;
+    });
+    router.get('/api/:rest(.*)', (ctx) => {
+      reply(ctx, { rest: ctx.params.rest });
+    });
+
+    await request(server).get('/api/a/b/5/c').expect(401);
+    await request(server).get('/api/a/b/5').expect(401);
+    await expectReply(request(server).get('/api/a/b/x/c'), { rest: 'a/b/x/c' });
+  });
+
+  it('finds a following literal with the case sensitivity of the layer', async () => {
+    const { server, router } = createRouterApp();
+
+    router.use('/api/files/:path(.*)/raw/:id(\\d+)', (ctx) => {
+      ctx.status = 401;
+    });
+    router.get('/api/files/:rest(.*)', (ctx) => {
+      reply(ctx, { rest: ctx.params.rest });
+    });
+
+    await request(server).get('/api/files/a/raw/5/raw/b').expect(401);
+    await request(server).get('/api/files/a/RAW/5/raw/b').expect(401);
+    await request(server).get('/api/files/a/Raw/5/RAW/b').expect(401);
+  });
+
+  it('runs a guard, and a route does not match, when there are more cuts than it tries', async () => {
+    const { server, router } = createRouterApp();
+    const deep = `/api/files/${'a/'.repeat(40)}b`;
+
+    router.use('/api/files/:path(.*)/:id(\\d+)', (ctx) => {
+      ctx.status = 401;
+    });
+    router.get('/api/files/:rest(.*)', (ctx) => {
+      reply(ctx, { rest: ctx.params.rest });
+    });
+    router.get('/files/:path(.*)/:id(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    await request(server).get(deep).expect(401);
+    await request(server).get(deep.replace('/api', '')).expect(404);
+  });
+
   it('splits a patterned parameter at the last separator before a dot wildcard', async () => {
     const { server, router } = createRouterApp();
 
