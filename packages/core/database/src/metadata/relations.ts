@@ -3,7 +3,7 @@ import _, { snakeCase } from 'lodash';
 import { identifiers } from '../utils/identifiers';
 import { attributeNaming } from './attribute-naming';
 import type { Meta, Metadata } from './metadata';
-import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
+import type { Attribute, RelationalAttribute, Relation, MorphJoinTable } from '../types';
 
 interface JoinColumnOptions {
   attribute: (Relation.OneToOne | Relation.ManyToOne) & Relation.Owner;
@@ -69,6 +69,46 @@ export const hasInverseOrderColumn = (attribute: RelationalAttribute) =>
   isBidirectional(attribute) && isManyToAny(attribute);
 
 /**
+ * An inverse (mappedBy) side stores nothing itself: it reads the join column or join table that its
+ * owner side assigns through `inversedBy`. With no owner pointing back, writes to it are dropped and
+ * reads return nothing, so fail instead of loading a dead relation.
+ *
+ * Out of scope: the check only reads the owner's `target` and `inversedBy`, not whether the owner
+ * builds storage. An owner that builds no join table or join column (for example a manyToMany owner
+ * with `useJoinTable: false`) still passes, as before, and its inverse side still reads nothing.
+ */
+const assertInverseSideHasOwner = (
+  attributeName: string,
+  attribute: Relation.Bidirectional,
+  meta: Meta,
+  metadata: Metadata
+) => {
+  const targetMeta = metadata.get(attribute.target);
+
+  const pointsBack = (candidate: Attribute | undefined) =>
+    candidate !== undefined &&
+    candidate.type === 'relation' &&
+    'target' in candidate &&
+    candidate.target === meta.uid &&
+    'inversedBy' in candidate &&
+    candidate.inversedBy === attributeName;
+
+  if (attribute.mappedBy !== undefined && pointsBack(targetMeta.attributes[attribute.mappedBy])) {
+    return;
+  }
+
+  // An owner that points back under another name still builds the relation: the mappedBy name is
+  // never read at runtime, so apps relying on it keep booting.
+  if (Object.values(targetMeta.attributes).some(pointsBack)) {
+    return;
+  }
+
+  throw new Error(
+    `mappedBy attribute ${attribute.mappedBy} in ${targetMeta.uid} must be a relation to ${meta.uid} with inversedBy "${attributeName}"`
+  );
+};
+
+/**
  * Creates a oneToOne relation metadata
  *
  * if owner then
@@ -80,7 +120,7 @@ export const hasInverseOrderColumn = (attribute: RelationalAttribute) =>
  *     set inverse attribute joinCol or joinTable info correctly
  * else
  *   this property must be set by the owner side
- *   verify the owner side is valid // should be done before or at the same time ?
+ *   assert an owner on the target points back with inversedBy
  */
 const createOneToOne = (
   attributeName: string,
@@ -103,7 +143,7 @@ const createOneToOne = (
       });
     }
   } else {
-    // TODO: verify other side is valid
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
   }
 };
 
@@ -114,7 +154,7 @@ const createOneToOne = (
  *   create join table
  * if bidirectional then
  *   cannot be owning side
- *   do nothing
+ *   assert an owner on the target points back with inversedBy
  */
 const createOneToMany = (
   attributeName: string,
@@ -130,6 +170,8 @@ const createOneToMany = (
     });
   } else if (isOwner(attribute)) {
     throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
+  } else {
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
   }
 };
 
@@ -184,7 +226,7 @@ const createManyToOne = (
  *     if with join table then
  *       create join table
  *   else
- *     do nothing
+ *     assert an owner on the target points back with inversedBy
  */
 const createManyToMany = (
   attributeName: string,
@@ -192,7 +234,9 @@ const createManyToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  if (shouldUseJoinTable(attribute) && (!isBidirectional(attribute) || isOwner(attribute))) {
+  if (!isOwner(attribute)) {
+    assertInverseSideHasOwner(attributeName, attribute, meta, metadata);
+  } else if (shouldUseJoinTable(attribute)) {
     createJoinTable(metadata, {
       attribute,
       attributeName,

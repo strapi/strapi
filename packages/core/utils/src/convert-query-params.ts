@@ -224,11 +224,59 @@ const convertOrderingQueryParams = (ordering: unknown) => {
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every(isString);
 
+/**
+ * Describes a filter key that `convertAndSanitizeFilters` removed because it is neither an
+ * attribute of the model it was resolved against, nor `id`/`documentId`, nor a known operator.
+ */
+export type UnknownFilterKey = {
+  /** The removed key */
+  key: string;
+  /** UID of the model the key was resolved against, `undefined` when no model was available */
+  uid: string | undefined;
+  /**
+   * Attribute path to the removed key, operators excluded. It starts at the model the filters
+   * apply to: the queried model, or the populated model for filters nested in `populate`
+   * (e.g. `populate: { author: { filters: { nmae: 'x' } } }` reports `['nmae']` with the uid
+   * of the author model).
+   */
+  path: string[];
+  /**
+   * Set when the key sits inside the object operand of an operator applied to a scalar
+   * (non-relational) attribute, at any depth, e.g. `$eq` in `{ meta: { $eq: { a: 1 } } }`
+   * and in `{ meta: { $eq: { title: { a: 1 } } } }`. It is the nearest such operator.
+   */
+  operator: string | undefined;
+};
+
 interface TransformerOptions {
   getModel: (uid: string) => Model | undefined;
+  /**
+   * Called each time an unknown filter key is removed from the filters.
+   * The key is still removed: the hook only observes the removal.
+   * An error thrown by the hook is not caught: it propagates to the caller of the transformer.
+   */
+  onUnknownFilterKey?: (unknownFilterKey: UnknownFilterKey) => void;
 }
 
-const createTransformer = ({ getModel }: TransformerOptions) => {
+/**
+ * Where `convertAndSanitizeFilters` is in the filters tree
+ */
+type FiltersWalkContext = {
+  /** Attribute path from the model the filters apply to, operators excluded */
+  path: string[];
+  /** Whether the walk is inside the value of a scalar (non-relational) attribute */
+  isInScalarValue: boolean;
+  /** Nearest operator met inside a scalar attribute value, kept through nested attributes */
+  operator: string | undefined;
+};
+
+const ROOT_FILTERS_WALK_CONTEXT: FiltersWalkContext = {
+  path: [],
+  isInScalarValue: false,
+  operator: undefined,
+};
+
+const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions) => {
   /**
    * Sort query parser
    */
@@ -701,15 +749,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     // Don't mutate the original object
     const filtersCopy = cloneDeep(filters);
 
-    return convertAndSanitizeFilters(filtersCopy, schema);
+    return convertAndSanitizeFilters(filtersCopy, schema, ROOT_FILTERS_WALK_CONTEXT);
   };
 
-  const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): WhereQuery => {
+  const convertAndSanitizeFilters = (
+    filters: FiltersParams,
+    schema: Model | undefined,
+    context: FiltersWalkContext
+  ): WhereQuery => {
     if (Array.isArray(filters)) {
       return (
         filters
           // Sanitize each filter
-          .map((filter) => convertAndSanitizeFilters(filter, schema))
+          .map((filter) => convertAndSanitizeFilters(filter, schema, context))
           // Filter out empty filters
           .filter((filter) => !isPlainObject(filter) || !isEmpty(filter))
       );
@@ -728,22 +780,50 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       if (!validKey) {
         removeOperator(key);
+
+        if (onUnknownFilterKey !== undefined) {
+          onUnknownFilterKey({
+            key,
+            uid: schema?.uid,
+            path: [...context.path, key],
+            operator: context.operator,
+          });
+        }
       }
       // Handle attributes
       else if (attribute) {
+        const attributeContext: FiltersWalkContext = {
+          path: [...context.path, key],
+          isInScalarValue: false,
+          // Inside an object operand, keep reporting the operand's operator
+          operator: context.operator,
+        };
+
         // Relations
         if (attribute.type === 'relation') {
-          filters[key] = convertAndSanitizeFilters(value, getModel(attribute.target!));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel(attribute.target!),
+            attributeContext
+          );
         }
 
         // Components
         else if (attribute.type === 'component') {
-          filters[key] = convertAndSanitizeFilters(value, getModel(attribute.component));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel(attribute.component),
+            attributeContext
+          );
         }
 
         // Media
         else if (attribute.type === 'media') {
-          filters[key] = convertAndSanitizeFilters(value, getModel('plugin::upload.file'));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel('plugin::upload.file'),
+            attributeContext
+          );
         }
 
         // Dynamic Zones
@@ -759,7 +839,10 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
         // Scalar attributes
         else {
-          filters[key] = convertAndSanitizeFilters(value, schema);
+          filters[key] = convertAndSanitizeFilters(value, schema, {
+            ...attributeContext,
+            isInScalarValue: true,
+          });
         }
       }
 
@@ -767,7 +850,13 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       else if (['$null', '$notNull'].includes(key)) {
         filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
       } else if (isObject(value)) {
-        filters[key] = convertAndSanitizeFilters(value, schema);
+        const nestedContext: FiltersWalkContext =
+          isOperator(key) === true
+            ? { ...context, operator: context.isInScalarValue === true ? key : context.operator }
+            : // `id` and `documentId`, valid without being declared as attributes
+              { path: [...context.path, key], isInScalarValue: true, operator: context.operator };
+
+        filters[key] = convertAndSanitizeFilters(value, schema, nestedContext);
       }
 
       // Remove empty objects & arrays

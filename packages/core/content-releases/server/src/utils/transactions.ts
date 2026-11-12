@@ -45,7 +45,14 @@ export const runAfterCommit = (
   errorMessage: string,
   { strapi }: { strapi: Core.Strapi }
 ) => {
-  const logError = (error: unknown) => strapi.log.error(errorMessage, { error });
+  const logError = (error: unknown) => {
+    // A commit hook can finish after the instance has shut down.
+    try {
+      strapi.log.error(errorMessage, { error });
+    } catch {
+      // The instance is already shut down.
+    }
+  };
 
   if (!strapi.db.inTransaction()) {
     task().catch(logError);
