@@ -169,10 +169,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
-        title: formatRecentDocumentTitle(
-          document[meta.mainField ?? 'documentId'],
-          document.documentId
-        ),
+        title: formatRecentDocumentTitle(document[meta.mainField ?? 'documentId']),
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
