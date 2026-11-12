@@ -5,6 +5,7 @@ const _ = require('lodash');
 const dotenv = require('dotenv');
 const { createStrapi } = require('../../core/strapi');
 const { createUtils } = require('./utils');
+const profile = require('./profile');
 
 const superAdminCredentials = {
   email: 'admin@strapi.io',
@@ -24,6 +25,17 @@ const createStrapiInstance = async ({
   strapiOptions = {},
   /** When false (default), opts out of deprecated expiresIn so tests use new session config defaults. Set true to test legacy/deprecation behavior. */
   skipDefaultSessionConfig = false,
+  /**
+   * The model and builder helpers boot Strapi only to write schema files or rows. They never
+   * serve GraphQL, so they pass false to skip building the GraphQL schema, which is over a
+   * third of a boot.
+   */
+  buildGraphqlSchema = true,
+  /**
+   * Load the registries without connecting to the database or running bootstrap. That is all
+   * the content-type-builder services need to write or delete schema files.
+   */
+  registerOnly = false,
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
@@ -87,7 +99,27 @@ const createStrapiInstance = async ({
     };
   }
 
-  await instance.load();
+  if (!buildGraphqlSchema) {
+    const modules = instance.get('modules');
+    const originalModulesBootstrap = modules.bootstrap;
+    modules.bootstrap = async () => {
+      const graphql = modules.get('plugin::graphql');
+      if (graphql) {
+        graphql.bootstrap = async () => {};
+      }
+      await originalModulesBootstrap();
+    };
+  }
+
+  profile.instrumentInstance(instance);
+
+  if (registerOnly) {
+    await profile.timed('boot.register-only', () => instance.register());
+    return instance;
+  }
+
+  const bootStart = performance.now();
+  await profile.timed('boot.load', () => instance.load());
 
   instance.log.level = logLevel;
 
@@ -98,6 +130,8 @@ const createStrapiInstance = async ({
   if (ensureSuperAdmin) {
     await utils.createUserIfNotExists(superAdminCredentials);
   }
+
+  profile.record('boot.total', performance.now() - bootStart);
 
   return instance;
 };
