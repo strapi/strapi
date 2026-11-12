@@ -1,10 +1,10 @@
-export interface ShouldOpenAdminOptions {
+export type ShouldOpenAdminOptions = {
   environment?: string;
   autoOpen?: boolean;
   /** Set by `strapi develop --open` or `--no-open`. `undefined` when neither flag is passed. */
   open?: boolean;
   isInitialized: boolean;
-}
+};
 
 export const shouldOpenAdmin = ({
   environment,

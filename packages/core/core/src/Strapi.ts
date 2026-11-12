@@ -58,10 +58,13 @@ class Strapi extends Container implements Core.Strapi {
 
   internal_config: Record<string, unknown> = {};
 
+  private readonly openOnStart: boolean | undefined;
+
   constructor(opts: StrapiOptions) {
     super();
 
     this.internal_config = loadConfiguration(opts);
+    this.openOnStart = opts.open;
 
     this.registerInternalServices();
 
@@ -360,7 +363,7 @@ class Strapi extends Container implements Core.Strapi {
     const shouldOpen = utils.shouldOpenAdmin({
       environment: this.config.get('environment'),
       autoOpen: this.config.get('admin.autoOpen', true),
-      open: this.config.get('open') as boolean | undefined,
+      open: this.openOnStart,
       isInitialized,
     });
 
@@ -637,8 +640,9 @@ export interface StrapiOptions {
   autoReload?: boolean;
   serveAdminPanel?: boolean;
   /**
-   * Open the admin in a browser on start. `undefined` keeps the default: only on the
-   * first run, and only when `admin.autoOpen` is not `false`.
+   * Open the admin in a browser after the server listens, in development only. `true` always
+   * opens it, `false` never does. `undefined` keeps the default: only when no admin user exists
+   * and `admin.autoOpen` is not `false`. Not part of the app config.
    */
   open?: boolean;
 }

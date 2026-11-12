@@ -73,7 +73,7 @@ const defaultConfig = {
 };
 
 export const loadConfiguration = (opts: StrapiOptions) => {
-  const { appDir, distDir, autoReload = false, serveAdminPanel = true, open } = opts;
+  const { appDir, distDir, autoReload = false, serveAdminPanel = true } = opts;
 
   const pkgJSON = require(path.resolve(appDir, 'package.json'));
 
@@ -82,7 +82,6 @@ export const loadConfiguration = (opts: StrapiOptions) => {
   const rootConfig = {
     launchedAt: Date.now(),
     autoReload,
-    open,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
     installId: _.get(pkgJSON, 'strapi.installId'),

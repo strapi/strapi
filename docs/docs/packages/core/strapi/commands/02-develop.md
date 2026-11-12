@@ -24,16 +24,20 @@ Start your Strapi application in development mode
 Options:
   --polling         Watch for file changes in network directories (default: false)
   --watch-admin     Watch the admin panel for hot changes
-  --open            Always open the admin in your browser, including later starts
-  --no-open         Never open the admin in your browser
+  --open            Open the admin in your browser when develop starts, even if an admin user exists
+  --no-open         Do not open the admin in your browser, even on the first run
   -h, --help        Display help for command
 ```
 
 ## How it works
 
-The admin opens in a browser from `Strapi.openAdmin()` after the server listens. Without a flag, it opens only on the first run, when no admin user exists and `admin.autoOpen` is not `false`.
+The admin opens in a browser from `Strapi.openAdmin()` after the server listens, and only in the `development` environment: with `NODE_ENV=production`, neither flag opens it. Without a flag, it opens only when no admin user exists and `admin.autoOpen` is not `false`.
 
-`--open` opens the admin on every start, including when an admin user exists. `--no-open` never opens it, including on the first run. The flags set the root `open` config value, which `openAdmin()` reads. Neither flag changes `config/admin`.
+`--open` opens the admin once per `strapi develop` session, when the first worker starts, even if an admin user exists or `admin.autoOpen` is `false`. `--no-open` never opens it, including on the first run and on restarts.
+
+On a restart after a file change (for example a Content-Type Builder save), the primary forks the new worker with `STRAPI_DEVELOP_RESTART=true`. That worker ignores `--open` and uses the default behaviour, so `--open` does not open a new tab on each reload. `--no-open` still applies.
+
+The flag is passed to `createStrapi()` as the `open` option. It is kept on the Strapi instance, not in the app config, so a user `config/open.*` file still loads. Neither flag changes `config/admin`.
 
 The admin dev server runs Vite in middleware mode, so it never opens a browser.
 
@@ -68,7 +72,9 @@ interface DevelopOptions extends CLIContext {
    */
   logger: Logger;
   /**
-   * Whether or not to open the browser after the build is complete.
+   * Open the admin in a browser after the server listens. `true` opens it on the first start of
+   * the session, `false` never opens it, `undefined` keeps the default (only when no admin user
+   * exists and `admin.autoOpen` is not `false`).
    */
   open?: boolean;
   /**

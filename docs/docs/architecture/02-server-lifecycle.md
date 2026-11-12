@@ -131,7 +131,7 @@ Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootst
 
 `strapi.start()` calls `load()` if `strapi.isLoaded` is `false`. Then it calls `listen()`. `listen()` uses `server.socket` if it is set. Otherwise it uses `server.host` and `server.port`.
 
-After the server listens, `postListen()` logs the startup message and sends the `didStartServer` telemetry event without awaiting it. In development, `openAdmin()` opens the admin panel in a browser. Without `strapi develop --open` or `--no-open`, it opens only when no admin user exists and `admin.autoOpen` is not `false`. `--open` opens it on every start. `--no-open` never opens it. The flags set the root `open` config value, and the Vite dev server runs in middleware mode, so it never opens a browser.
+After the server listens, `postListen()` logs the startup message and sends the `didStartServer` telemetry event without awaiting it. In development, `openAdmin()` opens the admin panel in a browser. Without `strapi develop --open` or `--no-open`, it opens only when no admin user exists and `admin.autoOpen` is not `false`. `--open` opens it once per `strapi develop` session: workers forked after a reload use the default behaviour. `--no-open` never opens it, including on restarts. The flag reaches `openAdmin()` through the `open` option of `createStrapi()`, not through the app config. The Vite dev server runs in middleware mode, so it never opens a browser.
 
 If `start()` catches an error, it calls `stopWithError()`. This logs the error and calls `stop()`. `stop()` calls `destroy()` without awaiting it, sends `stop` to the parent process when `autoReload` is on, and calls `process.exit(1)`.
 

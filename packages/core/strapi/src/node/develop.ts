@@ -37,6 +37,11 @@ interface DevelopOptions extends CLIContext {
    */
   bundler?: 'webpack' | 'vite';
   polling?: boolean;
+  /**
+   * Open the admin in a browser after the server listens. `true` opens it on the first start of
+   * the session, `false` never opens it, `undefined` keeps the default (only when no admin user
+   * exists and `admin.autoOpen` is not `false`).
+   */
   open?: boolean;
   watchAdmin?: boolean;
   buildAdmin?: boolean;
@@ -89,6 +94,16 @@ const cleanupDistDirectory = async ({
   cleaningSpinner.text = `Cleaning dist dir (${prettyTime(generatingDuration)})`;
   cleaningSpinner?.succeed();
 };
+
+// Set by the primary on workers it forks after a reload, so they know they are not the first start.
+const RESTART_ENV = 'STRAPI_DEVELOP_RESTART';
+
+/**
+ * `--open` opens the admin once per `strapi develop` session: restarted workers fall back to the
+ * default behaviour. `--no-open` applies to every start.
+ */
+const getWorkerOpenOption = (open: boolean | undefined, isRestart: boolean) =>
+  isRestart && open === true ? undefined : open;
 
 const develop = async ({
   cwd,
@@ -182,7 +197,7 @@ const develop = async ({
         }
         case 'killed': {
           logger.debug('cluster has the killed message, forking the cluster');
-          cluster.fork();
+          cluster.fork({ [RESTART_ENV]: 'true' });
           break;
         }
         case 'stop': {
@@ -206,7 +221,7 @@ const develop = async ({
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
       serveAdminPanel: !watchAdmin,
-      open: options.open,
+      open: getWorkerOpenOption(options.open, process.env[RESTART_ENV] === 'true'),
     });
 
     /**
@@ -459,5 +474,5 @@ function startWatcher(
   });
 }
 
-export { develop };
+export { develop, getWorkerOpenOption };
 export type { DevelopOptions };
