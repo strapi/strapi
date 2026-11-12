@@ -41,8 +41,7 @@ type NestedAttributeCondition<
   > extends infer TTargetUID extends UID.Schema
     ? If<
         IsComponent<TSchemaUID>,
-        | (ObjectNotation<TTargetUID> & { [TIter in IdOperator]?: Forbidden })
-        | IdOperatorCondition<TTargetUID>,
+        ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>,
         ObjectNotation<TTargetUID>
       >
     : never;
@@ -53,7 +52,12 @@ type NestedAttributeCondition<
  *
  * The database applies it to the target's id. It throws for an object with several operators, or
  * with an operator next to other keys. So each operator object forbids the other operators and the
- * target's filter keys, and the filter object member forbids the id operators.
+ * target's filter keys. A literal that mixes an operator with other keys matches no member.
+ *
+ * The filter object member does not forbid the operators, so spreading a filter read back from it
+ * and adding a key (`{ ...filters.article, title: 'a' }`) compiles. The spread compiles even when the
+ * value holds an operator object, and the database then throws. With `exactOptionalPropertyTypes`
+ * the spread is rejected: out of scope for now.
  *
  * The forbidden keys are optional {@link Forbidden} properties, so the type stays assignable to
  * `ObjectNotation<Target>` and reading a filter back keeps the target's keys. A bare id would break

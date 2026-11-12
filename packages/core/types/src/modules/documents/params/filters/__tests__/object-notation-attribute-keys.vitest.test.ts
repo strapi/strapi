@@ -42,6 +42,16 @@ describe('Filters.ObjectNotation attribute keys', () => {
     COMPILE_TIMEOUT_MS + 10_000
   );
 
+  test.each([[[]], [['--strictNullChecks', 'false']]])(
+    'accepts a spread of a nested component filter (%j)',
+    (compilerArgs) => {
+      const { status, signal, output } = compileFixture('component-spread', compilerArgs);
+
+      expect({ status, signal }, output).toEqual({ status: 0, signal: null });
+    },
+    COMPILE_TIMEOUT_MS + 10_000
+  );
+
   test(
     'accepts any attribute when the schema registries are not extended',
     () => {
