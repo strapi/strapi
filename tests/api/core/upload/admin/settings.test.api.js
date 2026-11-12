@@ -172,7 +172,8 @@ describe('Settings', () => {
         data: {
           sizeOptimization: true,
           responsiveDimensions: true,
-          // Omitted from the body, so the schema default is stored.
+          // Omitted from the body, so the schema defaults are stored.
+          autoOrientation: false,
           aiMetadata: true,
         },
       });
@@ -184,6 +185,7 @@ describe('Settings', () => {
         data: {
           sizeOptimization: true,
           responsiveDimensions: true,
+          autoOrientation: false,
           aiMetadata: true,
           aiMetadataAvailable: false,
           // Read-only echo of the app config, appended to every GET response.
