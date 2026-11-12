@@ -1,4 +1,4 @@
-import { isEmpty, cloneDeep } from 'lodash';
+import { isEmpty, cloneDeep, omit } from 'lodash';
 
 import type { Schema } from '@strapi/types';
 import { async } from '@strapi/utils';
@@ -64,6 +64,72 @@ const normalizeMediaIds = (
   return data;
 };
 
+const countRelationTargets = (value: unknown): number => {
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+
+  return value == null ? 0 : 1;
+};
+
+/**
+ * Whether resolving `source` for another locale lost a relation target, anywhere inside it.
+ *
+ * A target with no entry in that locale is left out of the transformed `set`. A longer `set` is
+ * fine: one document can map to both its draft and published entries.
+ */
+const hasDroppedRelationTarget = (
+  schema: Schema.ContentType | Schema.Component,
+  source: Record<string, any>,
+  transformed: Record<string, any>
+): boolean => {
+  if (!schema?.attributes || !source || !transformed) {
+    return false;
+  }
+
+  return Object.entries(schema.attributes).some(([attributeName, attribute]) => {
+    const sourceValue = source[attributeName];
+    const transformedValue = transformed[attributeName];
+
+    if (attribute.type === 'relation') {
+      return (
+        Array.isArray(transformedValue?.set) &&
+        transformedValue.set.length < countRelationTargets(sourceValue)
+      );
+    }
+
+    if (attribute.type === 'component') {
+      const componentSchema = strapi.getModel(attribute.component);
+
+      if (attribute.repeatable && Array.isArray(sourceValue) && Array.isArray(transformedValue)) {
+        return sourceValue.some((componentValue, index) =>
+          hasDroppedRelationTarget(componentSchema, componentValue, transformedValue[index])
+        );
+      }
+
+      return hasDroppedRelationTarget(componentSchema, sourceValue, transformedValue);
+    }
+
+    if (
+      attribute.type === 'dynamiczone' &&
+      Array.isArray(sourceValue) &&
+      Array.isArray(transformedValue)
+    ) {
+      return sourceValue.some(
+        (componentValue, index) =>
+          componentValue?.__component &&
+          hasDroppedRelationTarget(
+            strapi.getModel(componentValue.__component),
+            componentValue,
+            transformedValue[index]
+          )
+      );
+    }
+
+    return false;
+  });
+};
+
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
  */
@@ -106,10 +172,27 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
       }
     );
 
+    // A shared component that loses a relation here would be written without it, and the next
+    // save from this locale would copy that loss to every other locale. Component rows are
+    // specific to a locale, so the whole field is left as it is in this locale.
+    const attributesToSkip = Object.keys(transformedData).filter((attributeName) =>
+      hasDroppedRelationTarget(
+        model,
+        { [attributeName]: normalizedNonLocalizedAttributes[attributeName] },
+        { [attributeName]: (transformedData as Record<string, any>)[attributeName] }
+      )
+    );
+
+    if (attributesToSkip.length > 0) {
+      strapi.log.warn(
+        `i18n: not syncing ${attributesToSkip.join(', ')} of ${uid} "${documentId}" to locale "${entry.locale}": a relation it holds has no entry in that locale.`
+      );
+    }
+
     // Update or create non localized components for the entry
     const componentData = await strapi
       .documents(uid)
-      .updateComponents(entry, transformedData as any);
+      .updateComponents(entry, omit(transformedData, attributesToSkip) as any);
 
     // Update every other locale entry of this documentId in the same status
     await strapi.db.query(uid).update({
