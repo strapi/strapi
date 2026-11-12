@@ -194,6 +194,31 @@ describe('Settings', () => {
       });
     });
 
+    test('resets an omitted autoOrientation to false over a stored true', async () => {
+      const enableRes = await rq({
+        method: 'PUT',
+        url: '/upload/settings',
+        body: { sizeOptimization: true, responsiveDimensions: true, autoOrientation: true },
+      });
+
+      expect(enableRes.statusCode).toBe(200);
+      expect(enableRes.body.data.autoOrientation).toBe(true);
+
+      const updateRes = await rq({
+        method: 'PUT',
+        url: '/upload/settings',
+        body: { sizeOptimization: true, responsiveDimensions: true },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data.autoOrientation).toBe(false);
+
+      const getRes = await rq({ method: 'GET', url: '/upload/settings' });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body.data.autoOrientation).toBe(false);
+    });
+
     test('strips the read-only concurrentUploadRequests echo from a PUT instead of persisting it', async () => {
       // The legacy Settings page seeds its form from GET (which now echoes
       // concurrentUploadRequests) and PUTs the whole payload back. That echo

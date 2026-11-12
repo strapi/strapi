@@ -103,6 +103,7 @@ describe('Admin Settings Controller - updateSettings defaults', () => {
   test('applies defaults to omitted settings', async () => {
     // The server reads a missing `aiMetadata` as enabled, the admin reads it as
     // disabled. Storing the default keeps both sides in agreement.
+    // `autoOrientation` is stored as `false`, the same as the bootstrap default.
     const ctx = buildContext([], { sizeOptimization: false, responsiveDimensions: true });
 
     await adminSettingsController.updateSettings(ctx as Context);
