@@ -16,6 +16,7 @@ import { isOwner, isSelf } from '../conditions';
 import { PROFILE_UID, USER_UID } from '../constants';
 import profile from '../content-types/profile';
 import { normalizeEmailMiddleware } from '../document-middlewares/normalize-email';
+import { refuseUserCloneMiddleware } from '../document-middlewares/refuse-user-clone';
 import register from '../register';
 import { engineOwnedUserFieldsValidator } from '../utils/engine-owned-user-fields';
 import { createTransaction } from './utils/fake-strapi';
@@ -282,6 +283,14 @@ describe('register', () => {
     expect(use).toHaveBeenCalledWith(normalizeEmailMiddleware);
   });
 
+  it('registers the refusal to clone a user', () => {
+    const { strapi, use } = setup();
+
+    register({ strapi });
+
+    expect(use).toHaveBeenCalledWith(refuseUserCloneMiddleware);
+  });
+
   it('registers the friendly check of the unique email and username, after the email rule', () => {
     const { strapi, use } = setup();
 
@@ -335,7 +344,7 @@ describe('register', () => {
     register({ strapi });
 
     // Six rules after the three that check and complete what a user create writes
-    expect(use).toHaveBeenCalledTimes(9);
+    expect(use).toHaveBeenCalledTimes(10);
 
     // Run the chain the way the Document Service does, outermost first, on a user create with a
     // password, and watch the order things happen in
