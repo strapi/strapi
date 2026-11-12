@@ -11049,6 +11049,7 @@ __metadata:
     react-router-dom: "npm:6.30.6"
     styled-components: "npm:6.4.1"
     tsconfig: "workspace:*"
+    vitest: "catalog:"
   languageName: unknown
   linkType: soft
 

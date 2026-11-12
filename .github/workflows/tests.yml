@@ -961,8 +961,9 @@ jobs:
       fail-fast: false
       matrix:
         # Labels only for now: the run step doesn't read them yet and always runs Chromium CE.
-        # The EE replay of @ee and @smoke tests comes with the edition contract (CMS-1944), and
-        # WebKit with the browser projects (CMS-1949); both need the run step to pass them on.
+        # The suites read STRAPI_TEST_EDITION (default ce, CMS-1944); the EE replay of the @ee
+        # and @smoke tests (an `ee` entry with the license secret) comes with CMS-2242, and
+        # WebKit with the browser projects (CMS-1949).
         edition: [ce]
         project: [chromium]
     steps:
