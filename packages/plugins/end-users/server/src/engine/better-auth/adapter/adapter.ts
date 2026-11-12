@@ -177,21 +177,11 @@ const isDatabaseError = (error: unknown): boolean => {
     return true;
   }
 
-  // What knex raises from the driver: MySQL's error carries `sqlMessage`, PostgreSQL's `severity`
-  // and `routine`, SQLite's a `SQLITE_*` code, and knex adds the `sql` it ran to the ones it wraps.
-  // A bare `code` is not enough: a Node system error or an error a middleware throws has one too,
-  // and its message is what whoever debugs it needs.
-  if ('sql' in error || 'sqlMessage' in error) {
-    return true;
-  }
-
-  const { code } = error as { code?: unknown };
-
-  return (
-    ('errno' in error && typeof code === 'string' && /^(ER_|SQLITE_)/.test(code)) ||
-    ('severity' in error && 'routine' in error) ||
-    (typeof code === 'string' && /^SQLITE_[A-Z_]+$/.test(code))
-  );
+  // Everything knex raises from a driver carries a `code`, and knex has already written the query
+  // and its values into the message. The message cannot be told apart from a harmless one, so any
+  // error with a `code` loses it: a Node system error or a middleware's error keeps its code and
+  // loses its text, which is the safe side of that trade.
+  return 'code' in error || 'sql' in error || 'sqlMessage' in error;
 };
 
 const withoutQuery = (operation: string, error: unknown): Error => {
@@ -204,7 +194,10 @@ const withoutQuery = (operation: string, error: unknown): Error => {
   return known ? Object.assign(refused, { code }) : refused;
 };
 
-const WRITE_OPERATIONS = [
+const DATABASE_OPERATIONS = [
+  'findOne',
+  'findMany',
+  'count',
   'create',
   'update',
   'updateMany',
@@ -694,10 +687,11 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
     },
   } as ReturnType<AdapterFactoryCustomizeAdapterCreator>;
 
-  // The write paths, which carry the credentials: a database error leaves them without its query
+  // Reads bind a session token or an identifier as surely as writes bind a credential: a database
+  // error leaves any of them without its query
   const methods = adapter as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
 
-  for (const operation of WRITE_OPERATIONS) {
+  for (const operation of DATABASE_OPERATIONS) {
     const run = methods[operation];
 
     methods[operation] = async (...args) => {

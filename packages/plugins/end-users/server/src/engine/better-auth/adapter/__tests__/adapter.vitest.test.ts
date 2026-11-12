@@ -1138,19 +1138,38 @@ describe('strapiAdapter', () => {
       expect((error as Error).message).toMatch(/^The database refused/);
     });
 
-    it('rethrows an error that only has a code, as it came', async () => {
+    it('keeps the code and drops the text of any other error that has a code', async () => {
       const system = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:1'), {
         code: 'ECONNREFUSED',
       });
-      const middleware = Object.assign(new Error('Not allowed here'), { code: 'POLICY_DENIED' });
 
-      for (const thrown of [system, middleware]) {
-        documents.create.mockRejectedValue(thrown);
+      documents.create.mockRejectedValue(system);
 
+      const error = await adapter
+        .create({ model: 'session', data: { token: 'x' } })
+        .catch((caught: Error & { code?: string }) => caught);
+
+      expect(error.message).toBe(
+        'The database refused the create of an auth record (error code ECONNREFUSED).'
+      );
+      expect(error.code).toBe('ECONNREFUSED');
+    });
+
+    it('does the same on the read paths, which bind tokens and identifiers', async () => {
+      documents.findFirst.mockRejectedValue(failure());
+      documents.findMany.mockRejectedValue(failure());
+      documents.count.mockRejectedValue(failure());
+
+      for (const run of [
+        () => adapter.findOne({ model: 'session', where: [{ field: 'token', value: bound }] }),
+        () => adapter.findMany({ model: 'session', where: [{ field: 'token', value: bound }] }),
+        () => adapter.count({ model: 'session', where: [{ field: 'token', value: bound }] }),
+      ]) {
         // eslint-disable-next-line no-await-in-loop
-        await expect(adapter.create({ model: 'session', data: { token: 'x' } })).rejects.toBe(
-          thrown
-        );
+        const error = await run().catch((caught: Error) => caught);
+
+        expect((error as Error).message).toMatch(/^The database refused/);
+        expect((error as Error).message).not.toMatch(/SECRET|insert into|eu_sessions/);
       }
     });
 
