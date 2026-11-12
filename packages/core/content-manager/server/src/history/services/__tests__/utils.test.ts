@@ -2,6 +2,22 @@ import type { Core, Schema } from '@strapi/types';
 
 import { createServiceUtils, toAuthor, type RequestContext } from '../utils';
 
+const mockFindNames = jest.fn();
+
+const mockKnownProvider = {
+  type: 'person',
+  model: 'plugin::fake.user',
+  getRecordId: (credentials: { id?: number } | null) => credentials?.id,
+};
+
+jest.mock('../../utils', () => ({
+  getService: () => ({
+    findNames: mockFindNames,
+    findProviderByStrategy: (strategy: string) =>
+      strategy === 'known' ? mockKnownProvider : undefined,
+  }),
+}));
+
 const baseStrapiMock = {
   plugin: jest.fn(() => {}),
 };
@@ -12,12 +28,16 @@ const articleModel = {
   attributes: {},
 } as unknown as Schema.ContentType;
 
-const createCtx = (pluginName: string, strategyName: string, type = 'admin') =>
+const createCtx = (
+  pluginName: string,
+  strategyName: string,
+  type = 'admin',
+  credentials: { id: number } | null = { id: 2 }
+) =>
   ({
     state: {
-      user: { id: 1 },
       route: { info: { pluginName, type } },
-      auth: { strategy: { name: strategyName }, credentials: { id: 2 } },
+      auth: { strategy: { name: strategyName }, credentials },
     },
   }) as unknown as RequestContext;
 
@@ -227,68 +247,70 @@ describe('History utils', () => {
       id,
     });
 
-    it('getAuthorNameDictionary finds the current names with one query per model', async () => {
-      const findMany = jest.fn(({ select }) =>
-        select.includes('email')
-          ? [
-              {
-                documentId: '1',
-                username: 'kai',
-                firstname: 'Kai',
-                lastname: 'Doe',
-                email: 'kai@test.com',
-              },
-              {
-                documentId: '2',
-                username: null,
-                firstname: 'John',
-                lastname: 'Doe',
-                email: 'john@test.com',
-              },
-              {
-                documentId: '3',
-                username: null,
-                firstname: 'Ana',
-                lastname: null,
-                email: 'ana@test.com',
-              },
-              {
-                documentId: '4',
-                username: null,
-                firstname: null,
-                lastname: null,
-                email: 'jane@test.com',
-              },
-            ]
-          : [{ documentId: '5', name: 'CI token' }]
+    it('getAuthorNameDictionary finds the current names with one lookup per model', async () => {
+      mockFindNames.mockImplementation(async (model: string) =>
+        model === 'admin::user' ? { 1: 'kai', 2: 'John Doe' } : { 5: 'CI token' }
       );
-      const strapi = { db: { query: jest.fn(() => ({ findMany })) } } as unknown as Core.Strapi;
-      const { getAuthorNameDictionary } = createServiceUtils({ strapi });
+      const { getAuthorNameDictionary } = createServiceUtils({ strapi: {} as Core.Strapi });
 
       await expect(
         getAuthorNameDictionary([
           adminUser('1'),
           adminUser('2'),
-          adminUser('3'),
-          adminUser('4'),
           adminUser('1'),
           adminUser(null),
           { type: 'token', model: 'admin::api-token', id: '5' },
           null,
         ])
       ).resolves.toEqual({
-        'admin::user': { 1: 'kai', 2: 'John Doe', 3: 'Ana', 4: 'jane@test.com' },
+        'admin::user': { 1: 'kai', 2: 'John Doe' },
         'admin::api-token': { 5: 'CI token' },
       });
-      expect(findMany).toHaveBeenCalledTimes(2);
+      expect(mockFindNames).toHaveBeenCalledTimes(2);
+      expect(mockFindNames).toHaveBeenCalledWith('admin::user', ['1', '2']);
+      expect(mockFindNames).toHaveBeenCalledWith('admin::api-token', ['5']);
+    });
+
+    it('findAdminUserNames finds the current names, with the display name rule', async () => {
+      const findMany = jest.fn().mockResolvedValue([
+        {
+          documentId: '1',
+          username: 'kai',
+          firstname: 'Kai',
+          lastname: 'Doe',
+          email: 'a@test.com',
+        },
+        {
+          documentId: '2',
+          username: null,
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'b@test.com',
+        },
+        { documentId: '3', username: null, firstname: 'Ana', lastname: null, email: 'c@test.com' },
+        { documentId: '4', username: null, firstname: null, lastname: null, email: 'd@test.com' },
+      ]);
+      const strapi = { db: { query: jest.fn(() => ({ findMany })) } } as unknown as Core.Strapi;
+      const { findAdminUserNames } = createServiceUtils({ strapi });
+
+      await expect(findAdminUserNames(['1', '2', '3', '4'])).resolves.toEqual({
+        1: 'kai',
+        2: 'John Doe',
+        3: 'Ana',
+        4: 'd@test.com',
+      });
       expect(findMany).toHaveBeenCalledWith({
         select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
         where: { documentId: { $in: ['1', '2', '3', '4'] } },
       });
-      expect(findMany).toHaveBeenCalledWith({
-        select: ['documentId', 'name'],
-        where: { documentId: { $in: ['5'] } },
-      });
+    });
+
+    it('findApiTokenNames finds the current names of tokens', async () => {
+      const findMany = jest.fn().mockResolvedValue([{ documentId: '5', name: 'CI token' }]);
+      const strapi = { db: { query: jest.fn(() => ({ findMany })) } } as unknown as Core.Strapi;
+      const { findApiTokenNames } = createServiceUtils({ strapi });
+
+      await expect(findApiTokenNames(['5'])).resolves.toEqual({ 5: 'CI token' });
     });
 
     it('toAuthor gives no id and no name to a deleted author', () => {
@@ -311,35 +333,40 @@ describe('History utils', () => {
       strapi: baseStrapiMock,
     });
 
-    it('resolves an admin session on a Content Manager route to the admin', () => {
-      expect(resolveHistoryOrigin(createCtx('content-manager', 'admin'))).toEqual({
-        source: 'admin-panel',
-        author: { type: 'person', model: 'admin::user', id: '1' },
-      });
+    it('resolves an admin session on a Content Manager route to the admin panel source', () => {
+      expect(resolveHistoryOrigin(createCtx('content-manager', 'admin'))?.source).toBe(
+        'admin-panel'
+      );
     });
 
-    it('resolves an admin token on a Content Manager route to the token, not its owner', () => {
-      expect(resolveHistoryOrigin(createCtx('content-manager', 'admin-token'))).toEqual({
-        source: 'admin-api',
-        author: { type: 'token', model: 'admin::api-token', id: '2' },
-      });
+    it('resolves an admin token on a Content Manager route to the admin API source', () => {
+      expect(resolveHistoryOrigin(createCtx('content-manager', 'admin-token'))?.source).toBe(
+        'admin-api'
+      );
     });
 
-    it('resolves a Content API token on a Content API route to the token', () => {
-      expect(resolveHistoryOrigin(createCtx('api', 'content-api-token', 'content-api'))).toEqual({
+    it('resolves a Content API route to the Content API source, with the author of a registered strategy', () => {
+      expect(resolveHistoryOrigin(createCtx('api', 'known', 'content-api'))).toEqual({
         source: 'content-api',
-        author: { type: 'token', model: 'admin::api-token', id: '2' },
+        author: { type: 'person', model: 'plugin::fake.user', id: '2' },
       });
     });
 
-    it('resolves another strategy on a Content API route to no author', () => {
-      expect(resolveHistoryOrigin(createCtx('api', 'users-permissions', 'content-api'))).toEqual({
+    it('resolves credentials with no record to no author', () => {
+      expect(resolveHistoryOrigin(createCtx('api', 'known', 'content-api', null))).toEqual({
         source: 'content-api',
         author: null,
       });
     });
 
-    it('resolves a Content API route without a strategy to no author', () => {
+    it('resolves a strategy with no provider to no author', () => {
+      expect(resolveHistoryOrigin(createCtx('api', 'custom', 'content-api'))).toEqual({
+        source: 'content-api',
+        author: null,
+      });
+    });
+
+    it('resolves a route without a strategy to no author', () => {
       const ctx = {
         state: { route: { info: { type: 'content-api' } } },
       } as unknown as RequestContext;

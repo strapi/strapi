@@ -3,7 +3,13 @@ import { HISTORY_VERSION_UID } from '../../constants';
 import { createLifecyclesService } from '../lifecycles';
 
 jest.mock('../../utils', () => ({
-  getService: () => ({ createVersion: mockCreateVersion }),
+  getService: () => ({
+    createVersion: mockCreateVersion,
+    findProviderByStrategy: (strategy: string) =>
+      strategy === 'admin'
+        ? { type: 'person', model: 'admin::user', getRecordId: (user: { id: string }) => user.id }
+        : undefined,
+  }),
 }));
 
 const mockGetRequestContext = jest.fn<unknown, []>();
@@ -136,7 +142,7 @@ describe('history lifecycles service', () => {
         state: {
           user: { id: '123' },
           route: { info: { pluginName, type: 'admin' } },
-          auth: { strategy: { name: 'admin' } },
+          auth: { strategy: { name: 'admin' }, credentials: { id: '123' } },
         },
         request: { url },
       });
