@@ -26,6 +26,7 @@ import { buildAuthOptions } from '../create-engine';
 import type { AuthEngine } from '../../types';
 import { passwordPolicy } from '../plugins/password-policy';
 import { revokeOnPasswordChange } from '../plugins/revoke-on-password-change';
+import { legacyRevoke } from '../plugins/legacy-revoke';
 import { strapiCompat } from '../plugins/strapi-compat';
 
 vi.mock('../../../compat/login-response', async (importOriginal) => ({
@@ -809,6 +810,7 @@ describe('strapi-compat reset, through the engine', () => {
         probe(),
         passwordPolicy(strapi),
         revokeOnPasswordChange(),
+        legacyRevoke(strapi),
         username(),
         bearer(),
       ],
