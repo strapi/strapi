@@ -11,7 +11,9 @@ import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
 
-const { ValidationError, NotFoundError } = errors;
+const { ValidationError, NotFoundError, ForbiddenError } = errors;
+
+const isNumericId = (id: string) => /^\d+$/.test(id);
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sanitizeOutput = async (data: unknown | unknown[], ctx: Context) => {
@@ -42,6 +44,103 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     // The upload service hands unknown root keys (e.g. `where`) straight to the query engine
     return strapi.contentAPI.sanitize.query(data, schema, { auth, route, strictParams: true });
+  };
+
+  /**
+   * Whether the caller's permissions carry data rules (an end-users caller with a role). Everything
+   * below that narrows a write is for these callers only: API tokens, Users & Permissions and the
+   * admin keep what they have today.
+   */
+  const hasDataRules = (ctx: Context) =>
+    strapi.contentAPI.permissions.checker.isActive(ctx.state.auth);
+
+  /**
+   * Files have no owner and no data rule of their own, so a caller whose permissions are narrowed
+   * by conditions can't be limited to the files they uploaded. Replacing or updating one by id is
+   * refused for them rather than left open to every file.
+   */
+  const refuseFileById = (ctx: Context) => {
+    if (hasDataRules(ctx)) {
+      throw new ForbiddenError('Replacing or updating a file by id is not allowed for this caller');
+    }
+  };
+
+  const isGiven = (value: unknown) => value !== undefined && value !== null && value !== '';
+
+  /**
+   * `ref`, `refId` and `field` link the new file to an entry. Linking changes that entry, so the
+   * caller needs what an update of it needs: the update route of its type, and the entry check the
+   * core controllers run (`assertEntry`) over every locale, as the link is made on every row of the
+   * document. `field` has to be a media attribute of the type. Components are refused: they have no
+   * documentId to check an entry by.
+   */
+  const assertLinkAllowed = async (ctx: Context, body: Record<string, unknown> = {}) => {
+    const { ref, refId, field } = body;
+
+    if (!hasDataRules(ctx) || ![ref, refId, field].some(isGiven)) {
+      return;
+    }
+
+    if (typeof ref !== 'string' || typeof refId !== 'string' || typeof field !== 'string') {
+      throw new ValidationError('ref, refId and field are each required, as text, to link a file');
+    }
+
+    const model = strapi.getModel(ref as any);
+
+    if (model?.modelType !== 'contentType') {
+      throw new ValidationError('ref must be the uid of a content type');
+    }
+
+    if (field === '' || model.attributes?.[field]?.type !== 'media') {
+      throw new ValidationError('field must be a media attribute of ref');
+    }
+
+    const { auth } = ctx.state;
+
+    if (!auth?.ability?.can(`${ref}.update`)) {
+      throw new ForbiddenError('Forbidden');
+    }
+
+    // A numeric id names a row, not a document: the entry check can't be made on it
+    if (isNumericId(refId)) {
+      throw new ValidationError('refId must be the documentId of an entry');
+    }
+
+    await strapi.contentAPI.permissions.assertEntry(auth, 'update', ref as any, refId, {
+      locale: '*',
+    });
+
+    // The link writes `field`, so the caller needs that field on an update of this entry: for
+    // every entry, or through a conditioned row whose condition this entry matches
+    const { always, conditional } = strapi.contentAPI.permissions.checker.fieldsFor(
+      auth,
+      'update',
+      ref
+    );
+    const lists = (fields: string[] | null) => fields === null || fields.includes(field);
+
+    if (lists(always)) {
+      return;
+    }
+
+    // The link is written on every row of the document (each locale, draft and published), so
+    // every one of them has to match a conditioned row that gives the field. Counted both ways
+    // rather than with a negated filter, which a null in a condition field would slip through.
+    const filters = conditional.filter((group) => lists(group.fields)).map((group) => group.filter);
+
+    if (filters.length > 0) {
+      const rows = strapi.db.query(ref);
+      const [all, covered] = await Promise.all([
+        rows.count({ where: { documentId: refId } }),
+        rows.count({ where: { documentId: refId, $or: filters } }),
+      ]);
+
+      if (all > 0 && covered === all) {
+        return;
+      }
+    }
+
+    throw new ForbiddenError('Forbidden');
   };
 
   return {
@@ -99,6 +198,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async updateFileInfo(ctx: Context) {
+      refuseFileById(ctx);
+
       const {
         query: { id },
         request: { body },
@@ -123,6 +224,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async replaceFile(ctx: Context) {
+      refuseFileById(ctx);
+
       const {
         query: { id },
         request: { body, files: { files: filesInput } = {} },
@@ -170,6 +273,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
+
+      await assertLinkAllowed(ctx, body);
 
       const {
         validFiles,

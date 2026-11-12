@@ -313,6 +313,47 @@ describe('Content API permissions: the checker', () => {
       });
     });
 
+    it('denies every field for a row saved with no fields, read and write', async () => {
+      const denied = {
+        filtersFor: null,
+        fieldsFor: { always: [], conditional: [] },
+        readableFields: [],
+        populateDepth: 0,
+      };
+      const auth = await authOf([
+        { action: `${NOTE}.find`, properties: { fields: [] } },
+        { action: `${NOTE}.update`, properties: { fields: [] } },
+      ]);
+
+      expect(answers(auth, 'find', NOTE)).toEqual(denied);
+      expect(answers(auth, 'update', NOTE)).toEqual(denied);
+      expect(p.checker.writableFields(auth, 'update', NOTE)).toEqual([]);
+    });
+
+    it('denies an action whose only row has no fields, even when another action opens its route', async () => {
+      // `findOne` reads the `find` rows when no `findOne` row is held
+      const auth = await authOf([
+        { action: `${NOTE}.find`, properties: { fields: [] } },
+        { action: `${NOTE}.findOne` },
+      ]);
+
+      expect(p.checker.fieldsFor(auth, 'find', NOTE)).toEqual({ always: [], conditional: [] });
+      expect(p.checker.fieldsFor(auth, 'findOne', NOTE)).toEqual({ always: null, conditional: [] });
+    });
+
+    it('lets a row with no fields widen nothing and narrow nothing next to another role', async () => {
+      const auth = await authOf([
+        { action: `${NOTE}.update`, properties: { fields: [] }, origin: { role: 'A' } },
+        { action: `${NOTE}.update`, properties: { fields: ['title'] }, origin: { role: 'B' } },
+      ]);
+
+      expect(p.checker.filtersFor(auth, 'update', NOTE)).toEqual({});
+      expect(p.checker.fieldsFor(auth, 'update', NOTE)).toEqual({
+        always: ['title'],
+        conditional: [],
+      });
+    });
+
     it('denies for a row stored under another content type, and lets it widen nothing', async () => {
       const stray = {
         action: `${NOTE}.update`,

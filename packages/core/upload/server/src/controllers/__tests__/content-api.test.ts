@@ -1,5 +1,7 @@
 import type { Context } from 'koa';
 
+import { errors } from '@strapi/utils';
+
 import contentApiController from '../content-api';
 import { getService } from '../../utils';
 import { validateUploadBody } from '../validation/content-api/upload';
@@ -64,6 +66,14 @@ describe('Content API Controller - find / findPage', () => {
       contentAPI: {
         validate: { query: mockValidateQuery },
         sanitize: { query: mockSanitizeQuery, output: mockSanitizeOutput },
+        // The caller of these tests carries no data rules: API token, Users & Permissions, admin
+        permissions: {
+          checker: {
+            isActive: jest.fn().mockReturnValue(false),
+            fieldsFor: jest.fn().mockReturnValue({ always: null, conditional: [] }),
+          },
+          assertEntry: jest.fn(),
+        },
       },
     } as any;
 
@@ -650,6 +660,212 @@ describe('Content API Controller - find / findPage', () => {
         name: 'NotFoundError',
       });
       expect(mockUploadService.replace).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a caller whose permissions carry data rules (end-users)', () => {
+    const NOTE = 'api::note.note';
+    const noteModel = {
+      uid: NOTE,
+      modelType: 'contentType',
+      attributes: { title: { type: 'string' }, cover: { type: 'media' } },
+    };
+    const uploaded = [{ id: 3, name: 'a.png' }];
+    const png = { filepath: '/tmp/a.png', originalFilename: 'a.png', mimetype: 'image/png' };
+    let assertEntry: jest.Mock;
+    let can: jest.Mock;
+
+    const upload = (body: Record<string, unknown>) => {
+      mockContext.query = {} as any;
+      mockContext.request = { body, files: { files: png } } as any;
+
+      return buildController().upload(mockContext);
+    };
+
+    beforeEach(() => {
+      const permissions = (globalThis.strapi as any).contentAPI.permissions;
+
+      permissions.checker.isActive.mockReturnValue(true);
+      assertEntry = permissions.assertEntry.mockResolvedValue(undefined);
+      can = jest.fn().mockReturnValue(true);
+      mockContext.state = { auth: { ability: { can } } } as any;
+
+      (globalThis.strapi as any).getModel = jest.fn((uid: string) =>
+        uid === NOTE ? noteModel : { uid: 'plugin::upload.file' }
+      );
+      (globalThis.strapi as any).db = { query: jest.fn() };
+
+      mockPrepareUploadRequest.mockImplementation(async (_files: any, body: any) => ({
+        validFiles: [png],
+        filteredBody: body,
+        errors: [],
+      }));
+      mockGetService.mockImplementation((serviceName: string) => {
+        if (serviceName === 'upload')
+          return { ...mockUploadService, upload: jest.fn().mockResolvedValue(uploaded) };
+        if (serviceName === 'file') return mockFileService;
+        if (serviceName === 'api-upload-folder') {
+          return { getAPIUploadFolder: jest.fn().mockResolvedValue({ id: 1 }) };
+        }
+        return {};
+      });
+    });
+
+    it('links a file to an entry the caller may update, on every locale, and uploads it', async () => {
+      await upload({ ref: NOTE, refId: 'abc123', field: 'cover' });
+
+      expect(can).toHaveBeenCalledWith(`${NOTE}.update`);
+      expect(assertEntry).toHaveBeenCalledWith(mockContext.state.auth, 'update', NOTE, 'abc123', {
+        locale: '*',
+      });
+      expect(mockContext.status).toBe(201);
+    });
+
+    it('refuses the link unless every row of the entry gives the caller the field', async () => {
+      const { checker } = (globalThis.strapi as any).contentAPI.permissions;
+      const owned = { owner: { documentId: 'me' } };
+      const count = jest.fn(async ({ where }: { where: Record<string, unknown> }) =>
+        '$or' in where ? 1 : 2
+      );
+
+      (globalThis.strapi as any).db = { query: jest.fn().mockReturnValue({ count }) };
+
+      // Not among the fields every entry gets: only the conditioned row gives it
+      checker.fieldsFor.mockReturnValue({
+        always: ['title'],
+        conditional: [{ filter: owned, fields: ['cover'] }],
+      });
+
+      // Two rows (a draft and a published version, or two locales), one of which matches
+      await expect(upload({ ref: NOTE, refId: 'abc123', field: 'cover' })).rejects.toThrow(
+        errors.ForbiddenError
+      );
+      expect(count).toHaveBeenCalledWith({ where: { documentId: 'abc123' } });
+      expect(count).toHaveBeenCalledWith({ where: { documentId: 'abc123', $or: [owned] } });
+
+      // Both rows match
+      count.mockImplementation(async () => 2);
+      await upload({ ref: NOTE, refId: 'abc123', field: 'cover' });
+
+      expect(mockContext.status).toBe(201);
+
+      // No conditioned row gives the field at all: nothing is counted
+      count.mockClear();
+      checker.fieldsFor.mockReturnValue({
+        always: ['title'],
+        conditional: [{ filter: owned, fields: ['summary'] }],
+      });
+
+      await expect(upload({ ref: NOTE, refId: 'abc123', field: 'cover' })).rejects.toThrow(
+        errors.ForbiddenError
+      );
+      expect(count).not.toHaveBeenCalled();
+
+      checker.fieldsFor.mockReturnValue({ always: null, conditional: [] });
+    });
+
+    it('uploads a file with no link without asking for an entry', async () => {
+      await upload({});
+
+      expect(assertEntry).not.toHaveBeenCalled();
+      expect(mockContext.status).toBe(201);
+    });
+
+    it('refuses the link when the entry check refuses, and uploads nothing', async () => {
+      assertEntry.mockRejectedValue(new errors.NotFoundError('Not Found'));
+
+      await expect(upload({ ref: NOTE, refId: 'abc123', field: 'cover' })).rejects.toMatchObject({
+        name: 'NotFoundError',
+      });
+      expect(mockContext.status).not.toBe(201);
+    });
+
+    it.each([
+      ['ref only', { ref: NOTE }],
+      ['a field that is not a media attribute', { ref: NOTE, refId: 'abc123', field: 'title' }],
+      ['an unknown field', { ref: NOTE, refId: 'abc123', field: 'nope' }],
+      ['a ref that is no content type', { ref: 'api::none.none', refId: 'abc123', field: 'cover' }],
+      ['a numeric refId', { ref: NOTE, refId: '12', field: 'cover' }],
+      ['a list as refId', { ref: NOTE, refId: ['a', 'b'], field: 'cover' }],
+    ])('refuses %s with a validation error', async (_label, body) => {
+      await expect(upload(body)).rejects.toMatchObject({ name: 'ValidationError' });
+      expect(assertEntry).not.toHaveBeenCalled();
+    });
+
+    it('refuses the link when the caller has no update route on the type', async () => {
+      can.mockReturnValue(false);
+
+      await expect(upload({ ref: NOTE, refId: 'abc123', field: 'cover' })).rejects.toMatchObject({
+        name: 'ForbiddenError',
+      });
+      expect(assertEntry).not.toHaveBeenCalled();
+    });
+
+    it('refuses updating and replacing a file by id', async () => {
+      mockContext.query = { id: '5' } as any;
+      mockContext.request = { body: {} } as any;
+
+      await expect(buildController().upload(mockContext)).rejects.toMatchObject({
+        name: 'ForbiddenError',
+      });
+
+      mockContext.request = { body: {}, files: { files: png } } as any;
+
+      await expect(buildController().upload(mockContext)).rejects.toMatchObject({
+        name: 'ForbiddenError',
+      });
+      expect(mockUploadService.updateFileInfo).not.toHaveBeenCalled();
+      expect(mockUploadService.replace).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('every other caller (API token, Users & Permissions, admin)', () => {
+    const png = { filepath: '/tmp/a.png', originalFilename: 'a.png', mimetype: 'image/png' };
+
+    beforeEach(() => {
+      (globalThis.strapi as any).db = { query: jest.fn() };
+      mockGetService.mockImplementation((serviceName: string) => {
+        if (serviceName === 'upload') {
+          return { ...mockUploadService, upload: jest.fn().mockResolvedValue([{ id: 3 }]) };
+        }
+        if (serviceName === 'file') return mockFileService;
+        if (serviceName === 'api-upload-folder') {
+          return { getAPIUploadFolder: jest.fn().mockResolvedValue({ id: 1 }) };
+        }
+        return {};
+      });
+      mockPrepareUploadRequest.mockImplementation(async (_files: any, body: any) => ({
+        validFiles: [png],
+        filteredBody: body,
+        errors: [],
+      }));
+    });
+
+    it('still links to any ref with no entry check', async () => {
+      const permissions = (globalThis.strapi as any).contentAPI.permissions;
+
+      mockContext.query = {} as any;
+      mockContext.request = {
+        body: { ref: 'api::any.any', refId: '12', field: 'whatever' },
+        files: { files: png },
+      } as any;
+
+      await buildController().upload(mockContext);
+
+      expect(permissions.assertEntry).not.toHaveBeenCalled();
+      expect(mockContext.status).toBe(201);
+    });
+
+    it('still updates a file by id, with no files', async () => {
+      const file = { id: 5 };
+
+      mockContext.query = { id: '5' } as any;
+      mockContext.request = { body: {} } as any;
+      mockUploadService.updateFileInfo.mockResolvedValue(file);
+
+      await buildController().upload(mockContext);
+
+      expect(mockUploadService.updateFileInfo).toHaveBeenCalledWith('5', expect.anything());
     });
   });
 });

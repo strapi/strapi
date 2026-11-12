@@ -138,12 +138,18 @@ const toProperties = (value: unknown): PermissionRow['properties'] => {
     refuse('properties.populateDepth of a permission is a number or null');
   }
 
+  // The engine reads no locale limit, so one that is saved would look like a restriction and
+  // restrict nothing. Rows already stored with one still load: this runs on what is written
+  if (locales !== undefined && locales !== null) {
+    refuse(
+      'properties.locales of a permission must be null: a locale limit is not enforced yet, so it cannot be saved'
+    );
+  }
+
   const properties: PermissionRow['properties'] = {};
 
   if (fields !== undefined) properties.fields = fields === null ? null : [...(fields as string[])];
-  if (locales !== undefined) {
-    properties.locales = locales === null ? null : [...(locales as string[])];
-  }
+  if (locales !== undefined) properties.locales = null;
   if (populateDepth !== undefined) properties.populateDepth = populateDepth as number | null;
 
   return properties;

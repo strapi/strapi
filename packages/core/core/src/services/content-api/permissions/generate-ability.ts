@@ -64,8 +64,8 @@ const dataAbilityBuilder = (): permissionsEngine.abilities.CustomAbilityBuilder 
  * What the data ability is built from. The engine evaluates each row's conditions for the caller
  * (`providers.condition.get({ name, params })`): a row whose conditions are all false, or all
  * unregistered, gives no data rule and fails closed; it stays in `CompiledPermissions.rules` as a
- * row the caller holds, as does a row stored under another content type than its action's, which
- * is never handed to this function. Several conditions on one row are ORed into
+ * row the caller holds, as does a row with no fields and a row stored under another content type
+ * than its action's, which are never handed to this function. Several conditions on one row are ORed into
  * `{ $and: [{ $or: filters }] }`.
  */
 const toDataPermissions = (rules: MaterializedPermission[]) =>
@@ -127,6 +127,8 @@ export const createAbilityGenerator = ({ engine, providers, getContentTypes }: G
     permissions: ContentApiPermission[],
     options: { user: ConditionUser | null }
   ): Promise<ContentApiAbility> {
+    // A row with no fields opens no route and gives no data rule, but it is still held (below), so
+    // the type is denied its fields instead of left route-level only
     const kept = permissions.filter((permission) => !grantsNothing(permission));
 
     // The same action from two roles is one route rule. `read-drafts` and `publish` are not routes,
@@ -140,7 +142,7 @@ export const createAbilityGenerator = ({ engine, providers, getContentTypes }: G
     )) as ContentApiAbility;
 
     const contentTypes = getContentTypes();
-    const { rules, grants } = materialize(kept, (action) =>
+    const { rules, grants } = materialize(permissions, (action) =>
       contentTypeOfAction(contentTypes, action)
     );
     const user = options?.user ?? null;

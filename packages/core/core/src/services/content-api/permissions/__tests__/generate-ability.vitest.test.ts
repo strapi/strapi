@@ -271,7 +271,7 @@ describe('Content API permissions: generateAbility', () => {
     expect(ability[DATA_ABILITY]!.rules).toEqual([]);
   });
 
-  it('drops a row whose fields list is empty from both abilities', async () => {
+  it('opens no route and gives no data rule for a row whose fields list is empty, but holds it', async () => {
     const ability = await p.generateAbility(
       [{ action: 'api::note.note.find', subject: 'api::note.note', properties: { fields: [] } }],
       { user: null }
@@ -280,7 +280,9 @@ describe('Content API permissions: generateAbility', () => {
 
     expect(canCallRoute(ability, 'api::note.note.find')).toBe(false);
     expect(compiled.ability.can('find', 'api::note.note')).toBe(false);
-    expect(compiled.rules).toEqual([]);
+    expect(compiled.ability.rules).toEqual([]);
+    expect(compiled.grants).toEqual([]);
+    expect(compiled.rules).toEqual([expect.objectContaining({ dataAction: 'find', fields: [] })]);
   });
 
   it('gives a row with a condition nobody registered no data rule, but keeps it as a held row', async () => {

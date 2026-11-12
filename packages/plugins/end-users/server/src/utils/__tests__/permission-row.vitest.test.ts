@@ -40,6 +40,22 @@ describe('permission rows', () => {
       expect(({} as Record<string, unknown>).polluted).toBeUndefined();
     });
 
+    it('refuses a locale limit on a row, a change and a diff, because none is enforced', () => {
+      const withLocales = { action: 'a.b.c', properties: { fields: ['title'], locales: ['en'] } };
+
+      expect(() => toPermissionRow(withLocales)).toThrow(/properties\.locales .* must be null/);
+      expect(() => toPermissionRow({ action: 'a.b.c', properties: { locales: [] } })).toThrow(
+        /properties\.locales/
+      );
+      expect(() =>
+        toPermissionChanges({ documentId: 'abc', properties: { locales: ['en'] } })
+      ).toThrow(/properties\.locales/);
+      expect(() => toStoredDiff({ create: [withLocales] })).toThrow(/properties\.locales/);
+      expect(() =>
+        toPermissionRow({ action: 'a.b.c', properties: { locales: null } })
+      ).not.toThrow();
+    });
+
     it('leaves out what was not given instead of storing it as undefined', () => {
       const { properties } = toPermissionRow({
         action: 'a.b.c',

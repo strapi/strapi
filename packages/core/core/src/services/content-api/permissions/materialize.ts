@@ -4,7 +4,8 @@ import type { ContentApiPermission, MaterializedPermission } from './types';
 
 /**
  * A row whose fields list is empty (`fields: []`) grants nothing: neither its route scope nor a
- * data rule. `null` or no list at all means every field.
+ * data rule. It is still a held row (see `materialize`), so its action on its type is denied rather
+ * than left route-level only. `null` or no list at all means every field.
  */
 export const grantsNothing = (permission: ContentApiPermission): boolean => {
   const fields = permission.properties?.fields;
@@ -66,6 +67,9 @@ export interface Materialized {
  * caller is denied there. Dropping it instead would leave the pair route-level only, and the limits
  * the row carries would vanish.
  *
+ * A row with no fields (`grantsNothing`) is held the same way, so the caller is denied there, and for
+ * the same reason: dropping it would leave the pair route-level only, every field open.
+ *
  * Lists and params are copied, so nothing that reads the result can change the caller's rows.
  */
 export const materialize = (
@@ -99,7 +103,7 @@ export const materialize = (
 
     rules.push(rule);
 
-    if ((permission.subject ?? owner) === owner) {
+    if ((permission.subject ?? owner) === owner && !grantsNothing(permission)) {
       grants.push(rule);
     }
   }
