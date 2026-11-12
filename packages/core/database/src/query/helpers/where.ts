@@ -36,12 +36,18 @@ const castValue = (value: unknown, attribute: Attribute | null) => {
 /**
  * Reads a `$null` / `$notNull` operand with the values boolean filters accept. A truthiness
  * check read `'false'` or `'no'` as true, so `{ $null: 'false' }` matched the null rows.
+ *
+ * `null` and `undefined` keep the loose reading (false), as optional flags pass them.
  */
 const toNullOperand = (value: unknown): boolean => {
   const recognised = toRecognisedBoolean(value);
 
-  if (recognised === null || recognised === undefined) {
+  if (recognised === undefined) {
     throw new InvalidBooleanError();
+  }
+
+  if (recognised === null) {
+    return false;
   }
 
   return recognised;

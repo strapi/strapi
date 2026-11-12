@@ -202,7 +202,8 @@ describe('applyWhere - $null and $notNull operands', () => {
     expect(compile({ price: { $notNull: operand } })).toMatch(/`price` is not null$/);
   });
 
-  test.each([false, 'false', 'f', '0', 0, 'FALSE', 'False', 'F'])(
+  // `null` and `undefined` keep the loose reading (false), as optional flags pass them.
+  test.each([false, 'false', 'f', '0', 0, 'FALSE', 'False', 'F', null, undefined])(
     'reads %p as false',
     (operand) => {
       expect(compile({ price: { $null: operand } })).toMatch(/`price` is not null$/);
@@ -210,7 +211,7 @@ describe('applyWhere - $null and $notNull operands', () => {
     }
   );
 
-  test.each(['no', 'yes', '', ' true ', 2, null, undefined, ['no'], { anything: 'anything' }])(
+  test.each(['no', 'yes', '', ' true ', 2, ['no'], { anything: 'anything' }])(
     'rejects unrecognised operand %p',
     (operand) => {
       for (const operator of ['$null', '$notNull']) {

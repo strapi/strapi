@@ -193,10 +193,17 @@ const NULL_OPERAND_FALSE_VALUES = new Set(['false', 'f', '0']);
 /**
  * Reads a `$null` / `$notNull` operand with the values boolean filters accept (case-insensitive).
  * A forced cast read `no` or `FALSE` as true, so `filters[x][$null]=no` matched the null rows.
+ *
+ * `null` and `undefined` keep the loose reading (false): optional flags (`{ $null: someFlag }`),
+ * GraphQL's nullable input and a bare `?filters[x][$null]` pass them.
  */
 const parseNullOperand = (value: unknown): boolean => {
   if (typeof value === 'boolean') {
     return value;
+  }
+
+  if (value === null || value === undefined) {
+    return false;
   }
 
   if (typeof value === 'number' || typeof value === 'string') {

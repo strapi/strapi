@@ -102,6 +102,10 @@ describe('convert-query-params', () => {
         ['FALSE', false],
         ['False', false],
         ['F', false],
+        // Kept from the loose reading: optional flags (`{ $null: someFlag }`), GraphQL's nullable
+        // input and a bare `?filters[x][$null]` (parsed with `strictNullHandling`) pass these.
+        [null, false],
+        [undefined, false],
       ])('reads %p as %p', (operand, expected) => {
         const res = transformer.private_convertFiltersQueryParams(
           { title: { [operator]: operand } },

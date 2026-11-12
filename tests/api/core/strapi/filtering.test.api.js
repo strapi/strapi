@@ -436,6 +436,23 @@ describe('Filtering API', () => {
         expect(res.body.data.length).toBe(3);
       });
 
+      // A bare operator is parsed as `null` (`strictNullHandling`) and keeps the loose reading: false.
+      test.each([
+        ['$null', (product) => product.price !== null],
+        ['$notNull', (product) => product.price === null],
+      ])('Should read a bare %s operand as false', async (operator, isMatching) => {
+        const res = await rq({
+          method: 'GET',
+          url: `/products?filters[price][${operator}]`,
+        });
+
+        const matching = data.product.filter(isMatching);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.length).toBe(matching.length);
+        expect(res.body.data).toEqual(expect.arrayContaining(matching));
+      });
+
       test.each([
         [{ $null: 'no' }],
         [{ $null: 'yes' }],
