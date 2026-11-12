@@ -1,3 +1,4 @@
+import { MIN_SECRET_LENGTH } from '../constants';
 import { isDefineAuthResult } from '../engine/better-auth/define-auth';
 import { DUPLICATES_MODES, MAX_FIELD_LENGTH, MAX_REGISTRATION_FIELDS } from '../migration/config';
 import { parseDuration } from './duration';
@@ -200,7 +201,7 @@ const isAbsoluteUrl = (value: string) => {
  * `compat`: the Users & Permissions compatibility mode. That a callback's origin is trusted is
  * judged when the application starts, against the server's address and Better Auth's own matcher.
  */
-const validateCompat = (compat: Plain) => {
+const validateCompat = (compat: Plain, environment: string) => {
   const legacyJwt = group(compat, 'legacyJwt', 'compat.legacyJwt');
   const refresh = group(compat, 'refresh', 'compat.refresh');
   const cookie = group(refresh, 'cookie', 'compat.refresh.cookie');
@@ -224,6 +225,35 @@ const validateCompat = (compat: Plain) => {
       'Invalid end-users configuration: `compat.legacyJwt.until` is set, so `compat.legacyJwt.secret` ' +
         'must be a non-empty string (the secret the old tokens were signed with, the JWT_SECRET ' +
         'environment variable by default).'
+    );
+  }
+
+  // With the compatibility mode on and a cut-off set, anyone who knows this secret can sign an old
+  // token for any user id until that date. It is refused for the same placeholders as `secret`, and
+  // for a length below what Strapi generates (`MIN_LEGACY_SECRET_LENGTH`)
+  const secret = legacyJwt.secret as string;
+  const acceptsLegacyTokens =
+    environment !== 'development' &&
+    compat.usersPermissions === true &&
+    until !== undefined &&
+    until !== null;
+
+  if (acceptsLegacyTokens && isPublicSecret(secret)) {
+    throw new Error(
+      'Invalid end-users configuration: `compat.legacyJwt.secret` is a published placeholder, so ' +
+        'anyone could sign an old Users & Permissions token for any user with it. Set JWT_SECRET to ' +
+        'the secret the old tokens were really signed with, or set `compat.legacyJwt.until` to null ' +
+        'to stop accepting them.'
+    );
+  }
+
+  if (acceptsLegacyTokens && secret.length < MIN_LEGACY_SECRET_LENGTH) {
+    throw new Error(
+      `Invalid end-users configuration: \`compat.legacyJwt.secret\` is ${secret.length} characters ` +
+        `long, and NODE_ENV "${environment}" needs at least ${MIN_LEGACY_SECRET_LENGTH} (what Strapi ` +
+        'generates for JWT_SECRET). A short one is within reach of a guess, and with it anyone could ' +
+        'sign an old token for any user. Set `compat.legacyJwt.until` to null to stop accepting ' +
+        'the old tokens.'
     );
   }
 
@@ -314,13 +344,30 @@ const validateMigration = (migration: Plain) => {
 };
 
 /**
- * Secrets anyone can read: Better Auth's built-in fallback, and the placeholder in the example
- * project's `.env.example`.
+ * Secrets anyone can read: Better Auth's built-in fallback, the placeholder in the example
+ * project's `.env.example`, and the ones Strapi's own templates ship in theirs. Compared without
+ * case, so `toBeModified` and `tobemodified` are the same placeholder.
  */
-const PUBLIC_SECRETS = new Set([
-  'better-auth-secret-12345678901234567890',
-  'change-me-to-a-long-random-string',
-]);
+const PUBLIC_SECRETS = new Set(
+  [
+    'better-auth-secret-12345678901234567890',
+    'change-me-to-a-long-random-string',
+    'tobemodified',
+    'toBeModified1',
+    'toBeModified2',
+    'changeme',
+  ].map((secret) => secret.toLowerCase())
+);
+
+const isPublicSecret = (secret: unknown) =>
+  typeof secret === 'string' && PUBLIC_SECRETS.has(secret.toLowerCase());
+
+/**
+ * The shortest legacy JWT secret accepted outside development. It is not the plugin's to choose:
+ * it is the secret Users & Permissions signed its tokens with, and changing it ends them all.
+ * Strapi generates `JWT_SECRET` as 16 random bytes in base64, 24 characters, so that is the floor.
+ */
+const MIN_LEGACY_SECRET_LENGTH = 24;
 
 /**
  * Checks the plugin configuration after the defaults are merged in. Keys it
@@ -353,11 +400,20 @@ export const validateConfig = (
     );
   }
 
-  if (environment !== 'development' && PUBLIC_SECRETS.has(secret as string)) {
+  if (environment !== 'development' && isPublicSecret(secret)) {
     throw new Error(
       'Invalid end-users configuration: `secret` is a published placeholder, so anyone could sign ' +
         'sessions and tokens with it. Set END_USERS_SECRET to a long random string (for example: ' +
         'openssl rand -base64 32).'
+    );
+  }
+
+  if (environment !== 'development' && (secret as string).length < MIN_SECRET_LENGTH) {
+    throw new Error(
+      `Invalid end-users configuration: \`secret\` is ${(secret as string).length} characters ` +
+        `long, and NODE_ENV "${environment}" needs at least ${MIN_SECRET_LENGTH}. It signs the ` +
+        'sessions and encrypts what the plugin stores, so a short one is within reach of a guess. ' +
+        'Set END_USERS_SECRET to a long random string (for example: openssl rand -base64 32).'
     );
   }
 
@@ -464,7 +520,7 @@ export const validateConfig = (
     invalid('rateLimit.storage', '"database" or "memory"', storage);
   }
 
-  validateCompat(group(values, 'compat'));
+  validateCompat(group(values, 'compat'), environment);
   validateMigration(group(values, 'migration'));
 
   const { auth } = values;

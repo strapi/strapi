@@ -27,6 +27,7 @@ import { readCompatConfig } from '../../compat/config';
 import { revokeLegacySessions } from '../../compat/legacy-sessions';
 import { compatRateLimitResponse } from '../../compat/rate-limit';
 import { parseDuration } from '../../config/duration';
+import { secureCookieOptions } from '../../config/secure-cookies';
 import { banState } from '../../utils/ban';
 import { setProviderClaims } from '../../utils/provider-claims';
 import type settingsService from '../../services/settings';
@@ -439,6 +440,8 @@ export const buildAuthOptions = (
     session: sessionOptions(strapi),
     advanced: {
       ...cookieOptions(strapi),
+      // Outside development, the session cookie is Secure on an https address
+      ...secureCookieOptions(strapi),
       cookiePrefix: 'strapi',
       // Better Auth's origin and CSRF checks (against `trustedOrigins`) are off by default when
       // NODE_ENV is "test" (`skipOriginCheck` in `better-auth/dist/context/create-context.mjs`).
@@ -492,9 +495,16 @@ export const buildAuthOptions = (
       },
     },
     ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
-    ...(providers.trustedProviders.length > 0
-      ? { account: { accountLinking: { trustedProviders: providers.trustedProviders } } }
-      : {}),
+    account: {
+      // A provider's access and refresh tokens are encrypted with the secret before they are
+      // stored, so a copy of the table does not hand out the end user's account at the provider.
+      // Rows stored in clear text before are still read: Better Auth decrypts only what looks
+      // encrypted.
+      encryptOAuthTokens: true,
+      ...(providers.trustedProviders.length > 0
+        ? { accountLinking: { trustedProviders: providers.trustedProviders } }
+        : {}),
+    },
   };
 
   const projectOptions = withoutProtectedOptions((project?.options ?? {}) as Plain);

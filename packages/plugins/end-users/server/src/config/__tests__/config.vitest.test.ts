@@ -47,6 +47,30 @@ describe('validateConfig', () => {
     }
   });
 
+  it("refuses Strapi's own template placeholders outside development, whatever their case", () => {
+    // The values Strapi's templates ship in `.env.example`, and the plain one people type
+    const placeholders = ['tobemodified', 'toBeModified1', 'toBeModified2', 'changeme'];
+
+    for (const secret of [...placeholders, 'ToBeModified', 'CHANGEME']) {
+      expect(() => validateConfig({ secret }, production)).toThrow(/published placeholder/);
+      expect(() => validateConfig({ secret }, { NODE_ENV: 'development' })).not.toThrow();
+    }
+  });
+
+  it('refuses a secret shorter than 32 characters outside development', () => {
+    const short = 'x'.repeat(31);
+
+    expect(() => validateConfig({ secret: short }, production)).toThrow(
+      /`secret` is 31 characters long, and NODE_ENV "production" needs at least 32/
+    );
+    expect(() => validateConfig({ secret: short }, { NODE_ENV: 'staging' })).toThrow(
+      /END_USERS_SECRET/
+    );
+    expect(() => validateConfig({ secret: 'x'.repeat(32) }, production)).not.toThrow();
+    // Development keeps the boot warning, and starts
+    expect(() => validateConfig({ secret: short }, { NODE_ENV: 'development' })).not.toThrow();
+  });
+
   it('refuses a secret that is not a string', () => {
     expect(() => validateConfig({ secret: 42 }, {})).toThrow(/secret/);
   });
@@ -482,6 +506,55 @@ describe('validateConfig', () => {
           /compat\.legacyJwt\.secret/
         );
         expect(() => validateConfig(compat({ legacyJwt: { secret: '' } }), {})).not.toThrow();
+      });
+
+      describe('the legacy secret outside development', () => {
+        const SECRET_PARTS = ['legacy', 'secret', 'long', 'enough'];
+        const legacy = (secret: string, extra: Record<string, unknown> = {}) => ({
+          secret: SECRET,
+          compat: {
+            usersPermissions: true,
+            legacyJwt: { until: '2027-06-30', secret },
+            ...extra,
+          },
+        });
+
+        it('refuses a published placeholder while old tokens are accepted', () => {
+          for (const placeholder of ['tobemodified', 'toBeModified', 'changeme']) {
+            expect(() => validateConfig(legacy(placeholder), production)).toThrow(
+              /`compat\.legacyJwt\.secret` is a published placeholder/
+            );
+          }
+        });
+
+        it('refuses one shorter than the 24 characters Strapi generates', () => {
+          expect(() => validateConfig(legacy('x'.repeat(23)), production)).toThrow(
+            /`compat\.legacyJwt\.secret` is 23 characters long/
+          );
+          // 16 random bytes in base64, as create-strapi-app writes JWT_SECRET
+          expect(() => validateConfig(legacy('x'.repeat(24)), production)).not.toThrow();
+          expect(() => validateConfig(legacy(SECRET_PARTS.join('-')), production)).not.toThrow();
+        });
+
+        it('leaves it alone when no old token is accepted, or in development', () => {
+          const weak = 'tobemodified';
+
+          // Compatibility mode off: the old tokens are never read
+          expect(() =>
+            validateConfig(
+              { secret: SECRET, compat: { legacyJwt: { until: '2027-06-30', secret: weak } } },
+              production
+            )
+          ).not.toThrow();
+          // No cut-off: the old tokens are not accepted
+          expect(() =>
+            validateConfig(
+              { secret: SECRET, compat: { usersPermissions: true, legacyJwt: { secret: weak } } },
+              production
+            )
+          ).not.toThrow();
+          expect(() => validateConfig(legacy(weak), { NODE_ENV: 'development' })).not.toThrow();
+        });
       });
 
       it('takes one of three algorithms for the legacy tokens', () => {

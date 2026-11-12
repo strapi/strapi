@@ -11,6 +11,7 @@ import { defaultsDeep } from 'lodash';
 import { errors, importDefault } from '@strapi/utils';
 import { createAuthEndpoint } from 'better-auth/api';
 import { getBooleanEnvVar } from 'better-auth';
+import { decryptOAuthToken, setTokenUtil } from 'better-auth/oauth2';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
@@ -460,6 +461,35 @@ describe('buildAuthOptions', () => {
     });
   });
 
+  describe("a provider's tokens", () => {
+    const withTrusted = (trustedProviders: string[]) => ({
+      ...emptyStartupInputs(),
+      providers: { ...emptyStartupInputs().providers, trustedProviders },
+    });
+
+    it('are encrypted before they are stored, with or without trusted providers', () => {
+      expect(buildAuthOptions(fakeStrapi()).account?.encryptOAuthTokens).toBe(true);
+
+      const trusted = buildAuthOptions(fakeStrapi(), undefined, withTrusted(['github']));
+
+      expect(trusted.account?.encryptOAuthTokens).toBe(true);
+      expect(trusted.account?.accountLinking).toEqual({ trustedProviders: ['github'] });
+    });
+
+    it('are stored encrypted, and a row stored in clear text before is still read', async () => {
+      const ctx = { options: buildAuthOptions(fakeStrapi()), secretConfig: SECRET } as never;
+      const token = ['provider', 'access', 'token'].join('-');
+
+      const stored = await setTokenUtil(token, ctx);
+
+      expect(stored).not.toBe(token);
+      expect(stored).not.toContain(token);
+      expect(await decryptOAuthToken(stored as string, ctx)).toBe(token);
+      // A row from before the change: not encrypted, read as it is
+      expect(await decryptOAuthToken(token, ctx)).toBe(token);
+    });
+  });
+
   describe('cookies', () => {
     it('are SameSite=None and Secure for a front end on another site', () => {
       const options = buildAuthOptions(fakeStrapi({ 'plugin::end-users.cookies.crossSite': true }));
@@ -484,6 +514,52 @@ describe('buildAuthOptions', () => {
         enabled: true,
         domain: '.example.com',
       });
+    });
+
+    it('are Secure outside development when the server is on https', () => {
+      const https = { 'server.url': 'https://api.example.com' };
+
+      for (const env of ['production', 'staging', 'test']) {
+        vi.stubEnv('NODE_ENV', env);
+
+        expect(buildAuthOptions(fakeStrapi(https)).advanced?.useSecureCookies, env).toBe(true);
+      }
+
+      // Development keeps Better Auth's own reading of the address
+      vi.stubEnv('NODE_ENV', 'development');
+
+      expect(buildAuthOptions(fakeStrapi(https)).advanced?.useSecureCookies).toBeUndefined();
+    });
+
+    it('stay as they are on plain http, and say so once off a loopback host', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+
+      const loopback = fakeStrapi({ 'server.url': 'http://localhost:1337' });
+
+      expect(buildAuthOptions(loopback).advanced?.useSecureCookies).toBeUndefined();
+      expect(loopback.log.warn).not.toHaveBeenCalled();
+
+      const remote = fakeStrapi({ 'server.url': 'http://api.example.com' });
+
+      expect(buildAuthOptions(remote).advanced?.useSecureCookies).toBeUndefined();
+      // A rebuild (an admin change of settings) does not say it again
+      buildAuthOptions(remote);
+
+      expect(remote.log.warn).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(remote.log.warn).mock.calls[0][0]).toMatch(
+        /http:\/\/api\.example\.com, plain http, so the session cookie is not Secure/
+      );
+    });
+
+    it('leave the choice to a project that sets useSecureCookies itself', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+
+      const options = buildAuthOptions(
+        fakeStrapi({ 'server.url': 'https://api.example.com' }),
+        defineAuth({ advanced: { useSecureCookies: false } })
+      );
+
+      expect(options.advanced?.useSecureCookies).toBe(false);
     });
 
     it('keep the cookie prefix and the id setting next to them', () => {
