@@ -126,11 +126,20 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
         });
 
-        // TODO v6: store the author `id` and remove this extra query.
-        // See discussion in https://github.com/strapi/strapi/pull/28554#issuecomment-6826618574.
-        const authorDocumentId = await serviceUtils.findAuthorDocumentId(origin.author);
-        if (authorDocumentId === null) {
-          return result;
+        let author: CreateHistoryVersion['author'] = null;
+        if (origin.author !== null) {
+          // TODO v6: store the author `id` and remove this extra query.
+          // See discussion in https://github.com/strapi/strapi/pull/28554#issuecomment-6826618574.
+          const authorDocumentId = await serviceUtils.findAuthorDocumentId(origin.author);
+          if (authorDocumentId === null) {
+            return result;
+          }
+
+          author = {
+            type: origin.author.type,
+            model: origin.author.model,
+            id: authorDocumentId,
+          };
         }
 
         await strapi.db.transaction(async ({ onCommit }) => {
@@ -150,11 +159,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
                   status,
                   ...schemas,
                   source: origin.source,
-                  author: {
-                    type: origin.author.type,
-                    model: origin.author.model,
-                    id: authorDocumentId,
-                  },
+                  author,
                 });
               } catch (error) {
                 strapi.log.error(`Failed to create a history version for ${uid}`, {

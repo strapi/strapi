@@ -47,7 +47,7 @@ interface HistoryOriginAuthor extends Omit<HistoryVersionAuthorReference, 'id'> 
 
 interface HistoryOrigin {
   source: HistoryVersionSource;
-  author: HistoryOriginAuthor;
+  author: HistoryOriginAuthor | null;
 }
 
 export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
@@ -72,11 +72,14 @@ const toApiTokenAuthor = (token: { id: Data.ID }): HistoryOriginAuthor => ({
   entityId: token.id,
 });
 
-export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
-  authorType: author.type,
-  authorModel: author.model,
-  authorId: author.id,
-});
+export const toAuthorColumns = (author: HistoryVersionAuthorReference | null): AuthorColumns =>
+  author === null
+    ? { authorType: null, authorModel: null, authorId: null }
+    : {
+        authorType: author.type,
+        authorModel: author.model,
+        authorId: author.id,
+      };
 
 export const toAuthorReference = (columns: AuthorColumns): StoredAuthorReference | null =>
   columns.authorType === null
@@ -132,6 +135,8 @@ type RelationResponse = {
 
 const isContentManagerRoute = ({ state }: RequestContext) =>
   state.route?.info?.pluginName === 'content-manager' && state.route?.info?.type === 'admin';
+
+const isContentApiRoute = ({ state }: RequestContext) => state.route?.info?.type === 'content-api';
 
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
@@ -549,6 +554,18 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
           return requestContext.state.user
             ? { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) }
             : null;
+      }
+    }
+
+    if (isContentApiRoute(requestContext)) {
+      switch (requestContext.state.auth?.strategy?.name) {
+        case 'content-api-token':
+          return {
+            source: 'content-api',
+            author: toApiTokenAuthor(requestContext.state.auth.credentials),
+          };
+        default:
+          return { source: 'content-api', author: null };
       }
     }
 

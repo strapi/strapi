@@ -141,11 +141,14 @@ describe('history lifecycles service', () => {
       });
     };
 
-    const updateArticle = async (locale: string | string[] = 'en') => {
+    const updateArticle = async (
+      locale: string | string[] = 'en',
+      uid = 'api::article.article'
+    ) => {
       const result = await useMiddleware(
         {
           action: 'update',
-          contentType: { uid: 'api::article.article' },
+          contentType: { uid },
           params: { documentId: 'doc-1', locale },
         },
         async () => ({ documentId: 'doc-1' })
@@ -186,6 +189,14 @@ describe('history lifecycles service', () => {
         mockRequest({ pluginName: 'admin' });
 
         await updateArticle();
+
+        expect(mockCreateVersion).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('content types outside the api namespace', () => {
+      it('records nothing for a plugin content type', async () => {
+        await updateArticle('en', 'plugin::users-permissions.user');
 
         expect(mockCreateVersion).not.toHaveBeenCalled();
       });
