@@ -245,6 +245,10 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       expect(list.statusCode).toBe(200);
       expect(list.body.length).toBeGreaterThanOrEqual(1);
       expect(list.body[0].userId).toMatch(/^[a-z0-9]{24,}$/);
+      // A session's token is its credential: the list never gives it out
+      for (const listed of list.body) {
+        expect(listed).not.toHaveProperty('token');
+      }
 
       const out = await rq.post('/api/auth/sign-out', {
         body: {},
@@ -1506,7 +1510,6 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
       { method: 'GET', path: '/account-info?accountId=not-an-account', signedIn: [400, 404] },
       { method: 'POST', path: '/update-session', body: {}, signedIn: [400] },
       { method: 'POST', path: '/update-user', body: { name: 'Probed' }, signedIn: [200] },
-      { method: 'POST', path: '/verify-password', body: { password: PASSWORD }, signedIn: [200] },
       {
         method: 'POST',
         path: '/change-password',
@@ -1867,26 +1870,18 @@ describe('end-users: rate limiting', () => {
     expect((await signIn()).statusCode).toBe(429);
   });
 
-  it('answers 429 to the fourth password check of a signed-in user within the window', async () => {
+  it('answers 404 to the password check, signed in or not: nothing here calls it, and it has no lockout', async () => {
     const up = await rq.post('/api/auth/sign-up/email', {
       body: { email: 'limited-check@example.com', password: PASSWORD, name: 'Limited' },
     });
 
     expect(up.statusCode).toBe(200);
 
-    const check = () =>
-      rq.post('/api/auth/verify-password', {
-        body: { password: 'not-the-password' },
-        headers: bearer(up.headers['set-auth-token']),
-      });
+    const check = (headers: Record<string, string> = {}) =>
+      rq.post('/api/auth/verify-password', { body: { password: PASSWORD }, headers });
 
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      expect((await check()).statusCode).not.toBe(429);
-    }
-
-    // A guessing loop on the password of a signed-in user is limited like a sign-in is
-    expect((await check()).statusCode).toBe(429);
+    expect((await check(bearer(up.headers['set-auth-token']))).statusCode).toBe(404);
+    expect((await check()).statusCode).toBe(404);
   });
 });
 
@@ -2256,6 +2251,56 @@ describe('end-users: the emails the engine sends', () => {
       1
     );
     expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(0);
+  });
+
+  it('asks the current address of a verified user first, the new one only once that is approved, and then ends the other sessions', async () => {
+    const { email, cookie } = await signedUp();
+
+    await strapi.db.query(USER_UID).update({ where: { email }, data: { emailVerified: true } });
+    clearSentEmails();
+
+    const changed = await rq.post('/api/auth/change-email', {
+      body: { newEmail: 'approved@example.com' },
+      headers: { ...FROM_FRONT_END, Cookie: cookie },
+    });
+
+    expect(changed.statusCode).toBe(200);
+    await emailsSent(1);
+    expect(sentEmails()).toHaveLength(1);
+    // Only the mailbox the user already owns is asked at first, so a stolen session cannot move
+    // the address to one of its own
+    expect(sentEmails()[0].to).toBe(email);
+
+    const approval = sentEmails()[0];
+
+    clearSentEmails();
+
+    // Opened from the mailbox, with no session
+    expect((await rq.get(linkOf(approval))).statusCode).toBe(302);
+    await emailsSent(1);
+    expect(sentEmails()[0].to).toBe('approved@example.com');
+    expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(1);
+
+    const proof = sentEmails()[0];
+
+    const proven = await rq.get(linkOf(proof));
+
+    expect(proven.statusCode).toBe(302);
+    expect(
+      await strapi.db.query(USER_UID).count({ where: { email: 'approved@example.com' } })
+    ).toBe(1);
+
+    // The session that asked for the change is gone; the one the link made is the only one left
+    const old = await rq.get('/api/auth/get-session', { headers: { cookie } });
+
+    expect(old.body).toBeNull();
+
+    const made = cookieOf(proven, 'strapi.session_token');
+
+    expect(made).toBeDefined();
+    expect(
+      (await rq.get('/api/auth/get-session', { headers: { cookie: made } })).body
+    ).not.toBeNull();
   });
 
   it('tells the old address, naming the masked new one, once a verified change completes', async () => {

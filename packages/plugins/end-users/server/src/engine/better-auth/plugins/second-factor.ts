@@ -14,7 +14,9 @@
  * - was made by a password sign-in that a trusted device let skip the challenge: the two-factor
  *   plugin's own after-hook has run by then and has left a session in place for a user with
  *   two-factor on only when the trusted-device cookie was valid (this plugin is installed after it)
- * - was made by a passkey sign-in, which is possession and the device's own check in one
+ * - was made by a passkey sign-in in which the authenticator verified the user (a fingerprint, a face,
+ *   a PIN: the flag in the signed authenticator data), which is possession and the device's own
+ *   check in one. A passkey that only proved possession still signs in, but the session is not marked
  * - replaces a session that had it: changing a password makes a new session for the caller
  *
  * Nothing a signed-in session does can earn the mark for itself. A code given while signed in (an
@@ -27,16 +29,30 @@
  * its way to the other. A user with two-factor on cannot register a passkey from a session that is
  * not marked, because a passkey sign-in is counted as both factors.
  *
+ * The emailed code is refused at the challenge for a user who has confirmed an authenticator: they
+ * answer it with the authenticator or a backup code. Otherwise the mailbox would be enough, since
+ * the mailbox also resets the password. A user who set up two-factor with the emailed code alone
+ * has the mailbox as their second factor, and keeps it.
+ *
+ * While two-factor is on, turning it off, setting it up again and making new backup codes need a
+ * session that passed it: the password alone (which a reset from the mailbox gives) is not enough.
+ *
  * Every other session is `false`, a session made by `createSession` included. The marker is written
  * right after the session exists and before the response leaves, so no client holds a token for a
  * session that is not marked yet. A write that fails fails the request: an unmarked session only
  * ever means a refusal later.
  */
-import { APIError, createAuthMiddleware, getAuthoritativeSessionFromCtx } from 'better-auth/api';
+import {
+  APIError,
+  createAuthMiddleware,
+  getAuthoritativeSessionFromCtx,
+  getSessionFromCtx,
+} from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
 import { PLUGIN_ID } from '../../../constants';
+import { isPlain } from '../../../utils/is-plain';
 import type settingsService from '../../../services/settings';
 import { clearAttempts, enrollmentKey, releaseAttempt, reserveAttempt } from '../lockout-counter';
 
@@ -63,6 +79,28 @@ const PASSKEY_REGISTRATION_PATHS = new Set([
   '/passkey/generate-register-options',
   '/passkey/verify-registration',
 ]);
+
+/** The emailed code, which a user with an authenticator cannot answer the challenge with */
+const OTP_PATHS = new Set(['/two-factor/send-otp', '/two-factor/verify-otp']);
+
+/** The two-factor plugin's challenge cookie */
+const TWO_FACTOR_COOKIE = 'two_factor';
+
+export const AUTHENTICATOR_REQUIRED_MESSAGE =
+  'Use your authenticator app or a backup code: the emailed code is not available for your account.';
+
+/** What changes a user's second factor, and so needs a session that passed it while it is on */
+const SECOND_FACTOR_CHANGE_PATHS = new Set([
+  '/two-factor/disable',
+  '/two-factor/enable',
+  '/two-factor/generate-backup-codes',
+]);
+
+export const CHANGE_NEEDS_SECOND_FACTOR_MESSAGE =
+  'Sign in again with your second factor before you change it.';
+
+/** The sessions Better Auth lists for the caller, one per device */
+const LIST_SESSIONS_PATH = '/list-sessions';
 
 export const PASSKEY_NEEDS_SECOND_FACTOR_MESSAGE =
   'Sign in again with your second factor before you add a passkey: a passkey counts as both factors.';
@@ -94,6 +132,34 @@ const settings = (strapi: Core.Strapi) =>
 
 /** The attempt counted for a request that confirms an enrollment, from its before-hook to its after-hook. */
 const enrollmentAttempts = new WeakMap<object, string>();
+
+/** The authenticator data's flags: the bit worth 4 says the authenticator verified the user */
+const USER_VERIFIED_WEIGHT = 4;
+/** The flags come after the 32 bytes of the relying party id hash */
+const FLAGS_OFFSET = 32;
+
+/**
+ * Whether the authenticator verified the user in this passkey sign-in, as the browser's response
+ * reports it. The plugin verifies the signature over this very data before the session exists, and
+ * asks for no more than that (it never requires user verification), so the flag is read here.
+ * Anything that does not parse as authenticator data is not verified.
+ */
+const userVerified = (ctx: HookContext): boolean => {
+  const { body } = ctx as { body?: unknown };
+  const outer = isPlain(body) ? body.response : undefined;
+  const inner = isPlain(outer) ? outer.response : undefined;
+  const data = isPlain(inner) ? inner.authenticatorData : undefined;
+
+  if (typeof data !== 'string') {
+    return false;
+  }
+
+  const bytes = Buffer.from(data, 'base64url');
+
+  return (
+    bytes.length > FLAGS_OFFSET && Math.floor(bytes[FLAGS_OFFSET] / USER_VERIFIED_WEIGHT) % 2 === 1
+  );
+};
 
 const failed = (ctx: HookContext) => ctx.context.returned instanceof APIError;
 
@@ -135,7 +201,7 @@ const markedSession = (ctx: HookContext): SessionRef | null => {
   }
 
   if (path === PASSKEY_SIGN_IN_PATH) {
-    return createdSession(ctx);
+    return userVerified(ctx) ? createdSession(ctx) : null;
   }
 
   if (PASSWORD_SIGN_IN_PATHS.has(path)) {
@@ -204,6 +270,60 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
         }),
       },
       {
+        // The emailed code at the challenge, for a user who confirmed an authenticator
+        matcher: (context) => OTP_PATHS.has(context.path as string),
+        handler: createAuthMiddleware(async (ctx) => {
+          // A request with a session is not the challenge: it is a signed-in user setting up
+          // two-factor, and the mark never comes from it
+          if (await getSessionFromCtx(ctx).catch(() => null)) {
+            return;
+          }
+
+          const cookie = ctx.context.createAuthCookie(TWO_FACTOR_COOKIE);
+          const challenge = await ctx.getSignedCookie(cookie.name, ctx.context.secret);
+          const pending = challenge
+            ? await ctx.context.internalAdapter.findVerificationValue(challenge)
+            : null;
+
+          // No challenge: Better Auth refuses the request itself
+          if (!pending?.value) {
+            return;
+          }
+
+          const row = (await ctx.context.adapter.findOne({
+            model: 'twoFactor',
+            where: [{ field: 'userId', value: pending.value }],
+          })) as { verified?: boolean | null } | null;
+
+          if (row?.verified === true) {
+            throw new APIError('FORBIDDEN', {
+              code: 'TWO_FACTOR_REQUIRED',
+              message: AUTHENTICATOR_REQUIRED_MESSAGE,
+            });
+          }
+        }),
+      },
+      {
+        // Changing the second factor while it is on, from a session that never passed it
+        matcher: (context) => SECOND_FACTOR_CHANGE_PATHS.has(context.path as string),
+        handler: createAuthMiddleware(async (ctx) => {
+          const current = (await getAuthoritativeSessionFromCtx(ctx)) as SessionRef | null;
+
+          // Better Auth refuses a request with no session itself, and a user who has not turned
+          // two-factor on is setting it up
+          if (!current || current.user.twoFactorEnabled !== true) {
+            return;
+          }
+
+          if (current.session.twoFactorVerified !== true) {
+            throw new APIError('FORBIDDEN', {
+              code: 'TWO_FACTOR_REQUIRED',
+              message: CHANGE_NEEDS_SECOND_FACTOR_MESSAGE,
+            });
+          }
+        }),
+      },
+      {
         matcher: (context) => PASSKEY_REGISTRATION_PATHS.has(context.path as string),
         handler: createAuthMiddleware(async (ctx) => {
           // Read from the store, not from a cached cookie: the mark is what is being asked about
@@ -244,6 +364,24 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
           });
 
           target.session.twoFactorVerified = true;
+        }),
+      },
+      {
+        // A session's token is the credential of that session: the list names each session by its
+        // id and device, and a stolen token does not give out the others
+        matcher: (context) => context.path === LIST_SESSIONS_PATH,
+        handler: createAuthMiddleware(async (ctx) => {
+          const { returned } = ctx.context;
+
+          if (!Array.isArray(returned)) {
+            return;
+          }
+
+          return ctx.json(
+            returned.map((session: Record<string, unknown>) =>
+              Object.fromEntries(Object.entries(session).filter(([field]) => field !== 'token'))
+            )
+          );
         }),
       },
       {

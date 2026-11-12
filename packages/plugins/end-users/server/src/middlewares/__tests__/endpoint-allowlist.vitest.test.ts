@@ -100,6 +100,26 @@ describe('endpointAllowlist', () => {
     });
   });
 
+  describe('answers 404 to the password check, however the path is spelled', () => {
+    it.each([
+      '/api/auth/verify-password',
+      '/api/auth/verify-password/',
+      '/api/auth/verify-password?x=1',
+      '/api/auth/Verify-Password',
+      '/api/auth/./verify-password',
+      '/api/auth/x/../verify-password',
+      '/api/auth/verify%2Dpassword',
+      '/api/auth/%76erify-password',
+    ])('%s', async (target) => {
+      expect(await run(target)).toEqual({ passed: false, notFound: true });
+    });
+
+    it('while the endpoints that merely sound like it stay open', async () => {
+      expect(await run('/api/auth/change-password')).toEqual({ passed: true, notFound: false });
+      expect(await run('/api/auth/x/verify-password')).toEqual({ passed: true, notFound: false });
+    });
+  });
+
   it('answers 404 to a path outside the base path, which Better Auth would not serve either', async () => {
     expect(await run('/api/auth')).toMatchObject({ passed: false });
     expect(await run('/api/other')).toMatchObject({ passed: false });
