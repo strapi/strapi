@@ -156,10 +156,43 @@ const isSnapshotConflict = (error: unknown): boolean =>
  * hash, a provider's tokens), and Better Auth and Strapi log the error. What goes on has the
  * database's error code and nothing else: no query text, no bindings, no `cause`.
  */
-const isDatabaseError = (error: unknown): boolean =>
-  typeof error === 'object' &&
-  error !== null &&
-  ('sql' in error || 'sqlMessage' in error || 'code' in error);
+/** Strapi's database errors (`DatabaseError` and what extends it), told by name: the class is not imported. */
+const isStrapiDatabaseError = (error: object): boolean => {
+  for (let proto = Object.getPrototypeOf(error); proto; proto = Object.getPrototypeOf(proto)) {
+    if (proto.constructor?.name === 'DatabaseError') {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const isDatabaseError = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  // Strapi's own database errors (a not-null or savepoint failure, an invalid value)
+  if (isStrapiDatabaseError(error)) {
+    return true;
+  }
+
+  // What knex raises from the driver: MySQL's error carries `sqlMessage`, PostgreSQL's `severity`
+  // and `routine`, SQLite's a `SQLITE_*` code, and knex adds the `sql` it ran to the ones it wraps.
+  // A bare `code` is not enough: a Node system error or an error a middleware throws has one too,
+  // and its message is what whoever debugs it needs.
+  if ('sql' in error || 'sqlMessage' in error) {
+    return true;
+  }
+
+  const { code } = error as { code?: unknown };
+
+  return (
+    ('errno' in error && typeof code === 'string' && /^(ER_|SQLITE_)/.test(code)) ||
+    ('severity' in error && 'routine' in error) ||
+    (typeof code === 'string' && /^SQLITE_[A-Z_]+$/.test(code))
+  );
+};
 
 const withoutQuery = (operation: string, error: unknown): Error => {
   const { code } = error as { code?: unknown };

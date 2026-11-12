@@ -47,6 +47,10 @@ const anyAttribute = new Proxy(
   }
 );
 
+// Shaped like `@strapi/database`'s errors, which the adapter tells apart by class name
+class DatabaseError extends Error {}
+class NotNullError extends DatabaseError {}
+
 describe('strapiAdapter', () => {
   let documents: {
     create: ReturnType<typeof vi.fn>;
@@ -1103,6 +1107,51 @@ describe('strapiAdapter', () => {
       expect((error as { code?: string }).code).toBe('SQLITE_CONSTRAINT');
       expect((error as { sql?: string }).sql).toBeUndefined();
       expect((error as { cause?: unknown }).cause).toBeUndefined();
+    });
+
+    it.each([
+      [
+        'a MySQL error',
+        Object.assign(new Error('Unknown column'), {
+          code: 'ER_BAD_FIELD_ERROR',
+          errno: 1054,
+          sqlMessage: 'Unknown column',
+        }),
+      ],
+      [
+        'a PostgreSQL error',
+        Object.assign(new Error('duplicate key'), {
+          code: '23505',
+          severity: 'ERROR',
+          routine: '_bt_check_unique',
+        }),
+      ],
+      ['a SQLite error', Object.assign(new Error('constraint'), { code: 'SQLITE_CONSTRAINT' })],
+      ['a Strapi database error', new NotNullError('Column cannot be null')],
+    ])('treats %s as a database error', async (_name, thrown) => {
+      documents.create.mockRejectedValue(thrown);
+
+      const error = await adapter
+        .create({ model: 'session', data: { token: 'x' } })
+        .catch((caught: Error) => caught);
+
+      expect((error as Error).message).toMatch(/^The database refused/);
+    });
+
+    it('rethrows an error that only has a code, as it came', async () => {
+      const system = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:1'), {
+        code: 'ECONNREFUSED',
+      });
+      const middleware = Object.assign(new Error('Not allowed here'), { code: 'POLICY_DENIED' });
+
+      for (const thrown of [system, middleware]) {
+        documents.create.mockRejectedValue(thrown);
+
+        // eslint-disable-next-line no-await-in-loop
+        await expect(adapter.create({ model: 'session', data: { token: 'x' } })).rejects.toBe(
+          thrown
+        );
+      }
     });
 
     it('does the same on the other write paths', async () => {
