@@ -157,8 +157,13 @@ const swap = async (strapi: Core.Strapi, current: string, next: unknown): Promis
 /**
  * Takes the migration for `by` for 15 minutes. Wins when the claim is empty, expired or already
  * `by`'s, and then sets `until` to now plus 15 minutes; a live claim of someone else is refused.
- * With no record yet it inserts one that holds the claim. Two starts that race for the same
- * moment cannot both win.
+ * With no record yet it inserts one that holds the claim.
+ *
+ * Against a record that exists, two starts that race for the same moment cannot both win: only one
+ * swap lands. With no record yet there is nothing to swap, so the settle delay (`CLAIM_SETTLE_MS`)
+ * decides: racing inserts are very unlikely to both win, but a start whose insert stalls for longer
+ * than the delay between taking its row id and committing can still win next to the other. The
+ * delay makes that rare; it does not rule it out.
  */
 export const claimMigration = async (
   strapi: Core.Strapi,
