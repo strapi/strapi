@@ -189,7 +189,7 @@ export const contentTypeShortcut: Filters<'api::article.article'>[] = [
   { author: { $eq: 1 } },
   { author: { $ne: 1 } },
   { author: { $in: [1, 2] } },
-  { author: { $notIn: ['a'] } },
+  { author: { $notIn: [3] } },
   { author: { $between: [1, 5] } },
   { author: { $null: true } },
   { author: { $notNull: true } },
@@ -269,9 +269,16 @@ articles.findMany({
   },
 });
 
-// Known gap, as on develop: `{ author: { $not: { name: 'a' } } }` type-checks, because `$not` is part
-// of the author's filter type, but the database throws. It reads a lone `$not` on a relation as an
-// operator on the id (`id: { $not: { name: 'a' } }`), and `name` is not an operator.
+// Known gaps, as on develop:
+// - `{ author: { $not: { name: 'a' } } }` type-checks, because `$not` is part of the author's
+//   filter type, but the database throws. It reads a lone `$not` on a relation as an operator on
+//   the id (`id: { $not: { name: 'a' } }`), and `name` is not an operator.
+// - A group or logical operator next to an attribute type-checks, but the database throws: in
+//   `{ author: { $or: [{ name: 'a' }], name: 'b' } }`, it reads `$or` as an operator mixed with
+//   other keys.
+// - The id operand accepts a string, because the id type is `string | number`. A documentId there
+//   (`{ author: { $in: [documentId] } }`) matches nothing, or fails on Postgres: filter by
+//   `{ author: { documentId: { $in: [documentId] } } }` instead.
 
 // Not rejected in a direct call: `{ author: { $eq: 1, name: 'a' } }`. The method infers its params,
 // so TypeScript does not check excess properties, and the object matches the author's filter type.

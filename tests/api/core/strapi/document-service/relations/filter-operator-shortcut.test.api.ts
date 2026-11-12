@@ -175,6 +175,13 @@ describe('Document Service relation filters with one operator', () => {
     );
   });
 
+  test('throws for a group operator next to attribute keys', async () => {
+    // Known gap of the types: `$or` and `name` are both part of the target's filter type
+    await expect(findTitles({ tag: { $or: [{ name: 't1' }], name: 't2' } })).rejects.toThrow(
+      'Operator and non-operator keys cannot be mixed in a relation where clause'
+    );
+  });
+
   test('throws for two operators', async () => {
     await expect(findTitles({ tag: { $gt: 1, $lt: 5 } })).rejects.toThrow(
       'Only one operator key is allowed in a relation where clause'
