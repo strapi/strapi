@@ -49,6 +49,7 @@ describe('end-users plugin shape', () => {
       'settings',
       'user',
       'user-security',
+      'user-write-guard',
     ]);
   });
 

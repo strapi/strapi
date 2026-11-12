@@ -12,6 +12,7 @@ import { readCompatConfig } from './compat/config';
 import { registerCompatGraphql } from './compat/graphql/compat-schema';
 import { applyGraphqlTypeNames } from './compat/graphql/names';
 import { PERMISSION_UID, PLUGIN_ID, ROLE_UID, USER_UID } from './constants';
+import { registerUserWriteGuard } from './controllers/admin/user-write-guard';
 import { registerGeneratedContentTypes } from './content-types/register-generated';
 import { assignDefaultRoleMiddleware } from './document-middlewares/assign-default-role';
 import { cascadeUserDeleteMiddleware } from './document-middlewares/cascade-user-delete';
@@ -172,6 +173,10 @@ const register = ({ strapi }: { strapi: Core.Strapi }): Promise<void> => {
   // Manager writes through the Document Service, which runs no Content API validator, so
   // administrators keep them
   strapi.validators.add('content-api.input', engineOwnedUserFieldsValidator);
+
+  // The Content Manager does the same by another road: an administrator's write of those fields
+  // needs the Security panel's permission there too
+  registerUserWriteGuard(strapi);
 
   return assertConnectCallbacks(strapi, engine.isTrustedOrigin).then(() =>
     registerConditions(strapi)

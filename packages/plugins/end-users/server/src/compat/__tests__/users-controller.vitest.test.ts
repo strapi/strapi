@@ -383,6 +383,25 @@ describe('users in the users-permissions shape', () => {
 
       expect(me.body).toHaveProperty('blocked', false);
     });
+
+    it("is shown on the caller's own record read by id, and not on another user's", async () => {
+      const { strapi, ctx, sanitize, service } = setup();
+
+      sanitize.output.mockImplementation(async () => ({}));
+      service.findOne.mockImplementation(async (documentId: string) =>
+        stored(documentId === 'doc-a' ? 7 : 8, documentId)
+      );
+
+      const state = { auth: { strategy: { name: 'end-users' } }, user: { documentId: 'doc-a' } };
+      const own = ctx({ params: { id: 'doc-a' }, state });
+      const other = ctx({ params: { id: 'doc-b' }, state });
+
+      await createUsersCompat(strapi).findOne(own);
+      await createUsersCompat(strapi).findOne(other);
+
+      expect(own.body).toHaveProperty('blocked', false);
+      expect(other.body).not.toHaveProperty('blocked');
+    });
   });
 
   it('sets the name of a new user only from what the field rules of the caller let through', async () => {

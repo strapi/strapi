@@ -63,6 +63,7 @@ const setup = ({
   const conditionRegister = vi.fn<(definition: { name: string }) => Promise<void>>(async () => {});
   // Core's registry of Content API validators (`strapi.validators`)
   const validatorsAdd = vi.fn();
+  const configSet = vi.fn();
   // Core's Koa server, and the registry of extra Content API query params
   const serverUse = vi.fn();
   const addQueryParams = vi.fn();
@@ -83,7 +84,7 @@ const setup = ({
     server: { use: serverUse },
     validators: { add: validatorsAdd },
     plugin,
-    config: { get: vi.fn() },
+    config: { get: vi.fn(), set: configSet },
     // The start control registers its `beforeSync` handler on a hook
     hook: vi.fn(() => ({ register: vi.fn() })),
     documents: { use },
@@ -111,6 +112,7 @@ const setup = ({
     templateRegister,
     conditionRegister,
     validatorsAdd,
+    configSet,
     serverUse,
     addQueryParams,
     shadowCRUD,
@@ -333,7 +335,7 @@ describe('register', () => {
       return { get: () => ({ ...engine, setPassword, revokeSessions }), register: vi.fn() };
     }) as never);
     Object.assign(strapi, {
-      config: { get: (_key: string, fallback: unknown) => fallback },
+      config: { get: (_key: string, fallback: unknown) => fallback, set: vi.fn() },
       documents: Object.assign(() => ({ create: vi.fn(async () => ({})) }), { use }),
       db: Object.assign((strapi as unknown as { db: object }).db, {
         query: () => ({ findOne: async () => null }),
@@ -405,6 +407,21 @@ describe('register', () => {
     expect(validatorsAdd).toHaveBeenCalledWith('content-api.input', engineOwnedUserFieldsValidator);
   });
 
+  it("points the Content Manager's writes of the user at the Security panel guard", () => {
+    const { strapi, configSet } = setup();
+
+    register({ strapi });
+
+    expect(configSet).toHaveBeenCalledWith(
+      'plugin::end-users.layout.user.actions.update',
+      'user-write-guard.update'
+    );
+    expect(configSet).toHaveBeenCalledWith(
+      'plugin::end-users.layout.user.actions.create',
+      'user-write-guard.create'
+    );
+  });
+
   describe('the Content API conditions', () => {
     let dir: string;
 
@@ -466,6 +483,7 @@ describe('register', () => {
           config: {
             get: (key: string) =>
               key === 'plugin::end-users.compat.connect.callbacks' ? callbacks : undefined,
+            set: vi.fn(),
           },
         });
 
@@ -562,6 +580,8 @@ describe('the development secret', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  const SECRET_KEY = 'plugin::end-users.secret';
+
   /** The app of a project that has no secret: `config.set` keeps it, `fs.appendFile` writes `.env` */
   const withoutSecret = (secret?: string) => {
     const { strapi, ...rest } = setup();
@@ -586,7 +606,7 @@ describe('the development secret', () => {
 
     register({ strapi });
 
-    const [key, secret] = set.mock.calls[0] as [string, string];
+    const [key, secret] = set.mock.calls.find(([name]) => name === SECRET_KEY) as [string, string];
 
     expect(key).toBe('plugin::end-users.secret');
     expect(secret.length).toBeGreaterThanOrEqual(32);
@@ -602,7 +622,7 @@ describe('the development secret', () => {
 
     register({ strapi: again.strapi });
 
-    expect(again.set).not.toHaveBeenCalled();
+    expect(again.set).not.toHaveBeenCalledWith(SECRET_KEY, expect.anything());
     expect(again.appendFile).not.toHaveBeenCalled();
     expect(readFileSync(join(dir, '.env'), 'utf8')).toBe(`END_USERS_SECRET=${secret}\n`);
   });
@@ -639,7 +659,7 @@ describe('the development secret', () => {
 
       register({ strapi });
 
-      expect(set, env).not.toHaveBeenCalled();
+      expect(set, env).not.toHaveBeenCalledWith(SECRET_KEY, expect.anything());
       expect(appendFile, env).not.toHaveBeenCalled();
     }
   });

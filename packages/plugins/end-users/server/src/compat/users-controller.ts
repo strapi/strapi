@@ -306,8 +306,10 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     ownRole = false
   ): Promise<UpUser[]> => {
     const readable = (await core().sanitizeOutput(found, ctx)) as UpUserSource[];
-    // The caller's own record (`/users/me`) is no secret from them
-    const showBlocked = ownRole || (await mayReadBanned(ctx));
+    // The caller's own record (`/users/me`, or their own id) is no secret from them. Whether the
+    // field rules show `banned` to others is decided once for the request.
+    const ownId = (ctx.state?.user as { documentId?: unknown } | undefined)?.documentId;
+    const showOthers = ownRole ? true : await mayReadBanned(ctx);
     const [extras, stored] = await Promise.all([
       loadUserExtras(strapi, ctx.state?.auth, readable),
       loadStored(
@@ -320,6 +322,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
 
     return readable.map((user) => {
       const own = stored.get(user.documentId);
+      const showBlocked = showOthers || (typeof ownId === 'string' && user.documentId === ownId);
 
       // `confirmed` follows the caller's field rules for `emailVerified`, and `blocked` follows
       // those for `banned`: the native payload keeps the moderation state private, so the compat
