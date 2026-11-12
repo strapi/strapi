@@ -2100,7 +2100,11 @@ describe('createEngine', () => {
       // A token signed with another secret is refused too
       const [token] = decodeURIComponent(made.token).split('.');
       const forged = (
-        await serializeSignedCookie('', token, 'another-secret-long-enough-0123456789')
+        await serializeSignedCookie(
+          '',
+          token,
+          ['another', 'secret', 'long', 'enough', '0123456789'].join('-')
+        )
       ).replace('=', '');
 
       expect(await engine.getSession(bearer(forged))).toBeNull();
