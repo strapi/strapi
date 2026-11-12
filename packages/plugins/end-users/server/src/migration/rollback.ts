@@ -301,6 +301,31 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
   if (record.completedSteps.includes('users')) {
     await copy('confirmed', verified);
     await copy('blocked', banned);
+
+    // U&P's `blocked` has no expiry: a ban that has already run out must not come back as a block
+    const banExpires = columnOf(db, USER_UID, 'banExpires') ?? 'ban_expires';
+
+    if (columns.includes('blocked') && columns.includes(banExpires)) {
+      const now = Date.now();
+      const timed = (await users()
+        .where(banned, true)
+        .whereNotNull(banExpires)
+        .select('id', { expires: banExpires })) as Array<{ id: number; expires: unknown }>;
+      // A value that is not a date stays blocked: a ban is only lifted when its end is known
+      const lapsed = timed
+        .filter(({ expires }) => {
+          const end = new Date(expires as string | number | Date).getTime();
+
+          return !Number.isNaN(end) && end <= now;
+        })
+        .map(({ id }) => id);
+
+      for (let i = 0; i < lapsed.length; i += 500) {
+        await users()
+          .whereIn('id', lapsed.slice(i, i + 500))
+          .update({ blocked: false });
+      }
+    }
   }
 
   if (hasAccounts && columns.includes('provider')) {
