@@ -2037,7 +2037,9 @@ describe('end-users: the Content API rules, over REST', () => {
 
       expect(res.statusCode).toBe(201);
       expect(await storedTitle(res.body.data.documentId)).toBe('ok-1');
-      expect(created).toHaveBeenCalled();
+
+      // The event goes out after the commit, which the answer does not wait for
+      await until(() => created.mock.calls.length > 0, { what: 'the create event' });
     });
 
     it('sends no webhook for a refused create, and one for a create that goes through', async () => {
