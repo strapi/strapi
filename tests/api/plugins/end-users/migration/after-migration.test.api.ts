@@ -203,7 +203,7 @@ describe('end-users compat: every must-keep behavior on a migrated database', ()
     });
   });
 
-  it('keeps numeric ids and documentIds, and derives confirmed, provider and the caller`s own blocked from the migrated data', async () => {
+  it('keeps numeric ids and documentIds, and derives confirmed, blocked and provider from the migrated data', async () => {
     const res = await rq.get('/api/users', { headers: bearer(await aliceToken()) });
 
     expect(res.status).toBe(200);
