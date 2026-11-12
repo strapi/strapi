@@ -16,6 +16,19 @@ const articleModel = {
   },
 };
 
+const shelfUid = 'api::fields-query-shelf.fields-query-shelf';
+const shelfModel = {
+  kind: 'collectionType',
+  singularName: 'fields-query-shelf',
+  pluralName: 'fields-query-shelves',
+  displayName: 'Fields query shelf',
+  draftAndPublish: false,
+  attributes: {
+    name: { type: 'string' },
+    articles: { type: 'relation', relation: 'oneToMany', target: articleUid },
+  },
+};
+
 const homepageUid = 'api::fields-query-homepage.fields-query-homepage';
 const homepageModel = {
   kind: 'singleType',
@@ -44,7 +57,7 @@ describe('Admin Permissions - fields query parameter', () => {
   let restrictedUser;
 
   beforeAll(async () => {
-    await builder.addContentTypes([articleModel, homepageModel]).build();
+    await builder.addContentTypes([articleModel, shelfModel, homepageModel]).build();
 
     strapi = await createStrapiInstance();
     utils = createUtils(strapi);
@@ -66,6 +79,11 @@ describe('Admin Permissions - fields query parameter', () => {
         action: 'plugin::content-manager.explorer.read',
         subject: articleUid,
         properties: { fields: ['title'] },
+      },
+      {
+        action: 'plugin::content-manager.explorer.read',
+        subject: shelfUid,
+        properties: { fields: ['name', 'articles'] },
       },
       {
         action: 'plugin::content-manager.explorer.read',
@@ -110,6 +128,28 @@ describe('Admin Permissions - fields query parameter', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0].title).toBe('Title');
+    expect(res.body.results[0].secret).toBeUndefined();
+  });
+
+  test('a relation search returns a field the role can read when fields names it', async () => {
+    const res = await restrictedRq({
+      method: 'GET',
+      url: `/content-manager/relations/${shelfUid}/articles?fields[0]=title`,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.results).toHaveLength(1);
+    expect(res.body.results[0].title).toBe('Title');
+  });
+
+  test('a relation search drops empty fields entries and a field the role cannot read', async () => {
+    const res = await restrictedRq({
+      method: 'GET',
+      url: `/content-manager/relations/${shelfUid}/articles?fields[0]&fields[1]=secret`,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0].secret).toBeUndefined();
   });
 

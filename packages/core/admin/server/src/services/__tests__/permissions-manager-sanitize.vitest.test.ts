@@ -84,6 +84,7 @@ const articleModel = {
     content: { type: 'text' },
     createdBy: { type: 'relation', relation: 'oneToOne', target: 'admin::user' },
     updatedBy: { type: 'relation', relation: 'oneToOne', target: 'admin::user' },
+    related: { type: 'relation', relation: 'oneToOne', target: 'api::article.article' },
   },
   config: {
     attributes: {},
@@ -185,6 +186,41 @@ describe('Permissions Manager - Sanitize', () => {
       );
 
       expect(result.fields).toEqual(['title']);
+    });
+
+    it('drops null entries before removing a field the role cannot read', async () => {
+      const result = await restrictedSanitizeHelpers.sanitizeQuery(
+        { fields: [null, 'content', 'title'] },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.fields).toEqual(['title']);
+    });
+
+    it('drops every non-string entry before removing a field the role cannot read', async () => {
+      const result = await restrictedSanitizeHelpers.sanitizeQuery(
+        { fields: [undefined, 1, {}, ['content'], 'content', 'title'] },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.fields).toEqual(['title']);
+    });
+
+    it('drops null entries inside populate before removing a field the role cannot read', async () => {
+      const relatedSanitizeHelpers = createSanitizeHelpers({
+        action: 'read',
+        model: articleModel.uid,
+        ability: defineAbility((can: any) =>
+          can('read', 'api::article.article', ['title', 'related'])
+        ),
+      });
+
+      const result: any = await relatedSanitizeHelpers.sanitizeQuery(
+        { populate: { related: { fields: [null, 'content', 'title'] } } },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.populate.related.fields).toEqual(['title']);
     });
 
     it('returns an empty array when every requested field is removed', async () => {
