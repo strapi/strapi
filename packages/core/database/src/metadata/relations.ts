@@ -72,6 +72,10 @@ export const hasInverseOrderColumn = (attribute: RelationalAttribute) =>
  * An inverse (mappedBy) side stores nothing itself: it reads the join column or join table that its
  * owner side assigns through `inversedBy`. With no owner pointing back, writes to it are dropped and
  * reads return nothing, so fail instead of loading a dead relation.
+ *
+ * Out of scope: the check only reads the owner's `target` and `inversedBy`, not whether the owner
+ * builds storage. An owner that builds no join table or join column (for example a manyToMany owner
+ * with `useJoinTable: false`) still passes, as before, and its inverse side still reads nothing.
  */
 const assertInverseSideHasOwner = (
   attributeName: string,
@@ -116,7 +120,7 @@ const assertInverseSideHasOwner = (
  *     set inverse attribute joinCol or joinTable info correctly
  * else
  *   this property must be set by the owner side
- *   verify the owner side is valid // should be done before or at the same time ?
+ *   assert an owner on the target points back with inversedBy
  */
 const createOneToOne = (
   attributeName: string,
@@ -150,7 +154,7 @@ const createOneToOne = (
  *   create join table
  * if bidirectional then
  *   cannot be owning side
- *   do nothing
+ *   assert an owner on the target points back with inversedBy
  */
 const createOneToMany = (
   attributeName: string,
@@ -222,7 +226,7 @@ const createManyToOne = (
  *     if with join table then
  *       create join table
  *   else
- *     do nothing
+ *     assert an owner on the target points back with inversedBy
  */
 const createManyToMany = (
   attributeName: string,
