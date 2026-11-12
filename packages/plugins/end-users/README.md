@@ -100,8 +100,9 @@ cannot connect or set a morph relation (it can still disconnect one), because th
 checked against the role's conditions.
 
 **A secret is required everywhere but development.** Outside `development`, `NODE_ENV=test` included, the plugin
-refuses to start without a real `END_USERS_SECRET` (or `secret` in its config); a published placeholder such as the one
-in an `.env.example` does not count. In development it generates one and stores it in `.env`.
+refuses to start without a real `END_USERS_SECRET` (or `secret` in its config); a short one, and a published
+placeholder such as the one in an `.env.example`, do not count. In development it generates one and stores it in
+`.env`.
 
 **After an upgrade, users of a role that requires two-factor sign in once more.** Sessions that were open before the
 upgrade carry no record of a second factor, so a user whose role requires two-factor is asked to sign in again, and
@@ -135,11 +136,48 @@ the others. Use it only when every subdomain is yours and trusted.
 upload routes (`plugin::upload`) are granted whole or not at all, so a role that may upload may reach every file its
 route permission covers, whatever conditions its other rows have.
 
-**An administrator who can update providers decides who can sign in.** On the Providers page an administrator can add
-an identity provider and mark it as trusted for linking, which lets an account at that provider attach to an existing
-user with the same email address. The discovery URL of an OpenID provider is fetched by the server when the provider is
-saved and when it is rebuilt, so the address an administrator enters is requested from your network. Give the
-permission to update providers only to administrators you trust with both.
+**Two administrator permissions are account-takeover grade, and are separate from the rest.** The role editor lists
+them under Plugins, and a Super Admin has them by default. Give each only to administrators you would trust with any
+end user's account.
+
+- _Manage the Security panel of end users_ (`security.manage`) is needed, besides the Content Manager's update
+  permission on end users, to reset a user's two-factor, unlink a sign-in method, send a password reset or a
+  verification email, sign a user out and ban or unban. The Content Manager's update permission alone is a routine
+  editor's, so it only lets an administrator look at the panel. An administrator who can also edit the `email` and
+  `emailVerified` fields of end users can reach the same ends another way, so keep those fields out of such roles.
+- _Manage custom providers and account linking_ (`providers.custom`) is needed to add or edit a custom OpenID Connect
+  provider and to change "Trust for account linking". A provider an administrator points at an identity provider of
+  their own, or marks as trusted, lets an account at that provider attach to an existing user with the same email
+  address. Updating a provider's client id, secret or enabled switch needs only the permission to update providers.
+  That permission still lets the server request an address the administrator enters: the discovery URL of an OpenID
+  provider is fetched when the provider is saved and when it is rebuilt, from your network.
+
+When an administrator changes a user's email address in the Content Manager, the user is signed out everywhere and the
+plugin emits `end-users.user.email-change` with the administrator's id and the user's `documentId`, as it does for the
+Security panel's changes.
+
+**The account lockout can be used to lock someone out.** After repeated wrong passwords an account is locked for the
+lockout duration, whoever sent them, so anyone who knows an address can keep that account locked by repeating the
+attempts. The owner gets back in when the lock ends, or by resetting the password; an administrator can unlock the
+account from the Security panel.
+
+**For a user with only emailed codes, the mailbox is the second factor.** If a user has no authenticator app and no
+passkey, the code sent by email is their second step, so whoever can read their mail can complete it. A role that
+requires two-factor is only as strong as the mailboxes of its users.
+
+**A passkey counts as a second factor only with user verification.** A passkey used without the authenticator checking
+the person (a PIN, a fingerprint) proves only that the device was present, so it does not satisfy a role that requires
+two-factor.
+
+**After an upgrade, clients holding a session token from before it sign in again.** A token a client kept (in a
+cookie, or as a Bearer token) from before the upgrade is no longer accepted, and its user signs in once more.
+
+**Tokens from identity providers are encrypted at rest.** The access, refresh and ID tokens a provider returns are
+stored encrypted, as the provider client secrets are, and are not readable from a copy of the database alone.
+
+**A data transfer copies sessions and secrets on purpose.** `strapi transfer`, export and import move the plugin's
+tables whole, sessions, accounts and stored provider secrets included, because a transfer syncs one environment to
+another exactly. Transfer only between environments you would trust with each other's users.
 
 ## Moving a project from Users & Permissions
 

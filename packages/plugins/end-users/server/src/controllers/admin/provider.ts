@@ -1,6 +1,8 @@
 import type Koa from 'koa';
+import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
+import { PROVIDER_ACTIONS } from '../../admin-actions';
 import { PLUGIN_ID } from '../../constants';
 import type providerService from '../../services/provider';
 
@@ -26,7 +28,22 @@ const providerController = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async update(ctx: Koa.Context) {
-      ctx.body = { data: await providers().update(ctx.params.id, ctx.request.body) };
+      const { id } = ctx.params;
+      const body = ctx.request.body;
+
+      // `providers.update` is for a provider's plain settings. A custom provider, and "trust for
+      // linking", can make an identity provider the admin controls sign in as an end user, so they
+      // need `providers.custom`. Checked here because the route cannot know what a body changes.
+      if (
+        (await providers().needsCustomAccess(id, body)) &&
+        !ctx.state.userAbility?.can(PROVIDER_ACTIONS.custom)
+      ) {
+        throw new errors.ForbiddenError(
+          'Editing a custom provider or changing trust for linking needs the permission to manage custom providers and account linking'
+        );
+      }
+
+      ctx.body = { data: await providers().update(id, body) };
     },
 
     async delete(ctx: Koa.Context) {

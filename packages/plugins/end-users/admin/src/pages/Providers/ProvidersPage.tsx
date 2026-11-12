@@ -46,7 +46,7 @@ const ProvidersContent = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const {
     isLoading: isLoadingPermissions,
-    allowedActions: { canUpdate },
+    allowedActions: { canUpdate, canCustom },
   } = useRBAC(PERMISSIONS.providers);
   const { data: providers, isLoading, error } = useGetProvidersQuery();
   const [deleteProvider] = useDeleteProviderMutation();
@@ -270,10 +270,16 @@ const ProvidersContent = () => {
       <ProviderPicker
         open={isPicking}
         available={available}
+        canAddCustom={canCustom}
         onClose={() => setIsPicking(false)}
         onPick={handlePick}
       />
-      <ProviderModal id={openId} canUpdate={canUpdate} onClose={() => setOpenId(null)} />
+      <ProviderModal
+        id={openId}
+        canUpdate={canUpdate}
+        canCustom={canCustom}
+        onClose={() => setOpenId(null)}
+      />
       <AddOidcModal
         open={isAddingOidc}
         onClose={() => setIsAddingOidc(false)}

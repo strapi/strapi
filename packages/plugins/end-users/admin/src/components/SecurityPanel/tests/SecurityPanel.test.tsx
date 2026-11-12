@@ -12,6 +12,7 @@ const USER = 'plugin::end-users.user';
 
 const UPDATE = { action: 'plugin::content-manager.explorer.update', subject: USER };
 const READ = { action: 'plugin::content-manager.explorer.read', subject: USER };
+const MANAGE = { action: 'plugin::end-users.security.manage', subject: null };
 
 const SECURITY: UserSecurity = {
   accounts: [
@@ -86,7 +87,7 @@ const Panel = (props: SecurityPanelProps) => {
 const SAVED = { model: USER, documentId: 'u1', document: { documentId: 'u1' } };
 
 const renderPanel = (props: SecurityPanelProps = SAVED) =>
-  renderAdmin(<Panel {...props} />, { providerOptions: { permissions: [READ, UPDATE] } });
+  renderAdmin(<Panel {...props} />, { providerOptions: { permissions: [READ, UPDATE, MANAGE] } });
 
 describe('SecurityPanel', () => {
   it('renders only for the end-user type', async () => {
@@ -346,6 +347,31 @@ describe('SecurityPanel', () => {
 
     await waitFor(() => expect(button).toBeEnabled());
     expect(sent).toEqual([path]);
+  });
+
+  it('hides actions without the security.manage action, even with explorer.update', async () => {
+    serve();
+    renderAdmin(<Panel {...SAVED} />, { providerOptions: { permissions: [READ, UPDATE] } });
+
+    expect(await screen.findByText('2 sessions')).toBeInTheDocument();
+    expect(
+      screen.getByText(/needs the permission to manage the Security panel of end users/)
+    ).toBeInTheDocument();
+
+    // It can look: sessions and permissions open, the profile is a link
+    expect(screen.getByRole('button', { name: 'View' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Effective permissions' })).toBeInTheDocument();
+
+    for (const name of [
+      'Unlink',
+      'Reset',
+      'Sign out all',
+      'Ban',
+      'Send password reset',
+      'Resend verification',
+    ]) {
+      expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+    }
   });
 
   it('falls back to read-only when an action is forbidden', async () => {

@@ -1,7 +1,9 @@
+import { render as renderAdmin } from '@strapi/admin/strapi-admin/test';
 import { fireEvent, within } from '@testing-library/react';
 import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { PERMISSIONS } from '../../../constants';
 import { ProvidersPage } from '../ProvidersPage';
 
 import type { ProviderDetail, ProviderSummary } from '../../../../../shared/contracts/providers';
@@ -682,5 +684,67 @@ describe('ProvidersPage', () => {
     expect(within(dialog).queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
     expect(within(dialog).queryByLabelText(/Client secret/)).not.toBeInTheDocument();
     expect(sent.put).toEqual([]);
+  });
+
+  describe('without the permission to manage custom providers and account linking', () => {
+    const CUSTOM = summary({
+      id: 'acme-sso',
+      name: 'Acme SSO',
+      kind: 'oidc',
+      enabled: true,
+      configured: true,
+      status: 'ready',
+    });
+
+    const renderWithoutCustom = () =>
+      renderAdmin(<ProvidersPage />, {
+        initialEntries: ['/settings/end-users/providers'],
+        providerOptions: {
+          permissions: [...PERMISSIONS.providers.read, ...PERMISSIONS.providers.update],
+        },
+      });
+
+    it('does not offer a custom OIDC provider in the picker', async () => {
+      serveProviders();
+      const { user } = renderWithoutCustom();
+
+      await user.click(await screen.findByRole('button', { name: 'Add new provider' }));
+
+      const picker = within(await screen.findByRole('dialog', { name: 'Add a provider' }));
+
+      await user.click(await picker.findByRole('combobox', { name: 'Provider' }));
+
+      expect(await screen.findByRole('option', { name: 'Google' })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Custom OIDC' })).not.toBeInTheDocument();
+    });
+
+    it('opens a custom provider read-only, with the reason', async () => {
+      serveProviders([...PROVIDERS, CUSTOM]);
+      server.use(
+        http.get('/end-users/providers/acme-sso', () =>
+          HttpResponse.json({ data: { ...DETAILS.twitch, ...CUSTOM, package: null } })
+        )
+      );
+      const { user } = renderWithoutCustom();
+
+      const dialog = await openProvider(user, 'Acme SSO');
+
+      expect(
+        await within(dialog).findByText(/needs the permission to manage custom/)
+      ).toBeVisible();
+      expect(within(dialog).queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+    });
+
+    it('keeps trust for account linking fixed on a provider it may still edit', async () => {
+      serveProviders();
+      const { user } = renderWithoutCustom();
+
+      const dialog = await openProvider(user, 'GitHub');
+
+      expect(await within(dialog).findByDisplayValue('gh-client')).toBeEnabled();
+      expect(
+        within(dialog).getByRole('checkbox', { name: 'Trust for account linking' })
+      ).toBeDisabled();
+    });
   });
 });

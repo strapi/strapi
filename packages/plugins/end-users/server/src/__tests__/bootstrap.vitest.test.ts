@@ -436,7 +436,7 @@ describe('bootstrap', () => {
     expect(registerMany).toHaveBeenCalledWith(ADMIN_ACTIONS);
   });
 
-  it('registers the role, condition, provider and settings actions, as actions of this plugin in the Plugins section', async () => {
+  it('registers the role, condition, provider, security and settings actions, as actions of this plugin in the Plugins section', async () => {
     const { strapi, registerMany } = setup();
 
     await bootstrap({ strapi });
@@ -446,12 +446,14 @@ describe('bootstrap', () => {
     expect(registered.map(({ uid }) => uid).sort()).toEqual([
       'conditions.read',
       'conditions.update',
+      'providers.custom',
       'providers.read',
       'providers.update',
       'roles.create',
       'roles.delete',
       'roles.read',
       'roles.update',
+      'security.manage',
       'settings.read',
       'settings.update',
     ]);

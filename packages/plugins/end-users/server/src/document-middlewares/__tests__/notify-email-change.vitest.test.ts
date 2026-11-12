@@ -13,6 +13,7 @@ const flush = () =>
 const setup = ({
   stored = { email: 'old@example.com', preferredLocale: 'fr' } as Record<string, unknown> | null,
   sendFails = false,
+  state = undefined as Record<string, unknown> | undefined,
 } = {}) => {
   const sendTemplate = vi.fn(async () => {
     if (sendFails) {
@@ -23,9 +24,13 @@ const setup = ({
   const findOne = vi.fn(async () => stored);
   const { transaction, commits } = createTransaction();
   const config: Record<string, unknown> = { 'info.name': 'my-app' };
+  const revokeSessions = vi.fn(async () => undefined);
+  const emit = vi.fn();
   const strapi = fakeStrapi({
     db: { transaction, query: () => ({ findOne }) },
-    plugin: () => ({ service: () => ({ sendTemplate }) }),
+    plugin: () => ({ service: () => ({ sendTemplate, get: () => ({ revokeSessions }) }) }),
+    requestContext: { get: () => (state ? { state } : undefined) },
+    eventHub: { emit },
     config: { get: (path: string) => config[path] },
     log: { warn },
   });
@@ -44,7 +49,7 @@ const setup = ({
     return { result, next };
   };
 
-  return { run, sendTemplate, warn, commits };
+  return { run, sendTemplate, warn, commits, revokeSessions, emit };
 };
 
 describe('notify-email-change', () => {
@@ -75,6 +80,47 @@ describe('notify-email-change', () => {
       expect.objectContaining({ newEmailMasked: 'a***@example.com' }),
       { locale: undefined }
     );
+  });
+
+  describe('an email change by an admin', () => {
+    const ADMIN = { auth: { strategy: { name: 'admin' } }, user: { documentId: 'admin-1' } };
+
+    it('ends the sessions and emits the user event once it commits', async () => {
+      const { run, revokeSessions, emit } = setup({ state: ADMIN });
+
+      await run('new@example.com');
+
+      expect(revokeSessions).toHaveBeenCalledWith('user-1');
+      expect(emit).toHaveBeenCalledWith('end-users.user.email-change', {
+        adminUserId: 'admin-1',
+        user: { documentId: 'user-1' },
+      });
+    });
+
+    it('does nothing more when the address is unchanged or only its case changed', async () => {
+      const { run, revokeSessions, emit } = setup({ state: ADMIN });
+
+      await run('old@example.com');
+      await run('OLD@Example.com');
+
+      expect(revokeSessions).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('is the same for an admin API token, and for the user of a content API request it is not', async () => {
+      const token = setup({ state: { ...ADMIN, auth: { strategy: { name: 'admin-token' } } } });
+      const user = setup({ state: { auth: { strategy: { name: 'end-users' } } } });
+      const none = setup();
+
+      await token.run('new@example.com');
+      await user.run('new@example.com');
+      await none.run('new@example.com');
+
+      expect(token.revokeSessions).toHaveBeenCalledTimes(1);
+      expect(user.revokeSessions).not.toHaveBeenCalled();
+      expect(user.emit).not.toHaveBeenCalled();
+      expect(none.revokeSessions).not.toHaveBeenCalled();
+    });
   });
 
   it('sends nothing when the email is unchanged or only its case changed', async () => {

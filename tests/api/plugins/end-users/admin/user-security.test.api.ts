@@ -350,6 +350,58 @@ describe('end-users: admin user security API', () => {
     expect((await rqAdmin.get(`${base(documentId)}/security`)).body.data.status.banned).toBe(false);
   });
 
+  it('an admin with explorer.update on every field but without security.manage is refused every change with 403', async () => {
+    const { documentId } = await signedUp();
+    const fields = contentTypesUtils.getVisibleAttributes(strapi.contentTypes[USER_UID]);
+    const role = await utils.createRole({ name: 'end-users-security-editor' });
+
+    await utils.assignPermissionsToRole(
+      role.id,
+      [READ, 'plugin::content-manager.explorer.update'].map((action) => ({
+        action,
+        subject: USER_UID,
+        conditions: [],
+        properties: { fields },
+      }))
+    );
+
+    const editor = await utils.createUser({
+      email: 'end-users-security-editor@example.com',
+      firstname: 'End users',
+      lastname: 'Editor',
+      password: AUTHOR_PASSWORD,
+      isActive: true,
+      roles: [role.id],
+    });
+
+    try {
+      const rqEditor = await createAuthRequest({
+        strapi,
+        userInfo: { email: 'end-users-security-editor@example.com', password: AUTHOR_PASSWORD },
+      });
+
+      // Reading the panel needs only the Content Manager's read
+      expect((await rqEditor.get(`${base(documentId)}/security`)).status).toBe(200);
+
+      for (const [method, path] of [
+        ['post', '/ban'],
+        ['post', '/two-factor/reset'],
+        ['post', '/send-password-reset'],
+        ['delete', '/sessions'],
+      ]) {
+        // eslint-disable-next-line no-await-in-loop
+        expect((await rqEditor[method](`${base(documentId)}${path}`)).status).toBe(403);
+      }
+
+      expect((await rqAdmin.get(`${base(documentId)}/security`)).body.data.status.banned).toBe(
+        false
+      );
+    } finally {
+      await utils.deleteUsersById([editor.id]);
+      await utils.deleteRolesById([role.id]);
+    }
+  });
+
   it('answers 404 for a user that does not exist', async () => {
     expect((await rqAdmin.get(`${base('nope')}/security`)).status).toBe(404);
   });

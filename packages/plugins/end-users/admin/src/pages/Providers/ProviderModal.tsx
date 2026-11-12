@@ -49,6 +49,8 @@ interface ProviderModalProps {
   id: string | null;
   /** Whether the admin may save: without it the modal reads like a locked provider */
   canUpdate: boolean;
+  /** Whether the admin may edit a custom provider and change trust for linking */
+  canCustom: boolean;
   onClose: () => void;
 }
 
@@ -515,10 +517,12 @@ const missingRequired = (values: ProviderFormValues, detail: ProviderDetail, isC
 const ProviderForm = ({
   detail,
   canUpdate,
+  canCustom,
   onClose,
 }: {
   detail: ProviderDetail;
   canUpdate: boolean;
+  canCustom: boolean;
   onClose: () => void;
 }) => {
   const { formatMessage } = useIntl();
@@ -529,9 +533,11 @@ const ProviderForm = ({
 
   // A provider from config is locked: nothing here can be changed
   const locked = detail.source === 'config';
-  const disabled = locked || !canUpdate;
   const claims = detail.definition.claims ?? {};
   const isCustom = detail.kind === 'oidc' && detail.package === null;
+  // A custom provider is edited only with the right to manage custom providers: it can be pointed at
+  // an identity provider the admin controls
+  const disabled = locked || !canUpdate || (isCustom && !canCustom);
 
   const initialValues = React.useMemo(
     (): ProviderFormValues => ({
@@ -695,6 +701,16 @@ const ProviderForm = ({
                 </Typography>
               )}
 
+              {!locked && canUpdate && isCustom && !canCustom && (
+                <Typography textColor="neutral600">
+                  {formatMessage({
+                    id: getTranslation('providers.custom-locked.hint'),
+                    defaultMessage:
+                      'Editing a custom provider needs the permission to manage custom providers and account linking.',
+                  })}
+                </Typography>
+              )}
+
               <ToggleField
                 name="enabled"
                 label={formatMessage({
@@ -806,7 +822,7 @@ const ProviderForm = ({
                   defaultMessage:
                     'A sign-in with this provider is linked to the existing account that has the same email. Turn it on only for a provider that checks emails.',
                 })}
-                disabled={disabled}
+                disabled={disabled || !canCustom}
               />
 
               <ToggleField
@@ -848,7 +864,7 @@ const ProviderForm = ({
 };
 
 /** One provider's settings. A provider set in config opens locked, and never shows a secret. */
-const ProviderModal = ({ id, canUpdate, onClose }: ProviderModalProps) => {
+const ProviderModal = ({ id, canUpdate, canCustom, onClose }: ProviderModalProps) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetProviderQuery(id ?? '', { skip: id === null });
 
@@ -880,7 +896,13 @@ const ProviderModal = ({ id, canUpdate, onClose }: ProviderModalProps) => {
           </Modal.Body>
         )}
         {data && (
-          <ProviderForm key={data.id} detail={data} canUpdate={canUpdate} onClose={onClose} />
+          <ProviderForm
+            key={data.id}
+            detail={data}
+            canUpdate={canUpdate}
+            canCustom={canCustom}
+            onClose={onClose}
+          />
         )}
       </Modal.Content>
     </UnsavedChangesModal>

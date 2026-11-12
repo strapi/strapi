@@ -1,11 +1,14 @@
 import type { Core } from '@strapi/types';
 
 import { PROVIDER_ACTIONS } from '../../admin-actions';
-import { guard } from './guard';
+import { guard, guardAll } from './guard';
 
 /**
  * The sign-in providers, under `/end-users/providers`. `:id` is the provider's id (`github`, `my-idp`),
- * never a database id; `PUT` to update, never `PATCH`. `POST` makes a custom OpenID Connect provider.
+ * never a database id; `PUT` to update, never `PATCH`. `POST` makes a custom OpenID Connect provider,
+ * which needs `providers.custom` as well: a provider the admin points at an identity provider of
+ * their own can sign in as a user. A `PUT` that edits a custom provider or changes "trust for
+ * linking" needs it too, which the controller checks once it knows what the request changes.
  */
 const routes: Core.RouterInput = {
   type: 'admin',
@@ -26,7 +29,7 @@ const routes: Core.RouterInput = {
       method: 'POST',
       path: '/providers',
       handler: 'provider.create',
-      config: guard(PROVIDER_ACTIONS.update),
+      config: guardAll([PROVIDER_ACTIONS.update, PROVIDER_ACTIONS.custom]),
     },
     {
       method: 'PUT',
