@@ -280,7 +280,7 @@ const providerItems = (snapshot: UpSnapshot, ctx: ReportContext): MigrationRepor
  * the counts of each provider, or `null` when it gave none. Provider ids and counts only.
  */
 export const pendingLinkItem = (byProvider: Record<string, number>): MigrationReportItem | null => {
-  const providers = Object.keys(byProvider).sort();
+  const providers = Object.keys(byProvider).sort((a, b) => a.localeCompare(b));
   const total = providers.reduce((sum, provider) => sum + byProvider[provider], 0);
 
   if (total === 0) {
