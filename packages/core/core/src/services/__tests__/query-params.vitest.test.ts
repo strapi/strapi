@@ -71,6 +71,39 @@ describe('query-params service', () => {
       );
     });
 
+    test('escapes control characters of filter keys in the warning', () => {
+      const { strapi, warn } = createStrapi('development');
+      const queryParams = createQueryParamService(strapi);
+      const key = 'x"\n\u001b[31mred\u009b\u2028';
+
+      queryParams.transform(UID, { filters: { [key]: 1 } });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+
+      const message: string = warn.mock.calls[0][0];
+
+      expect(message).toContain(
+        'Unknown filter key "x\\"\\n\\u001b[31mred\\u009b\\u2028" at "x\\"\\n\\u001b[31mred\\u009b\\u2028"'
+      );
+      // eslint-disable-next-line no-control-regex
+      expect(message).not.toMatch(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/);
+    });
+
+    test('escapes control characters of object operand keys in the warning', () => {
+      const { strapi, warn } = createStrapi('development');
+      const queryParams = createQueryParamService(strapi);
+
+      queryParams.transform(UID, { filters: { meta: { $eq: { 'a\nb': 1 } } } });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+
+      const message: string = warn.mock.calls[0][0];
+
+      expect(message).toContain('Unsupported object operand for "$eq" on "meta"');
+      // eslint-disable-next-line no-control-regex
+      expect(message).not.toMatch(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/);
+    });
+
     test.each([['production'], ['test'], [undefined]])(
       'does not warn when the environment is %s',
       (environment) => {
