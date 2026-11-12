@@ -156,6 +156,9 @@ const exchangeLegacy = async (
   const next = await engine.createSession(user.documentId, {
     userAgent: headers?.get('user-agent'),
     ...(old.deviceId ? { deviceId: old.deviceId } : {}),
+    // An old Users & Permissions session never passed a second factor (it had none to pass), so the
+    // new session starts unmarked and a role that requires one asks for it
+    passedSecondFactor: false,
   });
 
   // A device that only ever comes back to refresh is still on an old token: it counts as one, so

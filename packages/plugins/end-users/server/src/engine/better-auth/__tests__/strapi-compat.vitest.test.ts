@@ -1596,6 +1596,16 @@ describe('strapi-compat refresh, with an old refresh token', () => {
     expect(ctx.recordLegacyHit).toHaveBeenCalledTimes(1);
   });
 
+  it('makes the session of an exchange without a second factor, the old session having had none to pass', async () => {
+    const ctx = setup();
+
+    expect((await run(ctx)).status).toBe(200);
+    expect(ctx.engine.createSession).toHaveBeenCalledWith(
+      'doc7',
+      expect.objectContaining({ passedSecondFactor: false })
+    );
+  });
+
   it('refuses one that is not valid, one issued after the cutover, and any without a completed migration', async () => {
     for (const ctx of [
       setup({ valid: false }),
