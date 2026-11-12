@@ -3,7 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PermissionChecker } from '../content-api-permissions';
 import { createAPIValidators } from '../validate';
 import { createAPISanitizers } from '../sanitize';
-import { assertPopulateDepth, splitPopulateLists } from '../validate/populate-depth';
+import {
+  assertPopulateDepth,
+  cutPopulateDepth,
+  splitPopulateLists,
+} from '../validate/populate-depth';
 import { ValidationError } from '../errors';
 import type { Model } from '../types';
 
@@ -280,6 +284,97 @@ describe('Content API permissions: the populate depth of a role', () => {
 
       await api(active).validate.query({ filters: { title: 'a' } }, note, { auth, action: 'find' });
       expect(active.populateDepth).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cutPopulateDepth', () => {
+    it('keeps what is within the limit, in the shape it came in', () => {
+      expect(cutPopulateDepth('*', 1)).toBe('*');
+      expect(cutPopulateDepth('folder.notes', 2)).toBe('folder.notes');
+      expect(cutPopulateDepth(['folder', 'archive'], 1)).toEqual(['folder', 'archive']);
+      expect(cutPopulateDepth({ folder: { populate: { notes: true } } }, 2)).toEqual({
+        folder: { populate: { notes: true } },
+      });
+    });
+
+    it('cuts the paths, lists and nested populates below the limit', () => {
+      expect(cutPopulateDepth('folder.notes.folder', 2)).toBe('folder.notes');
+      expect(cutPopulateDepth('folder.notes, archive.notes', 1)).toBe('folder,archive');
+      expect(cutPopulateDepth(['folder.notes', 'archive'], 1)).toEqual(['folder', 'archive']);
+      expect(
+        cutPopulateDepth(
+          {
+            folder: { filters: { name: 'a' }, populate: { notes: { populate: { folder: true } } } },
+          },
+          2
+        )
+      ).toEqual({ folder: { filters: { name: 'a' }, populate: { notes: {} } } });
+      expect(cutPopulateDepth({ folder: { populate: { notes: true } } }, 1)).toEqual({
+        folder: {},
+      });
+    });
+
+    it('cuts the fragments of a dynamic zone or morph relation by their own populate', () => {
+      expect(
+        cutPopulateDepth({ blocks: { on: { 'shared.quote': { populate: { author: true } } } } }, 1)
+      ).toEqual({ blocks: { on: { 'shared.quote': {} } } });
+    });
+
+    it('leaves nothing for a limit of 0', () => {
+      expect(cutPopulateDepth({ folder: true }, 0)).toBeUndefined();
+      expect(cutPopulateDepth('*', 0)).toBeUndefined();
+    });
+  });
+
+  describe('sanitize.query', () => {
+    const sanitizeOf = (checker: PermissionChecker) =>
+      createAPISanitizers({ getModel, permissions: checker });
+
+    it('cuts a populate to the limit the validator would refuse beyond', async () => {
+      const sanitize = sanitizeOf(checkerOf(1));
+
+      const sanitized = await sanitize.query(
+        { populate: { folder: { populate: { notes: true } } } },
+        note,
+        { auth, action: 'find' }
+      );
+
+      expect(sanitized.populate).toEqual({ folder: {} });
+    });
+
+    it('cuts a dotted path', async () => {
+      const sanitized = await sanitizeOf(checkerOf(1)).query({ populate: 'folder.notes' }, note, {
+        auth,
+        action: 'find',
+      });
+
+      expect(JSON.stringify(sanitized.populate)).not.toContain('notes');
+    });
+
+    it('drops the populate under a limit of 0', async () => {
+      const sanitized = await sanitizeOf(checkerOf(0)).query({ populate: { folder: true } }, note, {
+        auth,
+        action: 'find',
+      });
+
+      expect(sanitized).not.toHaveProperty('populate');
+    });
+
+    it('changes nothing without a limit, for an inactive checker, or for a populate within it', async () => {
+      const populate = { folder: { populate: { notes: true } } };
+
+      for (const checker of [
+        checkerOf(null),
+        checkerOf(0, { isActive: vi.fn(() => false) }),
+        checkerOf(2),
+      ]) {
+        const sanitized = await sanitizeOf(checker).query({ populate }, note, {
+          auth,
+          action: 'find',
+        });
+
+        expect(JSON.stringify(sanitized.populate)).toContain('notes');
+      }
     });
   });
 });

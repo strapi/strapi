@@ -194,4 +194,18 @@ describe('Content API permissions: assertWritten', () => {
 
     expect(count).not.toHaveBeenCalled();
   });
+
+  it('tells explain mode the written-data check ran, and only for a subject-aware caller', async () => {
+    const auth = await conditioned(ARTICLE);
+    const route = await p.engine.generateAbility([{ action: `${ARTICLE}.create` }]);
+    const token = { strategy: { name: 'api-token' }, credentials: {}, ability: route };
+
+    expect(p.readExplain(auth).entryChecked).toBe(false);
+
+    await p.assertWritten(auth, 'create', ARTICLE, 'a1', { status: 'draft' });
+    await p.assertWritten(token, 'create', ARTICLE, 'a1', { status: 'draft' });
+
+    expect(p.readExplain(auth).entryChecked).toBe(true);
+    expect(p.readExplain(token).entryChecked).toBe(false);
+  });
 });

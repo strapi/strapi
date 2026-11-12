@@ -31,7 +31,7 @@ import {
   type EntryMatcher,
 } from '../field-rules';
 import { applyConditions } from './apply-conditions';
-import { splitPopulateLists } from '../validate/populate-depth';
+import { cutPopulateDepth, splitPopulateLists } from '../validate/populate-depth';
 
 export interface Options {
   auth?: unknown;
@@ -439,6 +439,21 @@ const createAPISanitizers = (opts: APIOptions) => {
       Object.assign(sanitizedQuery, {
         populate: await sanitizePopulate(populate, schema, { auth, action }),
       });
+
+      // The validator refuses a populate deeper than the caller's rows allow; a controller that
+      // only sanitizes gets it cut to that depth instead
+      const depthChecker = activeChecker(auth);
+      const maxDepth = depthChecker?.populateDepth(auth, readActionFor(action), schema.uid) ?? null;
+
+      if (maxDepth !== null) {
+        const kept = cutPopulateDepth(sanitizedQuery.populate, maxDepth);
+
+        if (kept === undefined) {
+          delete sanitizedQuery.populate;
+        } else {
+          sanitizedQuery.populate = kept;
+        }
+      }
     }
 
     const extraQueryKeys = getExtraQueryKeysFromRoute(route);

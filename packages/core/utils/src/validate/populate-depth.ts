@@ -156,3 +156,85 @@ export const assertPopulateDepth = (
     );
   }
 };
+
+/** A populate node with what it populates below its own level cut to `remaining` more levels */
+const cutNode = (node: unknown, remaining: number): unknown => {
+  if (!isPlainObject(node)) {
+    return node;
+  }
+
+  const { populate, on } = node as { populate?: unknown; on?: unknown };
+  const cut: Record<string, unknown> = { ...(node as Record<string, unknown>) };
+
+  if (populate !== undefined && populate !== null) {
+    const kept = remaining > 0 ? cutPopulateDepth(populate, remaining) : undefined;
+
+    if (kept === undefined) {
+      delete cut.populate;
+    } else {
+      cut.populate = kept;
+    }
+  }
+
+  // The fragments of a dynamic zone or a morph relation are not a level of their own
+  if (isPlainObject(on)) {
+    cut.on = Object.fromEntries(
+      Object.entries(on as Record<string, unknown>).map(([target, fragment]) => [
+        target,
+        cutNode(fragment, remaining),
+      ])
+    );
+  }
+
+  return cut;
+};
+
+/**
+ * What a populate keeps when it may go `max` levels deep, counted as {@link assertPopulateDepth}
+ * counts them: what is deeper is cut, and what is left is the same shape it came in. `undefined`
+ * when nothing is left (a limit of 0, or a populate that was only deeper levels). It is how
+ * `sanitize.query` holds a controller that only sanitizes to the limit the validator refuses
+ * anything beyond.
+ */
+export const cutPopulateDepth = (populate: unknown, max: number): unknown => {
+  if (max <= 0) {
+    return undefined;
+  }
+
+  if (populate === '*') {
+    return populate;
+  }
+
+  if (typeof populate === 'string') {
+    const kept = pathsOf(populate)
+      .map((path) =>
+        path
+          .split('.')
+          .filter((segment) => segment !== '')
+          .slice(0, max)
+          .join('.')
+      )
+      .filter((path) => path !== '');
+
+    return kept.length === 0 ? undefined : kept.join(',');
+  }
+
+  if (Array.isArray(populate)) {
+    const kept = populate
+      .map((item) => cutPopulateDepth(item, max))
+      .filter((item) => item !== undefined);
+
+    return kept.length === 0 ? undefined : kept;
+  }
+
+  if (isPlainObject(populate)) {
+    return Object.fromEntries(
+      Object.entries(populate as Record<string, unknown>).map(([key, node]) => [
+        key,
+        cutNode(node, max - 1),
+      ])
+    );
+  }
+
+  return populate;
+};

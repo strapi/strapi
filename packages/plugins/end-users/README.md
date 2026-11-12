@@ -40,6 +40,69 @@ one. A `has-role` with no roles stops the start. A refusal is a 403 whose `error
 not set `auth: false`, since then nobody is signed in. GraphQL does not run route policies, so a rule that must hold
 on both APIs belongs in a condition.
 
+## Custom controllers and routes
+
+The core controllers of a collection type run the checks that make a role's conditions hold: before an update or
+delete they call `strapi.contentAPI.permissions.assertEntry`, which answers 404 for an entry the caller's conditions
+(an `is-owner` condition, for one) do not match; on a create or update they judge the data written with `assertWritten`,
+and without the `publish` action they write a draft. These checks live in the controllers, not in the Document Service,
+so a controller of your own that calls `strapi.documents()` or a service directly skips all of them. A custom route
+gets its route-level permission and nothing more.
+
+A custom controller that writes on behalf of an end user must call them itself:
+
+```ts
+// src/api/note/controllers/note.ts
+import { factories } from '@strapi/strapi';
+
+export default factories.createCoreController('api::note.note', ({ strapi }) => ({
+  async archive(ctx) {
+    const { id } = ctx.params;
+    const { auth } = ctx.state;
+
+    await this.validateQuery(ctx);
+    const query = await this.sanitizeQuery(ctx);
+
+    // 404 when the caller's conditions do not match the entry, as for a missing one
+    await strapi.contentAPI.permissions.assertEntry(auth, 'update', 'api::note.note', id);
+
+    const entity = await strapi.documents('api::note.note').update({
+      ...query,
+      documentId: id,
+      data: { archived: true },
+    });
+
+    return this.transformResponse(await this.sanitizeOutput(entity, ctx));
+  },
+}));
+```
+
+Reads need `validateQuery` and `sanitizeQuery`, as they do without this plugin. A write that sets data from the
+request also needs `validateInput` and `sanitizeInput`, and, for a type with draft & publish, `resolveWriteStatus`
+before the write and `assertWritten` inside the transaction that wrote (see the core controllers for the order).
+
+In development the plugin logs one warning per route when an end user's write on an action whose permission has a
+condition succeeds and none of these checks ran in that request, so a controller that skipped them shows up in the
+log. Nothing is logged in production, and API tokens are not affected.
+
+## Things to know before you deploy
+
+**A frontend on another origin needs to be a trusted origin.** A browser app that reads or writes with the session
+cookie from an origin other than the server's must be listed in `trustedOrigins` in the plugin's config in
+`config/plugins.ts` (Better Auth also reads `BETTER_AUTH_TRUSTED_ORIGINS`). Otherwise a request that carries the cookie
+and sends an `Origin` the plugin does not trust is refused on the Content API with a 403 whose `error.details.code` is
+`ORIGIN_NOT_TRUSTED`, and a read of `/api/auth` from that origin arrives without the cookie, so the user looks signed
+out. A request with no `Origin` header, and one that sends a Bearer token, is not affected.
+
+**Roles with conditions link entries by `documentId` only.** For a caller whose roles carry conditions, a relation in
+a write must name the entries it links to by `documentId`; a numeric `id` is refused with a 400. Such a caller also
+cannot connect or set a morph relation (it can still disconnect one), because the entries it would link cannot be
+checked against the role's conditions.
+
+**A secret is required everywhere but development.** Outside `development`, `NODE_ENV=test` included, the plugin
+refuses to start without a real `END_USERS_SECRET` (or `secret` in its config); a published placeholder such as the one
+in an `.env.example` does not count. In development it generates one and stores it in `.env`.
+
 ## Moving a project from Users & Permissions
 
 The move works the same on Strapi Cloud and on a self-hosted project. No step needs a command. What you change reaches

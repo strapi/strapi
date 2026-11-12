@@ -188,6 +188,22 @@ describe('Content API permissions: entryMatches and assertEntry', () => {
     expect(documents).not.toHaveBeenCalled();
   });
 
+  it('tells explain mode the entry check ran, and only for a subject-aware caller', async () => {
+    const auth = await authOf([{ action: `${NOTE}.update`, conditions: mine }]);
+    const routeAbility = await p.engine.generateAbility([{ action: `${NOTE}.update` }]);
+    const token = { strategy: { name: 'api-token' }, credentials: {}, ability: routeAbility };
+
+    stored([{ documentId: 'n1', owner: 'u1' }]);
+
+    expect(p.readExplain(auth).entryChecked).toBe(false);
+
+    await p.assertEntry(auth, 'update', NOTE, 'n1');
+    await p.assertEntry(token, 'update', NOTE, 'n1');
+
+    expect(p.readExplain(auth).entryChecked).toBe(true);
+    expect(p.readExplain(token).entryChecked).toBe(false);
+  });
+
   describe('the lookups', () => {
     it('counts the versions with documentId ANDed with the filters, then all of them, with no status off draft & publish', async () => {
       const auth = await authOf([{ action: `${NOTE}.update`, conditions: mine }]);

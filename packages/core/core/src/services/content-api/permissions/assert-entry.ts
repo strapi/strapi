@@ -2,7 +2,8 @@ import { contentTypes as contentTypesUtils, errors, withDeny } from '@strapi/uti
 import type { PermissionChecker } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
-import { isSubjectAware } from './generate-ability';
+import { markEntryChecked } from './explain';
+import { compiledPermissionsOf, isSubjectAware } from './generate-ability';
 
 type PermissionUtilities = Modules.ContentAPI.PermissionUtilities;
 
@@ -80,6 +81,9 @@ export const createEntryCheck = ({ strapi, checker }: EntryCheckParams) => {
     if (!isSubjectAware(auth)) {
       return true;
     }
+
+    // Explain mode: this request's write went through the entry check
+    markEntryChecked(compiledPermissionsOf(auth) as object);
 
     // `{ documentId: undefined }` or an operator object would not name one entry
     if (typeof documentId !== 'string' || documentId === '') {
