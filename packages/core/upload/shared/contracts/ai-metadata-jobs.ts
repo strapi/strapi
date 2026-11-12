@@ -34,8 +34,6 @@ export declare namespace GetLatestAIMetadataJob {
 /**
  * The other two job endpoints — `POST /upload/ai-metadata-jobs` and
  * `GET /upload/ai-metadata-jobs/pending-count` — are declared in `./files.ts`
- * as `CreateAIMetadataJob` and `GetAIMetadataPendingCount`. They used to be
- * duplicated here under different names and with response shapes that had
- * drifted from what the controllers actually return; `./files.ts` is the one
- * that matched, so it is the single source of truth for both.
+ * as `CreateAIMetadataJob` and `GetAIMetadataPendingCount`, the single source
+ * of truth for both. Like this endpoint, they send a bare response body.
  */
