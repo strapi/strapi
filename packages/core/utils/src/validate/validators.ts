@@ -47,7 +47,8 @@ export const FILTER_TRAVERSALS = [
 const isPlainRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
 /**
- * Operators that take any operand: query conversion casts it to a boolean, so an object means true.
+ * Operators whose operand is left to query conversion, which reads it as a boolean and rejects
+ * any other value, an object included, with a 400.
  */
 const BOOLEAN_CAST_OPERATORS = new Set(['$null', '$notNull']);
 

@@ -98,8 +98,8 @@ export const buildFiltersSchema = (
         Object.fromEntries(
           FILTER_OPERATORS.map((op) => [
             op,
-            // `$null` / `$notNull` take a boolean whatever the field type: the query layer
-            // rejects any other operand, such as an enumeration value.
+            // `$null` / `$notNull` take a boolean whatever the field type. The query layer also
+            // reads `'true'`, `1` and the like, but rejects other values, such as an enum value.
             NULL_OPERATORS.has(op) === true ? z.boolean().optional() : valueSchema.optional(),
           ])
         )
