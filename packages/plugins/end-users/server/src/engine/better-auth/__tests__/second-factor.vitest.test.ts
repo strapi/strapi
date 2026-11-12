@@ -483,6 +483,32 @@ describe('the session a verification link makes', () => {
   });
 });
 
+describe('the list of sessions', () => {
+  it("never carries a token, whether it is the caller's own or another session's", async () => {
+    const { auth, db } = build();
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+    const cookie = cookieHeader(signedUp.headers);
+
+    await auth.api.signInEmail({ body: { email: EMAIL, password: PASSWORD } });
+
+    const listed = (await auth.api.listSessions({ headers: { cookie } })) as Row[];
+
+    expect(listed).toHaveLength(2);
+    expect(listed.map((session) => session.id).sort()).toEqual(
+      db.session.map((session) => session.id).sort()
+    );
+
+    for (const session of listed) {
+      expect(session).not.toHaveProperty('token');
+      expect(JSON.stringify(session)).not.toContain(db.session[0].token);
+      expect(JSON.stringify(session)).not.toContain(db.session[1].token);
+    }
+  });
+});
+
 describe('confirming an enrollment', () => {
   /** A user who has asked to turn two-factor on and has not confirmed it, and the session that asked */
   const begin = async (ctx: ReturnType<typeof build>) => {

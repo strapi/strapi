@@ -11,10 +11,11 @@ import type settingsService from '../services/settings';
  *
  * Better Auth's router only has the endpoints of the plugins that are installed, so an endpoint of
  * a plugin that is off (magic link, passkeys, JWT, anonymous sign-in...) is a 404 without any help.
- * The one set that must be refused is the admin plugin's: it is installed for its ban fields and its
- * check when a session is created, but its endpoints (list users, set a role, ban, impersonate,
- * remove a user) would act on end users outside the Content Manager's permissions, and the Strapi
- * admin replaces them.
+ * The admin plugin's endpoints must be refused: it is installed for its ban fields and its check
+ * when a session is created, but its endpoints (list users, set a role, ban, impersonate, remove a
+ * user) would act on end users outside the Content Manager's permissions, and the Strapi admin
+ * replaces them. So must `verify-password`: nothing here calls it, and it answers whether a guess is
+ * the signed-in user's password without the lockout that sign-in has.
  *
  * The other refusal is per request: an administrator can turn a sign-in method off (Settings, Sign-in),
  * and its endpoints answer 404 from the next request, as if it were not installed. A method that is
@@ -23,7 +24,7 @@ import type settingsService from '../services/settings';
  * Endpoints are matched on the path of the request Better Auth will receive (see `requestPathname`),
  * relative to the base path, by their first segment, whatever its case or encoding.
  */
-const BLOCKED_ROOT_SEGMENTS: ReadonlySet<string> = new Set(['admin']);
+const BLOCKED_ROOT_SEGMENTS: ReadonlySet<string> = new Set(['admin', 'verify-password']);
 
 /** The path as a person would read it: percent-decoded when it can be. */
 const decoded = (path: string) => {

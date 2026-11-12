@@ -64,6 +64,9 @@ const PASSKEY_REGISTRATION_PATHS = new Set([
   '/passkey/verify-registration',
 ]);
 
+/** The sessions Better Auth lists for the caller, one per device */
+const LIST_SESSIONS_PATH = '/list-sessions';
+
 export const PASSKEY_NEEDS_SECOND_FACTOR_MESSAGE =
   'Sign in again with your second factor before you add a passkey: a passkey counts as both factors.';
 
@@ -244,6 +247,24 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
           });
 
           target.session.twoFactorVerified = true;
+        }),
+      },
+      {
+        // A session's token is the credential of that session: the list names each session by its
+        // id and device, and a stolen token does not give out the others
+        matcher: (context) => context.path === LIST_SESSIONS_PATH,
+        handler: createAuthMiddleware(async (ctx) => {
+          const { returned } = ctx.context;
+
+          if (!Array.isArray(returned)) {
+            return;
+          }
+
+          return ctx.json(
+            returned.map((session: Record<string, unknown>) =>
+              Object.fromEntries(Object.entries(session).filter(([field]) => field !== 'token'))
+            )
+          );
         }),
       },
       {
