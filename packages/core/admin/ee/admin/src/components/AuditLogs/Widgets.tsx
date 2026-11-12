@@ -60,9 +60,15 @@ const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
                 </Typography>
               </Td>
               <Td>
-                <Typography variant="omega" textColor="neutral800">
-                  <RelativeTime timestamp={new Date(item.date)} />
-                </Typography>
+                {item.date != null ? (
+                  <Typography variant="omega" textColor="neutral800">
+                    <RelativeTime timestamp={new Date(item.date)} />
+                  </Typography>
+                ) : (
+                  <Typography variant="omega" textColor="neutral600" aria-hidden>
+                    -
+                  </Typography>
+                )}
               </Td>
               <Td>
                 <Typography title={userDisplayName} variant="omega" textColor="neutral800">

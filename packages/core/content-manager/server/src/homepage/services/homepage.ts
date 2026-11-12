@@ -175,7 +175,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         kind: meta.contentType.kind,
         ...additionalFields,
         // Keep dates last so populate cannot overwrite with non-JSON-safe values
-        updatedAt: toIsoDateString(document.updatedAt) ?? '',
+        updatedAt: toIsoDateString(document.updatedAt),
         publishedAt:
           meta.hasDraftAndPublish && document.publishedAt
             ? toIsoDateString(document.publishedAt)
@@ -272,8 +272,17 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return recentDocuments
         .flat()
         .sort((a, b) => {
-          // ISO-8601 strings compare lexicographically in chronological order
-          const compareIso = (left: string, right: string, direction: 1 | -1) => {
+          // ISO-8601 strings compare lexicographically. A missing timestamp is
+          // older than every real one, so a desc list keeps it last. Treating a
+          // missing value as equal (returning 0) is not a consistent order.
+          const compareIso = (
+            left: string | null | undefined,
+            right: string | null | undefined,
+            direction: 1 | -1
+          ) => {
+            if (!left && !right) return 0;
+            if (!left) return -1 * direction;
+            if (!right) return 1 * direction;
             if (left < right) return -1 * direction;
             if (left > right) return 1 * direction;
             return 0;
@@ -281,16 +290,12 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           switch (additionalQueryParams?.sort) {
             case 'publishedAt:desc':
-              if (!a.publishedAt || !b.publishedAt) return 0;
               return compareIso(a.publishedAt, b.publishedAt, -1);
             case 'publishedAt:asc':
-              if (!a.publishedAt || !b.publishedAt) return 0;
               return compareIso(a.publishedAt, b.publishedAt, 1);
             case 'updatedAt:desc':
-              if (!a.updatedAt || !b.updatedAt) return 0;
               return compareIso(a.updatedAt, b.updatedAt, -1);
             case 'updatedAt:asc':
-              if (!a.updatedAt || !b.updatedAt) return 0;
               return compareIso(a.updatedAt, b.updatedAt, 1);
             default:
               return 0;
