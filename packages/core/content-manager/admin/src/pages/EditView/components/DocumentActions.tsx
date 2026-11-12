@@ -99,11 +99,6 @@ interface DocumentActionDescription {
   variant?: ButtonProps['variant'];
   loading?: ButtonProps['loading'];
   /**
-   * Menus draw a separator wherever two consecutive actions belong to different groups.
-   * Actions without a group stay together, so menus without any group are unchanged.
-   */
-  group?: string;
-  /**
    * When set on a publish action with a dialog, registers an opener for the keyboard shortcut.
    */
   publishConfirmScope?: PublishConfirmDialogScope;
@@ -149,7 +144,19 @@ interface ModalOptions {
  * DocumentActions
  * -----------------------------------------------------------------------------------------------*/
 
-interface Action extends DocumentActionDescription {
+/**
+ * Kept out of the public `DocumentActionDescription` for now: only built-in actions set `group`.
+ * It is a typing boundary, the menu reads `group` from any action at runtime.
+ */
+interface InternalDocumentActionDescription extends DocumentActionDescription {
+  /**
+   * Menus draw a separator wherever two consecutive actions belong to different groups.
+   * Actions without a group stay together, so menus without any group are unchanged.
+   */
+  group?: string;
+}
+
+interface Action extends InternalDocumentActionDescription {
   id: string;
 }
 
@@ -664,6 +671,28 @@ interface DocumentActionModalProps extends ModalOptions {
   isOpen?: boolean;
 }
 
+/**
+ * Keys the list grid uses to move between cells. A modal opened from a row menu is rendered under
+ * the grid in the React tree, so without this they would move the focused cell behind the modal
+ * (and break moving the caret in its fields). Other keys still go through, Escape and Tab included.
+ */
+const GRID_NAVIGATION_KEYS = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+]);
+
+const stopGridNavigation = (e: React.KeyboardEvent) => {
+  if (GRID_NAVIGATION_KEYS.has(e.key)) {
+    e.stopPropagation();
+  }
+};
+
 const DocumentActionModal = ({
   isOpen,
   title,
@@ -687,7 +716,7 @@ const DocumentActionModal = ({
    */
   return (
     <UnsavedChangesModal open={isOpen ?? false} onOpenChange={handleClose}>
-      <Modal.Content>
+      <Modal.Content onKeyDown={stopGridNavigation}>
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
@@ -1841,6 +1870,7 @@ export {
 };
 export type {
   DocumentActionDescription,
+  InternalDocumentActionDescription,
   DocumentActionPosition,
   DialogOptions,
   NotificationOptions,

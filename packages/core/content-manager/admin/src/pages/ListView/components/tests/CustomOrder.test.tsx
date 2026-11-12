@@ -1,3 +1,5 @@
+import type { KeyboardEventHandler } from 'react';
+
 import { Table } from '@strapi/admin/strapi-admin';
 import {
   act,
@@ -147,10 +149,17 @@ const RowMenu = ({ documentId }: { documentId: string }) => {
   return <DocumentActionsMenu actions={actions} label="Row actions" />;
 };
 
-const renderMenu = (state: CustomOrderState, documentId = 'b') =>
+const renderMenu = (
+  state: CustomOrderState,
+  documentId = 'b',
+  onGridKeyDown?: KeyboardEventHandler
+) =>
   renderRTL(
     <CustomOrder.Root state={state}>
-      <RowMenu documentId={documentId} />
+      {/* Stands for the list grid: the dialog is portaled, but React events still bubble up to it */}
+      <div onKeyDown={onGridKeyDown}>
+        <RowMenu documentId={documentId} />
+      </div>
     </CustomOrder.Root>
   );
 
@@ -327,6 +336,45 @@ describe('CustomOrder', () => {
       expect(await screen.findByText('Enter a whole number from 1 to 3.')).toBeInTheDocument();
       expect(state.moveToPosition).not.toHaveBeenCalled();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('keeps the navigation keys of the dialog away from the list grid', async () => {
+      const onGridKeyDown = jest.fn();
+      const { user } = renderMenu(createState(), 'b', onGridKeyDown);
+
+      await user.type(await openMoveToPosition(user), '3');
+      onGridKeyDown.mockClear();
+      await user.keyboard(
+        '{ArrowLeft}{ArrowRight}{ArrowUp}{ArrowDown}{Home}{End}{PageUp}{PageDown}'
+      );
+
+      // The header sits outside the form, its close button has to be covered too
+      screen.getByRole('button', { name: /close/i }).focus();
+      await user.keyboard('{ArrowDown}{End}');
+
+      expect(onGridKeyDown).not.toHaveBeenCalled();
+    });
+
+    it('lets the other keys through', async () => {
+      const onGridKeyDown = jest.fn();
+      const { user } = renderMenu(createState(), 'b', onGridKeyDown);
+
+      await openMoveToPosition(user);
+      onGridKeyDown.mockClear();
+      await user.keyboard('{Tab}');
+
+      expect(onGridKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'Tab' }));
+    });
+
+    it('still closes with Escape', async () => {
+      const state = createState();
+      const { user } = renderMenu(state);
+
+      await openMoveToPosition(user);
+      await user.keyboard('{Escape}');
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+      expect(state.moveToPosition).not.toHaveBeenCalled();
     });
 
     it('leaves the entry in place when cancelled', async () => {

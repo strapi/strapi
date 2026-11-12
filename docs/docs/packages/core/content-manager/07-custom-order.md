@@ -79,7 +79,8 @@ Everything is in `admin/src/pages/ListView/components/CustomOrder.tsx`, used by 
 - **Dragging** uses `@dnd-kit` with a pointer sensor only, and is limited to the current page. On drop, the admin sends `before` or `after` the row the entry was dropped on.
 - **Move to position…** in the row menu opens a dialog that takes a whole number from 1 to the number of entries in the view. It works across pages. The admin first asks the list endpoint which entry sits at that position in the same view (`page = position`, `pageSize = 1`), then moves the entry before or after it.
 - **Move to top / Move to bottom** in the row menu are positions `1` and "past the end".
-- The three move actions share the `group` of `DocumentActionsMenu`, which draws a separator wherever two consecutive actions belong to different groups. This puts them between the other row actions and the delete actions.
+- The three move actions share a `group`, and `DocumentActionsMenu` draws a separator wherever two consecutive actions belong to different groups. This puts them between the other row actions and the delete actions. `group` is internal (`InternalDocumentActionDescription`), not part of the public `DocumentActionDescription`.
+- A modal opened from a row menu sits under the list grid in the React tree, even though it is portaled. `DocumentActionModal` stops the keys the grid navigates with (arrows, Home, End, PageUp, PageDown) so they don't move the focused cell behind the "Move to position…" dialog. It doesn't stop every key, since Escape has to reach Radix's document listener to close the modal, Tab has to reach its focus trap, and the edit view's save and publish shortcuts listen on `window`.
 
 Two things in there are dictated by the design system table:
 

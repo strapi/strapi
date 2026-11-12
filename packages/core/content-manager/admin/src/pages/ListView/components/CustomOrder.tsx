@@ -45,6 +45,7 @@ import { getTranslation } from '../../../utils/translations';
 
 import type { DocumentActionComponent } from '../../../content-manager';
 import type { Document } from '../../../hooks/useDocument';
+import type { InternalDocumentActionDescription } from '../../EditView/components/DocumentActions';
 import type { Store } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
@@ -372,7 +373,11 @@ const CustomOrderContext = React.createContext<CustomOrderState>({
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-/** Keeps the move actions together, between the other row actions and the delete actions. */
+/**
+ * Keeps the move actions together, between the other row actions and the delete actions.
+ * `group` is internal, so the actions return a typed variable: an object literal returned as a
+ * public `DocumentActionDescription` would fail the excess property check.
+ */
 const CUSTOM_ORDER_ACTIONS_GROUP = 'custom-order';
 
 const restrictToVerticalAxis: Modifier = ({ transform }) => ({ ...transform, x: 0 });
@@ -608,7 +613,7 @@ const MoveToTopAction: DocumentActionComponent = ({ documentId }) => {
     return null;
   }
 
-  return {
+  const description: InternalDocumentActionDescription = {
     disabled: isMoving || getPosition(documentId) === 1,
     group: CUSTOM_ORDER_ACTIONS_GROUP,
     icon: <ArrowUp />,
@@ -621,6 +626,8 @@ const MoveToTopAction: DocumentActionComponent = ({ documentId }) => {
       void moveToPosition(documentId, 1);
     },
   };
+
+  return description;
 };
 
 MoveToTopAction.position = 'table-row';
@@ -634,7 +641,7 @@ const MoveToBottomAction: DocumentActionComponent = ({ documentId }) => {
     return null;
   }
 
-  return {
+  const description: InternalDocumentActionDescription = {
     disabled: isMoving || getPosition(documentId) === total,
     group: CUSTOM_ORDER_ACTIONS_GROUP,
     icon: <ArrowDown />,
@@ -648,6 +655,8 @@ const MoveToBottomAction: DocumentActionComponent = ({ documentId }) => {
       void moveToPosition(documentId, Number.MAX_SAFE_INTEGER);
     },
   };
+
+  return description;
 };
 
 MoveToBottomAction.position = 'table-row';
@@ -667,7 +676,7 @@ const MoveToPositionAction: DocumentActionComponent = ({ documentId }) => {
     return null;
   }
 
-  return {
+  const description: InternalDocumentActionDescription = {
     disabled: isMoving || total < 2,
     group: CUSTOM_ORDER_ACTIONS_GROUP,
     icon: <NumberList />,
@@ -685,6 +694,8 @@ const MoveToPositionAction: DocumentActionComponent = ({ documentId }) => {
       content: Content,
     },
   };
+
+  return description;
 };
 
 MoveToPositionAction.position = 'table-row';
