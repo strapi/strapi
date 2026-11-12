@@ -1543,6 +1543,61 @@ describe('router path registration', () => {
     await request(server).get('/t/5/r').expect(404);
   });
 
+  it('runs a guard when an unconstrained wildcard precedes a constrained parameter', async () => {
+    const { server, router } = createRouterApp();
+
+    router.use('/api/files/:path(.*)/:id(\\d+)', (ctx) => {
+      ctx.status = 401;
+    });
+    router.get('/api/files/:rest(.*)', (ctx) => {
+      reply(ctx, { rest: ctx.params.rest });
+    });
+
+    await request(server).get('/api/files/a/5/b').expect(401);
+    await request(server).get('/api/files/a/5').expect(401);
+    await request(server).get('/api/files/a/5/6/b').expect(401);
+    await expectReply(request(server).get('/api/files/a/x/b'), { rest: 'a/x/b' });
+  });
+
+  it('splits a patterned parameter at the last separator before a dot wildcard', async () => {
+    const { server, router } = createRouterApp();
+
+    router.get('/dl/:name([^/]+).:ext(.*)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.get('/dx/:name([^/]+)-:ext(.*)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    await expectReply(request(server).get('/dl/my.file.tar.gz'), {
+      name: 'my.file.tar',
+      ext: 'gz',
+    });
+    await expectReply(request(server).get('/dl/my.file.tar.gz/extra'), {
+      name: 'my.file.tar',
+      ext: 'gz/extra',
+    });
+    await expectReply(request(server).get('/dx/my-file-tar-gz'), {
+      name: 'my-file-tar',
+      ext: 'gz',
+    });
+    await request(server).get('/dl/a/b.tar.gz').expect(404);
+  });
+
+  it('restores parameter names from the route that matched, not another method', async () => {
+    const { server, router } = createRouterApp();
+
+    router.get('/f/:a([a-z]+):b(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+    router.post('/f/:x([a-z]+):y(\\d+)', (ctx) => {
+      reply(ctx, { ...ctx.params });
+    });
+
+    await expectReply(request(server).get('/f/ab5'), { a: 'ab', b: '5' });
+    await expectReply(request(server).post('/f/ab5'), { x: 'ab', y: '5' });
+  });
+
   it('rejects a long hyphenated segment without trying every split', async () => {
     const { server, router } = createRouterApp();
 

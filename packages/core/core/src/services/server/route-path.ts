@@ -1226,15 +1226,19 @@ const paramText = (value: unknown) => {
  * written in `_matchedRoute`. Custom patterns are applied by `layer.match`, before this runs.
  */
 const createLayerShim = (layer: TranslatedLayer): LayerMiddleware => {
-  const shim = (ctx: ShimContext, next: () => Promise<unknown>) => {
+  const shim: LayerMiddleware = (ctx: ShimContext, next: () => Promise<unknown>) => {
     // A router that does not translate paths mounts a copy of this layer. The copy's path
     // is the one on the request, and its regexp includes the mount path.
     const matched = ctx.matched;
     let current = layer;
     if (matched) {
+      // Two routes can translate to the same path and both sit in `matched`, so the path
+      // alone would take the later route's parameter names. The shim is on this layer and on
+      // a copy @koa/router makes when it mounts the router, and `routerPath` is that copy.
       for (let index = matched.length - 1; index >= 0; index -= 1) {
-        if (matched[index]?.path === ctx.routerPath) {
-          current = matched[index];
+        const candidate = matched[index];
+        if (candidate?.path === ctx.routerPath && candidate.stack.includes(shim)) {
+          current = candidate;
           break;
         }
       }
@@ -1863,7 +1867,12 @@ const realignSameSegment = (
   captures: readonly (string | null | undefined)[],
   path: string,
   spans: readonly (CaptureSpan | undefined)[] | undefined
-): { captures: (string | undefined)[]; spans: (CaptureSpan | undefined)[] | undefined } | null => {
+): {
+  captures: (string | undefined)[];
+  spans: (CaptureSpan | undefined)[] | undefined;
+  /** A `(.*)` wildcard shared the segment, so this split replaces one that already passed. */
+  override: boolean;
+} | null => {
   const plan = capturePlan(layer);
   const layoutIndex = plan ? activeLayout(plan, captures) : -1;
   if (!plan || layoutIndex === -1 || typeof layer.path !== 'string') {
@@ -1885,6 +1894,12 @@ const realignSameSegment = (
   }
 
   const tokens = tokenizePath(layer.path);
+  const paramTokens = new Map<number, { wildcard: boolean }>();
+  for (const token of tokens) {
+    if (token.kind === 'param') {
+      paramTokens.set(token.paramIndex, token);
+    }
+  }
   const groups: { paramIndexes: number[]; betweens: string[] }[] = [];
   let group: { paramIndexes: number[]; betweens: string[] } | undefined;
   let pending = '';
@@ -1915,6 +1930,7 @@ const realignSameSegment = (
   const next: (string | undefined)[] = captures.map((value) => value ?? undefined);
   const nextSpans = spans?.slice();
   let changed = false;
+  let override = false;
   const flags = layer.regexp?.flags.includes('i') ? 'i' : '';
 
   for (const segment of groups) {
@@ -1932,12 +1948,24 @@ const realignSameSegment = (
 
     // A parameter without a pattern after a separator cannot contain that separator, as in
     // path-to-regexp 6.3. Without that rule, the lazy pieces backtrack over every way to split a
-    // long segment such as `1-1-…-x`.
+    // long segment such as `1-1-…-x`. A `(.*)` wildcard can contain the separator, and v6's
+    // greedy parameter before it keeps every earlier copy, so that piece is `.*`.
+    const openWildcard = segment.paramIndexes.some((index) => {
+      const token = paramTokens.get(index);
+      return Boolean(token?.wildcard) && !byIndex.has(index);
+    });
     const source = segment.paramIndexes
       .map((index, position) => {
         const between = position === 0 ? '' : escapeRegExp(segment.betweens[position - 1]);
-        const pattern =
-          byIndex.get(index)?.pattern ?? (between ? `(?:(?!${between})[^/])+?` : '[^/]+?');
+        const token = paramTokens.get(index);
+        let pattern = byIndex.get(index)?.pattern;
+        if (pattern === undefined && token?.wildcard) {
+          pattern = '.*';
+        } else if (pattern === undefined && between) {
+          pattern = `(?:(?!${between})[^/])+?`;
+        } else if (pattern === undefined) {
+          pattern = '[^/]+?';
+        }
         return `${between}(${pattern})`;
       })
       .join('');
@@ -1973,12 +2001,14 @@ const realignSameSegment = (
       continue;
     }
 
+    let segmentChanged = false;
     for (let position = 0; position < slots.length; position += 1) {
       const value = found[position + 1];
       const slot = slots[position];
       if (value !== undefined && next[slot] !== value) {
         next[slot] = value;
         changed = true;
+        segmentChanged = true;
       }
 
       const indexed = found.indices?.[position + 1];
@@ -1986,9 +2016,13 @@ const realignSameSegment = (
         nextSpans[slot] = [indexed[0], indexed[1]];
       }
     }
+
+    if (segmentChanged && openWildcard) {
+      override = true;
+    }
   }
 
-  return changed ? { captures: next, spans: nextSpans } : null;
+  return changed ? { captures: next, spans: nextSpans, override } : null;
 };
 
 /** The most ends {@link installConstraintMatch} tries for one wildcard before it gives up. */
@@ -2221,6 +2255,13 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     path: string,
     spans: readonly (CaptureSpan | undefined)[] | undefined
   ) => {
+    // v8 stops a `:param` at the first separator when a `.*` wildcard follows it. v6's greedy
+    // parameter keeps the earlier separators, so that split wins even when the short value passes.
+    const realigned = realignSameSegment(current, captures, path, spans);
+    if (realigned?.override && passes(current, realigned.captures, path, realigned.spans)) {
+      return rememberParts(current, realigned.captures, path, realigned.spans);
+    }
+
     if (passes(current, captures, path, spans)) {
       return rememberParts(current, captures, path, spans);
     }
@@ -2230,7 +2271,6 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
       return rememberParts(current, trimmed.captures, path, trimmed.spans);
     }
 
-    const realigned = realignSameSegment(current, captures, path, spans);
     if (realigned && passes(current, realigned.captures, path, realigned.spans)) {
       return rememberParts(current, realigned.captures, path, realigned.spans);
     }
@@ -2251,7 +2291,9 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
    * shorter capture. When a literal follows the wildcard, as the `/` in `/:a([a-z/]+)/:b(.+)`, the
    * capture can only end where that literal starts, so only those ends are tried, longest first.
    * Every other capture is then read again from the layer's own regexp, with this one pinned to
-   * the shorter length. `'untestable'` when there are more ends than {@link MAX_SHORTER_SPLITS}.
+   * the shorter length. An unconstrained `(.*)` is shortened the same way when a later constraint
+   * fails, so `router.use('/api/files/:path(.*)/:id(\\d+)')` can still match `/api/files/a/5/b`.
+   * `'untestable'` when there are more ends than {@link MAX_SHORTER_SPLITS}.
    */
   const shorterSplit = (
     current: TranslatedLayer,
@@ -2267,58 +2309,44 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
     }
 
     const tokens = tokenizePath(current.path);
-
+    const constrainedIndexes = new Set<number>();
     for (const constraint of current[LAYER_CONSTRAINTS] ?? []) {
-      const slot = captureSlot(current, captures, constraint);
-      const span = typeof slot === 'number' ? spans[slot] : undefined;
       const index = logicalIndex(current, plan, constraint);
-      const at = tokens.findIndex((token) => token.kind === 'param' && token.paramIndex === index);
-      const token = tokens[at];
-      const following = tokens[at + 1];
-      if (
-        typeof slot !== 'number' ||
-        !span ||
-        token?.kind !== 'param' ||
-        !token.wildcard ||
-        following?.kind !== 'text' ||
-        (following.optional && !token.optional) ||
-        constraintPasses(current, constraint, captures, path, spans)
-      ) {
-        continue;
+      if (index !== undefined) {
+        constrainedIndexes.add(index);
       }
+    }
 
-      const after = tokens[at + 2];
-      const layout = activeLayout(plan, captures);
-      const nextPosition =
-        after?.kind === 'param' && after.wildcard && layout !== -1
-          ? plan.layouts[layout].indexOf(after.paramIndex)
-          : -1;
-      const nextWildcard = nextPosition === -1 ? -1 : plan.offsets[layout] + nextPosition;
-
-      // The pattern, ending where the following literal starts, is one match. It finds the longest
-      // cut the pattern accepts even when that literal occurs many times. Further cuts are only
-      // the places the literal itself starts, and only up to {@link MAX_SHORTER_SPLITS} of them.
+    const tryLiteralEnds = (
+      slot: number,
+      span: CaptureSpan,
+      literal: string,
+      constraint: CompiledConstraint | undefined,
+      nextWildcard: number
+    ): (string | undefined)[] | 'untestable' | null => {
       const ends: number[] = [];
-      try {
-        const direct = new RegExp(
-          `(?:${constraint.pattern})(?=${escapeRegExp(following.text)})`,
-          `${constraint.regexp.flags}y`
-        );
-        direct.lastIndex = span[0];
-        const directFound = direct.exec(path);
-        const directEnd = directFound ? span[0] + directFound[0].length : 0;
-        if (directEnd > span[0] && directEnd < span[1]) {
-          ends.push(directEnd);
+      if (constraint) {
+        try {
+          const direct = new RegExp(
+            `(?:${constraint.pattern})(?=${escapeRegExp(literal)})`,
+            `${constraint.regexp.flags}y`
+          );
+          direct.lastIndex = span[0];
+          const directFound = direct.exec(path);
+          const directEnd = directFound ? span[0] + directFound[0].length : 0;
+          if (directEnd > span[0] && directEnd < span[1]) {
+            ends.push(directEnd);
+          }
+        } catch {
+          return 'untestable';
         }
-      } catch {
-        return 'untestable';
       }
 
       let bounded = true;
       for (
-        let end = path.lastIndexOf(following.text, span[1] - 1);
+        let end = path.lastIndexOf(literal, span[1] - 1);
         end > span[0];
-        end = path.lastIndexOf(following.text, end - 1)
+        end = path.lastIndexOf(literal, end - 1)
       ) {
         if (ends.length > MAX_SHORTER_SPLITS) {
           bounded = false;
@@ -2334,7 +2362,7 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
         shorter[slot] = path.slice(span[0], end);
         const shorterSpans = spans.slice();
         shorterSpans[slot] = [span[0], end];
-        if (!constraintPasses(current, constraint, shorter, path, shorterSpans)) {
+        if (constraint && !constraintPasses(current, constraint, shorter, path, shorterSpans)) {
           continue;
         }
 
@@ -2365,8 +2393,86 @@ const installConstraintMatch = (layer: TranslatedLayer) => {
         }
       }
 
-      if (!bounded) {
-        return 'untestable';
+      return bounded ? null : 'untestable';
+    };
+
+    const nextWildcardAt = (at: number) => {
+      const after = tokens[at + 2];
+      const layout = activeLayout(plan, captures);
+      const nextPosition =
+        after?.kind === 'param' && after.wildcard && layout !== -1
+          ? plan.layouts[layout].indexOf(after.paramIndex)
+          : -1;
+      return nextPosition === -1 ? -1 : plan.offsets[layout] + nextPosition;
+    };
+
+    for (const constraint of current[LAYER_CONSTRAINTS] ?? []) {
+      const slot = captureSlot(current, captures, constraint);
+      const span = typeof slot === 'number' ? spans[slot] : undefined;
+      const index = logicalIndex(current, plan, constraint);
+      const at = tokens.findIndex((token) => token.kind === 'param' && token.paramIndex === index);
+      const token = tokens[at];
+      const following = tokens[at + 1];
+      if (
+        typeof slot !== 'number' ||
+        !span ||
+        token?.kind !== 'param' ||
+        !token.wildcard ||
+        following?.kind !== 'text' ||
+        (following.optional && !token.optional) ||
+        constraintPasses(current, constraint, captures, path, spans)
+      ) {
+        continue;
+      }
+
+      // The pattern, ending where the following literal starts, is one match. It finds the longest
+      // cut the pattern accepts even when that literal occurs many times. Further cuts are only
+      // the places the literal itself starts, and only up to {@link MAX_SHORTER_SPLITS} of them.
+      const split = tryLiteralEnds(slot, span, following.text, constraint, nextWildcardAt(at));
+      if (split) {
+        return split;
+      }
+    }
+
+    // A `(.*)` wildcard has no constraint of its own. Shorten it at the following literal when a
+    // later constraint failed, as `:id(\\d+)` does for `/api/files/:path(.*)/:id(\\d+)`.
+    const layout = activeLayout(plan, captures);
+    for (let at = 0; at < tokens.length; at += 1) {
+      const token = tokens[at];
+      const following = tokens[at + 1];
+      if (
+        token?.kind !== 'param' ||
+        !token.wildcard ||
+        constrainedIndexes.has(token.paramIndex) ||
+        following?.kind !== 'text' ||
+        (following.optional && !token.optional) ||
+        layout === -1
+      ) {
+        continue;
+      }
+
+      const position = plan.layouts[layout].indexOf(token.paramIndex);
+      const slot = position === -1 ? -1 : plan.offsets[layout] + position;
+      const span = slot === -1 ? undefined : spans[slot];
+      let laterFails = false;
+      for (const constraint of current[LAYER_CONSTRAINTS] ?? []) {
+        const index = logicalIndex(current, plan, constraint);
+        if (
+          index !== undefined &&
+          index > token.paramIndex &&
+          !constraintPasses(current, constraint, captures, path, spans)
+        ) {
+          laterFails = true;
+          break;
+        }
+      }
+      if (!laterFails || slot === -1 || !span) {
+        continue;
+      }
+
+      const split = tryLiteralEnds(slot, span, following.text, undefined, nextWildcardAt(at));
+      if (split) {
+        return split;
       }
     }
 
