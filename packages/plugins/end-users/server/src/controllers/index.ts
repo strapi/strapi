@@ -11,6 +11,7 @@ import role from './admin/role';
 import settings from './admin/settings';
 import user from './user';
 import userSecurity from './admin/user-security';
+import userWriteGuard from './admin/user-write-guard';
 
 export default {
   auth,
@@ -26,4 +27,5 @@ export default {
   settings,
   user,
   'user-security': userSecurity,
+  'user-write-guard': userWriteGuard,
 };

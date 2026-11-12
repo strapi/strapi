@@ -367,7 +367,7 @@ describe('register', () => {
         name === 'graphql'
           ? undefined
           : { service: () => ({ get: () => engine, register: vi.fn() }) },
-      config: { get: () => undefined },
+      config: { get: () => undefined, set: vi.fn() },
       hook: () => ({ register: vi.fn() }),
       documents: { use: vi.fn() },
       get: () => ({ add: vi.fn(), register: vi.fn() }),

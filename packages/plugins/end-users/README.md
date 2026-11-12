@@ -143,8 +143,12 @@ end user's account.
 - _Manage the Security panel of end users_ (`security.manage`) is needed, besides the Content Manager's update
   permission on end users, to reset a user's two-factor, unlink a sign-in method, send a password reset or a
   verification email, sign a user out and ban or unban. The Content Manager's update permission alone is a routine
-  editor's, so it only lets an administrator look at the panel. An administrator who can also edit the `email` and
-  `emailVerified` fields of end users can reach the same ends another way, so keep those fields out of such roles.
+  editor's, so it only lets an administrator look at the panel. The same permission is needed to write the fields
+  those actions change through the Content Manager's own create, edit and publish: `email`, `emailVerified`,
+  `twoFactorEnabled`, `banned`, `banReason`, `banExpires`, `lockedUntil` and `failedSignIns`, and any other field the
+  engine owns (what a Better Auth plugin adds, such as `phoneNumberVerified`). Without it such a write is refused with a
+  403 that names the fields. Saving a user with those fields unchanged, as the edit page does, still works, and so does
+  entering the address of a new user.
 - _Manage custom providers and account linking_ (`providers.custom`) is needed to add or edit a custom OpenID Connect
   provider, to change "Trust for account linking", and to set or change a field a built-in provider's address is built
   from (a domain, a tenant, an issuer), which includes the first setup of such a provider. A provider an administrator points at an identity provider of
