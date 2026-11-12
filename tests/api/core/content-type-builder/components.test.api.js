@@ -504,6 +504,23 @@ describe('Content Type Builder - Components', () => {
       });
     });
 
+    test.each([
+      ['a null attribute', { foo: null }],
+      ['an array with a null attribute', [null]],
+    ])('Returns a validation error for %s', async (_label, attributes) => {
+      const res = await putComponent('default.some-component', {
+        component: {
+          category: 'default',
+          displayName: 'Some Component',
+          icon: 'calendar',
+          attributes,
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({ name: 'ValidationError' });
+    });
+
     test('Updates a component properly', async () => {
       const res = await rq({
         method: 'PUT',

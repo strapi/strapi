@@ -25,9 +25,11 @@ export const removeEmptyDefaults = (data: { attributes?: Record<string, unknown>
 };
 
 export const removeDeletedUIDTargetFields = (data: Struct.ContentTypeSchema) => {
-  if (_.has(data, 'attributes')) {
+  // Leave attributes that are not an object to the validation, which rejects them
+  if (_.isPlainObject(data?.attributes) === true) {
     Object.values(data.attributes).forEach((attribute) => {
       if (
+        _.isPlainObject(attribute) === true &&
         attribute.type === 'uid' &&
         !_.isUndefined(attribute.targetField) &&
         !_.has(data.attributes, attribute.targetField)
