@@ -31,6 +31,42 @@ const reuseUnsetPreviousProperties = (
 };
 
 /**
+ * Whether `targetAttribute`, the attribute named by `inversedBy` or `mappedBy` on the
+ * target of the relation `key` of `uid`, is the other side of that relation. Same rule as
+ * the database boot check:
+ * - an owner (`inversedBy`) is paired with the relation back to `uid` that it names;
+ * - an inverse side (`mappedBy`) is paired with the owner that points back to it: a
+ *   relation to `uid` with `inversedBy: key`. The `mappedBy` name alone does not pair them.
+ */
+const isOtherSide = ({
+  key,
+  uid,
+  attribute,
+  targetAttribute,
+}: {
+  key: string;
+  uid: string;
+  attribute: InternalRelationAttribute;
+  targetAttribute: Schema.Attribute.AnyAttribute;
+}) => {
+  if (isRelation(targetAttribute) === false) {
+    return false;
+  }
+
+  const counterpart = targetAttribute as InternalRelationAttribute;
+
+  if (counterpart.target !== uid) {
+    return false;
+  }
+
+  if (attribute.inversedBy !== undefined && attribute.inversedBy !== null) {
+    return true;
+  }
+
+  return counterpart.inversedBy === key;
+};
+
+/**
  * Maps each attribute name produced by this save's rename hops to the name it
  * had before the save, by folding the hops in order (`a -> tmp, tmp -> b`
  * gives `b -> a`).
@@ -89,9 +125,23 @@ export default function createComponentBuilder() {
       );
     },
 
+    /**
+     * Deletes the other side of the relation `key` of `uid` from its target.
+     * The attribute named by `inversedBy` or `mappedBy` is deleted only when it is
+     * the other side of this relation (see `isOtherSide`): earlier in the same save,
+     * that name can have been given to another attribute, which must be kept.
+     */
     unsetRelation(
       this: any,
-      attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>
+      {
+        key,
+        uid,
+        attribute,
+      }: {
+        key: string;
+        uid: string;
+        attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>;
+      }
     ) {
       if (!('target' in attribute) || !attribute.target) {
         return;
@@ -104,6 +154,10 @@ export default function createComponentBuilder() {
       const targetAttribute = targetCT.getAttribute(targetAttributeName);
 
       if (!targetAttribute) return;
+
+      if (isOtherSide({ key, uid, attribute: relationAttribute, targetAttribute }) === false) {
+        return;
+      }
 
       return targetCT.deleteAttribute(targetAttributeName);
     },
@@ -249,7 +303,7 @@ export default function createComponentBuilder() {
           const targetAttributeName = relationAttribute.inversedBy || relationAttribute.mappedBy;
 
           if (targetAttributeName !== null && targetAttributeName !== undefined) {
-            this.unsetRelation(attribute);
+            this.unsetRelation({ key, uid, attribute });
           }
         }
       });
@@ -267,7 +321,7 @@ export default function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && !isRelation(newAttribute)) {
-          return this.unsetRelation(oldAttribute);
+          return this.unsetRelation({ key, uid, attribute: oldAttribute });
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
@@ -279,9 +333,12 @@ export default function createComponentBuilder() {
           const sameRelation = oldAttribute.relation === relationAttribute.relation;
           const targetAttributeHasChanged =
             oldTargetAttributeName !== relationAttribute.targetAttribute;
+          // A retargeted relation keeps no counterpart on its old target, even when the
+          // counterpart name is unchanged
+          const targetHasChanged = oldRelationAttribute.target !== relationAttribute.target;
 
-          if (!sameRelation || targetAttributeHasChanged) {
-            this.unsetRelation(oldAttribute);
+          if (!sameRelation || targetAttributeHasChanged || targetHasChanged) {
+            this.unsetRelation({ key, uid, attribute: oldAttribute });
           }
 
           // keep extra options that were set manually on oldAttribute
