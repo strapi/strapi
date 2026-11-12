@@ -2,8 +2,7 @@
  * Spreading a nested filter read back from a component filter, then adding a key.
  *
  * Compiled on its own, with and without `strictNullChecks`, by
- * `object-notation-attribute-keys.vitest.test.ts`. Not compiled with `exactOptionalPropertyTypes`,
- * which is out of scope for now: the spread is rejected in that mode.
+ * `object-notation-attribute-keys.vitest.test.ts`.
  */
 import type { Modules, UID } from '../../../../../../..';
 
