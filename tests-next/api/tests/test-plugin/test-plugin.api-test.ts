@@ -127,16 +127,14 @@ describe('test plugin boot options', () => {
     await stopAllServers();
   });
 
-  // With a license, Strapi may accept the fake provider (cms-byok-ai): only CE is checked here.
-  (process.env.STRAPI_LICENSE ? test.skip : test)(
-    'fails the boot when the fake AI provider is requested but rejected',
-    async () => {
-      await expect(startServer(app, { port, fakeAiProvider: true })).rejects.toThrow(
-        // Strapi wraps the error in a box: match the start, which stays on one line.
-        'STRAPI_TEST_AI_PROVIDER=fake, but Strapi rejected the fake AI'
-      );
-    }
-  );
+  // In EE with `cms-byok-ai`, Strapi may accept the fake provider: the check runs on CE, which
+  // drops any license from the server env.
+  test('fails the boot when the fake AI provider is requested but rejected', async () => {
+    await expect(startServer(app, { port, fakeAiProvider: true, edition: 'ce' })).rejects.toThrow(
+      // Strapi wraps the error in a box: match the start, which stays on one line.
+      'STRAPI_TEST_AI_PROVIDER=fake, but Strapi rejected the fake AI'
+    );
+  });
 
   test(`ignores a ${TEST_AI_PROVIDER_ENV_VAR} inherited from the shell`, async () => {
     const inherited = process.env[TEST_AI_PROVIDER_ENV_VAR];
