@@ -138,13 +138,8 @@ describe('CM API - request locale passed to the document service', () => {
       empty: undefined,
       fr: 'fr',
     };
-    // The body `locale` is kept in the data of create and update, so an empty one is stored
-    const storedLocale: Record<string, string | null> = {
-      absent: null,
-      null: null,
-      empty: '',
-      fr: 'fr',
-    };
+    // A non-localized entry has no locale: the body `locale` is never stored
+    const storedLocale = null;
 
     test.each(variants)('create, body locale %s', async (name, locale) => {
       const { res, calls } = await send({
@@ -155,9 +150,7 @@ describe('CM API - request locale passed to the document service', () => {
 
       expect(res.statusCode).toBe(201);
       expect(calls).toEqual([['create', expectedLocale[name]]]);
-      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([
-        [storedLocale[name], 'draft'],
-      ]);
+      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([[storedLocale, 'draft']]);
     });
 
     test.each(variants)('update, body locale %s', async (name, locale) => {
@@ -173,7 +166,7 @@ describe('CM API - request locale passed to the document service', () => {
         ['findOne', expectedLocale[name]],
         ['update', expectedLocale[name]],
       ]);
-      expect(await rows(PLAIN_UID, sourceId)).toEqual([[storedLocale[name], 'draft']]);
+      expect(await rows(PLAIN_UID, sourceId)).toEqual([[storedLocale, 'draft']]);
     });
 
     test.each(variants)('clone, body locale %s', async (name, locale) => {
@@ -189,10 +182,7 @@ describe('CM API - request locale passed to the document service', () => {
         ['findOne', expectedLocale[name]],
         ['clone', expectedLocale[name]],
       ]);
-      // Without a locale, the clone keeps the locale of the source row
-      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([
-        [name === 'fr' ? 'fr' : null, 'draft'],
-      ]);
+      expect(await rows(PLAIN_UID, res.body.data.documentId)).toEqual([[storedLocale, 'draft']]);
     });
 
     // A query string cannot hold a null locale
@@ -225,8 +215,8 @@ describe('CM API - request locale passed to the document service', () => {
         ['publish', expectedLocale[name]],
       ]);
       expect(await rows(PLAIN_UID, sourceId)).toEqual([
-        [storedLocale[name], 'published'],
-        [storedLocale[name], 'draft'],
+        [storedLocale, 'published'],
+        [storedLocale, 'draft'],
       ]);
     });
   });

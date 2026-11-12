@@ -28,6 +28,18 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   };
 
+  /**
+   * A non-localized type has no locale, so the body locale must not be stored.
+   * The document service keeps it in the data, as its i18n transforms skip these types.
+   */
+  const omitLocaleOfNonLocalizedType = <T extends object>(uid: UID.ContentType, data: T) => {
+    if (strapi.localization.isLocalizedContentType(strapi.getModel(uid)) === true) {
+      return data;
+    }
+
+    return omit(data, 'locale');
+  };
+
   return {
     async findOne(
       id: string,
@@ -97,7 +109,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, status: 'draft' as const, populate };
+      const data = omitLocaleOfNonLocalizedType(uid, opts.data ?? {});
+      const params = { ...opts, data, status: 'draft' as const, populate };
 
       return strapi.documents(uid).create(params);
     },
@@ -107,7 +120,10 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
     ) {
-      const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
+      const publishData = omitLocaleOfNonLocalizedType(
+        uid,
+        flow(omitPublishedAtField, omitIdField)(opts.data || {})
+      );
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
@@ -125,7 +141,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const locale = body?.locale;
       const params = {
         // Ensure id and documentId are not copied to the clone
-        data: omit(body, ['id', 'documentId']),
+        data: omitLocaleOfNonLocalizedType(uid, omit(body, ['id', 'documentId'])),
         locale,
         populate,
       };

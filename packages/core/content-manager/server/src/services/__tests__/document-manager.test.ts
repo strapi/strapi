@@ -79,6 +79,8 @@ describe('document-manager', () => {
 
       global.strapi = {
         documents: jest.fn(() => ({ clone })),
+        getModel: jest.fn(() => ({ uid: RELATION_LAB_UID })),
+        localization: { isLocalizedContentType: jest.fn(() => true) },
       } as any;
     });
 
@@ -96,6 +98,72 @@ describe('document-manager', () => {
       expect(clone).toHaveBeenCalledTimes(1);
       expect(clone.mock.calls[0][0].documentId).toBe('doc-1');
       expect(clone.mock.calls[0][0].locale).toBe(expectedLocale);
+    });
+  });
+
+  describe('body locale in the data', () => {
+    const create = jest.fn();
+    const update = jest.fn();
+    const clone = jest.fn();
+
+    const setup = (isLocalized: boolean) => {
+      create.mockReset().mockResolvedValue({ documentId: 'doc-1' });
+      update.mockReset().mockResolvedValue({ documentId: 'doc-1' });
+      clone.mockReset().mockResolvedValue({ documentId: 'clone-1', entries: [{}] });
+
+      global.strapi = {
+        documents: jest.fn(() => ({ create, update, clone })),
+        getModel: jest.fn(() => ({ uid: RELATION_LAB_UID })),
+        localization: { isLocalizedContentType: jest.fn(() => isLocalized) },
+      } as any;
+
+      return documentManager({ strapi: global.strapi });
+    };
+
+    // The data each action passes to the document service, for a body { title, locale }
+    const actions = [
+      [
+        'create',
+        async (service: any, data: object) => {
+          await service.create(RELATION_LAB_UID, { data, locale: 'fr' });
+          return create.mock.calls[0][0];
+        },
+      ],
+      [
+        'update',
+        async (service: any, data: object) => {
+          await service.update('doc-1', RELATION_LAB_UID, { data, locale: 'fr' });
+          return update.mock.calls[0][0];
+        },
+      ],
+      [
+        'clone',
+        async (service: any, data: object) => {
+          await service.clone('doc-1', data, RELATION_LAB_UID);
+          return clone.mock.calls[0][0];
+        },
+      ],
+    ] as const;
+
+    it.each(actions)(
+      '%s drops the body locale of a non-localized type',
+      async (_name, callAction) => {
+        const service = setup(false);
+
+        const params = await callAction(service, { title: 'A', locale: 'fr' });
+
+        expect(params.data).toEqual({ title: 'A' });
+        expect(params.locale).toBe('fr');
+      }
+    );
+
+    it.each(actions)('%s keeps the body locale of a localized type', async (_name, callAction) => {
+      const service = setup(true);
+
+      const params = await callAction(service, { title: 'A', locale: 'fr' });
+
+      expect(params.data).toEqual({ title: 'A', locale: 'fr' });
+      expect(params.locale).toBe('fr');
     });
   });
 
