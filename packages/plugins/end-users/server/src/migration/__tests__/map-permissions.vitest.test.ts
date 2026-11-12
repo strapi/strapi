@@ -176,7 +176,7 @@ describe('mapRolePermissions', () => {
     expect(rows.map((row) => row.action).sort((a, b) => a.localeCompare(b))).toEqual(
       [
         ...DEFAULT_AUTHENTICATED_PERMISSIONS.map((row) => row.action).filter(
-          (action) => action !== `${PROFILE_UID}.update`
+          (action) => action !== `${PROFILE_UID}.update` && action !== `${EU}.me.updateProfile`
         ),
         'api::note.note.find',
       ].sort((a, b) => a.localeCompare(b))
@@ -184,6 +184,7 @@ describe('mapRolePermissions', () => {
     expect(find(rows, `${PROFILE_UID}.find`)).toBeDefined();
     expect(find(rows, `${PROFILE_UID}.findOne`)).toBeDefined();
     expect(find(rows, `${PROFILE_UID}.update`)).toBeUndefined();
+    expect(find(rows, `${EU}.me.updateProfile`)).toBeUndefined();
     // Other roles get no defaults
     expect(map([], 'public').rows).toEqual([]);
   });
@@ -194,6 +195,7 @@ describe('mapRolePermissions', () => {
     expect(find(rows, `${PROFILE_UID}.update`)?.properties).toEqual({
       fields: [`${PROFILE_UID}:write`],
     });
+    expect(find(rows, `${EU}.me.updateProfile`)).toBeDefined();
     expect(find(rows, `${PROFILE_UID}.find`)).toBeDefined();
   });
 });

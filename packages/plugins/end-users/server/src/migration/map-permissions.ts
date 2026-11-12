@@ -82,9 +82,12 @@ export const mapRolePermissions = (
   };
 
   if (roleType === 'authenticated') {
-    // The own-profile update row is left out on purpose: the role gets it only when it held
-    // Users & Permissions' user.update (see the `update` branch below).
-    add(...DEFAULT_AUTHENTICATED_PERMISSIONS.filter((d) => d.action !== `${PROFILE_UID}.update`));
+    // The own-profile update row and its route are left out on purpose: the role gets them only
+    // when it held Users & Permissions' user.update (see the `update` branch below). The route
+    // goes with the data row, because a route with no data row held is unrestricted.
+    const heldWithUpdate = new Set([`${PROFILE_UID}.update`, `${EU}.me.updateProfile`]);
+
+    add(...DEFAULT_AUTHENTICATED_PERMISSIONS.filter((d) => !heldWithUpdate.has(d.action)));
   }
 
   const drop = (action: string, reason: DroppedReason) => dropped.push({ action, reason });
