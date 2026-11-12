@@ -34,8 +34,9 @@
  * the mailbox also resets the password. A user who set up two-factor with the emailed code alone
  * has the mailbox as their second factor, and keeps it.
  *
- * While two-factor is on, turning it off, setting it up again and making new backup codes need a
- * session that passed it: the password alone (which a reset from the mailbox gives) is not enough.
+ * While two-factor is on, turning it off, setting it up again, making new backup codes and reading
+ * the authenticator's secret need a session that passed it: the password alone (which a reset from
+ * the mailbox gives) is not enough.
  *
  * Every other session is `false`, a session made by `createSession` included. The marker is written
  * right after the session exists and before the response leaves, so no client holds a token for a
@@ -96,8 +97,17 @@ const SECOND_FACTOR_CHANGE_PATHS = new Set([
   '/two-factor/generate-backup-codes',
 ]);
 
+/**
+ * Hands out the authenticator's secret for the password alone: whoever holds it can make the codes,
+ * so it is the second factor itself, and needs a session that passed it while it is on
+ */
+const TOTP_URI_PATH = '/two-factor/get-totp-uri';
+
 export const CHANGE_NEEDS_SECOND_FACTOR_MESSAGE =
   'Sign in again with your second factor before you change it.';
+
+export const SECRET_NEEDS_SECOND_FACTOR_MESSAGE =
+  'Sign in again with your second factor before you set up another authenticator.';
 
 /** The sessions Better Auth lists for the caller, one per device */
 const LIST_SESSIONS_PATH = '/list-sessions';
@@ -304,8 +314,10 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
         }),
       },
       {
-        // Changing the second factor while it is on, from a session that never passed it
-        matcher: (context) => SECOND_FACTOR_CHANGE_PATHS.has(context.path as string),
+        // Changing the second factor while it is on, or reading its secret, from a session that
+        // never passed it
+        matcher: (context) =>
+          SECOND_FACTOR_CHANGE_PATHS.has(context.path as string) || context.path === TOTP_URI_PATH,
         handler: createAuthMiddleware(async (ctx) => {
           const current = (await getAuthoritativeSessionFromCtx(ctx)) as SessionRef | null;
 
@@ -318,7 +330,10 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
           if (current.session.twoFactorVerified !== true) {
             throw new APIError('FORBIDDEN', {
               code: 'TWO_FACTOR_REQUIRED',
-              message: CHANGE_NEEDS_SECOND_FACTOR_MESSAGE,
+              message:
+                ctx.path === TOTP_URI_PATH
+                  ? SECRET_NEEDS_SECOND_FACTOR_MESSAGE
+                  : CHANGE_NEEDS_SECOND_FACTOR_MESSAGE,
             });
           }
         }),

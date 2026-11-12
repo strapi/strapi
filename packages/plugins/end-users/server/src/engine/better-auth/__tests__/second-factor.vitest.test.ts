@@ -10,7 +10,7 @@ import type { Core } from '@strapi/types';
 
 import { createLockoutDb, type LockoutDb } from './lockout-db';
 
-import { secondFactor } from '../plugins/second-factor';
+import { SECRET_NEEDS_SECOND_FACTOR_MESSAGE, secondFactor } from '../plugins/second-factor';
 import { twoFactorOptions } from '../plugins/strapi-email';
 
 // Built at run time: no secret-shaped literal in the source
@@ -608,6 +608,36 @@ describe('changing a second factor that is on', () => {
       ctx.auth.api.disableTwoFactor({ body, headers: { cookie: confirmed } })
     ).resolves.toEqual({ status: true });
     expect(ctx.db.user[0].twoFactorEnabled).toBe(false);
+  });
+
+  it("refuses the authenticator's secret to a session that never passed it, and gives it to one that did", async () => {
+    const ctx = build();
+    const { confirmed } = await ctx.enroll();
+    const cookie = await unmarkedSession(ctx);
+    const body = { password: PASSWORD };
+
+    await expect(ctx.auth.api.getTOTPURI({ body, headers: { cookie } })).rejects.toMatchObject({
+      statusCode: 403,
+      body: { code: 'TWO_FACTOR_REQUIRED', message: SECRET_NEEDS_SECOND_FACTOR_MESSAGE },
+    });
+    await expect(
+      ctx.auth.api.getTOTPURI({ body, headers: { cookie: confirmed } })
+    ).resolves.toHaveProperty('totpURI', expect.stringMatching(/^otpauth:\/\//));
+  });
+
+  it("gives the authenticator's secret to a user who is still setting two-factor up", async () => {
+    const ctx = build();
+    const signedUp = await ctx.auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+    const cookie = cookieHeader(signedUp.headers);
+
+    await ctx.auth.api.enableTwoFactor({ body: { password: PASSWORD }, headers: { cookie } });
+
+    await expect(
+      ctx.auth.api.getTOTPURI({ body: { password: PASSWORD }, headers: { cookie } })
+    ).resolves.toHaveProperty('totpURI');
   });
 
   it('does not stand in the way of a user who has not turned two-factor on', async () => {
