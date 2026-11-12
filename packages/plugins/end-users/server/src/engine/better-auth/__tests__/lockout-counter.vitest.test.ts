@@ -6,6 +6,7 @@ import type { Core } from '@strapi/types';
 
 import {
   clearAttempts,
+  enrollmentKey,
   lockoutKey,
   releaseAttempt,
   reserveAttempt,
@@ -142,6 +143,15 @@ describe('the counter on a real database', () => {
     await clearAttempts(strapi, 'a');
 
     expect(await row('a')).toBeUndefined();
+  });
+});
+
+describe('enrollmentKey', () => {
+  it('is its own counter per user, in a shape no identifier hashes to', () => {
+    expect(enrollmentKey('u1')).toMatch(/^lockout:totp-enroll:[0-9a-f]{64}$/);
+    expect(enrollmentKey('u1')).not.toContain('u1');
+    expect(enrollmentKey('u1')).not.toBe(enrollmentKey('u2'));
+    expect(enrollmentKey('u1')).not.toBe(lockoutKey('u1'));
   });
 });
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createOTP } from '@better-auth/utils/otp';
 import { memoryAdapter } from 'better-auth/adapters/memory';
 import { betterAuth } from 'better-auth/minimal';
@@ -6,6 +6,9 @@ import { symmetricDecrypt } from 'better-auth/crypto';
 import { bearer, magicLink, twoFactor } from 'better-auth/plugins';
 import { passkey } from '@better-auth/passkey';
 import type { BetterAuthPlugin } from 'better-auth';
+import type { Core } from '@strapi/types';
+
+import { createLockoutDb, type LockoutDb } from './lockout-db';
 
 import { secondFactor } from '../plugins/second-factor';
 import { twoFactorOptions } from '../plugins/strapi-email';
@@ -17,6 +20,30 @@ const NEW_PASSWORD = ['New', 'Passw0rd!y'].join('-');
 const EMAIL = 'ann@example.com';
 
 type Row = Record<string, any>;
+
+let lockoutDb: LockoutDb;
+
+beforeEach(async () => {
+  lockoutDb = await createLockoutDb();
+});
+
+afterEach(async () => {
+  await lockoutDb.connection.destroy();
+});
+
+/** Only what the plugin reads: the counter table and the lockout settings */
+const fakeStrapi = () =>
+  ({
+    db: lockoutDb.db,
+    log: { warn: vi.fn() },
+    plugin: () => ({
+      service: () => ({
+        get: async () => ({ lockout: { enabled: true, maxAttempts: 5, durationMinutes: 15 } }),
+      }),
+    }),
+  }) as unknown as Core.Strapi;
+
+const counters = () => lockoutDb.connection('eu_lockout_counters').select('key', 'count');
 
 /** The `name=value` pairs of the cookies a response sets, as a Cookie header */
 const cookieHeader = (...responses: Headers[]) => {
@@ -73,7 +100,7 @@ const build = (plugins: BetterAuthPlugin[] = []) => {
         },
       }),
       bearer(),
-      secondFactor(),
+      secondFactor(fakeStrapi()),
       magicLink({
         storeToken: 'hashed',
         async sendMagicLink({ token }: { token: string }) {
@@ -420,10 +447,101 @@ describe('second-factor', () => {
   });
 });
 
+describe('confirming an enrollment', () => {
+  /** A user who has asked to turn two-factor on and has not confirmed it, and the session that asked */
+  const begin = async (ctx: ReturnType<typeof build>) => {
+    const signedUp = await ctx.auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+    const cookie = cookieHeader(signedUp.headers);
+
+    await ctx.auth.api.enableTwoFactor({ body: { password: PASSWORD }, headers: { cookie } });
+
+    const secret = await symmetricDecrypt({ key: SECRET, data: ctx.db.twoFactor[0].secret });
+
+    return { cookie, code: () => createOTP(secret).totp() };
+  };
+
+  const guess = (ctx: ReturnType<typeof build>, cookie: string, code: string) =>
+    ctx.auth.api.verifyTOTP({ body: { code }, headers: { cookie } });
+
+  it('refuses after five wrong codes, even for the right one, and enrolls nothing', async () => {
+    const ctx = build();
+    const { cookie, code } = await begin(ctx);
+
+    for (let i = 0; i < 5; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await expect(guess(ctx, cookie, '000000')).rejects.toMatchObject({ statusCode: 401 });
+    }
+
+    await expect(guess(ctx, cookie, await code())).rejects.toMatchObject({
+      statusCode: 429,
+      body: { code: 'TWO_FACTOR_ENROLLMENT_LOCKED' },
+    });
+    expect(ctx.db.user[0].twoFactorEnabled).toBe(false);
+    expect(ctx.marks()).toEqual([false]);
+  });
+
+  it('counts the user, not the session, and never locks the sign-in', async () => {
+    const ctx = build();
+    const { cookie } = await begin(ctx);
+    const other = await ctx.auth.api.signInEmail({
+      body: { email: EMAIL, password: PASSWORD },
+      returnHeaders: true,
+    });
+
+    for (let i = 0; i < 5; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await guess(ctx, i % 2 ? cookie : cookieHeader(other.headers), '000000').catch(() => {});
+    }
+
+    await expect(guess(ctx, cookie, '000000')).rejects.toMatchObject({ statusCode: 429 });
+
+    const rows = await counters();
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].key).toMatch(/^lockout:totp-enroll:/);
+    // The password sign-in is not behind this lock
+    await expect(
+      ctx.auth.api.signInEmail({ body: { email: EMAIL, password: PASSWORD } })
+    ).resolves.toHaveProperty('token');
+  });
+
+  it('forgets the failures when the code is right, and does not count a user who already has two-factor on', async () => {
+    const ctx = build();
+    const { cookie, code } = await begin(ctx);
+
+    for (let i = 0; i < 3; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await guess(ctx, cookie, '000000').catch(() => {});
+    }
+
+    const confirmed = await ctx.auth.api.verifyTOTP({
+      body: { code: await code() },
+      headers: { cookie },
+      returnHeaders: true,
+    });
+
+    expect(ctx.db.user[0].twoFactorEnabled).toBe(true);
+    expect(await counters()).toEqual([]);
+
+    // Giving a code again from a session is not an enrollment: it is not counted, and not capped
+    const stepUp = cookieHeader(confirmed.headers);
+
+    for (let i = 0; i < 8; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await guess(ctx, stepUp, '000000').catch(() => {});
+    }
+
+    expect(await counters()).toEqual([]);
+  });
+});
+
 describe('the passkey sign-in', () => {
   const run = async (ctx: Record<string, unknown>) => {
     const written: Row[] = [];
-    const [hook] = secondFactor().hooks!.after!;
+    const [hook] = secondFactor({} as Core.Strapi).hooks!.after!;
     const context = {
       adapter: {
         async update(params: Row) {

@@ -46,6 +46,14 @@ export interface LockoutWindow {
 export const lockoutKey = (normalizedIdentifier: string): string =>
   `lockout:${createHash('sha256').update(normalizedIdentifier).digest('hex')}`;
 
+/**
+ * The counter of the attempts to confirm an authenticator enrollment, for one user. Not `lockoutKey`:
+ * a hash of an identifier cannot collide with it, so no address or username typed at a sign-in can
+ * count against it, and it never locks the account's sign-in.
+ */
+export const enrollmentKey = (userId: string): string =>
+  `lockout:totp-enroll:${createHash('sha256').update(userId).digest('hex')}`;
+
 interface Names {
   table: string;
   key: string;
