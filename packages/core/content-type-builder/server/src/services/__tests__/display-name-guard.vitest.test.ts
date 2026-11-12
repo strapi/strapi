@@ -1,7 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { UID } from '@strapi/types';
 
-import { editContentType } from '../content-types';
+import { editContentType, generateAPI } from '../content-types';
 import { updateSchema } from '../schema';
 import type { Schema as CTBSchema } from '../../controllers/validation/schema';
 
@@ -186,6 +189,71 @@ describe('displayName guard on direct service calls', () => {
 
       expect(generate).toHaveBeenCalledWith(expect.objectContaining({ displayName: 'Probe' }));
       expect(builder.writeFiles).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('updateSchema batch', () => {
+    it.each([
+      { name: 'null', displayName: null },
+      { name: 'a number', displayName: 42 },
+    ])(
+      'rejects the whole batch when one updated content type has a displayName that is $name',
+      async ({ displayName }) => {
+        const otherUid: UID.ContentType = 'api::page.page';
+        builder.contentTypes.set(otherUid, { uid: otherUid, schema: storedSchema });
+        (global as any).strapi.contentTypes[otherUid] = {
+          uid: otherUid,
+          kind: 'collectionType',
+          attributes: {},
+        };
+
+        const schema = schemaContentType({ action: 'update', displayName: 'Article' });
+        schema.contentTypes.push({
+          ...schema.contentTypes[0],
+          uid: otherUid,
+          singularName: 'page',
+          pluralName: 'pages',
+          displayName,
+        } as unknown as CTBSchema['contentTypes'][number]);
+
+        await expect(updateSchema(schema)).rejects.toThrow('A content type requires a displayName');
+
+        expect(builder.editContentType).not.toHaveBeenCalled();
+        expect(builder.writeFiles).not.toHaveBeenCalled();
+      }
+    );
+  });
+
+  describe('generateAPI', () => {
+    let appRoot: string;
+
+    beforeEach(async () => {
+      appRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'ctb-generate-api-'));
+      (global as any).strapi.dirs.app.root = appRoot;
+    });
+
+    afterEach(async () => {
+      await fs.rm(appRoot, { recursive: true, force: true });
+    });
+
+    it.each([
+      { name: 'is missing', displayName: undefined },
+      { name: 'is an empty string', displayName: '' },
+      { name: 'is null', displayName: null },
+    ])('rejects a displayName that $name before any write', ({ displayName }) => {
+      expect(() =>
+        generateAPI({ singularName: 'probe', pluralName: 'probes', displayName })
+      ).toThrow('A content type requires a displayName');
+
+      expect(generate).not.toHaveBeenCalled();
+    });
+
+    it('writes no file when the displayName is missing', async () => {
+      expect(() => generateAPI({ singularName: 'probe', pluralName: 'probes' })).toThrow(
+        'A content type requires a displayName'
+      );
+
+      await expect(fs.readdir(appRoot)).resolves.toEqual([]);
     });
   });
 });

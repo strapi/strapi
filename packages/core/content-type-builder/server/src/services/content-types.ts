@@ -224,6 +224,9 @@ export const generateAPI = ({
   pluralName,
   displayName,
 }: any) => {
+  // The generated schema.json is written as is, so a missing name breaks the next boot.
+  assertValidDisplayName(displayName);
+
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate(
