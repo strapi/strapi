@@ -137,7 +137,7 @@ Database lifecycles run inside the transaction. If the transaction rolls back la
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context starts those callbacks after the commit and does not wait for them. `strapi.db.transaction` has already resolved. Callbacks from one commit run together. A callback that throws is logged, and the other callbacks still run. The data is already committed. A rollback callback that throws is logged and does not replace the error from the write. `db.destroy()` waits for callbacks that are still running before it closes the pool. `emitEvent` catches and logs its own errors.
+The transaction context starts those callbacks after the commit and does not wait for them. Each callback runs synchronously up to its first `await` before `strapi.db.transaction` resolves, and the rest of it runs after. Callbacks from one commit run together. A callback that throws is logged, and the other callbacks still run. The data is already committed. A rollback callback that throws is logged and does not replace the error from the write. `db.destroy()` waits for callbacks that are still running before it closes the pool. `emitEvent` catches and logs its own errors.
 
 When the callback runs, the event manager:
 
