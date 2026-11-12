@@ -25,6 +25,7 @@ import { backgroundTaskHandler } from '../background-tasks';
 import { buildAuthOptions } from '../create-engine';
 import type { AuthEngine } from '../../types';
 import { passwordPolicy } from '../plugins/password-policy';
+import { revokeOnPasswordChange } from '../plugins/revoke-on-password-change';
 import { strapiCompat } from '../plugins/strapi-compat';
 
 vi.mock('../../../compat/login-response', async (importOriginal) => ({
@@ -805,6 +806,7 @@ describe('strapi-compat reset, through the engine', () => {
         strapiCompat(strapi, readCompatConfig(configStrapi(true))),
         probe(),
         passwordPolicy(strapi),
+        revokeOnPasswordChange(),
         username(),
         bearer(),
       ],
@@ -903,6 +905,31 @@ describe('strapi-compat reset, through the engine', () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toMatchObject({ code: 'INVALID_TOKEN' });
     expect(seen).toEqual([{ code: 'c', token: 'bad', newPassword: STRONG }]);
+  });
+
+  it('signs the other sessions out on a native change-password that did not ask for it', async () => {
+    const { auth, post, db } = build();
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
+      returnHeaders: true,
+    });
+    const other = await auth.api.signInEmail({
+      body: { email: 'ann@example.com', password: 'Old-Passw0rd!x' },
+    });
+
+    expect(db.session).toHaveLength(2);
+
+    const changed = await post(
+      '/change-password',
+      { currentPassword: 'Old-Passw0rd!x', newPassword: STRONG },
+      { cookie: (signedUp.headers.get('set-cookie') ?? '').split(';')[0] }
+    );
+    const answer = (await changed.json()) as { token: string };
+
+    expect(changed.status).toBe(200);
+    // The caller keeps one session, the new one; the other is gone
+    expect(db.session.map((session) => session.token)).toEqual([answer.token]);
+    expect(db.session.map((session) => session.token)).not.toContain(other.token);
   });
 
   it('answers a compat change-password body with { jwt, user } and leaves a native one alone', async () => {

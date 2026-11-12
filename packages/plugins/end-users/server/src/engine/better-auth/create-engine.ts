@@ -61,6 +61,7 @@ import { strapiCompat } from './plugins/strapi-compat';
 import { bannedReset, withoutBannedRecipients } from './plugins/banned-reset';
 import { totpReplay } from './plugins/totp-replay';
 import { secondFactor } from './plugins/second-factor';
+import { revokeOnPasswordChange } from './plugins/revoke-on-password-change';
 import { resolvePreset } from './presets';
 import { pendingLink } from './plugins/pending-link';
 import { providerProfile } from './plugins/provider-profile';
@@ -123,6 +124,7 @@ const betterAuthPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
  *      `banned-reset`     (a banned user gets no reset link and can't redeem one), and
  *      `totp-replay`      (an authenticator code is taken once)
  *   6. `password-policy`  (the admin's password rules on every way a password is set), installed
+ *      `revoke-on-password-change` (a password change signs the other sessions out)
  *   7. `last-sign-in`, `provider-profile` (the email guard, the every-sign-in profile mappings)
  *      `second-factor` (a session records whether a second factor made it); after `twoFactor`,
  *      whose after-hook it reads the result of
@@ -139,6 +141,7 @@ const strapiPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
   bannedReset(),
   totpReplay(strapi),
   passwordPolicy(strapi),
+  revokeOnPasswordChange(),
   lastSignIn(strapi),
   providerProfile(strapi),
   secondFactor(),
