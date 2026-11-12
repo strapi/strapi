@@ -55,7 +55,7 @@ const authTables = fromAuthTables(
       jwt(),
       lockout({} as Core.Strapi),
       totpReplay({} as Core.Strapi),
-      secondFactor(),
+      secondFactor({} as Core.Strapi),
     ],
     rateLimit: { storage: 'database' },
   })

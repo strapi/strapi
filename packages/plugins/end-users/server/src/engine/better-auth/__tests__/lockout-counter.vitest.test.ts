@@ -6,7 +6,9 @@ import type { Core } from '@strapi/types';
 
 import {
   clearAttempts,
+  enrollmentKey,
   lockoutKey,
+  pruneExpired,
   releaseAttempt,
   reserveAttempt,
   reserveQuery,
@@ -142,6 +144,117 @@ describe('the counter on a real database', () => {
     await clearAttempts(strapi, 'a');
 
     expect(await row('a')).toBeUndefined();
+  });
+});
+
+describe('enrollmentKey', () => {
+  it('is its own counter per user, in a shape no identifier hashes to', () => {
+    expect(enrollmentKey('u1')).toMatch(/^lockout:totp-enroll:[0-9a-f]{64}$/);
+    expect(enrollmentKey('u1')).not.toContain('u1');
+    expect(enrollmentKey('u1')).not.toBe(enrollmentKey('u2'));
+    expect(enrollmentKey('u1')).not.toBe(lockoutKey('u1'));
+  });
+});
+
+describe('the pruning of the counter table', () => {
+  let lockoutDb: LockoutDb;
+  let strapi: Core.Strapi;
+
+  const keys = async () =>
+    (await lockoutDb.connection('eu_lockout_counters').select('key')).map((r) => r.key).sort();
+
+  /** Lets the prune that `reserveAttempt` starts in the background finish */
+  const settle = () =>
+    new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
+
+  beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-05T10:00:00Z'));
+    lockoutDb = await createLockoutDb();
+    strapi = { db: lockoutDb.db, log: { warn: vi.fn() } } as unknown as Core.Strapi;
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    await lockoutDb.connection.destroy();
+  });
+
+  it('deletes a row only once its window and its lock have both run out', async () => {
+    await reserveAttempt(strapi, 'old', WINDOW);
+    // A row that reached the cap: it stays locked for the duration after its last counted attempt
+    for (let i = 0; i < 6; i += 1) {
+      await reserveAttempt(strapi, 'locked', WINDOW);
+    }
+
+    vi.setSystemTime(new Date('2026-11-05T10:14:59Z'));
+    await reserveAttempt(strapi, 'fresh', WINDOW);
+    expect(await pruneExpired(strapi, WINDOW, Date.now())).toBe(0);
+
+    // One second past the duration: the rows from 10:00 are over, the one from 10:14:59 is not
+    vi.setSystemTime(new Date('2026-11-05T10:15:01Z'));
+    expect(await pruneExpired(strapi, WINDOW, Date.now())).toBe(2);
+    expect(await keys()).toEqual(['fresh']);
+  });
+
+  it('keeps a row that is still inside its window at the exact cutoff', async () => {
+    await reserveAttempt(strapi, 'edge', WINDOW);
+
+    vi.setSystemTime(new Date('2026-11-05T10:15:00Z'));
+
+    expect(await pruneExpired(strapi, WINDOW, Date.now())).toBe(0);
+    expect(await keys()).toEqual(['edge']);
+  });
+
+  it('runs from reserveAttempt at most once a minute, and the attempt does not wait for it', async () => {
+    await reserveAttempt(strapi, 'old', WINDOW);
+    await settle();
+
+    // 20 minutes on: the first attempt after it prunes the old row
+    vi.setSystemTime(new Date('2026-11-05T10:20:00Z'));
+    await reserveAttempt(strapi, 'a', WINDOW);
+    await settle();
+    expect(await keys()).toEqual(['a']);
+
+    // Within the minute: a row that is over stays until the next interval
+    await lockoutDb.connection('eu_lockout_counters').insert({
+      key: 'stale',
+      count: 1,
+      last_request: Date.parse('2026-11-05T09:00:00Z'),
+    });
+    vi.setSystemTime(new Date('2026-11-05T10:20:30Z'));
+    await reserveAttempt(strapi, 'b', WINDOW);
+    await settle();
+    expect(await keys()).toEqual(['a', 'b', 'stale']);
+
+    vi.setSystemTime(new Date('2026-11-05T10:21:01Z'));
+    await reserveAttempt(strapi, 'c', WINDOW);
+    await settle();
+    expect(await keys()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('logs a failed prune and still counts the attempt', async () => {
+    const real = lockoutDb.connection;
+    const failing = {
+      ...lockoutDb.db,
+      connection: new Proxy(real, {
+        apply(target, thisArg, args) {
+          const builder = Reflect.apply(target, thisArg, args);
+
+          // Only the prune's DELETE is made outside a transaction
+          builder.delete = () => Promise.reject(new Error('lock wait timeout'));
+
+          return builder;
+        },
+      }),
+    };
+    const broken = { db: failing, log: { warn: vi.fn() } } as unknown as Core.Strapi;
+
+    expect(await reserveAttempt(broken, 'a', WINDOW)).toBe(1);
+    await settle();
+
+    expect(broken.log.warn).toHaveBeenCalledWith(expect.stringContaining('lock wait timeout'));
   });
 });
 

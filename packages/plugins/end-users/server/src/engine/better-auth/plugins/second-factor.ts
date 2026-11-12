@@ -20,7 +20,11 @@
  * Nothing a signed-in session does can earn the mark for itself. A code given while signed in (an
  * authenticator code, a backup code, above all an emailed one: whoever holds the mailbox that signed
  * a session in also gets that code) marks nothing, and neither does turning two-factor on with an
- * emailed code alone. A user with two-factor on cannot register a passkey from a session that is
+ * emailed code alone. Confirming an enrollment is the one exception, and it is the one that makes a
+ * new session in place of the caller's: a session that Better Auth only refreshed keeps its id and
+ * is not marked. The confirmation has an attempt cap of its own, counted per user in the lockout
+ * counter and kept apart from the sign-in lock, so a session that holds one factor cannot guess
+ * its way to the other. A user with two-factor on cannot register a passkey from a session that is
  * not marked, because a passkey sign-in is counted as both factors.
  *
  * Every other session is `false`, a session made by `createSession` included. The marker is written
@@ -30,12 +34,17 @@
  */
 import { APIError, createAuthMiddleware, getAuthoritativeSessionFromCtx } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
+import type { Core } from '@strapi/types';
+
+import { PLUGIN_ID } from '../../../constants';
+import type settingsService from '../../../services/settings';
+import { clearAttempts, enrollmentKey, releaseAttempt, reserveAttempt } from '../lockout-counter';
 
 type HookContext = Parameters<Parameters<typeof createAuthMiddleware>[0]>[0];
 
 interface SessionRef {
   session: { id: string; twoFactorVerified?: unknown };
-  user: { twoFactorEnabled?: unknown };
+  user: { id: string; twoFactorEnabled?: unknown };
 }
 
 /** The two-factor endpoints that check a code. Each one answers an error for a code that is wrong. */
@@ -74,6 +83,18 @@ const AFTER_PATHS = new Set([
   CHANGE_PASSWORD_PATH,
 ]);
 
+export const ENROLLMENT_LOCKED_MESSAGE =
+  'Too many wrong codes. Try again later, or start the setup again.';
+
+/** Better Auth's answer to a code that is wrong */
+const WRONG_CODE = 'INVALID_CODE';
+
+const settings = (strapi: Core.Strapi) =>
+  strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<typeof settingsService>;
+
+/** The attempt counted for a request that confirms an enrollment, from its before-hook to its after-hook. */
+const enrollmentAttempts = new WeakMap<object, string>();
+
 const failed = (ctx: HookContext) => ctx.context.returned instanceof APIError;
 
 /** The session the endpoint left in place for the caller, if it made one. */
@@ -104,9 +125,13 @@ const markedSession = (ctx: HookContext): SessionRef | null => {
     }
 
     // A session on the request: an enrollment is confirmed by the authenticator code that the
-    // password-protected setup produced. An emailed code that turns two-factor on has no second
-    // factor behind it, and a backup code makes no session.
-    return path === TOTP_VERIFY_PATH ? created : null;
+    // password-protected setup produced, and it replaces the caller's session with a new one. A
+    // session that is due a refresh is reported as created too, with the id it already had: that
+    // one only proved the caller has a session. An emailed code that turns two-factor on has no
+    // second factor behind it, and a backup code makes no session.
+    return path === TOTP_VERIFY_PATH && created.session.id !== callerSession(ctx)?.session.id
+      ? created
+      : null;
   }
 
   if (path === PASSKEY_SIGN_IN_PATH) {
@@ -130,7 +155,7 @@ const markedSession = (ctx: HookContext): SessionRef | null => {
   return null;
 };
 
-export const secondFactor = (): BetterAuthPlugin => ({
+export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
   id: 'second-factor',
 
   schema: {
@@ -148,6 +173,36 @@ export const secondFactor = (): BetterAuthPlugin => ({
 
   hooks: {
     before: [
+      {
+        // Confirming an enrollment from a session: whoever holds one factor can try the other
+        matcher: (context) => context.path === TOTP_VERIFY_PATH,
+        handler: createAuthMiddleware(async (ctx) => {
+          const current = (await getAuthoritativeSessionFromCtx(ctx)) as SessionRef | null;
+
+          // The challenge after a sign-in has no session (the sign-in lock counts it), and a user
+          // with two-factor on who gives a code again is not enrolling
+          if (!current || current.user.twoFactorEnabled === true) {
+            return;
+          }
+
+          const { lockout: options } = await settings(strapi).get();
+
+          if (!options.enabled) {
+            return;
+          }
+
+          const key = enrollmentKey(current.user.id);
+
+          if ((await reserveAttempt(strapi, key, options)) > options.maxAttempts) {
+            throw new APIError('TOO_MANY_REQUESTS', {
+              code: 'TWO_FACTOR_ENROLLMENT_LOCKED',
+              message: ENROLLMENT_LOCKED_MESSAGE,
+            });
+          }
+
+          enrollmentAttempts.set(ctx.context, key);
+        }),
+      },
       {
         matcher: (context) => PASSKEY_REGISTRATION_PATHS.has(context.path as string),
         handler: createAuthMiddleware(async (ctx) => {
@@ -189,6 +244,27 @@ export const secondFactor = (): BetterAuthPlugin => ({
           });
 
           target.session.twoFactorVerified = true;
+        }),
+      },
+      {
+        matcher: (context) => context.path === TOTP_VERIFY_PATH,
+        handler: createAuthMiddleware(async (ctx) => {
+          const key = enrollmentAttempts.get(ctx.context);
+
+          if (!key) {
+            return;
+          }
+
+          enrollmentAttempts.delete(ctx.context);
+
+          const { returned } = ctx.context;
+
+          if (!(returned instanceof APIError)) {
+            await clearAttempts(strapi, key);
+          } else if (returned.body?.code !== WRONG_CODE) {
+            // Not a guess (no authenticator was set up): the attempt does not count
+            await releaseAttempt(strapi, key);
+          }
         }),
       },
     ],

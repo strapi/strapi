@@ -148,7 +148,7 @@ const strapiPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
   legacyRevoke(strapi),
   lastSignIn(strapi),
   providerProfile(strapi),
-  secondFactor(),
+  secondFactor(strapi),
 ];
 
 /* ---------------------------------------------------------------------------------------------

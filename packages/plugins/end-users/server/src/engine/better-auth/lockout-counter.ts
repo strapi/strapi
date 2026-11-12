@@ -17,6 +17,12 @@
  * lock ends `durationMinutes` after the last attempt that was let through, and trying again while
  * locked does not extend it.
  *
+ * Nothing else prunes the table, and every address, username or phone number tried gets a row, so
+ * `reserveAttempt` deletes the rows whose window and lock have both run out (`lastRequest` older than
+ * `durationMinutes`: such a row restarts at 1 anyway, and a lock ends that long after its last
+ * attempt). It does so at most once a minute per instance, after the attempt is counted and without
+ * being waited for; a failure is logged and ignored, the next minute tries again.
+ *
  * The count is read back in the same transaction as the upsert. The upsert holds the row's lock
  * until the transaction ends, so the number read is the one this attempt wrote, on every database
  * (MySQL has no `RETURNING`).
@@ -29,7 +35,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { Core } from '@strapi/types';
 
-import { LOCKOUT_COUNTER_UID } from '../../constants';
+import { LOCKOUT_COUNTER_UID, PLUGIN_ID } from '../../constants';
 import { metadataOf } from '../../utils/typed-strapi';
 
 const MINUTE = 60_000;
@@ -45,6 +51,14 @@ export interface LockoutWindow {
 /** `lockout:<sha256>` of an identifier that is already normalized (see `utils/normalize-*.ts`). */
 export const lockoutKey = (normalizedIdentifier: string): string =>
   `lockout:${createHash('sha256').update(normalizedIdentifier).digest('hex')}`;
+
+/**
+ * The counter of the attempts to confirm an authenticator enrollment, for one user. Not `lockoutKey`:
+ * a hash of an identifier cannot collide with it, so no address or username typed at a sign-in can
+ * count against it, and it never locks the account's sign-in.
+ */
+export const enrollmentKey = (userId: string): string =>
+  `lockout:totp-enroll:${createHash('sha256').update(userId).digest('hex')}`;
 
 interface Names {
   table: string;
@@ -116,6 +130,43 @@ export const reserveQuery = (
     });
 };
 
+const PRUNE_INTERVAL = MINUTE;
+
+/** When each instance last started a prune: a failed one waits for the next interval like any other. */
+const lastPruned = new WeakMap<object, number>();
+
+/** Deletes the rows no window or lock still needs. A live lock is never in it. */
+export const pruneExpired = async (
+  strapi: Core.Strapi,
+  window: LockoutWindow,
+  now: number
+): Promise<number> => {
+  const names = namesOf(strapi);
+
+  return strapi.db
+    .connection(names.table)
+    .where(names.lastRequest, '<', now - window.durationMinutes * MINUTE)
+    .delete();
+};
+
+const pruneInBackground = (strapi: Core.Strapi, window: LockoutWindow, now: number): void => {
+  const last = lastPruned.get(strapi);
+
+  if (last !== undefined && now - last < PRUNE_INTERVAL) {
+    return;
+  }
+
+  lastPruned.set(strapi, now);
+
+  Promise.resolve()
+    .then(() => pruneExpired(strapi, window, now))
+    .catch((error: unknown) => {
+      const reason = error instanceof Error ? error.message : 'unknown error';
+
+      strapi.log?.warn(`${PLUGIN_ID}: pruning the lockout counters failed (${reason}).`);
+    });
+};
+
 /** Counts one attempt for `key` and returns the count including it. */
 export const reserveAttempt = async (
   strapi: Core.Strapi,
@@ -125,13 +176,19 @@ export const reserveAttempt = async (
   const names = namesOf(strapi);
   const { connection } = strapi.db;
 
-  return connection.transaction(async (trx) => {
-    await reserveQuery(trx as unknown as Connection, names, key, window, Date.now());
+  const now = Date.now();
+
+  const count = await connection.transaction(async (trx) => {
+    await reserveQuery(trx as unknown as Connection, names, key, window, now);
 
     const row = await trx(names.table).where(names.key, key).first(names.count);
 
     return Number(row?.[names.count] ?? 1);
   });
+
+  pruneInBackground(strapi, window, now);
+
+  return count;
 };
 
 /** Takes one attempt back (an answer that was not a wrong password), never below zero. */
