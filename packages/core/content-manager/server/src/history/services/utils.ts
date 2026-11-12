@@ -241,33 +241,50 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     }, {});
   };
 
+  const findAuthorDocumentId = async ({
+    model,
+    id,
+  }: HistoryVersionAuthorReference): Promise<string | null> => {
+    const author: { documentId: string } | null = await strapi.db
+      .query(model as UID.Schema)
+      .findOne({ select: ['documentId'], where: { id } });
+
+    return author?.documentId ?? null;
+  };
+
   /**
    * @description
-   * Finds the current names of the records of a model, keyed by id
+   * Finds the current names of the records of a model, keyed by document id
    */
-  const findAuthorNames = async (model: string, ids: string[]): Promise<Record<string, string>> => {
+  const findAuthorNames = async (
+    model: string,
+    documentIds: string[]
+  ): Promise<Record<string, string>> => {
     switch (model) {
       case 'admin::user': {
-        const users: Array<AdminUserNames & { id: Data.ID }> = await strapi.db
+        const users: Array<AdminUserNames & { documentId: string }> = await strapi.db
           .query('admin::user')
           .findMany({
-            select: ['id', 'username', 'firstname', 'lastname', 'email'],
-            where: { id: { $in: ids } },
+            select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
+            where: { documentId: { $in: documentIds } },
           });
 
         return users.reduce<Record<string, string>>((acc, user) => {
-          acc[String(user.id)] = getDisplayName(user);
+          acc[user.documentId] = getDisplayName(user);
 
           return acc;
         }, {});
       }
       case 'admin::api-token': {
-        const tokens: Array<{ id: Data.ID; name: string }> = await strapi.db
+        const tokens: Array<{ documentId: string; name: string }> = await strapi.db
           .query('admin::api-token')
-          .findMany({ select: ['id', 'name'], where: { id: { $in: ids } } });
+          .findMany({
+            select: ['documentId', 'name'],
+            where: { documentId: { $in: documentIds } },
+          });
 
         return tokens.reduce<Record<string, string>>((acc, token) => {
-          acc[String(token.id)] = token.name;
+          acc[token.documentId] = token.name;
 
           return acc;
         }, {});
@@ -506,6 +523,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getDefaultLocale,
     isLocalizedContentType,
     getLocaleDictionary,
+    findAuthorDocumentId,
     getAuthorNameDictionary,
     getRetentionDays,
     getVersionStatus,

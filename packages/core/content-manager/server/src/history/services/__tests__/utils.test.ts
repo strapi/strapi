@@ -222,12 +222,36 @@ describe('History utils', () => {
       const findMany = jest.fn(({ select }) =>
         select.includes('email')
           ? [
-              { id: 1, username: 'kai', firstname: 'Kai', lastname: 'Doe', email: 'kai@test.com' },
-              { id: 2, username: null, firstname: 'John', lastname: 'Doe', email: 'john@test.com' },
-              { id: 3, username: null, firstname: 'Ana', lastname: null, email: 'ana@test.com' },
-              { id: 4, username: null, firstname: null, lastname: null, email: 'jane@test.com' },
+              {
+                documentId: '1',
+                username: 'kai',
+                firstname: 'Kai',
+                lastname: 'Doe',
+                email: 'kai@test.com',
+              },
+              {
+                documentId: '2',
+                username: null,
+                firstname: 'John',
+                lastname: 'Doe',
+                email: 'john@test.com',
+              },
+              {
+                documentId: '3',
+                username: null,
+                firstname: 'Ana',
+                lastname: null,
+                email: 'ana@test.com',
+              },
+              {
+                documentId: '4',
+                username: null,
+                firstname: null,
+                lastname: null,
+                email: 'jane@test.com',
+              },
             ]
-          : [{ id: 5, name: 'CI token' }]
+          : [{ documentId: '5', name: 'CI token' }]
       );
       const strapi = { db: { query: jest.fn(() => ({ findMany })) } } as unknown as Core.Strapi;
       const { getAuthorNameDictionary } = createServiceUtils({ strapi });
@@ -249,12 +273,12 @@ describe('History utils', () => {
       });
       expect(findMany).toHaveBeenCalledTimes(2);
       expect(findMany).toHaveBeenCalledWith({
-        select: ['id', 'username', 'firstname', 'lastname', 'email'],
-        where: { id: { $in: ['1', '2', '3', '4'] } },
+        select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
+        where: { documentId: { $in: ['1', '2', '3', '4'] } },
       });
       expect(findMany).toHaveBeenCalledWith({
-        select: ['id', 'name'],
-        where: { id: { $in: ['5'] } },
+        select: ['documentId', 'name'],
+        where: { documentId: { $in: ['5'] } },
       });
     });
 

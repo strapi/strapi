@@ -1,12 +1,5 @@
-import type { Data } from '@strapi/types';
-
 import type { HistoryVersionSource } from '../../../../shared/contracts/history-versions';
-import {
-  type AuthorColumns,
-  type StoredAuthorReference,
-  toAdminUserAuthor,
-  toAuthorReference,
-} from './utils';
+import { type AuthorColumns, type StoredAuthorReference, toAuthorReference } from './utils';
 
 /**
  * Versions saved before the source and the author existed have a `null` source.
@@ -23,16 +16,16 @@ const LEGACY_SOURCE: HistoryVersionSource = 'admin-panel';
 
 export type StoredVersionOrigin = AuthorColumns & {
   source: HistoryVersionSource | null;
-  createdBy: { id: Data.ID } | null;
+  createdBy: { documentId: string } | null;
 };
 
 // Every version without a source was written by an admin,
 // so a missing `createdBy` means the admin was deleted
-const DELETED_ADMIN_USER: StoredAuthorReference = {
+const toLegacyAuthor = (createdBy: StoredVersionOrigin['createdBy']): StoredAuthorReference => ({
   type: 'person',
   model: 'admin::user',
-  id: null,
-};
+  id: createdBy?.documentId ?? null,
+});
 
 export const getVersionOrigin = (
   version: StoredVersionOrigin
@@ -40,7 +33,7 @@ export const getVersionOrigin = (
   if (version.source === null) {
     return {
       source: LEGACY_SOURCE,
-      author: version.createdBy ? toAdminUserAuthor(version.createdBy) : DELETED_ADMIN_USER,
+      author: toLegacyAuthor(version.createdBy),
     };
   }
 
