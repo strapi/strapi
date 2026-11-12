@@ -109,6 +109,34 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     await strapi.contentAPI.permissions.assertEntry(auth, 'update', ref as any, refId, {
       locale: '*',
     });
+
+    // The link writes `field`, so the caller needs that field on an update of this entry: for
+    // every entry, or through a conditioned row whose condition this entry matches
+    const { always, conditional } = strapi.contentAPI.permissions.checker.fieldsFor(
+      auth,
+      'update',
+      ref
+    );
+    const lists = (fields: string[] | null) => fields === null || fields.includes(field);
+
+    if (lists(always)) {
+      return;
+    }
+
+    for (const group of conditional) {
+      if (lists(group.fields)) {
+        // eslint-disable-next-line no-await-in-loop
+        const matching = await strapi.db
+          .query(ref)
+          .count({ where: { documentId: refId, $and: [group.filter] } });
+
+        if (matching > 0) {
+          return;
+        }
+      }
+    }
+
+    throw new ForbiddenError('Forbidden');
   };
 
   return {
