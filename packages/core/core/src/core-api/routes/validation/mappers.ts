@@ -149,13 +149,13 @@ export const mapAttributeToSchema = (
     default: {
       if (isCustomFieldAttribute(attribute)) {
         const attrCF = attribute as { type: 'customField'; customField: string };
-        const customField = strapi.get('custom-fields').get(attrCF.customField);
-        if (!customField) {
-          throw new Error(`Custom field '${attrCF.customField}' not found`);
-        }
 
-        // Re-dispatch with the resolved underlying Strapi kind
-        return mapAttributeToSchema(strapi, { ...attrCF, type: customField.type });
+        return z.lazy(() => {
+          const customField = strapi.get('custom-fields').get(attrCF.customField);
+
+          // Re-dispatch with the resolved underlying Strapi kind once plugin registration is complete.
+          return mapAttributeToSchema(strapi, { ...attrCF, type: customField.type });
+        });
       }
 
       const { type } = attribute as Schema.Attribute.AnyAttribute;
@@ -254,13 +254,13 @@ export const mapAttributeToInputSchema = (
     default: {
       if (isCustomFieldAttribute(attribute)) {
         const attrCF = attribute as { type: 'customField'; customField: string };
-        const customField = strapi.get('custom-fields').get(attrCF.customField);
-        if (!customField) {
-          throw new Error(`Custom field '${attrCF.customField}' not found`);
-        }
 
-        // Re-dispatch with the resolved underlying Strapi kind
-        return mapAttributeToInputSchema(strapi, { ...attrCF, type: customField.type });
+        return z.lazy(() => {
+          const customField = strapi.get('custom-fields').get(attrCF.customField);
+
+          // Re-dispatch with the resolved underlying Strapi kind once plugin registration is complete.
+          return mapAttributeToInputSchema(strapi, { ...attrCF, type: customField.type });
+        });
       }
 
       const { type } = attribute as Schema.Attribute.AnyAttribute;
