@@ -38,6 +38,12 @@ const NUMERIC_ID = /^\d{1,15}$/;
 
 const NOT_FOUND = 'User not found';
 
+/**
+ * What a write answers for a user that is missing, word for word what the entry check answers for
+ * one the caller may not write, so the two cannot be told apart.
+ */
+const NOT_FOUND_ON_WRITE = 'Not Found';
+
 /** What of a role the payload can show, besides its `id`, which every caller reads. */
 const ROLE_KEYS = ['name', 'description', 'type'] as const;
 
@@ -515,7 +521,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       const documentId = await resolve(ctx.params?.id);
 
       if (!documentId || !(await entries().findOne(documentId, { fields: ['documentId'] }))) {
-        throw new errors.NotFoundError(NOT_FOUND);
+        throw new errors.NotFoundError(NOT_FOUND_ON_WRITE);
       }
 
       const writes = sortWrites(bodyOf(ctx), false);
@@ -557,7 +563,7 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
       const user = documentId && (await present(ctx, documentId, {}, wantsRole));
 
       if (!documentId || !user) {
-        throw new errors.NotFoundError(NOT_FOUND);
+        throw new errors.NotFoundError(NOT_FOUND_ON_WRITE);
       }
 
       await strapi.contentAPI.permissions.assertEntry(
