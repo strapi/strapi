@@ -20,7 +20,7 @@ import { ALWAYS_ALLOWED_SCOPES } from '../strategies/end-users';
 import { matchesAccepts } from '../utils/builder/compile';
 import { builderConditionOf } from '../utils/builder/registry';
 import { paramExtras } from '../utils/builder/usage';
-import { ENGINE_OWNED_USER_FIELDS } from '../utils/engine-owned-user-fields';
+import { engineOwnedUserFields } from '../utils/engine-owned-user-fields';
 import { dataActionOf, isEngineType, layoutContentTypeUids } from '../utils/layout-content-types';
 import type conditionService from './condition';
 import { isPlain, isPlainObject } from '../utils/is-plain';
@@ -37,8 +37,6 @@ const isPrivate = (model: Plain, name: string) =>
 
 /** Said of the user type, whose accounts, sessions and password hashes are never in an answer */
 const USER_LOCKED_NOTE = 'Passwords, sessions and linked accounts';
-
-const ENGINE_OWNED: ReadonlySet<string> = new Set(ENGINE_OWNED_USER_FIELDS);
 
 /**
  * The attributes of a content type every caller reads whatever a role grants, and that are never
@@ -346,8 +344,14 @@ const permissionLayoutService = ({ strapi }: { strapi: Core.Strapi }) => {
    * type's own `createdAt`, `updatedAt`, `publishedAt` and `locale` are not fields (see
    * `ALWAYS_READABLE_ATTRIBUTES`); a component's attribute of the same name is.
    */
-  const fieldsOf = (model: Plain, prefix: string, open: string[]): LayoutField[] =>
-    attributesOf(model)
+  const fieldsOf = (model: Plain, prefix: string, open: string[]): LayoutField[] => {
+    // The user type's own attributes say which are engine-owned: a project's Better Auth plugins add some
+    const engineOwned =
+      model.uid === USER_UID && isPlain(model.attributes)
+        ? new Set(engineOwnedUserFields(model.attributes as never))
+        : new Set<string>();
+
+    return attributesOf(model)
       .filter(
         ([name]) =>
           !isPrivate(model, name) && !(prefix === '' && ALWAYS_READABLE_ATTRIBUTES.has(name))
@@ -358,7 +362,7 @@ const permissionLayoutService = ({ strapi }: { strapi: Core.Strapi }) => {
           label: name,
           type: String(attribute.type),
           required: attribute.required === true,
-          engineOwned: model.uid === USER_UID && ENGINE_OWNED.has(name),
+          engineOwned: engineOwned.has(name),
           ...(isReadOnlyAttribute(model, prefix, name, attribute) && { writable: false }),
         };
 
@@ -380,6 +384,7 @@ const permissionLayoutService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         return field;
       });
+  };
 
   /**
    * The rows the editor shows locked, on the end-user type only: its private attributes (not

@@ -77,6 +77,11 @@ const CONTENT_TYPES: Record<string, Schema> = {
       email: { type: 'email' },
       emailVerified: { type: 'boolean' },
       twoFactorEnabled: { type: 'boolean' },
+      // A Better Auth plugin's field, marked engine-owned when the type is generated
+      phoneNumberVerified: {
+        type: 'boolean',
+        pluginOptions: { 'end-users': { engineOwned: true } },
+      },
       banned: { type: 'boolean', private: true },
       failedSignIns: { type: 'integer', private: true },
       lockedUntil: { type: 'datetime', private: true },
@@ -429,7 +434,7 @@ describe('permission layout service', () => {
       const { fields, locked } = await contentType(USER_UID);
       const engineOwned = fields.filter((each) => each.engineOwned).map(({ name }) => name);
 
-      expect(engineOwned).toEqual(['emailVerified', 'twoFactorEnabled']);
+      expect(engineOwned).toEqual(['emailVerified', 'twoFactorEnabled', 'phoneNumberVerified']);
       // `banned` and `role` are private (`createdBy` and `updatedBy` too, as on every type, but they
       // are not locked rows); the user's secrets live in other tables. This is the only type with locked rows
       expect(locked).toEqual([

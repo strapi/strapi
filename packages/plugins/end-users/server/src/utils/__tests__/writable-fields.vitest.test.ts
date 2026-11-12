@@ -36,6 +36,28 @@ describe('writableFields', () => {
   });
 });
 
+describe('the fields a Better Auth plugin marks engine-owned', () => {
+  const marked = { pluginOptions: { 'end-users': { engineOwned: true } } };
+  const strapi = strapiWith({
+    [USER_UID]: {
+      attributes: {
+        email: { type: 'email' },
+        emailVerified: { type: 'boolean' },
+        phoneNumberVerified: { type: 'boolean', ...marked },
+        isAnonymous: { type: 'boolean', ...marked },
+      },
+    },
+  });
+
+  it('are not written through a role', () => {
+    expect(writableFields(strapi, USER_UID)).toEqual(['email']);
+  });
+
+  it('are not read through a role, bar the verified email flag', () => {
+    expect(readableFields(strapi, USER_UID)).toEqual(['email', 'emailVerified']);
+  });
+});
+
 describe('readableFields', () => {
   it('leaves out private and system attributes but keeps non-writable ones', () => {
     const strapi = strapiWith({
