@@ -25,6 +25,16 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
   const serviceUtils = createServiceUtils({ strapi });
 
+  const getCreatedBy = (source: CreateHistoryVersion['source']) => {
+    switch (source) {
+      case 'admin-panel':
+      case 'admin-api':
+        return strapi.requestContext.get()?.state?.user.id;
+      default:
+        return null;
+    }
+  };
+
   return {
     async createVersion({ author, ...historyVersionData }: HistoryVersions.CreateHistoryVersion) {
       await query.create({
@@ -32,7 +42,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           ...historyVersionData,
           ...toAuthorColumns(author),
           createdAt: new Date(),
-          createdBy: strapi.requestContext.get()?.state?.user.id,
+          createdBy: getCreatedBy(historyVersionData.source),
         },
       });
     },
