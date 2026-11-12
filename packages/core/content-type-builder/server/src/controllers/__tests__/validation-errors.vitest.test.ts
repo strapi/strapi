@@ -83,6 +83,25 @@ describe('CTB controllers - validation errors', () => {
     });
   });
 
+  it('answers a validation error when component update attributes are not an object', async () => {
+    const { ctx, send } = createContext({
+      params: { uid: 'shared.quote' },
+      body: {
+        component: { category: 'default', displayName: 'Quote', attributes: 'not-an-object' },
+      },
+    });
+
+    await components.updateComponent(ctx);
+
+    expect(send).toHaveBeenCalledWith(expect.anything(), 400);
+    expect(getSentBody(send)).toMatchObject({
+      error: {
+        name: 'ValidationError',
+        details: { errors: [expect.objectContaining({ path: ['component', 'attributes'] })] },
+      },
+    });
+  });
+
   it('keeps the Yup validation error body unchanged', async () => {
     const { ctx, send } = createContext({ body: { component: {} } });
 
