@@ -112,8 +112,24 @@ export const EditPage = () => {
     cursor.current = { field, start: position, end: position };
   };
 
-  const notifyError = (message: { id: string; defaultMessage: string }) =>
-    toggleNotification({ type: 'danger', message: formatMessage(message) });
+  // A refused request (400) carries the reason, such as a variable in a place it may not go, so it is shown
+  // as the server wrote it, not run through the translation formatter: the text can hold `{{ variable }}`.
+  // Any other failure gets the generic message.
+  const notifyError = (message: { id: string; defaultMessage: string }, error?: unknown) => {
+    const { status, response } = (error ?? {}) as {
+      status?: number;
+      response?: { data?: { error?: { message?: unknown } } };
+    };
+    const reason = response?.data?.error?.message;
+
+    toggleNotification({
+      type: 'danger',
+      message:
+        status === 400 && typeof reason === 'string' && reason.length > 0
+          ? reason
+          : formatMessage(message),
+    });
+  };
 
   const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -127,11 +143,14 @@ export const EditPage = () => {
             defaultMessage: 'Template saved',
           }),
         }),
-      onError: () =>
-        notifyError({
-          id: 'email.Templates.edit.saveError',
-          defaultMessage: 'Could not save the template',
-        }),
+      onError: (error) =>
+        notifyError(
+          {
+            id: 'email.Templates.edit.saveError',
+            defaultMessage: 'Could not save the template',
+          },
+          error
+        ),
     });
   };
 
@@ -156,7 +175,7 @@ export const EditPage = () => {
   };
 
   const handleSendTest = () => {
-    sendTest.mutate(undefined, {
+    sendTest.mutate(values, {
       onSuccess: () =>
         toggleNotification({
           type: 'success',
@@ -165,11 +184,14 @@ export const EditPage = () => {
             defaultMessage: 'Test email sent to your address',
           }),
         }),
-      onError: () =>
-        notifyError({
-          id: 'email.Templates.edit.testError',
-          defaultMessage: 'Could not send the test email',
-        }),
+      onError: (error) =>
+        notifyError(
+          {
+            id: 'email.Templates.edit.testError',
+            defaultMessage: 'Could not send the test email',
+          },
+          error
+        ),
     });
   };
 
@@ -288,7 +310,14 @@ export const EditPage = () => {
                   />
                 </Field.Root>
 
-                <Field.Root name="html">
+                <Field.Root
+                  name="html"
+                  hint={formatMessage({
+                    id: 'email.Templates.edit.htmlHint',
+                    defaultMessage:
+                      'Saving removes scripts, frames, forms, style blocks, event handlers such as onclick, and any link or image address that is not http, https or mailto.',
+                  })}
+                >
                   <Field.Label>{formatMessage(labels.html)}</Field.Label>
                   <Textarea
                     style={MONOSPACE}
@@ -298,6 +327,7 @@ export const EditPage = () => {
                     onChange={handleChange('html')}
                     onBlur={trackCursor('html')}
                   />
+                  <Field.Hint />
                 </Field.Root>
 
                 <Field.Root name="text">

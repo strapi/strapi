@@ -186,24 +186,34 @@ const misplacedInTag = (tagName: string, tag: string, secrets: readonly string[]
     return [...inTag.keys()];
   }
 
-  const inHref: string[] = [];
+  // A link may carry a secret only at the start of its address, where the server-built URL fixes the host.
+  // A secret later in the address (`https://elsewhere.example/?t={{ url }}`) would be sent to another site.
+  const allowed = new Map<string, number>();
 
   parseAttr(tag.slice(1 + tagName.length, -1), (name, value) => {
     if (name === 'href') {
-      inHref.push(value);
+      const leading = LEADING_PLACEHOLDER.exec(
+        withoutInvisibleCharacters(friendlyAttrValue(value))
+      );
+      const secret = leading?.[1];
+
+      if (secret !== undefined && secrets.includes(secret)) {
+        allowed.set(
+          secret,
+          (allowed.get(secret) ?? 0) + (countOccurrences(value, [secret]).get(secret) ?? 0)
+        );
+      }
     }
 
     return '';
   });
 
-  const allowed = countOccurrences(inHref.join('\n'), secrets);
-
   return [...inTag].filter(([secret, count]) => count > (allowed.get(secret) ?? 0)).map(([s]) => s);
 };
 
 /**
- * Returns the secret variables that appear in `html` anywhere but in text or in the `href` of a link,
- * for instance in an `img` `src`, a `style` or any other attribute. Secrets are variable names such as `url`.
+ * Returns the secret variables that appear in `html` anywhere but in text or at the start of the `href` of a
+ * link, for instance in an `img` `src`, a `style`, any other attribute, or after the first characters of an `href`. Secrets are variable names such as `url`.
  */
 export const findMisplacedSecrets = (html: string, secrets: readonly string[]): string[] => {
   if (secrets.length === 0) {

@@ -62,13 +62,43 @@ describe('Template controller', () => {
     templates.get.mockResolvedValue({ variables: ['url', 'user.name'] });
     templates.urlVariables.mockReturnValue(['url']);
 
-    await templateController.test(createCtx({ state: { user: { id: 7, email: 'a@b.c' } } }));
+    await templateController.test(
+      createCtx({ state: { user: { id: 7, email: 'a@b.c' } }, request: { body: {} } })
+    );
 
     expect(templates.sendTemplate).toHaveBeenCalledWith(
       'end-users.reset-password',
       'a@b.c',
       { url: 'https://example.com/url', user: { name: '[user.name]' } },
-      { locale: 'fr' }
+      { locale: 'fr', content: undefined }
     );
+  });
+
+  it('sends the content of the request, not the saved template, when the test has a body', async () => {
+    templates.get.mockResolvedValue({ variables: ['url'] });
+    templates.urlVariables.mockReturnValue(['url']);
+
+    await templateController.test(createCtx({ state: { user: { id: 7, email: 'a@b.c' } } }));
+
+    expect(templates.sendTemplate).toHaveBeenCalledWith(
+      'end-users.reset-password',
+      'a@b.c',
+      { url: 'https://example.com/url' },
+      { locale: 'fr', content: { subject: 'S', html: '<p>{{ url }}</p>', text: '{{ url }}' } }
+    );
+  });
+
+  it('refuses a test body that is not subject, html and text strings', async () => {
+    templates.get.mockResolvedValue({ variables: [] });
+
+    await expect(
+      templateController.test(
+        createCtx({
+          state: { user: { id: 7, email: 'a@b.c' } },
+          request: { body: { subject: 'S' } },
+        })
+      )
+    ).rejects.toThrow('html must be a string');
+    expect(templates.sendTemplate).not.toHaveBeenCalled();
   });
 });

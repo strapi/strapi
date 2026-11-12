@@ -60,6 +60,57 @@ describe('Templates EditPage', () => {
     });
   });
 
+  it('shows the reason the server gave when a save is refused', async () => {
+    server.use(
+      http.put('/email/templates/:key', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'The HTML puts {{ url }} where it could leak',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    renderEdit();
+
+    await screen.findByRole('textbox', { name: 'HTML' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(
+      await screen.findByText('The HTML puts {{ url }} where it could leak')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Could not save the template')).not.toBeInTheDocument();
+  });
+
+  it('shows the generic message when a save fails for another reason', async () => {
+    server.use(
+      http.put('/email/templates/:key', () =>
+        HttpResponse.json({ error: { message: 'boom' } }, { status: 500 })
+      )
+    );
+
+    renderEdit();
+
+    await screen.findByRole('textbox', { name: 'HTML' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Could not save the template')).toBeInTheDocument();
+  });
+
+  it('says near the HTML field what saving removes', async () => {
+    renderEdit();
+
+    const html = await screen.findByRole('textbox', { name: 'HTML' });
+
+    expect(html).toHaveAccessibleDescription(/Saving removes scripts/);
+  });
+
   it('inserts a variable at the cursor', async () => {
     const { user } = renderEdit();
 
@@ -108,6 +159,55 @@ describe('Templates EditPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Send test' }));
     expect(await screen.findByText('Could not send the test email')).toBeInTheDocument();
+  });
+
+  it('sends the unsaved content of the editor with the test', async () => {
+    const sent = jest.fn();
+    server.use(
+      http.post('/email/templates/:key/test', async ({ request }) => {
+        sent(await request.json());
+
+        return HttpResponse.json({ data: { ok: true } });
+      })
+    );
+
+    const { user } = renderEdit();
+
+    const subject = await screen.findByRole('textbox', { name: 'Subject' });
+    await user.clear(subject);
+    await user.type(subject, 'Draft');
+    await user.click(screen.getByRole('button', { name: 'Send test' }));
+
+    expect(await screen.findByText('Test email sent to your address')).toBeInTheDocument();
+    expect(sent).toHaveBeenCalledWith({
+      subject: 'Draft',
+      html: '<p>Hello {{ name }}</p>',
+      text: 'Hello {{ name }}',
+    });
+  });
+
+  it('shows the reason when the test content is refused', async () => {
+    server.use(
+      http.post('/email/templates/:key/test', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'No secret there',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    const { user } = renderEdit();
+
+    await user.click(await screen.findByRole('button', { name: 'Send test' }));
+
+    expect(await screen.findByText('No secret there')).toBeInTheDocument();
   });
 
   it('is read-only without templates.update', async () => {

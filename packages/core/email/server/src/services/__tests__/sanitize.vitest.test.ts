@@ -140,6 +140,24 @@ describe('findMisplacedSecrets', () => {
     expect(findMisplacedSecrets('<A HREF=\'{{url}}\' target="_blank">x</A>', secrets)).toEqual([]);
   });
 
+  it('refuses a secret variable that does not start the href, so the link cannot point at another site', () => {
+    expect(
+      findMisplacedSecrets('<a href="https://elsewhere.example/?t={{ url }}">x</a>', secrets)
+    ).toEqual(['url']);
+    expect(findMisplacedSecrets('<a href="//elsewhere.example/{{url}}">x</a>', secrets)).toEqual([
+      'url',
+    ]);
+    expect(findMisplacedSecrets('<a href="{{ url }}?code={{ otp }}">x</a>', secrets)).toEqual([
+      'otp',
+    ]);
+    expect(findMisplacedSecrets('<a href="x{{ url }}">x</a>', secrets)).toEqual(['url']);
+  });
+
+  it('accepts a secret variable that starts the href and goes on with more address', () => {
+    expect(findMisplacedSecrets('<a href="{{ url }}&utm=x">x</a>', secrets)).toEqual([]);
+    expect(findMisplacedSecrets('<a href=" {{ url }}?utm=x">x</a>', secrets)).toEqual([]);
+  });
+
   it('ignores variables that are not secret and templates without secrets', () => {
     expect(findMisplacedSecrets('<img src="{{ logo }}">', secrets)).toEqual([]);
     expect(findMisplacedSecrets('<img src="{{ url }}">', [])).toEqual([]);
