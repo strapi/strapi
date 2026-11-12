@@ -31,6 +31,7 @@ const folder = {
     name: { type: 'string' },
     notes: { type: 'relation', relation: 'oneToMany', target: NOTE_UID, mappedBy: 'folder' },
     pinned: { type: 'relation', relation: 'oneToOne', target: NOTE_UID },
+    related: { type: 'relation', relation: 'morphToMany' },
   },
 } satisfies Model;
 
@@ -171,6 +172,40 @@ describe('Content API permissions: the entries a write links to', () => {
 
     expect(error).toBeInstanceOf(ValidationError);
     expect(error.message).toMatch(/documentId/);
+  });
+
+  it.each([
+    [
+      'connect on a morphToMany',
+      { related: { connect: [{ documentId: 'mine-published', __type: NOTE_UID }] } },
+    ],
+    [
+      'set on a morphToMany',
+      { related: { set: [{ documentId: 'mine-published', __type: NOTE_UID }] } },
+    ],
+    ['a numeric id on a morphToMany', { related: { connect: [{ id: 3, __type: NOTE_UID }] } }],
+  ])('refuses %s, whose entries no condition can be checked on', async (_name, data) => {
+    const matcher = matcherOf();
+    const error = await rejection(() => write(data, checkerOf(), matcher));
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error.message).toMatch(/documentId/);
+    expect(matcher).not.toHaveBeenCalled();
+  });
+
+  it('lets a write unlink a morph relation, or leave it out', async () => {
+    await expect(
+      write({ related: { disconnect: [{ documentId: 'mine-published', __type: NOTE_UID }] } })
+    ).resolves.toBeUndefined();
+    await expect(write({ related: [], name: 'x' })).resolves.toBeUndefined();
+  });
+
+  it('leaves morph relations alone for a caller whose ability carries no data rules', async () => {
+    const checker = checkerOf({ isActive: vi.fn(() => false) });
+
+    await expect(
+      write({ related: { connect: [{ documentId: 'theirs', __type: NOTE_UID }] } }, checker)
+    ).resolves.toBeUndefined();
   });
 
   it('checks nothing for a caller whose ability carries no data rules', async () => {

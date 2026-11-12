@@ -67,20 +67,31 @@ const referencesOf = (uid: string, value: unknown): TargetReference[] => {
 
 /**
  * Collects, while the entity traversal walks a write's body (components and dynamic zones
- * included), the entries its regular relations link to. Morph relations name their type per item
- * and are left to the route-level check.
+ * included), the entries its regular relations link to. A morph relation names its type per item,
+ * and the entries it names cannot be matched against the caller's conditions here, so connecting
+ * or setting one is refused the way a numeric id is.
  */
 export const collectRelationTargets = (references: TargetReference[]): Visitor => {
   return ({ key, attribute, data }) => {
-    if (attribute?.type !== 'relation' || !('target' in attribute) || !attribute.target) {
-      return;
-    }
-
-    if (attribute.relation.startsWith('morph')) {
+    if (attribute?.type !== 'relation') {
       return;
     }
 
     const value = (data as Record<string, unknown>)[key];
+
+    // `morphToOne` and `morphToMany` have no target at all, `morphOne` and `morphMany` a fixed one
+    // that the items do not need to name
+    if (attribute.relation.startsWith('morph')) {
+      if (referencesOf('', value).length > 0) {
+        references.push({ uid: '', unchecked: true });
+      }
+
+      return;
+    }
+
+    if (!('target' in attribute) || !attribute.target) {
+      return;
+    }
 
     references.push(...referencesOf(attribute.target as string, value));
   };
