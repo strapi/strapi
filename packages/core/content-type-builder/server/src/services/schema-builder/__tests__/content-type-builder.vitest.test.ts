@@ -542,6 +542,176 @@ describe('content-type-builder editContentType with retargeted relations', () =>
       expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'books']);
     });
 
+    it('moves the inverse side when only the inverse side is edited', () => {
+      const builder = editAll(
+        {
+          [shelfUid]: {
+            name: { type: 'string' },
+            books: relation(oppositeRelation[kind], magazineUid, 'shelf'),
+          },
+        },
+        [shelfUid]
+      );
+
+      expect(attributesOf(builder, bookUid)).not.toHaveProperty('shelf');
+      expectValidPair(builder, [shelfUid, 'books'], [magazineUid, 'shelf']);
+    });
+
+    describe('when another attribute of the type takes over the counterpart name', () => {
+      // Book.mainShelf, stored before Book.shelf, owns Shelf.featured. The save makes it the
+      // owner of Shelf.books instead, and moves Book.shelf to Bookcase under the same
+      // counterpart name.
+      beforeEach(() => {
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[bookUid].__schema__.attributes = {
+          title: { type: 'string' },
+          mainShelf: { type: 'relation', relation: kind, target: shelfUid, inversedBy: 'featured' },
+          shelf: { type: 'relation', relation: kind, target: shelfUid, inversedBy: 'books' },
+        };
+        contentTypes[shelfUid].__schema__.attributes = {
+          ...contentTypes[shelfUid].__schema__.attributes,
+          featured: {
+            type: 'relation',
+            relation: oppositeRelation[kind],
+            target: bookUid,
+            mappedBy: 'mainShelf',
+          },
+        };
+      });
+
+      const bookEdit = {
+        title: { type: 'string' },
+        mainShelf: relation(kind, shelfUid, 'books'),
+        shelf: relation(kind, bookcaseUid, 'books'),
+      };
+
+      it('keeps the counterpart taken over in a single content type edit', () => {
+        const builder = editAll({ [bookUid]: bookEdit }, [bookUid]);
+
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('featured');
+        expectValidPair(builder, [bookUid, 'mainShelf'], [shelfUid, 'books']);
+        expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'books']);
+      });
+
+      it.each(permutations([bookUid, bookcaseUid, shelfUid]))(
+        'keeps the counterpart taken over in a save of both sides (%s, %s, %s)',
+        (...order) => {
+          const builder = editAll(
+            {
+              [bookUid]: bookEdit,
+              [bookcaseUid]: {
+                name: { type: 'string' },
+                books: relation(oppositeRelation[kind], bookUid, 'shelf'),
+              },
+              [shelfUid]: {
+                name: { type: 'string' },
+                books: relation(oppositeRelation[kind], bookUid, 'mainShelf'),
+              },
+            },
+            order
+          );
+
+          expect(attributesOf(builder, shelfUid)).not.toHaveProperty('featured');
+          expectValidPair(builder, [bookUid, 'mainShelf'], [shelfUid, 'books']);
+          expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'books']);
+        }
+      );
+    });
+
+    it.each([
+      ['no attribute', undefined],
+      [
+        'a relation to another type with the same counterpart name',
+        relation(kind, bookcaseUid, 'books'),
+      ],
+    ])(
+      'removes the inverse side whose mappedBy names %s when its owner is deleted',
+      (_label, legacyShelf) => {
+        // The database pairs Shelf.books with its owner Book.shelf: the mappedBy name is not
+        // read, and Book.legacyShelf does not claim Shelf.books
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[shelfUid].__schema__.attributes.books.mappedBy = 'legacyShelf';
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              ...(legacyShelf === undefined ? {} : { legacyShelf }),
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+      }
+    );
+
+    it('removes a one-way relation named by inversedBy when the owner is deleted', () => {
+      // Same as before this change: only a relation that owns another pair is kept
+      const { contentTypes } = (global as any).strapi;
+      delete contentTypes[shelfUid].__schema__.attributes.books.mappedBy;
+
+      const builder = editAll({ [bookUid]: { title: { type: 'string' } } }, [bookUid]);
+
+      expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+    });
+
+    it('drops the counterpart when the owner is retargeted as a one-way relation', () => {
+      const builder = editAll(
+        {
+          [bookUid]: {
+            title: { type: 'string' },
+            shelf: { type: 'relation', relation: kind, target: bookcaseUid },
+          },
+          [shelfUid]: { name: { type: 'string' } },
+        },
+        [bookUid, shelfUid]
+      );
+
+      const shelf = attributesOf(builder, bookUid).shelf;
+
+      expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+      expect(attributesOf(builder, bookcaseUid)).not.toHaveProperty('books');
+      expect(shelf).toMatchObject({ target: bookcaseUid });
+      expect(shelf).not.toHaveProperty('inversedBy');
+      expect(shelf).not.toHaveProperty('mappedBy');
+    });
+
+    it.each(permutations([bookUid, shelfUid]))(
+      'moves a self-referencing relation to another type under its own name (%s, %s)',
+      (...order) => {
+        // Book.prequel owns Book.sequels; the save retargets Book.prequel to Shelf
+        (global as any).strapi.contentTypes[bookUid].__schema__.attributes = {
+          title: { type: 'string' },
+          prequel: { type: 'relation', relation: kind, target: bookUid, inversedBy: 'sequels' },
+          sequels: {
+            type: 'relation',
+            relation: oppositeRelation[kind],
+            target: bookUid,
+            mappedBy: 'prequel',
+          },
+        };
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              prequel: relation(kind, shelfUid, 'sequels'),
+            },
+            [shelfUid]: {
+              name: { type: 'string' },
+              books: relation(oppositeRelation[kind], bookUid, 'shelf'),
+              sequels: relation(oppositeRelation[kind], bookUid, 'prequel'),
+            },
+          },
+          order
+        );
+
+        expect(attributesOf(builder, bookUid)).not.toHaveProperty('sequels');
+        expectValidPair(builder, [bookUid, 'prequel'], [shelfUid, 'sequels']);
+      }
+    );
+
     it.each([
       ['owner', bookUid, shelfUid, 'books', { title: { type: 'string' } }],
       ['inverse side', shelfUid, bookUid, 'shelf', { name: { type: 'string' } }],
