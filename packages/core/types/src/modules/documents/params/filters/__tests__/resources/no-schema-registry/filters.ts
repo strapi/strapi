@@ -20,3 +20,18 @@ export const component: Filters<'shared.seo'> = {
   metaTitle: 'a',
   $not: { metaDescription: { $null: true } },
 };
+
+/**
+ * A filter generic over a UID stays assignable to the filter of the wide UID
+ */
+export const toWideContentType = <TSchemaUID extends UID.ContentType>(
+  filters: Filters<TSchemaUID>
+): Filters<UID.ContentType> => filters;
+
+export const toWideComponent = <TSchemaUID extends UID.Component>(
+  filters: Filters<TSchemaUID>
+): Filters<UID.Component> => filters;
+
+export const toWideSchema = <TSchemaUID extends UID.Schema>(
+  filters: Filters<TSchemaUID>
+): Filters<UID.Schema> => filters;

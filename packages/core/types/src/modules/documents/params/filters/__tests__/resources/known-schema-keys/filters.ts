@@ -49,6 +49,10 @@ export const seo: Filters<'shared.seo'>[] = [
     // @ts-expect-error Components have no documentId
     documentId: 'a',
   },
+  {
+    // @ts-expect-error An id is a number or a string
+    id: true,
+  },
 ];
 
 /**
