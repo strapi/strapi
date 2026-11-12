@@ -92,6 +92,9 @@ describe('convert-query-params', () => {
       );
 
       expect(res).toEqual({});
+      expect(transformer.private_convertFiltersQueryParams(input, models['api::dog.dog'])).toEqual(
+        {}
+      );
       expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
       expect(onUnknownFilterKey).toHaveBeenCalledWith({
         key: unknownKey,
@@ -185,6 +188,8 @@ describe('convert-query-params', () => {
           models['api::dog.dog']
         );
 
+        // Pins a known widening: the converter drops the whole condition. Filter validation
+        // rejects such object operands before conversion, this converter does not.
         expect(res).toEqual({});
         expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
         expect(onUnknownFilterKey).toHaveBeenCalledWith({
@@ -192,6 +197,40 @@ describe('convert-query-params', () => {
           uid: 'api::dog.dog',
           path: ['title', 'a'],
           operator: '$eq',
+        });
+      });
+
+      test.each<[string, object, { uid: string; path: string[] }]>([
+        [
+          'an attribute name',
+          { title: { $eq: { title: { foo: 1 } } } },
+          { uid: 'api::dog.dog', path: ['title', 'title', 'foo'] },
+        ],
+        [
+          'id',
+          { title: { $eq: { id: { foo: 1 } } } },
+          { uid: 'api::dog.dog', path: ['title', 'id', 'foo'] },
+        ],
+        [
+          'a relation',
+          { title: { $eq: { one_to_one: { foo: 1 } } } },
+          { uid: 'api::dog.dog', path: ['title', 'one_to_one', 'foo'] },
+        ],
+        [
+          'a component',
+          { title: { $eq: { cpa: { foo: 1 } } } },
+          { uid: 'default.cpa', path: ['title', 'cpa', 'foo'] },
+        ],
+      ])('keeps the operator when an object operand holds %s', (_, filters, expected) => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(filters, models['api::dog.dog']);
+
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'foo',
+          operator: '$eq',
+          ...expected,
         });
       });
 
@@ -237,6 +276,7 @@ describe('convert-query-params', () => {
               author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
               cover: { type: 'media' },
               related: { type: 'relation', relation: 'morphToOne' },
+              secret: { type: 'password' },
             },
           },
           'api::author.author': {
@@ -302,6 +342,18 @@ describe('convert-query-params', () => {
             operator: undefined,
             ...expected,
           });
+        });
+
+        test('is not called for intentionally removed password filters', () => {
+          const { crossModelTransformer, onUnknownFilterKey } = createCrossModelTransformer();
+
+          const res = crossModelTransformer.private_convertFiltersQueryParams(
+            { secret: { $eq: 'x' } },
+            crossModels['api::article.article']
+          );
+
+          expect(res).toEqual({});
+          expect(onUnknownFilterKey).not.toHaveBeenCalled();
         });
 
         test('reports populate filters relative to the populated model', () => {

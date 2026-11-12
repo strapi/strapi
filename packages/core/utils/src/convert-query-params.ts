@@ -242,7 +242,8 @@ export type UnknownFilterKey = {
   path: string[];
   /**
    * Set when the key sits inside the object operand of an operator applied to a scalar
-   * (non-relational) attribute, e.g. `$eq` in `{ meta: { $eq: { a: 1 } } }`
+   * (non-relational) attribute, at any depth, e.g. `$eq` in `{ meta: { $eq: { a: 1 } } }`
+   * and in `{ meta: { $eq: { title: { a: 1 } } } }`. It is the nearest such operator.
    */
   operator: string | undefined;
 };
@@ -265,7 +266,7 @@ type FiltersWalkContext = {
   path: string[];
   /** Whether the walk is inside the value of a scalar (non-relational) attribute */
   isInScalarValue: boolean;
-  /** Nearest operator met inside a scalar attribute value */
+  /** Nearest operator met inside a scalar attribute value, kept through nested attributes */
   operator: string | undefined;
 };
 
@@ -794,7 +795,8 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
         const attributeContext: FiltersWalkContext = {
           path: [...context.path, key],
           isInScalarValue: false,
-          operator: undefined,
+          // Inside an object operand, keep reporting the operand's operator
+          operator: context.operator,
         };
 
         // Relations
@@ -852,7 +854,7 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
           isOperator(key) === true
             ? { ...context, operator: context.isInScalarValue === true ? key : context.operator }
             : // `id` and `documentId`, valid without being declared as attributes
-              { path: [...context.path, key], isInScalarValue: true, operator: undefined };
+              { path: [...context.path, key], isInScalarValue: true, operator: context.operator };
 
         filters[key] = convertAndSanitizeFilters(value, schema, nestedContext);
       }
