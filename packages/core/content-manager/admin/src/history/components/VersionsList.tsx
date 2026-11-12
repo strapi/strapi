@@ -207,6 +207,10 @@ const SOURCE_LABELS: Record<HistoryVersions.HistoryVersionSource, MessageDescrip
     id: 'content-manager.history.sidebar.version-card.source.admin-api',
     defaultMessage: 'Admin API',
   },
+  'content-api': {
+    id: 'content-manager.history.sidebar.version-card.source.content-api',
+    defaultMessage: 'Content API',
+  },
 };
 
 const VersionSource = ({ source }: { source: HistoryVersions.HistoryVersionSource }) => {

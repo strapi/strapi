@@ -12,11 +12,11 @@ const articleModel = {
   attributes: {},
 } as unknown as Schema.ContentType;
 
-const createCtx = (pluginName: string, strategyName: string) =>
+const createCtx = (pluginName: string, strategyName: string, type = 'admin') =>
   ({
     state: {
       user: { id: 1 },
-      route: { info: { pluginName, type: 'admin' } },
+      route: { info: { pluginName, type } },
       auth: { strategy: { name: strategyName }, credentials: { id: 2 } },
     },
   }) as unknown as RequestContext;
@@ -323,6 +323,28 @@ describe('History utils', () => {
         source: 'admin-api',
         author: { type: 'token', model: 'admin::api-token', id: '2' },
       });
+    });
+
+    it('resolves a Content API token on a Content API route to the token', () => {
+      expect(resolveHistoryOrigin(createCtx('api', 'content-api-token', 'content-api'))).toEqual({
+        source: 'content-api',
+        author: { type: 'token', model: 'admin::api-token', id: '2' },
+      });
+    });
+
+    it('resolves another strategy on a Content API route to no author', () => {
+      expect(resolveHistoryOrigin(createCtx('api', 'users-permissions', 'content-api'))).toEqual({
+        source: 'content-api',
+        author: null,
+      });
+    });
+
+    it('resolves a Content API route without a strategy to no author', () => {
+      const ctx = {
+        state: { route: { info: { type: 'content-api' } } },
+      } as unknown as RequestContext;
+
+      expect(resolveHistoryOrigin(ctx)).toEqual({ source: 'content-api', author: null });
     });
 
     it('resolves nothing on another admin route', () => {

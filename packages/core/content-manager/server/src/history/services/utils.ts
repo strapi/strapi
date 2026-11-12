@@ -43,7 +43,7 @@ export type RequestContext = NonNullable<ReturnType<Modules.RequestContext.Reque
 
 interface HistoryOrigin {
   source: HistoryVersionSource;
-  author: HistoryVersionAuthorReference;
+  author: HistoryVersionAuthorReference | null;
 }
 
 export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
@@ -68,11 +68,14 @@ const toApiTokenAuthor = (token: { id: Data.ID }): HistoryVersionAuthorReference
   id: String(token.id),
 });
 
-export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
-  authorType: author.type,
-  authorModel: author.model,
-  authorId: author.id,
-});
+export const toAuthorColumns = (author: HistoryVersionAuthorReference | null): AuthorColumns =>
+  author === null
+    ? { authorType: null, authorModel: null, authorId: null }
+    : {
+        authorType: author.type,
+        authorModel: author.model,
+        authorId: author.id,
+      };
 
 export const toAuthorReference = (columns: AuthorColumns): StoredAuthorReference | null =>
   columns.authorType === null
@@ -128,6 +131,8 @@ type RelationResponse = {
 
 const isContentManagerRoute = ({ state }: RequestContext) =>
   state.route?.info?.pluginName === 'content-manager' && state.route?.info?.type === 'admin';
+
+const isContentApiRoute = ({ state }: RequestContext) => state.route?.info?.type === 'content-api';
 
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
@@ -545,6 +550,18 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
           };
         default:
           return null;
+      }
+    }
+
+    if (isContentApiRoute(requestContext)) {
+      switch (requestContext.state.auth?.strategy?.name) {
+        case 'content-api-token':
+          return {
+            source: 'content-api',
+            author: toApiTokenAuthor(requestContext.state.auth.credentials),
+          };
+        default:
+          return { source: 'content-api', author: null };
       }
     }
 
