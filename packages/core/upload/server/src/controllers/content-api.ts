@@ -10,6 +10,7 @@ import { resolveFileId } from '../services/upload';
 import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
+import { refuseFileById as refuseFileByIdFor } from '../utils/refuse-file-by-id';
 
 const { ValidationError, NotFoundError, ForbiddenError } = errors;
 
@@ -54,16 +55,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const hasDataRules = (ctx: Context) =>
     strapi.contentAPI.permissions.checker.isActive(ctx.state.auth);
 
-  /**
-   * Files have no owner and no data rule of their own, so a caller whose permissions are narrowed
-   * by conditions can't be limited to the files they uploaded. Replacing or updating one by id is
-   * refused for them rather than left open to every file.
-   */
-  const refuseFileById = (ctx: Context) => {
-    if (hasDataRules(ctx)) {
-      throw new ForbiddenError('Replacing or updating a file by id is not allowed for this caller');
-    }
-  };
+  const refuseFileById = (ctx: Context) => refuseFileByIdFor(strapi, ctx.state.auth);
 
   const isGiven = (value: unknown) => value !== undefined && value !== null && value !== '';
 
@@ -183,6 +175,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async destroy(ctx: Context) {
+      refuseFileById(ctx);
+
       const id = await resolveFileId(strapi, ctx.params.id);
       const file = id ? await getService('upload').findOne(id) : null;
 

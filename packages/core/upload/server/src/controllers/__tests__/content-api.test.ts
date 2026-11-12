@@ -817,6 +817,20 @@ describe('Content API Controller - find / findPage', () => {
       expect(mockUploadService.updateFileInfo).not.toHaveBeenCalled();
       expect(mockUploadService.replace).not.toHaveBeenCalled();
     });
+    it('refuses deleting a file by id, by numeric id or documentId, and removes nothing', async () => {
+      mockContext.params = { id: '7' };
+
+      await expect(buildController().destroy(mockContext)).rejects.toMatchObject({
+        name: 'ForbiddenError',
+      });
+
+      mockContext.params = { id: 'qovkpekciob2wt8qyd51mg8k' };
+
+      await expect(buildController().destroy(mockContext)).rejects.toMatchObject({
+        name: 'ForbiddenError',
+      });
+      expect(mockUploadService.remove).not.toHaveBeenCalled();
+    });
   });
 
   describe('every other caller (API token, Users & Permissions, admin)', () => {
@@ -866,6 +880,17 @@ describe('Content API Controller - find / findPage', () => {
       await buildController().upload(mockContext);
 
       expect(mockUploadService.updateFileInfo).toHaveBeenCalledWith('5', expect.anything());
+    });
+
+    it('still deletes a file by id', async () => {
+      const file = { id: 7 };
+
+      mockContext.params = { id: '7' };
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockUploadService.remove).toHaveBeenCalledWith(file);
     });
   });
 });
