@@ -167,7 +167,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (misplaced.length > 0) {
         throw new ValidationError(
           `The HTML puts ${placeholders(misplaced)} where it could leak: ` +
-            'a variable that carries a secret may only appear in text or in a link (<a href>)'
+            'a variable that carries a secret may only appear in text or at the start of a link (<a href="{{ … }}">)'
         );
       }
 
