@@ -192,6 +192,20 @@ describe('users in the users-permissions shape', () => {
     });
   });
 
+  it('answers a write on a missing user with the entry check wording', async () => {
+    const { strapi, ctx } = setup();
+    const compat = createUsersCompat(strapi);
+
+    await expect(compat.update(ctx({ params: { id: '999' } }))).rejects.toMatchObject({
+      name: 'NotFoundError',
+      message: 'Not Found',
+    });
+    await expect(compat.delete(ctx({ params: { id: '999' } }))).rejects.toMatchObject({
+      name: 'NotFoundError',
+      message: 'Not Found',
+    });
+  });
+
   it('refuses role, confirmed, blocked and provider in a write, naming the field', async () => {
     const { strapi, ctx, documents } = setup();
     const compat = createUsersCompat(strapi);

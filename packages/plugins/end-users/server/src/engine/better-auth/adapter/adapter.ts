@@ -151,6 +151,36 @@ const isSnapshotConflict = (error: unknown): boolean =>
   ((error as { errno?: unknown }).errno === 1020 ||
     (error as { code?: unknown }).code === 'ER_CHECKREAD');
 
+/**
+ * A failed query's message holds its SQL with the values bound to it (a session token, a password
+ * hash, a provider's tokens), and Better Auth and Strapi log the error. What goes on has the
+ * database's error code and nothing else: no query text, no bindings, no `cause`.
+ */
+const isDatabaseError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  ('sql' in error || 'sqlMessage' in error || 'code' in error);
+
+const withoutQuery = (operation: string, error: unknown): Error => {
+  const { code } = error as { code?: unknown };
+  const known = typeof code === 'string' || typeof code === 'number';
+  const refused = new Error(
+    `The database refused ${operation}${known ? ` (error code ${code})` : ''}.`
+  );
+
+  return known ? Object.assign(refused, { code }) : refused;
+};
+
+const WRITE_OPERATIONS = [
+  'create',
+  'update',
+  'updateMany',
+  'delete',
+  'deleteMany',
+  'consumeOne',
+  'incrementOne',
+] as const;
+
 /** `{ id } AND <filters>`: the one row that was read, and only while the filters still hold. */
 const guardedBy = (id: unknown, filters: StrapiFilters): StrapiFilters => ({
   $and: [{ id }, filters],
@@ -344,7 +374,7 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
       .updateMany({ where: { documentId: userId }, data: { password } });
   };
 
-  return {
+  const adapter = {
     async create({ data, ...target }) {
       if (
         !mirrorsPassword(target, data) ||
@@ -629,7 +659,26 @@ const createCustomAdapter: AdapterFactoryCustomizeAdapterCreator = ({
     count({ where, ...target }) {
       return documentsOf(target).count(where?.length ? { filters: filtersOf(target, where) } : {});
     },
-  };
+  } as ReturnType<AdapterFactoryCustomizeAdapterCreator>;
+
+  // The write paths, which carry the credentials: a database error leaves them without its query
+  const methods = adapter as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
+
+  for (const operation of WRITE_OPERATIONS) {
+    const run = methods[operation];
+
+    methods[operation] = async (...args) => {
+      try {
+        return await run(...args);
+      } catch (error) {
+        throw isDatabaseError(error)
+          ? withoutQuery(`the ${operation} of an auth record`, error)
+          : error;
+      }
+    };
+  }
+
+  return adapter;
 };
 
 /**
