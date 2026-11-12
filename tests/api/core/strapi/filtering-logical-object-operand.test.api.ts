@@ -139,6 +139,44 @@ describe('Filtering with object-shaped $or and $and operands', () => {
     }
   );
 
+  // A $or or $and operand keyed by operators is not a list either. The database layer rejects it (a
+  // 500), or, when no valid key is left in it, query conversion drops it and every row is returned.
+  const operatorKeyedFilters: Array<[string, string, string, string]> = [
+    ['a $or keyed by $eq', 'filters[$or][$eq]=Note%201', '$or', '$or'],
+    [
+      'a $or keyed by $eq with an index-keyed operand',
+      'filters[$or][$eq][0]=Note%201&filters[$or][$eq][100]=x',
+      '$or',
+      '$or',
+    ],
+    ['a $and keyed by $not', 'filters[$and][$not][title]=Note%201', '$and', '$and'],
+    [
+      'a $or keyed by $eq in a relation filter',
+      'filters[category][$or][$eq]=1',
+      '$or',
+      'category.$or',
+    ],
+    ['a $and keyed by $eq under $not', 'filters[$not][$and][$eq]=x', '$and', '$not.$and'],
+    [
+      'the operator map of $or on a scalar attribute',
+      'filters[title][$or][$eq]=Note%201',
+      '$or',
+      'title.$or',
+    ],
+  ];
+
+  test.each(operatorKeyedFilters)('returns a 400 for %s', async (_, query, key, path) => {
+    const res = await rq({ method: 'GET', url: `/lop-notes?${query}` });
+
+    expect(res.body.data).toBeNull();
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toMatchObject({
+      status: 400,
+      name: 'ValidationError',
+      message: `Invalid operand for ${key} at ${path}: expected an array of filters, not an object`,
+    });
+  });
+
   const acceptedFilters: Array<[string, Record<string, unknown>, string[]]> = [
     ['$or with 100 conditions', { $or: conditions(100, 'title', 'Note 1') }, ['Note 1']],
     ['$and with 100 conditions', { $and: noteOneConditions(100) }, ['Note 1']],
@@ -167,6 +205,7 @@ describe('Filtering with object-shaped $or and $and operands', () => {
   const nullOperandFilters: Array<[string, Record<string, unknown>]> = [
     ['$or in a $null operand', { title: { $null: { $or: { a: 1 } } } }],
     ['$and in a $notNull operand', { title: { $notNull: { $and: { a: 1 } } } }],
+    ['a $or keyed by $eq in a $null operand', { title: { $null: { $or: { $eq: 1 } } } }],
   ];
 
   test.each(nullOperandFilters)('returns a 400 for %s', async (_, filters) => {
