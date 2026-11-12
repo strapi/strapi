@@ -42,7 +42,7 @@ describe('Filters.ObjectNotation attribute keys', () => {
     COMPILE_TIMEOUT_MS + 10_000
   );
 
-  test.each([[[]], [['--strictNullChecks', 'false']]])(
+  test.each([[[]], [['--strictNullChecks', 'false']], [['--exactOptionalPropertyTypes', 'true']]])(
     'accepts a spread of a nested component filter (%j)',
     (compilerArgs) => {
       const { status, signal, output } = compileFixture('component-spread', compilerArgs);

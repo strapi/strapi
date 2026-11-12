@@ -1,8 +1,8 @@
 /**
  * Spreading a nested filter read back from a component filter, then adding a key.
  *
- * Compiled on its own, with and without `strictNullChecks`, by
- * `object-notation-attribute-keys.vitest.test.ts`.
+ * Compiled on its own by `object-notation-attribute-keys.vitest.test.ts`: with `strict`, without
+ * `strictNullChecks`, and with `exactOptionalPropertyTypes`.
  */
 import type { Modules, UID } from '../../../../../../..';
 
