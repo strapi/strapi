@@ -287,6 +287,9 @@ describe('Test uid service', () => {
         ['an empty string', '', 'my-test-model'],
         ['a whitespace-only string', '   ', 'my-test-model'],
         ['a string of tabs and newlines', '\t\n', 'my-test-model'],
+        ['a punctuation-only string', '!!!', 'my-test-model'],
+        ['an emoji-only string', '\u{1F600}\u{1F389}', 'my-test-model'],
+        ['a zero-width space', '\u200B', 'my-test-model'],
         ['an object', { a: 'b' }, 'my-test-model'],
         ['an array', ['x'], 'my-test-model'],
         ['a number', 42, 'my-test-model'],
@@ -303,6 +306,37 @@ describe('Test uid service', () => {
 
         expect(uid).toBe(expected);
       });
+
+      test.each([
+        ['a whitespace-only string', '   '],
+        ['a punctuation-only string', '!!!'],
+      ])(
+        'Falls back to the attribute default when the target value is %s',
+        async (_label, title) => {
+          const uidService = uidServiceLoader({
+            strapi: {
+              ...strapi,
+              contentTypes: {
+                'my-model': {
+                  ...strapi.contentTypes['my-model'],
+                  attributes: {
+                    ...strapi.contentTypes['my-model'].attributes,
+                    slug: { type: 'uid', targetField: 'title', default: 'slug-default' },
+                  },
+                },
+              },
+            },
+          });
+
+          const uid = await uidService.generateUIDField({
+            contentTypeUID: 'my-model',
+            field: 'slug',
+            data: { title },
+          } as any);
+
+          expect(uid).toBe('slug-default');
+        }
+      );
     });
   });
 
