@@ -13,7 +13,8 @@ import type { Project } from '../../../modules/project';
 import type { UpgradeOptions } from '../types';
 
 /**
- * Detects ranged @strapi/* dependencies and offers to pin them before upgrading.
+ * Detects ranged @strapi/* dependencies that follow Strapi's release version and offers to pin
+ * them before upgrading.
  *
  * The upgrade tool matches and bumps only exact semver pins. Ranges (e.g. ^4.26.1)
  * make the current version ambiguous and can cause false "already up-to-date" errors.
@@ -47,7 +48,7 @@ export const pinVersions = async (project: Project, options: UpgradeOptions) => 
   const confirmed =
     typeof options.confirm === 'function'
       ? await options.confirm(
-          `Pin all @strapi/* dependencies to ${f.version(pinTarget)} before upgrading?`
+          `Pin these @strapi/* dependencies to ${f.version(pinTarget)} before upgrading?`
         )
       : true;
 
