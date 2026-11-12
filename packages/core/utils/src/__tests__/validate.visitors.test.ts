@@ -235,7 +235,7 @@ describe('Validate visitors util', () => {
       ['an implicit $eq', { title: 'x' }],
       ['an array operand', { rank: { $in: [1, 2], $between: [1, 3] } }],
       ['$null and $notNull', { rank: { $null: true }, title: { $notNull: 'true' } }],
-      // Query conversion casts any $null / $notNull operand to a boolean
+      // Left to query conversion, which rejects a non-boolean $null / $notNull operand with a 400
       ['$null and $notNull with an object', { rank: { $null: { a: 1 } }, title: { $notNull: {} } }],
       ['the operator map of $not', { title: { $not: { $eq: 'x' } } }],
       ['a nested $not', { title: { $not: { $not: { $eq: 'x' } } } }],
