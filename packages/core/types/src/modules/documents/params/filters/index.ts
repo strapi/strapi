@@ -56,7 +56,10 @@ type NestedAttributeCondition<
  *
  * The filter object member does not forbid the operators, so spreading a filter read back from it
  * and adding a key (`{ ...filters.article, title: 'a' }`) compiles. The spread compiles even when the
- * value holds an operator object, and the database then throws.
+ * value holds an operator object, and the database then throws. For the same reason, an operator next
+ * to other keys is rejected only in a literal: through a variable (`{ $in: ids, title }` with
+ * `title?: string`), a conditional or a spread it compiles, and the database throws. Write
+ * `{ id: { $in: ids }, title }` instead.
  *
  * The forbidden keys are optional {@link Forbidden} properties, so the type stays assignable to
  * `ObjectNotation<Target>` and reading a filter back keeps the target's keys. A bare id would break
