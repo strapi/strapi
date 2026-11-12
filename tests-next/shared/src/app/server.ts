@@ -4,6 +4,13 @@ import path from 'node:path';
 
 import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
 import { SQLITE, databaseEnv, type Database } from '../db/database';
+import {
+  assertEdition,
+  editionEnv,
+  editionFromEnv,
+  getInstanceFeatures,
+  type Edition,
+} from '../edition';
 import { HOST, baseEnv, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
 import type { App } from './generate';
@@ -22,7 +29,12 @@ export interface StartServerOptions {
   /** Default: the app's SQLite file. Call resetDatabase() first for an empty database. */
   database?: Database;
   env?: NodeJS.ProcessEnv;
-  /** Load the test plugin (tests-next/shared/test-plugin). Default: true. */
+  /** Default: the run's edition (`STRAPI_TEST_EDITION`, see edition/index.ts). */
+  edition?: Edition;
+  /**
+   * Load the test plugin (tests-next/shared/test-plugin). Default: true. Without it, the server
+   * can't check that Strapi booted in the expected edition.
+   */
   testPlugin?: boolean;
   /** Register the fake AI translations provider. Needs EE with the `cms-byok-ai` feature. */
   fakeAiProvider?: boolean;
@@ -33,6 +45,7 @@ export interface StartServerOptions {
 export interface Server {
   app: App;
   database: Database;
+  edition: Edition;
   port: number;
   url: string;
   pid: number;
@@ -156,6 +169,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     requireAdmin = false,
     env,
     database = SQLITE,
+    edition = editionFromEnv(),
     testPlugin = true,
     fakeAiProvider = false,
     timeout = 120_000,
@@ -188,6 +202,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
       ...process.env,
       ...baseEnv(),
       ...databaseEnv(app, database),
+      ...editionEnv(edition),
       [TEST_PLUGIN_ENV_VAR]: String(testPlugin),
       // Always written, so a value inherited from the shell can't turn the fake provider on.
       [TEST_AI_PROVIDER_ENV_VAR]: fakeAiProvider ? 'fake' : '',
@@ -256,7 +271,28 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     await sleep(50);
   }
 
-  return { app, database, port, url, pid: child.pid!, logs: () => output, stop };
+  const server: Server = {
+    app,
+    database,
+    edition,
+    port,
+    url,
+    pid: child.pid!,
+    logs: () => output,
+    stop,
+  };
+
+  // Strapi boots as CE, with a warning, when it rejects the license: fail the run instead.
+  if (testPlugin) {
+    try {
+      assertEdition(await getInstanceFeatures(server), edition);
+    } catch (error) {
+      await stop();
+      throw new Error(`${(error as Error).message}\n${output.slice(-4000)}`, { cause: error });
+    }
+  }
+
+  return server;
 };
 
 export const stopServer = (server: Server) => server.stop();

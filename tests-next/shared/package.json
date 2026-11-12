@@ -12,7 +12,8 @@
     "create-strapi-app": "workspace:*",
     "knex": "3.3.0",
     "mysql2": "3.23.1",
-    "pg": "8.20.0"
+    "pg": "8.20.0",
+    "vitest": "catalog:"
   },
   "devDependencies": {
     "@types/node": "22.20.0",
@@ -22,5 +23,9 @@
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
     "tsconfig": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./vitest": "./src/edition/vitest.ts"
   }
 }

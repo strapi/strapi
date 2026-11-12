@@ -8,6 +8,7 @@ import { baseEnv } from '../app/config';
 import type { App } from '../app/generate';
 import type { Server } from '../app/server';
 import { SQLITE, databaseEnv, type Database } from '../db/database';
+import { editionEnv, editionFromEnv, type Edition } from '../edition';
 import { TEST_PLUGIN_ENV_VAR } from '../test-plugin';
 import type { SeedPlan, SeedResult } from './types';
 
@@ -16,6 +17,8 @@ export type { AdminPermission, SeedPlan, SeedResult } from './types';
 export interface SeedAppOptions {
   /** The database the server will start on. Default: the app's SQLite file. */
   database?: Database;
+  /** Default: the run's edition. Seed with the edition the server will start in. */
+  edition?: Edition;
   env?: NodeJS.ProcessEnv;
   /** Default: 120 s. */
   timeout?: number;
@@ -32,7 +35,7 @@ export interface SeedAppOptions {
 export const seedApp = async (
   app: App,
   plan: SeedPlan,
-  { database = SQLITE, env, timeout = 120_000 }: SeedAppOptions = {}
+  { database = SQLITE, edition = editionFromEnv(), env, timeout = 120_000 }: SeedAppOptions = {}
 ): Promise<SeedResult> => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tests-seed-'));
   const planFile = path.join(dir, 'plan.json');
@@ -49,6 +52,7 @@ export const seedApp = async (
           ...process.env,
           ...baseEnv(),
           ...databaseEnv(app, database),
+          ...editionEnv(edition),
           // The seeders live in the test plugin, which refuses to load without it.
           [TEST_PLUGIN_ENV_VAR]: 'true',
           ...env,
