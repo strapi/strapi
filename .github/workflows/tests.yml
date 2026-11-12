@@ -1040,8 +1040,11 @@ jobs:
     if: ${{ always() }}
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     name: aggregate_test_result
+    # `conditions` is listed too: when it fails, every job gated on its outputs is skipped, not
+    # failed, so without it this job would pass with no test run.
     needs:
       [
+        conditions,
         pretty,
         lint,
         lint_oxlint,
