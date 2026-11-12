@@ -59,7 +59,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await getService('weeklyMetrics').registerCron();
 
   // AI metadata
-  await getService('aiMetadataJobs').failInterruptedJobs();
+  failInterruptedAIMetadataJobsOnListen(strapi);
 
   if (strapi.ai.admin.isAvailable()) {
     const aiMetadataProvider = getService('aiMetadataProvider');
@@ -73,6 +73,23 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   getService('extensions').signFileUrlsOnDocumentService();
 }
+
+/**
+ * A job runs inside the server process that created it, so a job still `processing` when a
+ * server starts listening was cut off by a stop or crash of the previous server.
+ * The sweep waits for `listening` because CLI commands (`strapi export`, `strapi console`, ...)
+ * also run `bootstrap` but never listen: while a server runs a job, they must not fail it.
+ */
+const failInterruptedAIMetadataJobsOnListen = (strapi: Core.Strapi) => {
+  strapi.server.httpServer.once('listening', async () => {
+    try {
+      await getService('aiMetadataJobs').failInterruptedJobs();
+    } catch (error) {
+      strapi.log.error('Could not fail the AI metadata jobs interrupted by a previous server');
+      strapi.log.error(error);
+    }
+  });
+};
 
 const registerWebhookEvents = async () =>
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {

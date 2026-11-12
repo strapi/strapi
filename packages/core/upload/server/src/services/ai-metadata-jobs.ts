@@ -41,13 +41,13 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
   },
 
   /**
-   * Marks as failed every job still `processing`. Called at boot: a job runs inside the
-   * process that created it, so a job still `processing` when the server starts was cut off
-   * by a stop or crash and will never settle on its own.
+   * Marks as failed every job still `processing`. The upload bootstrap calls it once the server
+   * listens, to settle the jobs a stop or crash of the previous server left behind.
    */
-  // TODO @Nico With several instances on one database, a restarting instance also fails a job
-  // another instance is still running. That job's own completion then overwrites the status.
-  // Tracked as a follow-up: record a job owner or heartbeat so boot fails only orphaned jobs.
+  // TODO With several servers on one database, a starting server also fails a job another
+  // server is still running, and that job's own completion then overwrites the status.
+  // Multi-server ownership is tracked as a follow-up: record a job owner or heartbeat so only
+  // orphaned jobs are failed.
   async failInterruptedJobs(): Promise<void> {
     await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
       where: { status: 'processing' },
