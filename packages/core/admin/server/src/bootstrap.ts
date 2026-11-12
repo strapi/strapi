@@ -1,9 +1,8 @@
 import { map, merge, difference } from 'lodash';
 
 import type { Core } from '@strapi/types';
-import { async } from '@strapi/utils';
+import { async, quoteForLog } from '@strapi/utils';
 import { getService } from './utils';
-import { quoteForLog } from './utils/quote-for-log';
 import {
   getTokenOptions,
   getLegacyExpiresInSeconds,
@@ -157,7 +156,7 @@ export const syncAPITokensPermissions = async () => {
 
     strapi.log.warn(
       `Removed ${removedPermissions.length} stored API token permission(s) whose action is no longer registered. ` +
-        `Actions: ${unknownPermissions.join(', ')}. ` +
+        `Actions: ${unknownPermissions.map(quoteForLog).join(', ')}. ` +
         `API tokens: ${tokens.size === 0 ? 'none' : Array.from(tokens.values()).join(', ')}. ` +
         `Without API token: ${withoutTokenCount}.`
     );

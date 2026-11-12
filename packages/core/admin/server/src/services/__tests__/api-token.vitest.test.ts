@@ -3141,7 +3141,7 @@ describe('API Token', () => {
         await syncApiTokenPermissionsForUser(1);
 
         expect(deleteByIdsMock).toHaveBeenCalledWith([101]);
-        expect(warnMock).toHaveBeenCalledWith(expect.stringContaining(`101 ${PUBLISH}`));
+        expect(warnMock).toHaveBeenCalledWith(expect.stringContaining(`101 "${PUBLISH}"`));
       });
 
       test('Keeps one the owner holds with the same action, subject and parameters', async () => {
@@ -3201,7 +3201,7 @@ describe('API Token', () => {
       expect(deleteByIdsMock).toHaveBeenCalledWith([102]);
       expect(updateMock).not.toHaveBeenCalled();
       expect(warnMock).toHaveBeenCalledTimes(1);
-      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('102 plugin::cm.delete'));
+      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('102 "plugin::cm.delete"'));
     });
 
     test('Updates conditions on token permissions whose conditions have drifted', async () => {
@@ -3243,10 +3243,10 @@ describe('API Token', () => {
         data: { conditions: ['admin::is-creator'] },
       });
       expect(warnMock).toHaveBeenCalledTimes(1);
-      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('101 plugin::cm.read'));
+      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('101 "plugin::cm.read"'));
     });
 
-    test('Escapes the token name in each warning, so a warning stays on one line', async () => {
+    test('Escapes the token name and actions in each warning, so a warning stays on one line', async () => {
       const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
       const userPermissions = [
         {
@@ -3259,7 +3259,7 @@ describe('API Token', () => {
       const tokens = [
         {
           id: 10,
-          name: 'QA clamp\ntoken\r"quoted"\u2028\u2029\u0085end',
+          name: 'QA clamp\ntoken\r"quoted"\u2028\u2029\u0085\u007f\u009b\u202eend',
           adminPermissions: [
             {
               id: 101,
@@ -3270,7 +3270,7 @@ describe('API Token', () => {
             },
             {
               id: 102,
-              action: 'plugin::cm.delete',
+              action: 'plugin::cm.delete\u001b[2J',
               subject: 'api::article.article',
               conditions: [],
               properties: {},
@@ -3285,11 +3285,14 @@ describe('API Token', () => {
 
       expect(warnMock).toHaveBeenCalledTimes(2);
       for (const [message] of warnMock.mock.calls) {
-        expect(message).not.toMatch(/[\n\r\u2028\u2029\u0085]/);
+        expect(message).not.toMatch(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u);
         expect(message).toContain(
-          'Admin token 10 ("QA clamp\\ntoken\\r\\"quoted\\"\\u2028\\u2029\\u0085end") of user 1'
+          'Admin token 10 ("QA clamp\\ntoken\\r\\"quoted\\"\\u2028\\u2029\\u0085\\u007f\\u009b\\u202eend") of user 1'
         );
       }
+      expect(warnMock).toHaveBeenCalledWith(
+        expect.stringContaining('102 "plugin::cm.delete\\u001b[2J"')
+      );
     });
 
     test('Does nothing when token permissions are already in sync', async () => {

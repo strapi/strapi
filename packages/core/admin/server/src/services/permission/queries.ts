@@ -2,8 +2,8 @@ import { get, xor, differenceWith } from 'lodash';
 
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
+import { quoteForLog } from '@strapi/utils';
 import { getService } from '../../utils';
-import { quoteForLog } from '../../utils/quote-for-log';
 import permissionDomain, { CreatePermissionPayload } from '../../domain/permission';
 import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
 import { Action } from '../../domain/action';
@@ -171,8 +171,8 @@ const logRemovedPermissions = (removedPermissions: Permission[]) => {
 
   strapi.log.warn(
     `Removed ${removedPermissions.length} stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ` +
-      `Actions: ${actions.join(', ')}. ` +
-      `Subjects: ${subjects.length === 0 ? 'none' : subjects.join(', ')}. ` +
+      `Actions: ${actions.map(quoteForLog).join(', ')}. ` +
+      `Subjects: ${subjects.length === 0 ? 'none' : subjects.map(quoteForLog).join(', ')}. ` +
       `Roles: ${formatOwners(roles)}. ` +
       `Admin tokens: ${formatOwners(tokens)}. ` +
       `Without role or admin token: ${withoutOwnerCount}.`
