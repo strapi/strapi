@@ -89,6 +89,27 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
     };
   };
 
+  /**
+   * Cleans the HTML, then checks and returns that same string, so what is checked is exactly what is stored
+   * or sent. Refuses a secret variable where it could leak.
+   */
+  const cleanAndCheck = (
+    definition: RegisteredTemplate,
+    body: TemplateContent
+  ): TemplateContent => {
+    const html = cleanTemplateHtml(body.html, definition.urls);
+    const misplaced = findMisplacedSecrets(html, definition.secrets);
+
+    if (misplaced.length > 0) {
+      throw new ValidationError(
+        `The HTML puts ${placeholders(misplaced)} where it could leak: ` +
+          'a variable that carries a secret may only appear in text or at the start of a link (<a href="{{ … }}">)'
+      );
+    }
+
+    return { subject: body.subject, html, text: body.text };
+  };
+
   /** The stored row for the locale, else the `en` row, else the registered defaults. */
   const get = async (key: string, locale: string = DEFAULT_LOCALE): Promise<TemplateDetail> => {
     assertLocale(locale);
@@ -160,18 +181,7 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
     async update(key: string, locale: string, body: TemplateContent): Promise<TemplateDetail> {
       assertLocale(locale);
       const definition = getDefinition(key);
-      // Clean first, then check and store the same string, so what is checked is exactly what is stored.
-      const html = cleanTemplateHtml(body.html, definition.urls);
-      const misplaced = findMisplacedSecrets(html, definition.secrets);
-
-      if (misplaced.length > 0) {
-        throw new ValidationError(
-          `The HTML puts ${placeholders(misplaced)} where it could leak: ` +
-            'a variable that carries a secret may only appear in text or at the start of a link (<a href="{{ … }}">)'
-        );
-      }
-
-      const data = { subject: body.subject, html, text: body.text };
+      const data = cleanAndCheck(definition, body);
 
       const existing = await query().findOne({ where: { key, locale } });
 
@@ -195,15 +205,20 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
       key: string,
       to: string,
       data: Record<string, unknown>,
-      opts: { locale?: string } = {}
+      opts: { locale?: string; content?: TemplateContent } = {}
     ): Promise<void> {
       const definition = getDefinition(key);
       let template = await get(key, opts.locale);
 
+      // Content that was not saved (a test email from the editor) is cleaned and checked like a save.
+      if (opts.content) {
+        template = { ...template, ...cleanAndCheck(definition, opts.content), isDefault: false };
+      }
+
       // Rows saved before the save-time checks, or written without them, are checked again here.
       // A row whose HTML the cleaning would change (a tag left open, say, which a browser reads
       // differently from the way it is split here) is not one that can be checked, so it is not sent.
-      if (!template.isDefault) {
+      if (!template.isDefault && !opts.content) {
         const misplaced = findMisplacedSecrets(template.html, definition.secrets);
         const unclean = cleanTemplateHtml(template.html, definition.urls) !== template.html;
 

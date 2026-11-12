@@ -84,12 +84,15 @@ const useResetTemplate = (key: string, locale: string) => {
   );
 };
 
-/** Sends the stored template, filled with sample data, to the signed-in admin. */
+/**
+ * Sends the content in the editor, filled with sample data, to the signed-in admin. It does not have to be
+ * saved: the server cleans and checks it the way it does a save.
+ */
 const useSendTestTemplate = (key: string, locale: string) => {
   const { post } = useFetchClient();
 
-  return useMutation(async () => {
-    await post(templatePath(key, '/test'), undefined, { params: { locale } });
+  return useMutation(async (body: TemplateContent) => {
+    await post(templatePath(key, '/test'), body, { params: { locale } });
   });
 };
 

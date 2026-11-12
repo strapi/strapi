@@ -338,6 +338,61 @@ describe('Templates service', () => {
     });
   });
 
+  describe('subject and unsaved content', () => {
+    const key = 'end-users.magic-link';
+
+    beforeEach(() => {
+      service.register(key, {
+        defaults: { subject: 'Hi {{ name }}', html: '<p>{{ url }}</p>', text: '{{ url }}' },
+        variables: ['name', { name: 'url', secret: true, url: true }],
+      });
+    });
+
+    it('sends the content it is given, cleaned, instead of the stored row', async () => {
+      ctx
+        .getRows()
+        .push({ id: 1, key, locale: 'en', subject: 'Stored', html: '<p>S</p>', text: 'S' });
+
+      await service.sendTemplate(
+        key,
+        'a@b.c',
+        { name: 'Ann', url: 'https://a.test' },
+        {
+          content: {
+            subject: 'Draft {{ name }}',
+            html: '<script>x()</script><a href="{{ url }}" onclick="x()">Go</a>',
+            text: 'Draft',
+          },
+        }
+      );
+
+      expect(ctx.send).toHaveBeenCalledWith({
+        to: 'a@b.c',
+        subject: 'Draft Ann',
+        html: '<a href="https://a.test">Go</a>',
+        text: 'Draft',
+      });
+    });
+
+    it('refuses given content that leaks a secret, and sends nothing', async () => {
+      await expect(
+        service.sendTemplate(
+          key,
+          'a@b.c',
+          { url: 'https://a.test' },
+          {
+            content: {
+              subject: 'S',
+              html: '<a href="https://e.test/?t={{ url }}">x</a>',
+              text: '',
+            },
+          }
+        )
+      ).rejects.toBeInstanceOf(errors.ValidationError);
+      expect(ctx.send).not.toHaveBeenCalled();
+    });
+  });
+
   describe('hardening at send time', () => {
     const key = 'end-users.magic-link';
     const defaults = {

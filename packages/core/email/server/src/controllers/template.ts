@@ -78,7 +78,11 @@ const templateController = {
     ctx.body = { data: { ok: true } };
   },
 
-  /** Sends the template to the signed-in admin, filled with sample data from its variable list. */
+  /**
+   * Sends the template to the signed-in admin, filled with sample data from its variable list. With a body
+   * (subject, html and text) it sends that content, cleaned and checked like a save, so the editor's unsaved
+   * changes can be tried; without one it sends the saved template.
+   */
   async test(ctx: Koa.Context) {
     const locale = getLocale(ctx);
     const to = ctx.state.user?.email;
@@ -87,12 +91,15 @@ const templateController = {
       throw new ApplicationError('No recipient for the test email');
     }
 
+    const body = ctx.request.body as Record<string, unknown> | undefined;
+    const content = body && Object.keys(body).length > 0 ? getBody(ctx) : undefined;
+
     const { variables } = await service().get(ctx.params.key, locale);
 
     try {
       const sample = buildSampleData(variables, service().urlVariables(ctx.params.key));
 
-      await service().sendTemplate(ctx.params.key, to, sample, { locale });
+      await service().sendTemplate(ctx.params.key, to, sample, { locale, content });
     } catch (error) {
       if (error instanceof Error) {
         if ('statusCode' in error && error.statusCode === 400) {

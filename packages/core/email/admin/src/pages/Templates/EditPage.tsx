@@ -175,7 +175,7 @@ export const EditPage = () => {
   };
 
   const handleSendTest = () => {
-    sendTest.mutate(undefined, {
+    sendTest.mutate(values, {
       onSuccess: () =>
         toggleNotification({
           type: 'success',
@@ -184,11 +184,14 @@ export const EditPage = () => {
             defaultMessage: 'Test email sent to your address',
           }),
         }),
-      onError: () =>
-        notifyError({
-          id: 'email.Templates.edit.testError',
-          defaultMessage: 'Could not send the test email',
-        }),
+      onError: (error) =>
+        notifyError(
+          {
+            id: 'email.Templates.edit.testError',
+            defaultMessage: 'Could not send the test email',
+          },
+          error
+        ),
     });
   };
 

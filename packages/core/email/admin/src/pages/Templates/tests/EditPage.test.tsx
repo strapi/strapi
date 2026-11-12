@@ -153,6 +153,55 @@ describe('Templates EditPage', () => {
     expect(await screen.findByText('Could not send the test email')).toBeInTheDocument();
   });
 
+  it('sends the unsaved content of the editor with the test', async () => {
+    const sent = jest.fn();
+    server.use(
+      http.post('/email/templates/:key/test', async ({ request }) => {
+        sent(await request.json());
+
+        return HttpResponse.json({ data: { ok: true } });
+      })
+    );
+
+    const { user } = renderEdit();
+
+    const subject = await screen.findByRole('textbox', { name: 'Subject' });
+    await user.clear(subject);
+    await user.type(subject, 'Draft');
+    await user.click(screen.getByRole('button', { name: 'Send test' }));
+
+    expect(await screen.findByText('Test email sent to your address')).toBeInTheDocument();
+    expect(sent).toHaveBeenCalledWith({
+      subject: 'Draft',
+      html: '<p>Hello {{ name }}</p>',
+      text: 'Hello {{ name }}',
+    });
+  });
+
+  it('shows the reason when the test content is refused', async () => {
+    server.use(
+      http.post('/email/templates/:key/test', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'No secret there',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    const { user } = renderEdit();
+
+    await user.click(await screen.findByRole('button', { name: 'Send test' }));
+
+    expect(await screen.findByText('No secret there')).toBeInTheDocument();
+  });
+
   it('is read-only without templates.update', async () => {
     renderEdit({ providerOptions: { permissions: PERMISSIONS.templatesRead } });
 
