@@ -1,11 +1,9 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import tailwindcss from '@tailwindcss/postcss';
 import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
-import fs from 'node:fs';
 import path from 'node:path';
 import { Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
@@ -16,7 +14,7 @@ import { getUserConfig } from '../core/config';
 import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
-import { buildSingletonAliasEntries, getSubpathEntries } from '../core/admin-vite-aliases';
+import { buildSingletonAliasEntries } from '../core/admin-vite-aliases';
 
 // esbuild's support table does not recognize current browserslist versions, so the
 // intersection of those targets is reported as missing arbitrary module namespace
@@ -51,8 +49,6 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
   });
   strapiProcessEnvPlugins.add(definePlugin);
 
-  const cssLoaders = [require.resolve('style-loader'), require.resolve('css-loader')];
-
   return {
     experiments: {
       topLevelAwait: true,
@@ -67,10 +63,6 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
         'styled-components': getModulePath('styled-components'),
         'react-router-dom': getModulePath('react-router-dom'),
         // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
-        // Exact `$` keys reach each exports subpath; the bare key matches subpath imports, so it comes last
-        ...Object.fromEntries(
-          getSubpathEntries('@strapi/design-system').map(([key, file]) => [`${key}$`, file])
-        ),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         // Force a single CodeMirror instance (resolved from design-system's closure) so the JSON
         // custom field does not crash on cross-copy instanceof checks. Tolerant: unresolvable
@@ -129,29 +121,7 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
         },
         {
           test: /\.css$/i,
-          oneOf: [
-            {
-              // Only the generated admin stylesheet holds Tailwind at-rules. Webpack matches the
-              // real path, so a symlinked application directory needs the realpath here
-              include: path.join(fs.realpathSync(ctx.runtimeDir), 'styles.css'),
-              use: [
-                ...cssLoaders,
-                {
-                  loader: require.resolve('postcss-loader'),
-                  options: {
-                    postcssOptions: {
-                      plugins: [
-                        tailwindcss({
-                          optimize: nodeEnv === 'production' && Boolean(ctx.options.minify),
-                        }),
-                      ],
-                    },
-                  },
-                },
-              ],
-            },
-            { use: cssLoaders },
-          ],
+          use: [require.resolve('style-loader'), require.resolve('css-loader')],
         },
         {
           test: /\.(svg|eot|otf|ttf|woff|woff2)$/,

@@ -28,11 +28,19 @@ jest.mock('../core/scan-roots', () => ({
   getScanRoots: jest.fn(async () => [mockScanRoot]),
 }));
 
+const mockGetModulePath = jest.fn((mod: string): string => `/app/node_modules/${mod}`);
+
+jest.mock('../core/resolve-module', () => ({
+  ...jest.requireActual('../core/resolve-module'),
+  getModulePath: (mod: string) => mockGetModulePath(mod),
+}));
+
 const buildStrapiMock = (
   cookieName?: string,
   cookiePath?: string,
   cookieDomain?: string,
-  legacyAuthDomain?: string
+  legacyAuthDomain?: string,
+  futureFlags: Record<string, boolean> = {}
 ): Core.Strapi =>
   ({
     config: {
@@ -69,11 +77,17 @@ const buildStrapiMock = (
       dist: { root: '/app/dist' },
     },
     telemetry: { isDisabled: true },
+    features: {
+      future: { isEnabled: (name: string) => futureFlags[name] === true },
+    },
   }) as unknown as Core.Strapi;
+
+const buildStrapiMockWithFlags = (futureFlags: Record<string, boolean>): Core.Strapi =>
+  buildStrapiMock(undefined, undefined, undefined, undefined, futureFlags);
 
 const buildArgs = (strapi: Core.Strapi) => ({
   cwd: '/app',
-  // createBuildContext calls `debug` and `warn` only, so the mock leaves out the counters, spinner and progress bar
+  // The tests observe `warn` only, so the mock leaves the rest of `Logger` out
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
@@ -91,17 +105,73 @@ describe('createBuildContext', () => {
     jest.clearAllMocks();
   });
 
-  it.each(['vite', 'webpack'] as const)(
-    'holds the Tailwind scan roots and warns nothing under %s',
-    async (bundler) => {
-      const args = { ...buildArgs(buildStrapiMock()), options: { bundler } };
+  describe('unstableNextDesignSystem', () => {
+    it('is off and holds no scan root when the flag is absent', async () => {
+      const args = buildArgs(buildStrapiMock());
 
       const ctx = await createBuildContext(args);
 
-      expect(ctx.scanRoots).toEqual([mockScanRoot]);
+      expect(ctx.nextDesignSystem).toBe(false);
+      expect(ctx.scanRoots).toEqual([]);
       expect(args.logger.warn).not.toHaveBeenCalled();
-    }
-  );
+    });
+
+    it('is on and holds the scan roots when the flag is on under Vite', async () => {
+      const strapi = buildStrapiMockWithFlags({ unstableNextDesignSystem: true });
+
+      const ctx = await createBuildContext({ ...buildArgs(strapi), options: { bundler: 'vite' } });
+
+      expect(ctx.nextDesignSystem).toBe(true);
+      expect(ctx.scanRoots).toEqual([mockScanRoot]);
+    });
+
+    it('throws with the resolutions snippet when the next entry does not resolve', async () => {
+      mockGetModulePath.mockImplementationOnce(() => {
+        throw new Error('Cannot find module');
+      });
+      const strapi = buildStrapiMockWithFlags({ unstableNextDesignSystem: true });
+
+      const build = createBuildContext({ ...buildArgs(strapi), options: { bundler: 'vite' } });
+
+      await expect(build).rejects.toThrow(
+        /"resolutions": \{ "@strapi\/design-system": "<version>" \}/
+      );
+      await expect(build).rejects.toThrow(/alpha dist-tag/);
+      await expect(build).rejects.not.toThrow(/experimental/);
+    });
+
+    it('resolves the next entry from the admin closure when the flag is on', async () => {
+      const strapi = buildStrapiMockWithFlags({ unstableNextDesignSystem: true });
+
+      const ctx = await createBuildContext({
+        ...buildArgs(strapi),
+        options: { bundler: 'vite' },
+      });
+
+      expect(ctx.nextDesignSystem).toBe(true);
+      expect(mockGetModulePath).toHaveBeenCalledWith('@strapi/design-system/next/source.css');
+    });
+
+    it('resolves nothing when the flag is off', async () => {
+      await createBuildContext(buildArgs(buildStrapiMock()));
+
+      expect(mockGetModulePath).not.toHaveBeenCalledWith('@strapi/design-system/next/source.css');
+    });
+
+    it('is off and warns once when the flag is on under webpack', async () => {
+      const strapi = buildStrapiMockWithFlags({ unstableNextDesignSystem: true });
+      const args = { ...buildArgs(strapi), options: { bundler: 'webpack' as const } };
+
+      const ctx = await createBuildContext(args);
+
+      expect(ctx.nextDesignSystem).toBe(false);
+      expect(ctx.scanRoots).toEqual([]);
+      expect(args.logger.warn).toHaveBeenCalledTimes(1);
+      expect(args.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('unstableNextDesignSystem')
+      );
+    });
+  });
 
   it('transports admin.auth.cookie.name into STRAPI_ADMIN_AUTH_COOKIE_NAME', async () => {
     const strapi = buildStrapiMock('my_admin_jwt');

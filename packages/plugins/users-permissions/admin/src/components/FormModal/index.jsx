@@ -6,15 +6,7 @@
 
 import * as React from 'react';
 
-import {
-  Button,
-  Flex,
-  Grid,
-  Modal,
-  Breadcrumbs,
-  Crumb,
-  VisuallyHidden,
-} from '@strapi/design-system';
+import { Button, Flex, Grid, Modal, Breadcrumbs, Crumb } from '@strapi/design-system';
 import { FormikUnsavedChangesRegistrar, UnsavedChangesModal } from '@strapi/strapi/admin';
 import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
@@ -45,9 +37,6 @@ const FormModal = ({
               </Crumb>
             ))}
           </Breadcrumbs>
-          <VisuallyHidden>
-            <Modal.Title>{headerBreadcrumbs.join(', ')}</Modal.Title>
-          </VisuallyHidden>
         </Modal.Header>
         <Formik
           onSubmit={(values) => onSubmit(values)}

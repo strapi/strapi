@@ -30,9 +30,12 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   // its CJS entry, which emits "The CJS build of Vite's Node API is deprecated".
   // https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated
   const { default: react } = await import('@vitejs/plugin-react-swc');
-  // Imported dynamically, because the CJS build turns a static import into a require() of an
-  // ESM-only package, which Node before 22.12 cannot load
-  const { default: tailwindcss } = await import('@tailwindcss/vite');
+
+  // Imported dynamically so a flag-off build never loads the native oxide and lightningcss binaries
+  // Make it a static import again when the flag goes
+  const tailwindPlugins = ctx.nextDesignSystem
+    ? [(await import('@tailwindcss/vite')).default()]
+    : [];
 
   return {
     root: ctx.cwd,
@@ -162,7 +165,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // where packages imported by plugins may not be resolvable from plugin chunks
       alias: buildAdminViteResolveAliases(),
     },
-    plugins: [tailwindcss(), react(), buildFilesPlugin(ctx)],
+    plugins: [...tailwindPlugins, react(), buildFilesPlugin(ctx)],
   };
 };
 
@@ -184,7 +187,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       sourcemap,
       rollupOptions: {
         input: {
-          strapi: path.join(ctx.runtimeDir, 'index.html'),
+          strapi: ctx.nextDesignSystem ? path.join(ctx.runtimeDir, 'index.html') : ctx.entry,
         },
       },
     },

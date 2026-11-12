@@ -158,17 +158,13 @@ describe('UnlockSharedFieldsAction', () => {
 
   it('unlocks only when the editor confirms the warning', async () => {
     const { result } = renderAction();
-    const { dialog } = result.current as {
-      dialog: { title: string; content: React.ComponentType<DialogProps> };
-    };
-    const Content = dialog.content;
+    const Content = (result.current as { dialog: { content: React.ComponentType<DialogProps> } })
+      .dialog.content;
     const onClose = jest.fn();
 
-    // Mirrors the content-manager DocumentActions dialog, which renders the action's title.
     const { user } = render(
       <Dialog.Root open>
         <Dialog.Content>
-          <Dialog.Header>{dialog.title}</Dialog.Header>
           <Content onClose={onClose} />
         </Dialog.Content>
       </Dialog.Root>

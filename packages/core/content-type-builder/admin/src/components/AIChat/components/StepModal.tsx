@@ -192,9 +192,9 @@ const StepModal = ({
         <UnsavedChangesModal open onOpenChange={handleCancel} hasUnsavedChanges={hasUnsavedChanges}>
           <Modal.Content>
             <Modal.Header>
-              <Modal.Title variant="omega" fontWeight="bold">
+              <Typography variant="omega" fontWeight="bold">
                 {currentChild?.title || title}
-              </Modal.Title>
+              </Typography>
             </Modal.Header>
 
             <form onSubmit={handleFormSubmit}>

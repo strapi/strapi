@@ -69,7 +69,7 @@ import { useFolderInfo } from '../../hooks/useFolderInfo';
 import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
 
-import { AssetCropEditor, CROP_EDITOR_SELECTOR } from './AssetCropEditor';
+import { AssetCropEditor } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
 
 import type {
@@ -1541,12 +1541,6 @@ export const AssetDetailsDrawer = ({
         // like the header's close button, so unsaved edits are still guarded.
         onPointerDownOutside={(event) => {
           if (shouldKeepDrawerOpen(event, isVisible)) {
-            event.preventDefault();
-          }
-        }}
-        // The crop editor takes Escape for itself: it closes the editor, not the drawer
-        onEscapeKeyDown={(event) => {
-          if (event.target instanceof Element && event.target.closest(CROP_EDITOR_SELECTOR)) {
             event.preventDefault();
           }
         }}

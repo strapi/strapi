@@ -1,31 +1,9 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-
-import { getSubpathEntries } from '../core/admin-vite-aliases';
-import { getEntryModule, getStylesheet, writeStaticClientFiles } from '../staticFiles';
+import { getEntryModule, getStylesheet } from '../staticFiles';
 
 import type { BuildContext } from '../create-build-context';
 
-// Prettier loads its plugins with a dynamic import, which Jest cannot run without --experimental-vm-modules
-jest.mock('prettier', () => ({ format: async (source: string) => source }));
-
-// The exports-map target of the fixture design system, so no test depends on the installed copy
-const sourceTarget = '/fixture/@strapi/design-system/src/next/source.css';
-
-jest.mock('../core/admin-vite-aliases', () => ({
-  getSubpathEntries: jest.fn(() => [
-    ['@strapi/design-system', '/fixture/@strapi/design-system/dist/index.mjs'],
-    ['@strapi/design-system/next/source.css', sourceTarget],
-  ]),
-}));
-
 describe('getStylesheet', () => {
   const ctx = (scanRoots: string[]) => ({ scanRoots }) as unknown as BuildContext;
-
-  test('imports the design system source that @strapi/admin resolves', () => {
-    expect(getStylesheet(ctx([]))).toContain(`@import "${sourceTarget}";`);
-  });
 
   test('quotes a path that holds an apostrophe, and adds no backslash', () => {
     const sheet = getStylesheet(ctx(["/Users/o'brien/app/src/admin"]));
@@ -73,70 +51,20 @@ describe('getStylesheet', () => {
     expect(sheet).not.toContain('\\');
   });
 
-  test('imports a Windows design system source with forward slashes', () => {
-    jest
-      .mocked(getSubpathEntries)
-      .mockReturnValueOnce([
-        [
-          '@strapi/design-system/next/source.css',
-          'C:\\fixture\\@strapi\\design-system\\src\\next\\source.css',
-        ],
-      ]);
-
-    expect(getStylesheet(ctx([]))).toContain(
-      '@import "C:/fixture/@strapi/design-system/src/next/source.css";'
-    );
-  });
-
   test('stops when the path holds both quote characters', () => {
     expect(() => getStylesheet(ctx([`/pkg/o'br"ien`]))).toThrow('both quote characters');
-  });
-
-  test('tells the user to update Strapi when the design system has no next source', () => {
-    // A design system older than 2.3.0 exports no next entry
-    jest
-      .mocked(getSubpathEntries)
-      .mockReturnValueOnce([
-        ['@strapi/design-system', '/fixture/@strapi/design-system/dist/index.mjs'],
-      ]);
-
-    expect(() => getStylesheet(ctx([]))).toThrow(
-      /@strapi\/design-system\/next\/source\.css.*Update @strapi\/strapi/
-    );
   });
 });
 
 describe('getEntryModule', () => {
-  const ctx = (bundler: BuildContext['bundler']) =>
-    ({ bundler, plugins: [] }) as unknown as BuildContext;
+  const ctx = (nextDesignSystem: boolean) =>
+    ({ nextDesignSystem, plugins: [] }) as unknown as BuildContext;
 
-  test.each(['vite', 'webpack'] as const)('imports the admin stylesheet under %s', (bundler) => {
-    expect(getEntryModule(ctx(bundler))).toContain("import './styles.css';");
-  });
-});
-
-describe('writeStaticClientFiles', () => {
-  let runtimeDir: string;
-
-  beforeEach(async () => {
-    runtimeDir = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-client-'));
+  test('imports the host stylesheet when the next design system is on', () => {
+    expect(getEntryModule(ctx(true))).toContain("import './styles.css';");
   });
 
-  afterEach(async () => {
-    await fs.rm(runtimeDir, { recursive: true, force: true });
-  });
-
-  test('writes the admin stylesheet under webpack', async () => {
-    const ctx = {
-      bundler: 'webpack',
-      runtimeDir,
-      plugins: [],
-      scanRoots: [],
-      logger: { debug: jest.fn() },
-    } as unknown as BuildContext;
-
-    await writeStaticClientFiles(ctx);
-
-    expect((await fs.readdir(runtimeDir)).sort()).toEqual(['app.js', 'index.html', 'styles.css']);
+  test('imports no stylesheet when the next design system is off', () => {
+    expect(getEntryModule(ctx(false))).not.toContain('styles.css');
   });
 });

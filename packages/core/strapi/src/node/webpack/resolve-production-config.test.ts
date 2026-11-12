@@ -6,32 +6,13 @@ import vm from 'node:vm';
 
 import { webpack, type Configuration, type DefinePlugin, type Stats } from 'webpack';
 
-import tailwindcss from '@tailwindcss/postcss';
-
-import {
-  mergeConfigWithUserConfig,
-  resolveDevelopmentConfig,
-  resolveProductionConfig,
-} from './config';
+import { mergeConfigWithUserConfig, resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
-import { getSubpathEntries } from '../core/admin-vite-aliases';
-import { getMonorepoAliases } from '../core/aliases';
-import { loadStrapiMonorepo } from '../core/monorepo';
-
-jest.mock('@tailwindcss/postcss', () => ({
-  __esModule: true,
-  default: jest.fn((options: unknown) => ({ postcssPlugin: 'tailwindcss', options })),
-}));
 
 jest.mock('browserslist-to-esbuild', () => ({
   __esModule: true,
   default: jest.fn(() => ['chrome100']),
 }));
-
-// The OS temp directory is a symlink on macOS, so the stylesheet rule must match its realpath
-const runtimeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-webpack-runtime-'));
-
-afterAll(() => fs.rmSync(runtimeDir, { recursive: true, force: true }));
 
 const createContext = (options: Record<string, unknown>) =>
   ({
@@ -44,7 +25,7 @@ const createContext = (options: Record<string, unknown>) =>
     entry: '.strapi/client/app.js',
     distPath: `${process.cwd()}/dist/build`,
     env: {},
-    runtimeDir,
+    runtimeDir: `${process.cwd()}/.strapi/client`,
     logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
     strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
     bundler: 'webpack' as const,
@@ -67,73 +48,6 @@ describe('Webpack admin configuration', () => {
     const config = await resolveProductionConfig(createContext({ minify: true, sourcemap: true }));
 
     expect(config.devtool).toBe('source-map');
-  });
-
-  describe('admin stylesheet rule', () => {
-    const getCssBranches = async (options: Record<string, unknown>) => {
-      const config = await resolveProductionConfig(createContext(options));
-      const cssRule = config.module?.rules?.find(
-        (rule) => rule && typeof rule === 'object' && String(rule.test) === String(/\.css$/i)
-      );
-
-      return cssRule && typeof cssRule === 'object' ? (cssRule.oneOf ?? []) : [];
-    };
-
-    it('runs postcss-loader with Tailwind last, on the generated stylesheet only', async () => {
-      const [stylesheetRule, otherRule] = await getCssBranches({ minify: true });
-      const loaders = stylesheetRule && Array.isArray(stylesheetRule.use) ? stylesheetRule.use : [];
-
-      expect(stylesheetRule).toHaveProperty(
-        'include',
-        path.join(fs.realpathSync(runtimeDir), 'styles.css')
-      );
-      expect(loaders.at(-1)).toEqual({
-        loader: require.resolve('postcss-loader'),
-        options: {
-          postcssOptions: {
-            plugins: [{ postcssPlugin: 'tailwindcss', options: expect.anything() }],
-          },
-        },
-      });
-      expect(otherRule).toEqual({
-        use: [require.resolve('style-loader'), require.resolve('css-loader')],
-      });
-    });
-
-    it('matches the stylesheet on the real path of a symlinked runtime directory', async () => {
-      const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-webpack-symlink-'));
-      const target = path.join(directory, 'target');
-      const link = path.join(directory, 'link');
-      fs.mkdirSync(target);
-      fs.symlinkSync(target, link, 'dir');
-
-      try {
-        const ctx = createContext({ minify: true });
-        ctx.runtimeDir = link;
-        const config = await resolveProductionConfig(ctx);
-        const cssRule = config.module?.rules?.find(
-          (rule) => rule && typeof rule === 'object' && String(rule.test) === String(/\.css$/i)
-        );
-        const [stylesheetRule] =
-          cssRule && typeof cssRule === 'object' ? (cssRule.oneOf ?? []) : [];
-
-        expect(stylesheetRule).toHaveProperty(
-          'include',
-          path.join(fs.realpathSync(target), 'styles.css')
-        );
-      } finally {
-        fs.rmSync(directory, { recursive: true, force: true });
-      }
-    });
-
-    it.each([
-      [true, true],
-      [false, false],
-    ])('sets the Tailwind optimize option to %s when minify is %s', async (optimize, minify) => {
-      await getCssBranches({ minify });
-
-      expect(tailwindcss).toHaveBeenLastCalledWith({ optimize });
-    });
   });
 
   it('disables devtool when options.sourcemap is false', async () => {
@@ -193,42 +107,6 @@ describe('Webpack admin configuration', () => {
       NODE_ENV: 'production',
     });
   });
-
-  // Webpack takes the first matching key. A bare key `x` matches `x` and `x/…`, a key `x$` only `x`
-  it.each([
-    ['production', resolveProductionConfig, false],
-    ['development', resolveDevelopmentConfig, true],
-  ])(
-    'aliases every design system export subpath in the %s config, with no key shadowed',
-    async (_, resolveConfig, withMonorepo) => {
-      const config = await resolveConfig(createContext({ minify: true, sourcemap: false }));
-      const aliasOption = config.resolve?.alias;
-      const alias = aliasOption && !Array.isArray(aliasOption) ? aliasOption : {};
-      const keys = Object.keys(alias);
-      const matches = (key: string, request: string) =>
-        key.endsWith('$')
-          ? request === key.slice(0, -1)
-          : request === key || request.startsWith(`${key}/`);
-
-      const entries = getSubpathEntries('@strapi/design-system');
-      expect(entries.length).toBeGreaterThan(0);
-
-      for (const [key, file] of entries) {
-        expect(alias[`${key}$`]).toBe(file);
-      }
-
-      const monorepoAliases = withMonorepo
-        ? getMonorepoAliases({ monorepo: await loadStrapiMonorepo(process.cwd()) })
-        : {};
-      expect(Object.keys(monorepoAliases).length > 0).toBe(withMonorepo);
-      expect(alias).toMatchObject(monorepoAliases);
-
-      keys.forEach((key, index) => {
-        const request = key.replace(/\$$/, '');
-        expect(keys.slice(0, index).filter((earlier) => matches(earlier, request))).toEqual([]);
-      });
-    }
-  );
 
   // The Content-Type Builder bundles micromatch, whose picomatch reads `process.platform` on load.
   it('bundles micromatch so it runs without a `process` global', async () => {

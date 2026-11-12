@@ -12,7 +12,6 @@ import {
   Typography,
   Breadcrumbs,
   Crumb,
-  VisuallyHidden,
 } from '@strapi/design-system';
 import { produce } from 'immer';
 import get from 'lodash/get';
@@ -161,14 +160,6 @@ const ConditionsForm = ({
   return (
     <>
       <Modal.Header>
-        <VisuallyHidden>
-          <Modal.Title>
-            {formatMessage({
-              id: 'Settings.permissions.conditions.define-conditions',
-              defaultMessage: 'Define conditions',
-            })}
-          </Modal.Title>
-        </VisuallyHidden>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
           {headerBreadCrumbs.map((label, index, arr) => (
             <Crumb isCurrent={index === arr.length - 1} key={label}>

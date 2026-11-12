@@ -15,6 +15,7 @@ The flags Strapi declares are listed in `FeaturesFutureFlags` ([`features.ts`](h
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `experimental_firstPublishedAt` | The `firstPublishedAt` attribute on draft and publish content                                                             |
 | `unstableCustomOrder`           | The [custom order](../packages/core/content-manager/07-custom-order.md) of collection type entries in the Content Manager |
+| `unstableNextDesignSystem`      | Building the admin panel against the next design system                                                                   |
 
 The type also accepts any other string key, so a plugin can read its own flag without changing `@strapi/types`.
 
@@ -27,6 +28,7 @@ Add the flag under `future` in the `config/features.(js|ts)` file of your Strapi
 
 export default ({ env }) => ({
   future: {
+    unstableNextDesignSystem: true,
     experimental_firstPublishedAt: env.bool('STRAPI_FEATURES_FUTURE_FIRST_PUBLISHED_AT', false),
   },
 });

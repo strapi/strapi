@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, IconButton, FlexComponent, Modal, VisuallyHidden } from '@strapi/design-system';
+import { Flex, IconButton, FlexComponent, Modal } from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
@@ -34,14 +34,6 @@ const EditorLayout = ({
       {isExpandedMode && (
         <Modal.Root open={isExpandedMode} onOpenChange={onToggleExpand}>
           <Modal.Content style={{ maxWidth: 'unset', width: 'unset' }}>
-            <VisuallyHidden>
-              <Modal.Title>
-                {formatMessage({
-                  id: getTranslation('components.Blocks.expand'),
-                  defaultMessage: 'Expand',
-                })}
-              </Modal.Title>
-            </VisuallyHidden>
             <Flex height="90dvh" width="90dvw" alignItems="flex-start" direction="column">
               {children}
               <IconButton

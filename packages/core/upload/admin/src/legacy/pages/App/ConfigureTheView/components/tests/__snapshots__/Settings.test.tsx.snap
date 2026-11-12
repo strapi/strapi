@@ -115,7 +115,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   border: 1px solid #dcdce4;
   padding-inline-start: 16px;
   padding-inline-end: 12px;
-  padding-block: calc(12px - 1px);
+  padding-block: calc(           12px - 1px         );
   cursor: pointer;
   outline: none;
   box-shadow: none;

@@ -617,7 +617,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                 >
                   <ArrowLeft />
                 </IconButton>
-                <Modal.Title fontWeight={600}>
+                <Typography tag="span" fontWeight={600}>
                   {isCreating
                     ? formatMessage({
                         id: 'content-manager.relation.create',
@@ -627,7 +627,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                         id: 'content-manager.components.RelationInputModal.modal-title',
                         defaultMessage: 'Edit a relation',
                       })}
-                </Modal.Title>
+                </Typography>
               </Flex>
               <IconButton
                 onClick={() => {

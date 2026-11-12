@@ -9,7 +9,6 @@ import {
   Typography,
   Breadcrumbs,
   Crumb,
-  VisuallyHidden,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -147,9 +146,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     >
       <Modal.Content>
         <Modal.Header>
-          <VisuallyHidden>
-            <Modal.Title>{headerTitle}</Modal.Title>
-          </VisuallyHidden>
           {/**
            * TODO: this is not semantically correct and should be amended.
            */}
