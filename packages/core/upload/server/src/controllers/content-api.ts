@@ -123,16 +123,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return;
     }
 
-    for (const group of conditional) {
-      if (lists(group.fields)) {
-        // eslint-disable-next-line no-await-in-loop
-        const matching = await strapi.db
-          .query(ref)
-          .count({ where: { documentId: refId, $and: [group.filter] } });
+    // The link is written on every row of the document (each locale, draft and published), so
+    // every one of them has to match a conditioned row that gives the field. Counted both ways
+    // rather than with a negated filter, which a null in a condition field would slip through.
+    const filters = conditional.filter((group) => lists(group.fields)).map((group) => group.filter);
 
-        if (matching > 0) {
-          return;
-        }
+    if (filters.length > 0) {
+      const rows = strapi.db.query(ref);
+      const [all, covered] = await Promise.all([
+        rows.count({ where: { documentId: refId } }),
+        rows.count({ where: { documentId: refId, $or: filters } }),
+      ]);
+
+      if (all > 0 && covered === all) {
+        return;
       }
     }
 

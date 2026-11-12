@@ -721,30 +721,45 @@ describe('Content API Controller - find / findPage', () => {
       expect(mockContext.status).toBe(201);
     });
 
-    it('refuses the link when the caller may not write the field on that entry', async () => {
+    it('refuses the link unless every row of the entry gives the caller the field', async () => {
       const { checker } = (globalThis.strapi as any).contentAPI.permissions;
-      const count = jest.fn().mockResolvedValue(0);
+      const owned = { owner: { documentId: 'me' } };
+      const count = jest.fn(async ({ where }: { where: Record<string, unknown> }) =>
+        '$or' in where ? 1 : 2
+      );
 
       (globalThis.strapi as any).db = { query: jest.fn().mockReturnValue({ count }) };
 
-      // Not among the fields every entry gets, and the one conditioned row does not match
+      // Not among the fields every entry gets: only the conditioned row gives it
       checker.fieldsFor.mockReturnValue({
         always: ['title'],
-        conditional: [{ filter: { owner: { documentId: 'me' } }, fields: ['cover'] }],
+        conditional: [{ filter: owned, fields: ['cover'] }],
+      });
+
+      // Two rows (a draft and a published version, or two locales), one of which matches
+      await expect(upload({ ref: NOTE, refId: 'abc123', field: 'cover' })).rejects.toThrow(
+        errors.ForbiddenError
+      );
+      expect(count).toHaveBeenCalledWith({ where: { documentId: 'abc123' } });
+      expect(count).toHaveBeenCalledWith({ where: { documentId: 'abc123', $or: [owned] } });
+
+      // Both rows match
+      count.mockImplementation(async () => 2);
+      await upload({ ref: NOTE, refId: 'abc123', field: 'cover' });
+
+      expect(mockContext.status).toBe(201);
+
+      // No conditioned row gives the field at all: nothing is counted
+      count.mockClear();
+      checker.fieldsFor.mockReturnValue({
+        always: ['title'],
+        conditional: [{ filter: owned, fields: ['summary'] }],
       });
 
       await expect(upload({ ref: NOTE, refId: 'abc123', field: 'cover' })).rejects.toThrow(
         errors.ForbiddenError
       );
-      expect(count).toHaveBeenCalledWith({
-        where: { documentId: 'abc123', $and: [{ owner: { documentId: 'me' } }] },
-      });
-
-      // The same row, on an entry its condition matches
-      count.mockResolvedValue(1);
-      await upload({ ref: NOTE, refId: 'abc123', field: 'cover' });
-
-      expect(mockContext.status).toBe(201);
+      expect(count).not.toHaveBeenCalled();
 
       checker.fieldsFor.mockReturnValue({ always: null, conditional: [] });
     });
