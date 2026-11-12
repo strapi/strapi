@@ -182,3 +182,18 @@ export const byId = <TSchemaUID extends UID.ContentType>(filters: Filters<TSchem
 
 export const byDocumentId = <TSchemaUID extends UID.ContentType>(documentId: string) =>
   ({ documentId }) as Modules.Documents.Params.Filters.Any<TSchemaUID>;
+
+/**
+ * A filter generic over a UID stays assignable to the filter of the wide UID
+ */
+export const toWideContentType = <TSchemaUID extends UID.ContentType>(
+  filters: Modules.Documents.Params.Filters.Any<TSchemaUID>
+): Modules.Documents.Params.Filters.Any<UID.ContentType> => filters;
+
+export const toWideComponent = <TSchemaUID extends UID.Component>(
+  filters: Modules.Documents.Params.Filters.Any<TSchemaUID>
+): Modules.Documents.Params.Filters.Any<UID.Component> => filters;
+
+export const toWideSchema = <TSchemaUID extends UID.Schema>(
+  filters: Modules.Documents.Params.Filters.Any<TSchemaUID>
+): Modules.Documents.Params.Filters.Any<UID.Schema> => filters;

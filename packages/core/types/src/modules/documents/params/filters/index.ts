@@ -203,15 +203,16 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
           // while the UID is generic.
           { [TIter in DocumentIDKey]?: Forbidden },
           unknown
-        > &
-          If<
-            IsNotNever<TNestedKeys>,
-            { [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter> },
-            // Not an empty object type: intersected with `{}`, the filter type is no longer a weak type,
-            // so TypeScript would accept an inferred filter (e.g. a direct `findMany` call) that has no
-            // known key
-            unknown
-          >,
+        > & {
+            // `id` is always one of the keys, so this object type is never empty. An empty object type
+            // (`{}`) in the intersection would stop the filter from being a weak type, and TypeScript
+            // would accept an inferred filter (e.g. a direct `findMany` call) that has no known key.
+            // A conditional around the whole object would avoid `{}` too, but then a filter for a
+            // generic UID would no longer be assignable to the filter of the wide UID.
+            [TIter in IDKey | TNestedKeys]?: TIter extends TNestedKeys
+              ? NestedAttributeCondition<TSchemaUID, TIter>
+              : unknown;
+          },
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
         {
           [TKey in string]?:
