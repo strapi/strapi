@@ -27,7 +27,13 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
   installed: `@strapi/*` resolves from the root `node_modules`. Deleting the folder is safe.
 - **Ports**: from `TESTS_PORT_BASE` (default 8600), with one range per suite (ui `+0`, api `+20`,
   cli `+40`), so suites can run side by side.
-- **Database**: SQLite, pinned in the app env. A `DATABASE_*` variable exported in your shell
+- **Database**: SQLite by default. `TESTS_DATABASE=postgres` or `mysql` runs the api and cli
+  suites on a database server instead, with `TESTS_DATABASE_HOST`, `_PORT`, `_USER` and
+  `_PASSWORD` (defaults match the CI services). Each app gets its own database, emptied before
+  it boots. A `DATABASE_*` variable exported in your shell doesn't reach the test apps.
+- **Resets** (RFC D4): api and cli start one instance per file on an empty database. The ui
+  suite snapshots its SQLite database when the worker starts, then restores it before each spec
+  file (`resetScope: 'file'`, default) or each test (`test.use({ resetScope: 'test' })`).
   doesn't reach the test apps.
 - **One ui worker** for now: each worker will need its own app and database first.
 - **Windows** is not supported yet: stopping a server signals its process group.
