@@ -948,9 +948,9 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     });
 
     /**
-     * Through REST, an inverse morph item needs `__type` to resolve its target. The Content API
-     * rejects `__type` in the array form (`Invalid key __type at remarks`), so a REST client
-     * sends `{ set }`, `{ connect }` or `{ disconnect }` with `{ documentId, __type }` items.
+     * Through REST, an inverse morph item resolves its target from the schema, so `{ documentId }`
+     * is enough. `{ set }`, `{ connect }` and `{ disconnect }` also accept `{ documentId, __type }`
+     * items. The array form rejects `__type` (`Invalid key __type at remarks`).
      */
     describe('through REST', () => {
       let rqContent: ReturnType<typeof createContentAPIRequest>;
@@ -991,6 +991,21 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
           { id: r1.id, subjectId: null, subjectType: null },
           { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
           { id: r3.id, subjectId: note.draftId, subjectType: NOTE_UID },
+        ]);
+      });
+
+      it('links every entry of an array of documentIds', async () => {
+        const [r1, r2] = await createRemarks(2);
+        const created = await strapi.documents(NOTE_UID).create({
+          data: { title: 'linked' } as any,
+        });
+
+        await updateNote(created.documentId, [{ documentId: r1.documentId }, r2.documentId]);
+
+        const draft = await getNoteRow(created.documentId, 'draft');
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: draft?.id, subjectType: NOTE_UID },
         ]);
       });
 

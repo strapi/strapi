@@ -1,7 +1,7 @@
 import { curry } from 'lodash';
 
 import type { UID } from '@strapi/types';
-import { errors, relations } from '@strapi/utils';
+import { contentTypes, errors, relations } from '@strapi/utils';
 
 import { ID, LongHandDocument } from '../utils/types';
 import { IdMap } from '../../id-map';
@@ -11,6 +11,7 @@ import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { normalizeXToOneRelationValue } from '../utils/xto-one';
 
 const { isPolymorphic } = relations;
+const { isMorphToRelationalAttribute } = contentTypes;
 const MEDIA_UID = 'plugin::upload.file' as UID.ContentType;
 
 interface Options {
@@ -91,9 +92,11 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
         let targetUid: UID.Schema;
         if (attribute.type === 'media') {
           targetUid = MEDIA_UID;
-        } else if (isPolymorphicRelation) {
+        } else if (isMorphToRelationalAttribute(attribute)) {
+          // morphToOne / morphToMany entries name their target with __type
           targetUid = relation.__type;
         } else {
+          // Regular relations and the inverse morphOne / morphMany have a single target
           targetUid = attribute.target;
         }
         const ids: ID[] = getIds(targetUid, relation);
