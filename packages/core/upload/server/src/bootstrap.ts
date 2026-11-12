@@ -77,8 +77,10 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 /**
  * A job runs inside the server process that created it, so a job still `processing` when a
  * server starts listening was cut off by a stop or crash of the previous server.
- * The sweep waits for `listening` because CLI commands (`strapi export`, `strapi console`, ...)
- * also run `bootstrap` but never listen: while a server runs a job, they must not fail it.
+ * The sweep runs in each process that serves HTTP, `strapi console` included, because console
+ * listens too. It waits for `listening` because the other CLI commands (`strapi export`,
+ * `strapi import`, `strapi transfer`, `configuration:dump`, ...) also run `bootstrap` but never
+ * listen: while a server runs a job, they must not fail it.
  */
 const failInterruptedAIMetadataJobsOnListen = (strapi: Core.Strapi) => {
   strapi.server.httpServer.once('listening', async () => {
