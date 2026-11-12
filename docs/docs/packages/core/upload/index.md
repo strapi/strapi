@@ -29,6 +29,8 @@ The plugin declares two content types: `plugin::upload.file` and `plugin::upload
 
 The controllers call `prepareUploadRequest` to validate the MIME types before any work starts. The `upload` service in `server/src/services/upload.ts` then builds the file info, optimizes images and checks the size limit. It sends the file to the provider service, which prefers `uploadStream` over `upload`. It saves the `plugin::upload.file` entry and emits a `media.create` event, or `media.update` and `media.delete` for the other actions. The option `concurrentUploadSize` sets how many files one request processes at the same time.
 
+If one file in a multi-file upload fails, the service removes the files that the same request already saved. Each removal deletes the file from the provider and the database, including its image formats such as thumbnails. The removals run in chunks of `concurrentUploadSize`. The service rethrows the original error. A failed removal is logged and not rethrown.
+
 ### MIME type validation
 
 `server/src/utils/mime-validation.ts` decides whether a file is accepted. It compares the declared type, the type from the file extension and the type detected from the content against the `allowedTypes` and `deniedTypes` lists. See [MIME type validation](./01-backend/01-mime-validation.md).

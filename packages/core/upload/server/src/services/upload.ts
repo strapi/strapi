@@ -316,7 +316,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    const uploadedFiles = [];
+    const uploadedFiles: File[] = [];
     try {
       const { fileInfo, ...metas } = data;
 
@@ -339,11 +339,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       );
 
       for (const batch of fileBatches) {
-        const results = await Promise.all(
+        // allSettled: every sibling finishes before we decide anything
+        const results = await Promise.allSettled(
           batch.map(({ file, fileInfo }) => doUpload(file, fileInfo))
         );
-        uploadedFiles.push(...results);
+
+        // Keep every file that persisted, even when a sibling in this batch failed
+        for (const result of results) {
+          if (result.status === 'fulfilled') {
+            uploadedFiles.push(result.value);
+          }
+        }
+
+        // Rethrow the first failure in input order; no later batch starts
+        const failure = results.find(
+          (result): result is PromiseRejectedResult => result.status === 'rejected'
+        );
+        if (failure) {
+          throw failure.reason;
+        }
       }
+    } catch (error) {
+      await rollbackUploadedFiles(uploadedFiles);
+      throw error;
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
@@ -765,6 +783,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const signedResults = await async.map(results, (file: File) => fileService.signFileUrls(file));
 
     return { results: signedResults, pagination };
+  }
+
+  /**
+   * Best-effort rollback of files persisted by a failed upload request. Each file is
+   * removed with `remove()` (provider + DB). Removals run in chunks of `concurrentUploadSize`,
+   * the same bound `upload()` uses. Failures are logged, never thrown, so the caller always
+   * sees the original upload error.
+   */
+  async function rollbackUploadedFiles(files: File[]) {
+    const concurrentUploadSize = Math.max(
+      1,
+      strapi.config.get<Config>('plugin::upload').concurrentUploadSize ?? 1
+    );
+
+    for (const chunk of _.chunk(files, concurrentUploadSize)) {
+      const results = await Promise.allSettled(chunk.map((file) => remove(file)));
+
+      results.forEach((result, idx) => {
+        if (result.status === 'rejected') {
+          strapi.log.error(`Failed to roll back uploaded file ${chunk[idx].id}`, {
+            error: result.reason,
+          });
+        }
+      });
+    }
   }
 
   async function remove(file: File) {
