@@ -10,7 +10,12 @@ import type { Core } from '@strapi/types';
 
 import { createLockoutDb, type LockoutDb } from './lockout-db';
 
-import { SECRET_NEEDS_SECOND_FACTOR_MESSAGE, secondFactor } from '../plugins/second-factor';
+import {
+  CHANGE_EMAIL_NEEDS_SECOND_FACTOR_MESSAGE,
+  CHANGE_EMAIL_NEEDS_VERIFIED_MESSAGE,
+  SECRET_NEEDS_SECOND_FACTOR_MESSAGE,
+  secondFactor,
+} from '../plugins/second-factor';
 import { twoFactorOptions } from '../plugins/strapi-email';
 
 // Built at run time: no secret-shaped literal in the source
@@ -524,6 +529,81 @@ describe('the session a verification link makes', () => {
     expect(db.user[0].email).toBe('ann.new@example.com');
     expect(db.session).toHaveLength(2);
     expect(marks()).toEqual([true, false]);
+  });
+});
+
+describe('changing the email address', () => {
+  const body = { newEmail: 'ann.new@example.com' };
+
+  it('is refused to a user whose current address is not confirmed, with a code to branch on', async () => {
+    const ctx = build();
+    const signedUp = await ctx.auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+
+    await expect(
+      ctx.auth.api.changeEmail({ body, headers: { cookie: cookieHeader(signedUp.headers) } })
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      body: { code: 'CURRENT_EMAIL_NOT_VERIFIED', message: CHANGE_EMAIL_NEEDS_VERIFIED_MESSAGE },
+    });
+    expect(ctx.approvals).toHaveLength(0);
+    expect(ctx.proofs).toHaveLength(0);
+    expect(ctx.db.user[0].email).toBe(EMAIL);
+  });
+
+  it('is refused to a session that never passed the second factor of its user', async () => {
+    const ctx = build();
+
+    await ctx.enroll();
+    ctx.db.user[0].emailVerified = true;
+    await ctx.auth.api.signInMagicLink({
+      body: { email: EMAIL },
+      headers: new Headers({ origin: 'http://localhost:1337' }),
+    });
+
+    const linked = await ctx.auth.api
+      .magicLinkVerify({
+        query: { token: ctx.links[0] },
+        headers: new Headers({ origin: 'http://localhost:1337' }),
+        returnHeaders: true,
+      })
+      .catch((error: { headers?: Headers }) => ({ headers: error.headers as Headers }));
+
+    await expect(
+      ctx.auth.api.changeEmail({ body, headers: { cookie: cookieHeader(linked.headers) } })
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      body: { code: 'TWO_FACTOR_REQUIRED', message: CHANGE_EMAIL_NEEDS_SECOND_FACTOR_MESSAGE },
+    });
+    expect(ctx.approvals).toHaveLength(0);
+  });
+
+  it('is allowed to a confirmed address, with a second factor that was passed when it is on', async () => {
+    const ctx = build();
+    const { confirmed } = await ctx.enroll();
+
+    ctx.db.user[0].emailVerified = true;
+    await ctx.auth.api.changeEmail({ body, headers: { cookie: confirmed } });
+
+    expect(ctx.approvals).toHaveLength(1);
+  });
+
+  it('is allowed to a confirmed address of a user with no second factor', async () => {
+    const ctx = build();
+    const signedUp = await ctx.auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+
+    ctx.db.user[0].emailVerified = true;
+    await ctx.auth.api.changeEmail({
+      body,
+      headers: { cookie: cookieHeader(signedUp.headers) },
+    });
+
+    expect(ctx.approvals).toHaveLength(1);
   });
 });
 

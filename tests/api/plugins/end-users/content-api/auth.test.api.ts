@@ -1536,7 +1536,8 @@ describe('end-users: the plugin endpoints, over the whole stack', () => {
         method: 'POST',
         path: '/change-email',
         body: { newEmail: 'probe-moved@example.com' },
-        signedIn: [200],
+        // A user whose address is not confirmed yet is refused, after the session check
+        signedIn: [403],
       },
       {
         method: 'POST',
@@ -2133,6 +2134,17 @@ describe('end-users: the emails the engine sends', () => {
     return { email, cookie: cookieOf(res, 'strapi.session_token') };
   };
 
+  /** A user whose address is confirmed, the only kind that may change it */
+  const verifiedSignedUp = async () => {
+    const user = await signedUp();
+
+    await strapi.db
+      .query(USER_UID)
+      .update({ where: { email: user.email }, data: { emailVerified: true } });
+
+    return user;
+  };
+
   beforeAll(async () => {
     strapi = await createEndUsersInstance({ pluginConfig: { trustedOrigins: [TEST_ORIGIN] } });
     rq = createRequest({ strapi });
@@ -2244,7 +2256,7 @@ describe('end-users: the emails the engine sends', () => {
     expect(sentEmails()[0].subject).toBe(`Choose a new password for ${email}`);
   });
 
-  it('sends change-email to the new address, and following it changes the email', async () => {
+  it('refuses a change of address to a user whose current address is not confirmed, and sends nothing', async () => {
     const { email, cookie } = await signedUp();
 
     clearSentEmails();
@@ -2254,19 +2266,10 @@ describe('end-users: the emails the engine sends', () => {
       headers: { ...FROM_FRONT_END, Cookie: cookie },
     });
 
-    expect(changed.statusCode).toBe(200);
-    await emailsSent(1);
-    expect(sentEmails()).toHaveLength(1);
-    expect(sentEmails()[0].to).toBe('moved@example.com');
-    expect(sentEmails()[0].subject).toBe('Confirm your new email address');
-
-    const followed = await rq.get(linkOf(sentEmails()[0]), { headers: { Cookie: cookie } });
-
-    expect(followed.statusCode).toBe(302);
-    expect(await strapi.db.query(USER_UID).count({ where: { email: 'moved@example.com' } })).toBe(
-      1
-    );
-    expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(0);
+    expect(changed.statusCode).toBe(403);
+    expect(changed.body.code).toBe('CURRENT_EMAIL_NOT_VERIFIED');
+    expect(sentEmails().filter((sent) => sent.to === 'moved@example.com')).toHaveLength(0);
+    expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(1);
   });
 
   it('asks the current address of a verified user first, the new one only once that is approved, and then ends the other sessions', async () => {
@@ -2320,24 +2323,32 @@ describe('end-users: the emails the engine sends', () => {
   });
 
   it('tells the old address, naming the masked new one, once a verified change completes', async () => {
-    const { email, cookie } = await signedUp();
+    const { email, cookie } = await verifiedSignedUp();
 
+    clearSentEmails();
     await rq.post('/api/auth/change-email', {
       body: { newEmail: 'masked-target@example.com' },
       headers: { ...FROM_FRONT_END, Cookie: cookie },
     });
 
-    // The sign-up may have sent its own email: the confirmation is the one sent last, once it lands
-    await until(
-      () => sentEmails().some((email) => email.subject === 'Confirm your new email address'),
-      { what: 'the change-email confirmation' }
-    );
+    // The current address approves first, then the new one is asked to prove it is theirs
+    const approval = await until(() => sentEmails().find((sent) => sent.to === email), {
+      what: 'the approval sent to the current address',
+    });
 
-    const confirmation = sentEmails()[sentEmails().length - 1];
+    clearSentEmails();
+    await rq.get(linkOf(approval as { text: string }));
+
+    const confirmation = await until(
+      () => sentEmails().find((sent) => sent.to === 'masked-target@example.com'),
+      { what: 'the confirmation sent to the new address' }
+    );
 
     clearSentEmails();
 
-    const followed = await rq.get(linkOf(confirmation), { headers: { Cookie: cookie } });
+    const followed = await rq.get(linkOf(confirmation as { text: string }), {
+      headers: { Cookie: cookie },
+    });
 
     expect(followed.statusCode).toBe(302);
     // Sent once the change is committed, without holding the response: wait for it to land
@@ -2424,14 +2435,29 @@ describe('end-users: the emails the engine sends', () => {
   });
 
   describe('changing the email address', () => {
-    /** Asks for the change, and answers the link in the email that goes to the new address */
-    const requestChange = async (cookie: string, newEmail: string, sendsMail = true) => {
+    /** Asks for the change, approves it from the current address, and returns the mail that goes to the new one */
+    const requestChange = async (
+      cookie: string,
+      newEmail: string,
+      sendsMail = true,
+      current = ''
+    ) => {
       clearSentEmails();
 
       const res = await rq.post('/api/auth/change-email', {
         body: { newEmail },
         headers: { ...FROM_FRONT_END, Cookie: cookie },
       });
+
+      if (sendsMail) {
+        // The current address approves first, opened from its mailbox with no session
+        const approval = await until(() => sentEmails().find((sent) => sent.to === current), {
+          what: `the approval sent to ${current}`,
+        });
+
+        clearSentEmails();
+        await rq.get(linkOf(approval as { text: string }));
+      }
 
       return {
         res,
@@ -2446,8 +2472,8 @@ describe('end-users: the emails the engine sends', () => {
     const emailOf = async (email: string) => strapi.db.query(USER_UID).count({ where: { email } });
 
     it('leaves the address as it was until the link is followed, so the old one still signs in', async () => {
-      const { email, cookie } = await signedUp();
-      const { res, mail } = await requestChange(cookie, 'later@example.com');
+      const { email, cookie } = await verifiedSignedUp();
+      const { res, mail } = await requestChange(cookie, 'later@example.com', true, email);
 
       expect(res.statusCode).toBe(200);
       expect(mail?.to).toBe('later@example.com');
@@ -2467,8 +2493,8 @@ describe('end-users: the emails the engine sends', () => {
     });
 
     it('changes nothing for a link whose token was tampered with, and for one that expired, and sends no notice', async () => {
-      const { email, cookie } = await signedUp();
-      const { mail } = await requestChange(cookie, 'tampered@example.com');
+      const { email, cookie } = await verifiedSignedUp();
+      const { mail } = await requestChange(cookie, 'tampered@example.com', true, email);
       const link = new URL(linkOf(mail as { text: string }), 'http://localhost');
       const token = link.searchParams.get('token') as string;
 
@@ -2526,7 +2552,7 @@ describe('end-users: the emails the engine sends', () => {
 
       // Control: a token made the same way with time left on it is taken, so the refusal of the
       // expired one was for its expiry and not for the way it was built
-      const other = await signedUp();
+      const other = await verifiedSignedUp();
       const fresh = await tokenFor('control@example.com', 3600, other.email);
       const followed = await rq.get(
         `${link.pathname}?${new URLSearchParams({ token: fresh, callbackURL: '/' })}`,
@@ -2538,8 +2564,8 @@ describe('end-users: the emails the engine sends', () => {
     });
 
     it('answers 200 to a change to an address another user holds, changes nothing and sends nothing to it', async () => {
-      const mine = await signedUp();
-      const theirs = await signedUp();
+      const mine = await verifiedSignedUp();
+      const theirs = await verifiedSignedUp();
 
       const { res } = await requestChange(mine.cookie, theirs.email, false);
 
@@ -2550,15 +2576,20 @@ describe('end-users: the emails the engine sends', () => {
 
       // The list was emptied by the request above: a change let through afterwards is the first
       // mail there is, and a mail the held address had been sent would have come before it
-      const { mail } = await requestChange(mine.cookie, 'free-address@example.com');
+      const { mail } = await requestChange(
+        mine.cookie,
+        'free-address@example.com',
+        true,
+        mine.email
+      );
 
       expect(sentEmails().map((sent) => sent.to)).toEqual(['free-address@example.com']);
       expect(mail?.to).toBe('free-address@example.com');
     });
 
     it('does nothing the second time the same link is followed', async () => {
-      const { email, cookie } = await signedUp();
-      const { mail } = await requestChange(cookie, 'once@example.com');
+      const { email, cookie } = await verifiedSignedUp();
+      const { mail } = await requestChange(cookie, 'once@example.com', true, email);
       const link = linkOf(mail as { text: string });
       const notices = () =>
         sentEmails().filter((sent) => sent.subject === 'Your email address was changed');
