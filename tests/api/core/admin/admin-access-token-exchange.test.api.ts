@@ -91,8 +91,7 @@ describe('Admin Access Token Exchange', () => {
     expect(childExchangeRes.body?.data?.token).toEqual(expect.any(String));
   });
 
-  // Parent-row claim for two overlapping refreshes is the next layer of this stack.
-  it.skip('concurrent access-token with same parent: one wins, loser gets 401, child cookie still valid', async () => {
+  it('concurrent access-token with same parent: one wins, loser gets 401, child cookie still valid', async () => {
     const rq = createRequest({ strapi });
 
     const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });

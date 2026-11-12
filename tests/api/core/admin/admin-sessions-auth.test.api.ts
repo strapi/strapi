@@ -146,6 +146,20 @@ describe('Admin Sessions Auth', () => {
 
       expect(res.statusCode).toBe(401);
     });
+
+    it('lets one of two overlapping refreshes win', async () => {
+      const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+      expect(loginRes.statusCode).toBe(200);
+
+      const cookiePair = getCookie(loginRes, cookieName)!.split(';')[0];
+      const [first, second] = await Promise.all([
+        createRequest({ strapi }).post('/admin/access-token', { headers: { Cookie: cookiePair } }),
+        createRequest({ strapi }).post('/admin/access-token', { headers: { Cookie: cookiePair } }),
+      ]);
+
+      const statuses = [first.statusCode, second.statusCode].sort();
+      expect(statuses).toEqual([200, 401]);
+    });
   });
 
   describe('Session Invalidation on User Operations', () => {

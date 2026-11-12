@@ -360,13 +360,19 @@ class Database {
   /**
    * Runs `cb` in a savepoint of the current transaction, so a failure undoes only `cb`'s writes.
    * If `cb` throws, its writes are rolled back, the `onCommit` callbacks registered in it are
-   * dropped, its `onRollback` callbacks run, and the error is rethrown. The transaction stays
-   * usable, on Postgres also after a database error, but not after a MySQL deadlock, which rolls
-   * back the whole transaction: the savepoint then can't be rolled back to, and it throws an
-   * `errors.SavepointError`, as when it can't be released. Throws if called outside a transaction.
+   * dropped, its `onRollback` callbacks run, and the error is rethrown. A failing `onRollback`
+   * callback is logged and does not replace that error. The callbacks after it do not run. The
+   * transaction stays usable, on Postgres also after a database error, but not after a MySQL
+   * deadlock, which rolls back the whole transaction: the savepoint then can't be rolled back
+   * to, and it throws an `errors.SavepointError`, as when it can't be released. Throws if called
+   * outside a transaction.
    */
   savepoint<T>(cb: () => Promise<T> | T): Promise<T> {
-    return transactionCtx.savepoint(cb);
+    return transactionCtx.savepoint(cb, (error) => {
+      this.logger.error(
+        `Rollback hook failed after the transaction rolled back: ${formatHookError(error)}`
+      );
+    });
   }
 
   /**
