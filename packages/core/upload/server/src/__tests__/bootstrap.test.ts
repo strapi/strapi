@@ -258,9 +258,9 @@ describe('Upload plugin bootstrap function', () => {
       await failInterruptedJobs.mock.results[0]?.value;
 
       // Without this, `/latest` keeps answering `processing` and the settings page polls forever
-      const latest = await jobs.getLatestActiveJob();
-      expect(latest).toMatchObject({ id: jobId, status: 'failed' });
-      expect(latest?.completedAt).not.toBeNull();
+      const job = await jobs.getJob(jobId);
+      expect(job).toMatchObject({ id: jobId, status: 'failed' });
+      expect(job?.completedAt).not.toBeNull();
 
       failInterruptedJobs.mockRestore();
     });
