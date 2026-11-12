@@ -15,6 +15,7 @@ const toEngineField = (field: DBFieldAttribute): EngineField => {
   if (field.bigint !== undefined) engineField.bigint = field.bigint;
   if (field.defaultValue !== undefined) engineField.defaultValue = field.defaultValue;
   if (field.fieldName !== undefined) engineField.fieldName = field.fieldName;
+  if (field.input !== undefined) engineField.input = field.input;
   if (field.references) {
     engineField.references = { model: field.references.model, field: field.references.field };
   }

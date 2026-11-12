@@ -277,8 +277,10 @@ describe('buildAuthOptions', () => {
       'banned-reset',
       'totp-replay',
       'password-policy',
+      'revoke-on-password-change',
       'last-sign-in',
       'provider-profile',
+      'second-factor',
     ]);
   });
 
@@ -308,6 +310,12 @@ describe('buildAuthOptions', () => {
 
     expect(ids.indexOf('generic-oauth')).toBeGreaterThanOrEqual(0);
     expect(ids.indexOf('pending-link')).toBe(ids.indexOf('generic-oauth') + 1);
+  });
+
+  it('puts second-factor after two-factor, whose after-hook it reads the result of', () => {
+    const ids = buildAuthOptions(fakeStrapi()).plugins?.map((plugin) => plugin.id) ?? [];
+
+    expect(ids.indexOf('second-factor')).toBeGreaterThan(ids.indexOf('two-factor'));
   });
 
   it('puts two-factor before bearer, so the token is not for a session two-factor deleted', () => {
@@ -346,8 +354,10 @@ describe('buildAuthOptions', () => {
       'banned-reset',
       'totp-replay',
       'password-policy',
+      'revoke-on-password-change',
       'last-sign-in',
       'provider-profile',
+      'second-factor',
       'project-plugin',
     ]);
   });
@@ -1787,6 +1797,27 @@ describe('createEngine', () => {
       const session = await engine.createSession(userId, {});
 
       expect(session.userId).toBe(userId);
+    });
+
+    it('records no second factor unless the new session replaces one that passed it', async () => {
+      const { userId } = await signUp(engine);
+      const plain = await engine.createSession(userId, {});
+      const rotated = await engine.createSession(userId, { passedSecondFactor: true });
+      const refused = await engine.createSession(userId, { passedSecondFactor: false });
+
+      expect(plain.passedSecondFactor).toBe(false);
+      expect(refused.passedSecondFactor).toBe(false);
+      expect(rotated.passedSecondFactor).toBe(true);
+      expect(rowsOf('session').map((row) => row.twoFactorVerified)).toEqual([
+        false,
+        false,
+        true,
+        false,
+      ]);
+
+      // And a lookup of the session by its token reads it back
+      expect((await engine.getSession(bearer(rotated.token)))?.passedSecondFactor).toBe(true);
+      expect((await engine.getSession(bearer(plain.token)))?.passedSecondFactor).toBe(false);
     });
 
     it('refuses a user that does not exist', async () => {

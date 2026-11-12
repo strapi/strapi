@@ -21,7 +21,8 @@ export const PRIVATE_FIELDS: Readonly<Record<string, readonly string[]>> = {
   // (`returned`), its ban check (it reads the stored row) and the plugin's strategy are untouched,
   // and the Content Manager still shows these fields to administrators.
   user: ['role', 'banned', 'banReason', 'banExpires', 'failedSignIns', 'lockedUntil'],
-  session: ['token'],
+  // `twoFactorVerified` is the engine's record of how the session was made; a client never reads it
+  session: ['token', 'twoFactorVerified'],
   account: ['password', 'accessToken', 'refreshToken', 'idToken'],
   verification: ['identifier', 'value'],
   'two-factor': ['secret', 'backupCodes', 'lastTotpStep'],
@@ -50,10 +51,12 @@ export const isPrivateField = (
  *
  * `user.role` is the admin plugin's (its hooks need it). It is private as well, so it never reaches a
  * response, and an editor changing it by hand would only confuse the plugin: end users get their
- * Strapi roles from `user.roles`.
+ * Strapi roles from `user.roles`. `user.legacyTokensRevokedAt` is the moment the user's old Users &
+ * Permissions tokens were revoked (`returned: false`, so private too): an editor setting it would
+ * only revive or kill tokens by hand.
  */
 export const HIDDEN_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  user: ['role'],
+  user: ['role', 'legacyTokensRevokedAt'],
 };
 
 export const isHiddenField = (
@@ -72,11 +75,14 @@ export const isHiddenField = (
  * still write these; only the Content API's input sanitizer strips them, so a role granted
  * `user.update` can never set one.
  *
- * `user.role` is the admin plugin's. It is private and hidden already; engine writes go through the
- * Document Service, never the Content API, so nothing legitimate needs a request to set it.
+ * `user.role` is the admin plugin's, and `user.legacyTokensRevokedAt` the plugin's own. Both are
+ * private and hidden already; engine writes go through the Document Service or the database layer,
+ * never the Content API, so nothing legitimate needs a request to set them.
  */
 export const READ_ONLY_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  user: ['role'],
+  user: ['role', 'legacyTokensRevokedAt'],
+  // Whether a session passed a second factor is set by the engine when it makes the session
+  session: ['twoFactorVerified'],
 };
 
 export const isReadOnlyField = (

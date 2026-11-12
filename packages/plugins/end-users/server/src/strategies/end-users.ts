@@ -108,8 +108,9 @@ const toHeaders = (ctx: Context) => {
  * - a banned user: 403 with `details.code` `USER_BANNED`
  * - an unverified user, while the Sign-in settings require a verified email: 403
  *   `EMAIL_NOT_VERIFIED`
- * - a user holding a role that requires two-factor authentication, without it enabled: 403
- *   `TWO_FACTOR_REQUIRED`
+ * - a user holding a role that requires two-factor authentication, without it enabled, or whose
+ *   session did not pass a second factor (a provider, a link or an emailed code signed it in, or
+ *   it is an old Users & Permissions token, which has no session): 403 `TWO_FACTOR_REQUIRED`
  * - a request made with the session cookie from an origin that is not trusted (a write, or a read
  *   that sends `Origin`): 403 `ORIGIN_NOT_TRUSTED`
  *
@@ -238,12 +239,18 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
   };
 
   /**
-   * Whose request this is: the `documentId` of the session's user, or of a legacy token's, or the
-   * refusal (`Authentication`) of credentials that are not good, or `null` for no credentials at all.
+   * Whose request this is: the `documentId` of the session's user, or of a legacy token's, and
+   * whether the session passed a second factor (a legacy token has no session, so it did not), or
+   * the refusal (`Authentication`) of credentials that are not good, or `null` for no credentials at
+   * all.
    */
   const identify = async (
     ctx: Context
-  ): Promise<{ userId: string; cookies: string[] } | { refusal: Authentication } | null> => {
+  ): Promise<
+    | { userId: string; cookies: string[]; secondFactor: boolean }
+    | { refusal: Authentication }
+    | null
+  > => {
     // An error here (the database is down) is an error, not a request with no credentials: it
     // propagates and answers 500, and the request is never given the Public role because of it.
     const { session, credentials, source, setCookies } = await engine().lookupSession(
@@ -257,7 +264,11 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
 
       // The engine sends a fresh cookie when it extends a session. A cookie client only keeps a
       // sliding lifetime if that cookie reaches it. A Bearer client has no use for one.
-      return { userId: session.userId, cookies: source === 'cookie' ? setCookies : [] };
+      return {
+        userId: session.userId,
+        cookies: source === 'cookie' ? setCookies : [],
+        secondFactor: session.passedSecondFactor === true,
+      };
     }
 
     if (!credentials) {
@@ -275,7 +286,7 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
 
     // Credentials that are not good are a 401, never the Public role
     return userId
-      ? { userId, cookies: [] }
+      ? { userId, cookies: [], secondFactor: false }
       : { refusal: { authenticated: false, error: invalidCredentials() } };
   };
 
@@ -285,7 +296,7 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
    * 401, and carries no code. They are `PolicyError`s so that their message and code survive core's
    * `authorize` on a GET (see `assertTrustedOrigin`).
    */
-  const assertUsable = async (user: Plain): Promise<RoleSummary[]> => {
+  const assertUsable = async (user: Plain, secondFactor: boolean): Promise<RoleSummary[]> => {
     if (banState(user) === 'active') {
       throw new errors.PolicyError('You have been banned from this application.', {
         code: 'USER_BANNED',
@@ -305,11 +316,23 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
     const held = await roles().getForUser(user.documentId as string);
 
     // A role can require a second factor. Until the user has enabled one, the Content API refuses
-    // them; the auth endpoints, where they enable it, never reach this strategy.
-    if (held.some((role) => role.requireTwoFactor) && user.twoFactorEnabled !== true) {
-      throw new errors.PolicyError('Two-factor authentication is required for your role.', {
-        code: 'TWO_FACTOR_REQUIRED',
-      });
+    // them; the auth endpoints, where they enable it, never reach this strategy. Enabled is not
+    // enough: Better Auth asks for the second factor after a password sign-in only, so a session
+    // made any other way (a provider, a magic link, an emailed code, an old token) has to be
+    // refused until the user signs in again with it.
+    if (held.some((role) => role.requireTwoFactor)) {
+      if (user.twoFactorEnabled !== true) {
+        throw new errors.PolicyError('Two-factor authentication is required for your role.', {
+          code: 'TWO_FACTOR_REQUIRED',
+        });
+      }
+
+      if (!secondFactor) {
+        throw new errors.PolicyError(
+          'Sign in again with your second factor: this session did not use it, and your role requires it.',
+          { code: 'TWO_FACTOR_REQUIRED' }
+        );
+      }
     }
 
     return held;
@@ -339,7 +362,7 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
       return { authenticated: false, error: invalidCredentials() };
     }
 
-    const held = await assertUsable(user);
+    const held = await assertUsable(user, identity.secondFactor);
 
     const endUser = toCredentials(user, held);
     // The row, not the credentials: conditions read `$user.<attribute>`, and the credentials carry

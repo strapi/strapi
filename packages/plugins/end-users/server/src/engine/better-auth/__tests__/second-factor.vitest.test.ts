@@ -1,0 +1,447 @@
+import { describe, expect, it } from 'vitest';
+import { createOTP } from '@better-auth/utils/otp';
+import { memoryAdapter } from 'better-auth/adapters/memory';
+import { betterAuth } from 'better-auth/minimal';
+import { symmetricDecrypt } from 'better-auth/crypto';
+import { bearer, magicLink, twoFactor } from 'better-auth/plugins';
+import type { BetterAuthPlugin } from 'better-auth';
+
+import { secondFactor } from '../plugins/second-factor';
+import { twoFactorOptions } from '../plugins/strapi-email';
+
+// Built at run time: no secret-shaped literal in the source
+const SECRET = ['second', 'factor', 'test', 'secret', 'long', 'enough', 'to', 'use'].join('-');
+const PASSWORD = ['Old', 'Passw0rd!x'].join('-');
+const NEW_PASSWORD = ['New', 'Passw0rd!y'].join('-');
+const EMAIL = 'ann@example.com';
+
+type Row = Record<string, any>;
+
+/** The `name=value` pairs of the cookies a response sets, as a Cookie header */
+const cookieHeader = (...responses: Headers[]) => {
+  const cookies = new Map<string, string>();
+
+  for (const headers of responses) {
+    for (const line of headers.getSetCookie()) {
+      const [pair] = line.split(';');
+      const separator = pair.indexOf('=');
+      const value = pair.slice(separator + 1);
+
+      // A cookie that was cleared is not sent back
+      if (/max-age=0/i.test(line) || value === '') {
+        cookies.delete(pair.slice(0, separator));
+      } else {
+        cookies.set(pair.slice(0, separator), value);
+      }
+    }
+  }
+
+  return [...cookies].map(([name, value]) => `${name}=${value}`).join('; ');
+};
+
+const build = (plugins: BetterAuthPlugin[] = []) => {
+  const db = { user: [], session: [], account: [], verification: [], twoFactor: [] } as Record<
+    string,
+    Row[]
+  >;
+  const codes: string[] = [];
+  const links: string[] = [];
+
+  const auth = betterAuth({
+    secret: SECRET,
+    baseURL: 'http://localhost:1337',
+    basePath: '/api/auth',
+    telemetry: { enabled: false },
+    database: memoryAdapter(db),
+    emailAndPassword: { enabled: true },
+    plugins: [
+      twoFactor({
+        ...twoFactorOptions({
+          plugin: () => ({ service: () => ({}) }),
+          config: { get: () => undefined },
+        } as never),
+        otpOptions: {
+          storeOTP: 'hashed',
+          async sendOTP({ otp }: { otp: string }) {
+            codes.push(otp);
+          },
+        },
+      }),
+      bearer(),
+      secondFactor(),
+      magicLink({
+        storeToken: 'hashed',
+        async sendMagicLink({ token }: { token: string }) {
+          links.push(token);
+        },
+      }),
+      ...plugins,
+    ],
+  });
+
+  /** Signs up, turns two-factor on, and confirms it: the session that results passed it */
+  const enroll = async () => {
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+    const cookie = cookieHeader(signedUp.headers);
+    const enabled = await auth.api.enableTwoFactor({
+      body: { password: PASSWORD },
+      headers: { cookie },
+    });
+    const [row] = db.twoFactor;
+    const secret = await symmetricDecrypt({ key: SECRET, data: row.secret });
+    const code = () => createOTP(secret).totp();
+    const confirmed = await auth.api.verifyTOTP({
+      body: { code: await code() },
+      headers: { cookie },
+      returnHeaders: true,
+    });
+
+    return {
+      signedUp: cookie,
+      confirmed: cookieHeader(signedUp.headers, confirmed.headers),
+      code,
+      backupCodes: (enabled as { backupCodes: string[] }).backupCodes,
+    };
+  };
+
+  /** A password sign-in of the enrolled user, which stops at the challenge */
+  const challenge = async (cookie = '') => {
+    const result = await auth.api.signInEmail({
+      body: { email: EMAIL, password: PASSWORD },
+      headers: { cookie },
+      returnHeaders: true,
+    });
+
+    return {
+      response: result.response,
+      headers: result.headers,
+      cookie: cookieHeader(result.headers),
+    };
+  };
+
+  const marks = () => db.session.map((session) => session.twoFactorVerified);
+
+  return { auth, db, codes, links, enroll, challenge, marks };
+};
+
+describe('second-factor', () => {
+  it('leaves a new session unmarked, `false`, whichever way it was made', async () => {
+    const { auth, db, marks } = build();
+
+    await auth.api.signUpEmail({ body: { email: EMAIL, password: PASSWORD, name: 'Ann' } });
+    await auth.api.signInEmail({ body: { email: EMAIL, password: PASSWORD } });
+
+    expect(db.session).toHaveLength(2);
+    expect(marks()).toEqual([false, false]);
+  });
+
+  it('marks the session that confirms an enrollment, which replaces the one that asked for it', async () => {
+    const { db, enroll, marks } = build();
+
+    await enroll();
+
+    expect(db.session).toHaveLength(1);
+    expect(marks()).toEqual([true]);
+    expect(db.user[0].twoFactorEnabled).toBe(true);
+  });
+
+  it('marks the session an authenticator code makes at the sign-in challenge', async () => {
+    const { db, enroll, challenge, auth, marks } = build();
+    const { code } = await enroll();
+
+    const stopped = await challenge();
+
+    expect(stopped.response).toMatchObject({ twoFactorRedirect: true });
+    // The password alone left no session behind
+    expect(db.session).toHaveLength(1);
+
+    const verified = await auth.api.verifyTOTP({
+      body: { code: await code() },
+      headers: { cookie: stopped.cookie },
+      returnHeaders: true,
+    });
+
+    expect(verified.headers.get('set-cookie')).toContain('session_token');
+    expect(marks()).toEqual([true, true]);
+  });
+
+  it('marks the session a backup code makes, and the one an emailed code makes', async () => {
+    const { db, enroll, challenge, auth, codes, marks } = build();
+    const { backupCodes } = await enroll();
+
+    const withBackup = await challenge();
+
+    await auth.api.verifyBackupCode({
+      body: { code: backupCodes[0] },
+      headers: { cookie: withBackup.cookie },
+    });
+
+    expect(marks()).toEqual([true, true]);
+
+    const withOtp = await challenge();
+
+    await auth.api.sendTwoFactorOTP({ headers: { cookie: withOtp.cookie }, body: {} });
+    await auth.api.verifyTwoFactorOTP({
+      body: { code: codes[0] },
+      headers: { cookie: withOtp.cookie },
+    });
+
+    expect(db.session).toHaveLength(3);
+    expect(marks()).toEqual([true, true, true]);
+  });
+
+  it('marks nothing for a code that is wrong', async () => {
+    const { db, enroll, challenge, auth, marks } = build();
+
+    await enroll();
+
+    const stopped = await challenge();
+
+    await expect(
+      auth.api.verifyTOTP({ body: { code: '000000' }, headers: { cookie: stopped.cookie } })
+    ).rejects.toMatchObject({ statusCode: 401 });
+    expect(db.session).toHaveLength(1);
+    expect(marks()).toEqual([true]);
+  });
+
+  it('marks the session a signed-in user vouches for by giving a code again', async () => {
+    const { db, auth, enroll, links, marks } = build();
+    const { code } = await enroll();
+
+    // A magic link proves the address, and a verified address keeps its sessions
+    db.user[0].emailVerified = true;
+    // A session made by a magic link, with no challenge, for a user who has two-factor on
+    await auth.api.signInMagicLink({
+      body: { email: EMAIL },
+      headers: new Headers({ origin: 'http://localhost:1337' }),
+    });
+
+    const linked = await auth.api
+      .magicLinkVerify({
+        query: { token: links[0] },
+        headers: new Headers({ origin: 'http://localhost:1337' }),
+        returnHeaders: true,
+      })
+      .catch((error: { headers?: Headers }) => ({ headers: error.headers as Headers }));
+    const cookie = cookieHeader(linked.headers);
+
+    expect(marks()).toEqual([true, false]);
+
+    await auth.api.verifyTOTP({ body: { code: await code() }, headers: { cookie } });
+
+    expect(db.session).toHaveLength(2);
+    expect(marks()).toEqual([true, true]);
+  });
+
+  it('leaves a magic-link session of a user with two-factor on unmarked, and stores the token hashed', async () => {
+    const { db, auth, enroll, links, marks } = build();
+
+    await enroll();
+    db.user[0].emailVerified = true;
+    await auth.api.signInMagicLink({
+      body: { email: EMAIL },
+      headers: new Headers({ origin: 'http://localhost:1337' }),
+    });
+
+    const token = links[0];
+    const identifiers = db.verification.map((row) => row.identifier as string);
+
+    // The row is there, and what it is looked up by is not the token that was emailed
+    expect(identifiers.filter((identifier) => identifier.startsWith('magic-link:'))).toHaveLength(
+      1
+    );
+    expect(identifiers.some((identifier) => identifier.includes(token))).toBe(false);
+
+    await auth.api
+      .magicLinkVerify({
+        query: { token },
+        headers: new Headers({ origin: 'http://localhost:1337' }),
+        returnHeaders: true,
+      })
+      .catch(() => undefined);
+
+    // The user has two-factor on and was signed in with no challenge
+    expect(db.user[0].twoFactorEnabled).toBe(true);
+    expect(db.session).toHaveLength(2);
+    expect(marks()).toEqual([true, false]);
+  });
+
+  it('stores the emailed two-factor code hashed', async () => {
+    const { db, enroll, challenge, auth, codes } = build();
+
+    await enroll();
+
+    const stopped = await challenge();
+
+    await auth.api.sendTwoFactorOTP({ headers: { cookie: stopped.cookie }, body: {} });
+
+    const stored = db.verification.filter((row) => String(row.identifier).startsWith('2fa-otp-'));
+
+    expect(stored).toHaveLength(1);
+    expect(stored[0].value).not.toContain(codes[0]);
+  });
+
+  it('marks a password sign-in a trusted device let skip the challenge, and only that one', async () => {
+    const { db, enroll, challenge, auth, marks } = build();
+    const { code } = await enroll();
+
+    const stopped = await challenge();
+    const trusted = await auth.api.verifyTOTP({
+      body: { code: await code(), trustDevice: true },
+      headers: { cookie: stopped.cookie },
+      returnHeaders: true,
+    });
+    const trustCookie = cookieHeader(trusted.headers)
+      .split('; ')
+      .filter((pair) => pair.includes('trust_device'))
+      .join('; ');
+
+    expect(trustCookie).not.toBe('');
+
+    // The device is known: no challenge, and a session that counts
+    const again = await challenge(trustCookie);
+
+    expect(again.response).not.toHaveProperty('twoFactorRedirect');
+    expect(db.session).toHaveLength(3);
+    expect(marks()).toEqual([true, true, true]);
+
+    // A device that is not known meets the challenge, and leaves no session
+    const other = await challenge();
+
+    expect(other.response).toMatchObject({ twoFactorRedirect: true });
+    expect(db.session).toHaveLength(3);
+  });
+
+  it('keeps the mark on the session a password change makes for the caller, and signs the others out', async () => {
+    const { db, enroll, auth, marks } = build();
+    const { confirmed } = await enroll();
+
+    // A second session of the user, that passed nothing
+    db.session.push({
+      ...db.session[0],
+      id: 'other-session',
+      token: 'other-token',
+      twoFactorVerified: false,
+    });
+
+    expect(marks()).toEqual([true, false]);
+
+    const changed = await auth.api.changePassword({
+      body: { currentPassword: PASSWORD, newPassword: NEW_PASSWORD, revokeOtherSessions: true },
+      headers: { cookie: confirmed },
+      returnHeaders: true,
+    });
+
+    expect(changed.response.token).toEqual(expect.any(String));
+    // The other session is gone, and the caller has one new session that kept the mark
+    expect(db.session).toHaveLength(1);
+    expect(db.session[0].token).toBe(changed.response.token);
+    expect(marks()).toEqual([true]);
+  });
+
+  it('does not give a mark to the new session of a caller whose session had none', async () => {
+    const { db, auth, marks } = build();
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+
+    await auth.api.changePassword({
+      body: { currentPassword: PASSWORD, newPassword: NEW_PASSWORD, revokeOtherSessions: true },
+      headers: { cookie: cookieHeader(signedUp.headers) },
+    });
+
+    expect(db.session).toHaveLength(1);
+    expect(marks()).toEqual([false]);
+  });
+});
+
+describe('the passkey sign-in', () => {
+  const run = async (ctx: Record<string, unknown>) => {
+    const written: Row[] = [];
+    const [hook] = secondFactor().hooks!.after!;
+    const context = {
+      adapter: {
+        async update(params: Row) {
+          written.push(params);
+        },
+      },
+      returned: undefined,
+      newSession: null,
+      session: null,
+      ...((ctx.context as object) ?? {}),
+    };
+
+    await (hook.handler as unknown as (c: unknown) => Promise<unknown>)({ ...ctx, context });
+
+    return {
+      written,
+      matches: hook.matcher({ path: ctx.path } as never),
+    };
+  };
+
+  const created = () => ({ session: { id: 'session-1' }, user: { twoFactorEnabled: false } });
+
+  it('marks the session a passkey sign-in makes, for a user with or without two-factor on', async () => {
+    for (const twoFactorEnabled of [false, true]) {
+      // eslint-disable-next-line no-await-in-loop
+      const { written, matches } = await run({
+        path: '/passkey/verify-authentication',
+        context: { newSession: { ...created(), user: { twoFactorEnabled } } },
+      });
+
+      expect(matches).toBe(true);
+      expect(written).toEqual([
+        {
+          model: 'session',
+          where: [{ field: 'id', value: 'session-1' }],
+          update: { twoFactorVerified: true },
+        },
+      ]);
+    }
+  });
+
+  it('marks nothing when the sign-in failed or made no session', async () => {
+    const { APIError } = await import('better-auth/api');
+
+    const failed = await run({
+      path: '/passkey/verify-authentication',
+      context: {
+        returned: new APIError('UNAUTHORIZED', { message: 'no' }),
+        newSession: created(),
+      },
+    });
+    const none = await run({ path: '/passkey/verify-authentication' });
+
+    expect(failed.written).toEqual([]);
+    expect(none.written).toEqual([]);
+  });
+
+  it('does not mark the session a passkey registration makes, or a sign-in by any other way', async () => {
+    for (const path of [
+      '/passkey/verify-registration',
+      '/magic-link/verify',
+      '/email-otp/verify-email',
+      '/callback/:id',
+      '/sign-in/email-otp',
+    ]) {
+      // eslint-disable-next-line no-await-in-loop
+      const { written, matches } = await run({ path, context: { newSession: created() } });
+
+      expect(matches, path).toBe(false);
+      expect(written, path).toEqual([]);
+    }
+  });
+
+  it('does not mark a password sign-in of a user who has no two-factor on: there was nothing to skip', async () => {
+    const { written } = await run({
+      path: '/sign-in/email',
+      context: { newSession: created() },
+    });
+
+    expect(written).toEqual([]);
+  });
+});

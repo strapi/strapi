@@ -81,6 +81,8 @@ const rotate = async (
     ipAddress: claimed.ipAddress,
     userAgent: headers?.get('user-agent') ?? claimed.userAgent,
     ...(claimed.deviceId ? { deviceId: claimed.deviceId } : {}),
+    // The rotation is the same sign-in, so it keeps a second factor the old session passed
+    passedSecondFactor: claimed.passedSecondFactor,
   });
 
   return next.token;

@@ -25,6 +25,7 @@ import { backgroundTaskHandler } from '../background-tasks';
 import { buildAuthOptions } from '../create-engine';
 import type { AuthEngine } from '../../types';
 import { passwordPolicy } from '../plugins/password-policy';
+import { revokeOnPasswordChange } from '../plugins/revoke-on-password-change';
 import { strapiCompat } from '../plugins/strapi-compat';
 
 vi.mock('../../../compat/login-response', async (importOriginal) => ({
@@ -760,6 +761,7 @@ describe('strapi-compat reset, through the engine', () => {
 
     const policy = { minLength: 8, maxLength: 128, requireMixedClasses: true };
     const invalidateLegacy = vi.fn(async () => undefined);
+    const markLegacyRevoked = vi.fn(async () => ({ count: 1 }));
     const strapi = {
       config: { get: () => undefined },
       sessionManager: Object.assign(() => ({ invalidateRefreshToken: invalidateLegacy }), {
@@ -769,6 +771,7 @@ describe('strapi-compat reset, through the engine', () => {
         query: () => ({
           findOne: async ({ where }: { where: { documentId: string } }) =>
             db.user.find((user) => user.id === where.documentId) ?? null,
+          updateMany: markLegacyRevoked,
         }),
       },
       plugin: () => ({
@@ -805,6 +808,7 @@ describe('strapi-compat reset, through the engine', () => {
         strapiCompat(strapi, readCompatConfig(configStrapi(true))),
         probe(),
         passwordPolicy(strapi),
+        revokeOnPasswordChange(),
         username(),
         bearer(),
       ],
@@ -829,7 +833,7 @@ describe('strapi-compat reset, through the engine', () => {
         })
       );
 
-    return { auth, post, tokens, db, strapi, invalidateLegacy };
+    return { auth, post, tokens, db, strapi, invalidateLegacy, markLegacyRevoked };
   };
 
   beforeEach(() => {
@@ -905,8 +909,60 @@ describe('strapi-compat reset, through the engine', () => {
     expect(seen).toEqual([{ code: 'c', token: 'bad', newPassword: STRONG }]);
   });
 
+  it('signs the other sessions out on a native change-password that did not ask for it', async () => {
+    const { auth, post, db } = build();
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
+      returnHeaders: true,
+    });
+    const other = await auth.api.signInEmail({
+      body: { email: 'ann@example.com', password: 'Old-Passw0rd!x' },
+    });
+
+    expect(db.session).toHaveLength(2);
+
+    const changed = await post(
+      '/change-password',
+      { currentPassword: 'Old-Passw0rd!x', newPassword: STRONG },
+      { cookie: (signedUp.headers.get('set-cookie') ?? '').split(';')[0] }
+    );
+    const answer = (await changed.json()) as { token: string };
+
+    expect(changed.status).toBe(200);
+    // The caller keeps one session, the new one; the other is gone
+    expect(db.session.map((session) => session.token)).toEqual([answer.token]);
+    expect(db.session.map((session) => session.token)).not.toContain(other.token);
+  });
+
+  it('signs the user out of the old tokens when they change their password, revoke their other sessions or all of them', async () => {
+    for (const [path, body] of [
+      ['/change-password', { currentPassword: 'Old-Passw0rd!x', newPassword: STRONG }],
+      ['/revoke-other-sessions', {}],
+      ['/revoke-sessions', {}],
+    ] as const) {
+      const { auth, post, db, invalidateLegacy, markLegacyRevoked } = build();
+      const signedUp = await auth.api.signUpEmail({
+        body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
+        returnHeaders: true,
+      });
+
+      await auth.api.signInEmail({
+        body: { email: 'ann@example.com', password: 'Old-Passw0rd!x' },
+      });
+
+      // eslint-disable-next-line no-await-in-loop
+      const answered = await post(path, body, {
+        cookie: (signedUp.headers.get('set-cookie') ?? '').split(';')[0],
+      });
+
+      expect(answered.status, path).toBe(200);
+      expect(invalidateLegacy, path).toHaveBeenCalledWith(String(db.user[0].id), undefined);
+      expect(markLegacyRevoked, path).toHaveBeenCalledTimes(1);
+    }
+  });
+
   it('answers a compat change-password body with { jwt, user } and leaves a native one alone', async () => {
-    const { auth, post, db, invalidateLegacy } = build();
+    const { auth, post, db, invalidateLegacy, markLegacyRevoked } = build();
     const signedUp = await auth.api.signUpEmail({
       body: { email: 'ann@example.com', password: 'Old-Passw0rd!x', name: 'Ann' },
       returnHeaders: true,
@@ -923,6 +979,7 @@ describe('strapi-compat reset, through the engine', () => {
 
     expect(wrong.status).toBe(400);
     expect(invalidateLegacy).not.toHaveBeenCalled();
+    expect(markLegacyRevoked).not.toHaveBeenCalled();
 
     const compat = await post(
       '/change-password',
@@ -935,6 +992,10 @@ describe('strapi-compat reset, through the engine', () => {
     expect(answer).toMatchObject({ jwt: expect.any(String), user: expect.anything() });
     // The old Users & Permissions sessions of the user go with the others
     expect(invalidateLegacy).toHaveBeenCalledWith(String(db.user[0].id), undefined);
+    expect(markLegacyRevoked).toHaveBeenCalledWith({
+      where: { documentId: db.user[0].id },
+      data: { legacyTokensRevokedAt: expect.any(Date) },
+    });
 
     // The other sessions were revoked, so the next calls carry the new one
     const renewed = { authorization: `Bearer ${answer.jwt}` };
@@ -1234,6 +1295,37 @@ describe('strapi-compat refresh routes, through the engine', () => {
 
     expect((await call('POST', '/refresh', { body: { refreshToken: first } })).status).toBe(401);
     expect(db.session).toHaveLength(1);
+  });
+
+  it('keeps a second factor the old session passed across a rotation, and gives none it lacked', async () => {
+    for (const passedSecondFactor of [true, false]) {
+      const { call, signIn, engine } = build();
+      const first = await signIn('ann@example.com', 'device-a');
+      const lookup = engine.getSession.bind(engine);
+      const claim = engine.claimSession.bind(engine);
+      const create = vi.spyOn(engine, 'createSession');
+
+      // The test engine has no second-factor plugin: the sessions it finds say what they say
+      engine.getSession = async (headers) => {
+        const found = await lookup(headers);
+
+        return found && { ...found, passedSecondFactor };
+      };
+      engine.claimSession = async (userId, sessionId) => {
+        const found = await claim(userId, sessionId);
+
+        return found && { ...found, passedSecondFactor };
+      };
+
+      // eslint-disable-next-line no-await-in-loop
+      const rotated = await call('POST', '/refresh', { body: { refreshToken: first } });
+
+      expect(rotated.status).toBe(200);
+      expect(create).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ passedSecondFactor })
+      );
+    }
   });
 
   it('keeps the device across a rotation and answers 400 when there is no token', async () => {

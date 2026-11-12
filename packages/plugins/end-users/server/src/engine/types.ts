@@ -48,6 +48,8 @@ export interface EngineField {
   references?: EngineFieldReference;
   /** The attribute name to store the value under, when it differs from the field's key. */
   fieldName?: string;
+  /** `false` means a request body never sets the value: only the engine and the plugin write it. */
+  input?: boolean;
 }
 
 /** An index over one or more fields, named by field key. */
@@ -77,6 +79,8 @@ export interface RequestMeta {
   userAgent?: string | null;
   /** The device the session belongs to; a session made with none gets one of its own. */
   deviceId?: string;
+  /** The session passed a second factor, which the new session keeps (a rotation). */
+  passedSecondFactor?: boolean;
 }
 
 export interface EngineSession {
@@ -91,6 +95,12 @@ export interface EngineSession {
   deviceId: string | null;
   /** Set when an administrator is signed in as this user. */
   impersonatedBy?: ID | null;
+  /**
+   * Whether the session was made by a second factor: a verified code, a confirmed enrollment, a
+   * passkey, or a trusted device. A sign-in by password alone, by a provider, a link or an old
+   * token is not.
+   */
+  passedSecondFactor: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

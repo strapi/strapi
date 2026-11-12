@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { validate } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 
-import { PROFILE_UID, USER_UID } from '../../constants';
+import { PLUGIN_ID, PROFILE_UID, USER_UID } from '../../constants';
 import {
+  ENGINE_OWNED_ATTRIBUTE_OPTION,
   ENGINE_OWNED_USER_FIELDS,
   REQUEST_NEVER_WRITES_USER_RELATIONS,
+  engineOwnedUserFields,
   engineOwnedUserFieldsValidator,
 } from '../engine-owned-user-fields';
 
@@ -18,6 +20,7 @@ const OWNED = [
   'failedSignIns',
   'lockedUntil',
   'lastSignInAt',
+  'legacyTokensRevokedAt',
 ] as const;
 
 /** The end-user type as far as these checks read it */
@@ -37,6 +40,7 @@ const USER_SCHEMA = {
     failedSignIns: { type: 'integer' },
     lockedUntil: { type: 'datetime' },
     lastSignInAt: { type: 'datetime' },
+    legacyTokensRevokedAt: { type: 'datetime' },
     roles: { type: 'relation', relation: 'manyToMany', target: 'plugin::end-users.role' },
   },
 } as unknown as Struct.ContentTypeSchema;
@@ -57,6 +61,7 @@ const VALUES: Record<(typeof OWNED)[number], unknown> = {
   failedSignIns: 0,
   lockedUntil: null,
   lastSignInAt: null,
+  legacyTokensRevokedAt: null,
 };
 
 /**
@@ -67,7 +72,7 @@ const run = (schema: Struct.ContentTypeSchema, data: unknown) =>
   engineOwnedUserFieldsValidator(schema)(data as never);
 
 describe('the engine-owned user fields', () => {
-  it('are the seven fields Better Auth and the plugin write', () => {
+  it('are the fields Better Auth and the plugin write', () => {
     expect(ENGINE_OWNED_USER_FIELDS).toEqual(OWNED);
     expect(Object.isFrozen(ENGINE_OWNED_USER_FIELDS)).toBe(true);
   });
@@ -193,5 +198,46 @@ describe('the engine-owned user fields', () => {
     await expect(
       validators.input({ banned: true }, PROFILE_SCHEMA, { action: 'update' })
     ).resolves.toBeUndefined();
+  });
+
+  describe('the fields the engine marks on the generated type', () => {
+    /** The type as the engine generates it with the phone-number and anonymous plugins installed */
+    const marked = { pluginOptions: { [PLUGIN_ID]: { [ENGINE_OWNED_ATTRIBUTE_OPTION]: true } } };
+    const SCHEMA_WITH_PLUGINS = {
+      ...USER_SCHEMA,
+      attributes: {
+        ...(USER_SCHEMA as unknown as { attributes: Record<string, unknown> }).attributes,
+        phoneNumber: { type: 'string' },
+        phoneNumberVerified: { type: 'boolean', ...marked },
+        isAnonymous: { type: 'boolean', ...marked },
+      },
+    } as unknown as Struct.ContentTypeSchema;
+
+    it('are refused with the static ones: the list is their union', async () => {
+      expect(
+        engineOwnedUserFields((SCHEMA_WITH_PLUGINS as never as { attributes: never }).attributes)
+      ).toEqual([...OWNED, 'phoneNumberVerified', 'isAnonymous']);
+
+      for (const field of ['phoneNumberVerified', 'isAnonymous', 'emailVerified']) {
+        // eslint-disable-next-line no-await-in-loop
+        await expect(run(SCHEMA_WITH_PLUGINS, { [field]: true }), field).rejects.toMatchObject({
+          name: 'ValidationError',
+          message: `${field} can only be changed by the plugin`,
+          details: { key: field, path: field },
+        });
+      }
+
+      // A field the engine does not own stays writable
+      const data = { name: 'A', phoneNumber: '+15550100' };
+
+      await expect(run(SCHEMA_WITH_PLUGINS, data)).resolves.toBe(data);
+    });
+
+    it('leave a type that carries no marks with the static list alone', async () => {
+      await expect(run(USER_SCHEMA, { phoneNumberVerified: true })).resolves.toEqual({
+        phoneNumberVerified: true,
+      });
+      expect(engineOwnedUserFields(undefined)).toBe(ENGINE_OWNED_USER_FIELDS);
+    });
   });
 });

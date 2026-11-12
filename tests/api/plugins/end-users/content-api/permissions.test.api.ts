@@ -720,10 +720,25 @@ describe('end-users: the Content API rules, over REST', () => {
       expect(whoami.statusCode).toBe(403);
       expect(whoami.body.error.details.code).toBe('TWO_FACTOR_REQUIRED');
 
-      // Once two-factor is enabled the user is let in
+      // Enabled is not enough: a session that did not pass the second factor (a provider, a link, an
+      // emailed code made it) is told to sign in again with it
       await strapi.db
         .query(USER_UID)
         .update({ where: { documentId }, data: { twoFactorEnabled: true } });
+
+      for (const headers of [bearer(token), { Cookie: cookie }]) {
+        // eslint-disable-next-line no-await-in-loop
+        const skipped = await rq.get('/api/notes', { headers });
+
+        expect(skipped.statusCode).toBe(403);
+        expect(skipped.body.error.details.code).toBe('TWO_FACTOR_REQUIRED');
+        expect(skipped.body.error.message).toMatch(/sign in again with your second factor/i);
+      }
+
+      // Once the session has passed it, as a code at the challenge records, the user is let in
+      await strapi.db
+        .query(SESSION_UID)
+        .updateMany({ where: { userId: documentId }, data: { twoFactorVerified: true } });
 
       expect((await rq.get('/api/notes', { headers: bearer(token) })).statusCode).toBe(200);
     });

@@ -11,7 +11,8 @@ import { LEGACY_ORIGIN } from './origin';
  * that belongs to a session of the `users-permissions` origin.
  */
 export type LegacyHit =
-  { kind: 'legacy'; userId: string } | { kind: 'access'; userId: string; sessionId: string };
+  | { kind: 'legacy'; userId: string; issuedAt: number }
+  | { kind: 'access'; userId: string; sessionId: string; issuedAt: number };
 
 /** The largest id the user table's integer key holds */
 const MAX_ID = 2_147_483_647;
@@ -136,7 +137,7 @@ const verifyAccessToken = async (
     return null;
   }
 
-  return { kind: 'access', userId, sessionId };
+  return { kind: 'access', userId, sessionId, issuedAt: result.payload.iat as number };
 };
 
 const verifyIdToken = (
@@ -163,7 +164,7 @@ const verifyIdToken = (
 
     const userId = toNumericId(payload.id);
 
-    return userId ? { kind: 'legacy', userId } : null;
+    return userId ? { kind: 'legacy', userId, issuedAt: payload.iat as number } : null;
   } catch {
     // Wrong signature or algorithm, expired, malformed: all the same answer
     return null;
@@ -203,17 +204,35 @@ export const verifyLegacyBearer = async (
 
 /**
  * The `documentId` of the user a legacy token names by its numeric id, or `null` when there is no
- * such user. The only place a numeric id is turned into the id the rest of the plugin uses.
+ * such user, or the token was issued at or before the moment the user's old tokens were revoked
+ * (`legacyTokensRevokedAt`, set by a password reset, a password change or a sign-out everywhere).
+ * The only place a numeric id is turned into the id the rest of the plugin uses.
  */
 export const resolveLegacyUserId = async (
   strapi: Core.Strapi,
   hit: LegacyHit
 ): Promise<string | null> => {
-  const user = (await strapi.db
-    .query(USER_UID)
-    .findOne({ where: { id: Number(hit.userId) }, select: ['documentId'] })) as {
+  const user = (await strapi.db.query(USER_UID).findOne({
+    where: { id: Number(hit.userId) },
+    select: ['documentId', 'legacyTokensRevokedAt'],
+  })) as {
     documentId?: string;
+    legacyTokensRevokedAt?: Date | string | null;
   } | null;
 
-  return user?.documentId ?? null;
+  if (!user?.documentId) {
+    return null;
+  }
+
+  if (user.legacyTokensRevokedAt) {
+    const revokedAt = new Date(user.legacyTokensRevokedAt).getTime();
+
+    // `iat` is in whole seconds, so a token issued in the second of the revoke counts as before it.
+    // A revoke time that cannot be read refuses every token of the user rather than none.
+    if (Number.isNaN(revokedAt) || hit.issuedAt <= Math.floor(revokedAt / 1000)) {
+      return null;
+    }
+  }
+
+  return user.documentId;
 };

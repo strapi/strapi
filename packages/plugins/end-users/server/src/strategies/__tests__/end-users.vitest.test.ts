@@ -26,6 +26,7 @@ const SESSION = {
   userId: 'user-1',
   token: 'secret-token',
   deviceId: null,
+  passedSecondFactor: false,
   expiresAt: new Date(Date.now() + 60_000),
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -588,9 +589,13 @@ describe('the end-users strategy', () => {
         requireTwoFactor: true,
       };
 
-      it('lets in a user who has enabled it', async () => {
+      /** A session that passed a second factor: a password and a code, a passkey, a trusted device */
+      const withSecondFactor = (extra: Partial<SessionLookup> = {}) =>
+        signedIn({ session: { ...SESSION, passedSecondFactor: true }, ...extra });
+
+      it('lets in a user who has enabled it, on a session that passed a second factor', async () => {
         const { strategy } = setup({
-          lookup: signedIn(),
+          lookup: withSecondFactor(),
           held: [EDITORS_2FA],
           user: storedUser({ twoFactorEnabled: true }),
         });
@@ -598,6 +603,104 @@ describe('the end-users strategy', () => {
         const result = await strategy.authenticate(koaCtx());
 
         expect(result).toMatchObject({ authenticated: true, ability: ABILITY });
+      });
+
+      it('refuses a user who has enabled it on a session that did not pass one: a provider, a magic link, an emailed code', async () => {
+        const { strategy, forUser } = setup({
+          // `signedIn` is a session the engine did not mark, whichever way it was made
+          lookup: signedIn(),
+          held: [EDITORS_2FA],
+          user: storedUser({ twoFactorEnabled: true }),
+        });
+        const ctx = koaCtx();
+
+        const outcome = await outcomeOf(strategy.authenticate(ctx));
+
+        expect(outcome).toBeInstanceOf(errors.PolicyError);
+        expect(codeOf(outcome)).toEqual({ code: 'TWO_FACTOR_REQUIRED' });
+        expect((outcome as Error).message).toMatch(/sign in again with your second factor/i);
+        expect(forUser).not.toHaveBeenCalled();
+        expect(ctx.state.user).toBeUndefined();
+      });
+
+      it('keeps its own message for a user who has none set up, whatever the session', async () => {
+        for (const lookup of [signedIn(), withSecondFactor()]) {
+          const { strategy } = setup({
+            lookup,
+            held: [EDITORS_2FA],
+            user: storedUser({ twoFactorEnabled: false }),
+          });
+
+          // eslint-disable-next-line no-await-in-loop
+          const outcome = await outcomeOf(strategy.authenticate(koaCtx()));
+
+          expect((outcome as Error).message).toBe(
+            'Two-factor authentication is required for your role.'
+          );
+        }
+      });
+
+      it('refuses a session whose mark is anything but true', async () => {
+        for (const passedSecondFactor of [undefined, null, 1, 'true']) {
+          const { strategy } = setup({
+            lookup: signedIn({ session: { ...SESSION, passedSecondFactor } as never }),
+            held: [EDITORS_2FA],
+            user: storedUser({ twoFactorEnabled: true }),
+          });
+
+          // eslint-disable-next-line no-await-in-loop
+          const outcome = await outcomeOf(strategy.authenticate(koaCtx()));
+
+          expect(codeOf(outcome), String(passedSecondFactor)).toEqual({
+            code: 'TWO_FACTOR_REQUIRED',
+          });
+        }
+      });
+
+      it('lets a session that did not pass a second factor in when no role held requires it', async () => {
+        const { strategy } = setup({
+          lookup: signedIn(),
+          held: HELD,
+          user: storedUser({ twoFactorEnabled: true }),
+        });
+
+        expect(await strategy.authenticate(koaCtx())).toMatchObject({ authenticated: true });
+      });
+
+      it('refuses an old Users & Permissions token for such a role: it has no session, so no second factor', async () => {
+        vi.mocked(verifyLegacyBearer).mockResolvedValue({
+          kind: 'legacy',
+          userId: '7',
+          issuedAt: 1,
+        });
+        vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
+
+        const { strategy } = setup({
+          lookup: { session: null, credentials: true, source: 'bearer', setCookies: [] },
+          compat: true,
+          held: [EDITORS_2FA],
+          user: storedUser({ twoFactorEnabled: true }),
+        });
+
+        const outcome = await outcomeOf(
+          strategy.authenticate(koaCtx({ headers: { authorization: 'Bearer legacy-token' } }))
+        );
+
+        expect(codeOf(outcome)).toEqual({ code: 'TWO_FACTOR_REQUIRED' });
+
+        // ...and is let in for a role that does not
+        const open = setup({
+          lookup: { session: null, credentials: true, source: 'bearer', setCookies: [] },
+          compat: true,
+          held: HELD,
+          user: storedUser({ twoFactorEnabled: true }),
+        });
+
+        expect(
+          await open.strategy.authenticate(
+            koaCtx({ headers: { authorization: 'Bearer legacy-token' } })
+          )
+        ).toMatchObject({ authenticated: true });
       });
 
       it('refuses a user who has not, with 403 and the code TWO_FACTOR_REQUIRED', async () => {
@@ -1088,7 +1191,7 @@ describe('the end-users strategy', () => {
     });
 
     it('falls through to the legacy bridge only when until is in the future', async () => {
-      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7' });
+      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7', issuedAt: 1 });
       vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
       const on = setup({ lookup: unknownBearer(), compat: true });
       const ctx = bearer();
@@ -1146,7 +1249,7 @@ describe('the end-users strategy', () => {
     });
 
     it('answers 401, and counts nothing, when the token names a user that is gone', async () => {
-      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7' });
+      vi.mocked(verifyLegacyBearer).mockResolvedValue({ kind: 'legacy', userId: '7', issuedAt: 1 });
       vi.mocked(resolveLegacyUserId).mockResolvedValue(null);
       const { strategy, recordLegacyHit } = setup({ lookup: unknownBearer(), compat: true });
 
@@ -1159,6 +1262,7 @@ describe('the end-users strategy', () => {
         kind: 'access',
         userId: '7',
         sessionId: 's-1',
+        issuedAt: 1,
       });
       vi.mocked(resolveLegacyUserId).mockResolvedValue('user-1');
       const { strategy } = setup({

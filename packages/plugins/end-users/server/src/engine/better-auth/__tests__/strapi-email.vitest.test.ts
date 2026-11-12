@@ -192,6 +192,12 @@ describe('strapi-email: the senders', () => {
     );
   });
 
+  it('has the two-factor plugin store the emailed code hashed', () => {
+    const { strapi } = setup();
+
+    expect(twoFactorOptions(strapi).otpOptions.storeOTP).toBe('hashed');
+  });
+
   it('leaves a locale the email plugin would refuse to the default', async () => {
     const { strapi, sendTemplate } = setup();
 
