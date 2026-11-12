@@ -348,6 +348,15 @@ describe('Templates service', () => {
       });
     });
 
+    it('strips CR and LF from the rendered subject', async () => {
+      await service.sendTemplate(key, 'a@b.c', {
+        name: 'Ann\r\nBcc: x@y.z',
+        url: 'https://a.test',
+      });
+
+      expect(ctx.send.mock.calls[0][0].subject).toBe('Hi AnnBcc: x@y.z');
+    });
+
     it('sends the content it is given, cleaned, instead of the stored row', async () => {
       ctx
         .getRows()

@@ -237,7 +237,11 @@ const templatesService = ({ strapi }: { strapi: Core.Strapi }) => {
         .service('email')
         .send({
           to,
-          subject: render(template.subject, template.variables, data, 'text'),
+          // A variable value can carry line breaks, which would let it add headers to the message.
+          subject: render(template.subject, template.variables, data, 'text').replace(
+            /[\r\n]/g,
+            ''
+          ),
           html: render(template.html, template.variables, data, 'html'),
           text: render(template.text, template.variables, data, 'text'),
         });
