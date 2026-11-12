@@ -245,6 +245,26 @@ describe('second-factor', () => {
     expect(ctx.marks()).toEqual([true, false]);
   });
 
+  it('does not mark a session that a refresh made look new, however old the session is', async () => {
+    const ctx = build();
+    const { code } = await ctx.enroll();
+    const cookie = await magicLinkSession(ctx);
+    const unmarked = ctx.db.session.find((session) => session.twoFactorVerified === false)!;
+    // Seven days of life, one day between refreshes: five days left means it is due for one
+    const due = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+
+    unmarked.expiresAt = due;
+
+    await ctx.auth.api.verifyTOTP({ body: { code: await code() }, headers: { cookie } });
+
+    // Better Auth did refresh it (it kept its id and its life was extended), and it is still unmarked
+    expect(ctx.db.session).toHaveLength(2);
+    expect(
+      ctx.db.session.find((session) => session.id === unmarked.id)!.expiresAt.getTime()
+    ).toBeGreaterThan(due.getTime());
+    expect(ctx.marks()).toEqual([true, false]);
+  });
+
   it('does not mark a session because its user gave an emailed code, which whoever signed it in can read', async () => {
     const ctx = build();
 

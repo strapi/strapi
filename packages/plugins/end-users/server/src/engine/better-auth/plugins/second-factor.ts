@@ -20,7 +20,9 @@
  * Nothing a signed-in session does can earn the mark for itself. A code given while signed in (an
  * authenticator code, a backup code, above all an emailed one: whoever holds the mailbox that signed
  * a session in also gets that code) marks nothing, and neither does turning two-factor on with an
- * emailed code alone. A user with two-factor on cannot register a passkey from a session that is
+ * emailed code alone. Confirming an enrollment is the one exception, and it is the one that makes a
+ * new session in place of the caller's: a session that Better Auth only refreshed keeps its id and
+ * is not marked. A user with two-factor on cannot register a passkey from a session that is
  * not marked, because a passkey sign-in is counted as both factors.
  *
  * Every other session is `false`, a session made by `createSession` included. The marker is written
@@ -104,9 +106,13 @@ const markedSession = (ctx: HookContext): SessionRef | null => {
     }
 
     // A session on the request: an enrollment is confirmed by the authenticator code that the
-    // password-protected setup produced. An emailed code that turns two-factor on has no second
-    // factor behind it, and a backup code makes no session.
-    return path === TOTP_VERIFY_PATH ? created : null;
+    // password-protected setup produced, and it replaces the caller's session with a new one. A
+    // session that is due a refresh is reported as created too, with the id it already had: that
+    // one only proved the caller has a session. An emailed code that turns two-factor on has no
+    // second factor behind it, and a backup code makes no session.
+    return path === TOTP_VERIFY_PATH && created.session.id !== callerSession(ctx)?.session.id
+      ? created
+      : null;
   }
 
   if (path === PASSKEY_SIGN_IN_PATH) {
