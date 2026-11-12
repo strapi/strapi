@@ -91,4 +91,48 @@ describe('folder', () => {
       expect(childIds).toHaveLength(1);
     });
   });
+
+  describe('getNamePaths', () => {
+    const findMany = jest.fn(async () => [
+      { pathId: 1, name: 'Clients' },
+      { pathId: 2, name: 'Acme' },
+    ]);
+
+    beforeAll(() => {
+      global.strapi = {
+        db: {
+          query: () => ({ findMany }),
+        },
+      } as any;
+    });
+
+    beforeEach(() => {
+      findMany.mockClear();
+    });
+
+    test.each([
+      ['/1/2', '/Clients/Acme'],
+      ['/imported', '/'],
+      ['/legacy/nested', '/'],
+      ['/1/xx/2', '/Clients/Acme'],
+    ])('maps %s to %s', async (path, namePath) => {
+      expect(await folderService.getNamePaths([path])).toEqual({ [path]: namePath });
+    });
+
+    test('skips a folder without a path', async () => {
+      expect(await folderService.getNamePaths([null, '/1'])).toEqual({ '/1': '/Clients' });
+    });
+
+    test.each(['99999999999', '2147483648', '1e21'])(
+      'skips the out-of-range segment %s without querying it',
+      async (segment) => {
+        const path = `/1/${segment}/2`;
+
+        expect(await folderService.getNamePaths([path])).toEqual({ [path]: '/Clients/Acme' });
+        expect(findMany).toHaveBeenCalledWith(
+          expect.objectContaining({ where: { pathId: { $in: [1, 2] } } })
+        );
+      }
+    );
+  });
 });

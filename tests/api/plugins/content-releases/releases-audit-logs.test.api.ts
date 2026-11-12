@@ -265,6 +265,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       await sleep(400);
       const logs = await findLogs('release.update');
 
+      // JSON/JSONB objects do not preserve insertion order, so compare the field set.
       expect(
         // Sorted: Postgres stores the payload as jsonb, which reorders its keys
         logs.map((log: { payload: { details: { changes: object } } }) =>
