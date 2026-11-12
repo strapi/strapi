@@ -7,9 +7,10 @@
  *
  *  - Every identifier has a counter, whether or not an account exists for it (`lockout-counter.ts`:
  *    one atomic upsert in the plugin's own counter table, which Better Auth's rate limiter never
- *    prunes, keyed by a hash of the normalized address or username). An unknown address locks after the same number of attempts as a real one and gets
- *    the same answer, so the lock is not a way to find out who has an account. A username that
- *    belongs to an account is counted on that account's address, so the two ways in share one count.
+ *    prunes, keyed by a hash of the normalized address, username or phone number). An unknown
+ *    address locks after the same number of attempts as a real one and gets the same answer, so the
+ *    lock is not a way to find out who has an account. A username or a phone number that belongs to
+ *    an account is counted on that account's address, so the ways in share one count.
  *  - The attempt is counted in the before-hook, before the password is checked, so parallel guesses
  *    cannot all read the same count. The first `maxAttempts` attempts get Better Auth's own answer
  *    (a wrong password is 401); the next one gets 403 `ACCOUNT_LOCKED`, whatever the password,
@@ -33,13 +34,19 @@ import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 import { clearAttempts, lockoutKey, releaseAttempt, reserveAttempt } from '../lockout-counter';
 import { isPlain } from '../../../utils/is-plain';
 
-const SIGN_IN_PATHS = new Set<string>(['/sign-in/email', '/sign-in/username']);
+const USERNAME_PATH = '/sign-in/username';
+const PHONE_NUMBER_PATH = '/sign-in/phone-number';
+const SIGN_IN_PATHS = new Set<string>(['/sign-in/email', USERNAME_PATH, PHONE_NUMBER_PATH]);
 const RESET_PASSWORD_PATH = '/reset-password';
 
-/** The two answers Better Auth gives to a wrong password (the email one and the username one). */
+/**
+ * The answers Better Auth gives to a wrong password (the email one, the username one and the phone
+ * number one).
+ */
 const WRONG_PASSWORD_CODES = new Set<string>([
   'INVALID_EMAIL_OR_PASSWORD',
   'INVALID_USERNAME_OR_PASSWORD',
+  'INVALID_PHONE_NUMBER_OR_PASSWORD',
 ]);
 
 export const ACCOUNT_LOCKED_MESSAGE = 'This account is locked. Try again later.';
@@ -76,14 +83,25 @@ interface LockoutContext {
   };
 }
 
-/** The user a password sign-in names, by its address or its username (both are stored lowercase). */
-const findUser = async (ctx: LockoutContext, identifier: string): Promise<LockoutUser | null> =>
-  ctx.path === '/sign-in/username'
-    ? ctx.context.adapter.findOne<LockoutUser>({
-        model: 'user',
-        where: [{ field: 'username', value: identifier }],
-      })
-    : ((await ctx.context.internalAdapter.findUserByEmail(identifier))?.user ?? null);
+/**
+ * The user a password sign-in names, by its address or its username (both are stored lowercase) or
+ * by its phone number (stored as given: the phone number plugin looks it up as it is).
+ */
+const findUser = async (ctx: LockoutContext, identifier: string): Promise<LockoutUser | null> => {
+  if (ctx.path === USERNAME_PATH || ctx.path === PHONE_NUMBER_PATH) {
+    return ctx.context.adapter.findOne<LockoutUser>({
+      model: 'user',
+      where: [
+        {
+          field: ctx.path === USERNAME_PATH ? 'username' : 'phoneNumber',
+          value: identifier,
+        },
+      ],
+    });
+  }
+
+  return (await ctx.context.internalAdapter.findUserByEmail(identifier))?.user ?? null;
+};
 
 /** What the sign-in names, normalized the way the plugin stores it; null when the body names nothing. */
 const identifierOf = (ctx: LockoutContext): string | null => {
@@ -93,13 +111,21 @@ const identifierOf = (ctx: LockoutContext): string | null => {
     return null;
   }
 
-  const value = ctx.path === '/sign-in/username' ? body.username : body.email;
+  if (ctx.path === PHONE_NUMBER_PATH) {
+    // A number nobody has is counted on itself, under a prefix no address or username can collide
+    // with; the number is not normalized, because the sign-in looks it up as given
+    return typeof body.phoneNumber === 'string' && body.phoneNumber !== ''
+      ? body.phoneNumber
+      : null;
+  }
+
+  const value = ctx.path === USERNAME_PATH ? body.username : body.email;
 
   if (typeof value !== 'string' || value === '') {
     return null;
   }
 
-  return ctx.path === '/sign-in/username' ? normalizeUsername(value) : normalizeEmail(value);
+  return ctx.path === USERNAME_PATH ? normalizeUsername(value) : normalizeEmail(value);
 };
 
 /** The counter of the sign-in in flight, from its before-hook to its after-hook. */
@@ -176,7 +202,11 @@ export const lockout = (strapi: Core.Strapi): BetterAuthPlugin => ({
           }
 
           const user = await findUser(lockoutCtx, identifier);
-          const key = user ? keyOfAccount(user.email) : lockoutKey(identifier);
+          const key = user
+            ? keyOfAccount(user.email)
+            : lockoutKey(
+                lockoutCtx.path === PHONE_NUMBER_PATH ? `phone:${identifier}` : identifier
+              );
           const count = await reserveAttempt(strapi, key, options);
 
           if (count > options.maxAttempts) {
