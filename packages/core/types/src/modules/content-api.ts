@@ -337,9 +337,15 @@ export interface PermissionUtilities {
    * the distinct fields, relations and conditions they acted on, with the caller's own roles and the
    * names of the conditions (never their parameters). `checked` is false when nothing asked the
    * caller's rows: a route that skipped the checks has route-level permission only. A caller that
-   * is not subject-aware has nothing to explain: `{ checked: false, entries: [] }`.
+   * is not subject-aware has nothing to explain: `{ checked: false, entryChecked: false, entries: [] }`.
+   * `entryChecked` is true once `assertEntry`, `entryMatches` or `assertWritten` ran for the caller's
+   * request: the write went through the core controllers' guard, not straight to the Document Service.
    */
-  readExplain: (auth: unknown) => { checked: boolean; entries: ExplainEntry[] };
+  readExplain: (auth: unknown) => {
+    checked: boolean;
+    entryChecked: boolean;
+    entries: ExplainEntry[];
+  };
   /**
    * Whether the stored entries a write touches all match the caller's condition filters for
    * (action, uid), in `opts.locale`: the default locale when missing, `'*'` for every locale, or a

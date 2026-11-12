@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { restrictsEntries } from '@strapi/utils';
 import type { ExplainEntry } from '@strapi/utils';
 
 import { PLUGIN_ID } from '../constants';
@@ -80,6 +81,25 @@ const routeOf = (route: RouteState) => {
   return typeof route.handler === 'string' ? route.handler : `${route.method} ${route.path}`;
 };
 
+/** The core action a write method runs: what a route's permission and its conditions are named by */
+const WRITE_ACTIONS: Record<string, 'create' | 'update' | 'delete'> = {
+  POST: 'create',
+  PUT: 'update',
+  PATCH: 'update',
+  DELETE: 'delete',
+};
+
+/** The content type a core-style handler (`api::note.note.update`) belongs to, if it names one */
+const contentTypeOf = (strapi: Core.Strapi, handler: unknown) => {
+  if (typeof handler !== 'string') {
+    return undefined;
+  }
+
+  const uid = handler.slice(0, handler.lastIndexOf('.'));
+
+  return strapi.contentType(uid as never)?.uid;
+};
+
 /**
  * Explain mode for the Content API: what the permission engine did to a request of an
  * end user, so a developer can see why a field is missing or an entry is not listed.
@@ -96,9 +116,62 @@ const routeOf = (route: RouteState) => {
  *
  * It never changes what a request does: a failure here is logged and the response goes out as it was.
  */
-export const createExplainMiddleware =
-  (strapi: Core.Strapi): Core.MiddlewareHandler =>
-  async (ctx, next) => {
+export const createExplainMiddleware = (strapi: Core.Strapi): Core.MiddlewareHandler => {
+  // One warning per route, so a busy route doesn't fill the log
+  const warned = new Set<string>();
+
+  /**
+   * In development, says so once when an end user's write on an action with a condition succeeded
+   * and core's entry check never ran: a project's own controller wrote through the Document Service,
+   * so the ownership rule did not apply to it.
+   */
+  const warnUnguardedWrite = (
+    ctx: Parameters<Core.MiddlewareHandler>[0],
+    route: RouteState,
+    auth: unknown,
+    entryChecked: boolean | undefined
+  ) => {
+    const action = WRITE_ACTIONS[ctx.method];
+
+    if (
+      !action ||
+      entryChecked ||
+      ctx.status >= 400 ||
+      !strapi.config.get('autoReload') ||
+      process.env.NODE_ENV === 'production'
+    ) {
+      return;
+    }
+
+    const uid = contentTypeOf(strapi, route.handler);
+
+    if (uid === undefined) {
+      return;
+    }
+
+    const filters = strapi.contentAPI.permissions.checker.filtersFor(auth, action, uid);
+
+    // No condition on the action: there was no ownership rule to skip
+    if (!restrictsEntries(filters)) {
+      return;
+    }
+
+    const key = `${ctx.method} ${routeOf(route)}`;
+
+    if (warned.has(key)) {
+      return;
+    }
+
+    warned.add(key);
+    strapi.log.warn(
+      `${key} wrote ${uid} for an end user whose ${action} permission has a condition, but ` +
+        'the ownership check did not run in this request. A custom controller that calls the ' +
+        'Document Service directly skips it: call strapi.contentAPI.permissions.assertEntry ' +
+        'before the write (see the end-users README, "Custom controllers and routes").'
+    );
+  };
+
+  return async (ctx, next) => {
     await next();
 
     try {
@@ -114,8 +187,14 @@ export const createExplainMiddleware =
         return;
       }
 
-      const { checked, entries: recorded } = strapi.contentAPI.permissions.readExplain(auth);
+      const {
+        checked,
+        entryChecked,
+        entries: recorded,
+      } = strapi.contentAPI.permissions.readExplain(auth);
       let entries = recorded;
+
+      warnUnguardedWrite(ctx, route, auth, entryChecked);
 
       // A refusal is not a route that ran unchecked: the route's own permission said no
       if (!checked && ctx.status < 400) {
@@ -152,5 +231,6 @@ export const createExplainMiddleware =
       );
     }
   };
+};
 
 export default createExplainMiddleware;

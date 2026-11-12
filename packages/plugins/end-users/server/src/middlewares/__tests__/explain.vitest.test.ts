@@ -338,6 +338,100 @@ describe('explain middleware', () => {
   });
 });
 
+describe('explain middleware: a write that skipped the ownership check', () => {
+  const NOTE = 'api::note.note';
+  const MINE = { owner: { documentId: { $eq: 'u1' } } };
+
+  interface Write {
+    method?: string;
+    handler?: unknown;
+    status?: number;
+    entryChecked?: boolean;
+    filters?: Record<string, unknown> | null;
+    autoReload?: boolean;
+    nodeEnv?: string;
+  }
+
+  /** One middleware, so a second request of the same route can be told from a first */
+  const setup = (options: Pick<Write, 'filters' | 'autoReload'> = {}) => {
+    const { filters = MINE, autoReload = true } = options;
+    const warn = vi.fn();
+    const filtersFor = vi.fn(() => filters);
+    const readExplain = vi.fn();
+    const strapi = {
+      config: { get: (path: string) => (path === 'autoReload' ? autoReload : undefined) },
+      contentType: (uid: string) => (uid === NOTE ? { uid } : undefined),
+      contentAPI: { permissions: { readExplain, checker: { filtersFor } } },
+      log: { debug: vi.fn(), warn },
+    } as unknown as Core.Strapi;
+    const middleware = createExplainMiddleware(strapi) as Core.MiddlewareHandler;
+
+    const send = async ({
+      method = 'PUT',
+      handler = `${NOTE}.update`,
+      status = 200,
+      entryChecked = false,
+      nodeEnv = 'development',
+    }: Write = {}) => {
+      const previous = process.env.NODE_ENV;
+
+      process.env.NODE_ENV = nodeEnv;
+      readExplain.mockReturnValue({ checked: true, entryChecked, entries: [] });
+
+      const ctx = koaCtx({ method, url: '/api/notes/n1' });
+
+      await middleware(ctx, async () => {
+        Object.assign(ctx.state, {
+          route: { info: { type: 'content-api' }, handler, method, path: '/api/notes/:id' },
+          auth: { strategy: { name: 'end-users' }, ability: {} },
+        });
+        ctx.status = status;
+        ctx.body = {};
+      });
+
+      process.env.NODE_ENV = previous;
+    };
+
+    return { send, warn, filtersFor };
+  };
+
+  it('warns once per route when a conditioned write completes without the entry check', async () => {
+    const { send, warn, filtersFor } = setup();
+
+    await send();
+    await send();
+
+    expect(filtersFor).toHaveBeenCalledWith(expect.anything(), 'update', NOTE);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('PUT api::note.note.update');
+    expect(warn.mock.calls[0][0]).toContain('assertEntry');
+
+    await send({ method: 'DELETE', handler: `${NOTE}.delete` });
+
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ['the entry check ran', { entryChecked: true }],
+    ['the write was refused', { status: 404 }],
+    ['the request is a read', { method: 'GET', handler: `${NOTE}.find` }],
+    ['the permission has no condition', { filters: {} }],
+    ['it is not in development', { autoReload: false }],
+    ['NODE_ENV is production', { nodeEnv: 'production' }],
+    ["the handler is not a content type's", { handler: 'api::other.other.update' }],
+    ['the handler is a function', { handler() {} }],
+  ] as Array<[string, Write & { autoReload?: boolean }]>)(
+    'does not warn when %s',
+    async (_name, write) => {
+      const { send, warn } = setup({ filters: write.filters, autoReload: write.autoReload });
+
+      await send(write);
+
+      expect(warn).not.toHaveBeenCalled();
+    }
+  );
+});
+
 describe('toHeaderValue', () => {
   it('is the JSON of the entries when it fits', () => {
     expect(JSON.parse(toHeaderValue([removed('a'), removed('b')]))).toEqual([

@@ -7,7 +7,8 @@ import {
 import type { PermissionChecker } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
-import { isSubjectAware } from './generate-ability';
+import { markEntryChecked } from './explain';
+import { compiledPermissionsOf, isSubjectAware } from './generate-ability';
 
 type PermissionUtilities = Modules.ContentAPI.PermissionUtilities;
 
@@ -50,6 +51,9 @@ export const createWrittenCheck = ({ strapi, checker }: WrittenCheckParams) => {
     if (!isSubjectAware(auth)) {
       return;
     }
+
+    // Explain mode: this request's write went through the written-data check
+    markEntryChecked(compiledPermissionsOf(auth) as object);
 
     // The registry is a plain object: only a schema that names itself by the uid counts
     const contentType = strapi.contentType(uid);

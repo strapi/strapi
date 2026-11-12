@@ -10,6 +10,8 @@ import type { ExplainEntry } from '@strapi/utils';
 interface Collected {
   /** Whether a check asked the caller's rows anything: false is a route that skipped them */
   checked: boolean;
+  /** Whether the stored-entry or written-data check ran: the checks core controllers make before and after a write */
+  entryChecked: boolean;
   entries: Map<string, ExplainEntry>;
 }
 
@@ -25,7 +27,7 @@ const stateOf = (key: object): Collected => {
   let state = collected.get(key);
 
   if (state === undefined) {
-    state = { checked: false, entries: new Map() };
+    state = { checked: false, entryChecked: false, entries: new Map() };
     collected.set(key, state);
   }
 
@@ -42,6 +44,15 @@ const keyOf = (entry: ExplainEntry) => {
 /** Notes that a check ran for this request */
 export const markChecked = (key: object) => {
   stateOf(key).checked = true;
+};
+
+/**
+ * Notes that the entry check of a write ran for this request (`assertEntry`, `entryMatches` or
+ * `assertWritten`), so the end-users plugin can tell a write that went through core's guard from one
+ * a project's own controller made straight to the Document Service
+ */
+export const markEntryChecked = (key: object) => {
+  stateOf(key).entryChecked = true;
 };
 
 /**
@@ -68,15 +79,18 @@ export const record = (
 };
 
 /** What was recorded for this request, in the order it was recorded. Copies; nothing leaks */
-export const read = (key: object | null): { checked: boolean; entries: ExplainEntry[] } => {
+export const read = (
+  key: object | null
+): { checked: boolean; entryChecked: boolean; entries: ExplainEntry[] } => {
   const state = key === null ? undefined : collected.get(key);
 
   if (state === undefined) {
-    return { checked: false, entries: [] };
+    return { checked: false, entryChecked: false, entries: [] };
   }
 
   return {
     checked: state.checked,
+    entryChecked: state.entryChecked,
     entries: [...state.entries.values()].map((entry) => structuredClone(entry)),
   };
 };

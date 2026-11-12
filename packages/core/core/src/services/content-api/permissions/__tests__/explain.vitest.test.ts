@@ -26,8 +26,8 @@ const removed = (path = 'secret'): ExplainEntry => ({
 
 describe('explain: the collector', () => {
   it('has nothing for a request that was never asked about', () => {
-    expect(explain.read({})).toEqual({ checked: false, entries: [] });
-    expect(explain.read(null)).toEqual({ checked: false, entries: [] });
+    expect(explain.read({})).toEqual({ checked: false, entryChecked: false, entries: [] });
+    expect(explain.read(null)).toEqual({ checked: false, entryChecked: false, entries: [] });
   });
 
   it('says a check ran once it is told so, and records nothing by that', () => {
@@ -35,7 +35,7 @@ describe('explain: the collector', () => {
 
     explain.markChecked(key);
 
-    expect(explain.read(key)).toEqual({ checked: true, entries: [] });
+    expect(explain.read(key)).toEqual({ checked: true, entryChecked: false, entries: [] });
   });
 
   it('records an entry once, however often it is recorded, in the order it first came', () => {
@@ -99,7 +99,7 @@ describe('explain: the collector', () => {
     explain.markChecked(second);
 
     expect(explain.read(first).entries).toHaveLength(1);
-    expect(explain.read(second)).toEqual({ checked: true, entries: [] });
+    expect(explain.read(second)).toEqual({ checked: true, entryChecked: false, entries: [] });
   });
 
   it('stops growing at a bound, so a request never carries an unbounded list', () => {
@@ -186,12 +186,12 @@ describe('explain: through the checker', () => {
   it('says nothing was checked until a check asks for the caller rows', async () => {
     const auth = await authOf([row('find', 'Authenticated')]);
 
-    expect(p.readExplain(auth)).toEqual({ checked: false, entries: [] });
+    expect(p.readExplain(auth)).toEqual({ checked: false, entryChecked: false, entries: [] });
 
     // Asking whether the caller has rules is not a check
     p.checker.isActive(auth);
 
-    expect(p.readExplain(auth)).toEqual({ checked: false, entries: [] });
+    expect(p.readExplain(auth)).toEqual({ checked: false, entryChecked: false, entries: [] });
   });
 
   it.each([
@@ -208,7 +208,7 @@ describe('explain: through the checker', () => {
 
     ask(auth);
 
-    expect(p.readExplain(auth)).toEqual({ checked: true, entries: [] });
+    expect(p.readExplain(auth)).toEqual({ checked: true, entryChecked: false, entries: [] });
   });
 
   it('marks it checked even when the caller holds no row for the type', async () => {
@@ -216,7 +216,7 @@ describe('explain: through the checker', () => {
 
     p.checker.filtersFor(auth, 'find', NOTE);
 
-    expect(p.readExplain(auth)).toEqual({ checked: true, entries: [] });
+    expect(p.readExplain(auth)).toEqual({ checked: true, entryChecked: false, entries: [] });
   });
 
   it('names every role that holds the rows a removed field was decided by', async () => {
@@ -339,9 +339,9 @@ describe('explain: through the checker', () => {
     p.checker.record(token, removed());
     p.checker.filtersFor(token, 'find', NOTE);
 
-    expect(p.readExplain(token)).toEqual({ checked: false, entries: [] });
-    expect(p.readExplain(null)).toEqual({ checked: false, entries: [] });
-    expect(p.readExplain({})).toEqual({ checked: false, entries: [] });
+    expect(p.readExplain(token)).toEqual({ checked: false, entryChecked: false, entries: [] });
+    expect(p.readExplain(null)).toEqual({ checked: false, entryChecked: false, entries: [] });
+    expect(p.readExplain({})).toEqual({ checked: false, entryChecked: false, entries: [] });
   });
 
   it('keeps one request apart from the next one of the same role', async () => {
@@ -352,7 +352,7 @@ describe('explain: through the checker', () => {
     p.checker.record(first, removed());
 
     expect(p.readExplain(first).entries).toHaveLength(1);
-    expect(p.readExplain(second)).toEqual({ checked: false, entries: [] });
+    expect(p.readExplain(second)).toEqual({ checked: false, entryChecked: false, entries: [] });
   });
 
   it('never throws, whatever it is given', async () => {
