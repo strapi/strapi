@@ -1,12 +1,21 @@
 import { installGraphqlExtension } from '../graphql';
 
-type Resolver = (parent: unknown, args: Record<string, unknown>) => Promise<unknown>;
+type Resolver = (
+  parent: unknown,
+  args: Record<string, unknown>,
+  context?: object
+) => Promise<unknown>;
 
 const file = { id: 7, documentId: 'qovkpekciob2wt8qyd51mg8k', name: 'image.jpg' };
 
 describe('Upload GraphQL extension', () => {
   let mockDbFindOne: jest.Mock;
-  let mockUploadService: { findOne: jest.Mock; updateFileInfo: jest.Mock; remove: jest.Mock };
+  let mockUploadService: {
+    findOne: jest.Mock;
+    updateFileInfo: jest.Mock;
+    remove: jest.Mock;
+    getNamePaths: jest.Mock;
+  };
   let resolvers: Record<string, Resolver>;
 
   beforeEach(() => {
@@ -15,6 +24,7 @@ describe('Upload GraphQL extension', () => {
       findOne: jest.fn(),
       updateFileInfo: jest.fn(),
       remove: jest.fn(),
+      getNamePaths: jest.fn(),
     };
     resolvers = {};
 
@@ -22,18 +32,20 @@ describe('Upload GraphQL extension', () => {
       inputObjectType: jest.fn((config) => config),
       nonNull: jest.fn((type) => type),
       extendType: jest.fn((config) => {
-        config.definition({
-          field(name: string, { resolve }: { resolve: Resolver }) {
-            resolvers[name] = resolve;
-          },
-        });
+        const register = (name: string, { resolve }: { resolve: Resolver }) => {
+          resolvers[name] = resolve;
+        };
+        config.definition({ field: register, string: register });
         return config;
       }),
     };
 
     const graphqlServices: Record<string, unknown> = {
       extension: {
-        shadowCRUD: () => ({ disable: jest.fn(), disableMutations: jest.fn() }),
+        shadowCRUD: () => ({
+          disableMutations: jest.fn(),
+          field: () => ({ disable: jest.fn(), disableOutput: jest.fn() }),
+        }),
         use: (register: (ctx: { nexus: unknown }) => unknown) => register({ nexus }),
       },
       utils: { naming: { getTypeName: () => 'UploadFile' } },
@@ -139,6 +151,30 @@ describe('Upload GraphQL extension', () => {
 
       expect(result).toBeNull();
       expect(mockUploadService.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('UploadFolder.namePath', () => {
+    it('loads the name paths of one request in a single batch', async () => {
+      mockUploadService.getNamePaths.mockResolvedValue({
+        '/1': '/Clients',
+        '/1/2': '/Clients/Acme',
+      });
+      const context = {};
+
+      const namePaths = await Promise.all([
+        resolvers.namePath({ path: '/1' }, {}, context),
+        resolvers.namePath({ path: '/1/2' }, {}, context),
+      ]);
+
+      expect(namePaths).toEqual(['/Clients', '/Clients/Acme']);
+      expect(mockUploadService.getNamePaths).toHaveBeenCalledTimes(1);
+      expect(mockUploadService.getNamePaths).toHaveBeenCalledWith(['/1', '/1/2']);
+    });
+
+    it('returns null for a folder without a path', async () => {
+      expect(await resolvers.namePath({ path: null }, {}, {})).toBeNull();
+      expect(mockUploadService.getNamePaths).not.toHaveBeenCalled();
     });
   });
 });

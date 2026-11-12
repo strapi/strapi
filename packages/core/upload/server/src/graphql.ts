@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import { FILE_MODEL_UID } from './constants';
+import { FILE_MODEL_UID, FOLDER_MODEL_UID } from './constants';
 import { resolveFileId } from './services/upload';
 
 const { NotFoundError } = errors;
@@ -18,13 +18,49 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
     return;
   }
 
-  getGraphQLService('extension').shadowCRUD('plugin::upload.folder').disable();
-  getGraphQLService('extension').shadowCRUD('plugin::upload.file').disableMutations();
+  const folderCRUD = getGraphQLService('extension').shadowCRUD(FOLDER_MODEL_UID);
+
+  folderCRUD.disableMutations();
+  folderCRUD.field('files').disable();
+  folderCRUD.field('children').disableOutput();
+  folderCRUD.field('pathId').disableOutput();
+
+  getGraphQLService('extension').shadowCRUD(FILE_MODEL_UID).disableMutations();
 
   const { getTypeName } = getGraphQLService('utils').naming;
 
   const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
+  const folderTypeName = getTypeName(strapi.getModel(FOLDER_MODEL_UID));
+
+  const pendingNamePaths = new WeakMap<
+    object,
+    { paths: Set<string>; namePaths: Promise<Record<string, string>> }
+  >();
+
+  // Batches the folders of one request into a single ancestors query.
+  const loadNamePath = (context: object, path: string) => {
+    let batch = pendingNamePaths.get(context);
+
+    if (!batch) {
+      const paths = new Set<string>();
+      const namePaths = new Promise<void>((resolve) => {
+        setImmediate(resolve);
+      }).then(() => {
+        pendingNamePaths.delete(context);
+
+        return getUploadService('folder').getNamePaths([...paths]);
+      });
+
+      batch = { paths, namePaths };
+      pendingNamePaths.set(context, batch);
+    }
+
+    batch.paths.add(path);
+
+    return batch.namePaths.then((namePaths) => namePaths[path]);
+  };
+
   /**
    * Register Upload's types, queries & mutations to the content API using the GraphQL extension API
    */
@@ -39,6 +75,18 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
         t.string('name');
         t.string('alternativeText');
         t.string('caption');
+      },
+    });
+
+    const folderNamePath = extendType({
+      type: folderTypeName,
+
+      definition(t: any) {
+        t.string('namePath', {
+          resolve(parent: { path?: string | null }, args: unknown, context: object) {
+            return typeof parent.path === 'string' ? loadNamePath(context, parent.path) : null;
+          },
+        });
       },
     });
 
@@ -98,12 +146,15 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
     });
 
     return {
-      types: [fileInfoInputType, mutations],
+      types: [fileInfoInputType, folderNamePath, mutations],
       resolversConfig: {
         // Use custom scopes for the upload file CRUD operations
         'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },
         'Query.uploadFiles_connection': { auth: { scope: 'plugin::upload.content-api.find' } },
         'Query.uploadFile': { auth: { scope: 'plugin::upload.content-api.findOne' } },
+        'Query.uploadFolders': { auth: { scope: 'plugin::upload.folder.find' } },
+        'Query.uploadFolders_connection': { auth: { scope: 'plugin::upload.folder.find' } },
+        'Query.uploadFolder': { auth: { scope: 'plugin::upload.folder.findOne' } },
         'Mutation.updateUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
         'Mutation.deleteUploadFile': { auth: { scope: 'plugin::upload.content-api.destroy' } },
       },
