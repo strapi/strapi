@@ -32,19 +32,11 @@ import { logout, refresh, revokeSession, sessions } from '../../../compat/endpoi
 import type { CompatResult } from '../../../compat/types';
 import { pendingDevice } from '../../../compat/pending-device';
 import { pendingUsername } from '../../../compat/pending-username';
-import { revokeLegacySessions } from '../../../compat/legacy-sessions';
 import { RESET_PASSWORD_IDENTIFIER } from '../reset-identifier';
 
 /** The compat paths, which share one window each. */
 const SIGN_IN_PATHS = new Set<string>(['/local', '/local/register']);
 const EMAIL_PATHS = new Set<string>(['/forgot-password', '/send-email-confirmation']);
-
-/** The native routes that end sessions of the caller's user other than, or including, the one in use */
-const SESSION_REVOKING_PATHS = new Set<string>([
-  '/change-password',
-  '/revoke-sessions',
-  '/revoke-other-sessions',
-]);
 
 const DEFAULT_WINDOW_SECONDS = 60;
 const SIGN_IN_MAX = 5;
@@ -276,21 +268,6 @@ export const strapiCompat = (strapi: Core.Strapi, cfg: CompatConfig): BetterAuth
           return finish(
             await changePassword(strapi, cfg, { body: ctx.body, headers: ctx.headers })
           );
-        }),
-      },
-    ],
-    after: [
-      {
-        // A password change, or a revoke of the other sessions or of all of them, signs the user out
-        // of the old Users & Permissions sessions too, which Better Auth's own revoke does not
-        // reach. The compat shape of the change runs this route as well
-        matcher: (context) => SESSION_REVOKING_PATHS.has(context.path as string),
-        handler: createAuthMiddleware(async (ctx) => {
-          const userId = ctx.context.session?.user.id;
-
-          if (userId && !(ctx.context.returned instanceof APIError)) {
-            await revokeLegacySessions(strapi, userId);
-          }
         }),
       },
     ],

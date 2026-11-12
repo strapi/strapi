@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import { defineAuth } from '../define-auth';
+import { phoneNumber } from '../public/plugins';
 import { createEngine } from '../create-engine';
 import type { AuthEngine } from '../../types';
 import { lockoutKey } from '../lockout-counter';
@@ -33,6 +34,7 @@ const SERVER_URL = 'http://localhost:1337';
 const PASSWORD = 'Passw0rd!long';
 const WRONG = 'not-the-password';
 const EMAIL = 'ann@example.com';
+const PHONE = '+15550100';
 
 interface Lockout {
   enabled: boolean;
@@ -122,11 +124,18 @@ describe('lockout', () => {
             resetLinks.push({ token });
           },
         },
+        plugins: [phoneNumber()],
       })
     );
 
     const res = await engine.handle(
-      post('/sign-up/email', { email: EMAIL, password: PASSWORD, name: 'Ann', username: 'ann' })
+      post('/sign-up/email', {
+        email: EMAIL,
+        password: PASSWORD,
+        name: 'Ann',
+        username: 'ann',
+        phoneNumber: PHONE,
+      })
     );
 
     expect(res.status).toBe(200);
@@ -138,8 +147,8 @@ describe('lockout', () => {
   });
 
   const counterOf = async (identifier: string) =>
-    lockoutDb.connection('eu_rate_limits').where('key', lockoutKey(identifier)).first();
-  const counters = () => lockoutDb.connection('eu_rate_limits').select();
+    lockoutDb.connection('eu_lockout_counters').where('key', lockoutKey(identifier)).first();
+  const counters = () => lockoutDb.connection('eu_lockout_counters').select();
 
   it('locks after maxAttempts failures and refuses even the right password while locked', async () => {
     await fail(5);
@@ -219,6 +228,47 @@ describe('lockout', () => {
     await fail(2, (password) => signInAs('ann', password));
 
     expect((await signIn(PASSWORD)).status).toBe(403);
+  });
+
+  const signInByPhone = (phone: string, password: string) =>
+    engine.handle(post('/sign-in/phone-number', { phoneNumber: phone, password }));
+
+  it('counts phone number sign-ins on the account the number belongs to, across the other ways in', async () => {
+    await fail(3, (password) => signInByPhone(PHONE, password));
+    await fail(2);
+
+    const byPhone = await signInByPhone(PHONE, PASSWORD);
+
+    expect(byPhone.status).toBe(403);
+    expect(await body(byPhone)).toMatchObject({ code: 'ACCOUNT_LOCKED' });
+    expect((await signIn(PASSWORD)).status).toBe(403);
+    expect(userRow().lockedUntil).toBeTruthy();
+    // One counter for the account, none under the number
+    expect((await counterOf(EMAIL))?.count).toBe(7);
+  });
+
+  it('locks a phone number nobody has on the number itself, with the answer of a locked account', async () => {
+    await fail(5, (password) => signInByPhone('+15550199', password));
+
+    const res = await signInByPhone('+15550199', WRONG);
+
+    expect(res.status).toBe(403);
+    expect(await body(res)).toMatchObject({ code: 'ACCOUNT_LOCKED' });
+    expect(
+      await lockoutDb
+        .connection('eu_lockout_counters')
+        .where('key', lockoutKey('phone:+15550199'))
+        .first()
+    ).toMatchObject({ count: 6 });
+    // The account itself is not touched by guesses at another number
+    expect((await signIn(PASSWORD)).status).toBe(200);
+  });
+
+  it('clears the account counter when a phone number sign-in succeeds', async () => {
+    await fail(4, (password) => signInByPhone(PHONE, password));
+
+    expect((await signInByPhone(PHONE, PASSWORD)).status).toBe(200);
+    expect(await counterOf(EMAIL)).toBeUndefined();
   });
 
   it('keeps the count per account', async () => {

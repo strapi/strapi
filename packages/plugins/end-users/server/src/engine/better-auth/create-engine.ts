@@ -62,6 +62,7 @@ import { bannedReset, withoutBannedRecipients } from './plugins/banned-reset';
 import { totpReplay } from './plugins/totp-replay';
 import { secondFactor } from './plugins/second-factor';
 import { revokeOnPasswordChange } from './plugins/revoke-on-password-change';
+import { legacyRevoke } from './plugins/legacy-revoke';
 import { resolvePreset } from './presets';
 import { pendingLink } from './plugins/pending-link';
 import { providerProfile } from './plugins/provider-profile';
@@ -124,7 +125,9 @@ const betterAuthPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
  *      `banned-reset`     (a banned user gets no reset link and can't redeem one), and
  *      `totp-replay`      (an authenticator code is taken once)
  *   6. `password-policy`  (the admin's password rules on every way a password is set), installed
- *      `revoke-on-password-change` (a password change signs the other sessions out)
+ *      `revoke-on-password-change` (a password change signs the other sessions out), and
+ *      `legacy-revoke`    (those revokes end the old Users & Permissions tokens too, with the
+ *                         compatibility mode on or off)
  *   7. `last-sign-in`, `provider-profile` (the email guard, the every-sign-in profile mappings)
  *      `second-factor` (a session records whether a second factor made it); after `twoFactor`,
  *      whose after-hook it reads the result of
@@ -142,6 +145,7 @@ const strapiPlugins = (strapi: Core.Strapi): BetterAuthPlugin[] => [
   totpReplay(strapi),
   passwordPolicy(strapi),
   revokeOnPasswordChange(),
+  legacyRevoke(strapi),
   lastSignIn(strapi),
   providerProfile(strapi),
   secondFactor(),
@@ -1062,8 +1066,8 @@ export const createEngine = (
 
   return {
     schema() {
-      // The rate-limit table is always wanted: `lockout` keeps its counters there, whichever
-      // storage Better Auth's own rate limiter uses
+      // The rate-limit table is always created, whichever storage Better Auth's own rate limiter
+      // uses, so choosing the other storage later changes no table
       return fromAuthTables(
         getAuthTables({
           ...firstOptions,

@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import knex from 'knex';
+import { betterAuth } from 'better-auth/minimal';
+import { memoryAdapter } from 'better-auth/adapters/memory';
 import type { Core } from '@strapi/types';
 
 import {
@@ -10,10 +12,12 @@ import {
   reserveQuery,
 } from '../lockout-counter';
 import { createLockoutDb, type LockoutDb } from './lockout-db';
+import { lockout } from '../plugins/lockout';
+import { strapiAdapter } from '../adapter/adapter';
 
 const WINDOW = { maxAttempts: 5, durationMinutes: 15 };
 const NAMES = {
-  table: 'eu_rate_limits',
+  table: 'eu_lockout_counters',
   key: 'key',
   count: 'count',
   lastRequest: 'last_request',
@@ -41,23 +45,23 @@ describe('reserveQuery', () => {
     const sql = sqlFor(client);
     const id = (name: string) => `${q}${name}${q}`;
 
-    expect(sql).toMatch(new RegExp(`^insert into ${id('eu_rate_limits')}`));
+    expect(sql).toMatch(new RegExp(`^insert into ${id('eu_lockout_counters')}`));
     expect(sql).toContain(`on conflict (${id('key')}) do update set`);
     expect(sql).toContain(
-      `${id('count')} = CASE WHEN ${id('eu_rate_limits')}.${id('last_request')} < ? THEN 1 ELSE`
+      `${id('count')} = CASE WHEN ${id('eu_lockout_counters')}.${id('last_request')} < ? THEN 1 ELSE`
     );
     // The old count, so the fifth attempt (count 4 before it) still moves the clock
-    expect(sql).toContain(`WHEN ${id('eu_rate_limits')}.${id('count')} < ? THEN ?`);
+    expect(sql).toContain(`WHEN ${id('eu_lockout_counters')}.${id('count')} < ? THEN ?`);
   });
 
   it('is one ON DUPLICATE KEY UPDATE on MySQL, the count assigned first and read back new', () => {
     const sql = sqlFor('mysql2');
 
-    expect(sql).toMatch(/^insert into `eu_rate_limits`/);
+    expect(sql).toMatch(/^insert into `eu_lockout_counters`/);
     expect(sql).toMatch(/on duplicate key update `count` = CASE/);
     expect(sql.indexOf('`count` = CASE')).toBeLessThan(sql.indexOf('`last_request` = CASE'));
     // The new count, so the fifth attempt (count 5 after it) still moves the clock
-    expect(sql).toMatch(/WHEN `eu_rate_limits`\.`count` <= \? THEN \?/);
+    expect(sql).toMatch(/WHEN `eu_lockout_counters`\.`count` <= \? THEN \?/);
   });
 });
 
@@ -65,7 +69,7 @@ describe('the counter on a real database', () => {
   let lockoutDb: LockoutDb;
   let strapi: Core.Strapi;
 
-  const row = (key: string) => lockoutDb.connection('eu_rate_limits').where({ key }).first();
+  const row = (key: string) => lockoutDb.connection('eu_lockout_counters').where({ key }).first();
 
   beforeEach(async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
@@ -88,7 +92,7 @@ describe('the counter on a real database', () => {
     ];
 
     expect(counts).toEqual([1, 2, 1, 3]);
-    expect(await lockoutDb.connection('eu_rate_limits').count({ n: '*' })).toEqual([{ n: 2 }]);
+    expect(await lockoutDb.connection('eu_lockout_counters').count({ n: '*' })).toEqual([{ n: 2 }]);
     expect((await row('a'))?.document_id).toMatch(/^[0-9a-f]{24}$/);
   });
 
@@ -138,5 +142,98 @@ describe('the counter on a real database', () => {
     await clearAttempts(strapi, 'a');
 
     expect(await row('a')).toBeUndefined();
+  });
+});
+
+describe('the pruning of Better Auth`s rate limiter', () => {
+  let lockoutDb: LockoutDb;
+
+  beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-05T10:00:00Z'));
+    lockoutDb = await createLockoutDb();
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    await lockoutDb.connection.destroy();
+  });
+
+  it('cannot reach a lockout row: the delete it runs on the `rateLimit` model is the other table`s', async () => {
+    const strapi = { db: lockoutDb.db } as unknown as Core.Strapi;
+    const { connection } = lockoutDb;
+
+    // The model Better Auth deletes from, and the model the plugin declares for the counters, as
+    // the engine builds them: both are in the schema the adapter reads
+    const options = {
+      secret: ['prune', 'test', 'secret', 'long', 'enough', 'to', 'use'].join('-'),
+      baseURL: 'http://localhost:1337',
+      telemetry: { enabled: false },
+      database: memoryAdapter({}),
+      rateLimit: { storage: 'database' as const },
+      plugins: [lockout(strapi)],
+    };
+    const { $context } = betterAuth(options);
+    const { options: built } = await $context;
+
+    // Where each model is stored, as Strapi's metadata says
+    const deleted: Array<{ uid: string; where: Record<string, Record<string, number>> }> = [];
+
+    vi.stubGlobal('strapi', {
+      getModel: () => ({
+        attributes: { key: {}, count: {}, lastRequest: {}, documentId: {} },
+      }),
+      db: {
+        query: (uid: string) => ({
+          async deleteMany({ where }: { where: Record<string, Record<string, number>> }) {
+            deleted.push({ uid, where });
+
+            const { tableName: table } = lockoutDb.db.metadata.get(uid) as { tableName: string };
+            const count = await connection(table)
+              .where('last_request', '<', where.lastRequest.$lt)
+              .delete();
+
+            return { count };
+          },
+        }),
+      },
+    });
+
+    const adapter = strapiAdapter()(built);
+
+    // A lockout that began an hour ago and has 15 minutes to run, and an old rate-limit row
+    await reserveAttempt(strapi, 'lockout:locked', WINDOW);
+    await connection('eu_rate_limits').insert({
+      key: '127.0.0.1/sign-in',
+      count: 3,
+      last_request: Date.now(),
+    });
+    vi.setSystemTime(new Date('2026-11-05T10:00:50Z'));
+
+    // What Better Auth runs after a window rolls over: everything older than its longest window
+    const cutoff = Date.now() - 60_000;
+
+    await adapter.deleteMany({
+      model: 'rateLimit',
+      where: [{ field: 'lastRequest', operator: 'lt', value: cutoff }],
+    });
+
+    vi.setSystemTime(new Date('2026-11-05T10:05:00Z'));
+    await adapter.deleteMany({
+      model: 'rateLimit',
+      where: [{ field: 'lastRequest', operator: 'lt', value: Date.now() - 60_000 }],
+    });
+
+    expect(deleted.map((call) => call.uid)).toEqual([
+      'plugin::end-users.rate-limit',
+      'plugin::end-users.rate-limit',
+    ]);
+    // The rate-limit row is pruned, as it always was
+    expect(await connection('eu_rate_limits').count({ n: '*' })).toEqual([{ n: 0 }]);
+    // The counter is still there, five minutes in, with its count
+    expect(
+      await connection('eu_lockout_counters').where({ key: 'lockout:locked' }).first()
+    ).toMatchObject({ count: 1 });
   });
 });

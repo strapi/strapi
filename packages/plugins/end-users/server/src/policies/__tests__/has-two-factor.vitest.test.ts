@@ -14,7 +14,9 @@ describe('plugin::end-users.has-two-factor', () => {
   it('passes a user whose row says two-factor authentication is on, read by their documentId', async () => {
     const options = strapiWith({ userRow: { twoFactorEnabled: true } });
 
-    await expect(hasTwoFactor.handler(requestOf(endUser()), {}, options)).resolves.toBe(true);
+    await expect(
+      hasTwoFactor.handler(requestOf(endUser({ passedSecondFactor: true })), {}, options)
+    ).resolves.toBe(true);
     expect(options.query).toHaveBeenCalledWith(USER_UID);
     expect(options.query(USER_UID).findOne).toHaveBeenCalledWith({
       where: { documentId: 'user-doc-1' },
@@ -32,6 +34,20 @@ describe('plugin::end-users.has-two-factor', () => {
     await expect(
       hasTwoFactor.handler(requestOf(endUser()), {}, strapiWith({ userRow: {} }))
     ).rejects.toThrow('Enable two-factor authentication to do this.');
+  });
+
+  it('refuses a session that did not pass a second factor, whatever the row says', async () => {
+    const options = strapiWith({ userRow: { twoFactorEnabled: true } });
+
+    for (const passedSecondFactor of [false, undefined]) {
+      await expect(
+        hasTwoFactor.handler(requestOf(endUser({ passedSecondFactor })), {}, options)
+      ).rejects.toThrow(refusal('TWO_FACTOR_REQUIRED'));
+    }
+
+    await expect(
+      hasTwoFactor.handler(requestOf(endUser({ passedSecondFactor: false })), {}, options)
+    ).rejects.toThrow('Sign in again with your second factor');
   });
 
   it.each(Object.entries(NOT_SIGNED_IN))(

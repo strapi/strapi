@@ -4,6 +4,7 @@ import { memoryAdapter } from 'better-auth/adapters/memory';
 import { betterAuth } from 'better-auth/minimal';
 import { symmetricDecrypt } from 'better-auth/crypto';
 import { bearer, magicLink, twoFactor } from 'better-auth/plugins';
+import { passkey } from '@better-auth/passkey';
 import type { BetterAuthPlugin } from 'better-auth';
 
 import { secondFactor } from '../plugins/second-factor';
@@ -40,10 +41,14 @@ const cookieHeader = (...responses: Headers[]) => {
 };
 
 const build = (plugins: BetterAuthPlugin[] = []) => {
-  const db = { user: [], session: [], account: [], verification: [], twoFactor: [] } as Record<
-    string,
-    Row[]
-  >;
+  const db = {
+    user: [],
+    session: [],
+    account: [],
+    verification: [],
+    twoFactor: [],
+    passkey: [],
+  } as Record<string, Row[]>;
   const codes: string[] = [];
   const links: string[] = [];
 
@@ -207,33 +212,69 @@ describe('second-factor', () => {
     expect(marks()).toEqual([true]);
   });
 
-  it('marks the session a signed-in user vouches for by giving a code again', async () => {
-    const { db, auth, enroll, links, marks } = build();
-    const { code } = await enroll();
-
-    // A magic link proves the address, and a verified address keeps its sessions
-    db.user[0].emailVerified = true;
-    // A session made by a magic link, with no challenge, for a user who has two-factor on
-    await auth.api.signInMagicLink({
+  /** A session made by a magic link, with no challenge, for a user who has two-factor on */
+  const magicLinkSession = async (ctx: ReturnType<typeof build>) => {
+    ctx.db.user[0].emailVerified = true;
+    await ctx.auth.api.signInMagicLink({
       body: { email: EMAIL },
       headers: new Headers({ origin: 'http://localhost:1337' }),
     });
 
-    const linked = await auth.api
+    const linked = await ctx.auth.api
       .magicLinkVerify({
-        query: { token: links[0] },
+        query: { token: ctx.links[0] },
         headers: new Headers({ origin: 'http://localhost:1337' }),
         returnHeaders: true,
       })
       .catch((error: { headers?: Headers }) => ({ headers: error.headers as Headers }));
-    const cookie = cookieHeader(linked.headers);
 
-    expect(marks()).toEqual([true, false]);
+    return cookieHeader(linked.headers);
+  };
 
-    await auth.api.verifyTOTP({ body: { code: await code() }, headers: { cookie } });
+  it('does not mark a session because its user gave an authenticator or a backup code again', async () => {
+    const ctx = build();
+    const { code, backupCodes } = await ctx.enroll();
+    const cookie = await magicLinkSession(ctx);
 
-    expect(db.session).toHaveLength(2);
-    expect(marks()).toEqual([true, true]);
+    expect(ctx.marks()).toEqual([true, false]);
+
+    await ctx.auth.api.verifyTOTP({ body: { code: await code() }, headers: { cookie } });
+    await ctx.auth.api.verifyBackupCode({ body: { code: backupCodes[0] }, headers: { cookie } });
+
+    expect(ctx.db.session).toHaveLength(2);
+    expect(ctx.marks()).toEqual([true, false]);
+  });
+
+  it('does not mark a session because its user gave an emailed code, which whoever signed it in can read', async () => {
+    const ctx = build();
+
+    await ctx.enroll();
+
+    const cookie = await magicLinkSession(ctx);
+
+    await ctx.auth.api.sendTwoFactorOTP({ headers: { cookie }, body: {} });
+    await ctx.auth.api.verifyTwoFactorOTP({ body: { code: ctx.codes[0] }, headers: { cookie } });
+
+    expect(ctx.db.session).toHaveLength(2);
+    expect(ctx.marks()).toEqual([true, false]);
+  });
+
+  it('does not mark the session that turning two-factor on with an emailed code alone makes', async () => {
+    const { auth, db, codes, marks } = build();
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+    const cookie = cookieHeader(signedUp.headers);
+
+    // No password is asked for here, and no authenticator is enrolled: the mailbox is all there is
+    await auth.api.sendTwoFactorOTP({ headers: { cookie }, body: {} });
+    await auth.api.verifyTwoFactorOTP({ body: { code: codes[0] }, headers: { cookie } });
+
+    expect(db.user[0].twoFactorEnabled).toBe(true);
+    // The session that asked was replaced by the one the code made, and it is not marked
+    expect(db.session).toHaveLength(1);
+    expect(marks()).toEqual([false]);
   });
 
   it('leaves a magic-link session of a user with two-factor on unmarked, and stores the token hashed', async () => {
@@ -443,5 +484,65 @@ describe('the passkey sign-in', () => {
     });
 
     expect(written).toEqual([]);
+  });
+});
+
+describe('registering a passkey', () => {
+  // The passkey plugin is added by the test, so its endpoints are not in the engine's API type
+  const passkeyApi = (ctx: ReturnType<typeof build>) =>
+    ctx.auth.api as unknown as Record<string, (input: Record<string, unknown>) => Promise<unknown>>;
+
+  const registerOptions = (ctx: ReturnType<typeof build>, cookie: string) =>
+    passkeyApi(ctx).generatePasskeyRegistrationOptions({ headers: { cookie }, query: {} });
+
+  it('is refused for a user with two-factor on whose session is not marked, with the code the strategy uses', async () => {
+    const ctx = build([passkey()]);
+
+    await ctx.enroll();
+    ctx.db.user[0].emailVerified = true;
+    await ctx.auth.api.signInMagicLink({
+      body: { email: EMAIL },
+      headers: new Headers({ origin: 'http://localhost:1337' }),
+    });
+
+    const linked = await ctx.auth.api
+      .magicLinkVerify({
+        query: { token: ctx.links[0] },
+        headers: new Headers({ origin: 'http://localhost:1337' }),
+        returnHeaders: true,
+      })
+      .catch((error: { headers?: Headers }) => ({ headers: error.headers as Headers }));
+    const cookie = cookieHeader(linked.headers);
+
+    expect(ctx.marks()).toEqual([true, false]);
+
+    await expect(registerOptions(ctx, cookie)).rejects.toMatchObject({
+      statusCode: 403,
+      body: { code: 'TWO_FACTOR_REQUIRED' },
+    });
+    await expect(
+      passkeyApi(ctx).verifyPasskeyRegistration({
+        body: { response: {} },
+        headers: { cookie, origin: 'http://localhost:1337' },
+      })
+    ).rejects.toMatchObject({ statusCode: 403, body: { code: 'TWO_FACTOR_REQUIRED' } });
+    expect(ctx.db.passkey).toHaveLength(0);
+  });
+
+  it('is allowed from a marked session, and for a user who has no two-factor on', async () => {
+    const marked = build([passkey()]);
+    const { confirmed } = await marked.enroll();
+
+    await expect(registerOptions(marked, confirmed)).resolves.toHaveProperty('challenge');
+
+    const plain = build([passkey()]);
+    const signedUp = await plain.auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+
+    await expect(registerOptions(plain, cookieHeader(signedUp.headers))).resolves.toHaveProperty(
+      'challenge'
+    );
   });
 });

@@ -1,8 +1,13 @@
 /**
- * The counter behind `lockout`: one row per identifier in the generated rate-limit table
- * (`plugin::end-users.rate-limit`, `eu_rate_limits`: `key`, `count`, `lastRequest`), keyed
+ * The counter behind `lockout`: one row per identifier in its own generated table
+ * (`plugin::end-users.lockout-counter`, `eu_lockout_counters`: `key`, `count`, `lastRequest`), keyed
  * `lockout:<sha256 of the normalized identifier>`, for an account and for an address or username
  * nobody has alike.
+ *
+ * The table is not the rate-limit one. Better Auth's database rate limiter deletes every row there
+ * whose `lastRequest` is older than its longest window (about a minute), whatever wrote it, so a
+ * counter kept in that table would be gone before a lockout of 15 minutes had run. Nothing else
+ * reads, writes or prunes this table.
  *
  * `reserveAttempt` is one `INSERT ... ON CONFLICT (key) DO UPDATE` (`ON DUPLICATE KEY UPDATE` on
  * MySQL), written with knex so each database gets its own spelling of it. The database applies the
@@ -24,7 +29,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { Core } from '@strapi/types';
 
-import { RATE_LIMIT_UID } from '../../constants';
+import { LOCKOUT_COUNTER_UID } from '../../constants';
 import { metadataOf } from '../../utils/typed-strapi';
 
 const MINUTE = 60_000;
@@ -54,7 +59,7 @@ const namesOf = (strapi: Core.Strapi): Names => {
   const meta = metadataOf<{
     tableName: string;
     attributes: Record<string, { columnName?: string } | undefined>;
-  }>(strapi.db, RATE_LIMIT_UID);
+  }>(strapi.db, LOCKOUT_COUNTER_UID);
   const column = (attribute: string) => meta.attributes[attribute]?.columnName ?? attribute;
 
   return {

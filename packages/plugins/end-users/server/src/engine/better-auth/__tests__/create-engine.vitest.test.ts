@@ -112,7 +112,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await lockoutDb.connection('eu_rate_limits').delete();
+  await lockoutDb.connection('eu_lockout_counters').delete();
 });
 
 const fakeStrapi = (values: ConfigValues = {}, distSrc = '/nonexistent/end-users/src') => {
@@ -278,6 +278,7 @@ describe('buildAuthOptions', () => {
       'totp-replay',
       'password-policy',
       'revoke-on-password-change',
+      'legacy-revoke',
       'last-sign-in',
       'provider-profile',
       'second-factor',
@@ -355,6 +356,7 @@ describe('buildAuthOptions', () => {
       'totp-replay',
       'password-policy',
       'revoke-on-password-change',
+      'legacy-revoke',
       'last-sign-in',
       'provider-profile',
       'second-factor',

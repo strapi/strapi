@@ -26,6 +26,7 @@ import { buildAuthOptions } from '../create-engine';
 import type { AuthEngine } from '../../types';
 import { passwordPolicy } from '../plugins/password-policy';
 import { revokeOnPasswordChange } from '../plugins/revoke-on-password-change';
+import { legacyRevoke } from '../plugins/legacy-revoke';
 import { strapiCompat } from '../plugins/strapi-compat';
 
 vi.mock('../../../compat/login-response', async (importOriginal) => ({
@@ -809,6 +810,7 @@ describe('strapi-compat reset, through the engine', () => {
         probe(),
         passwordPolicy(strapi),
         revokeOnPasswordChange(),
+        legacyRevoke(strapi),
         username(),
         bearer(),
       ],
@@ -1592,6 +1594,16 @@ describe('strapi-compat refresh, with an old refresh token', () => {
     });
     // The exchange counts as a use of an old token, which a device that only refreshes never makes otherwise
     expect(ctx.recordLegacyHit).toHaveBeenCalledTimes(1);
+  });
+
+  it('makes the session of an exchange without a second factor, the old session having had none to pass', async () => {
+    const ctx = setup();
+
+    expect((await run(ctx)).status).toBe(200);
+    expect(ctx.engine.createSession).toHaveBeenCalledWith(
+      'doc7',
+      expect.objectContaining({ passedSecondFactor: false })
+    );
   });
 
   it('refuses one that is not valid, one issued after the cutover, and any without a completed migration', async () => {

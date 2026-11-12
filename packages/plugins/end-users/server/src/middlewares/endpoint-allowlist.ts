@@ -52,6 +52,9 @@ const isBlocked = (relative: string) =>
  * The endpoints each method that can be turned off owns, by first segment and, for the sign-in
  * endpoints, by the segment after `/sign-in`. `paths` are single endpoints, `root/segment`.
  *
+ * An endpoint named in `paths` belongs to that method alone, even when its root is another method's:
+ * `forget-password/email-otp` is the email OTP's, so it is answered when only that method is on.
+ *
  * Two-factor is the exception: turning it off blocks enrolment only (Better Auth 1.7.14's
  * `/two-factor/enable`, `get-totp-uri` and `generate-backup-codes`). The verify endpoints
  * (`verify-totp`, `verify-otp`, `verify-backup-code`) and `send-otp` stay, so a user who already
@@ -77,7 +80,13 @@ const METHOD_ENDPOINTS: ReadonlyArray<{
     paths: ['two-factor/enable', 'two-factor/get-totp-uri', 'two-factor/generate-backup-codes'],
   },
   { method: 'magicLink', roots: ['magic-link'], signIn: ['magic-link'] },
-  { method: 'emailOtp', roots: ['email-otp'], signIn: ['email-otp'] },
+  {
+    method: 'emailOtp',
+    roots: ['email-otp'],
+    signIn: ['email-otp'],
+    // The reset code of the email OTP plugin lives under the password reset's root
+    paths: ['forget-password/email-otp'],
+  },
   { method: 'passkey', roots: ['passkey'], signIn: ['passkey'] },
 ];
 
@@ -92,13 +101,18 @@ const methodsOf = (relative: string): Set<SignInMethod> => {
   const found = new Set<SignInMethod>();
 
   for (const parts of [segments(relative), segments(decoded(relative))]) {
-    for (const { method, roots, signIn, paths = [] } of METHOD_ENDPOINTS) {
-      if (
-        roots.includes(parts[0]) ||
-        (parts[0] === 'sign-in' && signIn.includes(parts[1])) ||
-        paths.includes(`${parts[0]}/${parts[1]}`)
-      ) {
-        found.add(method);
+    const exact = METHOD_ENDPOINTS.filter(({ paths = [] }) =>
+      paths.includes(`${parts[0]}/${parts[1]}`)
+    );
+
+    // A named endpoint is its method's alone; every other one belongs to the method of its root
+    if (exact.length > 0) {
+      exact.forEach(({ method }) => found.add(method));
+    } else {
+      for (const { method, roots, signIn } of METHOD_ENDPOINTS) {
+        if (roots.includes(parts[0]) || (parts[0] === 'sign-in' && signIn.includes(parts[1]))) {
+          found.add(method);
+        }
       }
     }
   }

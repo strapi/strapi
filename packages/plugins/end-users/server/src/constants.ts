@@ -20,6 +20,13 @@ export const ACCOUNT_UID = 'plugin::end-users.account' as const satisfies UID.Co
 export const VERIFICATION_UID = 'plugin::end-users.verification' as const satisfies UID.ContentType;
 export const TWO_FACTOR_UID = 'plugin::end-users.two-factor' as const satisfies UID.ContentType;
 export const RATE_LIMIT_UID = 'plugin::end-users.rate-limit' as const satisfies UID.ContentType;
+/**
+ * The sign-in lockout's counters. Their own table, never the rate-limit one: Better Auth deletes
+ * every row of that table older than its longest window, which is a minute or so, and a lockout
+ * lasts minutes to hours.
+ */
+export const LOCKOUT_COUNTER_UID =
+  'plugin::end-users.lockout-counter' as const satisfies UID.ContentType;
 
 /**
  * The GraphQL type names of the plugin's public types, set as `pluginOptions.graphql.typeName` (the
