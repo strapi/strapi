@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 import type { ProviderCapabilities } from '../../shared/types';
 import type { EmailConfig, SendOptions } from './types';
+import { subscribeTemplateLifecycles } from './lifecycles';
 
 interface EmailProvider {
   send: (options: SendOptions) => Promise<any>;
@@ -64,6 +65,8 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   strapi.plugin('email').provider = createProvider(emailConfig);
+
+  subscribeTemplateLifecycles(strapi);
 
   // Add permissions
   const actions = [
