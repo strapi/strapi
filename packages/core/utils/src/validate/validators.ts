@@ -87,6 +87,25 @@ const isObjectGroupOperand = (
   Object.keys(operand).some((key) => isOperator(key) === false);
 
 /**
+ * True when a raw filter path, e.g. `title.$null.$or`, goes through the operand of an operator that
+ * is not logical. Such an operand is a value, not a filter: query conversion casts a `$null` /
+ * `$notNull` operand to a boolean, so a `$and` / `$or` key in it does not filter anything.
+ */
+const isInOperatorOperand = (rawPath: string | null) => {
+  if (rawPath === null) {
+    return false;
+  }
+
+  // Drop the last segment (the key itself) and the list indexes, e.g. `$and[0]` -> `$and`
+  const parentKeys = rawPath
+    .split('.')
+    .slice(0, -1)
+    .map((segment) => segment.replace(/(\[\d+\])+$/, ''));
+
+  return parentKeys.some((key) => isOperator(key) === true && LOGICAL_OPERATORS.has(key) === false);
+};
+
+/**
  * Returns the first operator, and its operand, in the filter of a scalar attribute, whose operand is a non-empty plain object.
  * The filters traversal does not walk such operands, and query conversion drops them along with their
  * condition, so letting one through makes the query match every row.
@@ -162,7 +181,10 @@ export const validateFilters = asyncCurry(
             }
           }
 
-          if (isObjectGroupOperand(key, value) === true) {
+          if (
+            isObjectGroupOperand(key, value) === true &&
+            isInOperatorOperand(path.raw) === false
+          ) {
             // $and and $or have no attribute path, so name the raw path, e.g. `category.$or`
             const operandPath = path.raw ?? key;
 
