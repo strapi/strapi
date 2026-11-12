@@ -54,6 +54,8 @@ History records the writes made through the Content Manager routes and through t
 
 Each version also stores a reference to its author: a type, and the model and document id of the author record. An admin panel write is attributed to the admin. An admin token write is attributed to the token, not to its owner. A Content API write made with an API token is attributed to that token. Other Content API writes have no author: the request has no authentication, or it uses a strategy that gives no author. The versions list shows no author for these versions. For the other versions, the versions list shows the current name of the author. A version of a deleted admin shows "Deleted user", and a version of a deleted token shows "Deleted token". The reference stays on the version after a delete. A document id is never given to another record, so the reference never points to a newer author.
 
+Set `admin.history.contentApi.enabled` to `false` to stop recording Content API writes. It is `true` by default. The flag does not change Content Manager writes.
+
 The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead. It is empty for Content API writes.
 
 Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`.
