@@ -47,6 +47,7 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
    */
   // TODO @Nico With several instances on one database, a restarting instance also fails a job
   // another instance is still running. That job's own completion then overwrites the status.
+  // Tracked as a follow-up: record a job owner or heartbeat so boot fails only orphaned jobs.
   async failInterruptedJobs(): Promise<void> {
     await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
       where: { status: 'processing' },
