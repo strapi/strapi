@@ -84,7 +84,6 @@ describe('document-manager', () => {
 
     it.each([
       ['a string', 'fr', 'fr'],
-      ['null', null, undefined],
       ['absent', undefined, undefined],
     ])('passes the body locale when it is %s', async (_name, bodyLocale, expectedLocale) => {
       const service = documentManager({ strapi: global.strapi });

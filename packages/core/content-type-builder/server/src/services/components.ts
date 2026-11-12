@@ -1,4 +1,5 @@
 import type { Internal, Struct } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
@@ -106,7 +107,12 @@ export const editComponent = async (
     return builder.editComponent(replaceTmpUIDs(component));
   });
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 
   await emitSchemaEvent('component.update', { component: updatedComponent });
 
