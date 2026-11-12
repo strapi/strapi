@@ -52,7 +52,9 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
   const sanitize = {
     query: vi.fn(async (query: Record<string, unknown>) => query),
     input: vi.fn(async (data: object) => data),
-    output: vi.fn(async (data: object) => data),
+    output: vi.fn<(data: object, schema?: object, options?: object) => Promise<object>>(
+      async (data) => data
+    ),
   };
   const validate = {
     query: vi.fn<(query: object, schema: object, options: { action?: string }) => Promise<void>>(
@@ -321,6 +323,66 @@ describe('users in the users-permissions shape', () => {
 
     expect((list.body as object[])[0]).not.toHaveProperty('confirmed');
     expect((list.body as object[])[0]).toHaveProperty('blocked', false);
+  });
+
+  describe('blocked', () => {
+    it('is left out when the caller may not read banned, and asked about the field as a public one', async () => {
+      const { strapi, ctx, sanitize } = setup();
+
+      // The caller's rules keep `banned` only when the type does not call it private
+      sanitize.output.mockImplementation(async (data: object, schema?: object) => {
+        const banned = (schema as { attributes: { banned?: { private?: boolean } } }).attributes
+          .banned;
+
+        return banned?.private === false ? {} : data;
+      });
+
+      const list = ctx();
+
+      await createUsersCompat(strapi).find(list);
+
+      expect((list.body as object[])[0]).not.toHaveProperty('blocked');
+      expect((list.body as object[])[0]).toHaveProperty('confirmed', true);
+      expect(sanitize.output).toHaveBeenCalledWith(
+        { banned: true },
+        expect.objectContaining({
+          uid: USER_UID,
+          attributes: expect.objectContaining({
+            banned: expect.objectContaining({ private: false }),
+          }),
+        }),
+        expect.objectContaining({ action: 'find' })
+      );
+    });
+
+    it('is shown when the caller may read banned', async () => {
+      const { strapi, ctx, sanitize } = setup({
+        users: [{ ...stored(7, 'doc-a'), banned: true }],
+      });
+
+      sanitize.output.mockImplementation(async (data: object) => data);
+
+      const list = ctx();
+
+      await createUsersCompat(strapi).find(list);
+
+      expect((list.body as object[])[0]).toHaveProperty('blocked', true);
+    });
+
+    it("is always shown on the caller's own record", async () => {
+      const { strapi, ctx, sanitize, service } = setup();
+
+      sanitize.output.mockImplementation(async () => ({}));
+      service.findOne.mockImplementation(async () => stored(7, 'doc-a'));
+
+      const me = ctx({
+        state: { auth: { strategy: { name: 'end-users' } }, user: { documentId: 'doc-a' } },
+      });
+
+      await createUsersCompat(strapi).me(me);
+
+      expect(me.body).toHaveProperty('blocked', false);
+    });
   });
 
   it('sets the name of a new user only from what the field rules of the caller let through', async () => {

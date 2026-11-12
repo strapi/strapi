@@ -277,6 +277,27 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     return stored;
   };
 
+  /**
+   * Whether the caller's field rules let them read `banned`, which is private to the core payload
+   * and so never in what the output rules return. The rules are asked about the field itself, on a
+   * copy of the type that does not call it private: the sanitizer then keeps it exactly when the
+   * caller's role lists it (or lists every field of the type).
+   */
+  const mayReadBanned = async (ctx: Koa.Context): Promise<boolean> => {
+    const schema = userSchema();
+    const open = {
+      ...schema,
+      attributes: { ...schema.attributes, banned: { ...schema.attributes.banned, private: false } },
+    };
+    const readable = await strapi.contentAPI.sanitize.output(
+      { banned: true },
+      open as Struct.ContentTypeSchema,
+      options(ctx, 'find') as never
+    );
+
+    return isPlain(readable) && 'banned' in readable;
+  };
+
   /** Users as the core output rules let the caller read them, in the shape of the mode. */
   const shape = async (
     ctx: Koa.Context,
@@ -285,6 +306,8 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     ownRole = false
   ): Promise<UpUser[]> => {
     const readable = (await core().sanitizeOutput(found, ctx)) as UpUserSource[];
+    // The caller's own record (`/users/me`) is no secret from them
+    const showBlocked = ownRole || (await mayReadBanned(ctx));
     const [extras, stored] = await Promise.all([
       loadUserExtras(strapi, ctx.state?.auth, readable),
       loadStored(
@@ -298,14 +321,22 @@ export const createUsersCompat = (strapi: Core.Strapi) => {
     return readable.map((user) => {
       const own = stored.get(user.documentId);
 
-      // `confirmed` follows the caller's field rules for `emailVerified`. `blocked` is shown whatever
-      // they are, as it was to a reader of the users-permissions payload: the one exception.
+      // `confirmed` follows the caller's field rules for `emailVerified`, and `blocked` follows
+      // those for `banned`: the native payload keeps the moderation state private, so the compat
+      // one does not show it to every caller who can read a user.
       const shown = 'emailVerified' in user ? { emailVerified: own?.emailVerified ?? false } : {};
-
-      return toUpUser({ ...user, ...shown, banned: own?.banned ?? false } as UpUserSource, {
+      const upUser = toUpUser({ ...user, ...shown, banned: own?.banned ?? false } as UpUserSource, {
         extras: extras.get(user.documentId),
         ...(wantsRole && { role: own?.role ?? null }),
       });
+
+      if (showBlocked) {
+        return upUser;
+      }
+
+      const { blocked: _blocked, ...rest } = upUser;
+
+      return rest as UpUser;
     });
   };
 
