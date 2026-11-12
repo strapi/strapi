@@ -1,3 +1,5 @@
+import { errors } from '@strapi/utils';
+
 import folderService from '../folder';
 
 const folderUID = '1';
@@ -39,6 +41,63 @@ describe('folder', () => {
         pathId: expect.any(Number),
         path: expect.stringMatching(expectedPath),
       });
+    });
+  });
+
+  describe('update', () => {
+    const joinTableName = 'upload_folders_parent_lnk';
+    let trx: { get: jest.Mock; commit: jest.Mock; rollback: jest.Mock };
+    let queryBuilder: jest.Mock;
+
+    beforeEach(() => {
+      trx = { get: jest.fn(), commit: jest.fn(), rollback: jest.fn() };
+
+      // The moved folder, then the destination folder: deleted after the request validation
+      // checked it, so the lookup (`first()`) answers nothing.
+      const folderResults: unknown[] = [{ pathId: 2, path: '/2' }, undefined];
+      queryBuilder = jest.fn((uid: string) => {
+        const chain: Record<string, unknown> = {
+          execute: jest.fn(async () => (uid === joinTableName ? 0 : folderResults.shift())),
+        };
+        ['select', 'where', 'transacting', 'forUpdate', 'first', 'delete', 'insert'].forEach(
+          (method) => {
+            chain[method] = () => chain;
+          }
+        );
+        return chain;
+      });
+
+      global.strapi = {
+        db: {
+          query: () => ({ findOne: jest.fn(async () => ({ id: 2, name: 'moved', parent: null })) }),
+          transaction: jest.fn(async () => trx),
+          queryBuilder,
+          metadata: {
+            get: () => ({
+              attributes: {
+                parent: {
+                  joinTable: {
+                    name: joinTableName,
+                    joinColumn: { name: 'folder_id' },
+                    inverseJoinColumn: { name: 'inv_folder_id' },
+                  },
+                },
+              },
+            }),
+          },
+        },
+      } as any;
+    });
+
+    test('rejects with a ValidationError when the destination folder no longer exists', async () => {
+      await expect(
+        folderService.update(2, { name: 'moved', parent: 1 }, { user: { id: 1 } })
+      ).rejects.toThrow(new errors.ValidationError('parent folder does not exist'));
+
+      expect(trx.rollback).toHaveBeenCalled();
+      expect(trx.commit).not.toHaveBeenCalled();
+      // The parent link is left untouched: no row points at the missing folder.
+      expect(queryBuilder).not.toHaveBeenCalledWith(joinTableName);
     });
   });
 

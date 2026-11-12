@@ -1,5 +1,5 @@
 import { map, sortBy } from 'lodash';
-import { strings, setCreatorFields } from '@strapi/utils';
+import { errors, strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 import { isIntegerId } from '../utils/integer-id';
@@ -180,6 +180,28 @@ const update = async (
         .first()
         .execute<Folder>();
 
+      // fetch destinationFolder path
+      let destinationFolderPath = '/';
+      if (parent !== null) {
+        const destinationFolder = await strapi.db
+          .queryBuilder(FOLDER_MODEL_UID)
+          .select('path')
+          .where({ id: parent })
+          .transacting(trx.get())
+          .forUpdate()
+          .first()
+          .execute<Folder | undefined>();
+
+        // Request validation checks the parent exists, but it can be deleted (e.g. by another admin)
+        // before this lookup runs. Answer like the validation does, before linking to it; the catch
+        // rolls back. The row lock keeps it from being deleted until the move commits.
+        if (destinationFolder === undefined || destinationFolder === null) {
+          throw new errors.ValidationError('parent folder does not exist');
+        }
+
+        destinationFolderPath = destinationFolder.path;
+      }
+
       // update parent folder (delete + insert; upsert not possible)
       // @ts-expect-error - no dynamic types
       const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
@@ -197,19 +219,6 @@ const update = async (
           .insert({ [joinTable.inverseJoinColumn.name]: parent, [joinTable.joinColumn.name]: id })
           .where({ [joinTable.joinColumn.name]: id })
           .execute();
-      }
-
-      // fetch destinationFolder path
-      let destinationFolderPath = '/';
-      if (parent !== null) {
-        const destinationFolder = await strapi.db
-          .queryBuilder(FOLDER_MODEL_UID)
-          .select('path')
-          .where({ id: parent })
-          .transacting(trx.get())
-          .first()
-          .execute<Folder>();
-        destinationFolderPath = destinationFolder.path;
       }
 
       const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
