@@ -174,6 +174,11 @@ requires two-factor is only as strong as the mailboxes of its users.
 the person (a PIN, a fingerprint) proves only that the device was present, so it does not satisfy a role that requires
 two-factor.
 
+**Changing an email address takes two confirmations.** `/change-email` first mails the current address, which has
+to approve the change, and then the new one, which has to prove it is the user's. A user whose current address was
+never verified is refused (`CURRENT_EMAIL_NOT_VERIFIED`) and verifies it first, and a user with two-factor needs a
+session that passed it. When the change completes, the user's other sessions are signed out.
+
 **Only the signed session token works as a Bearer token.** Send the value of the `set-auth-token` response header, or
 the `jwt` the compatibility routes answer with, in `Authorization: Bearer`. The `token` field in Better Auth's JSON
 answers is the stored form and is refused, so a copy of the database is not a set of working sessions. A client that
