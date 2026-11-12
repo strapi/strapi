@@ -224,6 +224,134 @@ describe('convert-query-params', () => {
         });
       });
 
+      describe('across models', () => {
+        const crossModels = {
+          'api::article.article': {
+            uid: 'api::article.article',
+            modelType: 'contentType',
+            kind: 'collectionType',
+            info: { displayName: 'Article', singularName: 'article', pluralName: 'articles' },
+            options: {},
+            attributes: {
+              title: { type: 'string' },
+              author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+              cover: { type: 'media' },
+              related: { type: 'relation', relation: 'morphToOne' },
+            },
+          },
+          'api::author.author': {
+            uid: 'api::author.author',
+            modelType: 'contentType',
+            kind: 'collectionType',
+            info: { displayName: 'Author', singularName: 'author', pluralName: 'authors' },
+            options: {},
+            attributes: {
+              name: { type: 'string' },
+            },
+          },
+          'plugin::upload.file': {
+            uid: 'plugin::upload.file',
+            modelType: 'contentType',
+            kind: 'collectionType',
+            info: { displayName: 'File', singularName: 'file', pluralName: 'files' },
+            options: {},
+            attributes: {
+              name: { type: 'string' },
+            },
+          },
+        } satisfies Record<string, Model>;
+
+        const createCrossModelTransformer = () => {
+          const onUnknownFilterKey = jest.fn();
+          const crossModelTransformer = createTransformer({
+            getModel: (uid: string) => crossModels[uid],
+            onUnknownFilterKey,
+          });
+
+          return { crossModelTransformer, onUnknownFilterKey };
+        };
+
+        test.each<[string, object, { uid: string | undefined; path: string[] }]>([
+          [
+            'a relation to another model',
+            { author: { nmae: 'x' } },
+            { uid: 'api::author.author', path: ['author', 'nmae'] },
+          ],
+          [
+            'a media attribute',
+            { cover: { nmae: 'x' } },
+            { uid: 'plugin::upload.file', path: ['cover', 'nmae'] },
+          ],
+          [
+            // Morph relations have no target model: every nested key is unknown
+            'a morph relation',
+            { related: { name: 'x' } },
+            { uid: undefined, path: ['related', 'name'] },
+          ],
+        ])('reports the target model and the path through %s', (_, filters, expected) => {
+          const { crossModelTransformer, onUnknownFilterKey } = createCrossModelTransformer();
+
+          crossModelTransformer.private_convertFiltersQueryParams(
+            filters,
+            crossModels['api::article.article']
+          );
+
+          expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+          expect(onUnknownFilterKey).toHaveBeenCalledWith({
+            key: expected.path[expected.path.length - 1],
+            operator: undefined,
+            ...expected,
+          });
+        });
+
+        test('reports populate filters relative to the populated model', () => {
+          const { crossModelTransformer, onUnknownFilterKey } = createCrossModelTransformer();
+
+          crossModelTransformer.transformQueryParams('api::article.article', {
+            populate: { author: { filters: { nmae: 'x' } } },
+          });
+
+          expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+          expect(onUnknownFilterKey).toHaveBeenCalledWith({
+            key: 'nmae',
+            uid: 'api::author.author',
+            path: ['nmae'],
+            operator: undefined,
+          });
+        });
+      });
+
+      test('does not change the converted query', () => {
+        const { observedTransformer } = createObservedTransformer();
+        const params: Params = {
+          filters: {
+            titel: 'a',
+            title: { $eq: 'Hello', $nope: 1 },
+            cpa: { feild: 'x', field: { $eq: { a: 1 } } },
+            one_to_one: { $or: [{ titel: 'a' }, { title: 'b' }] },
+            dz: { field: 'x' },
+          },
+          populate: { one_to_one: { filters: { titel: 'a', title: 'b' } } },
+        };
+
+        expect(observedTransformer.transformQueryParams('api::dog.dog', params)).toEqual(
+          transformer.transformQueryParams('api::dog.dog', params)
+        );
+      });
+
+      test('lets an error thrown by the hook propagate to the caller', () => {
+        const throwingTransformer = createTransformer({
+          getModel: (uid: string) => models[uid],
+          onUnknownFilterKey() {
+            throw new Error('unknown filter key');
+          },
+        });
+
+        expect(() =>
+          throwingTransformer.transformQueryParams('api::dog.dog', { filters: { titel: 'a' } })
+        ).toThrow('unknown filter key');
+      });
+
       test('is called through transformQueryParams', () => {
         const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
 

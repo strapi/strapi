@@ -233,7 +233,12 @@ export type UnknownFilterKey = {
   key: string;
   /** UID of the model the key was resolved against, `undefined` when no model was available */
   uid: string | undefined;
-  /** Attribute path from the queried model to the removed key, operators excluded */
+  /**
+   * Attribute path to the removed key, operators excluded. It starts at the model the filters
+   * apply to: the queried model, or the populated model for filters nested in `populate`
+   * (e.g. `populate: { author: { filters: { nmae: 'x' } } }` reports `['nmae']` with the uid
+   * of the author model).
+   */
   path: string[];
   /**
    * Set when the key sits inside the object operand of an operator applied to a scalar
@@ -247,6 +252,7 @@ interface TransformerOptions {
   /**
    * Called each time an unknown filter key is removed from the filters.
    * The key is still removed: the hook only observes the removal.
+   * An error thrown by the hook is not caught: it propagates to the caller of the transformer.
    */
   onUnknownFilterKey?: (unknownFilterKey: UnknownFilterKey) => void;
 }
@@ -255,7 +261,7 @@ interface TransformerOptions {
  * Where `convertAndSanitizeFilters` is in the filters tree
  */
 type FiltersWalkContext = {
-  /** Attribute path from the queried model, operators excluded */
+  /** Attribute path from the model the filters apply to, operators excluded */
   path: string[];
   /** Whether the walk is inside the value of a scalar (non-relational) attribute */
   isInScalarValue: boolean;
