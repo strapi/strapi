@@ -319,8 +319,6 @@ describe('Validate visitors util', () => {
       ['$or in a relation filter', { createdBy: { $or: [{ firstname: 'a' }, { lastname: 'b' }] } }],
       ['$and under $not', { $not: { $and: [{ title: 'a' }, { title: 'b' }] } }],
       ['nested $or and $and lists', { $and: [{ $or: [{ title: 'a' }] }, { title: 'b' }] }],
-      // The operator map form is validated by the scalar attribute checks
-      ['the operator map of $and on a scalar attribute', { title: { $and: { $eq: 'x' } } }],
       // Empty objects hold no condition and are sanitized out
       ['an empty operand', { $or: {}, createdBy: { $and: {} } }],
       // Query conversion casts any $null / $notNull operand to a boolean, so a nested $or or $and

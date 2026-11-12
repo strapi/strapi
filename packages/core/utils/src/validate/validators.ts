@@ -76,11 +76,17 @@ const arrayLimitMessage = (operator: string, path: string) =>
 const GROUP_OPERATORS = new Set(['$and', '$or']);
 
 /**
- * True when a `$and` / `$or` operand is a non-empty plain object with a key that is not an operator,
- * such as an index or an attribute name. Query conversion drops such an operand along with its
- * condition (or the database layer rejects it), so letting one through can make the query match
- * every row. An operator map, e.g. `{ title: { $and: { $eq: 'x' } } }`, is left to the object
- * operand check (`findObjectOperand`), and empty objects hold no condition and are sanitized out.
+ * True when the value holds a condition: anything but a plain object whose values are all empty
+ * objects, at any depth. Sanitization removes such objects.
+ */
+const holdsCondition = (value: unknown): boolean =>
+  isPlainRecord(value) === false || Object.values(value).some(holdsCondition);
+
+/**
+ * True when a `$and` / `$or` operand is a plain object that holds a condition, whatever its keys:
+ * indexes, attribute names or operators. The database layer reads a group only from a list and has
+ * no attribute level `$and` / `$or`, so it rejects such an operand, and query conversion drops one
+ * with no valid key left, so letting one through can make the query match every row.
  */
 const isObjectGroupOperand = (
   operator: string,
@@ -88,7 +94,7 @@ const isObjectGroupOperand = (
 ): operand is Record<string, unknown> =>
   GROUP_OPERATORS.has(operator) === true &&
   isPlainRecord(operand) === true &&
-  Object.keys(operand).some((key) => isOperator(key) === false);
+  holdsCondition(operand) === true;
 
 /**
  * True when a raw filter path, e.g. `title.$null.$or`, goes through the operand of an operator that
