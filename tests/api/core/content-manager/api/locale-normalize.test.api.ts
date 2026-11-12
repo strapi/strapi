@@ -227,52 +227,68 @@ describe('CM API - request locale passed to the document service', () => {
   });
 
   // The unique check of the entity validator filters on the locale param. A non-localized entry
-  // stores no locale, so a body locale must not reach the document service as a param either.
+  // stores no locale, so a body locale must not reach the document service as a param either:
+  // a request with `"locale": "fr"` must still see the values stored with no locale.
   describe('non-localized content type, unique field', () => {
     const base = `/content-manager/collection-types/${UNIQUE_UID}`;
 
-    const create = (code: string) =>
-      rq({ method: 'POST', url: base, body: { code, locale: 'fr' } });
+    // Stores an entry with no locale, without going through the content manager
+    const seed = async (code: string): Promise<string> => {
+      const entry = await strapi.documents(UNIQUE_UID).create({ data: { code } });
+      expect(await rows(UNIQUE_UID, entry.documentId)).toEqual([[null, 'published']]);
+      return entry.documentId;
+    };
 
     const count = (code: string): Promise<number> =>
       strapi.db.query(UNIQUE_UID).count({ where: { code } });
 
-    test('create, body locale fr, rejects a duplicate value', async () => {
-      expect((await create('create-taken')).statusCode).toBe(201);
-
-      const res = await create('create-taken');
-
+    const expectUniqueError = (res: any) => {
       expect(res.statusCode).toBe(400);
-      expect(await count('create-taken')).toBe(1);
-    });
-
-    test('update, body locale fr, rejects a duplicate value', async () => {
-      expect((await create('update-taken')).statusCode).toBe(201);
-      const other = await create('update-other');
-      expect(other.statusCode).toBe(201);
-
-      const res = await rq({
-        method: 'PUT',
-        url: `${base}/${other.body.data.documentId}`,
-        body: { code: 'update-taken', locale: 'fr' },
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'This attribute must be unique',
+        details: { errors: [{ path: ['code'], message: 'This attribute must be unique' }] },
       });
+    };
 
-      expect(res.statusCode).toBe(400);
-      expect(await count('update-taken')).toBe(1);
-    });
-
-    test('clone, body locale fr, rejects a duplicate value', async () => {
-      expect((await create('clone-taken')).statusCode).toBe(201);
-      const source = await create('clone-source');
-      expect(source.statusCode).toBe(201);
+    test('create, body locale fr, rejects a value stored with no locale', async () => {
+      await seed('create-taken');
 
       const res = await rq({
         method: 'POST',
-        url: `${base}/clone/${source.body.data.documentId}`,
+        url: base,
+        body: { code: 'create-taken', locale: 'fr' },
+      });
+
+      expectUniqueError(res);
+      expect(await count('create-taken')).toBe(1);
+    });
+
+    test('update, body locale fr, rejects a value stored with no locale', async () => {
+      await seed('update-taken');
+      const otherId = await seed('update-other');
+
+      const res = await rq({
+        method: 'PUT',
+        url: `${base}/${otherId}`,
+        body: { code: 'update-taken', locale: 'fr' },
+      });
+
+      expectUniqueError(res);
+      expect(await count('update-taken')).toBe(1);
+    });
+
+    test('clone, body locale fr, rejects a value stored with no locale', async () => {
+      await seed('clone-taken');
+      const sourceId = await seed('clone-source');
+
+      const res = await rq({
+        method: 'POST',
+        url: `${base}/clone/${sourceId}`,
         body: { code: 'clone-taken', locale: 'fr' },
       });
 
-      expect(res.statusCode).toBe(400);
+      expectUniqueError(res);
       expect(await count('clone-taken')).toBe(1);
     });
   });
