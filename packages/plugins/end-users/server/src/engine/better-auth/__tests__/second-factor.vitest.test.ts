@@ -372,7 +372,7 @@ describe('the passkey sign-in', () => {
       returned: undefined,
       newSession: null,
       session: null,
-      ...((ctx.context as object) ?? {}),
+      ...(ctx.context as object | undefined),
     };
 
     await (hook.handler as unknown as (c: unknown) => Promise<unknown>)({ ...ctx, context });

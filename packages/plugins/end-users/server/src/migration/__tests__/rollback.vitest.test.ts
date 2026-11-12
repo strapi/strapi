@@ -408,14 +408,32 @@ describe('runRollback', () => {
 
     await knex('up_users').insert([
       { id: 4, document_id: 'd4', banned: true, ban_expires: null },
-      { id: 5, document_id: 'd5', banned: true, ban_expires: new Date(Date.now() + day).toISOString() },
-      { id: 6, document_id: 'd6', banned: true, ban_expires: new Date(Date.now() - day).toISOString() },
-      { id: 7, document_id: 'd7', banned: false, ban_expires: new Date(Date.now() - day).toISOString() },
+      {
+        id: 5,
+        document_id: 'd5',
+        banned: true,
+        ban_expires: new Date(Date.now() + day).toISOString(),
+      },
+      {
+        id: 6,
+        document_id: 'd6',
+        banned: true,
+        ban_expires: new Date(Date.now() - day).toISOString(),
+      },
+      {
+        id: 7,
+        document_id: 'd7',
+        banned: false,
+        ban_expires: new Date(Date.now() - day).toISOString(),
+      },
     ]);
 
     await runRollback(knex as never, db, ctx);
 
-    const users = await knex('up_users').whereIn('id', [4, 5, 6, 7]).orderBy('id').select('id', 'blocked');
+    const users = await knex('up_users')
+      .whereIn('id', [4, 5, 6, 7])
+      .orderBy('id')
+      .select('id', 'blocked');
 
     // permanent, still running, already over, never banned
     expect(users.map((u: Row) => u.blocked)).toEqual([1, 1, 0, 0]);
