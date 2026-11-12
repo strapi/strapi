@@ -351,18 +351,30 @@ describe('EditFolderDialog', () => {
       fireEvent.blur(name);
       expect(editFolder).not.toHaveBeenCalled();
       fireEvent.click(getButton(baseElement, 'cancel')!);
-      expect(onClose).toHaveBeenCalledTimes(1);
+      const confirmation = await screen.findByRole('alertdialog');
+      expect(confirmation).toHaveTextContent(/unsaved changes/i);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(editFolder).not.toHaveBeenCalled();
+
+      fireEvent.click(within(confirmation).getByRole('button', { name: 'Confirm' }));
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
       expect(editFolder).not.toHaveBeenCalled();
     });
 
-    test('closes without saving on Escape', async () => {
+    test('asks before closing on Escape and does not save', async () => {
       const { editFolder, onClose, name } = setupKeyboard();
       act(() => {
         (name as HTMLInputElement).focus();
       });
       fireEvent.keyDown(name, { key: 'Escape', keyCode: 27 });
+      const confirmation = await screen.findByRole('alertdialog');
+      expect(confirmation).toHaveTextContent(/unsaved changes/i);
+      expect(onClose).not.toHaveBeenCalled();
       expect(editFolder).not.toHaveBeenCalled();
-      expect(onClose).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(within(confirmation).getByRole('button', { name: 'Confirm' }));
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+      expect(editFolder).not.toHaveBeenCalled();
     });
   });
 });

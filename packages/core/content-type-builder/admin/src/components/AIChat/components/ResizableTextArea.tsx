@@ -3,6 +3,8 @@ import { useRef, useEffect, useState } from 'react';
 import { Box } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
+import { isImeComposing } from '../../../utils/isImeComposing';
+
 interface TextAreaProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -58,15 +60,7 @@ export const ResizableTextArea = ({ value, onChange, onSubmit, placeholder }: Te
       return;
     }
 
-    // Do not submit when Enter confirms an IME composition.
-    // Safari may end composition before the confirming Enter keydown.
-    if (
-      e.key === 'Enter' &&
-      !e.nativeEvent.isComposing &&
-      e.nativeEvent.keyCode !== 229 &&
-      !e.shiftKey &&
-      onSubmit
-    ) {
+    if (e.key === 'Enter' && !isImeComposing(e) && !e.shiftKey && onSubmit) {
       e.preventDefault();
       onSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
       // Ensure focus is maintained after submission using a small delay

@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { getTrad } from '../../../../utils/getTrad';
+import { isImeComposing } from '../../../../utils/isImeComposing';
 
 const Row = styled(Flex)<{ $depth: number }>`
   padding-right: ${({ theme }) => theme.spaces[3]};
@@ -142,13 +143,7 @@ export const FolderNameField = ({
   };
 
   const onNameInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    // Do not accept the folder name when Enter confirms an IME composition.
-    // Safari may end composition before the confirming Enter keydown.
-    if (
-      event.key === 'Enter' &&
-      !event.nativeEvent.isComposing &&
-      event.nativeEvent.keyCode !== 229
-    ) {
+    if (event.key === 'Enter' && !isImeComposing(event)) {
       event.preventDefault();
       commitFromEnter();
     }

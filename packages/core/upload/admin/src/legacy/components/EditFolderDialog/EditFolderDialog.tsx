@@ -27,6 +27,7 @@ import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../hooks/useTracking';
 import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
+import { isImeComposing } from '../../utils/isImeComposing';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';
 
@@ -103,13 +104,7 @@ export const EditFolderContent = ({
   const handleKeyDown =
     (handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void) =>
     (event: React.KeyboardEvent<HTMLFormElement>) => {
-      // Do not save the folder when Enter confirms an IME composition.
-      // Safari may end composition before the confirming Enter keydown.
-      if (
-        event.key === 'Enter' &&
-        !event.nativeEvent.isComposing &&
-        event.nativeEvent.keyCode !== 229
-      ) {
+      if (event.key === 'Enter' && !isImeComposing(event)) {
         if (event.target instanceof HTMLInputElement) {
           handleSubmit(event);
           event.preventDefault();
