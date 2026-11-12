@@ -334,6 +334,107 @@ describe('Validate visitors util', () => {
     });
   });
 
+  describe('validateFilters - object operands in lists and on relation, media and component attributes', () => {
+    const fileModel = {
+      uid: 'plugin::upload.file',
+      modelType: 'contentType' as const,
+      kind: 'collectionType' as const,
+      info: { singularName: 'file', pluralName: 'files', displayName: 'File' },
+      options: {},
+      attributes: { name: { type: 'string' } },
+    };
+    const seoModel = {
+      uid: 'default.seo',
+      modelType: 'component' as const,
+      info: { displayName: 'Seo' },
+      options: {},
+      attributes: { metaTitle: { type: 'string' } },
+    };
+    const schema = {
+      ...articleModel,
+      attributes: {
+        ...articleModel.attributes,
+        rank: { type: 'integer' },
+        cover: { type: 'media', multiple: false },
+        seo: { type: 'component', component: 'default.seo', repeatable: false },
+      },
+    };
+    const extraModels: Record<string, unknown> = {
+      [fileModel.uid]: fileModel,
+      [seoModel.uid]: seoModel,
+    };
+    const ctx = {
+      schema,
+      getModel: (uid: string) => (extraModels[uid] ?? getModel(uid)) as any,
+    };
+
+    const validate = (filters: unknown) =>
+      validators.validateFilters(ctx, filters, ['nonAttributesOperators']);
+
+    test.each([
+      // Query conversion empties the list, and an empty $not list matches every row
+      ['an operand in a $not list', { title: { $not: [{ $eq: { a: 1 } }] } }, '$eq', 'title'],
+      [
+        'an operand in an $or list',
+        { title: { $or: [{ $eq: 'x' }, { $eq: { a: 1 } }] } },
+        '$eq',
+        'title',
+      ],
+      [
+        'an operand under $not in an $and list',
+        { title: { $and: [{ $not: { $eq: { a: 1 } } }] } },
+        '$eq',
+        'title',
+      ],
+      ['an operand in an $or list on id', { id: { $or: [{ $ne: { a: 1 } }] } }, '$ne', 'id'],
+      // Query conversion strips the operand's keys and drops the whole condition
+      ['$eq on a media attribute', { cover: { $eq: { a: 1 } } }, '$eq', 'cover'],
+      ['$eq on a component attribute', { seo: { $eq: { a: 1 } } }, '$eq', 'seo'],
+      ['$eq on a relation attribute', { createdBy: { $eq: { a: 1 } } }, '$eq', 'createdBy'],
+      [
+        'an operand keyed by a target attribute name',
+        { createdBy: { $in: { firstname: 'x' } } },
+        '$in',
+        'createdBy',
+      ],
+      [
+        'an operand under $not on a media attribute',
+        { cover: { $not: { $eq: { a: 1 } } } },
+        '$eq',
+        'cover',
+      ],
+      [
+        'an operand in an $or list on a relation',
+        { createdBy: { $or: [{ $ne: { a: 1 } }] } },
+        '$ne',
+        'createdBy',
+      ],
+    ])('throws on an object operand: %s', async (_, filters, key, path) => {
+      const error = await validate(filters).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toMatchObject({
+        message: `Invalid operand for ${key} at ${path}: expected a value, not an object`,
+        details: { key, path },
+      });
+    });
+
+    test.each([
+      ['a $not list of operator maps', { title: { $not: [{ $eq: 'x' }, { $contains: 'y' }] } }],
+      ['an $or list of operator maps', { title: { $or: [{ $eq: 'x' }, { $null: true }] } }],
+      ['a list of values', { title: { $eq: ['x', 'y'] }, rank: { $notIn: [1, 2] } }],
+      ['a relation id operand', { createdBy: { $eq: 1, $in: [1, 2] } }],
+      ['a relation $null operand', { createdBy: { $null: true }, cover: { $notNull: true } }],
+      ['a nested relation filter', { createdBy: { firstname: { $eq: 'x' } } }],
+      ['a nested media filter', { cover: { name: { $eq: 'x' } } }],
+      ['a nested component filter', { seo: { metaTitle: { $eq: 'x' } } }],
+      ['a relation filter under $not', { createdBy: { $not: { firstname: 'x' } } }],
+      ['a relation filter list under $or', { createdBy: { $or: [{ firstname: 'x' }, { id: 1 }] } }],
+    ])('accepts %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toEqual(filters);
+    });
+  });
+
   describe('defaultValidatePopulate - nested filters/sort/fields within populate', () => {
     const categoryModel: any = {
       uid: 'api::category.category',
