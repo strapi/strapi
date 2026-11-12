@@ -3246,6 +3246,52 @@ describe('API Token', () => {
       expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('101 plugin::cm.read'));
     });
 
+    test('Escapes the token name in each warning, so a warning stays on one line', async () => {
+      const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
+      const userPermissions = [
+        {
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: ['admin::is-creator'],
+          properties: {},
+        },
+      ];
+      const tokens = [
+        {
+          id: 10,
+          name: 'QA clamp\ntoken\r"quoted"\u2028\u2029\u0085end',
+          adminPermissions: [
+            {
+              id: 101,
+              action: 'plugin::cm.read',
+              subject: 'api::article.article',
+              conditions: [],
+              properties: {},
+            },
+            {
+              id: 102,
+              action: 'plugin::cm.delete',
+              subject: 'api::article.article',
+              conditions: [],
+              properties: {},
+            },
+          ],
+        },
+      ];
+
+      const { warnMock } = buildStrapi({ user, userPermissions, tokens });
+
+      await syncApiTokenPermissionsForUser(1);
+
+      expect(warnMock).toHaveBeenCalledTimes(2);
+      for (const [message] of warnMock.mock.calls) {
+        expect(message).not.toMatch(/[\n\r\u2028\u2029\u0085]/);
+        expect(message).toContain(
+          'Admin token 10 ("QA clamp\\ntoken\\r\\"quoted\\"\\u2028\\u2029\\u0085end") of user 1'
+        );
+      }
+    });
+
     test('Does nothing when token permissions are already in sync', async () => {
       const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
       const userPermissions = [

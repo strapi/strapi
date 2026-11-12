@@ -3,6 +3,7 @@ import { get, xor, differenceWith } from 'lodash';
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
 import { getService } from '../../utils';
+import { quoteForLog } from '../../utils/quote-for-log';
 import permissionDomain, { CreatePermissionPayload } from '../../domain/permission';
 import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
 import { Action } from '../../domain/action';
@@ -136,7 +137,7 @@ const formatOwners = (owners: PermissionOwner[]) => {
     return 'none';
   }
 
-  return uniqueOwners.map((owner) => `${JSON.stringify(owner.name)} (id ${owner.id})`).join(', ');
+  return uniqueOwners.map((owner) => `${quoteForLog(owner.name)} (id ${owner.id})`).join(', ');
 };
 
 /**

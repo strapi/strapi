@@ -3,6 +3,7 @@ import { map, merge, difference } from 'lodash';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
+import { quoteForLog } from './utils/quote-for-log';
 import {
   getTokenOptions,
   getLegacyExpiresInSeconds,
@@ -148,7 +149,7 @@ export const syncAPITokensPermissions = async () => {
       removedPermissions
         .map((permission) => permission.token)
         .filter((token): token is NonNullable<APITokenPermissionRow['token']> => token != null)
-        .map((token) => [token.id, `${JSON.stringify(token.name)} (id ${token.id})`])
+        .map((token) => [token.id, `${quoteForLog(token.name)} (id ${token.id})`])
     );
     const withoutTokenCount = removedPermissions.filter(
       (permission) => permission.token == null

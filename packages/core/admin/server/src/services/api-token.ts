@@ -23,6 +23,7 @@ import type { AdminApiToken, AdminTokenBody } from '../../../shared/contracts/ad
 import type { AdminTokenOwner, AdminUser, Permission } from '../../../shared/contracts/shared';
 import constants from './constants';
 import { getService } from '../utils';
+import { quoteForLog } from '../utils/quote-for-log';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
 import {
@@ -668,7 +669,7 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
     const toDelete = [...plain.toDelete, ...parameterized.toDelete];
     const toUpdate = [...plain.toUpdate, ...parameterized.toUpdate];
 
-    const tokenLabel = `Admin token ${token.id} (${token.name}) of user ${userId}`;
+    const tokenLabel = `Admin token ${token.id} (${quoteForLog(token.name)}) of user ${userId}`;
     const describePermission = (id: Data.ID) =>
       `${id} ${tokenPermissions.find((p) => p.id === id)?.action}`;
 
