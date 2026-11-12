@@ -38,4 +38,15 @@ export class Container implements Core.Container {
 
     throw new Error(`Could not resolve service ${name}`);
   }
+
+  /**
+   * Drop registered services so a destroyed instance can be collected.
+   * `Strapi.destroy()` does not call this. The API test helper does, after
+   * destroy succeeds, because those tests keep the instance for the whole
+   * Jest process.
+   */
+  release() {
+    this.registerMap.clear();
+    this.serviceMap.clear();
+  }
 }

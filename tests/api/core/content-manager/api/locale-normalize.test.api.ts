@@ -83,13 +83,22 @@ describe('CM API - request locale passed to the document service', () => {
   const rows = async (uid: string, documentId: string): Promise<Row[]> => {
     const entries = await strapi.db.query(uid).findMany({
       where: { documentId },
-      orderBy: [{ locale: 'asc' }, { publishedAt: 'desc' }],
     });
 
-    return entries.map((entry: any) => [
-      entry.locale,
-      entry.publishedAt === null ? 'draft' : 'published',
-    ]);
+    // Postgres sorts NULL publishedAt first on DESC. SQLite and MySQL sort it last.
+    // Compare the stored rows in a fixed order instead of depending on that.
+    return entries
+      .map((entry: any): Row => [entry.locale, entry.publishedAt === null ? 'draft' : 'published'])
+      .sort((left, right) => {
+        if (left[0] !== right[0]) {
+          if (left[0] === null) return -1;
+          if (right[0] === null) return 1;
+          return left[0] < right[0] ? -1 : 1;
+        }
+
+        if (left[1] === right[1]) return 0;
+        return left[1] === 'published' ? -1 : 1;
+      });
   };
 
   const withLocale = (body: Record<string, unknown>, locale: RequestLocale) =>

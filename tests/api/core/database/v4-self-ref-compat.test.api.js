@@ -41,8 +41,8 @@ describe('v4-self-ref-compat', () => {
   });
 
   test('2 tables are created', async () => {
-    const hasFirstTable = await strapi.db.getConnection().schema.hasTable('tests_children_lnk');
-    const hasSecondTable = await strapi.db.getConnection().schema.hasTable('tests_parents_lnk');
+    const hasFirstTable = await strapi.db.getSchemaConnection().hasTable('tests_children_lnk');
+    const hasSecondTable = await strapi.db.getSchemaConnection().hasTable('tests_parents_lnk');
 
     expect(hasFirstTable).toBe(true);
     expect(hasSecondTable).toBe(true);

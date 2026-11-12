@@ -18,6 +18,32 @@ import { createRepairManager, type RepairManager } from './repairs';
 import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
 import { withStrapiKnexLog } from './utils/knex-log';
 
+/**
+ * Commit and rollback hooks run after the transaction has already settled.
+ * Log a useful message for Error instances and for thrown non-errors.
+ */
+const formatHookError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  try {
+    const serialized = JSON.stringify(error);
+    return typeof serialized === 'string' ? serialized : '';
+  } catch {
+    // Circular values have no JSON form.
+    return 'Unserializable value';
+  }
+};
+
+/** Drivers and hooks can reject with any value. Callers receive an Error. */
+const asThrownError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error));
+
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
@@ -282,16 +308,25 @@ class Database {
     const trx = notNestedTransaction
       ? await this.startTransaction()
       : (transactionCtx.get() as Knex.Transaction);
+    const logger = this.logger;
 
     async function commit() {
       if (notNestedTransaction) {
-        await transactionCtx.commit(trx);
+        await transactionCtx.commit(trx, (error) => {
+          logger.error(
+            `Commit hook failed after the transaction committed: ${formatHookError(error)}`
+          );
+        });
       }
     }
 
     async function rollback() {
       if (notNestedTransaction) {
-        await transactionCtx.rollback(trx);
+        await transactionCtx.rollback(trx, (error) => {
+          logger.error(
+            `Rollback hook failed after the transaction rolled back: ${formatHookError(error)}`
+          );
+        });
       }
     }
 
@@ -299,23 +334,27 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return await transactionCtx.run(trx, async () => {
-      try {
-        const callbackParams = {
-          trx,
-          commit,
-          rollback,
-          onCommit: transactionCtx.onCommit,
-          onRollback: transactionCtx.onRollback,
-        };
-        const res = await cb(callbackParams);
-        await commit();
-        return res;
-      } catch (error) {
-        await rollback();
-        throw error;
-      }
-    });
+    return await transactionCtx.run(
+      trx,
+      async () => {
+        try {
+          const callbackParams = {
+            trx,
+            commit,
+            rollback,
+            onCommit: transactionCtx.onCommit,
+            onRollback: transactionCtx.onRollback,
+          };
+          const res = await cb(callbackParams);
+          await commit();
+          return res;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      },
+      this
+    );
   }
 
   /**
@@ -392,14 +431,56 @@ class Database {
     return this.entityManager.createQueryBuilder(uid);
   }
 
+  /**
+   * Wait for `onCommit` and `onRollback` hooks still running on this database.
+   * The transaction call itself does not wait, so a test that reads a hook's
+   * side effect does. `destroy()` stops waiting after 10 seconds.
+   */
+  settleTransactionHooks(timeoutMs?: number) {
+    return transactionCtx.settleHooks(this, timeoutMs);
+  }
+
   async destroy() {
+    // A commit hook can still write. Timestamp and model subscribers have to
+    // stay registered until that write finishes. Clearing them first stores
+    // the row with NULL createdAt and updatedAt.
+    let drained = true;
+    let settleError: unknown;
+    let failedToSettle = false;
+    try {
+      drained = await this.settleTransactionHooks();
+    } catch (error) {
+      failedToSettle = true;
+      settleError = error;
+    }
+
     try {
       await this.lifecycles.clear();
     } finally {
       this.poolDiagnostics?.dispose();
     }
 
-    await this.connection.destroy();
+    // Close the pool before reporting a drain failure. Throwing from `finally`
+    // hides a close failure, and lint rejects that throw.
+    let closeError: unknown;
+    let failedToClose = false;
+    try {
+      if (!drained) {
+        this.logger.warn('Closing the database connection with transaction hooks still running');
+      }
+      await this.connection.destroy();
+    } catch (error) {
+      failedToClose = true;
+      closeError = error;
+    }
+
+    if (failedToSettle) {
+      throw asThrownError(settleError);
+    }
+
+    if (failedToClose) {
+      throw asThrownError(closeError);
+    }
   }
 }
 

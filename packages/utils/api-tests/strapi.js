@@ -4,6 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const dotenv = require('dotenv');
 const { createStrapi } = require('../../core/strapi');
+const { releaseAfterSuccessfulDestroy } = require('./release-after-destroy');
 const { createUtils } = require('./utils');
 
 const superAdminCredentials = {
@@ -36,7 +37,7 @@ const createStrapiInstance = async ({
     autoReload: true,
     ...strapiOptions,
   };
-  const instance = createStrapi(options);
+  const instance = releaseAfterSuccessfulDestroy(createStrapi(options));
 
   // Ensure Koa trusts X-Forwarded-* headers in tests so asHTTPS() can simulate HTTPS
   instance.config.set('server.proxy.koa', true);
