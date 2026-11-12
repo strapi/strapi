@@ -34,6 +34,9 @@
  * the mailbox also resets the password. A user who set up two-factor with the emailed code alone
  * has the mailbox as their second factor, and keeps it.
  *
+ * Changing the email address needs a confirmed current address, and for a user with two-factor on a
+ * session that passed it: an unconfirmed address has no mailbox that approves the change.
+ *
  * While two-factor is on, turning it off, setting it up again, making new backup codes and reading
  * the authenticator's secret need a session that passed it: the password alone (which a reset from
  * the mailbox gives) is not enough.
@@ -61,7 +64,7 @@ type HookContext = Parameters<Parameters<typeof createAuthMiddleware>[0]>[0];
 
 interface SessionRef {
   session: { id: string; twoFactorVerified?: unknown };
-  user: { id: string; twoFactorEnabled?: unknown };
+  user: { id: string; twoFactorEnabled?: unknown; emailVerified?: unknown };
 }
 
 /** The two-factor endpoints that check a code. Each one answers an error for a code that is wrong. */
@@ -108,6 +111,19 @@ export const CHANGE_NEEDS_SECOND_FACTOR_MESSAGE =
 
 export const SECRET_NEEDS_SECOND_FACTOR_MESSAGE =
   'Sign in again with your second factor before you set up another authenticator.';
+
+/**
+ * Moves the account to another address. Only a user whose current address is confirmed has it
+ * approved from that mailbox first; for anyone else the proof goes to the new address alone, and a
+ * stolen session could take the account with it. It is also guarded like the second factor itself.
+ */
+const CHANGE_EMAIL_PATH = '/change-email';
+
+export const CHANGE_EMAIL_NEEDS_VERIFIED_MESSAGE =
+  'Confirm your current email address before you change it: follow the link we sent you, or ask for a new one.';
+
+export const CHANGE_EMAIL_NEEDS_SECOND_FACTOR_MESSAGE =
+  'Sign in again with your second factor before you change your email address.';
 
 /** The sessions Better Auth lists for the caller, one per device */
 const LIST_SESSIONS_PATH = '/list-sessions';
@@ -334,6 +350,35 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
                 ctx.path === TOTP_URI_PATH
                   ? SECRET_NEEDS_SECOND_FACTOR_MESSAGE
                   : CHANGE_NEEDS_SECOND_FACTOR_MESSAGE,
+            });
+          }
+        }),
+      },
+      {
+        // Changing the address from a session that proves less than the mailbox does
+        matcher: (context) => context.path === CHANGE_EMAIL_PATH,
+        handler: createAuthMiddleware(async (ctx) => {
+          const current = (await getAuthoritativeSessionFromCtx(ctx)) as SessionRef | null;
+
+          // Better Auth refuses a request with no session itself
+          if (!current) {
+            return;
+          }
+
+          if (current.user.emailVerified !== true) {
+            throw new APIError('FORBIDDEN', {
+              code: 'CURRENT_EMAIL_NOT_VERIFIED',
+              message: CHANGE_EMAIL_NEEDS_VERIFIED_MESSAGE,
+            });
+          }
+
+          if (
+            current.user.twoFactorEnabled === true &&
+            current.session.twoFactorVerified !== true
+          ) {
+            throw new APIError('FORBIDDEN', {
+              code: 'TWO_FACTOR_REQUIRED',
+              message: CHANGE_EMAIL_NEEDS_SECOND_FACTOR_MESSAGE,
             });
           }
         }),
