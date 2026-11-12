@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 // dist/types.d.ts next to dist/index.d.ts.
 import type { Scope } from 'create-strapi-app/dist/types';
 
+import { testPluginConfigEntry } from '../test-plugin';
 import { APPS_DIR, baseEnv } from './config';
 
 export interface App {
@@ -81,6 +82,20 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
       env: { ...process.env, ...baseEnv() },
       maxBuffer: 10 * 1024 * 1024,
     }
+  );
+
+  // Load the test plugin (only when STRAPI_TEST_PLUGIN=true, see test-plugin.ts).
+  const pluginsFile = path.join(dir, 'config', 'plugins.js');
+  const plugins = fs.readFileSync(pluginsFile, 'utf8');
+  if (!plugins.includes('module.exports = () => ({')) {
+    throw new Error(`Unexpected ${pluginsFile}: cannot add the test plugin to it.`);
+  }
+  fs.writeFileSync(
+    pluginsFile,
+    plugins.replace(
+      'module.exports = () => ({',
+      `module.exports = () => ({\n  ${testPluginConfigEntry()}`
+    )
   );
 
   // `strapi develop` opens the admin in a browser tab when the app has no admin user yet, which
