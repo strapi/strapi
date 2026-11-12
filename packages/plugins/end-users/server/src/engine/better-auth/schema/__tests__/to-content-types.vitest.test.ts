@@ -28,7 +28,7 @@ import { fromAuthTables } from '../from-auth-tables';
 import { ENGINE_OWNED_ATTRIBUTE_OPTION } from '../../../../utils/engine-owned-user-fields';
 import { PRIVATE_FIELDS, READ_ONLY_FIELDS } from '../private-fields';
 import { LEGACY_USER_ATTRIBUTES } from '../../../../compat/legacy-confirmation';
-import { toContentTypes } from '../to-content-types';
+import { toContentTypes, withEngineOwnedMark } from '../to-content-types';
 
 type Json = Record<string, unknown>;
 
@@ -830,6 +830,26 @@ describe('toContentTypes', () => {
       expect(session.schema.indexes).toEqual(
         expect.arrayContaining([expect.objectContaining({ type: 'unique', columns: ['token'] })])
       );
+    });
+  });
+});
+
+describe('withEngineOwnedMark', () => {
+  it('adds the mark to an attribute with no options', () => {
+    expect(withEngineOwnedMark()).toEqual({
+      [PLUGIN_ID]: { [ENGINE_OWNED_ATTRIBUTE_OPTION]: true },
+    });
+  });
+
+  it('keeps the options the attribute already has, those of other plugins and this plugin`s own', () => {
+    expect(
+      withEngineOwnedMark({
+        i18n: { localized: false },
+        [PLUGIN_ID]: { another: 'option' },
+      })
+    ).toEqual({
+      i18n: { localized: false },
+      [PLUGIN_ID]: { another: 'option', [ENGINE_OWNED_ATTRIBUTE_OPTION]: true },
     });
   });
 });

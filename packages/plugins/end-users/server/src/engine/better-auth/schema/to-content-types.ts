@@ -175,6 +175,17 @@ const toStringType = (
   return isShort ? 'string' : 'text';
 };
 
+/**
+ * The `pluginOptions` of an attribute with the engine-owned mark added, keeping every option it
+ * already has, this plugin's own included: a later option must not be dropped by this one.
+ */
+export const withEngineOwnedMark = (
+  existing?: Record<string, Record<string, unknown>>
+): Record<string, Record<string, unknown>> => ({
+  ...existing,
+  [PLUGIN_ID]: { ...existing?.[PLUGIN_ID], [ENGINE_OWNED_ATTRIBUTE_OPTION]: true },
+});
+
 const toAttribute = (
   singularName: string,
   key: string,
@@ -223,7 +234,9 @@ const toAttribute = (
   // the type it is handed, whatever Better Auth plugins the project installed. A read-only field
   // is stripped already.
   if (singularName === USER_TYPE && field.input === false && result.writable !== false) {
-    result.pluginOptions = { [PLUGIN_ID]: { [ENGINE_OWNED_ATTRIBUTE_OPTION]: true } };
+    result.pluginOptions = withEngineOwnedMark(
+      result.pluginOptions as Record<string, Record<string, unknown>> | undefined
+    );
   }
 
   if (
