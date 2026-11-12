@@ -59,6 +59,8 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await getService('weeklyMetrics').registerCron();
 
   // AI metadata
+  await getService('aiMetadataJobs').failInterruptedJobs();
+
   if (strapi.ai.admin.isAvailable()) {
     const aiMetadataProvider = getService('aiMetadataProvider');
 

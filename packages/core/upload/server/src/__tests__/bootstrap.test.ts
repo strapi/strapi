@@ -1,6 +1,12 @@
+import fs from 'node:fs';
+import os from 'node:os';
 import { join } from 'path';
 
+import { Database } from '@strapi/database';
+
 import { bootstrap } from '../bootstrap';
+import { aiMetadataJob } from '../models/ai-metadata-job';
+import { createAIMetadataJobsService } from '../services/ai-metadata-jobs';
 
 jest.mock('@strapi/provider-upload-local', () => ({
   init() {
@@ -20,6 +26,9 @@ const createStrapiMock = ({
   hasProvider = jest.fn(() => false),
   registerStrapiManagedProvider = jest.fn(),
   auditLogsLifecycle = undefined as { registerEvent: jest.Mock } | undefined,
+  aiMetadataJobs = { failInterruptedJobs: jest.fn() } as Partial<
+    ReturnType<typeof createAIMetadataJobsService>
+  >,
 } = {}) =>
   ({
     has: jest.fn((name: string) => name === 'audit-logs-lifecycle' && !!auditLogsLifecycle),
@@ -76,6 +85,7 @@ const createStrapiMock = ({
             hasProvider,
             registerStrapiManagedProvider,
           },
+          aiMetadataJobs,
         },
       },
     },
@@ -187,5 +197,49 @@ describe('Upload plugin bootstrap function', () => {
       'media-folder.delete.audit',
       'media.move',
     ]);
+  });
+
+  describe('AI metadata jobs left by a previous process', () => {
+    let db: Database;
+    let tmpDir: string;
+    let jobs: ReturnType<typeof createAIMetadataJobsService>;
+
+    beforeAll(async () => {
+      tmpDir = fs.mkdtempSync(join(os.tmpdir(), 'strapi-upload-bootstrap-'));
+      db = new Database({
+        connection: {
+          client: 'sqlite',
+          connection: { filename: join(tmpDir, 'data.db') },
+          useNullAsDefault: true,
+        },
+        settings: { migrations: { dir: join(tmpDir, 'migrations') } },
+        logger: { debug() {}, info() {}, warn() {}, error() {} } as any,
+      });
+
+      await db.init({ models: [aiMetadataJob] });
+      await db.schema.sync();
+
+      jobs = createAIMetadataJobsService({ strapi: { db } as any });
+    });
+
+    afterAll(async () => {
+      await db.destroy();
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    test('fails a job that was still processing when the server stopped', async () => {
+      // The entity manager reaches for the global `strapi.db` to open its transactions
+      global.strapi = { ...createStrapiMock({ aiMetadataJobs: jobs }), db };
+
+      // The previous process created the job, then stopped before `processExistingFiles` settled it
+      const jobId = await jobs.createJob();
+
+      await bootstrap({ strapi });
+
+      // Without this, `/latest` keeps answering `processing` and the settings page polls forever
+      const latest = await jobs.getLatestActiveJob();
+      expect(latest).toMatchObject({ id: jobId, status: 'failed' });
+      expect(latest?.completedAt).not.toBeNull();
+    });
   });
 });
