@@ -968,8 +968,12 @@ describeOnCondition(edition === 'EE')('History API', () => {
         },
       });
 
+      const { documentId } = await strapi.db
+        .query('admin::api-token')
+        .findOne({ select: ['documentId'], where: { id: body.data.id } });
+
       return {
-        token: body.data,
+        token: { ...body.data, documentId },
         tokenRq: await createAgent(strapi, { token: body.data.accessKey }),
       };
     };
@@ -1016,7 +1020,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
         type: 'person',
         name: 'admin admin',
         model: 'admin::user',
-        id: String(me.data.id),
+        id: me.data.documentId,
       });
       expect(latestVersion.createdBy).toEqual({
         id: me.data.id,
@@ -1037,7 +1041,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
         type: 'token',
         name: 'history-author-token',
         model: 'admin::api-token',
-        id: String(token.id),
+        id: token.documentId,
       });
       expect(version.createdBy).toMatchObject({ id: me.data.id });
     });
@@ -1080,22 +1084,21 @@ describeOnCondition(edition === 'EE')('History API', () => {
         type: 'person',
         name: 'Renamed author',
         model: 'admin::user',
-        id: String(author.id),
+        id: author.documentId,
       });
     });
 
-    test('Clears the author id of the versions when the author is deleted', async () => {
-      const { author, version } = await createAuthorVersion('deleted');
+    test('Shows a deleted author when the author is deleted', async () => {
+      const { author, documentId } = await createAuthorVersion('deleted');
 
       await createUtils(strapi).deleteUserById(author.id);
 
-      const storedVersion = await strapi.db
-        .query('plugin::content-manager.history-version')
-        .findOne({ where: { id: version.id } });
-      expect(storedVersion).toMatchObject({
-        authorType: 'person',
-        authorModel: 'admin::user',
-        authorId: null,
+      const [latestVersion] = await findVersions(documentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: null,
+        model: 'admin::user',
+        id: null,
       });
     });
 
@@ -1113,22 +1116,21 @@ describeOnCondition(edition === 'EE')('History API', () => {
         type: 'token',
         name: 'history-renamed-token-new-name',
         model: 'admin::api-token',
-        id: String(token.id),
+        id: token.documentId,
       });
     });
 
-    test('Clears the author id of the versions when the token is deleted', async () => {
+    test('Shows a deleted token when the token is deleted', async () => {
       const { token, version } = await createAdminTokenVersion('history-deleted-token');
 
       await rq({ method: 'DELETE', url: `/admin/admin-tokens/${token.id}` });
 
-      const storedVersion = await strapi.db
-        .query('plugin::content-manager.history-version')
-        .findOne({ where: { id: version.id } });
-      expect(storedVersion).toMatchObject({
-        authorType: 'token',
-        authorModel: 'admin::api-token',
-        authorId: null,
+      const versions = await findVersions(collectionTypeDocumentId);
+      expect(versions.find(({ id }) => id === version.id).author).toEqual({
+        type: 'token',
+        name: null,
+        model: 'admin::api-token',
+        id: null,
       });
     });
 
@@ -1165,7 +1167,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
           type: 'person',
           name: 'admin admin',
           model: 'admin::user',
-          id: String(me.data.id),
+          id: me.data.documentId,
         });
       });
 

@@ -127,6 +127,11 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
         });
 
+        const authorDocumentId = await serviceUtils.findAuthorDocumentId(origin.author);
+        if (authorDocumentId === null) {
+          return result;
+        }
+
         await strapi.db.transaction(async ({ onCommit }) => {
           // .createVersion() is executed asynchronously,
           // onCommit prevents creating a history version
@@ -144,7 +149,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
                   status,
                   ...schemas,
                   source: origin.source,
-                  author: origin.author,
+                  author: { ...origin.author, id: authorDocumentId },
                 });
               } catch (error) {
                 strapi.log.error(`Failed to create a history version for ${uid}`, {

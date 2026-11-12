@@ -49,7 +49,10 @@ const mockStrapi = {
           create: jest.fn(),
         };
       }
-      return { findMany: mockFindEntries };
+      return {
+        findMany: mockFindEntries,
+        findOne: jest.fn().mockResolvedValue({ documentId: 'admin-document-id' }),
+      };
     },
     transaction(cb: any) {
       const opt = {
@@ -174,7 +177,7 @@ describe('history lifecycles service', () => {
           expect.objectContaining({
             locale: 'en',
             source: 'admin-panel',
-            author: { type: 'person', model: 'admin::user', id: '123' },
+            author: { type: 'person', model: 'admin::user', id: 'admin-document-id' },
           })
         );
       });

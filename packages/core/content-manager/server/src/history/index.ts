@@ -1,32 +1,10 @@
-import type { Core, Plugin } from '@strapi/types';
+import type { Plugin } from '@strapi/types';
 import { controllers } from './controllers';
 import { services } from './services';
 import { routes } from './routes';
 import { getService } from './utils';
 import { historyVersion } from './models/history-version';
 import { registerHistoryEntitlements } from './entitlements';
-import { HISTORY_VERSION_UID } from './constants';
-
-/**
- * Clear the author id of the versions when the author is deleted,
- * so that a new record with the same id is never shown as their author
- */
-const clearDeletedAuthors = (strapi: Core.Strapi) => {
-  strapi.db.lifecycles.subscribe({
-    models: ['admin::user', 'admin::api-token'],
-    async afterDelete(event) {
-      try {
-        await strapi.db.query(HISTORY_VERSION_UID).updateMany({
-          where: { authorModel: event.model.uid, authorId: String(event.result.id) },
-          data: { authorId: null },
-        });
-      } catch (error) {
-        // The author is already deleted: throwing would only break the rest of the delete flow
-        strapi.log.error('Error while clearing the deleted author of history versions', { error });
-      }
-    },
-  });
-};
 
 /**
  * Check once if the feature is enabled before loading it,
@@ -42,7 +20,6 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
       bootstrap({ strapi }) {
         // Start recording history and saving history versions
         getService(strapi, 'lifecycles').bootstrap();
-        clearDeletedAuthors(strapi);
       },
       destroy({ strapi }) {
         getService(strapi, 'lifecycles').destroy();
@@ -61,9 +38,6 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
     register({ strapi }) {
       strapi.get('models').add(historyVersion);
       registerHistoryEntitlements(strapi);
-    },
-    bootstrap({ strapi }) {
-      clearDeletedAuthors(strapi);
     },
   };
 };
