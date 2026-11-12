@@ -1,13 +1,43 @@
 import knex, { Knex } from 'knex';
 
 import { SavepointError } from '../errors';
-import { transactionCtx } from '../transaction-context';
+import { isDeadlockError, transactionCtx } from '../transaction-context';
 
 const fakeTrx = () =>
   ({
     commit: jest.fn(async () => undefined),
     rollback: jest.fn(async () => undefined),
   }) as any;
+
+describe('isDeadlockError', () => {
+  test('matches driver codes and a driver error that only kept the message', () => {
+    expect(isDeadlockError(Object.assign(new Error('boom'), { code: '40P01' }))).toBe(true);
+    expect(isDeadlockError({ errno: 1213, message: 'lock' })).toBe(true);
+    expect(isDeadlockError({ sql: 'update t set a = 1', message: 'deadlock detected' })).toBe(true);
+    expect(isDeadlockError({ message: 'wrapped', original: { code: 'ER_LOCK_DEADLOCK' } })).toBe(
+      true
+    );
+  });
+
+  test('ignores an application error that only mentions a deadlock', () => {
+    expect(isDeadlockError(new Error('deadlock detected'))).toBe(false);
+    expect(isDeadlockError(new Error('Deadlock found'))).toBe(false);
+  });
+
+  test('matches a driver error whose message only says Deadlock found', () => {
+    expect(
+      isDeadlockError({
+        sqlMessage: 'Deadlock found when trying to get lock',
+        message: 'Deadlock found when trying to get lock',
+      })
+    ).toBe(true);
+  });
+
+  test('ignores a driver error that has no message', () => {
+    expect(isDeadlockError({ sqlState: '40P01' })).toBe(false);
+    expect(isDeadlockError({ sql: 'update t set a = 1' })).toBe(false);
+  });
+});
 
 describe('transaction hooks', () => {
   test('commit returns before commit hooks, and settleHooks waits for them', async () => {
@@ -50,7 +80,7 @@ describe('transaction hooks', () => {
     expect(reported).toEqual([error]);
   });
 
-  test('a throwing rollback hook is reported and the later hooks still run', async () => {
+  test('a throwing rollback hook is reported and skips the hooks after it', async () => {
     const error = Object.assign(new Error('rollback hook failed'), { code: '40P01' });
     const later = jest.fn();
     const reported: unknown[] = [];
@@ -67,7 +97,7 @@ describe('transaction hooks', () => {
 
     await transactionCtx.settleHooks();
     expect(reported).toEqual([error]);
-    expect(later).toHaveBeenCalledTimes(1);
+    expect(later).not.toHaveBeenCalled();
   });
 
   test('commit still finishes when a hook fails and nobody is listening', async () => {
@@ -301,5 +331,152 @@ describe('transactionCtx.savepoint', () => {
     });
 
     expect(called).toEqual(['rollback']);
+  });
+
+  test('keeps the callback error when an onRollback hook throws', async () => {
+    const later = jest.fn();
+    const hookError = new Error('rollback hook failed');
+    const reported: unknown[] = [];
+
+    await inTransaction(async () => {
+      await expect(
+        transactionCtx.savepoint(
+          async () => {
+            transactionCtx.onRollback(() => {
+              throw hookError;
+            });
+            transactionCtx.onRollback(later);
+            throw new Error('callback failed');
+          },
+          (error) => {
+            reported.push(error);
+          }
+        )
+      ).rejects.toThrow('callback failed');
+    });
+
+    expect(later).not.toHaveBeenCalled();
+    expect(reported).toEqual([hookError]);
+  });
+
+  test('keeps the savepoint error when an onRollback hook throws after a failed rollback', async () => {
+    const callbackError = new Error('callback failed');
+    const hookError = new Error('rollback hook failed');
+    const later = jest.fn();
+    const reported: unknown[] = [];
+
+    await inTransaction(async () => {
+      const savepoint = transactionCtx.savepoint(
+        async () => {
+          transactionCtx.onRollback(() => {
+            throw hookError;
+          });
+          transactionCtx.onRollback(later);
+          await rollBackWholeTransaction(transactionCtx.get()!);
+          throw callbackError;
+        },
+        (error) => {
+          reported.push(error);
+        }
+      );
+
+      await expect(savepoint).rejects.toBeInstanceOf(SavepointError);
+      await expect(savepoint).rejects.toMatchObject({
+        message: 'Failed to roll back to the savepoint',
+        cause: expect.objectContaining({ message: expect.stringMatching(/no such savepoint/) }),
+        details: { error: callbackError },
+      });
+    });
+
+    expect(later).not.toHaveBeenCalled();
+    expect(reported).toEqual([hookError]);
+  });
+
+  test('keeps the savepoint error when an onRollback hook throws after a failed release', async () => {
+    const hookError = new Error('rollback hook failed');
+    const later = jest.fn();
+    const reported: unknown[] = [];
+
+    await inTransaction(async () => {
+      const savepoint = transactionCtx.savepoint(
+        async () => {
+          transactionCtx.onRollback(() => {
+            throw hookError;
+          });
+          transactionCtx.onRollback(later);
+          await rollBackWholeTransaction(transactionCtx.get()!);
+        },
+        (error) => {
+          reported.push(error);
+        }
+      );
+
+      await expect(savepoint).rejects.toBeInstanceOf(SavepointError);
+      await expect(savepoint).rejects.toMatchObject({
+        message: 'Failed to release the savepoint',
+        cause: expect.objectContaining({ message: expect.stringMatching(/no such savepoint/) }),
+      });
+    });
+
+    expect(later).not.toHaveBeenCalled();
+    expect(reported).toEqual([hookError]);
+  });
+});
+
+describe('transactionCtx.commit', () => {
+  let db: Knex;
+
+  beforeEach(async () => {
+    db = knex({
+      client: 'better-sqlite3',
+      connection: { filename: ':memory:' },
+      useNullAsDefault: true,
+    });
+    await db.raw('PRAGMA foreign_keys = ON');
+    await db.raw('create table parents (id integer primary key)');
+    // Checked when SQLite commits, not when the row is inserted
+    await db.raw(
+      'create table children (id integer primary key, parent_id integer references parents (id) deferrable initially deferred)'
+    );
+  });
+
+  afterEach(async () => {
+    await db.destroy();
+  });
+
+  test('rejects with the database error and skips the commit hooks when COMMIT is rejected', async () => {
+    const onCommit = jest.fn();
+    const trx = await db.transaction();
+
+    const commit = transactionCtx.run(trx, async () => {
+      transactionCtx.onCommit(onCommit);
+      // Inserted without error: the missing parent is only found at COMMIT
+      await trx('children').insert({ parent_id: 999 });
+      await transactionCtx.commit(trx);
+    });
+
+    await expect(commit).rejects.toMatchObject({
+      message: expect.stringMatching(/FOREIGN KEY constraint failed/),
+    });
+    expect(trx.isCompleted()).toBe(true);
+
+    await transactionCtx.settleHooks();
+    expect(onCommit).not.toHaveBeenCalled();
+  });
+
+  test('runs the commit hooks once COMMIT succeeds', async () => {
+    const onCommit = jest.fn();
+    const trx = await db.transaction();
+
+    await transactionCtx.run(trx, async () => {
+      transactionCtx.onCommit(onCommit);
+      await trx('parents').insert({ id: 1 });
+      await trx('children').insert({ parent_id: 1 });
+      await transactionCtx.commit(trx);
+    });
+
+    await transactionCtx.settleHooks();
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    await expect(db('children').count({ count: '*' })).resolves.toEqual([{ count: 1 }]);
   });
 });
