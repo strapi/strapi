@@ -623,6 +623,26 @@ describe('the end-users strategy', () => {
         expect(ctx.state.user).toBeUndefined();
       });
 
+      it('carries the session`s mark on the credentials, out of sight of the attributes, for the route policies', async () => {
+        for (const [lookup, expected] of [
+          [withSecondFactor(), true],
+          [signedIn(), false],
+        ] as const) {
+          const { strategy } = setup({
+            lookup,
+            held: HELD,
+            user: storedUser({ twoFactorEnabled: true }),
+          });
+
+          // eslint-disable-next-line no-await-in-loop
+          const { credentials } = await strategy.authenticate(koaCtx());
+
+          expect(credentials).toHaveProperty('passedSecondFactor', expected);
+          expect(Object.keys(credentials as object)).not.toContain('passedSecondFactor');
+          expect(JSON.stringify(credentials)).not.toContain('passedSecondFactor');
+        }
+      });
+
       it('keeps its own message for a user who has none set up, whatever the session', async () => {
         for (const lookup of [signedIn(), withSecondFactor()]) {
           const { strategy } = setup({

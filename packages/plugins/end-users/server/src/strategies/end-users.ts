@@ -53,6 +53,12 @@ export interface EndUserCredentials {
   roles: Array<{ documentId: string; name: string; type: string }>;
   /** The first role, as users-permissions shows its one role. Only while that mode is on. */
   role?: UpRole | null;
+  /**
+   * Whether the session this request was made with passed a second factor (see the engine's
+   * `second-factor` plugin). Not enumerable, so it is neither listed with the user's attributes nor
+   * serialized with them; a route policy that needs a second factor reads it by name.
+   */
+  readonly passedSecondFactor?: boolean;
 }
 
 type Plain = Record<string, unknown>;
@@ -191,7 +197,11 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
   };
 
   /** The signed-in user: the row, and the roles they hold. */
-  const toCredentials = (user: Plain, held: RoleSummary[]): EndUserCredentials => {
+  const toCredentials = (
+    user: Plain,
+    held: RoleSummary[],
+    secondFactor: boolean
+  ): EndUserCredentials => {
     const credentials: EndUserCredentials = {
       id: user.id as number,
       documentId: user.documentId as string,
@@ -207,6 +217,11 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
     if (compat) {
       credentials.role = toUpRole(held);
     }
+
+    Object.defineProperty(credentials, 'passedSecondFactor', {
+      value: secondFactor,
+      enumerable: false,
+    });
 
     return credentials;
   };
@@ -364,7 +379,7 @@ const createEndUsersStrategy = (strapi: Core.Strapi, compat = false) => {
 
     const held = await assertUsable(user, identity.secondFactor);
 
-    const endUser = toCredentials(user, held);
+    const endUser = toCredentials(user, held, identity.secondFactor);
     // The row, not the credentials: conditions read `$user.<attribute>`, and the credentials carry
     // seven of them. The ability service leaves out what is private.
     const ability = await abilities().forUser(user, held);

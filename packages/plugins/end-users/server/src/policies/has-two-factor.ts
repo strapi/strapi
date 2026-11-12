@@ -8,9 +8,11 @@ import type { PolicyContext } from './signed-in';
 const { createPolicy } = policy;
 
 /**
- * `plugin::end-users.has-two-factor`: the signed-in end user has two-factor authentication enabled.
- * The request's credentials don't carry the flag, so it is read from the user's row, which also
- * means a user who has just turned it off is refused at once. Refused with code
+ * `plugin::end-users.has-two-factor`: the signed-in end user has two-factor authentication enabled,
+ * and the session of this request passed a second factor. Enabled is read from the user's row, which
+ * means a user who has just turned it off is refused at once; whether the session passed one is
+ * what the strategy put on the credentials. A provider, a magic link or an emailed code can sign a
+ * user in with no challenge, so enabled alone says nothing about this session. Refused with code
  * `TWO_FACTOR_REQUIRED`, the code the strategy uses for a role that requires it.
  */
 export const hasTwoFactor = createPolicy({
@@ -26,6 +28,13 @@ export const hasTwoFactor = createPolicy({
       throw new errors.PolicyError('Enable two-factor authentication to do this.', {
         code: 'TWO_FACTOR_REQUIRED',
       });
+    }
+
+    if (user.passedSecondFactor !== true) {
+      throw new errors.PolicyError(
+        'Sign in again with your second factor: this session did not use it.',
+        { code: 'TWO_FACTOR_REQUIRED' }
+      );
     }
 
     return true;
