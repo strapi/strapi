@@ -4,8 +4,13 @@ import { resolveBasePath } from '../engine/better-auth/base-path';
 
 const MASK = '[masked]';
 
-/** Query parameters that carry a one-time secret: Better Auth's `token`, the compat `confirmation` and an OAuth `code` */
-const SECRET_QUERY_PARAM = /([?&](?:token|confirmation|code)=)[^&#\s]*/gi;
+/**
+ * Query parameters that carry a secret: Better Auth's `token`, the compat `confirmation`, an OAuth
+ * `code`, and the tokens and verifiers a provider's redirect or an old Users & Permissions front end
+ * puts in a callback URL. `state` is left alone: it names no secret the log could leak.
+ */
+const SECRET_QUERY_PARAM =
+  /([?&](?:token|confirmation|code|access_token|id_token|refresh_token|oauth_token|oauth_verifier)=)[^&#\s]*/gi;
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

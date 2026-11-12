@@ -24,6 +24,18 @@ describe('maskSecretsInUrl', () => {
     ).toBe('GET /api/auth/email-confirmation?confirmation=[masked] (1 ms) 302');
   });
 
+  it.each(['access_token', 'id_token', 'refresh_token', 'oauth_token', 'oauth_verifier'])(
+    'blanks %s in a provider callback URL, and leaves state alone',
+    (name) => {
+      expect(
+        maskSecretsInUrl(`GET ${BASE}/github/callback?state=s1&${name}=abc.def (2 ms) 302`, BASE)
+      ).toBe(`GET ${BASE}/github/callback?state=s1&${name}=[masked] (2 ms) 302`);
+      expect(maskSecretsInUrl(`GET /api/auth/github/callback?${name}=abc&state=s1`, BASE)).toBe(
+        `GET /api/auth/github/callback?${name}=[masked]&state=s1`
+      );
+    }
+  );
+
   it('follows the base path, and leaves a line with no secret alone', () => {
     expect(maskSecretsInUrl('GET /auth/reset-password/abc (1 ms) 200', '/auth')).toBe(
       'GET /auth/reset-password/[masked] (1 ms) 200'
