@@ -215,8 +215,8 @@ describe('second-factor', () => {
     expect(marks()).toEqual([true, true]);
   });
 
-  it('marks the session a backup code makes, and the one an emailed code makes', async () => {
-    const { db, enroll, challenge, auth, codes, marks } = build();
+  it('marks the session a backup code makes', async () => {
+    const { db, enroll, challenge, auth, marks } = build();
     const { backupCodes } = await enroll();
 
     const withBackup = await challenge();
@@ -226,18 +226,64 @@ describe('second-factor', () => {
       headers: { cookie: withBackup.cookie },
     });
 
+    expect(db.session).toHaveLength(2);
     expect(marks()).toEqual([true, true]);
+  });
 
-    const withOtp = await challenge();
+  it('refuses the emailed code at the challenge of a user who confirmed an authenticator, and the authenticator still works', async () => {
+    const { db, enroll, challenge, auth, codes, marks } = build();
+    const { code } = await enroll();
 
-    await auth.api.sendTwoFactorOTP({ headers: { cookie: withOtp.cookie }, body: {} });
-    await auth.api.verifyTwoFactorOTP({
-      body: { code: codes[0] },
-      headers: { cookie: withOtp.cookie },
+    const stopped = await challenge();
+
+    await expect(
+      auth.api.sendTwoFactorOTP({ headers: { cookie: stopped.cookie }, body: {} })
+    ).rejects.toMatchObject({ statusCode: 403, body: { code: 'TWO_FACTOR_REQUIRED' } });
+    expect(codes).toEqual([]);
+
+    await expect(
+      auth.api.verifyTwoFactorOTP({
+        body: { code: '123456' },
+        headers: { cookie: stopped.cookie },
+      })
+    ).rejects.toMatchObject({ statusCode: 403, body: { code: 'TWO_FACTOR_REQUIRED' } });
+    expect(db.session).toHaveLength(1);
+
+    // The challenge is still open: the refusal did not use it up
+    await auth.api.verifyTOTP({
+      body: { code: await code() },
+      headers: { cookie: stopped.cookie },
     });
 
-    expect(db.session).toHaveLength(3);
-    expect(marks()).toEqual([true, true, true]);
+    expect(db.session).toHaveLength(2);
+    expect(marks()).toEqual([true, true]);
+  });
+
+  it('keeps the emailed code at the challenge for a user who set two-factor up with it alone', async () => {
+    const { db, auth, challenge, codes, marks } = build();
+    const signedUp = await auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+    const cookie = cookieHeader(signedUp.headers);
+
+    await auth.api.sendTwoFactorOTP({ headers: { cookie }, body: {} });
+    await auth.api.verifyTwoFactorOTP({ body: { code: codes[0] }, headers: { cookie } });
+
+    expect(db.user[0].twoFactorEnabled).toBe(true);
+
+    const stopped = await challenge();
+
+    expect(stopped.response).toMatchObject({ twoFactorRedirect: true });
+
+    await auth.api.sendTwoFactorOTP({ headers: { cookie: stopped.cookie }, body: {} });
+    await auth.api.verifyTwoFactorOTP({
+      body: { code: codes[1] },
+      headers: { cookie: stopped.cookie },
+    });
+
+    expect(db.session).toHaveLength(2);
+    expect(marks()).toEqual([false, true]);
   });
 
   it('marks nothing for a code that is wrong', async () => {
@@ -373,13 +419,11 @@ describe('second-factor', () => {
   });
 
   it('stores the emailed two-factor code hashed', async () => {
-    const { db, enroll, challenge, auth, codes } = build();
+    const { db, enroll, auth, codes } = build();
+    const { confirmed } = await enroll();
 
-    await enroll();
-
-    const stopped = await challenge();
-
-    await auth.api.sendTwoFactorOTP({ headers: { cookie: stopped.cookie }, body: {} });
+    // From a session: the challenge of a user with an authenticator does not offer the emailed code
+    await auth.api.sendTwoFactorOTP({ headers: { cookie: confirmed }, body: {} });
 
     const stored = db.verification.filter((row) => String(row.identifier).startsWith('2fa-otp-'));
 
@@ -506,6 +550,79 @@ describe('the list of sessions', () => {
       expect(JSON.stringify(session)).not.toContain(db.session[0].token);
       expect(JSON.stringify(session)).not.toContain(db.session[1].token);
     }
+  });
+});
+
+describe('changing a second factor that is on', () => {
+  const unmarkedSession = async (ctx: ReturnType<typeof build>) => {
+    ctx.db.user[0].emailVerified = true;
+    await ctx.auth.api.signInMagicLink({
+      body: { email: EMAIL },
+      headers: new Headers({ origin: 'http://localhost:1337' }),
+    });
+
+    const linked = await ctx.auth.api
+      .magicLinkVerify({
+        query: { token: ctx.links[0] },
+        headers: new Headers({ origin: 'http://localhost:1337' }),
+        returnHeaders: true,
+      })
+      .catch((error: { headers?: Headers }) => ({ headers: error.headers as Headers }));
+
+    return cookieHeader(linked.headers);
+  };
+
+  it('is refused to a session that never passed it, whatever the password it knows', async () => {
+    const ctx = build();
+
+    await ctx.enroll();
+
+    const cookie = await unmarkedSession(ctx);
+    const body = { password: PASSWORD };
+    const refused = { statusCode: 403, body: { code: 'TWO_FACTOR_REQUIRED' } };
+
+    await expect(
+      ctx.auth.api.disableTwoFactor({ body, headers: { cookie } })
+    ).rejects.toMatchObject(refused);
+    await expect(ctx.auth.api.enableTwoFactor({ body, headers: { cookie } })).rejects.toMatchObject(
+      refused
+    );
+    await expect(
+      ctx.auth.api.generateBackupCodes({ body, headers: { cookie } })
+    ).rejects.toMatchObject(refused);
+
+    // Nothing was changed
+    expect(ctx.db.user[0].twoFactorEnabled).toBe(true);
+    expect(ctx.db.twoFactor).toHaveLength(1);
+  });
+
+  it('is allowed to a session that passed it', async () => {
+    const ctx = build();
+    const { confirmed } = await ctx.enroll();
+    const body = { password: PASSWORD };
+
+    await expect(
+      ctx.auth.api.generateBackupCodes({ body, headers: { cookie: confirmed } })
+    ).resolves.toHaveProperty('backupCodes');
+    await expect(
+      ctx.auth.api.disableTwoFactor({ body, headers: { cookie: confirmed } })
+    ).resolves.toEqual({ status: true });
+    expect(ctx.db.user[0].twoFactorEnabled).toBe(false);
+  });
+
+  it('does not stand in the way of a user who has not turned two-factor on', async () => {
+    const ctx = build();
+    const signedUp = await ctx.auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+
+    await expect(
+      ctx.auth.api.enableTwoFactor({
+        body: { password: PASSWORD },
+        headers: { cookie: cookieHeader(signedUp.headers) },
+      })
+    ).resolves.toHaveProperty('totpURI');
   });
 });
 

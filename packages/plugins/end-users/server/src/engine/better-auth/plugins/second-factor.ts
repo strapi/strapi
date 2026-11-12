@@ -27,12 +27,25 @@
  * its way to the other. A user with two-factor on cannot register a passkey from a session that is
  * not marked, because a passkey sign-in is counted as both factors.
  *
+ * The emailed code is refused at the challenge for a user who has confirmed an authenticator: they
+ * answer it with the authenticator or a backup code. Otherwise the mailbox would be enough, since
+ * the mailbox also resets the password. A user who set up two-factor with the emailed code alone
+ * has the mailbox as their second factor, and keeps it.
+ *
+ * While two-factor is on, turning it off, setting it up again and making new backup codes need a
+ * session that passed it: the password alone (which a reset from the mailbox gives) is not enough.
+ *
  * Every other session is `false`, a session made by `createSession` included. The marker is written
  * right after the session exists and before the response leaves, so no client holds a token for a
  * session that is not marked yet. A write that fails fails the request: an unmarked session only
  * ever means a refusal later.
  */
-import { APIError, createAuthMiddleware, getAuthoritativeSessionFromCtx } from 'better-auth/api';
+import {
+  APIError,
+  createAuthMiddleware,
+  getAuthoritativeSessionFromCtx,
+  getSessionFromCtx,
+} from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 import type { Core } from '@strapi/types';
 
@@ -63,6 +76,25 @@ const PASSKEY_REGISTRATION_PATHS = new Set([
   '/passkey/generate-register-options',
   '/passkey/verify-registration',
 ]);
+
+/** The emailed code, which a user with an authenticator cannot answer the challenge with */
+const OTP_PATHS = new Set(['/two-factor/send-otp', '/two-factor/verify-otp']);
+
+/** The two-factor plugin's challenge cookie */
+const TWO_FACTOR_COOKIE = 'two_factor';
+
+export const AUTHENTICATOR_REQUIRED_MESSAGE =
+  'Use your authenticator app or a backup code: the emailed code is not available for your account.';
+
+/** What changes a user's second factor, and so needs a session that passed it while it is on */
+const SECOND_FACTOR_CHANGE_PATHS = new Set([
+  '/two-factor/disable',
+  '/two-factor/enable',
+  '/two-factor/generate-backup-codes',
+]);
+
+export const CHANGE_NEEDS_SECOND_FACTOR_MESSAGE =
+  'Sign in again with your second factor before you change it.';
 
 /** The sessions Better Auth lists for the caller, one per device */
 const LIST_SESSIONS_PATH = '/list-sessions';
@@ -204,6 +236,60 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
           }
 
           enrollmentAttempts.set(ctx.context, key);
+        }),
+      },
+      {
+        // The emailed code at the challenge, for a user who confirmed an authenticator
+        matcher: (context) => OTP_PATHS.has(context.path as string),
+        handler: createAuthMiddleware(async (ctx) => {
+          // A request with a session is not the challenge: it is a signed-in user setting up
+          // two-factor, and the mark never comes from it
+          if (await getSessionFromCtx(ctx).catch(() => null)) {
+            return;
+          }
+
+          const cookie = ctx.context.createAuthCookie(TWO_FACTOR_COOKIE);
+          const challenge = await ctx.getSignedCookie(cookie.name, ctx.context.secret);
+          const pending = challenge
+            ? await ctx.context.internalAdapter.findVerificationValue(challenge)
+            : null;
+
+          // No challenge: Better Auth refuses the request itself
+          if (!pending?.value) {
+            return;
+          }
+
+          const row = (await ctx.context.adapter.findOne({
+            model: 'twoFactor',
+            where: [{ field: 'userId', value: pending.value }],
+          })) as { verified?: boolean | null } | null;
+
+          if (row?.verified === true) {
+            throw new APIError('FORBIDDEN', {
+              code: 'TWO_FACTOR_REQUIRED',
+              message: AUTHENTICATOR_REQUIRED_MESSAGE,
+            });
+          }
+        }),
+      },
+      {
+        // Changing the second factor while it is on, from a session that never passed it
+        matcher: (context) => SECOND_FACTOR_CHANGE_PATHS.has(context.path as string),
+        handler: createAuthMiddleware(async (ctx) => {
+          const current = (await getAuthoritativeSessionFromCtx(ctx)) as SessionRef | null;
+
+          // Better Auth refuses a request with no session itself, and a user who has not turned
+          // two-factor on is setting it up
+          if (!current || current.user.twoFactorEnabled !== true) {
+            return;
+          }
+
+          if (current.session.twoFactorVerified !== true) {
+            throw new APIError('FORBIDDEN', {
+              code: 'TWO_FACTOR_REQUIRED',
+              message: CHANGE_NEEDS_SECOND_FACTOR_MESSAGE,
+            });
+          }
         }),
       },
       {
