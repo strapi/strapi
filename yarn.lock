@@ -10046,7 +10046,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
-    "@types/koa": "npm:2.15.2"
+    "@types/koa": "npm:^2.13.5"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:22.20.0"
     jest: "npm:29.6.0"
