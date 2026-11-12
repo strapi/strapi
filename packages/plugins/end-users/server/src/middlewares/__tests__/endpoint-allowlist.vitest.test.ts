@@ -138,11 +138,32 @@ describe('endpointAllowlist', () => {
       ['magicLink', '/api/auth/magic-link/verify?token=x'],
       ['emailOtp', '/api/auth/sign-in/email-otp'],
       ['emailOtp', '/api/auth/email-otp/send-verification-otp'],
+      ['emailOtp', '/api/auth/forget-password/email-otp'],
+      ['emailOtp', '/api/auth/Forget-Password/%65mail-otp'],
       ['passkey', '/api/auth/sign-in/passkey'],
       ['passkey', '/api/auth/passkey/generate-register-options'],
     ])('%s: %s', async (method, target) => {
       expect(await run(target, {}, { [method]: false })).toEqual({ passed: false, notFound: true });
       expect(await run(target)).toEqual({ passed: true, notFound: false });
+    });
+
+    it('gives the email OTP reset code to the email OTP method alone, not to the password reset', async () => {
+      const target = '/api/auth/forget-password/email-otp';
+
+      // Passwords off, the email OTP method on: its own reset code is still answered
+      expect(await run(target, {}, { emailPassword: false })).toEqual({
+        passed: true,
+        notFound: false,
+      });
+      // The password reset itself is the password method's
+      expect(await run('/api/auth/forget-password', {}, { emailPassword: false })).toEqual({
+        passed: false,
+        notFound: true,
+      });
+      expect(await run('/api/auth/forget-password', {}, { emailOtp: false })).toEqual({
+        passed: true,
+        notFound: false,
+      });
     });
 
     it.each([
