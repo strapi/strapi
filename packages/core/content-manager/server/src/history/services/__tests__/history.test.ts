@@ -30,6 +30,7 @@ const mockGetRequestContext = jest.fn(() => {
 });
 const mockFindOne = jest.fn();
 const mockStrapi = {
+  service: jest.fn(() => ({ findNames: jest.fn().mockResolvedValue({}) })),
   plugins: {
     'content-manager': {
       service: jest.fn(() => ({
