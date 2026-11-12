@@ -9,6 +9,7 @@ import {
   addReportItems,
   claimMigration,
   CLAIM_MS,
+  CLAIM_SETTLE_MS,
   readRecord,
   readReport,
   releaseMigration,
@@ -218,6 +219,55 @@ describe('claimMigration', () => {
 
     expect(results.filter(Boolean)).toHaveLength(1);
     expect((await readRecord(strapi))?.claim?.by).toBe(results[0] ? 'a' : 'b');
+  });
+
+  describe('when two starts insert the first record together', () => {
+    const rows = () => db('strapi_core_store_settings').orderBy('id').select('id', 'value');
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('loses to an older row and takes its own row back out', async () => {
+      const strapi = makeStrapi();
+
+      await db('strapi_core_store_settings').insert({
+        id: 1,
+        key: `${PREFIX}${MIGRATION_KEY}`,
+        value: JSON.stringify(record({ claim: { by: 'other', until: minutes(15).toISOString() } })),
+        type: 'object',
+      });
+      // The older row is invisible to the first read of a start that has inserted, as on Postgres
+      // when it is not committed yet: here it is hidden by being read with another key at first
+      await db('strapi_core_store_settings').where({ id: 1 }).update({ key: 'hidden' });
+      vi.useFakeTimers();
+
+      const result = claimMigration(strapi, 'a', NOW);
+
+      await vi.advanceTimersByTimeAsync(CLAIM_SETTLE_MS);
+      // the older row commits between the two reads
+      await db('strapi_core_store_settings')
+        .where({ id: 1 })
+        .update({ key: `${PREFIX}${MIGRATION_KEY}` });
+      await vi.advanceTimersByTimeAsync(CLAIM_SETTLE_MS);
+
+      expect(await result).toBe(false);
+      expect(await rows()).toHaveLength(1);
+      expect((await rows())[0].id).toBe(1);
+    });
+
+    it('wins when the same row is the oldest on both reads', async () => {
+      const strapi = makeStrapi();
+
+      vi.useFakeTimers();
+
+      const result = claimMigration(strapi, 'a', NOW);
+
+      await vi.advanceTimersByTimeAsync(CLAIM_SETTLE_MS * 2);
+
+      expect(await result).toBe(true);
+      expect(await rows()).toHaveLength(1);
+    });
   });
 
   it('refuses a row that is not a record', async () => {
