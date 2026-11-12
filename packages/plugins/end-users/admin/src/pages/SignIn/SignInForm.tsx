@@ -35,7 +35,10 @@ import type {
 } from '../../../../shared/contracts/settings';
 
 /** The settings this page edits: the rest of the document belongs to the Advanced page */
-type SignInValues = Pick<EndUsersSettings, 'methods' | 'signUp' | 'passwords' | 'lockout'>;
+type SignInValues = Pick<
+  EndUsersSettings,
+  'methods' | 'signUp' | 'account' | 'passwords' | 'lockout'
+>;
 
 interface SignInFormProps {
   settings: SettingsResponse;
@@ -161,6 +164,7 @@ const SignInForm = ({
   const initialValues: SignInValues = {
     methods: data.methods,
     signUp: data.signUp,
+    account: data.account,
     passwords: data.passwords,
     lockout: data.lockout,
   };
@@ -324,6 +328,30 @@ const SignInForm = ({
                       options={profileFields.map((name) => ({ value: name, label: name }))}
                       disabled={disabled}
                     />
+                  </Grid.Item>
+                </Grid.Root>
+              </Section>
+
+              <Section
+                title={formatMessage({
+                  id: getTranslation('settings.sign-in.account'),
+                  defaultMessage: 'Account',
+                })}
+              >
+                <Grid.Root gap={4}>
+                  <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
+                    {toggle(
+                      'account.allowUnverifiedEmailChange',
+                      formatMessage({
+                        id: getTranslation('settings.sign-in.unverified-email-change'),
+                        defaultMessage: 'Let unverified users change their email',
+                      }),
+                      formatMessage({
+                        id: getTranslation('settings.sign-in.unverified-email-change.hint'),
+                        defaultMessage:
+                          'Nobody can approve the change from an address that was never verified, so someone holding the session of an unverified user could move the account to another address. The new address still has to confirm.',
+                      })
+                    )}
                   </Grid.Item>
                 </Grid.Root>
               </Section>

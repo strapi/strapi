@@ -28,22 +28,29 @@ type Row = Record<string, any>;
 
 let lockoutDb: LockoutDb;
 
+/** The `account.allowUnverifiedEmailChange` setting the fake settings service answers with */
+let allowUnverifiedEmailChange = false;
+
 beforeEach(async () => {
   lockoutDb = await createLockoutDb();
+  allowUnverifiedEmailChange = false;
 });
 
 afterEach(async () => {
   await lockoutDb.connection.destroy();
 });
 
-/** Only what the plugin reads: the counter table and the lockout settings */
+/** Only what the plugin reads: the counter table, the lockout settings and the account setting */
 const fakeStrapi = () =>
   ({
     db: lockoutDb.db,
     log: { warn: vi.fn() },
     plugin: () => ({
       service: () => ({
-        get: async () => ({ lockout: { enabled: true, maxAttempts: 5, durationMinutes: 15 } }),
+        get: async () => ({
+          lockout: { enabled: true, maxAttempts: 5, durationMinutes: 15 },
+          account: { allowUnverifiedEmailChange },
+        }),
       }),
     }),
   }) as unknown as Core.Strapi;
@@ -551,6 +558,51 @@ describe('changing the email address', () => {
     expect(ctx.approvals).toHaveLength(0);
     expect(ctx.proofs).toHaveLength(0);
     expect(ctx.db.user[0].email).toBe(EMAIL);
+  });
+
+  it('goes through as Better Auth does it for an unconfirmed address once the setting allows it', async () => {
+    const ctx = build();
+    const signedUp = await ctx.auth.api.signUpEmail({
+      body: { email: EMAIL, password: PASSWORD, name: 'Ann' },
+      returnHeaders: true,
+    });
+    const headers = { cookie: cookieHeader(signedUp.headers) };
+
+    await expect(ctx.auth.api.changeEmail({ body, headers })).rejects.toMatchObject({
+      body: { code: 'CURRENT_EMAIL_NOT_VERIFIED' },
+    });
+
+    // Read on each request: no rebuild between the refusal and the change
+    allowUnverifiedEmailChange = true;
+    await ctx.auth.api.changeEmail({ body, headers });
+
+    // No mailbox approves from the old address; the new one is asked to confirm
+    expect(ctx.approvals).toHaveLength(0);
+    expect(ctx.proofs).toHaveLength(1);
+  });
+
+  it('still asks a user with two-factor for a session that passed it when the setting allows it', async () => {
+    allowUnverifiedEmailChange = true;
+
+    const ctx = build();
+
+    await ctx.enroll();
+    await ctx.auth.api.signInMagicLink({
+      body: { email: EMAIL },
+      headers: new Headers({ origin: 'http://localhost:1337' }),
+    });
+
+    const linked = await ctx.auth.api
+      .magicLinkVerify({
+        query: { token: ctx.links[0] },
+        headers: new Headers({ origin: 'http://localhost:1337' }),
+        returnHeaders: true,
+      })
+      .catch((error: { headers?: Headers }) => ({ headers: error.headers as Headers }));
+
+    await expect(
+      ctx.auth.api.changeEmail({ body, headers: { cookie: cookieHeader(linked.headers) } })
+    ).rejects.toMatchObject({ body: { code: 'TWO_FACTOR_REQUIRED' } });
   });
 
   it('is refused to a session that never passed the second factor of its user', async () => {

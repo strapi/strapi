@@ -2161,6 +2161,7 @@ describe('end-users: the emails the engine sends', () => {
     clearSentEmails();
     await settings.set({
       signUp: { requireEmailVerification: false },
+      account: { allowUnverifiedEmailChange: false },
       redirects: { emailVerified: '/verified', passwordReset: '/reset' },
     });
     await strapi.plugin('end-users').service('engine').reload();
@@ -2269,6 +2270,26 @@ describe('end-users: the emails the engine sends', () => {
     expect(changed.statusCode).toBe(403);
     expect(changed.body.code).toBe('CURRENT_EMAIL_NOT_VERIFIED');
     expect(sentEmails().filter((sent) => sent.to === 'moved@example.com')).toHaveLength(0);
+    expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(1);
+  });
+
+  it('lets an unverified user change the address once an administrator allows it, and asks the new address to confirm', async () => {
+    const { email, cookie } = await signedUp();
+
+    // Applies on the next request, with no reload of the engine
+    await settings.set({ account: { allowUnverifiedEmailChange: true } });
+    clearSentEmails();
+
+    const changed = await rq.post('/api/auth/change-email', {
+      body: { newEmail: 'moved@example.com' },
+      headers: { ...FROM_FRONT_END, Cookie: cookie },
+    });
+
+    expect(changed.statusCode).toBe(200);
+    await emailsSent(1);
+    expect(sentEmails()).toHaveLength(1);
+    // No mailbox approved this change, so the new address is the one that has to confirm
+    expect(sentEmails()[0].to).toBe('moved@example.com');
     expect(await strapi.db.query(USER_UID).count({ where: { email } })).toBe(1);
   });
 

@@ -48,6 +48,7 @@ const defaults = (): EndUsersSettings => ({
     registrationFields: [],
   },
   redirects: { emailVerified: null, passwordReset: null, error: null },
+  account: { allowUnverifiedEmailChange: false },
   passwords: { minLength: 8, maxLength: 128, requireMixedClasses: false },
   lockout: { enabled: true, maxAttempts: 5, durationMinutes: 15 },
   methods: {

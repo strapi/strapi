@@ -177,7 +177,10 @@ two-factor.
 **Changing an email address takes two confirmations.** `/change-email` first mails the current address, which has
 to approve the change, and then the new one, which has to prove it is the user's. A user whose current address was
 never verified is refused (`CURRENT_EMAIL_NOT_VERIFIED`) and verifies it first, and a user with two-factor needs a
-session that passed it. When the change completes, the user's other sessions are signed out.
+session that passed it. An administrator can let unverified users through with `account.allowUnverifiedEmailChange`
+(Settings, End users, Sign-in, Account; off by default): the new address then confirms, and nobody approves from the
+old one, so whoever holds the session of an unverified user can move the account to another address. It applies on
+the next request, and the two-factor rule stays. When the change completes, the user's other sessions are signed out.
 
 **Only the signed session token works as a Bearer token.** Send the value of the `set-auth-token` response header, or
 the `jwt` the compatibility routes answer with, in `Authorization: Bearer`. The `token` field in Better Auth's JSON

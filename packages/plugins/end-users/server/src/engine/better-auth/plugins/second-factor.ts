@@ -34,8 +34,9 @@
  * the mailbox also resets the password. A user who set up two-factor with the emailed code alone
  * has the mailbox as their second factor, and keeps it.
  *
- * Changing the email address needs a confirmed current address, and for a user with two-factor on a
- * session that passed it: an unconfirmed address has no mailbox that approves the change.
+ * Changing the email address needs a confirmed current address (unless an administrator allows it
+ * in the settings), and for a user with two-factor on a session that passed it: an unconfirmed
+ * address has no mailbox that approves the change.
  *
  * While two-factor is on, turning it off, setting it up again, making new backup codes and reading
  * the authenticator's secret need a session that passed it: the password alone (which a reset from
@@ -365,7 +366,11 @@ export const secondFactor = (strapi: Core.Strapi): BetterAuthPlugin => ({
             return;
           }
 
-          if (current.user.emailVerified !== true) {
+          // Read on each request, so turning the setting on or off applies at once
+          if (
+            current.user.emailVerified !== true &&
+            !(await settings(strapi).get()).account.allowUnverifiedEmailChange
+          ) {
             throw new APIError('FORBIDDEN', {
               code: 'CURRENT_EMAIL_NOT_VERIFIED',
               message: CHANGE_EMAIL_NEEDS_VERIFIED_MESSAGE,

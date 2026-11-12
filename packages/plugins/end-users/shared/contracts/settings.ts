@@ -20,6 +20,12 @@ export interface EndUsersSettings {
     passwordReset: string | null;
     error: string | null;
   };
+  /**
+   * Changing the email address. A user whose current address was never verified is refused unless
+   * this is on: nobody can approve the change from that mailbox, so a stolen session could move the
+   * account to another address.
+   */
+  account: { allowUnverifiedEmailChange: boolean };
   passwords: { minLength: number; maxLength: number; requireMixedClasses: boolean };
   lockout: { enabled: boolean; maxAttempts: number; durationMinutes: number };
   methods: Record<SignInMethod, boolean>;
