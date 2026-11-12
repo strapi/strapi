@@ -151,6 +151,107 @@ describe('Validate visitors util', () => {
     });
   });
 
+  describe('validateFilters - object operands on scalar and JSON attributes', () => {
+    const schema = {
+      ...articleModel,
+      attributes: {
+        ...articleModel.attributes,
+        meta: { type: 'json' },
+        rank: { type: 'integer' },
+        publishedAt: { type: 'datetime' },
+      },
+    };
+    const ctx = { schema, getModel };
+
+    const validate = (filters: unknown) =>
+      validators.validateFilters(ctx, filters, ['nonAttributesOperators']);
+
+    test.each([
+      ['$eq on a string attribute', { title: { $eq: { a: 1 } } }, '$eq', 'title'],
+      ['$eq on a JSON attribute', { meta: { $eq: { a: 999 } } }, '$eq', 'meta'],
+      ['$contains on a JSON attribute', { meta: { $contains: { a: 1 } } }, '$contains', 'meta'],
+      ['an operand under $not', { meta: { $not: { $eq: { a: 1 } } } }, '$eq', 'meta'],
+      ['an operand keyed by an attribute name', { meta: { $eq: { title: 'x' } } }, '$eq', 'meta'],
+      ['an operand made of operators', { rank: { $eq: { $gt: 1 } } }, '$eq', 'rank'],
+      ['an operand under $and', { title: { $and: { $eq: { a: 1 } } } }, '$eq', 'title'],
+      ['an operand under $or', { title: { $or: { $ne: { a: 1 } } } }, '$ne', 'title'],
+      ['an operand on documentId', { documentId: { $eq: { a: 1 } } }, '$eq', 'documentId'],
+      ['an operand on id', { id: { $in: [1], $eq: { a: 1 } } }, '$eq', 'id'],
+      [
+        'an operand on a relation documentId',
+        { createdBy: { documentId: { $eq: { a: 1 } } } },
+        '$eq',
+        'createdBy.documentId',
+      ],
+      ['an operand inside $or', { $or: [{ meta: { $eq: { a: 1 } } }] }, '$eq', 'meta'],
+      [
+        'an operand on a relation target attribute',
+        { createdBy: { firstname: { $eq: { a: 1 } } } },
+        '$eq',
+        'createdBy.firstname',
+      ],
+    ])('throws on an object operand: %s', async (_, filters, key, path) => {
+      const error = await validate(filters).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toMatchObject({
+        message: `Invalid operand for ${key} at ${path}: expected a value, not an object`,
+        details: { key, path },
+      });
+    });
+
+    // qs turns a REST list longer than its arrayLimit (100 by default) into an object keyed by index
+    const indexKeyedList = Object.fromEntries(
+      Array.from({ length: 101 }, (_, index) => [String(index), String(index + 1)])
+    );
+
+    test.each([
+      ['$in on id', { id: { $in: indexKeyedList } }, '$in', 'id'],
+      ['$notIn on a scalar attribute', { rank: { $notIn: indexKeyedList } }, '$notIn', 'rank'],
+      ['$in under $not', { title: { $not: { $in: { 0: 'a', 1: 'b' } } } }, '$in', 'title'],
+    ])(
+      'throws an arrayLimit error on an index-keyed operand: %s',
+      async (_, filters, key, path) => {
+        const error = await validate(filters).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ValidationError);
+        expect(error).toMatchObject({
+          message: `Invalid operand for ${key} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+          details: { key, path },
+        });
+      }
+    );
+
+    test('keeps the generic message when an operand mixes index and other keys', async () => {
+      const error = await validate({ title: { $in: { 0: 'a', b: 'c' } } }).catch((e: unknown) => e);
+
+      expect(error).toMatchObject({
+        message: 'Invalid operand for $in at title: expected a value, not an object',
+      });
+    });
+
+    test.each([
+      ['a scalar operand', { title: { $eq: 'x' } }],
+      ['an implicit $eq', { title: 'x' }],
+      ['an array operand', { rank: { $in: [1, 2], $between: [1, 3] } }],
+      ['$null and $notNull', { rank: { $null: true }, title: { $notNull: 'true' } }],
+      // Query conversion casts any $null / $notNull operand to a boolean
+      ['$null and $notNull with an object', { rank: { $null: { a: 1 } }, title: { $notNull: {} } }],
+      ['the operator map of $not', { title: { $not: { $eq: 'x' } } }],
+      ['a nested $not', { title: { $not: { $not: { $eq: 'x' } } } }],
+      // Empty objects hold no condition and are sanitized out
+      ['an empty operand', { id: { $eq: {} }, title: { $and: { $eq: {}, $contains: {} } } }],
+      ['a string operand on a JSON attribute', { meta: { $contains: '"uid"' } }],
+      ['$jsonSupersetOf with a string', { meta: { $jsonSupersetOf: '["api::a.a"]' } }],
+      ['a Date operand', { publishedAt: { $gt: new Date('2022-03-17T15:06:57.878Z') } }],
+      ['a relation filter', { createdBy: { firstname: { $eq: 'John' } } }],
+      ['a relation id operator', { createdBy: { $eq: 1 } }],
+      ['documentId and id operands', { documentId: { $in: ['a'] }, id: { $eq: 1 } }],
+    ])('accepts %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toEqual(filters);
+    });
+  });
+
   describe('defaultValidatePopulate - nested filters/sort/fields within populate', () => {
     const categoryModel: any = {
       uid: 'api::category.category',

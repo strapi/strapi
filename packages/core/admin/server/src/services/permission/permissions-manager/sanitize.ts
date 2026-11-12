@@ -190,7 +190,12 @@ export default ({ action, ability, model }: any) => {
   const wrapSanitize = (createSanitizeFunction: any) => {
     const { getPermissionFields } = createPermissionFieldsCache(ability);
 
-    const wrappedSanitize = async (data: unknown, options = {} as any): Promise<unknown> => {
+    /**
+     * The result keeps the type of `data` (`unknown` stays `unknown`), so callers can type
+     * their sanitized data. At runtime, fields the user is not allowed to see are removed.
+     */
+    function wrappedSanitize<T>(data: T, options?: any): Promise<T>;
+    async function wrappedSanitize(data: unknown, options = {} as any): Promise<unknown> {
       if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
       }
@@ -214,7 +219,7 @@ export default ({ action, ability, model }: any) => {
       const sanitizeFunction = createSanitizeFunction(sanitizeOptions);
 
       return sanitizeFunction(data);
-    };
+    }
 
     return wrappedSanitize;
   };
@@ -314,9 +319,13 @@ export default ({ action, ability, model }: any) => {
     ];
   };
 
+  // sanitizeQuery keeps its `unknown` result, so existing query callers keep their types
+  const sanitizeQuery: (query: unknown, options?: any) => Promise<unknown> =
+    wrapSanitize(createSanitizeQuery);
+
   return {
     sanitizeOutput: wrapSanitize(createSanitizeOutput),
     sanitizeInput: wrapSanitize(createSanitizeInput),
-    sanitizeQuery: wrapSanitize(createSanitizeQuery),
+    sanitizeQuery,
   };
 };
