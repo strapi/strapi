@@ -1062,8 +1062,8 @@ export const createEngine = (
 
   return {
     schema() {
-      // The rate-limit table is always wanted: `lockout` keeps its counters there, whichever
-      // storage Better Auth's own rate limiter uses
+      // The rate-limit table is always created, whichever storage Better Auth's own rate limiter
+      // uses, so choosing the other storage later changes no table
       return fromAuthTables(
         getAuthTables({
           ...firstOptions,

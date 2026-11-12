@@ -138,8 +138,8 @@ describe('lockout', () => {
   });
 
   const counterOf = async (identifier: string) =>
-    lockoutDb.connection('eu_rate_limits').where('key', lockoutKey(identifier)).first();
-  const counters = () => lockoutDb.connection('eu_rate_limits').select();
+    lockoutDb.connection('eu_lockout_counters').where('key', lockoutKey(identifier)).first();
+  const counters = () => lockoutDb.connection('eu_lockout_counters').select();
 
   it('locks after maxAttempts failures and refuses even the right password while locked', async () => {
     await fail(5);

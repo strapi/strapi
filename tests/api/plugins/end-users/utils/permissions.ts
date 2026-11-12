@@ -14,6 +14,7 @@ export const ENGINE_UIDS = [
   'plugin::end-users.user',
   // The rate limit and lockout counters, which outlive a run in the shared test database
   'plugin::end-users.rate-limit',
+  'plugin::end-users.lockout-counter',
 ];
 
 /** A permission row as a test gives it to `setRolePermissions` */

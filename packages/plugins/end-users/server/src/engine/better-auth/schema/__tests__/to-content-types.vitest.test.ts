@@ -15,6 +15,7 @@ import { secondFactor } from '../../plugins/second-factor';
 import type { EngineTable } from '../../../types';
 import {
   ACCOUNT_UID,
+  LOCKOUT_COUNTER_UID,
   PLUGIN_ID,
   RATE_LIMIT_UID,
   ROLE_UID,
@@ -129,6 +130,7 @@ describe('toContentTypes', () => {
     expect(cts.session.schema.collectionName).toBe('eu_sessions');
     expect(cts['two-factor'].schema.collectionName).toBe('eu_two_factors');
     expect(cts['rate-limit'].schema.collectionName).toBe('eu_rate_limits');
+    expect(cts['lockout-counter'].schema.collectionName).toBe('eu_lockout_counters');
     expect(cts.jwk.schema.collectionName).toBe('eu_jwks');
   });
 
@@ -136,6 +138,7 @@ describe('toContentTypes', () => {
     expect(Object.keys(cts).sort()).toEqual([
       'account',
       'jwk',
+      'lockout-counter',
       'passkey',
       'rate-limit',
       'session',
@@ -156,6 +159,7 @@ describe('toContentTypes', () => {
     expect(`plugin::${PLUGIN_ID}.verification`).toBe(VERIFICATION_UID);
     expect(`plugin::${PLUGIN_ID}.two-factor`).toBe(TWO_FACTOR_UID);
     expect(`plugin::${PLUGIN_ID}.rate-limit`).toBe(RATE_LIMIT_UID);
+    expect(`plugin::${PLUGIN_ID}.lockout-counter`).toBe(LOCKOUT_COUNTER_UID);
   });
 
   it('gives every content type a plural name that differs from its singular name', () => {
@@ -239,6 +243,10 @@ describe('toContentTypes', () => {
       expect.arrayContaining([expect.objectContaining({ columns: ['identifier'] })])
     );
     expect(indexesOf('rate-limit')).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: 'unique', columns: ['key'] })])
+    );
+    // The upsert of the lockout counter needs the unique index on `key`
+    expect(indexesOf('lockout-counter')).toEqual(
       expect.arrayContaining([expect.objectContaining({ type: 'unique', columns: ['key'] })])
     );
     expect(indexesOf('passkey')).toEqual(
@@ -676,6 +684,8 @@ describe('toContentTypes', () => {
     expect(attributesOf('session').expiresAt.type).toBe('datetime');
     expect(attributesOf('rate-limit').count.type).toBe('integer');
     expect(attributesOf('rate-limit').lastRequest.type).toBe('biginteger');
+    expect(attributesOf('lockout-counter').count.type).toBe('integer');
+    expect(attributesOf('lockout-counter').lastRequest.type).toBe('biginteger');
     expect(attributesOf('passkey').backedUp.type).toBe('boolean');
   });
 

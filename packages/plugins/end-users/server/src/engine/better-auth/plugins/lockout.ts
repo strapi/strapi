@@ -6,8 +6,8 @@
  * request.
  *
  *  - Every identifier has a counter, whether or not an account exists for it (`lockout-counter.ts`:
- *    one atomic upsert in the rate-limit table, keyed by a hash of the normalized address or
- *    username). An unknown address locks after the same number of attempts as a real one and gets
+ *    one atomic upsert in the plugin's own counter table, which Better Auth's rate limiter never
+ *    prunes, keyed by a hash of the normalized address or username). An unknown address locks after the same number of attempts as a real one and gets
  *    the same answer, so the lock is not a way to find out who has an account. A username that
  *    belongs to an account is counted on that account's address, so the two ways in share one count.
  *  - The attempt is counted in the before-hook, before the password is checked, so parallel guesses
@@ -143,6 +143,15 @@ export const lockout = (strapi: Core.Strapi): BetterAuthPlugin => ({
           returned: false,
         },
         lockedUntil: { type: 'date', required: false, input: false, returned: false },
+      },
+    },
+    // Written through the database layer by `lockout-counter.ts`, never through Better Auth. Declared
+    // here so the table is generated like the engine's others, hidden and out of the Content API.
+    lockoutCounter: {
+      fields: {
+        key: { type: 'string', required: true, unique: true },
+        count: { type: 'number', required: true },
+        lastRequest: { type: 'number', required: true, bigint: true },
       },
     },
   },

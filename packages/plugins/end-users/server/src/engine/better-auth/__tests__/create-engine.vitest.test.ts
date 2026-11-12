@@ -112,7 +112,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await lockoutDb.connection('eu_rate_limits').delete();
+  await lockoutDb.connection('eu_lockout_counters').delete();
 });
 
 const fakeStrapi = (values: ConfigValues = {}, distSrc = '/nonexistent/end-users/src') => {

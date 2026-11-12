@@ -26,6 +26,7 @@ const options: BetterAuthOptions = {
         },
         passkey: { fields: { name: { type: 'string' } } },
         jwks: { fields: { publicKey: { type: 'string' } } },
+        lockoutCounter: { fields: { key: { type: 'string' } } },
       },
     },
   ],
@@ -186,6 +187,7 @@ describe('strapiAdapter', () => {
       ['passkey', 'plugin::end-users.passkey'],
       ['jwks', 'plugin::end-users.jwk'],
       ['rateLimit', 'plugin::end-users.rate-limit'],
+      ['lockoutCounter', 'plugin::end-users.lockout-counter'],
     ])('stores the %s model in %s', async (model, uid) => {
       documents.count.mockResolvedValue(0);
 

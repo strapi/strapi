@@ -1897,7 +1897,7 @@ describe('end-users: lockout after failed sign-ins and the password policy', () 
   beforeAll(async () => {
     // Many sign-ins from one address in a row: the rate limiter is not what is under test
     // The front end of the sign-ups is a trusted origin; the lockout counters of an earlier run
-    // are in the shared database (`eu_rate_limits`), so they are cleared before the first attempt
+    // are in the shared database (`eu_lockout_counters`), so they are cleared before the first attempt
     strapi = await createEndUsersInstance({
       pluginConfig: { rateLimit: { enabled: false }, trustedOrigins: [TEST_ORIGIN] },
     });
@@ -2019,6 +2019,72 @@ describe('end-users: lockout after failed sign-ins and the password policy', () 
       (await rq.get('/api/auth/get-session', { headers: { cookie: renewed } })).body
     ).not.toBeNull();
   });
+});
+
+describe('end-users: the lockout holds with the rate limit kept in the database', () => {
+  // Better Auth's database rate limiter deletes every row of its own table older than its longest
+  // window, whenever a window rolls over. The lockout's counters are in a table of their own, so a
+  // lockout of 15 minutes is still in force after that has run.
+  const PAST_THE_LONGEST_WINDOW = 70_000;
+
+  let strapi;
+  let rq;
+
+  beforeAll(async () => {
+    strapi = await createEndUsersInstance({
+      pluginConfig: {
+        // The sign-in rule of Better Auth (3 in 10 seconds) would answer 429 before the lock does
+        rateLimit: {
+          enabled: true,
+          storage: 'database',
+          customRules: { '/sign-in/*': { window: 10, max: 100 } },
+        },
+        trustedOrigins: [TEST_ORIGIN],
+      },
+    });
+    rq = createRequest({ strapi });
+
+    await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
+  });
+
+  afterAll(async () => {
+    await emptyTables(strapi, [PROFILE_UID, ...ENGINE_UIDS]);
+    await strapi.destroy();
+  });
+
+  it('keeps a locked account locked after the rate limiter has pruned its table', async () => {
+    const email = 'locked-in-database@example.com';
+    const signedUp = await rq.post('/api/auth/sign-up/email', {
+      body: { email, password: PASSWORD, name: 'Locked' },
+      headers: FROM_FRONT_END,
+    });
+
+    expect(signedUp.statusCode).toBe(200);
+
+    const signIn = (password: string) =>
+      rq.post('/api/auth/sign-in/email', { body: { email, password } });
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      expect((await signIn('not-the-password')).statusCode).toBe(401);
+    }
+
+    expect((await signIn(PASSWORD)).statusCode).toBe(403);
+
+    // A request that opens a row of the rate limiter, then one that finds its window over: that
+    // one deletes what is older than the longest window, in the rate-limit table
+    await rq.get('/api/auth/get-session');
+    await new Promise((resolve) => {
+      setTimeout(resolve, PAST_THE_LONGEST_WINDOW);
+    });
+    await rq.get('/api/auth/get-session');
+
+    expect(await strapi.db.query('plugin::end-users.lockout-counter').count()).toBe(1);
+    expect((await signIn(PASSWORD)).body).toEqual({
+      code: 'ACCOUNT_LOCKED',
+      message: 'This account is locked. Try again later.',
+    });
+  }, 120_000);
 });
 
 describe('end-users: the emails the engine sends', () => {
