@@ -516,6 +516,102 @@ describe('metadata', () => {
                   'joinTable'
                 );
               });
+
+              // The target check runs first, so a missing target reports the target, not the owner
+              test('throws the missing target error when the target model does not exist', () => {
+                const models = inverseModels(inverseRelation, 'article', {}).filter(
+                  (model: { uid: string }) => model.uid !== 'api::writer.writer'
+                );
+
+                expect(() => createMetadata(models)).toThrow(
+                  'Error on attribute contributors in model article(api::article.article): Metadata for "api::writer.writer" not found'
+                );
+              });
+
+              // The target has a relation back to this model, but it is the owner of another inverse side
+              test('throws when the target relation pointing back to this model is owned by another inverse side', () => {
+                const models = [
+                  {
+                    uid: 'api::article.article',
+                    singularName: 'article',
+                    tableName: 'articles',
+                    attributes: {
+                      contributors: {
+                        type: 'relation',
+                        relation: inverseRelation,
+                        target: 'api::writer.writer',
+                        mappedBy: 'article',
+                      },
+                      editors: {
+                        type: 'relation',
+                        relation: inverseRelation,
+                        target: 'api::writer.writer',
+                        mappedBy: 'article',
+                      },
+                    },
+                  },
+                  {
+                    uid: 'api::writer.writer',
+                    singularName: 'writer',
+                    tableName: 'writers',
+                    attributes: {
+                      article: {
+                        type: 'relation',
+                        relation: ownerRelationOf[inverseRelation],
+                        target: 'api::article.article',
+                        inversedBy: 'editors',
+                      },
+                    },
+                  },
+                ] as any;
+
+                expect(() => createMetadata(models)).toThrow(
+                  'Error on attribute contributors in model article(api::article.article): mappedBy attribute article in api::writer.writer must be a relation to api::article.article with inversedBy "contributors"'
+                );
+              });
+
+              describe('self-referential', () => {
+                const selfModels = (nodeAttributes: Record<string, unknown>) =>
+                  [
+                    {
+                      uid: 'api::folder.folder',
+                      singularName: 'folder',
+                      tableName: 'folders',
+                      attributes: {
+                        children: {
+                          type: 'relation',
+                          relation: inverseRelation,
+                          target: 'api::folder.folder',
+                          mappedBy: 'parent',
+                        },
+                        ...nodeAttributes,
+                      },
+                    },
+                  ] as any;
+
+                test('loads when the owner on the same model points back', () => {
+                  const metadata = createMetadata(
+                    selfModels({
+                      parent: {
+                        type: 'relation',
+                        relation: ownerRelationOf[inverseRelation],
+                        target: 'api::folder.folder',
+                        inversedBy: 'children',
+                      },
+                    })
+                  );
+
+                  expect(metadata.get('api::folder.folder').attributes.children).toHaveProperty(
+                    'joinTable'
+                  );
+                });
+
+                test('throws when no owner on the same model points back', () => {
+                  expect(() => createMetadata(selfModels({}))).toThrow(
+                    'Error on attribute children in model folder(api::folder.folder): mappedBy attribute parent in api::folder.folder must be a relation to api::folder.folder with inversedBy "children"'
+                  );
+                });
+              });
             }
           );
 
