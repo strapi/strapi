@@ -56,6 +56,8 @@ export const FILTER_OPERATORS = [
   '$notNull',
 ] as const;
 
+const NULL_OPERATORS = new Set<(typeof FILTER_OPERATORS)[number]>(['$null', '$notNull']);
+
 /**
  * Builds a per-content-type recursive filters Zod schema.
  *
@@ -93,7 +95,14 @@ export const buildFiltersSchema = (
       const attr = attributes[key];
       const valueSchema = attributeTypeToFilterValue(attr);
       const operatorObject = z.object(
-        Object.fromEntries(FILTER_OPERATORS.map((op) => [op, valueSchema.optional()]))
+        Object.fromEntries(
+          FILTER_OPERATORS.map((op) => [
+            op,
+            // `$null` / `$notNull` take a boolean whatever the field type: the query layer
+            // rejects any other operand, such as an enumeration value.
+            NULL_OPERATORS.has(op) === true ? z.boolean().optional() : valueSchema.optional(),
+          ])
+        )
       );
       // Field accepts either a direct value (implicit $eq) or operator object
       fieldShapes[key] = z.union([valueSchema, operatorObject]).optional();
