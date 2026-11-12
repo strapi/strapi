@@ -60,6 +60,49 @@ describe('Templates EditPage', () => {
     });
   });
 
+  it('shows the reason the server gave when a save is refused', async () => {
+    server.use(
+      http.put('/email/templates/:key', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'The HTML puts {{ url }} where it could leak',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    renderEdit();
+
+    await screen.findByRole('textbox', { name: 'HTML' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(
+      await screen.findByText('The HTML puts {{ url }} where it could leak')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Could not save the template')).not.toBeInTheDocument();
+  });
+
+  it('shows the generic message when a save fails for another reason', async () => {
+    server.use(
+      http.put('/email/templates/:key', () =>
+        HttpResponse.json({ error: { message: 'boom' } }, { status: 500 })
+      )
+    );
+
+    renderEdit();
+
+    await screen.findByRole('textbox', { name: 'HTML' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Could not save the template')).toBeInTheDocument();
+  });
+
   it('inserts a variable at the cursor', async () => {
     const { user } = renderEdit();
 
