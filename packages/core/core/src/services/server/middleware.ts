@@ -111,7 +111,7 @@ const resolveMiddlewares = (
     }
 
     throw new Error(
-      'Middleware config must either be a string or an object {name?: string, resolve?: string, config: any}.'
+      'Middleware config must either be a string, a function or an object {name?: string, resolve?: string, config: any}.'
     );
   }
 

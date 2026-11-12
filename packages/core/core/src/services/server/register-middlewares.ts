@@ -2,8 +2,6 @@ import { yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { resolveMiddlewares } from './middleware';
 
-type MiddlewareConfig = (string | { name?: string; resolve?: string; config?: unknown })[];
-
 const defaultConfig = [
   'strapi::logger',
   'strapi::errors',
@@ -33,6 +31,11 @@ const middlewareConfigSchema = yup.array().of(
       return yup.string().required();
     }
 
+    // Inline handlers are allowed by `Core.Config.Middlewares` and handled by `resolveMiddlewares`
+    if (typeof value === 'function') {
+      return yup.mixed();
+    }
+
     if (typeof value === 'object') {
       return yup
         .object({
@@ -52,7 +55,7 @@ const middlewareConfigSchema = yup.array().of(
  * Register middlewares in router
  */
 const registerApplicationMiddlewares = async (strapi: Core.Strapi) => {
-  const middlewareConfig: MiddlewareConfig = strapi.config.get('middlewares', defaultConfig);
+  const middlewareConfig: Core.Config.Middlewares = strapi.config.get('middlewares', defaultConfig);
 
   await validateMiddlewareConfig(middlewareConfig);
 
@@ -71,12 +74,12 @@ const registerApplicationMiddlewares = async (strapi: Core.Strapi) => {
  *
  * @param {MiddlewaresConfig} config
  */
-const validateMiddlewareConfig = async (config: MiddlewareConfig) => {
+const validateMiddlewareConfig = async (config: Core.Config.Middlewares) => {
   try {
     await middlewareConfigSchema.validate(config, { strict: true, abortEarly: false });
   } catch {
     throw new Error(
-      'Invalid middleware configuration. Expected Array<string|{name?: string, resolve?: string, config: any}.'
+      'Invalid middleware configuration. Expected Array<string|{name?: string, resolve?: string, config: any}|function>.'
     );
   }
 };
