@@ -71,6 +71,12 @@ const licenseErrorSchema = z.object({
   }),
 });
 
+/**
+ * Identifies this running process to the license registry, so it can tell instances of a
+ * project apart. Generated once per process: it changes on every restart.
+ */
+const INSTANCE_ID = crypto.randomUUID();
+
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
 class LicenseCheckError extends Error {
@@ -135,10 +141,21 @@ const throwShouldFallbackError = () => {
   throw createShouldFallbackError();
 };
 
+interface FetchLicenseOptions {
+  /** HMAC hashes of the active admin users (see `./user-hashes`). Omitted when unavailable. */
+  userHashes?: string[];
+}
+
+const getStrapiVersion = (strapi: Core.Strapi): string | undefined => {
+  const version = strapi.config.get('info.strapi');
+  return typeof version === 'string' ? version : undefined;
+};
+
 const fetchLicense = async (
   { strapi }: { strapi: Core.Strapi },
   key: string,
-  projectId: string
+  projectId: string,
+  { userHashes }: FetchLicenseOptions = {}
 ) => {
   const { installId: installIdFromPackageJson } = strapi.config;
 
@@ -146,10 +163,15 @@ const fetchLicense = async (
     .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      // `instanceId`, `strapiVersion` and `userHashes` are optional: registries that do not know
+      // them ignore them. `JSON.stringify` drops the ones that are undefined.
       body: JSON.stringify({
         key,
         projectId,
         deviceId: generateInstallId(projectId, installIdFromPackageJson),
+        instanceId: INSTANCE_ID,
+        strapiVersion: getStrapiVersion(strapi),
+        userHashes,
       }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwShouldFallbackError);

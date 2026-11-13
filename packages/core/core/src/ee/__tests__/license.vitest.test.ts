@@ -31,12 +31,20 @@ const mockFetch = (response: Response): FetchMock =>
 
 const createStrapi = (
   fetchImpl: FetchMock,
-  { installId = 'install-id-from-package-json' }: { installId?: string } = {}
+  {
+    installId = 'install-id-from-package-json',
+    strapiVersion = '5.0.0',
+  }: { installId?: string; strapiVersion?: string } = {}
 ) =>
   ({
-    config: { installId },
+    config: {
+      installId,
+      get: vi.fn((key: string) => (key === 'info.strapi' ? strapiVersion : undefined)),
+    },
     fetch: fetchImpl,
   }) as any;
+
+const sentBody = (fetchImpl: FetchMock) => JSON.parse(fetchImpl.mock.calls[0][1].body as string);
 
 describe('fetchLicense', () => {
   it('POSTs the license key, project id and device id as JSON to the license registry', async () => {
@@ -51,13 +59,64 @@ describe('fetchLicense', () => {
     expect(fetchImpl).toHaveBeenCalledWith(VALIDATE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // installId is returned verbatim by generateInstallId when set
-      body: JSON.stringify({
-        key: 'the-key',
-        projectId: 'the-project-id',
-        deviceId: 'the-device-id',
-      }),
+      body: expect.any(String),
     });
+    expect(sentBody(fetchImpl)).toMatchObject({
+      key: 'the-key',
+      projectId: 'the-project-id',
+      // installId is returned verbatim by generateInstallId when set
+      deviceId: 'the-device-id',
+    });
+  });
+
+  it('sends the instance id, the Strapi version and the user hashes', async () => {
+    const fetchImpl = mockFetch(
+      createResponse({ status: 200, body: { data: { license: 'the-license' } } })
+    );
+    const strapi = createStrapi(fetchImpl, { strapiVersion: '5.62.0' });
+    const userHashes = ['a'.repeat(64), 'b'.repeat(64)];
+
+    await fetchLicense({ strapi }, 'the-key', 'the-project-id', { userHashes });
+
+    const body = sentBody(fetchImpl);
+    expect(body.instanceId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+    expect(body.strapiVersion).toBe('5.62.0');
+    expect(body.userHashes).toEqual(userHashes);
+  });
+
+  it('keeps the same instance id across checks of the same process', async () => {
+    const fetchImpl = vi
+      .fn<Promise<Response>, FetchArgs>()
+      .mockImplementation(async () =>
+        createResponse({ status: 200, body: { data: { license: 'the-license' } } })
+      );
+    const strapi = createStrapi(fetchImpl);
+
+    await fetchLicense({ strapi }, 'key', 'project');
+    await fetchLicense({ strapi }, 'key', 'project');
+
+    const [first, second] = fetchImpl.mock.calls.map(([, init]) =>
+      JSON.parse((init as RequestInit).body as string)
+    );
+    expect(first.instanceId).toBe(second.instanceId);
+  });
+
+  it('still sends the check, without userHashes, when no hashes are given', async () => {
+    const fetchImpl = mockFetch(
+      createResponse({ status: 200, body: { data: { license: 'the-license' } } })
+    );
+
+    const license = await fetchLicense({ strapi: createStrapi(fetchImpl) }, 'key', 'project', {
+      userHashes: undefined,
+    });
+
+    expect(license).toBe('the-license');
+    const body = sentBody(fetchImpl);
+    expect(body).not.toHaveProperty('userHashes');
+    expect(body.instanceId).toEqual(expect.any(String));
+    expect(body.strapiVersion).toBe('5.0.0');
   });
 
   it('returns the license string on a 200 response', async () => {
