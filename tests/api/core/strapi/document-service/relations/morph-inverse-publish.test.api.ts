@@ -947,6 +947,34 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       ]);
     });
 
+    it.each([
+      ['a document of the other type', 'card'],
+      ['a document of the schema target', 'remark'],
+    ])(
+      'rejects a foreign __type given %s through the document service',
+      async (_label, documentOf) => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await strapi.documents(NOTE_UID).create({
+          data: { title: 'linked', remarks: [r1.id] } as any,
+        });
+        const draft = await getNoteRow(note.documentId, 'draft');
+        const card = await strapi.documents(CARD_UID).create({ data: { title: 'c' } as any });
+        const documentId = documentOf === 'card' ? card.documentId : r2.documentId;
+
+        await expect(
+          strapi.documents(NOTE_UID).update({
+            documentId: note.documentId,
+            data: { remarks: { connect: [{ documentId, __type: CARD_UID }] } } as any,
+          })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: null, subjectType: null },
+        ]);
+      }
+    );
+
     /**
      * Through REST, an inverse morph item resolves its target from the schema, so `{ documentId }`
      * is enough. `{ set }`, `{ connect }` and `{ disconnect }` also accept `{ documentId, __type }`
@@ -1030,6 +1058,31 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
         expect(await getRemarkSubjects()).toEqual([
           { id: r1.id, subjectId: null, subjectType: null },
           { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
+        ]);
+      });
+
+      // An inverse morph item resolves its target from the schema: a __type naming another type
+      // is rejected, whether or not the documentId exists in the schema target
+      it.each([
+        ['a document of the other type', 'card'],
+        ['a document of the schema target', 'remark'],
+      ])('rejects a foreign __type given %s', async (_label, documentOf) => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await createNote([r1]);
+        const card = await strapi.documents(CARD_UID).create({ data: { title: 'c' } as any });
+        const documentId = documentOf === 'card' ? card.documentId : r2.documentId;
+
+        const res = await rqContent({
+          method: 'PUT',
+          url: `/morph-notes/${note.documentId}`,
+          body: { data: { remarks: { connect: [{ documentId, __type: CARD_UID }] } } },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.name).toBe('ValidationError');
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: null, subjectType: null },
         ]);
       });
 

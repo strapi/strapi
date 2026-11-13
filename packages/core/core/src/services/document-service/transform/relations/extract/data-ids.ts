@@ -8,6 +8,7 @@ import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { normalizeXToOneRelationValue } from '../utils/xto-one';
 import { LongHandDocument } from '../utils/types';
+import { getInverseMorphTargetUid } from '../utils/inverse-morph-target';
 
 const { isPolymorphic } = relations;
 const { isMorphToRelationalAttribute } = contentTypes;
@@ -76,8 +77,11 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
         } else if (isMorphToRelationalAttribute(attribute)) {
           // morphToOne / morphToMany entries name their target with __type
           targetUid = relation.__type;
+        } else if (isPolymorphicRelation) {
+          // The inverse morphOne / morphMany have a single target
+          targetUid = getInverseMorphTargetUid(attribute.target, relation);
         } else {
-          // Regular relations and the inverse morphOne / morphMany have a single target
+          // Regular relations have a single target
           targetUid = attribute.target;
         }
 
