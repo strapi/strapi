@@ -1,7 +1,7 @@
 import createKnex from 'knex';
 import type { Knex } from 'knex';
 
-import { applyWhere } from '../where';
+import { applyWhere, processWhere } from '../where';
 
 // Strapi maps its sqlite/mysql/postgres clients onto these knex clients
 // (see src/connection.ts). We only compile queries here (`toSQL`), so no
@@ -132,4 +132,93 @@ describe('applyWhere - LIKE operator escaping', () => {
       }
     });
   });
+});
+
+describe('processWhere - boolean filter values', () => {
+  const ctx = {
+    db: { metadata: { get: () => ({ attributes: { flag: { type: 'boolean' } } }) } },
+    qb: { aliasColumn: (column: string) => column },
+    uid: 'api::article.article',
+  } as unknown as Parameters<typeof processWhere>[1];
+
+  test.each([
+    [true, true],
+    ['true', true],
+    ['t', true],
+    ['1', true],
+    [1, true],
+    [false, false],
+    ['false', false],
+    ['f', false],
+    ['0', false],
+    [0, false],
+    ['TRUE', true],
+    ['T', true],
+    ['FALSE', false],
+    ['F', false],
+  ])('casts %p to %p', (input, expected) => {
+    expect(processWhere({ flag: { $eq: input } }, ctx)).toEqual({ flag: { $eq: expected } });
+  });
+
+  test('keeps null', () => {
+    expect(processWhere({ flag: { $eq: null } }, ctx)).toEqual({ flag: { $eq: null } });
+  });
+
+  test('casts every value of $in', () => {
+    expect(processWhere({ flag: { $in: ['t', '0'] } }, ctx)).toEqual({
+      flag: { $in: [true, false] },
+    });
+  });
+
+  test.each(['$null', '$notNull'])('does not cast %s values', (operator) => {
+    expect(processWhere({ flag: { [operator]: 'true' } }, ctx)).toEqual({
+      flag: { [operator]: 'true' },
+    });
+  });
+
+  test.each(['yes', 'no', '', 2, 'on'])('rejects unrecognised value %p', (input) => {
+    expect(() => processWhere({ flag: { $eq: input } }, ctx)).toThrow(
+      expect.objectContaining({ name: 'InvalidBooleanFormat' })
+    );
+  });
+});
+
+describe('applyWhere - $null and $notNull operands', () => {
+  const knex = createKnex({ client: 'better-sqlite3', useNullAsDefault: true });
+
+  afterAll(async () => {
+    await knex.destroy().catch(() => {});
+  });
+
+  const compile = (where: Record<string, unknown>) => {
+    const qb = knex('t');
+    applyWhere(qb, where);
+
+    return qb.toSQL().sql;
+  };
+
+  test.each([true, 'true', 't', '1', 1, 'TRUE', 'True', 'T'])('reads %p as true', (operand) => {
+    expect(compile({ price: { $null: operand } })).toMatch(/`price` is null$/);
+    expect(compile({ price: { $notNull: operand } })).toMatch(/`price` is not null$/);
+  });
+
+  // `null` and `undefined` keep the loose reading (false), as optional flags pass them.
+  test.each([false, 'false', 'f', '0', 0, 'FALSE', 'False', 'F', null, undefined])(
+    'reads %p as false',
+    (operand) => {
+      expect(compile({ price: { $null: operand } })).toMatch(/`price` is not null$/);
+      expect(compile({ price: { $notNull: operand } })).toMatch(/`price` is null$/);
+    }
+  );
+
+  test.each(['no', 'yes', '', ' true ', 2, ['no'], { anything: 'anything' }])(
+    'rejects unrecognised operand %p',
+    (operand) => {
+      for (const operator of ['$null', '$notNull']) {
+        expect(() => compile({ price: { [operator]: operand } })).toThrow(
+          expect.objectContaining({ name: 'InvalidBooleanFormat' })
+        );
+      }
+    }
+  );
 });

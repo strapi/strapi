@@ -72,11 +72,15 @@ export const transformAttribute = (
 ) => {
   switch (attribute.type) {
     case 'media': {
+      const multiple = attribute.multiple === true;
       return {
         type: 'relation',
-        relation: attribute.multiple === true ? 'morphMany' : 'morphOne',
+        relation: multiple ? 'morphMany' : 'morphOne',
         target: 'plugin::upload.file',
         morphBy: 'related',
+        // Single media is one row. The database layer reads this flag instead of
+        // the upload plugin UID, so a generic morphOne is not treated as media.
+        ...(multiple ? {} : { singleRow: true as const }),
       };
     }
     case 'component': {

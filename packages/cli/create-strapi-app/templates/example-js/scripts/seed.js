@@ -101,7 +101,9 @@ async function uploadFile(file, name) {
 async function createEntry({ model, entry }) {
   try {
     // Actually create the entry in Strapi
-    await strapi.documents(`api::${model}.${model}`).create({
+    // Content-type UIDs follow `api::<name>.<name>` for every seeded model
+    const uid = /** @type {import('@strapi/strapi').UID.ContentType} */ (`api::${model}.${model}`);
+    await strapi.documents(uid).create({
       data: entry,
     });
   } catch (error) {

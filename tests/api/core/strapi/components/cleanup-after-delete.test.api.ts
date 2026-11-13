@@ -4,6 +4,7 @@ const { createAuthRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 const pluralize = require('pluralize');
+const { rowsFromRaw } = require('../../../utils/raw-rows');
 
 let strapi;
 let rq;
@@ -171,7 +172,9 @@ describe('Component Deletion and Cleanup Test', () => {
     });
 
     // Ensure data related to the deleted component is no longer in the database
-    const dbResult = await strapi.db.connection.raw(`SELECT * FROM ${contentType.pluralName}_cmps`);
+    const dbResult = rowsFromRaw(
+      await strapi.db.connection.raw(`SELECT * FROM ${contentType.pluralName}_cmps`)
+    );
 
     // Ensure table for the deleted component no longer exists
     const tempComponentTableExists = await strapi.db.connection.schema.hasTable(

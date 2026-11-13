@@ -1,0 +1,17 @@
+{
+  "name": "@strapi/tests-cli",
+  "private": true,
+  "description": "CLI test suite, run with Vitest.",
+  "scripts": {
+    "lint": "run -T eslint . --max-warnings=0",
+    "test": "run -T vitest run --config vitest.config.ts",
+    "test:ts": "run -T tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@strapi/tests-shared": "workspace:*",
+    "@types/node": "22.20.0",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "vitest": "catalog:"
+  }
+}

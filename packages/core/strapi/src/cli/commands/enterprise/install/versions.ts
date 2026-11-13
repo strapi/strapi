@@ -5,6 +5,7 @@ import semver from 'semver';
 import { STRAPI_PACKAGE_NAME } from './constants';
 import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
+import { toPrintableText } from './printable-text';
 import type { Packument, PackumentVersion, StrapiPackageMetadata } from './registry';
 
 export interface InstalledPackageJson {
@@ -83,6 +84,9 @@ export interface VersionChoice {
   newestVersionStrapiRange?: string;
 }
 
+/** `semver.valid` trims whitespace, so it accepts `'\r1.0.0'`, which would then be printed. */
+const isCleanVersion = (version: string): boolean => semver.valid(version) === version;
+
 const getStrapiRange = (packumentVersion: PackumentVersion | undefined) =>
   packumentVersion?.peerDependencies?.[STRAPI_PACKAGE_NAME];
 
@@ -112,7 +116,7 @@ export const pickTargetVersion = (
   const stableVersions = Object.values(packument.versions ?? {})
     .filter(
       (packumentVersion) =>
-        semver.valid(packumentVersion.version) !== null &&
+        isCleanVersion(packumentVersion.version) &&
         semver.prerelease(packumentVersion.version) === null &&
         !packumentVersion.deprecated &&
         (versionCap === undefined || semver.lte(packumentVersion.version, versionCap))
@@ -126,7 +130,7 @@ export const pickTargetVersion = (
       fitsStrapiVersion(packumentVersion, strapiVersion)
     )?.version,
     newestVersion: newest?.version,
-    newestVersionStrapiRange: getStrapiRange(newest),
+    newestVersionStrapiRange: toPrintableText(getStrapiRange(newest)),
   };
 };
 
@@ -162,7 +166,11 @@ export const resolveRequestedVersion = (
     return requestedVersion;
   }
 
-  if (taggedVersion !== undefined && publishedVersions.includes(taggedVersion)) {
+  if (
+    taggedVersion !== undefined &&
+    isCleanVersion(taggedVersion) &&
+    publishedVersions.includes(taggedVersion)
+  ) {
     return taggedVersion;
   }
 
@@ -174,7 +182,7 @@ export const resolveRequestedVersion = (
   // version that is not deprecated and fits the app's Strapi, and like npm, prefer `latest`.
   const inRange = Object.values(packument.versions ?? {}).filter(
     (packumentVersion) =>
-      semver.valid(packumentVersion.version) !== null &&
+      isCleanVersion(packumentVersion.version) &&
       semver.satisfies(packumentVersion.version, requestedVersion)
   );
   const notDeprecated = inRange.filter((packumentVersion) => !packumentVersion.deprecated);
@@ -207,7 +215,7 @@ export const findUnsupportedStrapiRange = (
     return undefined;
   }
 
-  return semver.satisfies(strapiVersion, strapiRange) ? undefined : strapiRange;
+  return semver.satisfies(strapiVersion, strapiRange) ? undefined : toPrintableText(strapiRange);
 };
 
 /** A prerelease, such as an experimental build, is usually ahead of the latest stable release. */

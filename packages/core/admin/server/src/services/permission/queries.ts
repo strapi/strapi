@@ -136,7 +136,7 @@ const formatOwners = (owners: PermissionOwner[]) => {
     return 'none';
   }
 
-  return uniqueOwners.map((owner) => `"${owner.name}" (id ${owner.id})`).join(', ');
+  return uniqueOwners.map((owner) => `${JSON.stringify(owner.name)} (id ${owner.id})`).join(', ');
 };
 
 /**
@@ -187,16 +187,23 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
 
   const contentTypeService = getService('content-type');
 
-  const total = await strapi.db.query('admin::permission').count();
-  const pageCount = Math.ceil(total / pageSize);
+  // Pages by id, not by offset: each page deletes rows, which would shift the next offset past unread rows
+  let lastId: Data.ID | undefined;
 
-  for (let page = 0; page < pageCount; page += 1) {
+  for (;;) {
     // 1. Find invalid permissions and collect their ID to delete them later
     const results = (await strapi.db.query('admin::permission').findMany({
+      where: lastId === undefined ? {} : { id: { $gt: lastId } },
+      orderBy: { id: 'asc' },
       limit: pageSize,
-      offset: page * pageSize,
       populate: ['role', 'apiToken'],
     })) as Permission[];
+
+    if (results.length === 0) {
+      break;
+    }
+
+    lastId = results[results.length - 1].id;
 
     const permissions = permissionDomain.toPermission(results);
     const permissionsToRemove = await filterPermissionsToRemove(permissions);
@@ -244,6 +251,10 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
         stopOnError: true,
       }),
     ]);
+
+    if (results.length < pageSize) {
+      break;
+    }
   }
 
   logRemovedPermissions(removedPermissions);

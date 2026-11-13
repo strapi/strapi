@@ -104,7 +104,12 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
       /* Default time each action such as `click()` can take */
       actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 10 * 1000),
       // Only record trace when retrying a test to optimize test performance
-      trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
+      trace: {
+        mode: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
+        // Without snapshots, a trace holds no network responses and no DOM. The
+        // enterprise-plugins job turns them off, so its public traces cannot hold plugin code.
+        snapshots: getEnvBool(process.env.PLAYWRIGHT_TRACE_SNAPSHOTS, true),
+      },
       video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
         ? {
             mode: 'on-first-retry', // Only save videos when retrying a test
