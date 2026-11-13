@@ -77,6 +77,23 @@ const licenseErrorSchema = z.object({
  */
 const INSTANCE_ID = crypto.randomUUID();
 
+/**
+ * Shape of a successful (200) response from the registry's usage endpoint: the active admin users
+ * it counted across every instance of the license, and the number the contract covers, if any.
+ */
+const licenseUsageSchema = z.object({
+  data: z.object({
+    activeUsers: z.number().int().nonnegative(),
+    contractedUsers: z.number().int().nonnegative().nullable(),
+    updatedAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
+  }),
+});
+
+type LicenseUsage = z.infer<typeof licenseUsageSchema>['data'];
+
+/** The usage is informational: never hold a license check up for long waiting for it. */
+const LICENSE_USAGE_TIMEOUT_MS = 5000;
+
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
 class LicenseCheckError extends Error {
@@ -204,4 +221,52 @@ const fetchLicense = async (
   }
 };
 
-export { readLicense, verifyLicense, fetchLicense, LicenseCheckError, LICENSE_REGISTRY_URI };
+/**
+ * Reads the license usage the registry counted across every instance of the license.
+ *
+ * Best effort and never throws: any failure (network, timeout, rate limit, a registry that does
+ * not have the endpoint yet, an unexpected body) resolves to `null`.
+ */
+const fetchLicenseUsage = async (
+  { strapi }: { strapi: Core.Strapi },
+  key: string
+): Promise<LicenseUsage | null> => {
+  try {
+    const response = await strapi.fetch(`${LICENSE_REGISTRY_URI}/api/licenses/usage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+      signal: AbortSignal.timeout(LICENSE_USAGE_TIMEOUT_MS),
+    });
+
+    if (response.status !== 200) {
+      // 404/405 from a registry without the endpoint, 429 when rate limited
+      strapi.log.debug(`License usage unavailable from the license registry (${response.status}).`);
+      return null;
+    }
+
+    const result = licenseUsageSchema.safeParse(await response.json());
+
+    if (!result.success) {
+      strapi.log.warn('Ignoring an unexpected license usage response from the license registry.');
+      return null;
+    }
+
+    return result.data.data;
+  } catch (error) {
+    strapi.log.debug(
+      `Could not fetch the license usage: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return null;
+  }
+};
+
+export {
+  readLicense,
+  verifyLicense,
+  fetchLicense,
+  fetchLicenseUsage,
+  LicenseCheckError,
+  LICENSE_REGISTRY_URI,
+};
+export type { LicenseUsage };

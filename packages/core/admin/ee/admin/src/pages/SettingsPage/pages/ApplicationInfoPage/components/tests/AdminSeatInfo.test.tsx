@@ -124,6 +124,80 @@ describe('<AdminSeatInfo />', () => {
     expect(queryByText('Admin seats')).not.toBeInTheDocument();
   });
 
+  describe('with the usage counted across all environments', () => {
+    const PROJECT_USAGE = {
+      activeUsers: 8,
+      contractedUsers: 10,
+      updatedAt: '2026-11-13T10:00:00.000Z',
+    };
+
+    test('shows the active admin users against the contracted number', () => {
+      // @ts-expect-error – mocked
+      useLicenseLimits.mockReturnValue({
+        ...LICENSE_MOCK,
+        license: { ...LICENSE_MOCK.license, projectUsage: PROJECT_USAGE },
+      });
+
+      const { getByText, queryByText } = render(<AdminSeatInfoEE />);
+
+      expect(getByText('Active admin users across all environments')).toBeInTheDocument();
+      expect(getByText('8 / 10')).toBeInTheDocument();
+      expect(getByText(/^Last updated /)).toBeInTheDocument();
+      expect(queryByText('Over limit')).not.toBeInTheDocument();
+      // Shown next to this instance's seats, which are still enforced
+      expect(getByText('Admin seats')).toBeInTheDocument();
+      expect(withMarkup(getByText)('10/100')).toBeInTheDocument();
+    });
+
+    test('shows an over-limit status above the contracted number', () => {
+      // @ts-expect-error – mocked
+      useLicenseLimits.mockReturnValue({
+        ...LICENSE_MOCK,
+        license: {
+          ...LICENSE_MOCK.license,
+          projectUsage: { ...PROJECT_USAGE, activeUsers: 12 },
+        },
+      });
+
+      const { getByText } = render(<AdminSeatInfoEE />);
+
+      expect(getByText('12 / 10')).toBeInTheDocument();
+      expect(getByText('Over limit')).toBeInTheDocument();
+    });
+
+    test('shows only the count when the license sets no contracted number', () => {
+      // @ts-expect-error – mocked
+      useLicenseLimits.mockReturnValue({
+        ...LICENSE_MOCK,
+        license: {
+          ...LICENSE_MOCK.license,
+          permittedSeats: null,
+          projectUsage: { ...PROJECT_USAGE, activeUsers: 42, contractedUsers: null },
+        },
+      });
+
+      const { getByText, queryByText } = render(<AdminSeatInfoEE />);
+
+      expect(getByText('Active admin users across all environments')).toBeInTheDocument();
+      expect(getByText('42')).toBeInTheDocument();
+      expect(queryByText('Over limit')).not.toBeInTheDocument();
+    });
+
+    test('shows only the seat count when the usage is null', () => {
+      // @ts-expect-error – mocked
+      useLicenseLimits.mockReturnValue({
+        ...LICENSE_MOCK,
+        license: { ...LICENSE_MOCK.license, projectUsage: null },
+      });
+
+      const { getByText, queryByText } = render(<AdminSeatInfoEE />);
+
+      expect(getByText('Admin seats')).toBeInTheDocument();
+      expect(withMarkup(getByText)('10/100')).toBeInTheDocument();
+      expect(queryByText('Active admin users across all environments')).not.toBeInTheDocument();
+    });
+  });
+
   // The per-plan billing links that used to live under the seat count were removed: the Plan card
   // now carries a single Manage/View subscription button that covers both cases.
   test.each([['gold'], ['bronze']])('Render no billing link (%s license)', (type) => {

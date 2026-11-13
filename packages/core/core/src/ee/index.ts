@@ -6,6 +6,7 @@ import {
   readLicense,
   verifyLicense,
   fetchLicense,
+  fetchLicenseUsage,
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
   PLAN_FEATURE_CATALOG,
@@ -15,6 +16,12 @@ import { getUserHashes } from './user-hashes';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
+
+/**
+ * Core-store entry holding the last license usage read from the registry. Read by the admin
+ * `license-limit-information` endpoint.
+ */
+const LICENSE_USAGE_STORE_KEY = { type: 'ee', key: 'license_usage' } as const;
 
 type LicenseFeature = { name: string; [key: string]: any };
 
@@ -140,17 +147,38 @@ const init = (licenseDir: string, logger?: Logger) => {
 };
 
 /**
+ * Stores the license usage counted by the registry. On any failure the previously stored usage
+ * is kept. Never throws.
+ */
+const refreshLicenseUsage = async ({ strapi }: { strapi: Core.Strapi }, licenseKey: string) => {
+  try {
+    const usage = await fetchLicenseUsage({ strapi }, licenseKey);
+
+    if (usage) {
+      await strapi.store.set({ ...LICENSE_USAGE_STORE_KEY, value: usage });
+    }
+  } catch (error) {
+    ee.logger?.debug(
+      `Could not store the license usage: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+};
+
+/**
  * Contact the license registry to update the license to its latest state.
  *
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
+  const { licenseKey } = ee.licenseInfo;
+
   // Read before the transaction opens: SQLite pools hold a single connection, which the
   // transaction below keeps busy, and on Postgres a failed query would abort the transaction.
   // Never throws: without hashes the license check is still sent, just without them.
-  const userHashes = ee.licenseInfo.licenseKey
-    ? await getUserHashes(strapi, ee.licenseInfo.licenseKey)
-    : undefined;
+  const userHashes = licenseKey ? await getUserHashes(strapi, licenseKey) : undefined;
+
+  // Whether the registry answered this check with a license (not a fallback, not throttled)
+  let registryAnswered = false;
 
   const { get, commit, rollback } = await strapi.db.transaction();
   const transaction = get();
@@ -202,7 +230,12 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     const license = shouldContactRegistry
       ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid'), {
           userHashes,
-        }).catch(fallback)
+        })
+          .then((fetchedLicense) => {
+            registryAnswered = true;
+            return fetchedLicense;
+          })
+          .catch(fallback)
       : storedInfo.license;
 
     if (license) {
@@ -251,6 +284,12 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
   } catch {
     // Example of errors: SQLite does not support FOR UPDATE
     await rollback();
+  }
+
+  // Outside the transaction, and kept apart from `ee_information`: usage is informational and
+  // must never hold the lock nor affect the license state.
+  if (registryAnswered && licenseKey) {
+    await refreshLicenseUsage({ strapi }, licenseKey);
   }
 };
 

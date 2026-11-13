@@ -568,6 +568,111 @@ describe('licenseLimitInformation (planEntitlements)', () => {
   });
 });
 
+describe('licenseLimitInformation (projectUsage)', () => {
+  const OLD_ENV = process.env;
+  const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
+
+  beforeEach(() => {
+    process.env = { ...OLD_ENV };
+  });
+  afterEach(() => {
+    process.env = OLD_ENV;
+  });
+
+  const withStoredUsage = (value: unknown) => {
+    const get = vi.fn(async () => value);
+    (global.strapi as any).store = { get };
+    return get;
+  };
+
+  it('reports the usage stored from the license registry', async () => {
+    createStrapiMock({ stored: null });
+    stubUserServices();
+    const get = withStoredUsage(USAGE);
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(get).toHaveBeenCalledWith({ type: 'ee', key: 'license_usage' });
+    expect(data.projectUsage).toEqual(USAGE);
+  });
+
+  it('reports a usage without a contracted number of users', async () => {
+    createStrapiMock({ stored: null });
+    stubUserServices();
+    withStoredUsage({ ...USAGE, contractedUsers: null });
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.projectUsage).toEqual({ ...USAGE, contractedUsers: null });
+  });
+
+  it.each([
+    ['nothing is stored', null],
+    ['the stored value is malformed', { activeUsers: '12', updatedAt: 1 }],
+  ])('is null when %s', async (_label, value) => {
+    createStrapiMock({ stored: null });
+    stubUserServices();
+    withStoredUsage(value);
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.projectUsage).toBeNull();
+  });
+
+  it('is null when the store cannot be read', async () => {
+    createStrapiMock({ stored: null });
+    stubUserServices();
+    (global.strapi as any).store = { get: vi.fn().mockRejectedValue(new Error('db down')) };
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.projectUsage).toBeNull();
+  });
+
+  it('is null for an offline license, even with a usage stored by an earlier online run', async () => {
+    createStrapiMock({ stored: null });
+    stubUserServices();
+    const get = withStoredUsage(USAGE);
+    process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.licenseMode).toBe('offline');
+    expect(data.projectUsage).toBeNull();
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('leaves the seat fields as they were', async () => {
+    createStrapiMock({ stored: null, ee: { seats: 10 } });
+    (global.strapi as any).service = () => ({
+      getCurrentActiveUserCount: async () => 3,
+      getDisabledUserList: async () => [],
+    });
+    withStoredUsage(USAGE);
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.currentActiveUserCount).toBe(3);
+    expect(data.permittedSeats).toBe(10);
+    expect(data.shouldStopCreate).toBe(false);
+  });
+
+  it("still stops user creation at this instance's seat limit, whatever the usage", async () => {
+    createStrapiMock({ stored: null, ee: { seats: 10 } });
+    (global.strapi as any).service = () => ({
+      getCurrentActiveUserCount: async () => 10,
+      getDisabledUserList: async () => [],
+    });
+    // The registry counts fewer users across environments: it doesn't lift the local limit
+    withStoredUsage({ ...USAGE, activeUsers: 4 });
+
+    const { data } = await adminController.licenseLimitInformation();
+
+    expect(data.shouldStopCreate).toBe(true);
+    expect(data.projectUsage).toEqual({ ...USAGE, activeUsers: 4 });
+  });
+});
+
 describe('licenseLimitInformation (renewalDate)', () => {
   const OLD_ENV = process.env;
   beforeEach(() => {
