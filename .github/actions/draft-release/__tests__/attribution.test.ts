@@ -217,8 +217,6 @@ describe('summarisePull', () => {
       url: '',
       baseRef: '',
       headRef: '',
-      milestone: null,
-      milestoneNumber: null,
       mergedAt: '2026-09-05T09:59:00Z',
     });
   });
@@ -235,7 +233,6 @@ describe('resolveIntegration', () => {
     assert.equal(resolved.status, 'resolved');
     assert.equal(resolved.basis, 'exact-merge-sha');
     assert.equal(resolved.pull?.number, 27482);
-    assert.equal(resolved.pull?.milestone, '5.52.4');
     assert.deepEqual(resolved.warnings, []);
   });
 
