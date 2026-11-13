@@ -1,4 +1,5 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
+import { expect } from '../../../../fixtures';
 import { clickAndWait, navToHeader } from '../../../../utils/shared';
 
 interface Schedule {

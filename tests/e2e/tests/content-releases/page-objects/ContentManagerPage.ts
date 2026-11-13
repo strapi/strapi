@@ -1,4 +1,5 @@
-import { expect, type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
+import { expect } from '../../../../fixtures';
 import { clickAndWait, findAndClose } from '../../../../utils/shared';
 
 // The labels of the add to release dialog's publish / unpublish options

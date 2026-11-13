@@ -1,4 +1,5 @@
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import { type APIRequestContext, type Page } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import {
   resetDatabaseAndImportDataFromPath,
   resyncSuperAdminPermissionsAfterImport,

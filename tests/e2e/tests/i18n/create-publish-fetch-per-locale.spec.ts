@@ -1,4 +1,5 @@
-import { test, expect, type APIRequestContext, type Browser, type Page } from '@playwright/test';
+import { type APIRequestContext, type Browser, type Page } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { loginWithApi } from '../../../utils/login';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';

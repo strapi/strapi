@@ -1,4 +1,5 @@
-import { test, expect, type Page, type Locator, type Response } from '@playwright/test';
+import { type Page, type Locator, type Response } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 type NavItem = string | [string, string] | Locator | { text: string; exact?: boolean };
 

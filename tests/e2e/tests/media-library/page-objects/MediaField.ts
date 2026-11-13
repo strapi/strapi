@@ -1,4 +1,5 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
+import { expect } from '../../../../fixtures';
 import { readFileSync } from 'fs';
 import path from 'path';
 
