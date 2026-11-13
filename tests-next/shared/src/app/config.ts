@@ -23,7 +23,10 @@ export type Suite = 'ui' | 'api' | 'cli';
 /** Each suite gets its own port range, so suites can run at the same time. */
 const SUITE_PORT_OFFSET: Record<Suite, number> = { ui: 0, api: 20, cli: 40 };
 
-/** Port of the `index`-th app of a suite (a Playwright worker or a Vitest worker). */
+/**
+ * Port of the `index`-th app of a suite: one per Playwright or Vitest worker. A worker runs one
+ * file at a time and stops its servers at the end of it, so the files of a worker share a port.
+ */
 export const appPort = (suite: Suite, index: number) =>
   PORT_BASE + SUITE_PORT_OFFSET[suite] + index;
 
@@ -33,13 +36,11 @@ export const strapiBin = () =>
 
 /**
  * Env every test app (and app generation) runs with, on top of the caller's env. The database
- * is pinned to the app's SQLite file: a `DATABASE_*` exported in the shell would otherwise win
- * over the generated `.env`. A database matrix comes later, through this option.
+ * env comes from `startServer({ database })` (see db/database.ts), so a `DATABASE_*` exported
+ * in the shell never reaches the apps.
  */
 export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
   STRAPI_TELEMETRY_DISABLED: 'true',
   NODE_ENV: 'development',
-  DATABASE_CLIENT: 'sqlite',
-  DATABASE_FILENAME: '.tmp/data.db',
 });

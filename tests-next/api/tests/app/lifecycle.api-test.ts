@@ -4,7 +4,9 @@ import path from 'node:path';
 
 import {
   appPort,
+  databaseFromEnv,
   generateApp,
+  resetDatabase,
   startServer,
   stopAllServers,
   type App,
@@ -19,8 +21,11 @@ describe('test app lifecycle', () => {
   let server: Server;
 
   beforeAll(async () => {
+    // One instance per file, on an empty database (TESTS_DATABASE, SQLite by default).
+    const database = databaseFromEnv();
     app = await generateApp({ name: `api-${worker}` });
-    server = await startServer(app, { port: appPort('api', worker - 1) });
+    await resetDatabase(app, database);
+    server = await startServer(app, { port: appPort('api', worker - 1), database });
   });
 
   afterAll(async () => {
