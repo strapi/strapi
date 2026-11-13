@@ -1,0 +1,34 @@
+Title: What is a webhook? All your questions answered
+Meta Description: You may be wondering: What is a webhook, exactly? Let us take a look at one of the most useful tools for any app developer!
+
+Title
+What Is a Webhook and How Does It Work?
+Author
+Sunny Hsiao 
+Reviewers
+Victor, Anastasia, Yves 
+URL
+/blog/what-is-a-webhook-and-how-does-it-work 
+Publication date
+Nov 11 
+
+
+
+What Is a Webhook and How Does It Work?
+You may have come across webhook integrations in several of the applications you use without even knowing it, or you may be wondering: wWhat is a webhook, exactly, and why would I need it? To put it simply, webhooks are one of the ways apps are able to share updates withupdate you by sending automated messages. For instance, if you wanted to receive a notification every time someone you follow updated their social media, a webhook would act as the liaison. In essence, it is a solution you can implement to have apps ‘communicate’ with one another, pushing data between them. Let us delve deeper into all you need to know about webhooks and how to use them.
+What Is a Webhook?
+In answer to the question: ‘What is a webhook?’, some like to compare them to APIs. Such a comparison is relevant in the sense that both can be used to access information from an application. The difference lies in how the information is obtained.
+
+With APIs, it is possible to add data, to edit it, and to retrieve it. For instance, you could deploy an API to connect two applications. However, to transfer informationfor information to be transferred from one app to the other, an order needs to be given. In other words, only when the data is requested specifically does it actually get sent. What makes webhooks so special is the fact that they are entirely automated. They can be configured to output data whenever an event in particular happens. Where APIs rely on a request-based output mechanism, webhooks work on an event-based output mechanism.
+To illustrate this concept, one could think of a more concrete situation. Say, for instance, that you are quite sensitive to the cold. Yet, you hate bringing a coat with you everywhere you go if it means you’ll have to carry it instead of wearing it, because you can’t stand being too warm either. You might then decide to check the weather for yourself each night, or you might prefer to receive a message informing you to bring a coat because it’s going to be too chilly for you. If it’s warm enough, no need to bother you: only the temperature dropping below a certain point will trigger the notification. What is a webhook? In this case, it is the little helper that checks the weather for you and only distracts you from your busy life if it knows you will be interested in a particular event.
+From a more web-centric perspective, a webhook can be a wonderful way to automatise certain actions. For instance, if you wanted to send a discount code to the first 1,000 subscribers who open one of your emails, checking the stats manually and forwarding the code in question 1,000 times would be extremely cumbersome. What is a webhook going to do instead? It will allow codes to be sent right up until the number has been reached and make sure the action does not continue after that point.
+How Do Webhooks Work?
+The basic principle behind webhooks is one action serving as a signal to trigger another action. In more concrete terms, it is an HTTP callback. Whenever a specific event takes place, the webhook picks up on it and collects the data, which it immediately sends to a URL defined by the user in the form of an HTTP request. This means that webhooks can be utilised for real-time notifications, making it possible to sync events efficiently. Even something happening on a website can cause another website to trigger an action.
+
+Such headless CMS as Strapi give you the option to set up webhooks for your applications. You can even create them right from the interface by identifying the URL you wish to send data to. The webhook itself should also contain a description of the event it addresses, defined by special headers. Next, a test is in order to make sure the webhook works as intended. Some CMS (this is the case for Strapi) go as far as to provide a Trigger Button you can use to verify that everything is working correctly. What is a webhook going to achieve if it was not configured properly? Finally, you will need to enable your webhook, which will go live immediately.
+
+
+What is a webhook’s best potential? Probably the fact that it could be adapted to whatever your imagination can come up with! Its simplicity, together with the absence of constant polling, means that it is exceptionally great at streamlining systems that would otherwise have to parse, often at the risk of overloading or losing data. The use of HTTP provides a much more straightforward solution for real-time applications. Regardless of the type of event you wish to track over the web, webhooks are there to make your life easier. Be sure to give them a try if you haven’t already!
+Get Strapi up and running in 3 minutes
+Get access to a hosted Strapi with sample data
+Discover Enterprise Edition
