@@ -205,6 +205,20 @@ const toAssocs = (data: Assocs) => {
   };
 };
 
+/**
+ * `toAssocs` checks `set` by truthiness, so `{ set: null }` reaches the write branches as an
+ * empty delta. Released Strapi cleared the inverse morph fields on a bare null set, and the morph
+ * branches keep that until #27432 settles what `{ set: null }` means for every relation type.
+ * Next to a connect or disconnect, the delta applies. Released Strapi did that for an inverse
+ * morphToMany (media); its inverse morphToOne branch cleared every link and linked nothing.
+ */
+const isBareNullSet = (value: unknown, assocs: ReturnType<typeof toAssocs>) =>
+  isRecord(value) &&
+  has(value, 'set') &&
+  value.set === null &&
+  isEmpty(assocs.connect) &&
+  isEmpty(assocs.disconnect);
+
 const processData = (
   metadata: Meta,
   data: Record<string, unknown> = {},
@@ -657,11 +671,9 @@ export const createEntityManager = (db: Database): EntityManager => {
             const dataset = cleanRelationData.set ?? cleanRelationData.connect ?? [];
 
             // Copy flows (publish, discardDraft, clone) pass the populated value of a morphMany,
-            // which can be empty:
-            // - the document service drops these ids, since inverse morph items carry no `__type`
-            //   (document-service/transform/relations/transform/data-ids.ts)
-            // - a populate with a field selection never selects the morph id column, so the
-            //   relation comes back empty (query/helpers/populate/apply.ts)
+            // and it comes back empty: they populate relations with a field selection
+            // (document-service/utils/populate.ts), which never selects the morph id column
+            // (query/helpers/populate/apply.ts).
             // An empty morphOne populates as null or undefined and is skipped above.
             // Publish omits an empty value: the links stay on the draft, and the document service
             // re-points those of the old published version to the new one. Every other caller is
@@ -984,8 +996,11 @@ export const createEntityManager = (db: Database): EntityManager => {
                 .execute();
             };
 
-            // set replaces every link: null and an empty set clear them
-            if ('set' in cleanRelationData) {
+            // set replaces every link: null, an empty set and a bare `{ set: null }` clear them
+            if (
+              'set' in cleanRelationData ||
+              isBareNullSet(data[attributeName], cleanRelationData)
+            ) {
               await unlink();
               await link(cleanRelationData.set ?? []);
               continue;
@@ -1020,22 +1035,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isSingle =
               types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const hasConnect = !isEmpty(cleanRelationData.connect);
-            const hasDisconnect = !isEmpty(cleanRelationData.disconnect);
             const hasSet = !isEmpty(cleanRelationData.set);
-
-            // `toAssocs` checks `set` by truthiness, so `{ set: null }` reaches this branch
-            // as an empty delta. Released Strapi cleared the field on a bare null set (it
-            // fell through to the replace path below) and applied the delta when a connect
-            // or disconnect came with it. Keep both outcomes as they are until #27432
-            // settles what `{ set: null }` means for every relation type: only a real delta
-            // shape may take the empty-delta no-op path.
-            const rawValue = data[attributeName];
-            const isBareNullSet =
-              isRecord(rawValue) &&
-              has(rawValue, 'set') &&
-              rawValue.set === null &&
-              !hasConnect &&
-              !hasDisconnect;
 
             // A partial update is a connect/disconnect delta payload (no `set` key),
             // which must modify only the listed relations — as opposed to a `set`/
@@ -1043,7 +1043,10 @@ export const createEntityManager = (db: Database): EntityManager => {
             // payload *shape* (like regular joinTable relations at `!has(…, 'set')`),
             // not on content, so that an empty delta (`{ connect: [] }` /
             // `{ disconnect: [] }`) is a no-op instead of wiping the field.
-            const isPartialUpdate = !has(cleanRelationData, 'set') && !isBareNullSet;
+            // A bare `{ set: null }` falls through to the replace path, see `isBareNullSet`.
+            const isPartialUpdate =
+              !has(cleanRelationData, 'set') &&
+              !isBareNullSet(data[attributeName], cleanRelationData);
 
             if (isPartialUpdate) {
               // For single media a connect is last-wins and the field holds at most one
