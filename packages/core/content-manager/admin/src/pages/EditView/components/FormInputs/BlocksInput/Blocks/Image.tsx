@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FlexComponent } from '@strapi/design-system';
 import { Image as Picture } from '@strapi/icons';
-import { Element, Transforms, Editor, Node, Path, Range } from 'slate';
+import { Element, Transforms, Editor, Node, Path, Range, type RangeRef } from 'slate';
 import { ReactEditor, useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import { styled, css } from 'styled-components';
 
@@ -161,10 +161,24 @@ const ImageDialog = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const { editor } = useBlocksEditorContext('ImageDialog');
   // Where the caret was when Image was picked: the editor can lose its selection while the
-  // Media Library dialog is open. The ref follows the content if it changes meanwhile.
-  const [targetRef] = React.useState(() =>
-    editor.selection ? Editor.rangeRef(editor, editor.selection) : null
-  );
+  // Media Library dialog is open
+  const [initialSelection] = React.useState(() => editor.selection);
+  // Follows the content if it changes meanwhile. Created in an effect so that its cleanup can
+  // release it when the dialog unmounts: StrictMode runs that cleanup right after the first mount,
+  // then the effect runs again and creates a new ref.
+  const targetRef = React.useRef<RangeRef | null>(null);
+
+  React.useEffect(() => {
+    if (!initialSelection) return;
+
+    const rangeRef = Editor.rangeRef(editor, initialSelection);
+    targetRef.current = rangeRef;
+
+    return () => {
+      rangeRef.unref();
+      targetRef.current = null;
+    };
+  }, [editor, initialSelection]);
 
   const components = useStrapiApp('ImageDialog', (state) => state.components);
 
@@ -177,7 +191,7 @@ const ImageDialog = () => {
   }>;
 
   const insertImages = (images: Block<'image'>['image'][]) => {
-    const target = targetRef?.current ?? editor.selection;
+    const target = targetRef.current?.current ?? editor.selection;
     if (!target) return;
 
     Transforms.select(editor, target);
@@ -246,7 +260,7 @@ const ImageDialog = () => {
   };
 
   const close = () => {
-    targetRef?.unref();
+    targetRef.current?.unref();
     setIsOpen(false);
   };
 

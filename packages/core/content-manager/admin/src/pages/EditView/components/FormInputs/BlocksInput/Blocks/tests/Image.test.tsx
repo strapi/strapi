@@ -1,6 +1,6 @@
 /* eslint-disable testing-library/no-node-access */
 
-import { ReactElement } from 'react';
+import { ReactElement, StrictMode } from 'react';
 
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Editor, Transforms, createEditor } from 'slate';
@@ -279,6 +279,44 @@ describe('Image', () => {
       { type: 'image', image: mockImage, children: [{ type: 'text', text: '' }] },
       { type: 'paragraph', children: [{ type: 'text', text: 'Two' }] },
     ]);
+  });
+
+  it('keeps the caret position under StrictMode, which runs effect cleanups once on mount', async () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      { type: 'paragraph', children: [{ type: 'text', text: 'One' }] },
+      { type: 'paragraph', children: [{ type: 'text', text: 'Two' }] },
+    ];
+
+    await waitFor(() => Transforms.select(baseEditor, { path: [0, 0], offset: 1 }));
+
+    const { user } = render(
+      <StrictMode>{imageBlocks.image.handleConvert!(baseEditor)!()}</StrictMode>,
+      { baseEditor }
+    );
+    baseEditor.selection = null;
+    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
+    expect(baseEditor.children).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'One' }] },
+      { type: 'image', image: mockImage, children: [{ type: 'text', text: '' }] },
+      { type: 'paragraph', children: [{ type: 'text', text: 'Two' }] },
+    ]);
+  });
+
+  it('releases the caret position when the dialog unmounts while open', async () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [{ type: 'paragraph', children: [{ type: 'text', text: 'One' }] }];
+
+    await waitFor(() => Transforms.select(baseEditor, { path: [0, 0], offset: 1 }));
+
+    const { unmount } = render(imageBlocks.image.handleConvert!(baseEditor)!(), { baseEditor });
+
+    expect(Editor.rangeRefs(baseEditor).size).toBe(1);
+
+    unmount();
+
+    expect(Editor.rangeRefs(baseEditor).size).toBe(0);
   });
 
   it('reverts the insertion in a single undo step', async () => {
