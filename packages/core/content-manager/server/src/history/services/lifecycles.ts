@@ -127,6 +127,8 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
         });
 
+        // TODO v6: store the author `id` and remove this extra query.
+        // See discussion in https://github.com/strapi/strapi/pull/28554#issuecomment-6826618574.
         const authorDocumentId = await serviceUtils.findAuthorDocumentId(origin.author);
         if (authorDocumentId === null) {
           return result;
