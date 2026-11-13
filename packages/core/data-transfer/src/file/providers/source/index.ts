@@ -4,7 +4,7 @@ import type { Duplex, Readable } from 'stream';
 import zip from 'zlib';
 import path from 'path';
 import { pipeline, PassThrough } from 'stream';
-import { finished } from 'stream/promises';
+import { finished, pipeline as pipelinePromise } from 'stream/promises';
 import fs from 'fs-extra';
 import { Parser, type ReadEntry } from 'tar';
 import { isEmpty, keyBy } from 'lodash';
@@ -451,13 +451,14 @@ class LocalFileSourceProvider implements ISourceProvider {
                 (line: { key: string; value: object }) => line.value,
               ];
 
-              const stream = chain(transforms);
-              entry.pipe(stream);
-
               try {
-                for await (const chunk of stream) {
-                  await write(outStream, chunk);
-                }
+                // pipeline forwards an entry read error. pipe() left it on the entry,
+                // so the reader waited forever for an end that never came.
+                await pipelinePromise(entry, chain(transforms), async (source) => {
+                  for await (const chunk of source) {
+                    await write(outStream, chunk);
+                  }
+                });
               } catch (e: unknown) {
                 outStream.destroy(
                   new ProviderTransferError(
