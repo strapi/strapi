@@ -6,6 +6,10 @@
  * or 8 (undici 6 is already at the root of a default app). The type accepts all three, but at
  * runtime Node 22 and 24's fetch only works with undici 6 and 7 agents directly: an undici 8
  * dispatcher must be wrapped in undici's `Dispatcher1Wrapper`, as @strapi/core does for the proxy.
+ *
+ * Typed for assigning: the value read back can be closed and destroyed, but handing it to a
+ * specific undici (`request(url, { dispatcher })`, `setGlobalDispatcher`) needs a cast to that
+ * undici's `Dispatcher`.
  */
 export interface Dispatcher {
   dispatch(options: unknown, handler: unknown): boolean;
