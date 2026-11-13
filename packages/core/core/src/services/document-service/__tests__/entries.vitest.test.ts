@@ -154,23 +154,10 @@ describe('Document Service: entries', () => {
       }));
     });
 
-    it('keeps an empty inverse morph value by default', async () => {
+    it('omits an empty inverse morph value', async () => {
       const entries = createEntriesService(NOTE_UID, entityValidator as any);
 
       await entries.publish({ id: 1, title: 'Note', remarks: [] });
-
-      expect(dbCreate).toHaveBeenCalledTimes(1);
-      expect(dbCreate.mock.calls[0][0].data).toMatchObject({ title: 'Note', remarks: [] });
-    });
-
-    it('omits an empty inverse morph value when asked', async () => {
-      const entries = createEntriesService(NOTE_UID, entityValidator as any);
-
-      await entries.publish(
-        { id: 1, title: 'Note', remarks: [] },
-        {},
-        { omitEmptyInverseMorphValues: true }
-      );
 
       expect(dbCreate).toHaveBeenCalledTimes(1);
       expect(dbCreate.mock.calls[0][0].data).not.toHaveProperty('remarks');

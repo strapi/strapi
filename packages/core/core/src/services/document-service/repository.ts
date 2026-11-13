@@ -683,7 +683,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     );
 
     // Links the old published versions own through an inverse morphOne / morphMany of a
-    // morphToOne. Deleting these versions below clears them.
+    // morphToOne. Deleting these versions below clears them, so they are re-pointed to the new
+    // published versions once created.
     const inverseMorphLinks = await inverseMorphRelations.load(
       uid,
       oldPublishedVersions.map((entry: any) => entry.id)
@@ -733,14 +734,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         });
       }
 
-      publishedEntries.push(
-        await entries.publish(entryToPublish, queryParams, {
-          // Keep the empty inverse morph value when the old published version owned links, so the
-          // database layer throws and the transaction rolls back instead of dropping them
-          omitEmptyInverseMorphValues: inverseMorphLinks.length === 0,
-        })
-      );
+      publishedEntries.push(await entries.publish(entryToPublish, queryParams));
     }
+
+    await inverseMorphRelations.sync(uid, documentId, oldPublishedVersions, inverseMorphLinks);
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
@@ -762,9 +759,28 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       selfRelationsToSync
     );
 
-    publishedEntries.forEach(emitEvent('entry.publish'));
+    // The published entries were read back on create (with the caller's fields and populate),
+    // before the re-point above: read them again so the response lists the links they own
+    let entriesToReturn: any[] = publishedEntries;
 
-    return { documentId, entries: publishedEntries };
+    if (inverseMorphLinks.length > 0) {
+      const selectionQuery = transformParamsToQuery(
+        uid,
+        pickSelectionParams({ ...queryParams, status: 'published' }) as any
+      );
+
+      // One at a time: a populate issues its own queries on this transaction's connection
+      entriesToReturn = [];
+      for (const entry of publishedEntries) {
+        entriesToReturn.push(
+          await strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: entry.id } })
+        );
+      }
+    }
+
+    entriesToReturn.forEach(emitEvent('entry.publish'));
+
+    return { documentId, entries: entriesToReturn };
   }
 
   async function unpublish(opts = {} as any) {
