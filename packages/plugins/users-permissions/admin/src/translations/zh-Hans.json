@@ -78,5 +78,7 @@
   "popUpWarning.button.cancel": "取消",
   "popUpWarning.button.confirm": "确认",
   "popUpWarning.title": "请确认",
-  "popUpWarning.warning.cancel": "你确定你要取消你的修改？"
+  "popUpWarning.warning.cancel": "你确定你要取消你的修改？",
+  "Email.template.reset_password": "重置密码",
+  "Settings.roles.created": "角色已创建"
 }
