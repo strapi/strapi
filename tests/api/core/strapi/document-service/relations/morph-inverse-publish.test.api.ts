@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 
+import { createContentAPIRequest } from 'api-tests/request';
+
 import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-helper';
 
 const NOTE_UID = 'api::morph-note.morph-note' as const;
@@ -406,5 +408,325 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     expect(await getRemarkSubjects()).toEqual([
       { id: r1.id, subjectId: published.id, subjectType: NOTE_UID },
     ]);
+  });
+  describe('update', () => {
+    const createRemarks = async (count: number) => {
+      const remarks = [];
+      for (let i = 1; i <= count; i += 1) {
+        remarks.push(await strapi.db.query(REMARK_UID).create({ data: { text: `r${i}` } }));
+      }
+      return remarks;
+    };
+
+    it('links every entry of an array and unlinks the entries left out', async () => {
+      const [r1, r2, r3, r4] = await createRemarks(4);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r4.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: [r1.id, r2.id, r3.id] },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r4.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('links every entry of a set', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { set: [r2.id, r1.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('keeps the existing links on connect', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { connect: [r2.id, r3.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('unlinks only the entries given to disconnect', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+      const otherNote = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'other', remarks: [r3.id] },
+      });
+
+      // r3 belongs to another note, so disconnecting it from this note is a no-op
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { disconnect: [r1.id, r3.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: otherNote.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('applies connect and disconnect together', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { connect: [r3.id], disconnect: [r1.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    // The admin sends an empty delta for every relation field on save
+    // toAssocs drops a null set, so `{ set: null }` reaches this branch as an empty delta, like
+    // regular relations (a bare `null` still clears). What `{ set: null }` should mean for every
+    // relation kind is still open.
+    it('keeps every link on { set: null }', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { set: null } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    // A remark stores a single owner, so connecting it to another note takes it away from the
+    // note it belonged to
+    it('moves a connected entry away from its current owner', async () => {
+      const [r1, r2] = await createRemarks(2);
+      await strapi.db.query(NOTE_UID).create({ data: { title: 'other', remarks: [r1.id] } });
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { connect: [r1.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('keeps every link on an empty connect and disconnect', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { connect: [], disconnect: [] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it.each([
+      ['an empty array', []],
+      ['an empty set', { set: [] }],
+      ['null', null],
+    ])('unlinks every entry on %s', async (_label, value) => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: value },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('links every entry of an array through the document service', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] } as any,
+      });
+
+      await strapi.documents(NOTE_UID).update({
+        documentId: note.documentId,
+        data: { remarks: [r1.id, r2.id, r3.id] } as any,
+      });
+
+      const draft = await getNoteRow(note.documentId, 'draft');
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: draft?.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('links only the first entry of a morphOne array', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const card = await strapi.db.query(CARD_UID).create({
+        data: { title: 'pinned', pinnedRemark: [r1.id] },
+      });
+
+      await strapi.db.query(CARD_UID).update({
+        where: { id: card.id },
+        data: { pinnedRemark: [r2.id, r3.id] },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: card.id, subjectType: CARD_UID },
+        { id: r3.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('replaces the linked entry of a morphOne on connect', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const card = await strapi.db.query(CARD_UID).create({
+        data: { title: 'pinned', pinnedRemark: [r1.id] },
+      });
+
+      await strapi.db.query(CARD_UID).update({
+        where: { id: card.id },
+        data: { pinnedRemark: { connect: [r2.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: card.id, subjectType: CARD_UID },
+      ]);
+    });
+
+    /**
+     * Through REST, an inverse morph item needs `__type` to resolve its target. The Content API
+     * rejects `__type` in the array form (`Invalid key __type at remarks`), so a REST client
+     * sends `{ set }`, `{ connect }` or `{ disconnect }` with `{ documentId, __type }` items.
+     */
+    describe('through REST', () => {
+      let rqContent: ReturnType<typeof createContentAPIRequest>;
+
+      beforeAll(async () => {
+        rqContent = await createContentAPIRequest({ strapi });
+      });
+
+      const toItem = (remark: { documentId: string }) => ({
+        documentId: remark.documentId,
+        __type: REMARK_UID,
+      });
+
+      const updateNote = async (documentId: string, remarks: unknown) => {
+        const res = await rqContent({
+          method: 'PUT',
+          url: `/morph-notes/${documentId}`,
+          body: { data: { remarks } },
+        });
+        expect(res.statusCode).toBe(200);
+      };
+
+      const createNote = async (remarks: { id: number }[]) => {
+        const note = await strapi.documents(NOTE_UID).create({
+          data: { title: 'linked', remarks: remarks.map((remark) => remark.id) } as any,
+        });
+        const draft = await getNoteRow(note.documentId, 'draft');
+        return { documentId: note.documentId, draftId: draft?.id };
+      };
+
+      it('links every entry of a set and unlinks the entries left out', async () => {
+        const [r1, r2, r3] = await createRemarks(3);
+        const note = await createNote([r1]);
+
+        await updateNote(note.documentId, { set: [toItem(r2), toItem(r3)] });
+
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: null, subjectType: null },
+          { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r3.id, subjectId: note.draftId, subjectType: NOTE_UID },
+        ]);
+      });
+
+      it('keeps the existing links on connect', async () => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await createNote([r1]);
+
+        await updateNote(note.documentId, { connect: [toItem(r2)] });
+
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
+        ]);
+      });
+
+      it('unlinks only the entries given to disconnect', async () => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await createNote([r1, r2]);
+
+        await updateNote(note.documentId, { disconnect: [toItem(r1)] });
+
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: null, subjectType: null },
+          { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
+        ]);
+      });
+
+      it('keeps every link on { set: null }', async () => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await createNote([r1, r2]);
+
+        await updateNote(note.documentId, { set: null });
+
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
+        ]);
+      });
+    });
   });
 });
