@@ -244,7 +244,9 @@ export default {
    * 404s when no job exists or AI metadata is not enabled.
    *
    * A job whose server stopped or crashed is failed first, so the client sees
-   * it fail without waiting for a server to restart.
+   * it fail without waiting for a server to restart. If that sweep fails, the
+   * error is logged and the job is still sent: an error response would stop the
+   * settings page polling a job that may still run.
    */
   async getLatestAIMetadataJob(ctx: Context) {
     if ((await getService('aiMetadata').isEnabled()) === false) {
@@ -252,7 +254,17 @@ export default {
     }
 
     const jobService = getService('aiMetadataJobs');
-    await jobService.failInterruptedJobs();
+
+    try {
+      await jobService.failInterruptedJobs();
+    } catch (error) {
+      strapi.log.error(
+        'Could not fail the interrupted AI metadata jobs before reading the latest one',
+        {
+          error,
+        }
+      );
+    }
     const job = await jobService.getLatestActiveJob();
 
     if (!job) {

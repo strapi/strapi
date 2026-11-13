@@ -1,3 +1,12 @@
+/**
+ * The whole file runs with the process in Europe/Paris, so the DST case below can fail on
+ * Postgres and MySQL whatever the time zone of the machine or CI runner. Assigning
+ * `process.env.TZ` inside a test would only change the sandbox's copy.
+ *
+ * @jest-environment ./tests/setup/timezone-environment.js
+ * @jest-environment-options {"strapi": {"tz": "Europe/Paris"}}
+ */
+
 'use strict';
 
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -71,40 +80,30 @@ describe('GET /upload/ai-metadata-jobs/latest', () => {
     // Europe/Paris falls back at 01:00 UTC, so 02:00:50 local comes after 02:59:00 local. Postgres
     // and MySQL store a `datetime` as local wall time, so a heartbeat compared as a `datetime`
     // looked older than the cutoff and the live job was failed for two minutes.
-    const originalTz = process.env.TZ;
-    process.env.TZ = 'Europe/Paris';
+    expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe('Europe/Paris');
 
-    try {
-      // Only `Date` is faked; the database driver and the HTTP stack keep their real timers
-      jest.useFakeTimers({
-        now: new Date('2026-10-25T01:00:50Z'),
-        advanceTimers: true,
-        doNotFake: [
-          'hrtime',
-          'nextTick',
-          'performance',
-          'queueMicrotask',
-          'setImmediate',
-          'clearImmediate',
-          'setInterval',
-          'clearInterval',
-          'setTimeout',
-          'clearTimeout',
-        ],
-      });
-      const jobId = await jobs().createJob();
+    // Only `Date` is faked; the database driver and the HTTP stack keep their real timers
+    jest.useFakeTimers({
+      now: new Date('2026-10-25T01:00:50Z'),
+      advanceTimers: true,
+      doNotFake: [
+        'hrtime',
+        'nextTick',
+        'performance',
+        'queueMicrotask',
+        'setImmediate',
+        'clearImmediate',
+        'setInterval',
+        'clearInterval',
+        'setTimeout',
+        'clearTimeout',
+      ],
+    });
+    const jobId = await jobs().createJob();
 
-      jest.setSystemTime(new Date('2026-10-25T01:01:00Z'));
-      const res = await getLatest();
+    jest.setSystemTime(new Date('2026-10-25T01:01:00Z'));
+    const res = await getLatest();
 
-      expect(res.body).toMatchObject({ id: jobId, status: 'processing' });
-    } finally {
-      // Assigning `undefined` would set the string "undefined"
-      if (originalTz === undefined) {
-        delete process.env.TZ;
-      } else {
-        process.env.TZ = originalTz;
-      }
-    }
+    expect(res.body).toMatchObject({ id: jobId, status: 'processing' });
   });
 });
