@@ -110,7 +110,10 @@ describe('Admin File Controller - generateAIMetadata', () => {
 describe('Admin File Controller - getLatestAIMetadataJob', () => {
   let ctx: Partial<Context>;
   let mockAiMetadataService: { isEnabled: jest.Mock };
-  let mockAiMetadataJobsService: { getLatestActiveJob: jest.Mock };
+  let mockAiMetadataJobsService: {
+    failInterruptedJobs: jest.Mock;
+    getLatestActiveJob: jest.Mock;
+  };
 
   const call = () => adminFileController.getLatestAIMetadataJob(ctx as Context);
 
@@ -118,7 +121,10 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
     jest.clearAllMocks();
 
     mockAiMetadataService = { isEnabled: jest.fn().mockResolvedValue(true) };
-    mockAiMetadataJobsService = { getLatestActiveJob: jest.fn().mockResolvedValue(null) };
+    mockAiMetadataJobsService = {
+      failInterruptedJobs: jest.fn().mockResolvedValue(undefined),
+      getLatestActiveJob: jest.fn().mockResolvedValue(null),
+    };
 
     mockGetService.mockImplementation((serviceName: string) => {
       if (serviceName === 'aiMetadata') return mockAiMetadataService as any;
@@ -135,6 +141,7 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
       status: 'completed',
       createdAt: '2026-11-09T10:00:00.000Z',
       completedAt: '2026-11-09T10:01:00.000Z',
+      heartbeatAtMs: '1793872845000',
     };
     mockAiMetadataJobsService.getLatestActiveJob.mockResolvedValue(job);
 
@@ -144,6 +151,42 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
     const expected: GetLatestAIMetadataJob.Response = job;
     expect(ctx.body).toEqual(expected);
     expect(ctx.notFound).not.toHaveBeenCalled();
+  });
+
+  it('fails the jobs whose server stopped before reading the latest one', async () => {
+    // A single server that crashed mid-job never restarts its sweep: the read settles the job
+    mockAiMetadataJobsService.failInterruptedJobs.mockImplementation(async () => {
+      expect(mockAiMetadataJobsService.getLatestActiveJob).not.toHaveBeenCalled();
+    });
+
+    await call();
+
+    expect(mockAiMetadataJobsService.failInterruptedJobs).toHaveBeenCalledTimes(1);
+    expect(mockAiMetadataJobsService.getLatestActiveJob).toHaveBeenCalledTimes(1);
+  });
+
+  it('still sends the latest job when the sweep fails, so the settings page keeps polling', async () => {
+    // A lock timeout on the sweep's UPDATE, while reads still work
+    const sweepError = new Error('lock wait timeout');
+    const log = { error: jest.fn() };
+    global.strapi = { log } as any;
+    mockAiMetadataJobsService.failInterruptedJobs.mockRejectedValue(sweepError);
+    const job: AIMetadataJob = {
+      id: 4,
+      status: 'processing',
+      createdAt: '2026-11-09T10:00:00.000Z',
+      completedAt: null,
+      heartbeatAtMs: '1793872845000',
+    };
+    mockAiMetadataJobsService.getLatestActiveJob.mockResolvedValue(job);
+
+    await call();
+
+    expect(ctx.body).toEqual(job);
+    expect(log.error).toHaveBeenCalledWith(
+      'Could not fail the interrupted AI metadata jobs before reading the latest one',
+      { error: sweepError }
+    );
   });
 
   it('returns not found when no job exists', async () => {
@@ -159,6 +202,7 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
     await call();
 
     expect(ctx.notFound).toHaveBeenCalled();
+    expect(mockAiMetadataJobsService.failInterruptedJobs).not.toHaveBeenCalled();
     expect(mockAiMetadataJobsService.getLatestActiveJob).not.toHaveBeenCalled();
   });
 });

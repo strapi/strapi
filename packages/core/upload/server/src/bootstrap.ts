@@ -75,12 +75,17 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 }
 
 /**
- * A job runs inside the server process that created it, so a job still `processing` when a
- * server starts listening was cut off by a stop or crash of the previous server.
+ * A job runs inside the server process that created it, and that process writes the job's
+ * heartbeat at an interval. A job still `processing` with a stale or missing heartbeat was cut
+ * off by a stop or crash of its server, so a server that starts listening fails it. A job that
+ * another server on the same database still runs has a fresh heartbeat and is left alone.
+ * After a crash, a server that restarts at once finds the heartbeat still fresh: the job is then
+ * failed once the heartbeat goes stale, about two minutes later, by the sweep that runs on each
+ * `GET /upload/ai-metadata-jobs/latest`. A clean stop fails its own jobs at once (see `destroy`).
  * The sweep runs in each process that serves HTTP, `strapi console` included, because console
  * listens too. It waits for `listening` because the other CLI commands (`strapi export`,
  * `strapi import`, `strapi transfer`, `configuration:dump`, ...) also run `bootstrap` but never
- * listen: while a server runs a job, they must not fail it.
+ * listen: they never fail a job.
  */
 const failInterruptedAIMetadataJobsOnListen = (strapi: Core.Strapi) => {
   strapi.server.httpServer.once('listening', async () => {
