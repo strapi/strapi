@@ -137,7 +137,7 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
       status: 'completed',
       createdAt: '2026-11-09T10:00:00.000Z',
       completedAt: '2026-11-09T10:01:00.000Z',
-      heartbeatAt: '2026-11-09T10:00:45.000Z',
+      heartbeatAtMs: '1793872845000',
     };
     mockAiMetadataJobsService.getLatestActiveJob.mockResolvedValue(job);
 

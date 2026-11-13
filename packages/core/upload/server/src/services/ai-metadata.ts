@@ -122,10 +122,9 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Tells the other servers on the same database that this job still runs
       jobService.startHeartbeat(jobId);
 
+      // `createJob` created the job as `processing`. The final writes only settle a job still
+      // `processing`, so a job another server failed as interrupted keeps that status.
       try {
-        // Mark as processing
-        await jobService.updateJob(jobId, { status: 'processing' });
-
         // Query all images without metadata
         const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
           where: {
@@ -142,10 +141,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         if (files.length === 0) {
-          await jobService.updateJob(jobId, {
-            status: 'completed',
-            completedAt: new Date(),
-          });
+          await jobService.settleJob(jobId, 'completed');
           return;
         }
 
@@ -153,21 +149,14 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         const metadataResults = await this.processFiles(files);
         await this.updateFilesWithAIMetadata(files, metadataResults, user);
 
-        // Mark as completed
-        await jobService.updateJob(jobId, {
-          status: 'completed',
-          completedAt: new Date(),
-        });
+        await jobService.settleJob(jobId, 'completed');
       } catch (error) {
         strapi.log.error('AI metadata job failed', {
           jobId,
           error: error instanceof Error ? error.message : String(error),
         });
 
-        await jobService.updateJob(jobId, {
-          status: 'failed',
-          completedAt: new Date(),
-        });
+        await jobService.settleJob(jobId, 'failed');
       } finally {
         jobService.stopHeartbeat(jobId);
       }
