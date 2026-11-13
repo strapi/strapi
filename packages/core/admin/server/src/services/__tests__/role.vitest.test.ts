@@ -627,6 +627,89 @@ describe('Role', () => {
     });
   });
 
+  describe('createRolesIfNoneExist default role permissions hook', () => {
+    const DELETE = 'plugin::content-manager.explorer.delete';
+    const PUBLISH = 'plugin::content-manager.explorer.publish';
+    const addLocales = vi.fn(async (permissions: any[]) =>
+      permissions.map((permission) => ({
+        ...permission,
+        properties: { ...permission.properties, locales: ['en'] },
+      }))
+    );
+
+    afterEach(() => {
+      roleService.hooks.willCreateDefaultRolePermissions.delete(addLocales);
+    });
+
+    test('Stores the content-type permissions the hook returns, for the Editor and the Author', async () => {
+      roleService.hooks.willCreateDefaultRolePermissions.register(addLocales);
+
+      const actions = [
+        { actionId: DELETE, subjects: ['country'], section: 'contentTypes', options: {} },
+        { actionId: PUBLISH, subjects: ['country'], section: 'contentTypes', options: {} },
+      ];
+      const permissions = actions.map(({ actionId }) =>
+        createPermission({ action: actionId, subject: 'country' })
+      );
+
+      let id = 1;
+      const create = vi.fn(({ data }) => {
+        const res = { ...data, id };
+        id += 1;
+        return res;
+      });
+      const createMany = vi.fn();
+
+      global.strapi = {
+        contentTypes: {},
+        db: { query: () => ({ count: vi.fn(() => Promise.resolve(0)), create }) },
+        admin: {
+          services: {
+            permission: {
+              actionProvider: { values: vi.fn(() => actions) },
+              createMany,
+              conditionProvider: { has: () => true },
+            },
+            condition: { isValidCondition: () => true },
+            'content-type': {
+              getPermissionsWithNestedFields: vi.fn(() => permissions.map(createPermission)),
+            },
+            user: { assignARoleToAll: vi.fn() },
+          },
+        },
+        eventHub: { emit: vi.fn() },
+      } as any;
+
+      await createRolesIfNoneExist();
+
+      expect(addLocales).toHaveBeenCalledTimes(1);
+      expect(addLocales).toHaveBeenCalledWith(permissions);
+
+      const contentTypePermissions = (call: number) =>
+        createMany.mock.calls[call][0]
+          .filter(({ subject }: { subject: string | null }) => subject === 'country')
+          .map(({ action, properties, conditions, role }: any) => ({
+            action,
+            properties,
+            conditions,
+            role,
+          }));
+
+      expect(contentTypePermissions(0)).toEqual([
+        { action: DELETE, properties: { locales: ['en'] }, conditions: [], role: 2 },
+        { action: PUBLISH, properties: { locales: ['en'] }, conditions: [], role: 2 },
+      ]);
+      expect(contentTypePermissions(1)).toEqual([
+        {
+          action: DELETE,
+          properties: { locales: ['en'] },
+          conditions: ['admin::is-creator'],
+          role: 3,
+        },
+      ]);
+    });
+  });
+
   describe('displayWarningIfNoSuperAdmin', () => {
     test('superAdmin role exists & a user is superAdmin', async () => {
       const findOne = vi.fn(() => ({ id: 1 }));

@@ -35,6 +35,8 @@ const { createAsyncSeriesWaterfallHook } = hooksUtils;
 const { ApplicationError, ForbiddenError } = errors;
 
 const hooks = {
+  // Gets the content-type permissions of the Editor and Author roles created at first boot
+  willCreateDefaultRolePermissions: createAsyncSeriesWaterfallHook(),
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
   willValidateUpdatePermissions: createAsyncSeriesWaterfallHook(),
 };
@@ -307,12 +309,18 @@ const createRolesIfNoneExist = async () => {
     .filter((ct) => ct?.pluginOptions?.['content-manager']?.visible === false)
     .map((ct) => ct.uid as string);
 
-  const editorPermissions = getService('content-type').getPermissionsWithNestedFields(
+  const contentTypesPermissions = getService('content-type').getPermissionsWithNestedFields(
     contentTypesActions,
     {
       restrictedSubjects: ['plugin::users-permissions.user', ...nonDisplayedUids],
     }
   ) as Permission[];
+
+  // The permissions only set `fields`: plugins set the other properties they add to the actions
+  // (e.g. i18n `locales`), otherwise the boot cleanup removes a permission that misses all of them
+  const editorPermissions = (await hooks.willCreateDefaultRolePermissions.call(
+    contentTypesPermissions
+  )) as Permission[];
 
   const authorPermissions = editorPermissions
     .filter(({ action }: any) => action !== ACTIONS.publish)
