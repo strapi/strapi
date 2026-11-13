@@ -4,8 +4,11 @@ import { pipe as pipeAsync } from '../async';
 import {
   isScalarAttribute,
   constants,
+  isComponentAttribute,
   isDynamicZoneAttribute,
+  isMediaAttribute,
   isMorphToRelationalAttribute,
+  isRelationalAttribute,
 } from '../content-types';
 import {
   traverseQueryFilters,
@@ -76,8 +79,8 @@ const GROUP_OPERATORS = new Set(['$and', '$or']);
  * True when a `$and` / `$or` operand is a non-empty plain object with a key that is not an operator,
  * such as an index or an attribute name. Query conversion drops such an operand along with its
  * condition (or the database layer rejects it), so letting one through can make the query match
- * every row. An operator map, e.g. `{ title: { $and: { $eq: 'x' } } }`, is left to the scalar
- * attribute checks, and empty objects hold no condition and are sanitized out.
+ * every row. An operator map, e.g. `{ title: { $and: { $eq: 'x' } } }`, is left to the object
+ * operand check (`findObjectOperand`), and empty objects hold no condition and are sanitized out.
  */
 const isObjectGroupOperand = (
   operator: string,
@@ -107,37 +110,93 @@ const isInOperatorOperand = (rawPath: string | null) => {
 };
 
 /**
- * Returns the first operator, and its operand, in the filter of a scalar attribute, whose operand is a non-empty plain object.
+ * Returns the first non-empty plain object in the operand of a non-logical operator: the operand
+ * itself, or an item of its value list at any depth. An operator map is such an object too.
+ */
+const findObjectValue = (operand: unknown): Record<string, unknown> | undefined => {
+  if (Array.isArray(operand) === true) {
+    for (const item of operand as unknown[]) {
+      const found = findObjectValue(item);
+
+      if (found !== undefined) {
+        return found;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isPlainRecord(operand) === true && Object.keys(operand).length > 0) {
+    return operand;
+  }
+
+  return undefined;
+};
+
+/**
+ * Returns the first non-logical operator, and its operand, in an operator map (or a list of them, at
+ * any depth) whose operand is a non-empty plain object, operator maps included, or holds one in its
+ * value list, e.g. `{ $eq: { a: 1 } }` or `{ $notIn: [{ $eq: 'x' }] }`.
+ * The operand of a logical operator is an operator map, or a list of them, and is searched in turn.
  * The filters traversal does not walk such operands, and query conversion drops them along with their
- * condition, so letting one through makes the query match every row.
+ * condition, or empties the list holding them. The query then matches every row, except for a `$and` /
+ * `$or` list on a scalar attribute, which the database layer rejects with a 500.
  * Empty objects are not reported: they hold no condition, and sanitization removes them.
  */
 const findObjectOperand = (
-  filter: Record<string, unknown>
+  filter: unknown
 ): { operator: string; operand: Record<string, unknown> } | undefined => {
+  if (Array.isArray(filter) === true) {
+    for (const item of filter as unknown[]) {
+      const nested = findObjectOperand(item);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isPlainRecord(filter) === false) {
+    return undefined;
+  }
+
   for (const [operator, operand] of Object.entries(filter)) {
-    if (
-      isOperator(operator) === false ||
-      BOOLEAN_CAST_OPERATORS.has(operator) === true ||
-      isPlainRecord(operand) === false ||
-      Object.keys(operand).length === 0
-    ) {
+    if (isOperator(operator) === false || BOOLEAN_CAST_OPERATORS.has(operator) === true) {
       continue;
     }
 
-    if (LOGICAL_OPERATORS.has(operator) === false) {
-      return { operator, operand };
+    if (LOGICAL_OPERATORS.has(operator) === true) {
+      const nested = findObjectOperand(operand);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+
+      continue;
     }
 
-    const nested = findObjectOperand(operand);
+    const objectValue = findObjectValue(operand);
 
-    if (nested !== undefined) {
-      return nested;
+    if (objectValue !== undefined) {
+      return { operator, operand: objectValue };
     }
   }
 
   return undefined;
 };
+
+/**
+ * True for the attributes whose filter can hold operators: scalar, relation, media and component
+ * attributes. Dynamic zones and morphTo relations are left to their own checks, which reject them.
+ */
+const isOperatorFilterableAttribute = (attribute: Attribute | undefined) =>
+  isScalarAttribute(attribute) === true ||
+  isMediaAttribute(attribute) === true ||
+  (isRelationalAttribute(attribute) === true &&
+    isMorphToRelationalAttribute(attribute) === false) ||
+  (isComponentAttribute(attribute) === true && isDynamicZoneAttribute(attribute) === false);
 
 export const validateFilters = asyncCurry(
   async (ctx: Context, filters: unknown, include: (typeof FILTER_TRAVERSALS)[number][]) => {
@@ -152,11 +211,21 @@ export const validateFilters = asyncCurry(
     // keys that are not attributes or valid operators
     if (include.includes('nonAttributesOperators')) {
       functionsToApply.push(
-        traverseQueryFilters(({ key, attribute, path, value }) => {
+        traverseQueryFilters(({ key, attribute, path, value, parent }) => {
           const isIdKey = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key);
+          // An operator at the root of the filters, e.g. `{ $not: { $eq: ... } }`, applies to no
+          // attribute, so the attribute checks below never see its operand
+          const isRootOperator = parent === undefined && isOperator(key) === true;
 
-          if ((isIdKey || isScalarAttribute(attribute) === true) && isPlainRecord(value)) {
-            const objectOperand = findObjectOperand(value);
+          let filter: unknown;
+          if (isIdKey || isOperatorFilterableAttribute(attribute) === true) {
+            filter = isPlainRecord(value) === true ? value : undefined;
+          } else if (isRootOperator === true) {
+            filter = { [key]: value };
+          }
+
+          if (filter !== undefined) {
+            const objectOperand = findObjectOperand(filter);
 
             if (objectOperand !== undefined) {
               const { operator, operand } = objectOperand;
