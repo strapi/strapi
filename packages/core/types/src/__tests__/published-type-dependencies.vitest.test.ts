@@ -9,13 +9,17 @@ import { describe, expect, test } from 'vitest';
 /**
  * The published declarations keep every import of `src`. A consumer type-checking with
  * `skipLibCheck: false` (or a strict package manager such as pnpm) can only resolve those
- * imports when the package that provides their types is a runtime dependency of `@strapi/types`.
+ * imports when the package that provides their types is a runtime dependency of `@strapi/types`,
+ * or an optional peer dependency the app provides (`@types/koa`, so the app's Koa 2 or Koa 3 types
+ * are the ones Strapi's types use).
  */
 
 type PackageManifest = {
   name: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   engines?: { node?: string };
   types?: string;
   typings?: string;
@@ -31,6 +35,7 @@ const readManifest = (manifestPath: string) =>
 
 const manifest = readManifest(path.join(packageRoot, 'package.json'));
 const dependencies = Object.keys(manifest.dependencies ?? {});
+const peerDependencies = Object.keys(manifest.peerDependencies ?? {});
 
 const isPublishedSource = (relativePath: string) =>
   relativePath.endsWith('.ts') === true &&
@@ -118,9 +123,16 @@ describe('published type dependencies', () => {
   test.each(typeProviders)(
     'types imported from %s are provided by a dependency (%s)',
     (_packageName, typeProvider) => {
-      expect(dependencies).toContain(typeProvider);
+      expect([...dependencies, ...peerDependencies]).toContain(typeProvider);
     }
   );
+
+  // A required peer would make every app install it; an optional one is only checked against the
+  // app's copy. The devDependency is the copy the repo builds and tests against.
+  test.each(peerDependencies)('peer dependency %s is optional and installed for dev', (peer) => {
+    expect(manifest.peerDependenciesMeta?.[peer]?.optional).toBe(true);
+    expect(Object.keys(manifest.devDependencies ?? {})).toContain(peer);
+  });
 
   test.each(devOnlyTypeImports)(
     'types imported from %s still have a dev-only provider',

@@ -10046,7 +10046,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
-    "@types/koa": "npm:^2.13.5"
+    "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:22.20.0"
     jest: "npm:29.6.0"
@@ -10066,11 +10066,15 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
+    "@types/koa": ^2.13.5 || ^3
     koa: ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10785,7 +10789,7 @@ __metadata:
     "@strapi/utils": "npm:5.62.0"
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
-    "@types/koa": "npm:^2.13.5"
+    "@types/koa": "npm:2.15.2"
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:22.20.0"
@@ -10807,6 +10811,11 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.62.0"
     zod: "npm:4.4.3"
+  peerDependencies:
+    "@types/koa": ^2.13.5 || ^3
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
