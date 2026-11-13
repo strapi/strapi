@@ -121,17 +121,35 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       throw new Error("Can't encrypt without a key");
     }
 
+    this.#archiveError = undefined;
     this.#archive.stream = tar.pack();
 
     const outStream = createWriteStream(this.#archivePath);
+    const archiveStream = this.#archive.stream;
 
-    outStream.on('error', (err: NodeJS.ErrnoException) => {
-      if (err.code === 'ENOSPC') {
-        throw new ProviderTransferError(
-          "Your server doesn't have space to proceed with the import."
-        );
+    // Record the failure and destroy the archive. Throwing from this listener crashes the
+    // process, and close() never sees the error.
+    const failArchive = (error: Error) => {
+      if (!this.#archiveError) {
+        this.#archiveError = error;
       }
-      throw err;
+
+      const cause = this.#archiveError;
+      if (this.#archive.pipeline && !this.#archive.pipeline.destroyed) {
+        this.#archive.pipeline.destroy(cause);
+      }
+      if (!archiveStream.destroyed) {
+        archiveStream.destroy(cause);
+      }
+    };
+
+    archiveStream.on('error', () => {});
+    outStream.on('error', (err: NodeJS.ErrnoException) => {
+      const error =
+        err.code === 'ENOSPC'
+          ? new ProviderTransferError("Your server doesn't have space to proceed with the import.")
+          : err;
+      failArchive(error);
     });
 
     const archiveTransforms: Stream[] = [];
@@ -144,11 +162,13 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       archiveTransforms.push(createEncryptionCipher(encryption.key));
     }
 
-    const archiveStream = this.#archive.stream;
-    this.#archiveError = undefined;
     this.#archiveReady = loadStreamDeps()
       .then(({ chain }) => {
-        this.#archive.pipeline = chain([archiveStream, ...archiveTransforms, outStream]);
+        const archivePipeline = chain([archiveStream, ...archiveTransforms, outStream]);
+        this.#archive.pipeline = archivePipeline;
+        archivePipeline.on('error', (error: Error) => {
+          failArchive(errorFromUnknown(error));
+        });
       })
       .catch((error: unknown) => {
         this.#archiveError = errorFromUnknown(error);
@@ -166,11 +186,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     this.#closed = true;
     await this.#archiveReady;
-    if (this.#archiveError) {
-      throw this.#archiveError;
+    const loadError = this.#archiveError;
+    if (loadError) {
+      throw loadError;
     }
 
-    const { stream, pipeline } = this.#archive;
+    const { stream, pipeline: archivePipeline } = this.#archive;
 
     if (!stream) {
       return;
@@ -179,17 +200,28 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     await this.#writeMetadata();
     stream.finalize();
 
-    if (pipeline && !pipeline.closed) {
+    if (archivePipeline && !archivePipeline.closed && !archivePipeline.destroyed) {
       await new Promise<void>((resolve, reject) => {
-        pipeline.on('close', resolve).on('error', reject);
+        archivePipeline.once('close', () => resolve());
+        archivePipeline.once('error', (error: Error) => {
+          reject(this.#archiveError ?? error);
+        });
       });
+    }
+
+    const archiveError = this.#archiveError;
+    if (archiveError) {
+      throw archiveError;
     }
   }
 
   async rollback(): Promise<void> {
     this.#reportInfo('rolling back');
-    await this.close();
-    await rm(this.#archivePath, { force: true });
+    try {
+      await this.close();
+    } finally {
+      await rm(this.#archivePath, { force: true });
+    }
   }
 
   getMetadata() {
