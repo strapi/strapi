@@ -93,6 +93,41 @@ The packages of this monorepo declare their contracts by hand (`*Contract` types
 these declared contracts first. A plugin author publishes contracts the same way: read
 [Declaring a package's contracts](#declaring-a-packages-contracts).
 
+A plugin's `provider` (`strapi.plugin(name).provider`) is the exception: without a registered
+provider type it stays `any`. Read [Plugin providers](#plugin-providers).
+
+### Plugin providers
+
+A package that sets a provider on its plugin registers its type in `PackagePluginProviders`, keyed
+by plugin name. With strict types, `strapi.plugin(name).provider` resolves to that type. Email
+registers `EmailProvider`.
+
+A custom provider can have members that the package type lacks, such as an `outboxPath()` function.
+The application declares its own type in `AppPluginProviders`, which replaces the package entry.
+Extend the package type to keep its members:
+
+```ts
+import type { EmailProvider } from '@strapi/email/strapi-server';
+
+interface OutboxProvider extends EmailProvider {
+  outboxPath(): string;
+}
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface AppPluginProviders {
+        email: OutboxProvider;
+      }
+    }
+  }
+}
+```
+
+`strapi.plugin('email').provider.outboxPath()` is then a `string`. Do not add the plugin to
+`PackagePluginProviders` instead: the package already declares that key, and a second declaration
+fails with TS2717. Without strict types, `provider` stays `any`.
+
 ### Permission action IDs
 
 With strict types, the permission actions named in typed configs, such as the `actions` of
@@ -161,7 +196,9 @@ use the global `Strapi.Registries` interfaces and `registries.ts` files, and lis
 Keep contracts in the package that implements them, under `server/src/types/`, and declare them
 in the `Package*` registries: `PackageServices`, `PackageControllers`, `PackagePolicies`,
 `PackageMiddlewares`, and `PackageConfigs`. Content-type schemas go in
-`PackageContentTypeSchemas`, described below. The `App*` registries belong to applications.
+`PackageContentTypeSchemas`, described below. The type of the provider a plugin sets on itself goes
+in `PackagePluginProviders` ([Plugin providers](#plugin-providers)). The `App*` registries belong
+to applications.
 
 ```ts
 // server/src/types/index.ts
