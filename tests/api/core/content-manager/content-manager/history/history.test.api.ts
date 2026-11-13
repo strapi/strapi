@@ -1,5 +1,6 @@
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
+import { createAgent } from 'api-tests/agent';
 import { createUtils, describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 import fs from 'fs';
@@ -934,6 +935,263 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
 
       expect(restoredDocument.seo).toMatchObject({ metaTitle: 'Initial title' });
+    });
+  });
+
+  describe('Source and author of history versions', () => {
+    const findVersions = async (documentId: string) => {
+      const { body } = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${documentId}`,
+      });
+
+      return body.data;
+    };
+
+    const createAdminToken = async (name: string) => {
+      const permission = (action: string) => ({
+        action,
+        subject: collectionTypeUid,
+        conditions: [],
+        properties: { fields: ['name', 'description'], locales: ['en'] },
+      });
+
+      const { body } = await rq({
+        method: 'POST',
+        url: '/admin/admin-tokens',
+        body: {
+          name,
+          adminPermissions: [
+            permission('plugin::content-manager.explorer.read'),
+            permission('plugin::content-manager.explorer.update'),
+          ],
+        },
+      });
+
+      const { documentId } = await strapi.db
+        .query('admin::api-token')
+        .findOne({ select: ['documentId'], where: { id: body.data.id } });
+
+      return {
+        token: { ...body.data, documentId },
+        tokenRq: await createAgent(strapi, { token: body.data.accessKey }),
+      };
+    };
+
+    const createAdminTokenVersion = async (name: string) => {
+      const { token, tokenRq } = await createAdminToken(name);
+
+      const res = await tokenRq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
+        body: { description: `Updated with the ${name}` },
+        qs: { locale: 'en' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(collectionTypeDocumentId);
+
+      return { token, version: latestVersion };
+    };
+
+    test('Records an admin panel write with the admin panel source', async () => {
+      const versions = await findVersions(collectionTypeDocumentId);
+
+      expect(versions.length).toBeGreaterThan(0);
+      versions.forEach((version) => {
+        expect(version.source).toBe('admin-panel');
+      });
+    });
+
+    test('Records an admin panel write with the admin as its author', async () => {
+      const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
+        body: { description: 'Updated in the admin panel' },
+        qs: { locale: 'en' },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(collectionTypeDocumentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: 'admin admin',
+        model: 'admin::user',
+        id: me.data.documentId,
+      });
+      expect(latestVersion.createdBy).toEqual({
+        id: me.data.id,
+        firstname: 'admin',
+        lastname: 'admin',
+        username: null,
+        email: 'admin@strapi.io',
+      });
+    });
+
+    test('Records an admin token write with the admin API source and the token as its author', async () => {
+      const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+
+      const { token, version } = await createAdminTokenVersion('history-author-token');
+
+      expect(version.source).toBe('admin-api');
+      expect(version.author).toEqual({
+        type: 'token',
+        name: 'history-author-token',
+        model: 'admin::api-token',
+        id: token.documentId,
+      });
+      expect(version.createdBy).toMatchObject({ id: me.data.id });
+    });
+
+    const createAuthorVersion = async (firstname: string) => {
+      const utils = createUtils(strapi);
+      const superAdminRole = await utils.getSuperAdminRole();
+      const author = await utils.createUser({
+        firstname,
+        lastname: 'author',
+        email: `${firstname}.author@strapi.io`,
+        roles: [superAdminRole.id],
+      });
+      const authorRq = await createAuthRequest({ strapi, userInfo: author });
+      const { data: entry } = await createEntry({
+        uid: collectionTypeUid,
+        data: { name: `Product of the ${firstname} author` },
+      });
+
+      const res = await authorRq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${entry.documentId}`,
+        body: { description: `Updated by the ${firstname} author` },
+        qs: { locale: 'en' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(entry.documentId);
+
+      return { author, version: latestVersion, documentId: entry.documentId };
+    };
+
+    test('Shows the current name of the author', async () => {
+      const { author, documentId } = await createAuthorVersion('renamed');
+
+      await strapi.service('admin::user').updateById(author.id, { firstname: 'Renamed' });
+
+      const [latestVersion] = await findVersions(documentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: 'Renamed author',
+        model: 'admin::user',
+        id: author.documentId,
+      });
+    });
+
+    test('Shows a deleted author when the author is deleted', async () => {
+      const { author, documentId } = await createAuthorVersion('deleted');
+
+      await createUtils(strapi).deleteUserById(author.id);
+
+      const [latestVersion] = await findVersions(documentId);
+      expect(latestVersion.author).toEqual({
+        type: 'person',
+        name: null,
+        model: 'admin::user',
+        id: null,
+      });
+    });
+
+    test('Shows the current name of the token', async () => {
+      const { token, version } = await createAdminTokenVersion('history-renamed-token');
+
+      await rq({
+        method: 'PUT',
+        url: `/admin/admin-tokens/${token.id}`,
+        body: { name: 'history-renamed-token-new-name' },
+      });
+
+      const versions = await findVersions(collectionTypeDocumentId);
+      expect(versions.find(({ id }) => id === version.id).author).toEqual({
+        type: 'token',
+        name: 'history-renamed-token-new-name',
+        model: 'admin::api-token',
+        id: token.documentId,
+      });
+    });
+
+    test('Shows a deleted token when the token is deleted', async () => {
+      const { token, version } = await createAdminTokenVersion('history-deleted-token');
+
+      await rq({ method: 'DELETE', url: `/admin/admin-tokens/${token.id}` });
+
+      const versions = await findVersions(collectionTypeDocumentId);
+      expect(versions.find(({ id }) => id === version.id).author).toEqual({
+        type: 'token',
+        name: null,
+        model: 'admin::api-token',
+        id: null,
+      });
+    });
+
+    describe('Versions saved before the source and the author', () => {
+      let documentId: string;
+
+      const createLegacyVersion = async (createdBy: number) => {
+        const historyVersions = strapi.db.query('plugin::content-manager.history-version');
+        const { contentType, relatedDocumentId, locale, status, data, schema } =
+          await historyVersions.findOne({ where: { relatedDocumentId: documentId } });
+
+        return historyVersions.create({
+          data: { contentType, relatedDocumentId, locale, status, data, schema, createdBy },
+        });
+      };
+
+      beforeAll(async () => {
+        const { data } = await createEntry({
+          uid: collectionTypeUid,
+          data: { name: 'Product saved before the source and the author' },
+        });
+        documentId = data.documentId;
+      });
+
+      test('Shows the admin panel source and the admin as the author', async () => {
+        const { body: me } = await rq({ method: 'GET', url: '/admin/users/me' });
+        const legacyVersion = await createLegacyVersion(me.data.id);
+
+        const versions = await findVersions(documentId);
+        const version = versions.find(({ id }) => id === legacyVersion.id);
+
+        expect(version.source).toBe('admin-panel');
+        expect(version.author).toEqual({
+          type: 'person',
+          name: 'admin admin',
+          model: 'admin::user',
+          id: me.data.documentId,
+        });
+      });
+
+      test('Shows a deleted author when the admin was deleted', async () => {
+        const utils = createUtils(strapi);
+        const admin = await utils.createUser({
+          firstname: 'deleted',
+          lastname: 'admin',
+          email: 'deleted.admin@strapi.io',
+        });
+        const legacyVersion = await createLegacyVersion(admin.id);
+        await utils.deleteUserById(admin.id);
+
+        const versions = await findVersions(documentId);
+        const version = versions.find(({ id }) => id === legacyVersion.id);
+
+        expect(version.source).toBe('admin-panel');
+        expect(version.author).toEqual({
+          type: 'person',
+          name: null,
+          model: 'admin::user',
+          id: null,
+        });
+      });
     });
   });
 

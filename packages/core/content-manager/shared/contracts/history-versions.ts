@@ -1,6 +1,29 @@
 import type { Data, Modules, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
+import type { HISTORY_VERSION_AUTHOR_TYPES, HISTORY_VERSION_SOURCES } from '../constants';
+
+export type HistoryVersionSource = (typeof HISTORY_VERSION_SOURCES)[number];
+
+export type HistoryVersionAuthorType = (typeof HISTORY_VERSION_AUTHOR_TYPES)[number];
+
+export interface HistoryVersionAuthorReference {
+  type: HistoryVersionAuthorType;
+  model: string;
+  id: string;
+}
+
+export interface HistoryVersionAuthor extends Omit<HistoryVersionAuthorReference, 'id'> {
+  /**
+   * `null` when the author was deleted.
+   */
+  id: string | null;
+  /**
+   * The current name of the author, `null` when the author was deleted.
+   */
+  name: string | null;
+}
+
 /**
  * Unlike other Content Manager contracts, history versions can't be created via
  * a dedicated API endpoint, but only by the history service listening to other actions.
@@ -13,6 +36,8 @@ export interface CreateHistoryVersion {
   status: 'draft' | 'published' | 'modified' | null;
   data: Modules.Documents.AnyDocument;
   schema: Struct.SchemaAttributes;
+  source: HistoryVersionSource;
+  author: HistoryVersionAuthorReference;
 }
 
 export interface Locale {
@@ -20,9 +45,16 @@ export interface Locale {
   code: string;
 }
 
-export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, 'locale'> {
+export interface HistoryVersionDataResponse extends Omit<
+  CreateHistoryVersion,
+  'locale' | 'author'
+> {
   id: Data.ID;
   createdAt: string;
+  author: HistoryVersionAuthor | null;
+  /**
+   * @deprecated Use `author` instead.
+   */
   createdBy?: {
     id: Data.ID;
     firstname?: string;

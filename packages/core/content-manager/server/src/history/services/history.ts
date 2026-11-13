@@ -8,23 +8,29 @@ import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
-import { createServiceUtils } from './utils';
+import { createServiceUtils, toAuthor, toAuthorColumns } from './utils';
+import { getVersionOrigin, type StoredVersionOrigin } from './legacy-versions';
 import { getService as getContentManagerService } from '../../utils';
 import { AUDITED_EVENTS, type HistoryRestoreEvent } from '../../audit-logs';
 
 // Needed because the query engine doesn't return any types yet
-type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
-  Pick<CreateHistoryVersion, 'locale'>;
+type HistoryVersionQueryResult = Omit<
+  HistoryVersionDataResponse,
+  'locale' | 'author' | 'source' | 'createdBy'
+> &
+  Pick<CreateHistoryVersion, 'locale'> &
+  StoredVersionOrigin;
 
 const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
   const serviceUtils = createServiceUtils({ strapi });
 
   return {
-    async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {
+    async createVersion({ author, ...historyVersionData }: HistoryVersions.CreateHistoryVersion) {
       await query.create({
         data: {
           ...historyVersionData,
+          ...toAuthorColumns(author),
           createdAt: new Date(),
           createdBy: strapi.requestContext.get()?.state?.user.id,
         },
@@ -70,7 +76,9 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           })
         : [];
       const versionsById = new Map(versions.map((version) => [version.id, version]));
-      const results = ids.map((id) => versionsById.get(id)).filter(Boolean);
+      const results = ids
+        .map((id) => versionsById.get(id))
+        .filter(Boolean) as HistoryVersionQueryResult[];
 
       const populateEntry = async (entry: HistoryVersionQueryResult) => {
         return traverseEntity(
@@ -159,10 +167,17 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         );
       };
 
+      const origins = results.map(getVersionOrigin);
+      const authorNameDictionary = await serviceUtils.getAuthorNameDictionary(
+        origins.map(({ author }) => author)
+      );
+
       const formattedResults: any[] = await Promise.all(
-        (results as HistoryVersionQueryResult[]).map(async (result) => {
+        results.map(async (result, index) => {
           return {
-            ...result,
+            ...omit(result, ['authorType', 'authorModel', 'authorId']),
+            source: origins[index].source,
+            author: toAuthor(origins[index].author, authorNameDictionary),
             data: await populateEntry(result),
             meta: {
               unknownAttributes: serviceUtils.getSchemaAttributesDiff(

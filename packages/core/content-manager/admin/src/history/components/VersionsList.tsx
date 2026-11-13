@@ -1,15 +1,16 @@
 import * as React from 'react';
 
 import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { AccessibleIcon, Box, Flex, Status, Tooltip, Typography } from '@strapi/design-system';
+import { Key, User } from '@strapi/icons';
 import { stringify } from 'qs';
-import { useIntl } from 'react-intl';
+import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { ActionsDrawer, useActionsDrawer } from '../../components/ActionsDrawer';
 import { RelativeTime } from '../../components/RelativeTime';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
-import { getDisplayName } from '../../utils/users';
 import { useHistoryContext } from '../pages/History';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -25,18 +26,148 @@ const BlueText = (children: React.ReactNode) => (
 );
 
 /* -------------------------------------------------------------------------------------------------
+ * TruncatedName
+ * -----------------------------------------------------------------------------------------------*/
+
+const TruncatedName = ({
+  name,
+  isTooltipOpen,
+  onTooltipOpenChange,
+}: {
+  name: string;
+  isTooltipOpen?: boolean;
+  onTooltipOpenChange?: (open: boolean) => void;
+}) => {
+  const nameRef = React.useRef<HTMLSpanElement | null>(null);
+  const [isNameCut, setIsNameCut] = React.useState(false);
+
+  const measureName = React.useCallback(() => {
+    if (nameRef.current) {
+      setIsNameCut(nameRef.current.scrollWidth > nameRef.current.clientWidth);
+    }
+  }, []);
+
+  const attachName = React.useCallback(
+    (node: HTMLSpanElement | null) => {
+      nameRef.current = node;
+      measureName();
+    },
+    [measureName]
+  );
+
+  React.useEffect(() => {
+    if (isTooltipOpen) {
+      measureName();
+    }
+  }, [isTooltipOpen, measureName]);
+
+  return (
+    <Tooltip
+      side="bottom"
+      label={isNameCut ? name : undefined}
+      open={isTooltipOpen}
+      onOpenChange={onTooltipOpenChange}
+    >
+      <Typography ref={attachName} tag="span" variant="pi" ellipsis onPointerEnter={measureName}>
+        {name}
+      </Typography>
+    </Tooltip>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * VersionAuthorName
+ * -----------------------------------------------------------------------------------------------*/
+
+const AUTHOR_TYPE_ICONS: Record<HistoryVersions.HistoryVersionAuthorType, React.ElementType> = {
+  person: User,
+  token: Key,
+};
+
+const AUTHOR_TYPE_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
+  person: {
+    id: 'content-manager.history.sidebar.version-card.author-type.person',
+    defaultMessage: 'Person',
+  },
+  token: {
+    id: 'content-manager.history.sidebar.version-card.author-type.token',
+    defaultMessage: 'Token',
+  },
+};
+
+const DELETED_AUTHOR_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, MessageDescriptor> = {
+  person: {
+    id: 'content-manager.history.sidebar.version-card.deleted-author.person',
+    defaultMessage: 'Deleted user',
+  },
+  token: {
+    id: 'content-manager.history.sidebar.version-card.deleted-author.token',
+    defaultMessage: 'Deleted token',
+  },
+};
+
+const ItalicName = styled(Typography)`
+  font-style: italic;
+`;
+
+const VersionDescription = styled(Typography)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spaces[1]};
+  white-space: nowrap;
+`;
+
+const VersionAuthorName = ({
+  author,
+  isNameTooltipOpen,
+  onNameTooltipOpenChange,
+}: {
+  author: HistoryVersions.HistoryVersionAuthor;
+  isNameTooltipOpen?: boolean;
+  onNameTooltipOpenChange?: (open: boolean) => void;
+}) => {
+  const { formatMessage } = useIntl();
+  const Icon = AUTHOR_TYPE_ICONS[author.type];
+
+  return (
+    <Flex tag="span" gap={1} minWidth={0}>
+      <Flex tag="span" shrink={0}>
+        <AccessibleIcon label={formatMessage(AUTHOR_TYPE_LABELS[author.type])}>
+          <Icon />
+        </AccessibleIcon>
+      </Flex>
+      {author.name ? (
+        <TruncatedName
+          name={author.name}
+          isTooltipOpen={isNameTooltipOpen}
+          onTooltipOpenChange={onNameTooltipOpenChange}
+        />
+      ) : (
+        <ItalicName tag="span" variant="pi" textColor="neutral500">
+          {formatMessage(DELETED_AUTHOR_LABELS[author.type])}
+        </ItalicName>
+      )}
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * VersionAuthor
  * -----------------------------------------------------------------------------------------------*/
 
 const VersionAuthor = ({
   version,
   isCurrent,
+  isNameTooltipOpen,
+  onNameTooltipOpenChange,
 }: {
   version: HistoryVersions.HistoryVersionDataResponse;
   isCurrent: boolean;
+  isNameTooltipOpen?: boolean;
+  onNameTooltipOpenChange?: (open: boolean) => void;
 }) => {
   const { formatMessage } = useIntl();
-  const author = version.createdBy && getDisplayName(version.createdBy);
+
   return (
     <>
       {formatMessage(
@@ -47,13 +178,46 @@ const VersionAuthor = ({
         },
         {
           distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
-          author,
-          isAnonymous: !version.createdBy,
+          author: version.author && (
+            <VersionAuthorName
+              author={version.author}
+              isNameTooltipOpen={isNameTooltipOpen}
+              onNameTooltipOpenChange={onNameTooltipOpenChange}
+            />
+          ),
+          isAnonymous: !version.author,
           isCurrent,
           b: BlueText,
         }
       )}
     </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * VersionSource
+ * -----------------------------------------------------------------------------------------------*/
+
+const SOURCE_LABELS: Record<HistoryVersions.HistoryVersionSource, MessageDescriptor> = {
+  'admin-panel': {
+    id: 'content-manager.history.sidebar.version-card.source.admin-panel',
+    defaultMessage: 'Admin panel',
+  },
+  'admin-api': {
+    id: 'content-manager.history.sidebar.version-card.source.admin-api',
+    defaultMessage: 'Admin API',
+  },
+};
+
+const VersionSource = ({ source }: { source: HistoryVersions.HistoryVersionSource }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Status variant="neutral" size="XS">
+      <Typography tag="span" variant="omega" fontWeight="bold">
+        {formatMessage(SOURCE_LABELS[source])}
+      </Typography>
+    </Status>
   );
 };
 
@@ -71,9 +235,27 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
   const [{ query }] = useQueryParams<{ id?: string }>();
   const setIsOpen = useActionsDrawer('VersionCard', (s) => s?.setIsOpen, false);
   const isActive = query.id === version.id.toString();
+  // The name is not focusable inside the card link, so keyboard focus on the card shows its tooltip.
+  // A click also focuses the card: the pointer down tells it apart, like the Radix tooltip trigger.
+  const [isNameTooltipOpen, setIsNameTooltipOpen] = React.useState(false);
+  const isPointerDownRef = React.useRef(false);
 
   const handleClick = () => {
     setIsOpen?.(false);
+  };
+
+  const handlePointerDown = () => {
+    isPointerDownRef.current = true;
+  };
+
+  const handleFocus = () => {
+    setIsNameTooltipOpen(!isPointerDownRef.current);
+    isPointerDownRef.current = false;
+  };
+
+  const handleBlur = () => {
+    setIsNameTooltipOpen(false);
+    isPointerDownRef.current = false;
   };
 
   return (
@@ -91,8 +273,11 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       to={`?${stringify({ ...query, id: version.id })}`}
       style={{ textDecoration: 'none' }}
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
     >
-      <Flex direction="column" gap={1} alignItems="flex-start">
+      <Flex direction="column" gap={1} alignItems="flex-start" maxWidth="100%">
         <Typography tag="h3" fontWeight="semiBold">
           {formatDate(version.createdAt, {
             day: 'numeric',
@@ -102,11 +287,19 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
             minute: '2-digit',
           })}
         </Typography>
-        <Typography tag="p" variant="pi" textColor="neutral600">
-          <VersionAuthor version={version} isCurrent={isCurrent} />
-        </Typography>
+        <VersionDescription tag="p" variant="pi" textColor="neutral600" maxWidth="100%">
+          <VersionAuthor
+            version={version}
+            isCurrent={isCurrent}
+            isNameTooltipOpen={isNameTooltipOpen}
+            onNameTooltipOpenChange={setIsNameTooltipOpen}
+          />
+        </VersionDescription>
       </Flex>
-      {version.status && <DocumentStatus status={version.status} size="XS" />}
+      <Flex gap={2} wrap="wrap">
+        {version.status && <DocumentStatus status={version.status} size="XS" />}
+        <VersionSource source={version.source} />
+      </Flex>
     </Flex>
   );
 };

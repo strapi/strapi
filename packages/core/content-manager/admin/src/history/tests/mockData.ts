@@ -9,6 +9,8 @@ const HISTORY_VERSIONS_MOCK_DATA = {
       relatedDocumentId: 'b2t6guwt3z4cdfb4sufuswry',
       locale: null,
       status: 'draft' as const,
+      source: 'admin-panel' as const,
+      author: null,
       data: {
         short_text: 'ktchnsnk',
         long_text:
@@ -443,6 +445,8 @@ const HISTORY_VERSIONS_MOCK_DATA = {
       relatedDocumentId: 'b2t6guwt3z4cdfb4sufuswry',
       locale: null,
       status: 'draft' as const,
+      source: 'admin-api' as const,
+      author: { type: 'token' as const, name: 'Deploy token', model: 'admin::api-token', id: '1' },
       data: {
         short_text: 'ktchnsnk',
         long_text:

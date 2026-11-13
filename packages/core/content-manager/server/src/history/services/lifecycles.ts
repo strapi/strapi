@@ -7,22 +7,18 @@ import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
-import { createServiceUtils } from './utils';
+import { createServiceUtils, type RequestContext } from './utils';
 
 /**
  * Filters out actions that should not create a history version.
  */
 const shouldCreateHistoryVersion = (
-  context: Modules.Documents.Middleware.Context
+  context: Modules.Documents.Middleware.Context,
+  requestContext: RequestContext | undefined
 ): context is Modules.Documents.Middleware.Context & {
   action: 'create' | 'update' | 'clone' | 'publish' | 'unpublish' | 'discardDraft';
   contentType: UID.CollectionType;
 } => {
-  // Ignore requests that are not related to the content manager
-  if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
-    return false;
-  }
-
   // NOTE: cannot do type narrowing with array includes
   if (
     context.action !== 'create' &&
@@ -43,7 +39,7 @@ const shouldCreateHistoryVersion = (
    */
   if (
     context.action === 'update' &&
-    strapi.requestContext.get()?.request.url.split('?')[0].endsWith('/actions/publish')
+    requestContext?.request.url.split('?')[0].endsWith('/actions/publish')
   ) {
     return false;
   }
@@ -90,9 +86,11 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       await persistTablesWithPrefix('strapi_history_versions');
 
       strapi.documents.use(async (context, next) => {
+        const requestContext = strapi.requestContext.get();
+        const origin = serviceUtils.resolveHistoryOrigin(requestContext);
         const result = (await next()) as any;
 
-        if (!shouldCreateHistoryVersion(context)) {
+        if (origin === null || !shouldCreateHistoryVersion(context, requestContext)) {
           return result;
         }
 
@@ -128,22 +126,39 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
         });
 
+        // TODO v6: store the author `id` and remove this extra query.
+        // See discussion in https://github.com/strapi/strapi/pull/28554#issuecomment-6826618574.
+        const authorDocumentId = await serviceUtils.findAuthorDocumentId(origin.author);
+        if (authorDocumentId === null) {
+          return result;
+        }
+
         await strapi.db.transaction(async ({ onCommit }) => {
           // .createVersion() is executed asynchronously,
           // onCommit prevents creating a history version
           // when the transaction has already been committed
           onCommit(async () => {
             for (const entry of localeEntries) {
-              const status = await serviceUtils.getVersionStatus(uid, entry);
+              try {
+                const status = await serviceUtils.getVersionStatus(uid, entry);
 
-              await getService(strapi, 'history').createVersion({
-                contentType: uid,
-                data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
-                relatedDocumentId: documentId,
-                locale: entry.locale,
-                status,
-                ...schemas,
-              });
+                await getService(strapi, 'history').createVersion({
+                  contentType: uid,
+                  data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
+                  relatedDocumentId: documentId,
+                  locale: entry.locale,
+                  status,
+                  ...schemas,
+                  source: origin.source,
+                  author: { ...origin.author, id: authorDocumentId },
+                });
+              } catch (error) {
+                strapi.log.error(`Failed to create a history version for ${uid}`, {
+                  documentId,
+                  locale: entry.locale,
+                  error,
+                });
+              }
             }
           });
         });

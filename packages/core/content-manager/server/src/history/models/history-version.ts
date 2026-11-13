@@ -1,4 +1,8 @@
 import type { Model } from '@strapi/database';
+import {
+  HISTORY_VERSION_AUTHOR_TYPES,
+  HISTORY_VERSION_SOURCES,
+} from '../../../../shared/constants';
 import { HISTORY_VERSION_UID } from '../constants';
 
 const historyVersion: Model = {
@@ -30,6 +34,20 @@ const historyVersion: Model = {
     },
     schema: {
       type: 'json',
+    },
+    source: {
+      type: 'enumeration',
+      enum: [...HISTORY_VERSION_SOURCES],
+    },
+    authorType: {
+      type: 'enumeration',
+      enum: [...HISTORY_VERSION_AUTHOR_TYPES],
+    },
+    authorModel: {
+      type: 'string',
+    },
+    authorId: {
+      type: 'string',
     },
     createdAt: {
       type: 'datetime',

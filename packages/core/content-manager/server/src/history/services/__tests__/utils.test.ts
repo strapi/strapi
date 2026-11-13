@@ -1,6 +1,6 @@
 import type { Core, Schema } from '@strapi/types';
 
-import { createServiceUtils } from '../utils';
+import { createServiceUtils, toAuthor, type RequestContext } from '../utils';
 
 const baseStrapiMock = {
   plugin: jest.fn(() => {}),
@@ -11,6 +11,15 @@ const articleModel = {
   modelType: 'contentType',
   attributes: {},
 } as unknown as Schema.ContentType;
+
+const createCtx = (pluginName: string, strategyName: string) =>
+  ({
+    state: {
+      user: { id: 1 },
+      route: { info: { pluginName, type: 'admin' } },
+      auth: { strategy: { name: strategyName }, credentials: { id: 2 } },
+    },
+  }) as unknown as RequestContext;
 
 type LocalizationFixture = {
   defaultLocale: string;
@@ -208,6 +217,120 @@ describe('History utils', () => {
 
         await expect(getLocaleDictionary()).resolves.toEqual({});
       });
+    });
+  });
+
+  describe('author helpers', () => {
+    const adminUser = (id: string | null) => ({
+      type: 'person' as const,
+      model: 'admin::user',
+      id,
+    });
+
+    it('getAuthorNameDictionary finds the current names with one query per model', async () => {
+      const findMany = jest.fn(({ select }) =>
+        select.includes('email')
+          ? [
+              {
+                documentId: '1',
+                username: 'kai',
+                firstname: 'Kai',
+                lastname: 'Doe',
+                email: 'kai@test.com',
+              },
+              {
+                documentId: '2',
+                username: null,
+                firstname: 'John',
+                lastname: 'Doe',
+                email: 'john@test.com',
+              },
+              {
+                documentId: '3',
+                username: null,
+                firstname: 'Ana',
+                lastname: null,
+                email: 'ana@test.com',
+              },
+              {
+                documentId: '4',
+                username: null,
+                firstname: null,
+                lastname: null,
+                email: 'jane@test.com',
+              },
+            ]
+          : [{ documentId: '5', name: 'CI token' }]
+      );
+      const strapi = { db: { query: jest.fn(() => ({ findMany })) } } as unknown as Core.Strapi;
+      const { getAuthorNameDictionary } = createServiceUtils({ strapi });
+
+      await expect(
+        getAuthorNameDictionary([
+          adminUser('1'),
+          adminUser('2'),
+          adminUser('3'),
+          adminUser('4'),
+          adminUser('1'),
+          adminUser(null),
+          { type: 'token', model: 'admin::api-token', id: '5' },
+          null,
+        ])
+      ).resolves.toEqual({
+        'admin::user': { 1: 'kai', 2: 'John Doe', 3: 'Ana', 4: 'jane@test.com' },
+        'admin::api-token': { 5: 'CI token' },
+      });
+      expect(findMany).toHaveBeenCalledTimes(2);
+      expect(findMany).toHaveBeenCalledWith({
+        select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
+        where: { documentId: { $in: ['1', '2', '3', '4'] } },
+      });
+      expect(findMany).toHaveBeenCalledWith({
+        select: ['documentId', 'name'],
+        where: { documentId: { $in: ['5'] } },
+      });
+    });
+
+    it('toAuthor gives no id and no name to a deleted author', () => {
+      const authorNameDictionary = { 'admin::user': { 1: 'kai' } };
+
+      expect(toAuthor(adminUser(null), authorNameDictionary)).toEqual({
+        ...adminUser(null),
+        name: null,
+      });
+      expect(toAuthor(adminUser('3'), authorNameDictionary)).toEqual({
+        ...adminUser(null),
+        name: null,
+      });
+    });
+  });
+
+  describe('resolveHistoryOrigin', () => {
+    const { resolveHistoryOrigin } = createServiceUtils({
+      // @ts-expect-error ignore
+      strapi: baseStrapiMock,
+    });
+
+    it('resolves an admin session on a Content Manager route to the admin', () => {
+      expect(resolveHistoryOrigin(createCtx('content-manager', 'admin'))).toEqual({
+        source: 'admin-panel',
+        author: { type: 'person', model: 'admin::user', id: '1' },
+      });
+    });
+
+    it('resolves an admin token on a Content Manager route to the token, not its owner', () => {
+      expect(resolveHistoryOrigin(createCtx('content-manager', 'admin-token'))).toEqual({
+        source: 'admin-api',
+        author: { type: 'token', model: 'admin::api-token', id: '2' },
+      });
+    });
+
+    it('resolves nothing on another admin route', () => {
+      expect(resolveHistoryOrigin(createCtx('admin', 'admin'))).toBeNull();
+    });
+
+    it('resolves nothing without a request context', () => {
+      expect(resolveHistoryOrigin(undefined)).toBeNull();
     });
   });
 });

@@ -4,7 +4,12 @@ import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
 import { FIELDS_TO_IGNORE } from '../constants';
-import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
+import type {
+  CreateHistoryVersion,
+  HistoryVersionAuthor,
+  HistoryVersionAuthorReference,
+  HistoryVersionSource,
+} from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
 
@@ -34,10 +39,95 @@ export const computeRetentionDays = (
   return Math.min(licenseDays, DEFAULT_RETENTION_DAYS);
 };
 
+export type RequestContext = NonNullable<ReturnType<Modules.RequestContext.RequestContext['get']>>;
+
+interface HistoryOrigin {
+  source: HistoryVersionSource;
+  author: HistoryVersionAuthorReference;
+}
+
+export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
+
+export type AuthorColumns =
+  | {
+      authorType: StoredAuthorReference['type'];
+      authorModel: StoredAuthorReference['model'];
+      authorId: StoredAuthorReference['id'];
+    }
+  | { authorType: null; authorModel: null; authorId: null };
+
+const toAdminUserAuthor = (user: { id: Data.ID }): HistoryVersionAuthorReference => ({
+  type: 'person',
+  model: 'admin::user',
+  id: String(user.id),
+});
+
+const toApiTokenAuthor = (token: { id: Data.ID }): HistoryVersionAuthorReference => ({
+  type: 'token',
+  model: 'admin::api-token',
+  id: String(token.id),
+});
+
+export const toAuthorColumns = (author: HistoryVersionAuthorReference): AuthorColumns => ({
+  authorType: author.type,
+  authorModel: author.model,
+  authorId: author.id,
+});
+
+export const toAuthorReference = (columns: AuthorColumns): StoredAuthorReference | null =>
+  columns.authorType === null
+    ? null
+    : {
+        type: columns.authorType,
+        model: columns.authorModel,
+        id: columns.authorId,
+      };
+
+type AuthorNameDictionary = Record<string, Record<string, string>>;
+
+export const toAuthor = (
+  author: StoredAuthorReference | null,
+  authorNameDictionary: AuthorNameDictionary
+): HistoryVersionAuthor | null => {
+  if (!author) {
+    return null;
+  }
+
+  const name = author.id ? authorNameDictionary[author.model]?.[author.id] : undefined;
+
+  return name === undefined ? { ...author, id: null, name: null } : { ...author, name };
+};
+
+interface AdminUserNames {
+  username: string | null;
+  firstname: string | null;
+  lastname: string | null;
+  email: string;
+}
+
+/**
+ * Retrieves the display name of an admin panel user
+ */
+const getDisplayName = ({ firstname, lastname, username, email }: AdminUserNames): string => {
+  if (username) {
+    return username;
+  }
+
+  // firstname is not required if the user is created with a username
+  if (firstname) {
+    return `${firstname} ${lastname ?? ''}`.trim();
+  }
+
+  return email;
+};
+
 type RelationResponse = {
   results: RelationResult[];
   meta: { missingCount: number };
 };
+
+const isContentManagerRoute = ({ state }: RequestContext) =>
+  state.route?.info?.pluginName === 'content-manager' && state.route?.info?.type === 'admin';
 
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
@@ -160,6 +250,83 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
       return acc;
     }, {});
+  };
+
+  const findAuthorDocumentId = async ({
+    model,
+    id,
+  }: HistoryVersionAuthorReference): Promise<string | null> => {
+    const author: { documentId: string } | null = await strapi.db
+      .query(model as UID.Schema)
+      .findOne({ select: ['documentId'], where: { id } });
+
+    return author?.documentId ?? null;
+  };
+
+  /**
+   * @description
+   * Finds the current names of the records of a model, keyed by document id
+   */
+  const findAuthorNames = async (
+    model: string,
+    documentIds: string[]
+  ): Promise<Record<string, string>> => {
+    switch (model) {
+      case 'admin::user': {
+        const users: Array<AdminUserNames & { documentId: string }> = await strapi.db
+          .query('admin::user')
+          .findMany({
+            select: ['documentId', 'username', 'firstname', 'lastname', 'email'],
+            where: { documentId: { $in: documentIds } },
+          });
+
+        return users.reduce<Record<string, string>>((acc, user) => {
+          acc[user.documentId] = getDisplayName(user);
+
+          return acc;
+        }, {});
+      }
+      case 'admin::api-token': {
+        const tokens: Array<{ documentId: string; name: string }> = await strapi.db
+          .query('admin::api-token')
+          .findMany({
+            select: ['documentId', 'name'],
+            where: { documentId: { $in: documentIds } },
+          });
+
+        return tokens.reduce<Record<string, string>>((acc, token) => {
+          acc[token.documentId] = token.name;
+
+          return acc;
+        }, {});
+      }
+      default:
+        return {};
+    }
+  };
+
+  /**
+   * @description
+   * Creates a dictionary of the current author names, with one query per model
+   */
+  const getAuthorNameDictionary = async (
+    authors: Array<StoredAuthorReference | null>
+  ): Promise<AuthorNameDictionary> => {
+    const idsByModel = authors.reduce<Record<string, Set<string>>>((acc, author) => {
+      if (author?.id) {
+        acc[author.model] = (acc[author.model] ?? new Set()).add(author.id);
+      }
+
+      return acc;
+    }, {});
+
+    const namesByModel = await Promise.all(
+      Object.entries(idsByModel).map(
+        async ([model, ids]) => [model, await findAuthorNames(model, Array.from(ids))] as const
+      )
+    );
+
+    return Object.fromEntries(namesByModel);
   };
 
   /**
@@ -360,6 +527,30 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
+  const resolveHistoryOrigin = (
+    requestContext: RequestContext | undefined
+  ): HistoryOrigin | null => {
+    if (!requestContext) {
+      return null;
+    }
+
+    if (isContentManagerRoute(requestContext)) {
+      switch (requestContext.state.auth?.strategy?.name) {
+        case 'admin':
+          return { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) };
+        case 'admin-token':
+          return {
+            source: 'admin-api',
+            author: toApiTokenAuthor(requestContext.state.auth.credentials),
+          };
+        default:
+          return null;
+      }
+    }
+
+    return null;
+  };
+
   return {
     getSchemaAttributesDiff,
     getRelationRestoreValue,
@@ -367,8 +558,11 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getDefaultLocale,
     isLocalizedContentType,
     getLocaleDictionary,
+    findAuthorDocumentId,
+    getAuthorNameDictionary,
     getRetentionDays,
     getVersionStatus,
+    resolveHistoryOrigin,
     getDeepPopulate,
     buildMediaResponse,
     buildRelationReponse,
