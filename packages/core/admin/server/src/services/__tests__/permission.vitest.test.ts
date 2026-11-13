@@ -429,7 +429,7 @@ describe('Permission Service', () => {
         expect(warn).toHaveBeenCalledTimes(1);
         expect(warn).toHaveBeenCalledWith(
           'Removed 5 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
-            'Actions: admin::audit-logs.read, admin::audit-logs.export, admin::users.read. ' +
+            'Actions: "admin::audit-logs.read", "admin::audit-logs.export", "admin::users.read". ' +
             'Subjects: none. ' +
             'Roles: "QA Auditor" (id 3). ' +
             'Admin tokens: "qa-siem-token" (id 7). ' +
@@ -466,8 +466,8 @@ describe('Permission Service', () => {
         expect(dbDelete).toHaveBeenCalledTimes(2);
         expect(warn).toHaveBeenCalledWith(
           'Removed 2 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
-            'Actions: plugin::content-manager.explorer.read, plugin::content-manager.explorer.update. ' +
-            'Subjects: api::legacy.legacy. ' +
+            'Actions: "plugin::content-manager.explorer.read", "plugin::content-manager.explorer.update". ' +
+            'Subjects: "api::legacy.legacy". ' +
             'Roles: "Editor" (id 2). ' +
             'Admin tokens: none. ' +
             'Without role or admin token: 0.'
@@ -496,7 +496,7 @@ describe('Permission Service', () => {
         expect(warn).toHaveBeenCalledTimes(1);
         expect(warn).toHaveBeenCalledWith(
           'Removed 401 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
-            'Actions: admin::audit-logs.read, admin::audit-logs.export, admin::legacy.read. ' +
+            'Actions: "admin::audit-logs.read", "admin::audit-logs.export", "admin::legacy.read". ' +
             'Subjects: none. ' +
             'Roles: "QA Auditor" (id 3), "Editor" (id 2). ' +
             'Admin tokens: "siem" (id 7). ' +
@@ -504,11 +504,16 @@ describe('Permission Service', () => {
         );
       });
 
-      test('quotes role and admin token names so the warning stays on one line', async () => {
+      test('quotes actions, subjects, role and admin token names so the warning stays on one line', async () => {
         const { warn } = setupCleanup(
           [
-            perm(1, 'admin::legacy.read', { role: { id: 3, name: 'Evil\nRole "x"' } }),
-            perm(2, 'admin::legacy.read', { apiToken: { id: 7, name: 'evil\r\ntoken' } }),
+            {
+              ...perm(1, 'admin::legacy.read\u001b[2J', {
+                role: { id: 3, name: 'Evil\nRole "x"\u0085\u2028\u2029' },
+              }),
+              subject: 'api::legacy.legacy\u009b\u202e',
+            },
+            perm(2, 'admin::legacy.read', { apiToken: { id: 7, name: 'evil\r\ntoken\u007f' } }),
           ],
           []
         );
@@ -517,9 +522,13 @@ describe('Permission Service', () => {
 
         expect(warn).toHaveBeenCalledTimes(1);
         const message = warn.mock.calls[0][0] as string;
-        expect(message).not.toMatch(/[\r\n]/);
-        expect(message).toContain('Roles: "Evil\\nRole \\"x\\"" (id 3). ');
-        expect(message).toContain('Admin tokens: "evil\\r\\ntoken" (id 7). ');
+        expect(message).not.toMatch(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u);
+        expect(message).toContain(
+          'Actions: "admin::legacy.read\\u001b[2J", "admin::legacy.read". '
+        );
+        expect(message).toContain('Subjects: "api::legacy.legacy\\u009b\\u202e". ');
+        expect(message).toContain('Roles: "Evil\\nRole \\"x\\"\\u0085\\u2028\\u2029" (id 3). ');
+        expect(message).toContain('Admin tokens: "evil\\r\\ntoken\\u007f" (id 7). ');
       });
 
       test('removes every stale permission in one run when they span several pages', async () => {
