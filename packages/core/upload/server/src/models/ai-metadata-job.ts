@@ -23,6 +23,12 @@ const aiMetadataJob: Model = {
       type: 'datetime',
       default: null,
     },
+    // Written at an interval by the process that runs the job. A `processing` job whose
+    // heartbeat is stale or missing was interrupted (see `failInterruptedJobs`).
+    heartbeatAt: {
+      type: 'datetime',
+      default: null,
+    },
   },
 };
 
