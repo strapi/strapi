@@ -77,7 +77,6 @@
     "json-logic-js": "2.0.5",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
-    "undici-types": "8.12.4",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -93,6 +92,7 @@
     "typedoc-github-wiki-theme": "2.1.0",
     "typedoc-plugin-markdown": "4.11.0",
     "typescript": "5.9.3",
+    "undici": "8.12.4",
     "vitest": "catalog:",
     "vitest-config": "5.62.0"
   },
