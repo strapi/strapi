@@ -97,8 +97,9 @@ const assertInverseSideHasOwner = (
     return;
   }
 
-  // An owner that points back under another name still builds the relation: the mappedBy name is
-  // never read at runtime, so apps relying on it keep booting.
+  // An owner that points back under another name still builds the relation: the mappedBy name only
+  // picks which attribute is checked first and appears in the error, so whether the app loads does
+  // not depend on it and apps relying on this keep booting.
   if (Object.values(targetMeta.attributes).some(pointsBack)) {
     return;
   }
