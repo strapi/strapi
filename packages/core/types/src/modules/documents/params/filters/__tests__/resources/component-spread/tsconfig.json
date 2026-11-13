@@ -1,0 +1,8 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": []
+  },
+  "files": ["../known-schema-keys/schemas.ts", "filters.ts"]
+}
