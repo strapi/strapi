@@ -15,6 +15,7 @@ describe('user email hash', () => {
     const ctx = createContext({}, { state });
 
     const strapi = {
+      has: vi.fn(() => true),
       requestContext: {
         get: vi.fn(() => ctx),
       },
@@ -30,6 +31,7 @@ describe('user email hash', () => {
     const ctx = createContext({}, {});
 
     const strapi = {
+      has: vi.fn(() => true),
       requestContext: {
         get: vi.fn(() => ctx),
       },
@@ -37,5 +39,16 @@ describe('user email hash', () => {
 
     const userId = generateAdminUserHash(strapi as any);
     expect(userId).toBe('');
+  });
+
+  test('returns empty string after request context has been released', () => {
+    const strapi = {
+      has: vi.fn(() => false),
+      get requestContext() {
+        throw new Error('Could not resolve service requestContext');
+      },
+    };
+
+    expect(generateAdminUserHash(strapi as any)).toBe('');
   });
 });

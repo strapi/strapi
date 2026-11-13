@@ -5,6 +5,7 @@ status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - The statement that plugin modules and API modules have no guaranteed relative order comes from reading `loadApplicationContext` (`Promise.all`). No test confirms it.
+  - Destroy leaves the service container in place. A second call waits for an in-flight shutdown and returns immediately after it succeeds. A failed shutdown can be retried from the step that did not finish. The API test helper clears the container after destroy succeeds.
 ---
 
 This page describes the boot sequence of the server runtime in `@strapi/core`. Read it before you add code to an internal provider, a loader, or a `register` or `bootstrap` function.
@@ -147,8 +148,9 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 6. `db.destroy()`.
 7. `process.removeAllListeners()`.
 8. `delete global.strapi`. This lets a test create a new instance.
+9. The shutdown message is logged. The service container stays registered. API tests keep the instance, and the test helper clears the container after `destroy()` succeeds so the process can collect those services.
 
-`destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
+A second `destroy()` waits for the shutdown already in progress. After that shutdown succeeds, another `destroy()` returns immediately. If shutdown throws, a later `destroy()` continues from the step that failed, so a closed database is not skipped. `destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
 
 `strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
 
@@ -156,7 +158,7 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 
 ## Idempotency guards
 
-- Each module records which lifecycle functions ran. A second call to `register`, `bootstrap` or `destroy` on the same module throws, for example `Register for plugin::i18n has already been called`.
+- Each module records which lifecycle functions finished. A second call to `register` or `bootstrap` throws, for example `Register for plugin::i18n has already been called`. A second `destroy` throws when the first one finished. A `destroy` that threw is not recorded, so the next shutdown runs that module again and skips modules that already finished.
 - `start()` skips `load()` when `isLoaded` is `true`. `load()` has no guard of its own. A second `load()` throws from the module guards.
 - The `modules`, `plugins` and `apis` registries throw when a name is added twice.
 - Provider functions have no guard.

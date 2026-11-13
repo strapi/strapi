@@ -75,13 +75,394 @@ describe('convert-query-params', () => {
     });
 
     // test filters that should be removed
-    test.each<[string, object]>([
-      ['invalid attribute', { invAttribute: 'test' }],
-      ['invalid operator', { $nope: 'test' }],
-      ['uppercase operator', { $GT: new Date() }],
-    ])('removes: %s', (key, input) => {
-      const res = transformer.private_convertFiltersQueryParams(input, models['api::dog.dog']);
+    test.each<[string, object, string]>([
+      ['invalid attribute', { invAttribute: 'test' }, 'invAttribute'],
+      ['invalid operator', { $nope: 'test' }, '$nope'],
+      ['uppercase operator', { $GT: new Date() }, '$GT'],
+    ])('removes: %s', (_, input, unknownKey) => {
+      const onUnknownFilterKey = jest.fn();
+      const observedTransformer = createTransformer({
+        getModel: (uid: string) => models[uid],
+        onUnknownFilterKey,
+      });
+
+      const res = observedTransformer.private_convertFiltersQueryParams(
+        input,
+        models['api::dog.dog']
+      );
+
       expect(res).toEqual({});
+      expect(transformer.private_convertFiltersQueryParams(input, models['api::dog.dog'])).toEqual(
+        {}
+      );
+      expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+      expect(onUnknownFilterKey).toHaveBeenCalledWith({
+        key: unknownKey,
+        uid: 'api::dog.dog',
+        path: [unknownKey],
+        operator: undefined,
+      });
+    });
+
+    describe('onUnknownFilterKey', () => {
+      const createObservedTransformer = () => {
+        const onUnknownFilterKey = jest.fn();
+        const observedTransformer = createTransformer({
+          getModel: (uid: string) => models[uid],
+          onUnknownFilterKey,
+        });
+
+        return { observedTransformer, onUnknownFilterKey };
+      };
+
+      test('is not called when every key is known', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(
+          {
+            id: 1,
+            documentId: { $eq: 'abc' },
+            title: { $eq: 'Hello' },
+            cpa: { field: { $contains: 'x' } },
+            one_to_one: { title: 'Hello' },
+            $or: [{ title: 'a' }, { createdAt: { $gt: '2022-03-17T15:06:57.878Z' } }],
+          },
+          models['api::dog.dog']
+        );
+
+        expect(onUnknownFilterKey).not.toHaveBeenCalled();
+      });
+
+      test('is not called for intentionally removed dynamic zone filters', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const res = observedTransformer.private_convertFiltersQueryParams(
+          { dz: { field: 'x' } },
+          models['api::dog.dog']
+        );
+
+        expect(res).toEqual({});
+        expect(onUnknownFilterKey).not.toHaveBeenCalled();
+      });
+
+      test('reports the nested model and attribute path of an unknown component key', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const res = observedTransformer.private_convertFiltersQueryParams(
+          { title: { $eq: 'Hello' }, cpa: { feild: { $eq: 'a' } } },
+          models['api::dog.dog']
+        );
+
+        expect(res).toEqual({ title: { $eq: 'Hello' } });
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'feild',
+          uid: 'default.cpa',
+          path: ['cpa', 'feild'],
+          operator: undefined,
+        });
+      });
+
+      test('reports unknown keys through relations and logical operators', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(
+          { $and: [{ one_to_one: { $or: [{ titel: 'a' }] } }] },
+          models['api::dog.dog']
+        );
+
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'titel',
+          uid: 'api::dog.dog',
+          path: ['one_to_one', 'titel'],
+          operator: undefined,
+        });
+      });
+
+      test('reports the operator of an object operand on a scalar attribute', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const res = observedTransformer.private_convertFiltersQueryParams(
+          { title: { $not: { $eq: { a: 999 } } } },
+          models['api::dog.dog']
+        );
+
+        // Pins a known widening: the converter drops the whole condition. Filter validation
+        // rejects such object operands before conversion, this converter does not.
+        expect(res).toEqual({});
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'a',
+          uid: 'api::dog.dog',
+          path: ['title', 'a'],
+          operator: '$eq',
+        });
+      });
+
+      test.each<[string, object, { uid: string; path: string[] }]>([
+        [
+          'an attribute name',
+          { title: { $eq: { title: { foo: 1 } } } },
+          { uid: 'api::dog.dog', path: ['title', 'title', 'foo'] },
+        ],
+        [
+          'id',
+          { title: { $eq: { id: { foo: 1 } } } },
+          { uid: 'api::dog.dog', path: ['title', 'id', 'foo'] },
+        ],
+        [
+          'a relation',
+          { title: { $eq: { one_to_one: { foo: 1 } } } },
+          { uid: 'api::dog.dog', path: ['title', 'one_to_one', 'foo'] },
+        ],
+        [
+          'a component',
+          { title: { $eq: { cpa: { foo: 1 } } } },
+          { uid: 'default.cpa', path: ['title', 'cpa', 'foo'] },
+        ],
+      ])('keeps the operator when an object operand holds %s', (_, filters, expected) => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(filters, models['api::dog.dog']);
+
+        expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'foo',
+          operator: '$eq',
+          ...expected,
+        });
+      });
+
+      test('reports the operator of an object operand on id', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams(
+          { id: { $in: [{ a: 1 }] } },
+          models['api::dog.dog']
+        );
+
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'a',
+          uid: 'api::dog.dog',
+          path: ['id', 'a'],
+          operator: '$in',
+        });
+      });
+
+      test('reports an undefined uid when the model is unknown', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        observedTransformer.private_convertFiltersQueryParams({ title: 'a' }, undefined);
+
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'title',
+          uid: undefined,
+          path: ['title'],
+          operator: undefined,
+        });
+      });
+
+      describe('across models', () => {
+        const crossModels = {
+          'api::article.article': {
+            uid: 'api::article.article',
+            modelType: 'contentType',
+            kind: 'collectionType',
+            info: { displayName: 'Article', singularName: 'article', pluralName: 'articles' },
+            options: {},
+            attributes: {
+              title: { type: 'string' },
+              author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+              cover: { type: 'media' },
+              related: { type: 'relation', relation: 'morphToOne' },
+              secret: { type: 'password' },
+            },
+          },
+          'api::author.author': {
+            uid: 'api::author.author',
+            modelType: 'contentType',
+            kind: 'collectionType',
+            info: { displayName: 'Author', singularName: 'author', pluralName: 'authors' },
+            options: {},
+            attributes: {
+              name: { type: 'string' },
+            },
+          },
+          'plugin::upload.file': {
+            uid: 'plugin::upload.file',
+            modelType: 'contentType',
+            kind: 'collectionType',
+            info: { displayName: 'File', singularName: 'file', pluralName: 'files' },
+            options: {},
+            attributes: {
+              name: { type: 'string' },
+            },
+          },
+        } satisfies Record<string, Model>;
+
+        const createCrossModelTransformer = () => {
+          const onUnknownFilterKey = jest.fn();
+          const crossModelTransformer = createTransformer({
+            getModel: (uid: string) => crossModels[uid],
+            onUnknownFilterKey,
+          });
+
+          return { crossModelTransformer, onUnknownFilterKey };
+        };
+
+        test.each<[string, object, { uid: string | undefined; path: string[] }]>([
+          [
+            'a relation to another model',
+            { author: { nmae: 'x' } },
+            { uid: 'api::author.author', path: ['author', 'nmae'] },
+          ],
+          [
+            'a media attribute',
+            { cover: { nmae: 'x' } },
+            { uid: 'plugin::upload.file', path: ['cover', 'nmae'] },
+          ],
+          [
+            // Morph relations have no target model: every nested key is unknown
+            'a morph relation',
+            { related: { name: 'x' } },
+            { uid: undefined, path: ['related', 'name'] },
+          ],
+        ])('reports the target model and the path through %s', (_, filters, expected) => {
+          const { crossModelTransformer, onUnknownFilterKey } = createCrossModelTransformer();
+
+          crossModelTransformer.private_convertFiltersQueryParams(
+            filters,
+            crossModels['api::article.article']
+          );
+
+          expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+          expect(onUnknownFilterKey).toHaveBeenCalledWith({
+            key: expected.path[expected.path.length - 1],
+            operator: undefined,
+            ...expected,
+          });
+        });
+
+        test('is not called for intentionally removed password filters', () => {
+          const { crossModelTransformer, onUnknownFilterKey } = createCrossModelTransformer();
+
+          const res = crossModelTransformer.private_convertFiltersQueryParams(
+            { secret: { $eq: 'x' } },
+            crossModels['api::article.article']
+          );
+
+          expect(res).toEqual({});
+          expect(onUnknownFilterKey).not.toHaveBeenCalled();
+        });
+
+        test('reports populate filters relative to the populated model', () => {
+          const { crossModelTransformer, onUnknownFilterKey } = createCrossModelTransformer();
+
+          crossModelTransformer.transformQueryParams('api::article.article', {
+            populate: { author: { filters: { nmae: 'x' } } },
+          });
+
+          expect(onUnknownFilterKey).toHaveBeenCalledTimes(1);
+          expect(onUnknownFilterKey).toHaveBeenCalledWith({
+            key: 'nmae',
+            uid: 'api::author.author',
+            path: ['nmae'],
+            operator: undefined,
+          });
+        });
+      });
+
+      test('does not change the converted query', () => {
+        const { observedTransformer } = createObservedTransformer();
+        const params: Params = {
+          filters: {
+            titel: 'a',
+            title: { $eq: 'Hello', $nope: 1 },
+            cpa: { feild: 'x', field: { $eq: { a: 1 } } },
+            one_to_one: { $or: [{ titel: 'a' }, { title: 'b' }] },
+            dz: { field: 'x' },
+          },
+          populate: { one_to_one: { filters: { titel: 'a', title: 'b' } } },
+        };
+
+        expect(observedTransformer.transformQueryParams('api::dog.dog', params)).toEqual(
+          transformer.transformQueryParams('api::dog.dog', params)
+        );
+      });
+
+      test('lets an error thrown by the hook propagate to the caller', () => {
+        const throwingTransformer = createTransformer({
+          getModel: (uid: string) => models[uid],
+          onUnknownFilterKey() {
+            throw new Error('unknown filter key');
+          },
+        });
+
+        expect(() =>
+          throwingTransformer.transformQueryParams('api::dog.dog', { filters: { titel: 'a' } })
+        ).toThrow('unknown filter key');
+      });
+
+      test('is called through transformQueryParams', () => {
+        const { observedTransformer, onUnknownFilterKey } = createObservedTransformer();
+
+        const query = observedTransformer.transformQueryParams('api::dog.dog', {
+          filters: { titel: 'a' },
+        });
+
+        expect(query.where).toEqual({});
+        expect(onUnknownFilterKey).toHaveBeenCalledWith({
+          key: 'titel',
+          uid: 'api::dog.dog',
+          path: ['titel'],
+          operator: undefined,
+        });
+      });
+    });
+
+    describe.each(['$null', '$notNull'])('%s operand', (operator) => {
+      test.each<[unknown, boolean]>([
+        [true, true],
+        ['true', true],
+        ['t', true],
+        ['1', true],
+        [1, true],
+        ['TRUE', true],
+        ['True', true],
+        ['T', true],
+        [false, false],
+        ['false', false],
+        ['f', false],
+        ['0', false],
+        [0, false],
+        ['FALSE', false],
+        ['False', false],
+        ['F', false],
+        // Kept from the loose reading: optional flags (`{ $null: someFlag }`), GraphQL's nullable
+        // input and a bare `?filters[x][$null]` (parsed with `strictNullHandling`) pass these.
+        [null, false],
+        [undefined, false],
+      ])('reads %p as %p', (operand, expected) => {
+        const res = transformer.private_convertFiltersQueryParams(
+          { title: { [operator]: operand } },
+          models['api::dog.dog']
+        );
+
+        expect(res).toEqual({ title: { [operator]: expected } });
+      });
+
+      test.each<unknown>(['no', 'yes', '', ' true ', 2, ['true'], { anything: 'anything' }])(
+        'rejects unrecognised operand %p',
+        (operand) => {
+          expect(() =>
+            transformer.private_convertFiltersQueryParams(
+              { title: { [operator]: operand } },
+              models['api::dog.dog']
+            )
+          ).toThrow(ValidationError);
+        }
+      );
     });
 
     test.todo('partial filtering works');

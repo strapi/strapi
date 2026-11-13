@@ -41,7 +41,7 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
   },
 
   async getLatestActiveJob(): Promise<AIMetadataJob | null> {
-    // Return the most recent job, regardless of status
+    // Despite the name, return the most recent job regardless of status
     // This allows the frontend to see completed/failed status
     return strapi.db.query(AI_METADATA_JOB_UID).findOne({
       orderBy: { createdAt: 'desc' },

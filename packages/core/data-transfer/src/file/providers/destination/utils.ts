@@ -1,6 +1,7 @@
-import { Writable } from 'stream';
 import { posix } from 'path';
 import tar from 'tar-stream';
+
+import { createBufferedEntryWriter } from '../../../utils/buffered-entry-writer';
 
 /**
  * Create a file path factory for a given path & prefix.
@@ -24,55 +25,36 @@ export const createTarEntryStream = (
   maxSize = 2.56e8
 ) => {
   let fileIndex = 0;
-  let buffer = '';
 
-  const flush = async () => {
-    if (!buffer) {
-      return;
-    }
-
+  const writeEntry = (content: string) => {
     fileIndex += 1;
     const name = pathFactory(fileIndex);
-    const size = buffer.length;
+    const size = content.length;
 
-    await new Promise<void>((resolve, reject) => {
-      archive.entry({ name, size }, buffer, (err) => {
-        if (err) {
-          reject(err);
-        }
+    return new Promise<void>((resolve, reject) => {
+      // tar-stream 2.2.0 does not call the callback when the pack is finalized or destroyed,
+      // and it throws instead of calling back when another entry is still open. Either one
+      // would leave this promise pending, and a destroy that waits for the flush would hang.
+      let entry: unknown;
+      try {
+        entry = archive.entry({ name, size }, content, (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
 
-        resolve();
-      });
-    });
-
-    buffer = '';
-  };
-
-  const push = (chunk: string | Buffer) => {
-    buffer += chunk;
-  };
-
-  return new Writable({
-    async destroy(err, callback) {
-      await flush();
-      callback(err);
-    },
-
-    async write(chunk, _encoding, callback) {
-      const size = chunk.length;
-
-      if (chunk.length > maxSize) {
-        callback(new Error(`payload too large: ${chunk.length}>${maxSize}`));
+          resolve();
+        });
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error(String(err)));
         return;
       }
 
-      if (buffer.length + size > maxSize) {
-        await flush();
+      if (!entry) {
+        reject(new Error('Cannot write a tar entry after the archive has closed'));
       }
+    });
+  };
 
-      push(chunk);
-
-      callback(null);
-    },
-  });
+  return createBufferedEntryWriter({ maxSize, writeEntry });
 };

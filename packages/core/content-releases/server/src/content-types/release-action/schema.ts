@@ -1,3 +1,4 @@
+import { RELEASE_ACTION_OUTCOMES } from '../../../../shared/constants';
 import { RELEASE_MODEL_UID } from '../../constants';
 
 export default {
@@ -42,6 +43,14 @@ export default {
     },
     isEntryValid: {
       type: 'boolean',
+    },
+    // What happened to the entry when its release froze. Null while the release is planned.
+    outcome: {
+      type: 'enumeration',
+      enum: [...RELEASE_ACTION_OUTCOMES],
+    },
+    reason: {
+      type: 'json',
     },
   },
 };
