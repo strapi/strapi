@@ -183,18 +183,17 @@ You must pass **`--initial <4.x semver>`** (or use **`--scenario tests/migration
 
 The orchestrator (`tests/migration/scripts/run-migration-scenario.ts`) wipes `examples/complex/.migration-v5/`, scaffolds a disposable v4 app via `scripts/setup-v4-project.ts`, seeds it, then validates on the same database against workspace Strapi. **Postgres / MySQL / MariaDB** legs start DB containers via `examples/complex/docker-compose.dev.yml`; **sqlite** uses a local file and needs no Docker. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial legacy`.
 
-**CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job: v4 baseline on Node 20, workspace on Node 22, latest v4 from `@strapi/strapi@legacy`).
+**CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job, Node 20, latest v4 from `@strapi/strapi@legacy`).
 
 Options:
 
 - `--initial <4.x semver>` — required without `--scenario`
 - `--scenario <path>` — JSON scenario (default: `tests/migration/scenarios/v4-to-head.json`)
-- `--initial-node-bin <path>` — Node executable for a v4 baseline's scaffold, install and seed (env `MIGRATION_INITIAL_NODE_BIN`). Pinned v5 baselines, later stages, and workspace validation keep the host Node
-- `--initial-node` / `--workspace-node` — optional Node major guards for the baseline runtime and the host (must match unless `--initial-node-bin` is set)
+- `--initial-node` / `--workspace-node` — optional host Node major guard (single process; aliases must match)
 - `--database sqlite` (default locally) | `postgres` | `mysql` | `mariadb`
 - `--multiplier N`, `--build`, `--skip-build`
 
-Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20** while workspace Strapi needs **Node ≥ 22**, so CI runs the host on Node 22 and passes `--initial-node-bin` with `--initial-node 20`. Env defaults (`DATABASE_CLIENT`, `MIGRATION_MULTIPLIER` / `SEED_MULTIPLIER`) apply when the matching CLI flag is omitted.
+Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20** (CI passes `--initial-node 20`). Env defaults (`DATABASE_CLIENT`, `MIGRATION_MULTIPLIER` / `SEED_MULTIPLIER`) apply when the matching CLI flag is omitted.
 
 Pass flags after the script name (avoid an extra `--` before `--database` or Yarn may not forward options).
 
@@ -202,7 +201,7 @@ Examples:
 
 - `yarn test:migrations --initial legacy --database sqlite --skip-build`
 - `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json`
-- `yarn test:migrations --initial legacy --initial-node 20 --initial-node-bin "$(nvm which 20)" --workspace-node 22` — v4 baseline on Node 20, workspace on Node 22 (same as CI)
+- `yarn test:migrations --initial-node 20` — fail fast if Node major ≠ 20
 
 Checkpoints: [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
 

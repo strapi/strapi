@@ -6,21 +6,8 @@ jest.mock('sort-package-json', () => ({
   sortPackageJson: (pkg: Record<string, unknown>) => pkg,
 }));
 
-import {
-  betterSqlite3NeedsInstallScript,
-  getBetterSqlite3Version,
-} from '../../../../packages/cli/create-strapi-app/src/utils/database';
 import { createPackageJSON } from '../../../../packages/cli/create-strapi-app/src/utils/package-json';
 import type { Scope } from '../../../../packages/cli/create-strapi-app/src/types';
-
-// 13.x ships a prebuild and is left off the pnpm build allow-list. 12.x still needs prebuild-install.
-const sqlitePnpmBuildPackages = [
-  '@swc/core',
-  ...(betterSqlite3NeedsInstallScript(getBetterSqlite3Version()) ? ['better-sqlite3'] : []),
-  'core-js-pure',
-  'esbuild',
-  'sharp',
-];
 
 const repoRoot = path.resolve(__dirname, '../../../..');
 
@@ -92,15 +79,13 @@ describe('createPackageJSON', () => {
 
       await createPackageJSON(makeScope(projectDir, { pnpmVersion: '10.25.0' }));
 
-      const pkg = readPkg(projectDir);
-
-      expect(pkg.pnpm.onlyBuiltDependencies).toEqual(sqlitePnpmBuildPackages);
-      if (betterSqlite3NeedsInstallScript(getBetterSqlite3Version())) {
-        expect(pkg.pnpm.ignoredBuiltDependencies).toBeUndefined();
-      } else {
-        expect(pkg.pnpm.ignoredBuiltDependencies).toEqual(['better-sqlite3']);
-        expect(pkg.pnpm.onlyBuiltDependencies).not.toContain('better-sqlite3');
-      }
+      expect(readPkg(projectDir).pnpm.onlyBuiltDependencies).toEqual([
+        '@swc/core',
+        'better-sqlite3',
+        'core-js-pure',
+        'esbuild',
+        'sharp',
+      ]);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
@@ -122,7 +107,13 @@ describe('createPackageJSON', () => {
 
       await createPackageJSON(makeScope(projectDir, { pnpmVersion: '10.25.0' }));
 
-      expect(readPkg(projectDir).pnpm.onlyBuiltDependencies).toEqual(sqlitePnpmBuildPackages);
+      expect(readPkg(projectDir).pnpm.onlyBuiltDependencies).toEqual([
+        '@swc/core',
+        'better-sqlite3',
+        'core-js-pure',
+        'esbuild',
+        'sharp',
+      ]);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }

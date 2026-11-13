@@ -244,12 +244,11 @@ async function prepareDockerDatabase(ctx: MigrationContext, client: DbClient): P
   }
 }
 
-function assertNodeForV4(nodeBin: string = process.execPath): void {
-  const { getNodeMajorForBinary } = require('./node-check');
-  const major = getNodeMajorForBinary(nodeBin);
+function assertNodeForV4(): void {
+  const major = Number(process.versions.node.split('.')[0]);
   if (major > 20) {
     console.warn(
-      `\n⚠️  Strapi v4 in this scaffold expects Node <= 20 (engines). Baseline Node major is ${major} (${nodeBin}). If install or seed fails, pass --initial-node-bin pointing at a Node 20 executable.\n`
+      `\n⚠️  Strapi v4 in this scaffold expects Node <= 20 (engines). Current Node is ${process.version}. If install or seed fails, use Node 20.\n`
     );
   }
 }

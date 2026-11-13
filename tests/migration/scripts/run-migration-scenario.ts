@@ -11,7 +11,7 @@
  * Examples:
  *   yarn test:migrations --initial legacy --database sqlite --skip-build
  *   yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
- *   yarn test:migrations --initial legacy --initial-node 20 --initial-node-bin "$(nvm which 20)" --workspace-node 22
+ *   yarn test:migrations --initial legacy --initial-node 20
  *
  * When --scenario is omitted, you must pass **--initial** (no default). When --scenario is set,
  * `--initial` / `--via` are ignored.
@@ -84,18 +84,13 @@ const argv = yargs(hideBin(process.argv))
   .option('initial-node', {
     type: 'number',
     describe:
-      'Require this Node.js major for the baseline (e.g. 20 for Strapi v4). Checks --initial-node-bin when set, otherwise the host process',
-  })
-  .option('initial-node-bin', {
-    type: 'string',
-    describe:
-      'Node executable for the baseline scaffold, install and seed (env: MIGRATION_INITIAL_NODE_BIN). Lets the baseline run on Node 20 while the workspace runs on the host Node',
+      'Require this host Node.js major for the whole run (single process; e.g. 20 for Strapi v4 CI)',
   })
   .option('workspace-node', {
     alias: 'final-node',
     type: 'number',
     describe:
-      'Require this host Node.js major (pinned stages and workspace validation). Without --initial-node-bin it must match --initial-node',
+      'Alias of --initial-node (same host-runtime guard). Must match --initial-node if both are set',
   })
   .option('validators', {
     type: 'string',
@@ -160,48 +155,31 @@ function resolveMultiplier(): number {
   return 1;
 }
 
-function resolveInitialNodeBin(baselineType: string): string {
-  // Only the v4 app needs Node 20. A pinned v5 baseline uses the host Node: its
-  // driver pin follows this repo, and better-sqlite3 13 does not load on Node 20.
-  if (baselineType !== 'v4-scaffold') {
-    return process.execPath;
-  }
-
-  const raw = (argv.initialNodeBin as string | undefined) || process.env.MIGRATION_INITIAL_NODE_BIN;
-  if (!raw) {
-    return process.execPath;
-  }
-  const resolved = path.resolve(raw);
-  if (!fs.existsSync(resolved)) {
-    console.error(`\n❌ --initial-node-bin not found: ${resolved}\n`);
-    process.exit(1);
-  }
-  return resolved;
-}
-
-function toMajor(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-}
-
 /**
- * Baseline steps run on `initialNodeBin`; everything else runs on the host process.
- * Without a separate baseline binary both flags guard the same runtime, so they must agree.
+ * Single host-runtime guard: the runner is one Node process, so dual majors cannot work.
+ * --workspace-node / --final-node are aliases of --initial-node.
  */
-function assertNodeMajors(initialNodeBin: string): void {
-  const initial = toMajor(argv.initialNode);
-  const workspace = toMajor(argv.workspaceNode ?? argv.finalNode);
-  const separateBaseline = initialNodeBin !== process.execPath;
-
-  if (!separateBaseline && initial != null && workspace != null && initial !== workspace) {
+function resolveHostNodeMajor(): number | undefined {
+  const initial = argv.initialNode as number | undefined;
+  const workspace = (argv.workspaceNode ?? argv.finalNode) as number | undefined;
+  if (
+    initial != null &&
+    Number.isFinite(initial) &&
+    workspace != null &&
+    Number.isFinite(workspace) &&
+    initial !== workspace
+  ) {
     console.error(
-      '\n❌ Different --initial-node and --workspace-node need --initial-node-bin: without it the baseline runs on the host Node.\n' +
-        '   Pass --initial-node-bin "$(nvm which 20)" --initial-node 20 --workspace-node 22, or run on one Node.\n'
+      '\n❌ Cannot use different --initial-node and --workspace-node: the migration runner is a single Node process.\n' +
+        '   Pass one host major (e.g. --initial-node 20), or switch Node and re-run.\n'
     );
     process.exit(1);
   }
-
-  assertNodeMajor(initial, 'initial-node', initialNodeBin);
-  assertNodeMajor(workspace, 'workspace-node');
+  const major = initial ?? workspace;
+  if (major == null || !Number.isFinite(major)) {
+    return undefined;
+  }
+  return major;
 }
 
 function normalizeVia(raw: unknown): string[] {
@@ -357,9 +335,7 @@ async function run(): Promise<void> {
   loadMigrationDotenv();
 
   assertCliInitialOrScenario();
-  const { scenario, sourceLabel } = resolveScenario();
-  const initialNodeBin = resolveInitialNodeBin(scenario.baseline.type);
-  assertNodeMajors(initialNodeBin);
+  assertNodeMajor(resolveHostNodeMajor(), 'initial-node');
 
   const database = resolveDatabase();
   const multiplier = resolveMultiplier();
@@ -369,10 +345,12 @@ async function run(): Promise<void> {
     skipBuild: argv.skipBuild,
   });
 
+  const { scenario, sourceLabel } = resolveScenario();
+
   const dataOrigin =
     scenario.dataOrigin != null ? scenario.dataOrigin : inferDataOrigin(scenario.baseline);
   if (scenario.baseline.type === 'v4-scaffold') {
-    assertNodeForV4(initialNodeBin);
+    assertNodeForV4();
   }
 
   const composeProject = process.env.STRAPI_MIGRATION_COMPOSE_PROJECT || 'strapi_migration_v5';
@@ -403,7 +381,6 @@ async function run(): Promise<void> {
       multiplier,
       dbEnv,
       initialVersion,
-      nodeBin: initialNodeBin,
     });
   } else if (scenario.baseline.type === 'v5-pinned') {
     await runV5PinnedBaseline(ctx, {

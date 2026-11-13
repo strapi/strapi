@@ -678,7 +678,7 @@ jobs:
 
   migration_v5:
     if: needs.conditions.outputs.migrations == 'true'
-    name: 'v4 → workspace migration test (latest v4, ${{ matrix.database }}, node: 20 → 22)'
+    name: 'v4 → workspace migration test (latest v4, ${{ matrix.database }}, node: 20)'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
     timeout-minutes: 30
@@ -694,21 +694,13 @@ jobs:
         database: [sqlite, postgres, mysql, mariadb]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # Strapi v4 needs Node <= 20 and workspace Strapi needs Node >= 22: install Node 20
-      # for the v4 baseline (MIGRATION_INITIAL_NODE_BIN), then Node 22 for the host.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 20
-      - name: Record Node 20 path for the v4 baseline
-        id: baseline-node
-        run: echo "bin=$(command -v node)" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 22
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      # Host (Node 22) runs the orchestrator (run-migration-scenario.ts) and workspace validation.
-      # The v4 baseline is scaffolded, installed and seeded on Node 20. Compose is
+      # Host runs the orchestrator (run-migration-scenario.js) and workspace validation.
+      # The v4 baseline is scaffolded and seeded on the host (Node 20). Compose is
       # only used to start postgres/mysql/mariadb services when the matrix leg needs them.
       - name: Monorepo build
         uses: ./.github/actions/run-build
@@ -716,9 +708,7 @@ jobs:
         run: yarn test:migrations:unit
       # Latest Strapi v4 line: npm dist-tag `legacy` on @strapi/strapi (resolved by the orchestrator).
       - name: Run migration integration test
-        env:
-          MIGRATION_INITIAL_NODE_BIN: ${{ steps.baseline-node.outputs.bin }}
-        run: timeout 25m yarn test:migrations --initial legacy --initial-node 20 --workspace-node 22 --database ${{ matrix.database }} --skip-build
+        run: timeout 25m yarn test:migrations --initial legacy --initial-node 20 --database ${{ matrix.database }} --skip-build
 
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'

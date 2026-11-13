@@ -117,11 +117,8 @@ Database driver packages often have their own minimum versions for each version 
 
 | Node Version | PostgreSQL (pg) | MySQL (mysql2) | SQLite (better-sqlite3) |
 | ------------ | --------------- | -------------- | ----------------------- |
-| 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
+| 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@11.x     |
 | 24           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
-| 26           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
-
-`better-sqlite3@13` needs Node-API 10, which Node ships from 22.14.0 and 23.6.0. Node 22.0–22.13 and 23.0–23.5 crash when the database opens. `13.0.3` also ships prebuilds only for 64-bit Linux (glibc and musl), macOS, and Windows. It has no binary for 32-bit ARM (`linux/arm` and Alpine's `linuxmusl-arm`) or for any other OS or CPU, and it does not compile during install. `12.11.1` still publishes those 32-bit ARM binaries and compiles everywhere else. `create-strapi-app` pins `13.0.3` only when the scaffolding machine can load that prebuild, and `12.11.1` otherwise. A new app pinned to 13.x sets `engines.node` to `>=22.14.0 <23.0.0 || >=23.6.0 <=26.x.x`. An existing app can stay on 12.x. Yarn 1 compiles `13.0.3` because that package ships `binding.gyp` and has no install script, so a new SQLite app created with Yarn 1 is pinned to `12.11.1`. The Yarn version is the `yarn` binary in the new app's directory, which is the one that runs the install. Yarn 2 and later install the 13.x prebuilt binary.
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 

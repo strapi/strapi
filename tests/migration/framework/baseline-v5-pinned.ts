@@ -19,8 +19,6 @@ type V5PinnedBaselineOpts = {
   multiplier: number;
   dbEnv: DbEnv;
   initialVersion: string;
-  /** Node executable for scaffold, install and seed. */
-  nodeBin?: string;
 };
 
 /**
@@ -31,27 +29,26 @@ async function runV5PinnedBaseline(
   ctx: MigrationContext,
   opts: V5PinnedBaselineOpts
 ): Promise<DbEnv> {
-  const { database, multiplier, dbEnv, initialVersion, nodeBin = process.execPath } = opts;
-  const { envForNodeBinary } = require('./node-check');
+  const { database, multiplier, dbEnv, initialVersion } = opts;
   const pinnedRoot = path.join(ctx.MIGRATION_ROOT, 'v5-baseline', initialVersion);
 
   console.log(
     `\n📁 Pinned Strapi v5 baseline ${initialVersion} (canonical v5 seed) at ${pinnedRoot}...`
   );
   await execa(
-    nodeBin,
+    process.execPath,
     ['--import', 'tsx', path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-pinned-v5-project.ts')],
     {
       cwd: ctx.REPO_ROOT,
       stdio: 'inherit',
-      env: envForNodeBinary(nodeBin, {
+      env: {
         ...process.env,
         PINNED_STRAPI_VERSION: initialVersion,
         PINNED_V5_OUT_DIR: pinnedRoot,
         NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), process.env.NODE_PATH]
           .filter(Boolean)
           .join(path.delimiter),
-      }),
+      },
     }
   );
 
@@ -73,7 +70,7 @@ async function runV5PinnedBaseline(
   await execa('yarn', ['install'], {
     cwd: pinnedRoot,
     stdio: 'inherit',
-    env: envForNodeBinary(nodeBin, nestedYarnInstallEnv(dbEnv)),
+    env: nestedYarnInstallEnv(dbEnv),
   });
 
   const scriptsDir = path.join(pinnedRoot, 'scripts');
@@ -88,10 +85,10 @@ async function runV5PinnedBaseline(
   );
 
   console.log(`\n🌱 Seeding (seed-v5.ts) against Strapi ${initialVersion}...`);
-  await execa(nodeBin, ['--import', 'tsx', path.join('scripts', 'seed-v5.ts')], {
+  await execa(process.execPath, ['--import', 'tsx', path.join('scripts', 'seed-v5.ts')], {
     cwd: pinnedRoot,
     stdio: 'inherit',
-    env: envForNodeBinary(nodeBin, {
+    env: {
       ...process.env,
       ...dbEnv,
       SEED_MULTIPLIER: String(multiplier),
@@ -99,7 +96,7 @@ async function runV5PinnedBaseline(
       NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), process.env.NODE_PATH]
         .filter(Boolean)
         .join(path.delimiter),
-    }),
+    },
   });
 
   return dbEnv;
