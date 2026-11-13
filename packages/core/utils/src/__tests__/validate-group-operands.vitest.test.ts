@@ -6,8 +6,7 @@ import { articleModel, getModel } from './test-fixtures';
 
 /**
  * The database layer reads a `$and` / `$or` operand as a group only when it is a list, and has no
- * attribute level `$and` / `$or`. Any other operand fails there (a 500), or query conversion drops it
- * when nothing valid is left in it, and the query then matches every row.
+ * attribute level `$and` / `$or`. It fails on any other operand, and REST answers with a 500.
  */
 describe('validateFilters - $or and $and operands keyed by operators', () => {
   const ctx = { schema: articleModel, getModel };
@@ -34,12 +33,22 @@ describe('validateFilters - $or and $and operands keyed by operators', () => {
       '$or',
       'title.$or',
     ],
+    // A value that is not a plain object holds a condition, even when it is null or empty
+    ['$or holding $eq with a null value', { $or: { $eq: null } }, '$or', '$or'],
+    ['$and holding $in with an empty list', { $and: { $in: [] } }, '$and', '$and'],
+    ['$or holding $gt with a Date', { $or: { $gt: new Date('2026-01-01') } }, '$or', '$or'],
+    [
+      '$and holding empty objects next to a condition',
+      { title: { $and: { $not: {}, $eq: 'x' } } },
+      '$and',
+      'title.$and',
+    ],
   ])('throws on %s', async (_, filters, key, path) => {
     const error = await validate(filters).catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(ValidationError);
     expect(error).toMatchObject({
-      message: `Invalid operand for ${key} at ${path}: expected an array of filters, not an object`,
+      message: `Invalid operand for ${key} at ${path}: expected a list of filters, at the root of the filters or under a relation, not an object`,
       details: { key, path },
     });
   });
@@ -64,6 +73,10 @@ describe('validateFilters - $or and $and operands keyed by operators', () => {
     // Empty objects hold no condition and are sanitized out
     ['an empty operand', { $or: {}, createdBy: { $and: {} } }],
     ['an operand holding only empty objects', { $and: { $eq: {} }, title: { $or: { $eq: {} } } }],
+    [
+      'an operand holding only nested empty objects',
+      { $or: { $not: { $eq: {} } }, title: { $and: { $not: { $not: {} } } } },
+    ],
     // Left to query conversion, which reads a $null / $notNull operand as a boolean
     ['$or holding $eq in a $null operand', { title: { $null: { $or: { $eq: 1 } } } }],
     ['$and holding $not in a $notNull operand', { createdBy: { $notNull: { $and: { $not: 1 } } } }],

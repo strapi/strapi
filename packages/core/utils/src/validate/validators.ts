@@ -76,8 +76,8 @@ const arrayLimitMessage = (operator: string, path: string) =>
 const GROUP_OPERATORS = new Set(['$and', '$or']);
 
 /**
- * True when the value holds a condition: anything but a plain object whose values are all empty
- * objects, at any depth. Sanitization removes such objects.
+ * True when the value holds a condition: anything but a plain object that holds only empty objects,
+ * at any depth. Such an object holds no condition: sanitization and query conversion remove it.
  */
 const holdsCondition = (value: unknown): boolean =>
   isPlainRecord(value) === false || Object.values(value).some(holdsCondition);
@@ -273,8 +273,10 @@ export const validateFilters = asyncCurry(
               });
             }
 
+            // Only name the places where the database layer reads a list of filters: under a scalar
+            // attribute, the list form is not supported either
             throw new ValidationError(
-              `Invalid operand for ${key} at ${operandPath}: expected an array of filters, not an object`,
+              `Invalid operand for ${key} at ${operandPath}: expected a list of filters, at the root of the filters or under a relation, not an object`,
               { key, path: operandPath }
             );
           }

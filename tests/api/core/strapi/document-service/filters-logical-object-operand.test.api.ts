@@ -6,8 +6,8 @@ import { createTestBuilder } from 'api-tests/builder';
 
 /**
  * The Document Service validates its filters before it reads or writes. A `$or` or `$and` operand
- * must be a list: the database layer rejects any other operand, and query conversion drops one with
- * nothing valid left in it, so the query matches every row.
+ * must be a list: the database layer reads a group only from a list, and fails on any other operand
+ * with an Error that REST answers with a 500.
  */
 
 const CATEGORY_UID = 'api::dslo-category.dslo-category' as UID.ContentType;
@@ -53,7 +53,7 @@ const arrayLimitMessage = (operator: string, path: string) =>
   `Invalid operand for ${operator} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`;
 
 const objectMessage = (operator: string, path: string) =>
-  `Invalid operand for ${operator} at ${path}: expected an array of filters, not an object`;
+  `Invalid operand for ${operator} at ${path}: expected a list of filters, at the root of the filters or under a relation, not an object`;
 
 describe('Document Service filters with object-shaped $or and $and operands', () => {
   beforeAll(async () => {
@@ -161,7 +161,8 @@ describe('Document Service filters with object-shaped $or and $and operands', ()
     });
   });
 
-  // Runs last: before the fix, this delete removed Note 2
+  // Runs last: validation must throw before the delete runs, so no document the filter does not match
+  // is removed
   test('delete throws before it deletes a document the filter does not match', async () => {
     const error = await strapi
       .documents(NOTE_UID)

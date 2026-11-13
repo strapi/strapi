@@ -139,8 +139,8 @@ describe('Filtering with object-shaped $or and $and operands', () => {
     }
   );
 
-  // A $or or $and operand keyed by operators is not a list either. The database layer rejects it (a
-  // 500), or, when no valid key is left in it, query conversion drops it and every row is returned.
+  // A $or or $and operand keyed by operators is not a list either. The database layer reads a group
+  // only from a list and rejects it with a 500, so validation must answer a 400 first.
   const operatorKeyedFilters: Array<[string, string, string, string]> = [
     ['a $or keyed by $eq', 'filters[$or][$eq]=Note%201', '$or', '$or'],
     ['a $and keyed by $not', 'filters[$and][$not][title]=Note%201', '$and', '$and'],
@@ -183,7 +183,7 @@ describe('Filtering with object-shaped $or and $and operands', () => {
     expect(res.body.error).toMatchObject({
       status: 400,
       name: 'ValidationError',
-      message: `Invalid operand for ${key} at ${path}: expected an array of filters, not an object`,
+      message: `Invalid operand for ${key} at ${path}: expected a list of filters, at the root of the filters or under a relation, not an object`,
     });
   });
 
