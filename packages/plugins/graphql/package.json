@@ -60,7 +60,7 @@
     "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
-    "@apollo/server": "4.13.0",
+    "@apollo/server": "5.5.2",
     "@as-integrations/koa": "1.1.1",
     "@graphql-tools/schema": "10.0.3",
     "@graphql-tools/utils": "^12.0.3",
