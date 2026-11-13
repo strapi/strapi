@@ -11,6 +11,7 @@ import {
   PLAN_FEATURE_CATALOG,
 } from './license';
 import { createEntitlementsRegistry, parseNumericString } from './entitlements';
+import { getUserHashes } from './user-hashes';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
@@ -144,6 +145,13 @@ const init = (licenseDir: string, logger?: Logger) => {
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
+  // Read before the transaction opens: SQLite pools hold a single connection, which the
+  // transaction below keeps busy, and on Postgres a failed query would abort the transaction.
+  // Never throws: without hashes the license check is still sent, just without them.
+  const userHashes = ee.licenseInfo.licenseKey
+    ? await getUserHashes(strapi, ee.licenseInfo.licenseKey)
+    : undefined;
+
   const { get, commit, rollback } = await strapi.db.transaction();
   const transaction = get();
 
@@ -192,9 +200,9 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     const license = shouldContactRegistry
-      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(
-          fallback
-        )
+      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid'), {
+          userHashes,
+        }).catch(fallback)
       : storedInfo.license;
 
     if (license) {
