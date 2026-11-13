@@ -207,9 +207,10 @@ const toAssocs = (data: Assocs) => {
 
 /**
  * `toAssocs` checks `set` by truthiness, so `{ set: null }` reaches the write branches as an
- * empty delta. Released Strapi cleared the inverse morph fields on a bare null set and applied
- * the delta when a connect or disconnect came with it. The morph branches keep both outcomes
- * until #27432 settles what `{ set: null }` means for every relation type.
+ * empty delta. Released Strapi cleared the inverse morph fields on a bare null set, and the morph
+ * branches keep that until #27432 settles what `{ set: null }` means for every relation type.
+ * Next to a connect or disconnect, the delta applies. Released Strapi did that for an inverse
+ * morphToMany (media); its inverse morphToOne branch cleared every link and linked nothing.
  */
 const isBareNullSet = (value: unknown, assocs: ReturnType<typeof toAssocs>) =>
   isRecord(value) &&

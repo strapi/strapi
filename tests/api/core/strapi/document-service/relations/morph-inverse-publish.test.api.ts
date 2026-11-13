@@ -975,6 +975,86 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       }
     );
 
+    // A foreign __type is rejected in every write shape, and nothing is written
+    it.each([
+      [
+        'set',
+        (r2: any, card: any) => ({
+          remarks: { set: [{ documentId: r2.documentId, __type: CARD_UID }] },
+        }),
+      ],
+      [
+        'disconnect',
+        (r2: any, card: any) => ({
+          remarks: { disconnect: [{ documentId: card.documentId, __type: CARD_UID }] },
+        }),
+      ],
+      [
+        'a mix of a valid and a foreign item',
+        (r2: any, card: any) => ({
+          remarks: {
+            connect: [
+              { documentId: r2.documentId, __type: REMARK_UID },
+              { documentId: card.documentId, __type: CARD_UID },
+            ],
+          },
+        }),
+      ],
+      [
+        'an item given by id',
+        (r2: any) => ({ remarks: { connect: [{ id: r2.id, __type: CARD_UID }] } }),
+      ],
+      [
+        'a non-string __type',
+        (r2: any) => ({
+          remarks: { connect: [{ documentId: r2.documentId, __type: { toString: 1 } }] },
+        }),
+      ],
+    ])('rejects a foreign __type in %s through the document service', async (_label, toData) => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] } as any,
+      });
+      const draft = await getNoteRow(note.documentId, 'draft');
+      const card = await strapi.documents(CARD_UID).create({ data: { title: 'c' } as any });
+
+      await expect(
+        strapi.documents(NOTE_UID).update({
+          documentId: note.documentId,
+          data: toData(r2, card) as any,
+        })
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('rejects a foreign __type on a morphOne through the document service', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const card = await strapi.documents(CARD_UID).create({
+        data: { title: 'pinned', pinnedRemark: [r1.id] } as any,
+      });
+      const cardRow = await strapi.db.query(CARD_UID).findOne({
+        where: { documentId: card.documentId },
+      });
+
+      await expect(
+        strapi.documents(CARD_UID).update({
+          documentId: card.documentId,
+          data: {
+            pinnedRemark: { connect: [{ documentId: r2.documentId, __type: NOTE_UID }] },
+          } as any,
+        })
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: cardRow?.id, subjectType: CARD_UID },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
     /**
      * Through REST, an inverse morph item resolves its target from the schema, so `{ documentId }`
      * is enough. `{ set }`, `{ connect }` and `{ disconnect }` also accept `{ documentId, __type }`
@@ -1080,6 +1160,27 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body.error.name).toBe('ValidationError');
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: null, subjectType: null },
+        ]);
+      });
+
+      it('answers a non-string __type with a 400', async () => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await createNote([r1]);
+
+        const res = await rqContent({
+          method: 'PUT',
+          url: `/morph-notes/${note.documentId}`,
+          body: {
+            data: {
+              remarks: { connect: [{ documentId: r2.documentId, __type: { toString: 1 } }] },
+            },
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
         expect(await getRemarkSubjects()).toEqual([
           { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
           { id: r2.id, subjectId: null, subjectType: null },

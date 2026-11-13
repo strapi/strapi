@@ -85,6 +85,16 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
       // Transform the relation documentId to entity id
       const newRelation = await mapRelation((relation) => {
         if (!relation || !relation.documentId) {
+          // An entry given by id keeps its id, but its __type is still checked
+          if (
+            typeof relation === 'object' &&
+            relation !== null &&
+            isPolymorphicRelation === true &&
+            isMorphToRelationalAttribute(attribute) === false
+          ) {
+            getInverseMorphTargetUid(attribute.target, relation);
+          }
+
           return relation;
         }
 
