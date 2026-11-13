@@ -20,6 +20,7 @@ import { useTypedDispatch } from '../../../core/store/hooks';
 import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
+import { usePasswordPolicy } from '../../../hooks/usePasswordPolicy';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
 import {
   useGetRegistrationInfoQuery,
@@ -29,197 +30,89 @@ import {
 import { isBaseQueryError } from '../../../utils/baseQuery';
 import { getOrCreateDeviceId } from '../../../utils/deviceId';
 import { establishAdminSession } from '../../../utils/establishAdminSession';
-import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
-const REGISTER_USER_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required(translatedErrors.required).nullable(),
-  lastname: yup.string().nullable(),
-  password: yup
-    .string()
-    .min(8, {
-      id: translatedErrors.minLength.id,
-      defaultMessage: 'Password must be at least 8 characters',
-      values: { min: 8 },
-    })
-    .test(
-      'max-bytes',
-      {
-        id: 'components.Input.error.contain.maxBytes',
-        defaultMessage: 'Password must be less than 73 bytes',
-      },
-      function (value) {
-        if (!value || typeof value !== 'string') return true; // validated elsewhere
+import type { PasswordSchema } from '../../../utils/passwordPolicy';
 
-        const byteSize = getByteSize(value);
-        return byteSize <= 72;
-      }
-    )
-    .test(
-      'lowercase',
-      {
-        message: {
-          id: 'components.Input.error.contain.lowercase',
-          defaultMessage: 'Password must contain at least 1 lowercase letter',
-        },
-      },
-      (value) => {
-        if (!value) return true;
-        return /[a-z]/.test(value);
-      }
-    )
-    .test(
-      'uppercase',
-      {
-        message: {
-          id: 'components.Input.error.contain.uppercase',
-          defaultMessage: 'Password must contain at least 1 uppercase letter',
-        },
-      },
-      (value) => {
-        if (!value) return true;
-        return /[A-Z]/.test(value);
-      }
-    )
-    .test(
-      'number',
-      {
-        message: {
-          id: 'components.Input.error.contain.number',
-          defaultMessage: 'Password must contain at least 1 number',
-        },
-      },
-      (value) => {
-        if (!value) return true;
-        return /\d/.test(value);
-      }
-    )
-    .required({
+const getRegisterUserSchema = (passwordSchema: PasswordSchema) =>
+  yup.object().shape({
+    firstname: yup.string().trim().required(translatedErrors.required).nullable(),
+    lastname: yup.string().nullable(),
+    password: passwordSchema
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Password is required',
+      })
+      .nullable(),
+    confirmPassword: yup
+      .string()
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Confirm password is required',
+      })
+      .oneOf([yup.ref('password'), null], {
+        id: 'components.Input.error.password.noMatch',
+        defaultMessage: 'Passwords must match',
+      })
+      .nullable(),
+    registrationToken: yup.string().required({
       id: translatedErrors.required.id,
-      defaultMessage: 'Password is required',
-    })
-    .nullable(),
-  confirmPassword: yup
-    .string()
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'Confirm password is required',
-    })
-    .oneOf([yup.ref('password'), null], {
-      id: 'components.Input.error.password.noMatch',
-      defaultMessage: 'Passwords must match',
-    })
-    .nullable(),
-  registrationToken: yup.string().required({
-    id: translatedErrors.required.id,
-    defaultMessage: 'Registration token is required',
-  }),
-});
-
-const REGISTER_ADMIN_SCHEMA = yup.object().shape({
-  firstname: yup
-    .string()
-    .trim()
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'Firstname is required',
-    })
-    .nullable(),
-  lastname: yup.string().nullable(),
-  password: yup
-    .string()
-    .min(8, {
-      id: translatedErrors.minLength.id,
-      defaultMessage: 'Password must be at least 8 characters',
-      values: { min: 8 },
-    })
-    .test(
-      'max-bytes',
-      {
-        id: 'components.Input.error.contain.maxBytes',
-        defaultMessage: 'Password must be less than 73 bytes',
-      },
-      function (value) {
-        if (!value) return true;
-        return new TextEncoder().encode(value).length <= 72;
-      }
-    )
-    .test(
-      'lowercase',
-      {
-        message: {
-          id: 'components.Input.error.contain.lowercase',
-          defaultMessage: 'Password must contain at least 1 lowercase letter',
-        },
-      },
-      (value) => {
-        if (!value) return true;
-        return /[a-z]/.test(value);
-      }
-    )
-    .test(
-      'uppercase',
-      {
-        message: {
-          id: 'components.Input.error.contain.uppercase',
-          defaultMessage: 'Password must contain at least 1 uppercase letter',
-        },
-      },
-      (value) => {
-        if (!value) return true;
-        return /[A-Z]/.test(value);
-      }
-    )
-    .test(
-      'number',
-      {
-        message: {
-          id: 'components.Input.error.contain.number',
-          defaultMessage: 'Password must contain at least 1 number',
-        },
-      },
-      (value) => {
-        if (!value) return true;
-        return /\d/.test(value);
-      }
-    )
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'Password is required',
-    })
-    .nullable(),
-  confirmPassword: yup
-    .string()
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'Confirm password is required',
-    })
-    .nullable()
-    .oneOf([yup.ref('password'), null], {
-      id: 'components.Input.error.password.noMatch',
-      defaultMessage: 'Passwords must match',
+      defaultMessage: 'Registration token is required',
     }),
-  email: yup
-    .string()
-    .email({
-      id: translatedErrors.email.id,
-      defaultMessage: 'Not a valid email',
-    })
-    .strict()
-    .lowercase({
-      id: translatedErrors.lowercase.id,
-      defaultMessage: 'Email must be lowercase',
-    })
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'Email is required',
-    })
-    .nullable(),
-});
+  });
+
+const getRegisterAdminSchema = (passwordSchema: PasswordSchema) =>
+  yup.object().shape({
+    firstname: yup
+      .string()
+      .trim()
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Firstname is required',
+      })
+      .nullable(),
+    lastname: yup.string().nullable(),
+    password: passwordSchema
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Password is required',
+      })
+      .nullable(),
+    confirmPassword: yup
+      .string()
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Confirm password is required',
+      })
+      .nullable()
+      .oneOf([yup.ref('password'), null], {
+        id: 'components.Input.error.password.noMatch',
+        defaultMessage: 'Passwords must match',
+      }),
+    email: yup
+      .string()
+      .email({
+        id: translatedErrors.email.id,
+        defaultMessage: 'Not a valid email',
+      })
+      .strict()
+      .lowercase({
+        id: translatedErrors.lowercase.id,
+        defaultMessage: 'Email must be lowercase',
+      })
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Email is required',
+      })
+      .nullable(),
+  });
 
 interface RegisterProps {
   hasAdmin?: boolean;
 }
+
+/** Fields of the invite form sent under `userInfo` and rendered as inputs. */
+const USER_INFO_FIELDS = new Set(['firstname', 'lastname', 'password']);
 
 interface RegisterFormValues {
   firstname: string;
@@ -301,6 +194,21 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
   const { setNpsSurveySettings } = useNpsSurveySettings();
+  const {
+    schema: passwordSchema,
+    hint: passwordHint,
+    refetch: refetchPasswordPolicy,
+  } = usePasswordPolicy();
+
+  const isAdminRegistration = match?.params.authType === 'register-admin';
+
+  const schema = React.useMemo(
+    () =>
+      isAdminRegistration
+        ? getRegisterAdminSchema(passwordSchema)
+        : getRegisterUserSchema(passwordSchema),
+    [isAdminRegistration, passwordSchema]
+  );
 
   const registrationToken = query.get('registrationToken');
   // Once registration succeeds the token is consumed. Skipping here stops the
@@ -398,8 +306,24 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         trackUsage('didNotCreateFirstAdmin');
 
         if (res.error.name === 'ValidationError') {
-          setFormErrors(formatValidationErrors(res.error));
-          return;
+          // The body nests the fields under `userInfo`, the form does not
+          const { userInfo: userInfoErrors } = formatValidationErrors(res.error) as {
+            userInfo?: Record<string, string>;
+          };
+          const fieldErrors = Object.fromEntries(
+            Object.entries(userInfoErrors ?? {})
+              .filter(([field]) => USER_INFO_FIELDS.has(field))
+              .map(([field, message]) => [field, String(message).replace(/^userInfo\./, '')])
+          );
+
+          // The password policy may have changed since the page loaded
+          refetchPasswordPolicy();
+
+          // Errors on other paths (e.g. the registration token) have no field: show the alert
+          if (Object.keys(fieldErrors).length > 0) {
+            setFormErrors(fieldErrors);
+            return;
+          }
         }
 
         setApiError(formatAPIError(res.error));
@@ -413,10 +337,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   ) {
     return <Navigate to="/" />;
   }
-
-  const isAdminRegistration = match.params.authType === 'register-admin';
-
-  const schema = isAdminRegistration ? REGISTER_ADMIN_SCHEMA : REGISTER_USER_SCHEMA;
 
   return (
     <UnauthenticatedLayout>
@@ -538,11 +458,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                   type: 'email' as const,
                 },
                 {
-                  hint: formatMessage({
-                    id: 'Auth.form.password.hint',
-                    defaultMessage:
-                      'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number',
-                  }),
+                  hint: passwordHint,
                   label: formatMessage({
                     id: 'global.password',
                     defaultMessage: 'Password',
