@@ -121,11 +121,19 @@ const processRelationWhere = (where: unknown, ctx: WhereCtx) => {
   if (operatorKeys.length === 1) {
     const operator = operatorKeys[0];
 
-    if (isOperatorOfType('group', operator)) {
+    // A group, or a $not holding a filter on the target's attributes (e.g. `{ $not: { name: 'x' } }`),
+    // filters the related rows, not the relation id
+    const operand = where[operator];
+    const isNestedFilterNot =
+      operator === '$not' &&
+      isRecord(operand) &&
+      Object.keys(operand).some((key) => isOperator(key) === false);
+
+    if (isOperatorOfType('group', operator) || isNestedFilterNot) {
       return processWhere(where, ctx);
     }
 
-    return { [idAlias]: { [operator]: processNested(where[operator], ctx) } };
+    return { [idAlias]: { [operator]: processNested(operand, ctx) } };
   }
 
   return processWhere(where, ctx);
