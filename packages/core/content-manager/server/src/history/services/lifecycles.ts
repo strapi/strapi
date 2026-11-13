@@ -7,8 +7,7 @@ import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
-import { resolveHistoryOrigin, type RequestContext } from '../origin';
-import { createServiceUtils } from './utils';
+import { createServiceUtils, type RequestContext } from './utils';
 
 /**
  * Filters out actions that should not create a history version.
@@ -88,7 +87,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       strapi.documents.use(async (context, next) => {
         const requestContext = strapi.requestContext.get();
-        const origin = resolveHistoryOrigin(requestContext);
+        const origin = serviceUtils.resolveHistoryOrigin(requestContext);
         const result = (await next()) as any;
 
         if (origin === null || !shouldCreateHistoryVersion(context, requestContext)) {
