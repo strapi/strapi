@@ -30,6 +30,7 @@ const mockGetRequestContext = jest.fn(() => {
 });
 const mockFindOne = jest.fn();
 const mockStrapi = {
+  service: jest.fn(() => ({ findNames: jest.fn().mockResolvedValue({}) })),
   plugins: {
     'content-manager': {
       service: jest.fn(() => ({
@@ -163,6 +164,42 @@ describe('history-version service', () => {
         authorModel: 'admin::user',
         authorId: '1',
         createdBy: userId,
+        createdAt: fakeDate,
+      },
+    });
+  });
+
+  it('creates a Content API history version with no createdBy and no author', async () => {
+    jest.useFakeTimers().setSystemTime(fakeDate);
+
+    const historyVersionData = {
+      contentType: 'api::article.article' as UID.ContentType,
+      data: {
+        documentId: '1234',
+        id: 1,
+        title: 'My article',
+      },
+      locale: 'en',
+      relatedDocumentId: 'randomid',
+      schema: {
+        title: {
+          type: 'string' as const,
+        },
+      },
+      status: 'draft' as const,
+      source: 'content-api' as const,
+      author: null,
+    };
+
+    await historyService.createVersion(historyVersionData);
+    const { author: _author, ...historyVersionColumns } = historyVersionData;
+    expect(createMock).toHaveBeenCalledWith({
+      data: {
+        ...historyVersionColumns,
+        authorType: null,
+        authorModel: null,
+        authorId: null,
+        createdBy: null,
         createdAt: fakeDate,
       },
     });

@@ -44,16 +44,19 @@ The edit view response holds only a count for each relation field, and the relat
 
 `server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost.
 
-History records the writes made through the Content Manager routes. Each version stores the source of the write, and the versions list shows it as a tag:
+History records the writes made through the Content Manager routes and through the Content API (REST and GraphQL). Each version stores the source of the write, and the versions list shows it as a tag:
 
 | Source        | Write made with                              |
 | ------------- | -------------------------------------------- |
 | `admin-panel` | An admin panel session                       |
 | `admin-api`   | An admin token on the Content Manager routes |
+| `content-api` | Any request on a Content API route           |
 
-Each version also stores a reference to its author: a type, and the model and document id of the author record. An admin panel write is attributed to the admin. An admin token write is attributed to the token, not to its owner. The versions list shows the current name of the author. A version of a deleted admin shows "Deleted user", and a version of a deleted token shows "Deleted token". The reference stays on the version after a delete. A document id is never given to another record, so the reference never points to a newer author.
+Each version also stores a reference to its author: a type, and the model and document id of the author record. An admin panel write is attributed to the admin. An admin token write is attributed to the token, not to its owner. A Content API write made with an API token is attributed to that token. A Content API write made by a logged-in end user is attributed to that end user. The author comes from the authentication strategy of the request: each strategy that can give an author is registered with the history feature, and the Users & Permissions plugin registers its own. Other Content API writes have no author: the request has no authentication, it is a public write, or it uses a strategy that is not registered. The versions list shows no author for these versions. For the other versions, the versions list shows the current name of the author. A version of a deleted admin or end user shows "Deleted user", and a version of a deleted token shows "Deleted token". The reference stays on the version after a delete. A document id is never given to another record, so the reference never points to a newer author.
 
-The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead.
+Set `admin.history.contentApi.enabled` to `false` to stop recording Content API writes. It is `true` by default. The flag does not change Content Manager writes.
+
+The `createdBy` relation is saved and returned from the history route as backward support for third-party usage. But it is now deprecated, and the `author` fields should be used instead. It is empty for Content API writes.
 
 Versions saved before the source and the author existed show as `admin-panel`. Their author is the admin of `createdBy`.
 

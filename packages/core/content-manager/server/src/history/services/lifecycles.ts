@@ -7,50 +7,7 @@ import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
-import { createServiceUtils, type RequestContext } from './utils';
-
-/**
- * Filters out actions that should not create a history version.
- */
-const shouldCreateHistoryVersion = (
-  context: Modules.Documents.Middleware.Context,
-  requestContext: RequestContext | undefined
-): context is Modules.Documents.Middleware.Context & {
-  action: 'create' | 'update' | 'clone' | 'publish' | 'unpublish' | 'discardDraft';
-  contentType: UID.CollectionType;
-} => {
-  // NOTE: cannot do type narrowing with array includes
-  if (
-    context.action !== 'create' &&
-    context.action !== 'update' &&
-    context.action !== 'clone' &&
-    context.action !== 'publish' &&
-    context.action !== 'unpublish' &&
-    context.action !== 'discardDraft'
-  ) {
-    return false;
-  }
-
-  /**
-   * When a document is published, the draft version of the document is also updated.
-   * It creates confusion for users because they see two history versions each publish action.
-   * To avoid this, we silence the update action during a publish request,
-   * so that they only see the published version of the document in the history.
-   */
-  if (
-    context.action === 'update' &&
-    requestContext?.request.url.split('?')[0].endsWith('/actions/publish')
-  ) {
-    return false;
-  }
-
-  // Ignore content types not created by the user
-  if (!context.contentType.uid.startsWith('api::')) {
-    return false;
-  }
-
-  return true;
-};
+import { createServiceUtils, type HistoryOrigin, type RequestContext } from './utils';
 
 /**
  * Returns the content type schema.
@@ -75,6 +32,55 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const serviceUtils = createServiceUtils({ strapi });
   const { persistTablesWithPrefix } = strapi.service('admin::persist-tables');
 
+  /**
+   * Filters out actions that should not create a history version.
+   */
+  const shouldCreateHistoryVersion = (
+    context: Modules.Documents.Middleware.Context,
+    requestContext: RequestContext | undefined,
+    origin: HistoryOrigin
+  ): context is Modules.Documents.Middleware.Context & {
+    action: 'create' | 'update' | 'clone' | 'publish' | 'unpublish' | 'discardDraft';
+    contentType: UID.CollectionType;
+  } => {
+    // NOTE: cannot do type narrowing with array includes
+    if (
+      context.action !== 'create' &&
+      context.action !== 'update' &&
+      context.action !== 'clone' &&
+      context.action !== 'publish' &&
+      context.action !== 'unpublish' &&
+      context.action !== 'discardDraft'
+    ) {
+      return false;
+    }
+
+    /**
+     * When a document is published, the draft version of the document is also updated.
+     * It creates confusion for users because they see two history versions each publish action.
+     * To avoid this, we silence the update action during a publish request,
+     * so that they only see the published version of the document in the history.
+     */
+    if (
+      context.action === 'update' &&
+      requestContext?.request.url.split('?')[0].endsWith('/actions/publish')
+    ) {
+      return false;
+    }
+
+    // Ignore content types not created by the user
+    if (!context.contentType.uid.startsWith('api::')) {
+      return false;
+    }
+
+    // Ignore Content API writes when the user turned history off for them
+    if (origin.source === 'content-api' && !serviceUtils.isContentApiHistoryEnabled()) {
+      return false;
+    }
+
+    return true;
+  };
+
   return {
     async bootstrap() {
       // Prevent initializing the service twice
@@ -90,7 +96,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         const origin = serviceUtils.resolveHistoryOrigin(requestContext);
         const result = (await next()) as any;
 
-        if (origin === null || !shouldCreateHistoryVersion(context, requestContext)) {
+        if (origin === null || !shouldCreateHistoryVersion(context, requestContext, origin)) {
           return result;
         }
 
@@ -126,11 +132,16 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
         });
 
-        // TODO v6: store the author `id` and remove this extra query.
-        // See discussion in https://github.com/strapi/strapi/pull/28554#issuecomment-6826618574.
-        const authorDocumentId = await serviceUtils.findAuthorDocumentId(origin.author);
-        if (authorDocumentId === null) {
-          return result;
+        let author: CreateHistoryVersion['author'] = null;
+        if (origin.author !== null) {
+          // TODO v6: store the author `id` and remove this extra query.
+          // See discussion in https://github.com/strapi/strapi/pull/28554#issuecomment-6826618574.
+          const authorDocumentId = await serviceUtils.findAuthorDocumentId(origin.author);
+          if (authorDocumentId === null) {
+            return result;
+          }
+
+          author = { ...origin.author, id: authorDocumentId };
         }
 
         await strapi.db.transaction(async ({ onCommit }) => {
@@ -150,7 +161,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
                   status,
                   ...schemas,
                   source: origin.source,
-                  author: { ...origin.author, id: authorDocumentId },
+                  author,
                 });
               } catch (error) {
                 strapi.log.error(`Failed to create a history version for ${uid}`, {
