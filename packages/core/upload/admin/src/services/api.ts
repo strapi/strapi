@@ -130,18 +130,6 @@ const unregisterAbortController = (uploadId: number) => {
 };
 
 /**
- * Aborts an upload by its uploadId.
- * Called from the UploadProgressDialog when the user clicks cancel or close.
- */
-export const abortUpload = (uploadId: number) => {
-  const controller = abortControllers.get(uploadId);
-  if (controller) {
-    controller.abort();
-    unregisterAbortController(uploadId);
-  }
-};
-
-/**
  * One controller per file in flight, keyed by `uploadId:index`, so a single row
  * can be cancelled without stopping the rest of its batch. Files still queued
  * have no request to abort yet; they are remembered in `skippedFiles` instead
@@ -151,6 +139,35 @@ const fileAbortControllers = new Map<string, AbortController>();
 const skippedFiles = new Set<string>();
 
 const getFileKey = (uploadId: number, index: number) => `${uploadId}:${index}`;
+
+const clearSkippedFile = (uploadId: number, index: number) => {
+  skippedFiles.delete(getFileKey(uploadId, index));
+};
+
+const clearSkippedFiles = (uploadId: number, indices?: number[]) => {
+  if (indices) {
+    indices.forEach((index) => clearSkippedFile(uploadId, index));
+  } else {
+    for (const key of skippedFiles) {
+      if (key.startsWith(`${uploadId}:`)) {
+        skippedFiles.delete(key);
+      }
+    }
+  }
+};
+
+/**
+ * Aborts an upload by its uploadId.
+ * Called from the UploadProgressDialog when the user clicks cancel or close.
+ */
+export const abortUpload = (uploadId: number) => {
+  const controller = abortControllers.get(uploadId);
+  if (controller) {
+    controller.abort();
+    unregisterAbortController(uploadId);
+  }
+  clearSkippedFiles(uploadId);
+};
 
 /**
  * Aborts one file of a batch. Pair it with `cancelFile` to mark the row, the
@@ -868,6 +885,7 @@ const uploadApi = adminApi
           }
 
           // Reset cancelled files back to pending
+          clearSkippedFiles(uploadId, cancelledIndices);
           dispatch(retryCancelledFiles());
 
           // Fresh AbortController for the retry run
@@ -914,7 +932,7 @@ const uploadApi = adminApi
             return { error: { name: 'UnknownError', message: 'Original file not found' } };
           }
 
-          skippedFiles.delete(getFileKey(uploadId, index));
+          clearSkippedFile(uploadId, index);
           dispatch(retryFile({ uploadId, index }));
 
           return runMergedUploadPool({
