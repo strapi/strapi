@@ -387,7 +387,12 @@ export const editContentType = async (
     return updatedContentType;
   }
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new ApplicationError('Invalid schema edition');
+  }
 
   await emitSchemaEvent('content-type.update', { contentType: updatedContentType });
 

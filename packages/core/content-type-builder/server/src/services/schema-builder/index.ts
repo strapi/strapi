@@ -18,7 +18,9 @@ export default function createBuilder() {
     uid: componentInput.uid,
     filename: componentInput.__filename__,
     dir: join(strapi.dirs.app.components, componentInput.category),
-    schema: componentInput.__schema__,
+    // The loader adds `__filename__` to the loaded schema; it is not part of the file, and a
+    // rollback writes this schema back to the file
+    schema: _.omit(componentInput.__schema__, '__filename__'),
     config: componentInput.config,
   }));
 
@@ -170,24 +172,33 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
         ...Array.from(tmpContentTypes.values()),
       ];
 
-      const written = await Promise.all(schemas.map((schema) => schema.flush()))
-        .then(() => true)
-        .catch((error) => {
-          strapi.log.error('Error writing schema files');
-          strapi.log.error(error);
-          return this.rollback().then(() => false);
-        })
-        .catch((error) => {
+      // Wait for every write to settle before rolling back, or a write still running would
+      // land after the rollback (e.g. leave a created file on disk)
+      const results = await Promise.allSettled(schemas.map((schema) => schema.flush()));
+      const failure = results.find(
+        (result): result is PromiseRejectedResult => result.status === 'rejected'
+      );
+
+      if (failure !== undefined) {
+        strapi.log.error('Error writing schema files');
+        strapi.log.error(failure.reason);
+
+        try {
+          await this.rollback();
+        } catch (error) {
           strapi.log.error(
             'Error rolling back schema files. You might need to fix your files manually'
           );
           strapi.log.error(error);
 
           throw new errors.ApplicationError('Invalid schema edition');
-        });
+        }
 
-      if (!written || !renameComponentRows) {
-        return written;
+        return false;
+      }
+
+      if (renameComponentRows === false) {
+        return true;
       }
 
       try {

@@ -6,19 +6,30 @@ import { hasDefaultAttribute } from '../../utils/typeguards';
 export const removeEmptyDefaults = (data: { attributes?: Record<string, unknown> } | undefined) => {
   const { attributes } = data || {};
 
+  // Leave attributes that are not an object to the validation, which rejects them
+  if (_.isPlainObject(attributes) === false) {
+    return;
+  }
+
   Object.keys(attributes!).forEach((attributeName) => {
     const attribute = attributes![attributeName] as Schema.Attribute.AnyAttribute;
 
-    if (hasDefaultAttribute(attribute) && attribute.default === '') {
+    if (
+      _.isPlainObject(attribute) === true &&
+      hasDefaultAttribute(attribute) &&
+      attribute.default === ''
+    ) {
       attribute.default = undefined;
     }
   });
 };
 
 export const removeDeletedUIDTargetFields = (data: Struct.ContentTypeSchema) => {
-  if (_.has(data, 'attributes')) {
+  // Leave attributes that are not an object to the validation, which rejects them
+  if (_.isPlainObject(data?.attributes) === true) {
     Object.values(data.attributes).forEach((attribute) => {
       if (
+        _.isPlainObject(attribute) === true &&
         attribute.type === 'uid' &&
         !_.isUndefined(attribute.targetField) &&
         !_.has(data.attributes, attribute.targetField)
