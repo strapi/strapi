@@ -56,12 +56,42 @@ interface Article extends Struct.CollectionTypeSchema {
     title: Schema.Attribute.String;
     seo: Schema.Attribute.Component<'shared.seo', false>;
     links: Schema.Attribute.Component<'shared.link', true>;
+    author: Schema.Attribute.Relation<'manyToOne', 'api::author.author'>;
+    coauthors: Schema.Attribute.Relation<'manyToMany', 'api::author.author'>;
+    cover: Schema.Attribute.Media<'images'>;
+    // The target is not in the registries, so its attribute names are unknown
+    legacy: Schema.Attribute.Relation<'manyToOne', 'api::legacy.legacy'>;
+  };
+}
+
+/**
+ * A content type with a password attribute, which filters do not accept
+ */
+interface Author extends Struct.CollectionTypeSchema {
+  collectionName: 'authors';
+  info: { singularName: 'author'; pluralName: 'authors'; displayName: 'Author' };
+  attributes: {
+    name: Schema.Attribute.String;
+    secret: Schema.Attribute.Password;
+  };
+}
+
+/**
+ * The media target, registered as in apps with generated types
+ */
+interface File extends Struct.CollectionTypeSchema {
+  collectionName: 'files';
+  info: { singularName: 'file'; pluralName: 'files'; displayName: 'File' };
+  attributes: {
+    name: Schema.Attribute.String;
   };
 }
 
 declare module '../../../../../../../public/registries' {
   export interface ContentTypeSchemas {
     'api::article.article': Article;
+    'api::author.author': Author;
+    'plugin::upload.file': File;
   }
   export interface ComponentSchemas {
     'shared.seo': Seo;

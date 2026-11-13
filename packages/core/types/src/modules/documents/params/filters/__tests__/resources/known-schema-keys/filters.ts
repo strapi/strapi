@@ -179,11 +179,109 @@ export const nestedComponentShortcut: Filters<'shared.card'>[] = [
 export const shortcutFromContentType: Filters<'api::article.article'>[] = [
   { links: { article: { $eq: 5 } } },
   { links: { article: { $in: [1, 2] } } },
+];
+
+/**
+ * One operator object on a relation, media or component attribute of a content type. The database
+ * applies it to the target's id, as inside a component.
+ */
+export const contentTypeShortcut: Filters<'api::article.article'>[] = [
+  { author: { $eq: 1 } },
+  { author: { $ne: 1 } },
+  { author: { $in: [1, 2] } },
+  { author: { $notIn: [3] } },
+  { author: { $between: [1, 5] } },
+  { author: { $null: true } },
+  { author: { $notNull: true } },
+  { coauthors: { $in: [1, 2] } },
+  { coauthors: { $null: true } },
+  { cover: { $eq: 1 } },
+  { cover: { $null: true } },
+  { cover: { $notNull: false } },
+  { seo: { $null: true } },
+  { seo: { $notNull: true } },
+  { links: { $null: true } },
+  { links: { article: { author: { $in: [1] } } } },
+  { $or: [{ author: { $null: true } }, { cover: { $null: true } }] },
+  { author: { name: 'a' } },
+  { author: { id: { $in: [1, 2] } } },
+  { author: { documentId: 'a' } },
   {
-    // @ts-expect-error The shortcut is not accepted on content type attributes
-    seo: { $null: true },
+    // @ts-expect-error A bare id is not accepted, use `{ id: 5 }` or `{ $eq: 5 }`
+    author: 5,
+  },
+  {
+    // @ts-expect-error A bare id is not accepted on media
+    cover: 1,
+  },
+  {
+    // @ts-expect-error A bare id is not accepted on components
+    seo: 1,
+  },
+  // @ts-expect-error An operator next to attribute keys throws at runtime
+  { author: { $in: [1], name: 'a' } },
+  // @ts-expect-error An operator next to an identifier key throws at runtime
+  { author: { $null: true, documentId: 'a' } },
+  {
+    // @ts-expect-error Two operators throw at runtime
+    author: { $gt: 1, $lt: 5 },
+  },
+  {
+    // @ts-expect-error Wrong value type for $null
+    cover: { $null: 'a' },
+  },
+  {
+    // @ts-expect-error Wrong value type for $in
+    author: { $in: 1 },
+  },
+  {
+    // @ts-expect-error Unknown operator
+    author: { $unknown: 1 },
+  },
+  {
+    author: {
+      // @ts-expect-error Unknown attribute in a relation filter
+      nme: 'a',
+    },
+  },
+  {
+    author: {
+      // @ts-expect-error Password attributes are not filterable
+      secret: 'a',
+    },
   },
 ];
+
+articles.findMany({ filters: { author: { $null: true }, cover: { $notNull: true } } });
+articles.findMany({ filters: { seo: { $null: true } } });
+
+articles.findMany({
+  filters: {
+    // @ts-expect-error A bare id is not accepted
+    author: 5,
+  },
+});
+
+articles.findMany({
+  filters: {
+    // @ts-expect-error Two operators throw at runtime
+    author: { $null: true, $notNull: true },
+  },
+});
+
+// Known gaps, as on develop:
+// - `{ author: { $not: { name: 'a' } } }` type-checks, because `$not` is part of the author's
+//   filter type, but the database throws. It reads a lone `$not` on a relation as an operator on
+//   the id (`id: { $not: { name: 'a' } }`), and `name` is not an operator.
+// - A group or logical operator next to an attribute type-checks, but the database throws: in
+//   `{ author: { $or: [{ name: 'a' }], name: 'b' } }`, it reads `$or` as an operator mixed with
+//   other keys.
+// - The id operand accepts a string, because the id type is `string | number`. A documentId there
+//   (`{ author: { $in: [documentId] } }`) matches nothing, or fails on Postgres: filter by
+//   `{ author: { documentId: { $in: [documentId] } } }` instead.
+
+// Not rejected in a direct call: `{ author: { $eq: 1, name: 'a' } }`. The method infers its params,
+// so TypeScript does not check excess properties, and the object matches the author's filter type.
 
 articles.findMany({ filters: { links: { article: { $null: true } } } });
 
@@ -235,4 +333,46 @@ export const componentReadBackFromContentType = (filters: Filters<'api::article.
   const card: Filters<'shared.seo'> | undefined = filters.links?.article?.$not?.seo;
 
   return { article, card };
+};
+
+/**
+ * Reading back the filter of a relation, media or component attribute of a content type keeps the
+ * target's filter type
+ */
+export const contentTypeReadBack = (filters: Filters<'api::article.article'>) => {
+  const author: Filters<'api::author.author'> | undefined = filters.author;
+  const authorName = filters.author?.name;
+  const coauthors: Filters<'api::author.author'> | undefined = filters.$or?.[0]?.coauthors;
+  const cover: Filters<'plugin::upload.file'> | undefined = filters.cover;
+  const seo: Filters<'shared.seo'> | undefined = filters.seo;
+  const notAuthor: Filters<'api::author.author'> | undefined = filters.author?.$not;
+
+  return { author, authorName, coauthors, cover, seo, notAuthor };
+};
+
+/**
+ * Reading back the filter of a relation whose target is not in the registries keeps the target's
+ * loose filter type, with any key
+ */
+export const unknownTargetReadBack = (filters: Filters<'api::article.article'>) => {
+  const legacy: Filters<'api::legacy.legacy'> | undefined = filters.legacy;
+  const legacyName = filters.legacy?.name;
+  const notLegacy = filters.$and?.[0]?.legacy?.$not?.anything;
+
+  return { legacy, legacyName, notLegacy };
+};
+
+export const unknownTarget: Filters<'api::article.article'>[] = [
+  { legacy: { name: 'a', anything: { $in: [1] } } },
+  { legacy: { $null: true } },
+];
+
+/**
+ * A content-type relation filter read back can be spread into a new filter with another key (the
+ * component case is in the `component-spread` fixture)
+ */
+export const spreadRelationFilter = (filters: Filters<'api::article.article'>) => {
+  const next: Filters<'api::article.article'> = { author: { ...filters.author, name: 'x' } };
+
+  return next;
 };

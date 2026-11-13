@@ -26,10 +26,8 @@ type DocumentIDKey = 'documentId';
  * The target UID is resolved through `infer` before recursing. When `TSchemaUID` is a type
  * parameter, the conditional type stays deferred, so TypeScript does not build an endless chain of
  * new `ObjectNotation<Target<...>>` instantiations, which would exhaust the heap on nested filters.
- * When `TSchemaUID` is known, the type is `ObjectNotation<Target>`.
- *
- * Inside a component, the attribute also accepts one operator on the target's id
- * ({@link IdOperatorCondition}).
+ * When the target's attributes are known, the type is the target's filter object, or one operator on
+ * the target's id ({@link IdOperatorCondition}). Otherwise it is the target's loose filter object.
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
@@ -40,8 +38,10 @@ type NestedAttributeCondition<
     UID.Schema
   > extends infer TTargetUID extends UID.Schema
     ? If<
-        IsComponent<TSchemaUID>,
+        HasKnownAttributeNames<TTargetUID>,
         ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>,
+        // The loose filter of an unknown target already accepts any operator. A union with the
+        // operator objects would make TypeScript narrow on the operator key and drop it.
         ObjectNotation<TTargetUID>
       >
     : never;
@@ -50,9 +50,13 @@ type NestedAttributeCondition<
  * Filter on the id of a nested attribute's target: an object with exactly one comparison, list or
  * null operator (e.g. `{ $in: [1, 2] }`, `{ $null: true }`).
  *
- * The database applies it to the target's id. It throws for an object with several operators, or
- * with an operator next to other keys. So each operator object forbids the other operators and the
- * target's filter keys. A literal that mixes an operator with other keys matches no member.
+ * The database applies it to the target's numeric id, not to its documentId: a documentId operand
+ * type-checks (`ID` is `string | number`) but matches nothing, or fails on Postgres. `$ne` and
+ * `$notIn` do not match entries without a related entry (their id is null).
+ *
+ * The database throws for an object with several operators, or with an operator next to other keys.
+ * So each operator object forbids the other operators and the target's filter keys. A literal that
+ * mixes an operator with other keys matches no member.
  *
  * The filter object member does not forbid the operators, so spreading a filter read back from it
  * and adding a key (`{ ...filters.article, title: 'a' }`) compiles. The spread compiles even when the
