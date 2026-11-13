@@ -81,14 +81,28 @@ describe('Filtering with object operands in lists and on relation, media and com
     const category = await strapi.documents(CATEGORY_UID).create({ data: { name: 'Cat A' } });
     categoryId = category.id as number;
 
+    const cover = await strapi.db.query('plugin::upload.file').create({
+      data: {
+        name: 'cover.jpg',
+        folderPath: '/',
+        hash: 'cover_hash',
+        ext: '.jpg',
+        mime: 'image/jpeg',
+        size: 1,
+        provider: 'local',
+        url: '/uploads/cover.jpg',
+      },
+    });
+
     await strapi.documents(NOTE_UID).create({
       data: {
         title: 'Note 1',
         rank: 1,
+        cover: cover.id,
         seo: { metaTitle: 'Seo 1' },
         category: category.documentId,
       },
-    });
+    } as any);
     await strapi.documents(NOTE_UID).create({
       data: { title: 'Note 2', rank: 2, seo: { metaTitle: 'Seo 2' } },
     });
@@ -157,8 +171,13 @@ describe('Filtering with object operands in lists and on relation, media and com
     ['a relation id operand', { category: { $eq: categoryId } }, ['Note 1']],
     ['a relation $null operand', { category: { $null: true } }, ['Note 2']],
     ['a nested relation filter', { category: { name: { $eq: 'Cat A' } } }, ['Note 1']],
-    ['a media $null operand', { cover: { $null: true } }, ['Note 1', 'Note 2']],
+    ['a relation $in id list', { category: { $in: [categoryId] } }, ['Note 1']],
+    ['a relation $notNull operand', { category: { $notNull: true } }, ['Note 1']],
+    ['a media $null operand', { cover: { $null: true } }, ['Note 2']],
+    ['a media $notNull operand', { cover: { $notNull: true } }, ['Note 1']],
+    ['a nested media filter', { cover: { name: { $eq: 'cover.jpg' } } }, ['Note 1']],
     ['a nested component filter', { seo: { metaTitle: { $eq: 'Seo 2' } } }, ['Note 2']],
+    ['a component $notNull operand', { seo: { $notNull: true } }, ['Note 1', 'Note 2']],
     [
       'a relation $or list',
       { category: { $or: [{ name: 'Cat B' }, { name: 'Cat A' }] } },
