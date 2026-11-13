@@ -8,6 +8,9 @@ const config = {
     {
       files: ['**/*.ts', '**/*.tsx'],
       extends: ['eslint-config-custom/front/typescript'],
+      rules: {
+        'import/no-unresolved': 'off',
+      },
     },
   ],
 };
