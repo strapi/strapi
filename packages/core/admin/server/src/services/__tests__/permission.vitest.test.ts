@@ -316,7 +316,10 @@ describe('Permission Service', () => {
     });
 
     describe('applicable properties', () => {
-      const setupPropertyCleanup = (permsInDb: Record<string, unknown>[]) => {
+      const setupPropertyCleanup = (
+        permsInDb: Record<string, unknown>[],
+        applyToProperties: string[]
+      ) => {
         const dbDelete = vi.fn(({ where }: { where: { id: number } }) =>
           Promise.resolve({ where: { id: where.id } })
         );
@@ -337,7 +340,7 @@ describe('Permission Service', () => {
                   has: vi.fn(() => true),
                   get: vi.fn(() => ({
                     subjects: ['api::article.article'],
-                    options: { applyToProperties: ['locales'] },
+                    options: { applyToProperties },
                   })),
                   appliesToProperty: vi.fn(() => Promise.resolve(true)),
                 },
@@ -350,9 +353,9 @@ describe('Permission Service', () => {
         return { dbDelete };
       };
 
-      const localizedPermission = (id: number, properties: Record<string, unknown>) => ({
+      const rolePermission = (id: number, action: string, properties: Record<string, unknown>) => ({
         id,
-        action: 'plugin::content-manager.explorer.delete',
+        action,
         actionParameters: {},
         subject: 'api::article.article',
         properties,
@@ -361,16 +364,48 @@ describe('Permission Service', () => {
         apiToken: null,
       });
 
-      test('keeps a permission whose applicable property is null', async () => {
-        const { dbDelete } = setupPropertyCleanup([localizedPermission(1, { locales: null })]);
+      const DELETE = 'plugin::content-manager.explorer.delete';
+      const READ = 'plugin::content-manager.explorer.read';
+
+      test('keeps a permission whose locales is null (every locale)', async () => {
+        const { dbDelete } = setupPropertyCleanup(
+          [rolePermission(1, DELETE, { locales: null })],
+          ['locales']
+        );
 
         await cleanPermissionsInDatabase();
 
         expect(dbDelete).not.toHaveBeenCalled();
       });
 
-      test('removes a permission that lacks its applicable property', async () => {
-        const { dbDelete } = setupPropertyCleanup([localizedPermission(1, {})]);
+      test('removes a permission that has no locales key', async () => {
+        const { dbDelete } = setupPropertyCleanup([rolePermission(1, DELETE, {})], ['locales']);
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(1);
+        expect(dbDelete).toHaveBeenCalledWith({ where: { id: 1 } });
+      });
+
+      test('keeps a permission with an explicit fields list and locales null', async () => {
+        const { dbDelete } = setupPropertyCleanup(
+          [rolePermission(1, READ, { fields: ['title'], locales: null })],
+          ['fields', 'locales']
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).not.toHaveBeenCalled();
+      });
+
+      test.each([
+        ['fields null and locales null', { fields: null, locales: null }],
+        ['fields null and no locales key', { fields: null }],
+      ])('removes a permission with %s', async (_, properties) => {
+        const { dbDelete } = setupPropertyCleanup(
+          [rolePermission(1, READ, properties)],
+          ['fields', 'locales']
+        );
 
         await cleanPermissionsInDatabase();
 

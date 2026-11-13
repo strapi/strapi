@@ -89,6 +89,33 @@ export const findUserPermissions = async (user: AdminUser): Promise<Permission[]
   return findMany({ where: { role: { users: { id: user.id } } } });
 };
 
+const isNil = (value: unknown) => value === undefined || value === null;
+
+type ApplicableProperty = { property: string; applies: boolean; value: unknown };
+
+/**
+ * Whether each property the action lists is applicable and missing on the stored permission.
+ * A `null` or `undefined` property is missing, with one exception: `locales: null` grants every
+ * locale (i18n), so it counts as set as long as no other applicable property is missing.
+ */
+const findMissingProperties = (properties: ApplicableProperty[]) => {
+  const hasOtherMissingProperty = properties.some(
+    ({ property, applies, value }) => applies === true && property !== 'locales' && isNil(value)
+  );
+
+  return properties.map(({ property, applies, value }) => {
+    if (applies === false) {
+      return false;
+    }
+
+    if (property === 'locales' && value === null) {
+      return hasOtherMissingProperty;
+    }
+
+    return isNil(value);
+  });
+};
+
 const filterPermissionsToRemove = async (permissions: Permission[]) => {
   const { actionProvider } = getService('permission');
 
@@ -99,18 +126,18 @@ const filterPermissionsToRemove = async (permissions: Permission[]) => {
       (actionProvider.get(permission.action) as Action) || {};
     const { applyToProperties } = options;
 
-    const invalidProperties = await Promise.all(
-      (applyToProperties || []).map(async (property) => {
-        const applies = await actionProvider.appliesToProperty(
+    const properties = await Promise.all(
+      (applyToProperties || []).map(async (property) => ({
+        property,
+        applies: await actionProvider.appliesToProperty(
           property,
           permission.action,
           permission.subject
-        );
-
-        // Only a missing property is invalid: `null` is a stored value (`locales: null` is every locale)
-        return applies && permissionDomain.getProperty(property, permission) === undefined;
-      })
+        ),
+        value: permissionDomain.getProperty(property, permission) as unknown,
+      }))
     );
+    const invalidProperties = findMissingProperties(properties);
 
     const isRegisteredAction = actionProvider.has(permission.action);
     const hasInvalidProperties =
