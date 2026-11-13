@@ -22,6 +22,8 @@ function makeScope(rootPath: string, overrides: Partial<Scope> = {}): Scope {
     packageManager: 'pnpm',
     database: { client: 'sqlite' },
     shouldCreateGrowthSsoTrial: false,
+    invocation: 'unknown',
+    agentName: null,
     uuid: 'test-uuid',
     installId: 'test-install-id',
     dependencies: {

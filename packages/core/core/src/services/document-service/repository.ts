@@ -341,7 +341,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params || {});
 
-    return strapi.db.query(uid).findMany(query);
+    return await strapi.db.query(uid).findMany(query);
   }
 
   async function findFirst(params = {} as any) {
@@ -356,7 +356,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
@@ -375,7 +375,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   async function deleteDocument(opts = {} as any) {
@@ -403,9 +403,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);
 
-    const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
-      entries.delete(entryToDelete.id, selectionQuery)
-    );
+    // Each delete loads and removes components, so they cannot share this
+    // transaction's connection concurrently.
+    const deletedEntries = [];
+    for (const entryToDelete of entriesToDelete) {
+      deletedEntries.push(await entries.delete(entryToDelete.id, selectionQuery));
+    }
 
     entriesToDelete.forEach(emitEvent('entry.delete'));
 
@@ -429,7 +432,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     emitEvent('entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId: doc.documentId,
       }).then((doc) => doc.entries[0]);
@@ -528,7 +531,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           return doc;
         }
 
-        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+        return await strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
       }
     );
 
@@ -574,10 +577,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
-          ...queryParams.data,
+        const mergedData = await copyNonLocalizedFields(
+          contentType,
           documentId,
-        });
+          {
+            ...queryParams.data,
+            documentId,
+          },
+          { status: 'draft', strategy: 'fill' }
+        );
 
         updatedDraft = await entries.create({
           ...queryParams,
@@ -588,7 +596,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     }
 
     if (hasDraftAndPublish && updatedDraft && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId,
       }).then((doc) => doc.entries[0]);
@@ -608,7 +616,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).count(query);
+    return await strapi.db.query(uid).count(query);
   }
 
   async function publish(opts = {} as any) {
@@ -621,25 +629,34 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [draftsToPublish, oldPublishedVersions] = await Promise.all([
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: null, // Ignore lookup
-        },
-        // Populate relations, media, compos and dz
-        populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
-      }),
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: { $ne: null },
-        },
-        select: ['id', 'locale'],
-      }),
-    ]);
+    // Deep populate issues its own queries. Run these lookups one after another
+    // so they stay on this transaction's single connection.
+    const draftsToPublish = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: null, // Ignore lookup
+      },
+      // Populate relations, media, compos and dz
+      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
+    });
+    const oldPublishedVersions = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      select: ['id', 'locale'],
+    });
+    // All published locales of this document (not scoped to the publish lookup).
+    // Used so a first publish of FR can inherit EN published shared fields.
+    const publishedVersions = await strapi.db.query(uid).findMany({
+      where: {
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      select: ['locale'],
+    });
 
     // Load any unidirectional relation targetting the old published entries
     const relationsToSync = await unidirectionalRelations.load(
@@ -649,7 +666,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         oldVersions: oldPublishedVersions,
       },
       {
-        shouldPropagateRelation: components.createComponentRelationFilter(),
+        filterRelationsToPropagate: components.createComponentRelationFilter(),
       }
     );
 
@@ -664,18 +681,52 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       'published'
     );
 
-    // Delete old published versions
-    await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
+    // Delete old published versions. Each delete loads and removes components,
+    // so they cannot share this transaction's connection concurrently.
+    for (const entry of oldPublishedVersions) {
+      await entries.delete(entry.id);
+    }
 
     // Add firstPublishedAt to draft if it doesn't exist
-    const updatedDraft = await async.map(draftsToPublish, (draft: any) =>
-      addFirstPublishedAtToDraft(draft, entries.update, contentType)
+    const updatedDraft: any[] = [];
+    for (const draft of draftsToPublish) {
+      updatedDraft.push(await addFirstPublishedAtToDraft(draft, entries.update, contentType));
+    }
+
+    // First publish of a locale must inherit shared fields from an existing
+    // published sibling. Copying the draft would publish unpublished shared
+    // edits and i18n sync would then overwrite every published locale.
+    const publishedLocales = new Set(
+      (publishedVersions as Array<{ locale?: string }>).map((entry) => entry.locale)
+    );
+    // Republishing a locale in the same call publishes its draft shared values,
+    // and its old published row (an inheritance source) was deleted above.
+    const republishesALocale = updatedDraft.some((draft: any) =>
+      publishedLocales.has(draft.locale)
     );
 
-    // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(updatedDraft, (draft: any) =>
-      entries.publish(draft, queryParams)
-    );
+    // Transform draft entry data and create published versions. One at a time:
+    // each publish loads components on this transaction's connection.
+    const publishedEntries: any[] = [];
+    for (const draft of updatedDraft) {
+      const isFirstPublishForLocale = !publishedLocales.has(draft.locale);
+      const hasPublishedSibling = [...publishedLocales].some((locale) => locale !== draft.locale);
+
+      let entryToPublish = draft;
+      if (
+        hasDraftAndPublish &&
+        isFirstPublishForLocale &&
+        hasPublishedSibling &&
+        !republishesALocale
+      ) {
+        entryToPublish = await copyNonLocalizedFields(contentType, documentId, draft, {
+          status: 'published',
+          strategy: 'replace',
+        });
+      }
+
+      publishedEntries.push(await entries.publish(entryToPublish, queryParams));
+    }
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
@@ -714,9 +765,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => ({ ...query, where: { ...query.where, documentId, publishedAt: { $ne: null } } })
     )(params);
 
-    // Delete all published versions
+    // Delete all published versions. Component cleanup shares this connection.
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
-    await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
+    for (const entry of versionsToDelete) {
+      await entries.delete(entry.id);
+    }
 
     versionsToDelete.forEach(emitEvent('entry.unpublish'));
     return { documentId, entries: versionsToDelete };
@@ -732,25 +785,23 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [versionsToDraft, oldDrafts] = await Promise.all([
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: { $ne: null },
-        },
-        // Populate relations, media, compos and dz
-        populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
-      }),
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: null,
-        },
-        select: ['id', 'locale'],
-      }),
-    ]);
+    const versionsToDraft = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      // Populate relations, media, compos and dz
+      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
+    });
+    const oldDrafts = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: null,
+      },
+      select: ['id', 'locale'],
+    });
 
     // Load any unidirectional relation targeting the old drafts
     const relationsToSync = await unidirectionalRelations.load(
@@ -760,7 +811,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         oldVersions: oldDrafts,
       },
       {
-        shouldPropagateRelation: components.createComponentRelationFilter(),
+        filterRelationsToPropagate: components.createComponentRelationFilter(),
       }
     );
 
@@ -771,13 +822,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft, 'draft');
 
-    // Delete old drafts
-    await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
+    // Delete old drafts one at a time; component cleanup queries share this connection.
+    for (const entry of oldDrafts) {
+      await entries.delete(entry.id);
+    }
 
     // Transform published entry data and create draft versions
-    const draftEntries = await async.map(versionsToDraft, (entry: any) =>
-      entries.discardDraft(entry, queryParams)
-    );
+    const draftEntries: any[] = [];
+    for (const entry of versionsToDraft) {
+      draftEntries.push(await entries.discardDraft(entry, queryParams));
+    }
 
     // Sync unidirectional relations with the new draft entries
     await unidirectionalRelations.sync(
@@ -804,7 +858,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function updateComponents(entry: any, data: any) {
-    return components.updateComponents(uid, entry, data);
+    return await components.updateComponents(uid, entry, data);
   }
 
   function omitComponentData(data: any) {

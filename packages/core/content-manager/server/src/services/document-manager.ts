@@ -1,6 +1,6 @@
 import { omit, flow } from 'lodash';
 
-import { contentTypes, pagination } from '@strapi/utils';
+import { contentTypes, errors, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
@@ -18,6 +18,32 @@ const omitPublishedAtField = <T extends object>(document: T) =>
 const omitIdField = <T extends object>(document: T) => omit(document, 'id');
 
 const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
+  /**
+   * The document service has no publish, unpublish or discardDraft methods
+   * for content types without draft and publish
+   */
+  const assertDraftAndPublish = (uid: UID.ContentType) => {
+    if (contentTypes.hasDraftAndPublish(strapi.getModel(uid)) === false) {
+      throw new errors.ValidationError('Draft and publish is not enabled for this content type');
+    }
+  };
+
+  /**
+   * A non-localized type has no locale, so the request locale is dropped from the data and the
+   * params. The i18n transforms of the document service skip these types: it would store a data
+   * locale, and the entity validator would filter its unique check on a locale the rows don't have.
+   */
+  const omitLocaleOfNonLocalizedType = <T extends { data: object; locale?: unknown }>(
+    uid: UID.ContentType,
+    params: T
+  ) => {
+    if (strapi.localization.isLocalizedContentType(strapi.getModel(uid)) === true) {
+      return params;
+    }
+
+    return { ...omit(params, 'locale'), data: omit(params.data, 'locale') };
+  };
+
   return {
     async findOne(
       id: string,
@@ -87,7 +113,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, status: 'draft' as const, populate };
+      const params = omitLocaleOfNonLocalizedType(uid, {
+        ...opts,
+        data: opts.data ?? {},
+        status: 'draft' as const,
+        populate,
+      });
 
       return strapi.documents(uid).create(params);
     },
@@ -99,7 +130,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, data: publishData, populate, status: 'draft' };
+      const params = omitLocaleOfNonLocalizedType(uid, {
+        ...opts,
+        data: publishData,
+        populate,
+        status: 'draft',
+      });
 
       return strapi.documents(uid).update({ ...params, documentId: id });
     },
@@ -113,12 +149,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Extract the locale to pass it as a plain param
       const locale = body?.locale;
-      const params = {
+      const params = omitLocaleOfNonLocalizedType(uid, {
         // Ensure id and documentId are not copied to the clone
         data: omit(body, ['id', 'documentId']),
         locale,
         populate,
-      };
+      });
 
       return strapi
         .documents(uid)
@@ -159,11 +195,16 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: DocServiceParams<'findMany'> & { locale?: string } = {}
     ) {
-      const deletedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
+      const count = await strapi.db.transaction(async () => {
+        // One transaction has one connection. Deleting in parallel overlaps
+        // queries on that connection, and Postgres then warns or, on pg 9, errors.
+        for (const id of documentIds) {
+          await this.delete(id, uid, opts);
+        }
+        return documentIds.length;
       });
 
-      return { count: deletedEntries.length };
+      return { count };
     },
 
     async publish(
@@ -171,6 +212,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'publish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
@@ -181,10 +224,15 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+      assertDraftAndPublish(uid);
+
       return strapi.db.transaction(async () => {
-        const results = await Promise.all(
-          documentIds.map((documentId) => this.publish(documentId, uid, { locale, populate: {} }))
-        );
+        // One transaction has one connection. Publishing in parallel overlaps
+        // queries on that connection, and Postgres then warns or, on pg 9, errors.
+        const results = [];
+        for (const documentId of documentIds) {
+          results.push(await this.publish(documentId, uid, { locale, populate: {} }));
+        }
 
         const publishedEntitiesCount = results.flat().filter(Boolean).length;
         return publishedEntitiesCount;
@@ -196,15 +244,17 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const unpublishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(
-          documentIds.map((id) =>
-            strapi
-              .documents(uid)
-              .unpublish({ ...opts, documentId: id, populate: {} })
-              .then((result) => result?.entries)
-          )
-        );
+        const entries = [];
+        for (const id of documentIds) {
+          const result = await strapi
+            .documents(uid)
+            .unpublish({ ...opts, documentId: id, populate: {} });
+          entries.push(result?.entries);
+        }
+        return entries;
       });
 
       const unpublishedEntitiesCount = unpublishedEntries.flat().filter(Boolean).length;
@@ -218,6 +268,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
@@ -232,6 +284,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> & { populate?: object } = {} as any
     ) {
+      assertDraftAndPublish(uid);
+
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 

@@ -6,6 +6,7 @@ import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
+import { resolveFileId } from '../services/upload';
 import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
@@ -24,27 +25,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
     const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.validate.query(data, schema, { auth, route });
+    // Same behaviour as core-api: only throw on unknown params if the project turned on strictParams.
+    // Either way they never reach the query, because sanitizeQuery strips them.
+    const strictParams = strapi.config.get('api.rest.strictParams');
+
+    return strapi.contentAPI.validate.query(data, schema, {
+      auth,
+      route,
+      ...(typeof strictParams === 'boolean' && { strictParams }),
+    });
   };
 
   const sanitizeQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
     const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
-  };
-
-  // Files can be addressed by numeric id or documentId (1:1, files have no draft & publish)
-  const resolveFileId = async (id: string | number) => {
-    if (/^\d+$/.test(String(id))) {
-      return id;
-    }
-
-    const file = await strapi.db
-      .query(FILE_MODEL_UID)
-      .findOne({ where: { documentId: id }, select: ['id'] });
-
-    return file?.id;
+    // The upload service hands unknown root keys (e.g. `where`) straight to the query engine
+    return strapi.contentAPI.sanitize.query(data, schema, { auth, route, strictParams: true });
   };
 
   return {
@@ -74,7 +71,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const id = await resolveFileId(ctx.params.id);
+      const id = await resolveFileId(strapi, ctx.params.id);
       const file = id ? await getService('upload').findOne(id, sanitizedQuery.populate!) : null;
 
       if (!file) {
@@ -87,7 +84,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async destroy(ctx: Context) {
-      const id = await resolveFileId(ctx.params.id);
+      const id = await resolveFileId(strapi, ctx.params.id);
       const file = id ? await getService('upload').findOne(id) : null;
 
       if (!file) {
@@ -112,7 +109,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const fileId = await resolveFileId(id);
+      const fileId = await resolveFileId(strapi, id);
 
       if (!fileId) {
         throw new NotFoundError();
@@ -151,7 +148,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const fileId = await resolveFileId(id);
+      const fileId = await resolveFileId(strapi, id);
 
       if (!fileId) {
         throw new NotFoundError();

@@ -3,6 +3,7 @@ import _, { get } from 'lodash';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import { emitSchemaEvent } from '../utils/events';
 import { getService } from '../utils';
 import createBuilder from './schema-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
@@ -107,7 +108,7 @@ export const createContentTypes = async (contentTypes: any[]) => {
   }
 
   for (const contentType of createdContentTypes) {
-    strapi.eventHub.emit('content-type.create', { contentType });
+    await emitSchemaEvent('content-type.create', { contentType });
   }
 
   return createdContentTypes;
@@ -120,12 +121,25 @@ type CreateContentTypeOptions = {
 };
 
 /**
+ * The HTTP validators require a non-empty `displayName`; direct service callers must provide
+ * one too, otherwise the schema builder writes a schema the core validator rejects at the
+ * next load and the app no longer boots. Run it before anything is written.
+ */
+export const assertValidDisplayName = (displayName: unknown): void => {
+  if (typeof displayName !== 'string' || displayName === '') {
+    throw new ApplicationError('A content type requires a displayName');
+  }
+};
+
+/**
  * Creates a content type and handle the nested components sent with it
  */
 export const createContentType = async (
   { contentType, components }: any,
   options: CreateContentTypeOptions = {}
 ) => {
+  assertValidDisplayName(contentType?.displayName);
+
   const builder = options.defaultBuilder || createBuilder();
   const uidMap = builder.createNewComponentUIDMap(components || []);
 
@@ -164,7 +178,7 @@ export const createContentType = async (
       generatedApiNames.push(contentType.singularName);
 
       await generateAPI({
-        displayName: contentType!.displayName || contentType!.info.displayName,
+        displayName: contentType.displayName,
         singularName: contentType!.singularName,
         pluralName: contentType!.pluralName,
         kind: contentType!.kind,
@@ -195,7 +209,7 @@ export const createContentType = async (
   }
 
   if (!options.deferEvent) {
-    strapi.eventHub.emit('content-type.create', { contentType: newContentType });
+    await emitSchemaEvent('content-type.create', { contentType: newContentType });
   }
 
   return newContentType;
@@ -210,6 +224,9 @@ export const generateAPI = ({
   pluralName,
   displayName,
 }: any) => {
+  // The generated schema.json is written as is, so a missing name breaks the next boot.
+  assertValidDisplayName(displayName);
+
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate(
@@ -229,13 +246,58 @@ export const generateAPI = ({
 };
 
 /**
+ * A document can span several rows (draft and published versions, one per locale),
+ * so compare documentIds instead of counting rows.
+ * A row without documentId (raw SQL, imports) cannot be tied to any document, so it
+ * counts as another one. `$ne` alone would skip it, as SQL `<>` never matches NULL.
+ */
+const hasMultipleDocuments = async (uid: UID.ContentType) => {
+  const firstEntry = await strapi.db.query(uid).findOne({
+    select: ['documentId'],
+    where: { documentId: { $notNull: true } },
+  });
+  if (firstEntry === null) {
+    const rowsCount = await strapi.db.query(uid).count();
+    return rowsCount > 1;
+  }
+
+  const otherDocumentsCount = await strapi.db.query(uid).count({
+    where: {
+      $or: [{ documentId: { $ne: firstEntry.documentId } }, { documentId: { $null: true } }],
+    },
+  });
+
+  return otherDocumentsCount > 0;
+};
+
+/**
+ * A single type holds one document, so refuse the switch while several exist.
+ */
+export const assertCanConvertToSingleType = async (uid: UID.ContentType) => {
+  if ((await hasMultipleDocuments(uid)) === true) {
+    throw new ApplicationError(
+      'You cannot convert a collectionType to a singleType when having multiple entries in DB'
+    );
+  }
+};
+
+/**
  * Edits a contentType and handle the nested contentTypes sent with it
  */
 export const editContentType = async (
   uid: UID.ContentType,
   { contentType, components = [] }: any
 ) => {
+  // Without `displayName` the builder keeps the stored one.
+  if (contentType.displayName !== undefined) {
+    assertValidDisplayName(contentType.displayName);
+  }
+
   const builder = createBuilder();
+
+  if (builder.contentTypes.has(uid) === false) {
+    throw new ApplicationError('contentType.notFound');
+  }
 
   const previousSchema = builder.contentTypes.get(uid).schema;
   const isPluginContentType = Boolean(builder.contentTypes.get(uid).plugin);
@@ -256,12 +318,7 @@ export const editContentType = async (
   contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
-    const entryCount = await strapi.db.query(uid).count();
-    if (entryCount > 1) {
-      throw new ApplicationError(
-        'You cannot convert a collectionType to a singleType when having multiple entries in DB'
-      );
-    }
+    await assertCanConvertToSingleType(uid);
   }
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -300,12 +357,16 @@ export const editContentType = async (
         });
       }
 
-      const schemaFilesWritten = await builder.writeFiles();
+      // The rows of renamed components are rewritten below, with the folder commit.
+      const schemaFilesWritten = await builder.writeFiles({ renameComponentRows: false });
       if (!schemaFilesWritten) {
         schemaAlreadyRolledBack = true;
         throw new ApplicationError('Invalid schema edition');
       }
-      await pruneFolderReferences([uid]);
+
+      // The folder commit runs inside the row transaction: if it fails, the rows are rolled
+      // back and the catch restores the files. Filesystem only, no database call in here.
+      await builder.renameComponentRows({ beforeCommit: () => pruneFolderReferences([uid]) });
     } catch (error) {
       await rollbackSchemaMutation({
         builder,
@@ -321,12 +382,19 @@ export const editContentType = async (
       strapi.log.error(error);
     }
 
+    strapi.eventHub.emit('content-type.update', { contentType: updatedContentType });
+
     return updatedContentType;
   }
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
 
-  strapi.eventHub.emit('content-type.update', { contentType: updatedContentType });
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new ApplicationError('Invalid schema edition');
+  }
+
+  await emitSchemaEvent('content-type.update', { contentType: updatedContentType });
 
   return updatedContentType;
 };
@@ -377,7 +445,7 @@ export const deleteContentTypes = async (uids: UID.ContentType[]) => {
   }
 
   for (const contentType of deletedContentTypes) {
-    strapi.eventHub.emit('content-type.delete', { contentType });
+    await emitSchemaEvent('content-type.delete', { contentType });
   }
 };
 
@@ -426,7 +494,7 @@ export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: an
   }
 
   if (!defaultBuilder) {
-    strapi.eventHub.emit('content-type.delete', { contentType });
+    await emitSchemaEvent('content-type.delete', { contentType });
   }
 
   return contentType;

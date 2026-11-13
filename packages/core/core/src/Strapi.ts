@@ -56,6 +56,18 @@ class Strapi extends Container implements Core.Strapi {
 
   isLoaded: boolean = false;
 
+  /**
+   * destroy() can run twice: a transfer provider closes the instance, then the
+   * CLI calls destroy() again. The second call returns once the first has
+   * succeeded. A call that overlaps one in progress shares its promise. A call
+   * that failed can run again, from the step that did not finish.
+   */
+  private destroyed = false;
+
+  private destroyPromise?: Promise<void>;
+
+  private destroyStage?: number;
+
   internal_config: Record<string, unknown> = {};
 
   constructor(opts: StrapiOptions) {
@@ -314,6 +326,7 @@ class Strapi extends Container implements Core.Strapi {
         return new Database(
           _.merge(this.config.get('database'), {
             logger,
+            getPhase: () => (this.isLoaded ? 'runtime' : 'boot'),
             settings: {
               migrations: {
                 dir: path.join(projectDir, 'database/migrations'),
@@ -535,6 +548,9 @@ class Strapi extends Container implements Core.Strapi {
 
     await this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 
+    // Runs once every module, provider and the app have bootstrapped
+    await this.hook('strapi::app.afterBootstrap').call();
+
     return this;
   }
 
@@ -561,27 +577,76 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async destroy() {
-    this.log.info('Shutting down Strapi');
-    await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
-
-    for (const provider of providers) {
-      await provider.destroy?.(this);
+    if (this.destroyed) {
+      return;
     }
 
-    await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
+    if (!this.destroyPromise) {
+      this.destroyPromise = this.shutdown().catch((error) => {
+        this.destroyPromise = undefined;
+        throw error;
+      });
+    }
 
-    await this.server.destroy();
+    return this.destroyPromise;
+  }
 
-    this.eventHub.destroy();
+  private async shutdown() {
+    if ((this.destroyStage ?? 0) < 1) {
+      this.log.info('Shutting down Strapi');
+      await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
+      this.destroyStage = 1;
+    }
 
-    await this.db?.destroy();
+    if ((this.destroyStage ?? 0) < 2) {
+      for (const provider of providers) {
+        await provider.destroy?.(this);
+      }
+      this.destroyStage = 2;
+    }
 
-    process.removeAllListeners();
+    if ((this.destroyStage ?? 0) < 3) {
+      await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
+      this.destroyStage = 3;
+    }
 
-    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
-    delete global.strapi;
+    if ((this.destroyStage ?? 0) < 4) {
+      await this.server.destroy();
+      this.destroyStage = 4;
+    }
 
-    this.log.info('Strapi has been shut down');
+    if ((this.destroyStage ?? 0) < 5) {
+      this.eventHub.destroy();
+      this.destroyStage = 5;
+    }
+
+    if ((this.destroyStage ?? 0) < 6) {
+      await this.db?.destroy();
+      this.destroyStage = 6;
+    }
+
+    if ((this.destroyStage ?? 0) < 7) {
+      process.removeAllListeners();
+      this.destroyStage = 7;
+    }
+
+    if ((this.destroyStage ?? 0) < 8) {
+      // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
+      delete global.strapi;
+      this.destroyStage = 8;
+    }
+
+    this.app = undefined;
+    this.isLoaded = false;
+
+    if ((this.destroyStage ?? 0) < 9) {
+      // The container stays registered. API tests keep this object, and the
+      // test helper clears the service maps after destroy() succeeds.
+      this.log.info('Strapi has been shut down');
+      this.destroyStage = 9;
+    }
+
+    this.destroyed = true;
   }
 
   async runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {

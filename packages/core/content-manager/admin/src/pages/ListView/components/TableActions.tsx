@@ -20,6 +20,7 @@ import { isBaseQueryError } from '../../../utils/api';
 import { DocumentActionsMenu } from '../../EditView/components/DocumentActions';
 
 import { AutoCloneFailureModalBody } from './AutoCloneFailureModal';
+import { MoveToBottomAction, MoveToPositionAction, MoveToTopAction } from './CustomOrder';
 
 import type { ProhibitedCloningField } from '../../../../../shared/contracts/collection-types';
 import type {
@@ -290,6 +291,13 @@ const StyledDuplicate = styled(Duplicate)`
   }
 `;
 
-const DEFAULT_TABLE_ROW_ACTIONS = [EditAction, OpenInNewTabAction, CloneAction];
+const DEFAULT_TABLE_ROW_ACTIONS = [
+  EditAction,
+  OpenInNewTabAction,
+  CloneAction,
+  MoveToTopAction,
+  MoveToBottomAction,
+  MoveToPositionAction,
+];
 
 export { TableActions, DEFAULT_TABLE_ROW_ACTIONS };

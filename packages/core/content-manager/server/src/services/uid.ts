@@ -25,13 +25,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     } = attributes[field] as Schema.Attribute.UID;
 
     // @ts-expect-error targetField can be undefined
-    const targetValue = _.get(data, targetField);
+    const targetValue: unknown = _.get(data, targetField);
 
-    if (!_.isEmpty(targetValue)) {
+    // Only strings can be slugified. Any other value, or a string that slugifies to nothing
+    // (whitespace, punctuation, emoji, zero-width characters), falls back like an empty one
+    const targetSlug = typeof targetValue === 'string' ? slugify(targetValue, options) : '';
+
+    if (targetSlug !== '') {
       return this.findUniqueUID({
         contentTypeUID,
         field,
-        value: slugify(targetValue, options),
+        value: targetSlug,
         locale,
       });
     }

@@ -56,6 +56,8 @@ export const FILTER_OPERATORS = [
   '$notNull',
 ] as const;
 
+const NULL_OPERATORS = new Set<(typeof FILTER_OPERATORS)[number]>(['$null', '$notNull']);
+
 /**
  * Builds a per-content-type recursive filters Zod schema.
  *
@@ -77,21 +79,36 @@ export const buildFiltersSchema = (
     return z.never();
   }
 
-  // Lazy reference for recursion ($and / $or / $not)
+  // Lazy reference for recursion ($and / $or / $not).
+  // The getter is memoized: zod's JSON Schema conversion calls `def.getter()` directly for every
+  // node that reaches the lazy, bypassing zod's own cache, so an unmemoized getter rebuilds the
+  // whole object (fields x operators) many times per conversion.
+  let resolvedFiltersObject: z.ZodTypeAny | undefined;
   const filtersSchema: z.ZodTypeAny = z.lazy(() => {
+    if (resolvedFiltersObject !== undefined) {
+      return resolvedFiltersObject;
+    }
+
     const fieldShapes: Record<string, z.ZodTypeAny> = {};
 
     for (const key of scalarKeys) {
       const attr = attributes[key];
       const valueSchema = attributeTypeToFilterValue(attr);
       const operatorObject = z.object(
-        Object.fromEntries(FILTER_OPERATORS.map((op) => [op, valueSchema.optional()]))
+        Object.fromEntries(
+          FILTER_OPERATORS.map((op) => [
+            op,
+            // `$null` / `$notNull` take a boolean whatever the field type. The query layer also
+            // reads `'true'`, `1` and the like, but rejects other values, such as an enum value.
+            NULL_OPERATORS.has(op) === true ? z.boolean().optional() : valueSchema.optional(),
+          ])
+        )
       );
       // Field accepts either a direct value (implicit $eq) or operator object
       fieldShapes[key] = z.union([valueSchema, operatorObject]).optional();
     }
 
-    return z
+    resolvedFiltersObject = z
       .object({
         $and: z.array(filtersSchema).optional(),
         $or: z.array(filtersSchema).optional(),
@@ -99,6 +116,8 @@ export const buildFiltersSchema = (
         ...fieldShapes,
       })
       .strict();
+
+    return resolvedFiltersObject;
   });
 
   return filtersSchema

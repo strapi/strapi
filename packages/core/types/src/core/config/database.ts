@@ -63,5 +63,18 @@ export interface Database<TClient extends Database.ClientKind = Database.ClientK
     forceMigration?: boolean;
     runMigrations?: boolean;
     useTypescriptMigrations?: boolean;
+    /**
+     * Describe the pool on connection pool timeouts. Defaults to true. Must be a boolean (for
+     * example `env.bool('DATABASE_POOL_TIMEOUT_DIAGNOSTICS', true)`): a string is not read as false.
+     */
+    poolTimeoutDiagnostics?: boolean;
+    /**
+     * Maximum time in milliseconds a query run through the query builder's `execute()` may run
+     * before the database cancels it. Unset by default (no limit). Only applied on clients that
+     * can cancel queries (postgres, mysql); ignored on sqlite. Streams, direct `db.connection`
+     * queries, schema sync, and migrations are not covered. Must be a positive number (for
+     * example `env.int('DATABASE_QUERY_TIMEOUT')`).
+     */
+    queryTimeout?: number;
   };
 }

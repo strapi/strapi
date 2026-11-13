@@ -1,66 +1,181 @@
 import { setImmediate } from 'node:timers/promises';
 
-import type { Core, Modules, Schema } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
-import { bootstrap } from '../../bootstrap';
-import { RELEASE_ACTION_MODEL_UID } from '../../constants';
-import { isEntryValid } from '../../utils';
-import { deleteActionsOnDelete, updateActionsOnUpdate } from '../documents';
+import { createDeleteActionsOnDelete, createRevalidateActionsOnDraftChange } from '../documents';
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  isEntryValid: jest.fn().mockResolvedValue(true),
-}));
-
-type Middleware = Modules.Documents.Middleware.Middleware;
-type Context = Parameters<Middleware>[0];
-type Subscriber = Exclude<
-  Parameters<Core.Strapi['db']['lifecycles']['subscribe']>[0],
-  (event: never) => unknown
->;
+type Context = Parameters<Modules.Documents.Middleware.Middleware>[0];
 
 const UID = 'api::article.article';
+const DRAFT = { documentId: 'doc-1', locale: 'en' };
 
-const releaseFindMany = jest.fn();
-const actionDeleteMany = jest.fn();
-const updateReleaseStatus = jest.fn();
+// The planned actions of one entry's locale
+const entryWhere = (draft: { documentId: string; locale?: string }) => ({
+  contentType: UID,
+  entryDocumentId: draft.documentId,
+  locale: draft.locale,
+});
 
-const setupStrapi = ({ localized }: { localized: boolean }) => {
-  global.strapi = {
-    db: {
-      query: jest.fn((uid: string) =>
-        uid === RELEASE_ACTION_MODEL_UID
-          ? { deleteMany: actionDeleteMany }
-          : { findMany: releaseFindMany }
-      ),
-    },
-    plugins: { 'content-releases': { services: { release: { updateReleaseStatus } } } },
-    localization: {
-      isLocalizedContentType: () => localized,
-      getDefaultLocale: jest.fn().mockResolvedValue('en'),
-    },
-    log: { error: jest.fn() },
-  } as unknown as typeof global.strapi;
+const deletePlannedActions = jest.fn();
+const revalidatePlannedActions = jest.fn();
+const logError = jest.fn();
+
+// The caller's transaction: the work registered on its commit waits for `commit()`
+let commitCallbacks: (() => unknown)[] = [];
+const commit = () => {
+  commitCallbacks.forEach((callback) => callback());
+  commitCallbacks = [];
 };
 
-const deleteDocument = async (params: Record<string, unknown>, { draftAndPublish = true } = {}) => {
-  const next = jest.fn().mockResolvedValue({ documentId: 'doc-1', entries: [] });
-  const ctx = {
-    action: 'delete',
-    contentType: { uid: UID, options: { draftAndPublish } },
-    params: { documentId: 'doc-1', ...params },
-  } as unknown as Context;
+const isLocalizedContentType = jest.fn();
 
-  await deleteActionsOnDelete(ctx, next);
+const strapi = {
+  plugin: () => ({
+    service: (name: string) =>
+      name === 'release-action' ? { deletePlannedActions, revalidatePlannedActions } : undefined,
+  }),
+  db: {
+    // The middleware runs inside the caller's transaction unless a test says otherwise
+    inTransaction: jest.fn(() => true),
+    transaction: async (work: (params: { onCommit: (cb: () => unknown) => void }) => unknown) =>
+      work({ onCommit: (cb) => commitCallbacks.push(cb) }),
+  },
+  localization: {
+    isLocalizedContentType,
+    getDefaultLocale: jest.fn().mockResolvedValue('en'),
+  },
+  log: { error: logError },
+} as unknown as Core.Strapi;
+
+// The middleware's work on releases runs after the caller's commit, without being awaited: commit
+// and let it settle before asserting
+const runMiddleware = async (
+  middleware: Modules.Documents.Middleware.Middleware,
+  ctx: unknown,
+  result: unknown = DRAFT
+) => {
+  const returned = await middleware(ctx as Context, jest.fn().mockResolvedValue(result));
+  await setImmediate();
+  commit();
   await setImmediate();
 
-  return next;
+  return returned;
 };
 
-describe('deleteActionsOnDelete', () => {
+beforeEach(() => {
+  jest.clearAllMocks();
+  commitCallbacks = [];
+  deletePlannedActions.mockResolvedValue(undefined);
+  revalidatePlannedActions.mockResolvedValue(undefined);
+});
+
+describe('createRevalidateActionsOnDraftChange', () => {
+  const changeDraft = (action: 'update' | 'discardDraft', result?: unknown) =>
+    runMiddleware(
+      createRevalidateActionsOnDraftChange({ strapi }),
+      {
+        action,
+        contentType: { uid: UID, options: { draftAndPublish: true } },
+        params: { documentId: 'doc-1' },
+      },
+      result
+    );
+
+  it("revalidates the updated entry's release actions", async () => {
+    await changeDraft('update');
+
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(DRAFT)]]);
+  });
+
+  it("waits for the caller's transaction to commit", async () => {
+    await createRevalidateActionsOnDraftChange({ strapi })(
+      {
+        action: 'update',
+        contentType: { uid: UID, options: { draftAndPublish: true } },
+        params: { documentId: 'doc-1' },
+      } as unknown as Context,
+      jest.fn().mockResolvedValue(DRAFT)
+    );
+    await setImmediate();
+
+    // The entry's change could still roll back, and its draft isn't committed yet
+    expect(revalidatePlannedActions).not.toHaveBeenCalled();
+
+    commit();
+    await setImmediate();
+
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(DRAFT)]]);
+  });
+
+  it('revalidates the release actions of each locale whose draft was discarded', async () => {
+    const frDraft = { documentId: 'doc-1', locale: 'fr' };
+
+    await changeDraft('discardDraft', { documentId: 'doc-1', entries: [DRAFT, frDraft] });
+
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([
+      [entryWhere(DRAFT)],
+      [entryWhere(frDraft)],
+    ]);
+  });
+
+  it('revalidates an updated entry that has its own `entries` field as one entry', async () => {
+    const draft = { ...DRAFT, entries: [] };
+
+    await changeDraft('update', draft);
+
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(draft)]]);
+  });
+
+  it.each(['update', 'discardDraft'] as const)(
+    'logs a failure to revalidate after %s and still returns the result',
+    async (action) => {
+      revalidatePlannedActions.mockRejectedValue(new Error('revalidation failed'));
+      const result = action === 'update' ? DRAFT : { documentId: 'doc-1', entries: [DRAFT] };
+
+      expect(await changeDraft(action, result)).toEqual(result);
+      expect(logError).toHaveBeenCalledWith(
+        `Error while updating release actions after ${action}`,
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    }
+  );
+
+  it('starts right away when the change was made outside a transaction', async () => {
+    jest.mocked(strapi.db.inTransaction).mockReturnValueOnce(false);
+    revalidatePlannedActions.mockRejectedValueOnce(new Error('revalidation failed'));
+
+    await createRevalidateActionsOnDraftChange({ strapi })(
+      {
+        action: 'update',
+        contentType: { uid: UID, options: { draftAndPublish: true } },
+        params: { documentId: 'doc-1' },
+      } as unknown as Context,
+      jest.fn().mockResolvedValue(DRAFT)
+    );
+    await setImmediate();
+
+    // Nothing to wait for: no commit() call
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(DRAFT)]]);
+    expect(logError).toHaveBeenCalledWith(
+      'Error while updating release actions after update',
+      expect.objectContaining({ error: expect.any(Error) })
+    );
+  });
+});
+
+describe('createDeleteActionsOnDelete', () => {
+  const deleteEntry = (
+    params: Record<string, unknown> = { locale: 'en' },
+    draftAndPublish = true
+  ) =>
+    runMiddleware(createDeleteActionsOnDelete({ strapi }), {
+      action: 'delete',
+      contentType: { uid: UID, options: { draftAndPublish } },
+      params: { documentId: 'doc-1', ...params },
+    });
+
   beforeEach(() => {
-    jest.clearAllMocks();
-    releaseFindMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    isLocalizedContentType.mockReturnValue(true);
   });
 
   it.each([
@@ -75,183 +190,31 @@ describe('deleteActionsOnDelete', () => {
       { locale: { $in: ['en', 'fr'] } },
     ],
     ['a localized entry without a locale', true, {}, { locale: 'en' }],
-  ])('removes the release actions of %s', async (_, localized, params, localeFilter) => {
-    setupStrapi({ localized });
+  ])('deletes the actions of %s', async (_, localized, params, localeFilter) => {
+    isLocalizedContentType.mockReturnValue(localized);
 
-    await deleteDocument(params);
+    await deleteEntry(params);
 
-    const where = { contentType: UID, entryDocumentId: 'doc-1', ...localeFilter };
-    expect(releaseFindMany.mock.calls).toStrictEqual([[{ where: { actions: where } }]]);
-    expect(actionDeleteMany.mock.calls).toStrictEqual([[{ where }]]);
-    expect(updateReleaseStatus).toHaveBeenCalledWith(1);
-    expect(updateReleaseStatus).toHaveBeenCalledWith(2);
+    expect(deletePlannedActions.mock.calls).toStrictEqual([
+      [{ contentType: UID, entryDocumentId: 'doc-1', ...localeFilter }],
+    ]);
   });
 
   it('leaves releases alone for a content type without draft and publish', async () => {
-    setupStrapi({ localized: false });
+    await deleteEntry({}, false);
 
-    const next = await deleteDocument({}, { draftAndPublish: false });
-
-    expect(next).toHaveBeenCalled();
-    expect(actionDeleteMany).not.toHaveBeenCalled();
-  });
-});
-
-const contentType: Schema.ContentType = {
-  uid: UID,
-  modelType: 'contentType',
-  modelName: 'article',
-  globalId: 'Article',
-  kind: 'collectionType',
-  collectionName: 'articles',
-  info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
-  options: { draftAndPublish: true },
-  attributes: {},
-};
-
-describe('content-releases cleanup failures', () => {
-  const error = new Error('database unavailable');
-  const findMany = jest.fn();
-  const deleteMany = jest.fn();
-  const updateMany = jest.fn();
-  const updateStatus = jest.fn();
-  const logError = jest.fn();
-  let deleteMiddleware: Middleware;
-  let updateMiddleware: Middleware;
-  let subscriber: Subscriber;
-
-  beforeEach(async () => {
-    jest.clearAllMocks();
-    findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
-    deleteMany.mockResolvedValue({ count: 1 });
-    updateMany.mockResolvedValue({ count: 1 });
-    updateStatus.mockResolvedValue({});
-    jest.mocked(isEntryValid).mockResolvedValue(true);
-
-    const strapi = {
-      db: {
-        query: jest.fn(() => ({ findMany, deleteMany, updateMany })),
-        lifecycles: {
-          subscribe(value: Subscriber) {
-            subscriber = value;
-          },
-        },
-      },
-      log: { error: logError },
-      ee: { features: { isEnabled: () => true } },
-      contentTypes: { [contentType.uid]: contentType },
-      getModel: () => contentType,
-      documents: {
-        use(middleware: Middleware) {
-          if (middleware === deleteActionsOnDelete) {
-            deleteMiddleware = middleware;
-          }
-          if (middleware === updateActionsOnUpdate) {
-            updateMiddleware = middleware;
-          }
-        },
-      },
-      plugins: {
-        'content-releases': {
-          services: {
-            release: { updateReleaseStatus: updateStatus },
-            scheduling: { syncFromDatabase: jest.fn().mockResolvedValue(undefined) },
-          },
-        },
-      },
-      localization: {
-        isLocalizedContentType: () => false,
-        getDefaultLocale: jest.fn().mockResolvedValue('en'),
-      },
-      get: () => ({ addAllowedEvent: jest.fn() }),
-      has: () => false,
-    } as unknown as Core.Strapi;
-
-    global.strapi = strapi;
-    await bootstrap({ strapi });
+    expect(deletePlannedActions).not.toHaveBeenCalled();
   });
 
-  describe.each(['delete', 'update', 'afterDeleteMany'] as const)('%s', (action) => {
-    const invoke = async () => {
-      if (action === 'afterDeleteMany') {
-        await subscriber.afterDeleteMany!({
-          action: 'afterDeleteMany',
-          model: {
-            uid: contentType.uid,
-            singularName: 'article',
-            tableName: 'articles',
-            attributes: {},
-            columnToAttribute: {},
-            indexes: [],
-            foreignKeys: [],
-            lifecycles: {},
-          },
-          params: { where: { locale: 'en', documentId: 'doc-1' } },
-          state: {},
-        });
-        return;
-      }
+  it('logs a failure to delete the actions and still returns the deleted entry', async () => {
+    deletePlannedActions.mockRejectedValue(new Error('delete failed'));
 
-      const result = { id: 1, documentId: 'doc-1', locale: 'en' };
-      const ctx = {
-        action,
-        uid: contentType.uid,
-        contentType,
-        params: { documentId: 'doc-1', locale: 'en', ...(action === 'update' && { data: {} }) },
-      } as unknown as Context;
-      const middleware = action === 'delete' ? deleteMiddleware : updateMiddleware;
-      await expect(middleware(ctx, async () => result)).resolves.toBe(result);
-    };
+    const result = await deleteEntry();
 
-    it.each(['lookup', 'cleanup', 'status'] as const)(
-      'logs a %s failure without blocking the operation',
-      async (stage) => {
-        // Keep the rejection handled even if an await regresses, so the log assertion reports it.
-        const rejected = Promise.reject(error);
-        rejected.catch(() => {});
-        const failingCall = {
-          lookup: findMany,
-          status: updateStatus,
-          cleanup: action === 'update' ? updateMany : deleteMany,
-        }[stage];
-        failingCall.mockReturnValueOnce(rejected);
-        await invoke();
-        const message = {
-          update: 'Error while updating release actions after update',
-          delete: 'Error while deleting release actions after delete',
-          afterDeleteMany: 'Error while deleting release actions after entry deleteMany',
-        }[action];
-        expect(logError).toHaveBeenCalledTimes(1);
-        expect(logError).toHaveBeenCalledWith(message, { error });
-      }
+    expect(result).toEqual(DRAFT);
+    expect(logError).toHaveBeenCalledWith(
+      'Error while deleting release actions after delete',
+      expect.objectContaining({ error: expect.any(Error) })
     );
-
-    it('updates every affected release on success', async () => {
-      await invoke();
-      expect(updateStatus.mock.calls).toEqual([[1], [2]]);
-      expect(logError).not.toHaveBeenCalled();
-    });
-
-    it('updates later releases when one status refresh fails', async () => {
-      findMany.mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
-      const rejected = Promise.reject(error);
-      rejected.catch(() => {});
-      updateStatus.mockReset();
-      updateStatus
-        .mockResolvedValueOnce({})
-        .mockReturnValueOnce(rejected)
-        .mockResolvedValueOnce({});
-
-      await invoke();
-
-      expect(updateStatus.mock.calls).toEqual([[1], [2], [3]]);
-      const message = {
-        update: 'Error while updating release actions after update',
-        delete: 'Error while deleting release actions after delete',
-        afterDeleteMany: 'Error while deleting release actions after entry deleteMany',
-      }[action];
-      expect(logError).toHaveBeenCalledTimes(1);
-      expect(logError).toHaveBeenCalledWith(message, { error });
-    });
   });
 });

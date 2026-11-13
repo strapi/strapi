@@ -6,13 +6,16 @@ import { FolderNode, GetFolderStructure } from '../../../../shared/contracts/fol
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../utils';
 
-import { recursiveRenameKeys } from './utils/renameKeys';
+import { DeepRecord, recursiveRenameKeys } from './utils/renameKeys';
 
 const FIELD_MAPPING: Record<string, string> = {
   name: 'label',
   id: 'value',
 };
 
+/**
+ * A folder node once FIELD_MAPPING renamed `id` to `value` and `name` to `label`.
+ */
 interface FolderNodeWithChildren extends Omit<FolderNode, 'children'> {
   children: FolderNodeWithChildren[];
   label?: string;
@@ -27,8 +30,13 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
     const {
       data: { data },
     } = await get<GetFolderStructure.Response['data']>('/upload/folder-structure');
-    const children = data.map((f: FolderNodeWithChildren) =>
-      recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key)
+    // recursiveRenameKeys cannot type the renamed keys, so the result is asserted.
+    const children = data.map(
+      (f) =>
+        recursiveRenameKeys(
+          f,
+          (key) => FIELD_MAPPING?.[key] ?? key
+        ) as DeepRecord<FolderNodeWithChildren>
     );
 
     return [

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { render, renderHook, screen } from '@testing-library/react';
+import { fireEvent, render, renderHook, screen } from '@testing-library/react';
 
 import { createContext } from '../Context';
 
@@ -56,6 +56,78 @@ describe('createContext', () => {
     const { result } = renderHook(() => useTestContext('Consumer', (state) => state.value));
 
     expect(result.current).toBeUndefined();
+  });
+
+  it('returns the default context value when rendered outside its provider', () => {
+    const [, useTestContext] = createContext<{ value: string }>('TestContext', {
+      value: 'default',
+    });
+
+    const { result } = renderHook(() => useTestContext('Consumer', (state) => state.value));
+
+    expect(result.current).toBe('default');
+  });
+
+  /**
+   * Consumers only re-render when the value they select changes, not on every change of the
+   * provider value.
+   */
+  describe('re-renders', () => {
+    const [TestProvider, useTestContext] = createContext<{ count: number; label: string }>(
+      'TestContext'
+    );
+
+    const renders = { count: 0, label: 0 };
+
+    const CountConsumer = React.memo(() => {
+      const count = useTestContext('CountConsumer', (state) => state.count);
+      renders.count += 1;
+      return <span data-testid="count">{count}</span>;
+    });
+
+    const LabelConsumer = React.memo(() => {
+      const label = useTestContext('LabelConsumer', (state) => state.label);
+      renders.label += 1;
+      return <span data-testid="label">{label}</span>;
+    });
+
+    const App = () => {
+      const [count, setCount] = React.useState(0);
+
+      return (
+        <TestProvider count={count} label="static">
+          <button type="button" onClick={() => setCount((c) => c + 1)}>
+            Increment
+          </button>
+          <CountConsumer />
+          <LabelConsumer />
+        </TestProvider>
+      );
+    };
+
+    beforeEach(() => {
+      renders.count = 0;
+      renders.label = 0;
+    });
+
+    it('re-renders a consumer whose selected value changed, with the new value', () => {
+      render(<App />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Increment' }));
+
+      expect(screen.getByTestId('count')).toHaveTextContent('1');
+      expect(renders.count).toBe(2);
+    });
+
+    it('does not re-render a consumer whose selected value did not change', () => {
+      render(<App />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Increment' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Increment' }));
+
+      expect(screen.getByTestId('label')).toHaveTextContent('static');
+      expect(renders.label).toBe(1);
+    });
   });
 
   /**
