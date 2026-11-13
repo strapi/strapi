@@ -9545,7 +9545,6 @@ __metadata:
     immer: "npm:9.0.21"
     inquirer: "npm:9.3.8"
     invariant: "npm:2.2.4"
-    is-localhost-ip: "npm:2.0.0"
     jest: "npm:29.6.0"
     json-logic-js: "npm:2.0.5"
     jsonwebtoken: "npm:9.0.3"
@@ -20889,13 +20888,6 @@ __metadata:
   version: 2.0.0
   resolution: "is-interactive@npm:2.0.0"
   checksum: 10c0/801c8f6064f85199dc6bf99b5dd98db3282e930c3bc197b32f2c5b89313bb578a07d1b8a01365c4348c2927229234f3681eb861b9c2c92bee72ff397390fa600
-  languageName: node
-  linkType: hard
-
-"is-localhost-ip@npm:2.0.0":
-  version: 2.0.0
-  resolution: "is-localhost-ip@npm:2.0.0"
-  checksum: 10c0/40a55283374add1fe1edd5130d66e0ec814bc89e45d1a8b91722c494548ce4807b08e70bdc668b732e497f4de8b95d13d7a477e0d060df04ade2cbf0505f9480
   languageName: node
   linkType: hard
 

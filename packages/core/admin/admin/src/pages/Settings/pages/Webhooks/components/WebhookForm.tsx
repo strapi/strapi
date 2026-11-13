@@ -136,7 +136,8 @@ const WebhookForm = ({
           />
           <Layouts.Content>
             <Flex direction="column" alignItems="stretch" gap={4}>
-              {showTriggerResponse && (
+              {/* A failed trigger is reported in a notification, without a result to show */}
+              {showTriggerResponse && (isTriggering || triggerResponse) && (
                 <TriggerContainer
                   isPending={isTriggering}
                   response={triggerResponse}

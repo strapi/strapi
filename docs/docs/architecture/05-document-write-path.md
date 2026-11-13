@@ -8,6 +8,7 @@ review_notes:
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
   - 'A commit callback runs up to its first await before the write returns. destroy() waits at most 10 seconds for that database. Knex can resolve commit() when the database rejects COMMIT, and the callbacks still run.'
   - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release-run.ts`. The rest of this page was not re-verified.
+  - The destination checks paragraph was checked against `webhook-destinations.ts`, `webhook-runner.ts`, `utils/address-ranges.ts`, and the admin `controllers/webhooks.ts`.
 ---
 
 This page follows one write through the server. It explains the layers and the order in which they run. It is not an API reference for the Document Service.
@@ -164,6 +165,8 @@ The webhook runner adds an event hub listener for an event when the first webhoo
 
 When the option is `true`, the event manager keeps the request context from the moment the event was scheduled. The commit callback emits the event inside that context, so the runner can still read the release action after the document operation has returned. Content Releases writes that action onto the context only while the option is on.
 
+`server.webhooks.destinationChecks` holds optional checks on where webhooks are sent. They are all off by default. `blockLoopback`, `blockPrivateNetworks` and `blockLinkLocal` each block a set of address ranges, listed in `utils/address-ranges.ts`. The admin webhooks controller calls `webhookRunner.checkDestination(url)` when a webhook is created or its URL changes. That call resolves every address of the hostname and returns what blocks the first one in an enabled range. With `checkOnSend`, `run()` sends through an undici dispatcher that applies the same check to each address it connects to. Behind a proxy, set with `server.proxy.*` or Node's `NODE_USE_ENV_PROXY`, the runner checks the hostname before each request instead, because the proxy opens the connection. `redirects` is `follow` (fetch follows them), `check` (the runner follows up to 5 and checks each target) or `none` (fetch returns the redirect response). Webhooks that the provider reads at bootstrap, and the ones created with `webhookStore.createWebhook`, are not checked when they are saved.
+
 When a webhook is created or updated, the webhook store rejects events that are not in its allowed list. It checks both `events` and `contentTypeEvents`. Core allows the six `entry.*` events. Plugins add their own events with `addAllowedEvent`. `contentTypeEvents` maps a content-type UID to event names. The store does not keep a per-type event that is already in `events`. A webhook saved before this field existed is read as an empty map.
 
 ## Code map
@@ -185,6 +188,7 @@ When a webhook is created or updated, the webhook store rejects events that are 
 | Transactions                     | [`packages/core/database/src/transaction-context.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/transaction-context.ts)                                                                   |
 | Event hub                        | [`packages/core/core/src/services/event-hub.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/event-hub.ts)                                                                             |
 | Webhook runner                   | [`packages/core/core/src/services/webhook-runner.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/webhook-runner.ts)                                                                   |
+| Webhook destination checks       | [`packages/core/core/src/services/webhook-destinations.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/webhook-destinations.ts)                                                       |
 | Webhook store and allowed events | [`packages/core/core/src/services/webhook-store.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/webhook-store.ts)                                                                     |
 | Document Service types           | [`packages/core/types/src/modules/documents/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/modules/documents/index.ts)                                                                 |
 
