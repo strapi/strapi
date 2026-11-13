@@ -57,11 +57,11 @@ describe('Document Service', () => {
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
     strapi = testUtils.strapi;
-  });
+  }, 180000);
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 180000);
 
   setupDatabaseReset();
 
@@ -492,6 +492,97 @@ describe('Document Service', () => {
           documentId: replacementFile.documentId,
         },
       });
+    });
+
+    it('Syncs non-localized field when reverted to a previous value (GH-28225)', async () => {
+      const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
+      const a = await strapi.documents(MIXED_CONTENT_UID).create({
+        locale: 'en',
+        data: { localizedText: 'A', sharedText: 'x' },
+      });
+      await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: a.documentId,
+        locale: 'es',
+        data: { localizedText: 'B' },
+      });
+      await strapi.documents(MIXED_CONTENT_UID).publish({
+        documentId: a.documentId,
+        locale: 'en',
+      });
+      await strapi.documents(MIXED_CONTENT_UID).publish({
+        documentId: a.documentId,
+        locale: 'es',
+      });
+
+      // Localized-only edit on EN must not rewrite ES (PR #24648)
+      const esBeforeLocalizedEdit = await strapi.db.query(MIXED_CONTENT_UID).findOne({
+        where: { documentId: a.documentId, locale: 'es', publishedAt: null },
+      });
+
+      await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: a.documentId,
+        locale: 'en',
+        data: { localizedText: 'A2' },
+      });
+
+      const esAfterLocalizedEdit = await strapi.db.query(MIXED_CONTENT_UID).findOne({
+        where: { documentId: a.documentId, locale: 'es', publishedAt: null },
+      });
+      expect(esAfterLocalizedEdit.updatedAt).toEqual(esBeforeLocalizedEdit.updatedAt);
+      expect(esAfterLocalizedEdit.sharedText).toBe('x');
+
+      await strapi.documents(MIXED_CONTENT_UID).publish({
+        documentId: a.documentId,
+        locale: 'en',
+      });
+
+      // Update non-localized field to 'y'
+      await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: a.documentId,
+        locale: 'en',
+        data: { sharedText: 'y' },
+      });
+
+      const esAfterUpdateY = await strapi.db.query(MIXED_CONTENT_UID).findOne({
+        where: { documentId: a.documentId, locale: 'es', publishedAt: null },
+      });
+      expect(esAfterUpdateY.sharedText).toBe('y');
+
+      // Update non-localized field back to 'x' (matching another row of the document)
+      await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: a.documentId,
+        locale: 'en',
+        data: { sharedText: 'x' },
+      });
+
+      const esAfterUpdateX = await strapi.db.query(MIXED_CONTENT_UID).findOne({
+        where: { documentId: a.documentId, locale: 'es', publishedAt: null },
+      });
+      expect(esAfterUpdateX.sharedText).toBe('x');
+
+      await strapi.documents(MIXED_CONTENT_UID).unpublish({
+        documentId: a.documentId,
+        locale: '*',
+      });
+      await strapi.documents(MIXED_CONTENT_UID).publish({
+        documentId: a.documentId,
+        locale: '*',
+      });
+
+      const rows = await strapi.db.query(MIXED_CONTENT_UID).findMany({
+        where: { documentId: a.documentId },
+        select: ['locale', 'sharedText', 'publishedAt'],
+      });
+
+      const esDraft = rows.find((r: any) => r.locale === 'es' && r.publishedAt === null);
+      const esPublished = rows.find((r: any) => r.locale === 'es' && r.publishedAt !== null);
+      const enDraft = rows.find((r: any) => r.locale === 'en' && r.publishedAt === null);
+      const enPublished = rows.find((r: any) => r.locale === 'en' && r.publishedAt !== null);
+
+      expect(enDraft?.sharedText).toBe('x');
+      expect(enPublished?.sharedText).toBe('x');
+      expect(esDraft?.sharedText).toBe('x');
+      expect(esPublished?.sharedText).toBe('x');
     });
   });
 });
