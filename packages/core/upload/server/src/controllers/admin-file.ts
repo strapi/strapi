@@ -252,7 +252,7 @@ export default {
     const job = await jobService.getLatestActiveJob();
 
     if (!job) {
-      return ctx.notFound('No active job found');
+      return ctx.notFound('No AI metadata job found');
     }
 
     ctx.body = job;
