@@ -43,21 +43,72 @@ describe('better-sqlite3 version for the running Node', () => {
   });
 
   it('pins 13.0.3 where Node-API 10 is available', () => {
-    expect(getBetterSqlite3Version('22.14.0')).toBe(BETTER_SQLITE3_VERSION);
-    expect(getBetterSqlite3Version('23.6.0')).toBe(BETTER_SQLITE3_VERSION);
-    expect(getBetterSqlite3Version('24.11.0')).toBe(BETTER_SQLITE3_VERSION);
-    expect(getBetterSqlite3Version('26.0.0')).toBe(BETTER_SQLITE3_VERSION);
+    const linux64 = { platform: 'linux' as const, arch: 'x64' };
+
+    expect(getBetterSqlite3Version('22.14.0', null, linux64)).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('23.6.0', null, linux64)).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('24.11.0', null, linux64)).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('26.0.0', null, linux64)).toBe(BETTER_SQLITE3_VERSION);
   });
 
   it('pins 12.11.1 for Yarn 1, which compiles 13.x', () => {
-    expect(getBetterSqlite3Version('24.11.0', '1.22.22')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
-    expect(getBetterSqlite3Version('22.14.0', '1.22.22')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+    const linux64 = { platform: 'linux' as const, arch: 'x64' };
+
+    expect(getBetterSqlite3Version('24.11.0', '1.22.22', linux64)).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(getBetterSqlite3Version('22.14.0', '1.22.22', linux64)).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
   });
 
   it('pins 13.0.3 for Yarn 2 and later when Node can load it', () => {
-    expect(getBetterSqlite3Version('24.11.0', '2.4.3')).toBe(BETTER_SQLITE3_VERSION);
-    expect(getBetterSqlite3Version('24.11.0', '4.12.0')).toBe(BETTER_SQLITE3_VERSION);
-    expect(getBetterSqlite3Version('22.13.0', '4.12.0')).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
+    const linux64 = { platform: 'linux' as const, arch: 'x64' };
+
+    expect(getBetterSqlite3Version('24.11.0', '2.4.3', linux64)).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('24.11.0', '4.12.0', linux64)).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('22.13.0', '4.12.0', linux64)).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+  });
+
+  it('pins 13.0.3 only on the 64-bit platforms that ship a prebuild', () => {
+    const supported = { platform: 'linux' as const, arch: 'x64' };
+
+    expect(getBetterSqlite3Version('24.11.0', null, supported)).toBe(BETTER_SQLITE3_VERSION);
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'linux', arch: 'arm64' })).toBe(
+      BETTER_SQLITE3_VERSION
+    );
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'darwin', arch: 'arm64' })).toBe(
+      BETTER_SQLITE3_VERSION
+    );
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'win32', arch: 'x64' })).toBe(
+      BETTER_SQLITE3_VERSION
+    );
+  });
+
+  it('pins 12.11.1 where 13.0.3 has no prebuild, including 32-bit ARM', () => {
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'linux', arch: 'arm' })).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(getBetterSqlite3Version('22.14.0', '4.12.0', { platform: 'linux', arch: 'arm' })).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'linux', arch: 'ia32' })).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'linux', arch: 'riscv64' })).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'win32', arch: 'ia32' })).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(getBetterSqlite3Version('24.11.0', null, { platform: 'freebsd', arch: 'x64' })).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
+    expect(getBetterSqlite3Version('22.13.0', null, { platform: 'linux', arch: 'x64' })).toBe(
+      BETTER_SQLITE3_NODE_22_13_VERSION
+    );
   });
 });
 

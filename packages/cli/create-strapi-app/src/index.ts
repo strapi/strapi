@@ -222,7 +222,9 @@ async function run(args: string[]): Promise<void> {
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
 
-  scope.yarnVersion = await resolveYarnVersion(scope.packageManager);
+  // The app directory has to exist so `yarn --version` runs where `yarn install` will run.
+  await fse.ensureDir(scope.rootPath);
+  scope.yarnVersion = await resolveYarnVersion(scope.packageManager, scope.rootPath);
 
   addDatabaseDependencies(scope);
 

@@ -22,12 +22,60 @@ function mkProjectDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-csa-cli-test-'));
 }
 
+const SQLITE_13 = '13.0.3';
+const SQLITE_12 = '12.11.1';
+const ENGINES_WIDE = '>=22.0.0 <=26.x.x';
+const ENGINES_13 = '>=22.14.0 <23.0.0 || >=23.6.0 <=26.x.x';
+
+/**
+ * 13.0.3 loads only with Node-API 10 and only on the 64-bit linux/darwin/win32 prebuilds.
+ * Must stay in step with platformCanLoadBetterSqlite3V13 in create-strapi-app.
+ */
+function hostCanLoadSqlite13() {
+  return (
+    Number(process.versions.napi) >= 10 &&
+    ['linux', 'darwin', 'win32'].includes(process.platform) &&
+    ['x64', 'arm64'].includes(process.arch)
+  );
+}
+
+function expectedSqlitePin(yarnVersion) {
+  const yarnMajor = yarnVersion == null ? null : Number(String(yarnVersion).split('.')[0]);
+  const yarnCanInstall13 = yarnMajor === null || yarnMajor >= 2;
+
+  return hostCanLoadSqlite13() && yarnCanInstall13 ? SQLITE_13 : SQLITE_12;
+}
+
+function expectSqlitePackageJson(pkg, yarnVersion) {
+  const pin = expectedSqlitePin(yarnVersion);
+
+  expect(pkg.dependencies['better-sqlite3']).toBe(pin);
+  expect(pkg.engines.node).toBe(pin === SQLITE_13 ? ENGINES_13 : ENGINES_WIDE);
+
+  if (yarnVersion != null && pin === SQLITE_13) {
+    expect(pkg.dependenciesMeta).toEqual({ 'better-sqlite3': { built: false } });
+  } else {
+    expect(pkg.dependenciesMeta).toBeUndefined();
+  }
+}
+
 /**
  * 12.x still needs its install script. 13.x is denied (`better-sqlite3: false`)
- * wherever the running Node has Node-API 10.
+ * wherever this machine can load the 13.0.3 prebuild.
  */
 function sqliteDriverNeedsPnpmBuild() {
-  return Number(process.versions.napi) < 10;
+  return !hostCanLoadSqlite13();
+}
+
+function yarnOnPath(version) {
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-csa-yarn-bin-'));
+  fs.writeFileSync(
+    path.join(binDir, 'yarn'),
+    `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(`${version}\n`)});\n`
+  );
+  fs.chmodSync(path.join(binDir, 'yarn'), 0o755);
+
+  return binDir;
 }
 
 function sqlitePnpmBuildPackages() {
@@ -146,9 +194,12 @@ describe('create-strapi-app', () => {
 
   it('writes a Yarn node-modules linker config for Yarn projects', async () => {
     const projectDir = mkProjectDir();
+    const yarnBin = yarnOnPath('4.12.0');
     try {
       await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
-        npm_config_user_agent: 'yarn/4.12.0 npm/? node/v24.12.0 darwin arm64',
+        // The user agent says Yarn 1. The binary in the app directory is Yarn 4, and that one wins.
+        npm_config_user_agent: 'yarn/1.22.22 npm/? node/v24.12.0 darwin arm64',
+        PATH: `${yarnBin}${path.delimiter}${process.env.PATH}`,
       })
         .expect('code', 0)
         .end();
@@ -156,23 +207,32 @@ describe('create-strapi-app', () => {
       expect(fs.readFileSync(path.join(projectDir, '.yarnrc.yml'), 'utf8')).toBe(
         'nodeLinker: node-modules\n'
       );
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      expectSqlitePackageJson(pkg, '4.12.0');
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
+      fs.rmSync(yarnBin, { recursive: true, force: true });
     }
   });
 
   it('does not write a Yarn config for Yarn classic projects', async () => {
     const projectDir = mkProjectDir();
+    const yarnBin = yarnOnPath('1.22.22');
     try {
       await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
-        npm_config_user_agent: 'yarn/1.22.22 npm/? node/v24.12.0 darwin arm64',
+        // A parent Yarn 4 user agent must not pin 13 when the app directory's yarn is classic.
+        npm_config_user_agent: 'yarn/4.12.0 npm/? node/v24.12.0 darwin arm64',
+        PATH: `${yarnBin}${path.delimiter}${process.env.PATH}`,
       })
         .expect('code', 0)
         .end();
 
       expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      expectSqlitePackageJson(pkg, '1.22.22');
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
+      fs.rmSync(yarnBin, { recursive: true, force: true });
     }
   });
 
@@ -196,6 +256,7 @@ describe('create-strapi-app', () => {
       expect(pkg.dependencies.react).toBe('^18.0.0');
       expect(pkg.dependencies['react-dom']).toBe('^18.0.0');
       expect(pkg.dependencies['styled-components']).toBe('^6.0.0');
+      expectSqlitePackageJson(pkg, null);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
@@ -213,7 +274,7 @@ describe('create-strapi-app', () => {
       const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
       const workspace = fs.readFileSync(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
 
-      expect(pkg.dependencies).toMatchObject({ 'better-sqlite3': expect.any(String) });
+      expectSqlitePackageJson(pkg, null);
       expect(pkg.pnpm).toBeUndefined();
       expect(workspace).toContain('allowBuilds:');
       expect(workspace).toContain('sharp: true');
@@ -240,7 +301,14 @@ describe('create-strapi-app', () => {
 
       const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
 
+      expectSqlitePackageJson(pkg, null);
       expect(pkg.pnpm.onlyBuiltDependencies).toEqual(sqlitePnpmBuildPackages());
+      if (expectedSqlitePin(null) === SQLITE_13) {
+        expect(pkg.pnpm.ignoredBuiltDependencies).toEqual(['better-sqlite3']);
+        expect(pkg.pnpm.onlyBuiltDependencies).not.toContain('better-sqlite3');
+      } else {
+        expect(pkg.pnpm.ignoredBuiltDependencies).toBeUndefined();
+      }
       expect(fs.existsSync(path.join(projectDir, 'pnpm-workspace.yaml'))).toBe(false);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
@@ -250,6 +318,7 @@ describe('create-strapi-app', () => {
   it('scaffolds inside an existing Yarn workspace monorepo', async () => {
     const monorepoDir = mkProjectDir();
     const projectDir = path.join(monorepoDir, 'packages', 'strapi-app');
+    const yarnBin = yarnOnPath('4.12.0');
 
     try {
       fs.mkdirSync(path.dirname(projectDir), { recursive: true });
@@ -269,6 +338,7 @@ describe('create-strapi-app', () => {
 
       await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
         npm_config_user_agent: 'yarn/4.12.0 npm/? node/v24.12.0 darwin arm64',
+        PATH: `${yarnBin}${path.delimiter}${process.env.PATH}`,
       })
         .expect('code', 0)
         .end();
@@ -281,6 +351,7 @@ describe('create-strapi-app', () => {
       );
     } finally {
       fs.rmSync(monorepoDir, { recursive: true, force: true });
+      fs.rmSync(yarnBin, { recursive: true, force: true });
     }
   });
 

@@ -10,6 +10,8 @@ import {
   shouldUsePnpmWorkspaceConfig,
   writePnpmWorkspaceConfig,
 } from '../../../../packages/cli/create-strapi-app/src/utils/pnpm-config';
+
+const linux64 = { platform: 'linux' as const, arch: 'x64' };
 import type { Scope } from '../../../../packages/cli/create-strapi-app/src/types';
 
 function mkProjectDir() {
@@ -58,7 +60,7 @@ describe('pnpm-config', () => {
         'sharp',
       ]);
       // 13.0.3 ships a prebuild. pnpm must not be told to compile it.
-      expect(getPnpmBuildPackageNames(makeScope(sqliteDir), '22.14.0')).toEqual([
+      expect(getPnpmBuildPackageNames(makeScope(sqliteDir), '22.14.0', linux64)).toEqual([
         '@swc/core',
         'core-js-pure',
         'esbuild',
@@ -80,21 +82,21 @@ describe('pnpm-config', () => {
     const projectDir = mkProjectDir();
 
     try {
-      const yaml = formatPnpmWorkspaceYaml(makeScope(projectDir), '11.8.0', '22.14.0');
+      const yaml = formatPnpmWorkspaceYaml(makeScope(projectDir), '11.8.0', '22.14.0', linux64);
 
       expect(yaml).toContain("packages:\n  - '.'");
       expect(yaml).toContain("minimumReleaseAgeExclude:\n  - '@strapi/*'");
       expect(yaml).toContain("'@swc/core': true");
       expect(yaml).toContain('better-sqlite3: false');
       expect(yaml).toContain('sharp: true');
-      expect(getPnpmAllowBuilds(makeScope(projectDir), '22.14.0')).toMatchObject({
+      expect(getPnpmAllowBuilds(makeScope(projectDir), '22.14.0', linux64)).toMatchObject({
         '@swc/core': true,
         'better-sqlite3': false,
       });
-      expect(getPnpmAllowBuilds(makeScope(projectDir), '23.5.0')).toMatchObject({
+      expect(getPnpmAllowBuilds(makeScope(projectDir), '23.5.0', linux64)).toMatchObject({
         'better-sqlite3': true,
       });
-      expect(getPnpmAllowBuilds(makeScope(projectDir), '23.6.0')).toMatchObject({
+      expect(getPnpmAllowBuilds(makeScope(projectDir), '23.6.0', linux64)).toMatchObject({
         'better-sqlite3': false,
       });
       expect(getPnpmAllowBuilds(makeScope(projectDir), '22.13.0')).toMatchObject({

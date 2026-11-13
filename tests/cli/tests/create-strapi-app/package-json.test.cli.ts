@@ -92,7 +92,15 @@ describe('createPackageJSON', () => {
 
       await createPackageJSON(makeScope(projectDir, { pnpmVersion: '10.25.0' }));
 
-      expect(readPkg(projectDir).pnpm.onlyBuiltDependencies).toEqual(sqlitePnpmBuildPackages);
+      const pkg = readPkg(projectDir);
+
+      expect(pkg.pnpm.onlyBuiltDependencies).toEqual(sqlitePnpmBuildPackages);
+      if (betterSqlite3NeedsInstallScript(getBetterSqlite3Version())) {
+        expect(pkg.pnpm.ignoredBuiltDependencies).toBeUndefined();
+      } else {
+        expect(pkg.pnpm.ignoredBuiltDependencies).toEqual(['better-sqlite3']);
+        expect(pkg.pnpm.onlyBuiltDependencies).not.toContain('better-sqlite3');
+      }
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }

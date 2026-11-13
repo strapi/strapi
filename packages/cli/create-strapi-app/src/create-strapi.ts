@@ -34,9 +34,27 @@ const getUserAgentPackageManagerVersion = (packageManager: Scope['packageManager
   return semver.coerce(version)?.version ?? null;
 };
 
-export const resolveYarnVersion = async (packageManager: Scope['packageManager']) => {
+/**
+ * The version that matters is the `yarn` binary that will install the new app.
+ * `yarn --version` from the directory where the command was launched can see a
+ * parent project's yarnPath and report Yarn 4 while the app directory's `yarn` is Yarn 1.
+ */
+export const resolveYarnVersion = async (packageManager: Scope['packageManager'], cwd?: string) => {
   if (packageManager !== 'yarn') {
     return null;
+  }
+
+  if (cwd) {
+    try {
+      const packageManagerVersion = await getPackageManagerVersion(packageManager, { cwd });
+      const normalized = semver.coerce(packageManagerVersion)?.version ?? null;
+
+      if (normalized) {
+        return normalized;
+      }
+    } catch {
+      // No usable Yarn in the app directory. Fall back to the process that launched the CLI.
+    }
   }
 
   const userAgentVersion = getUserAgentPackageManagerVersion(packageManager);
@@ -148,7 +166,7 @@ async function createApp(scope: Scope) {
   await trackUsage({ event: 'didCopyProjectFiles', scope });
 
   const pnpmVersion = await resolvePnpmVersion(packageManager);
-  const yarnVersion = scope.yarnVersion ?? (await resolveYarnVersion(packageManager));
+  const yarnVersion = scope.yarnVersion ?? (await resolveYarnVersion(packageManager, rootPath));
   const scopeWithPnpmVersion = { ...scope, pnpmVersion, yarnVersion };
 
   try {

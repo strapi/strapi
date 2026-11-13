@@ -16,6 +16,21 @@ export const BETTER_SQLITE3_13_MIN_NODE = '22.14.0';
 export const BETTER_SQLITE3_13_MIN_NODE_23 = '23.6.0';
 
 /**
+ * Platforms and CPU architectures that ship inside better-sqlite3@13.0.3.
+ * These match `PREBUILD_PLATFORMS` and `PREBUILD_ARCHS` in that version's `lib/binding.js`.
+ * Linux glibc and musl both have x64 and arm64 binaries. 32-bit ARM (`linux-arm` and
+ * `linuxmusl-arm`) is not among them; 12.11.1 still publishes those two.
+ * Every other OS or arch has no 13.x binary, and 13.x does not compile during install.
+ */
+const BETTER_SQLITE3_13_PREBUILD_PLATFORMS = new Set<string>(['linux', 'darwin', 'win32']);
+const BETTER_SQLITE3_13_PREBUILD_ARCHS = new Set<string>(['x64', 'arm64']);
+
+export type BetterSqlite3Host = {
+  platform?: NodeJS.Platform;
+  arch?: string;
+};
+
+/**
  * True when this Node version can load the 13.x prebuild.
  * The running process uses `process.versions.napi`. A passed version uses the releases that shipped Node-API 10.
  */
@@ -52,11 +67,32 @@ export function yarnCanInstallBetterSqlite3V13(yarnVersion: string | null | unde
   return semver.gte(normalized, '2.0.0');
 }
 
+/**
+ * True when better-sqlite3@13.0.3 contains a prebuild for this OS and CPU.
+ * The running process is the default. Tests pass another host to cover machines this one is not.
+ */
+export function platformCanLoadBetterSqlite3V13(
+  platform: NodeJS.Platform = process.platform,
+  arch: string = process.arch
+): boolean {
+  return (
+    BETTER_SQLITE3_13_PREBUILD_PLATFORMS.has(platform) && BETTER_SQLITE3_13_PREBUILD_ARCHS.has(arch)
+  );
+}
+
 export function getBetterSqlite3Version(
   nodeVersion: string = process.versions.node,
-  yarnVersion?: string | null
+  yarnVersion?: string | null,
+  host: BetterSqlite3Host = {}
 ): string {
-  if (!nodeCanLoadBetterSqlite3V13(nodeVersion) || !yarnCanInstallBetterSqlite3V13(yarnVersion)) {
+  const platform = host.platform ?? process.platform;
+  const arch = host.arch ?? process.arch;
+
+  if (
+    !nodeCanLoadBetterSqlite3V13(nodeVersion) ||
+    !yarnCanInstallBetterSqlite3V13(yarnVersion) ||
+    !platformCanLoadBetterSqlite3V13(platform, arch)
+  ) {
     return BETTER_SQLITE3_NODE_22_13_VERSION;
   }
 
@@ -177,13 +213,18 @@ const sqlClientModule = {
   postgres: { pg: '8.20.0' },
 };
 
-export function addDatabaseDependencies(scope: Scope, nodeVersion: string = process.versions.node) {
+export function addDatabaseDependencies(
+  scope: Scope,
+  nodeVersion: string = process.versions.node,
+  host: BetterSqlite3Host = {}
+) {
   const databaseDependencies =
     scope.database.client === 'sqlite'
       ? {
           'better-sqlite3': getBetterSqlite3Version(
             nodeVersion,
-            scope.packageManager === 'yarn' ? scope.yarnVersion : undefined
+            scope.packageManager === 'yarn' ? scope.yarnVersion : undefined,
+            host
           ),
         }
       : sqlClientModule[scope.database.client];

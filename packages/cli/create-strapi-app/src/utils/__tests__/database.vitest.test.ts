@@ -28,6 +28,8 @@ const dependencyScope = (client: Scope['database']['client']): Scope => ({
   agentName: null,
 });
 
+const linux64 = { platform: 'linux' as const, arch: 'x64' };
+
 describe('addDatabaseDependencies', () => {
   it('pins better-sqlite3 from the Node version, not the test runner', () => {
     const node22WithoutNapi = dependencyScope('sqlite');
@@ -35,10 +37,10 @@ describe('addDatabaseDependencies', () => {
     const node22WithNapi = dependencyScope('sqlite');
     const node23WithNapi = dependencyScope('sqlite');
 
-    addDatabaseDependencies(node22WithoutNapi, '22.13.0');
-    addDatabaseDependencies(node23WithoutNapi, '23.5.0');
-    addDatabaseDependencies(node22WithNapi, '22.14.0');
-    addDatabaseDependencies(node23WithNapi, '23.6.0');
+    addDatabaseDependencies(node22WithoutNapi, '22.13.0', linux64);
+    addDatabaseDependencies(node23WithoutNapi, '23.5.0', linux64);
+    addDatabaseDependencies(node22WithNapi, '22.14.0', linux64);
+    addDatabaseDependencies(node23WithNapi, '23.6.0', linux64);
 
     expect(node22WithoutNapi.dependencies?.['better-sqlite3']).toBe(
       BETTER_SQLITE3_NODE_22_13_VERSION
@@ -62,9 +64,9 @@ describe('addDatabaseDependencies', () => {
     const npmWithStrayYarnVersion = dependencyScope('sqlite');
     npmWithStrayYarnVersion.yarnVersion = '1.22.22';
 
-    addDatabaseDependencies(yarn1, '24.0.0');
-    addDatabaseDependencies(yarn4, '24.0.0');
-    addDatabaseDependencies(npmWithStrayYarnVersion, '24.0.0');
+    addDatabaseDependencies(yarn1, '24.0.0', linux64);
+    addDatabaseDependencies(yarn4, '24.0.0', linux64);
+    addDatabaseDependencies(npmWithStrayYarnVersion, '24.0.0', linux64);
 
     expect(yarn1.dependencies?.['better-sqlite3']).toBe(BETTER_SQLITE3_NODE_22_13_VERSION);
     expect(yarn4.dependencies?.['better-sqlite3']).toBe(BETTER_SQLITE3_VERSION);

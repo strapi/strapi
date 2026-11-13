@@ -4,11 +4,16 @@ import fse from 'fs-extra';
 
 import { betterSqlite3NeedsInstallScript } from './database';
 import { engines, SQLITE_13_NODE_ENGINE } from './engines';
-import { getPnpmOnlyBuiltDependencies, shouldUsePackageJsonPnpmConfig } from './pnpm-config';
+import {
+  getPnpmIgnoredBuiltDependencies,
+  getPnpmOnlyBuiltDependencies,
+  shouldUsePackageJsonPnpmConfig,
+} from './pnpm-config';
 import type { Scope } from '../types';
 
 type PnpmPackageConfig = {
   onlyBuiltDependencies?: string[];
+  ignoredBuiltDependencies?: string[];
   [key: string]: unknown;
 };
 
@@ -69,16 +74,30 @@ const getPnpmPackageJsonConfig = (scope: Scope, existingPkg: PackageJson) => {
     return {};
   }
 
-  const existingOnlyBuiltDependencies = Array.isArray(existingPkg.pnpm?.onlyBuiltDependencies)
-    ? existingPkg.pnpm.onlyBuiltDependencies.filter((dep): dep is string => typeof dep === 'string')
-    : [];
-
-  return {
-    pnpm: {
-      ...existingPkg.pnpm,
-      onlyBuiltDependencies: getPnpmOnlyBuiltDependencies(scope, existingOnlyBuiltDependencies),
-    },
+  const packageNames = (value: unknown): string[] => {
+    return Array.isArray(value)
+      ? value.filter((dep): dep is string => typeof dep === 'string')
+      : [];
   };
+
+  const existingOnlyBuiltDependencies = packageNames(existingPkg.pnpm?.onlyBuiltDependencies);
+  const ignoredBuiltDependencies = getPnpmIgnoredBuiltDependencies(
+    scope,
+    packageNames(existingPkg.pnpm?.ignoredBuiltDependencies)
+  );
+
+  const pnpm: PnpmPackageConfig = {
+    ...existingPkg.pnpm,
+    onlyBuiltDependencies: getPnpmOnlyBuiltDependencies(scope, existingOnlyBuiltDependencies),
+  };
+
+  if (ignoredBuiltDependencies.length > 0) {
+    pnpm.ignoredBuiltDependencies = ignoredBuiltDependencies;
+  } else {
+    delete pnpm.ignoredBuiltDependencies;
+  }
+
+  return { pnpm };
 };
 
 export async function createPackageJSON(scope: Scope) {
