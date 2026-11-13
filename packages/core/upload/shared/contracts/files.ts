@@ -75,6 +75,9 @@ export interface File {
         thumbnail: {
           url: string;
         };
+        small?: {
+          url: string;
+        };
       }
     | null;
   hash: string;
