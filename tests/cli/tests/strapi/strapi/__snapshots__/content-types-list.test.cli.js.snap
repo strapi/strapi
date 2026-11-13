@@ -40,5 +40,7 @@ exports[`content-types:list should output list of content-types 1`] = `
 │ admin::transfer-token                                │
 │ admin::transfer-token-permission                     │
 │ admin::session                                       │
+│ admin::mcp-oauth-client                              │
+│ admin::mcp-oauth-authorization-code                  │
 │ admin::audit-log                                     │"
 `;

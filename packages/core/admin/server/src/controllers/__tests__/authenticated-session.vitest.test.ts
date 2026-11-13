@@ -13,21 +13,35 @@ const createSessionManager = ({
   listSessions = vi.fn(() => Promise.resolve([])),
   revokeSessionById = vi.fn(() => Promise.resolve(true)),
   invalidateRefreshToken = vi.fn(() => Promise.resolve()),
+  hasMcpOrigin = false,
 }: {
   listSessions?: Mock;
   revokeSessionById?: Mock;
   invalidateRefreshToken?: Mock;
+  hasMcpOrigin?: boolean;
 } = {}) => {
   const adminOrigin = { listSessions, revokeSessionById, invalidateRefreshToken };
-  const sessionManagerFn = vi.fn((origin: string) => {
-    if (origin === 'admin') {
-      return adminOrigin;
+  const mcpOrigin = { invalidateRefreshToken: vi.fn(() => Promise.resolve()) };
+  const sessionManagerFn = Object.assign(
+    vi.fn((origin: string) => {
+      if (origin === 'admin') {
+        return adminOrigin;
+      }
+
+      if (origin === 'mcp' && hasMcpOrigin) {
+        return mcpOrigin;
+      }
+
+      throw new Error(`Unexpected origin: ${origin}`);
+    }),
+    {
+      hasOrigin: vi.fn(
+        (origin: string) => origin === 'admin' || (hasMcpOrigin && origin === 'mcp')
+      ),
     }
+  );
 
-    throw new Error(`Unexpected origin: ${origin}`);
-  });
-
-  return { sessionManagerFn, adminOrigin };
+  return { sessionManagerFn, adminOrigin, mcpOrigin };
 };
 
 describe('Authenticated Session Controller', () => {
@@ -180,6 +194,20 @@ describe('Authenticated Session Controller', () => {
       expect(adminOrigin.invalidateRefreshToken).not.toHaveBeenCalled();
       expect(adminOrigin.revokeSessionById).toHaveBeenCalledWith('7', 'session-other');
       expect(adminOrigin.revokeSessionById).not.toHaveBeenCalledWith('7', 'session-current');
+    });
+
+    test('Also revokes MCP OAuth grants when the mcp origin is registered', async () => {
+      const { sessionManagerFn, adminOrigin, mcpOrigin } = createSessionManager({
+        hasMcpOrigin: true,
+      });
+      setStrapi({ sessionManager: sessionManagerFn });
+
+      const ctx = createContext({}, { state: { user: { id: 7 } } }) as any;
+
+      await authenticatedSessionController.revokeAll(ctx);
+
+      expect(adminOrigin.invalidateRefreshToken).toHaveBeenCalledWith('7');
+      expect(mcpOrigin.invalidateRefreshToken).toHaveBeenCalledWith('7');
     });
   });
 });

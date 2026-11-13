@@ -54,6 +54,22 @@ const getSessionManager = () => {
   return manager ?? null;
 };
 
+// Keep in sync with MCP_SESSION_ORIGIN in @strapi/core (services/mcp/oauth/constants.ts).
+const MCP_SESSION_ORIGIN = 'mcp';
+
+/**
+ * Revokes every MCP OAuth grant of the user; a no-op when MCP OAuth is not enabled.
+ * Called wherever the user's credentials or account state change in a way that must
+ * cut off delegated access: password set/reset, deactivation, deletion.
+ */
+const invalidateMcpSessionsForUser = async (id: Data.ID): Promise<void> => {
+  const sessionManager = getSessionManager();
+
+  if (sessionManager && sessionManager.hasOrigin(MCP_SESSION_ORIGIN)) {
+    await sessionManager(MCP_SESSION_ORIGIN).invalidateRefreshToken(String(id));
+  }
+};
+
 /**
  * Remove private user fields
  * @param  user - user to sanitize
@@ -201,6 +217,9 @@ const updateById = async (
       populate: ['roles'],
     });
 
+    // A password set by any path (own change, super admin, CLI reset) revokes MCP grants.
+    await invalidateMcpSessionsForUser(id);
+
     strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
     await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
 
@@ -214,6 +233,12 @@ const updateById = async (
   });
 
   if (updatedUser) {
+    if (attributes.isActive === false) {
+      // Deactivation revokes MCP grants so they cannot keep rotating and come back
+      // to life when the user is reactivated.
+      await invalidateMcpSessionsForUser(id);
+    }
+
     strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
     await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
   }
@@ -412,6 +437,7 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
   if (sessionManager && sessionManager.hasOrigin('admin')) {
     await sessionManager('admin').invalidateRefreshToken(String(id));
   }
+  await invalidateMcpSessionsForUser(id);
 
   strapi.eventHub.emit(LEGACY_USER_EVENTS.DELETE, { user: sanitizeUser(deletedUser) });
   await emitAdminUserDeleted({ strapi }, deletedUser);
@@ -448,6 +474,7 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
     if (sessionManager && sessionManager.hasOrigin('admin')) {
       await sessionManager('admin').invalidateRefreshToken(String(id));
     }
+    await invalidateMcpSessionsForUser(id);
 
     deletedUsers.push(deletedUser);
   }

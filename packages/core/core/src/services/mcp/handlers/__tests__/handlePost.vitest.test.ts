@@ -148,6 +148,71 @@ describe('handlePost', () => {
     expect(sendDidNotHandleMcpRequest).not.toHaveBeenCalled();
   });
 
+  test('should not send WWW-Authenticate on auth failure when OAuth is disabled', async () => {
+    mockAuthenticationStrategy.authenticate = vi.fn().mockResolvedValue({
+      authenticated: false,
+      reason: 'invalid_token',
+    });
+
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: vi.fn(),
+      capabilityDefinitions: {} as any,
+    };
+
+    const handler = createPostHandler(deps);
+    const { res } = makeRes();
+    const setHeaderSpy = vi.fn();
+    (res as any).setHeader = setHeaderSpy;
+    const ctx = makeCtx(makeReq(), res);
+
+    await handler(ctx, () => Promise.resolve());
+
+    expect(setHeaderSpy).not.toHaveBeenCalled();
+  });
+
+  test('should point clients at the resource metadata on auth failure when OAuth is enabled', async () => {
+    mockStrapi.config!.get = vi.fn((key: string, defaultValue?: unknown) => {
+      if (key === 'server.mcp.oauth.enabled') {
+        return true;
+      }
+      if (key === 'server.absoluteUrl') {
+        return 'http://localhost:1337';
+      }
+      return defaultValue;
+    }) as any;
+    const oauthEnabledConfig = new McpConfiguration(mockStrapi as Core.Strapi);
+
+    mockAuthenticationStrategy.authenticate = vi.fn().mockResolvedValue({
+      authenticated: false,
+      reason: 'missing_token',
+    });
+
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: oauthEnabledConfig,
+      createServerWithRegistries: vi.fn(),
+      capabilityDefinitions: {} as any,
+    };
+
+    const handler = createPostHandler(deps);
+    const { res, writeHeadSpy } = makeRes();
+    const setHeaderSpy = vi.fn();
+    (res as any).setHeader = setHeaderSpy;
+    const ctx = makeCtx(makeReq(), res);
+
+    await handler(ctx, () => Promise.resolve());
+
+    expect(setHeaderSpy).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer resource_metadata="http://localhost:1337/.well-known/oauth-protected-resource/mcp"'
+    );
+    expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
+  });
+
   test('should record missing_token auth failure telemetry', async () => {
     mockAuthenticationStrategy.authenticate = vi.fn().mockResolvedValue({
       authenticated: false,

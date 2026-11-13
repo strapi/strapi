@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { McpOAuthConfiguration } from '../oauth/configuration';
 
 export const DEFAULT_MAX_TOOL_INPUT_ELEMENTS = 10_000;
 
@@ -34,6 +35,8 @@ export class McpConfiguration {
 
   readonly maxToolInputElements: number;
 
+  readonly oauth: McpOAuthConfiguration;
+
   #strapi: Core.Strapi;
 
   constructor(strapi: Core.Strapi) {
@@ -42,6 +45,7 @@ export class McpConfiguration {
     this.connectTimeoutMs = strapi.config.get('server.mcp.connectTimeoutMs', 5 * 1000); // 5 seconds
     this.requestTimeoutMs = strapi.config.get('server.mcp.requestTimeoutMs', 60 * 1000); // 60 seconds
     this.maxToolInputElements = resolveMaxToolInputElements(strapi);
+    this.oauth = new McpOAuthConfiguration(strapi, this.path);
   }
 
   isEnabled(): boolean {

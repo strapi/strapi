@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import { sanitizeSessionEntry, sortSessionsForDisplay } from '@strapi/utils';
 
-import { getSessionManager } from '../../../shared/utils/session-auth';
+import { getSessionManager, invalidateMcpSessions } from '../../../shared/utils/session-auth';
 import type {
   GetSessions,
   DeleteSession,
@@ -71,6 +71,10 @@ export default {
     } else {
       await sessionManager(ORIGIN).invalidateRefreshToken(userId);
     }
+
+    // "Sign out of all devices" is the panel's revoke-everything action, so it also revokes
+    // MCP OAuth grants (which are never the current panel session).
+    await invalidateMcpSessions(userId);
 
     ctx.body = { data: {} } satisfies DeleteAllSessions.Response;
   },

@@ -1,5 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
-import { createMcpAdminTokenAuthenticator } from './authentication';
+import { createMcpAuthenticationStrategy } from './authentication';
+import { createMcpOAuthModule } from './oauth';
 import { createPostHandler } from './handlers/handlePost';
 import type { McpHandlerDependencies } from './handlers/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
@@ -17,7 +18,12 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
   // Initialize configuration
   const config = new McpConfiguration(strapi);
 
-  const authenticationStrategy = createMcpAdminTokenAuthenticator(strapi);
+  const oauthModule = createMcpOAuthModule(strapi, config.oauth);
+
+  const authenticationStrategy = createMcpAuthenticationStrategy(strapi, {
+    isOAuthEnabled: () => config.oauth.isEnabled(),
+    oauthAuthenticator: oauthModule.accessTokenAuthenticator,
+  });
 
   // Status tracking
   let serverStatus: Modules.MCP.McpServiceStatus = 'idle';
@@ -102,6 +108,10 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
       const routes = createMcpRoutes(config, { handlePost });
       strapi.server.routes(routes);
+
+      if (config.oauth.isEnabled()) {
+        oauthModule.start(config.path);
+      }
 
       serverStatus = 'running';
 

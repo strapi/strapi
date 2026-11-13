@@ -15,6 +15,7 @@ import {
   extractDeviceParams,
   generateDeviceId,
   getRefreshCookieOptions,
+  invalidateMcpSessions,
   resolveLogoutDeviceId,
 } from '../../../shared/utils/session-auth';
 
@@ -307,6 +308,7 @@ export default {
 
       // Invalidate all existing sessions before creating a new one
       await sessionManager('admin').invalidateRefreshToken(userId);
+      await invalidateMcpSessions(userId);
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
