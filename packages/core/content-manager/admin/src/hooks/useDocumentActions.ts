@@ -511,7 +511,7 @@ const useDocumentActions: UseDocumentActions = () => {
     ]
   );
 
-  const [unpublishDocument] = useUnpublishDocumentMutation();
+  const [unpublishDocument, { isLoading: isUnpublishing }] = useUnpublishDocumentMutation();
   const unpublish: IUseDocumentActs['unpublish'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, discardDraft = false) => {
       try {
@@ -777,6 +777,7 @@ const useDocumentActions: UseDocumentActions = () => {
       isDiscardingDocument ||
       isDeleting ||
       isDeletingMany ||
+      isUnpublishing ||
       isUnpublishingMany ||
       isPublishingMany,
     autoClone,
