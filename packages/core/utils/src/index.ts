@@ -49,6 +49,7 @@ export {
 
 export * from './primitives';
 export * from './content-api-router';
+export * from './content-api-permissions';
 export * from './security';
 export * from './publication-filter';
 export * from './has-published-version-param';

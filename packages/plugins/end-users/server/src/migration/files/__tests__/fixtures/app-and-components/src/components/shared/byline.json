@@ -1,0 +1,8 @@
+{
+  "collectionName": "components_shared_bylines",
+  "info": { "displayName": "Byline" },
+  "attributes": {
+    "writer": { "type": "relation", "relation": "oneToOne", "target": "plugin::users-permissions.user" },
+    "note": { "type": "string" }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "kind": "collectionType",
+  "collectionName": "up_users",
+  "info": { "singularName": "user", "pluralName": "users", "displayName": "User" },
+  "attributes": {
+    "username": { "type": "string" }, "email": { "type": "email" }, "provider": { "type": "string" }, "password": { "type": "password" }, "role": { "type": "relation", "relation": "manyToOne", "target": "plugin::users-permissions.role", "inversedBy": "users" },
+    "posts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::post.post",
+      "mappedBy": "author"
+    }
+  }
+}

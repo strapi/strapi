@@ -1,0 +1,10 @@
+{
+  "kind": "collectionType",
+  "collectionName": "eu_profiles",
+  "info": { "singularName": "profile", "pluralName": "profiles", "displayName": "Profile" },
+  "attributes": {
+    "user": { "type": "relation", "relation": "oneToOne", "target": "plugin::end-users.user", "required": true },
+    "bio": { "type": "text" },
+    "nickname": { "type": "string" }
+  }
+}

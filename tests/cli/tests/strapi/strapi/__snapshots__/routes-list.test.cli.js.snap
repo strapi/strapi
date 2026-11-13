@@ -264,6 +264,11 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /email/test                                                                     │
 │ HEAD|GET           │ /email/settings                                                                 │
 │ POST               │ /email/verify                                                                   │
+│ HEAD|GET           │ /email/templates                                                                │
+│ HEAD|GET           │ /email/templates/:key                                                           │
+│ PUT                │ /email/templates/:key                                                           │
+│ DELETE             │ /email/templates/:key                                                           │
+│ POST               │ /email/templates/:key/test                                                      │
 │ HEAD|GET           │ /upload/settings                                                                │
 │ PUT                │ /upload/settings                                                                │
 │ POST               │ /upload                                                                         │

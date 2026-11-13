@@ -1,0 +1,17 @@
+'use strict';
+
+module.exports = function ({ env }) {
+  const siteName = env('SITE_NAME', 'shop');
+
+  return {
+    'users-permissions': {
+      enabled: true,
+      config: {
+        jwtSecret: env('SHOP_JWT_SECRET'),
+        jwt: { expiresIn: env('JWT_EXPIRES_IN', '30d') },
+        ratelimit: { interval: env.int('RATE_MS', 60000), max: 10, delayAfter: 2 },
+        siteName,
+      },
+    },
+  };
+};

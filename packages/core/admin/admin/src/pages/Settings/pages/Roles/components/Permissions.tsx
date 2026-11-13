@@ -7,7 +7,7 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
 import set from 'lodash/set';
-import { useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import * as PermissonContracts from '../../../../../../../shared/contracts/permissions';
 import { Permission } from '../../../../../../../shared/contracts/shared';
@@ -25,6 +25,11 @@ import {
   toEnforcedPermissions,
 } from '../utils/createPermissionChecker';
 import { difference } from '../utils/difference';
+import {
+  composeLeafCheckers,
+  createFieldRulesChecker,
+  createSubjectFieldRulesChecker,
+} from '../utils/fieldRules';
 import {
   ConditionForm,
   Form,
@@ -66,6 +71,49 @@ const TAB_LABELS = [
   },
 ] as const;
 
+type PermissionsTabId = (typeof TAB_LABELS)[number]['id'];
+
+type PermissionsLayout = PermissonContracts.GetAll.Response['data'];
+
+/**
+ * A permission as the form reports it. `fields` and `locales` may be `null`, which means all of
+ * them.
+ */
+interface PermissionsRow {
+  action: string;
+  subject?: string | null;
+  conditions: string[];
+  properties: {
+    fields?: string[] | null;
+    locales?: string[] | null;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * A change of a whole column of a tab (the "select all" of an action), as `confirmBulkChange` is
+ * asked about it.
+ */
+interface PermissionsBulkChange {
+  tab: PermissionsTabId;
+  /** The id of the action, as in the layout. */
+  actionId: string;
+  /** The label of the action, as the column shows it. */
+  label: string;
+  /** The uids of the content types the change applies to. */
+  subjects: string[];
+  /** What the content types are about to be: granted the action (`true`) or not (`false`). */
+  value: boolean;
+  /** Whether a search limits `subjects` to some of the content types of the tab. */
+  filtered: boolean;
+}
+
+/**
+ * What the column checkbox of an action tells about its change: the content types it covers and
+ * how to describe it.
+ */
+type GlobalActionScope = Pick<PermissionsBulkChange, 'subjects' | 'label' | 'filtered'>;
+
 /* -------------------------------------------------------------------------------------------------
  * Permissions
  * -----------------------------------------------------------------------------------------------*/
@@ -80,11 +128,11 @@ export interface PermissionsAPI {
   setFormAfterSubmit: () => void;
 }
 
-interface PermissionsProps {
+export interface PermissionsProps {
   isFormDisabled?: boolean;
   onLocaleValidationChange?: (hasErrors: boolean) => void;
   permissions?: Permission[];
-  layout: PermissonContracts.GetAll.Response['data'];
+  layout: PermissionsLayout;
   /**
    * The permissions of the user editing the form. When provided, checkboxes for permissions
    * the user does not hold are disabled and bulk selections skip them.
@@ -102,8 +150,64 @@ interface PermissionsProps {
    * the source role's and nothing is stored for the new role yet.
    */
   permissionsAreStored?: boolean;
+  /**
+   * Replaces the label of a tab. `null` hides the tab (its permissions are still part of what
+   * the form reports).
+   */
+  tabLabels?: Partial<Record<PermissionsTabId, MessageDescriptor | null>>;
+  /**
+   * Called with the rows `getPermissions()` would send after every change of the form, a reset
+   * included. Not called for the form as it is first rendered.
+   */
+  onChange?: (rows: PermissionsRow[]) => void;
+  /**
+   * Called when a content type, plugin or settings category opens or closes, with where it is
+   * (`id` is the uid of a content type, or the plugin / category key) or `null` when none is open.
+   */
+  onOpenSubjectChange?: (open: { tab: PermissionsTabId; id: string } | null) => void;
+  /**
+   * Renders actions in the row of each content type of the collection and single types tabs, next
+   * to its conditions button. `disabled` is the form's `isFormDisabled`.
+   */
+  renderSubjectActions?: (args: {
+    tab: 'collectionTypes' | 'singleTypes';
+    subject: string;
+    disabled: boolean;
+  }) => React.ReactNode;
+  /**
+   * Renders content inside the open content type, plugin or settings category, under its rows (e.g.
+   * the routes its actions are bound to). `subject` is what `onOpenSubjectChange` reports as `id`.
+   */
+  renderSubjectDetails?: (args: { tab: PermissionsTabId; subject: string }) => React.ReactNode;
+  /**
+   * The id of an action (e.g. `create`) that fails unless the role can set every required field of
+   * the content type: a warning names the required fields the role can't set while the action is
+   * granted.
+   */
+  requiredFieldsAction?: string;
+  /**
+   * Renders an indicator in the cell of an action of a content type in the collection and single
+   * types tabs (e.g. a dot where the action has rules). Return `null` for none.
+   */
+  renderActionIndicator?: (args: { actionId: string; subject: string }) => React.ReactNode;
+  /**
+   * Adds a search to each tab. It lists the content types whose label or fields match (or the
+   * plugins or settings categories whose name or actions match) and never changes the form. A
+   * column "select all" then changes the listed content types only.
+   */
+  searchable?: boolean;
+  /**
+   * Asked before the "select all" of a column applies, with the change it is about to make. The
+   * form changes when the answer is `true` and stays as it is otherwise. Not asked about any other
+   * change. Without it a column applies at once.
+   */
+  confirmBulkChange?: (change: PermissionsBulkChange) => Promise<boolean>;
 }
 
+/**
+ * @experimental Exported from `@strapi/admin/strapi-admin` for plugins that edit their own roles;
+ * its props and types may change in a minor release.
+ */
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
   (
     {
@@ -114,6 +218,15 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
       userPermissions: heldPermissions,
       inheritConditions = false,
       permissionsAreStored = false,
+      tabLabels,
+      onChange,
+      onOpenSubjectChange,
+      renderSubjectActions,
+      renderSubjectDetails,
+      requiredFieldsAction,
+      renderActionIndicator,
+      searchable,
+      confirmBulkChange,
     },
     api
   ) => {
@@ -132,6 +245,32 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
     React.useEffect(() => {
       onLocaleValidationChange?.(hasLocaleValidationErrors(modifiedData));
     }, [modifiedData, onLocaleValidationChange]);
+
+    // The latest `onChange` is called, so an inline callback does not report a change by itself
+    const onChangeRef = React.useRef(onChange);
+    const previousModifiedData = React.useRef(modifiedData);
+
+    React.useEffect(() => {
+      onChangeRef.current = onChange;
+    }, [onChange]);
+
+    // The answer to a column's change is awaited, so the latest callback is the one asked, and a
+    // column is not asked about again before the answer is in
+    const confirmBulkChangeRef = React.useRef(confirmBulkChange);
+    const isConfirmingRef = React.useRef(false);
+
+    React.useEffect(() => {
+      confirmBulkChangeRef.current = confirmBulkChange;
+    }, [confirmBulkChange]);
+
+    React.useEffect(() => {
+      if (previousModifiedData.current === modifiedData) {
+        return;
+      }
+
+      previousModifiedData.current = modifiedData;
+      onChangeRef.current?.(getPermissionsToSend(modifiedData, initialData, permissions));
+    }, [modifiedData, initialData, permissions]);
 
     React.useImperativeHandle(api, () => {
       return {
@@ -156,9 +295,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
             });
           }
 
-          const permissionsToSend = formatPermissionsForAPI(modifiedData).map((perm) =>
-            restoreNullLocalesIfUnchanged(perm, permissions, initialData, modifiedData)
-          );
+          const permissionsToSend = getPermissionsToSend(modifiedData, initialData, permissions);
 
           return { permissionsToSend, didUpdateConditions };
         },
@@ -173,6 +310,9 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
         },
       } satisfies PermissionsAPI;
     });
+
+    // A tab the consumer hides is not rendered, but what it holds is still reported
+    const tabs = TAB_LABELS.filter(({ id }) => tabLabels?.[id] !== null);
 
     const handleChangeCollectionTypeLeftActionRowCheckbox = React.useCallback(
       (
@@ -194,23 +334,56 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
       [userPermissions, inheritConditions]
     );
 
-    const handleChangeCollectionTypeGlobalActionCheckbox = React.useCallback(
-      (
-        collectionTypeKind: OnChangeCollectionTypeGlobalActionCheckboxAction['collectionTypeKind'],
-        actionId: OnChangeCollectionTypeGlobalActionCheckboxAction['actionId'],
-        value: OnChangeCollectionTypeGlobalActionCheckboxAction['value']
-      ) => {
-        dispatch({
-          type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
-          collectionTypeKind,
-          actionId,
-          value,
-          userPermissions,
-          inheritConditions,
-        });
-      },
-      [userPermissions, inheritConditions]
-    );
+    const handleChangeCollectionTypeGlobalActionCheckbox: PermissionsDataManagerContextValue['onChangeCollectionTypeGlobalActionCheckbox'] =
+      React.useCallback(
+        (collectionTypeKind, actionId, value, scope) => {
+          const applyChange = () =>
+            dispatch({
+              type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
+              collectionTypeKind,
+              actionId,
+              value,
+              subjects: scope?.subjects,
+              userPermissions,
+              inheritConditions,
+            });
+          const confirm = confirmBulkChangeRef.current;
+
+          if (!confirm || !scope) {
+            applyChange();
+
+            return;
+          }
+
+          if (isConfirmingRef.current) {
+            return;
+          }
+
+          const askThenApplyChange = async () => {
+            isConfirmingRef.current = true;
+
+            try {
+              const isConfirmed = await confirm({
+                tab: collectionTypeKind,
+                actionId,
+                label: scope.label,
+                subjects: scope.subjects,
+                value,
+                filtered: scope.filtered,
+              });
+
+              if (isConfirmed) {
+                applyChange();
+              }
+            } finally {
+              isConfirmingRef.current = false;
+            }
+          };
+
+          void askThenApplyChange();
+        },
+        [userPermissions, inheritConditions]
+      );
 
     const handleChangeConditions = React.useCallback(
       (conditions: OnChangeConditionsAction['conditions']) => {
@@ -262,47 +435,47 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
         userPermissions={userPermissions}
         inheritConditions={inheritConditions}
       >
-        <Tabs.Root defaultValue={TAB_LABELS[0].id}>
+        <Tabs.Root defaultValue={tabs[0]?.id}>
           <Tabs.List
             aria-label={formatMessage({
               id: 'Settings.permissions.users.tabs.label',
               defaultMessage: 'Tabs Permissions',
             })}
           >
-            {TAB_LABELS.map((tabLabel) => (
-              <Tabs.Trigger key={tabLabel.id} value={tabLabel.id}>
-                {formatMessage({ id: tabLabel.labelId, defaultMessage: tabLabel.defaultMessage })}
+            {tabs.map((tab) => (
+              <Tabs.Trigger key={tab.id} value={tab.id}>
+                {formatMessage(
+                  tabLabels?.[tab.id] ?? { id: tab.labelId, defaultMessage: tab.defaultMessage }
+                )}
               </Tabs.Trigger>
             ))}
           </Tabs.List>
-          <Tabs.Content value={TAB_LABELS[0].id}>
-            <ContentTypes
-              layout={layouts.collectionTypes}
-              kind="collectionTypes"
-              isFormDisabled={isFormDisabled}
-            />
-          </Tabs.Content>
-          <Tabs.Content value={TAB_LABELS[1].id}>
-            <ContentTypes
-              layout={layouts.singleTypes}
-              kind="singleTypes"
-              isFormDisabled={isFormDisabled}
-            />
-          </Tabs.Content>
-          <Tabs.Content value={TAB_LABELS[2].id}>
-            <PluginsAndSettingsPermissions
-              layout={layouts.plugins}
-              kind="plugins"
-              isFormDisabled={isFormDisabled}
-            />
-          </Tabs.Content>
-          <Tabs.Content value={TAB_LABELS[3].id}>
-            <PluginsAndSettingsPermissions
-              layout={layouts.settings}
-              kind="settings"
-              isFormDisabled={isFormDisabled}
-            />
-          </Tabs.Content>
+          {tabs.map(({ id }) => (
+            <Tabs.Content key={id} value={id}>
+              {id === 'collectionTypes' || id === 'singleTypes' ? (
+                <ContentTypes
+                  layout={layouts[id]}
+                  kind={id}
+                  isFormDisabled={isFormDisabled}
+                  onOpenSubjectChange={onOpenSubjectChange}
+                  renderActionIndicator={renderActionIndicator}
+                  renderSubjectActions={renderSubjectActions}
+                  renderSubjectDetails={renderSubjectDetails}
+                  requiredFieldsAction={requiredFieldsAction}
+                  searchable={searchable}
+                />
+              ) : (
+                <PluginsAndSettingsPermissions
+                  layout={layouts[id]}
+                  kind={id}
+                  isFormDisabled={isFormDisabled}
+                  onOpenSubjectChange={onOpenSubjectChange}
+                  renderSubjectDetails={renderSubjectDetails}
+                  searchable={searchable}
+                />
+              )}
+            </Tabs.Content>
+          ))}
         </Tabs.Root>
       </PermissionsDataManagerProvider>
     );
@@ -348,6 +521,11 @@ interface OnChangeCollectionTypeGlobalActionCheckboxAction {
   collectionTypeKind: keyof PermissionForms;
   actionId: string;
   value: boolean;
+  /**
+   * The uids of the content types to change, the ones that have the action. Every content type of
+   * the tab when absent.
+   */
+  subjects?: string[];
   userPermissions?: AuthPermission[];
   inheritConditions?: boolean;
 }
@@ -476,15 +654,35 @@ const inheritConditionsAtPath = (
 const getStoredForm = (state: State, path: string[]): unknown =>
   state.isInitialDataStored ? get(state.initialData, path) : undefined;
 
+/**
+ * The layouts of the content types of a tab by uid, empty for plugins and settings: what the field
+ * rules of the layout are read from (`createFieldRulesChecker`).
+ */
+const getSubjectLayouts = (
+  layouts: State['layouts'],
+  kind: string
+): Map<string, PermissonContracts.Subject> =>
+  kind === 'collectionTypes' || kind === 'singleTypes'
+    ? new Map(layouts[kind].subjects.map((subject) => [subject.uid, subject]))
+    : new Map();
+
 /* eslint-disable consistent-return */
 const reducer = (state: State, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX': {
-        const { collectionTypeKind, actionId, value, userPermissions, inheritConditions } = action;
+        const {
+          collectionTypeKind,
+          actionId,
+          value,
+          subjects,
+          userPermissions,
+          inheritConditions,
+        } = action;
         const pathToData = ['modifiedData', collectionTypeKind];
+        const subjectLayouts = getSubjectLayouts(state.layouts, collectionTypeKind);
 
-        Object.keys(get(state, pathToData)).forEach((collectionType) => {
+        (subjects ?? Object.keys(get(state, pathToData))).forEach((collectionType) => {
           const collectionTypeActionData = get(
             state,
             [...pathToData, collectionType, actionId],
@@ -492,20 +690,27 @@ const reducer = (state: State, action: Action) =>
           );
 
           if (collectionTypeActionData) {
-            const subjectPermissionChecker = createBulkPermissionChecker({
-              userPermissions,
-              action: actionId,
-              subject: collectionType,
-              actionForm: collectionTypeActionData,
-              scope: collectionTypeActionData,
-              scopePath: [],
-              value,
-              storedActionForm: getStoredForm(state, [
-                collectionTypeKind,
-                collectionType,
+            const subjectPermissionChecker = composeLeafCheckers(
+              createFieldRulesChecker({
+                subject: subjectLayouts.get(collectionType),
                 actionId,
-              ]),
-            });
+                scopePath: [],
+              }),
+              createBulkPermissionChecker({
+                userPermissions,
+                action: actionId,
+                subject: collectionType,
+                actionForm: collectionTypeActionData,
+                scope: collectionTypeActionData,
+                scopePath: [],
+                value,
+                storedActionForm: getStoredForm(state, [
+                  collectionTypeKind,
+                  collectionType,
+                  actionId,
+                ]),
+              })
+            );
 
             let updatedValues = updateValuesWithPermissions(
               collectionTypeActionData,
@@ -553,6 +758,10 @@ const reducer = (state: State, action: Action) =>
 
         const subject =
           pathToModifiedDataCollectionType[pathToModifiedDataCollectionType.length - 1];
+        const subjectLayout = getSubjectLayouts(
+          state.layouts,
+          pathToModifiedDataCollectionType[0]
+        ).get(subject);
 
         Object.keys(objToUpdate).forEach((actionId) => {
           if (has(objToUpdate[actionId], `properties.${propertyName}`)) {
@@ -565,20 +774,30 @@ const reducer = (state: State, action: Action) =>
               rowName,
             ];
 
-            // Undefined when there is no user permission restriction (super admin)
-            const checker = createBulkPermissionChecker({
-              userPermissions,
-              action: actionId,
-              subject,
-              actionForm: objToUpdate[actionId],
-              scope: objValue,
-              scopePath: ['properties', propertyName, rowName],
-              value,
-              storedActionForm: getStoredForm(state, [
-                ...pathToModifiedDataCollectionType,
+            const scopePath = ['properties', propertyName, rowName];
+
+            // Undefined when neither the layout nor a user permission restriction (super admin)
+            // asks for a check
+            const checker = composeLeafCheckers(
+              createFieldRulesChecker({
+                subject: subjectLayout,
                 actionId,
-              ]),
-            });
+                scopePath,
+              }),
+              createBulkPermissionChecker({
+                userPermissions,
+                action: actionId,
+                subject,
+                actionForm: objToUpdate[actionId],
+                scope: objValue,
+                scopePath,
+                value,
+                storedActionForm: getStoredForm(state, [
+                  ...pathToModifiedDataCollectionType,
+                  actionId,
+                ]),
+              })
+            );
 
             if (!isObject(objValue)) {
               const hasPermission = checker === undefined || checker([]);
@@ -748,25 +967,37 @@ const reducer = (state: State, action: Action) =>
           }
         }
 
+        const subjectLayout = getSubjectLayouts(state.layouts, root).get(subject ?? '');
+
         const permissionChecker =
           actionId === undefined
-            ? createSubjectBulkPermissionChecker({
-                userPermissions,
-                subject,
-                subjectForm: oldValues,
-                value,
-                storedSubjectForm: getStoredForm(state, pathToValue),
-              })
-            : createBulkPermissionChecker({
-                userPermissions,
-                action: actionId,
-                subject,
-                actionForm: get(nextModifiedDataState, pathToValue.slice(0, 3)),
-                scope: oldValues,
-                scopePath: pathToValue.slice(3),
-                value,
-                storedActionForm: getStoredForm(state, pathToValue.slice(0, 3)),
-              });
+            ? composeLeafCheckers(
+                createSubjectFieldRulesChecker({ subject: subjectLayout }),
+                createSubjectBulkPermissionChecker({
+                  userPermissions,
+                  subject,
+                  subjectForm: oldValues,
+                  value,
+                  storedSubjectForm: getStoredForm(state, pathToValue),
+                })
+              )
+            : composeLeafCheckers(
+                createFieldRulesChecker({
+                  subject: subjectLayout,
+                  actionId,
+                  scopePath: pathToValue.slice(3),
+                }),
+                createBulkPermissionChecker({
+                  userPermissions,
+                  action: actionId,
+                  subject,
+                  actionForm: get(nextModifiedDataState, pathToValue.slice(0, 3)),
+                  scope: oldValues,
+                  scopePath: pathToValue.slice(3),
+                  value,
+                  storedActionForm: getStoredForm(state, pathToValue.slice(0, 3)),
+                })
+              );
 
         const updatedValues = updateValuesWithPermissions(oldValues, value, permissionChecker);
 
@@ -888,6 +1119,18 @@ const restoreNullLocalesIfUnchanged = (
   return { ...perm, properties: { ...perm.properties, locales: null } };
 };
 
+/**
+ * The rows the form sends: `getPermissions()` returns them and `onChange` reports them.
+ */
+const getPermissionsToSend = (
+  modifiedData: PermissionForms,
+  initialData: PermissionForms,
+  permissions: Permission[]
+): SentPermission[] =>
+  formatPermissionsForAPI(modifiedData).map((perm) =>
+    restoreNullLocalesIfUnchanged(perm, permissions, initialData, modifiedData)
+  );
+
 /* -------------------------------------------------------------------------------------------------
  * init (reducer)
  * -----------------------------------------------------------------------------------------------*/
@@ -926,6 +1169,11 @@ const init = (
 
 export { Permissions };
 export type {
+  GlobalActionScope,
+  PermissionsBulkChange,
+  PermissionsLayout,
+  PermissionsRow,
+  PermissionsTabId,
   State,
   OnChangeCollectionTypeRowLeftCheckboxAction,
   OnChangeConditionsAction,

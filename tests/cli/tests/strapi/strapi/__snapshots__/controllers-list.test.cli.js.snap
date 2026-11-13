@@ -18,6 +18,7 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ plugin::content-type-builder.content-types           │
 │ plugin::content-type-builder.schema                  │
 │ plugin::email.email                                  │
+│ plugin::email.template                               │
 │ plugin::upload.admin-file                            │
 │ plugin::upload.admin-folder                          │
 │ plugin::upload.admin-folder-file                     │
