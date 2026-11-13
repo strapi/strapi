@@ -103,8 +103,12 @@ async function createEntry({ model, entry }) {
     // Actually create the entry in Strapi
     // Content-type UIDs follow `api::<name>.<name>` for every seeded model
     const uid = /** @type {import('@strapi/strapi').UID.ContentType} */ (`api::${model}.${model}`);
+    // The Document Service ignores `publishedAt` in `data`: ask for the published
+    // version explicitly, or draft & publish entries are only created as drafts
+    const isDraftAndPublish = strapi.contentType(uid).options?.draftAndPublish === true;
     await strapi.documents(uid).create({
       data: entry,
+      ...(isDraftAndPublish && { status: 'published' }),
     });
   } catch (error) {
     console.error({ model, entry, error });
@@ -179,8 +183,6 @@ async function importArticles() {
         ...article,
         cover,
         blocks: updatedBlocks,
-        // Make sure it's not a draft
-        publishedAt: Date.now(),
       },
     });
   }
@@ -194,8 +196,6 @@ async function importGlobal() {
     entry: {
       ...global,
       favicon,
-      // Make sure it's not a draft
-      publishedAt: Date.now(),
       defaultSeo: {
         ...global.defaultSeo,
         shareImage,
@@ -212,8 +212,6 @@ async function importAbout() {
     entry: {
       ...about,
       blocks: updatedBlocks,
-      // Make sure it's not a draft
-      publishedAt: Date.now(),
     },
   });
 }
