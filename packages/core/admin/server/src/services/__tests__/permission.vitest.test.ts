@@ -426,7 +426,8 @@ describe('Permission Service', () => {
       const setupCleanup = (
         permsInDb: StoredPermission[],
         registeredActions: string[],
-        actionSubjects: Record<string, string[]> = {}
+        actionSubjects: Record<string, string[]> = {},
+        actionProperties: Record<string, string[]> = {}
       ) => {
         const warn = vi.fn();
         const table = createPermissionTable(permsInDb);
@@ -447,8 +448,21 @@ describe('Permission Service', () => {
               permission: {
                 actionProvider: {
                   has: vi.fn((id: string) => registeredActions.includes(id)),
-                  get: vi.fn((id: string) =>
-                    actionSubjects[id] === undefined ? undefined : { subjects: actionSubjects[id] }
+                  get: vi.fn((id: string) => {
+                    if (registeredActions.includes(id) === false) {
+                      return undefined;
+                    }
+
+                    return {
+                      subjects: actionSubjects[id],
+                      options:
+                        actionProperties[id] === undefined
+                          ? {}
+                          : { applyToProperties: actionProperties[id] },
+                    };
+                  }),
+                  appliesToProperty: vi.fn(async (property: string, id: string) =>
+                    (actionProperties[id] ?? []).includes(property)
                   ),
                 },
               },
@@ -493,10 +507,50 @@ describe('Permission Service', () => {
         expect(warn).toHaveBeenCalledTimes(1);
         expect(warn).toHaveBeenCalledWith(
           'Removed 5 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Reasons: unregistered action: 4, no owner: 1. ' +
             'Actions: "admin::audit-logs.read", "admin::audit-logs.export", "admin::users.read". ' +
             'Subjects: none. ' +
             'Roles: "QA Auditor" (id 3). ' +
             'Admin tokens: "qa-siem-token" (id 7). ' +
+            'Without role or admin token: 1.'
+        );
+      });
+
+      test('names the reason each permission was removed for', async () => {
+        const editor = { id: 2, name: 'Editor' };
+        const DELETE = 'plugin::content-manager.explorer.delete';
+        const PUBLISH = 'plugin::content-manager.explorer.publish';
+        const READ = 'plugin::content-manager.explorer.read';
+        const ARTICLE = 'api::article.article';
+        const { warn, dbDelete } = setupCleanup(
+          [
+            perm(1, 'admin::legacy.read', { role: editor }),
+            { ...perm(2, READ, { role: editor }), subject: 'api::legacy.legacy' },
+            { ...perm(3, DELETE, { role: editor }), subject: ARTICLE },
+            { ...perm(4, PUBLISH, { role: editor }), subject: ARTICLE },
+            perm(5, 'admin::users.read', {}),
+            {
+              ...perm(6, PUBLISH, { role: editor }),
+              subject: ARTICLE,
+              properties: { locales: ['en'] },
+            },
+          ],
+          ['admin::users.read', READ, DELETE, PUBLISH],
+          { [READ]: [ARTICLE], [DELETE]: [ARTICLE], [PUBLISH]: [ARTICLE] },
+          { [READ]: ['fields', 'locales'], [DELETE]: ['locales'], [PUBLISH]: ['locales'] }
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(5);
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn).toHaveBeenCalledWith(
+          'Removed 5 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Reasons: unregistered action: 1, subject not handled: 1, missing properties (locales): 2, no owner: 1. ' +
+            `Actions: "admin::legacy.read", "${READ}", "${DELETE}", "${PUBLISH}", "admin::users.read". ` +
+            'Subjects: "api::legacy.legacy", "api::article.article". ' +
+            'Roles: "Editor" (id 2). ' +
+            'Admin tokens: none. ' +
             'Without role or admin token: 1.'
         );
       });
@@ -530,6 +584,7 @@ describe('Permission Service', () => {
         expect(dbDelete).toHaveBeenCalledTimes(2);
         expect(warn).toHaveBeenCalledWith(
           'Removed 2 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Reasons: subject not handled: 2. ' +
             'Actions: "plugin::content-manager.explorer.read", "plugin::content-manager.explorer.update". ' +
             'Subjects: "api::legacy.legacy". ' +
             'Roles: "Editor" (id 2). ' +
@@ -560,6 +615,7 @@ describe('Permission Service', () => {
         expect(warn).toHaveBeenCalledTimes(1);
         expect(warn).toHaveBeenCalledWith(
           'Removed 401 stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ' +
+            'Reasons: unregistered action: 401. ' +
             'Actions: "admin::audit-logs.read", "admin::audit-logs.export", "admin::legacy.read". ' +
             'Subjects: none. ' +
             'Roles: "QA Auditor" (id 3), "Editor" (id 2). ' +
