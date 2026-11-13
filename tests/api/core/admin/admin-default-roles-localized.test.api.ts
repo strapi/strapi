@@ -38,20 +38,39 @@ type RolesSnapshot = {
   userRoleLinks: Row[];
 };
 
+type JoinTableAttribute = { joinTable: { name: string; joinColumn: { name: string } } };
+
+const isJoinTableAttribute = (attribute: unknown): attribute is JoinTableAttribute =>
+  typeof attribute === 'object' &&
+  attribute !== null &&
+  'joinTable' in attribute &&
+  typeof attribute.joinTable === 'object' &&
+  attribute.joinTable !== null;
+
+const getJoinTable = (strapi: Core.Strapi, uid: string, attributeName: string) => {
+  const attribute: unknown = strapi.db.metadata.get(uid).attributes[attributeName];
+
+  if (isJoinTableAttribute(attribute) === false) {
+    throw new Error(`${uid}.${attributeName} has no join table`);
+  }
+
+  return attribute.joinTable;
+};
+
 /**
  * The tables that hold the admin roles, their permissions and their users
  */
 const getRoleTables = (strapi: Core.Strapi) => {
   const { metadata } = strapi.db;
-  const permissionRole = (metadata.get('admin::permission').attributes.role as any).joinTable;
-  const userRoles = (metadata.get('admin::user').attributes.roles as any).joinTable;
+  const permissionRole = getJoinTable(strapi, 'admin::permission', 'role');
+  const userRoles = getJoinTable(strapi, 'admin::user', 'roles');
 
   return {
     roles: metadata.get('admin::role').tableName,
     permissions: metadata.get('admin::permission').tableName,
-    permissionRoleLinks: permissionRole.name as string,
-    permissionColumn: permissionRole.joinColumn.name as string,
-    userRoleLinks: userRoles.name as string,
+    permissionRoleLinks: permissionRole.name,
+    permissionColumn: permissionRole.joinColumn.name,
+    userRoleLinks: userRoles.name,
   };
 };
 
@@ -111,7 +130,7 @@ const restoreRoles = async (strapi: Core.Strapi, snapshot: RolesSnapshot) => {
   await deleteAllRoles(strapi);
 
   const insert = (table: string, rows: Row[]) =>
-    knex.batchInsert(table, rows.map(toInsertableRow) as any[], 100);
+    knex.batchInsert<Row>(table, rows.map(toInsertableRow), 100);
 
   await insert(tables.roles, snapshot.roles);
   await insert(tables.permissions, snapshot.permissions);
