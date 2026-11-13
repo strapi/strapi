@@ -870,6 +870,105 @@ describe('Release service', () => {
     });
   });
 
+  describe('publish logs', () => {
+    // A line break, an ANSI escape and a right-to-left override: each could split or disguise a log line
+    const SPOOFING_NAME = 'Spring\n[strapi] fake line \u001b[31m‮evil';
+    const QUOTED_NAME = '"Spring\\n[strapi] fake line \\u001b[31m\\u202eevil"';
+
+    const run = async ({
+      releaseCondition,
+      publish,
+    }: {
+      releaseCondition: 'allow_partial' | 'all_or_nothing';
+      publish: jest.Mock;
+    }) => {
+      mockExecute.mockReturnValueOnce({
+        id: 1,
+        name: SPOOFING_NAME,
+        releasedAt: null,
+        releaseCondition,
+      });
+      const strapiMock = {
+        ...baseStrapiMock,
+        eventHub: { emit: jest.fn() },
+        log: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        documents: jest.fn().mockReturnValue({ publish, unpublish: jest.fn() }),
+        db: {
+          ...baseStrapiMock.db,
+          savepoint: jest.fn((cb: () => unknown) => cb()),
+          query: jest.fn().mockReturnValue({
+            findMany: jest.fn().mockReturnValue([
+              { id: 1, contentType: 'collectionType', type: 'publish', entryDocumentId: 'a' },
+              { id: 2, contentType: 'collectionType', type: 'publish', entryDocumentId: 'b' },
+            ]),
+            update: jest.fn(async ({ data }) => ({ id: 1, name: SPOOFING_NAME, ...data })),
+            updateMany: jest.fn(),
+          }),
+        },
+        contentTypes: { collectionType: { kind: 'collectionType' } },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+      await releaseService.publish(1, { trigger: 'manual' }).catch(() => undefined);
+
+      return strapiMock.log;
+    };
+
+    const loggedMessages = (log: jest.Mock) => log.mock.calls.map(([message]) => message as string);
+
+    it('quotes the release name when a run starts', async () => {
+      const log = await run({
+        releaseCondition: 'all_or_nothing',
+        publish: jest.fn(async () => PUBLISHED),
+      });
+
+      expect(loggedMessages(log.info)).toContain(
+        `[Content Releases] Starting to publish release ${QUOTED_NAME}`
+      );
+    });
+
+    it('quotes the release name when an allow_partial run skips an entry', async () => {
+      const log = await run({
+        releaseCondition: 'allow_partial',
+        publish: jest.fn(async ({ documentId }: { documentId: string }) => {
+          if (documentId === 'b') {
+            throw new Error('Publish failed');
+          }
+          return PUBLISHED;
+        }),
+      });
+
+      expect(loggedMessages(log.warn)).toContain(
+        `[Content Releases] Release ${QUOTED_NAME}: skipped an entry that failed to publish (Error)`
+      );
+    });
+
+    it('quotes the release name when a run fails on an unexpected error', async () => {
+      const log = await run({
+        releaseCondition: 'all_or_nothing',
+        publish: jest.fn().mockRejectedValue(new Error('Publish failed')),
+      });
+
+      expect(loggedMessages(log.error)).toContain(
+        `[Content Releases] Release ${QUOTED_NAME} failed`
+      );
+    });
+
+    it('keeps every message on one line', async () => {
+      const log = await run({
+        releaseCondition: 'allow_partial',
+        publish: jest.fn().mockRejectedValue(new Error('Publish failed')),
+      });
+
+      const messages = [log.info, log.warn, log.error].flatMap(loggedMessages);
+      expect(messages.length).toBeGreaterThan(0);
+      for (const message of messages) {
+        expect(message).not.toMatch(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u);
+      }
+    });
+  });
+
   describe('update audit', () => {
     it('reports nothing when the update changed nothing', async () => {
       const strapiMock = {
