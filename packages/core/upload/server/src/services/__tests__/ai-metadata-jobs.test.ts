@@ -207,19 +207,21 @@ describe('AI metadata jobs service', () => {
       service.stopHeartbeat(jobId);
     });
 
-    it('fails a running job once its server stops writing the heartbeat', async () => {
+    it('lets another server fail a running job only once its server stops writing the heartbeat', async () => {
+      // Two servers on the same database: `service` runs the job, `otherServer` sweeps
+      const otherServer = createAIMetadataJobsService({ strapi: { db, log } as any });
       const jobId = await service.createJob();
       service.startHeartbeat(jobId);
 
-      // The server keeps the heartbeat fresh for longer than the stale bound
+      // The running server keeps the heartbeat fresh for longer than the stale bound
       await jest.advanceTimersByTimeAsync(AI_METADATA_JOB_STALE_AFTER_MS * 2);
-      await service.failInterruptedJobs();
+      await otherServer.failInterruptedJobs();
       expect(await service.getJob(jobId)).toMatchObject({ status: 'processing' });
 
-      // The server crashes: the heartbeat stops, without the job being settled
+      // The running server crashes: the heartbeat stops, without the job being settled
       service.stopHeartbeat(jobId);
       await jest.advanceTimersByTimeAsync(AI_METADATA_JOB_STALE_AFTER_MS + 1_000);
-      await service.failInterruptedJobs();
+      await otherServer.failInterruptedJobs();
 
       expect(await service.getJob(jobId)).toMatchObject({ status: 'failed' });
     });
