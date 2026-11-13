@@ -281,7 +281,6 @@ describe('Validate visitors util', () => {
       ['$or under $not', { $not: { $or: indexKeyed(101) } }, '$or', '$not.$or'],
       ['a sparse $and under $not', { $not: { $and: sparse } }, '$and', '$not.$and'],
       ['$or inside an $and list', { $and: [{ $or: sparse }] }, '$or', '$and[0].$or'],
-      ['$or on a scalar attribute', { title: { $or: { 0: { $eq: 'a' } } } }, '$or', 'title.$or'],
     ])(
       'throws an arrayLimit error on an index-keyed operand: %s',
       async (_, filters, key, path) => {
@@ -458,7 +457,6 @@ describe('Validate visitors util', () => {
 
     test.each([
       ['a $not list of operator maps', { title: { $not: [{ $eq: 'x' }, { $contains: 'y' }] } }],
-      ['an $or list of operator maps', { title: { $or: [{ $eq: 'x' }, { $null: true }] } }],
       ['a list of values', { title: { $eq: ['x', 'y'] }, rank: { $notIn: [1, 2] } }],
       ['a relation id operand', { createdBy: { $eq: 1, $in: [1, 2] } }],
       ['a relation $null operand', { createdBy: { $null: true }, cover: { $notNull: true } }],

@@ -151,12 +151,6 @@ describe('Filtering with object-shaped $or and $and operands', () => {
       'category.$or',
     ],
     ['a $and keyed by $eq under $not', 'filters[$not][$and][$eq]=x', '$and', '$not.$and'],
-    [
-      'the operator map of $or on a scalar attribute',
-      'filters[title][$or][$eq]=Note%201',
-      '$or',
-      'title.$or',
-    ],
   ];
 
   // The object operand check of a root operator sees the index-keyed `$eq` operand first
@@ -187,6 +181,69 @@ describe('Filtering with object-shaped $or and $and operands', () => {
     });
   });
 
+  // The database layer has no attribute level $or / $and: a list there failed with a 500 too, so the
+  // message sends the caller around the attribute filters instead
+  const attributeGroupFilters: Array<[string, string, string, string, string]> = [
+    [
+      'the operator map of $or on a scalar attribute',
+      'filters[title][$or][$eq]=Note%201',
+      '$or',
+      'title.$or',
+      'title',
+    ],
+    [
+      'a $or list on a scalar attribute',
+      'filters[title][$or][0][$eq]=Note%201&filters[title][$or][1][$eq]=Note%202',
+      '$or',
+      'title.$or',
+      'title',
+    ],
+    [
+      'a $and list on a scalar attribute',
+      'filters[title][$and][0][$eq]=Note%201',
+      '$and',
+      'title.$and',
+      'title',
+    ],
+    [
+      'a $or list of values on a scalar attribute',
+      'filters[title][$or][0]=Note%201&filters[title][$or][1]=Note%202',
+      '$or',
+      'title.$or',
+      'title',
+    ],
+    [
+      'a $or list under $not on a scalar attribute',
+      'filters[title][$not][$or][0][$eq]=Note%201',
+      '$or',
+      'title.$not.$or',
+      'title',
+    ],
+    [
+      'a $or list on an attribute of a relation',
+      'filters[category][name][$or][0][$eq]=Cat%20A',
+      '$or',
+      'category.name.$or',
+      'name',
+    ],
+  ];
+
+  test.each(attributeGroupFilters)(
+    'returns a 400 for %s',
+    async (_, query, operator, path, attribute) => {
+      const res = await rq({ method: 'GET', url: `/lop-notes?${query}` });
+
+      expect(res.body.data).toBeNull();
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        status: 400,
+        name: 'ValidationError',
+        message: `Invalid operator ${operator} at ${path}: $and and $or cannot be used on an attribute. Use them around the attribute filters instead, e.g. { ${operator}: [{ ${attribute}: ... }, { ${attribute}: ... }] }`,
+        details: { key: operator, path },
+      });
+    }
+  );
+
   const acceptedFilters: Array<[string, Record<string, unknown>, string[]]> = [
     ['$or with 100 conditions', { $or: conditions(100, 'title', 'Note 1') }, ['Note 1']],
     ['$and with 100 conditions', { $and: noteOneConditions(100) }, ['Note 1']],
@@ -201,6 +258,11 @@ describe('Filtering with object-shaped $or and $and operands', () => {
       ['Note 1'],
     ],
     ['a $or list', { $or: [{ title: 'Note 1' }, { rank: { $gt: 1 } }] }, ['Note 1', 'Note 2']],
+    [
+      'a $or list around attribute filters',
+      { $or: [{ title: { $eq: 'Note 1' } }, { title: { $eq: 'Note 2' } }] },
+      ['Note 1', 'Note 2'],
+    ],
   ];
 
   test.each(acceptedFilters)('accepts %s', async (_, filters, expected) => {
