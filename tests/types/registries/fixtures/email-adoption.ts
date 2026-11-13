@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/strapi';
-import type { EmailService } from '@strapi/email/strapi-server';
+import type { EmailProvider, EmailService } from '@strapi/email/strapi-server';
 
 declare const app: Core.Strapi;
 declare const context: Parameters<Core.ControllerHandler>[0];
@@ -24,6 +24,32 @@ const templated = app
 templated satisfies Promise<unknown>;
 // @ts-expect-error Registered services have no arbitrary members.
 email.missing();
+
+// Provider options reach the provider as they are, through the service and the provider alike.
+const headers = { 'X-Mailgun-Track': 'no' };
+const attachments = [{ filename: 'report.txt', content: 'Report' }];
+const sentWithOptions = email.send({
+  to: 'to@example.com',
+  subject: 'Hi',
+  text: 'Hi',
+  headers,
+  attachments,
+});
+sentWithOptions satisfies Promise<unknown>;
+const provider = app.plugin('email').provider;
+provider satisfies EmailProvider;
+const providerSent = provider.send({
+  to: 'to@example.com',
+  subject: 'Hi',
+  text: 'Hi',
+  headers,
+  attachments,
+});
+providerSent satisfies Promise<unknown>;
+// @ts-expect-error An email has a recipient.
+provider.send({ subject: 'Hi', text: 'Hi', headers });
+// @ts-expect-error The bundled provider contract has no custom members.
+provider.outboxPath();
 
 const settings = email.getProviderSettings();
 settings.provider satisfies string;

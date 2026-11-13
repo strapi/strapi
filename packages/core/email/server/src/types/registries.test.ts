@@ -1,6 +1,7 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
+import type { EmailProvider } from './providers';
 
 declare const context: Parameters<Core.ControllerHandler>[0];
 declare const next: Parameters<Core.ControllerHandler>[1];
@@ -63,6 +64,26 @@ email.sendTemplatedEmail(
   { subject: 'Subject', html: '<p>HTML</p>' },
   {}
 );
+
+// The provider receives the options the service forwards, as the service received them.
+const provider = strapi.plugin('email').provider;
+provider satisfies EmailProvider;
+provider.send({
+  to: 'to@example.com',
+  from: undefined,
+  subject: 'Subject',
+  text: 'Text',
+  headers: { 'X-Mailgun-Track': 'no' },
+  attachments: [{ filename: 'report.txt', content: 'Report' }],
+}) satisfies Promise<unknown>;
+// `sendTemplatedEmail` leaves out the template attributes that are empty.
+provider.send({ to: 'to@example.com', headers: { 'X-Mailgun-Track': 'no' } });
+// @ts-expect-error An email has a recipient.
+provider.send({ subject: 'Subject', text: 'Text' });
+// @ts-expect-error The text body is a string.
+provider.send({ to: 'to@example.com', subject: 'Subject', text: 1 });
+// @ts-expect-error The provider has no arbitrary members.
+provider.missing();
 
 email.getProviderSettings().provider satisfies string;
 // @ts-expect-error Registered services have no arbitrary members.

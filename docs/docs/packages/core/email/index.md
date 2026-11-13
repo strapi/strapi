@@ -42,7 +42,9 @@ With strict types, lookups of the plugin resolve to the contracts it registers i
 - The `plugin::email.email` controller is `EmailController`, with the `send`, `test`, `getSettings` and `verify` actions. The admin and Content API routes are checked against it with `Core.RouterInputFor`.
 - The `plugin::email` config is `EmailPluginConfig`, and the `plugin::email.rateLimit` middleware takes `RateLimitOptions`.
 
-`strapi.plugin('email').provider` has no contract: it stays `any`. Without strict types, the lookups keep their previous types.
+- `strapi.plugin('email').provider` is `EmailProvider`, registered in `PackagePluginProviders`. Its `send` takes `ProviderSendOptions`: the options as the service received them, with `subject`, `text` and `html` possibly missing after `sendTemplatedEmail`, and any other key as a provider option, such as the `headers` and `attachments` that nodemailer forwards. An application whose provider has members of its own declares its type in `AppPluginProviders`. Read [Plugin providers](../../../contributing/05-typescript.md#plugin-providers).
+
+Without strict types, the lookups keep their previous types, and `provider` stays `any`.
 
 ### Settings page
 
