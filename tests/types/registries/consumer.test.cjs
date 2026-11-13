@@ -602,6 +602,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     });
   }
 
+  test(`${resolution}: an application types its own email provider`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'email-custom-provider.ts']),
+      `${resolution}, application email provider contract`
+    );
+  });
+
   test(`${resolution}: registry helpers check factories and names against contracts`, () => {
     assertClean(
       compile(['settings.d.ts', 'registry-helpers.ts']),
@@ -1108,6 +1115,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       ['settings.d.ts', 'registry-helpers.ts'],
       ['settings.d.ts', 'graphql-adoption.ts'],
       ['settings.d.ts', 'email-adoption.ts'],
+      ['settings.d.ts', 'email-custom-provider.ts'],
       ['settings.d.ts', 'documentation-adoption.ts'],
       ['settings.d.ts', 'upload-adoption.ts'],
       ['settings.d.ts', 'content-type-builder-adoption.ts'],
