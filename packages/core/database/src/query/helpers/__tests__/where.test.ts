@@ -224,27 +224,109 @@ describe('applyWhere - $null and $notNull operands', () => {
 });
 
 describe('processWhere - $not on a relation', () => {
+  const joinColumn = (name: string) => ({ name, referencedColumn: 'id' });
   const metas: Record<string, unknown> = {
     'api::note.note': {
       attributes: {
-        category: { type: 'relation', relation: 'manyToOne', target: 'api::category.category' },
+        title: { type: 'string' },
+        category: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'api::category.category',
+          joinColumn: joinColumn('category_id'),
+        },
+        author: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'api::author.author',
+          joinColumn: joinColumn('author_id'),
+        },
       },
     },
     'api::category.category': {
+      tableName: 'categories',
+      attributes: { id: { type: 'increments' }, name: { type: 'string' } },
+    },
+    'api::author.author': {
+      tableName: 'authors',
       attributes: { id: { type: 'increments' }, name: { type: 'string' } },
     },
   };
 
-  const ctx = {
-    db: { metadata: { get: (uid: string) => metas[uid] } },
-    qb: { alias: 't0', aliasColumn: (column: string, alias: string) => `${alias}.${column}` },
-    alias: 't0',
-    uid: 'api::note.note',
-  } as unknown as Parameters<typeof processWhere>[1];
+  // Each join gets the next alias: t1, t2, ...
+  const createCtx = () => {
+    let aliasCount = 0;
+
+    return {
+      db: { metadata: { get: (uid: string) => metas[uid] } },
+      qb: {
+        alias: 't0',
+        aliasColumn: (column: string, alias: string) => `${alias}.${column}`,
+        getAlias() {
+          aliasCount += 1;
+          return `t${aliasCount}`;
+        },
+        join() {},
+      },
+      alias: 't0',
+      uid: 'api::note.note',
+    } as unknown as Parameters<typeof processWhere>[1];
+  };
 
   test('applies a nested filter to the related rows', () => {
-    expect(processWhere({ category: { $not: { name: 'x' } } }, ctx)).toEqual({
-      $not: { 't0.name': 'x' },
+    expect(processWhere({ category: { $not: { name: 'x' } } }, createCtx())).toEqual({
+      $not: { 't1.name': 'x' },
+    });
+  });
+
+  // An object holds one value per key, so a second condition under the same key goes to $and
+  test('keeps both $not filters of two relations', () => {
+    expect(
+      processWhere(
+        { category: { $not: { name: 'x' } }, author: { $not: { name: 'p' } } },
+        createCtx()
+      )
+    ).toEqual({
+      $not: { 't1.name': 'x' },
+      $and: [{ $not: { 't2.name': 'p' } }],
+    });
+  });
+
+  test('keeps a root $not beside a relation $not', () => {
+    expect(
+      processWhere({ $not: { title: 'a2' }, category: { $not: { name: 'x' } } }, createCtx())
+    ).toEqual({
+      $not: { 't0.title': 'a2' },
+      $and: [{ $not: { 't1.name': 'x' } }],
+    });
+  });
+
+  test('keeps a relation $not before a root $not', () => {
+    expect(
+      processWhere({ category: { $not: { name: 'x' } }, $not: { title: 'a2' } }, createCtx())
+    ).toEqual({
+      $not: { 't1.name': 'x' },
+      $and: [{ $not: { 't0.title': 'a2' } }],
+    });
+  });
+
+  test('keeps both $or lists of two relations', () => {
+    expect(
+      processWhere(
+        { category: { $or: [{ name: 'x' }] }, author: { $or: [{ name: 'p' }] } },
+        createCtx()
+      )
+    ).toEqual({
+      $or: [{ 't1.name': 'x' }],
+      $and: [{ $or: [{ 't2.name': 'p' }] }],
+    });
+  });
+
+  test('joins a relation $and list and a root $and list', () => {
+    expect(
+      processWhere({ category: { $and: [{ name: 'x' }] }, $and: [{ title: 'a1' }] }, createCtx())
+    ).toEqual({
+      $and: [{ 't1.name': 'x' }, { 't0.title': 'a1' }],
     });
   });
 });

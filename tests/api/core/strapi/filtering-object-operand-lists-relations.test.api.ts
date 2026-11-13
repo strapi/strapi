@@ -100,7 +100,8 @@ describe('Filtering with object operands in lists and on relation, media and com
   });
 
   // Each of these filters has no matching row. Before the fix, each one returned both rows, except
-  // the scalar $or list, which the database layer answered with a 500.
+  // the scalar $or list, which the database layer answered with a 500, and the $in lists on rank and
+  // category, which Postgres answered with a 500.
   const rejectedFilters: Array<[string, Record<string, unknown>]> = [
     ['an object operand in a $not list', { title: { $not: [{ $eq: { a: 1 } }] } }],
     [
@@ -113,6 +114,9 @@ describe('Filtering with object operands in lists and on relation, media and com
     ['an object operand in a nested $not list', { category: { $not: [[{ $eq: { a: 1 } }]] } }],
     ['an object operand in an $eq list', { title: { $eq: [{ $eq: { a: 1 } }] } }],
     ['an object operand under a root $not', { $not: { $eq: { a: 1 } } }],
+    ['an operator map in a $notIn list', { title: { $notIn: [{ $eq: 'Note 1' }] } }],
+    ['an operator map in an $in list', { rank: { $in: [{ $eq: 1 }] } }],
+    ['an object in an $in list on a relation', { category: { $in: [{ id: 1 }] } }],
     [
       'an object operand in an $or list',
       { title: { $or: [{ $eq: 'Note 1' }, { $eq: { a: 1 } }] } },

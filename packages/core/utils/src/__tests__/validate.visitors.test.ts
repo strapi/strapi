@@ -422,14 +422,28 @@ describe('Validate visitors util', () => {
         '$eq',
         'createdBy',
       ],
-      // An operator map in the value list of a non-logical operator is searched too
+      // The value list of a non-logical operator holds values, so any plain object in it is reported
       ['an operand in an $eq list', { title: { $eq: [{ $eq: { a: 1 } }] } }, '$eq', 'title'],
       [
         'an operand in an $in list on a relation',
         { createdBy: { $in: [1, { $eq: { a: 1 } }] } },
-        '$eq',
+        '$in',
         'createdBy',
       ],
+      [
+        'an operator map in a $notIn list',
+        { title: { $notIn: [{ $eq: 'a1' }] } },
+        '$notIn',
+        'title',
+      ],
+      ['an operator map in an $in list', { rank: { $in: [{ $eq: 1 }] } }, '$in', 'rank'],
+      [
+        'an object in an $in list on a relation',
+        { createdBy: { $in: [{ id: 1 }] } },
+        '$in',
+        'createdBy',
+      ],
+      ['an object in a nested $in list', { title: { $in: [['x', { a: 1 }]] } }, '$in', 'title'],
       // Operators at the root of the filters have no attribute, so the path is the root key
       ['an operand under a root $not', { $not: { $eq: { a: 1 } } }, '$eq', '$not'],
       ['an operand in a root $and list', { $and: [{ $eq: { a: 1 } }] }, '$eq', '$and'],
@@ -462,6 +476,15 @@ describe('Validate visitors util', () => {
       ],
     ])('accepts %s', async (_, filters) => {
       await expect(validate(filters)).resolves.toEqual(filters);
+    });
+
+    // The traversal drops dates and empty objects from the lists it returns, so only check that
+    // validation does not throw
+    test.each([
+      ['a list of dates', { title: { $in: [new Date(0)] }, rank: { $between: [1, 2] } }],
+      ['an empty object in a list', { title: { $in: ['x', {}] } }],
+    ])('does not throw on %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toBeDefined();
     });
 
     test.each([
