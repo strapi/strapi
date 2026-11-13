@@ -22,7 +22,6 @@ const ColorPreview = styled.div`
   width: 20px;
   height: 20px;
   margin-right: 10px;
-  background-color: ${(props) => props.color};
   border: 1px solid rgba(0, 0, 0, 0.1);
 `;
 
@@ -114,7 +113,9 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 size="L"
               >
                 <Flex>
-                  <ColorPreview color={color} />
+                  {/* An inline style keeps typed values (e.g. `#ff(`) out of the shared
+                      stylesheet, where they would break parsing of the rules after them. */}
+                  <ColorPreview style={{ backgroundColor: color }} />
                   <Typography
                     style={{ textTransform: 'uppercase' }}
                     textColor={hasColor === true ? undefined : 'neutral500'}
