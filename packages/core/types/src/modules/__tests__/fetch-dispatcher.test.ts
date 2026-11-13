@@ -1,7 +1,8 @@
 /**
  * Type-level regression tests, compiled by `yarn test:ts` (tsc -p tsconfig.json).
- * `strapi.fetch.dispatcher` accepts any undici dispatcher, whatever undici version the app holds,
- * and keeps rejecting values that are not dispatchers.
+ * `strapi.fetch.dispatcher` accepts an undici dispatcher of any version the app holds, keeps its
+ * `close` and `destroy` when read back, and keeps rejecting values that are not dispatchers.
+ * Types only: at runtime Node's fetch needs an undici 8 dispatcher wrapped in Dispatcher1Wrapper.
  */
 import { Agent, Dispatcher1Wrapper, ProxyAgent } from 'undici';
 
@@ -20,15 +21,35 @@ declare const olderUndiciDispatch: (
   options: { path: string; method: 'QUERY' },
   handler: { onBodySent?: () => void }
 ) => boolean;
-fetch.dispatcher = { dispatch: olderUndiciDispatch };
+fetch.dispatcher = {
+  dispatch: olderUndiciDispatch,
+  close: () => Promise.resolve(),
+  destroy: () => Promise.resolve(),
+};
 
 fetch.dispatcher = undefined;
+
+// The dispatcher read back can be shut down
+export const shutDown = async () => {
+  await fetch.dispatcher?.close();
+  await fetch.dispatcher?.destroy();
+};
 
 // @ts-expect-error a string is not a dispatcher
 fetch.dispatcher = 'dispatcher';
 
 // @ts-expect-error an object without `dispatch` is not a dispatcher
-fetch.dispatcher = { close: () => Promise.resolve() };
+fetch.dispatcher = { close: () => Promise.resolve(), destroy: () => Promise.resolve() };
 
-// @ts-expect-error `dispatch` must return whether the dispatcher can take more requests
-fetch.dispatcher = { dispatch: () => Promise.resolve() };
+// @ts-expect-error a dispatcher without `close` and `destroy` cannot be shut down
+fetch.dispatcher = { dispatch: olderUndiciDispatch };
+
+fetch.dispatcher = {
+  // @ts-expect-error `dispatch` must return whether the dispatcher can take more requests
+  dispatch: () => Promise.resolve(),
+  close: () => Promise.resolve(),
+  destroy: () => Promise.resolve(),
+};
+
+// @ts-expect-error an object is not a dispatcher
+fetch.dispatcher = { foo: 1 };

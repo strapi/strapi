@@ -1,11 +1,16 @@
 /**
- * The part of an undici dispatcher that `strapi.fetch` relies on.
+ * The part of an undici dispatcher that `strapi.fetch` and its callers rely on: `dispatch` for
+ * Node's fetch, `close` and `destroy` to shut it down.
  *
- * Typed structurally rather than from one undici version: an app can hold undici 6, 7 or 8
- * (undici 6 is already at the root of a default app), and Node's fetch accepts their agents.
+ * Typed structurally rather than from one undici version, because an app can hold undici 6, 7
+ * or 8 (undici 6 is already at the root of a default app). The type accepts all three, but at
+ * runtime Node 22 and 24's fetch only works with undici 6 and 7 agents directly: an undici 8
+ * dispatcher must be wrapped in undici's `Dispatcher1Wrapper`, as @strapi/core does for the proxy.
  */
 export interface Dispatcher {
   dispatch(options: unknown, handler: unknown): boolean;
+  close(): Promise<void>;
+  destroy(): Promise<void>;
 }
 
 /**
