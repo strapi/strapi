@@ -2256,6 +2256,14 @@
     "name": "Tajik (tg)"
   },
   {
+  "code": "zgh",
+  "name": "Tamazight (Tifinagh)"
+  },
+  {
+    "code": "zgh-Latn",
+    "name": "Tamazight (Latin)"
+  },
+  {
     "code": "ta",
     "name": "Tamil (ta)"
   },
