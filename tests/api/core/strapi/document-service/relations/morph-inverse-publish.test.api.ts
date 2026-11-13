@@ -966,7 +966,10 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
             documentId: note.documentId,
             data: { remarks: { connect: [{ documentId, __type: CARD_UID }] } } as any,
           })
-        ).rejects.toMatchObject({ name: 'ValidationError' });
+        ).rejects.toMatchObject({
+          name: 'ValidationError',
+          message: expect.stringMatching(/Invalid __type/),
+        });
 
         expect(await getRemarkSubjects()).toEqual([
           { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
@@ -975,38 +978,39 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       }
     );
 
-    // A foreign __type is rejected in every write shape, and nothing is written
+    // A foreign __type is rejected in every write shape, and nothing is written. Each foreign item
+    // uses a remark's documentId, so only the __type check can reject it.
     it.each([
       [
         'set',
-        (r2: any, card: any) => ({
+        ({ r2 }: any) => ({
           remarks: { set: [{ documentId: r2.documentId, __type: CARD_UID }] },
         }),
       ],
       [
         'disconnect',
-        (r2: any, card: any) => ({
-          remarks: { disconnect: [{ documentId: card.documentId, __type: CARD_UID }] },
+        ({ r1 }: any) => ({
+          remarks: { disconnect: [{ documentId: r1.documentId, __type: CARD_UID }] },
         }),
       ],
       [
         'a mix of a valid and a foreign item',
-        (r2: any, card: any) => ({
+        ({ r1, r2 }: any) => ({
           remarks: {
             connect: [
               { documentId: r2.documentId, __type: REMARK_UID },
-              { documentId: card.documentId, __type: CARD_UID },
+              { documentId: r1.documentId, __type: CARD_UID },
             ],
           },
         }),
       ],
       [
         'an item given by id',
-        (r2: any) => ({ remarks: { connect: [{ id: r2.id, __type: CARD_UID }] } }),
+        ({ r2 }: any) => ({ remarks: { connect: [{ id: r2.id, __type: CARD_UID }] } }),
       ],
       [
         'a non-string __type',
-        (r2: any) => ({
+        ({ r2 }: any) => ({
           remarks: { connect: [{ documentId: r2.documentId, __type: { toString: 1 } }] },
         }),
       ],
@@ -1021,13 +1025,34 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       await expect(
         strapi.documents(NOTE_UID).update({
           documentId: note.documentId,
-          data: toData(r2, card) as any,
+          data: toData({ r1, r2, card }) as any,
         })
-      ).rejects.toMatchObject({ name: 'ValidationError' });
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: expect.stringMatching(/Invalid __type/),
+      });
 
       expect(await getRemarkSubjects()).toEqual([
         { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
         { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('links an item whose __type is null through the document service', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] } as any,
+      });
+      const draft = await getNoteRow(note.documentId, 'draft');
+
+      await strapi.documents(NOTE_UID).update({
+        documentId: note.documentId,
+        data: { remarks: { connect: [{ documentId: r2.documentId, __type: null }] } } as any,
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: draft?.id, subjectType: NOTE_UID },
       ]);
     });
 
@@ -1047,7 +1072,10 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
             pinnedRemark: { connect: [{ documentId: r2.documentId, __type: NOTE_UID }] },
           } as any,
         })
-      ).rejects.toMatchObject({ name: 'ValidationError' });
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: expect.stringMatching(/Invalid __type/),
+      });
 
       expect(await getRemarkSubjects()).toEqual([
         { id: r1.id, subjectId: cardRow?.id, subjectType: CARD_UID },
@@ -1160,6 +1188,7 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body.error.name).toBe('ValidationError');
+        expect(res.body.error.message).toMatch(/Invalid __type/);
         expect(await getRemarkSubjects()).toEqual([
           { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
           { id: r2.id, subjectId: null, subjectType: null },
@@ -1181,6 +1210,7 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
         });
 
         expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toMatch(/Invalid __type/);
         expect(await getRemarkSubjects()).toEqual([
           { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
           { id: r2.id, subjectId: null, subjectType: null },

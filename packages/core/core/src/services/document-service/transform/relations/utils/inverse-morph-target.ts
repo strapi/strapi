@@ -3,8 +3,9 @@ import { errors } from '@strapi/utils';
 
 /**
  * An inverse morphOne / morphMany has a single target, the attribute's `target`, so its entries
- * need no `__type`. An entry whose `__type` names another type, or is not a string, is rejected
- * rather than ignored, whether the entry is given by `documentId` or by `id`.
+ * need no `__type`. A missing or `null` `__type` resolves to `target`. A `__type` naming another
+ * type, or any other non-string value, is rejected with a `ValidationError`, whether the entry is
+ * given by `documentId` or by `id`.
  */
 const getInverseMorphTargetUid = (
   target: UID.Schema,

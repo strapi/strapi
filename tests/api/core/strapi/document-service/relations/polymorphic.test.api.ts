@@ -858,13 +858,19 @@ describe('Document Service polymorphic relations', () => {
   // An inverse morphMany of a morphToMany is a join-table relation: the copy flows copy its rows
   // per version, like a regular relation, mapping each target to its version of the same status.
   describe('inverse morphMany of a morphToMany in the copy flows', () => {
-    const namesOf = async (documentId: string, status: 'draft' | 'published') => {
+    // Each link names its target and the version it points to, so a link to the wrong version
+    // of B or C fails the check
+    const linksOf = async (documentId: string, status: 'draft' | 'published') => {
       const entry = await strapi.documents(MORPH_BOX_UID).findOne({
         documentId,
         status,
-        populate: { mtmInverse: { fields: ['name'] } },
+        populate: { mtmInverse: { fields: ['name', 'publishedAt'] } },
       } as any);
-      return ((entry as any)?.mtmInverse ?? []).map(({ name }: { name: string }) => name).sort();
+      return ((entry as any)?.mtmInverse ?? [])
+        .map(({ name, publishedAt }: { name: string; publishedAt: string | null }) =>
+          publishedAt === null ? `${name}:draft` : `${name}:published`
+        )
+        .sort();
     };
 
     it('copies the links on publish and restores them on discard draft', async () => {
@@ -886,13 +892,13 @@ describe('Document Service polymorphic relations', () => {
 
         await strapi.documents(MORPH_BOX_UID).publish({ documentId: box.documentId });
 
-        expect(await namesOf(box.documentId, 'draft')).toEqual(['B', 'C']);
-        expect(await namesOf(box.documentId, 'published')).toEqual(['B', 'C']);
+        expect(await linksOf(box.documentId, 'draft')).toEqual(['B:draft', 'C:draft']);
+        expect(await linksOf(box.documentId, 'published')).toEqual(['B:published', 'C:published']);
 
         await strapi.documents(MORPH_BOX_UID).discardDraft({ documentId: box.documentId });
 
-        expect(await namesOf(box.documentId, 'draft')).toEqual(['B', 'C']);
-        expect(await namesOf(box.documentId, 'published')).toEqual(['B', 'C']);
+        expect(await linksOf(box.documentId, 'draft')).toEqual(['B:draft', 'C:draft']);
+        expect(await linksOf(box.documentId, 'published')).toEqual(['B:published', 'C:published']);
       } finally {
         for (const documentId of documentIds) {
           await strapi.documents(MORPH_BOX_UID).delete({ documentId });
