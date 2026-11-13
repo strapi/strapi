@@ -30,16 +30,19 @@ const waitForQueue = () =>
     setTimeout(resolve);
   });
 
-const setup = () => {
+const setup = ({ isBodyTemplateEnabled = false } = {}) => {
   const eventHub = createEventHub();
   const fetch = vi.fn(async () => ({ ok: true, status: 200 }));
-  const logger = { error: vi.fn() };
+  const logger = { error: vi.fn(), warn: vi.fn() };
 
   const runner = createWebhookRunner({
     eventHub,
     requestContext,
     fetch: fetch as any,
     logger: logger as any,
+    isBodyTemplateEnabled: () => isBodyTemplateEnabled,
+    getContentTypes: () =>
+      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } }) as any,
   });
 
   const emit = async (event: string, info: Record<string, unknown>) => {
@@ -54,10 +57,137 @@ const setup = () => {
       JSON.parse(body),
     ]);
 
-  return { runner, emit, getRequests };
+  return { runner, emit, getRequests, logger, fetch };
 };
 
 describe('WebhookRunner', () => {
+  describe('Body template', () => {
+    const enabled = { isBodyTemplateEnabled: true };
+    const articleEvent = () => ({
+      model: 'article',
+      uid: ARTICLE_UID,
+      entry: { id: 1, documentId: 'abc', title: 'Hello' },
+    });
+
+    test('Sends the default payload when the webhook has no body', async () => {
+      const { runner, emit, getRequests } = setup(enabled);
+      runner.add(createWebhook({ body: null }));
+
+      await emit('entry.create', articleEvent());
+
+      const [[, payload]] = getRequests();
+      expect(Object.keys(payload)).toEqual(['event', 'createdAt', 'model', 'uid', 'entry']);
+    });
+
+    test('Sends the rendered body template in place of the default payload', async () => {
+      const { runner, emit, getRequests, logger } = setup(enabled);
+      runner.add(createWebhook({ body: { ref: 'main', inputs: { title: '{{ entry.title }}' } } }));
+
+      await emit('entry.create', articleEvent());
+
+      expect(getRequests()).toEqual([
+        ['https://example.com/hook', { ref: 'main', inputs: { title: 'Hello' } }],
+      ]);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('Sends the default payload and leaves the template when the flag is off', async () => {
+      const { runner, emit, getRequests } = setup();
+      runner.add(createWebhook({ body: { ref: 'main' } }));
+
+      await emit('entry.create', articleEvent());
+
+      const [[, payload]] = getRequests();
+      expect(payload).not.toHaveProperty('ref');
+      expect(payload).toMatchObject({ event: 'entry.create', uid: ARTICLE_UID });
+    });
+
+    test('Logs the variables without a value, without their template values', async () => {
+      const { runner, emit, getRequests, logger } = setup(enabled);
+      runner.add(
+        createWebhook({
+          name: 'Deploy',
+          body: { token: 's3cret', title: '{{ entry.removed }}', text: 'x{{ entry.removed }}' },
+        })
+      );
+
+      await emit('entry.create', articleEvent());
+
+      expect(getRequests()[0][1]).toEqual({ token: 's3cret', title: null, text: 'x' });
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toBe(
+        'Webhook "Deploy": no value for entry.removed in the body template on event entry.create'
+      );
+    });
+
+    test('Keeps the webhook headers and the event header with a body template', async () => {
+      const { runner, fetch } = setup(enabled);
+      const webhook = createWebhook({
+        headers: { Authorization: 'Bearer token' },
+        body: { ref: 'main' },
+      });
+
+      await runner.run(webhook, 'entry.create', articleEvent());
+
+      expect((fetch.mock.calls as any)[0][1].headers).toEqual({
+        Authorization: 'Bearer token',
+        'X-Strapi-Event': 'entry.create',
+        'Content-Type': 'application/json',
+      });
+    });
+
+    test('Uses the new body once the webhook is updated', async () => {
+      const { runner, emit, getRequests } = setup(enabled);
+      const webhook = createWebhook({ body: { version: 1 } });
+      runner.add(webhook);
+
+      runner.update({ ...webhook, body: { version: 2 } });
+      await emit('entry.create', articleEvent());
+
+      runner.update({ ...webhook, body: null });
+      await emit('entry.create', articleEvent());
+
+      expect(getRequests()[0][1]).toEqual({ version: 2 });
+      expect(getRequests()[1][1]).toMatchObject({ event: 'entry.create' });
+    });
+
+    test('A test trigger renders the template against a sample event', async () => {
+      const { runner, getRequests, logger } = setup(enabled);
+
+      await runner.trigger(
+        createWebhook({
+          events: [],
+          contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] },
+          body: {
+            event: '{{ event }}',
+            uid: '{{ uid }}',
+            documentId: '{{ documentId }}',
+            title: '{{ entry.title }}',
+          },
+        })
+      );
+
+      expect(getRequests()[0][1]).toEqual({
+        event: 'trigger-test',
+        uid: ARTICLE_UID,
+        documentId: 'sample-document-id',
+        title: 'Sample title',
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test.each([
+      ['without a template', enabled, null],
+      ['with the flag off', {}, { ref: 'main' }],
+    ])('A test trigger sends the bare test event %s', async (_name, options, body) => {
+      const { runner, getRequests } = setup(options);
+
+      await runner.trigger(createWebhook({ body }));
+
+      expect(getRequests()[0][1]).toEqual({ event: 'trigger-test', createdAt: expect.any(String) });
+    });
+  });
+
   test('Sends the event with its payload', async () => {
     const { runner, emit, getRequests } = setup();
     runner.add(createWebhook());

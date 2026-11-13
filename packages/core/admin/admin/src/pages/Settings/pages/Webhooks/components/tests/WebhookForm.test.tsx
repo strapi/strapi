@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { useContentTypes } from '../../../../../../hooks/useContentTypes';
-import { WebhookForm } from '../WebhookForm';
+import { WebhookForm, parseWebhookBody } from '../WebhookForm';
 
 jest.mock('../../../../../../hooks/useContentTypes');
 
@@ -82,6 +82,9 @@ describe('WebhookForm', () => {
 
     expect(screen.getByRole('button', { name: 'Create new header' })).toBeInTheDocument();
 
+    // Behind the unstableWebhookBodyTemplate future flag
+    expect(screen.queryByText('Request body')).not.toBeInTheDocument();
+
     expect(screen.getByRole('grid', { name: 'Events' })).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -115,9 +118,84 @@ describe('WebhookForm', () => {
       events: ['entry.create'],
       contentTypeEvents: {},
       headers: [{ key: '', value: '' }],
+      body: '',
     });
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
+  describe('body template', () => {
+    // The JSON editor (CodeMirror) splits its text into highlighted spans
+    const getEditorText = (container: HTMLElement) =>
+      container.querySelector('.cm-content')?.textContent ?? '';
+
+    const webhook = {
+      id: '1',
+      name: 'Deploy',
+      url: 'https://example.com',
+      headers: {},
+      events: [],
+      body: { ref: 'main' },
+      isEnabled: true,
+    };
+
+    const renderForm = (handleSubmit = jest.fn()) =>
+      render(
+        <WebhookForm
+          data={webhook}
+          handleSubmit={handleSubmit}
+          isCreating={false}
+          isTriggering={false}
+          triggerWebhook={jest.fn()}
+        />
+      );
+
+    let isFutureFlagEnabled: jest.SpyInstance;
+
+    beforeEach(() => {
+      isFutureFlagEnabled = jest
+        .spyOn(window.strapi.future, 'isEnabled')
+        .mockImplementation((name) => name === 'unstableWebhookBodyTemplate');
+    });
+
+    afterEach(() => {
+      isFutureFlagEnabled.mockRestore();
+    });
+
+    it('shows the saved body template and the available variables', () => {
+      const { container } = renderForm();
+
+      expect(screen.getByText('Request body')).toBeInTheDocument();
+      expect(getEditorText(container)).toContain('"ref": "main"');
+      expect(
+        screen.getByText(
+          'Sent in place of the default payload, leave empty to keep it. Available variables: {{ event }}, {{ createdAt }}. For entry events: {{ model }}, {{ uid }}, {{ documentId }}, {{ entry }}, and {{ entry.title }} when the events are selected per content type.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('submits the body template', async () => {
+      const handleSubmit = jest.fn();
+      renderForm(handleSubmit);
+
+      fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), {
+        target: { value: 'Renamed' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(handleSubmit).toHaveBeenCalledTimes(1));
+      expect(handleSubmit.mock.calls[0][0]).toMatchObject({
+        body: JSON.stringify({ ref: 'main' }, null, 2),
+      });
+    });
+
+    it('hides the input when the future flag is off', () => {
+      isFutureFlagEnabled.mockReturnValue(false);
+
+      renderForm();
+
+      expect(screen.queryByText('Request body')).not.toBeInTheDocument();
+    });
   });
 
   describe('content type events', () => {
@@ -249,5 +327,28 @@ describe('WebhookForm', () => {
 
       expect(await submit()).toMatchObject({ contentTypeEvents: {} });
     });
+  });
+});
+
+describe('parseWebhookBody', () => {
+  it('returns null for an empty text', () => {
+    expect(parseWebhookBody('')).toBeNull();
+    expect(parseWebhookBody('  \n')).toBeNull();
+  });
+
+  it('returns the parsed JSON object', () => {
+    expect(
+      parseWebhookBody('{ "ref": "main", "inputs": { "title": "{{ entry.title }}" } }')
+    ).toEqual({
+      ref: 'main',
+      inputs: { title: '{{ entry.title }}' },
+    });
+  });
+
+  it('throws for invalid JSON and for JSON that is not an object', () => {
+    expect(() => parseWebhookBody('{ ref: main }')).toThrow();
+    expect(() => parseWebhookBody('["ref"]')).toThrow('The body must be a JSON object');
+    expect(() => parseWebhookBody('"ref"')).toThrow('The body must be a JSON object');
+    expect(() => parseWebhookBody('null')).toThrow('The body must be a JSON object');
   });
 });

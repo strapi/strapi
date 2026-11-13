@@ -65,6 +65,7 @@ describe('Webhooks controller audit events', () => {
       events: ['entry.create', 'entry.update'],
       contentTypeEvents: {},
       headers: ['Authorization', 'X-Env'],
+      body: null,
       isEnabled: true,
     });
     expect(JSON.stringify(emitAuditMock.mock.calls[0][2])).not.toMatch(/s3cret|prod/);
@@ -142,6 +143,105 @@ describe('Webhooks controller audit events', () => {
       ['webhook.delete', { webhookId: '4', name: 'Deploy site' }],
       ['webhook.delete', { webhookId: '5', name: 'Other' }],
     ]);
+  });
+});
+
+describe('Webhooks controller body template', () => {
+  beforeEach(() => {
+    emitAuditMock.mockClear();
+  });
+
+  test('createWebhook saves the body template and audits its keys only', async () => {
+    const template = {
+      token: 'glptt-s3cret',
+      ref: 'main',
+      variables: { TITLE: '{{ entry.title }}' },
+    };
+    const store = { createWebhook: vi.fn(async (data) => ({ ...webhook, ...data, id: '4' })) };
+    const runner = setStrapi(store);
+    const ctx = createCtx({ body: { ...body, body: template } });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(store.createWebhook).toHaveBeenCalledWith(expect.objectContaining({ body: template }));
+    expect(runner.add).toHaveBeenCalledWith(expect.objectContaining({ body: template }));
+    expect(emitAuditMock.mock.calls[0][2]).toMatchObject({
+      body: ['ref', 'token', 'variables'],
+    });
+    expect(JSON.stringify(emitAuditMock.mock.calls[0][2])).not.toMatch(/s3cret|main/);
+  });
+
+  test('createWebhook records a null body for the default payload', async () => {
+    setStrapi({ createWebhook: vi.fn(async () => webhook) });
+    const ctx = createCtx({ body });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(emitAuditMock.mock.calls[0][2]).toMatchObject({ body: null });
+  });
+
+  test.each([[['ref']], ['{"ref":"main"}'], [42], [true]])(
+    'createWebhook rejects a body that is not a JSON object (%j)',
+    async (invalidBody) => {
+      const store = { createWebhook: vi.fn() };
+      setStrapi(store);
+      const ctx = createCtx({ body: { ...body, body: invalidBody } });
+
+      await expect(webhooksController.createWebhook(ctx as any)).rejects.toThrow(
+        'body must be a JSON object'
+      );
+      expect(store.createWebhook).not.toHaveBeenCalled();
+    }
+  );
+
+  test('updateWebhook keeps the saved body when the request has none', async () => {
+    const saved = { ...webhook, body: { ref: 'main' } };
+    const store = {
+      findWebhook: vi.fn(async () => saved),
+      updateWebhook: vi.fn(async (_id, data) => data),
+    };
+    setStrapi(store);
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, name: 'Renamed' } });
+
+    await webhooksController.updateWebhook(ctx as any);
+
+    expect(store.updateWebhook).toHaveBeenCalledWith(
+      '4',
+      expect.objectContaining({ name: 'Renamed', body: { ref: 'main' } })
+    );
+    expect(emitAuditMock.mock.calls[0][2].changes).toEqual({
+      name: { before: 'Deploy site', after: 'Renamed' },
+    });
+  });
+
+  test('updateWebhook resets the body with null and audits the change', async () => {
+    const saved = { ...webhook, body: { ref: 'main' } };
+    const store = {
+      findWebhook: vi.fn(async () => saved),
+      updateWebhook: vi.fn(async (_id, data) => data),
+    };
+    setStrapi(store);
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, body: null } });
+
+    await webhooksController.updateWebhook(ctx as any);
+
+    expect(store.updateWebhook).toHaveBeenCalledWith('4', expect.objectContaining({ body: null }));
+    expect(emitAuditMock.mock.calls[0][2].changes).toEqual({
+      body: { added: [], removed: ['ref'], changed: [], before: ['ref'], after: null },
+    });
+  });
+
+  test('triggerWebhook lets the runner build the test event', async () => {
+    const saved = { ...webhook, body: { ref: 'main' } };
+    const runner = setStrapi({ findWebhook: vi.fn(async () => saved) });
+    (runner as any).trigger = vi.fn(async () => ({ statusCode: 200 }));
+    const ctx = createCtx({ params: { id: '4' } });
+
+    await webhooksController.triggerWebhook(ctx as any);
+
+    expect((runner as any).trigger).toHaveBeenCalledWith(saved);
+    expect(runner.run).not.toHaveBeenCalled();
+    expect(ctx.body).toEqual({ data: { statusCode: 200 } });
   });
 });
 
