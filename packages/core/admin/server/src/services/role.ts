@@ -12,7 +12,7 @@ import _, {
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 
-import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
+import { dates, arrays, hooks as hooksUtils, errors, quoteForLog } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
 import permissionDomain, { type CreatePermissionPayload } from '../domain/permission';
@@ -268,6 +268,46 @@ const getSuperAdmin = (): Promise<AdminRole | undefined> => findOne({ code: SUPE
  */
 const getSuperAdminWithUsersCount = () => findOneWithUsersCount({ code: SUPER_ADMIN_CODE });
 
+/**
+ * Runs the `willCreateDefaultRolePermissions` handlers on the content-type permissions of the
+ * default roles. The roles already exist at this point and are never seeded again, so when a
+ * handler throws or returns something else than a list of permissions, the roles get the
+ * permissions as built, and a warning says why.
+ */
+const callWillCreateDefaultRolePermissions = async (
+  permissions: Permission[]
+): Promise<Permission[]> => {
+  const keepPermissionsAsBuilt = (reason: string) => {
+    strapi.log.warn(
+      `A willCreateDefaultRolePermissions handler ${reason}. ` +
+        'The Editor and Author roles get their content-type permissions without the handler changes.'
+    );
+
+    return permissions;
+  };
+
+  let result: unknown;
+
+  try {
+    // The handlers get copies, so one that fails after it changed them leaves the permissions as built
+    result = await hooks.willCreateDefaultRolePermissions.call(cloneDeep(permissions));
+  } catch (error) {
+    return keepPermissionsAsBuilt(
+      `threw ${quoteForLog(error instanceof Error ? error.message : String(error))}`
+    );
+  }
+
+  const isPermissionList =
+    Array.isArray(result) &&
+    result.every((permission) => permission !== null && typeof permission === 'object');
+
+  if (isPermissionList === false) {
+    return keepPermissionsAsBuilt('returned something else than a list of permissions');
+  }
+
+  return result as Permission[];
+};
+
 /** Create superAdmin, Author and Editor role is no role already exist
  */
 const createRolesIfNoneExist = async () => {
@@ -318,9 +358,7 @@ const createRolesIfNoneExist = async () => {
 
   // The permissions only set `fields`: plugins set the other properties they add to the actions
   // (e.g. i18n `locales`), otherwise the boot cleanup removes a permission that misses all of them
-  const editorPermissions = (await hooks.willCreateDefaultRolePermissions.call(
-    contentTypesPermissions
-  )) as Permission[];
+  const editorPermissions = await callWillCreateDefaultRolePermissions(contentTypesPermissions);
 
   const authorPermissions = editorPermissions
     .filter(({ action }: any) => action !== ACTIONS.publish)

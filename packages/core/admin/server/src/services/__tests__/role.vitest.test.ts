@@ -641,9 +641,7 @@ describe('Role', () => {
       roleService.hooks.willCreateDefaultRolePermissions.delete(addLocales);
     });
 
-    test('Stores the content-type permissions the hook returns, for the Editor and the Author', async () => {
-      roleService.hooks.willCreateDefaultRolePermissions.register(addLocales);
-
+    const setupSeeding = () => {
       const actions = [
         { actionId: DELETE, subjects: ['country'], section: 'contentTypes', options: {} },
         { actionId: PUBLISH, subjects: ['country'], section: 'contentTypes', options: {} },
@@ -659,10 +657,12 @@ describe('Role', () => {
         return res;
       });
       const createMany = vi.fn();
+      const warn = vi.fn();
 
       global.strapi = {
         contentTypes: {},
         db: { query: () => ({ count: vi.fn(() => Promise.resolve(0)), create }) },
+        log: { warn },
         admin: {
           services: {
             permission: {
@@ -680,11 +680,7 @@ describe('Role', () => {
         eventHub: { emit: vi.fn() },
       } as any;
 
-      await createRolesIfNoneExist();
-
-      expect(addLocales).toHaveBeenCalledTimes(1);
-      expect(addLocales).toHaveBeenCalledWith(permissions);
-
+      // The content-type permissions stored for the role created in that position (Editor: 0)
       const contentTypePermissions = (call: number) =>
         createMany.mock.calls[call][0]
           .filter(({ subject }: { subject: string | null }) => subject === 'country')
@@ -694,6 +690,19 @@ describe('Role', () => {
             conditions,
             role,
           }));
+
+      return { permissions, warn, contentTypePermissions };
+    };
+
+    test('Stores the content-type permissions the hook returns, for the Editor and the Author', async () => {
+      roleService.hooks.willCreateDefaultRolePermissions.register(addLocales);
+      const { permissions, warn, contentTypePermissions } = setupSeeding();
+
+      await createRolesIfNoneExist();
+
+      expect(addLocales).toHaveBeenCalledTimes(1);
+      expect(addLocales).toHaveBeenCalledWith(permissions);
+      expect(warn).not.toHaveBeenCalled();
 
       expect(contentTypePermissions(0)).toEqual([
         { action: DELETE, properties: { locales: ['en'] }, conditions: [], role: 2 },
@@ -707,6 +716,47 @@ describe('Role', () => {
           role: 3,
         },
       ]);
+    });
+
+    describe('Stores the content-type permissions as built, with a warning, when a handler', () => {
+      const asBuilt = {
+        editor: [
+          { action: DELETE, properties: {}, conditions: [], role: 2 },
+          { action: PUBLISH, properties: {}, conditions: [], role: 2 },
+        ],
+        author: [{ action: DELETE, properties: {}, conditions: ['admin::is-creator'], role: 3 }],
+      };
+
+      const failingHandlers = {
+        throws: vi.fn(async (permissions: any[]) => {
+          // Changes its input before it fails
+          permissions.forEach((permission) => {
+            permission.properties.locales = ['en'];
+          });
+
+          throw new Error('handler failure');
+        }),
+        'returns no array': vi.fn(async () => undefined),
+        'returns an array with a value that is not a permission': vi.fn(async () => [null]),
+      };
+
+      afterEach(() => {
+        Object.values(failingHandlers).forEach((handler) =>
+          roleService.hooks.willCreateDefaultRolePermissions.delete(handler)
+        );
+      });
+
+      test.each(Object.entries(failingHandlers))('%s', async (_, handler) => {
+        roleService.hooks.willCreateDefaultRolePermissions.register(handler);
+        const { warn, contentTypePermissions } = setupSeeding();
+
+        await createRolesIfNoneExist();
+
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn.mock.calls[0][0]).toMatch(/willCreateDefaultRolePermissions/);
+        expect(contentTypePermissions(0)).toEqual(asBuilt.editor);
+        expect(contentTypePermissions(1)).toEqual(asBuilt.author);
+      });
     });
   });
 
