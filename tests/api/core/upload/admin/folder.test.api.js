@@ -39,6 +39,78 @@ const createAFile = async (parent = null) => {
   return res.body[0];
 };
 
+// Delete the folder (as another admin would) right after the request validation has checked
+// that it exists, so the request handler looks up a folder that is gone.
+const deleteFolderOnceValidated = async (folderId, request) => {
+  const folderService = strapi.plugin('upload').service('folder');
+  const originalExists = folderService.exists;
+  let deleteRes;
+  folderService.exists = async (...args) => {
+    const exists = await originalExists.apply(folderService, args);
+    if (exists === true && deleteRes === undefined) {
+      deleteRes = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { folderIds: [folderId] },
+      });
+    }
+    return exists;
+  };
+
+  try {
+    const res = await request();
+    return { res, deleteRes };
+  } finally {
+    folderService.exists = originalExists;
+  }
+};
+
+const isSqlite = process.env.DATABASE_CLIENT === 'sqlite';
+
+const wait = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+// Pause a move inside its transaction, right after it looked up (and locked) the destination
+// and before it rewrites the parent link, and run `duringPause` there.
+const pauseMoveAfterDestinationLookup = async (request, duringPause) => {
+  const { joinTable } = strapi.db.metadata.get('plugin::upload.folder').attributes.parent;
+  const originalQueryBuilder = strapi.db.queryBuilder;
+  let paused = false;
+  let pauseResult;
+  strapi.db.queryBuilder = function queryBuilder(uid, ...args) {
+    const qb = originalQueryBuilder.call(this, uid, ...args);
+    if (uid !== joinTable.name) {
+      return qb;
+    }
+
+    const originalDelete = qb.delete;
+    const originalExecute = qb.execute;
+    let isLinkDelete = false;
+    qb.delete = (...deleteArgs) => {
+      isLinkDelete = true;
+      return originalDelete.apply(qb, deleteArgs);
+    };
+    qb.execute = async (...executeArgs) => {
+      if (isLinkDelete === true && paused === false) {
+        paused = true;
+        pauseResult = await duringPause();
+      }
+      return originalExecute.apply(qb, executeArgs);
+    };
+    return qb;
+  };
+
+  try {
+    const res = await request();
+    expect(paused).toBe(true);
+    return { res, pauseResult };
+  } finally {
+    strapi.db.queryBuilder = originalQueryBuilder;
+  }
+};
+
 describe('Folder', () => {
   const builder = createTestBuilder();
 
@@ -406,6 +478,21 @@ describe('Folder', () => {
       expect(res.status).toBe(404);
     });
 
+    test('Return 404 when moving a folder that does not exist', async () => {
+      const destination = await createFolder('folder-404-destination', null);
+      data.folders.push(destination);
+
+      const res = await rq({
+        method: 'PUT',
+        url: '/upload/folders/99999',
+        body: {
+          parent: destination.id,
+        },
+      });
+
+      expect(res.status).toBe(404);
+    });
+
     test('Rename a folder', async () => {
       const folder = await createFolder('folder-name', null);
 
@@ -476,6 +563,112 @@ describe('Folder', () => {
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('parent folder does not exist');
     });
+
+    test('Cannot move a folder to a folder deleted after the request was validated', async () => {
+      const destination = await createFolder('folder-c-1', null);
+      const folder = await createFolder('folder-c-2', null);
+      data.folders.push(folder);
+
+      const { res, deleteRes } = await deleteFolderOnceValidated(destination.id, () =>
+        rq({
+          method: 'PUT',
+          url: `/upload/folders/${folder.id}`,
+          body: { parent: destination.id },
+        })
+      );
+
+      expect(deleteRes.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'parent folder does not exist',
+      });
+
+      const { body: folderAfter } = await rq({
+        method: 'GET',
+        url: `/upload/folders/${folder.id}`,
+        qs: { populate: 'parent' },
+      });
+      expect(folderAfter.data).toMatchObject({ parent: null, path: folder.path });
+    });
+
+    test('Deleting the destination of a move in progress waits for the move to commit', async () => {
+      const destination = await createFolder('folder-c-3', null);
+      const folder = await createFolder('folder-c-4', null);
+      data.folders.push(destination, folder);
+
+      const { res, pauseResult } = await pauseMoveAfterDestinationLookup(
+        () =>
+          rq({
+            method: 'PUT',
+            url: `/upload/folders/${folder.id}`,
+            body: { parent: destination.id },
+          }),
+        async () => {
+          let isSettled = false;
+          const deletion = (async () => {
+            try {
+              return await rq({
+                method: 'POST',
+                url: '/upload/actions/bulk-delete',
+                body: { folderIds: [destination.id] },
+              });
+            } finally {
+              isSettled = true;
+            }
+          })();
+          // Without the lock on the destination, the delete commits within this window and the
+          // move fails on the parent link's foreign key (Postgres, MySQL). SQLite serializes
+          // writers, so there the delete waits either way.
+          await wait(1000);
+          return { deletion, isSettledDuringMove: isSettled };
+        }
+      );
+
+      expect(pauseResult.isSettledDuringMove).toBe(false);
+      expect((await pauseResult.deletion).status).toBe(200);
+      // The move commits before the delete resumes. On MySQL the delete then sees the moved folder
+      // under the destination and removes it too, so the rename that follows the commit can find
+      // nothing (404). Either way, the move no longer fails on the parent link (500).
+      expect([200, 404]).toContain(res.status);
+    });
+
+    (isSqlite ? test.skip : test)(
+      'Creating a folder inside the destination of a move in progress does not wait for the move',
+      async () => {
+        const destination = await createFolder('folder-c-5', null);
+        const folder = await createFolder('folder-c-6', null);
+        data.folders.push(destination);
+
+        const { res, pauseResult } = await pauseMoveAfterDestinationLookup(
+          () =>
+            rq({
+              method: 'PUT',
+              url: `/upload/folders/${folder.id}`,
+              body: { parent: destination.id },
+            }),
+          async () => {
+            const creation = Promise.resolve(
+              rq({
+                method: 'POST',
+                url: '/upload/folders',
+                body: { name: 'folder-c-7', parent: destination.id },
+              })
+            );
+            // An exclusive lock on the destination would hold the creation until the move commits.
+            const settled = await Promise.race([
+              creation.then(() => true),
+              wait(5000).then(() => false),
+            ]);
+            return { creation, isSettledDuringMove: settled };
+          }
+        );
+
+        expect(res.status).toBe(200);
+        expect(pauseResult.isSettledDuringMove).toBe(true);
+        expect((await pauseResult.creation).status).toBe(201);
+      }
+    );
 
     test('Cannot move a folder inside itself (0 level)', async () => {
       const folder = await createFolder('folder-d-0', null);

@@ -1,4 +1,4 @@
-import { queryParams } from '@strapi/utils';
+import { queryParams, quoteForLog } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 
 /**
@@ -6,35 +6,6 @@ import type { Core, UID } from '@strapi/types';
  * cannot grow the dedupe set without bound. Past it, unknown filter keys are no longer reported.
  */
 const MAX_WARNED_UNKNOWN_FILTER_KEYS = 1000;
-
-/**
- * Longest value, in code points, printed in a warning before it is truncated
- */
-const MAX_LOGGED_VALUE_LENGTH = 100;
-
-const escapeCodePoint = (character: string): string => {
-  const codePoint = character.codePointAt(0) ?? 0;
-  const hex = codePoint.toString(16);
-
-  return codePoint > 0xffff ? `\\u{${hex}}` : `\\u${hex.padStart(4, '0')}`;
-};
-
-/**
- * Quotes a value for a log line. Filter keys come from the request, so:
- * - control characters (line breaks, ANSI escapes, C1 controls), format characters
- *   (bidirectional overrides and isolates, zero-width characters) and line separators
- *   are escaped, to keep one readable warning on one log line;
- * - long values are truncated.
- */
-const quoteForLog = (value: string): string => {
-  const codePoints = Array.from(value);
-  const truncated =
-    codePoints.length > MAX_LOGGED_VALUE_LENGTH
-      ? `${codePoints.slice(0, MAX_LOGGED_VALUE_LENGTH).join('')}…`
-      : value;
-
-  return JSON.stringify(truncated).replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, escapeCodePoint);
-};
 
 const formatUnknownFilterKeyWarning = ({
   key,

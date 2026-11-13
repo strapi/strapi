@@ -7,6 +7,10 @@ import type {
   AIMetadataJob,
   GetLatestAIMetadataJob,
 } from '../../../../shared/contracts/ai-metadata-jobs';
+import type {
+  CreateAIMetadataJob,
+  GetAIMetadataPendingCount,
+} from '../../../../shared/contracts/files';
 
 jest.mock('../../utils');
 
@@ -145,7 +149,7 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
   it('returns not found when no job exists', async () => {
     await call();
 
-    expect(ctx.notFound).toHaveBeenCalledWith('No active job found');
+    expect(ctx.notFound).toHaveBeenCalledWith('No AI metadata job found');
     expect(ctx.body).toBeUndefined();
   });
 
@@ -156,5 +160,126 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
 
     expect(ctx.notFound).toHaveBeenCalled();
     expect(mockAiMetadataJobsService.getLatestActiveJob).not.toHaveBeenCalled();
+  });
+});
+
+describe('Admin File Controller - getAIMetadataPendingCount', () => {
+  let ctx: Partial<Context>;
+  let mockAiMetadataService: { isEnabled: jest.Mock; countImagesWithoutMetadata: jest.Mock };
+
+  const call = () => adminFileController.getAIMetadataPendingCount(ctx as Context);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockAiMetadataService = {
+      isEnabled: jest.fn().mockResolvedValue(true),
+      countImagesWithoutMetadata: jest
+        .fn()
+        .mockResolvedValue({ imagesWithoutMetadataCount: 2, totalImages: 5 }),
+    };
+
+    mockGetService.mockImplementation((serviceName: string) => {
+      if (serviceName === 'aiMetadata') return mockAiMetadataService as any;
+      return {} as any;
+    });
+
+    global.strapi = {
+      admin: {
+        services: {
+          permission: {
+            createPermissionsManager: jest.fn().mockReturnValue({ isAllowed: true }),
+          },
+        },
+      },
+      log: { error: jest.fn() },
+    } as any;
+
+    ctx = { state: { userAbility: {} }, forbidden: jest.fn(), badRequest: jest.fn() } as any;
+  });
+
+  it('sends the counts as the bare response body', async () => {
+    await call();
+
+    // Typed against the contract: fails type checking if the contract wraps the counts in `{ data }`
+    const expected: GetAIMetadataPendingCount.Response = {
+      imagesWithoutMetadataCount: 2,
+      totalImages: 5,
+    };
+    expect(ctx.body).toEqual(expected);
+    expect(ctx.badRequest).not.toHaveBeenCalled();
+  });
+});
+
+describe('Admin File Controller - createAIMetadataJob', () => {
+  let ctx: Partial<Context>;
+  let mockAiMetadataService: {
+    isEnabled: jest.Mock;
+    countImagesWithoutMetadata: jest.Mock;
+    processExistingFiles: jest.Mock;
+  };
+  let mockAiMetadataJobsService: { createJob: jest.Mock };
+
+  const call = () => adminFileController.createAIMetadataJob(ctx as Context);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockAiMetadataService = {
+      isEnabled: jest.fn().mockResolvedValue(true),
+      countImagesWithoutMetadata: jest
+        .fn()
+        .mockResolvedValue({ imagesWithoutMetadataCount: 2, totalImages: 5 }),
+      processExistingFiles: jest.fn().mockResolvedValue(undefined),
+    };
+    mockAiMetadataJobsService = { createJob: jest.fn().mockResolvedValue(7) };
+
+    mockGetService.mockImplementation((serviceName: string) => {
+      if (serviceName === 'aiMetadata') return mockAiMetadataService as any;
+      if (serviceName === 'aiMetadataJobs') return mockAiMetadataJobsService as any;
+      return {} as any;
+    });
+
+    global.strapi = {
+      admin: {
+        services: {
+          permission: {
+            createPermissionsManager: jest.fn().mockReturnValue({ isAllowed: true }),
+          },
+        },
+      },
+      log: { error: jest.fn() },
+    } as any;
+
+    ctx = {
+      state: { userAbility: {}, user: { id: 1 } },
+      forbidden: jest.fn(),
+      badRequest: jest.fn(),
+    } as any;
+  });
+
+  it('sends the created job as the bare response body', async () => {
+    await call();
+
+    // Typed against the contract: fails type checking if the contract wraps the job in `{ data }`
+    const expected: CreateAIMetadataJob.Response = { jobId: 7, status: 'pending' };
+    expect(ctx.body).toEqual(expected);
+    expect(mockAiMetadataService.processExistingFiles).toHaveBeenCalledWith(7, { id: 1 });
+  });
+
+  it('sends a zero count as the bare response body when no image misses metadata', async () => {
+    mockAiMetadataService.countImagesWithoutMetadata.mockResolvedValue({
+      imagesWithoutMetadataCount: 0,
+      totalImages: 5,
+    });
+
+    await call();
+
+    const expected: CreateAIMetadataJob.Response = {
+      count: 0,
+      message: 'No images without metadata found',
+    };
+    expect(ctx.body).toEqual(expected);
+    expect(mockAiMetadataJobsService.createJob).not.toHaveBeenCalled();
   });
 });
