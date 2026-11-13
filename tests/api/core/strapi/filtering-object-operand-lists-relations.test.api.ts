@@ -99,7 +99,8 @@ describe('Filtering with object operands in lists and on relation, media and com
     await builder.cleanup();
   });
 
-  // Each of these filters has no matching row. Before the fix, every one of them returned both rows.
+  // Each of these filters has no matching row. Before the fix, each one returned both rows, except
+  // the scalar $or list, which the database layer answered with a 500.
   const rejectedFilters: Array<[string, Record<string, unknown>]> = [
     ['an object operand in a $not list', { title: { $not: [{ $eq: { a: 1 } }] } }],
     [
@@ -109,6 +110,17 @@ describe('Filtering with object operands in lists and on relation, media and com
     ['an object operand on a media attribute', { cover: { $eq: { a: 1 } } }],
     ['an object operand on a component attribute', { seo: { $eq: { a: 1 } } }],
     ['an object operand on a relation attribute', { category: { $eq: { a: 1 } } }],
+    ['an object operand in a nested $not list', { category: { $not: [[{ $eq: { a: 1 } }]] } }],
+    ['an object operand in an $eq list', { title: { $eq: [{ $eq: { a: 1 } }] } }],
+    ['an object operand under a root $not', { $not: { $eq: { a: 1 } } }],
+    [
+      'an object operand in an $or list',
+      { title: { $or: [{ $eq: 'Note 1' }, { $eq: { a: 1 } }] } },
+    ],
+    [
+      'an object operand in an $and list on a relation',
+      { category: { $and: [{ $eq: { a: 1 } }] } },
+    ],
   ];
 
   describe('Document Service', () => {
@@ -143,6 +155,14 @@ describe('Filtering with object operands in lists and on relation, media and com
     ['a nested relation filter', { category: { name: { $eq: 'Cat A' } } }, ['Note 1']],
     ['a media $null operand', { cover: { $null: true } }, ['Note 1', 'Note 2']],
     ['a nested component filter', { seo: { metaTitle: { $eq: 'Seo 2' } } }, ['Note 2']],
+    [
+      'a relation $or list',
+      { category: { $or: [{ name: 'Cat B' }, { name: 'Cat A' }] } },
+      ['Note 1'],
+    ],
+    // A row without a category has a null name, so neither $not form matches it
+    ['a relation $not filter', { category: { $not: { name: 'Cat B' } } }, ['Note 1']],
+    ['a root $not relation filter', { $not: { category: { name: 'Cat B' } } }, ['Note 1']],
   ];
 
   describe('legitimate operands', () => {

@@ -222,3 +222,29 @@ describe('applyWhere - $null and $notNull operands', () => {
     }
   );
 });
+
+describe('processWhere - $not on a relation', () => {
+  const metas: Record<string, unknown> = {
+    'api::note.note': {
+      attributes: {
+        category: { type: 'relation', relation: 'manyToOne', target: 'api::category.category' },
+      },
+    },
+    'api::category.category': {
+      attributes: { id: { type: 'increments' }, name: { type: 'string' } },
+    },
+  };
+
+  const ctx = {
+    db: { metadata: { get: (uid: string) => metas[uid] } },
+    qb: { alias: 't0', aliasColumn: (column: string, alias: string) => `${alias}.${column}` },
+    alias: 't0',
+    uid: 'api::note.note',
+  } as unknown as Parameters<typeof processWhere>[1];
+
+  test('applies a nested filter to the related rows', () => {
+    expect(processWhere({ category: { $not: { name: 'x' } } }, ctx)).toEqual({
+      $not: { 't0.name': 'x' },
+    });
+  });
+});

@@ -409,6 +409,31 @@ describe('Validate visitors util', () => {
         '$ne',
         'createdBy',
       ],
+      // A list nested one level deeper is searched too
+      [
+        'an operand in a nested $not list',
+        { title: { $not: [[{ $eq: { a: 1 } }]] } },
+        '$eq',
+        'title',
+      ],
+      [
+        'an operand in a nested $not list on a relation',
+        { createdBy: { $not: [[{ $eq: { a: 1 } }]] } },
+        '$eq',
+        'createdBy',
+      ],
+      // An operator map in the value list of a non-logical operator is searched too
+      ['an operand in an $eq list', { title: { $eq: [{ $eq: { a: 1 } }] } }, '$eq', 'title'],
+      [
+        'an operand in an $in list on a relation',
+        { createdBy: { $in: [1, { $eq: { a: 1 } }] } },
+        '$eq',
+        'createdBy',
+      ],
+      // Operators at the root of the filters have no attribute, so the path is the root key
+      ['an operand under a root $not', { $not: { $eq: { a: 1 } } }, '$eq', '$not'],
+      ['an operand in a root $and list', { $and: [{ $eq: { a: 1 } }] }, '$eq', '$and'],
+      ['an operand of a root $eq', { $eq: { a: 1 } }, '$eq', '$eq'],
     ])('throws on an object operand: %s', async (_, filters, key, path) => {
       const error = await validate(filters).catch((e: unknown) => e);
 
@@ -430,8 +455,44 @@ describe('Validate visitors util', () => {
       ['a nested component filter', { seo: { metaTitle: { $eq: 'x' } } }],
       ['a relation filter under $not', { createdBy: { $not: { firstname: 'x' } } }],
       ['a relation filter list under $or', { createdBy: { $or: [{ firstname: 'x' }, { id: 1 }] } }],
+      ['an attribute filter under a root $not', { $not: { title: { $eq: 'x' } } }],
+      [
+        'a root $and list of attribute filters',
+        { $and: [{ title: 'x' }, { $not: { createdBy: { firstname: 'x' } } }] },
+      ],
     ])('accepts %s', async (_, filters) => {
       await expect(validate(filters)).resolves.toEqual(filters);
+    });
+
+    test.each([
+      ['a relation', { createdBy: { $in: { 0: 1, 25: 2 } } }, 'createdBy'],
+      ['a media', { cover: { $in: { 0: 1, 25: 2 } } }, 'cover'],
+      ['a component', { seo: { $notIn: { 0: 1, 25: 2 } } }, 'seo'],
+    ])('names the arrayLimit for a list cut by qs on %s attribute', async (_, filters, path) => {
+      const operator = Object.keys(Object.values(filters)[0])[0];
+
+      await expect(validate(filters)).rejects.toMatchObject({
+        message: `Invalid operand for ${operator} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+      });
+    });
+
+    // Dynamic zones and morphTo relations are left to their own checks, which reject the key
+    test.each([
+      ['a dynamic zone', { blocks: { $eq: { a: 1 } } }, 'blocks'],
+      ['a morphTo relation', { owner: { $eq: { a: 1 } } }, 'owner'],
+    ])('rejects an object operand on %s as an invalid key', async (_, filters, key) => {
+      const dzSchema = {
+        ...schema,
+        attributes: {
+          ...schema.attributes,
+          blocks: { type: 'dynamiczone', components: ['default.seo'] },
+          owner: { type: 'relation', relation: 'morphToOne' },
+        },
+      };
+
+      await expect(
+        validators.defaultValidateFilters({ ...ctx, schema: dzSchema }, filters)
+      ).rejects.toMatchObject({ message: `Invalid key ${key}` });
     });
   });
 
