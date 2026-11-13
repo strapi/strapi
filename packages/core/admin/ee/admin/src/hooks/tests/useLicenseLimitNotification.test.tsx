@@ -106,15 +106,35 @@ describe('useLicenseLimitNotification', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'danger',
       message:
-        "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title: 'Over seat limit (6/5)',
+        'Upgrade your license to invite admin users. If you already upgraded: the new limit applies automatically within 12 hours or on Strapi restart.',
+      title: 'Over the admin user limit of this instance (6/5)',
       link: {
         url: 'https://billing.strapi.io',
-        label: 'Manage seats',
+        label: 'Manage subscription',
       },
       blockTransition: true,
       onClose: expect.any(Function),
     });
+  });
+
+  it('asks offline licenses to restart Strapi with the new license file', () => {
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({
+      license: {
+        ...baseLicenseInfo,
+        licenseLimitStatus: 'OVER_LIMIT',
+        licenseMode: 'offline',
+      },
+    }));
+
+    setup();
+
+    expect(toggleNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message:
+          'Upgrade your license to invite admin users. Once you have the new license file, restart Strapi to apply it.',
+      })
+    );
   });
 
   it('should have Contact sales url if is Gold license', () => {
@@ -132,8 +152,8 @@ describe('useLicenseLimitNotification', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'danger',
       message:
-        "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title: 'Over seat limit (5/5)',
+        'Upgrade your license to invite admin users. If you already upgraded: the new limit applies automatically within 12 hours or on Strapi restart.',
+      title: 'Over the admin user limit of this instance (5/5)',
       link: {
         url: 'mailto:sales@strapi.io',
         label: 'Contact sales',

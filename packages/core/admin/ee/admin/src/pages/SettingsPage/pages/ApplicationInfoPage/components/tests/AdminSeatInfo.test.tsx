@@ -45,7 +45,7 @@ describe('<AdminSeatInfo />', () => {
 
     const { queryByText } = render(<AdminSeatInfoEE />);
 
-    expect(queryByText('Admin seats')).not.toBeInTheDocument();
+    expect(queryByText('Active admin users in this instance')).not.toBeInTheDocument();
   });
 
   test('Render seat info', () => {
@@ -56,7 +56,7 @@ describe('<AdminSeatInfo />', () => {
 
     const getByTextWithMarkup = withMarkup(getByText);
 
-    expect(getByText('Admin seats')).toBeInTheDocument();
+    expect(getByText('Active admin users in this instance')).toBeInTheDocument();
     expect(getByTextWithMarkup('10/100')).toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe('<AdminSeatInfo />', () => {
 
     const { getByText } = render(<AdminSeatInfoEE />);
 
-    expect(getByText('Admin seats')).toBeInTheDocument();
+    expect(getByText('Active admin users in this instance')).toBeInTheDocument();
     expect(withMarkup(getByText)('4/10')).toBeInTheDocument();
   });
 
@@ -121,10 +121,10 @@ describe('<AdminSeatInfo />', () => {
 
     const { queryByText } = render(<AdminSeatInfoEE />);
 
-    expect(queryByText('Admin seats')).not.toBeInTheDocument();
+    expect(queryByText('Active admin users in this instance')).not.toBeInTheDocument();
   });
 
-  describe('with the usage counted across all environments', () => {
+  describe('with the usage counted across all instances', () => {
     const PROJECT_USAGE = {
       activeUsers: 8,
       contractedUsers: 10,
@@ -140,12 +140,12 @@ describe('<AdminSeatInfo />', () => {
 
       const { getByText, queryByText } = render(<AdminSeatInfoEE />);
 
-      expect(getByText('Active admin users across all environments')).toBeInTheDocument();
+      expect(getByText('Active admin users across all instances')).toBeInTheDocument();
       expect(getByText('8 / 10')).toBeInTheDocument();
       expect(getByText(/^Last updated /)).toBeInTheDocument();
       expect(queryByText('Over limit')).not.toBeInTheDocument();
       // Shown next to this instance's seats, which are still enforced
-      expect(getByText('Admin seats')).toBeInTheDocument();
+      expect(getByText('Active admin users in this instance')).toBeInTheDocument();
       expect(withMarkup(getByText)('10/100')).toBeInTheDocument();
     });
 
@@ -178,7 +178,7 @@ describe('<AdminSeatInfo />', () => {
 
       const { getByText, queryByText } = render(<AdminSeatInfoEE />);
 
-      expect(getByText('Active admin users across all environments')).toBeInTheDocument();
+      expect(getByText('Active admin users across all instances')).toBeInTheDocument();
       expect(getByText('42')).toBeInTheDocument();
       expect(queryByText('Over limit')).not.toBeInTheDocument();
     });
@@ -192,9 +192,9 @@ describe('<AdminSeatInfo />', () => {
 
       const { getByText, queryByText } = render(<AdminSeatInfoEE />);
 
-      expect(getByText('Admin seats')).toBeInTheDocument();
+      expect(getByText('Active admin users in this instance')).toBeInTheDocument();
       expect(withMarkup(getByText)('10/100')).toBeInTheDocument();
-      expect(queryByText('Active admin users across all environments')).not.toBeInTheDocument();
+      expect(queryByText('Active admin users across all instances')).not.toBeInTheDocument();
     });
   });
 

@@ -27,7 +27,7 @@ const ProjectUsageInfo = ({ usage }: { usage: ProjectUsage }) => {
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.ee.project-usage.title',
-          defaultMessage: 'Active admin users across all environments',
+          defaultMessage: 'Active admin users across all instances',
         })}
       </Typography>
       <Flex gap={2} alignItems="center">
@@ -115,7 +115,7 @@ export const AdminSeatInfoEE = () => {
           <Typography variant="sigma" textColor="neutral600">
             {formatMessage({
               id: 'Settings.application.admin-seats',
-              defaultMessage: 'Admin seats',
+              defaultMessage: 'Active admin users in this instance',
             })}
           </Typography>
           <Flex gap={2}>
@@ -145,7 +145,7 @@ export const AdminSeatInfoEE = () => {
               <Tooltip
                 label={formatMessage({
                   id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
-                  defaultMessage: 'At limit: add seats to invite more users',
+                  defaultMessage: 'Limit reached: upgrade your license to invite more admin users',
                 })}
               >
                 <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />

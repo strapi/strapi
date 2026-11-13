@@ -30,14 +30,7 @@ import { ModalForm } from './components/NewUserForm';
  * ListPageCE
  * -----------------------------------------------------------------------------------------------*/
 
-interface ListPageCEProps {
-  /**
-   * Rendered above the users table, e.g. the Enterprise license usage banner.
-   */
-  banner?: React.ReactNode;
-}
-
-const ListPageCE = ({ banner }: ListPageCEProps = {}) => {
+const ListPageCE = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = React.useState(false);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
@@ -159,7 +152,6 @@ const ListPageCE = ({ banner }: ListPageCEProps = {}) => {
         }
       />
       <Layouts.Content>
-        {banner}
         <Table.Root rows={users} headers={headers}>
           <Table.ActionBar />
           <Table.Content>
