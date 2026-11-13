@@ -31,6 +31,85 @@ const reuseUnsetPreviousProperties = (
 };
 
 /**
+ * Whether `relation`, an attribute of the type being edited, is a relation to `target` that
+ * names `targetAttributeName` as its other side.
+ */
+const namesOtherSide = (
+  relation: InternalAttribute | undefined,
+  target: string,
+  targetAttributeName: string
+) => {
+  if (relation === undefined || isRelation(relation) === false) {
+    return false;
+  }
+
+  const {
+    target: relationTarget,
+    targetAttribute,
+    inversedBy,
+  } = relation as InternalRelationAttribute;
+
+  return (
+    relationTarget === target &&
+    (targetAttribute === targetAttributeName || inversedBy === targetAttributeName)
+  );
+};
+
+/**
+ * Whether `targetAttribute`, the attribute named by `inversedBy` or `mappedBy` on the
+ * target of the relation `key` of `uid`, is the other side of that relation. `attributes`
+ * are the attributes of `uid` after the edit. Same rule as the database boot check:
+ * - an inverse side (`mappedBy`) is paired with the owner that points back to it: a
+ *   relation to `uid` with `inversedBy: key`. The `mappedBy` name alone does not pair them.
+ * - an owner (`inversedBy`) is paired with the relation back to `uid` that it names, unless
+ *   another attribute of `uid` took that relation over earlier in the same save: the
+ *   relation then owns another pair (`inversedBy` another name), or its `mappedBy` names
+ *   another attribute that claims it after the edit. When that `mappedBy` names an
+ *   attribute that does not claim it, the database still pairs it with this owner.
+ */
+const isOtherSide = ({
+  key,
+  uid,
+  attribute,
+  targetAttribute,
+  attributes,
+}: {
+  key: string;
+  uid: string;
+  attribute: InternalRelationAttribute;
+  targetAttribute: Schema.Attribute.AnyAttribute;
+  attributes: Record<string, InternalAttribute>;
+}) => {
+  if (isRelation(targetAttribute) === false) {
+    return false;
+  }
+
+  const counterpart = targetAttribute as InternalRelationAttribute;
+
+  if (counterpart.target !== uid) {
+    return false;
+  }
+
+  if (attribute.inversedBy === undefined || attribute.inversedBy === null) {
+    return counterpart.inversedBy === key;
+  }
+
+  if (counterpart.mappedBy === key || counterpart.inversedBy === key) {
+    return true;
+  }
+
+  if (counterpart.mappedBy !== undefined && counterpart.mappedBy !== null) {
+    return (
+      namesOtherSide(attributes[counterpart.mappedBy], attribute.target, attribute.inversedBy) ===
+      false
+    );
+  }
+
+  // An owner of another pair is kept; a relation with no other side is deleted, as before
+  return counterpart.inversedBy === undefined || counterpart.inversedBy === null;
+};
+
+/**
  * Maps each attribute name produced by this save's rename hops to the name it
  * had before the save, by folding the hops in order (`a -> tmp, tmp -> b`
  * gives `b -> a`).
@@ -89,9 +168,26 @@ export default function createComponentBuilder() {
       );
     },
 
+    /**
+     * Deletes the other side of the relation `key` of `uid` from its target.
+     * The attribute named by `inversedBy` or `mappedBy` is deleted only when it is
+     * the other side of this relation (see `isOtherSide`): earlier in the same save,
+     * that name can have been given to another attribute, which must be kept.
+     * `attributes` are the attributes of `uid` after the edit.
+     */
     unsetRelation(
       this: any,
-      attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>
+      {
+        key,
+        uid,
+        attribute,
+        attributes,
+      }: {
+        key: string;
+        uid: string;
+        attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>;
+        attributes: Record<string, InternalAttribute>;
+      }
     ) {
       if (!('target' in attribute) || !attribute.target) {
         return;
@@ -104,6 +200,13 @@ export default function createComponentBuilder() {
       const targetAttribute = targetCT.getAttribute(targetAttributeName);
 
       if (!targetAttribute) return;
+
+      if (
+        isOtherSide({ key, uid, attribute: relationAttribute, targetAttribute, attributes }) ===
+        false
+      ) {
+        return;
+      }
 
       return targetCT.deleteAttribute(targetAttributeName);
     },
@@ -249,7 +352,7 @@ export default function createComponentBuilder() {
           const targetAttributeName = relationAttribute.inversedBy || relationAttribute.mappedBy;
 
           if (targetAttributeName !== null && targetAttributeName !== undefined) {
-            this.unsetRelation(attribute);
+            this.unsetRelation({ key, uid, attribute, attributes: newAttributes });
           }
         }
       });
@@ -267,7 +370,12 @@ export default function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && !isRelation(newAttribute)) {
-          return this.unsetRelation(oldAttribute);
+          return this.unsetRelation({
+            key,
+            uid,
+            attribute: oldAttribute,
+            attributes: newAttributes,
+          });
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
@@ -279,9 +387,12 @@ export default function createComponentBuilder() {
           const sameRelation = oldAttribute.relation === relationAttribute.relation;
           const targetAttributeHasChanged =
             oldTargetAttributeName !== relationAttribute.targetAttribute;
+          // A retargeted relation keeps no counterpart on its old target, even when the
+          // counterpart name is unchanged
+          const targetHasChanged = oldRelationAttribute.target !== relationAttribute.target;
 
-          if (!sameRelation || targetAttributeHasChanged) {
-            this.unsetRelation(oldAttribute);
+          if (!sameRelation || targetAttributeHasChanged || targetHasChanged) {
+            this.unsetRelation({ key, uid, attribute: oldAttribute, attributes: newAttributes });
           }
 
           // keep extra options that were set manually on oldAttribute
