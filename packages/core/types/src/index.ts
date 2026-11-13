@@ -152,9 +152,19 @@ declare global {
        * The provider a package sets on its plugin (`strapi.plugin(name).provider`), keyed by plugin
        * name. With strict types enabled, `provider` of a listed plugin resolves to its entry; other
        * plugins keep the `any` of their unregistered members.
+       * Application entries in {@link AppPluginProviders} take precedence over these contracts.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface PackagePluginProviders {}
+
+      /**
+       * Application provider contracts and overrides, keyed by plugin name, such as the type of a
+       * custom email provider with members of its own. Each entry replaces the entire package
+       * contract for that plugin; it is not intersected with it, so extend the package type to keep
+       * its members. Without strict types, `provider` stays `any`.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface AppPluginProviders {}
 
       /**
        * Resolved configuration contracts supplied by Strapi and plugin packages, keyed by
