@@ -12,17 +12,6 @@ export type HomepagePermissionChecker = {
 };
 
 /**
- * Removes invalid entries left in the fields array after permission sanitization.
- */
-export const compactSanitizedFields = (fields: unknown): string[] | undefined => {
-  if (!Array.isArray(fields)) {
-    return undefined;
-  }
-
-  return fields.filter((field): field is string => typeof field === 'string');
-};
-
-/**
  * Resolves the main field used for homepage widgets, falling back when the user cannot read it.
  */
 export const resolveReadableMainField = (
