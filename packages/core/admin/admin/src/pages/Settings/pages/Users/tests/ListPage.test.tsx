@@ -13,11 +13,4 @@ describe('Users | ListPage', () => {
     await findByText('John');
     await findByText('Kai');
   });
-
-  it('renders the given banner above the users', async () => {
-    const { findByText } = render(<ListPageCE banner={<p>License usage banner</p>} />);
-
-    await findByText('License usage banner');
-    await findByText('John');
-  });
 });

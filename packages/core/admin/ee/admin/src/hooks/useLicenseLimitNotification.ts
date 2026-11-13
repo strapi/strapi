@@ -24,7 +24,8 @@ export const useLicenseLimitNotification = () => {
   const { toggleNotification } = useNotification();
   const { pathname } = useLocation();
 
-  const { enforcementUserCount, permittedSeats, licenseLimitStatus, type } = license ?? {};
+  const { enforcementUserCount, permittedSeats, licenseLimitStatus, type, licenseMode } =
+    license ?? {};
 
   React.useEffect(() => {
     if (isError || isLoading) {
@@ -49,15 +50,15 @@ export const useLicenseLimitNotification = () => {
           {
             id: 'notification.ee.warning.over-.message',
             defaultMessage:
-              "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+              'Upgrade your license to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} admin users. {licenseMode, select, offline {Once you have the new license file, restart Strapi to apply it.} other {If you already upgraded: the new limit applies automatically within 12 hours or on Strapi restart.}}',
           },
-          { licenseLimitStatus }
+          { licenseLimitStatus, licenseMode }
         ),
         title: formatMessage(
           {
             id: 'notification.ee.warning.at-seat-limit.title',
             defaultMessage:
-              '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
+              '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} the admin user limit of this instance ({enforcementUserCount}/{permittedSeats})',
           },
           {
             licenseLimitStatus,
@@ -69,7 +70,7 @@ export const useLicenseLimitNotification = () => {
           url: type === 'gold' ? BILLING_SELF_HOSTED_URL : MANAGE_SEATS_URL,
           label: formatMessage({
             id: 'notification.ee.warning.seat-limit.link',
-            defaultMessage: type === 'gold' ? 'Contact sales' : 'Manage seats',
+            defaultMessage: type === 'gold' ? 'Contact sales' : 'Manage subscription',
           }),
         },
         blockTransition: true,
@@ -86,6 +87,7 @@ export const useLicenseLimitNotification = () => {
     isLoading,
     permittedSeats,
     licenseLimitStatus,
+    licenseMode,
     enforcementUserCount,
     isError,
     type,
