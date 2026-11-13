@@ -9,6 +9,7 @@ const email = app.plugin('email').service('email');
 email.send({ subject: 3 }).anything();
 email.sendTemplatedEmail({}, {}, 'data');
 app.service('plugin::email.email').missing();
+app.plugin('email').provider.outboxPath().anything();
 app
   .plugin('email')
   .controller('email')
