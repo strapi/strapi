@@ -8,6 +8,7 @@ import type {
   CreateHistoryVersion,
   HistoryVersionAuthor,
   HistoryVersionAuthorReference,
+  HistoryVersionSource,
 } from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
@@ -38,6 +39,13 @@ export const computeRetentionDays = (
   return Math.min(licenseDays, DEFAULT_RETENTION_DAYS);
 };
 
+export type RequestContext = NonNullable<ReturnType<Modules.RequestContext.RequestContext['get']>>;
+
+interface HistoryOrigin {
+  source: HistoryVersionSource;
+  author: HistoryVersionAuthorReference;
+}
+
 export type StoredAuthorReference = Omit<HistoryVersionAuthor, 'name'>;
 
 export type AuthorColumns =
@@ -48,13 +56,13 @@ export type AuthorColumns =
     }
   | { authorType: null; authorModel: null; authorId: null };
 
-export const toAdminUserAuthor = (user: { id: Data.ID }): HistoryVersionAuthorReference => ({
+const toAdminUserAuthor = (user: { id: Data.ID }): HistoryVersionAuthorReference => ({
   type: 'person',
   model: 'admin::user',
   id: String(user.id),
 });
 
-export const toApiTokenAuthor = (token: { id: Data.ID }): HistoryVersionAuthorReference => ({
+const toApiTokenAuthor = (token: { id: Data.ID }): HistoryVersionAuthorReference => ({
   type: 'token',
   model: 'admin::api-token',
   id: String(token.id),
@@ -117,6 +125,9 @@ type RelationResponse = {
   results: RelationResult[];
   meta: { missingCount: number };
 };
+
+const isContentManagerRoute = ({ state }: RequestContext) =>
+  state.route?.info?.pluginName === 'content-manager' && state.route?.info?.type === 'admin';
 
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
@@ -516,6 +527,30 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
+  const resolveHistoryOrigin = (
+    requestContext: RequestContext | undefined
+  ): HistoryOrigin | null => {
+    if (!requestContext) {
+      return null;
+    }
+
+    if (isContentManagerRoute(requestContext)) {
+      switch (requestContext.state.auth?.strategy?.name) {
+        case 'admin':
+          return { source: 'admin-panel', author: toAdminUserAuthor(requestContext.state.user) };
+        case 'admin-token':
+          return {
+            source: 'admin-api',
+            author: toApiTokenAuthor(requestContext.state.auth.credentials),
+          };
+        default:
+          return null;
+      }
+    }
+
+    return null;
+  };
+
   return {
     getSchemaAttributesDiff,
     getRelationRestoreValue,
@@ -527,6 +562,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getAuthorNameDictionary,
     getRetentionDays,
     getVersionStatus,
+    resolveHistoryOrigin,
     getDeepPopulate,
     buildMediaResponse,
     buildRelationReponse,
