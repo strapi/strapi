@@ -711,7 +711,7 @@ describe('AI Metadata Service', () => {
     const mockFindMany = jest.fn();
     // The order of the job calls, so the heartbeat can be checked against the job's settlement
     let jobCalls: string[];
-    let mockJobs: { startHeartbeat: jest.Mock; stopHeartbeat: jest.Mock; updateJob: jest.Mock };
+    let mockJobs: { startHeartbeat: jest.Mock; stopHeartbeat: jest.Mock; settleJob: jest.Mock };
 
     beforeEach(() => {
       jobCalls = [];
@@ -722,8 +722,8 @@ describe('AI Metadata Service', () => {
         stopHeartbeat: jest.fn(() => {
           jobCalls.push('stopHeartbeat');
         }),
-        updateJob: jest.fn(async (_id: number, updates: { status?: string }) => {
-          jobCalls.push(`updateJob:${updates.status}`);
+        settleJob: jest.fn(async (_id: number, status: string) => {
+          jobCalls.push(`settleJob:${status}`);
         }),
       };
       mockStrapi.plugins.upload.services.aiMetadataJobs = mockJobs;
@@ -746,12 +746,7 @@ describe('AI Metadata Service', () => {
 
       await aiMetadataService.processExistingFiles(jobId, user);
 
-      expect(jobCalls).toEqual([
-        'startHeartbeat',
-        'updateJob:processing',
-        'updateJob:completed',
-        'stopHeartbeat',
-      ]);
+      expect(jobCalls).toEqual(['startHeartbeat', 'settleJob:completed', 'stopHeartbeat']);
       expect(mockJobs.stopHeartbeat).toHaveBeenCalledWith(jobId);
     });
 
@@ -760,18 +755,13 @@ describe('AI Metadata Service', () => {
 
       await aiMetadataService.processExistingFiles(jobId, user);
 
-      expect(jobCalls).toEqual([
-        'startHeartbeat',
-        'updateJob:processing',
-        'updateJob:failed',
-        'stopHeartbeat',
-      ]);
+      expect(jobCalls).toEqual(['startHeartbeat', 'settleJob:failed', 'stopHeartbeat']);
     });
 
     it('stops the heartbeat even when the job cannot be settled', async () => {
       jest.spyOn(aiMetadataService, 'processFiles').mockRejectedValue(new Error('provider down'));
-      mockJobs.updateJob.mockImplementation(async (_id: number, updates: { status?: string }) => {
-        if (updates.status === 'failed') {
+      mockJobs.settleJob.mockImplementation(async (_id: number, status: string) => {
+        if (status === 'failed') {
           throw new Error('database down');
         }
       });

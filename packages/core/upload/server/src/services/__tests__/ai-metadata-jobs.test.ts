@@ -26,7 +26,7 @@ describe('AI metadata jobs service', () => {
   const createProcessingJob = async (ageMs: number | null): Promise<number> => {
     const jobId = await service.createJob();
     await service.updateJob(jobId, {
-      heartbeatAt: ageMs === null ? null : new Date(Date.now() - ageMs),
+      heartbeatAtMs: ageMs === null ? null : Date.now() - ageMs,
     });
     return jobId;
   };
@@ -85,13 +85,13 @@ describe('AI metadata jobs service', () => {
     await service.updateJob(completedId, {
       status: 'completed',
       completedAt: new Date(0),
-      heartbeatAt: new Date(0),
+      heartbeatAtMs: 0,
     });
     const failedId = await service.createJob();
     await service.updateJob(failedId, {
       status: 'failed',
       completedAt: new Date(0),
-      heartbeatAt: new Date(0),
+      heartbeatAtMs: 0,
     });
     const processingId = await createProcessingJob(AI_METADATA_JOB_STALE_AFTER_MS + 1_000);
 
@@ -133,6 +133,33 @@ describe('AI metadata jobs service', () => {
     expect(legacy.completedAt).toMatch(ISO_DATE);
   });
 
+  it('settles a processing job as completed or failed', async () => {
+    const completedId = await service.createJob();
+    const failedId = await service.createJob();
+
+    await service.settleJob(completedId, 'completed');
+    await service.settleJob(failedId, 'failed');
+
+    const completed = (await service.getJob(completedId)) as AIMetadataJob;
+    expect(completed.status).toBe('completed');
+    expect(completed.completedAt).toMatch(ISO_DATE);
+    expect(await service.getJob(failedId)).toMatchObject({ status: 'failed' });
+  });
+
+  it('does not settle a job that was already failed, so the failure the admin saw stays', async () => {
+    // A server swept the job as interrupted while it was still running somewhere
+    const jobId = await createProcessingJob(AI_METADATA_JOB_STALE_AFTER_MS + 1_000);
+    await service.failInterruptedJobs();
+    const swept = (await service.getJob(jobId)) as AIMetadataJob;
+
+    await service.settleJob(jobId, 'completed');
+
+    expect(await service.getJob(jobId)).toMatchObject({
+      status: 'failed',
+      completedAt: swept.completedAt,
+    });
+  });
+
   describe('heartbeat', () => {
     beforeEach(() => {
       // Keep the event loop phases real: sqlite and knex rely on them
@@ -144,26 +171,22 @@ describe('AI metadata jobs service', () => {
     });
 
     const heartbeatOf = async (jobId: number) =>
-      ((await service.getJob(jobId)) as AIMetadataJob).heartbeatAt;
+      Number(((await service.getJob(jobId)) as AIMetadataJob).heartbeatAtMs);
 
     it('writes the heartbeat of a running job at each interval, and stops when told to', async () => {
       const jobId = await service.createJob();
       const createdHeartbeat = await heartbeatOf(jobId);
-      expect(createdHeartbeat).toMatch(ISO_DATE);
+      expect(createdHeartbeat).toBe(Date.now());
 
       service.startHeartbeat(jobId);
 
       await jest.advanceTimersByTimeAsync(AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS);
       const firstBeat = await heartbeatOf(jobId);
-      expect(new Date(firstBeat as string).getTime()).toBeGreaterThan(
-        new Date(createdHeartbeat as string).getTime()
-      );
+      expect(firstBeat).toBe(createdHeartbeat + AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS);
 
       await jest.advanceTimersByTimeAsync(AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS);
       const secondBeat = await heartbeatOf(jobId);
-      expect(new Date(secondBeat as string).getTime()).toBe(
-        new Date(firstBeat as string).getTime() + AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS
-      );
+      expect(secondBeat).toBe(firstBeat + AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS);
 
       service.stopHeartbeat(jobId);
       await jest.advanceTimersByTimeAsync(AI_METADATA_JOB_STALE_AFTER_MS);
@@ -199,6 +222,42 @@ describe('AI metadata jobs service', () => {
       await service.failInterruptedJobs();
 
       expect(await service.getJob(jobId)).toMatchObject({ status: 'failed' });
+    });
+
+    it('stores the heartbeat as epoch milliseconds, which no time zone or DST change shifts', async () => {
+      // Europe/Paris falls back at 01:00 UTC: 02:00:50 local comes after 02:59:00 local. A
+      // timestamp without time zone stores local wall time on Postgres and MySQL, so a heartbeat
+      // written then compared as older than the cutoff two minutes earlier.
+      jest.setSystemTime(new Date('2026-10-25T01:00:50Z'));
+      const jobId = await service.createJob();
+
+      const row = await db
+        .getConnection()('strapi_ai_metadata_jobs')
+        .where({ id: jobId })
+        .first('heartbeat_at_ms');
+      expect(Number(row.heartbeat_at_ms)).toBe(Date.parse('2026-10-25T01:00:50Z'));
+
+      jest.setSystemTime(new Date('2026-10-25T01:01:00Z'));
+      await service.failInterruptedJobs();
+
+      expect(await service.getJob(jobId)).toMatchObject({ status: 'processing' });
+    });
+
+    it('never fails a job this process runs, even when its heartbeat writes stop landing', async () => {
+      const jobId = await service.createJob();
+      service.startHeartbeat(jobId);
+      // A database blip: this process still runs the job, but its last heartbeat looks stale
+      await service.updateJob(jobId, {
+        heartbeatAtMs: Date.now() - AI_METADATA_JOB_STALE_AFTER_MS * 2,
+      });
+      // A job left by a server that crashed, as stale as this process's job
+      const orphanId = await createProcessingJob(AI_METADATA_JOB_STALE_AFTER_MS * 2);
+
+      await service.failInterruptedJobs();
+
+      expect(await service.getJob(jobId)).toMatchObject({ status: 'processing' });
+      expect(await service.getJob(orphanId)).toMatchObject({ status: 'failed' });
+      service.stopHeartbeat(jobId);
     });
 
     it('fails the jobs of this process when it stops, and only those', async () => {
@@ -247,8 +306,8 @@ describe('AI metadata jobs table upgrade', () => {
 
   it('adds the heartbeat column to an existing table, and fails the jobs it left processing', async () => {
     // The table as it was before jobs had a heartbeat
-    const { heartbeatAt, ...legacyAttributes } = aiMetadataJob.attributes;
-    expect(heartbeatAt).toBeDefined();
+    const { heartbeatAtMs, ...legacyAttributes } = aiMetadataJob.attributes;
+    expect(heartbeatAtMs).toBeDefined();
     const legacyDb = await openDatabase({ ...aiMetadataJob, attributes: legacyAttributes });
     const legacyJob = await legacyDb.query(aiMetadataJob.uid).create({
       data: { status: 'processing', createdAt: new Date() },
@@ -260,7 +319,7 @@ describe('AI metadata jobs table upgrade', () => {
 
     expect(await service.getJob(legacyJob.id)).toMatchObject({
       status: 'processing',
-      heartbeatAt: null,
+      heartbeatAtMs: null,
     });
 
     await service.failInterruptedJobs();

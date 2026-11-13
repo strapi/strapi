@@ -246,7 +246,7 @@ describe('Upload plugin bootstrap function', () => {
     /** A job left `processing`, whose server last wrote its heartbeat `ageMs` ago */
     const createProcessingJob = async (ageMs: number) => {
       const jobId = await jobs.createJob();
-      await jobs.updateJob(jobId, { heartbeatAt: new Date(Date.now() - ageMs) });
+      await jobs.updateJob(jobId, { heartbeatAtMs: Date.now() - ageMs });
       return jobId;
     };
 
@@ -303,7 +303,7 @@ describe('Upload plugin bootstrap function', () => {
 
     test('fails a job created before jobs had a heartbeat once this server listens', async () => {
       const jobId = await jobs.createJob();
-      await jobs.updateJob(jobId, { heartbeatAt: null });
+      await jobs.updateJob(jobId, { heartbeatAtMs: null });
 
       await bootAndListen();
 

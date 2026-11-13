@@ -4,7 +4,7 @@ import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 import { AI_METADATA_JOB_UID } from '../models/ai-metadata-job';
 
 /**
- * How often the process that runs a job writes the job's `heartbeatAt`.
+ * How often the process that runs a job writes the job's `heartbeatAtMs`.
  */
 export const AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS = 15_000;
 
@@ -17,10 +17,11 @@ export const AI_METADATA_JOB_STALE_AFTER_MS = 2 * 60_000;
 
 /**
  * Fields a job update writes. Dates are written as `Date` instances; they are
- * read back as ISO strings (see `AIMetadataJob`).
+ * read back as ISO strings (see `AIMetadataJob`). The heartbeat is written as
+ * epoch milliseconds.
  */
 type AIMetadataJobUpdate = Partial<
-  Pick<AIMetadataJob, 'status'> & { completedAt: Date; heartbeatAt: Date | null }
+  Pick<AIMetadataJob, 'status'> & { completedAt: Date; heartbeatAtMs: number | null }
 >;
 
 export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -31,7 +32,7 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     try {
       await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
         where: { id: jobId, status: 'processing' },
-        data: { heartbeatAt: new Date() },
+        data: { heartbeatAtMs: Date.now() },
       });
     } catch (error) {
       strapi.log.warn('Could not write the heartbeat of an AI metadata job', {
@@ -48,12 +49,12 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
 
   return {
     async createJob(): Promise<number> {
-      const now = new Date();
+      const now = Date.now();
       const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
         data: {
           status: 'processing',
-          createdAt: now,
-          heartbeatAt: now,
+          createdAt: new Date(now),
+          heartbeatAtMs: now,
         },
       });
 
@@ -70,6 +71,18 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
       await strapi.db.query(AI_METADATA_JOB_UID).update({
         where: { id: jobId },
         data: updates,
+      });
+    },
+
+    /**
+     * Marks a `processing` job as completed or failed. A job that is no longer `processing` is
+     * left as it is: once a server failed it as interrupted, the admin has shown that failure and
+     * stopped polling, so a late result must not turn it back into a success unseen.
+     */
+    async settleJob(jobId: number, status: 'completed' | 'failed'): Promise<void> {
+      await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
+        where: { id: jobId, status: 'processing' },
+        data: { status, completedAt: new Date() },
       });
     },
 
@@ -103,15 +116,18 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
      * `AI_METADATA_JOB_STALE_AFTER_MS`, or missing (a job created before the heartbeat existed).
      * The process that ran such a job stopped or crashed, since a running job writes its
      * heartbeat at a much shorter interval. Any server can call it: a job that another server
-     * still runs has a fresh heartbeat, so it is left alone.
+     * still runs has a fresh heartbeat, so it is left alone. The jobs this process runs are
+     * never failed, even when their heartbeat writes stopped landing for a while.
      */
     async failInterruptedJobs(): Promise<void> {
-      const staleBefore = new Date(Date.now() - AI_METADATA_JOB_STALE_AFTER_MS);
+      const staleBeforeMs = Date.now() - AI_METADATA_JOB_STALE_AFTER_MS;
+      const ownJobIds = [...heartbeats.keys()];
 
       await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
         where: {
           status: 'processing',
-          $or: [{ heartbeatAt: { $null: true } }, { heartbeatAt: { $lt: staleBefore } }],
+          $or: [{ heartbeatAtMs: { $null: true } }, { heartbeatAtMs: { $lt: staleBeforeMs } }],
+          ...(ownJobIds.length > 0 ? { id: { $notIn: ownJobIds } } : {}),
         },
         data: { status: 'failed', completedAt: new Date() },
       });

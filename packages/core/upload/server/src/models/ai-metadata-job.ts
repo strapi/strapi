@@ -23,10 +23,12 @@ const aiMetadataJob: Model = {
       type: 'datetime',
       default: null,
     },
-    // Written at an interval by the process that runs the job. A `processing` job whose
-    // heartbeat is stale or missing was interrupted (see `failInterruptedJobs`).
-    heartbeatAt: {
-      type: 'datetime',
+    // Written at an interval by the process that runs the job, as epoch milliseconds. A
+    // `processing` job whose heartbeat is stale or missing was interrupted (see
+    // `failInterruptedJobs`). Not a `datetime`: Postgres and MySQL store those as local wall
+    // time, which a time zone's DST change shifts by an hour.
+    heartbeatAtMs: {
+      type: 'biginteger',
       default: null,
     },
   },
