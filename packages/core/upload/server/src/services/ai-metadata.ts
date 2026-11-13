@@ -119,6 +119,9 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     async processExistingFiles(jobId: number, user: { id: string | number }): Promise<void> {
       const jobService = getService('aiMetadataJobs');
 
+      // Tells the other servers on the same database that this job still runs
+      jobService.startHeartbeat(jobId);
+
       try {
         // Mark as processing
         await jobService.updateJob(jobId, { status: 'processing' });
@@ -165,6 +168,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           status: 'failed',
           completedAt: new Date(),
         });
+      } finally {
+        jobService.stopHeartbeat(jobId);
       }
     },
 

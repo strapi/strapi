@@ -242,6 +242,9 @@ export default {
    * (see `GetLatestAIMetadataJob`). A client that reloads mid-run picks the
    * progress bar back up, and one that polls sees the run complete or fail.
    * 404s when no job exists or AI metadata is not enabled.
+   *
+   * A job whose server stopped or crashed is failed first, so the client sees
+   * it fail without waiting for a server to restart.
    */
   async getLatestAIMetadataJob(ctx: Context) {
     if ((await getService('aiMetadata').isEnabled()) === false) {
@@ -249,6 +252,7 @@ export default {
     }
 
     const jobService = getService('aiMetadataJobs');
+    await jobService.failInterruptedJobs();
     const job = await jobService.getLatestActiveJob();
 
     if (!job) {

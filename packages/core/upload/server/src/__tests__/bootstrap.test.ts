@@ -7,7 +7,11 @@ import { Database } from '@strapi/database';
 
 import { bootstrap } from '../bootstrap';
 import { aiMetadataJob } from '../models/ai-metadata-job';
-import { createAIMetadataJobsService } from '../services/ai-metadata-jobs';
+import {
+  AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS,
+  AI_METADATA_JOB_STALE_AFTER_MS,
+  createAIMetadataJobsService,
+} from '../services/ai-metadata-jobs';
 
 jest.mock('@strapi/provider-upload-local', () => ({
   init() {
@@ -222,8 +226,29 @@ describe('Upload plugin bootstrap function', () => {
       await db.init({ models: [aiMetadataJob] });
       await db.schema.sync();
 
-      jobs = createAIMetadataJobsService({ strapi: { db } as any });
+      jobs = createAIMetadataJobsService({ strapi: { db, log: console } as any });
     });
+
+    /** Boots this server against the shared database, and resolves once its sweep ran */
+    const bootAndListen = async () => {
+      const httpServer = new EventEmitter();
+      const failInterruptedJobs = jest.spyOn(jobs, 'failInterruptedJobs');
+      // The entity manager reaches for the global `strapi.db` to open its transactions
+      global.strapi = { ...createStrapiMock({ aiMetadataJobs: jobs, httpServer }), db };
+
+      await bootstrap({ strapi });
+      httpServer.emit('listening');
+      await failInterruptedJobs.mock.results[0]?.value;
+
+      failInterruptedJobs.mockRestore();
+    };
+
+    /** A job left `processing`, whose server last wrote its heartbeat `ageMs` ago */
+    const createProcessingJob = async (ageMs: number) => {
+      const jobId = await jobs.createJob();
+      await jobs.updateJob(jobId, { heartbeatAt: new Date(Date.now() - ageMs) });
+      return jobId;
+    };
 
     afterAll(async () => {
       await db.destroy();
@@ -231,11 +256,11 @@ describe('Upload plugin bootstrap function', () => {
     });
 
     test('leaves a processing job alone when the app is only loaded, as CLI commands do', async () => {
-      // `strapi export`, `strapi console` and the like run `load()` but never listen. A server
-      // may be running this job right now, so the CLI process must not touch it.
+      // `strapi export`, `strapi import` and the like run `load()` but never listen. A process
+      // that does not serve HTTP never fails a job, even one whose heartbeat looks stale.
       global.strapi = { ...createStrapiMock({ aiMetadataJobs: jobs }), db };
 
-      const jobId = await jobs.createJob();
+      const jobId = await createProcessingJob(AI_METADATA_JOB_STALE_AFTER_MS + 1_000);
 
       await bootstrap({ strapi });
 
@@ -248,8 +273,9 @@ describe('Upload plugin bootstrap function', () => {
       // The entity manager reaches for the global `strapi.db` to open its transactions
       global.strapi = { ...createStrapiMock({ aiMetadataJobs: jobs, httpServer }), db };
 
-      // The previous server created the job, then stopped before `processExistingFiles` settled it
-      const jobId = await jobs.createJob();
+      // The previous server created the job, then stopped before `processExistingFiles` settled it,
+      // so its heartbeat is stale
+      const jobId = await createProcessingJob(AI_METADATA_JOB_STALE_AFTER_MS + 1_000);
 
       await bootstrap({ strapi });
       expect(failInterruptedJobs).not.toHaveBeenCalled();
@@ -263,6 +289,25 @@ describe('Upload plugin bootstrap function', () => {
       expect(job?.completedAt).not.toBeNull();
 
       failInterruptedJobs.mockRestore();
+    });
+
+    test('leaves alone a job that another server still runs when this server listens', async () => {
+      // Server A, on the same database, runs this job and wrote its heartbeat a moment ago. This
+      // server is B restarting, or a `strapi console` started on another host or port.
+      const jobId = await createProcessingJob(AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS);
+
+      await bootAndListen();
+
+      expect(await jobs.getJob(jobId)).toMatchObject({ status: 'processing', completedAt: null });
+    });
+
+    test('fails a job created before jobs had a heartbeat once this server listens', async () => {
+      const jobId = await jobs.createJob();
+      await jobs.updateJob(jobId, { heartbeatAt: null });
+
+      await bootAndListen();
+
+      expect(await jobs.getJob(jobId)).toMatchObject({ status: 'failed' });
     });
   });
 });
