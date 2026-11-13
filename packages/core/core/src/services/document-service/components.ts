@@ -28,6 +28,29 @@ type ComponentBody = {
   [key: string]: ComponentValue | DynamicZoneValue;
 };
 
+/**
+ * Runs one task per component value.
+ *
+ * Inside a transaction every query is bound to the transaction's single connection, and
+ * node-postgres deprecated (pg@8.19) and removes (pg@9) calling `client.query()` on a client
+ * that is already executing a query. The tasks therefore run one after another there, which
+ * costs nothing: the driver was already serialising them on that one connection. Outside a
+ * transaction they fan out over the pool as before.
+ */
+const mapComponents = async <T>(values: T[], task: (value: T) => Promise<any>): Promise<any[]> => {
+  if (strapi?.db?.inTransaction?.()) {
+    const results = [];
+
+    for (const value of values) {
+      results.push(await task(value));
+    }
+
+    return results;
+  }
+
+  return async.map(values, task);
+};
+
 const omitComponentData = curry(
   (schema: Schema.Schema, data: Input<UID.Schema>): Partial<Input<UID.Schema>> => {
     const { attributes } = schema;
@@ -71,7 +94,7 @@ const createComponents = async <TUID extends UID.Schema, TData extends Input<TUI
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components: RepeatableComponentValue = await async.map(componentValue, (value: any) =>
+        const components: RepeatableComponentValue = await mapComponents(componentValue, (value: any) =>
           createComponent(componentUID, value)
         );
 
@@ -125,7 +148,7 @@ const createComponents = async <TUID extends UID.Schema, TData extends Input<TUI
       };
 
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-      componentBody[attributeName] = await async.map(
+      componentBody[attributeName] = await mapComponents(
         dynamiczoneValues,
         createDynamicZoneComponents
       );
@@ -201,7 +224,7 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const results: Array<ComponentWriteResult | null> = await async.map(
+        const results: Array<ComponentWriteResult | null> = await mapComponents(
           componentValue,
           (value: any) => updateOrCreateComponent(componentUID, value, getPrevious(value))
         );
@@ -281,7 +304,7 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
 
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
       const components: Array<ComponentWriteResult & { __component: UID.Component }> =
-        await async.map(dynamiczoneValues, async (value: any) => {
+        await mapComponents(dynamiczoneValues, async (value: any) => {
           const previous =
             has(value, 'id') && !isNil(value.id) ? previousByKey.get(toKey(value)) : undefined;
           const result = await updateOrCreateComponent(value.__component, value, previous);
@@ -835,11 +858,11 @@ const deleteComponentsOneByOne = async <TUID extends UID.Schema, TEntity extends
 
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
-        await async.map(_.castArray(value), (subValue: any) =>
+        await mapComponents(_.castArray(value), (subValue: any) =>
           deleteComponent(componentUID, subValue)
         );
       } else {
-        await async.map(_.castArray(value), (subValue: any) =>
+        await mapComponents(_.castArray(value), (subValue: any) =>
           deleteComponent(subValue.__component, subValue)
         );
       }
