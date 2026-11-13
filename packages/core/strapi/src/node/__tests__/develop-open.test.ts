@@ -17,8 +17,10 @@ jest.mock('../core/ensure-admin-dependencies', () => ({
   handleAdminDependencies: jest.fn().mockResolvedValue(true),
 }));
 
+const mockCompile = jest.fn().mockResolvedValue(undefined);
+
 jest.mock('@strapi/typescript-utils', () => ({
-  compile: jest.fn().mockResolvedValue(undefined),
+  compile: (...args: unknown[]) => mockCompile(...args),
   generators: { generate: jest.fn().mockResolvedValue(undefined) },
 }));
 
@@ -77,13 +79,14 @@ const createLogger = () => {
   };
 };
 
-const runDevelop = (open?: boolean) =>
+const runDevelop = (open?: boolean, tsconfig?: DevelopOptions['tsconfig']) =>
   develop({
     cwd: '/app',
     logger: createLogger(),
     watchAdmin: false,
     buildAdmin: false,
     open,
+    tsconfig,
   } as unknown as DevelopOptions);
 
 const RESTART_ENV = 'STRAPI_DEVELOP_RESTART';
@@ -107,6 +110,8 @@ describe('develop open option', () => {
 
   beforeEach(() => {
     mockCreateStrapi.mockClear();
+    mockCompile.mockReset();
+    mockCompile.mockResolvedValue(undefined);
     mockCluster.on.mockClear();
     mockCluster.fork.mockClear();
     messageListenersBefore = process.listeners('message');
@@ -173,5 +178,55 @@ describe('develop open option', () => {
 
     expect(mockCluster.fork).toHaveBeenCalledTimes(2);
     expect(mockCluster.fork).toHaveBeenLastCalledWith();
+  });
+
+  it('sends started to the primary after start() resolves', async () => {
+    let resolveStart: () => void = () => undefined;
+    const instance = createStrapiInstance();
+    instance.start.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveStart = resolve;
+      })
+    );
+    mockCreateStrapi.mockImplementationOnce(() => instance);
+
+    const send = jest.fn();
+    const originalSend = process.send;
+    process.send = send;
+
+    try {
+      await runDevelop(true);
+
+      expect(instance.start).toHaveBeenCalledTimes(1);
+      expect(send).not.toHaveBeenCalledWith('started');
+
+      resolveStart();
+      await new Promise(process.nextTick);
+
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(send).toHaveBeenCalledWith('started');
+    } finally {
+      process.send = originalSend;
+    }
+  });
+
+  it('does not send started when the worker fails before the server starts', async () => {
+    mockCompile.mockRejectedValue(new Error('TypeScript compilation failed'));
+    const send = jest.fn();
+    const originalSend = process.send;
+    process.send = send;
+
+    try {
+      await runDevelop(true, {
+        config: { options: { outDir: '/app/does-not-exist/dist' } },
+        path: '/app',
+      } as unknown as DevelopOptions['tsconfig']);
+
+      const instance = mockCreateStrapi.mock.results[0]?.value;
+      expect(instance.start).not.toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalledWith('started');
+    } finally {
+      process.send = originalSend;
+    }
   });
 });
