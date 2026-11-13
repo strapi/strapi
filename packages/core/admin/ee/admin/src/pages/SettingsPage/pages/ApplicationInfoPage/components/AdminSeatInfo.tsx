@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Flex, Tooltip, Typography } from '@strapi/design-system';
+import { Flex, Status, Tooltip, Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -8,6 +8,63 @@ import { useSelector } from 'react-redux';
 import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
+
+import type { GetLicenseLimitInformation } from '../../../../../../../../shared/contracts/admin';
+
+type ProjectUsage = NonNullable<GetLicenseLimitInformation.Response['data']['projectUsage']>;
+
+/**
+ * Active admin users counted by the license registry across every environment of the project.
+ * Informational only: being over the contracted number blocks nothing.
+ */
+const ProjectUsageInfo = ({ usage }: { usage: ProjectUsage }) => {
+  const { formatMessage, formatDate } = useIntl();
+  const { activeUsers, contractedUsers, updatedAt } = usage;
+  const isOverLimit = contractedUsers !== null && activeUsers > contractedUsers;
+
+  return (
+    <Flex direction="column" alignItems="start" gap={2}>
+      <Typography variant="sigma" textColor="neutral600">
+        {formatMessage({
+          id: 'Settings.application.ee.project-usage.title',
+          defaultMessage: 'Active admin users across all environments',
+        })}
+      </Typography>
+      <Flex gap={2} alignItems="center">
+        <Typography tag="p" fontWeight="semiBold">
+          {contractedUsers === null
+            ? activeUsers
+            : formatMessage(
+                {
+                  id: 'Settings.application.ee.project-usage.count',
+                  defaultMessage: '{activeUsers} / {contractedUsers}',
+                },
+                { activeUsers, contractedUsers }
+              )}
+        </Typography>
+        {isOverLimit && (
+          <Status size="S" variant="danger">
+            <Typography variant="omega" fontWeight="bold">
+              {formatMessage({
+                id: 'Settings.application.ee.project-usage.over-limit',
+                defaultMessage: 'Over limit',
+              })}
+            </Typography>
+          </Status>
+        )}
+      </Flex>
+      <Typography variant="pi" textColor="neutral500">
+        {formatMessage(
+          {
+            id: 'Settings.application.ee.project-usage.updated-at',
+            defaultMessage: 'Last updated {date}',
+          },
+          { date: formatDate(updatedAt, { dateStyle: 'medium', timeStyle: 'short' }) }
+        )}
+      </Typography>
+    </Flex>
+  );
+};
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -34,7 +91,7 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { enforcementUserCount, permittedSeats, seats } = license;
+  const { enforcementUserCount, permittedSeats, seats, projectUsage } = license;
 
   // `permittedSeats` is the live enforcement limit and is wiped once the licence stops being
   // usable, so fall back to the retained `seats` to keep showing the count on an expired
@@ -42,56 +99,63 @@ export const AdminSeatInfoEE = () => {
   // `permittedSeats` server-side and is untouched by this.
   const seatLimit = permittedSeats ?? seats;
 
-  if (!seatLimit) {
+  if (!seatLimit && !projectUsage) {
     return null;
   }
 
   // The red count and the warning follow the same displayed limit. Server-side
   // `licenseLimitStatus` tracks only the live limit, so it is empty once the licence expires.
-  const isOverLimit = enforcementUserCount > seatLimit;
+  const isOverLimit = seatLimit ? enforcementUserCount > seatLimit : false;
 
   return (
-    <Flex direction="column" alignItems="start" gap={2}>
-      <Typography variant="sigma" textColor="neutral600">
-        {formatMessage({
-          id: 'Settings.application.admin-seats',
-          defaultMessage: 'Admin seats',
-        })}
-      </Typography>
-      <Flex gap={2}>
-        <Flex>
-          <Typography tag="p">
-            {formatMessage(
-              {
-                id: 'Settings.application.ee.admin-seats.count',
-                defaultMessage: '<text>{enforcementUserCount}</text>/{permittedSeats}',
-              },
-              {
-                permittedSeats: seatLimit,
-                enforcementUserCount,
-                text: (chunks: ReactNode) => (
-                  <Typography
-                    fontWeight="semiBold"
-                    textColor={isOverLimit ? 'danger500' : undefined}
-                  >
-                    {chunks}
-                  </Typography>
-                ),
-              }
-            )}
-          </Typography>
-        </Flex>
-        {isOverLimit && (
-          <Tooltip
-            label={formatMessage({
-              id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
-              defaultMessage: 'At limit: add seats to invite more users',
+    <Flex direction="column" alignItems="start" gap={4}>
+      {seatLimit ? (
+        // This instance's seats: the limit enforced when creating or re-activating users
+        <Flex direction="column" alignItems="start" gap={2}>
+          <Typography variant="sigma" textColor="neutral600">
+            {formatMessage({
+              id: 'Settings.application.admin-seats',
+              defaultMessage: 'Admin seats',
             })}
-          >
-            <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
-          </Tooltip>
-        )}
-      </Flex>
+          </Typography>
+          <Flex gap={2}>
+            <Flex>
+              <Typography tag="p">
+                {formatMessage(
+                  {
+                    id: 'Settings.application.ee.admin-seats.count',
+                    defaultMessage: '<text>{enforcementUserCount}</text>/{permittedSeats}',
+                  },
+                  {
+                    permittedSeats: seatLimit,
+                    enforcementUserCount,
+                    text: (chunks: ReactNode) => (
+                      <Typography
+                        fontWeight="semiBold"
+                        textColor={isOverLimit ? 'danger500' : undefined}
+                      >
+                        {chunks}
+                      </Typography>
+                    ),
+                  }
+                )}
+              </Typography>
+            </Flex>
+            {isOverLimit && (
+              <Tooltip
+                label={formatMessage({
+                  id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
+                  defaultMessage: 'At limit: add seats to invite more users',
+                })}
+              >
+                <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
+              </Tooltip>
+            )}
+          </Flex>
+        </Flex>
+      ) : null}
+      {/* Across every environment, counted by the license registry: information only */}
+      {projectUsage ? <ProjectUsageInfo usage={projectUsage} /> : null}
     </Flex>
   );
 };

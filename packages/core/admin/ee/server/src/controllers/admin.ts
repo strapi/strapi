@@ -9,6 +9,41 @@ import { isAuditLogsEnabled } from '../audit-logs/utils';
 
 type RetainedFeature = { name: string; [key: string]: any };
 
+type ProjectUsage = NonNullable<GetLicenseLimitInformation.Response['data']['projectUsage']>;
+
+const isProjectUsage = (value: unknown): value is ProjectUsage => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const { activeUsers, contractedUsers, updatedAt } = value as Record<string, unknown>;
+
+  return (
+    typeof activeUsers === 'number' &&
+    (contractedUsers === null || typeof contractedUsers === 'number') &&
+    typeof updatedAt === 'string'
+  );
+};
+
+/**
+ * Last license usage the license registry reported, stored by the online license check (see
+ * `onlineUpdate` in @strapi/core's ee module). Null when nothing usable is stored.
+ */
+const getStoredProjectUsage = async (): Promise<ProjectUsage | null> => {
+  try {
+    const stored = await strapi.store.get({ type: 'ee', key: 'license_usage' });
+
+    if (!isProjectUsage(stored)) {
+      return null;
+    }
+
+    const { activeUsers, contractedUsers, updatedAt } = stored;
+    return { activeUsers, contractedUsers, updatedAt };
+  } catch {
+    return null;
+  }
+};
+
 const findRetainedFeature = (
   retainedFeatures: Array<RetainedFeature | string> | undefined,
   featureName: string
@@ -120,6 +155,10 @@ export default {
     // came with it) stored by an earlier online run says nothing about its current state.
     const registryState = licenseMode === 'online' ? eeInformation : null;
 
+    // Counted by the license registry across every environment of the project. Offline licenses
+    // never report to the registry, so a usage stored by an earlier online run does not apply.
+    const projectUsage = licenseMode === 'online' ? await getStoredProjectUsage() : null;
+
     const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
       currentActiveUserCount,
@@ -161,6 +200,7 @@ export default {
       usingCachedLicense: Boolean(registryState?.error && registryState?.license),
       registrySyncError: registryState?.error ?? null,
       registrySyncErrorKind: registryState?.errorKind ?? null,
+      projectUsage,
       shouldNotify,
       shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,

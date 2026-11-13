@@ -11,12 +11,14 @@ vi.mock('../license', async (importOriginal) => ({
   readLicense: vi.fn(),
   verifyLicense: vi.fn(),
   fetchLicense: vi.fn(),
+  fetchLicenseUsage: vi.fn(),
 }));
 
 type LicenseModuleMock = {
   readLicense: Mock;
   verifyLicense: Mock;
   fetchLicense: Mock;
+  fetchLicenseUsage: Mock;
 };
 
 type EEModule = typeof import('../index').default;
@@ -92,6 +94,7 @@ const setup = async (strapiOptions?: Parameters<typeof createMockStrapi>[0]) => 
   license.readLicense.mockReset().mockReturnValue('raw-license');
   license.verifyLicense.mockReset().mockReturnValue({ ...GOLD_LICENSE_INFO });
   license.fetchLicense.mockReset().mockResolvedValue('fresh-license');
+  license.fetchLicenseUsage.mockReset().mockResolvedValue(null);
 
   delete process.env.STRAPI_LICENSE;
   delete process.env.STRAPI_DISABLE_EE;
@@ -142,5 +145,92 @@ describe('onlineUpdate user hashes', () => {
 
     expect(license.fetchLicense).not.toHaveBeenCalled();
     expect(strapi.db.query).not.toHaveBeenCalled();
+  });
+});
+
+describe('onlineUpdate license usage', () => {
+  const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
+
+  it('stores the usage after a license check the registry answered', async () => {
+    const { strapi, license, eeModule } = await setup();
+    license.fetchLicenseUsage.mockResolvedValue(USAGE);
+
+    await eeModule.checkLicense({ strapi });
+
+    expect(license.fetchLicenseUsage).toHaveBeenCalledWith({ strapi }, LICENSE_KEY);
+    expect(strapi.store.set).toHaveBeenCalledWith({
+      type: 'ee',
+      key: 'license_usage',
+      value: USAGE,
+    });
+    // After the license transaction, never inside it
+    const commit = (await strapi.db.transaction.mock.results[0].value).commit;
+    expect(commit.mock.invocationCallOrder[0]).toBeLessThan(
+      license.fetchLicenseUsage.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('keeps the stored usage when the registry has none to give', async () => {
+    const { strapi, license, eeModule } = await setup();
+    license.fetchLicenseUsage.mockResolvedValue(null);
+
+    await eeModule.checkLicense({ strapi });
+
+    expect(license.fetchLicenseUsage).toHaveBeenCalled();
+    expect(strapi.store.set).not.toHaveBeenCalled();
+    expect(eeModule.isEE).toBe(true);
+  });
+
+  it('does not affect the license when storing the usage fails', async () => {
+    const { strapi, license, eeModule } = await setup();
+    license.fetchLicenseUsage.mockResolvedValue(USAGE);
+    strapi.store.set.mockRejectedValue(new Error('db down'));
+
+    await expect(eeModule.checkLicense({ strapi })).resolves.toBeUndefined();
+
+    expect(eeModule.isEE).toBe(true);
+  });
+
+  it('is not fetched when the license check fell back', async () => {
+    const { strapi, license, eeModule } = await setup({
+      storedRow: { license: 'cached-license', lastCheckAt: 0 },
+    });
+    const { LicenseCheckError } = await import('../license');
+    license.fetchLicense.mockRejectedValue(new LicenseCheckError('unreachable', true));
+
+    await eeModule.checkLicense({ strapi });
+
+    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
+  });
+
+  it('is not fetched when the registry rejected the license', async () => {
+    const { strapi, license, eeModule } = await setup();
+    const { LicenseCheckError } = await import('../license');
+    license.fetchLicense.mockRejectedValue(new LicenseCheckError('Invalid key.'));
+
+    await eeModule.checkLicense({ strapi });
+
+    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
+  });
+
+  it('is not fetched when the registry was checked less than a minute ago', async () => {
+    const { strapi, license, eeModule } = await setup({
+      storedRow: { license: 'cached-license', lastCheckAt: Date.now() },
+    });
+
+    await eeModule.checkLicense({ strapi });
+
+    expect(license.fetchLicense).not.toHaveBeenCalled();
+    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
+  });
+
+  it('is not fetched for an offline license', async () => {
+    const { strapi, license, eeModule } = await setup();
+    process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+
+    await eeModule.checkLicense({ strapi });
+
+    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
+    expect(strapi.store.set).not.toHaveBeenCalled();
   });
 });

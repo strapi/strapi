@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, type Mock } from 'vitest';
-import { fetchLicense, LicenseCheckError, LICENSE_REGISTRY_URI } from '../license';
+import {
+  fetchLicense,
+  fetchLicenseUsage,
+  LicenseCheckError,
+  LICENSE_REGISTRY_URI,
+} from '../license';
 
 const VALIDATE_URL = `${LICENSE_REGISTRY_URI}/api/licenses/validate`;
 
@@ -42,6 +47,7 @@ const createStrapi = (
       get: vi.fn((key: string) => (key === 'info.strapi' ? strapiVersion : undefined)),
     },
     fetch: fetchImpl,
+    log: { debug: vi.fn(), warn: vi.fn() },
   }) as any;
 
 const sentBody = (fetchImpl: FetchMock) => JSON.parse(fetchImpl.mock.calls[0][1].body as string);
@@ -235,5 +241,77 @@ describe('fetchLicense', () => {
 
       await expect(promise).rejects.toMatchObject({ shouldFallback: true });
     });
+  });
+});
+
+describe('fetchLicenseUsage', () => {
+  const USAGE_URL = `${LICENSE_REGISTRY_URI}/api/licenses/usage`;
+  const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
+
+  it('POSTs only the license key, with a timeout', async () => {
+    const fetchImpl = mockFetch(createResponse({ status: 200, body: { data: USAGE } }));
+
+    await fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'the-key');
+
+    expect(fetchImpl).toHaveBeenCalledWith(USAGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'the-key' }),
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it('returns the usage on a 200 response', async () => {
+    const fetchImpl = mockFetch(
+      createResponse({ status: 200, body: { data: { ...USAGE, extra: 'ignored' } } })
+    );
+
+    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toEqual(
+      USAGE
+    );
+  });
+
+  it('accepts a license without a contracted number of users', async () => {
+    const fetchImpl = mockFetch(
+      createResponse({ status: 200, body: { data: { ...USAGE, contractedUsers: null } } })
+    );
+
+    await expect(
+      fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')
+    ).resolves.toMatchObject({ contractedUsers: null });
+  });
+
+  // 404: unknown key, or a registry without the endpoint; 405: older registry; 429: rate limited
+  it.each([404, 405, 429, 500])('resolves to null on a %s response', async (status) => {
+    const fetchImpl = mockFetch(
+      createResponse({ status, body: { error: { code: 'license_not_found' } } })
+    );
+
+    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
+  });
+
+  it.each([
+    ['a missing data object', {}],
+    ['a non-numeric activeUsers', { data: { ...USAGE, activeUsers: '12' } }],
+    ['a missing contractedUsers', { data: { activeUsers: 1, updatedAt: USAGE.updatedAt } }],
+    ['an invalid updatedAt', { data: { ...USAGE, updatedAt: 'not a date' } }],
+  ])('resolves to null on a 200 response with %s', async (_label, body) => {
+    const fetchImpl = mockFetch(createResponse({ status: 200, body }));
+
+    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
+  });
+
+  it('resolves to null on a body that does not parse', async () => {
+    const fetchImpl = mockFetch(createResponse({ status: 200, body: '{"data":' }));
+
+    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
+  });
+
+  it('resolves to null when the request fails', async () => {
+    const fetchImpl = vi
+      .fn<Promise<Response>, FetchArgs>()
+      .mockRejectedValue(new Error('network down'));
+
+    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
   });
 });

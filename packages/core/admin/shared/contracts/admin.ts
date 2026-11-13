@@ -274,6 +274,18 @@ export declare namespace GetLicenseLimitInformation {
        * an instance that has never reached the registry and so has nothing cached.
        */
       registrySyncErrorKind: 'unreachable' | 'rejected' | null;
+      /**
+       * Active admin users the license registry counted across every environment of the
+       * project, and the number the license covers (`null` when it sets none). Informational
+       * only: nothing is blocked when it is over. `null` for offline licenses and until the
+       * registry has reported it; absent from servers that predate it.
+       */
+      projectUsage?: {
+        activeUsers: number;
+        contractedUsers: number | null;
+        /** ISO date of the registry's count */
+        updatedAt: string;
+      } | null;
       entitlements: Array<{
         feature: string;
         limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
