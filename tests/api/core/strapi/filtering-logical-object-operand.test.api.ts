@@ -153,13 +153,6 @@ describe('Filtering with object-shaped $or and $and operands', () => {
       ['Note 1'],
     ],
     ['a $or list', { $or: [{ title: 'Note 1' }, { rank: { $gt: 1 } }] }, ['Note 1', 'Note 2']],
-    // Query conversion casts any $null / $notNull operand to a boolean, so these mean true
-    ['$or in a $null operand', { title: { $null: { $or: { a: 1 } } } }, []],
-    [
-      '$and in a $notNull operand',
-      { title: { $notNull: { $and: { a: 1 } } } },
-      ['Note 1', 'Note 2'],
-    ],
   ];
 
   test.each(acceptedFilters)('accepts %s', async (_, filters, expected) => {
@@ -167,5 +160,24 @@ describe('Filtering with object-shaped $or and $and operands', () => {
 
     expect(res.statusCode).toBe(200);
     expect(titles(res.body.data)).toEqual(expected);
+  });
+
+  // Query conversion reads a $null / $notNull operand as a boolean and rejects any other value,
+  // an object included, so a $or / $and operand there never reaches the query
+  const nullOperandFilters: Array<[string, Record<string, unknown>]> = [
+    ['$or in a $null operand', { title: { $null: { $or: { a: 1 } } } }],
+    ['$and in a $notNull operand', { title: { $notNull: { $and: { a: 1 } } } }],
+  ];
+
+  test.each(nullOperandFilters)('returns a 400 for %s', async (_, filters) => {
+    const res = await getNotes(filters);
+
+    expect(res.body.data).toBeNull();
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toMatchObject({
+      status: 400,
+      name: 'ValidationError',
+      message: 'Invalid boolean, expected one of true, t, 1, false, f, 0 (case-insensitive)',
+    });
   });
 });
