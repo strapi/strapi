@@ -99,7 +99,8 @@ describe('Document Service filters with object-shaped $or and $and operands', ()
     [
       'a $and keyed by an operator with an index-keyed operand',
       { $and: { $eq: { 0: 'Note 1', 100: 'x' } } },
-      objectMessage('$and', '$and'),
+      // The object operand check of a root operator sees the index-keyed `$eq` operand first
+      arrayLimitMessage('$eq', '$and'),
     ],
     [
       'a $or keyed by an operator in a relation filter',
@@ -171,7 +172,7 @@ describe('Document Service filters with object-shaped $or and $and operands', ()
       .catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(errors.ValidationError);
-    expect(error).toMatchObject({ message: objectMessage('$and', '$and') });
+    expect(error).toMatchObject({ message: arrayLimitMessage('$eq', '$and') });
 
     const remaining = await strapi.documents(NOTE_UID).findMany();
     expect(titles(remaining as unknown as Note[])).toEqual(['Note 1', 'Note 2']);

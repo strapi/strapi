@@ -143,12 +143,6 @@ describe('Filtering with object-shaped $or and $and operands', () => {
   // 500), or, when no valid key is left in it, query conversion drops it and every row is returned.
   const operatorKeyedFilters: Array<[string, string, string, string]> = [
     ['a $or keyed by $eq', 'filters[$or][$eq]=Note%201', '$or', '$or'],
-    [
-      'a $or keyed by $eq with an index-keyed operand',
-      'filters[$or][$eq][0]=Note%201&filters[$or][$eq][100]=x',
-      '$or',
-      '$or',
-    ],
     ['a $and keyed by $not', 'filters[$and][$not][title]=Note%201', '$and', '$and'],
     [
       'a $or keyed by $eq in a relation filter',
@@ -164,6 +158,22 @@ describe('Filtering with object-shaped $or and $and operands', () => {
       'title.$or',
     ],
   ];
+
+  // The object operand check of a root operator sees the index-keyed `$eq` operand first
+  test('returns a 400 naming arrayLimit for a $or keyed by $eq with an index-keyed operand', async () => {
+    const res = await rq({
+      method: 'GET',
+      url: '/lop-notes?filters[$or][$eq][0]=Note%201&filters[$or][$eq][100]=x',
+    });
+
+    expect(res.body.data).toBeNull();
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toMatchObject({
+      status: 400,
+      name: 'ValidationError',
+      message: arrayLimitMessage('$eq', '$or'),
+    });
+  });
 
   test.each(operatorKeyedFilters)('returns a 400 for %s', async (_, query, key, path) => {
     const res = await rq({ method: 'GET', url: `/lop-notes?${query}` });

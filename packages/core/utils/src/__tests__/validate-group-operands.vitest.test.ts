@@ -19,13 +19,6 @@ describe('validateFilters - $or and $and operands keyed by operators', () => {
     ['$or holding $eq', { $or: { $eq: 'alpha' } }, '$or', '$or'],
     ['$and holding $not', { $and: { $not: { title: 'x' } } }, '$and', '$and'],
     ['$and holding a $or list', { $and: { $or: [{ title: 'x' }] } }, '$and', '$and'],
-    // REST `filters[$or][$eq][0]=alpha&filters[$or][$eq][100]=x`
-    [
-      '$or holding $eq with an index-keyed operand',
-      { $or: { $eq: { 0: 'alpha', 100: 'x' } } },
-      '$or',
-      '$or',
-    ],
     ['$or in a relation filter', { createdBy: { $or: { $eq: 1 } } }, '$or', 'createdBy.$or'],
     ['$and under $not', { $not: { $and: { $eq: 'a' } } }, '$and', '$not.$and'],
     ['$or inside an $and list', { $and: [{ $or: { $eq: 'a' } }] }, '$or', '$and[0].$or'],
@@ -48,6 +41,20 @@ describe('validateFilters - $or and $and operands keyed by operators', () => {
     expect(error).toMatchObject({
       message: `Invalid operand for ${key} at ${path}: expected an array of filters, not an object`,
       details: { key, path },
+    });
+  });
+
+  // REST `filters[$or][$eq][0]=alpha&filters[$or][$eq][100]=x`: the object operand check of a root
+  // operator sees the index-keyed `$eq` operand first, and names the arrayLimit
+  test('throws on $or holding $eq with an index-keyed operand', async () => {
+    const error = await validate({ $or: { $eq: { 0: 'alpha', 100: 'x' } } }).catch(
+      (e: unknown) => e
+    );
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toMatchObject({
+      message: `Invalid operand for $eq at $or: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+      details: { key: '$eq', path: '$or' },
     });
   });
 
