@@ -201,7 +201,7 @@ The core service (`createCoreService`) calls the Document Service: `strapi.docum
 
 The core controller helpers call `strapi.contentAPI.validate` and `strapi.contentAPI.sanitize` ([`services/content-api/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/content-api/index.ts)), which wrap the functions in `@strapi/utils`. They pass `ctx.state.auth`, `ctx.state.route` and `api.rest.strictParams`.
 
-- **`validateQuery`** checks `filters`, `sort`, `fields` and `populate` against the schema and throws `ValidationError` (400). It also rejects filters and sorts on relations whose target the caller cannot `find`. With `strictParams`, it rejects unknown top-level query keys.
+- **`validateQuery`** checks `filters`, `sort`, `fields` and `populate` against the schema and throws `ValidationError` (400). It also rejects filters and sorts on relations whose target the caller cannot `find`. With `strictParams`, it rejects unknown top-level query keys. It rejects a plain-object operand on a scalar or JSON attribute, `id` or `documentId`. When that object has only index keys, the message names the `strapi::query` `arrayLimit` (100 by default), because `qs` turns a longer list into such an object. It also rejects a `$and` or `$or` operand that is an object rather than a list, with the same `arrayLimit` message when the object has only index keys.
 - **`sanitizeQuery`** returns a copy of the query without private fields, invalid keys and restricted relations. With `strictParams`, it also drops unknown top-level keys.
 - **`validateInput`** rejects `id`, `documentId`, non-writable attributes, unknown attributes and restricted relations.
 - **`sanitizeInput`** removes the same data instead of throwing.

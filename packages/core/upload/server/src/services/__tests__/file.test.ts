@@ -1,6 +1,7 @@
 import os from 'os';
 import path from 'path';
 import fse from 'fs-extra';
+import { errors } from '@strapi/utils';
 
 import fileService from '../file';
 
@@ -26,6 +27,20 @@ describe('file', () => {
       const result = await fileService.getFolderPath(id);
 
       expect(result).toBe(expectedResult);
+    });
+
+    test('rejects with a ValidationError when the folder does not exist', async () => {
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne: jest.fn(async () => null) };
+          },
+        },
+      } as any;
+
+      await expect(fileService.getFolderPath(1)).rejects.toThrow(
+        new errors.ValidationError('the folder does not exist')
+      );
     });
   });
 

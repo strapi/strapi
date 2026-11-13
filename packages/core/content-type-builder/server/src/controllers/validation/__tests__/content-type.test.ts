@@ -60,6 +60,28 @@ describe('Content type validator', () => {
     });
   });
 
+  describe('validateUpdateContentTypeInput with attributes that are not objects', () => {
+    const contentType = { singularName: 'test', pluralName: 'tests', displayName: 'Test' };
+
+    test.each([
+      ['null attributes', null],
+      ['a null attribute', { foo: null }],
+      ['an array with a null attribute', [null]],
+    ])(
+      'rejects %s with a validation error',
+      async (_label, attributes) => {
+        const data = {
+          contentType: { ...contentType, attributes },
+        } as unknown as CreateContentTypeInput;
+
+        await expect(validateUpdateContentTypeInput(data)).rejects.toMatchObject({
+          name: 'ValidationError',
+        });
+      },
+      2000
+    );
+  });
+
   describe('Prevents use of reservedNames in attributes', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
