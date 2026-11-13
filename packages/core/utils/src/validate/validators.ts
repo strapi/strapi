@@ -110,10 +110,34 @@ const isInOperatorOperand = (rawPath: string | null) => {
 };
 
 /**
- * Returns the first operator, and its operand, in an operator map (or a list of them, at any depth)
- * whose operand is a non-empty plain object that is not an operator map.
+ * Returns the first non-empty plain object in the operand of a non-logical operator: the operand
+ * itself, or an item of its value list at any depth. An operator map is such an object too.
+ */
+const findObjectValue = (operand: unknown): Record<string, unknown> | undefined => {
+  if (Array.isArray(operand) === true) {
+    for (const item of operand as unknown[]) {
+      const found = findObjectValue(item);
+
+      if (found !== undefined) {
+        return found;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isPlainRecord(operand) === true && Object.keys(operand).length > 0) {
+    return operand;
+  }
+
+  return undefined;
+};
+
+/**
+ * Returns the first non-logical operator, and its operand, in an operator map (or a list of them, at
+ * any depth) whose operand is a non-empty plain object, operator maps included, or holds one in its
+ * value list, e.g. `{ $eq: { a: 1 } }` or `{ $notIn: [{ $eq: 'x' }] }`.
  * The operand of a logical operator is an operator map, or a list of them, and is searched in turn.
- * So is each item of a list operand, e.g. `{ $eq: [{ $eq: { a: 1 } }] }`.
  * The filters traversal does not walk such operands, and query conversion drops them along with their
  * condition, or empties the list holding them. The query then matches every row, except for a `$and` /
  * `$or` list on a scalar attribute, which the database layer rejects with a 500.
@@ -143,18 +167,20 @@ const findObjectOperand = (
       continue;
     }
 
-    if (
-      LOGICAL_OPERATORS.has(operator) === false &&
-      isPlainRecord(operand) === true &&
-      Object.keys(operand).length > 0
-    ) {
-      return { operator, operand };
+    if (LOGICAL_OPERATORS.has(operator) === true) {
+      const nested = findObjectOperand(operand);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+
+      continue;
     }
 
-    const nested = findObjectOperand(operand);
+    const objectValue = findObjectValue(operand);
 
-    if (nested !== undefined) {
-      return nested;
+    if (objectValue !== undefined) {
+      return { operator, operand: objectValue };
     }
   }
 
