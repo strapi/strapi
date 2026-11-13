@@ -433,3 +433,51 @@ describe('content-type-builder createContentType draftAndPublish', () => {
     });
   });
 });
+
+describe('content-type-builder editContentType displayName', () => {
+  const articleUid = 'api::article.article';
+
+  beforeEach(() => {
+    (global as any).strapi = {
+      dirs: { app: { api: '/app/src/api', components: '/app/src/components' } },
+      components: {},
+      contentTypes: {
+        [articleUid]: {
+          uid: articleUid,
+          apiName: 'article',
+          modelName: 'article',
+          info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+          __schema__: {
+            kind: 'collectionType',
+            collectionName: 'articles',
+            info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+            options: {},
+            attributes: { title: { type: 'string' } },
+          },
+        },
+      },
+    };
+  });
+
+  const edit = (infos: Record<string, unknown>) => {
+    const builder = createBuilder();
+    builder.editContentType({
+      uid: articleUid,
+      attributes: { title: { type: 'string' } },
+      ...infos,
+    });
+    return builder.contentTypes.get(articleUid).schema.info;
+  };
+
+  it('keeps the stored displayName when the payload omits it', () => {
+    expect(edit({})).toMatchObject({ displayName: 'Article' });
+  });
+
+  it('keeps the stored displayName when the payload sets it to undefined', () => {
+    expect(edit({ displayName: undefined })).toMatchObject({ displayName: 'Article' });
+  });
+
+  it('uses the displayName the payload sets', () => {
+    expect(edit({ displayName: 'Post' })).toMatchObject({ displayName: 'Post' });
+  });
+});

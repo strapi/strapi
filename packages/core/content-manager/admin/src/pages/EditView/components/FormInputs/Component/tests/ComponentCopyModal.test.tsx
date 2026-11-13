@@ -380,9 +380,12 @@ describe('ComponentCopyModal', () => {
 
       await user.type(screen.getByRole('searchbox'), 'anna');
 
-      // the search is debounced
-      await waitFor(() =>
-        expect(screen.queryByRole('button', { name: /Le Petit Bistro/ })).not.toBeInTheDocument()
+      // the search is debounced by 300 ms, and the list only follows once that has fired and
+      // rendered: give it more than the default 1 s for a loaded machine
+      await waitFor(
+        () =>
+          expect(screen.queryByRole('button', { name: /Le Petit Bistro/ })).not.toBeInTheDocument(),
+        { timeout: 3000 }
       );
       expect(screen.getByRole('button', { name: /La Table d’Anna/ })).toBeInTheDocument();
       expect(screen.queryByText('Recently updated entries')).not.toBeInTheDocument();

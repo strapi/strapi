@@ -40,8 +40,23 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     });
   },
 
+  /**
+   * Marks as failed every job still `processing`. The upload bootstrap calls it once the server
+   * listens, to settle the jobs a stop or crash of the previous server left behind.
+   */
+  // TODO With several servers on one database, a starting server also fails a job another
+  // server is still running, and that job's own completion then overwrites the status.
+  // Multi-server ownership is tracked as a follow-up: record a job owner or heartbeat so only
+  // orphaned jobs are failed.
+  async failInterruptedJobs(): Promise<void> {
+    await strapi.db.query(AI_METADATA_JOB_UID).updateMany({
+      where: { status: 'processing' },
+      data: { status: 'failed', completedAt: new Date() },
+    });
+  },
+
   async getLatestActiveJob(): Promise<AIMetadataJob | null> {
-    // Return the most recent job, regardless of status
+    // Despite the name, return the most recent job regardless of status
     // This allows the frontend to see completed/failed status
     return strapi.db.query(AI_METADATA_JOB_UID).findOne({
       orderBy: { createdAt: 'desc' },

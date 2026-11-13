@@ -1,7 +1,7 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["tests"],
+  "include": ["tests", "vitest.config.ts"],
   "compilerOptions": {
-    "types": ["node", "jest"]
+    "types": ["node"]
   }
 }
