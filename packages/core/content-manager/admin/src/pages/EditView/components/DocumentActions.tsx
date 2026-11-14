@@ -144,7 +144,19 @@ interface ModalOptions {
  * DocumentActions
  * -----------------------------------------------------------------------------------------------*/
 
-interface Action extends DocumentActionDescription {
+/**
+ * Kept out of the public `DocumentActionDescription` for now: only built-in actions set `group`.
+ * It is a typing boundary, the menu reads `group` from any action at runtime.
+ */
+interface InternalDocumentActionDescription extends DocumentActionDescription {
+  /**
+   * Menus draw a separator wherever two consecutive actions belong to different groups.
+   * Actions without a group stay together, so menus without any group are unchanged.
+   */
+  group?: string;
+}
+
+interface Action extends InternalDocumentActionDescription {
   id: string;
 }
 
@@ -441,9 +453,16 @@ const DocumentActionsMenu = ({
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+  /**
+   * Set synchronously when an item that opens a dialog is selected. The menu closes right away,
+   * before `onClick` resolves and `dialogId` is set, so the state can't tell it yet.
+   */
+  const opensDialogRef = React.useRef(false);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
     const { onClick = () => false, dialog, id } = action;
+
+    opensDialogRef.current = dialog?.type === 'dialog' || dialog?.type === 'modal';
 
     const muteDialog = await onClick(e);
 
@@ -472,6 +491,11 @@ const DocumentActionsMenu = ({
 
   const handleOpenChange = (open: boolean) => {
     if (!isDisabled) {
+      if (open) {
+        // In case the menu stayed open after a selection, a later close returns the focus as usual
+        opensDialogRef.current = false;
+      }
+
       setIsOpen(open);
     }
   };
@@ -492,24 +516,39 @@ const DocumentActionsMenu = ({
         icon={<More />}
         variant={variant}
       />
-      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end" maxWidth="25rem">
-        {actions.map((action) => {
+      <Menu.Content
+        maxHeight={undefined}
+        popoverPlacement="bottom-end"
+        maxWidth="25rem"
+        // Giving the focus back to the trigger would take it from the dialog that just opened
+        onCloseAutoFocus={(event: Event) => {
+          if (opensDialogRef.current) {
+            opensDialogRef.current = false;
+            event.preventDefault();
+          }
+        }}
+      >
+        {actions.map((action, index) => {
+          const hasSeparator = index > 0 && actions[index - 1].group !== action.group;
+
           return (
-            <Menu.Item
-              disabled={action.disabled}
-              /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
-              onSelect={handleClick(action)}
-              display="block"
-              key={action.id}
-              variant={action.variant === 'danger' ? action.variant : 'default'}
-              startIcon={action.icon}
-            >
-              <Flex justifyContent="space-between" gap={4}>
-                <Flex gap={2} tag="span">
-                  {action.label}
+            <React.Fragment key={action.id}>
+              {hasSeparator ? <Menu.Separator /> : null}
+              <Menu.Item
+                disabled={action.disabled}
+                /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
+                onSelect={handleClick(action)}
+                display="block"
+                variant={action.variant === 'danger' ? action.variant : 'default'}
+                startIcon={action.icon}
+              >
+                <Flex justifyContent="space-between" gap={4}>
+                  <Flex gap={2} tag="span">
+                    {action.label}
+                  </Flex>
                 </Flex>
-              </Flex>
-            </Menu.Item>
+              </Menu.Item>
+            </React.Fragment>
           );
         })}
         {children}
@@ -632,6 +671,28 @@ interface DocumentActionModalProps extends ModalOptions {
   isOpen?: boolean;
 }
 
+/**
+ * Keys the list grid uses to move between cells. A modal opened from a row menu is rendered under
+ * the grid in the React tree, so without this they would move the focused cell behind the modal
+ * (and break moving the caret in its fields). Other keys still go through, Escape and Tab included.
+ */
+const GRID_NAVIGATION_KEYS = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+]);
+
+const stopGridNavigation = (e: React.KeyboardEvent) => {
+  if (GRID_NAVIGATION_KEYS.has(e.key)) {
+    e.stopPropagation();
+  }
+};
+
 const DocumentActionModal = ({
   isOpen,
   title,
@@ -655,7 +716,7 @@ const DocumentActionModal = ({
    */
   return (
     <UnsavedChangesModal open={isOpen ?? false} onOpenChange={handleClose}>
-      <Modal.Content>
+      <Modal.Content onKeyDown={stopGridNavigation}>
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
@@ -1809,6 +1870,7 @@ export {
 };
 export type {
   DocumentActionDescription,
+  InternalDocumentActionDescription,
   DocumentActionPosition,
   DialogOptions,
   NotificationOptions,

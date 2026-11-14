@@ -700,13 +700,11 @@ const ListViewPage = () => {
                                 return (
                                   <CustomOrder.PositionCell
                                     key={header.name}
-                                    documentId={row.documentId}
                                     position={
                                       ((pagination?.page ?? 1) - 1) * (pagination?.pageSize ?? 0) +
                                       index +
                                       1
                                     }
-                                    total={pagination?.total ?? customOrder.rows.length}
                                   />
                                 );
                               }
