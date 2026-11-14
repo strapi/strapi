@@ -62,34 +62,45 @@ const waitForDeadlockRetry = (attempt: number) =>
   });
 
 /**
- * Releases (`commit`) or rolls back to (`rollback`) a savepoint, returning what the database
- * rejected it with. Knex resolves the savepoint's `commit()`/`rollback()` even when the database
- * rejects `RELEASE SAVEPOINT`/`ROLLBACK TO SAVEPOINT`: only its `executionPromise` rejects (with
- * nothing, if the rollback timed out). On MySQL it doesn't even do that for a savepoint that no
- * longer exists (`ER_SP_DOES_NOT_EXIST`, e.g. after a deadlock rolled back the whole
- * transaction): its transaction class takes it for an implicit commit by DDL, only logs a warning,
- * and resolves. The error is still emitted as the transactor's `query-error`, so it's read there.
+ * Ends a transactor and returns what the database rejected it with, or null. Knex resolves the
+ * transactor's `commit()`/`rollback()` even when the database rejects the statement: only its
+ * `executionPromise` rejects (with nothing, if the rollback timed out).
+ *
+ * That covers `COMMIT` (e.g. a deferred foreign key that fails when SQLite commits) and, for a
+ * savepoint, `RELEASE SAVEPOINT` and `ROLLBACK TO SAVEPOINT`. On MySQL it doesn't even do that
+ * for a savepoint that no longer exists (`ER_SP_DOES_NOT_EXIST`, e.g. after a deadlock rolled back
+ * the whole transaction): its transaction class takes it for an implicit commit by DDL, only logs
+ * a warning, and resolves. The error is still emitted as the transactor's `query-error`, so it's
+ * read there.
+ *
+ * Transactors that don't emit events or expose an `executionPromise` (test doubles) never report
+ * an error.
  */
-const endSavepoint = async (
+const endTransactor = async (
   trx: Knex.Transaction,
-  end: 'commit' | 'rollback'
+  end: 'commit' | 'rollback',
+  name: 'savepoint' | 'transaction'
 ): Promise<unknown> => {
+  const emitter = trx as Partial<Pick<Knex.Transaction, 'on' | 'off'>>;
   let queryError: unknown = null;
   const onQueryError = (error: unknown) => {
     queryError = error;
   };
 
-  trx.on('query-error', onQueryError);
+  emitter.on?.call(trx, 'query-error', onQueryError);
   try {
     await trx[end]();
     await trx.executionPromise;
     return queryError;
   } catch (error) {
-    return error ?? new Error(`The savepoint ${end} timed out`);
+    return error ?? new Error(`The ${name} ${end} timed out`);
   } finally {
-    trx.off('query-error', onQueryError);
+    emitter.off?.call(trx, 'query-error', onQueryError);
   }
 };
+
+const endSavepoint = (trx: Knex.Transaction, end: 'commit' | 'rollback') =>
+  endTransactor(trx, end, 'savepoint');
 
 export type Callback = (...args: any[]) => Promise<any> | any;
 
@@ -111,6 +122,8 @@ const storage = new AsyncLocalStorage<Store>();
 
 interface CallbackRunOptions {
   report?: (error: unknown) => void;
+  /** Report the error, skip the remaining callbacks, and do not reject the caller. */
+  stopOnError?: boolean;
 }
 
 /**
@@ -146,15 +159,20 @@ const runCallbacks = async (callbacks: Callback[], options?: CallbackRunOptions)
   // Hooks can register more hooks while they run.
   while (callbacks.length > 0) {
     const batch = callbacks.splice(0, callbacks.length);
-    await Promise.allSettled(
-      batch.map(async (cb) => {
-        try {
-          await cb();
-        } catch (error) {
-          options?.report?.(error);
+    for (const cb of batch) {
+      try {
+        await cb();
+      } catch (error) {
+        options?.report?.(error);
+        // A commit hook runs after the database has kept the write. Log it
+        // and keep going so one failure does not drop the hooks after it.
+        // A rollback hook stops. The rest would observe a rolled-back write.
+        if (options?.stopOnError || !options?.report) {
+          callbacks.length = 0;
+          return;
         }
-      })
-    );
+      }
+    }
   }
 };
 
@@ -246,8 +264,12 @@ const transactionCtx = {
       store.trx = null;
     }
 
-    // Commit transaction
-    await trx.commit();
+    // Knex resolves `commit()` even when the database rejects `COMMIT`. The write was not kept, so
+    // the commit hooks must not run and the caller must see the database error.
+    const commitError = await endTransactor(trx, 'commit', 'transaction');
+    if (commitError) {
+      throw commitError as Error;
+    }
 
     scheduleCallbacks(store?.commitCallbacks, {
       report: reportCommitHookError ?? (() => undefined),
@@ -273,6 +295,7 @@ const transactionCtx = {
 
     scheduleCallbacks(store?.rollbackCallbacks, {
       report: reportRollbackHookError,
+      stopOnError: true,
     });
   },
 
@@ -301,11 +324,16 @@ const transactionCtx = {
    * Runs `cb` in a savepoint of the current transaction, with its own commit and rollback
    * callbacks. Once `cb` resolves, the savepoint is released and its callbacks wait for the
    * outer transaction. If `cb` throws, only its writes are rolled back, its commit callbacks
-   * are dropped, its rollback callbacks run, and the error is rethrown. If the database rejects
-   * the release or the rollback (e.g. MySQL already rolled back the whole transaction), it throws
-   * a `SavepointError`, after running the rollback callbacks: the transaction must fail with it.
+   * are dropped, its rollback callbacks run, and the error is rethrown. A rollback callback
+   * that throws is reported and does not replace that error. Callbacks after it do not run.
+   * If the database rejects the release or the rollback (e.g. MySQL already rolled back the
+   * whole transaction), it throws a `SavepointError`, after running the rollback callbacks:
+   * the transaction must fail with it.
    */
-  async savepoint<T>(cb: () => Promise<T> | T): Promise<T> {
+  async savepoint<T>(
+    cb: () => Promise<T> | T,
+    reportRollbackHookError?: (error: unknown) => void
+  ): Promise<T> {
     const parent = storage.getStore();
     if (!parent?.trx) {
       throw new Error('A savepoint can only be created inside a transaction');
@@ -320,12 +348,20 @@ const transactionCtx = {
       rollbackCallbacks: [],
     };
 
+    // Same runner as an outermost rollback: stop on the first hook error, and do not
+    // let that error replace the write error or SavepointError savepoint() rethrows.
+    const runRollbackCallbacks = () =>
+      runCallbacks(store.rollbackCallbacks, {
+        report: reportRollbackHookError,
+        stopOnError: true,
+      });
+
     let result: T;
     try {
       result = await storage.run(store, cb);
     } catch (error) {
       const rollbackError = await endSavepoint(trx, 'rollback');
-      store.rollbackCallbacks.forEach((callback) => callback());
+      await runRollbackCallbacks();
       throw rollbackError
         ? new SavepointError('Failed to roll back to the savepoint', {
             cause: rollbackError,
@@ -336,7 +372,7 @@ const transactionCtx = {
 
     const releaseError = await endSavepoint(trx, 'commit');
     if (releaseError) {
-      store.rollbackCallbacks.forEach((callback) => callback());
+      await runRollbackCallbacks();
       throw new SavepointError('Failed to release the savepoint', { cause: releaseError });
     }
     parent.commitCallbacks.push(...store.commitCallbacks);

@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - 'A commit callback runs up to its first await before the write returns. destroy() waits at most 10 seconds for that database. Knex can resolve commit() when the database rejects COMMIT, and the callbacks still run.'
+  - 'Commit callbacks run one after another. The first runs up to its first await before the write returns. A failing commit callback is logged and later callbacks still run. A failing rollback callback is logged, skips the rest, and does not replace the write error. destroy() waits at most 10 seconds for that database. When the database rejects COMMIT, the commit callbacks do not run and the write fails.'
   - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release-run.ts`. The rest of this page was not re-verified.
 ---
 
@@ -137,9 +137,9 @@ Database lifecycles run inside the transaction. If the transaction rolls back la
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context starts those callbacks after the commit and does not wait for them. Each callback runs synchronously up to its first `await` before `strapi.db.transaction` resolves, and the rest of it runs after. Callbacks from one commit run together. A callback that throws is logged, and the other callbacks still run. A rollback callback that throws is logged and does not replace the error from the write. `db.destroy()` waits up to 10 seconds for callbacks that belong to that database, then closes the pool. Callbacks still running at the deadline are left running. `emitEvent` catches and logs its own errors.
+The transaction context starts those callbacks after the commit and does not wait for them. They run one after another. The first callback runs synchronously up to its first `await` before `strapi.db.transaction` resolves, and the rest runs after. A callback that throws is logged, and the callbacks after it still run. The data is already committed. A rollback callback that throws is logged and skips the callbacks after it. It does not replace the error from the write. `db.destroy()` waits up to 10 seconds for callbacks that belong to that database, then closes the pool. Callbacks still running at the deadline are left running. `emitEvent` catches and logs its own errors.
 
-Knex resolves `commit()` even when the database rejects `COMMIT`. The rejection is on the transactor's `executionPromise`. The callbacks still run in that case, and the transaction call still resolves.
+Knex resolves `commit()` even when the database rejects `COMMIT`. The rejection is on the transactor's `executionPromise`. The transaction context reads it there, skips the commit callbacks, and the transaction call rejects with the database error.
 
 When the callback runs, the event manager:
 
