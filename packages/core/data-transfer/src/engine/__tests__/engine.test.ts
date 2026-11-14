@@ -1158,7 +1158,7 @@ describe('Transfer engine', () => {
           const source = createSource();
           source.getSchemas = jest.fn().mockResolvedValue({ ...schemas, foo: { foo: 'bar' } });
           const engine = createTransferEngine(source, completeDestination, engineOptions);
-          expect(
+          await expect(
             (async () => {
               await engine.transfer();
             })()
@@ -1169,7 +1169,7 @@ describe('Transfer engine', () => {
           const destination = createDestination();
           destination.getSchemas = jest.fn().mockResolvedValue({ ...schemas, foo: { foo: 'bar' } });
           const engine = createTransferEngine(completeSource, destination, engineOptions);
-          expect(
+          await expect(
             (async () => {
               await engine.transfer();
             })()
@@ -1186,7 +1186,7 @@ describe('Transfer engine', () => {
 
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchema);
           const engine = createTransferEngine(completeSource, destination, engineOptions);
-          expect(
+          await expect(
             (async () => {
               await engine.transfer();
             })()
@@ -1208,7 +1208,7 @@ describe('Transfer engine', () => {
           ['default', () => () => null],
         ])(
           `Don't throw on ignorable attribute's properties: %s`,
-          (attributeName, transformValue) => {
+          async (attributeName, transformValue) => {
             const destination = createDestination();
             const fakeSchemas = cloneDeep(schemas);
 
@@ -1224,7 +1224,7 @@ describe('Transfer engine', () => {
             destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
             const engine = createTransferEngine(completeSource, destination, engineOptions);
 
-            expect(
+            await expect(
               (async () => {
                 await engine.transfer();
               })()
@@ -1232,7 +1232,7 @@ describe('Transfer engine', () => {
           }
         );
 
-        test(`Throws on regular attributes' properties`, () => {
+        test(`Throws on regular attributes' properties`, async () => {
           const destination = createDestination();
           const fakeSchemas = set(
             cloneDeep(schemas),
@@ -1243,7 +1243,7 @@ describe('Transfer engine', () => {
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
           const engine = createTransferEngine(completeSource, destination, engineOptions);
 
-          expect(
+          await expect(
             (async () => {
               await engine.transfer();
             })()
@@ -1264,18 +1264,20 @@ describe('Transfer engine', () => {
           versionStrategy: 'exact',
         };
 
-        versionsThatFail.forEach((version) => {
-          const modifiedMetadata = cloneDeep(metadata);
-          modifiedMetadata.strapi.version = version;
-          const source = createSource();
-          source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, createDestination(), options);
-          expect(
-            (async () => {
-              await engine.transfer();
-            })()
-          ).rejects.toThrow();
-        });
+        await Promise.all(
+          versionsThatFail.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, createDestination(), options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).rejects.toThrow();
+          })
+        );
       });
 
       test('exact works', async () => {
@@ -1286,31 +1288,35 @@ describe('Transfer engine', () => {
           versionStrategy: 'exact',
         };
 
-        versionsThatFail.forEach((version) => {
-          const modifiedMetadata = cloneDeep(metadata);
-          modifiedMetadata.strapi.version = version;
-          const source = createSource();
-          source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, createDestination(), options);
-          expect(
-            (async () => {
-              await engine.transfer();
-            })()
-          ).rejects.toThrow();
-        });
+        await Promise.all(
+          versionsThatFail.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, createDestination(), options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).rejects.toThrow();
+          })
+        );
 
-        versionsThatSucceed.forEach((version) => {
-          const modifiedMetadata = cloneDeep(metadata);
-          modifiedMetadata.strapi.version = version;
-          const source = createSource();
-          source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, createDestination(), options);
-          expect(
-            (async () => {
-              await engine.transfer();
-            })()
-          ).resolves.toBe(undefined);
-        });
+        await Promise.all(
+          versionsThatSucceed.map(async (version) => {
+            const modifiedMetadata = cloneDeep(metadata);
+            modifiedMetadata.strapi.version = version;
+            const source = createSource();
+            source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
+            const engine = createTransferEngine(source, createDestination(), options);
+            await expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).resolves.toBe(undefined);
+          })
+        );
       });
 
       test('major works', async () => {

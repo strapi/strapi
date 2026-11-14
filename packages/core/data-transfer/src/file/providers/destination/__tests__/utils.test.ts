@@ -68,14 +68,15 @@ describe('Local File Destination Provider - Utils', () => {
       const pathFactory = createFilePathFactory('entries');
       const tarEntryStream = createTarEntryStream(archive, pathFactory, maxSize);
 
+      // A chunk under maxSize is only buffered, so the stream never finishes on its own: wait for the
+      // write callback instead
       const write = async () =>
         new Promise((resolve, reject) => {
-          tarEntryStream.on('finish', resolve);
           tarEntryStream.on('error', reject);
-          tarEntryStream.write(chunk);
+          tarEntryStream.write(chunk, (error) => (error ? reject(error) : resolve(undefined)));
         });
 
-      expect(write()).resolves.not.toBe(null);
+      await expect(write()).resolves.toBeUndefined();
     });
 
     const writeChunk = (writer: Writable, chunk: string) =>
