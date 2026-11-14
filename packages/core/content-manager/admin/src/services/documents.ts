@@ -479,18 +479,29 @@ const documentApi = contentManagerApi.injectEndpoints({
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
-        // Optimistically update the cache with the new data
-        const patchResult = dispatch(
+        try {
+          await queryFulfilled;
+        } catch {
+          /**
+           * Leave the cache on the saved document. The edit view derives the form's
+           * initial values from this cache and `Form` copies any change into the form
+           * state, so patching before the request (and undoing on failure) makes the
+           * form treat the optimistic values as the new initial values. A failed save
+           * then resets every unsaved change. See #28167.
+           */
+          return;
+        }
+
+        /**
+         * Patch after the server accepted the change. The invalidation refetch would
+         * eventually bring the same data, but doing it here keeps the edit view from
+         * flashing the previous document in the meantime.
+         */
+        dispatch(
           documentApi.util.updateQueryData('getDocument', patch, (draft) => {
             Object.assign(draft.data, data);
           })
         );
-        try {
-          await queryFulfilled;
-        } catch {
-          // Rollback the optimistic update if there's an error
-          patchResult.undo();
-        }
       },
       transformResponse: (response: Update.Response, meta, arg): Update.Response => {
         /**
