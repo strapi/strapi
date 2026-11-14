@@ -44,7 +44,12 @@ export const editCategory = async (name: string, infos: Infos) => {
     });
   });
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 
   return newName;
 };
@@ -65,7 +70,12 @@ export const deleteCategory = async (name: string) => {
     }
   });
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 };
 
 /**

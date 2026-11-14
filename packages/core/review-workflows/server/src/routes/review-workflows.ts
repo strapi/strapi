@@ -1,5 +1,20 @@
 import { enableFeatureMiddleware } from './utils';
 
+const contentManagerEntryRoute = (
+  method: 'GET' | 'PUT',
+  action: 'stage' | 'stages' | 'assignee',
+  handler: string,
+  policies: Array<string | { name: string; config?: { actions: string[] } }>
+) => ({
+  method,
+  path: `/content-manager/(collection|single)-types/:model_uid/:id/${action}`,
+  handler,
+  config: {
+    middlewares: [enableFeatureMiddleware('review-workflows')],
+    policies,
+  },
+});
+
 export default {
   type: 'admin',
   routes: [
@@ -106,40 +121,20 @@ export default {
         ],
       },
     },
-    {
-      method: 'PUT',
-      path: '/content-manager/(collection|single)-types/:model_uid/:id/stage',
-      handler: 'stages.updateEntity',
-      config: {
-        middlewares: [enableFeatureMiddleware('review-workflows')],
-        policies: ['admin::isAuthenticatedAdmin'],
+    contentManagerEntryRoute('PUT', 'stage', 'stages.updateEntity', [
+      'admin::isAuthenticatedAdmin',
+    ]),
+    contentManagerEntryRoute('GET', 'stages', 'stages.listAvailableStages', [
+      'admin::isAuthenticatedAdmin',
+    ]),
+    contentManagerEntryRoute('PUT', 'assignee', 'assignees.updateEntity', [
+      'admin::isAuthenticatedAdmin',
+      {
+        name: 'admin::hasPermissions',
+        config: {
+          actions: ['admin::users.read'],
+        },
       },
-    },
-    {
-      method: 'GET',
-      path: '/content-manager/(collection|single)-types/:model_uid/:id/stages',
-      handler: 'stages.listAvailableStages',
-      config: {
-        middlewares: [enableFeatureMiddleware('review-workflows')],
-        policies: ['admin::isAuthenticatedAdmin'],
-      },
-    },
-    {
-      method: 'PUT',
-      path: '/content-manager/(collection|single)-types/:model_uid/:id/assignee',
-      handler: 'assignees.updateEntity',
-      config: {
-        middlewares: [enableFeatureMiddleware('review-workflows')],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['admin::users.read'],
-            },
-          },
-        ],
-      },
-    },
+    ]),
   ],
 };
