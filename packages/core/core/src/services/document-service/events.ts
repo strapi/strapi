@@ -64,8 +64,8 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
           ? strapi.requestContext.get()
           : undefined;
       strapi.db.transaction(({ onCommit }) => {
-        // The transaction runner discards the callback result, so a failure here
-        // (e.g. the re-read of the entry) would be an unhandled rejection.
+        // The write does not wait for this hook. The runner logs a rejection.
+        // Catch here so a failed re-read is this message, not the runner's.
         onCommit(() =>
           (context
             ? strapi.requestContext.run(context, () => emitEvent(eventName, entry))
