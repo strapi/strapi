@@ -371,6 +371,10 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       const id = isRecord(res[0]) ? res[0].id : res[0];
 
+      // Inside a document write this is the outer transaction. A deadlock has
+      // already aborted it, so deleting the new row throws "current transaction
+      // is aborted" and the outermost retry never sees the deadlock.
+      const nested = Boolean(transactionCtx.get());
       const trx = await strapi.db.transaction();
       try {
         await this.attachRelations(uid, id, data, { transaction: trx.get() });
@@ -378,7 +382,10 @@ export const createEntityManager = (db: Database): EntityManager => {
         await trx.commit();
       } catch (e) {
         await trx.rollback();
-        await this.createQueryBuilder(uid).where({ id }).delete().execute();
+
+        if (!(nested && isDeadlockError(e))) {
+          await this.createQueryBuilder(uid).where({ id }).delete().execute();
+        }
         throw e;
       }
 
@@ -516,7 +523,11 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
 
       if (!relationsUpdated) {
-        await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
+        // The scalar update above is in the same aborted transaction, so a
+        // restore query would hide the deadlock with "transaction is aborted".
+        if (!(nested && isDeadlockError(lastError))) {
+          await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
+        }
         throw lastError;
       }
 

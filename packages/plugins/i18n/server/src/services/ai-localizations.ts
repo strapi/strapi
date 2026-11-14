@@ -398,16 +398,28 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         // Don't await since localizations should be done in the background without blocking the request
-        strapi
-          .plugin('i18n')
-          .service('ai-localizations')
-          .generateDocumentLocalizations({
-            model: context.contentType.uid,
-            document: result,
-          })
-          .catch((error: any) => {
-            strapi.log.error('AI Localizations generation failed', error);
+        const startLocalizations = () => {
+          strapi
+            .plugin('i18n')
+            .service('ai-localizations')
+            .generateDocumentLocalizations({
+              model: context.contentType.uid,
+              document: result,
+            })
+            .catch((error: any) => {
+              strapi.log.error('AI Localizations generation failed', error);
+            });
+        };
+
+        // A deadlock retry runs the whole transaction again. Starting the job
+        // only once it commits keeps a retried save from starting a second job.
+        if (strapi.db.inTransaction()) {
+          await strapi.db.transaction(({ onCommit }) => {
+            onCommit(startLocalizations);
           });
+        } else {
+          startLocalizations();
+        }
 
         return result;
       });
