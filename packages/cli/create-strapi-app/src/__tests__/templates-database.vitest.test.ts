@@ -35,13 +35,18 @@ const loadDatabaseConfig = async (template: string) => {
 };
 
 describe('create-strapi-app templates database config', () => {
-  const originalClient = process.env.DATABASE_CLIENT;
+  const originalEnv = {
+    DATABASE_CLIENT: process.env.DATABASE_CLIENT,
+    DATABASE_FILENAME: process.env.DATABASE_FILENAME,
+  };
 
   afterEach(() => {
-    if (originalClient === undefined) {
-      delete process.env.DATABASE_CLIENT;
-    } else {
-      process.env.DATABASE_CLIENT = originalClient;
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
     }
   });
 
@@ -62,4 +67,17 @@ describe('create-strapi-app templates database config', () => {
 
     expect(() => config({ env })).not.toThrow();
   });
+
+  it.each(templates)(
+    '%s falls back to .tmp/data.db when DATABASE_FILENAME is empty',
+    async (template) => {
+      process.env.DATABASE_CLIENT = 'sqlite';
+      process.env.DATABASE_FILENAME = '';
+      const config = await loadDatabaseConfig(template);
+
+      const result = config({ env }) as { connection: { connection: { filename: string } } };
+
+      expect(result.connection.connection.filename).toMatch(/[\\/]\.tmp[\\/]data\.db$/);
+    }
+  );
 });

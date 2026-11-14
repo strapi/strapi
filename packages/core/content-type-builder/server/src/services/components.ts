@@ -1,4 +1,5 @@
 import type { Internal, Struct } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
@@ -50,16 +51,43 @@ export const createComponent = async ({
     return builder.editComponent(replaceTmpUIDs(component));
   });
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 
   await emitSchemaEvent('component.create', { component: newComponent });
 
   return newComponent;
 };
 
-type ComponentToCreate = {
-  component: Struct.ComponentSchema;
-  components?: Struct.ComponentSchema[];
+/**
+ * A component in a Content-Type Builder payload: the `info` fields sit at the top level,
+ * unlike the loaded `Struct.ComponentSchema`.
+ */
+export type ComponentInput = {
+  category: string;
+  displayName: string;
+  icon?: string;
+  description?: string;
+  options?: Struct.SchemaOptions;
+  pluginOptions?: Struct.SchemaPluginOptions;
+  collectionName?: string;
+  attributes: Record<string, unknown>;
+};
+
+/**
+ * A component sent along with the edited one: an existing component to update (by `uid`),
+ * or a new one with a temporary uid that attributes in the same payload can reference.
+ */
+export type NestedComponentInput = ComponentInput &
+  ({ uid: Internal.UID.Component; tmpUID?: never } | { tmpUID: string; uid?: never });
+
+export type ComponentToCreate = {
+  component: ComponentInput;
+  components?: NestedComponentInput[];
 };
 
 export const editComponent = async (
@@ -84,7 +112,12 @@ export const editComponent = async (
     return builder.editComponent(replaceTmpUIDs(component));
   });
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 
   await emitSchemaEvent('component.update', { component: updatedComponent });
 
@@ -96,7 +129,12 @@ export const deleteComponent = async (uid: Internal.UID.Component) => {
 
   const deletedComponent = builder.deleteComponent(uid);
 
-  await builder.writeFiles();
+  const filesWritten = await builder.writeFiles();
+
+  // The builder already rolled the files back
+  if (filesWritten === false) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
 
   await emitSchemaEvent('component.delete', { component: deletedComponent });
 

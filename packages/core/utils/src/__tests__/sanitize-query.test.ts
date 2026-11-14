@@ -167,6 +167,16 @@ describe('sanitizeQuery', () => {
     expect((result as any).filters.title).not.toHaveProperty('__invalidNestedFilterKey');
   });
 
+  it.each([
+    ['$in', { title: { $in: [] } }],
+    ['$notIn', { title: { $notIn: [] } }],
+    ['id $in', { id: { $in: [] } }],
+  ])('preserves empty %s filter (must not be stripped)', async (_label, filters) => {
+    const result = await sanitizers.query({ filters }, schema);
+
+    expect(result).toMatchObject({ filters });
+  });
+
   describe('sort', () => {
     it.each([
       ['empty array (GraphQL default)', []],

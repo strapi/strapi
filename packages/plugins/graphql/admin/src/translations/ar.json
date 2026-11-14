@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "يضيف نقطة نهاية GraphQL مع أساليب واجهة برمجة التطبيقات (API) الافتراضية.",
+  "plugin.description.short": "يضيف نقطة نهاية GraphQL مع أساليب واجهة برمجة التطبيقات (API) الافتراضية.",
+  "plugin.name": "GraphQL"
+}

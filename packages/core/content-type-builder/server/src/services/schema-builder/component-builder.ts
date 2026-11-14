@@ -34,6 +34,12 @@ export default function createComponentBuilder() {
      * create a component in the tmpComponent map
      */
     createComponent(this: any, infos: any) {
+      // The HTTP validator requires it; without it a direct service call writes a nameless
+      // file (e.g. `shared/.json`) that never loads.
+      if (typeof infos.displayName !== 'string' || infos.displayName === '') {
+        throw new ApplicationError('A component requires a displayName');
+      }
+
       if (infos.uid && infos.uid !== this.createComponentUID(infos)) {
         throw new ApplicationError('component.invalidUID');
       }

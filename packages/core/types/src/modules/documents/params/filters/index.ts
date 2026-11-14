@@ -14,16 +14,22 @@ type DocumentIDKey = 'documentId';
 
 /**
  * Filter representation for nested attributes
+ *
+ * The target UID is resolved through `infer` before recursing. When `TSchemaUID` is a type
+ * parameter, the conditional type stays deferred, so TypeScript does not build an endless chain of
+ * new `ObjectNotation<Target<...>>` instantiations, which would exhaust the heap on nested filters.
+ * When `TSchemaUID` is known, the type is the same as `ObjectNotation<Target>`.
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
   TAttributeName extends Schema.AttributeNames<TSchemaUID>,
-> = ObjectNotation<
+> =
   Guard.Never<
     Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TAttributeName>>,
     UID.Schema
-  >
->;
+  > extends infer TTargetUID extends UID.Schema
+    ? ObjectNotation<TTargetUID>
+    : never;
 
 /**
  * Filter representation for scalar attributes

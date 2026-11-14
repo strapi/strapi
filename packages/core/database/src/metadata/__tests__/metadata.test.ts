@@ -320,6 +320,342 @@ describe('metadata', () => {
               'Error on attribute role in model undefined(strapi::core-store): Metadata for "missingtarget" not found'
             );
           });
+
+          // The inverse (mappedBy) side creates no join column or join table, so it must check its target on its own
+          const inverseSideRelations = [
+            ['oneToMany', { relation: 'oneToMany', mappedBy: 'article' }],
+            ['oneToOne', { relation: 'oneToOne', mappedBy: 'article' }],
+            ['manyToMany', { relation: 'manyToMany', mappedBy: 'articles' }],
+          ] as const;
+
+          test.each(inverseSideRelations)(
+            'throws error on missing target of an inverse side %s relation',
+            (_relation, relationAttribute) => {
+              const badModels = [
+                {
+                  uid: 'api::article.article',
+                  singularName: 'article',
+                  tableName: 'articles',
+                  attributes: {
+                    contributors: {
+                      type: 'relation',
+                      ...relationAttribute,
+                      target: 'plugin::users-permissions.user',
+                    },
+                  },
+                },
+              ] as any;
+
+              expect(() => createMetadata(badModels)).toThrow(
+                'Error on attribute contributors in model article(api::article.article): Metadata for "plugin::users-permissions.user" not found'
+              );
+            }
+          );
+
+          // A manyToMany without a join table builds no join table either, so it must check its target on its own
+          test('throws error on missing target of a manyToMany relation without a join table', () => {
+            const badModels = [
+              {
+                uid: 'api::article.article',
+                singularName: 'article',
+                tableName: 'articles',
+                attributes: {
+                  contributors: {
+                    type: 'relation',
+                    relation: 'manyToMany',
+                    useJoinTable: false,
+                    target: 'plugin::users-permissions.user',
+                  },
+                },
+              },
+            ] as any;
+
+            expect(() => createMetadata(badModels)).toThrow(
+              'Error on attribute contributors in model article(api::article.article): Metadata for "plugin::users-permissions.user" not found'
+            );
+          });
+        });
+
+        describe('inverse side relations', () => {
+          const inverseSideRelations = [
+            ['oneToMany', 'manyToOne', { inversedBy: 'contributors' }],
+            ['oneToOne', 'oneToOne', { inversedBy: 'contributors' }],
+            ['manyToMany', 'manyToMany', { inversedBy: 'contributors' }],
+          ] as const;
+
+          test.each(inverseSideRelations)(
+            'loads an inverse side %s relation whose target exists',
+            (inverseRelation, ownerRelation, ownerAttribute) => {
+              const models = [
+                {
+                  uid: 'api::article.article',
+                  singularName: 'article',
+                  tableName: 'articles',
+                  attributes: {
+                    contributors: {
+                      type: 'relation',
+                      relation: inverseRelation,
+                      target: 'api::writer.writer',
+                      mappedBy: 'article',
+                    },
+                  },
+                },
+                {
+                  uid: 'api::writer.writer',
+                  singularName: 'writer',
+                  tableName: 'writers',
+                  attributes: {
+                    article: {
+                      type: 'relation',
+                      relation: ownerRelation,
+                      target: 'api::article.article',
+                      ...ownerAttribute,
+                    },
+                  },
+                },
+              ] as any;
+
+              expect(() => createMetadata(models)).not.toThrow();
+            }
+          );
+
+          const inverseModels = (
+            inverseRelation: string,
+            mappedBy: string,
+            writerAttributes: Record<string, unknown>
+          ) =>
+            [
+              {
+                uid: 'api::article.article',
+                singularName: 'article',
+                tableName: 'articles',
+                attributes: {
+                  contributors: {
+                    type: 'relation',
+                    relation: inverseRelation,
+                    target: 'api::writer.writer',
+                    mappedBy,
+                  },
+                },
+              },
+              {
+                uid: 'api::writer.writer',
+                singularName: 'writer',
+                tableName: 'writers',
+                attributes: { name: { type: 'string' }, ...writerAttributes },
+              },
+              {
+                uid: 'api::category.category',
+                singularName: 'category',
+                tableName: 'categories',
+                attributes: {},
+              },
+            ] as any;
+
+          const ownerRelationOf = {
+            oneToOne: 'oneToOne',
+            oneToMany: 'manyToOne',
+            manyToMany: 'manyToMany',
+          } as const;
+
+          // Nothing on the target points back with inversedBy, so the inverse side gets no join column or table
+          const unownedInverseSides = [
+            ['an attribute the target does not have', 'article', {}],
+            ['a scalar attribute', 'name', {}],
+            [
+              'a relation to another model',
+              'article',
+              {
+                article: {
+                  type: 'relation',
+                  relation: 'manyToOne',
+                  target: 'api::category.category',
+                },
+              },
+            ],
+            [
+              'a unidirectional relation',
+              'article',
+              {
+                article: {
+                  type: 'relation',
+                  relation: 'manyToOne',
+                  target: 'api::article.article',
+                },
+              },
+            ],
+          ] as const;
+
+          describe.each(['oneToOne', 'oneToMany', 'manyToMany'] as const)(
+            '%s inverse side',
+            (inverseRelation) => {
+              test.each(unownedInverseSides)(
+                'throws when mappedBy names %s',
+                (_case, mappedBy, writerAttributes) => {
+                  expect(() =>
+                    createMetadata(inverseModels(inverseRelation, mappedBy, writerAttributes))
+                  ).toThrow(
+                    `Error on attribute contributors in model article(api::article.article): mappedBy attribute ${mappedBy} in api::writer.writer must be a relation to api::article.article with inversedBy "contributors"`
+                  );
+                }
+              );
+
+              test('loads when an owner points back under another name than mappedBy', () => {
+                const metadata = createMetadata(
+                  inverseModels(inverseRelation, 'misnamed', {
+                    article: {
+                      type: 'relation',
+                      relation: ownerRelationOf[inverseRelation],
+                      target: 'api::article.article',
+                      inversedBy: 'contributors',
+                    },
+                  })
+                );
+
+                expect(metadata.get('api::article.article').attributes.contributors).toHaveProperty(
+                  'joinTable'
+                );
+              });
+
+              // The target check runs first, so a missing target reports the target, not the owner
+              test('throws the missing target error when the target model does not exist', () => {
+                const models = inverseModels(inverseRelation, 'article', {}).filter(
+                  (model: { uid: string }) => model.uid !== 'api::writer.writer'
+                );
+
+                expect(() => createMetadata(models)).toThrow(
+                  'Error on attribute contributors in model article(api::article.article): Metadata for "api::writer.writer" not found'
+                );
+              });
+
+              // The target has a relation back to this model, but it is the owner of another inverse side
+              test('throws when the target relation pointing back to this model is owned by another inverse side', () => {
+                const models = [
+                  {
+                    uid: 'api::article.article',
+                    singularName: 'article',
+                    tableName: 'articles',
+                    attributes: {
+                      contributors: {
+                        type: 'relation',
+                        relation: inverseRelation,
+                        target: 'api::writer.writer',
+                        mappedBy: 'article',
+                      },
+                      editors: {
+                        type: 'relation',
+                        relation: inverseRelation,
+                        target: 'api::writer.writer',
+                        mappedBy: 'article',
+                      },
+                    },
+                  },
+                  {
+                    uid: 'api::writer.writer',
+                    singularName: 'writer',
+                    tableName: 'writers',
+                    attributes: {
+                      article: {
+                        type: 'relation',
+                        relation: ownerRelationOf[inverseRelation],
+                        target: 'api::article.article',
+                        inversedBy: 'editors',
+                      },
+                    },
+                  },
+                ] as any;
+
+                expect(() => createMetadata(models)).toThrow(
+                  'Error on attribute contributors in model article(api::article.article): mappedBy attribute article in api::writer.writer must be a relation to api::article.article with inversedBy "contributors"'
+                );
+              });
+
+              // The owner has the right inversedBy, but it points to another model that has an attribute of the same name
+              test('throws when the owner named by mappedBy points back to another model', () => {
+                const models = inverseModels(inverseRelation, 'article', {
+                  article: {
+                    type: 'relation',
+                    relation: ownerRelationOf[inverseRelation],
+                    target: 'api::category.category',
+                    inversedBy: 'contributors',
+                  },
+                });
+                models.find(
+                  (model: { uid: string }) => model.uid === 'api::category.category'
+                ).attributes.contributors = {
+                  type: 'relation',
+                  relation: inverseRelation,
+                  target: 'api::writer.writer',
+                  mappedBy: 'article',
+                };
+
+                expect(() => createMetadata(models)).toThrow(
+                  'Error on attribute contributors in model article(api::article.article): mappedBy attribute article in api::writer.writer must be a relation to api::article.article with inversedBy "contributors"'
+                );
+              });
+
+              describe('self-referential', () => {
+                const selfModels = (nodeAttributes: Record<string, unknown>) =>
+                  [
+                    {
+                      uid: 'api::folder.folder',
+                      singularName: 'folder',
+                      tableName: 'folders',
+                      attributes: {
+                        children: {
+                          type: 'relation',
+                          relation: inverseRelation,
+                          target: 'api::folder.folder',
+                          mappedBy: 'parent',
+                        },
+                        ...nodeAttributes,
+                      },
+                    },
+                  ] as any;
+
+                test('loads when the owner on the same model points back', () => {
+                  const metadata = createMetadata(
+                    selfModels({
+                      parent: {
+                        type: 'relation',
+                        relation: ownerRelationOf[inverseRelation],
+                        target: 'api::folder.folder',
+                        inversedBy: 'children',
+                      },
+                    })
+                  );
+
+                  expect(metadata.get('api::folder.folder').attributes.children).toHaveProperty(
+                    'joinTable'
+                  );
+                });
+
+                test('throws when no owner on the same model points back', () => {
+                  expect(() => createMetadata(selfModels({}))).toThrow(
+                    'Error on attribute children in model folder(api::folder.folder): mappedBy attribute parent in api::folder.folder must be a relation to api::folder.folder with inversedBy "children"'
+                  );
+                });
+              });
+            }
+          );
+
+          test('does not look up a target for a morphToOne relation', () => {
+            const models = [
+              {
+                uid: 'api::article.article',
+                singularName: 'article',
+                tableName: 'articles',
+                attributes: {
+                  related: {
+                    type: 'relation',
+                    relation: 'morphToOne',
+                  },
+                },
+              },
+            ] as any;
+
+            expect(() => createMetadata(models)).not.toThrow();
+          });
         });
       });
     });
