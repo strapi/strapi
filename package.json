@@ -46,7 +46,7 @@
     "format:other": "yarn prettier:other --write",
     "lint": "nx run-many --target=lint --nx-ignore-cycles && yarn lint:other",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
-    "lint:other": "npm run prettier:other -- --check",
+    "lint:other": "yarn prettier:other --check",
     "lint:oxlint": "oxlint --config packages/utils/oxlint-config/oxlint.config.ts",
     "version:check": "node scripts/check-package-versions.mjs && syncpack lint",
     "version:fix": "node scripts/check-package-versions.mjs --fix --prompt && syncpack prompt && syncpack fix-mismatches",
@@ -118,8 +118,12 @@
     "tmp@^0.2.3": "0.2.7",
     "tmp@~0.2.1": "0.2.7",
     "@types/node": "22.20.0",
-    "@types/react": "18.3.2",
-    "@strapi/design-system": "2.3.0-alpha.0"
+    "@types/react": "18.3.2"
+  },
+  "dependenciesMeta": {
+    "better-sqlite3": {
+      "built": true
+    }
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -129,7 +133,7 @@
     "@commitlint/config-conventional": "19.1.0",
     "@commitlint/prompt-cli": "19.2.0",
     "@nx/js": "20.8.4",
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.64.1",
     "@rollup/plugin-commonjs": "28.0.9",
     "@rollup/plugin-dynamic-import-vars": "2.1.5",
     "@rollup/plugin-image": "3.0.3",
@@ -199,8 +203,6 @@
     "rollup": "4.60.4",
     "rollup-plugin-html": "0.2.1",
     "semver": "7.7.4",
-    "stream-chain": "2.2.5",
-    "stream-json": "1.9.1",
     "supertest": "7.2.2",
     "syncpack": "13.0.4",
     "tar": "7.5.22",
@@ -210,7 +212,7 @@
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.12.0",
+  "packageManager": "yarn@4.18.1",
   "engines": {
     "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"

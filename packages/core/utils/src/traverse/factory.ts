@@ -59,6 +59,13 @@ interface Interceptor<T = unknown> {
 }
 
 interface ParseUtils<T> {
+  /**
+   * Copies data the traversal does not own yet. Optional. It runs once, on the data the caller
+   * passes in, and not on the values the traversal recurses into, which are already part of
+   * that copy.
+   */
+  clone?(data: T): T;
+  /** Runs at every level, on the data about to be walked. */
   transform(data: T): unknown;
   remove(key: string, data: T): unknown;
   set(key: string, value: unknown, data: T): unknown;
@@ -125,13 +132,29 @@ export default () => {
     },
   };
 
-  const traverse: Traverse = async (visitor, options, data) => {
+  /**
+   * `owned` is true when `data` is part of a copy this traversal has already made.
+   *
+   * A parser's `set` and `remove` build new objects instead of writing into the data, so a
+   * single copy of the caller's data is enough to keep it untouched, and to keep the result from
+   * sharing objects with it. Values a handler recurses into come from that copy, from the
+   * handler, or from a visitor's `set`, and are walked without copying them again. A visitor
+   * must therefore `set` a fresh value, not one it shares with anything else.
+   */
+  const walk = async (
+    visitor: Visitor,
+    options: TraverseOptions,
+    data: unknown,
+    owned: boolean
+  ): Promise<unknown> => {
     const { path = DEFAULT_PATH, parent, schema, getModel } = options ?? {};
 
     // interceptors
     for (const { predicate, handler } of state.interceptors) {
       if (predicate(data)) {
-        return handler(visitor, options, data, { recurse: traverse });
+        // An interceptor can hand the caller's own data to the recursion (for example the
+        // items of a filters array), so it only skips the copy when this level already owns it.
+        return handler(visitor, options, data, { recurse: owned ? traverseOwned : traverse });
       }
     }
 
@@ -145,7 +168,7 @@ export default () => {
     }
 
     // main loop
-    let out = utils.transform(data);
+    let out = utils.transform(owned || !utils.clone ? data : utils.clone(data));
     const keys = utils.keys(out);
 
     // Built once per traversal rather than once per key. `state.handlers` is populated
@@ -165,7 +188,8 @@ export default () => {
       set(key, value) {
         out = utils.set(key, value, out);
       },
-      recurse: traverse,
+      // Handlers recurse into values of `out`, which this traversal owns.
+      recurse: traverseOwned,
     };
 
     // Pre-picked instead of calling lodash `pick` per key, which allocated both the
@@ -272,6 +296,10 @@ export default () => {
 
     return out;
   };
+
+  // Entry point: the data comes from the caller, so it is copied before it is walked.
+  const traverse: Traverse = (visitor, options, data) => walk(visitor, options, data, false);
+  const traverseOwned: Traverse = (visitor, options, data) => walk(visitor, options, data, true);
 
   return {
     traverse,

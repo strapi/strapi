@@ -1,10 +1,14 @@
 import { useGetCountDocumentsQuery } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@tests/utils';
 
-import { ChartEntriesWidget } from '../Widgets';
+import { useGetRecentDocumentsQuery } from '../../services/homepage';
+import { ChartEntriesWidget, LastEditedWidget, LastPublishedWidget } from '../Widgets';
+
+import type { RecentDocument } from '../../../../shared/contracts/homepage';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   useGetCountDocumentsQuery: jest.fn(),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   adminApi: {
     enhanceEndpoints: jest.fn(() => ({
       injectEndpoints: jest.fn(() => ({
@@ -31,6 +35,54 @@ jest.mock('../../services/api', () => ({
     })),
   },
 }));
+
+jest.mock('../../services/homepage', () => ({
+  useGetRecentDocumentsQuery: jest.fn(),
+}));
+
+const recentDocument: RecentDocument = {
+  documentId: 'doc-1',
+  locale: null,
+  title: 'Article 1',
+  kind: 'collectionType',
+  contentTypeUid: 'api::article.article',
+  contentTypeDisplayName: 'Article',
+  updatedAt: '2026-11-10T10:00:00.000Z',
+  publishedAt: null,
+};
+
+describe.each([
+  ['LastEditedWidget', LastEditedWidget],
+  ['LastPublishedWidget', LastPublishedWidget],
+])('%s', (_name, RecentDocumentsWidget) => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockRecentDocuments = (documents: RecentDocument[]) => {
+    jest.mocked(useGetRecentDocumentsQuery).mockReturnValue({
+      data: documents,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useGetRecentDocumentsQuery>);
+  };
+
+  it('renders the document title', () => {
+    mockRecentDocuments([recentDocument]);
+    render(<RecentDocumentsWidget />);
+    expect(screen.getByText('Article 1')).toBeInTheDocument();
+  });
+
+  it('renders "Untitled" for an empty title', () => {
+    mockRecentDocuments([{ ...recentDocument, title: '' }]);
+    render(<RecentDocumentsWidget />);
+    // The server used to send the document id as the title of an empty main field
+    expect(screen.getByRole('grid')).not.toHaveTextContent(recentDocument.documentId);
+    const titleCell = screen.getByTitle('Untitled');
+    expect(titleCell).toHaveTextContent(/^Untitled$/);
+  });
+});
 
 describe('ChartEntriesWidget', () => {
   afterEach(() => {

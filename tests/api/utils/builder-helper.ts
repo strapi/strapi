@@ -73,9 +73,20 @@ export const createTestSetup = async (
 };
 
 export const destroyTestSetup = async ({ strapi, builder }) => {
-  documentServiceSetupBarrier = documentServiceSetupBarrier.then(async () => {
+  const previous = documentServiceSetupBarrier;
+  let releaseBarrier = () => {};
+  // Do not chain onto the previous promise. A rejected teardown would
+  // otherwise reject every later setup. The next setup waits only for this one.
+  documentServiceSetupBarrier = new Promise((resolve) => {
+    releaseBarrier = resolve;
+  });
+
+  await previous;
+
+  try {
     await strapi.destroy();
     await builder.cleanup();
-  });
-  await documentServiceSetupBarrier;
+  } finally {
+    releaseBarrier();
+  }
 };
