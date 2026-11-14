@@ -158,13 +158,13 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     (p) => !declaredPluginsResolves.has(p.pathToPlugin)
   );
 
-  const allPlugins = defaultsDeep(
+  const allPlugins: PluginMetas = defaultsDeep(
     {},
     internalPlugins,
     declaredPlugins,
     installedPluginsNotAlreadyUsed
   );
-  const enabledPlugins = pickBy(allPlugins, (plugin: PluginMeta) => plugin.enabled);
+  const enabledPlugins: PluginMetas = pickBy(allPlugins, (plugin: PluginMeta) => plugin.enabled);
 
   return enabledPlugins;
 };
