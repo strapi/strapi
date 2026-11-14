@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';

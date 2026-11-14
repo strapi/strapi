@@ -1,5 +1,4 @@
 import flow from 'lodash/flow';
-// eslint-disable-next-line import/default
 import qs from 'qs';
 
 import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';

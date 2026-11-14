@@ -26,7 +26,6 @@
  *   they’re tiny and reused.
  */
 
-/* eslint-disable no-continue */
 import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { createId } from '@paralleldrive/cuid2';

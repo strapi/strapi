@@ -6,7 +6,6 @@ import type { Plugin } from '@strapi/types';
 
 const admin: Plugin.Config.AdminInput = {
   // TODO typing app in strapi/types as every plugin needs it
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: StrapiApp) {
     // Create the email settings section
     app.addSettingsLink(
@@ -33,7 +32,6 @@ const admin: Plugin.Config.AdminInput = {
       name: 'email',
     });
   },
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   bootstrap() {},
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import type { Core, UID } from '@strapi/types';
 
 import { ALLOWED_WEBHOOK_EVENTS, OVERDUE_SWEEP_CRON_RULE } from './constants';

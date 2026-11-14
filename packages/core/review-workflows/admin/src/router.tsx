@@ -1,4 +1,3 @@
-/* eslint-disable check-file/filename-naming-convention */
 import { lazy } from 'react';
 
 import { Routes, Route, PathRouteProps } from 'react-router-dom';

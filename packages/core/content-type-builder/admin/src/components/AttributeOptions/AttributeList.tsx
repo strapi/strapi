@@ -13,7 +13,7 @@ export const AttributeList = ({ attributes }: AttributeListProps) => (
     <Flex direction="column" alignItems="stretch" gap={8}>
       {attributes.map((attributeRow, index) => {
         return (
-          // eslint-disable-next-line react/no-array-index-key
+          // oxlint-disable-next-line react/no-array-index-key
           <Grid.Root key={index} gap={3}>
             {attributeRow.map((attribute) => (
               <Grid.Item key={attribute} col={6} xs={12} direction="column" alignItems="stretch">
