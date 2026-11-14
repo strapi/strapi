@@ -157,8 +157,6 @@ jobs:
   lint_oxlint:
     name: 'lint_oxlint'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    needs: [conditions]
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -235,8 +233,9 @@ jobs:
           retention-days: 1
 
   unit_back_vitest:
+    # frontend: admin source has *.vitest.test.ts files too (e.g. admin/src/utils/__tests__).
     # e2e: the vitest projects include the e2e helpers in tests/utils.
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.e2e == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     name: 'unit_back_vitest (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
@@ -307,13 +306,16 @@ jobs:
     # Browsers and their system libraries are preinstalled in the Playwright image, so the
     # job never runs `playwright install --with-deps`, whose apt step can stall for most of
     # the job timeout on a slow Ubuntu mirror.
+    # `-resolute` is Ubuntu 26.04, which `ubuntu-latest` moves to in November 2026
+    # (actions/runner-images#14748).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       # The image has no zstd, so actions/cache falls back to gzip there. A gzip cache is a
       # different cache version, so these jobs missed every cache the build job saves with
-      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd works in the image
-      # (both are Ubuntu 24.04); actions/cache also calls it as unzstd and zstdmt.
+      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd runs in the image: it
+      # only links libc, zlib, liblzma, liblz4 and libxxhash, which the image's Ubuntu base has.
+      # actions/cache also calls it as unzstd and zstdmt.
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
         - /usr/bin/zstd:/usr/local/bin/unzstd:ro
@@ -400,7 +402,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -461,7 +463,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -513,6 +515,80 @@ jobs:
         if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
         run: exit 1
 
+  # Checks that changes do not break the Strapi Enterprise plugins, with the oldest version of
+  # each plugin that we support and with the latest one.
+  # See docs/docs/contributing/03-testing/e2e/03-enterprise-plugins.md.
+  #
+  # - Only release PRs (from or to `releases/*`) are blocked by this job. Elsewhere, a failure
+  #   shows in the checks but does not fail the workflow.
+  # - Fork PRs skip this job: GitHub gives them no secrets, so they cannot install the plugins.
+  #   Pushes, and a merge queue, run code that a maintainer has reviewed.
+  # - Never run this job from `pull_request_target` or `workflow_run`: code that no maintainer
+  #   has reviewed could then read the license and the plugins.
+  # - The plugins are installed in $RUNNER_TEMP, outside every path that caches and artifacts
+  #   use. Traces are recorded without snapshots, so they hold no network responses.
+  e2e_enterprise_plugins:
+    if: (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true') && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true')
+    continue-on-error: ${{ !startsWith(github.head_ref, 'releases/') && !startsWith(github.base_ref, 'releases/') }}
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: '[EE] e2e enterprise plugins (versions: ${{ matrix.plugin-versions }}) (browser: chromium)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin-versions: [oldest, latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Install the Enterprise plugins
+        env:
+          STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+          PLUGIN_VERSIONS: ${{ matrix.plugin-versions }}
+        run: |
+          tests/scripts/install-enterprise-plugins.sh "$PLUGIN_VERSIONS" "$RUNNER_TEMP/enterprise-plugins"
+          echo "STRAPI_ENTERPRISE_PLUGINS_PATH=$RUNNER_TEMP/enterprise-plugins" >> "$GITHUB_ENV"
+
+      - name: Run [EE] e2e enterprise plugins E2E tests
+        id: e2e
+        uses: ./.github/actions/run-e2e-tests
+        env:
+          STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+          PLAYWRIGHT_TRACE_SNAPSHOTS: 'false'
+        with:
+          runEE: true
+          disableLicensePing: false
+          domains: enterprise-plugins
+          jestOptions: '--project=chromium'
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ failure() && steps.e2e.outcome == 'failure' }}
+        with:
+          name: ee-enterprise-plugins-${{ matrix.plugin-versions }}-playwright-trace-${{ github.run_id }}-${{ github.job }}
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
   e2e_ee:
     # Needs the licence secret. On pull requests only local branches have it (is_local, which is
     # false on every other event), so pushes always run. A fork PR would otherwise run these
@@ -525,7 +601,7 @@ jobs:
     # Browsers and system libraries come from the Playwright image, zstd from the runner (see
     # `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
@@ -937,12 +1013,113 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+  # /tests-next suites (Test Infrastructure Overhaul). Until a suite holds a migrated domain,
+  # they only run when tests-next/** changes, or on `global` changes (CI files, root
+  # package.json and its Playwright pin, yarn.lock) like the other test jobs. Then the `if:`
+  # becomes nx affected (CMS-2242): the suites depend on @strapi/tests-shared, which depends on
+  # @strapi/strapi, so a change in a tested package triggers them.
+  tests_next_ui:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: 'tests-next ui (${{ matrix.edition }}, browser: ${{ matrix.project }})'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    # Same Playwright image and zstd mounts as `e2e_ce`.
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
+    strategy:
+      fail-fast: false
+      matrix:
+        # Labels only for now: the run step doesn't read them yet and always runs Chromium CE.
+        # The EE replay of @ee and @smoke tests comes with the edition contract (CMS-1944), and
+        # WebKit with the browser projects (CMS-1949); both need the run step to pass them on.
+        edition: [ce]
+        project: [chromium]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run tests-next ui
+        run: yarn nx run @strapi/tests-e2e:test --skip-nx-cache
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: tests-next-ui-${{ matrix.edition }}-${{ matrix.project }}-reports
+          path: |
+            test-apps/next/reports/junit/
+            test-apps/next/reports/ui-html/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  tests_next_api:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: 'tests-next api (ce)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run tests-next api
+        run: yarn nx run @strapi/tests-api:test --skip-nx-cache
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: tests-next-api-reports
+          path: test-apps/next/reports/junit/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  tests_next_cli:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: 'tests-next cli (ce)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run tests-next cli
+        run: yarn nx run @strapi/tests-cli:test --skip-nx-cache
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: tests-next-cli-reports
+          path: test-apps/next/reports/junit/
+          retention-days: 7
+          if-no-files-found: ignore
+
   test_result:
     if: ${{ always() }}
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     name: aggregate_test_result
+    # `conditions` is listed too: when it fails, every job gated on its outputs is skipped, not
+    # failed, so without it this job would pass with no test run.
     needs:
       [
+        conditions,
         pretty,
         lint,
         lint_oxlint,
@@ -957,6 +1134,7 @@ jobs:
         e2e_ee,
         e2e_media_library,
         e2e_media_library_legacy,
+        e2e_enterprise_plugins,
         cli,
         migration_v5,
         api_ce_pg,
@@ -965,6 +1143,9 @@ jobs:
         api_ee_pg,
         api_ee_mysql,
         api_ee_sqlite,
+        tests_next_ui,
+        tests_next_api,
+        tests_next_cli,
         sonarqube,
       ]
     steps:
