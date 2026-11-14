@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fse from 'fs-extra';
 
 import createBuilder from '../index';
@@ -74,6 +74,112 @@ describe('createBuilder', () => {
       expect.objectContaining({ info: expect.objectContaining({ displayName: 'Admin Banner' }) }),
       expect.anything()
     );
+  });
+
+  describe('a failed write', () => {
+    const cardPath = path.join(COMPONENTS_DIR, 'default', 'card.json');
+    const freshPath = path.join(COMPONENTS_DIR, 'default', 'fresh.json');
+
+    beforeEach(() => {
+      const card = createComponent('default', 'card');
+
+      (global as any).strapi.log = { error: vi.fn() };
+      (global as any).strapi.telemetry = { send: vi.fn() };
+      (global as any).strapi.components['default.card'] = {
+        ...card,
+        // The loader adds the file name to the loaded schema, as an enumerable key
+        __schema__: { ...card.__schema__, __filename__: 'card.json' },
+      };
+    });
+
+    afterEach(() => {
+      vi.mocked(fse.writeJSON).mockImplementation(() => Promise.resolve());
+      vi.mocked(fse.remove).mockImplementation(() => Promise.resolve());
+    });
+
+    it('restores the edited files without the __filename__ key of the loaded schema', async () => {
+      vi.mocked(fse.writeJSON).mockImplementation(async (file) => {
+        if (file === path.join(COMPONENTS_DIR, 'blocked', 'admin.json')) {
+          throw new Error('EISDIR');
+        }
+      });
+
+      const builder = createBuilder();
+      builder.editComponent({
+        uid: 'default.card',
+        category: 'default',
+        displayName: 'Card Renamed',
+        icon: 'star',
+        attributes: { title: { type: 'string' } },
+      });
+      builder.editComponent({
+        uid: 'default.admin',
+        category: 'blocked',
+        displayName: 'admin',
+        icon: 'star',
+        attributes: { title: { type: 'string' } },
+      });
+
+      await expect(builder.writeFiles()).resolves.toBe(false);
+
+      const cardWrites = vi.mocked(fse.writeJSON).mock.calls.filter(([file]) => file === cardPath);
+      // the edit, then the rollback
+      expect(cardWrites).toHaveLength(2);
+      expect(cardWrites[1][1]).toEqual(createComponent('default', 'card').__schema__);
+    });
+
+    it('rolls back only once every file write has settled', async () => {
+      const events: string[] = [];
+      let finishFreshWrite = () => {};
+      let cardWritten = false;
+
+      vi.mocked(fse.writeJSON).mockImplementation(async (file) => {
+        // the edit fails, the rollback succeeds
+        if (file === cardPath && cardWritten === false) {
+          cardWritten = true;
+          throw new Error('EISDIR');
+        }
+
+        if (file === freshPath) {
+          await new Promise<void>((resolve) => {
+            finishFreshWrite = resolve;
+          });
+          events.push('fresh written');
+        }
+      });
+      vi.mocked(fse.remove).mockImplementation(async (file) => {
+        if (file === freshPath) {
+          events.push('fresh removed');
+        }
+      });
+
+      const builder = createBuilder();
+      builder.editComponent({
+        uid: 'default.card',
+        category: 'default',
+        displayName: 'Card Renamed',
+        icon: 'star',
+        attributes: { title: { type: 'string' } },
+      });
+      builder.createComponent({
+        category: 'default',
+        displayName: 'fresh',
+        icon: 'star',
+        attributes: { note: { type: 'text' } },
+      });
+
+      const written = builder.writeFiles();
+
+      // Let the failed write reject while the new file is still being written
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      finishFreshWrite();
+
+      await expect(written).resolves.toBe(false);
+      // the new file is removed after it was written, so it does not stay on disk
+      expect(events).toEqual(['fresh written', 'fresh removed']);
+    });
   });
 
   it('keeps the content types of the admin plugin not writable', () => {

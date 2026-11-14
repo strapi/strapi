@@ -1,6 +1,7 @@
 import lt from 'semver/functions/lt';
 import major from 'semver/functions/major';
 import minor from 'semver/functions/minor';
+import parse from 'semver/functions/parse';
 import valid from 'semver/functions/valid';
 
 /**
@@ -25,8 +26,28 @@ interface StrapiUpdateInfo {
 
 const NO_UPDATE: StrapiUpdateInfo = { severity: 'none', releasesBehind: 0, isMajorBehind: false };
 
+/**
+ * `0.0.0-*` versions are unreleased builds (experimental, nightly) published from a commit.
+ * They are not behind any release, so they never get an upgrade notice.
+ */
+const isUnreleasedBuild = (version: string) => {
+  const parsed = parse(version);
+
+  return (
+    parsed !== null &&
+    parsed.major === 0 &&
+    parsed.minor === 0 &&
+    parsed.patch === 0 &&
+    parsed.prerelease.length > 0
+  );
+};
+
 const isUpdateAvailable = (currentVersion?: string | null, latestVersion?: string | null) => {
   if (!currentVersion || !latestVersion || !valid(currentVersion) || !valid(latestVersion)) {
+    return false;
+  }
+
+  if (isUnreleasedBuild(currentVersion) === true) {
     return false;
   }
 

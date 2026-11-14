@@ -13,6 +13,11 @@ runs:
   steps:
     - run: $GITHUB_ACTION_PATH/script.sh
       env:
+        # The API tests run in one Jest process, and Jest keeps the compiled modules of every test
+        # file it has run (about 110-140 MB per file) until the process exits. A shard's heap grows
+        # with its file count, not with what Strapi needs at runtime, and passes Node's default
+        # limit (about 4 GB on a 16 GB runner).
+        NODE_OPTIONS: --max-old-space-size=8192
         DB_OPTIONS: ${{ inputs.dbOptions }}
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
