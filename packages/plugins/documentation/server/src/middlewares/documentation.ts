@@ -16,8 +16,6 @@ export const addDocumentMiddlewares = async ({ strapi }: { strapi: Core.Strapi }
     {
       method: 'GET',
       path: '/plugins/documentation/(.*)',
-      // Kept in v6 syntax so ctx.params[0] and the API documentation stay as they were.
-      [Symbol.for('strapi.route.keepV6Path')]: true,
       async handler(ctx, next) {
         ctx.url = path.basename(ctx.url);
 

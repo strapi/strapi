@@ -233,8 +233,9 @@ jobs:
           retention-days: 1
 
   unit_back_vitest:
+    # frontend: admin source has *.vitest.test.ts files too (e.g. admin/src/utils/__tests__).
     # e2e: the vitest projects include the e2e helpers in tests/utils.
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.e2e == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     name: 'unit_back_vitest (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}

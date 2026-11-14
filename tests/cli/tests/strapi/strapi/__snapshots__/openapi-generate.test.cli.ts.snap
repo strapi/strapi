@@ -10714,7 +10714,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "description": "Populate a single relation, component, file, or dynamic zone",
                   "enum": [
                     "country",
-                    "Author",
                   ],
                   "readOnly": true,
                   "type": "string",
@@ -10724,7 +10723,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "items": {
                     "enum": [
                       "country",
-                      "Author",
                     ],
                     "type": "string",
                   },
@@ -10805,13 +10803,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "items": {
                         "additionalProperties": false,
                         "properties": {
-                          "Author": {
-                            "description": "A relational field",
-                            "items": {
-                              "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                            },
-                            "type": "array",
-                          },
                           "country": {
                             "$ref": "#/components/schemas/ApiCountryCountryDocument",
                             "description": "A relational field",
@@ -11016,7 +11007,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "description": "Populate a single relation, component, file, or dynamic zone",
                   "enum": [
                     "country",
-                    "Author",
                   ],
                   "readOnly": true,
                   "type": "string",
@@ -11026,7 +11016,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "items": {
                     "enum": [
                       "country",
-                      "Author",
                     ],
                     "type": "string",
                   },
@@ -11105,15 +11094,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "data": {
                     "additionalProperties": false,
                     "properties": {
-                      "Author": {
-                        "description": "A relational field",
-                        "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
                       "country": {
                         "description": "A relational field",
                         "format": "uuid",
@@ -11179,13 +11159,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "data": {
                       "additionalProperties": false,
                       "properties": {
-                        "Author": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                          },
-                          "type": "array",
-                        },
                         "country": {
                           "$ref": "#/components/schemas/ApiCountryCountryDocument",
                           "description": "A relational field",
@@ -11339,7 +11312,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "description": "Populate a single relation, component, file, or dynamic zone",
                   "enum": [
                     "country",
-                    "Author",
                   ],
                   "readOnly": true,
                   "type": "string",
@@ -11349,7 +11321,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "items": {
                     "enum": [
                       "country",
-                      "Author",
                     ],
                     "type": "string",
                   },
@@ -11453,13 +11424,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "data": {
                       "additionalProperties": false,
                       "properties": {
-                        "Author": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                          },
-                          "type": "array",
-                        },
                         "country": {
                           "$ref": "#/components/schemas/ApiCountryCountryDocument",
                           "description": "A relational field",
@@ -11611,7 +11575,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "description": "Populate a single relation, component, file, or dynamic zone",
                   "enum": [
                     "country",
-                    "Author",
                   ],
                   "readOnly": true,
                   "type": "string",
@@ -11621,7 +11584,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "items": {
                     "enum": [
                       "country",
-                      "Author",
                     ],
                     "type": "string",
                   },
@@ -11803,13 +11765,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "data": {
                       "additionalProperties": false,
                       "properties": {
-                        "Author": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                          },
-                          "type": "array",
-                        },
                         "country": {
                           "$ref": "#/components/schemas/ApiCountryCountryDocument",
                           "description": "A relational field",
@@ -11961,7 +11916,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "description": "Populate a single relation, component, file, or dynamic zone",
                   "enum": [
                     "country",
-                    "Author",
                   ],
                   "readOnly": true,
                   "type": "string",
@@ -11971,7 +11925,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "items": {
                     "enum": [
                       "country",
-                      "Author",
                     ],
                     "type": "string",
                   },
@@ -12050,15 +12003,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "data": {
                     "additionalProperties": false,
                     "properties": {
-                      "Author": {
-                        "description": "A relational field",
-                        "items": {
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "type": "array",
-                      },
                       "country": {
                         "description": "A relational field",
                         "format": "uuid",
@@ -12121,13 +12065,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "data": {
                       "additionalProperties": false,
                       "properties": {
-                        "Author": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                          },
-                          "type": "array",
-                        },
                         "country": {
                           "$ref": "#/components/schemas/ApiCountryCountryDocument",
                           "description": "A relational field",

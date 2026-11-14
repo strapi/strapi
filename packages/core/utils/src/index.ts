@@ -53,4 +53,5 @@ export * from './security';
 export * from './publication-filter';
 export * from './has-published-version-param';
 export { hasSort } from './sort-query';
+export { quoteForLog } from './quote-for-log';
 export { emitAudit, type AuditEmitter } from './audit-logs';
