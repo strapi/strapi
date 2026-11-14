@@ -42,7 +42,7 @@ const initGrant = async (pluginStore) => {
 
   if (!prevGrantConfig || !_.isEqual(prevGrantConfig, grantConfig)) {
     // merge with the previous provider config.
-    _.keys(grantConfig).forEach((key) => {
+    Object.keys(grantConfig).forEach((key) => {
       if (key in prevGrantConfig) {
         grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
       }
