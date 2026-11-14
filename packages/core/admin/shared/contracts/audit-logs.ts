@@ -93,4 +93,4 @@ namespace Export {
       };
 }
 
-export { AuditLog, GetAll, Get, GetUsers, Export };
+export type { AuditLog, GetAll, Get, GetUsers, Export };

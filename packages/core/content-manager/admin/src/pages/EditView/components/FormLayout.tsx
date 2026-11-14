@@ -338,4 +338,4 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
 
 FormLayout.displayName = 'FormLayout';
 
-export { FormLayout, FormLayoutProps, hasMountSideEffects };
+export { FormLayout, type FormLayoutProps, hasMountSideEffects };
