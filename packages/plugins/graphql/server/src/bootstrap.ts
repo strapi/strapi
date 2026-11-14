@@ -13,9 +13,11 @@ import type { Core } from '@strapi/types';
 import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
+import { abortFieldsOnClientDisconnect } from './abort-disconnected-request';
 import { formatGraphqlError } from './format-graphql-error';
 
 type StrapiGraphQLContext = BaseContext & {
+  koaContext: Parameters<Core.MiddlewareHandler>[0];
   rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
 };
 
@@ -230,6 +232,10 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       return undefined;
     }
   ) as ApolloServerOptions<StrapiGraphQLContext> & CustomOptions;
+
+  if (serverConfig.schema) {
+    abortFieldsOnClientDisconnect(serverConfig.schema);
+  }
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);

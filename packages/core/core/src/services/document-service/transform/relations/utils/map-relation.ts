@@ -168,6 +168,7 @@ const mapRelationCurried = curry(mapRelation);
 const traverseEntityRelationsCurried = curry(traverseEntityRelations);
 
 export {
+  isNumeric,
   mapRelationCurried as mapRelation,
   traverseEntityRelationsCurried as traverseEntityRelations,
 };

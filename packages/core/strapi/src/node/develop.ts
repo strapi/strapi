@@ -37,6 +37,11 @@ interface DevelopOptions extends CLIContext {
    */
   bundler?: 'webpack' | 'vite';
   polling?: boolean;
+  /**
+   * Open the admin in a browser after the server listens. `true` opens it on the first start of
+   * the session, `false` never opens it, `undefined` keeps the default (only when no admin user
+   * exists and `admin.autoOpen` is not `false`).
+   */
   open?: boolean;
   watchAdmin?: boolean;
   buildAdmin?: boolean;
@@ -89,6 +94,17 @@ const cleanupDistDirectory = async ({
   cleaningSpinner.text = `Cleaning dist dir (${prettyTime(generatingDuration)})`;
   cleaningSpinner?.succeed();
 };
+
+// Set by the primary on workers it forks after a worker has started, so they know they are not the
+// first start. A worker that failed before its server listened does not count.
+const RESTART_ENV = 'STRAPI_DEVELOP_RESTART';
+
+/**
+ * `--open` opens the admin once per `strapi develop` session: restarted workers fall back to the
+ * default behaviour. `--no-open` applies to every start.
+ */
+const getWorkerOpenOption = (open: boolean | undefined, isRestart: boolean) =>
+  isRestart && open === true ? undefined : open;
 
 const develop = async ({
   cwd,
@@ -162,8 +178,16 @@ const develop = async ({
       adminSpinner.succeed();
     }
 
+    // Only a worker whose server listened opened the admin, so only that makes the next worker a
+    // restart. A worker that failed before start() leaves `--open` for the one that replaces it.
+    let hasStarted = false;
+
     cluster.on('message', async (worker, message) => {
       switch (message) {
+        case 'started': {
+          hasStarted = true;
+          break;
+        }
         case 'reload': {
           if (tsconfig?.config) {
             try {
@@ -182,7 +206,11 @@ const develop = async ({
         }
         case 'killed': {
           logger.debug('cluster has the killed message, forking the cluster');
-          cluster.fork();
+          if (hasStarted) {
+            cluster.fork({ [RESTART_ENV]: 'true' });
+          } else {
+            cluster.fork();
+          }
           break;
         }
         case 'stop': {
@@ -206,6 +234,7 @@ const develop = async ({
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
       serveAdminPanel: !watchAdmin,
+      open: getWorkerOpenOption(options.open, process.env[RESTART_ENV] === 'true'),
     });
 
     /**
@@ -221,11 +250,28 @@ const develop = async ({
     const generatingTsSpinner = logger.spinner(`Generating types`);
     const compilingTsSpinner = logger.spinner(`Compiling TS`);
 
+    // Stops the app once: the failed-compile path and the restart path can both call it.
+    // The flag is set only once destroy() resolves: a destroy() that throws leaves the app
+    // half running (cron, server, database), so it does not count as stopped.
+    let isStopped = false;
+    const stopApp = async () => {
+      if (isStopped === true) {
+        return;
+      }
+      await strapiInstance.destroy();
+      isStopped = true;
+      // Not awaited: the restart does not wait for the admin bundler to close.
+      bundleWatcher?.close().catch((closeError: unknown) => {
+        const closeMessage = closeError instanceof Error ? closeError.message : String(closeError);
+        logger.error(`Error while closing the admin bundler: ${closeMessage}`);
+      });
+    };
+
     let watcherStarted = false;
     const ensureWatcher = () => {
       if (!watcherStarted) {
         watcherStarted = true;
-        startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
+        startWatcher(strapiInstance, cwd, polling ?? false, logger, stopApp);
       }
     };
 
@@ -301,7 +347,14 @@ const develop = async ({
 
       ensureWatcher();
 
-      strapiInstance.start();
+      const starting = strapiInstance.start();
+      // start() resolves after the server listens. Tell the primary, so the worker it forks after
+      // the next reload counts as a restart and drops `--open`.
+      if (starting instanceof Promise) {
+        starting.then(() => {
+          process.send?.('started');
+        });
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error(`Error during development: ${message}`);
@@ -323,6 +376,30 @@ const develop = async ({
         generatingTsSpinner.fail();
       }
 
+      // The app was loaded (register, bootstrap, cron) but will not start.
+      // Shut it down so it does not keep running jobs while we wait for a fix.
+      // Destroy before starting the watcher: destroy removes every process listener.
+      try {
+        await stopApp();
+      } catch (destroyError: unknown) {
+        const destroyMessage =
+          destroyError instanceof Error ? destroyError.message : String(destroyError);
+        logger.error(`Error while stopping Strapi: ${destroyMessage}`);
+        // destroy() stopped partway, so cron, the server or the database can still run.
+        // Exit instead of keeping a half-destroyed app next to the one the next restart forks.
+        // Like Strapi.stop(), tell the primary to exit too, or it would wait with no worker.
+        process.send?.('stop');
+        process.exit(1);
+        return;
+      }
+      // destroy() called process.removeAllListeners(), which also removed the listener the cluster
+      // module adds so a worker exits when its primary goes away. Add it back, or the worker
+      // outlives a primary that exits or is killed.
+      process.once('disconnect', () => process.exit(0));
+      logger.warn(
+        'Strapi is stopped. Fix the errors above, it will restart on the next file change.'
+      );
+
       ensureWatcher();
     }
   }
@@ -333,9 +410,15 @@ function startWatcher(
   cwd: string,
   polling: boolean,
   logger: Logger,
-  bundleWatcher?: WebpackWatcher | ViteWatcher
+  stopApp: () => Promise<void>
 ) {
   const restart = async () => {
+    // The primary is gone, there is nothing left to restart this worker.
+    if (process.connected === false) {
+      process.exit(0);
+      return;
+    }
+
     if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
       strapiInstance.reload.isReloading = true;
       strapiInstance.reload();
@@ -400,11 +483,8 @@ function startWatcher(
         );
         await watcher.close();
 
-        await strapiInstance.destroy();
+        await stopApp();
 
-        if (bundleWatcher) {
-          bundleWatcher.close();
-        }
         process.send?.('killed');
         break;
       }
@@ -414,5 +494,5 @@ function startWatcher(
   });
 }
 
-export { develop };
+export { develop, getWorkerOpenOption };
 export type { DevelopOptions };

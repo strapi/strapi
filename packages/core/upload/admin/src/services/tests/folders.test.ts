@@ -3,7 +3,14 @@ import { http, HttpResponse } from 'msw';
 import * as qs from 'qs';
 
 import { useDeleteAssetMutation, useUpdateAssetMutation } from '../assets';
-import { useGetFoldersQuery, useGetFolderQuery, useUpdateFolderMutation } from '../folders';
+import {
+  useGetFoldersQuery,
+  useGetFolderQuery,
+  useGetFolderStructureQuery,
+  useUpdateFolderMutation,
+} from '../folders';
+
+import type { GetFolderStructure } from '../../../../shared/contracts/folders';
 
 describe('future folders service - getFolders filter shape', () => {
   let lastRequestParams:
@@ -293,5 +300,37 @@ describe('future folder header count invalidation', () => {
     // refetches after a move without a page reload.
     await waitFor(() => expect(result.current.folder.data?.files?.count).toBe(2));
     expect(folderRequests).toBeGreaterThan(1);
+  });
+});
+
+describe('future folders service - getFolderStructure', () => {
+  // The envelope GET /upload/folder-structure returns: a tree of { id, name, children } nodes.
+  const body: GetFolderStructure.Response['data'] = {
+    data: [
+      { id: 2, name: 'a-root', children: [] },
+      { id: 1, name: 'b-root', children: [{ id: 3, name: 'child', children: [] }] },
+    ],
+  };
+
+  it('returns the tree of folder nodes from the response envelope', async () => {
+    server.use(http.get('*/upload/folder-structure', () => HttpResponse.json(body)));
+
+    const { result } = renderHook(() => useGetFolderStructureQuery());
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual(body.data);
+  });
+
+  it('types the response as folder nodes only (verified by test:ts:front)', () => {
+    const [node] = body.data;
+
+    // @ts-expect-error - a node is not a folder id
+    const id: number = node;
+    // @ts-expect-error - a node has no `value`, the legacy picker adds it client side
+    const value = node.value;
+
+    expect(id).toBe(node);
+    expect(value).toBeUndefined();
   });
 });

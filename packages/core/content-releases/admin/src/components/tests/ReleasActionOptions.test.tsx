@@ -5,19 +5,17 @@ import { ReleaseActionOptions } from '../ReleaseActionOptions';
 
 describe('ReleaseActionOptions', () => {
   it('should render the component', () => {
-    const handleChange = jest.fn();
-    render(
-      <ReleaseActionOptions selected="publish" handleChange={handleChange} name="test-radio" />
-    );
+    const onChange = jest.fn();
+    render(<ReleaseActionOptions selected="publish" onChange={onChange} name="test-radio" />);
 
-    const publishOption = screen.getByRole('radio', { name: 'publish' });
-    const unpublishOption = screen.getByRole('radio', { name: 'unpublish' });
+    const publishOption = screen.getByRole('radio', { name: 'Publish' });
+    const unpublishOption = screen.getByRole('radio', { name: 'Unpublish' });
 
     expect(publishOption).toBeInTheDocument();
     expect(publishOption).toBeChecked();
     expect(unpublishOption).toBeInTheDocument();
 
     fireEvent.click(unpublishOption);
-    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith('unpublish');
   });
 });

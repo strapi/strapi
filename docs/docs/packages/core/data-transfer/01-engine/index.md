@@ -207,7 +207,7 @@ Content-type filters (`--only-content-types` / `--exclude-content-types`) furthe
 
 When `--only` omits one or more of `content` / `files` / `config`, the CLI prints a dim clarity line listing stages that are not transferred so destination data for those stages is obviously preserved.
 
-A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
+A transfer starts by loading the JSONL stream packages, then bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc. If the package load fails, `transfer()` reports the error and rethrows without destination `rollback` or provider `close`. No provider has started, and rollback on the file and directory destinations deletes an existing `--file` path.
 
 After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
 
@@ -350,6 +350,8 @@ const options = {
 };
 ```
 
+Each stage runs its items through one transform chain, in this order: the `global` transforms, the transforms keyed by the stage name, and then the `throttle` delay. Items that a filter drops are not delayed. The `throttle` delay applies to every stage, including entities and links.
+
 #### versionStrategy
 
 The following `versionStrategy` values may be used:
@@ -452,7 +454,7 @@ The following events are available:
 `stage::progress` - after each entity in that stage has been transferred
 `stage::skip` - when an entire stage is skipped (eg, when 'only' or 'exclude' are used)
 `stage::error` - when there is an error thrown during a stage
-`transfer::init` - at the very beginning of engine.transfer()
+`transfer::init` - after the JSONL stream packages load and before bootstrap (if that load fails, `transfer::error` is emitted without `transfer::init`)
 `transfer::start` - after bootstrapping and initializing the providers, when the transfer is about to start
 `transfer::finish` - when the transfer has finished
 `transfer::error` - when there is an error thrown during the transfer

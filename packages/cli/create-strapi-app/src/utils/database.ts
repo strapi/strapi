@@ -3,6 +3,9 @@ import type { Question } from 'inquirer';
 import type { Scope, Options, DBClient, DBConfig } from '../types';
 import { logger } from './logger';
 
+// Any of these flags selects the flag-driven path, and all of them are required unless the client
+// is sqlite. `--dbfile` and `--dbssl` are not in the list: `--dbfile` alone implies sqlite (see
+// `getDatabaseInfos`), and `--dbssl` alone is ignored, as it always was.
 const DBOptions = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
 
 const VALID_CLIENTS = ['sqlite', 'mysql', 'postgres'] as const;
@@ -49,6 +52,9 @@ async function dbPrompt() {
   };
 }
 
+// An empty or whitespace-only `--dbfile` would be written as an empty `DATABASE_FILENAME`
+const isBlank = (value: string | undefined) => value === undefined || value.trim() === '';
+
 export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
   if (options.skipDb) {
     return DEFAULT_CONFIG;
@@ -71,9 +77,12 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
     logger.fatal(`Required database arguments are missing: ${missingArgs.join(', ')}.`);
   }
 
-  const hasDBOptions = DBOptions.some((key) => key in options);
+  const hasDBOptions = matchingArgs.length > 0;
+  // sqlite is the only client that reads `--dbfile`, so a lone `--dbfile` selects it instead of
+  // being dropped or failing a script that never passed `--dbclient`
+  const hasLoneDBFile = hasDBOptions === false && 'dbfile' in options;
 
-  if (!hasDBOptions) {
+  if (hasDBOptions === false && hasLoneDBFile === false) {
     if (options.quickstart || options.nonInteractive) {
       return DEFAULT_CONFIG;
     }
@@ -81,12 +90,14 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
     return dbPrompt();
   }
 
-  if (!options.dbclient) {
+  const client = hasLoneDBFile === true ? 'sqlite' : options.dbclient;
+
+  if (client === undefined) {
     return logger.fatal('Please specify the database client');
   }
 
   const database: DBConfig = {
-    client: options.dbclient,
+    client,
     connection: {
       host: options.dbhost,
       port: options.dbport,
@@ -94,7 +105,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
       username: options.dbusername,
       password: options.dbpassword,
       filename:
-        options.dbclient === 'sqlite' && options.dbfile === undefined
+        client === 'sqlite' && isBlank(options.dbfile) === true
           ? DEFAULT_CONFIG.connection.filename
           : options.dbfile,
     },

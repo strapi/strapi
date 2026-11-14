@@ -70,9 +70,10 @@ jobs:
             npx create-strapi-app@0.0.0-experimental.${{ github.event.pull_request.head.sha }} my-project --non-interactive --skip-cloud --no-run
             ```
 
-            To upgrade an existing app, set every `@strapi/*` dependency in `package.json` to `0.0.0-experimental.${{ github.event.pull_request.head.sha }}`, then reinstall from scratch. Prerelease builds pin peer dependencies to the exact version, so a plain `npm install` over an existing install fails with `ERESOLVE`:
+            To upgrade an existing app, set every `@strapi/*` package published from this repo (`@strapi/strapi`, `@strapi/plugin-*`, …) in `package.json` to `0.0.0-experimental.${{ github.event.pull_request.head.sha }}`. Leave `@strapi/design-system` and `@strapi/icons` as they are: they have no experimental version. Prerelease builds pin peer dependencies to the exact version, so a plain `npm install` over an existing install fails with `ERESOLVE`. Delete the lock file and reinstall from scratch:
 
             ```bash
             rm -rf node_modules package-lock.json && npm install
-            # or keep the lock file: npm install --legacy-peer-deps
             ```
+
+            If the app has community plugins that peer-depend on `@strapi/strapi@^5`, the clean reinstall still fails with `ERESOLVE`. Add `legacy-peer-deps=true` to the app's `.npmrc` before you reinstall. A one-off `npm install --legacy-peer-deps` does not survive a later plain `npm install`.

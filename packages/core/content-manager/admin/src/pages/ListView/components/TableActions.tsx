@@ -20,7 +20,7 @@ import { isBaseQueryError } from '../../../utils/api';
 import { DocumentActionsMenu } from '../../EditView/components/DocumentActions';
 
 import { AutoCloneFailureModalBody } from './AutoCloneFailureModal';
-import { MoveToBottomAction, MoveToTopAction } from './CustomOrder';
+import { MoveToBottomAction, MoveToPositionAction, MoveToTopAction } from './CustomOrder';
 
 import type { ProhibitedCloningField } from '../../../../../shared/contracts/collection-types';
 import type {
@@ -297,6 +297,7 @@ const DEFAULT_TABLE_ROW_ACTIONS = [
   CloneAction,
   MoveToTopAction,
   MoveToBottomAction,
+  MoveToPositionAction,
 ];
 
 export { TableActions, DEFAULT_TABLE_ROW_ACTIONS };
