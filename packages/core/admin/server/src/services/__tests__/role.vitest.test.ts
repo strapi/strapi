@@ -1249,7 +1249,7 @@ describe('Role', () => {
       });
 
       test('Holds no locale on a token whose owner is a super admin', async () => {
-        // i18n's super-admin skip reads `context.user`, which the engine never sets
+        // i18n's hook never looks at the holder's role, so no `locales` key holds no locale here too
         setupStrapi({ localizedSubjects: [ARTICLE] });
 
         await expectForbidden(

@@ -3,7 +3,6 @@ import { getService } from '../../utils';
 /**
  * @typedef {object} WillRegisterPermissionContext
  * @property {Permission} permission
- * @property {object} user
  * @property {object} condition
  */
 
