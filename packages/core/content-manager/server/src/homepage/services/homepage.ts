@@ -11,6 +11,7 @@ import type {
 import {
   buildHomepageQueryFields,
   compactSanitizedFields,
+  formatRecentDocumentTitle,
   resolveReadableMainField,
   resolveTitleField,
 } from './homepage-query-utils';
@@ -168,7 +169,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
-        title: document[meta.mainField ?? 'documentId'],
+        title: formatRecentDocumentTitle(document[meta.mainField ?? 'documentId']),
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
