@@ -151,6 +151,374 @@ describe('Validate visitors util', () => {
     });
   });
 
+  describe('validateFilters - object operands on scalar and JSON attributes', () => {
+    const schema = {
+      ...articleModel,
+      attributes: {
+        ...articleModel.attributes,
+        meta: { type: 'json' },
+        rank: { type: 'integer' },
+        publishedAt: { type: 'datetime' },
+      },
+    };
+    const ctx = { schema, getModel };
+
+    const validate = (filters: unknown) =>
+      validators.validateFilters(ctx, filters, ['nonAttributesOperators']);
+
+    test.each([
+      ['$eq on a string attribute', { title: { $eq: { a: 1 } } }, '$eq', 'title'],
+      ['$eq on a JSON attribute', { meta: { $eq: { a: 999 } } }, '$eq', 'meta'],
+      ['$contains on a JSON attribute', { meta: { $contains: { a: 1 } } }, '$contains', 'meta'],
+      ['an operand under $not', { meta: { $not: { $eq: { a: 1 } } } }, '$eq', 'meta'],
+      ['an operand keyed by an attribute name', { meta: { $eq: { title: 'x' } } }, '$eq', 'meta'],
+      ['an operand made of operators', { rank: { $eq: { $gt: 1 } } }, '$eq', 'rank'],
+      ['an operand under $and', { title: { $and: { $eq: { a: 1 } } } }, '$eq', 'title'],
+      ['an operand under $or', { title: { $or: { $ne: { a: 1 } } } }, '$ne', 'title'],
+      ['an operand on documentId', { documentId: { $eq: { a: 1 } } }, '$eq', 'documentId'],
+      ['an operand on id', { id: { $in: [1], $eq: { a: 1 } } }, '$eq', 'id'],
+      [
+        'an operand on a relation documentId',
+        { createdBy: { documentId: { $eq: { a: 1 } } } },
+        '$eq',
+        'createdBy.documentId',
+      ],
+      ['an operand inside $or', { $or: [{ meta: { $eq: { a: 1 } } }] }, '$eq', 'meta'],
+      [
+        'an operand on a relation target attribute',
+        { createdBy: { firstname: { $eq: { a: 1 } } } },
+        '$eq',
+        'createdBy.firstname',
+      ],
+    ])('throws on an object operand: %s', async (_, filters, key, path) => {
+      const error = await validate(filters).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toMatchObject({
+        message: `Invalid operand for ${key} at ${path}: expected a value, not an object`,
+        details: { key, path },
+      });
+    });
+
+    // qs turns a REST list longer than its arrayLimit (100 by default) into an object keyed by index
+    const indexKeyedList = Object.fromEntries(
+      Array.from({ length: 101 }, (_, index) => [String(index), String(index + 1)])
+    );
+
+    test.each([
+      ['$in on id', { id: { $in: indexKeyedList } }, '$in', 'id'],
+      ['$notIn on a scalar attribute', { rank: { $notIn: indexKeyedList } }, '$notIn', 'rank'],
+      ['$in under $not', { title: { $not: { $in: { 0: 'a', 1: 'b' } } } }, '$in', 'title'],
+    ])(
+      'throws an arrayLimit error on an index-keyed operand: %s',
+      async (_, filters, key, path) => {
+        const error = await validate(filters).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ValidationError);
+        expect(error).toMatchObject({
+          message: `Invalid operand for ${key} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+          details: { key, path },
+        });
+      }
+    );
+
+    test('keeps the generic message when an operand mixes index and other keys', async () => {
+      const error = await validate({ title: { $in: { 0: 'a', b: 'c' } } }).catch((e: unknown) => e);
+
+      expect(error).toMatchObject({
+        message: 'Invalid operand for $in at title: expected a value, not an object',
+      });
+    });
+
+    test.each([
+      ['a scalar operand', { title: { $eq: 'x' } }],
+      ['an implicit $eq', { title: 'x' }],
+      ['an array operand', { rank: { $in: [1, 2], $between: [1, 3] } }],
+      ['$null and $notNull', { rank: { $null: true }, title: { $notNull: 'true' } }],
+      // Left to query conversion, which rejects a non-boolean $null / $notNull operand with a 400
+      ['$null and $notNull with an object', { rank: { $null: { a: 1 } }, title: { $notNull: {} } }],
+      ['the operator map of $not', { title: { $not: { $eq: 'x' } } }],
+      ['a nested $not', { title: { $not: { $not: { $eq: 'x' } } } }],
+      // Empty objects hold no condition and are sanitized out
+      ['an empty operand', { id: { $eq: {} }, title: { $and: { $eq: {}, $contains: {} } } }],
+      ['a string operand on a JSON attribute', { meta: { $contains: '"uid"' } }],
+      ['$jsonSupersetOf with a string', { meta: { $jsonSupersetOf: '["api::a.a"]' } }],
+      ['a Date operand', { publishedAt: { $gt: new Date('2022-03-17T15:06:57.878Z') } }],
+      ['a relation filter', { createdBy: { firstname: { $eq: 'John' } } }],
+      ['a relation id operator', { createdBy: { $eq: 1 } }],
+      ['documentId and id operands', { documentId: { $in: ['a'] }, id: { $eq: 1 } }],
+    ])('accepts %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toEqual(filters);
+    });
+  });
+
+  describe('validateFilters - object operands on $or and $and', () => {
+    const ctx = { schema: articleModel, getModel };
+
+    const validate = (filters: unknown) =>
+      validators.validateFilters(ctx, filters, ['nonAttributesOperators']);
+
+    const conditions = (length: number) =>
+      Array.from({ length }, (_, index) => ({ title: `title ${index}` }));
+
+    // qs turns a REST list longer than its arrayLimit (100 by default), or a list with an index
+    // of 100 or more, into an object keyed by index
+    const indexKeyed = (length: number) => ({ ...conditions(length) });
+    const sparse = { 100: { title: 'x' } };
+
+    test.each([
+      ['$or with 101 conditions', { $or: indexKeyed(101) }, '$or', '$or'],
+      ['$and with 101 conditions', { $and: indexKeyed(101) }, '$and', '$and'],
+      ['a sparse $or', { $or: sparse }, '$or', '$or'],
+      ['a sparse $and', { $and: sparse }, '$and', '$and'],
+      ['$or in a relation filter', { createdBy: { $or: indexKeyed(101) } }, '$or', 'createdBy.$or'],
+      [
+        'a sparse $and in a relation filter',
+        { createdBy: { $and: sparse } },
+        '$and',
+        'createdBy.$and',
+      ],
+      ['$or under $not', { $not: { $or: indexKeyed(101) } }, '$or', '$not.$or'],
+      ['a sparse $and under $not', { $not: { $and: sparse } }, '$and', '$not.$and'],
+      ['$or inside an $and list', { $and: [{ $or: sparse }] }, '$or', '$and[0].$or'],
+      ['$or on a scalar attribute', { title: { $or: { 0: { $eq: 'a' } } } }, '$or', 'title.$or'],
+    ])(
+      'throws an arrayLimit error on an index-keyed operand: %s',
+      async (_, filters, key, path) => {
+        const error = await validate(filters).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ValidationError);
+        expect(error).toMatchObject({
+          message: `Invalid operand for ${key} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+          details: { key, path },
+        });
+      }
+    );
+
+    test.each([
+      ['an operand keyed by an attribute name', { $or: { title: 'x' } }, '$or', '$or'],
+      [
+        'an operand mixing index and other keys',
+        { $and: { 0: { title: 'x' }, title: 'y' } },
+        '$and',
+        '$and',
+      ],
+    ])('throws on any other object operand: %s', async (_, filters, key, path) => {
+      const error = await validate(filters).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toMatchObject({
+        message: `Invalid operand for ${key} at ${path}: expected an array of filters, not an object`,
+        details: { key, path },
+      });
+    });
+
+    test.each([
+      ['$or with 100 conditions', { $or: conditions(100) }],
+      ['$and with 100 conditions', { $and: conditions(100) }],
+      ['$or in a relation filter', { createdBy: { $or: [{ firstname: 'a' }, { lastname: 'b' }] } }],
+      ['$and under $not', { $not: { $and: [{ title: 'a' }, { title: 'b' }] } }],
+      ['nested $or and $and lists', { $and: [{ $or: [{ title: 'a' }] }, { title: 'b' }] }],
+      // The operator map form is validated by the scalar attribute checks
+      ['the operator map of $and on a scalar attribute', { title: { $and: { $eq: 'x' } } }],
+      // Empty objects hold no condition and are sanitized out
+      ['an empty operand', { $or: {}, createdBy: { $and: {} } }],
+      // Query conversion casts any $null / $notNull operand to a boolean, so a nested $or or $and
+      // there is not a filter
+      ['$or in a $null operand', { title: { $null: { $or: { a: 1 } } } }],
+      ['$and in a $notNull operand', { title: { $notNull: { $and: { a: 1 } } } }],
+      ['$or under $not in a $null operand', { id: { $null: { $not: { $or: { a: 1 } } } } }],
+      ['$and in a relation $notNull operand', { createdBy: { $notNull: { $and: { 0: 'x' } } } }],
+    ])('accepts %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toEqual(filters);
+    });
+  });
+
+  describe('validateFilters - object operands in lists and on relation, media and component attributes', () => {
+    const fileModel = {
+      uid: 'plugin::upload.file',
+      modelType: 'contentType' as const,
+      kind: 'collectionType' as const,
+      info: { singularName: 'file', pluralName: 'files', displayName: 'File' },
+      options: {},
+      attributes: { name: { type: 'string' } },
+    };
+    const seoModel = {
+      uid: 'default.seo',
+      modelType: 'component' as const,
+      info: { displayName: 'Seo' },
+      options: {},
+      attributes: { metaTitle: { type: 'string' } },
+    };
+    const schema = {
+      ...articleModel,
+      attributes: {
+        ...articleModel.attributes,
+        rank: { type: 'integer' },
+        cover: { type: 'media', multiple: false },
+        seo: { type: 'component', component: 'default.seo', repeatable: false },
+      },
+    };
+    const extraModels: Record<string, unknown> = {
+      [fileModel.uid]: fileModel,
+      [seoModel.uid]: seoModel,
+    };
+    const ctx = {
+      schema,
+      getModel: (uid: string) => (extraModels[uid] ?? getModel(uid)) as any,
+    };
+
+    const validate = (filters: unknown) =>
+      validators.validateFilters(ctx, filters, ['nonAttributesOperators']);
+
+    test.each([
+      // Query conversion empties the list, and an empty $not list matches every row
+      ['an operand in a $not list', { title: { $not: [{ $eq: { a: 1 } }] } }, '$eq', 'title'],
+      [
+        'an operand in an $or list',
+        { title: { $or: [{ $eq: 'x' }, { $eq: { a: 1 } }] } },
+        '$eq',
+        'title',
+      ],
+      [
+        'an operand under $not in an $and list',
+        { title: { $and: [{ $not: { $eq: { a: 1 } } }] } },
+        '$eq',
+        'title',
+      ],
+      ['an operand in an $or list on id', { id: { $or: [{ $ne: { a: 1 } }] } }, '$ne', 'id'],
+      // Query conversion strips the operand's keys and drops the whole condition
+      ['$eq on a media attribute', { cover: { $eq: { a: 1 } } }, '$eq', 'cover'],
+      ['$eq on a component attribute', { seo: { $eq: { a: 1 } } }, '$eq', 'seo'],
+      ['$eq on a relation attribute', { createdBy: { $eq: { a: 1 } } }, '$eq', 'createdBy'],
+      [
+        'an operand keyed by a target attribute name',
+        { createdBy: { $in: { firstname: 'x' } } },
+        '$in',
+        'createdBy',
+      ],
+      [
+        'an operand under $not on a media attribute',
+        { cover: { $not: { $eq: { a: 1 } } } },
+        '$eq',
+        'cover',
+      ],
+      [
+        'an operand in an $or list on a relation',
+        { createdBy: { $or: [{ $ne: { a: 1 } }] } },
+        '$ne',
+        'createdBy',
+      ],
+      // A list nested one level deeper is searched too
+      [
+        'an operand in a nested $not list',
+        { title: { $not: [[{ $eq: { a: 1 } }]] } },
+        '$eq',
+        'title',
+      ],
+      [
+        'an operand in a nested $not list on a relation',
+        { createdBy: { $not: [[{ $eq: { a: 1 } }]] } },
+        '$eq',
+        'createdBy',
+      ],
+      // The value list of a non-logical operator holds values, so any plain object in it is reported
+      ['an operand in an $eq list', { title: { $eq: [{ $eq: { a: 1 } }] } }, '$eq', 'title'],
+      [
+        'an operand in an $in list on a relation',
+        { createdBy: { $in: [1, { $eq: { a: 1 } }] } },
+        '$in',
+        'createdBy',
+      ],
+      [
+        'an operator map in a $notIn list',
+        { title: { $notIn: [{ $eq: 'a1' }] } },
+        '$notIn',
+        'title',
+      ],
+      ['an operator map in an $in list', { rank: { $in: [{ $eq: 1 }] } }, '$in', 'rank'],
+      [
+        'an object in an $in list on a relation',
+        { createdBy: { $in: [{ id: 1 }] } },
+        '$in',
+        'createdBy',
+      ],
+      ['an object in a nested $in list', { title: { $in: [['x', { a: 1 }]] } }, '$in', 'title'],
+      // Operators at the root of the filters have no attribute, so the path is the root key
+      ['an operand under a root $not', { $not: { $eq: { a: 1 } } }, '$eq', '$not'],
+      ['an operand in a root $and list', { $and: [{ $eq: { a: 1 } }] }, '$eq', '$and'],
+      ['an operand of a root $eq', { $eq: { a: 1 } }, '$eq', '$eq'],
+    ])('throws on an object operand: %s', async (_, filters, key, path) => {
+      const error = await validate(filters).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toMatchObject({
+        message: `Invalid operand for ${key} at ${path}: expected a value, not an object`,
+        details: { key, path },
+      });
+    });
+
+    test.each([
+      ['a $not list of operator maps', { title: { $not: [{ $eq: 'x' }, { $contains: 'y' }] } }],
+      ['an $or list of operator maps', { title: { $or: [{ $eq: 'x' }, { $null: true }] } }],
+      ['a list of values', { title: { $eq: ['x', 'y'] }, rank: { $notIn: [1, 2] } }],
+      ['a relation id operand', { createdBy: { $eq: 1, $in: [1, 2] } }],
+      ['a relation $null operand', { createdBy: { $null: true }, cover: { $notNull: true } }],
+      ['a nested relation filter', { createdBy: { firstname: { $eq: 'x' } } }],
+      ['a nested media filter', { cover: { name: { $eq: 'x' } } }],
+      ['a nested component filter', { seo: { metaTitle: { $eq: 'x' } } }],
+      ['a relation filter under $not', { createdBy: { $not: { firstname: 'x' } } }],
+      ['a relation filter list under $or', { createdBy: { $or: [{ firstname: 'x' }, { id: 1 }] } }],
+      ['an attribute filter under a root $not', { $not: { title: { $eq: 'x' } } }],
+      [
+        'a root $and list of attribute filters',
+        { $and: [{ title: 'x' }, { $not: { createdBy: { firstname: 'x' } } }] },
+      ],
+    ])('accepts %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toEqual(filters);
+    });
+
+    // The traversal drops dates and empty objects from the lists it returns, so only check that
+    // validation does not throw
+    test.each([
+      ['a list of dates', { title: { $in: [new Date(0)] }, rank: { $between: [1, 2] } }],
+      ['an empty object in a list', { title: { $in: ['x', {}] } }],
+    ])('does not throw on %s', async (_, filters) => {
+      await expect(validate(filters)).resolves.toBeDefined();
+    });
+
+    test.each([
+      ['a relation', { createdBy: { $in: { 0: 1, 25: 2 } } }, 'createdBy'],
+      ['a media', { cover: { $in: { 0: 1, 25: 2 } } }, 'cover'],
+      ['a component', { seo: { $notIn: { 0: 1, 25: 2 } } }, 'seo'],
+    ])('names the arrayLimit for a list cut by qs on %s attribute', async (_, filters, path) => {
+      const operator = Object.keys(Object.values(filters)[0])[0];
+
+      await expect(validate(filters)).rejects.toMatchObject({
+        message: `Invalid operand for ${operator} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`,
+      });
+    });
+
+    // Dynamic zones and morphTo relations are left to their own checks, which reject the key
+    test.each([
+      ['a dynamic zone', { blocks: { $eq: { a: 1 } } }, 'blocks'],
+      ['a morphTo relation', { owner: { $eq: { a: 1 } } }, 'owner'],
+    ])('rejects an object operand on %s as an invalid key', async (_, filters, key) => {
+      const dzSchema = {
+        ...schema,
+        attributes: {
+          ...schema.attributes,
+          blocks: { type: 'dynamiczone', components: ['default.seo'] },
+          owner: { type: 'relation', relation: 'morphToOne' },
+        },
+      };
+
+      await expect(
+        validators.defaultValidateFilters({ ...ctx, schema: dzSchema }, filters)
+      ).rejects.toMatchObject({ message: `Invalid key ${key}` });
+    });
+  });
+
   describe('defaultValidatePopulate - nested filters/sort/fields within populate', () => {
     const categoryModel: any = {
       uid: 'api::category.category',

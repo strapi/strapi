@@ -4,7 +4,11 @@
 const _ = require('lodash');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
-const { createContentAPIRequest, transformToRESTResource } = require('api-tests/request');
+const {
+  createAuthRequest,
+  createContentAPIRequest,
+  transformToRESTResource,
+} = require('api-tests/request');
 
 const builder = createTestBuilder();
 let strapi;
@@ -379,14 +383,14 @@ describe('Filtering API', () => {
         [{ $null: 'true' }],
         [{ $null: '1' }],
         [{ $null: 't' }],
-        [{ $null: 'anything' }],
-        [{ $null: ['anything'] }],
-        [{ $null: { anything: 'anything' } }],
+        [{ $null: 'TRUE' }],
+        [{ $null: 'T' }],
         [{ $notNull: false }],
         [{ $notNull: 'false' }],
         [{ $notNull: '0' }],
         [{ $notNull: 'f' }],
-        [{ $notNull: '' }],
+        [{ $notNull: 'FALSE' }],
+        [{ $notNull: 'F' }],
       ])('Should return only matching items (%s)', async (priceFilter) => {
         const res = await rq({
           method: 'GET',
@@ -410,14 +414,14 @@ describe('Filtering API', () => {
         [{ $notNull: 'true' }],
         [{ $notNull: '1' }],
         [{ $notNull: 't' }],
-        [{ $notNull: 'anything' }],
-        [{ $notNull: ['anything'] }],
-        [{ $notNull: { anything: 'anything' } }],
+        [{ $notNull: 'TRUE' }],
+        [{ $notNull: 'T' }],
         [{ $null: false }],
         [{ $null: 'false' }],
         [{ $null: '0' }],
         [{ $null: 'f' }],
-        [{ $null: '' }],
+        [{ $null: 'FALSE' }],
+        [{ $null: 'F' }],
       ])('Should return three matches (%s)', async (priceFilter) => {
         const res = await rq({
           method: 'GET',
@@ -430,6 +434,50 @@ describe('Filtering API', () => {
         });
 
         expect(res.body.data.length).toBe(3);
+      });
+
+      // A bare operator is parsed as `null` (`strictNullHandling`) and keeps the loose reading: false.
+      test.each([
+        ['$null', (product) => product.price !== null],
+        ['$notNull', (product) => product.price === null],
+      ])('Should read a bare %s operand as false', async (operator, isMatching) => {
+        const res = await rq({
+          method: 'GET',
+          url: `/products?filters[price][${operator}]`,
+        });
+
+        const matching = data.product.filter(isMatching);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.length).toBe(matching.length);
+        expect(res.body.data).toEqual(expect.arrayContaining(matching));
+      });
+
+      test.each([
+        [{ $null: 'no' }],
+        [{ $null: 'yes' }],
+        [{ $null: 'anything' }],
+        [{ $null: '' }],
+        [{ $null: ['anything'] }],
+        [{ $null: { anything: 'anything' } }],
+        [{ $notNull: 'no' }],
+        [{ $notNull: 'anything' }],
+        [{ $notNull: '' }],
+        [{ $notNull: ['anything'] }],
+        [{ $notNull: { anything: 'anything' } }],
+      ])('Should reject an unrecognised operand with a 400 (%s)', async (priceFilter) => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              price: priceFilter,
+            },
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toMatchObject({ status: 400, name: 'ValidationError' });
       });
     });
 
@@ -1793,6 +1841,68 @@ describe('Filtering API', () => {
           },
         });
         expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
+      });
+
+      test.each(['FALSE', 'False', 'F'])(
+        'Cast falsy booleans case-insensitively %s',
+        async (val) => {
+          const res = await rq({
+            method: 'GET',
+            url: '/products',
+            qs: {
+              filters: {
+                isChecked: {
+                  $eq: val,
+                },
+              },
+            },
+          });
+
+          expect(res.statusCode).toBe(200);
+          expect(res.body.data).toHaveLength(2);
+          expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
+        }
+      );
+
+      test.each(['no', 'yes', 'on', 'off', '', ' true ', '2'])(
+        'Reject unrecognised boolean %j with a 400',
+        async (val) => {
+          const res = await rq({
+            method: 'GET',
+            url: '/products',
+            qs: {
+              filters: {
+                isChecked: {
+                  $eq: val,
+                },
+              },
+            },
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.error).toMatchObject({ status: 400, name: 'ValidationError' });
+        }
+      );
+
+      // The admin users list queries strapi.db.query directly, so the database error
+      // reaches the global error middleware instead of the document service.
+      test('Reject unrecognised boolean with a 400 on a route querying the database directly', async () => {
+        const adminRq = await createAuthRequest({ strapi });
+
+        const res = await adminRq({
+          method: 'GET',
+          url: '/admin/users',
+          qs: {
+            filters: {
+              isActive: {
+                $eq: 'no',
+              },
+            },
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toMatchObject({ status: 400, name: 'ValidationError' });
       });
     });
 
