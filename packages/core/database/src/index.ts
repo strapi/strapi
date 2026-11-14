@@ -44,6 +44,8 @@ const formatHookError = (error: unknown): string => {
 const asThrownError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
+const DOCUMENT_LOCK_TABLE = 'strapi_document_locks';
+
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
@@ -161,6 +163,9 @@ class Database {
   private poolDiagnostics?: PoolDiagnostics;
 
   private phase?: string;
+
+  /** Document ids whose MySQL lock row each open transaction already holds. */
+  private heldDocumentLocks = new WeakMap<Knex.Transaction, Set<string>>();
 
   constructor(config: DatabaseConfig) {
     this.config = {
@@ -444,6 +449,71 @@ class Database {
    */
   settleTransactionHooks(timeoutMs?: number) {
     return transactionCtx.settleHooks(this, timeoutMs);
+  }
+
+  /**
+   * Serialize MySQL writers of one document on a sentinel row. No-op on other
+   * dialects. REPEATABLE READ fixes a transaction's snapshot at its first read,
+   * so a transaction that reads the document and then writes it must call this
+   * before that first read. Later calls in the same transaction do nothing.
+   */
+  async lockDocumentId(documentId: string) {
+    if (this.dialect.client !== 'mysql') {
+      return;
+    }
+
+    const trx = transactionCtx.get();
+    if (trx && this.heldDocumentLocks.get(trx)?.has(documentId)) {
+      return;
+    }
+
+    const insert = this.getConnection(DOCUMENT_LOCK_TABLE)
+      .insert({ document_id: documentId })
+      .onConflict('document_id')
+      // INSERT IGNORE leaves concurrent writers with a shared lock on a duplicate
+      // row. They then deadlock while both upgrade it in the SELECT FOR UPDATE below.
+      // A no-op duplicate-key update acquires the exclusive row lock immediately.
+      .merge({ document_id: documentId });
+
+    if (trx) {
+      insert.transacting(trx);
+    }
+
+    // The insert or duplicate-key update already holds the exclusive lock
+    // until the transaction completes.
+    await insert;
+
+    if (trx) {
+      const held = this.heldDocumentLocks.get(trx) ?? new Set<string>();
+      held.add(documentId);
+      this.heldDocumentLocks.set(trx, held);
+    }
+  }
+
+  /**
+   * Remove the lock row of a document that no longer exists, or never did.
+   * Without this, updates of made-up ids and deleted documents leave rows behind.
+   */
+  async deleteDocumentLock(documentId: string) {
+    if (this.dialect.client !== 'mysql') {
+      return;
+    }
+
+    const trx = transactionCtx.get();
+    const remove = this.getConnection(DOCUMENT_LOCK_TABLE)
+      .where({ document_id: documentId })
+      .delete();
+
+    if (trx) {
+      remove.transacting(trx);
+    }
+
+    await remove;
+
+    // The row is gone, so a later write in this transaction has to insert it again.
+    if (trx) {
+      this.heldDocumentLocks.get(trx)?.delete(documentId);
+    }
   }
 
   async destroy() {

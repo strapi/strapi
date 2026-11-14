@@ -173,6 +173,8 @@ const makeMinimalGlobalStrapi = (dbOverrides?: Record<string, unknown>): Core.St
     contentTypes: {},
     db: dbOverrides?.db ?? {
       transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+      lockDocumentId: jest.fn(async () => undefined),
+      dialect: { client: 'sqlite' },
       query: jest.fn(() => ({ findOne: jest.fn(() => Promise.resolve(null)) })),
     },
     ...dbOverrides,
@@ -817,6 +819,8 @@ describe('single-type handler: get', () => {
     const strapi = makeMinimalGlobalStrapi({
       db: {
         transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+        lockDocumentId: jest.fn(async () => undefined),
+        dialect: { client: 'sqlite' },
         query: jest.fn(() => ({ findOne: dbQueryFindOne })),
       },
     });
@@ -834,6 +838,8 @@ describe('single-type handler: get', () => {
     const strapi = makeMinimalGlobalStrapi({
       db: {
         transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+        lockDocumentId: jest.fn(async () => undefined),
+        dialect: { client: 'sqlite' },
         query: jest.fn(() => ({ findOne: dbQueryFindOne })),
       },
     });
@@ -2136,6 +2142,8 @@ const makeStrapiWithDb = (overrides: Record<string, unknown> = {}): Core.Strapi 
     getModel: jest.fn(() => ({})),
     db: {
       transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+      lockDocumentId: jest.fn(async () => undefined),
+      dialect: { client: 'sqlite' },
       query: jest.fn(() => ({
         findOne: jest.fn(() => Promise.resolve(null)),
       })),
@@ -2467,6 +2475,8 @@ describe('single-type handler: create/update (write)', () => {
     const strapi = makeStrapiWithDb({
       db: {
         transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+        lockDocumentId: jest.fn(async () => undefined),
+        dialect: { client: 'sqlite' },
         query: jest.fn(() => ({ findOne: dbQueryFindOne })),
       },
     });

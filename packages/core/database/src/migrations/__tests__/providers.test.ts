@@ -334,6 +334,48 @@ describe('migration providers', () => {
   });
 
   describe('createMigrationsProvider', () => {
+    it('creates the MySQL document lock table before user migrations', async () => {
+      await fse.writeFile(
+        path.join(tempDir, '001-update-document.js'),
+        `module.exports = {
+          async up(knex) {
+            if (!(await knex.schema.hasTable('strapi_document_locks'))) {
+              throw new Error('document lock table is missing');
+            }
+          },
+          async down() {},
+        };`
+      );
+
+      const { db, sqlite } = createTestDatabase({ migrationsDir: tempDir });
+      db.dialect = { client: 'mysql' };
+      db.connection = sqlite;
+
+      const provider = createMigrationsProvider(db);
+      await provider.up();
+
+      expect(await sqlite.schema.hasTable('strapi_document_locks')).toBe(true);
+
+      // The internal migration no-ops once the table exists. A second boot
+      // must not try to create it again.
+      await provider.up();
+      expect(await sqlite.schema.hasTable('strapi_document_locks')).toBe(true);
+
+      await sqlite.destroy();
+    });
+
+    it('does not create the document lock table for a non-mysql dialect', async () => {
+      const { db, sqlite } = createTestDatabase({ migrationsDir: tempDir });
+      db.dialect = { client: 'postgres' };
+      db.connection = sqlite;
+
+      const provider = createMigrationsProvider(db);
+      await provider.up();
+
+      expect(await sqlite.schema.hasTable('strapi_document_locks')).toBe(false);
+      await sqlite.destroy();
+    });
+
     it('runs user migrations before internal migrations', async () => {
       await writeJsMigration(tempDir, '001-user.js', 'user_table');
 
