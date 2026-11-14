@@ -1,3 +1,5 @@
+import profile from 'api-tests/profile';
+
 /* -------------------------------------------------------------------------------------------------
  * setupDatabaseReset
  * -----------------------------------------------------------------------------------------------*/
@@ -94,14 +96,14 @@ export function setupDatabaseReset() {
 
   beforeEach(async () => {
     if (!isDataCaptured) {
-      await captureInitialTestData();
+      await profile.timed('reset.capture', () => captureInitialTestData());
       isDataCaptured = true;
     }
   });
 
   afterEach(async () => {
     if (isDataCaptured) {
-      await resetTestDatabase();
+      await profile.timed('reset.restore', () => resetTestDatabase());
     }
   });
 }
