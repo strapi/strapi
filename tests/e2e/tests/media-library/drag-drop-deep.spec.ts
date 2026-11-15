@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { describeOnCondition } from '../../../utils/shared';
 
@@ -14,8 +14,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
     });
 
     test('moves a file onto a sidebar folder row', async ({ page }) => {

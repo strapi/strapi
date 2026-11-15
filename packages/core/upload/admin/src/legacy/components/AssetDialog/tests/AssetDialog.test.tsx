@@ -1,7 +1,10 @@
+import { configureStore } from '@reduxjs/toolkit';
+import { adminApi, NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { render as renderTL, screen } from '@testing-library/react';
+import { fireEvent, render as renderTL, screen, within } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useAssets } from '../../../hooks/useAssets';
@@ -14,6 +17,7 @@ jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolders');
 jest.mock('../../../hooks/useAssets');
 jest.mock('../../../hooks/useModalQueryParams');
+jest.mock('../../../hooks/useFolderStructure');
 /**
  * Mock the cropper import to avoid having an error
  */
@@ -29,6 +33,11 @@ const queryClient = new QueryClient({
   },
 });
 
+const store = configureStore({
+  reducer: { [adminApi.reducerPath]: adminApi.reducer },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(adminApi.middleware),
+});
+
 const renderML = (
   props = {
     onClose: jest.fn(),
@@ -41,15 +50,19 @@ const renderML = (
   }
 ) =>
   renderTL(
-    <QueryClientProvider client={queryClient}>
-      <DesignSystemProvider>
-        <MemoryRouter>
-          <IntlProvider locale="en" messages={{}}>
-            <AssetDialog open {...props} />
-          </IntlProvider>
-        </MemoryRouter>
-      </DesignSystemProvider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <DesignSystemProvider>
+          <MemoryRouter>
+            <IntlProvider locale="en" messages={{}}>
+              <NotificationsProvider>
+                <AssetDialog open {...props} />
+              </NotificationsProvider>
+            </IntlProvider>
+          </MemoryRouter>
+        </DesignSystemProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 
 describe('AssetDialog', () => {
@@ -181,6 +194,84 @@ describe('AssetDialog', () => {
 
         expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('unsaved changes', () => {
+    const defaultProps = {
+      onClose: jest.fn(),
+      onAddAsset: jest.fn(),
+      onAddFolder: jest.fn(),
+      onChangeFolder: jest.fn(),
+      onValidate: jest.fn(),
+      multiple: false,
+      initiallySelectedAssets: [],
+      allowedTypes: ['images', 'files', 'videos', 'audios'],
+    };
+
+    beforeEach(() => {
+      // Earlier tests queue `mockReturnValueOnce` values without rendering, which would leak here.
+      const assetsDefaults = jest.requireActual('../../../hooks/__mocks__/useAssets').useAssets();
+      const queryParamsDefaults = jest.requireActual(
+        '../../../hooks/__mocks__/useModalQueryParams'
+      );
+      (useAssets as jest.Mock).mockReset().mockReturnValue({
+        ...assetsDefaults,
+        data: {
+          ...assetsDefaults.data,
+          // An empty string keeps the edit form's input controlled.
+          results: assetsDefaults.data.results.map((asset: object) => ({
+            ...asset,
+            alternativeText: '',
+          })),
+        },
+      });
+      (useModalQueryParams as jest.Mock)
+        .mockReset()
+        .mockReturnValue(queryParamsDefaults.useModalQueryParams());
+    });
+
+    it('asks for confirmation on Escape when the asset being edited has changed', async () => {
+      renderML(defaultProps);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+
+      const input = await screen.findByRole('textbox', { name: /alternative text/i });
+      fireEvent.change(input, { target: { value: 'Test' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+        'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.'
+      );
+      expect(defaultProps.onClose).not.toHaveBeenCalled();
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('closes on Escape when the asset being edited has not changed', async () => {
+      renderML(defaultProps);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+
+      const input = await screen.findByRole('textbox', { name: /alternative text/i });
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(defaultProps.onClose).toHaveBeenCalled();
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    it('closes on Escape without asking when assets are selected', async () => {
+      renderML(defaultProps);
+
+      fireEvent.click(screen.getByRole('checkbox'));
+
+      expect(
+        within(screen.getByRole('tab', { name: /selected files/i })).getByText('1')
+      ).toBeInTheDocument();
+
+      fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+      expect(defaultProps.onClose).toHaveBeenCalled();
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
   });
 });

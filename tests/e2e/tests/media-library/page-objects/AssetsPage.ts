@@ -40,6 +40,9 @@ export class AssetsPage {
   }
 
   async goto() {
+    // A full navigation can cancel an in-flight login request, particularly in WebKit.
+    await expect(this.page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+
     // Deliberately no wait for `New` here: a role without `assets.create` never gets it,
     // so a spec covering a read-only user would hang rather than fail. A spec that acts
     // on a create affordance as its first move waits for it itself.
@@ -572,6 +575,15 @@ export class AssetsPage {
   async openCreateFolderDialog() {
     await this.openNewMenu();
     await this.newFolderMenuItem.click();
+  }
+
+  /**
+   * Confirm the "You have unsaved changes" prompt shown when dismissing a dialog with typed changes
+   */
+  async confirmDiscardChanges() {
+    const confirm = this.page.getByRole('alertdialog');
+    await expect(confirm).toContainText('You have unsaved changes');
+    await confirm.getByRole('button', { name: 'Confirm' }).click();
   }
 
   /**

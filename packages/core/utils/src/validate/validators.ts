@@ -1,11 +1,14 @@
-import { isEmpty, isObject } from 'lodash';
+import { isEmpty, isObject, isPlainObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
 import {
   isScalarAttribute,
   constants,
+  isComponentAttribute,
   isDynamicZoneAttribute,
+  isMediaAttribute,
   isMorphToRelationalAttribute,
+  isRelationalAttribute,
 } from '../content-types';
 import {
   traverseQueryFilters,
@@ -16,6 +19,7 @@ import {
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
+import { ValidationError } from '../errors';
 import type { Attribute, Model } from '../types';
 import { isBooleanLike } from '../parse-type';
 import type { SHARED_QUERY_PARAM_KEYS } from '../content-api-constants';
@@ -43,6 +47,157 @@ export const FILTER_TRAVERSALS = [
   'private',
 ];
 
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
+
+/**
+ * Operators whose operand is left to query conversion, which reads it as a boolean and rejects
+ * any other value, an object included, with a 400.
+ */
+const BOOLEAN_CAST_OPERATORS = new Set(['$null', '$notNull']);
+
+/**
+ * Operators whose object operand is a map of operators, searched in turn.
+ */
+const LOGICAL_OPERATORS = new Set(['$not', '$and', '$or']);
+
+/**
+ * True when every key of the object is a non-negative integer. The query string parser (`qs`) turns
+ * a list longer than its `arrayLimit` into such an object, keyed by index.
+ */
+const hasOnlyIndexKeys = (value: Record<string, unknown>) =>
+  Object.keys(value).every((key) => /^\d+$/.test(key));
+
+const arrayLimitMessage = (operator: string, path: string) =>
+  `Invalid operand for ${operator} at ${path}: the list has more items than the query parser's arrayLimit. Send fewer items, or raise arrayLimit in the strapi::query middleware config`;
+
+/**
+ * Operators whose operand is a list of filters.
+ */
+const GROUP_OPERATORS = new Set(['$and', '$or']);
+
+/**
+ * True when a `$and` / `$or` operand is a non-empty plain object with a key that is not an operator,
+ * such as an index or an attribute name. Query conversion drops such an operand along with its
+ * condition (or the database layer rejects it), so letting one through can make the query match
+ * every row. An operator map, e.g. `{ title: { $and: { $eq: 'x' } } }`, is left to the object
+ * operand check (`findObjectOperand`), and empty objects hold no condition and are sanitized out.
+ */
+const isObjectGroupOperand = (
+  operator: string,
+  operand: unknown
+): operand is Record<string, unknown> =>
+  GROUP_OPERATORS.has(operator) === true &&
+  isPlainRecord(operand) === true &&
+  Object.keys(operand).some((key) => isOperator(key) === false);
+
+/**
+ * True when a raw filter path, e.g. `title.$null.$or`, goes through the operand of an operator that
+ * is not logical. Such an operand is a value, not a filter: query conversion casts a `$null` /
+ * `$notNull` operand to a boolean, so a `$and` / `$or` key in it does not filter anything.
+ */
+const isInOperatorOperand = (rawPath: string | null) => {
+  if (rawPath === null) {
+    return false;
+  }
+
+  // Drop the last segment (the key itself) and the list indexes, e.g. `$and[0]` -> `$and`
+  const parentKeys = rawPath
+    .split('.')
+    .slice(0, -1)
+    .map((segment) => segment.replace(/(\[\d+\])+$/, ''));
+
+  return parentKeys.some((key) => isOperator(key) === true && LOGICAL_OPERATORS.has(key) === false);
+};
+
+/**
+ * Returns the first non-empty plain object in the operand of a non-logical operator: the operand
+ * itself, or an item of its value list at any depth. An operator map is such an object too.
+ */
+const findObjectValue = (operand: unknown): Record<string, unknown> | undefined => {
+  if (Array.isArray(operand) === true) {
+    for (const item of operand as unknown[]) {
+      const found = findObjectValue(item);
+
+      if (found !== undefined) {
+        return found;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isPlainRecord(operand) === true && Object.keys(operand).length > 0) {
+    return operand;
+  }
+
+  return undefined;
+};
+
+/**
+ * Returns the first non-logical operator, and its operand, in an operator map (or a list of them, at
+ * any depth) whose operand is a non-empty plain object, operator maps included, or holds one in its
+ * value list, e.g. `{ $eq: { a: 1 } }` or `{ $notIn: [{ $eq: 'x' }] }`.
+ * The operand of a logical operator is an operator map, or a list of them, and is searched in turn.
+ * The filters traversal does not walk such operands, and query conversion drops them along with their
+ * condition, or empties the list holding them. The query then matches every row, except for a `$and` /
+ * `$or` list on a scalar attribute, which the database layer rejects with a 500.
+ * Empty objects are not reported: they hold no condition, and sanitization removes them.
+ */
+const findObjectOperand = (
+  filter: unknown
+): { operator: string; operand: Record<string, unknown> } | undefined => {
+  if (Array.isArray(filter) === true) {
+    for (const item of filter as unknown[]) {
+      const nested = findObjectOperand(item);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isPlainRecord(filter) === false) {
+    return undefined;
+  }
+
+  for (const [operator, operand] of Object.entries(filter)) {
+    if (isOperator(operator) === false || BOOLEAN_CAST_OPERATORS.has(operator) === true) {
+      continue;
+    }
+
+    if (LOGICAL_OPERATORS.has(operator) === true) {
+      const nested = findObjectOperand(operand);
+
+      if (nested !== undefined) {
+        return nested;
+      }
+
+      continue;
+    }
+
+    const objectValue = findObjectValue(operand);
+
+    if (objectValue !== undefined) {
+      return { operator, operand: objectValue };
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * True for the attributes whose filter can hold operators: scalar, relation, media and component
+ * attributes. Dynamic zones and morphTo relations are left to their own checks, which reject them.
+ */
+const isOperatorFilterableAttribute = (attribute: Attribute | undefined) =>
+  isScalarAttribute(attribute) === true ||
+  isMediaAttribute(attribute) === true ||
+  (isRelationalAttribute(attribute) === true &&
+    isMorphToRelationalAttribute(attribute) === false) ||
+  (isComponentAttribute(attribute) === true && isDynamicZoneAttribute(attribute) === false);
+
 export const validateFilters = asyncCurry(
   async (ctx: Context, filters: unknown, include: (typeof FILTER_TRAVERSALS)[number][]) => {
     // TODO: schema checks should check that it is a valid schema with yup
@@ -56,10 +211,71 @@ export const validateFilters = asyncCurry(
     // keys that are not attributes or valid operators
     if (include.includes('nonAttributesOperators')) {
       functionsToApply.push(
-        traverseQueryFilters(({ key, attribute, path }) => {
+        traverseQueryFilters(({ key, attribute, path, value, parent }) => {
+          const isIdKey = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key);
+          // An operator at the root of the filters, e.g. `{ $not: { $eq: ... } }`, applies to no
+          // attribute, so the attribute checks below never see its operand
+          const isRootOperator = parent === undefined && isOperator(key) === true;
+
+          let filter: unknown;
+          if (isIdKey || isOperatorFilterableAttribute(attribute) === true) {
+            filter = isPlainRecord(value) === true ? value : undefined;
+          } else if (isRootOperator === true) {
+            filter = { [key]: value };
+          }
+
+          if (filter !== undefined) {
+            const objectOperand = findObjectOperand(filter);
+
+            if (objectOperand !== undefined) {
+              const { operator, operand } = objectOperand;
+              // id and documentId are not schema attributes, so the attribute path stops at their parent
+              let operandPath = path.attribute ?? key;
+              if (attribute === undefined && path.attribute !== null) {
+                operandPath = `${path.attribute}.${key}`;
+              }
+
+              // A REST list longer than the `strapi::query` middleware's `arrayLimit` reaches us as an
+              // object keyed by index, so name the limit instead of the object
+              if (hasOnlyIndexKeys(operand) === true) {
+                throw new ValidationError(arrayLimitMessage(operator, operandPath), {
+                  key: operator,
+                  path: operandPath,
+                });
+              }
+
+              throw new ValidationError(
+                `Invalid operand for ${operator} at ${operandPath}: expected a value, not an object`,
+                { key: operator, path: operandPath }
+              );
+            }
+          }
+
+          if (
+            isObjectGroupOperand(key, value) === true &&
+            isInOperatorOperand(path.raw) === false
+          ) {
+            // $and and $or have no attribute path, so name the raw path, e.g. `category.$or`
+            const operandPath = path.raw ?? key;
+
+            // A REST list longer than the `strapi::query` middleware's `arrayLimit`, or with an index
+            // of `arrayLimit` or more, reaches us as an object keyed by index
+            if (hasOnlyIndexKeys(value) === true) {
+              throw new ValidationError(arrayLimitMessage(key, operandPath), {
+                key,
+                path: operandPath,
+              });
+            }
+
+            throw new ValidationError(
+              `Invalid operand for ${key} at ${operandPath}: expected an array of filters, not an object`,
+              { key, path: operandPath }
+            );
+          }
+
           // ID is not an attribute per se, so we need to make
           // an extra check to ensure we're not removing it
-          if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
+          if (isIdKey) {
             return;
           }
 
@@ -570,21 +786,18 @@ export const validatePopulate = asyncCurry(
             return;
           }
 
-          // Handle recursive nested `populate` validation with the same include object
+          // Nested `populate`. The populate traversal walks into it with this same visitor
+          // (the `isPopulateKeyword` handler in traverse/query-populate.ts), and the private
+          // attribute pass below walks into it the same way. Validating it here as well walked
+          // every nested level twice, so the work doubled with each level of nesting. The
+          // traversal does this even when the schema has an attribute named `populate`.
           if (key === 'populate') {
-            set(
-              key,
-              await validatePopulate(
-                {
-                  schema,
-                  getModel,
-                  parent: { key, path, schema, attribute },
-                  path,
-                },
-                value, // pass the nested populate value
-                includes // pass down the same includes object
-              )
-            );
+            // The traversal turns a dot-notation string into an object before it walks it, so
+            // the path checks `validatePopulate` runs on a string have to run here.
+            if (isDotNotationPopulate(value)) {
+              validatePopulateDotPaths({ schema, getModel }, value);
+            }
+
             return;
           }
 

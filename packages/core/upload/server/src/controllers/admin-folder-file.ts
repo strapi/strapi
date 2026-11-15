@@ -9,6 +9,7 @@ import {
   validateDeleteManyFoldersFiles,
   validateMoveManyFoldersFiles,
 } from './validation/admin/folder-file';
+import { emitMediaMoves, readMediaMoves, type MediaMoveEvent } from '../audit-logs';
 
 import type { File, Folder } from '../types';
 
@@ -119,13 +120,14 @@ export default {
 
     let totalFolderNumber = 0;
     let totalFileNumber = 0;
+    let moves: MediaMoveEvent[] = [];
 
     const trx = await strapi.db.transaction();
     try {
       // fetch folders
       const existingFolders = await strapi.db
         .queryBuilder(FOLDER_MODEL_UID)
-        .select(['id', 'pathId', 'path'])
+        .select(['id', 'name', 'pathId', 'path'])
         .where({ id: { $in: folderIds } })
         .transacting(trx.get())
         .forUpdate()
@@ -134,7 +136,7 @@ export default {
       // fetch files
       const existingFiles = await strapi.db
         .queryBuilder(FILE_MODEL_UID)
-        .select(['id'])
+        .select(['id', 'name'])
         .where({ id: { $in: fileIds } })
         .transacting(trx.get())
         .forUpdate()
@@ -160,6 +162,23 @@ export default {
         strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
       // @ts-expect-error - no dynamic typings for the models
       const pathColName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
+
+      // Read before the write: the audit log records where each item was.
+      const fileFolderAttribute = strapi.db.metadata.get(FILE_MODEL_UID).attributes.folder;
+      const folderParentAttribute = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
+      moves = await readMediaMoves(
+        (table) => strapi.db.getConnection(table).transacting(trx.get()),
+        {
+          files: existingFiles,
+          folders: existingFolders,
+          destinationFolderId,
+          // @ts-expect-error - no dynamic typings for the models
+          fileFolderJoinTable: fileFolderAttribute.joinTable,
+          // @ts-expect-error - no dynamic typings for the models
+          folderParentJoinTable: folderParentAttribute.joinTable,
+          folderTable,
+        }
+      );
 
       if (existingFolders.length > 0) {
         // update folders' parent relation
@@ -267,6 +286,10 @@ export default {
       await trx.rollback();
       throw e;
     }
+
+    emitMediaMoves({ strapi }, moves).catch((error) => {
+      strapi.log.error(`Could not record media moves in audit logs: ${error?.message ?? error}`);
+    });
 
     const updatedFolders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
       where: { id: { $in: folderIds } },

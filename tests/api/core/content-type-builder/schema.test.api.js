@@ -555,6 +555,113 @@ describe('Content Type Builder - Schema', () => {
 
       expect(res.statusCode).toBe(200);
     });
+
+    test('Updating an unknown component answers 400 component.notFound', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/content-type-builder/update-schema',
+        body: {
+          data: {
+            components: [
+              {
+                action: 'update',
+                uid: 'basic.does-not-exist',
+                category: 'basic',
+                displayName: 'Does Not Exist',
+                attributes: [{ action: 'update', name: 'name', properties: { type: 'string' } }],
+              },
+            ],
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({ error: 'component.notFound' });
+    });
+
+    describe('Component pluginOptions', () => {
+      const uid = 'basic.plugin-options';
+
+      const getComponent = () =>
+        rq({ method: 'GET', url: `/content-type-builder/components/${uid}` });
+
+      afterAll(async () => {
+        await rq({
+          method: 'POST',
+          url: '/content-type-builder/update-schema',
+          body: { data: { components: [{ action: 'delete', uid }] } },
+        });
+        // update-schema stays locked until the restart
+        await restart();
+      });
+
+      test('Component and field pluginOptions survive a create and an update', async () => {
+        const create = await rq({
+          method: 'POST',
+          url: '/content-type-builder/update-schema',
+          body: {
+            data: {
+              components: [
+                {
+                  action: 'create',
+                  uid,
+                  category: 'basic',
+                  displayName: 'Plugin Options',
+                  pluginOptions: { pluginName: { option: true } },
+                  attributes: [{ action: 'create', name: 'name', properties: { type: 'string' } }],
+                },
+              ],
+            },
+          },
+        });
+        expect(create.statusCode).toBe(200);
+
+        await restart();
+
+        const created = await getComponent();
+        expect(created.statusCode).toBe(200);
+        expect(created.body.data.schema.pluginOptions).toEqual({ pluginName: { option: true } });
+
+        const update = await rq({
+          method: 'POST',
+          url: '/content-type-builder/update-schema',
+          body: {
+            data: {
+              components: [
+                {
+                  action: 'update',
+                  uid,
+                  category: 'basic',
+                  displayName: 'Plugin Options',
+                  pluginOptions: { pluginName: { option: false } },
+                  attributes: [
+                    {
+                      action: 'update',
+                      name: 'name',
+                      properties: {
+                        type: 'string',
+                        pluginOptions: { pluginName: { option: true } },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        });
+        expect(update.statusCode).toBe(200);
+
+        await restart();
+
+        const updated = await getComponent();
+        expect(updated.statusCode).toBe(200);
+        expect(updated.body.data.schema.pluginOptions).toEqual({ pluginName: { option: false } });
+        expect(updated.body.data.schema.attributes.name).toMatchObject({
+          type: 'string',
+          pluginOptions: { pluginName: { option: true } },
+        });
+      });
+    });
   });
 
   describe('GET /content-type-builder/update-schema-status', () => {
@@ -601,15 +708,14 @@ describe('Content Type Builder - Schema', () => {
         },
       };
 
-      // try to run them in // so it blocks on of the 2 requests
+      // Either request may acquire the lock first; the invariant is one success and one conflict.
       const [resA, resB] = await Promise.all([rq(reqBody), rq(reqBody)]);
+      const responses = [resA, resB];
 
-      // check the other request is not blocked
-      expect(resA.statusCode).toBe(200);
+      expect(responses.map((res) => res.statusCode).sort()).toEqual([200, 409]);
 
-      // check one of the requests is blocked
-      expect(resB.statusCode).toBe(409);
-      expect(resB.body).toMatchObject({
+      const blocked = responses.find((res) => res.statusCode === 409);
+      expect(blocked.body).toMatchObject({
         error: {
           message: 'Schema update is already in progress.',
           name: 'ConflictError',

@@ -1,4 +1,4 @@
-import { createCommand } from 'commander';
+import { createCommand, Option } from 'commander';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -18,7 +18,19 @@ const command: StrapiCommand = ({ ctx }) => {
     .description(
       'Install or upgrade Strapi Enterprise plugins. Without package names, choose them from a list.'
     )
-    .action(runAction('enterprise:install', (packages: string[] = []) => install(packages, ctx)));
+    .addOption(
+      new Option(
+        '--registry <url>',
+        'URL of another Enterprise registry, for internal tests'
+      ).hideHelp()
+    )
+    .action(
+      runAction(
+        'enterprise:install',
+        (packages: string[] | undefined, options: { registry?: string }) =>
+          install(packages ?? [], options, ctx)
+      )
+    );
 
   return enterprise;
 };

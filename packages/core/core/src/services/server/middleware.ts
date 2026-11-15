@@ -6,8 +6,16 @@ const instantiateMiddleware = (
   middlewareFactory: Core.MiddlewareFactory,
   name: string,
   config: unknown,
-  strapi: Core.Strapi
+  strapi: Core.Strapi,
+  file?: string
 ) => {
+  // A module without a default export (e.g. an ESM `.js` file with only named exports, loaded
+  // through Node's `require(esm)`) is registered as its namespace object, not as a factory
+  if (typeof middlewareFactory !== 'function') {
+    const location = file === undefined ? '' : ` in ${file}`;
+    throw new Error(`Middleware "${name}" is not a function (no default export?)${location}`);
+  }
+
   try {
     return middlewareFactory(config, { strapi });
   } catch (e) {
@@ -73,6 +81,11 @@ const resolveMiddlewares = (
 
       if (name) {
         const middlewareFactory = strapi.middleware(name);
+
+        if (middlewareFactory === undefined) {
+          throw new Error(`Middleware ${name} not found.`);
+        }
+
         middlewares.push({
           name,
           handler:
@@ -83,11 +96,11 @@ const resolveMiddlewares = (
       }
 
       if (resolve) {
-        const resolvedMiddlewareFactory = resolveCustomMiddleware(resolve, strapi);
+        const { modulePath, middlewareFactory } = resolveCustomMiddleware(resolve, strapi);
         middlewares.push({
           name: resolve,
           handler:
-            instantiateMiddleware(resolvedMiddlewareFactory, resolve, config, strapi) ??
+            instantiateMiddleware(middlewareFactory, resolve, config, strapi, modulePath) ??
             dummyMiddleware,
         });
 
@@ -122,7 +135,7 @@ const resolveCustomMiddleware = (resolve: string, strapi: Core.Strapi) => {
   }
 
   try {
-    return importDefault(modulePath);
+    return { modulePath, middlewareFactory: importDefault(modulePath) };
   } catch {
     throw new Error(`Could not load middleware "${modulePath}".`);
   }
