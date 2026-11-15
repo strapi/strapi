@@ -71,7 +71,6 @@ describe('PendingAssetStep', () => {
               <Modal.Content>
                 <PendingAssetStep
                   assets={assets}
-                  onClose={jest.fn()}
                   onAddAsset={jest.fn()}
                   onEditAsset={jest.fn()}
                   onClickAddAsset={jest.fn()}

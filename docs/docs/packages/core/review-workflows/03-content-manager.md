@@ -56,5 +56,5 @@ Please refer to the [type definitions](./02-settings.md) for more information.
 
 #### License limits
 
-If the user has exceeded the license limit (based on their license) for either the number of workflows or the number of stages of the workflow assigned
-to the entities content-type, any stage update action will trigger a license-limit overlay and abort the request.
+If the workflow assigned to the entities content-type has more stages than the license limit, any stage update action will trigger a license-limit overlay and
+abort the request. The workflow limit does not block a stage update: it is enforced only when a workflow is created.

@@ -27,6 +27,12 @@ await strapi.db.transaction(async ({ trx, rollback, commit, onCommit, onRollback
 
 After the transaction handler is executed, the transaction is committed if all operations succeed. If any of the operations throws, the transaction is rolled back and the data is restored to its previous state.
 
+`onCommit` and `onRollback` callbacks run after the outermost transaction commits or rolls back. `strapi.db.transaction` does not wait for them to finish, so a write stays as fast as the database commit. Each callback runs synchronously up to its first `await` before the call resolves, and the rest of it runs after. Callbacks from the same commit or rollback run together. On the outermost transaction, a failing callback is logged, the others still run, and a rollback-callback error does not replace the error that caused the rollback. A commit-callback error does not roll the commit back.
+
+`db.destroy()` waits up to 10 seconds for hooks that belong to that database, then closes the connection pool. Hooks still running at the deadline are left running. Another database in the same process does not wait for them.
+
+Knex resolves `commit()` even when the database rejects `COMMIT`. The rejection is on the transactor's `executionPromise`. `onCommit` still runs once in that case, and `strapi.db.transaction` still resolves. The savepoint path reads this error from `executionPromise` and the transactor's `query-error` event.
+
 :::note
 Every `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
 :::
@@ -56,6 +62,28 @@ await strapi.db.transaction(async () => {
   await strapi.db.transaction(async ({}) => {
     await strapi.db.create();
   });
+});
+```
+
+A nested transaction has no savepoint of its own: an error inside it that is caught in the outer transaction does not undo the writes it made before the error.
+
+### Savepoints
+
+To undo only part of a transaction, run it in `strapi.db.savepoint`. If the callback throws, its writes are rolled back, the `onCommit` callbacks registered inside it are dropped (its `onRollback` callbacks run), and the error is rethrown; the transaction stays usable, on Postgres also after a database error. Those `onRollback` callbacks run one after another. A callback that throws replaces the error `savepoint` rethrows, and the callbacks after it do not run. On MySQL, a deadlock rolls back the whole transaction, not just the savepoint. If it resolves, its writes and callbacks join the transaction. It throws outside a transaction.
+
+If the database rejects releasing the savepoint or rolling back to it, typically because it already rolled back the whole transaction (a MySQL deadlock, or a lock wait timeout with `innodb_rollback_on_timeout`), `savepoint` throws a `SavepointError` (`errors.SavepointError` from `@strapi/database`), after running the savepoint's `onRollback` callbacks. Its `cause` is the database's error, and `details.error` what the callback threw, if it threw. Knex itself resolves a savepoint's `commit()`/`rollback()` in that case: only the transactor's `executionPromise` rejects, and on MySQL not even that for a savepoint that no longer exists (`ER_SP_DOES_NOT_EXIST`), which knex takes for an implicit commit by DDL and only logs as `Transaction was implicitly committed`. `savepoint` reads the error from the transactor's `query-error` event instead. Without this, the caller would go on as if the savepoint had ended, on MySQL outside any transaction. Don't catch it to carry on: let the transaction fail with it.
+
+```js
+await strapi.db.transaction(async () => {
+  for (const entry of entries) {
+    try {
+      await strapi.db.savepoint(() =>
+        strapi.documents(uid).publish({ documentId: entry.documentId })
+      );
+    } catch {
+      // Only this entry's writes are rolled back, the others stay
+    }
+  }
 });
 ```
 
@@ -91,7 +119,9 @@ await strapi.db.transaction(async ({ trx, rollback, commit }) => {
 
 ## When to use transactions
 
-Transactions should be used in cases where multiple operations should be executed together and their execution is dependent on each other. For example, when creating a new user, the user should be created in the database and a welcome email should be sent to the user. If the email fails to send, the user should not be created in the database.
+Transactions should be used when several database operations must succeed or fail together. For example, creating a user and the profile row that belongs to them. If creating the profile throws, the user insert is rolled back too.
+
+A side effect that must not happen for a rolled-back write, such as a welcome email, does not belong in the handler. Register the email with `onCommit`. It is sent once, after the commit. The transaction call returns before that send finishes. If the handler fails, the email is not sent. If the email fails, the user row stays, because the commit has already happened.
 
 ## When not to use transactions
 

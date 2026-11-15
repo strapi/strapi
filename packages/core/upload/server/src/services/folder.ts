@@ -1,18 +1,21 @@
 import { map, sortBy } from 'lodash';
-import { strings, setCreatorFields } from '@strapi/utils';
+import { errors, strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
+import { isIntegerId } from '../utils/integer-id';
+import { AUDITED_EVENTS } from '../audit-logs';
 
 import type { File, Folder } from '../types';
 
-type FolderMap = {
-  [key: string]: Partial<Folder> & {
-    children: FolderNode[];
-  };
+/**
+ * A node of the folder tree: `Folder.children` holds ids, a node's children hold nodes.
+ */
+type FolderNode = Partial<Omit<Folder, 'children'>> & {
+  children: FolderNode[];
 };
 
-type FolderNode = Partial<Folder> & {
-  children: FolderNode[];
+type FolderMap = {
+  [key: string]: FolderNode;
 };
 
 type DeleteByIdsOptions = {
@@ -106,6 +109,9 @@ const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOpt
   });
 
   strapi.eventHub.emit('media-folder.delete', { folders });
+  folders.forEach((folder: Folder) => {
+    strapi.eventHub.emit(AUDITED_EVENTS.FOLDER_DELETE_AUDIT, { folder });
+  });
 
   return {
     folders,
@@ -134,7 +140,9 @@ const update = async (
 ) => {
   // only name is updated
   if (parent === undefined) {
-    const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
+    const existingFolder = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id }, populate: { parent: { select: ['id', 'name'] } } });
 
     if (!existingFolder) {
       return undefined;
@@ -147,10 +155,19 @@ const update = async (
         .query(FOLDER_MODEL_UID)
         .update({ where: { id }, data: newFolder });
 
+      strapi.eventHub.emit('media-folder.update', {
+        folder: { ...folder, parent: existingFolder.parent ?? null },
+        previous: existingFolder,
+      });
+
       return folder;
     }
     // location is updated => using transaction
   } else {
+    const previous = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id }, populate: { parent: { select: ['id', 'name'] } } });
+
     const trx = await strapi.db.transaction();
     try {
       // fetch existing folder
@@ -161,7 +178,45 @@ const update = async (
         .transacting(trx.get())
         .forUpdate()
         .first()
-        .execute<Folder>();
+        .execute<Folder | undefined>();
+
+      // Answer like the rename does (404), instead of failing on the path rewrite below.
+      if (existingFolder === undefined || existingFolder === null) {
+        await trx.rollback();
+        return undefined;
+      }
+
+      const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
+      const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
+      const folderPathColumnName =
+        // @ts-expect-error - no dynamic types
+        strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
+      // @ts-expect-error - no dynamic types
+      const pathColumnName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
+
+      // fetch destinationFolder path
+      let destinationFolderPath = '/';
+      if (parent !== null) {
+        // A share lock keeps the destination from being deleted or moved until the move commits,
+        // and still lets other requests create subfolders or upload files into it (their foreign
+        // key checks take a compatible lock). SQLite ignores the clause: it serializes writers.
+        const destinationFolder: Record<string, string> | undefined = await strapi.db
+          .getConnection(folderTable)
+          .transacting(trx.get())
+          .select(pathColumnName)
+          .where('id', parent)
+          .forShare()
+          .first();
+
+        // Request validation checks the parent exists, but it can be deleted (e.g. by another admin)
+        // before this lookup runs. Answer like the validation does, before linking to it; the catch
+        // rolls back.
+        if (destinationFolder === undefined || destinationFolder === null) {
+          throw new errors.ValidationError('parent folder does not exist');
+        }
+
+        destinationFolderPath = destinationFolder[pathColumnName];
+      }
 
       // update parent folder (delete + insert; upsert not possible)
       // @ts-expect-error - no dynamic types
@@ -181,27 +236,6 @@ const update = async (
           .where({ [joinTable.joinColumn.name]: id })
           .execute();
       }
-
-      // fetch destinationFolder path
-      let destinationFolderPath = '/';
-      if (parent !== null) {
-        const destinationFolder = await strapi.db
-          .queryBuilder(FOLDER_MODEL_UID)
-          .select('path')
-          .where({ id: parent })
-          .transacting(trx.get())
-          .first()
-          .execute<Folder>();
-        destinationFolderPath = destinationFolder.path;
-      }
-
-      const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
-      const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
-      const folderPathColumnName =
-        // @ts-expect-error - no dynamic types
-        strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
-      // @ts-expect-error - no dynamic types
-      const pathColumnName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
 
       // update folders below
       await strapi.db
@@ -246,7 +280,17 @@ const update = async (
       .query(FOLDER_MODEL_UID)
       .update({ where: { id }, data: newFolder });
 
-    strapi.eventHub.emit('media-folder.update', { folder });
+    const parentFolder =
+      parent === null
+        ? null
+        : await strapi.db
+            .query(FOLDER_MODEL_UID)
+            .findOne({ where: { id: parent }, select: ['id', 'name'] });
+
+    strapi.eventHub.emit('media-folder.update', {
+      folder: { ...folder, parent: parentFolder },
+      previous,
+    });
     return folder;
   }
 };
@@ -259,6 +303,34 @@ const update = async (
 const exists = async (params = {}) => {
   const count = await strapi.db.query(FOLDER_MODEL_UID).count({ where: params });
   return count > 0;
+};
+
+/**
+ * Maps each folder `path` (made of `pathId`s, e.g. `/1/4/7`) to the same path made of
+ * folder names (e.g. `/Clients/Acme/2026`), with a single query for all the ancestors.
+ */
+const getNamePaths = async (paths: (string | null)[]): Promise<Record<string, string>> => {
+  const validPaths = paths.filter((path): path is string => typeof path === 'string');
+  const segmentsByPath = validPaths.map((path) => path.split('/').filter(Boolean));
+  const pathIds = [...new Set(segmentsByPath.flat())].filter(isIntegerId).map(Number);
+
+  const ancestors: Pick<Folder, 'pathId' | 'name'>[] = pathIds.length
+    ? await strapi.db
+        .query(FOLDER_MODEL_UID)
+        .findMany({ select: ['pathId', 'name'], where: { pathId: { $in: pathIds } } })
+    : [];
+
+  const nameByPathId = new Map(ancestors.map(({ pathId, name }) => [String(pathId), name]));
+
+  return Object.fromEntries(
+    validPaths.map((path, index) => [
+      path,
+      `/${segmentsByPath[index]
+        .map((pathId) => nameByPathId.get(pathId))
+        .filter((name) => name !== undefined)
+        .join('/')}`,
+    ])
+  );
 };
 
 /**
@@ -311,4 +383,5 @@ export default {
   update,
   setPathIdAndPath,
   getStructure,
+  getNamePaths,
 };

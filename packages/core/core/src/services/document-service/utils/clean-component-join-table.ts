@@ -86,7 +86,7 @@ const findContentTypeParentForComponentInstance = async (
   if (strapi.components[parent.uid as keyof typeof strapi.components]) {
     // If the parent is a component, we need to check its parents recursively
     const parentComponentSchema = strapi.components[parent.uid as keyof typeof strapi.components];
-    return findContentTypeParentForComponentInstance(parentComponentSchema, parent.parentId);
+    return await findContentTypeParentForComponentInstance(parentComponentSchema, parent.parentId);
   }
 
   if (strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes]) {

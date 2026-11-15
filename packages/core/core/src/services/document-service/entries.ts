@@ -147,7 +147,7 @@ const createEntriesService = (
 
     const entryData = applyTransforms(contentType, dataWithComponents);
 
-    return strapi.db
+    return await strapi.db
       .query(uid)
       .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
   }
@@ -156,7 +156,7 @@ const createEntriesService = (
     clearTransformDataRequestCache();
     const publishedAt = new Date();
 
-    return async.pipe(
+    return await async.pipe(
       (value) => omit(value, 'id'),
       (value) => ({ ...value, publishedAt }),
       (draft) => {
@@ -177,7 +177,7 @@ const createEntriesService = (
   async function discardDraftEntry(entry: any, params = {} as any) {
     clearTransformDataRequestCache();
 
-    return async.pipe(
+    return await async.pipe(
       (value) => omit(value, 'id'),
       (value) => ({ ...value, publishedAt: null }),
       (entry) => {

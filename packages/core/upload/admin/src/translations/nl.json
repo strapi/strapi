@@ -216,7 +216,5 @@
   "view-switch.list": "Lijstweergave",
   "view.grid": "Rasterweergave",
   "view.switch.label": "Weergaveopties",
-  "view.table": "Tabelweergave",
-  "window.confirm.close-modal.file": "Weet je het zeker? Je wijzigingen gaan verloren.",
-  "window.confirm.close-modal.files": "Weet je het zeker? Er zijn bestanden die nog niet zijn geüpload."
+  "view.table": "Tabelweergave"
 }

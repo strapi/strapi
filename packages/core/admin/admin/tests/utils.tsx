@@ -198,10 +198,10 @@ const Providers = ({
                       light: lightTheme,
                     }}
                   >
-                    <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
-                      <QueryClientProvider client={queryClientRef.current!}>
-                        <DndProvider backend={HTML5Backend}>
-                          <NotificationsProvider>
+                    <NotificationsProvider>
+                      <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+                        <QueryClientProvider client={queryClientRef.current!}>
+                          <DndProvider backend={HTML5Backend}>
                             <GuidedTourContext enabled={false}>
                               <ConfigurationContextProvider
                                 showReleaseNotification={false}
@@ -226,10 +226,10 @@ const Providers = ({
                                 </AppInfoProvider>
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
-                          </NotificationsProvider>
-                        </DndProvider>
-                      </QueryClientProvider>
-                    </AuthProvider>
+                          </DndProvider>
+                        </QueryClientProvider>
+                      </AuthProvider>
+                    </NotificationsProvider>
                   </Theme>
                 </LanguageProvider>
               </Provider>

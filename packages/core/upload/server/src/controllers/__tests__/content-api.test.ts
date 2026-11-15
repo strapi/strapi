@@ -60,6 +60,7 @@ describe('Content API Controller - find / findPage', () => {
 
     globalThis.strapi = {
       getModel: jest.fn().mockReturnValue({ uid: 'plugin::upload.file' }),
+      config: { get: jest.fn() },
       contentAPI: {
         validate: { query: mockValidateQuery },
         sanitize: { query: mockSanitizeQuery, output: mockSanitizeOutput },
@@ -133,6 +134,70 @@ describe('Content API Controller - find / findPage', () => {
       expect(mockValidateQuery).toHaveBeenCalled();
       expect(mockSanitizeQuery).toHaveBeenCalled();
     });
+  });
+
+  describe('strict query sanitization', () => {
+    it.each(['find', 'findPage', 'findOne'] as const)(
+      '%s sanitizes the query with strictParams so unknown root keys (e.g. `where`) are dropped',
+      async (handler) => {
+        const route = { method: 'GET', path: '/files' };
+        mockContext.query = { where: { name: 'file.png' } } as any;
+        mockContext.params = { id: '1' };
+        (mockContext.state as any).route = route;
+        mockUploadService.findMany.mockResolvedValue([]);
+        mockUploadService.findAndCountPage.mockResolvedValue({ results: [], pagination: {} });
+        mockUploadService.findOne.mockResolvedValue(null);
+
+        await buildController()[handler](mockContext);
+
+        expect(mockSanitizeQuery).toHaveBeenCalledWith(
+          mockContext.query,
+          { uid: 'plugin::upload.file' },
+          { auth: {}, route, strictParams: true }
+        );
+      }
+    );
+
+    it.each(['find', 'findPage', 'findOne'] as const)(
+      '%s validates leniently when api.rest.strictParams is not set',
+      async (handler) => {
+        const route = { method: 'GET', path: '/files' };
+        mockContext.query = {} as any;
+        mockContext.params = { id: '1' };
+        (mockContext.state as any).route = route;
+        mockUploadService.findMany.mockResolvedValue([]);
+        mockUploadService.findAndCountPage.mockResolvedValue({ results: [], pagination: {} });
+        mockUploadService.findOne.mockResolvedValue({ id: 1 });
+
+        await buildController()[handler](mockContext);
+
+        expect((globalThis.strapi as any).config.get).toHaveBeenCalledWith('api.rest.strictParams');
+        expect(mockValidateQuery).toHaveBeenCalledWith(
+          mockContext.query,
+          { uid: 'plugin::upload.file' },
+          { auth: {}, route }
+        );
+      }
+    );
+
+    it.each([true, false])(
+      'passes api.rest.strictParams=%s through to validate',
+      async (strictParams) => {
+        const route = { method: 'GET', path: '/files' };
+        mockContext.query = {} as any;
+        (mockContext.state as any).route = route;
+        (globalThis.strapi as any).config.get.mockReturnValue(strictParams);
+        mockUploadService.findMany.mockResolvedValue([]);
+
+        await buildController().find(mockContext);
+
+        expect(mockValidateQuery).toHaveBeenCalledWith(
+          mockContext.query,
+          { uid: 'plugin::upload.file' },
+          { auth: {}, route, strictParams }
+        );
+      }
+    );
   });
 
   describe('findPage - paginated endpoint (GET /files/page)', () => {

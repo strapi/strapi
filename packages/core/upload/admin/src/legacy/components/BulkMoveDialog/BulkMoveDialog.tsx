@@ -1,3 +1,4 @@
+import { FormikUnsavedChangesRegistrar } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Grid, Field, Loader, Modal, Typography } from '@strapi/design-system';
 import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
@@ -110,6 +111,7 @@ export const BulkMoveDialog = ({
       <Formik validateOnChange={false} onSubmit={handleSubmit} initialValues={initialFormData}>
         {({ values, errors, setFieldValue }) => (
           <Form noValidate>
+            <FormikUnsavedChangesRegistrar />
             <Modal.Header>
               <Modal.Title>
                 {formatMessage({

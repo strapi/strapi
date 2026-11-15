@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 
+import { getMaximumReleases } from '../../shared/license';
+
 /**
  * Exposes the pending-release cap to the Plan card and the debug dump, defaulting the same way
  * `validatePendingReleasesLimit` does. Registered whatever the boot-time license says, so a
@@ -13,7 +15,9 @@ export const registerReleasesEntitlements = (strapi: Core.Strapi) => {
         key: 'maximumReleases',
         unit: 'count',
         get: (feature) =>
-          (typeof feature === 'object' ? feature.options?.maximumReleases : undefined) || 3,
+          getMaximumReleases(
+            typeof feature === 'object' ? feature.options?.maximumReleases : undefined
+          ),
       },
     ],
   });
