@@ -17,9 +17,7 @@ const createCoreController = <
   TController extends Core.CoreAPI.Controller.Extendable<TUID>,
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<
-    Utils.PartialWithThis<Core.CoreAPI.Controller.Extendable<TUID> & TController>
-  >
+  cfg?: WithStrapiCallback<Core.CoreAPI.Controller.FactoryConfig<TUID, TController>>
 ) => {
   return ({
     strapi,

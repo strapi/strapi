@@ -33,6 +33,23 @@ describe('installPackages', () => {
       installSpecs: SPECS,
     });
 
+  it('adds the given environment to the package manager environment', async () => {
+    execaMock.mockResolvedValue({});
+
+    await installPackages({
+      appDir: '/app',
+      packageManager: { name: 'npm', majorVersion: 10 },
+      installSpecs: SPECS,
+      env: { NPM_CONFIG_USERCONFIG: '/tmp/.npmrc' },
+    });
+
+    expect(execaMock).toHaveBeenCalledWith(
+      'npm',
+      ['install', '--save-exact', ...SPECS],
+      expect.objectContaining({ cwd: '/app', env: { NPM_CONFIG_USERCONFIG: '/tmp/.npmrc' } })
+    );
+  });
+
   it('keeps the exit code of a failed install, since the package manager printed its output', async () => {
     execaMock.mockRejectedValue(Object.assign(new Error('Command failed'), { exitCode: 2 }));
 

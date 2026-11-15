@@ -54,17 +54,26 @@ const providerFactory = <T = Item>(options: Options = {}): Provider<T> => {
   const state = {
     hooks: createProviderHooksMap(),
     registry: new Map<string, T>(),
+    // Keys whose registration is awaiting the willRegister hook
+    pendingKeys: new Set<string>(),
   };
 
   return {
     hooks: state.hooks,
 
     async register(key: string, item: T) {
-      if (throwOnDuplicates && this.has(key)) {
+      if (throwOnDuplicates && (this.has(key) || state.pendingKeys.has(key))) {
         throw new Error(`Duplicated item key: ${key}`);
       }
 
-      await state.hooks.willRegister.call({ key, value: item });
+      // Reserve the key so a concurrent registration of the same key throws
+      state.pendingKeys.add(key);
+
+      try {
+        await state.hooks.willRegister.call({ key, value: item });
+      } finally {
+        state.pendingKeys.delete(key);
+      }
 
       state.registry.set(key, item);
 

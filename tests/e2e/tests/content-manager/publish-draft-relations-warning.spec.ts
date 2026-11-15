@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { clickAndWait, findAndClose } from '../../../utils/shared';
 
@@ -9,8 +9,8 @@ const CREATE_URL =
 test.describe('Publish with draft relations warning', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('warns on publish with bidirectional M2M draft relations', async ({ page }) => {

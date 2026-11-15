@@ -4,6 +4,7 @@ import fse from 'fs-extra';
 import {
   canCheckStrapiCompatibility,
   describeNewerIncompatibleVersion,
+  findUnsupportedStrapiRange,
   isMajorUpgrade,
   isUpgrade,
   pickTargetVersion,
@@ -71,6 +72,26 @@ describe('pickTargetVersion', () => {
       newestVersionStrapiRange: undefined,
     });
   });
+
+  it('removes terminal control sequences from the Strapi range it reports', () => {
+    const packument = createPackument('@strapi-enterprise/plugin-ai-byok', [
+      { version: '1.0.0', strapiRange: '\u001B[2J^5.0.0' },
+    ]);
+
+    expect(pickTargetVersion(packument, '5.54.1').newestVersionStrapiRange).toBe('^5.0.0');
+  });
+
+  it('skips a version that is not a clean version', () => {
+    const packument = createPackument('@strapi-enterprise/plugin-ai-byok', [
+      { version: '1.0.0' },
+      { version: '\r1.1.0' },
+    ]);
+
+    expect(pickTargetVersion(packument, '5.54.1')).toMatchObject({
+      targetVersion: '1.0.0',
+      newestVersion: '1.0.0',
+    });
+  });
 });
 
 describe('describeNewerIncompatibleVersion', () => {
@@ -122,6 +143,27 @@ describe('pickTargetVersion and dist-tags.latest', () => {
   });
 });
 
+describe('resolveRequestedVersion with a tag', () => {
+  it.each(['\u001B[2J1.0.0', '\r1.0.0'])(
+    'rejects a tag that points to a version key that is not a clean version (%j)',
+    (version) => {
+      const packument = createPackument('@strapi-enterprise/plugin-ai-byok', [{ version }], {
+        latest: version,
+      });
+
+      expect(resolveRequestedVersion(packument, 'latest', '5.54.1')).toBeUndefined();
+    }
+  );
+
+  it('rejects a version in the range that is not a clean version', () => {
+    const packument = createPackument('@strapi-enterprise/plugin-ai-byok', [
+      { version: '\r1.0.0' },
+    ]);
+
+    expect(resolveRequestedVersion(packument, '^1.0.0', '5.54.1')).toBeUndefined();
+  });
+});
+
 describe('resolveRequestedVersion with a range', () => {
   const packument = createPackument(
     '@strapi-enterprise/plugin-ai-byok',
@@ -157,6 +199,16 @@ describe('resolveRequestedVersion with a range', () => {
 
   it('is undefined for a range with no published version', () => {
     expect(resolveRequestedVersion(packument, '^2.0.0', '5.54.1')).toBeUndefined();
+  });
+});
+
+describe('findUnsupportedStrapiRange', () => {
+  it('removes terminal control sequences from the Strapi range it returns', () => {
+    const packument = createPackument('@strapi-enterprise/plugin-ai-byok', [
+      { version: '1.0.0', strapiRange: '\u001B[2J^6.0.0' },
+    ]);
+
+    expect(findUnsupportedStrapiRange(packument, '1.0.0', '5.54.1')).toBe('^6.0.0');
   });
 });
 

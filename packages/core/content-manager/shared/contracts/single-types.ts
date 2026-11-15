@@ -10,6 +10,10 @@ type DocumentMetadata = {
   availableStatus: Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>[];
   // Available locales within the same status of the returned document
   availableLocales: Pick<Document, 'id' | 'locale' | 'status' | AT_FIELDS>[];
+  /**
+   * i18n default locale code. See collection-types DocumentMetadata.
+   */
+  defaultLocale?: string | null;
 };
 
 /**

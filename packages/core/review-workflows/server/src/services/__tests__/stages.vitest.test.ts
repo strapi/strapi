@@ -6,9 +6,6 @@ import { STAGE_MODEL_UID } from '../../constants/workflows';
 
 vi.mock('../../utils', () => ({
   getService: vi.fn((name: string) => {
-    if (name === 'validation') {
-      return { validateWorkflowCount: vi.fn() };
-    }
     if (name === 'workflow-metrics') {
       return {
         sendDidCreateStage: vi.fn(),

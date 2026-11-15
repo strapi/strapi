@@ -10,6 +10,7 @@ export default defineProvider({
     strapi.add('webhookRunner', () =>
       createWebhookRunner({
         eventHub: strapi.eventHub,
+        requestContext: strapi.requestContext,
         logger: strapi.log,
         configuration: strapi.config.get('server.webhooks', {}),
         fetch: strapi.fetch,
