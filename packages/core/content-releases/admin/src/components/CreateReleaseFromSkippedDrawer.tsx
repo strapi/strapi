@@ -61,12 +61,17 @@ export const CreateReleaseFromSkippedDrawer = ({
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [createRelease, { isLoading: isSubmitting }] = useCreateReleaseFromSkippedEntriesMutation();
-  const {
-    data: skippedData,
-    isLoading: isLoadingEntries,
-    isError: isEntriesError,
-    error: entriesError,
-  } = useGetReleaseActionsQuery(getSkippedEntriesQuery(release.id), { skip: !open });
+  const firstPage = useGetReleaseActionsQuery(getSkippedEntriesQuery(release.id), { skip: !open });
+  const hasMoreEntries = firstPage.data !== undefined && !hasLoadedEveryEntry(firstPage.data);
+  const everyEntry = useGetReleaseActionsQuery(
+    { ...getSkippedEntriesQuery(release.id), pageSize: firstPage.data?.meta.pagination.total ?? 0 },
+    { skip: !open || !hasMoreEntries }
+  );
+  const skippedData = hasMoreEntries ? everyEntry.data : firstPage.data;
+  const isEntriesError = firstPage.isError || (hasMoreEntries && everyEntry.isError);
+  const entriesError = firstPage.error ?? everyEntry.error;
+  const isLoadingEntries =
+    firstPage.isLoading || (hasMoreEntries && everyEntry.data === undefined && !isEntriesError);
   const { data: settings } = useGetReleaseSettingsQuery(undefined, { skip: !open });
   const [removedIds, setRemovedIds] = React.useState<Set<FormattedReleaseAction['id']>>(new Set());
   const [isExpanded, setIsExpanded] = React.useState(false);

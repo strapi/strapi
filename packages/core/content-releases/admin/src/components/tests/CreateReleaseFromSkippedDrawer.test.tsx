@@ -197,6 +197,54 @@ describe('CreateReleaseFromSkippedDrawer', () => {
     );
   });
 
+  it('loads, lists and lets remove every skipped entry past the first page', async () => {
+    const count = 109;
+    const actions = Array.from({ length: count }, (_, index) =>
+      skippedAction(index + 1, `Entry ${index + 1}`)
+    );
+    const pageSizes: string[] = [];
+    server.use(
+      http.get('/content-releases/:releaseId/actions', ({ request }) => {
+        const pageSize = Number(new URL(request.url).searchParams.get('pageSize'));
+        pageSizes.push(String(pageSize));
+
+        return HttpResponse.json({
+          data: { Article: actions.slice(0, pageSize) },
+          meta: {
+            pagination: { page: 1, pageSize, total: count, pageCount: Math.ceil(count / pageSize) },
+            contentTypes: {},
+            components: {},
+          },
+        });
+      }),
+      http.get('/content-releases/settings', () =>
+        HttpResponse.json({ data: { defaultTimezone: null } })
+      )
+    );
+    const requestBody = captureCreateRequest();
+
+    const { user } = renderDrawer();
+
+    await screen.findByText(`${count} entries carried over`);
+    expect(pageSizes).toEqual(['100', String(count)]);
+
+    await user.click(screen.getByRole('button', { name: 'Show more' }));
+    expect(screen.getByText(`Entry ${count}`)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: `Remove Entry ${count}` }));
+    expect(screen.getByText(`${count - 1} entries carried over`)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('checkbox', { name: "I don't have a release date yet" }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create release' }));
+
+    await waitFor(() => expect(requestBody).toHaveBeenCalled());
+    expect(requestBody).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionIds: actions.slice(0, count - 1).map((action) => action.id),
+      })
+    );
+  });
+
   it("explains that the skipped entries couldn't be loaded", async () => {
     server.use(
       http.get('/content-releases/:releaseId/actions', () =>
