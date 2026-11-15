@@ -218,7 +218,7 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
 
     // Modify
     await clickAndWait(page, draftTab);
-    titleBox.fill('West Ham pre match jokes');
+    await titleBox.fill('West Ham pre match jokes');
     await expect(saveButton).toBeEnabled();
     await clickAndWait(page, saveButton);
     await expect(titleBox).toHaveValue(/west ham pre match jokes/i);
