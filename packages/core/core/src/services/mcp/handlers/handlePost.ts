@@ -53,6 +53,7 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
         ability: authResult.ability,
         user: authResult.user,
         toolSchemaScope: resolveToolSchemaScope(requestBody),
+        maxToolInputElements: config.maxToolInputElements,
       });
 
       const transport = new NodeStreamableHTTPServerTransport({

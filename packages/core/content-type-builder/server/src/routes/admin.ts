@@ -1,4 +1,4 @@
-import { isDevelopmentMode } from '../middlewares';
+import isDevelopmentMode from '../middlewares/is-development-mode';
 
 export default {
   type: 'admin',

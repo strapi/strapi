@@ -98,7 +98,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
   });
 };
 
-const getPublishedAtClause = (status: string, uid: UID.Schema) => {
+const getPublishedAtClause = (status: string | undefined, uid: UID.Schema) => {
   const model = strapi.getModel(uid);
 
   /**
@@ -167,6 +167,15 @@ export default {
       );
     }
 
+    // Morph-to relations (morphToOne, morphToMany) have no single target model.
+    // `attribute` is still `any` here: the `in` check prepares the narrowing for the strict types
+    // branch, where `attribute` is typed and only the relations that declare a target pass it.
+    if (!('target' in attribute) || attribute.target === undefined) {
+      throw new errors.ValidationError(
+        `The relational field ${targetField} on ${model} has no target model`
+      );
+    }
+
     const sourceUid = model;
     const targetUid = attribute.target;
 
@@ -185,7 +194,7 @@ export default {
     const isComponent = sourceSchema.modelType === 'component';
     if (!isComponent) {
       if (permissionChecker.cannot.read(null, targetField)) {
-        return ctx.forbidden();
+        throw new errors.ForbiddenError();
       }
     }
 

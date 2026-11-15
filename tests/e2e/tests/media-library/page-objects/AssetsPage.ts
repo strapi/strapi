@@ -40,6 +40,9 @@ export class AssetsPage {
   }
 
   async goto() {
+    // A full navigation can cancel an in-flight login request, particularly in WebKit.
+    await expect(this.page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+
     // Deliberately no wait for `New` here: a role without `assets.create` never gets it,
     // so a spec covering a read-only user would hang rather than fail. A spec that acts
     // on a create affordance as its first move waits for it itself.
@@ -420,6 +423,19 @@ export class AssetsPage {
   }
 
   /**
+   * Read the drawer's Dimensions detail ("5,616 × 3,744") as numbers.
+   */
+  async readDrawerDimensions() {
+    const [width, height] = (
+      (await this.getDrawerDetailValue('Dimensions').first().textContent()) ?? ''
+    )
+      .replace(/[,\s]/g, '')
+      .split(/[x×]/)
+      .map(Number);
+    return { width, height };
+  }
+
+  /**
    * Close the asset details drawer
    */
   async closeAssetDetailsDrawer() {
@@ -544,11 +560,30 @@ export class AssetsPage {
   }
 
   /**
+   * Read a number field of the crop editor. They render with the locale's group
+   * separator ("5,616"), so the value is parsed rather than compared as text.
+   */
+  async readCropEditorNumber(label: string) {
+    return Number(
+      (await this.page.getByLabel(label, { exact: true }).inputValue()).replace(/[^\d.-]/g, '')
+    );
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {
     await this.openNewMenu();
     await this.newFolderMenuItem.click();
+  }
+
+  /**
+   * Confirm the "You have unsaved changes" prompt shown when dismissing a dialog with typed changes
+   */
+  async confirmDiscardChanges() {
+    const confirm = this.page.getByRole('alertdialog');
+    await expect(confirm).toContainText('You have unsaved changes');
+    await confirm.getByRole('button', { name: 'Confirm' }).click();
   }
 
   /**

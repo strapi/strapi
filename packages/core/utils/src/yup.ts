@@ -4,6 +4,7 @@ import * as yup from 'yup';
 import _, { isNumber, get } from 'lodash';
 import { strings } from './primitives';
 import { printValue } from './print-value';
+import { EMAIL_REGEX } from './email-regex';
 
 export * from 'yup';
 
@@ -87,6 +88,25 @@ yup.addMethod(
       }
       return true;
     });
+  }
+);
+
+// Stock yup reads the default message from its locale each time `.email()` is called, so
+// `yup.setLocale({ string: { email } })` takes effect. Building a schema with yup's own method and
+// reading the message it stored keeps that behaviour, without running any input through the old
+// regex.
+const yupEmail = yup.StringSchema.prototype.email;
+
+const defaultEmailMessage = () => {
+  const { tests } = yupEmail.call(yup.string());
+  return tests[tests.length - 1].OPTIONS.message;
+};
+
+yup.addMethod(
+  yup.string,
+  'email',
+  function email(message: Parameters<yup.StringSchema['email']>[0] = defaultEmailMessage()) {
+    return this.matches(EMAIL_REGEX, { name: 'email', message, excludeEmptyString: true });
   }
 );
 

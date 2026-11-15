@@ -3,9 +3,8 @@ import * as React from 'react';
 import { useDroppable, DndContext, UniqueIdentifier, DragOverlay } from '@dnd-kit/core';
 import { arraySwap, SortableContext, useSortable, rectSwappingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useField, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
+import { UnsavedChangesModal, useField, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
-  Modal,
   Box,
   Flex,
   Grid,
@@ -629,7 +628,7 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
   }
 
   return (
-    <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <UnsavedChangesModal open={isModalOpen} onOpenChange={setIsModalOpen}>
       <Flex
         borderColor="neutral150"
         background="neutral100"
@@ -780,7 +779,7 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
       {value.name !== TEMP_FIELD_NAME && (
         <EditFieldForm attribute={attribute} name={name} onClose={() => setIsModalOpen(false)} />
       )}
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

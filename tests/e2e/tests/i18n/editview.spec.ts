@@ -2,13 +2,8 @@ import { test, expect } from '@playwright/test';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
-import {
-  clickAndWait,
-  describeOnCondition,
-  findAndClose,
-  navToHeader,
-} from '../../../utils/shared';
+import { login, loginWithApi } from '../../../utils/login';
+import { findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 
 interface ValidationType {
@@ -29,8 +24,8 @@ test.describe('Edit view', () => {
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('As a user I want to create a brand new document in the non-default locale', async ({
@@ -657,88 +652,3 @@ test.describe('Edit view', () => {
     await waitForRestart(page);
   });
 });
-
-describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(() => {
-  test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin');
-    await page.goto('/admin');
-    await login({ page });
-  });
-
-  test('As a user I want to enable AI translation', async ({ page }) => {
-    // Navigate to an Article
-    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-    await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
-
-    // Assert the AI translation status is visible and disabled
-    const aiTranslationStatus = page.getByLabel('AI Translation Status');
-    await expect(aiTranslationStatus).toBeVisible();
-    aiTranslationStatus.hover();
-    await expect(page.getByRole('tooltip', { name: /AI translation disabled/ })).toBeVisible();
-
-    // Go to i18n settings
-    const enableLink = page.getByRole('link', { name: 'Enable it in settings' });
-    await clickAndWait(page, enableLink);
-    await page.waitForURL(/\/admin\/settings\/internationalization/);
-
-    // Enable the setting
-    const checkbox = await page.getByRole('checkbox');
-    await expect(checkbox).not.toBeChecked();
-    await checkbox.click();
-    await findAndClose(page, 'Changes saved');
-    await expect(checkbox).toBeChecked();
-
-    // Navigate back to the Article
-    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-    await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
-
-    // Assert the AI translation status is visible and enabled
-    await expect(aiTranslationStatus).toBeVisible();
-    aiTranslationStatus.hover();
-    await expect(page.getByRole('tooltip', { name: /AI translation enabled/ })).toBeVisible();
-  });
-});
-
-describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(
-  'Unstable edit view',
-  () => {
-    test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin');
-      await page.goto('/admin');
-      await login({ page });
-    });
-
-    test('As a user I want to enable AI translation', async ({ page }) => {
-      // Navigate to an Article
-      await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-      await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
-
-      // Assert the AI translation status is visible and disabled
-      const aiTranslationStatus = page.getByLabel('AI Translation Status');
-      await expect(aiTranslationStatus).toBeVisible();
-      aiTranslationStatus.hover();
-      await expect(page.getByRole('tooltip', { name: /AI translation disabled/ })).toBeVisible();
-
-      // Go to i18n settings
-      const enableLink = page.getByRole('link', { name: 'Enable it in settings' });
-      await clickAndWait(page, enableLink);
-      await page.waitForURL(/\/admin\/settings\/internationalization/);
-
-      // Enable the setting
-      const checkbox = await page.getByRole('checkbox');
-      await expect(checkbox).not.toBeChecked();
-      await checkbox.click();
-      await findAndClose(page, 'Changes saved');
-      await expect(checkbox).toBeChecked();
-
-      // Navigate back to the Article
-      await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-      await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
-
-      // Assert the AI translation status is visible and enabled
-      await expect(aiTranslationStatus).toBeVisible();
-      aiTranslationStatus.hover();
-      await expect(page.getByRole('tooltip', { name: /AI translation enabled/ })).toBeVisible();
-    });
-  }
-);

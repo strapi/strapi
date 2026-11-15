@@ -1,9 +1,11 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import tailwindcss from '@tailwindcss/postcss';
 import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 import { Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
@@ -14,11 +16,42 @@ import { getUserConfig } from '../core/config';
 import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
-import { buildSingletonAliasEntries } from '../core/admin-vite-aliases';
+import { buildSingletonAliasEntries, getSubpathEntries } from '../core/admin-vite-aliases';
 
-const resolveBaseConfig = async (ctx: BuildContext) => {
+// esbuild's support table does not recognize current browserslist versions, so the
+// intersection of those targets is reported as missing arbitrary module namespace
+// names. Dual-published packages then fail on `export { x as "module.exports" }`.
+// The syntax has been supported by the admin's browsers since 2021.
+const esbuildSupported = {
+  'arbitrary-module-namespace-names': true,
+};
+
+const strapiProcessEnvPlugins = new WeakSet<object>();
+
+const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'production') => {
   const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
+  const bundledEnv = { ...ctx.env, NODE_ENV: nodeEnv };
+
+  const definePlugin = new DefinePlugin({
+    ...Object.entries(bundledEnv).reduce<Record<string, string>>((acc, [key, value]) => {
+      acc[`process.env.${key}`] = JSON.stringify(value);
+      return acc;
+    }, {}),
+    // Unlisted `process.env.*` reads (optional flags) must resolve to undefined
+    // in the browser instead of throwing `process is not defined`.
+    // mergeConfigWithUserConfig drops this key when src/admin/webpack.config
+    // defines `process.env` itself. This plugin is applied first, and webpack
+    // keeps the first value for an expression, so the key would hide the user's.
+    'process.env': JSON.stringify(bundledEnv),
+    // picomatch (via micromatch) reads `process.platform` on load and `process.version`
+    // for lookbehind patterns.
+    'process.platform': JSON.stringify('browser'),
+    'process.version': JSON.stringify(''),
+  });
+  strapiProcessEnvPlugins.add(definePlugin);
+
+  const cssLoaders = [require.resolve('style-loader'), require.resolve('css-loader')];
 
   return {
     experiments: {
@@ -34,6 +67,10 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         'styled-components': getModulePath('styled-components'),
         'react-router-dom': getModulePath('react-router-dom'),
         // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
+        // Exact `$` keys reach each exports subpath; the bare key matches subpath imports, so it comes last
+        ...Object.fromEntries(
+          getSubpathEntries('@strapi/design-system').map(([key, file]) => [`${key}$`, file])
+        ),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         // Force a single CodeMirror instance (resolved from design-system's closure) so the JSON
         // custom field does not crash on cross-copy instanceof checks. Tolerant: unresolvable
@@ -42,16 +79,34 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
       },
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
+      // micromatch (used by the content-type builder) imports Node builtins.
+      fallback: {
+        path: require.resolve('path-browserify'),
+        // Trailing slash resolves the npm `util` package rather than the Node builtin.
+        // eslint-disable-next-line node/no-missing-require
+        util: require.resolve('util/'),
+      },
     },
     module: {
       rules: [
         {
-          test: /\.(ts|tsx)$/,
+          test: /\.tsx$/,
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: 'tsx',
             target,
             jsx: 'automatic',
+            supported: esbuildSupported,
+          },
+        },
+        {
+          // The tsx loader parses `<T, U>` generics as JSX and fails the admin build.
+          test: /\.ts$/,
+          loader: require.resolve('esbuild-loader'),
+          options: {
+            loader: 'ts',
+            target,
+            supported: esbuildSupported,
           },
         },
         {
@@ -62,6 +117,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
               loader: 'jsx',
               target,
               jsx: 'automatic',
+              supported: esbuildSupported,
             },
           },
         },
@@ -73,7 +129,29 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         },
         {
           test: /\.css$/i,
-          use: [require.resolve('style-loader'), require.resolve('css-loader')],
+          oneOf: [
+            {
+              // Only the generated admin stylesheet holds Tailwind at-rules. Webpack matches the
+              // real path, so a symlinked application directory needs the realpath here
+              include: path.join(fs.realpathSync(ctx.runtimeDir), 'styles.css'),
+              use: [
+                ...cssLoaders,
+                {
+                  loader: require.resolve('postcss-loader'),
+                  options: {
+                    postcssOptions: {
+                      plugins: [
+                        tailwindcss({
+                          optimize: nodeEnv === 'production' && Boolean(ctx.options.minify),
+                        }),
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+            { use: cssLoaders },
+          ],
         },
         {
           test: /\.(svg|eot|otf|ttf|woff|woff2)$/,
@@ -104,12 +182,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         inject: true,
         template: path.resolve(ctx.runtimeDir, 'index.html'),
       }),
-      new DefinePlugin(
-        Object.entries(ctx.env).reduce<Record<string, string>>((acc, [key, value]) => {
-          acc[`process.env.${key}`] = JSON.stringify(value);
-          return acc;
-        }, {})
-      ),
+      definePlugin,
       ctx.tsconfig &&
         new ForkTsCheckerPlugin({
           typescript: {
@@ -126,7 +199,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
 };
 
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuration> => {
-  const baseConfig = await resolveBaseConfig(ctx);
+  const baseConfig = await resolveBaseConfig(ctx, 'development');
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
   const linkedDesignSystemPath = getLinkedDesignSystemPath();
 
@@ -184,7 +257,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
   const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
-  const baseConfig = await resolveBaseConfig(ctx);
+  const baseConfig = await resolveBaseConfig(ctx, 'production');
 
   return {
     ...baseConfig,
@@ -227,26 +300,68 @@ const USER_CONFIGS = ['webpack.config.js', 'webpack.config.mjs', 'webpack.config
 
 type UserWebpackConfig = (config: Configuration, webpack: unknown) => Configuration;
 
+const definesBareProcessEnv = (
+  plugin: unknown
+): plugin is { definitions: Record<string, unknown> } => {
+  if (!plugin || typeof plugin !== 'object' || plugin.constructor?.name !== 'DefinePlugin') {
+    return false;
+  }
+
+  const definitions = (plugin as { definitions?: unknown }).definitions;
+
+  return (
+    !!definitions &&
+    typeof definitions === 'object' &&
+    Object.prototype.hasOwnProperty.call(definitions, 'process.env')
+  );
+};
+
+/**
+ * Webpack uses the first DefinePlugin value for an expression. Strapi's plugin
+ * is registered first, so its bare `process.env` object would hide a user's
+ * `DefinePlugin({ 'process.env': … })`. Per-key `process.env.*` defines stay,
+ * matching Vite, where a user define replaces Strapi's object.
+ */
+const preferUserProcessEnvDefine = (config: Configuration): Configuration => {
+  const plugins = config.plugins ?? [];
+  const userDefinesProcessEnv = plugins.some(
+    (plugin) => !!plugin && !strapiProcessEnvPlugins.has(plugin) && definesBareProcessEnv(plugin)
+  );
+
+  if (!userDefinesProcessEnv) {
+    return config;
+  }
+
+  for (const plugin of plugins) {
+    if (plugin && strapiProcessEnvPlugins.has(plugin) && definesBareProcessEnv(plugin)) {
+      delete plugin.definitions['process.env'];
+    }
+  }
+
+  return config;
+};
+
 const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContext) => {
   const userConfig = await getUserConfig<UserWebpackConfig>(USER_CONFIGS, ctx);
+  let merged = config;
 
   if (userConfig) {
     if (typeof userConfig === 'function') {
       const webpack = await import('webpack');
-      return userConfig(config, webpack);
+      merged = userConfig(config, webpack);
+    } else {
+      ctx.logger.warn(
+        `You've exported something other than a function from ${path.join(
+          ctx.appDir,
+          'src',
+          'admin',
+          'webpack.config'
+        )}, this will ignored.`
+      );
     }
-
-    ctx.logger.warn(
-      `You've exported something other than a function from ${path.join(
-        ctx.appDir,
-        'src',
-        'admin',
-        'webpack.config'
-      )}, this will ignored.`
-    );
   }
 
-  return config;
+  return preferUserProcessEnvDefine(merged);
 };
 
 export { mergeConfigWithUserConfig, resolveDevelopmentConfig, resolveProductionConfig };

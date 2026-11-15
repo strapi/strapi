@@ -3,5 +3,6 @@
 exports[`hooks:list should output list of hooks 1`] = `
 "│ Name                             │
 │ strapi::content-types.beforeSync │
-│ strapi::content-types.afterSync  │"
+│ strapi::content-types.afterSync  │
+│ strapi::app.afterBootstrap       │"
 `;
