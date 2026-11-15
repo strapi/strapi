@@ -56,6 +56,13 @@ export function buildComponentInputSchema(
 
   visited.delete(componentUid);
 
+  shape.id = z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('ID of an existing entry to keep and update; omit to create a new entry.');
+
   return z.object(shape).strict();
 }
 

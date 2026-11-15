@@ -1317,6 +1317,18 @@ describe('buildDataSchema', () => {
     expect(schema.safeParse({ tags: [{ title: 'a', unknownKey: 'x' }] }).success).toBe(false);
   });
 
+  it('accepts the id of an existing entry on component items', () => {
+    const attrs = {
+      seo: { type: 'component', component: 'shared.seo' },
+      tags: { type: 'component', component: 'shared.seo', repeatable: true },
+    } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    expect(schema.safeParse({ seo: { id: 3, title: 'a' } }).success).toBe(true);
+    expect(schema.safeParse({ tags: [{ id: 7, title: 'a' }, { title: 'b' }] }).success).toBe(true);
+    expect(schema.safeParse({ tags: [{ id: 'abc', title: 'a' }] }).success).toBe(false);
+    expect(schema.safeParse({ tags: [{ id: 1.5, title: 'a' }] }).success).toBe(false);
+  });
+
   it('nested component attributes recurse', () => {
     const attrs = { nested: { type: 'component', component: 'shared.nested' } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
