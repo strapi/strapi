@@ -25,7 +25,7 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   get file() {
     return z.object({
       id: this.fileId,
-      documentId: z.uuid(),
+      documentId: z.string(),
       name: z.string(),
       alternativeText: z.string().nullable().optional(),
       caption: z.string().nullable().optional(),
@@ -58,12 +58,20 @@ export class UploadRouteValidator extends AbstractRouteValidator {
 
   /**
    * Paginated files response schema: `{ data, meta: { pagination } }`.
-   *
+   */
+  get paginatedFiles() {
+    return z.object({
+      data: this.files,
+      meta: z.object({ pagination: this.paginationMeta }),
+    });
+  }
+
+  /**
    * Pagination meta is either page-based (`page`/`pageSize`) or offset-based
    * (`start`/`limit`), and `total`/`pageCount` are omitted when
    * `pagination[withCount]=false`.
    */
-  get paginatedFiles() {
+  get paginationMeta() {
     const pagedPagination = z.object({
       page: z.number().int(),
       pageSize: z.number().int(),
@@ -77,11 +85,51 @@ export class UploadRouteValidator extends AbstractRouteValidator {
       total: z.number().int().optional(),
     });
 
+    return z.union([pagedPagination, offsetPagination]);
+  }
+
+  /**
+   * Folder schema for the read-only folders routes. `path` is made of `pathId`s and is only
+   * meant as a subtree filter key; `namePath` is the same path made of folder names.
+   */
+  get folder() {
+    const parent = z.object({ id: z.number().int().positive(), documentId: z.string() });
+
     return z.object({
-      data: this.files,
-      meta: z.object({
-        pagination: z.union([pagedPagination, offsetPagination]),
-      }),
+      id: z.number().int().positive(),
+      documentId: z.string(),
+      name: z.string(),
+      path: z
+        .string()
+        .describe(
+          'Made of pathIds. To filter a subtree, match this path, or paths that start with it followed by `/`'
+        ),
+      namePath: z
+        .string()
+        .optional()
+        .describe(
+          'The path made of folder names. Computed, so it cannot be filtered or sorted on. Left out when `name` is private'
+        ),
+      parent: parent
+        .nullable()
+        .optional()
+        .describe('null at the library root. Left out when the token cannot list folders'),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    });
+  }
+
+  /**
+   * Content API folder lookup parameter: a numeric id or a documentId
+   */
+  get folderIdOrDocumentId() {
+    return z.union([z.number().int().positive(), z.string()]);
+  }
+
+  get paginatedFolders() {
+    return z.object({
+      data: z.array(this.folder),
+      meta: z.object({ pagination: this.paginationMeta }),
     });
   }
 

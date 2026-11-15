@@ -161,7 +161,7 @@ Plugins import `useTracking` from `@strapi/admin/strapi-admin` and call `trackUs
 | `@strapi/content-manager`      | Entry CRUD, bulk actions, list config, filters, history   |
 | `@strapi/content-type-builder` | Schema editing, AI chat (via wrapper below)               |
 | `@strapi/upload`               | Media library actions (via wrapper below)                 |
-| `@strapi/content-releases`     | `didPublishRelease`                                       |
+| `@strapi/content-releases`     | `willEditReleaseFromHome` (home page widget)              |
 
 ### Wrapper hooks (enrich properties, don't replace the API)
 

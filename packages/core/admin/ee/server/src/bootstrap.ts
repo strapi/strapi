@@ -4,14 +4,14 @@ import actions from './config/admin-actions';
 
 export default async (args: any) => {
   const { actionProvider } = getService('permission');
-  const { persistTablesWithPrefix } = getService('persist-tables');
 
   if (strapi.ee.features.isEnabled('sso')) {
     await actionProvider.registerMany(actions.sso);
   }
 
+  // License only, not `admin.auditLogs.enabled`: unregistered actions get their stored grants
+  // (roles and admin tokens) deleted by the boot permission cleanup
   if (strapi.ee.features.isEnabled('audit-logs')) {
-    await persistTablesWithPrefix('strapi_audit_logs');
     await actionProvider.registerMany(actions.auditLogs);
   }
 

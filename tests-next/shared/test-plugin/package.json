@@ -1,0 +1,10 @@
+{
+  "name": "strapi-plugin-tests",
+  "private": true,
+  "description": "Test-only Strapi plugin loaded into the /tests-next apps. Never published.",
+  "strapi": {
+    "kind": "plugin",
+    "name": "tests",
+    "displayName": "Tests"
+  }
+}

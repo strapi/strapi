@@ -1,6 +1,6 @@
 import { render, screen } from '@strapi/admin/strapi-admin/test';
 
-import { GenericInput } from '../GenericInputs';
+import { GENERIC_INPUT_TYPES, GenericInput } from '../GenericInputs';
 
 jest.mock('@strapi/design-system', () => {
   const actual = jest.requireActual('@strapi/design-system');
@@ -60,6 +60,18 @@ describe('CTB | GenericInput', () => {
     expect(screen.getByRole('textbox', { name: 'json-value' })).toHaveValue(
       JSON.stringify({ enabled: true }, null, 2)
     );
+  });
+
+  it.each(GENERIC_INPUT_TYPES)('renders the %s input type without a custom input', (type) => {
+    setup({ type });
+
+    expect(screen.queryByPlaceholderText('Not supported')).not.toBeInTheDocument();
+  });
+
+  it('renders an unknown input type as not supported', () => {
+    setup({ type: 'unknown-type' });
+
+    expect(screen.getByPlaceholderText('Not supported')).toBeInTheDocument();
   });
 
   it('keeps truthy boolean defaults checked', () => {

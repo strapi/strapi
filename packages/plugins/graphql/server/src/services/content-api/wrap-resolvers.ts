@@ -30,6 +30,47 @@ type GraphQLMiddleware = (
 ) => any;
 
 /**
+ * Instantiate a registered Strapi middleware and adapt its koa handler to the resolver middleware signature.
+ * The handler receives the koa context, and its `next` resolves the rest of the chain.
+ * If the handler does not call `next`, the field resolves to null.
+ */
+const createRegisteredMiddleware = (
+  name: string,
+  options: unknown,
+  strapi: Core.Strapi
+): GraphQLMiddleware => {
+  const middlewareFactory: Core.MiddlewareFactory | undefined = strapi.middleware(name);
+
+  if (middlewareFactory === undefined) {
+    throw new Error(`Middleware ${name} not found.`);
+  }
+
+  const handler = middlewareFactory(options, { strapi });
+
+  return async (resolve, parent, args, context, info) => {
+    if (handler === undefined) {
+      return resolve(parent, args, context, info);
+    }
+
+    const { koaContext } = context as { koaContext: Parameters<Core.MiddlewareHandler>[0] };
+    let result: unknown = null;
+    let isNextCalled = false;
+
+    // Same guard as koa-compose for REST routes: the chain must not run twice
+    await handler(koaContext, async () => {
+      if (isNextCalled === true) {
+        throw new Error('next() called multiple times');
+      }
+
+      isNextCalled = true;
+      result = await resolve(parent, args, context, info);
+    });
+
+    return result;
+  };
+};
+
+/**
  * Get & parse middlewares definitions from the resolver's config
  * @param {object} resolverConfig
  * @param {object} strapi
@@ -40,19 +81,19 @@ const parseMiddlewares = (resolverConfig: any, strapi: Core.Strapi): GraphQLMidd
 
   // TODO: [v4] to factorize with compose endpoints (routes)
   return resolverMiddlewares.map(
-    (middleware: string | Core.MiddlewareHandler | { name: string; options: any }) => {
+    (middleware: string | GraphQLMiddleware | { name: string; options?: unknown }) => {
       if (typeof middleware === 'function') {
         return middleware;
       }
 
       if (typeof middleware === 'string') {
-        return strapi.middleware(middleware);
+        return createRegisteredMiddleware(middleware, {}, strapi);
       }
 
       if (typeof middleware === 'object') {
-        const { name, options = {} } = middleware;
+        const { name, options } = middleware;
 
-        return strapi.middleware(name)(options, { strapi });
+        return createRegisteredMiddleware(name, options ?? {}, strapi);
       }
 
       throw new Error(

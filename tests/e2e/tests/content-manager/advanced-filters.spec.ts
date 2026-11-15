@@ -1,5 +1,5 @@
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { navToHeader } from '../../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
@@ -43,8 +43,8 @@ test.describe('Content Manager - advanced filters', { tag: ['@extended'] }, () =
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   const applyFilter = async (

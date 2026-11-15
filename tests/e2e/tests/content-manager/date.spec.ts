@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait } from '../../../utils/shared';
 import { createContent } from '../../../utils/content-creation';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 
 // Helper to get date in MM/DD/YYYY format consistently
 function toMMDDYYYY(date: Date) {
@@ -15,11 +14,10 @@ function toMMDDYYYY(date: Date) {
 test.describe('Date field tests', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
-
-    // Navigate to Content Manager
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    // No Content Manager click here: createContent opens it. A second click on that link while
+    // the first is still redirecting to the first content type leaves the main area empty.
   });
 
   test('should select the current date from the UI datepicker', async ({ page }) => {
