@@ -103,7 +103,8 @@ const isReleasePast = (release: ReleaseRow) =>
  * paper plane one behind us: it ran, or its date passed.
  *
  * The date is the schedule, the one the sort and the "Scheduled for" filter use: a release
- * published by hand without one stays "Not scheduled".
+ * published by hand without one stays "Not scheduled", and one published by hand before it shows
+ * the date alone until that date passes.
  */
 const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolean }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
@@ -126,6 +127,7 @@ const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolea
   const scheduledAt = new Date(release.scheduledAt);
   const absoluteTime = `${formatDate(scheduledAt, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(scheduledAt, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, scheduledAt)}`;
   const Icon = isPast ? PaperPlaneTilt : CalendarBlank;
+  const ranEarly = release.releasedAt != null && scheduledAt.getTime() > Date.now();
 
   return (
     <Flex gap={2} alignItems="center">
@@ -133,9 +135,15 @@ const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolea
         <Icon width="1.6rem" height="1.6rem" aria-hidden />
       </Flex>
       <SentenceCase textColor={isPast ? 'neutral600' : 'neutral800'}>
-        {/* Browser-zone default title would contradict the release-zone text */}
-        <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
-        {` • ${absoluteTime}`}
+        {ranEarly ? (
+          absoluteTime
+        ) : (
+          <>
+            {/* Browser-zone default title would contradict the release-zone text */}
+            <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
+            {` • ${absoluteTime}`}
+          </>
+        )}
       </SentenceCase>
     </Flex>
   );
