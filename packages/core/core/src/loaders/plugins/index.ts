@@ -47,7 +47,6 @@ const applyUserExtension = async (plugins: Plugins) => {
     for (const ctName of Object.keys(extendedContentTypes)) {
       const extendedSchema = extendedContentTypes?.[ctName]?.schema;
       if (!extendedSchema) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 

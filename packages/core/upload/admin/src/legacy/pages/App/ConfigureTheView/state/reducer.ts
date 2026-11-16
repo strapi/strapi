@@ -29,7 +29,6 @@ export const reducer = (
     type: '',
   }
 ) =>
-  // eslint-disable-next-line consistent-return
   produce(state, (draftState) => {
     switch (action.type) {
       case ON_CHANGE: {

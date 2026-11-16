@@ -11,7 +11,6 @@ import { generateAdminUserHash } from './admin-user-hash';
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
 const tsUtils = (): typeof import('@strapi/typescript-utils') => {
   if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyTsUtils = require('@strapi/typescript-utils');
   }
   return lazyTsUtils as typeof import('@strapi/typescript-utils');
