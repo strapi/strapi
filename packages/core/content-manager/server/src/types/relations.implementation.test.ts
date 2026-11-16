@@ -8,10 +8,10 @@ type Result = Awaited<ReturnType<Implementation['extractAndValidateRequestInfo']
 type ContractResult = Awaited<ReturnType<RelationsController['extractAndValidateRequestInfo']>>;
 
 /**
- * Members still inferred `any`: `attribute` (its morph target check cannot narrow the relation
- * union), `targetField` (route params), and `mainField` with `fieldsToSelect` (stored configuration).
+ * Members still inferred `any`: `targetField` (route params), and `mainField` with `fieldsToSelect`
+ * (stored configuration).
  */
-type Untyped = 'attribute' | 'targetField' | 'mainField' | 'fieldsToSelect';
+type Untyped = 'targetField' | 'mainField' | 'fieldsToSelect';
 
 // With strict types, extractAndValidateRequestInfo takes the contract's parameters and resolves to
 // its result.
@@ -23,5 +23,5 @@ export type RelationsImplementationAssertions = [
     >
   >,
   Expect<Equal<Omit<Result, Untyped>, Omit<ContractResult, Untyped>>>,
-  Expect<Equal<Result['attribute'], any>>,
+  Expect<Equal<Result['attribute'], ContractResult['attribute']>>,
 ];
