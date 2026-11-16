@@ -56,7 +56,8 @@ type NestedAttributeCondition<
  *
  * The database throws for an object with several operators, or with an operator next to other keys.
  * So each operator object forbids the other operators and the target's filter keys. A literal that
- * mixes an operator with other keys matches no member.
+ * mixes an operator with other keys matches no member. With `strictNullChecks` off, a forbidden key
+ * set to `null` is accepted (`{ $null: true, name: null }`), see {@link Forbidden}.
  *
  * The filter object member does not forbid the operators, so spreading a filter read back from it
  * and adding a key (`{ ...filters.article, title: 'a' }`) compiles. The spread compiles even when the
@@ -182,6 +183,9 @@ type IsComponent<TSchemaUID extends UID.Schema> = StrictEqual<
  * - With `exactOptionalPropertyTypes`, `?: undefined` is a key that can be present, so a filter
  *   object member with `$in?: undefined` is not assignable to the target's filter and reading a
  *   nested filter back fails. `?: never` keeps it assignable.
+ *
+ * With `strictNullChecks` off, `null` is assignable to `undefined`, so a forbidden key set to `null`
+ * is accepted. No type rejects it in that mode.
  */
 type Forbidden = null extends string ? undefined : never;
 

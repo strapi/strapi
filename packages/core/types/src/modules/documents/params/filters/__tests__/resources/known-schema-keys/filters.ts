@@ -373,3 +373,16 @@ export const spreadRelationFilter = (filters: Filters<'api::article.article'>) =
 
   return next;
 };
+
+/**
+ * A concrete content type filter widens to the filter of the wide content type UID
+ */
+export const toWideContentType = (
+  filters: Filters<'api::article.article'>
+): Modules.Documents.Params.Filters.Any<UID.ContentType> => filters;
+
+/**
+ * List and range operators on a relation, passed straight to `findMany`
+ */
+articles.findMany({ filters: { author: { $in: [1, 2] } } });
+articles.findMany({ filters: { author: { $between: [1, 5] } } });

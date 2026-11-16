@@ -15,7 +15,7 @@ describe('Filters.ObjectNotation attribute keys', () => {
   );
 
   test(
-    'rejects the same shapes without strictNullChecks',
+    'rejects the same shapes without strictNullChecks, except a forbidden key set to null',
     () => {
       // Apps created before v5.50.0, and configs that extend
       // `@strapi/typescript-utils/tsconfigs/server.json`, have `strict: false`
