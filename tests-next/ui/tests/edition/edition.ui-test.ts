@@ -17,10 +17,11 @@ test.describe('a test that needs a flag the instance does not have', () => {
 
   // Declared as expected to fail: the requirements check throws before the body runs. If the
   // check let the test pass, test.fail would fail. A skip is reported as skipped, not failed,
-  // so the afterEach checks the status: a skip fails it.
+  // so the afterEach fails on a skip. It only rejects a skip: failing a passed test here would
+  // turn it into the failure test.fail expects.
   // eslint-disable-next-line no-empty-pattern
   test.afterEach(async ({}, testInfo) => {
-    expect(testInfo.status).toBe('failed');
+    expect(testInfo.status).not.toBe('skipped');
   });
 
   test.fail('fails instead of skipping', async () => {});
