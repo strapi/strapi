@@ -8,7 +8,7 @@ test('the instance runs in the edition of the run', { tag: '@smoke' }, async ({ 
 });
 
 // CE runs leave out `@ee` tests (see playwright.config.ts): this one would fail on CE.
-test('an @ee test only runs in EE runs', { tag: '@ee' }, async ({ features }) => {
+test('an EE-tagged test only runs in EE runs', { tag: '@ee' }, async ({ features }) => {
   expect(features.edition).toBe('ee');
 });
 
