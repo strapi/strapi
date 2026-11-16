@@ -128,6 +128,37 @@ const canBeCounterpart = (attribute: Schema.Attribute.AnyAttribute | undefined) 
 };
 
 /**
+ * Reads a relation sent in the stored format (`inversedBy` or `mappedBy`, no `targetAttribute`)
+ * as the admin sends it (`targetAttribute`), so that the edit compares and rebuilds its other
+ * side. `convertAttribute` then writes `inversedBy` or `mappedBy` for the relation kind, and
+ * `dominant` keeps the stored side of a oneToOne or manyToMany relation when the attribute had
+ * no other side before the save (a one-way relation made two-way).
+ */
+const toTargetAttributeFormat = (attribute: InternalAttribute): InternalAttribute => {
+  if (isRelation(attribute) === false) {
+    return attribute;
+  }
+
+  const { inversedBy, mappedBy, ...relation } = attribute as InternalRelationAttribute;
+
+  if (relation.targetAttribute !== undefined) {
+    return attribute;
+  }
+
+  const targetAttribute = inversedBy || mappedBy;
+
+  if (_.isNil(targetAttribute)) {
+    return attribute;
+  }
+
+  return {
+    ...relation,
+    targetAttribute,
+    dominant: inversedBy !== undefined && inversedBy !== null && inversedBy !== '',
+  };
+};
+
+/**
  * Maps each attribute name produced by this save's rename hops to the name it
  * had before the save, by folding the hops in order (`a -> tmp, tmp -> b`
  * gives `b -> a`).
@@ -377,7 +408,15 @@ export default function createComponentBuilder() {
 
       const oldAttributes = contentType.schema.attributes;
 
-      const newAttributes = _.omitBy(infos.attributes, (attr, key) => {
+      // Only the attributes that exist before the save: a new relation in the stored format
+      // keeps its stored side, as before
+      const attributes: typeof infos.attributes = _.mapValues(
+        infos.attributes as Record<string, InternalAttribute>,
+        (attribute, key) =>
+          _.has(oldAttributes, key) ? toTargetAttributeFormat(attribute) : attribute
+      );
+
+      const newAttributes = _.omitBy(attributes, (attr, key) => {
         return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
       });
 
