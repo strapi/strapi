@@ -26,8 +26,9 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
     return data;
   }
 
-  // Store the default locale to avoid multiple calls
-  let defaultLocale: string | null = null;
+  // Store the default locale lookup, not only its result: relations are mapped concurrently, so
+  // caching the value alone lets every one of them issue the query before the first one answers
+  let defaultLocale: Promise<string | null> | null = null;
 
   /**
    * Traverse the entity input data and set the default locale to relations
@@ -44,11 +45,9 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
         }
 
         // Set default locale if not provided
-        if (!defaultLocale) {
-          defaultLocale = await getDefaultLocale();
-        }
+        defaultLocale ??= Promise.resolve(getDefaultLocale());
 
-        return setDefaultLocaleToRelation(relation, defaultLocale);
+        return setDefaultLocaleToRelation(relation, await defaultLocale);
       }, value as any);
 
       // @ts-expect-error - fix type
