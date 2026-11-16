@@ -90,7 +90,9 @@ sequenceDiagram
 
 ### Typed Hooks
 
-`engine.Engine`, what `engine.new` returns, and its `PermissionEngineHooks` take untyped handlers. `engine.TypedEngine` and `engine.TypedPermissionEngineHooks` describe the same hooks with typed handlers and contexts (`BeforeEvaluateContext`, `ValidateContext`, `WillRegisterContext`). They are opt-in: a typed contract can declare them instead of the untyped ones.
+`engine.Engine`, what `engine.new` returns, and its `PermissionEngineHooks` take untyped handlers. `engine.TypedEngine` and `engine.TypedPermissionEngineHooks` describe the same hooks with typed handlers and contexts (`BeforeEvaluateContext`, `ValidateContext`, `WillRegisterContext`). They are opt-in: a typed contract can declare them instead of the untyped ones, and the engine `engine.new` returns is assignable to `TypedEngine` without a cast.
+
+A validate hook stops at the first handler that returns a value other than `undefined`, and the engine rejects the permission when that value is `false`. A validator that lets the permission through returns nothing, so the next validators still run.
 
 ### Hook Implementation Example
 
@@ -102,11 +104,11 @@ engine.on('before-format::validate.permission', ({ permission }) => {
   if (permission.action === 'delete' && !permission.conditions.includes('isAdmin')) {
     return false; // Prevent non-admin delete
   }
-  return true;
+  // Return nothing, so the next validators still run
 });
 
 // Format hook
-engine.on('format.permission', ({ permission }) => {
+engine.on('format.permission', (permission) => {
   // Add timestamp to tracking actions
   if (permission.action.startsWith('track')) {
     return {

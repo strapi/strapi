@@ -7,7 +7,11 @@ import type { PermissionRule } from '../types';
 
 export interface PermissionEngineHooks {
   'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
-  'format.permission': ReturnType<typeof hooks.createAsyncSeriesWaterfallHook>;
+  /**
+   * The untyped waterfall interface, which resolves to `any` (the factory resolves to `unknown`), so
+   * the engine assigns to {@link TypedPermissionEngineHooks}.
+   */
+  'format.permission': hooks.AsyncSeriesWaterfallHook;
   'after-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
   'before-evaluate.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
   'before-register.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
@@ -158,8 +162,9 @@ export type WillRegisterContext = {
 
 /**
  * The engine hooks with typed handlers. {@link PermissionEngineHooks}, what the engine exposes,
- * keeps untyped handlers; a typed contract can declare this map instead. A validate handler
- * rejects the permission by returning `false`.
+ * keeps untyped handlers; a typed contract can declare this map instead. A validate hook stops at
+ * the first handler that returns a value other than `undefined`, and the engine rejects the
+ * permission when that value is `false`.
  */
 export interface TypedPermissionEngineHooks {
   'before-format::validate.permission': hooks.AsyncBailHook<

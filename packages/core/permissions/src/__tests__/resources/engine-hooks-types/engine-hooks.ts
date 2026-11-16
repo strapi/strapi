@@ -2,11 +2,12 @@
  * Compile-only checks of the engine hook types, run by `engine-hooks.types.vitest.test.ts`.
  * A failed assertion is a type error, and an unused `@ts-expect-error` is one too.
  */
-import type { engine } from '../../../index';
+import { engine } from '../../../index';
 import type { Permission } from '../../../domain/permission';
 import type { PermissionRule } from '../../../types';
 import {
   createBeforeEvaluateContext,
+  createEngineHooks,
   createValidateContext,
   createWillRegisterContext,
 } from '../../../engine/hooks';
@@ -17,8 +18,6 @@ type Equal<X, Y> =
   (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 type IsAny<T> = 0 extends 1 & T ? true : false;
-/** `true` when A and B are assignable to each other. */
-type Mutual<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 type AnyHandler = (...args: any[]) => any;
 
@@ -41,9 +40,8 @@ export type DefaultTypes = [
   Expect<
     IsAny<Awaited<ReturnType<PermissionEngineHooks['before-format::validate.permission']['call']>>>
   >,
-  Expect<
-    Equal<[Awaited<ReturnType<PermissionEngineHooks['format.permission']['call']>>], [unknown]>
-  >,
+  // `any`, as the untyped waterfall interface resolves, so the engine assigns to its typed view
+  Expect<IsAny<Awaited<ReturnType<PermissionEngineHooks['format.permission']['call']>>>>,
 ];
 
 declare const untypedEngine: engine.Engine;
@@ -95,8 +93,9 @@ export type TypedContexts = [
       [engine.WillRegisterCondition]
     >
   >,
-  // `Awaited` spells the permission out next to its alias, so the two are only mutually assignable
-  Expect<Mutual<Awaited<ReturnType<Hooks['format.permission']['call']>>, engine.TypedPermission>>,
+  Expect<
+    Equal<[Awaited<ReturnType<Hooks['format.permission']['call']>>], [engine.TypedPermission]>
+  >,
 ];
 
 declare const typedEngine: engine.TypedEngine;
@@ -107,7 +106,7 @@ typedEngine.on('format.permission', (context: engine.BeforeEvaluateContext) => c
 typedEngine.on('not.a.hook', () => undefined);
 
 /*
- * 3. The contexts the engine builds at runtime are the typed contexts.
+ * 3. The engine and the contexts it builds at runtime are their typed views, without a cast.
  */
 
 declare const permission: Permission;
@@ -120,3 +119,7 @@ export const willRegisterContext: engine.WillRegisterContext = createWillRegiste
   permission: rule,
   options: { id: 1 },
 });
+
+declare const params: engine.EngineParams;
+export const engineHooks: Hooks = createEngineHooks();
+export const typedEngineFromNew: engine.TypedEngine = engine.new(params);

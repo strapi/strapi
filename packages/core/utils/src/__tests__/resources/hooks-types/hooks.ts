@@ -28,68 +28,68 @@ type Expect<T extends true> = T;
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
 /*
- * 1. Untyped hooks keep the types they had before the hooks became generic.
- * The `Develop*` types copy those declarations.
+ * 1. Untyped hooks keep the types they had before the hooks took a handler type.
+ * The `PreGeneric*` types copy those declarations.
  */
 
-interface DevelopHook<T extends Handler = Handler> {
+interface PreGenericHook<T extends Handler = Handler> {
   getHandlers(): Handler[];
-  register(handler: T): DevelopHook<T>;
-  delete(handler: T): DevelopHook<T>;
+  register(handler: T): PreGenericHook<T>;
+  delete(handler: T): PreGenericHook<T>;
   call(...args: any[]): void;
 }
-interface DevelopAsyncSeriesHook extends DevelopHook {
+interface PreGenericAsyncSeriesHook extends PreGenericHook {
   call(...args: any[]): Promise<void>;
 }
-interface DevelopAsyncSeriesWaterfallHook extends DevelopHook {
+interface PreGenericAsyncSeriesWaterfallHook extends PreGenericHook {
   call(...args: any[]): Promise<any>;
 }
-interface DevelopAsyncParallelHook extends DevelopHook {
+interface PreGenericAsyncParallelHook extends PreGenericHook {
   call(...args: any[]): Promise<any[]>;
 }
-interface DevelopAsyncBailHook extends DevelopHook {
+interface PreGenericAsyncBailHook extends PreGenericHook {
   call(...args: any[]): Promise<any>;
 }
-type DevelopFactoryHook<TCall> = {
+type PreGenericFactoryHook<TCall> = {
   call: TCall;
   getHandlers(): Handler[];
-  register(handler: Handler): DevelopHook<Handler>;
-  delete(handler: Handler): DevelopHook<Handler>;
+  register(handler: Handler): PreGenericHook<Handler>;
+  delete(handler: Handler): PreGenericHook<Handler>;
 };
 
 export type DefaultTypes = [
-  Expect<Equal<[Hook], [DevelopHook]>>,
-  Expect<Equal<[ReturnType<typeof internals.createHook>], [DevelopHook]>>,
-  Expect<Equal<[AsyncSeriesHook], [DevelopAsyncSeriesHook]>>,
-  Expect<Equal<[AsyncSeriesWaterfallHook], [DevelopAsyncSeriesWaterfallHook]>>,
-  Expect<Equal<[AsyncParallelHook], [DevelopAsyncParallelHook]>>,
-  Expect<Equal<[AsyncBailHook], [DevelopAsyncBailHook]>>,
+  Expect<Equal<[Hook], [PreGenericHook]>>,
+  Expect<Equal<[ReturnType<typeof internals.createHook>], [PreGenericHook]>>,
+  Expect<Equal<[AsyncSeriesHook], [PreGenericAsyncSeriesHook]>>,
+  Expect<Equal<[AsyncSeriesWaterfallHook], [PreGenericAsyncSeriesWaterfallHook]>>,
+  Expect<Equal<[AsyncParallelHook], [PreGenericAsyncParallelHook]>>,
+  Expect<Equal<[AsyncBailHook], [PreGenericAsyncBailHook]>>,
   Expect<
     Equal<
       [ReturnType<typeof createAsyncSeriesHook>],
-      [DevelopFactoryHook<(context: unknown) => Promise<void>>]
+      [PreGenericFactoryHook<(context: unknown) => Promise<void>>]
     >
   >,
   Expect<
     Equal<
       [ReturnType<typeof createAsyncSeriesWaterfallHook>],
-      [DevelopFactoryHook<(param: unknown) => Promise<unknown>>]
+      [PreGenericFactoryHook<(param: unknown) => Promise<unknown>>]
     >
   >,
   Expect<
     Equal<
       [ReturnType<typeof createAsyncParallelHook>],
-      [DevelopFactoryHook<(context: unknown) => Promise<any[]>>]
+      [PreGenericFactoryHook<(context: unknown) => Promise<any[]>>]
     >
   >,
   Expect<
     Equal<
       [ReturnType<typeof createAsyncBailHook>],
-      [DevelopFactoryHook<(context: unknown) => Promise<any>>]
+      [PreGenericFactoryHook<(context: unknown) => Promise<any>>]
     >
   >,
-  Expect<Equal<[ProviderHooksMap['willRegister']], [DevelopAsyncSeriesHook]>>,
-  Expect<Equal<[ProviderHooksMap['didRegister']], [DevelopAsyncParallelHook]>>,
+  Expect<Equal<[ProviderHooksMap['willRegister']], [PreGenericAsyncSeriesHook]>>,
+  Expect<Equal<[ProviderHooksMap['didRegister']], [PreGenericAsyncParallelHook]>>,
   // An untyped bail or waterfall result is still read as before
   Expect<IsAny<Awaited<ReturnType<ReturnType<typeof createAsyncBailHook>['call']>>>>,
   Expect<IsAny<Awaited<ReturnType<AsyncSeriesWaterfallHook['call']>>>>,
@@ -184,4 +184,38 @@ export type TypedInterfaceResults = [
   Expect<Equal<[Awaited<ReturnType<typeof typedWaterfall.call>>], [Context]>>,
   Expect<Equal<[Awaited<ReturnType<typeof typedParallel.call>>], [boolean[]]>>,
   Expect<Equal<[Awaited<ReturnType<typeof typedBail.call>>], [boolean | undefined]>>,
+];
+
+// A hook passes one context to its handlers, so `call` takes one argument
+type TwoParameters = (first: string, second: number) => void;
+const twoParameters: AsyncSeriesHook<TwoParameters> = createAsyncSeriesHook<TwoParameters>();
+const twoParametersHook = internals.createHook<TwoParameters>();
+
+export const callWithOneContext = async () => {
+  await twoParameters.call('first');
+  // @ts-expect-error the second argument never reaches the handlers
+  await twoParameters.call('first', 2);
+  // @ts-expect-error the second argument never reaches the handlers
+  twoParametersHook.call('first', 2);
+};
+
+// A waterfall handler resolves to the value it takes, and the interface and the factory agree
+type Formatter = (value: string) => string | Promise<string>;
+type MisshapedFormatter = (value: string) => number;
+const formatter: AsyncSeriesWaterfallHook<Formatter> = createAsyncSeriesWaterfallHook<Formatter>();
+// The factory keeps `T extends Handler`: `ReturnType<typeof createAsyncSeriesWaterfallHook>` reads
+// the constraint, and an untyped waterfall hook must keep taking typed handlers
+declare const untypedWaterfall: ReturnType<typeof createAsyncSeriesWaterfallHook>;
+untypedWaterfall.register((value: string) => value.trim());
+// @ts-expect-error the next handler receives what this one resolves to, so the types must match
+export type MisshapedWaterfall = AsyncSeriesWaterfallHook<MisshapedFormatter>;
+
+export type WaterfallResults = [
+  Expect<Equal<[Awaited<ReturnType<typeof formatter.call>>], [string]>>,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<AsyncSeriesWaterfallHook<Formatter>['call']>>],
+      [Awaited<ReturnType<ReturnType<typeof createAsyncSeriesWaterfallHook<Formatter>>['call']>>]
+    >
+  >,
 ];

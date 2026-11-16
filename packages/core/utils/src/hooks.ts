@@ -14,26 +14,50 @@ export type HookContext<T extends Handler> = 0 extends 1 & Parameters<T>[0]
 /** The value a handler of type `T` resolves to. */
 export type HookResult<T extends Handler> = Awaited<ReturnType<T>>;
 
+/**
+ * The arguments `call` takes: the one context every handler of type `T` receives. Any arguments
+ * when the handler's first parameter is `any`, as for the default {@link Handler}.
+ */
+export type HookCallArgs<T extends Handler> = 0 extends 1 & Parameters<T>[0]
+  ? any[]
+  : [context: HookContext<T>];
+
+/**
+ * A handler of a waterfall hook: it receives what the previous handler resolved to, and resolves to
+ * the value the next handler receives.
+ */
+export type WaterfallHandler<T extends Handler> = (
+  value: HookContext<T>
+) => HookContext<T> | Promise<HookContext<T>>;
+
+/**
+ * What a waterfall hook of handler `T` resolves to: the value its handlers pass along. `any` when
+ * the handler's first parameter is `any`, as for the default {@link Handler}.
+ */
+export type WaterfallResult<T extends Handler> = 0 extends 1 & Parameters<T>[0]
+  ? any
+  : HookContext<T>;
+
 export interface Hook<T extends Handler = Handler> {
   getHandlers(): T[];
   register(handler: T): Hook<T>;
   delete(handler: T): Hook<T>;
-  call(...args: Parameters<T>): void;
+  call(...args: HookCallArgs<T>): void;
 }
 
 export interface AsyncSeriesHook<T extends Handler = Handler> extends Hook<T> {
-  call(...args: Parameters<T>): Promise<void>;
+  call(...args: HookCallArgs<T>): Promise<void>;
 }
-export interface AsyncSeriesWaterfallHook<T extends Handler = Handler> extends Hook<T> {
-  call(...args: Parameters<T>): Promise<HookResult<T>>;
+export interface AsyncSeriesWaterfallHook<T extends WaterfallHandler<T> = Handler> extends Hook<T> {
+  call(...args: HookCallArgs<T>): Promise<WaterfallResult<T>>;
 }
 
 export interface AsyncParallelHook<T extends Handler = Handler> extends Hook<T> {
-  call(...args: Parameters<T>): Promise<HookResult<T>[]>;
+  call(...args: HookCallArgs<T>): Promise<HookResult<T>[]>;
 }
 
 export interface AsyncBailHook<T extends Handler = Handler> extends Hook<T> {
-  call(...args: Parameters<T>): Promise<HookResult<T> | undefined>;
+  call(...args: HookCallArgs<T>): Promise<HookResult<T> | undefined>;
 }
 
 /**
