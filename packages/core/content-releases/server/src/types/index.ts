@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -40,12 +40,25 @@ type ReleaseActionRow = Omit<ReleaseAction, 'entry' | 'locale' | 'release' | 'st
 /** A written release action, with the ID of its release. */
 type CreatedReleaseAction = ReleaseActionRow & { release: Pick<Release, 'id'> };
 
+type ReleaseActionFilters =
+  Modules.Documents.Params.Filters.Any<'plugin::content-releases.release-action'>;
+
+/**
+ * Filters of `countActions`: the Document Service filters, or the same with the `release` relation
+ * given by its ID, as `controllers/release.ts` (`findOne`) and `services/release.ts`
+ * (`updateReleaseStatus`) pass it. The query engine reads a scalar relation filter as its ID
+ * (`tests/api/core/content-releases/content-releases-service-results.test.api.ts`).
+ */
+type CountActionsFilters =
+  ReleaseActionFilters | (Omit<ReleaseActionFilters, 'release'> & { release: Release['id'] });
+
 type ReleaseActionServiceOverride =
   | 'groupActions'
   | 'getContentTypeModelsFromActions'
   | 'create'
   | 'createMany'
   | 'findPage'
+  | 'countActions'
   | 'update'
   | 'delete';
 
@@ -77,6 +90,9 @@ type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServ
     results: Array<ReleaseActionRow & Pick<ReleaseAction, 'entry' | 'status'>>;
     pagination: Pagination;
   }>;
+  countActions(query: {
+    filters?: CountActionsFilters;
+  }): ReturnType<ReleaseActionService['countActions']>;
   update(...args: Parameters<ReleaseActionService['update']>): Promise<ReleaseActionRow>;
   /** The deleted action, without its release. */
   delete(...args: Parameters<ReleaseActionService['delete']>): Promise<ReleaseActionRow>;
