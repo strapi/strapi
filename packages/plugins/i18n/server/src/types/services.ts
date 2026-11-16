@@ -1,4 +1,4 @@
-import type { Data, Modules, Schema, Struct, UID } from '@strapi/types';
+import type { Core, Data, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { AILocalizationJobs } from '../../../shared/contracts/ai-localization-jobs';
 import type { Settings } from '../validation/settings';
 import type permissions from '../services/permissions';
@@ -177,9 +177,17 @@ export type LocalePermission = {
 /**
  * Existing permission action and engine hooks exposed by i18n. Locale normalization requires
  * permissions with an action; the implementation keeps its published develop `any[]` types.
+ * The newly-localized repair runs in the `strapi::content-types.afterSync` hook (`register.ts`) and
+ * takes that hook's context.
  */
 export type PermissionsService = Omit<PermissionsImplementation, 'actions'> & {
-  actions: Omit<PermissionsImplementation['actions'], 'normalizeRolePermissionsLocales'> & {
+  actions: Omit<
+    PermissionsImplementation['actions'],
+    'normalizeRolePermissionsLocales' | 'repairPermissionsForNewlyLocalizedTypes'
+  > & {
     normalizeRolePermissionsLocales(permissions: LocalePermission[]): Promise<LocalePermission[]>;
+    repairPermissionsForNewlyLocalizedTypes(
+      params: Pick<Core.ContentTypesSyncContext, 'oldContentTypes' | 'contentTypes'>
+    ): ReturnType<PermissionsImplementation['actions']['repairPermissionsForNewlyLocalizedTypes']>;
   };
 };
