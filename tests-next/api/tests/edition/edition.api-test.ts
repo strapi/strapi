@@ -15,7 +15,7 @@ import {
   type App,
   type Server,
 } from '@strapi/tests-shared';
-import { describeEE, describeIfFeature } from '@strapi/tests-shared/vitest';
+import { describeEE, describeIfFeature, requireServerFeature } from '@strapi/tests-shared/vitest';
 
 import { port, worker } from '../helpers';
 
@@ -106,6 +106,21 @@ describe('the instance', () => {
       'needs future flag "nope"'
     );
     expect(() => requireFeatures(features, { ee: ['nope'] })).toThrow('needs EE feature "nope"');
+  });
+
+  test("describeIfFeature's check fails on a feature the instance doesn't have", async () => {
+    await expect(requireServerFeature(server, 'tests-not-a-feature')).rejects.toThrow(
+      'needs EE feature "tests-not-a-feature"'
+    );
+    await expect(requireServerFeature(server, 'tests-not-a-feature')).rejects.toThrow(
+      `the ${server.edition.toUpperCase()} instance doesn't have`
+    );
+  });
+
+  test("describeIfFeature's check fails clearly when the server is not started yet", async () => {
+    await expect(requireServerFeature(undefined, 'cms-content-releases')).rejects.toThrow(
+      'in an outer beforeAll'
+    );
   });
 
   describeEE('EE-only block', () => {
