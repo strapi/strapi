@@ -1,4 +1,5 @@
 import type { Core, Modules, Struct } from '@strapi/types';
+import type { queryParams } from '@strapi/utils';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -104,12 +105,103 @@ type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServ
  */
 type ReleaseRow = Omit<Release, 'actions'>;
 
+/** The populate of a release read. */
+type ReleasePopulate = queryParams.Params['populate'];
+
+/** The relations of a release. */
+type ReleaseRelation = 'actions' | 'createdBy' | 'updatedBy';
+
+/** Each relation populated with a value the types cannot read, such as a variable's. */
+type UnreadPopulate = { [TRelation in ReleaseRelation]: ReleasePopulate };
+
+/**
+ * The relations that a release read with `TPopulate` populates, each with its populate value
+ * (`true` when the populate names it). A relation set to `false` is not populated.
+ */
+type PopulateByRelation<TPopulate> = 0 extends 1 & TPopulate
+  ? UnreadPopulate
+  : [TPopulate] extends [string]
+    ? string extends TPopulate
+      ? UnreadPopulate
+      : [TPopulate] extends ['*']
+        ? UnreadPopulate
+        : { [TRelation in Extract<TPopulate, ReleaseRelation>]: true }
+    : [TPopulate] extends [readonly (infer TName)[]]
+      ? string extends TName
+        ? UnreadPopulate
+        : '*' extends TName
+          ? UnreadPopulate
+          : { [TRelation in Extract<TName, ReleaseRelation>]: true }
+      : [TPopulate] extends [object]
+        ? string extends keyof TPopulate
+          ? UnreadPopulate
+          : {
+              [
+                TRelation in Extract<
+                  keyof TPopulate,
+                  ReleaseRelation
+                > as TPopulate[TRelation] extends false ? never : TRelation
+              ]: TPopulate[TRelation];
+            }
+        : UnreadPopulate;
+
+/**
+ * A populated relation as the plugin's `findMany` callers read it (same API test): the full
+ * `actions` when the populate names them, and the `actions` with only the requested `fields` (plus
+ * `id` and `documentId`), filtered or not. Any other populate gives `unknown`.
+ */
+type PopulatedRelation<TRelation, TValue> = TRelation extends 'actions'
+  ? [TValue] extends [true]
+    ? ReleaseActionRow[]
+    : [TValue] extends [{ fields: readonly (infer TField)[] }]
+      ? string extends TField
+        ? unknown
+        : [Exclude<keyof TValue, 'fields' | 'filters'>] extends [never]
+          ? Array<
+              Pick<ReleaseActionRow, 'id' | 'documentId' | Extract<TField, keyof ReleaseActionRow>>
+            >
+          : unknown
+      : unknown
+  : unknown;
+
+/**
+ * A release row with the relations that `TPopulate` populates. A populate that may be `undefined`
+ * populates what its defined part names.
+ */
+type PopulatedRelease<TPopulate> = [TPopulate] extends [undefined]
+  ? ReleaseRow
+  : ReleaseRow & {
+      [TRelation in keyof PopulateByRelation<Exclude<TPopulate, undefined>>]: PopulatedRelation<
+        TRelation,
+        PopulateByRelation<Exclude<TPopulate, undefined>>[TRelation]
+      >;
+    };
+
+/**
+ * A query-engine filter on releases, passed as is. The controllers filter with `null` values and
+ * with query-string values, which the Document Service filters reject.
+ */
+type ReleaseWhere = Record<string, unknown>;
+
 /**
  * The `release` service. The query engine's result stays `any` in the implementation, and the
  * published declaration prints the content-manager components as `any`; the results below are the
- * ones the runtime returns.
+ * ones the runtime returns. `findMany` follows the caller's `populate`.
  */
-type ReleaseServiceContract = Omit<ReleaseService, 'update' | 'getAllComponents'> & {
+type ReleaseServiceContract = Omit<
+  ReleaseService,
+  'findPage' | 'findMany' | 'update' | 'getAllComponents'
+> & {
+  /** A page of releases, each with the count of its actions, whatever the query. */
+  findPage(...args: Parameters<ReleaseService['findPage']>): Promise<{
+    results: Array<ReleaseRow & { actions: { count: number } }>;
+    pagination: Pagination;
+  }>;
+  /** The releases that match `where`, with the relations that `populate` names. */
+  findMany<const TPopulate extends ReleasePopulate | undefined = undefined>(query?: {
+    where?: ReleaseWhere;
+    populate?: TPopulate;
+  }): Promise<PopulatedRelease<TPopulate>[]>;
   update(...args: Parameters<ReleaseService['update']>): Promise<ReleaseRow>;
   /** The component schemas by UID. */
   getAllComponents(): Promise<Record<Struct.ComponentSchema['uid'], Struct.ComponentSchema>>;
