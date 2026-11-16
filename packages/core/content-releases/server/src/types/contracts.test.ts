@@ -1,4 +1,5 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
+import type { Modules } from '@strapi/types';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { Pagination, Release, ReleaseDataResponse } from '../../../shared/contracts/releases';
@@ -24,6 +25,13 @@ type ActionRow = Omit<ReleaseAction, 'entry' | 'locale' | 'release' | 'status'> 
 };
 type CreatedAction = ActionRow & { release: Pick<Release, 'id'> };
 
+// The callers filter the `release` relation by its ID, which the query engine accepts
+// (`countActions filters the release relation by its ID` in the same API test).
+type ActionFilters =
+  Modules.Documents.Params.Filters.Any<'plugin::content-releases.release-action'>;
+type CountActionsFilters =
+  ActionFilters | (Omit<ActionFilters, 'release'> & { release: Release['id'] });
+
 export type ReleaseActionServiceContractAssertions = [
   Expect<Equal<[Result<'create'>], [CreatedAction]>>,
   Expect<Equal<[Result<'createMany'>], [{ created: CreatedAction[]; alreadyInRelease: number }]>>,
@@ -47,4 +55,11 @@ export type ReleaseActionServiceContractAssertions = [
       [Array<Pick<ReleaseAction, 'contentType'>>]
     >
   >,
+  Expect<
+    Equal<
+      [Parameters<ReleaseActionService['countActions']>[0]],
+      [{ filters?: CountActionsFilters }]
+    >
+  >,
+  Expect<Equal<[Result<'countActions'>], [number]>>,
 ];
