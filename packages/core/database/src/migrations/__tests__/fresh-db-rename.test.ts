@@ -233,7 +233,6 @@ const connectOrSkip = async (
 
     if (context.driver !== 'sqlite') {
       const cause = error instanceof Error ? error.message : String(error);
-      // eslint-disable-next-line no-console
       console.warn(`Skipping ${context.driver} fresh-DB rename migration tests: ${cause}`);
       return null;
     }
