@@ -580,6 +580,31 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     }
   });
 
+  // Contract members typed for strict types do not carry `any` again. Every licensed feature is
+  // listed, so the check also reads the EE shapes of the contracts.
+  test(`${resolution}: guarded contract members carry no any`, async () => {
+    const scope = {
+      scope: 'every licensed feature',
+      licensedFeatures: [
+        'licensed',
+        'sso',
+        'audit-logs',
+        'review-workflows',
+        'cms-content-releases',
+        'cms-content-history',
+      ],
+    };
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    try {
+      assertClean(
+        compile([...(await licenseScopeFiles(appDir, scope)), 'no-any-contracts.ts']),
+        `${resolution}, license scope ${scope.scope}, contracts without any`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
   for (const provider of [
     'i18n',
     'content-manager',
