@@ -1,7 +1,6 @@
 import { createCommand } from 'commander';
 import CLITable from 'cli-table3';
 import chalk from 'chalk';
-import { toUpper } from 'lodash';
 
 import { createStrapi, compileStrapi } from '@strapi/core';
 
@@ -22,7 +21,7 @@ const action = async () => {
   list
     .filter((route) => route.methods.length)
     .forEach((route) => {
-      infoTable.push([route.methods.map(toUpper).join('|'), route.path]);
+      infoTable.push([route.methods.map((method) => method.toUpperCase()).join('|'), route.path]);
     });
 
   console.log(infoTable.toString());

@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 
 import { strings, errors } from '@strapi/utils';
-import { trim, has } from 'lodash';
+import { has } from 'lodash';
 
 import { getService } from '../utils';
 import {
@@ -78,8 +78,8 @@ export default {
 
     const attributes = {
       kind: 'admin' as const,
-      name: trim(body.name),
-      description: trim(body.description),
+      name: String(body.name ?? '').trim(),
+      description: String(body.description ?? '').trim(),
       adminPermissions: body.adminPermissions,
       lifespan: body.lifespan,
       adminUserOwner: ctx.state.user.id,
@@ -188,10 +188,10 @@ export default {
 
     const mutableBody = body as Record<string, unknown>;
     if (has(mutableBody, 'name')) {
-      mutableBody.name = trim(body.name ?? '');
+      mutableBody.name = String(body.name ?? '').trim();
     }
     if (has(mutableBody, 'description') || mutableBody.description === null) {
-      mutableBody.description = trim(body.description ?? '');
+      mutableBody.description = String(body.description ?? '').trim();
     }
 
     await validateAdminTokenUpdateInput(body);

@@ -1,4 +1,4 @@
-import { castArray, property, toLower, trim } from 'lodash';
+import { castArray, property } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
@@ -8,10 +8,10 @@ import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
 
 const getMethod = (route: Core.Route) => {
-  return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
+  return route.method.toLowerCase().trim() as Lowercase<Core.Route['method']>;
 };
 
-const getPath = (route: Core.Route) => trim(route.path);
+const getPath = (route: Core.Route) => route.path.trim();
 
 const createRouteInfoMiddleware =
   (routeInfo: Core.Route): Core.MiddlewareHandler =>
@@ -142,7 +142,7 @@ const getAction = (route: Core.Route, strapi: Core.Strapi) => {
     return handler;
   }
 
-  const { controllerName, actionName } = extractHandlerParts(trim(handler));
+  const { controllerName, actionName } = extractHandlerParts(handler.trim());
 
   const controller = getController(controllerName, { pluginName, apiName, type }, strapi);
 

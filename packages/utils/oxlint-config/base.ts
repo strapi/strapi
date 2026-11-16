@@ -17,6 +17,9 @@ import type { OxlintConfig } from 'oxlint';
  * enabling it only produced ~500 test-only diagnostics with no ESLint parity
  * signal. Revisit after an intentional Jest/Vitest ESLint policy exists.
  */
+const LODASH_STRING_ARRAY_MESSAGE =
+  'Use native String.prototype.toLowerCase / toUpperCase / trim / trimStart / trimEnd / padEnd / padStart and Array.prototype.includes / every. Lodash coerces input to a string (null/undefined become "") and returns false / true for nullish collections, so coerce or guard untrusted input (e.g. `String(x ?? "")`). For trim with custom chars use a regex replace; lodash includes also searches object values; lodash every accepts shorthand predicates and visits sparse-array holes, which native every skips (use `Array.from(arr).every(...)` for untrusted arrays such as auth scopes).';
+
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
   jsPlugins: ['./no-lodash-fp.js'],
@@ -71,6 +74,29 @@ export const base = {
             message:
               'Use `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), and native filter or find. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
           },
+          {
+            group: [
+              'lodash/toLower',
+              'lodash/toLower.js',
+              'lodash/toUpper',
+              'lodash/toUpper.js',
+              'lodash/trim',
+              'lodash/trim.js',
+              'lodash/trimStart',
+              'lodash/trimStart.js',
+              'lodash/trimEnd',
+              'lodash/trimEnd.js',
+              'lodash/padEnd',
+              'lodash/padEnd.js',
+              'lodash/padStart',
+              'lodash/padStart.js',
+              'lodash/includes',
+              'lodash/includes.js',
+              'lodash/every',
+              'lodash/every.js',
+            ],
+            message: LODASH_STRING_ARRAY_MESSAGE,
+          },
         ],
         paths: [
           {
@@ -88,6 +114,21 @@ export const base = {
             ],
             message:
               'Use native Array.isArray, Array.prototype.forEach / filter / find, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
+          },
+          {
+            name: 'lodash',
+            importNames: [
+              'toLower',
+              'toUpper',
+              'trim',
+              'trimStart',
+              'trimEnd',
+              'padEnd',
+              'padStart',
+              'includes',
+              'every',
+            ],
+            message: LODASH_STRING_ARRAY_MESSAGE,
           },
         ],
       },

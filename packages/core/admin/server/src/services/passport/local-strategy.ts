@@ -1,5 +1,3 @@
-import { toLower } from 'lodash';
-
 import { Strategy as LocalStrategy } from 'passport-local';
 import type { Core } from '@strapi/types';
 import { getService } from '../../utils';
@@ -13,7 +11,7 @@ const createLocalStrategy = (strapi: Core.Strapi, middleware?: any) => {
     },
     (email: string, password: string, done: any) => {
       return getService('auth')
-        .checkCredentials({ email: toLower(email), password })
+        .checkCredentials({ email: String(email).toLowerCase(), password })
         .then(async ([error, user, message]) => {
           if (middleware) {
             return middleware([error, user, message], done);

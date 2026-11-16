@@ -1,5 +1,5 @@
 import { Context } from 'koa';
-import { trim, has } from 'lodash';
+import { has } from 'lodash';
 
 import { errors, strings } from '@strapi/utils';
 import { getService } from '../../utils';
@@ -50,8 +50,8 @@ export default {
      * - having only spaces as value (so that an empty field can be caught in validation)
      */
     const attributes = {
-      name: trim(body.name),
-      description: trim(body.description),
+      name: String(body.name ?? '').trim(),
+      description: String(body.description ?? '').trim(),
       permissions: body.permissions,
       lifespan: body.lifespan,
     };
@@ -80,11 +80,11 @@ export default {
      * - having only spaces as value (so that an empty field can be caught in validation)
      */
     if (has(attributes, 'name')) {
-      attributes.name = trim(body.name);
+      attributes.name = String(body.name ?? '').trim();
     }
 
     if (has(attributes, 'description') || attributes.description === null) {
-      attributes.description = trim(body.description);
+      attributes.description = String(body.description ?? '').trim();
     }
 
     await validateTransferTokenUpdateInput(attributes);

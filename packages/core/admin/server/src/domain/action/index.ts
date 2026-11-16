@@ -1,4 +1,4 @@
-import { pick, includes, merge, get, curry, flow, omit } from 'lodash';
+import { pick, merge, curry, flow, omit } from 'lodash';
 import type { Utils } from '@strapi/types';
 
 export interface ActionAlias {
@@ -167,7 +167,7 @@ const assignOrOmitSubCategory = (action: Action): Action => {
  * Check if a property can be applied to an {@link Action}
  */
 const appliesToProperty = curry((property: string, action: Action): boolean => {
-  return includes(get(action, 'options.applyToProperties'), property);
+  return action.options?.applyToProperties?.includes(property) ?? false;
 });
 
 /**

@@ -1,5 +1,3 @@
-import trimEnd from 'lodash/trimEnd';
-
 const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
   return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
 };
@@ -18,7 +16,7 @@ const createAbsoluteUrl = (url?: string): string => {
      * This will also manage protocol relative URLs which is fine because
      * as we can see from the test, we still get the expected result.
      */
-    return trimEnd(new URL(url, window.location.origin).toString(), '/');
+    return new URL(url, window.location.origin).toString().replace(/\/+$/, '');
   } else {
     return url;
   }

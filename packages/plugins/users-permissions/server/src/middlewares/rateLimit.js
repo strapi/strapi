@@ -2,7 +2,7 @@
 
 const path = require('path');
 const utils = require('@strapi/utils');
-const { toLower, isString, has } = require('lodash');
+const { isString, has } = require('lodash');
 
 const { RateLimitError } = utils.errors;
 
@@ -56,7 +56,7 @@ const getEmailIdentifierForKey = (body) => {
     return 'unknownIdentifier';
   }
 
-  return toLower(body.email);
+  return body.email.toLowerCase();
 };
 
 const buildPrefixKey = (ctx) => {
