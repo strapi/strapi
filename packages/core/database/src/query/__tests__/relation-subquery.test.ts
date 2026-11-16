@@ -33,6 +33,8 @@ const models = [
       name: { type: 'string' },
       locale: { type: 'string' },
       publishedAt: { type: 'string' },
+      views: { type: 'integer' },
+      likes: { type: 'integer' },
       related: {
         type: 'relation',
         relation: 'manyToOne',
@@ -83,6 +85,8 @@ const setupTables = async (connection: knex.Knex) => {
     t.string('name');
     t.string('locale');
     t.string('published_at');
+    t.integer('views').defaultTo(10);
+    t.integer('likes').defaultTo(10);
   });
   await connection.schema.createTable('tests_related_lnk', (t) => {
     t.increments('id');
@@ -214,6 +218,85 @@ describe('relation subquery path (deleteMany / updateMany)', () => {
 
     expect(updatedNames.sort()).toEqual([...updated].sort());
     expect(untouchedNames.sort()).toEqual([...untouched].sort());
+
+    await connection.destroy();
+  });
+
+  it.each([
+    [
+      'increment',
+      (qb: any) => qb.increment('views', 2),
+      { views: [12, 10, 12], likes: [10, 10, 10] },
+    ],
+    [
+      'decrement',
+      (qb: any) => qb.decrement('views', 3),
+      { views: [7, 10, 7], likes: [10, 10, 10] },
+    ],
+    [
+      'increment + decrement on different columns',
+      (qb: any) => qb.increment('views', 1).decrement('likes', 2),
+      { views: [11, 10, 11], likes: [8, 10, 8] },
+    ],
+  ])('query builder %s: nested relation where', async (_label, apply, expected) => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } } });
+    await apply(qb).execute();
+
+    const rows = await connection('tests').orderBy('id').select('views', 'likes');
+    expect(rows.map((r) => r.views)).toEqual(expected.views);
+    expect(rows.map((r) => r.likes)).toEqual(expected.likes);
+
+    await connection.destroy();
+  });
+
+  it('query builder update data + increment: nested relation where', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    await em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } } })
+      .update({ name: 'UPDATED' })
+      .increment('views', 1)
+      .execute();
+
+    const rows = await connection('tests').orderBy('id').select('name', 'views');
+    expect(rows).toEqual([
+      { name: 'UPDATED', views: 11 },
+      { name: 'Samuel UMTITI', views: 10 },
+      { name: 'UPDATED', views: 11 },
+    ]);
+
+    await connection.destroy();
+  });
+
+  it('query builder increment honours an explicit transaction', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const trx = await connection.transaction();
+    try {
+      await em
+        .createQueryBuilder(TEST_UID)
+        .init({ where: { related: { title: 'Category A' } } })
+        .increment('views', 5)
+        .transacting(trx)
+        .execute();
+
+      expect(await trx('tests').orderBy('id').pluck('views')).toEqual([15, 10, 15]);
+    } finally {
+      await trx.rollback();
+    }
+
+    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([10, 10, 10]);
 
     await connection.destroy();
   });

@@ -172,6 +172,15 @@ const createQueryBuilder = (
     return alias;
   };
 
+  const applyUpdate = (qb: Knex.QueryBuilder) => {
+    if (state.data) {
+      qb.update(state.data);
+    }
+
+    state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+    state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+  };
+
   return {
     alias: getAlias(),
     getAlias,
@@ -434,7 +443,6 @@ const createQueryBuilder = (
 
     runSubQuery() {
       const originalType = state.type;
-      const { data, increments, decrements } = state;
 
       // Build the inner SELECT from a clone that stays `select`, so the outer write
       // state is never mutated. clone() shallow-merges state (shared where/joins,
@@ -442,30 +450,20 @@ const createQueryBuilder = (
       // against it. The clone inherits processed: true and must only read shared arrays.
       const sub = this.clone();
       sub.alias = this.alias;
-      // getKnexQuery applies increments/decrements after the type switch; keep them
-      // off the inner SELECT and apply them on the outer write instead.
-      sub.state.increments = [];
-      sub.state.decrements = [];
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
 
+      if (state.transaction) {
+        qb.transacting(state.transaction);
+      }
+
       if (originalType === 'delete') {
         return qb.delete();
       }
 
-      if (data) {
-        qb.update(data);
-      }
-
-      if (!_.isEmpty(increments)) {
-        increments.forEach((incr) => qb.increment(incr.column, incr.amount));
-      }
-
-      if (!_.isEmpty(decrements)) {
-        decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
-      }
+      applyUpdate(qb);
 
       return qb;
     },
@@ -670,9 +668,7 @@ const createQueryBuilder = (
           break;
         }
         case 'update': {
-          if (state.data) {
-            qb.update(state.data);
-          }
+          applyUpdate(qb);
           break;
         }
         case 'delete': {
@@ -695,14 +691,6 @@ const createQueryBuilder = (
 
       if (state.forUpdate) {
         qb.forUpdate();
-      }
-
-      if (!_.isEmpty(state.increments)) {
-        state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
-      }
-
-      if (!_.isEmpty(state.decrements)) {
-        state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
       }
 
       if (state.onConflict) {
