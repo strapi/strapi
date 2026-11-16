@@ -382,7 +382,7 @@ describe('the end-users strategy', () => {
 
         const [user, roles] = forUser.mock.calls[0] as unknown as [
           { documentId: string },
-          Array<{ documentId: string }>
+          Array<{ documentId: string }>,
         ];
 
         expect(user.documentId).toBe('user-1');

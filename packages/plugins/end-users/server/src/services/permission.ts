@@ -148,9 +148,7 @@ const declaredParamsOnly = (
 const relationsText = (relations: string[], target: string) =>
   relations.length === 0
     ? `no relation to ${target}`
-    : `${relations.length} relation${
-        relations.length === 1 ? '' : 's'
-      } to ${target} (${relations.join(', ')})`;
+    : `${relations.length} relation${relations.length === 1 ? '' : 's'} to ${target} (${relations.join(', ')})`;
 
 /**
  * `strapi.plugin('end-users').service('permission')`: the permissions of the roles.
@@ -226,18 +224,12 @@ const permissionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (missing) {
         return isParamNeeded(declaration, relations.length)
-          ? `the condition "${condition}" needs "${name}": ${uid} has ${relationsText(
-              relations,
-              relationTarget
-            )}, so it must say which one`
+          ? `the condition "${condition}" needs "${name}": ${uid} has ${relationsText(relations, relationTarget)}, so it must say which one`
           : undefined;
       }
 
       if (!(typeof value === 'string' && relations.includes(value))) {
-        return `the condition "${condition}": "${name}" names a relation of ${uid} to ${relationTarget}, and ${uid} has ${relationsText(
-          relations,
-          relationTarget
-        )}`;
+        return `the condition "${condition}": "${name}" names a relation of ${uid} to ${relationTarget}, and ${uid} has ${relationsText(relations, relationTarget)}`;
       }
 
       // A to-many relation can't be negated ("some entry is not" is not "none is"): the engine would
@@ -285,9 +277,7 @@ const permissionService = ({ strapi }: { strapi: Core.Strapi }) => {
       input?.accepts !== undefined &&
       chosen !== undefined &&
       !matchesAccepts(chosen, input.accepts)
-      ? `the condition "${condition}": "${name}" takes ${acceptsText(
-          input.accepts
-        )}, and "${value}" is a ${String(chosen.type)} field of ${uid}`
+      ? `the condition "${condition}": "${name}" takes ${acceptsText(input.accepts)}, and "${value}" is a ${String(chosen.type)} field of ${uid}`
       : undefined;
   };
 
@@ -313,9 +303,7 @@ const permissionService = ({ strapi }: { strapi: Core.Strapi }) => {
     if (stray !== undefined) {
       const declared = Object.keys(definition.params ?? {});
 
-      return `the condition "${name}" takes ${
-        declared.length === 0 ? 'no params' : `only ${declared.join(', ')}`
-      }, not "${stray}"`;
+      return `the condition "${name}" takes ${declared.length === 0 ? 'no params' : `only ${declared.join(', ')}`}, not "${stray}"`;
     }
 
     for (const [param, declaration] of Object.entries(definition.params ?? {})) {

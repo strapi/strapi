@@ -367,7 +367,7 @@ export const applyConditions = async (
 
   /** Both, ANDed when both restrict */
   const both = (first: Filters | undefined, second: Filters | undefined) =>
-    first !== undefined && second !== undefined ? { $and: [first, second] } : first ?? second;
+    first !== undefined && second !== undefined ? { $and: [first, second] } : (first ?? second);
 
   /**
    * What to insert for a type reached through a relation (populate, or a filter joined from rows of

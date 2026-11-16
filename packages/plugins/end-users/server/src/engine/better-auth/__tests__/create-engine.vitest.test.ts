@@ -2744,9 +2744,7 @@ describe('createEngine', () => {
           silent.listen(0, '127.0.0.1', resolve);
         });
 
-        discoveryUrl = `http://127.0.0.1:${
-          (silent.address() as AddressInfo).port
-        }/.well-known/openid-configuration`;
+        discoveryUrl = `http://127.0.0.1:${(silent.address() as AddressInfo).port}/.well-known/openid-configuration`;
       });
 
       afterAll(async () => {

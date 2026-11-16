@@ -809,9 +809,7 @@ export const FormModal = () => {
             });
 
             navigate({
-              pathname: `/plugins/${pluginId}/component-categories/${toStringValue(
-                modifiedData.category
-              )}/${componentUid}`,
+              pathname: `/plugins/${pluginId}/component-categories/${toStringValue(modifiedData.category)}/${componentUid}`,
             });
           }
 

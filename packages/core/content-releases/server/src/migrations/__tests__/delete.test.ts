@@ -9,7 +9,7 @@ const strapi = {
 } as unknown as Core.Strapi;
 
 const contentType = (draftAndPublish: boolean) =>
-  ({ options: { draftAndPublish }, attributes: {} } as unknown as Schema.ContentType);
+  ({ options: { draftAndPublish }, attributes: {} }) as unknown as Schema.ContentType;
 
 describe('content type removals', () => {
   beforeEach(() => {

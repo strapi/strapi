@@ -422,7 +422,7 @@ describe('role service', () => {
           who: { match: 'all', checks },
           which: { kind: 'group', match: 'all', items: [] },
           onSave: { stamp: [], locked: [] },
-        } as BuilderConditionV2);
+        }) as BuilderConditionV2;
       const records = builderRecordsOf(strapi);
 
       records.set('api::zed', {
@@ -1732,7 +1732,7 @@ describe('role service', () => {
 
         const [, diff] = permission.applyDiff.mock.calls[0] as unknown as [
           string,
-          { create: Array<Record<string, unknown>> }
+          { create: Array<Record<string, unknown>> },
         ];
 
         expect(diff.create).toEqual([

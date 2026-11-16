@@ -176,12 +176,15 @@ const sync = async (
    * Will be used to update the relation target ids
    */
   const newEntryByLocale = keyBy(newEntries, 'locale');
-  const oldEntriesMap = oldEntries.reduce((acc, entry) => {
-    const newEntry = newEntryByLocale[entry.locale];
-    if (!newEntry) return acc;
-    acc[String(entry.id)] = newEntry.id;
-    return acc;
-  }, {} as Record<string, Data.ID>);
+  const oldEntriesMap = oldEntries.reduce(
+    (acc, entry) => {
+      const newEntry = newEntryByLocale[entry.locale];
+      if (!newEntry) return acc;
+      acc[String(entry.id)] = newEntry.id;
+      return acc;
+    },
+    {} as Record<string, Data.ID>
+  );
 
   await strapi.db.transaction(async ({ trx }) => {
     // Iterate old relations that are deleted and insert the new ones

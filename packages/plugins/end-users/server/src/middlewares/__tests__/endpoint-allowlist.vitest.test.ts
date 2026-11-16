@@ -19,7 +19,7 @@ const strapiWith = (values: Record<string, unknown> = {}, methods: Record<string
     plugin: () => ({
       service: () => ({ get: async () => ({ methods: { ...ALL_ON, ...methods } }) }),
     }),
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 /** Runs the middleware on a request target: whether it let the request through, or answered 404. */
 const run = async (

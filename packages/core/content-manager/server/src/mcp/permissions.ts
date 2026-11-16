@@ -39,10 +39,7 @@ export const buildLocaleSchema = (
     }
 
     return schema.describe(
-      `Locale code. Available: ${localeCodes.join(', ')}. ${localeDefaultDescription(
-        defaultLocale,
-        localeCodes
-      )}`
+      `Locale code. Available: ${localeCodes.join(', ')}. ${localeDefaultDescription(defaultLocale, localeCodes)}`
     );
   }
 
@@ -97,10 +94,7 @@ export const resolvePermittedLocaleSchema = (
   }
 
   return schema.describe(
-    `Locale code. Permitted: ${permitted.join(', ')}. ${localeDefaultDescription(
-      defaultLocale,
-      permitted
-    )}`
+    `Locale code. Permitted: ${permitted.join(', ')}. ${localeDefaultDescription(defaultLocale, permitted)}`
   );
 };
 

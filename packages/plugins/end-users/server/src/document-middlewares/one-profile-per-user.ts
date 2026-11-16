@@ -182,8 +182,7 @@ export const oneProfilePerUserMiddleware =
     }
 
     const params = ctx.params as
-      | { documentId?: string; data?: Record<string, unknown> | null }
-      | undefined;
+      { documentId?: string; data?: Record<string, unknown> | null } | undefined;
     const data = params?.data ?? undefined;
 
     if (inProfileLifecycle()) {

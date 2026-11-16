@@ -41,8 +41,7 @@ export const uniqueUserFieldsMiddleware =
     }
 
     const params = ctx.params as
-      | { documentId?: string; data?: Record<string, unknown> | null }
-      | undefined;
+      { documentId?: string; data?: Record<string, unknown> | null } | undefined;
 
     // A copy when the username changes: the object belongs to the caller
     if (params?.data && typeof params.data.username === 'string') {

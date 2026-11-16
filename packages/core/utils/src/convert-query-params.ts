@@ -570,9 +570,7 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
 
         if (hasInvalidProperties) {
           throw new ValidationError(
-            `Invalid nested populate for ${schema.info?.singularName}.${key} (${
-              schema.uid
-            }). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
+            `Invalid nested populate for ${schema.info?.singularName}.${key} (${schema.uid}). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
           );
         }
 

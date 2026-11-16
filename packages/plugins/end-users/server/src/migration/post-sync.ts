@@ -218,8 +218,7 @@ const usersStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner: s
 
   // Pages of rows with no document id, each given the id a new document of the type would get
   const makeId = meta(strapi, USER_UID).attributes.documentId?.default as
-    | (() => string)
-    | undefined;
+    (() => string) | undefined;
 
   if (typeof makeId === 'function') {
     for (;;) {
@@ -653,9 +652,7 @@ const profilesStep = async (strapi: Core.Strapi, record: MigrationRecord, owner:
       kind: 'staged-undeclared' as const,
       severity: 'action' as const,
       message:
-        `The users-permissions table ${original} holds ${rows} ${
-          rows === 1 ? 'row' : 'rows'
-        } the ` +
+        `The users-permissions table ${original} holds ${rows} ${rows === 1 ? 'row' : 'rows'} the ` +
         `profile does not declare, so it was kept as ${stagedName}. Add the matching field to the ` +
         'profile and copy its rows, or drop the table once nothing needs it.',
       count: rows,
@@ -773,9 +770,7 @@ const accountsStep = async (strapi: Core.Strapi, _record: MigrationRecord, owner
   }
 
   strapi.log.info(
-    `${PLUGIN_ID}: recorded a pending link for ${
-      item?.count ?? 0
-    } users of providers that never say an address is verified`
+    `${PLUGIN_ID}: recorded a pending link for ${item?.count ?? 0} users of providers that never say an address is verified`
   );
 };
 
@@ -930,9 +925,7 @@ export const finishMigration = async (
   const open = items.filter((entry) => entry.severity === 'action' && !entry.resolved).length;
 
   strapi.log.info(
-    `${PLUGIN_ID}: migration completed: ${report?.counts.users ?? 0} users, ${
-      report?.counts.roles ?? 0
-    } roles, ${items.length} report items, ${open} to act on`
+    `${PLUGIN_ID}: migration completed: ${report?.counts.users ?? 0} users, ${report?.counts.roles ?? 0} roles, ${items.length} report items, ${open} to act on`
   );
 };
 

@@ -53,7 +53,7 @@ const fakeStrapi = () =>
         }),
       }),
     }),
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 const counters = () => lockoutDb.connection('eu_lockout_counters').select('key', 'count');
 

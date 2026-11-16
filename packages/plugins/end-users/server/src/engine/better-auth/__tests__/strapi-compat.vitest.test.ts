@@ -45,12 +45,12 @@ const configStrapi = (compat: boolean) =>
           'plugin::end-users.secret': SECRET,
           'plugin::end-users.compat.usersPermissions': compat,
           'server.absoluteUrl': 'http://localhost:1337',
-        }[path] ?? fallback),
+        })[path] ?? fallback,
     },
     dirs: { dist: { src: '/nonexistent/end-users/src' } },
     plugin: () => ({ service: () => ({}) }),
     log: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() },
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 const pluginIds = (compat: boolean) =>
   (buildAuthOptions(configStrapi(compat)).plugins ?? []).map((plugin) => plugin.id);
@@ -80,7 +80,7 @@ describe('strapi-compat', () => {
       plugin: () => ({
         service: (name: string) =>
           name === 'engine'
-            ? { get: () => ({ callNative } as unknown as AuthEngine) }
+            ? { get: () => ({ callNative }) as unknown as AuthEngine }
             : { get: async () => ({ methods }) },
       }),
     } as unknown as Core.Strapi;
@@ -337,7 +337,7 @@ describe('strapi-compat rate limit', () => {
       config: {
         get: (path: string, fallback?: unknown) =>
           path.startsWith('plugin::end-users.rateLimit.')
-            ? rateLimit[path.slice('plugin::end-users.rateLimit.'.length)] ?? fallback
+            ? (rateLimit[path.slice('plugin::end-users.rateLimit.'.length)] ?? fallback)
             : base.config.get(path, fallback),
       },
     } as unknown as Core.Strapi;
@@ -410,7 +410,7 @@ describe('strapi-compat register', () => {
       plugin: () => ({
         service(name: string) {
           if (name === 'engine') {
-            return { get: () => ({ callNative } as unknown as AuthEngine) };
+            return { get: () => ({ callNative }) as unknown as AuthEngine };
           }
 
           if (name === 'role') {
@@ -560,7 +560,7 @@ describe('strapi-compat password and confirmation routes', () => {
       plugin: () => ({
         service: (name: string) =>
           name === 'engine'
-            ? { get: () => ({ callNative } as unknown as AuthEngine) }
+            ? { get: () => ({ callNative }) as unknown as AuthEngine }
             : { get: async () => ({ redirects, methods: { emailPassword: true } }) },
       }),
     } as unknown as Core.Strapi;

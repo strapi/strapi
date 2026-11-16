@@ -49,9 +49,7 @@ export const loadProviderPackage = (name: string, paths: string[] = []): Provide
     loaded = require(modulePath);
   } catch (error) {
     throw new Error(
-      `the package at ${modulePath} could not be loaded${
-        error instanceof Error ? `: ${error.message}` : ''
-      }`
+      `the package at ${modulePath} could not be loaded${error instanceof Error ? `: ${error.message}` : ''}`
     );
   }
 

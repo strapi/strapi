@@ -111,7 +111,7 @@ describe('the engine-owned user fields', () => {
 
     const validators = validate.createAPIValidators({
       getModel: (uid: string) =>
-        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA }[uid] as never),
+        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA })[uid] as never,
       validators: { input: [engineOwnedUserFieldsValidator] },
     });
 
@@ -145,7 +145,7 @@ describe('the engine-owned user fields', () => {
   it('refuses an email on a write of an existing user, and takes it on a create', async () => {
     const validators = validate.createAPIValidators({
       getModel: (uid: string) =>
-        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA }[uid] as never),
+        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA })[uid] as never,
       validators: { input: [engineOwnedUserFieldsValidator] },
     });
 
@@ -180,7 +180,7 @@ describe('the engine-owned user fields', () => {
   it("refuses them through core's own input validation of the Content API", async () => {
     const validators = validate.createAPIValidators({
       getModel: (uid: string) =>
-        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA }[uid] as never),
+        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA })[uid] as never,
       validators: { input: [engineOwnedUserFieldsValidator] },
     });
 

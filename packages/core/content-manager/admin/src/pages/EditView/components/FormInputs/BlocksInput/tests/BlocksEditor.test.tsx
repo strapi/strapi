@@ -83,9 +83,9 @@ const setup = () => {
 
 describe('BlocksEditor', () => {
   beforeAll(() => {
-    Range.prototype.getBoundingClientRect = () => ({} as DOMRect);
+    Range.prototype.getBoundingClientRect = () => ({}) as DOMRect;
     Range.prototype.getClientRects = () =>
-      ({ length: 0, item: () => null, [Symbol.iterator]: [][Symbol.iterator] } as DOMRectList);
+      ({ length: 0, item: () => null, [Symbol.iterator]: [][Symbol.iterator] }) as DOMRectList;
   });
 
   beforeEach(() => {

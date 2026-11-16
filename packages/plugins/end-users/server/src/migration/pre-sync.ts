@@ -61,9 +61,7 @@ export const refusalOf = (snapshot: UpSnapshot, config: MigrationConfig): string
   if (config.duplicates === 'abort' && emails + names > 0) {
     return (
       'migration.duplicates is "abort" and some users share an email address or a username once ' +
-      `capitals are ignored: ${emails} email group${
-        emails === 1 ? '' : 's'
-      } and ${names} username ` +
+      `capitals are ignored: ${emails} email group${emails === 1 ? '' : 's'} and ${names} username ` +
       `group${names === 1 ? '' : 's'}. Set migration.duplicates to "keep-oldest" to keep the ` +
       'oldest user of each group and rewrite the others, or merge them first, then deploy again.'
     );
@@ -724,9 +722,7 @@ export const runPreSync: MigrationStepFn = async (trx, db, ctx) => {
   const media = await retypeMedia(trx, db);
 
   strapi.log.info(
-    `${PLUGIN_ID}: renamed ${Object.keys(RENAMED).length} tables and staged ${
-      Object.keys(staged).length
-    }; ` +
+    `${PLUGIN_ID}: renamed ${Object.keys(RENAMED).length} tables and staged ${Object.keys(staged).length}; ` +
       `lower-cased ${users.lowered.usernames} usernames and ${users.lowered.emails} addresses; ` +
       `rewrote ${users.renamedUsernames} usernames, ${users.renamedEmails} addresses and ${roles} role names; ` +
       `re-typed ${media} media rows`

@@ -40,7 +40,7 @@ const fakeStrapi = () =>
     config: {
       get: vi.fn((key: string) => (key === 'plugin::end-users.secret' ? SECRET : undefined)),
     },
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 /**
  * A request's auth context: the trusted providers, the stored link and the stored user. `shared`

@@ -68,10 +68,7 @@ type StringFilter = {
 
 type MimeFilter = {
   [key: string]:
-    | string
-    | NumberKeyedObject
-    | Record<string, string | NumberKeyedObject>
-    | undefined;
+    string | NumberKeyedObject | Record<string, string | NumberKeyedObject> | undefined;
 };
 
 export type FilterStructure = {
@@ -82,9 +79,7 @@ export type Filter = {
   [key in 'mime' | 'createdAt' | 'updatedAt']?:
     | {
         [key in '$contains' | '$notContains' | '$eq' | '$not']?:
-          | string[]
-          | string
-          | { $contains: string[] };
+          string[] | string | { $contains: string[] };
       }
     | undefined;
 };
@@ -299,14 +294,14 @@ export const BrowseStep = ({
                     defaultMessage: 'There are no assets with the applied filters',
                   })
                 : canCreate && !isSearching
-                ? formatMessage({
-                    id: getTrad('list.assets.empty'),
-                    defaultMessage: 'Upload your first assets...',
-                  })
-                : formatMessage({
-                    id: getTrad('list.assets.empty.no-permissions'),
-                    defaultMessage: 'The asset list is empty',
-                  })
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
             }
           />
         </Box>
@@ -327,8 +322,7 @@ export const BrowseStep = ({
           onSelectAll={onSelectAllAsset!}
           rows={
             [...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets] as
-              | FolderRow[]
-              | FileRow[]
+              FolderRow[] | FileRow[]
           }
           selected={selectedAssets}
           shouldDisableBulkSelect={!multiple}

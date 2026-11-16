@@ -126,7 +126,7 @@ describe('Core controllers: the publish gate, the owner stamp and the first writ
       params: { id: 'a1' },
       request: { body: { data: { title: 'b' } } },
       state: { auth, route: { method: 'POST', path: '/x', handler } },
-    } as any);
+    }) as any;
 
   /** Whether `first` ran before `then` */
   const ranBefore = (first: Mock, then: Mock) =>

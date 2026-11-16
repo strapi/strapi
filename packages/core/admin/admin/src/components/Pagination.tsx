@@ -254,8 +254,8 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...(siblingsStart > boundaryCount + 2
       ? ['start-ellipsis']
       : boundaryCount + 1 < pageCount - boundaryCount
-      ? [boundaryCount + 1]
-      : []),
+        ? [boundaryCount + 1]
+        : []),
 
     // Sibling pages
     ...range(siblingsStart, siblingsEnd),
@@ -264,8 +264,8 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...(siblingsEnd < pageCount - boundaryCount - 1
       ? ['end-ellipsis']
       : pageCount - boundaryCount > boundaryCount
-      ? [pageCount - boundaryCount]
-      : []),
+        ? [pageCount - boundaryCount]
+        : []),
 
     ...endPages,
   ];

@@ -330,9 +330,7 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (total > MAX_PERMISSIONS_PER_ROLE) {
         refuse(
-          `A role has at most ${formatLimit(
-            MAX_PERMISSIONS_PER_ROLE
-          )} permissions, and this save would leave it with ${formatLimit(total)}`
+          `A role has at most ${formatLimit(MAX_PERMISSIONS_PER_ROLE)} permissions, and this save would leave it with ${formatLimit(total)}`
         );
       }
     }
@@ -377,9 +375,7 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const refuseTooManyHolders = (role: Plain, count: number): never =>
     refuse(
-      `${formatLimit(count)} users have the ${
-        role.name as string
-      } role: move its users to other roles first`
+      `${formatLimit(count)} users have the ${role.name as string} role: move its users to other roles first`
     );
 
   /**
@@ -598,9 +594,7 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         if ((await countUsers(documentId)) > 0) {
           refuse(
-            `A user was given the ${
-              role.name as string
-            } role while it was being deleted: nothing was deleted, try again`
+            `A user was given the ${role.name as string} role while it was being deleted: nothing was deleted, try again`
           );
         }
 

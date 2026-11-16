@@ -14,10 +14,7 @@ type StringFilter = {
 
 type MimeFilter = {
   [key: string]:
-    | string
-    | NumberKeyedObject
-    | Record<string, string | NumberKeyedObject>
-    | undefined;
+    string | NumberKeyedObject | Record<string, string | NumberKeyedObject> | undefined;
 };
 
 export type FilterStructure = {

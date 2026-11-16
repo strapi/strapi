@@ -181,9 +181,7 @@ describe('totp-replay', () => {
     vi.useFakeTimers({ now: NOW });
 
     try {
-      const imported = `base32:${base32
-        .encode(Buffer.from(SECRET), { padding: false })
-        .toLowerCase()}`;
+      const imported = `base32:${base32.encode(Buffer.from(SECRET), { padding: false }).toLowerCase()}`;
       const { run, updateMany } = setup({
         row: { secret: imported, verified: true, lockedUntil: null },
       });

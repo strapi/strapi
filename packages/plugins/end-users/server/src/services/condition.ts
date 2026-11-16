@@ -342,11 +342,7 @@ export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> 
 
         if (record.stale.length > 0) {
           strapi.log.warn(
-            `${file}: ${
-              registering.name
-            } is false for everyone until this is fixed, because the project no longer has ${record.stale.join(
-              '; '
-            )}`
+            `${file}: ${registering.name} is false for everyone until this is fixed, because the project no longer has ${record.stale.join('; ')}`
           );
         }
       }
@@ -1258,9 +1254,7 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (used > 0) {
         throw new errors.ValidationError(
-          `${name} is used by ${used} ${used === 1 ? 'role' : 'roles'}: remove it from ${
-            used === 1 ? 'that role' : 'those roles'
-          } first`
+          `${name} is used by ${used} ${used === 1 ? 'role' : 'roles'}: remove it from ${used === 1 ? 'that role' : 'those roles'} first`
         );
       }
 
