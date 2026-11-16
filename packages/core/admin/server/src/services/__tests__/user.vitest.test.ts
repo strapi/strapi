@@ -1042,6 +1042,26 @@ describe('User', () => {
       );
     });
 
+    test('Fails without an audit entry if the user is deleted before the update', async () => {
+      const findOne = vi.fn(() => Promise.resolve({ id: 1 }));
+      const updateById = vi.fn(() => Promise.resolve(null));
+
+      global.strapi = {
+        ...global.strapi,
+        db: { query: () => ({ findOne }) },
+        admin: { services: { user: { updateById } } },
+      } as any;
+      vi.mocked(emitAudit).mockClear();
+
+      await expect(
+        register({
+          registrationToken: '123',
+          userInfo: { firstname: 'test', lastname: 'Strapi', password: 'Test1234' },
+        })
+      ).rejects.toThrowError('Invalid registration info');
+      expect(emitAudit).not.toHaveBeenCalled();
+    });
+
     test('Records the accepted invitation in the audit log, without the password', async () => {
       const findOne = vi.fn(() => Promise.resolve({ id: 1 }));
       const updateById = vi.fn(() =>
