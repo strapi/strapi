@@ -31,8 +31,8 @@ const reuseUnsetPreviousProperties = (
 };
 
 /**
- * Whether `relation`, an attribute of the type being edited, is a relation to `target` that
- * names `targetAttributeName` as its other side.
+ * Whether `relation`, an attribute of the type being edited (as sent in the save, or as
+ * stored), is a relation to `target` that names `targetAttributeName` as its other side.
  */
 const namesOtherSide = (
   relation: InternalAttribute | undefined,
@@ -57,28 +57,25 @@ const namesOtherSide = (
 
 /**
  * Whether `targetAttribute`, the attribute named by `inversedBy` or `mappedBy` on the
- * target of the relation `key` of `uid`, is the other side of that relation. `attributes`
- * are the attributes of `uid` after the edit. Same rule as the database boot check:
+ * target of the relation `key` of `uid`, is the other side of that relation. Same rule as
+ * the database boot check:
  * - an inverse side (`mappedBy`) is paired with the owner that points back to it: a
  *   relation to `uid` with `inversedBy: key`. The `mappedBy` name alone does not pair them.
- * - an owner (`inversedBy`) is paired with the relation back to `uid` that it names, unless
- *   another attribute of `uid` took that relation over earlier in the same save: the
- *   relation then owns another pair (`inversedBy` another name), or its `mappedBy` names
- *   another attribute that claims it after the edit. When that `mappedBy` names an
- *   attribute that does not claim it, the database still pairs it with this owner.
+ * - an owner (`inversedBy`) is paired with the inverse side it names: a relation to `uid`
+ *   with `mappedBy` (the database does not read that name). A relation with no `mappedBy`
+ *   is not paired with it: a one-way relation, or the owner of another pair. If an earlier
+ *   step of the same save made it the owner of this pair, it has `inversedBy: key`.
  */
 const isOtherSide = ({
   key,
   uid,
   attribute,
   targetAttribute,
-  attributes,
 }: {
   key: string;
   uid: string;
   attribute: InternalRelationAttribute;
   targetAttribute: Schema.Attribute.AnyAttribute;
-  attributes: Record<string, InternalAttribute>;
 }) => {
   if (isRelation(targetAttribute) === false) {
     return false;
@@ -94,19 +91,10 @@ const isOtherSide = ({
     return counterpart.inversedBy === key;
   }
 
-  if (counterpart.mappedBy === key || counterpart.inversedBy === key) {
-    return true;
-  }
-
-  if (counterpart.mappedBy !== undefined && counterpart.mappedBy !== null) {
-    return (
-      namesOtherSide(attributes[counterpart.mappedBy], attribute.target, attribute.inversedBy) ===
-      false
-    );
-  }
-
-  // An owner of another pair is kept; a relation with no other side is deleted, as before
-  return counterpart.inversedBy === undefined || counterpart.inversedBy === null;
+  return (
+    (counterpart.mappedBy !== undefined && counterpart.mappedBy !== null) ||
+    counterpart.inversedBy === key
+  );
 };
 
 /**
@@ -170,10 +158,13 @@ export default function createComponentBuilder() {
 
     /**
      * Deletes the other side of the relation `key` of `uid` from its target.
-     * The attribute named by `inversedBy` or `mappedBy` is deleted only when it is
-     * the other side of this relation (see `isOtherSide`): earlier in the same save,
-     * that name can have been given to another attribute, which must be kept.
-     * `attributes` are the attributes of `uid` after the edit.
+     * The attribute named by `inversedBy` or `mappedBy` is kept when:
+     * - an attribute of `uid` after the edit (`attributes`) names it as its other side, for
+     *   example another attribute that takes it over in the same save: `setRelation` then
+     *   rebuilds it, and keeps its own options (`private`, `required`, `pluginOptions`,
+     *   `conditions`);
+     * - it is not the other side of this relation (see `isOtherSide`), for example a
+     *   one-way relation, or the owner of another pair.
      */
     unsetRelation(
       this: any,
@@ -197,14 +188,24 @@ export default function createComponentBuilder() {
 
       const relationAttribute = attribute as InternalRelationAttribute;
       const targetAttributeName = relationAttribute.inversedBy || relationAttribute.mappedBy;
+
+      if (targetAttributeName === undefined) {
+        return;
+      }
+
       const targetAttribute = targetCT.getAttribute(targetAttributeName);
 
       if (!targetAttribute) return;
 
-      if (
-        isOtherSide({ key, uid, attribute: relationAttribute, targetAttribute, attributes }) ===
-        false
-      ) {
+      const isNamedAfterEdit = Object.values(attributes).some((other) =>
+        namesOtherSide(other, relationAttribute.target, targetAttributeName)
+      );
+
+      if (isNamedAfterEdit === true) {
+        return;
+      }
+
+      if (isOtherSide({ key, uid, attribute: relationAttribute, targetAttribute }) === false) {
         return;
       }
 
