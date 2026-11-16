@@ -1,4 +1,4 @@
-import { cloneDeep, has } from 'lodash';
+import { has, isPlainObject } from 'lodash';
 import { hooks } from '@strapi/utils';
 
 import * as domain from '../domain';
@@ -14,6 +14,24 @@ export interface PermissionEngineHooks {
 }
 
 export type HookName = keyof PermissionEngineHooks;
+
+const clonePermission = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return value.map(clonePermission) as T;
+  }
+
+  if (isPlainObject(value)) {
+    const copy: Record<string, unknown> = {};
+
+    for (const key of Object.keys(value as object)) {
+      copy[key] = clonePermission((value as Record<string, unknown>)[key]);
+    }
+
+    return copy as T;
+  }
+
+  return value;
+};
 
 /**
  * Create a hook map used by the permission Engine
@@ -31,7 +49,7 @@ const createEngineHooks = (): PermissionEngineHooks => ({
  */
 const createValidateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
-    return cloneDeep(permission);
+    return clonePermission(permission);
   },
 });
 
@@ -40,7 +58,7 @@ const createValidateContext = (permission: Permission) => ({
  */
 const createBeforeEvaluateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
-    return cloneDeep(permission);
+    return clonePermission(permission);
   },
 
   addCondition(condition: string) {
@@ -63,7 +81,7 @@ const createWillRegisterContext = ({ permission, options }: WillRegisterContextP
   ...options,
 
   get permission() {
-    return cloneDeep(permission);
+    return clonePermission(permission);
   },
 
   condition: {
