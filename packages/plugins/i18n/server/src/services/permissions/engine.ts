@@ -1,25 +1,34 @@
+import type { Modules, UID } from '@strapi/types';
 import { getService } from '../../utils';
 
+type WillRegisterPermissionContext = {
+  readonly permission: Modules.Permissions.PermissionRule & {
+    properties?: { locales?: string[] | null };
+  };
+  condition: { and(rawConditionObject: unknown): unknown };
+};
+
 /**
- * @typedef {object} WillRegisterPermissionContext
- * @property {Permission} permission
- * @property {object} condition
+ * The engine subject is a CASL subject: a string, a record, or null.
+ * Only a string that names a registered content type is a content-type UID.
  */
+const isContentTypeUID = (subject: unknown): subject is UID.ContentType => {
+  return typeof subject === 'string' && strapi.get('content-types').get(subject) !== undefined;
+};
 
 /**
  * Locales property handler for the permission engine
  * Add the has-locale-access condition if the locales property is defined
- * @param {WillRegisterPermissionContext} context
  */
-const willRegisterPermission = (context: any) => {
+const willRegisterPermission = (context: WillRegisterPermissionContext) => {
   const { permission, condition } = context;
   const { subject, properties } = permission;
 
   const { locales } = properties || {};
   const { isLocalizedContentType } = getService('content-types');
 
-  // If there is no subject defined, ignore the permission
-  if (!subject) {
+  // If the subject isn't a content type (none, a record, or another string), ignore the permission
+  if (isContentTypeUID(subject) === false) {
     return;
   }
 

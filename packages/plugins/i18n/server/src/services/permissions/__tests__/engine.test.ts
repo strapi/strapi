@@ -1,3 +1,4 @@
+import type { Modules } from '@strapi/types';
 import engine from '../engine';
 
 const mockGetService = jest.fn();
@@ -18,11 +19,15 @@ const notLocalizedModel = {
 
 const createContext = (
   user: Record<string, unknown>,
-  properties: Record<string, unknown>,
-  subject: unknown = localizedModel.uid
+  properties: { locales?: string[] | null },
+  subject: Modules.Permissions.PermissionRule['subject'] = localizedModel.uid
 ) => {
   const and = jest.fn();
-  const permissionGetter = jest.fn(() => ({ subject, properties }));
+  const permissionGetter = jest.fn(() => ({
+    action: 'plugin::content-manager.explorer.read',
+    subject,
+    properties,
+  }));
 
   const context = {
     ...user,
