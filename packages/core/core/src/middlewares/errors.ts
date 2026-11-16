@@ -1,4 +1,5 @@
 import { errors } from '@strapi/utils';
+import { errors as databaseErrors } from '@strapi/database';
 import type { Core } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
@@ -42,7 +43,12 @@ const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
         return;
       }
 
-      strapi.log.error(error);
+      // The client is gone: nobody reads this response, and it is not a failure of the server
+      if (error instanceof databaseErrors.RequestAbortedError) {
+        strapi.log.debug(`Request aborted before the query completed: ${error.message}`);
+      } else {
+        strapi.log.error(error);
+      }
 
       const { status, body } = formatInternalError(error);
       ctx.status = status;

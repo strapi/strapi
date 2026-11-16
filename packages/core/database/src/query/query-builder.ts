@@ -3,9 +3,11 @@ import _ from 'lodash';
 
 import type { Database } from '..';
 
-import { DatabaseError } from '../errors';
+import { DatabaseError, RequestAbortedError } from '../errors';
+import { abortCtx } from '../abort-context';
 import { transactionCtx } from '../transaction-context';
 import { applyQueryTimeout, isKnexQuery } from '../utils/knex';
+import { getActiveAbortSignal, runAbortable } from '../utils/abort';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
@@ -759,14 +761,21 @@ const createQueryBuilder = (
           qb.transacting(transaction);
         }
 
-        const rows = await qb;
+        const abortSignal = getActiveAbortSignal(db, state);
+        const rows = abortSignal ? await runAbortable(db, qb, abortSignal) : await qb;
 
         if (state.populate && rows != null) {
-          await helpers.applyPopulate(_.castArray(rows), state.populate, {
-            qb: this,
-            uid,
-            db,
-          });
+          const populateState = state.populate;
+          const populate = () =>
+            helpers.applyPopulate(_.castArray(rows), populateState, {
+              qb: this,
+              uid,
+              db,
+            });
+
+          // The sub-queries are fresh query builders that don't know the parent's transaction or
+          // lock: they must not be aborted when the parent is not
+          await (state.transaction || state.forUpdate ? abortCtx.exit(populate) : populate());
         }
 
         let results = rows;
@@ -786,6 +795,11 @@ const createQueryBuilder = (
 
     stream({ mapResults = true } = {}) {
       if (state.type === 'select') {
+        // A stream is not cancelled once started, but a disconnected request must not start one
+        if (getActiveAbortSignal(db, state)?.aborted) {
+          throw new RequestAbortedError();
+        }
+
         return new helpers.ReadableQuery({ qb: this, db, uid, mapResults });
       }
 

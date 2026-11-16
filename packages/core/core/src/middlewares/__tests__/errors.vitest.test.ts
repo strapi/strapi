@@ -18,7 +18,7 @@ const createApp = (error: unknown) => {
 
 describe('Errors middleware', () => {
   beforeEach(() => {
-    global.strapi = { log: { error: vi.fn() } } as any;
+    global.strapi = { log: { error: vi.fn(), debug: vi.fn() } } as any;
   });
 
   test('_explicitStatus still exists', async () => {
@@ -72,5 +72,15 @@ describe('Errors middleware', () => {
 
     expect(res.status).toBe(500);
     expect(global.strapi.log.error).toHaveBeenCalledWith(error);
+  });
+
+  test('does not log a RequestAbortedError as an error', async () => {
+    const error = new databaseErrors.RequestAbortedError();
+
+    const res = await request(createApp(error).callback()).get('/');
+
+    expect(res.status).toBe(500);
+    expect(global.strapi.log.error).not.toHaveBeenCalled();
+    expect(global.strapi.log.debug).toHaveBeenCalledTimes(1);
   });
 });

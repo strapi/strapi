@@ -44,6 +44,27 @@ The entity manager writes relations into join tables and keeps their order. Poly
 
 `db.transaction(callback)` runs the callback in a Knex transaction. It stores the transaction in an async context (`transactionCtx`), so queries inside the callback use it without an explicit argument. Nested calls reuse the outer transaction. Read [Transactions](./02-transactions.md).
 
+### Abort context
+
+`db.runWithAbortSignal(signal, callback)` runs the callback with an `AbortSignal` stored in an async context (`abortCtx`, [`src/abort-context.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/database/src/abort-context.ts)), the same way `transactionCtx` holds a transaction. `@strapi/core` calls it for every HTTP request ([`services/server/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/client-abort.ts)): the signal aborts when the response closes before it ended, which means the client disconnected. It exists so a request nobody waits for stops holding pooled connections (issue #28646).
+
+When a signal is in context, `execute()` of the query builder changes only for a query that is a `select` and runs outside a transaction (neither `transactionCtx` nor `qb.transacting()` is set). Writes and anything inside a transaction always run to completion, so a disconnect never leaves partial work.
+
+- If the signal is already aborted, the query is not issued and `execute()` throws `RequestAbortedError`. Populate sub-queries go through `execute()` too, and `stream()` refuses to start.
+- On clients that can cancel a query (`postgres`, `mysql`), the query builder acquires the connection itself, and cancels the running query with the client's `cancelQuery` when the signal aborts. The query then rejects with `RequestAbortedError` (the driver error is its `cause`). The connection is always released, and it is marked disposed when the cancel fails, as Knex does for a timed out query. `settings.queryTimeout` still applies to the same query.
+- On `sqlite` only the refusal applies, because the driver cannot cancel a running query.
+
+The mechanism is opt-in: it runs only when `settings.cancelQueriesOnClientDisconnect` is `true` (default `false`). With the setting unset, `runWithAbortSignal` runs the callback without storing the signal, so nothing changes. It must be a boolean, and the constructor throws otherwise. It is off by default because work that a request starts without awaiting it inherits the signal (see the limits below), which would change behaviour for existing projects.
+
+Limits:
+
+- Queries run directly on `strapi.db.connection` (including `connection.raw`) are not covered, like `queryTimeout`.
+- A stream that already started is not cancelled.
+- Work that a request starts without awaiting it inherits the signal, so its `select` queries are refused once the client disconnects. Its writes are not.
+- Cancelling is best effort: a signal that aborts in the instant between acquiring the connection and the driver sending the query can still let that one query run to completion.
+
+`RequestAbortedError` is not an internal error. The REST error middleware and the GraphQL error formatter log it at debug level instead of error.
+
 ### Migrations
 
 Two providers run migrations: the user provider for files in `database/migrations` of the application, and the internal provider for the migrations in `src/migrations/internal-migrations`. Each provider records the names it ran in its own table, `strapi_migrations` for user migrations and `strapi_migrations_internal` for internal ones. Read [Migrations](./03-migrations.md).

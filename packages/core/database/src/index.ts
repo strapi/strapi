@@ -10,6 +10,7 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
+import { abortCtx } from './abort-context';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
 import { appendCallerStack } from './utils/async-stack';
@@ -87,6 +88,12 @@ interface Settings {
    * example `env.int('DATABASE_QUERY_TIMEOUT')`).
    */
   queryTimeout?: number;
+  /**
+   * Stop issuing `select` queries (and cancel the running one on postgres and mysql) for a request
+   * whose client disconnected before the response ended. Writes and anything inside a transaction
+   * are never aborted. Off by default; set to true to enable it. Must be a boolean.
+   */
+  cancelQueriesOnClientDisconnect?: boolean;
   migrations: {
     dir: string;
   };
@@ -120,6 +127,16 @@ const assertValidQueryTimeout = (queryTimeout: unknown) => {
 
     throw new Error(
       `Invalid database setting "queryTimeout": expected a positive number of milliseconds, received ${received}. Use env.int() when reading it from an environment variable.`
+    );
+  }
+};
+
+const assertValidCancelQueriesOnClientDisconnect = (value: unknown) => {
+  if (value !== undefined && typeof value !== 'boolean') {
+    throw new Error(
+      `Invalid database setting "cancelQueriesOnClientDisconnect": expected a boolean, received ${
+        typeof value === 'string' ? JSON.stringify(value) : String(value)
+      }. Use env.bool() when reading it from an environment variable.`
     );
   }
 };
@@ -175,6 +192,9 @@ class Database {
     this.logger = config.logger ?? console;
 
     assertValidQueryTimeout(this.config.settings.queryTimeout);
+    assertValidCancelQueriesOnClientDisconnect(
+      this.config.settings.cancelQueriesOnClientDisconnect
+    );
 
     this.dialect = getDialect(this);
 
@@ -290,6 +310,21 @@ class Database {
     } finally {
       this.phase = previous;
     }
+  }
+
+  /**
+   * Runs `cb` with `signal` as the abort signal of the work it starts. While the signal is
+   * aborted (or once it aborts), `select` queries issued from that flow outside a transaction are
+   * refused with a `RequestAbortedError`, and a running one is cancelled on clients that can
+   * (postgres, mysql). Writes and queries inside a transaction are never affected. A no-op when
+   * `settings.cancelQueriesOnClientDisconnect` is not true.
+   */
+  runWithAbortSignal<T>(signal: AbortSignal, cb: () => T): T {
+    if (this.config.settings.cancelQueriesOnClientDisconnect !== true) {
+      return cb();
+    }
+
+    return abortCtx.run(signal, cb);
   }
 
   /**

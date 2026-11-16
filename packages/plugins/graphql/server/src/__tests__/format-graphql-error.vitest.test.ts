@@ -32,10 +32,12 @@ const formatResolverError = (originalError: unknown) => {
 
 describe('formatGraphqlError', () => {
   const logError = vi.fn();
+  const logDebug = vi.fn();
 
   beforeEach(() => {
     logError.mockReset();
-    vi.stubGlobal('strapi', { log: { error: logError } });
+    logDebug.mockReset();
+    vi.stubGlobal('strapi', { log: { error: logError, debug: logDebug } });
   });
 
   afterEach(() => {
@@ -83,6 +85,19 @@ describe('formatGraphqlError', () => {
 
       expect(logError).toHaveBeenCalledTimes(1);
       expect(logError).toHaveBeenCalledWith(internalError);
+    });
+  });
+
+  describe('errors from a request the client abandoned', () => {
+    it('does not log a RequestAbortedError as an error and still sends the generic 500', () => {
+      const aborted = new Error('The request was aborted before the query completed');
+      aborted.name = 'RequestAbortedError';
+
+      const formatted = formatResolverError(aborted);
+
+      expect(logError).not.toHaveBeenCalled();
+      expect(logDebug).toHaveBeenCalledTimes(1);
+      expect(formatted.message).toBe('Internal Server Error');
     });
   });
 

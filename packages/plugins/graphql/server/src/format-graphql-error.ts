@@ -64,8 +64,13 @@ export function formatGraphqlError(formattedError: GraphQLFormattedError, error:
 
   // else if originalError doesn't appear to be from Strapi or GraphQL..
 
-  // Log the error
-  strapi.log.error(originalError);
+  // Log the error. When the client disconnected nobody reads the response, so it is not an
+  // unexpected error (matched by name: this package does not depend on @strapi/database)
+  if (originalError instanceof Error && originalError.name === 'RequestAbortedError') {
+    strapi.log.debug(`Request aborted before the query completed: ${originalError.message}`);
+  } else {
+    strapi.log.error(originalError);
+  }
 
   // Create a generic 500 to send so we don't risk leaking any data. The error that went to the log
   // is not passed on: its name, message and details can hold SQL with bound values, hostnames and
