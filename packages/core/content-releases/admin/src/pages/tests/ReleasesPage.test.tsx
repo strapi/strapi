@@ -94,7 +94,7 @@ describe('Releases home page', () => {
     expect(screen.queryByRole('combobox', { name: /entries per page/i })).not.toBeInTheDocument();
   });
 
-  it('requests pending and done releases together, soonest scheduled first', async () => {
+  it('requests pending and done releases together, latest scheduled first', async () => {
     let requestParams: URLSearchParams | undefined;
     server.use(
       http.get('/content-releases', ({ request }) => {
@@ -108,7 +108,7 @@ describe('Releases home page', () => {
     expect(await screen.findByRole('link', { name: 'Holiday newsletter' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Summer campaign' })).toBeInTheDocument();
     expect(screen.getByText('6 releases')).toBeInTheDocument();
-    expect(requestParams?.get('sort')).toBe('scheduledAt:asc');
+    expect(requestParams?.get('sort')).toBe('scheduledAt:desc');
     // No releasedAt filter: pending and done releases come back together
     expect([...(requestParams?.keys() ?? [])].filter((key) => key.startsWith('filters'))).toEqual(
       []
@@ -647,14 +647,14 @@ describe('Releases home page', () => {
     const SCHEDULE_FROM = '2026-10-01T00:00:00.000Z';
     const FILTERED_URL = `/?filters[$and][0][releaseCondition][$eq]=all_or_nothing&filters[$and][1][scheduledAt][$gte]=${SCHEDULE_FROM}`;
 
-    it('sorts by scheduled date, soonest first, by default', async () => {
+    it('sorts by scheduled date, latest first, by default', async () => {
       const requests = captureRequests();
       render(<ReleasesPage />);
 
       expect(
-        await screen.findByRole('button', { name: 'Sort: Scheduled date (soonest first)' })
+        await screen.findByRole('button', { name: 'Sort: Scheduled date (latest first)' })
       ).toBeInTheDocument();
-      await waitFor(() => expect(requests.at(-1)?.get('sort')).toBe('scheduledAt:asc'));
+      await waitFor(() => expect(requests.at(-1)?.get('sort')).toBe('scheduledAt:desc'));
     });
 
     it('changes the sort, back to the first page, keeping the filters', async () => {
@@ -664,10 +664,10 @@ describe('Releases home page', () => {
       });
 
       await user.click(
-        await screen.findByRole('button', { name: 'Sort: Scheduled date (soonest first)' })
+        await screen.findByRole('button', { name: 'Sort: Scheduled date (latest first)' })
       );
       expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
-        'Scheduled date (soonest first)',
+        'Scheduled date (earliest first)',
         'Scheduled date (latest first)',
         'Most recent updates',
         'Oldest updates',
