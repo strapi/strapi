@@ -10,7 +10,9 @@ type WillRegisterPermissionContext = {
 
 /**
  * The engine subject is a CASL subject: a string, a record, or null.
- * Only a string that names a registered content type is a content-type UID.
+ * Only a string can be a content-type UID, and `strapi.contentType()` is typed to take one.
+ * The registry is a plain object, so an inherited key such as `constructor` also passes;
+ * it is not localized, so the handler still ignores it.
  */
 const isContentTypeUID = (subject: unknown): subject is UID.ContentType => {
   return typeof subject === 'string' && strapi.get('content-types').get(subject) !== undefined;

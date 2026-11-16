@@ -48,6 +48,7 @@ describe('i18n permissions engine', () => {
   };
   const contentTypes = jest.fn(() => ({ ...registry }));
   const contentType = jest.fn((uid: string) => registry[uid]);
+  const registryGet = jest.fn((uid: string) => registry[uid]);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,7 +60,7 @@ describe('i18n permissions engine', () => {
 
     global.strapi = {
       contentType,
-      get: (name: string) => (name === 'content-types' ? { get: contentType } : undefined),
+      get: (name: string) => (name === 'content-types' ? { get: registryGet } : undefined),
       get contentTypes() {
         return contentTypes();
       },
@@ -117,6 +118,17 @@ describe('i18n permissions engine', () => {
 
       expect(() => engine.willRegisterPermission(context)).not.toThrow();
       expect(and).not.toHaveBeenCalled();
+    });
+
+    test.each([
+      ['a record subject', { uid: localizedModel.uid }],
+      ['a string subject that is not a content-type UID', 'plugin::foo.bar'],
+    ])('does not pass %s to strapi.contentType()', (_, subject) => {
+      const { context } = createContext(editor, { locales: ['en'] }, subject);
+
+      engine.willRegisterPermission(context);
+
+      expect(contentType).not.toHaveBeenCalled();
     });
   });
 
