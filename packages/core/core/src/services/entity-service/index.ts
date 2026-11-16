@@ -3,6 +3,7 @@ import delegate from 'delegates';
 import {
   contentTypes as contentTypesUtils,
   errors,
+  pagination as paginationUtils,
   relations as relationUtils,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
@@ -34,6 +35,20 @@ const transformLoadParamsToQuery = (
   };
 
   return res;
+};
+
+type Pagination = Modules.EntityService.Params.Pagination.Any;
+type OffsetNotation = Modules.EntityService.Params.Pagination.OffsetNotation;
+
+/**
+ * Offset notation (`start`, `limit`) without any page notation key. Mixed notations keep the page
+ * notation path, which reads `page` and `pageSize` only.
+ */
+const isOffsetNotation = (pagination: Pagination): pagination is OffsetNotation => {
+  const hasOffsetKey = 'start' in pagination || 'limit' in pagination;
+  const hasPageKey = 'page' in pagination || 'pageSize' in pagination;
+
+  return hasOffsetKey === true && hasPageKey === false;
 };
 
 const createDefaultImplementation = ({
@@ -179,6 +194,26 @@ const createDefaultImplementation = ({
 
     if (!relationUtils.isAnyToMany(attribute)) {
       throw new Error(`Invalid load. Expected "${field}" to be an anyToMany relational attribute`);
+    }
+
+    if (isOffsetNotation(pagination) === true) {
+      // The database repository's loadPages only reads `page` and `pageSize`, so it would
+      // return the first page. Load the requested slice and the total count directly.
+      const { start, limit } = paginationUtils.withDefaultPagination(pagination);
+      const query = transformLoadParamsToQuery(uid, field, params ?? {});
+      // A limit of -1 means no limit
+      const sliceQuery =
+        limit === -1 ? { ...query, offset: start } : { ...query, offset: start, limit };
+
+      const [results, { count: total }] = await Promise.all([
+        db.query(uid).load(entity, field, sliceQuery),
+        db.query(uid).load(entity, field, { ...query, count: true }),
+      ]);
+
+      return {
+        results: await this.wrapResult(results, { uid, field, action: 'load' }),
+        pagination: { start, limit, total },
+      };
     }
 
     const query = transformLoadParamsToQuery(uid, field, params ?? {}, pagination);
