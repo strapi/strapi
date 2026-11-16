@@ -9,9 +9,11 @@ import { isAuditLogsEnabled } from '../audit-logs/utils';
 
 type RetainedFeature = { name: string; [key: string]: any };
 
-type ProjectUsage = NonNullable<GetLicenseLimitInformation.Response['data']['projectUsage']>;
+type AdminUsersAcrossInstances = NonNullable<
+  GetLicenseLimitInformation.Response['data']['adminUsersAcrossInstances']
+>;
 
-const isProjectUsage = (value: unknown): value is ProjectUsage => {
+const isAdminUsersAcrossInstances = (value: unknown): value is AdminUsersAcrossInstances => {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
@@ -25,12 +27,12 @@ const isProjectUsage = (value: unknown): value is ProjectUsage => {
   );
 };
 
-/** Usage stored by the online license check (`onlineUpdate` in @strapi/core). */
-const getStoredProjectUsage = async (): Promise<ProjectUsage | null> => {
+/** Count stored by the online license check (`reportActiveAdminUsers` in @strapi/core). */
+const getStoredAdminUsersAcrossInstances = async (): Promise<AdminUsersAcrossInstances | null> => {
   try {
-    const stored = await strapi.store.get({ type: 'ee', key: 'license_usage' });
+    const stored = await strapi.store.get({ type: 'ee', key: 'admin_users_across_instances' });
 
-    if (!isProjectUsage(stored)) {
+    if (!isAdminUsersAcrossInstances(stored)) {
       return null;
     }
 
@@ -152,8 +154,9 @@ export default {
     // came with it) stored by an earlier online run says nothing about its current state.
     const registryState = licenseMode === 'online' ? eeInformation : null;
 
-    // Offline licenses don't report usage
-    const projectUsage = licenseMode === 'online' ? await getStoredProjectUsage() : null;
+    // Offline licenses don't report their admin users
+    const adminUsersAcrossInstances =
+      licenseMode === 'online' ? await getStoredAdminUsersAcrossInstances() : null;
 
     const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
@@ -196,7 +199,7 @@ export default {
       usingCachedLicense: Boolean(registryState?.error && registryState?.license),
       registrySyncError: registryState?.error ?? null,
       registrySyncErrorKind: registryState?.errorKind ?? null,
-      projectUsage,
+      adminUsersAcrossInstances,
       shouldNotify,
       shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,

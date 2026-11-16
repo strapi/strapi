@@ -568,7 +568,7 @@ describe('licenseLimitInformation (planEntitlements)', () => {
   });
 });
 
-describe('licenseLimitInformation (projectUsage)', () => {
+describe('licenseLimitInformation (adminUsersAcrossInstances)', () => {
   const OLD_ENV = process.env;
   const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
 
@@ -579,7 +579,7 @@ describe('licenseLimitInformation (projectUsage)', () => {
     process.env = OLD_ENV;
   });
 
-  const withStoredUsage = (value: unknown) => {
+  const withStoredCount = (value: unknown) => {
     const get = vi.fn(async () => value);
     (global.strapi as any).store = { get };
     return get;
@@ -588,22 +588,22 @@ describe('licenseLimitInformation (projectUsage)', () => {
   it('reports the usage stored from the license registry', async () => {
     createStrapiMock({ stored: null });
     stubUserServices();
-    const get = withStoredUsage(USAGE);
+    const get = withStoredCount(USAGE);
 
     const { data } = await adminController.licenseLimitInformation();
 
-    expect(get).toHaveBeenCalledWith({ type: 'ee', key: 'license_usage' });
-    expect(data.projectUsage).toEqual(USAGE);
+    expect(get).toHaveBeenCalledWith({ type: 'ee', key: 'admin_users_across_instances' });
+    expect(data.adminUsersAcrossInstances).toEqual(USAGE);
   });
 
   it('reports a usage without a contracted number of users', async () => {
     createStrapiMock({ stored: null });
     stubUserServices();
-    withStoredUsage({ ...USAGE, contractedUsers: null });
+    withStoredCount({ ...USAGE, contractedUsers: null });
 
     const { data } = await adminController.licenseLimitInformation();
 
-    expect(data.projectUsage).toEqual({ ...USAGE, contractedUsers: null });
+    expect(data.adminUsersAcrossInstances).toEqual({ ...USAGE, contractedUsers: null });
   });
 
   it.each([
@@ -612,11 +612,11 @@ describe('licenseLimitInformation (projectUsage)', () => {
   ])('is null when %s', async (_label, value) => {
     createStrapiMock({ stored: null });
     stubUserServices();
-    withStoredUsage(value);
+    withStoredCount(value);
 
     const { data } = await adminController.licenseLimitInformation();
 
-    expect(data.projectUsage).toBeNull();
+    expect(data.adminUsersAcrossInstances).toBeNull();
   });
 
   it('is null when the store cannot be read', async () => {
@@ -626,19 +626,19 @@ describe('licenseLimitInformation (projectUsage)', () => {
 
     const { data } = await adminController.licenseLimitInformation();
 
-    expect(data.projectUsage).toBeNull();
+    expect(data.adminUsersAcrossInstances).toBeNull();
   });
 
   it('is null for an offline license, even with a usage stored by an earlier online run', async () => {
     createStrapiMock({ stored: null });
     stubUserServices();
-    const get = withStoredUsage(USAGE);
+    const get = withStoredCount(USAGE);
     process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
 
     const { data } = await adminController.licenseLimitInformation();
 
     expect(data.licenseMode).toBe('offline');
-    expect(data.projectUsage).toBeNull();
+    expect(data.adminUsersAcrossInstances).toBeNull();
     expect(get).not.toHaveBeenCalled();
   });
 
@@ -648,7 +648,7 @@ describe('licenseLimitInformation (projectUsage)', () => {
       getCurrentActiveUserCount: async () => 3,
       getDisabledUserList: async () => [],
     });
-    withStoredUsage(USAGE);
+    withStoredCount(USAGE);
 
     const { data } = await adminController.licenseLimitInformation();
 
@@ -664,12 +664,12 @@ describe('licenseLimitInformation (projectUsage)', () => {
       getDisabledUserList: async () => [],
     });
     // Fewer users across instances doesn't lift this instance's limit
-    withStoredUsage({ ...USAGE, activeUsers: 4 });
+    withStoredCount({ ...USAGE, activeUsers: 4 });
 
     const { data } = await adminController.licenseLimitInformation();
 
     expect(data.shouldStopCreate).toBe(true);
-    expect(data.projectUsage).toEqual({ ...USAGE, activeUsers: 4 });
+    expect(data.adminUsersAcrossInstances).toEqual({ ...USAGE, activeUsers: 4 });
   });
 });
 

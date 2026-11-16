@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, type Mock } from 'vitest';
 import {
   fetchLicense,
-  fetchLicenseUsage,
+  reportAdminUsers,
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
 } from '../license';
@@ -75,21 +75,20 @@ describe('fetchLicense', () => {
     });
   });
 
-  it('sends the instance id, the Strapi version and the user hashes', async () => {
+  it('sends the instance id and the Strapi version, but no user hashes', async () => {
     const fetchImpl = mockFetch(
       createResponse({ status: 200, body: { data: { license: 'the-license' } } })
     );
     const strapi = createStrapi(fetchImpl, { strapiVersion: '5.62.0' });
-    const userHashes = ['a'.repeat(64), 'b'.repeat(64)];
 
-    await fetchLicense({ strapi }, 'the-key', 'the-project-id', { userHashes });
+    await fetchLicense({ strapi }, 'the-key', 'the-project-id');
 
     const body = sentBody(fetchImpl);
     expect(body.instanceId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
     );
     expect(body.strapiVersion).toBe('5.62.0');
-    expect(body.userHashes).toEqual(userHashes);
+    expect(body).not.toHaveProperty('userHashes');
   });
 
   it('keeps the same instance id across checks of the same process', async () => {
@@ -107,22 +106,6 @@ describe('fetchLicense', () => {
       JSON.parse((init as RequestInit).body as string)
     );
     expect(first.instanceId).toBe(second.instanceId);
-  });
-
-  it('still sends the check, without userHashes, when no hashes are given', async () => {
-    const fetchImpl = mockFetch(
-      createResponse({ status: 200, body: { data: { license: 'the-license' } } })
-    );
-
-    const license = await fetchLicense({ strapi: createStrapi(fetchImpl) }, 'key', 'project', {
-      userHashes: undefined,
-    });
-
-    expect(license).toBe('the-license');
-    const body = sentBody(fetchImpl);
-    expect(body).not.toHaveProperty('userHashes');
-    expect(body.instanceId).toEqual(expect.any(String));
-    expect(body.strapiVersion).toBe('5.0.0');
   });
 
   it('returns the license string on a 200 response', async () => {
@@ -244,31 +227,37 @@ describe('fetchLicense', () => {
   });
 });
 
-describe('fetchLicenseUsage', () => {
-  const USAGE_URL = `${LICENSE_REGISTRY_URI}/api/licenses/usage`;
+describe('reportAdminUsers', () => {
+  const USAGE_URL = `${LICENSE_REGISTRY_URI}/api/licenses/admin-users`;
+  const HASHES = ['a'.repeat(64)];
   const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
 
-  it('POSTs only the license key, with a timeout', async () => {
+  it('POSTs the license key, the instance id and the user hashes, with a timeout', async () => {
     const fetchImpl = mockFetch(createResponse({ status: 200, body: { data: USAGE } }));
 
-    await fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'the-key');
+    await reportAdminUsers({ strapi: createStrapi(fetchImpl) }, 'the-key', HASHES);
 
     expect(fetchImpl).toHaveBeenCalledWith(USAGE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'the-key' }),
+      body: expect.any(String),
       signal: expect.any(AbortSignal),
+    });
+    expect(sentBody(fetchImpl)).toEqual({
+      key: 'the-key',
+      instanceId: expect.any(String),
+      userHashes: HASHES,
     });
   });
 
-  it('returns the usage on a 200 response', async () => {
+  it('returns the count on a 200 response', async () => {
     const fetchImpl = mockFetch(
       createResponse({ status: 200, body: { data: { ...USAGE, extra: 'ignored' } } })
     );
 
-    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toEqual(
-      USAGE
-    );
+    await expect(
+      reportAdminUsers({ strapi: createStrapi(fetchImpl) }, 'key', HASHES)
+    ).resolves.toEqual(USAGE);
   });
 
   it('accepts a license without a contracted number of users', async () => {
@@ -277,17 +266,19 @@ describe('fetchLicenseUsage', () => {
     );
 
     await expect(
-      fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')
+      reportAdminUsers({ strapi: createStrapi(fetchImpl) }, 'key', HASHES)
     ).resolves.toMatchObject({ contractedUsers: null });
   });
 
-  // 404: unknown key, or a registry without the endpoint; 405: older registry; 429: rate limited
+  // 404: unknown key or older registry; 429: rate limited
   it.each([404, 405, 429, 500])('resolves to null on a %s response', async (status) => {
     const fetchImpl = mockFetch(
       createResponse({ status, body: { error: { code: 'license_not_found' } } })
     );
 
-    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
+    await expect(
+      reportAdminUsers({ strapi: createStrapi(fetchImpl) }, 'key', HASHES)
+    ).resolves.toBeNull();
   });
 
   it.each([
@@ -298,13 +289,17 @@ describe('fetchLicenseUsage', () => {
   ])('resolves to null on a 200 response with %s', async (_label, body) => {
     const fetchImpl = mockFetch(createResponse({ status: 200, body }));
 
-    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
+    await expect(
+      reportAdminUsers({ strapi: createStrapi(fetchImpl) }, 'key', HASHES)
+    ).resolves.toBeNull();
   });
 
   it('resolves to null on a body that does not parse', async () => {
     const fetchImpl = mockFetch(createResponse({ status: 200, body: '{"data":' }));
 
-    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
+    await expect(
+      reportAdminUsers({ strapi: createStrapi(fetchImpl) }, 'key', HASHES)
+    ).resolves.toBeNull();
   });
 
   it('resolves to null when the request fails', async () => {
@@ -312,6 +307,8 @@ describe('fetchLicenseUsage', () => {
       .fn<Promise<Response>, FetchArgs>()
       .mockRejectedValue(new Error('network down'));
 
-    await expect(fetchLicenseUsage({ strapi: createStrapi(fetchImpl) }, 'key')).resolves.toBeNull();
+    await expect(
+      reportAdminUsers({ strapi: createStrapi(fetchImpl) }, 'key', HASHES)
+    ).resolves.toBeNull();
   });
 });

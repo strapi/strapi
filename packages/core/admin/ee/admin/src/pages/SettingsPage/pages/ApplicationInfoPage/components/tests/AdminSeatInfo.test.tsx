@@ -125,7 +125,7 @@ describe('<AdminSeatInfo />', () => {
   });
 
   describe('with the usage counted across all instances', () => {
-    const PROJECT_USAGE = {
+    const ADMIN_USERS = {
       activeUsers: 8,
       contractedUsers: 10,
       updatedAt: '2026-11-13T10:00:00.000Z',
@@ -135,7 +135,7 @@ describe('<AdminSeatInfo />', () => {
       // @ts-expect-error – mocked
       useLicenseLimits.mockReturnValue({
         ...LICENSE_MOCK,
-        license: { ...LICENSE_MOCK.license, projectUsage: PROJECT_USAGE },
+        license: { ...LICENSE_MOCK.license, adminUsersAcrossInstances: ADMIN_USERS },
       });
 
       const { getByText, queryByText } = render(<AdminSeatInfoEE />);
@@ -155,7 +155,7 @@ describe('<AdminSeatInfo />', () => {
         ...LICENSE_MOCK,
         license: {
           ...LICENSE_MOCK.license,
-          projectUsage: { ...PROJECT_USAGE, activeUsers: 12 },
+          adminUsersAcrossInstances: { ...ADMIN_USERS, activeUsers: 12 },
         },
       });
 
@@ -172,7 +172,7 @@ describe('<AdminSeatInfo />', () => {
         license: {
           ...LICENSE_MOCK.license,
           permittedSeats: null,
-          projectUsage: { ...PROJECT_USAGE, activeUsers: 42, contractedUsers: null },
+          adminUsersAcrossInstances: { ...ADMIN_USERS, activeUsers: 42, contractedUsers: null },
         },
       });
 
@@ -187,7 +187,7 @@ describe('<AdminSeatInfo />', () => {
       // @ts-expect-error – mocked
       useLicenseLimits.mockReturnValue({
         ...LICENSE_MOCK,
-        license: { ...LICENSE_MOCK.license, projectUsage: null },
+        license: { ...LICENSE_MOCK.license, adminUsersAcrossInstances: null },
       });
 
       const { getByText, queryByText } = render(<AdminSeatInfoEE />);

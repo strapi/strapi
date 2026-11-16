@@ -74,7 +74,7 @@ const licenseErrorSchema = z.object({
 // Identifies this process. Changes on every restart.
 const INSTANCE_ID = crypto.randomUUID();
 
-const licenseUsageSchema = z.object({
+const adminUsersResponseSchema = z.object({
   data: z.object({
     activeUsers: z.number().int().nonnegative(),
     contractedUsers: z.number().int().nonnegative().nullable(),
@@ -82,9 +82,9 @@ const licenseUsageSchema = z.object({
   }),
 });
 
-type LicenseUsage = z.infer<typeof licenseUsageSchema>['data'];
+type AdminUsersAcrossInstances = z.infer<typeof adminUsersResponseSchema>['data'];
 
-const LICENSE_USAGE_TIMEOUT_MS = 5000;
+const ADMIN_USERS_REPORT_TIMEOUT_MS = 5000;
 
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
@@ -150,10 +150,6 @@ const throwShouldFallbackError = () => {
   throw createShouldFallbackError();
 };
 
-interface FetchLicenseOptions {
-  userHashes?: string[];
-}
-
 const getStrapiVersion = (strapi: Core.Strapi): string | undefined => {
   const version = strapi.config.get('info.strapi');
   return typeof version === 'string' ? version : undefined;
@@ -162,8 +158,7 @@ const getStrapiVersion = (strapi: Core.Strapi): string | undefined => {
 const fetchLicense = async (
   { strapi }: { strapi: Core.Strapi },
   key: string,
-  projectId: string,
-  { userHashes }: FetchLicenseOptions = {}
+  projectId: string
 ) => {
   const { installId: installIdFromPackageJson } = strapi.config;
 
@@ -178,7 +173,6 @@ const fetchLicense = async (
         deviceId: generateInstallId(projectId, installIdFromPackageJson),
         instanceId: INSTANCE_ID,
         strapiVersion: getStrapiVersion(strapi),
-        userHashes,
       }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwShouldFallbackError);
@@ -211,36 +205,42 @@ const fetchLicense = async (
   }
 };
 
-/** Active admin users the registry counted across all instances. `null` on any failure. */
-const fetchLicenseUsage = async (
+/**
+ * Sends this instance's active admin users, and returns the count the registry has across all
+ * instances. `null` on any failure.
+ */
+const reportAdminUsers = async (
   { strapi }: { strapi: Core.Strapi },
-  key: string
-): Promise<LicenseUsage | null> => {
+  key: string,
+  userHashes: string[]
+): Promise<AdminUsersAcrossInstances | null> => {
   try {
-    const response = await strapi.fetch(`${LICENSE_REGISTRY_URI}/api/licenses/usage`, {
+    const response = await strapi.fetch(`${LICENSE_REGISTRY_URI}/api/licenses/admin-users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key }),
-      signal: AbortSignal.timeout(LICENSE_USAGE_TIMEOUT_MS),
+      body: JSON.stringify({ key, instanceId: INSTANCE_ID, userHashes }),
+      signal: AbortSignal.timeout(ADMIN_USERS_REPORT_TIMEOUT_MS),
     });
 
     if (response.status !== 200) {
       // e.g. 404 from an older registry, 429 when rate limited
-      strapi.log.debug(`License usage unavailable from the license registry (${response.status}).`);
+      strapi.log.debug(
+        `Could not report the admin users to the license registry (${response.status}).`
+      );
       return null;
     }
 
-    const result = licenseUsageSchema.safeParse(await response.json());
+    const result = adminUsersResponseSchema.safeParse(await response.json());
 
     if (!result.success) {
-      strapi.log.warn('Ignoring an unexpected license usage response from the license registry.');
+      strapi.log.warn('Ignoring an unexpected admin users response from the license registry.');
       return null;
     }
 
     return result.data.data;
   } catch (error) {
     strapi.log.debug(
-      `Could not fetch the license usage: ${error instanceof Error ? error.message : String(error)}`
+      `Could not report the admin users: ${error instanceof Error ? error.message : String(error)}`
     );
     return null;
   }
@@ -250,8 +250,8 @@ export {
   readLicense,
   verifyLicense,
   fetchLicense,
-  fetchLicenseUsage,
+  reportAdminUsers,
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
 };
-export type { LicenseUsage };
+export type { AdminUsersAcrossInstances };
