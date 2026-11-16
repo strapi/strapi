@@ -2,9 +2,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 
 import {
+  appEnv,
   databaseFromEnv,
   generateApp,
   resetDatabase,
@@ -176,6 +177,18 @@ describe('seedApp, before boot', () => {
 
     const users = await request(server, '/admin/users', { token });
     expect(users.status).toBe(403);
+  });
+
+  test('runs with the env the server gets, not the shell values the server ignores', () => {
+    vi.stubEnv('STRAPI_TEST_AI_PROVIDER', 'fake');
+    vi.stubEnv('DATABASE_URL', 'postgres://elsewhere/db');
+    try {
+      const env = appEnv(app, { database, testPlugin: true, fakeAiProvider: false });
+      expect(env.STRAPI_TEST_AI_PROVIDER).toBe('');
+      expect(env).not.toHaveProperty('DATABASE_URL');
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 

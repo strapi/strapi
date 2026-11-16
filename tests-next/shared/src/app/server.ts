@@ -2,10 +2,10 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import net from 'node:net';
 import path from 'node:path';
 
-import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
-import { databaseEnv, databaseFromEnv, type Database } from '../db/database';
-import { HOST, baseEnv, inheritedEnv, strapiBin } from './config';
+import { databaseFromEnv, type Database } from '../db/database';
+import { HOST, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
+import { appEnv } from './env';
 import type { App } from './generate';
 
 /**
@@ -187,16 +187,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
   // serve.cjs leads the group and kills it when this runner goes away (see the file).
   const child = spawn(process.execPath, [path.join(__dirname, 'serve.cjs'), strapiBin(), ...args], {
     cwd: app.dir,
-    env: {
-      ...inheritedEnv(),
-      ...baseEnv(),
-      ...databaseEnv(app, database),
-      [TEST_PLUGIN_ENV_VAR]: String(testPlugin),
-      // Always written, so a value inherited from the shell can't turn the fake provider on.
-      [TEST_AI_PROVIDER_ENV_VAR]: fakeAiProvider ? 'fake' : '',
-      ...env,
-      PORT: String(port),
-    },
+    env: { ...appEnv(app, { database, testPlugin, fakeAiProvider, env }), PORT: String(port) },
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     // Own process group, so stop() reaches the develop primary and worker too.
     detached: true,

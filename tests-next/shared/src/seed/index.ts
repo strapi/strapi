@@ -4,11 +4,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
-import { baseEnv } from '../app/config';
+import { appEnv } from '../app/env';
 import type { App } from '../app/generate';
 import type { Server } from '../app/server';
-import { SQLITE, databaseEnv, type Database } from '../db/database';
-import { TEST_PLUGIN_ENV_VAR } from '../test-plugin';
+import { SQLITE, type Database } from '../db/database';
 import type { SeedPlan, SeedResult } from './types';
 
 export type { AdminPermission, SeedPlan, SeedResult } from './types';
@@ -45,14 +44,9 @@ export const seedApp = async (
       [path.join(__dirname, 'seed-app.cjs'), app.dir, planFile, resultFile],
       {
         cwd: app.dir,
-        env: {
-          ...process.env,
-          ...baseEnv(),
-          ...databaseEnv(app, database),
-          // The seeders live in the test plugin, which refuses to load without it.
-          [TEST_PLUGIN_ENV_VAR]: 'true',
-          ...env,
-        },
+        // The server's env: the seeders live in the test plugin, and the fake AI provider stays
+        // off (it would fail outside an EE instance with the feature).
+        env: appEnv(app, { database, testPlugin: true, fakeAiProvider: false, env }),
         timeout,
         maxBuffer: 10 * 1024 * 1024,
       }
