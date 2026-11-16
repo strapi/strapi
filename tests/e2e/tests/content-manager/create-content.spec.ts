@@ -8,13 +8,13 @@ import {
 } from '../../../utils/shared';
 import { createContent, FieldValue, verifyFields } from '../../../utils/content-creation';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 
 test.describe('Adding content', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
 
     await navToHeader(page, ['Content Manager'], 'Content Manager');
   });

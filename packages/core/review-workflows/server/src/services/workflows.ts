@@ -170,7 +170,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         metrics.sendDidCreateWorkflow(createdWorkflow.id, !!opts.data.stageRequiredToPublishName);
 
-        if (opts.data.stageRequiredToPublishName) {
+        if (opts.data.contentTypes?.length) {
           await strapi
             .plugin('content-releases')
             .service('release-action')
@@ -205,8 +205,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
       let updatedStages: ReplacedStage[] | undefined;
       let updatedStageIds: any;
-
-      await workflowValidator.validateWorkflowCount();
 
       if (opts.data.name !== undefined && opts.data.name !== workflow.name) {
         await assertWorkflowNameIsUnique(opts.data.name, workflow.id);

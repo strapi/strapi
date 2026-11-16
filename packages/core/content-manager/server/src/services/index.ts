@@ -11,6 +11,7 @@ import uid from './uid';
 import history from '../history';
 import preview from '../preview';
 import homepage from '../homepage';
+import customOrder from '../custom-order';
 import documentMetadata from './document-metadata';
 import documentManager from './document-manager';
 
@@ -29,5 +30,6 @@ export default {
   uid,
   ...(history.services ? history.services : {}),
   ...(preview.services ? preview.services : {}),
+  ...(customOrder.services ? customOrder.services : {}),
   ...homepage.services,
 };

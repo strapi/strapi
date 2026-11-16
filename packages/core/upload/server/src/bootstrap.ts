@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 import { getService } from './utils';
 import { ALLOWED_SORT_STRINGS, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { notifyMediaLibraryDefault } from './media-library-default-notice';
+import { registerAuditEvents } from './audit-logs';
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const defaultConfig = {
@@ -51,9 +52,15 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await registerPermissionActions();
   await registerWebhookEvents();
 
+  if (strapi.has('audit-logs-lifecycle')) {
+    registerAuditEvents(strapi.get('audit-logs-lifecycle'));
+  }
+
   await getService('weeklyMetrics').registerCron();
 
   // AI metadata
+  failInterruptedAIMetadataJobsOnListen(strapi);
+
   if (strapi.ai.admin.isAvailable()) {
     const aiMetadataProvider = getService('aiMetadataProvider');
 
@@ -66,6 +73,25 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   getService('extensions').signFileUrlsOnDocumentService();
 }
+
+/**
+ * A job runs inside the server process that created it, so a job still `processing` when a
+ * server starts listening was cut off by a stop or crash of the previous server.
+ * The sweep runs in each process that serves HTTP, `strapi console` included, because console
+ * listens too. It waits for `listening` because the other CLI commands (`strapi export`,
+ * `strapi import`, `strapi transfer`, `configuration:dump`, ...) also run `bootstrap` but never
+ * listen: while a server runs a job, they must not fail it.
+ */
+const failInterruptedAIMetadataJobsOnListen = (strapi: Core.Strapi) => {
+  strapi.server.httpServer.once('listening', async () => {
+    try {
+      await getService('aiMetadataJobs').failInterruptedJobs();
+    } catch (error) {
+      strapi.log.error('Could not fail the AI metadata jobs interrupted by a previous server');
+      strapi.log.error(error);
+    }
+  });
+};
 
 const registerWebhookEvents = async () =>
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {

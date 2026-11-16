@@ -1,5 +1,6 @@
 import type { Context } from 'koa';
 import { getService } from '../utils';
+import { formatValidationError } from '../utils/errors';
 import validateComponentCategory from './validation/component-category';
 
 export default {
@@ -9,7 +10,7 @@ export default {
     try {
       await validateComponentCategory(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     const { name } = ctx.params;
@@ -18,11 +19,17 @@ export default {
 
     const componentCategoryService = getService('component-categories');
 
-    const newName = await componentCategoryService.editCategory(name, body);
+    try {
+      const newName = await componentCategoryService.editCategory(name, body);
 
-    setImmediate(() => strapi.reload());
+      setImmediate(() => strapi.reload());
 
-    ctx.send({ name: newName });
+      ctx.send({ name: newName });
+    } catch (error) {
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+      throw error;
+    }
   },
 
   async deleteCategory(ctx: Context) {
@@ -32,10 +39,16 @@ export default {
 
     const componentCategoryService = getService('component-categories');
 
-    await componentCategoryService.deleteCategory(name);
+    try {
+      await componentCategoryService.deleteCategory(name);
 
-    setImmediate(() => strapi.reload());
+      setImmediate(() => strapi.reload());
 
-    ctx.send({ name });
+      ctx.send({ name });
+    } catch (error) {
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+      throw error;
+    }
   },
 };

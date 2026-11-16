@@ -16,6 +16,17 @@ const config = {
     'coverage/',
     'lint-staged.config.mjs',
   ],
+  overrides: [
+    {
+      // Async stack traces only show functions suspended at an await. Keep `return await` on the
+      // query path so a database error's stack reaches the code that issued the query.
+      files: ['src/entity-manager/**/*.ts', 'src/query/**/*.ts', 'src/index.ts'],
+      excludedFiles: ['**/__tests__/**'],
+      rules: {
+        '@typescript-eslint/return-await': ['error', 'always'],
+      },
+    },
+  ],
 };
 
 module.exports = config;
