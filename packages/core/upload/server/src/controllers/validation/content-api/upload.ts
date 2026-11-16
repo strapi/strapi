@@ -66,5 +66,4 @@ const validateUploadFilesBody = (data = {}, isMulti = false) => {
 export { validateUploadBody, validateUploadFilesBody };
 
 export type UploadBody =
-  | yup.InferType<typeof uploadSchema>
-  | yup.InferType<typeof multiUploadSchema>;
+  yup.InferType<typeof uploadSchema> | yup.InferType<typeof multiUploadSchema>;
