@@ -23,7 +23,7 @@ export type Suite = 'ui' | 'api' | 'cli';
 /** Each suite gets its own port range, so suites can run at the same time. */
 const SUITE_PORT_OFFSET: Record<Suite, number> = { ui: 0, api: 20, cli: 40 };
 
-/** Port of the `index`-th app of a suite (a Playwright worker or a Jest worker). */
+/** Port of the `index`-th app of a suite (a Playwright worker or a Vitest worker). */
 export const appPort = (suite: Suite, index: number) =>
   PORT_BASE + SUITE_PORT_OFFSET[suite] + index;
 

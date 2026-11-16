@@ -4,7 +4,6 @@ import { yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import createEndpointComposer from './compose-endpoint';
-import { installRoutePathTranslation } from './route-path';
 
 const policyOrMiddlewareSchema = yup.lazy((value) => {
   if (typeof value === 'string') {
@@ -106,7 +105,6 @@ const createRouteManager = (strapi: Core.Strapi, opts: { type?: string } = {}) =
       routes.forEach((route) => createRoute(route, router));
     } else if (routes.routes) {
       const subRouter = new Router({ prefix: routes.prefix });
-      installRoutePathTranslation(subRouter, strapi);
 
       routes.routes.forEach((route) => {
         const hasPrefix = has(route.config, 'prefix');

@@ -2,34 +2,16 @@ import { castArray, property, toLower, trim } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
-import type Koa from 'koa';
 
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
-import {
-  KEEP_V6_ROUTE_PATH,
-  RoutePathMigrationError,
-  registerTranslatedRoute,
-  translateRoutePath,
-  warnTranslatedRoutePath,
-} from './route-path';
 
 const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
 };
 
-const getPath = (route: Core.Route, strapi: Core.Strapi) => {
-  const path = trim(route.path);
-  const translated = translateRoutePath(path);
-  const keepsV6Path = (route as { [KEEP_V6_ROUTE_PATH]?: boolean })[KEEP_V6_ROUTE_PATH] === true;
-
-  if (!keepsV6Path) {
-    warnTranslatedRoutePath(strapi, `Route "${route.method} ${path}"`, translated);
-  }
-
-  return translated;
-};
+const getPath = (route: Core.Route) => trim(route.path);
 
 const createRouteInfoMiddleware =
   (routeInfo: Core.Route): Core.MiddlewareHandler =>
@@ -47,7 +29,7 @@ const getAuthConfig = property('config.auth');
 
 const createAuthorizeMiddleware =
   (strapi: Core.Strapi): Core.MiddlewareHandler =>
-  async (ctx, next: Koa.Next) => {
+  async (ctx, next) => {
     const { auth, route } = ctx.state;
 
     const authService = strapi.get('auth');
@@ -94,8 +76,7 @@ export default (strapi: Core.Strapi) => {
   return (route: Core.Route, { router }: { router: Router }) => {
     try {
       const method = getMethod(route);
-      const translated = getPath(route, strapi);
-      const { path } = translated;
+      const path = getPath(route);
 
       const middlewares = resolveRouteMiddlewares(route, strapi);
 
@@ -111,26 +92,8 @@ export default (strapi: Core.Strapi) => {
         ...castArray(action),
       ]);
 
-      try {
-        registerTranslatedRoute(router, strapi, trim(route.path), translated, () => {
-          router[method](path, routeHandler);
-        });
-      } catch (error) {
-        // path-to-regexp errors link to its documentation.
-        if (error instanceof Error && /pathToRegexpError/.test(error.message)) {
-          throw new RoutePathMigrationError(
-            route.path,
-            `path-to-regexp v8 rejected the translated path "${path}": ${error.message}`
-          );
-        }
-
-        throw error;
-      }
+      router[method](path, routeHandler);
     } catch (error) {
-      if (error instanceof RoutePathMigrationError) {
-        throw error;
-      }
-
       if (error instanceof Error) {
         error.message = `Error creating endpoint ${route.method} ${route.path}: ${error.message}`;
       }

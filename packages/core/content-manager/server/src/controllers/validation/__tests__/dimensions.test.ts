@@ -91,4 +91,52 @@ describe('getDocumentDimensions', () => {
       status: 'published',
     });
   });
+
+  describe('missing locale', () => {
+    test.each([
+      ['absent', {}],
+      ['undefined', { locale: undefined }],
+      ['null', { locale: null }],
+      ['an empty string', { locale: '' }],
+    ])('returns an undefined locale when it is %s', async (_name, request) => {
+      const result = await getDocumentLocaleAndStatus(request, modelWithDraftAndPublishUID);
+
+      expect(result.locale).toBeUndefined();
+    });
+
+    test.each([
+      ['null', { locale: null }],
+      ['an empty string', { locale: '' }],
+    ])(
+      'returns an undefined locale when it is %s and multiple locales are allowed',
+      async (_name, request) => {
+        const result = await getDocumentLocaleAndStatus(request, modelWithDraftAndPublishUID, {
+          allowMultipleLocales: true,
+        });
+
+        expect(result.locale).toBeUndefined();
+      }
+    );
+
+    test.each([
+      ['a locale', 'fr', 'fr'],
+      ['all locales', '*', '*'],
+      ['an array of locales', ['en', 'fr'], ['en', 'fr']],
+    ])('keeps %s', async (_name, locale, expected) => {
+      const result = await getDocumentLocaleAndStatus({ locale }, modelWithDraftAndPublishUID, {
+        allowMultipleLocales: true,
+      });
+
+      expect(result.locale).toEqual(expected);
+    });
+
+    test('keeps the other request fields', async () => {
+      const result = await getDocumentLocaleAndStatus(
+        { locale: '', status: 'draft', title: 'Title' },
+        modelWithDraftAndPublishUID
+      );
+
+      expect(result).toEqual({ locale: undefined, status: 'draft', title: 'Title' });
+    });
+  });
 });

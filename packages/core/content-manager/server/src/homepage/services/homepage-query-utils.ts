@@ -80,16 +80,26 @@ export const resolveTitleField = (
 /**
  * Formats the main field value as the recent document title.
  * The main field can be any listable attribute (integer, boolean, date…), but the widgets render
- * the title as text. An empty value falls back to the document id.
+ * the title as text. An empty value returns an empty string, which the widgets render as a
+ * translated "Untitled", like the rest of the content manager.
+ * A main field the user cannot read is replaced by the document id before this point
+ * (see `resolveReadableMainField` and `resolveTitleField`).
+ * Any other value has no text form and returns an empty string ("Untitled"). No main field reaches
+ * here as an object: the main field must be sortable, which excludes component, media, json and
+ * dynamic zone attributes, and the homepage query does not populate a to-one relation main field.
  */
-export const formatRecentDocumentTitle = (value: unknown, documentId: string): string => {
-  if (value === null || value === undefined || value === '') {
-    return documentId;
+export const formatRecentDocumentTitle = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
   }
 
   if (value instanceof Date) {
     return value.toISOString();
   }
 
-  return String(value);
+  return '';
 };
