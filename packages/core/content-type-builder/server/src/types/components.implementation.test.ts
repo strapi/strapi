@@ -16,10 +16,21 @@ export type Assertions = [
       Parameters<ComponentsService['createComponent']>
     >
   >,
+  // `editComponent` takes develop's `ComponentToCreate`, whose attributes are `unknown`: the
+  // contract's payload, with typed attribute inputs, is one of them.
   Expect<
     Equal<
-      Parameters<typeof components.editComponent>,
-      Parameters<ComponentsService['editComponent']>
+      Parameters<typeof components.editComponent>[0],
+      Parameters<ComponentsService['editComponent']>[0]
+    >
+  >,
+  Expect<Equal<Parameters<typeof components.editComponent>[1], components.ComponentToCreate>>,
+  Expect<
+    Equal<
+      Parameters<ComponentsService['editComponent']>[1] extends components.ComponentToCreate
+        ? true
+        : false,
+      true
     >
   >,
   Expect<
