@@ -27,6 +27,8 @@ The package runs on the server. The admin code imports only types from it, for e
 
 The `hooks` namespace creates hook objects: `createAsyncSeriesHook`, `createAsyncSeriesWaterfallHook`, `createAsyncParallelHook` and `createAsyncBailHook`. A hook object has `register`, `delete`, `getHandlers` and `call`. The factory decides how `call` runs the handlers. The [hooks registry](../../../architecture/04-extension-points.md#hooks-registry) and the permission engine build on them.
 
+The hook types take the handler type as a parameter, `Handler` (`(...args: any[]) => any`) by default. An untyped hook takes any handler and any context, and its `call` result is not checked. A hook created with a handler type, for example `createAsyncBailHook<(context: Context) => boolean>()`, checks the handlers it registers, the context `call` takes (`HookContext<T>`) and what `call` resolves to (`HookResult<T>`).
+
 ### Errors
 
 The `errors` namespace defines `ApplicationError` and its subclasses, for example `ValidationError`, `NotFoundError`, `ForbiddenError`, `UnauthorizedError` and `PolicyError`. Each error has a `name`, a `message` and `details`. The errors middleware in `@strapi/core` formats these errors into the HTTP error response.

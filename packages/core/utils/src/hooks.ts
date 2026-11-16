@@ -2,26 +2,38 @@ import { cloneDeep } from 'lodash';
 
 export type Handler = (...args: any[]) => any;
 
+/**
+ * The context a hook passes to each handler of type `T`: the handler's first parameter. `unknown`
+ * when that parameter is `any`, as for the default {@link Handler}, so an untyped hook keeps
+ * accepting any context.
+ */
+export type HookContext<T extends Handler> = 0 extends 1 & Parameters<T>[0]
+  ? unknown
+  : Parameters<T>[0];
+
+/** The value a handler of type `T` resolves to. */
+export type HookResult<T extends Handler> = Awaited<ReturnType<T>>;
+
 export interface Hook<T extends Handler = Handler> {
-  getHandlers(): Handler[];
+  getHandlers(): T[];
   register(handler: T): Hook<T>;
   delete(handler: T): Hook<T>;
-  call(...args: any[]): void;
+  call(...args: Parameters<T>): void;
 }
 
-export interface AsyncSeriesHook extends Hook {
-  call(...args: any[]): Promise<void>;
+export interface AsyncSeriesHook<T extends Handler = Handler> extends Hook<T> {
+  call(...args: Parameters<T>): Promise<void>;
 }
-export interface AsyncSeriesWaterfallHook extends Hook {
-  call(...args: any[]): Promise<any>;
-}
-
-export interface AsyncParallelHook extends Hook {
-  call(...args: any[]): Promise<any[]>;
+export interface AsyncSeriesWaterfallHook<T extends Handler = Handler> extends Hook<T> {
+  call(...args: Parameters<T>): Promise<HookResult<T>>;
 }
 
-export interface AsyncBailHook extends Hook {
-  call(...args: any[]): Promise<any>;
+export interface AsyncParallelHook<T extends Handler = Handler> extends Hook<T> {
+  call(...args: Parameters<T>): Promise<HookResult<T>[]>;
+}
+
+export interface AsyncBailHook<T extends Handler = Handler> extends Hook<T> {
+  call(...args: Parameters<T>): Promise<HookResult<T> | undefined>;
 }
 
 /**
@@ -66,7 +78,7 @@ const createHook = <T extends Handler = Handler>(): Hook<T> => {
 const createAsyncSeriesHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(context: unknown) {
+  async call(context: HookContext<T>) {
     for (const handler of this.getHandlers()) {
       await handler(context);
     }
@@ -80,7 +92,7 @@ const createAsyncSeriesHook = <T extends Handler = Handler>() => ({
 const createAsyncSeriesWaterfallHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(param: unknown) {
+  async call(param: HookContext<T>): Promise<HookContext<T>> {
     let res = param;
 
     for (const handler of this.getHandlers()) {
@@ -98,7 +110,7 @@ const createAsyncSeriesWaterfallHook = <T extends Handler = Handler>() => ({
 const createAsyncParallelHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(context: unknown) {
+  async call(context: HookContext<T>): Promise<HookResult<T>[]> {
     const promises = this.getHandlers().map((handler) => handler(cloneDeep(context)));
 
     return Promise.all(promises);
@@ -112,7 +124,7 @@ const createAsyncParallelHook = <T extends Handler = Handler>() => ({
 const createAsyncBailHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(context: unknown) {
+  async call(context: HookContext<T>): Promise<HookResult<T> | undefined> {
     for (const handler of this.getHandlers()) {
       const result = await handler(context);
 

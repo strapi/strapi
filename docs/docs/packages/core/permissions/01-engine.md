@@ -88,6 +88,10 @@ sequenceDiagram
 | before-evaluate.permission         | Pre-evaluation   | Transform the permission after formatting and validation     |
 | before-register.permission         | Pre-registration | Final modifications after evaluation but before registration |
 
+### Typed Hooks
+
+`engine.Engine`, what `engine.new` returns, and its `PermissionEngineHooks` take untyped handlers. `engine.TypedEngine` and `engine.TypedPermissionEngineHooks` describe the same hooks with typed handlers and contexts (`BeforeEvaluateContext`, `ValidateContext`, `WillRegisterContext`). They are opt-in: a typed contract can declare them instead of the untyped ones.
+
 ### Hook Implementation Example
 
 ```typescript
