@@ -44,7 +44,6 @@ const codeAt = (step: number) => {
 describe('stepOfCode', () => {
   it('finds the step of a code of this period, or of the one on either side', async () => {
     for (const offset of [-1, 0, 1]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(stepOfCode(SECRET, codeAt(STEP + offset), {}, NOW)).resolves.toBe(STEP + offset);
     }
   });
@@ -64,7 +63,6 @@ describe('stepOfCode', () => {
       '12345a',
       '',
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(stepOfCode(SECRET, code, {}, NOW), code).resolves.toBeNull();
     }
   });
@@ -171,7 +169,6 @@ describe('totp-replay', () => {
       ] as const) {
         const { run, updateMany } = setup(state as never);
 
-        // eslint-disable-next-line no-await-in-loop
         await expect(run(code)).resolves.toBeUndefined();
         expect(updateMany).not.toHaveBeenCalled();
       }
@@ -184,7 +181,9 @@ describe('totp-replay', () => {
     vi.useFakeTimers({ now: NOW });
 
     try {
-      const imported = `base32:${base32.encode(Buffer.from(SECRET), { padding: false }).toLowerCase()}`;
+      const imported = `base32:${base32
+        .encode(Buffer.from(SECRET), { padding: false })
+        .toLowerCase()}`;
       const { run, updateMany } = setup({
         row: { secret: imported, verified: true, lockedUntil: null },
       });

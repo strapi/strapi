@@ -151,7 +151,6 @@ describe('a ?callback= written to get past the origin check', () => {
       'https://trusted.example.com.evil.example.net',
       'https://TRUSTED.example.com./',
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const resolved = await resolve(value);
 
       expect(resolved === null || new URL(resolved).origin === TRUSTED, value).toBe(true);

@@ -79,7 +79,6 @@ describe('the engine-owned user fields', () => {
 
   it('refuses the engine-owned user fields on Content API input and ignores other types', async () => {
     for (const field of OWNED) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         run(USER_SCHEMA, { name: 'A', [field]: VALUES[field] }),
         field
@@ -112,13 +111,12 @@ describe('the engine-owned user fields', () => {
 
     const validators = validate.createAPIValidators({
       getModel: (uid: string) =>
-        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA })[uid] as never,
+        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA }[uid] as never),
       validators: { input: [engineOwnedUserFieldsValidator] },
     });
 
     for (const action of ['create', 'update'] as const) {
       for (const [form, roles] of forms) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(
           validators.input({ name: 'A', roles }, USER_SCHEMA, { action }),
           `${action}: ${form}`
@@ -147,7 +145,7 @@ describe('the engine-owned user fields', () => {
   it('refuses an email on a write of an existing user, and takes it on a create', async () => {
     const validators = validate.createAPIValidators({
       getModel: (uid: string) =>
-        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA })[uid] as never,
+        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA }[uid] as never),
       validators: { input: [engineOwnedUserFieldsValidator] },
     });
 
@@ -182,7 +180,7 @@ describe('the engine-owned user fields', () => {
   it("refuses them through core's own input validation of the Content API", async () => {
     const validators = validate.createAPIValidators({
       getModel: (uid: string) =>
-        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA })[uid] as never,
+        ({ [USER_UID]: USER_SCHEMA, [PROFILE_UID]: PROFILE_SCHEMA }[uid] as never),
       validators: { input: [engineOwnedUserFieldsValidator] },
     });
 
@@ -219,7 +217,6 @@ describe('the engine-owned user fields', () => {
       ).toEqual([...OWNED, 'phoneNumberVerified', 'isAnonymous']);
 
       for (const field of ['phoneNumberVerified', 'isAnonymous', 'emailVerified']) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(run(SCHEMA_WITH_PLUGINS, { [field]: true }), field).rejects.toMatchObject({
           name: 'ValidationError',
           message: `${field} can only be changed by the plugin`,

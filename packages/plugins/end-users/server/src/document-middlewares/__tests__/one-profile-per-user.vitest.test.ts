@@ -253,7 +253,6 @@ describe('one-profile-per-user', () => {
         { uid: PROFILE_UID, action: 'findMany', params: {} },
         { uid: PROFILE_UID, action: 'delete', params: { documentId: 'p' } },
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         await run(ctx);
       }
 
@@ -402,7 +401,6 @@ describe('one-profile-per-user', () => {
       { uid: PROFILE_UID, action: 'findMany', params: {} },
       { uid: PROFILE_UID, action: 'delete', params: { documentId: 'p' } },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run(ctx);
 
       expect(next).toHaveBeenCalledTimes(1);

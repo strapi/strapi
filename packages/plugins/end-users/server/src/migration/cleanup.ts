@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
+// The steps run in order, one write at a time: each reads what the one before wrote
 import { PLUGIN_ID, USER_UID } from '../constants';
 import type { MigrationStepFn } from './control';
 import { dropPendingLinks, leftoverColumns } from './rollback';
@@ -119,10 +119,14 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
 
   const keptNote = [
     keptTables > 0
-      ? `kept ${keptTables} staged ${keptTables === 1 ? 'table' : 'tables'} the profile does not declare, which are dropped once their items in the report are resolved`
+      ? `kept ${keptTables} staged ${
+          keptTables === 1 ? 'table' : 'tables'
+        } the profile does not declare, which are dropped once their items in the report are resolved`
       : '',
     kept.length > 0
-      ? `kept ${kept.length} ${kept.length === 1 ? 'column' : 'columns'} the models do not declare (${kept.join(', ')}), each with an item in the report`
+      ? `kept ${kept.length} ${
+          kept.length === 1 ? 'column' : 'columns'
+        } the models do not declare (${kept.join(', ')}), each with an item in the report`
       : '',
   ]
     .filter(Boolean)
@@ -130,6 +134,8 @@ export const runCleanup: MigrationStepFn = async (trx, db, ctx) => {
     .join('');
 
   strapi.log.info(
-    `${PLUGIN_ID}: cleaned up after the migration: dropped ${dropping.length} staged tables, ${dropped.length} columns (${dropped.join(', ') || 'none'}) and ${links} pending provider links${keptNote}`
+    `${PLUGIN_ID}: cleaned up after the migration: dropped ${dropping.length} staged tables, ${
+      dropped.length
+    } columns (${dropped.join(', ') || 'none'}) and ${links} pending provider links${keptNote}`
   );
 };

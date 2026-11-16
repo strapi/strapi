@@ -101,7 +101,7 @@ export const ensureEveryUserHasAProfile = async (
 
   let lastId = 0;
 
-  /* eslint-disable no-await-in-loop -- pages are read in turn, and a profile is made one at a time so a race with another instance is seen */
+  // Pages are read in turn, and a profile is made one at a time so a race with another instance is seen
   for (;;) {
     const page = (await users.findMany({
       select: ['id', 'documentId'],
@@ -144,7 +144,6 @@ export const ensureEveryUserHasAProfile = async (
       }
     }
   }
-  /* eslint-enable no-await-in-loop */
 };
 
 /**

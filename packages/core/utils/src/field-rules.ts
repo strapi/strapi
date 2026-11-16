@@ -337,7 +337,6 @@ export const resolveEntryFields = async ({
   };
 
   for (const item of Array.isArray(data) ? data : [data]) {
-    // eslint-disable-next-line no-await-in-loop
     await traverseEntity(collect as never, { schema, getModel }, item as Data);
   }
 

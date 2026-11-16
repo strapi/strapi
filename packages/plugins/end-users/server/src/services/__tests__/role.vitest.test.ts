@@ -422,7 +422,7 @@ describe('role service', () => {
           who: { match: 'all', checks },
           which: { kind: 'group', match: 'all', items: [] },
           onSave: { stamp: [], locked: [] },
-        }) as BuilderConditionV2;
+        } as BuilderConditionV2);
       const records = builderRecordsOf(strapi);
 
       records.set('api::zed', {
@@ -548,7 +548,6 @@ describe('role service', () => {
         { name: 'n'.repeat(256) },
         { name: 'A', description: 'd'.repeat(256) },
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(role.create(input), JSON.stringify(input).slice(0, 30)).rejects.toMatchObject({
           name: 'ValidationError',
           message: expect.stringContaining('255'),
@@ -646,7 +645,6 @@ describe('role service', () => {
         { name: 'A', permissions: 'all' },
         { name: 'A', permissions: [{ action: '' }] },
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(role.create(input as never), JSON.stringify(input)).rejects.toMatchObject({
           name: 'ValidationError',
         });
@@ -733,7 +731,6 @@ describe('role service', () => {
       const { role, roleDocuments, transaction } = ctx;
 
       for (const input of [{ name: 'n'.repeat(256) }, { description: 'd'.repeat(256) }]) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(role.update('role-a', { revision: 0, ...input })).rejects.toMatchObject({
           name: 'ValidationError',
           message: expect.stringContaining('255'),
@@ -1306,7 +1303,6 @@ describe('role service', () => {
         }) => {
           const { connect = [], disconnect = [] } = data.roles;
 
-          // eslint-disable-next-line no-param-reassign
           held[where.id] = [
             ...held[where.id].filter((id) => !disconnect.some((gone) => gone.id === id)),
             ...connect.map((added) => added.id),
@@ -1736,7 +1732,7 @@ describe('role service', () => {
 
         const [, diff] = permission.applyDiff.mock.calls[0] as unknown as [
           string,
-          { create: Array<Record<string, unknown>> },
+          { create: Array<Record<string, unknown>> }
         ];
 
         expect(diff.create).toEqual([
@@ -1767,7 +1763,6 @@ describe('role service', () => {
           file({ permissions: {} }),
           file({ permissions: [{ action: 42 }] }),
         ]) {
-          // eslint-disable-next-line no-await-in-loop
           await expect(role.fromFile(bad), JSON.stringify(bad)).rejects.toMatchObject({
             name: 'ValidationError',
           });

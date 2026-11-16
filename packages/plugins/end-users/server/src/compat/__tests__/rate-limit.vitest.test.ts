@@ -19,12 +19,10 @@ describe('compatRateLimitResponse', () => {
       '/refresh',
       '/github/callback',
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const response = await compatRateLimitResponse(limited(), `${BASE}${path}`, BASE);
 
       expect(response.status).toBe(429);
       expect(response.headers.get('x-retry-after')).toBe('42');
-      // eslint-disable-next-line no-await-in-loop
       expect(await response.json()).toEqual({
         data: null,
         error: {

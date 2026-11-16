@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file */
-
 /**
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
@@ -572,7 +570,9 @@ const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions)
 
         if (hasInvalidProperties) {
           throw new ValidationError(
-            `Invalid nested populate for ${schema.info?.singularName}.${key} (${schema.uid}). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
+            `Invalid nested populate for ${schema.info?.singularName}.${key} (${
+              schema.uid
+            }). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
           );
         }
 

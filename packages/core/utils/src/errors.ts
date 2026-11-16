@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file */
-
 import * as yup from 'yup';
 import { HttpError } from 'http-errors';
 import { formatYupErrors } from './format-yup-error';
@@ -24,7 +22,7 @@ const brand = (ErrorClass: { prototype: object }, id: string) => {
 class ApplicationError<
   TName extends string = 'ApplicationError',
   TMessage extends string = string,
-  TDetails = unknown,
+  TDetails = unknown
 > extends Error {
   name: TName;
 
@@ -64,7 +62,7 @@ class ApplicationError<
 
 class ValidationError<
   TMessage extends string = string,
-  TDetails = unknown,
+  TDetails = unknown
 > extends ApplicationError<'ValidationError', TMessage, TDetails> {
   static {
     brand(this, 'ValidationError');
@@ -101,7 +99,7 @@ class YupValidationError<TMessage extends string = string> extends ValidationErr
 
 class PaginationError<
   TMessage extends string = string,
-  TDetails = unknown,
+  TDetails = unknown
 > extends ApplicationError<'PaginationError', TMessage, TDetails> {
   static {
     brand(this, 'PaginationError');
@@ -133,7 +131,7 @@ class NotFoundError<TMessage extends string = string, TDetails = unknown> extend
 class ForbiddenError<
   TName extends string = 'ForbiddenError',
   TMessage extends string = string,
-  TDetails = unknown,
+  TDetails = unknown
 > extends ApplicationError<TName, TMessage, TDetails> {
   static {
     brand(this, 'ForbiddenError');
@@ -148,7 +146,7 @@ class ForbiddenError<
 
 class UnauthorizedError<
   TMessage extends string = string,
-  TDetails = unknown,
+  TDetails = unknown
 > extends ApplicationError<'UnauthorizedError', TMessage, TDetails> {
   static {
     brand(this, 'UnauthorizedError');
@@ -183,7 +181,7 @@ class RateLimitError<TMessage extends string = string, TDetails = unknown> exten
 
 class PayloadTooLargeError<
   TMessage extends string = string,
-  TDetails = unknown,
+  TDetails = unknown
 > extends ApplicationError<'PayloadTooLargeError', TMessage, TDetails> {
   static {
     brand(this, 'PayloadTooLargeError');
@@ -215,7 +213,7 @@ class PolicyError<TMessage extends string = string, TDetails = unknown> extends 
 
 class NotImplementedError<
   TMessage extends string = string,
-  TDetails = unknown,
+  TDetails = unknown
 > extends ApplicationError<'NotImplementedError', TMessage, TDetails> {
   static {
     brand(this, 'NotImplementedError');

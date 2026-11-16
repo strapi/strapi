@@ -160,7 +160,6 @@ describe('unique-user-fields', () => {
           params: { documentId: 'u1', data: { email: 'copy@x.io', username: 'Copy' } },
         };
 
-        // eslint-disable-next-line no-await-in-loop
         await run(ctx);
 
         expect(ctx.params.data.username, action).toBe('copy');
@@ -178,7 +177,6 @@ describe('unique-user-fields', () => {
       ]) {
         const ctx = { uid: USER_UID, action: 'create', params: { data } };
 
-        // eslint-disable-next-line no-await-in-loop
         await run(ctx);
 
         expect(ctx.params.data).toBe(data);
@@ -277,7 +275,6 @@ describe('unique-user-fields', () => {
     const { run, query } = setup([alice]);
 
     for (const data of [{ email: null }, { email: 42 }, { username: null }, { username: '' }, {}]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run({ uid: USER_UID, action: 'create', params: { data } });
 
       expect(next, JSON.stringify(data)).toHaveBeenCalledTimes(1);
@@ -295,7 +292,6 @@ describe('unique-user-fields', () => {
       { uid: USER_UID, action: 'delete' },
       { uid: USER_UID, action: 'publish' },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run({
         ...ctx,
         params: { documentId: 'u1', data: { email: 'alice@example.com', username: 'alice' } },
@@ -310,7 +306,6 @@ describe('unique-user-fields', () => {
   it('copes with a call that has no data', async () => {
     for (const params of [undefined, {}, { data: undefined }, { data: null }]) {
       const { run } = setup([alice]);
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run({ uid: USER_UID, action: 'create', params });
 
       expect(next).toHaveBeenCalledTimes(1);

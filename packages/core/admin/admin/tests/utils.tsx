@@ -251,7 +251,6 @@ const Providers = ({
   );
 };
 
-// eslint-disable-next-line react/jsx-no-useless-fragment
 const fallbackWrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 export interface RenderOptions {
@@ -298,7 +297,7 @@ const renderHook = <
   Props,
   Q extends Queries,
   Container extends Element | DocumentFragment = HTMLElement,
-  BaseElement extends Element | DocumentFragment = Container,
+  BaseElement extends Element | DocumentFragment = Container
 >(
   hook: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props, Q, Container, BaseElement> &

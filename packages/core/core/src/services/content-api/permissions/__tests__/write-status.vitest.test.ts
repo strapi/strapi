@@ -153,18 +153,15 @@ describe('Content API permissions: resolveWriteStatus and publishIfAllowed', () 
 
     for (const auth of [token, null, undefined, {}, { ability: null }]) {
       for (const requested of [undefined, 'draft', 'published'] as const) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await p.resolveWriteStatus(auth, ARTICLE, { requested })).toEqual({
           status: requested,
           publishAfterCreate: false,
         });
-        // eslint-disable-next-line no-await-in-loop
         expect(
           await p.resolveWriteStatus(auth, ARTICLE, { requested, documentId: 'a1', locale: 'fr' })
         ).toEqual({ status: requested, publishAfterCreate: false });
       }
 
-      // eslint-disable-next-line no-await-in-loop
       expect(await p.publishIfAllowed(auth, ARTICLE, 'a1')).toBe(false);
     }
 
@@ -172,7 +169,6 @@ describe('Content API permissions: resolveWriteStatus and publishIfAllowed', () 
     const auth = await authOf([{ action: `${NOTE}.update`, conditions: mine }]);
 
     for (const requested of [undefined, 'draft', 'published'] as const) {
-      // eslint-disable-next-line no-await-in-loop
       expect(await p.resolveWriteStatus(auth, NOTE, { requested, documentId: 'n1' })).toEqual({
         status: requested,
         publishAfterCreate: false,
@@ -197,7 +193,6 @@ describe('Content API permissions: resolveWriteStatus and publishIfAllowed', () 
       for (const auth of [without, failing]) {
         for (const requested of [undefined, 'published'] as const) {
           for (const documentId of [undefined, 'a1']) {
-            // eslint-disable-next-line no-await-in-loop
             expect(await p.resolveWriteStatus(auth, ARTICLE, { requested, documentId })).toEqual({
               status: 'draft',
               publishAfterCreate: false,
@@ -215,7 +210,6 @@ describe('Content API permissions: resolveWriteStatus and publishIfAllowed', () 
       const none = await authOf([]);
 
       for (const caller of [auth, none]) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await p.resolveWriteStatus(caller, ARTICLE, { requested: 'draft' })).toEqual({
           status: 'draft',
           publishAfterCreate: false,
@@ -260,7 +254,6 @@ describe('Content API permissions: resolveWriteStatus and publishIfAllowed', () 
       // decision is on the draft as written (publishIfAllowed, in the write's transaction)
       for (const documentId of ['a1', 'a2', 'a3', 'nothing']) {
         for (const requested of [undefined, 'published'] as const) {
-          // eslint-disable-next-line no-await-in-loop
           expect(await p.resolveWriteStatus(auth, ARTICLE, { documentId, requested })).toEqual({
             status: 'draft',
             publishAfterCreate: true,
@@ -300,12 +293,10 @@ describe('Content API permissions: resolveWriteStatus and publishIfAllowed', () 
       const auth = await authOf([publishRow(mine)]);
 
       for (const requested of [undefined, 'published'] as const) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await p.resolveWriteStatus(auth, ARTICLE, { requested })).toEqual({
           status: 'draft',
           publishAfterCreate: true,
         });
-        // eslint-disable-next-line no-await-in-loop
         expect(await p.resolveWriteStatus(auth, ARTICLE, { requested, locale: 'fr' })).toEqual({
           status: 'draft',
           publishAfterCreate: true,

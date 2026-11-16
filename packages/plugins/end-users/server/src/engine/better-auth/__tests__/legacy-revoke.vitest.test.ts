@@ -82,7 +82,6 @@ describe('legacy-revoke', () => {
       const { auth, signedUp, markLegacyRevoked, invalidateLegacy } = build();
       const { cookie, db } = await signedUp();
 
-      // eslint-disable-next-line no-await-in-loop
       await auth.api[call]({ headers: { cookie } });
 
       expect(markLegacyRevoked, call).toHaveBeenCalledTimes(1);

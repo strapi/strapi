@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import _, { defaults } from 'lodash';
 
 import { arrays, errors, emitAudit } from '@strapi/utils';
@@ -20,7 +19,6 @@ import type {
   SanitizedAdminUser,
   SanitizedAdminRole,
   AdminUserUpdatePayload,
-  // eslint-disable-next-line node/no-unpublished-import
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
@@ -39,8 +37,9 @@ const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
  */
 const getSuperAdminRoleOrThrow = async (): Promise<AdminRoleWithUsersCount> => {
   // The role lookup resolves to null when the role doesn't exist
-  const superAdminRole: AdminRoleWithUsersCount | null =
-    await getService('role').getSuperAdminWithUsersCount();
+  const superAdminRole: AdminRoleWithUsersCount | null = await getService(
+    'role'
+  ).getSuperAdminWithUsersCount();
 
   if (superAdminRole === null) {
     throw new ApplicationError("Cannot proceed because the super admin role doesn't exist.");
@@ -254,8 +253,9 @@ const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
   const user = (await findOne(userId)) as AdminUser | null;
   if (!user) return false;
 
-  const superAdminRole: AdminRoleWithUsersCount | null =
-    await getService('role').getSuperAdminWithUsersCount();
+  const superAdminRole: AdminRoleWithUsersCount | null = await getService(
+    'role'
+  ).getSuperAdminWithUsersCount();
 
   // Without a super admin role, no user can be the last super admin
   if (superAdminRole === null) {

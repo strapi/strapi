@@ -215,7 +215,6 @@ const createAPIValidators = (opts: APIOptions) => {
 
             if (isPlainObject(node.on)) {
               for (const [uid, fragment] of Object.entries(node.on as Record<string, unknown>)) {
-                // eslint-disable-next-line no-await-in-loop
                 await checkNode(fragment, getModel(uid), reach, path);
               }
             }
@@ -232,7 +231,6 @@ const createAPIValidators = (opts: APIOptions) => {
                 const componentSchema = getModel(component);
 
                 if (componentSchema !== undefined) {
-                  // eslint-disable-next-line no-await-in-loop
                   await checkTree(node.populate, componentSchema, reach, path);
                 }
               }

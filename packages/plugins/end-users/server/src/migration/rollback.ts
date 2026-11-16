@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
+// The steps run in order, one write at a time: each reads what the one before wrote
 import type { Knex } from 'knex';
 import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';
@@ -77,7 +77,8 @@ export const upRoleType = (name: string, taken: ReadonlySet<string>): string => 
  */
 export const leftoverColumns = (db: Database, table: string, present: string[]): string[] => {
   const model = [...db.metadata.values()].find((entry) => entry.tableName === table) as
-    Model | undefined;
+    | Model
+    | undefined;
 
   if (!model) {
     return [];
@@ -404,7 +405,11 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
 
     if (kept.length > 0) {
       strapi.log.info(
-        `${PLUGIN_ID}: ${kept.length === 50 ? 'at least 50' : kept.length} users keep their migrated username because another user holds their original spelling (ids ${kept.join(', ')})`
+        `${PLUGIN_ID}: ${
+          kept.length === 50 ? 'at least 50' : kept.length
+        } users keep their migrated username because another user holds their original spelling (ids ${kept.join(
+          ', '
+        )})`
       );
     }
   }
@@ -451,7 +456,8 @@ const restoreUsers = async ({ strapi, db, trx, lost, record }: Run, userTable: s
     const owners = Number(
       (
         (await trx(qualified(db, account.tableName)).countDistinct({ c: accountUser }).first()) as
-          Row | undefined
+          | Row
+          | undefined
       )?.c ?? 0
     );
 
@@ -778,7 +784,11 @@ const restoreAdmin = async ({ strapi, db, trx, lost }: Run) => {
     if (!same) {
       // Never wider than the user's row: the fields are not merged, and the log says what to grant
       strapi.log.info(
-        `${PLUGIN_ID}: the profile permission of admin role ${row.role!.id} on ${row.action} has other conditions or properties than the user's, so its fields (${(add ?? []).join(', ') || 'all'}) were not merged; grant them in users-permissions if they are needed`
+        `${PLUGIN_ID}: the profile permission of admin role ${row.role!.id} on ${
+          row.action
+        } has other conditions or properties than the user's, so its fields (${
+          (add ?? []).join(', ') || 'all'
+        }) were not merged; grant them in users-permissions if they are needed`
       );
     } else if (have && add) {
       const union = [...new Set([...have, ...add])];

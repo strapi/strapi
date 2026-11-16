@@ -26,7 +26,6 @@
  *   they’re tiny and reused.
  */
 
-/* eslint-disable no-continue */
 import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { createId } from '@paralleldrive/cuid2';
@@ -763,8 +762,8 @@ const buildRelationKey = (
   targetId: number | string | null
 ): string => {
   const sourceId = normalizeId(relation[sourceColumnName]) ?? relation[sourceColumnName];
-  const fieldValue = 'field' in relation ? (relation.field ?? '') : '';
-  const componentTypeValue = 'component_type' in relation ? (relation.component_type ?? '') : '';
+  const fieldValue = 'field' in relation ? relation.field ?? '' : '';
+  const componentTypeValue = 'component_type' in relation ? relation.component_type ?? '' : '';
 
   return `${sourceId ?? 'null'}::${targetId ?? 'null'}::${fieldValue}::${componentTypeValue}`;
 };
@@ -1082,7 +1081,9 @@ function recordSkippedRelations(context: SkippedRelationContext, skippedIds: any
     return;
   }
 
-  const key = `${context.sourceUid}::${context.attributeName}::${context.joinTable ?? 'NO_JOIN_TABLE'}`;
+  const key = `${context.sourceUid}::${context.attributeName}::${
+    context.joinTable ?? 'NO_JOIN_TABLE'
+  }`;
   let stats = skippedRelationStats.get(key);
 
   if (!stats) {

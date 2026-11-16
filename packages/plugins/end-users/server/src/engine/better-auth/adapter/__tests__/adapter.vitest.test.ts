@@ -1165,7 +1165,6 @@ describe('strapiAdapter', () => {
         () => adapter.findMany({ model: 'session', where: [{ field: 'token', value: bound }] }),
         () => adapter.count({ model: 'session', where: [{ field: 'token', value: bound }] }),
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         const error = await run().catch((caught: Error) => caught);
 
         expect((error as Error).message).toMatch(/^The database refused/);
@@ -1188,7 +1187,6 @@ describe('strapiAdapter', () => {
             update: { token: 'x' },
           }),
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(run()).rejects.toThrow(
           /^The database refused .* \(error code SQLITE_CONSTRAINT\)\.$/
         );

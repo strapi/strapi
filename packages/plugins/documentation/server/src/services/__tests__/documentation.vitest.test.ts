@@ -1,7 +1,6 @@
 import path from 'path';
 import _ from 'lodash';
 import fse from 'fs-extra';
-// eslint-disable-next-line node/no-unpublished-import
 import SwaggerParser from '@apidevtools/swagger-parser';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { apis, plugins, components, contentTypes } from '../__mocks__/mock-strapi-data';
@@ -267,7 +266,7 @@ describe('Documentation plugin | Documentation service', () => {
         ({
           ...defaultConfig,
           'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: ['upload'] },
-        }) as any;
+        } as any);
 
       const docService = documentation({ strapi: global.strapi });
 
@@ -284,7 +283,7 @@ describe('Documentation plugin | Documentation service', () => {
         ({
           ...defaultConfig,
           'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
-        }) as any;
+        } as any);
 
       const docService = documentation({ strapi: global.strapi });
 
@@ -334,7 +333,7 @@ describe('Documentation plugin | Documentation service', () => {
         ],
       };
 
-      global.strapi.config.get = () => ({ ...userConfig }) as any;
+      global.strapi.config.get = () => ({ ...userConfig } as any);
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
@@ -356,7 +355,7 @@ describe('Documentation plugin | Documentation service', () => {
         ({
           ...defaultConfig,
           'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
-        }) as any;
+        } as any);
       const docService = documentation({ strapi: global.strapi });
       const overrideService = override({ strapi: global.strapi });
 
@@ -615,7 +614,7 @@ describe('Documentation plugin | Documentation service', () => {
               };
             },
           },
-        }) as any;
+        } as any);
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = vi.mocked(fse.writeJson).mock.calls[

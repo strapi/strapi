@@ -40,7 +40,7 @@ const fakeStrapi = () =>
     config: {
       get: vi.fn((key: string) => (key === 'plugin::end-users.secret' ? SECRET : undefined)),
     },
-  }) as unknown as Core.Strapi;
+  } as unknown as Core.Strapi);
 
 /**
  * A request's auth context: the trusted providers, the stored link and the stored user. `shared`
@@ -150,7 +150,6 @@ describe('pending-link', () => {
       const { auth } = requestContext();
 
       install([provider]);
-      // eslint-disable-next-line no-await-in-loop
       await lookUp(auth, provider);
 
       expect(auth.trustedProviders, JSON.stringify(data)).toEqual([]);
@@ -217,12 +216,10 @@ describe('pending-link', () => {
       const { auth } = requestContext(state);
       const { hooks } = install([provider]);
 
-      // eslint-disable-next-line no-await-in-loop
       await lookUp(auth, provider);
 
       expect(auth.trustedProviders, JSON.stringify(state)).toEqual([]);
       // And no grant: the account Better Auth would make is not a pending link's
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         hooks.before({ userId: USER.id, providerId: 'facebook' }, { context: auth })
       ).resolves.toBeUndefined();

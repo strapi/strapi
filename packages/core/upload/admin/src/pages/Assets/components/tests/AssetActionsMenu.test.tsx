@@ -239,7 +239,6 @@ describe('AssetActionsMenu', () => {
     it("offers only the asset's own type in the file picker", async () => {
       setup();
 
-      // eslint-disable-next-line testing-library/no-node-access
       expect(document.querySelector('input[type="file"]')).toHaveAttribute('accept', 'image/png');
     });
 

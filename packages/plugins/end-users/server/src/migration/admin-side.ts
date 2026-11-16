@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
+// The steps run in order, one write at a time: each reads what the one before wrote
 import { isDeepStrictEqual } from 'node:util';
 import type { Core } from '@strapi/types';
 
@@ -117,7 +117,11 @@ const carryActions = async (
   ];
   const noCounterpart =
     left.length > 0
-      ? ` ${left.length === 1 ? 'One action has' : `${left.length} actions have`} no counterpart and ${left.length === 1 ? 'is' : 'are'} removed when the application has started; grant what is needed in the admin.`
+      ? ` ${
+          left.length === 1 ? 'One action has' : `${left.length} actions have`
+        } no counterpart and ${
+          left.length === 1 ? 'is' : 'are'
+        } removed when the application has started; grant what is needed in the admin.`
       : '';
 
   return {

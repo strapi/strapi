@@ -553,7 +553,6 @@ describe('applyConditions: populate', () => {
     const blocks = { on: { [LINKS]: { populate: { notes: { filters: OWNED_BY_A } } } } };
 
     for (const populate of ['blocks.notes', ['blocks.notes'], { blocks: { populate: 'notes' } }]) {
-      // eslint-disable-next-line no-await-in-loop
       const q = await sanitize.query({ populate }, folder, find);
 
       expect(q.populate).toEqual({ blocks });
@@ -678,7 +677,6 @@ describe('applyConditions: populate', () => {
     // sanitize.query's stock step turns these into `on` fragments first; applyConditions alone
     // fails closed
     for (const pinned of [true, 'true', { count: true }, { populate: '*' }]) {
-      // eslint-disable-next-line no-await-in-loop
       const q = await applyConditions({ populate: { pinned, name: true } }, folder, {
         auth,
         action: 'find',
@@ -694,7 +692,6 @@ describe('applyConditions: populate', () => {
     const checker = fakeChecker();
 
     for (const notes of [1, ['title'], null]) {
-      // eslint-disable-next-line no-await-in-loop
       const q = await applyConditions({ populate: { notes, links: true } }, folder, {
         auth,
         action: 'find',

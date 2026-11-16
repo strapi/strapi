@@ -68,7 +68,6 @@ export const stepOfCode = async (
   const current = Math.floor(now / (period * 1000));
 
   for (const step of [current + 1, current, current - 1]) {
-    // eslint-disable-next-line no-await-in-loop
     if (sameCode(code, await otp.hotp(step))) {
       return step;
     }

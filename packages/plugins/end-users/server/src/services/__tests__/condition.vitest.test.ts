@@ -1495,7 +1495,6 @@ exports.default = {
 
         it('is refused with a 400 naming the input when it resolves to no field name (null and missing count as none, as in core)', async () => {
           for (const inputs of [{}, { pick: null }, { pick: '' }, { pick: 3 }]) {
-            // eslint-disable-next-line no-await-in-loop
             await expect(
               setupAdmin().conditions.preview({ ...request, condition: picking(), inputs }, scope)
             ).rejects.toMatchObject({
@@ -1641,7 +1640,6 @@ exports.default = {
             const admin = setupAdmin({ rows: [{ name: 'Editor' }] });
             const limited = scopeOf({ subject: ['owner'], user: [] });
 
-            // eslint-disable-next-line no-await-in-loop
             await expect(
               admin.conditions.preview(
                 {
@@ -1679,7 +1677,6 @@ exports.default = {
             const admin = setupAdmin();
             const limited = scopeOf({ subject: ['title', 'owner'], profile: [] });
 
-            // eslint-disable-next-line no-await-in-loop
             await expect(
               admin.conditions.preview({ ...request, condition }, limited)
             ).rejects.toMatchObject({

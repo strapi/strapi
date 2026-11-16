@@ -84,7 +84,6 @@ const validateCustomRules = (rules: unknown) => {
     const key = `rateLimit.customRules[${JSON.stringify(path)}]`;
 
     if (rule === false || typeof rule === 'function') {
-      // eslint-disable-next-line no-continue
       continue;
     }
 

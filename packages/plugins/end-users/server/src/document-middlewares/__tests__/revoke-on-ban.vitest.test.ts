@@ -218,7 +218,6 @@ describe('revoke-on-ban', () => {
       { uid: USER_UID, action: 'create', params: { data: { banned: true } } },
       { uid: USER_UID, action: 'delete', params: { documentId: 'user-1' } },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run(ctx);
 
       expect(next).toHaveBeenCalledTimes(1);

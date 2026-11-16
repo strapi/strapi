@@ -102,7 +102,6 @@ describe('create-profile', () => {
       { uid: USER_UID, action: 'delete', params: { documentId: 'u' } },
       { uid: USER_UID, action: 'findMany', params: {} },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run(ctx);
 
       expect(next).toHaveBeenCalledTimes(1);
@@ -125,7 +124,6 @@ describe('create-profile', () => {
       },
       { uid: USER_UID, action: 'create', params: {} },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await run(source);
     }
 

@@ -19,7 +19,7 @@ const strapiWith = (values: Record<string, unknown> = {}, methods: Record<string
     plugin: () => ({
       service: () => ({ get: async () => ({ methods: { ...ALL_ON, ...methods } }) }),
     }),
-  }) as unknown as Core.Strapi;
+  } as unknown as Core.Strapi);
 
 /** Runs the middleware on a request target: whether it let the request through, or answered 404. */
 const run = async (
@@ -206,7 +206,6 @@ describe('endpointAllowlist', () => {
         '/api/auth/sign-in/%75sername',
         '/api/auth//sign-in/username',
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await run(target, {}, { username: false }), target).toMatchObject({ passed: false });
       }
     });
@@ -222,7 +221,6 @@ describe('endpointAllowlist', () => {
       };
 
       for (const target of ['/api/auth/get-session', '/api/auth/sign-out', '/api/auth/ok']) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await run(target, {}, off), target).toMatchObject({ passed: true });
       }
 

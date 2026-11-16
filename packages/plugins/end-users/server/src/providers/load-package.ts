@@ -46,11 +46,12 @@ export const loadProviderPackage = (name: string, paths: string[] = []): Provide
   let loaded: unknown;
 
   try {
-    // eslint-disable-next-line import/no-dynamic-require, global-require
     loaded = require(modulePath);
   } catch (error) {
     throw new Error(
-      `the package at ${modulePath} could not be loaded${error instanceof Error ? `: ${error.message}` : ''}`
+      `the package at ${modulePath} could not be loaded${
+        error instanceof Error ? `: ${error.message}` : ''
+      }`
     );
   }
 

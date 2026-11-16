@@ -45,7 +45,7 @@ const readLimited = async (response: Response, controller: AbortController): Pro
   const chunks: Uint8Array[] = [];
   let total = 0;
 
-  /* eslint-disable no-await-in-loop -- a stream is read chunk by chunk */
+  // A stream is read chunk by chunk
   for (;;) {
     const { done, value } = await reader.read();
 
@@ -62,7 +62,6 @@ const readLimited = async (response: Response, controller: AbortController): Pro
 
     chunks.push(value);
   }
-  /* eslint-enable no-await-in-loop */
 
   return Buffer.concat(chunks).toString('utf8');
 };

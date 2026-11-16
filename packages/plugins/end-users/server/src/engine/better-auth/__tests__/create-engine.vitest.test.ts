@@ -1559,7 +1559,6 @@ describe('createEngine', () => {
         'strapi.session_token=',
         'x_strapi.session_token=a',
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         const lookup = await engine.lookupSession(new Headers({ cookie }));
 
         expect(lookup.credentials, cookie).toBe(false);
@@ -1599,7 +1598,6 @@ describe('createEngine', () => {
         );
 
         for (const authorization of ['Bearer a.b', 'Bearer forged.c2lnbmF0dXJl']) {
-          // eslint-disable-next-line no-await-in-loop
           const lookup = await engine.lookupSession(
             new Headers({ cookie: cookies, authorization })
           );
@@ -1630,7 +1628,6 @@ describe('createEngine', () => {
 
         // Headers trims `Bearer ` to `Bearer`, as Node does with the header of a real request
         for (const authorization of ['Bearer ', 'Bearer', 'bearer   ']) {
-          // eslint-disable-next-line no-await-in-loop
           const lookup = await engine.lookupSession(
             new Headers({ cookie: cookies, authorization })
           );
@@ -1659,7 +1656,6 @@ describe('createEngine', () => {
         const { signed, userId } = await signUp(engine);
 
         for (const scheme of ['bearer', 'BEARER', 'BeArEr']) {
-          // eslint-disable-next-line no-await-in-loop
           const lookup = await engine.lookupSession(
             new Headers({ authorization: `${scheme} ${signed}` })
           );
@@ -1673,7 +1669,6 @@ describe('createEngine', () => {
         const { cookies, userId } = await browserCookies('basic@x.io');
 
         for (const authorization of ['Basic dXNlcjpwYXNz', 'Bearerx abc']) {
-          // eslint-disable-next-line no-await-in-loop
           const lookup = await engine.lookupSession(
             new Headers({ cookie: cookies, authorization })
           );
@@ -1810,7 +1805,6 @@ describe('createEngine', () => {
         // a Referer: a URL with a path, read as its origin
         `${TRUSTED}/settings/profile?tab=1`,
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await trusting.isTrustedOrigin(origin), origin).toBe(true);
       }
     });
@@ -1826,7 +1820,6 @@ describe('createEngine', () => {
         '/a/relative/path',
         'not a url',
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await trusting.isTrustedOrigin(origin), origin).toBe(false);
       }
     });
@@ -1842,11 +1835,8 @@ describe('createEngine', () => {
       ];
 
       for (const [index, origin] of origins.entries()) {
-        // eslint-disable-next-line no-await-in-loop
         const { cookie } = await signUp(trusting, `parity-${index}@x.io`);
-        // eslint-disable-next-line no-await-in-loop
         const res = await trusting.handle(json('/sign-out', {}, { cookie, origin }));
-        // eslint-disable-next-line no-await-in-loop
         const trusted = await trusting.isTrustedOrigin(origin);
 
         expect(trusted, origin).toBe(res.status === 200);
@@ -2091,7 +2081,6 @@ describe('createEngine', () => {
 
       // Both a session `createSession` made and one a sign-in made: neither is a credential unsigned
       for (const raw of [stored(made.id), a.token]) {
-        // eslint-disable-next-line no-await-in-loop
         const lookup = await engine.lookupSession(bearer(raw));
 
         expect(lookup).toMatchObject({ session: null, credentials: true, source: 'bearer' });
@@ -2485,7 +2474,6 @@ describe('createEngine', () => {
       const statuses: number[] = [];
 
       for (let i = 0; i < 4; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
         statuses.push((await plain.handle(json('/request-password-reset', { email }))).status);
       }
 
@@ -2496,7 +2484,6 @@ describe('createEngine', () => {
       const { email } = await signUp(engine);
 
       for (let i = 0; i < 4; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
         await limited.sendPasswordReset(email, `${SERVER_URL}/reset`);
       }
 
@@ -2507,7 +2494,6 @@ describe('createEngine', () => {
       const { userId } = await signUp(engine);
 
       for (let i = 0; i < 4; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
         await limited.sendVerificationEmail(userId, `${SERVER_URL}/verified`);
       }
 
@@ -2547,9 +2533,7 @@ describe('createEngine', () => {
         const { email, userId } = await signUp(engine);
 
         for (const to of [`${SERVER_URL}/reset`, 'https://app.example.com/reset', '/reset']) {
-          // eslint-disable-next-line no-await-in-loop
           await limited.sendPasswordReset(email, to);
-          // eslint-disable-next-line no-await-in-loop
           await limited.sendVerificationEmail(userId, to);
         }
 
@@ -2565,12 +2549,10 @@ describe('createEngine', () => {
           'https://app.example.com.evil.example/reset',
           '//evil.example.com/reset',
         ]) {
-          // eslint-disable-next-line no-await-in-loop
           await expect(limited.sendPasswordReset(email, to), to).rejects.toMatchObject({
             name: 'ForbiddenError',
             details: { code: 'INVALID_REDIRECT_URL' },
           });
-          // eslint-disable-next-line no-await-in-loop
           await expect(limited.sendVerificationEmail(userId, to), to).rejects.toMatchObject({
             name: 'ForbiddenError',
           });
@@ -2762,7 +2744,9 @@ describe('createEngine', () => {
           silent.listen(0, '127.0.0.1', resolve);
         });
 
-        discoveryUrl = `http://127.0.0.1:${(silent.address() as AddressInfo).port}/.well-known/openid-configuration`;
+        discoveryUrl = `http://127.0.0.1:${
+          (silent.address() as AddressInfo).port
+        }/.well-known/openid-configuration`;
       });
 
       afterAll(async () => {

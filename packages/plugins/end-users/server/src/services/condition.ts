@@ -313,7 +313,7 @@ const staleDefinition = (
 export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> => {
   const files = await conditionFiles(join(strapi.dirs.dist.src, PROJECT_CONDITIONS_DIR));
 
-  /* eslint-disable no-await-in-loop -- registered one at a time: core's registry refuses a name it holds, and the order is the files' */
+  // Registered one at a time: core's registry refuses a name it holds, and the order is the files'
   for (const file of files) {
     try {
       let registering: ContentApiConditionDefinition;
@@ -342,7 +342,11 @@ export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> 
 
         if (record.stale.length > 0) {
           strapi.log.warn(
-            `${file}: ${registering.name} is false for everyone until this is fixed, because the project no longer has ${record.stale.join('; ')}`
+            `${file}: ${
+              registering.name
+            } is false for everyone until this is fixed, because the project no longer has ${record.stale.join(
+              '; '
+            )}`
           );
         }
       }
@@ -352,7 +356,6 @@ export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> 
       });
     }
   }
-  /* eslint-enable no-await-in-loop */
 };
 
 /**
@@ -360,11 +363,10 @@ export const loadProjectConditions = async (strapi: Core.Strapi): Promise<void> 
  * plugin's `register()`: core's registry refuses a registration once Strapi has loaded.
  */
 export const registerConditions = async (strapi: Core.Strapi): Promise<void> => {
-  /* eslint-disable no-await-in-loop -- registered one at a time, in the order of the list, for the same reason */
+  // Registered one at a time, in the order of the list, for the same reason
   for (const definition of BUILT_IN_CONDITIONS) {
     await conditionProvider(strapi).register(definition);
   }
-  /* eslint-enable no-await-in-loop */
 
   await loadProjectConditions(strapi);
 };
@@ -526,7 +528,7 @@ const refuseUnreadableReads = async (
   const reads = readsOf(condition, inputs);
   const seen = new Set<string>();
 
-  /* eslint-disable no-await-in-loop -- the first refusal is the answer, so the reads are checked in order */
+  // The first refusal is the answer, so the reads are checked in order
   for (const path of reads.paths) {
     const field = path.join('.');
 
@@ -539,25 +541,22 @@ const refuseUnreadableReads = async (
       );
     }
   }
-  /* eslint-enable no-await-in-loop */
 
-  /* eslint-disable no-await-in-loop -- the first refusal is the answer, so the reads are checked in order */
+  // The first refusal is the answer, so the reads are checked in order
   for (const attribute of reads.user) {
     await refuseUnreadable(
       () => scope.validateUser({ fields: [attribute] }),
       `A preview can't read the user's ${attribute}: it needs Content Manager read access to that attribute of end users`
     );
   }
-  /* eslint-enable no-await-in-loop */
 
-  /* eslint-disable no-await-in-loop -- the first refusal is the answer, so the reads are checked in order */
+  // The first refusal is the answer, so the reads are checked in order
   for (const attribute of reads.profile) {
     await refuseUnreadable(
       () => scope.validateProfile({ fields: [attribute] }),
       `A preview can't read the profile's ${attribute}: it needs Content Manager read access to that attribute of profiles`
     );
   }
-  /* eslint-enable no-await-in-loop */
 };
 
 /** A 400 that names the input the refusal is about */
@@ -850,7 +849,7 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
       })) as Array<{ id: number; conditions?: unknown; role?: { id?: number } | null }>;
       const changedRoles = new Set<number>();
 
-      /* eslint-disable no-await-in-loop -- one row at a time: they share the transaction's single connection */
+      // One row at a time: they share the transaction's single connection
       for (const { id, conditions, role } of rows) {
         if (!Array.isArray(conditions)) {
           continue;
@@ -885,10 +884,9 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
           }
         }
       }
-      /* eslint-enable no-await-in-loop */
 
       // As a role save does: an editor opened before this gets the 409 and can't save the old value back
-      /* eslint-disable no-await-in-loop -- one at a time: they share the transaction's single connection */
+      // One at a time: they share the transaction's single connection
       for (const id of changedRoles) {
         const current = (await strapi.db
           .query(ROLE_UID)
@@ -898,7 +896,6 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
           .query(ROLE_UID)
           .update({ where: { id }, data: { revision: (current?.revision ?? 0) + 1 } });
       }
-      /* eslint-enable no-await-in-loop */
     });
   };
 
@@ -1261,7 +1258,9 @@ const conditionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (used > 0) {
         throw new errors.ValidationError(
-          `${name} is used by ${used} ${used === 1 ? 'role' : 'roles'}: remove it from ${used === 1 ? 'that role' : 'those roles'} first`
+          `${name} is used by ${used} ${used === 1 ? 'role' : 'roles'}: remove it from ${
+            used === 1 ? 'that role' : 'those roles'
+          } first`
         );
       }
 

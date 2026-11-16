@@ -404,7 +404,9 @@ interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
     promptType:
-      'generate-product-schema' | 'tell-me-about-the-content-type-builder' | 'tell-me-about-strapi';
+      | 'generate-product-schema'
+      | 'tell-me-about-the-content-type-builder'
+      | 'tell-me-about-strapi';
   };
 }
 
@@ -528,7 +530,6 @@ export interface UseTrackingReturn {
     event: TEvent['name'],
     properties?: never
   ): Promise<null | AxiosResponse<string>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trackUsage<TEvent extends Extract<TrackingEvent, { properties: object }>>(
     event: TEvent['name'],
     properties: TEvent['properties']

@@ -99,7 +99,9 @@ export const assertProfileUser = (contentTypes: ContentTypesLike): void => {
 
   if (attribute.relation !== ONE_WAY_TO_ONE) {
     return fail(
-      `not a one-way relation (stored as ${String(attribute.relation)}, where the plugin ships ${ONE_WAY_TO_ONE})`
+      `not a one-way relation (stored as ${String(
+        attribute.relation
+      )}, where the plugin ships ${ONE_WAY_TO_ONE})`
     );
   }
 
@@ -137,17 +139,20 @@ export const assertConnectCallbacks = async (
 ): Promise<void> => {
   const { callbacks } = readCompatConfig(strapi).connect;
 
-  /* eslint-disable no-await-in-loop -- the first origin that is not trusted is the one reported */
+  // The first origin that is not trusted is the one reported
   for (const [provider, url] of Object.entries(callbacks)) {
     const { origin } = new URL(url);
 
     if (!(await isTrusted(origin))) {
       throw new Error(
-        `Invalid end-users configuration: \`compat.connect.callbacks[${JSON.stringify(provider)}]\` ` +
-          `is ${JSON.stringify(url)}, whose origin ${origin} is not the server's own and is not in ` +
+        `Invalid end-users configuration: \`compat.connect.callbacks[${JSON.stringify(
+          provider
+        )}]\` ` +
+          `is ${JSON.stringify(
+            url
+          )}, whose origin ${origin} is not the server's own and is not in ` +
           '`trustedOrigins`. Add the origin to `trustedOrigins`.'
       );
     }
   }
-  /* eslint-enable no-await-in-loop */
 };

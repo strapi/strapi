@@ -246,7 +246,6 @@ describe('drafts gate: the root', () => {
       { hasPublishedVersion: false },
       { publicationFilter: 'modified', status: 'draft' },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(validate.query(query, article, find)).resolves.toBeUndefined();
     }
   });
@@ -288,7 +287,6 @@ describe('drafts gate: the root', () => {
     );
 
     for (const checker of [denying, inconsistent]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         createAPI(checker).validate.query({ status: 'draft' }, article, find)
       ).rejects.toEqual(forbidden(ARTICLE));
@@ -307,7 +305,6 @@ describe('drafts gate: the root', () => {
     const { validate } = createAPI(fakeChecker());
 
     for (const action of ['create', 'update', 'delete']) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         validate.query({ status: 'draft', populate: ['author'] }, article, { auth, action })
       ).resolves.toBeUndefined();
@@ -326,13 +323,11 @@ describe('drafts gate: the root', () => {
         { status: 'draft', sort: 'tags.name' },
         { status: 'draft', populate: { seo: { populate: { tags: true } } } },
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(withoutTags.validate.query(query, article, { auth, action })).rejects.toEqual(
           forbidden(TAG)
         );
       }
 
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         withTags.validate.query({ status: 'draft', populate: ['tags'] }, article, { auth, action })
       ).resolves.toBeUndefined();
@@ -416,7 +411,6 @@ describe('drafts gate: related draft & publish types under status=draft', () => 
       { blocks: true },
       { cover: true },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         validate.query({ status: 'draft', populate }, article, find)
       ).resolves.toBeUndefined();
@@ -454,7 +448,6 @@ describe('drafts gate: related draft & publish types under status=draft', () => 
       { sort: ['tags.name'] },
       { populate: { tags: true } },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         validate.query({ status: 'draft', populate: { articles: node } }, folder, find)
       ).rejects.toEqual(forbidden(TAG));
@@ -475,7 +468,6 @@ describe('drafts gate: related draft & publish types under status=draft', () => 
       { sections: { populate: { folder: { populate: { articles: { sort: 'tags.name' } } } } } },
       { sections: { populate: ['folder.articles.tags'] } },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(validate.query({ status: 'draft', populate }, article, find)).rejects.toEqual(
         forbidden(TAG)
       );
@@ -772,7 +764,6 @@ describe('drafts gate in sanitize.query', () => {
     const { sanitize } = createAPI(checker);
 
     for (const action of ['create', 'update', 'delete']) {
-      // eslint-disable-next-line no-await-in-loop
       const sanitized = await sanitize.query(
         { status: 'draft', publicationFilter: 'modified', populate: 'author' },
         article,

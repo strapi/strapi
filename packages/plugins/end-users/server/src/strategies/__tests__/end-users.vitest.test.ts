@@ -382,7 +382,7 @@ describe('the end-users strategy', () => {
 
         const [user, roles] = forUser.mock.calls[0] as unknown as [
           { documentId: string },
-          Array<{ documentId: string }>,
+          Array<{ documentId: string }>
         ];
 
         expect(user.documentId).toBe('user-1');
@@ -465,7 +465,6 @@ describe('the end-users strategy', () => {
 
       it('is refused when the end of the ban cannot be read: the ban holds', async () => {
         for (const banExpires of ['not a date', 'Invalid Date', {}, Number.NaN]) {
-          // eslint-disable-next-line no-await-in-loop
           const { outcome } = await refusal(storedUser({ banned: true, banExpires }));
 
           expect(outcome, String(banExpires)).toBeInstanceOf(errors.PolicyError);
@@ -634,7 +633,6 @@ describe('the end-users strategy', () => {
             user: storedUser({ twoFactorEnabled: true }),
           });
 
-          // eslint-disable-next-line no-await-in-loop
           const { credentials } = await strategy.authenticate(koaCtx());
 
           expect(credentials).toHaveProperty('passedSecondFactor', expected);
@@ -651,7 +649,6 @@ describe('the end-users strategy', () => {
             user: storedUser({ twoFactorEnabled: false }),
           });
 
-          // eslint-disable-next-line no-await-in-loop
           const outcome = await outcomeOf(strategy.authenticate(koaCtx()));
 
           expect((outcome as Error).message).toBe(
@@ -668,7 +665,6 @@ describe('the end-users strategy', () => {
             user: storedUser({ twoFactorEnabled: true }),
           });
 
-          // eslint-disable-next-line no-await-in-loop
           const outcome = await outcomeOf(strategy.authenticate(koaCtx()));
 
           expect(codeOf(outcome), String(passedSecondFactor)).toEqual({
@@ -748,7 +744,6 @@ describe('the end-users strategy', () => {
             user: storedUser({ twoFactorEnabled }),
           });
 
-          // eslint-disable-next-line no-await-in-loop
           const outcome = await outcomeOf(strategy.authenticate(koaCtx()));
 
           expect(codeOf(outcome), String(twoFactorEnabled)).toEqual({

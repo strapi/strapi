@@ -1,5 +1,4 @@
 import flow from 'lodash/flow';
-// eslint-disable-next-line import/default
 import qs from 'qs';
 
 import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
@@ -415,10 +414,9 @@ type FetchClient = {
   get: {
     (url: string, config: FetchOptions & { responseType: 'blob' }): Promise<FetchResponse<Blob>>;
     (url: string, config: FetchOptions & { responseType: 'text' }): Promise<FetchResponse<string>>;
-    (
-      url: string,
-      config: FetchOptions & { responseType: 'arrayBuffer' }
-    ): Promise<FetchResponse<ArrayBuffer>>;
+    (url: string, config: FetchOptions & { responseType: 'arrayBuffer' }): Promise<
+      FetchResponse<ArrayBuffer>
+    >;
     <TData = unknown>(url: string, config?: FetchOptions): Promise<FetchResponse<TData>>;
   };
   put: <TData = unknown, TSend = unknown>(

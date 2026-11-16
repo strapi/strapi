@@ -279,7 +279,6 @@ describe('assign-default-role', () => {
       { uid: USER_UID, action: 'delete' },
     ]) {
       const params = { documentId: 'u1', data: { email: 'a@x.io' } };
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run({ ...ctx, params });
 
       expect(next, `${ctx.uid} ${ctx.action}`).toHaveBeenCalledTimes(1);
@@ -293,7 +292,6 @@ describe('assign-default-role', () => {
     const { run, getDefault } = setup();
 
     for (const params of [undefined, {}, { data: undefined }, { data: null }]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run({ uid: USER_UID, action: 'create', params });
 
       expect(next).toHaveBeenCalledTimes(1);

@@ -177,7 +177,6 @@ describe('Content API permissions: the stamp and the locked fields of a write', 
       const { sanitize } = apiOf(checker);
 
       for (const action of ['find', 'delete', 'me', undefined]) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await sanitize.input({ title: 'a' }, article, { auth, action })).toEqual({
           title: 'a',
         });
@@ -192,7 +191,6 @@ describe('Content API permissions: the stamp and the locked fields of a write', 
       const { sanitize } = apiOf(inactive);
 
       for (const action of ['create', 'update']) {
-        // eslint-disable-next-line no-await-in-loop
         expect(
           await sanitize.input({ title: 'a' }, article, { auth, action, creates: true })
         ).toEqual({
@@ -222,7 +220,6 @@ describe('Content API permissions: the stamp and the locked fields of a write', 
       const { validate } = apiOf(checker);
 
       for (const author of [{ set: [{ documentId: 'u2' }] }, null, {}]) {
-        // eslint-disable-next-line no-await-in-loop
         const error = await rejection(() =>
           validate.input({ title: 'a', author }, article, { auth, action: 'create' })
         );
@@ -243,7 +240,6 @@ describe('Content API permissions: the stamp and the locked fields of a write', 
       const { validate } = apiOf(checker);
 
       for (const field of ['author', 'body']) {
-        // eslint-disable-next-line no-await-in-loop
         const error = await rejection(() =>
           validate.input({ title: 'a', [field]: 'x' }, article, { auth, action: 'update' })
         );
@@ -271,7 +267,6 @@ describe('Content API permissions: the stamp and the locked fields of a write', 
       const { validate } = apiOf(checkerOf());
 
       for (const action of ['create', 'update']) {
-        // eslint-disable-next-line no-await-in-loop
         const error = await rejection(() =>
           validate.input({ author: { set: [{ documentId: 'u2' }] } }, article, { auth, action })
         );
@@ -313,7 +308,6 @@ describe('Content API permissions: the stamp and the locked fields of a write', 
       const { validate } = apiOf(inactive);
 
       for (const action of ['create', 'update']) {
-        // eslint-disable-next-line no-await-in-loop
         await expect(
           validate.input({ title: 'a', author: null }, article, { auth, action, creates: true })
         ).resolves.toBeUndefined();

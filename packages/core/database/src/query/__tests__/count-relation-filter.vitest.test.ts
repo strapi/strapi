@@ -121,7 +121,6 @@ const setUp = async () => {
   });
 
   for (const { joinTable } of [owners, tags]) {
-    // eslint-disable-next-line no-await-in-loop
     await connection.schema.createTable(joinTable.name, (t) => {
       t.increments('id');
       t.integer(joinTable.joinColumn.name);

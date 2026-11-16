@@ -126,7 +126,7 @@ describe('Core controllers: the publish gate, the owner stamp and the first writ
       params: { id: 'a1' },
       request: { body: { data: { title: 'b' } } },
       state: { auth, route: { method: 'POST', path: '/x', handler } },
-    }) as any;
+    } as any);
 
   /** Whether `first` ran before `then` */
   const ranBefore = (first: Mock, then: Mock) =>
@@ -247,7 +247,6 @@ describe('Core controllers: the publish gate, the owner stamp and the first writ
         const controller = createController({ contentType: article });
         const ctx = ctxFor(`${ARTICLE}.create`);
 
-        // eslint-disable-next-line no-await-in-loop
         await expect(controller.create(ctx, next)).rejects.toBeInstanceOf(errors.ForbiddenError);
       }
 
@@ -262,7 +261,6 @@ describe('Core controllers: the publish gate, the owner stamp and the first writ
       for (const filters of [{}, { author: { documentId: { $eq: 'u1' } } }]) {
         permissions.checker.filtersFor.mockReturnValue(filters);
 
-        // eslint-disable-next-line no-await-in-loop
         await controller.create(ctxFor(`${ARTICLE}.create`), next);
       }
 

@@ -85,7 +85,7 @@ const asset = (id: number, name: string): AssetFile =>
     provider: 'local',
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
-  }) as AssetFile;
+  } as AssetFile);
 
 const image = (name: string) => new File(['x'], name, { type: 'image/png' });
 
@@ -793,7 +793,6 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       await openMenu(user);
 
       for (const name of ['Browse library', 'Upload from device', 'Upload from URL']) {
-        // eslint-disable-next-line no-await-in-loop
         const item = await screen.findByRole('menuitem', { name });
         expect(item).toHaveAttribute('aria-disabled', 'true');
         // neutral500: the label greys out along with its icon.

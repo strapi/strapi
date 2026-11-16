@@ -39,7 +39,6 @@ describe('revoke-on-password-change', () => {
 
       expect(db.session).toHaveLength(2);
 
-      // eslint-disable-next-line no-await-in-loop
       const changed = await auth.api.changePassword({
         body: { currentPassword: PASSWORD, newPassword: NEW_PASSWORD, ...extra },
         headers: { cookie: signedUp.headers.get('set-cookie')?.split(';')[0] ?? '' },

@@ -94,8 +94,8 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
       ),
     },
     contentType: (uid: string) =>
-      ({ [USER_UID]: userSchema, [ROLE_UID]: { uid: ROLE_UID, attributes: {} } })[uid] ??
-      profileSchema,
+      ({ [USER_UID]: userSchema, [ROLE_UID]: { uid: ROLE_UID, attributes: {} } }[uid] ??
+      profileSchema),
     controller: () => core,
     service: () => service,
     plugin: (id: string) => ({ service: () => (id === PLUGIN_ID ? profiles : undefined) }),
@@ -115,7 +115,7 @@ const setup = ({ compat = true, users = [stored(7, 'doc-a'), stored(8, 'doc-b')]
       request: { body: {} },
       set: vi.fn(),
       ...extra,
-    }) as unknown as Koa.Context & { body?: unknown; status?: number };
+    } as unknown as Koa.Context & { body?: unknown; status?: number });
 
   return { strapi, service, documents, profiles, permissions, sanitize, validate, core, ctx };
 };
@@ -213,7 +213,6 @@ describe('users in the users-permissions shape', () => {
     const compat = createUsersCompat(strapi);
 
     for (const field of ['role', 'confirmed', 'blocked', 'provider']) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         compat.update(ctx({ params: { id: '7' }, request: { body: { [field]: 1 } } }))
       ).rejects.toMatchObject({

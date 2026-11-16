@@ -252,7 +252,6 @@ describe('Content API permissions: field rules', () => {
       const { sanitize } = apiOf(checker);
 
       for (const action of ['findOne', 'create', 'update']) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await sanitize.output(entry(), note, { auth, action })).toMatchObject({
           title: 't',
           secret: 's',
@@ -260,7 +259,6 @@ describe('Content API permissions: field rules', () => {
       }
 
       for (const action of ['find', 'custom', undefined]) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await sanitize.output(entry(), note, { auth, action })).not.toHaveProperty('secret');
       }
     });

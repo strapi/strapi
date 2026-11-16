@@ -166,7 +166,9 @@ const getDraftAndPublishReservedAttributeWarning = (uid: string, attributeName: 
   `The attribute name '${attributeName}' on content type '${uid}' is reserved when 'draftAndPublish' is enabled. It conflicts with the Document Service / REST 'status' query parameter. Rename the attribute or disable the 'draftAndPublish' option.`;
 
 const getDraftAndPublishEnableBlockedMessage = (attributeNames: string[]): string =>
-  `Cannot enable draft and publish while the following attribute names are reserved: ${attributeNames.join(', ')}. Rename them or remove them first.`;
+  `Cannot enable draft and publish while the following attribute names are reserved: ${attributeNames.join(
+    ', '
+  )}. Rename them or remove them first.`;
 
 const getTimestamps = (model: Model) => {
   const attributes: string[] = [];
@@ -240,7 +242,7 @@ const getNonVisibleAttributes = (model: Model) => {
 };
 
 const getVisibleAttributes = (model: Model) => {
-  return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
+  return _.difference(Object.keys(model.attributes ?? {}), getNonVisibleAttributes(model));
 };
 
 const isVisibleAttribute = (model: Model, attributeName: string) => {
@@ -337,7 +339,7 @@ const getStoredPrivateAttributes = (model: Model) =>
 const getPrivateAttributes = (model: Model) => {
   return _.union(
     getStoredPrivateAttributes(model),
-    _.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
+    Object.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
   );
 };
 

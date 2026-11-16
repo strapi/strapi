@@ -330,7 +330,9 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (total > MAX_PERMISSIONS_PER_ROLE) {
         refuse(
-          `A role has at most ${formatLimit(MAX_PERMISSIONS_PER_ROLE)} permissions, and this save would leave it with ${formatLimit(total)}`
+          `A role has at most ${formatLimit(
+            MAX_PERMISSIONS_PER_ROLE
+          )} permissions, and this save would leave it with ${formatLimit(total)}`
         );
       }
     }
@@ -375,7 +377,9 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const refuseTooManyHolders = (role: Plain, count: number): never =>
     refuse(
-      `${formatLimit(count)} users have the ${role.name as string} role: move its users to other roles first`
+      `${formatLimit(count)} users have the ${
+        role.name as string
+      } role: move its users to other roles first`
     );
 
   /**
@@ -392,7 +396,7 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
     let released = 0;
     let movedToDefault = 0;
 
-    /* eslint-disable no-await-in-loop -- pages are read in turn, and each write shares the transaction's single connection */
+    // Pages are read in turn, and each write shares the transaction's single connection
     for (;;) {
       const holders = (await userQuery().findMany({
         where: { roles: { id: role.id } },
@@ -436,7 +440,6 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
     }
-    /* eslint-enable no-await-in-loop */
   };
 
   return {
@@ -454,10 +457,9 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
     async ensureDefaults(): Promise<EnsureDefaultsResult> {
       const created: EnsureDefaultsResult['created'] = { public: false, authenticated: false };
 
-      /* eslint-disable no-await-in-loop -- a role another instance made first has to be found before the next one is tried */
+      // A role another instance made first has to be found before the next one is tried
       for (const { type, name, description } of BUILT_IN_ROLES) {
         if (await findByType(type)) {
-          // eslint-disable-next-line no-continue
           continue;
         }
 
@@ -471,7 +473,6 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
           }
         }
       }
-      /* eslint-enable no-await-in-loop */
 
       return { created };
     },
@@ -597,7 +598,9 @@ const roleService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         if ((await countUsers(documentId)) > 0) {
           refuse(
-            `A user was given the ${role.name as string} role while it was being deleted: nothing was deleted, try again`
+            `A user was given the ${
+              role.name as string
+            } role while it was being deleted: nothing was deleted, try again`
           );
         }
 

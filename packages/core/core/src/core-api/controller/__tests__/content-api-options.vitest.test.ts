@@ -41,7 +41,7 @@ const ctxFor = (handler: unknown) =>
   ({
     query: { filters: { title: 'a' } },
     state: { auth, route: { method: 'GET', path: '/notes', handler } },
-  }) as any;
+  } as any);
 
 describe('Core controllers: the options they give the content API', () => {
   let strictParams: unknown;
@@ -194,7 +194,6 @@ describe('Core controllers: the options they give the content API', () => {
       for (const status of ['archived', 'DRAFT', 'Published', '']) {
         vi.clearAllMocks();
 
-        // eslint-disable-next-line no-await-in-loop
         for (const options of await optionsOf({ status, locale: ['fr', 'en'] })) {
           expect(options).toMatchObject({ status: 'draft', locale: '*' });
         }

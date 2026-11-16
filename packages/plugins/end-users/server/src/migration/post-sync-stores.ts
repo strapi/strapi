@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
+// The steps run in order, one write at a time: each reads what the one before wrote
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
@@ -138,7 +138,11 @@ const settingsItems = async (
         item(
           'registration-field-dropped',
           'all',
-          `${plural(dropped.length, 'registration field')} in migration.registrationFields ${dropped.length === 1 ? 'is' : 'are'} not a profile field a sign-up can write, so ${dropped.length === 1 ? 'it was' : 'they were'} left out. Add the field to the profile, or remove it from the list.`,
+          `${plural(dropped.length, 'registration field')} in migration.registrationFields ${
+            dropped.length === 1 ? 'is' : 'are'
+          } not a profile field a sign-up can write, so ${
+            dropped.length === 1 ? 'it was' : 'they were'
+          } left out. Add the field to the profile, or remove it from the list.`,
           { count: dropped.length, refs: dropped }
         )
       );
@@ -233,7 +237,10 @@ const templateItems = async (
         item(
           'template-untranslated',
           translation.key,
-          `The ${label} email was edited and uses ${plural(translation.placeholders.length, 'expression')} that cannot be carried over. It keeps the end-users default until it is rewritten.`,
+          `The ${label} email was edited and uses ${plural(
+            translation.placeholders.length,
+            'expression'
+          )} that cannot be carried over. It keeps the end-users default until it is rewritten.`,
           { count: translation.placeholders.length, refs: translation.placeholders }
         )
       );
@@ -294,7 +301,9 @@ const needsInput = (id: string, missing: string[], why: string, body: ProviderUp
   item(
     'provider-needs-input',
     id,
-    `The ${id} provider is not carried over yet: ${why}.${heldValues(body)} Its redirect URI is the one shown in its settings.`,
+    `The ${id} provider is not carried over yet: ${why}.${heldValues(
+      body
+    )} Its redirect URI is the one shown in its settings.`,
     { count: missing.length, refs: missing }
   );
 

@@ -24,7 +24,7 @@ const sec = (date: Date) => Math.floor(date.getTime() / 1000);
 const config = (legacyJwt: Partial<CompatConfig['legacyJwt']> = {}): CompatConfig =>
   ({
     legacyJwt: { secret: SECRET, until: UNTIL, algorithm: 'HS256', ...legacyJwt },
-  }) as CompatConfig;
+  } as CompatConfig);
 
 // The migration cut over after every token the cases sign
 const CUTOVER = new Date('2026-07-01T00:00:00.000Z');
@@ -264,7 +264,11 @@ describe('verifyLegacyBearer', () => {
   it('refuses an unsigned token, whatever it claims', async () => {
     const { strapi } = strapiWith();
     const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
-    const unsigned = `${encode({ alg: 'none', typ: 'JWT' })}.${encode({ id: 7, iat: sec(NOW), exp: sec(UNTIL) })}.`;
+    const unsigned = `${encode({ alg: 'none', typ: 'JWT' })}.${encode({
+      id: 7,
+      iat: sec(NOW),
+      exp: sec(UNTIL),
+    })}.`;
 
     expect(await verifyLegacyBearer(strapi, unsigned, config(), NOW)).toBeNull();
   });
@@ -311,7 +315,6 @@ describe("resolveLegacyUserId and a revoke of the user's old tokens", () => {
         new Date('2026-05-19T00:00:00.000Z'),
         new Date('2026-05-20T10:00:00.000Z'),
       ]) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await resolveLegacyUserId(strapi, hit(issued, kind)), kind).toBeNull();
       }
     }

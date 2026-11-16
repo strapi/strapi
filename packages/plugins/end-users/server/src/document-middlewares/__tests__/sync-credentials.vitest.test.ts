@@ -221,7 +221,6 @@ describe('sync-credentials', () => {
       { uid: USER_UID, action: 'clone', params: { documentId: 'user-1', data: { password: 'x' } } },
       { uid: USER_UID, action: 'create', params: {} },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run(ctx);
 
       expect(next).toHaveBeenCalledTimes(1);

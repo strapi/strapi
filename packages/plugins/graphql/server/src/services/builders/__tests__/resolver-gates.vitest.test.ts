@@ -18,7 +18,7 @@ const ARTICLE = 'api::article.article';
 const TAG = 'api::tag.tag';
 
 const model = (uid: string, kind: string, draftAndPublish = false, attributes: any = {}) =>
-  ({ uid, kind, modelType: 'contentType', options: { draftAndPublish }, attributes }) as any;
+  ({ uid, kind, modelType: 'contentType', options: { draftAndPublish }, attributes } as any);
 
 const note = model(NOTE, 'collectionType');
 const article = model(ARTICLE, 'collectionType', true, {
@@ -974,7 +974,6 @@ describe('populate depth on nested resolvers', () => {
       () => component(parent, {}, context()),
       () => zone(parent, {}, context()),
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(resolve()).rejects.toThrow(
         'Populate depth 1 exceeds the limit of 0 for api::article.article'
       );
@@ -1144,7 +1143,7 @@ describe('the selection set of a mutation and the drafts gate', () => {
     });
     // Drafts of the related type are not the caller's to read
     permissions.checker.canReadDrafts.mockReturnValue(false);
-    strapi.getModel = (uid: string) => ({ [ARTICLE]: article, [TAG]: tag })[uid] as any;
+    strapi.getModel = (uid: string) => ({ [ARTICLE]: article, [TAG]: tag }[uid] as any);
     const fields = mutationsOf(
       createCollectionMutations({ strapi } as any),
       'buildCollectionTypeMutations',
@@ -1168,7 +1167,7 @@ describe('the selection set of a mutation and the drafts gate', () => {
   it('lets the write through when the response selects no such relation, or the write is published', async () => {
     const { strapi, documents, permissions } = makeStrapi({ active: true });
     permissions.checker.canReadDrafts.mockReturnValue(false);
-    strapi.getModel = (uid: string) => ({ [ARTICLE]: article, [TAG]: tag })[uid] as any;
+    strapi.getModel = (uid: string) => ({ [ARTICLE]: article, [TAG]: tag }[uid] as any);
     const fields = mutationsOf(
       createCollectionMutations({ strapi } as any),
       'buildCollectionTypeMutations',

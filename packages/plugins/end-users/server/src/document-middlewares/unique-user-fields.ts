@@ -41,7 +41,8 @@ export const uniqueUserFieldsMiddleware =
     }
 
     const params = ctx.params as
-      { documentId?: string; data?: Record<string, unknown> | null } | undefined;
+      | { documentId?: string; data?: Record<string, unknown> | null }
+      | undefined;
 
     // A copy when the username changes: the object belongs to the caller
     if (params?.data && typeof params.data.username === 'string') {
@@ -90,7 +91,7 @@ export const uniqueUserFieldsMiddleware =
 
     const taken: UniqueField[] = [];
 
-    /* eslint-disable no-await-in-loop -- checked in order: the answer lists the taken fields in the order of UNIQUE_FIELDS */
+    // Checked in order: the answer lists the taken fields in the order of UNIQUE_FIELDS
     for (const field of UNIQUE_FIELDS) {
       const value = values[field];
 
@@ -101,7 +102,6 @@ export const uniqueUserFieldsMiddleware =
         taken.push(field);
       }
     }
-    /* eslint-enable no-await-in-loop */
 
     if (taken.length > 0) {
       throw new errors.ValidationError(takenMessage(taken[0]), {

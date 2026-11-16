@@ -53,7 +53,7 @@ const fakeStrapi = () =>
         }),
       }),
     }),
-  }) as unknown as Core.Strapi;
+  } as unknown as Core.Strapi);
 
 const counters = () => lockoutDb.connection('eu_lockout_counters').select('key', 'count');
 
@@ -812,7 +812,6 @@ describe('confirming an enrollment', () => {
     const { cookie, code } = await begin(ctx);
 
     for (let i = 0; i < 5; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(guess(ctx, cookie, '000000')).rejects.toMatchObject({ statusCode: 401 });
     }
 
@@ -833,7 +832,6 @@ describe('confirming an enrollment', () => {
     });
 
     for (let i = 0; i < 5; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
       await guess(ctx, i % 2 ? cookie : cookieHeader(other.headers), '000000').catch(() => {});
     }
 
@@ -854,7 +852,6 @@ describe('confirming an enrollment', () => {
     const { cookie, code } = await begin(ctx);
 
     for (let i = 0; i < 3; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
       await guess(ctx, cookie, '000000').catch(() => {});
     }
 
@@ -871,7 +868,6 @@ describe('confirming an enrollment', () => {
     const stepUp = cookieHeader(confirmed.headers);
 
     for (let i = 0; i < 8; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
       await guess(ctx, stepUp, '000000').catch(() => {});
     }
 
@@ -924,7 +920,6 @@ describe('the passkey sign-in', () => {
   it('marks the session a passkey sign-in makes when the authenticator verified the user, with or without two-factor on', async () => {
     for (const twoFactorEnabled of [false, true]) {
       for (const flags of [USER_VERIFIED, USER_VERIFIED + USER_PRESENT]) {
-        // eslint-disable-next-line no-await-in-loop
         const { written, matches } = await run({
           path: '/passkey/verify-authentication',
           body: assertion(flags),
@@ -954,7 +949,6 @@ describe('the passkey sign-in', () => {
       { response: 'x' },
       undefined,
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { written } = await run({
         path: '/passkey/verify-authentication',
         body,
@@ -993,7 +987,6 @@ describe('the passkey sign-in', () => {
       '/callback/:id',
       '/sign-in/email-otp',
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { written, matches } = await run({
         path,
         body: assertion(USER_VERIFIED),

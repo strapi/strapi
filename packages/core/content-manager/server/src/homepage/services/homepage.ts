@@ -1,4 +1,3 @@
-/* eslint-disable func-names */
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
@@ -84,7 +83,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
             const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
-              { visible?: boolean } | undefined;
+              | { visible?: boolean }
+              | undefined;
 
             return contentTypeOptions?.visible !== false;
           })
@@ -159,13 +159,10 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   ) => {
     return documents.map((document) => {
       const additionalFields =
-        populate?.reduce(
-          (acc, key) => {
-            acc[key] = document[key];
-            return acc;
-          },
-          {} as Record<string, any>
-        ) || {};
+        populate?.reduce((acc, key) => {
+          acc[key] = document[key];
+          return acc;
+        }, {} as Record<string, any>) || {};
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,

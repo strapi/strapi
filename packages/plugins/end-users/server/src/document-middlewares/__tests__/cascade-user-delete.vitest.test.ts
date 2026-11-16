@@ -288,7 +288,6 @@ describe('cascade-user-delete', () => {
       { uid: USER_UID, action: 'update', params: { documentId: 'user-1', data: {} } },
       { uid: USER_UID, action: 'create', params: { data: {} } },
     ]) {
-      // eslint-disable-next-line no-await-in-loop
       const { next } = await run(ctx);
 
       expect(next).toHaveBeenCalledTimes(1);

@@ -216,7 +216,6 @@ export const assertDraftAccess = async (
             check(uid, 'populate');
           }
 
-          // eslint-disable-next-line no-await-in-loop
           await checkNode(fragment, getModel(uid));
         }
       }
@@ -226,7 +225,6 @@ export const assertDraftAccess = async (
         // as `sanitize.query` reads it): `'*'` is every relation of each, paths, lists and
         // objects are walked on each, nodes and all
         for (const component of attribute.components ?? []) {
-          // eslint-disable-next-line no-await-in-loop
           await checkPopulate(node.populate, getModel(component));
         }
       }
@@ -273,7 +271,6 @@ export const assertDraftAccess = async (
 
     if (isPlainObject(populate)) {
       for (const [key, value] of Object.entries(populate as Node)) {
-        // eslint-disable-next-line no-await-in-loop
         await checkEntry(key, value, populateSchema);
       }
     }

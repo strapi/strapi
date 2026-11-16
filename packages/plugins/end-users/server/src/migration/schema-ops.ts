@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop -- the steps run in order, one write at a time: each reads what the one before wrote */
+// The steps run in order, one write at a time: each reads what the one before wrote
 import type { Knex } from 'knex';
 import type { Database } from '@strapi/database';
 

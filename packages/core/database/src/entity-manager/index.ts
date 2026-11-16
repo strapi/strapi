@@ -18,6 +18,7 @@ import {
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
+import { InvalidRelationError } from '../errors';
 import { createRepository } from './entity-repository';
 import {
   cleanMorphToManyOrderColumn,
@@ -203,6 +204,20 @@ const toAssocs = (data: Assocs) => {
     disconnect: toIdArray(data?.disconnect),
   };
 };
+
+/**
+ * `toAssocs` checks `set` by truthiness, so `{ set: null }` reaches the write branches as an
+ * empty delta. Released Strapi cleared the inverse morph fields on a bare null set, and the morph
+ * branches keep that until #27432 settles what `{ set: null }` means for every relation type.
+ * Next to a connect or disconnect, the delta applies. Released Strapi did that for an inverse
+ * morphToMany (media); its inverse morphToOne branch cleared every link and linked nothing.
+ */
+const isBareNullSet = (value: unknown, assocs: ReturnType<typeof toAssocs>) =>
+  isRecord(value) &&
+  has(value, 'set') &&
+  value.set === null &&
+  isEmpty(assocs.connect) &&
+  isEmpty(assocs.disconnect);
 
 const processData = (
   metadata: Meta,
@@ -652,11 +667,33 @@ export const createEntityManager = (db: Database): EntityManager => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
-            const relId = toId(cleanRelationData.set?.[0]);
+            // set happens before connect/disconnect
+            const dataset = cleanRelationData.set ?? cleanRelationData.connect ?? [];
+
+            // Copy flows (publish, discardDraft, clone) pass the populated value of a morphMany,
+            // and it comes back empty: they populate relations with a field selection
+            // (document-service/utils/populate.ts), which never selects the morph id column
+            // (query/helpers/populate/apply.ts).
+            // An empty morphOne populates as null or undefined and is skipped above.
+            // Publish omits an empty value: the links stay on the draft, and the document service
+            // re-points those of the old published version to the new one. Every other caller is
+            // rejected here: discardDraft, clone, and the draft & publish migration, which then
+            // fails at boot on every start. Skipping the value would commit and drop the links of
+            // the deleted version. What discardDraft and clone should do with these links is an
+            // open question.
+            // An InvalidRelationError reaches the client as a 400 with this message, not a 500
+            if (dataset.length === 0) {
+              throw new InvalidRelationError(
+                `Invalid ${uid}.${attributeName} value, expected at least one entry to link`
+              );
+            }
+
+            // morphOne links a single entry, morphMany links all of them
+            const relIds = attribute.relation === 'morphOne' ? [toId(dataset[0])] : toIds(dataset);
 
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: relId })
+              .where({ id: relIds })
               .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
@@ -685,7 +722,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isSingle =
               types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const dataset = uniqBy(
-              isSingle ? (attachData ?? []).slice(-1) : (attachData ?? []),
+              isSingle ? (attachData ?? []).slice(-1) : attachData ?? [],
               'id'
             );
 
@@ -748,13 +785,10 @@ export const createEntityManager = (db: Database): EntityManager => {
             )
             .get()
             // set the order based on the order of the ids
-            .reduce(
-              (acc, rel, idx) => {
-                acc[rel.id] = idx + 1;
-                return acc;
-              },
-              {} as Record<ID, number>
-            );
+            .reduce((acc, rel, idx) => {
+              acc[rel.id] = idx + 1;
+              return acc;
+            }, {} as Record<ID, number>);
 
           rows.forEach((row: Record<string, unknown>) => {
             const rowId = row[morphColumn.idColumn.name] as ID;
@@ -863,13 +897,10 @@ export const createEntityManager = (db: Database): EntityManager => {
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
-              .reduce(
-                (acc, rel, idx) => {
-                  acc[rel.id] = idx;
-                  return acc;
-                },
-                {} as Record<ID, number>
-              );
+              .reduce((acc, rel, idx) => {
+                acc[rel.id] = idx;
+                return acc;
+              }, {} as Record<ID, number>);
 
             insert.forEach((row: Record<string, unknown>) => {
               row[orderColumnName] = orderMap[row[inverseJoinColumn.name] as number];
@@ -935,19 +966,54 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             // update instead of deleting because the relation is directly on the entity table
             // and not in a join table
-            await this.createQueryBuilder(target)
-              .update({ [idColumn.name]: null, [typeColumn.name]: null })
-              .where({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .transacting(trx)
-              .execute();
-
-            if (cleanRelationData.set !== null) {
-              const relId = toIds(cleanRelationData.set?.[0]);
+            const unlink = async (where: Record<string, unknown> = {}) => {
               await this.createQueryBuilder(target)
-                .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-                .where({ id: relId })
+                .update({ [idColumn.name]: null, [typeColumn.name]: null })
+                .where({ ...where, [idColumn.name]: id, [typeColumn.name]: uid })
                 .transacting(trx)
                 .execute();
+            };
+
+            // morphOne links a single entry, morphMany links all of them
+            const link = async (relations: { id: ID }[]) => {
+              const relIds =
+                attribute.relation === 'morphOne' ? toIds(relations.slice(0, 1)) : toIds(relations);
+
+              if (relIds.length === 0) {
+                return;
+              }
+
+              await this.createQueryBuilder(target)
+                .update({ [idColumn.name]: id, [typeColumn.name]: uid })
+                .where({ id: relIds })
+                .transacting(trx)
+                .execute();
+            };
+
+            // set replaces every link: null, an empty set and a bare `{ set: null }` clear them
+            if (
+              'set' in cleanRelationData ||
+              isBareNullSet(data[attributeName], cleanRelationData)
+            ) {
+              await unlink();
+              await link(cleanRelationData.set ?? []);
+              continue;
+            }
+
+            // connect and disconnect only change the given entries
+            const { connect = [], disconnect = [] } = cleanRelationData;
+
+            if (disconnect.length > 0) {
+              await unlink({ id: toIds(disconnect) });
+            }
+
+            if (connect.length > 0) {
+              // a morphOne links a single entry, so connecting replaces it
+              if (attribute.relation === 'morphOne') {
+                await unlink();
+              }
+
+              await link(connect);
             }
           } else if (
             targetAttribute.type === 'relation' &&
@@ -963,22 +1029,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isSingle =
               types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const hasConnect = !isEmpty(cleanRelationData.connect);
-            const hasDisconnect = !isEmpty(cleanRelationData.disconnect);
             const hasSet = !isEmpty(cleanRelationData.set);
-
-            // `toAssocs` checks `set` by truthiness, so `{ set: null }` reaches this branch
-            // as an empty delta. Released Strapi cleared the field on a bare null set (it
-            // fell through to the replace path below) and applied the delta when a connect
-            // or disconnect came with it. Keep both outcomes as they are until #27432
-            // settles what `{ set: null }` means for every relation type: only a real delta
-            // shape may take the empty-delta no-op path.
-            const rawValue = data[attributeName];
-            const isBareNullSet =
-              isRecord(rawValue) &&
-              has(rawValue, 'set') &&
-              rawValue.set === null &&
-              !hasConnect &&
-              !hasDisconnect;
 
             // A partial update is a connect/disconnect delta payload (no `set` key),
             // which must modify only the listed relations — as opposed to a `set`/
@@ -986,7 +1037,10 @@ export const createEntityManager = (db: Database): EntityManager => {
             // payload *shape* (like regular joinTable relations at `!has(…, 'set')`),
             // not on content, so that an empty delta (`{ connect: [] }` /
             // `{ disconnect: [] }`) is a no-op instead of wiping the field.
-            const isPartialUpdate = !has(cleanRelationData, 'set') && !isBareNullSet;
+            // A bare `{ set: null }` falls through to the replace path, see `isBareNullSet`.
+            const isPartialUpdate =
+              !has(cleanRelationData, 'set') &&
+              !isBareNullSet(data[attributeName], cleanRelationData);
 
             if (isPartialUpdate) {
               // For single media a connect is last-wins and the field holds at most one
@@ -1044,7 +1098,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 const connects = uniqBy(
                   isSingle
                     ? (cleanRelationData.connect ?? []).slice(-1)
-                    : (cleanRelationData.connect ?? []),
+                    : cleanRelationData.connect ?? [],
                   'id'
                 );
 
@@ -1098,7 +1152,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               // morphOne populate reads `order asc` + first — leave B observable with a
               // hidden C row, the same phantom-row defect the connect path guards against.
               const setData = uniqBy(
-                isSingle ? (cleanRelationData.set ?? []).slice(-1) : (cleanRelationData.set ?? []),
+                isSingle ? (cleanRelationData.set ?? []).slice(-1) : cleanRelationData.set ?? [],
                 'id'
               );
 
@@ -2010,13 +2064,10 @@ export const createEntityManager = (db: Database): EntityManager => {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: fieldsArr.reduce(
-          (acc, field) => {
-            acc[field] = populate || true;
-            return acc;
-          },
-          {} as Record<string, unknown>
-        ),
+        populate: fieldsArr.reduce((acc, field) => {
+          acc[field] = populate || true;
+          return acc;
+        }, {} as Record<string, unknown>),
       });
 
       if (!entry) {

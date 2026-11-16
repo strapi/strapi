@@ -30,7 +30,6 @@ describe('the magic-link plugin projects import', () => {
         ],
       });
 
-      // eslint-disable-next-line no-await-in-loop
       await auth.api.signInMagicLink({
         body: { email: 'ann@example.com' },
         headers: new Headers({ origin: 'http://localhost:1337' }),

@@ -549,7 +549,6 @@ export const FormModal = () => {
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
-      // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components) as Internal.UID.Component[],
@@ -810,7 +809,9 @@ export const FormModal = () => {
             });
 
             navigate({
-              pathname: `/plugins/${pluginId}/component-categories/${toStringValue(modifiedData.category)}/${componentUid}`,
+              pathname: `/plugins/${pluginId}/component-categories/${toStringValue(
+                modifiedData.category
+              )}/${componentUid}`,
             });
           }
 
@@ -916,7 +917,6 @@ export const FormModal = () => {
 
           // Adding an existing component
         }
-        // eslint-disable-next-line no-lonely-if
         if (isInFirstComponentStep) {
           // Navigate the user to step 2
           onNavigateToCreateComponentStep2();

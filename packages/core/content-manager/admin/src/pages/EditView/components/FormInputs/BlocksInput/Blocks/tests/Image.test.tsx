@@ -1,5 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
-
 import { ReactElement, StrictMode } from 'react';
 
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
@@ -507,7 +505,7 @@ describe('createDroppedImagesInserter', () => {
       ...mockImage,
       name,
       url: `/uploads/${name}`,
-    }) as unknown as Schema.Attribute.MediaValue<true>[number];
+    } as unknown as Schema.Attribute.MediaValue<true>[number]);
   const dropEvent = {} as React.DragEvent;
 
   /** What the editor holds, one entry per block: the image name or the paragraph text. */

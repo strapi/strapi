@@ -655,7 +655,6 @@ describe('permission service', () => {
         ]) {
           const { permission, transaction } = setup();
 
-          // eslint-disable-next-line no-await-in-loop
           await expect(permission.applyDiff('role1', diff)).rejects.toMatchObject({
             name: 'ValidationError',
             message: expect.stringContaining('255'),
