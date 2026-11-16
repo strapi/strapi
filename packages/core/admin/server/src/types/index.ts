@@ -39,6 +39,11 @@ import type {
 } from '../../../shared/contracts/shared';
 import type { AutoRegistrationEvent } from '../audit-logs/auth';
 import type { HomepageLayout } from '../controllers/validation/schema';
+import type {
+  ContentPermission,
+  PluginPermission,
+  SettingPermission,
+} from '../../../shared/contracts/permissions';
 
 export type * as Controllers from './controllers';
 export type * as Policies from './policies';
@@ -253,27 +258,73 @@ type StrictPermissionsManager<TAction extends string | undefined> = Omit<
 type SectionsBuilder = (typeof PermissionService)['sectionsBuilder'];
 
 /**
+ * The sections the admin creates, by name (`services/permission/sections-builder/index.ts`), in the
+ * form `GET /admin/permissions` serves them. Other sections are created by their owner.
+ */
+type BuiltInSections = {
+  plugins: PluginPermission[];
+  settings: SettingPermission[];
+  singleTypes: ContentPermission;
+  collectionTypes: ContentPermission;
+};
+
+/** The section a handler registered on `TName` receives: unknown unless the admin creates it. */
+type SectionFor<TName extends string> = TName extends keyof BuiltInSections
+  ? BuiltInSections[TName]
+  : unknown;
+
+/** A section handler: adds what an action contributes to the section, in place. */
+type SectionHandler<TSection> = (context: { action: Action; section: TSection }) => unknown;
+
+/** The sections builder members written for strict types: handlers receive their section. */
+type StrictSectionsBuilderMembers = {
+  /** A section calls its matchers with the action, and its handlers with the factory's state. */
+  createSection<TSection>(
+    sectionName: string,
+    options: {
+      initialStateFactory?: () => TSection;
+      handlers?: SectionHandler<TSection>[];
+      matchers?: ((action: Action) => unknown)[];
+    }
+  ): StrictSectionsBuilder;
+  deleteSection(sectionName: string): StrictSectionsBuilder;
+  addHandler<TName extends string>(
+    sectionName: TName,
+    handler: SectionHandler<SectionFor<TName>>
+  ): StrictSectionsBuilder;
+  addMatcher(sectionName: string, matcher: (action: Action) => unknown): StrictSectionsBuilder;
+  /** Every section built from the actions, by section name. */
+  build(actions?: Action[]): Promise<BuiltInSections & Record<string, unknown>>;
+};
+
+type StrictSectionsBuilder = Omit<SectionsBuilder, keyof StrictSectionsBuilderMembers> &
+  StrictSectionsBuilderMembers;
+
+/**
  * The `admin::permission` service as runtime calls it. The implementation keeps its published
  * develop signatures: the action provider requires a category, permission queries take two
  * arguments, and section hooks receive no arguments. With strict types, the permissions manager
- * is written from its options, its sanitizers resolve to the data they were given, and the
- * providers' `registerMany` resolves to the provider.
+ * is written from its options, its sanitizers resolve to the data they were given, the
+ * providers' `registerMany` resolves to the provider, and the sections builder hands each handler
+ * the section it is registered on.
  */
 type PermissionServiceContract = Omit<
   typeof PermissionService,
   'actionProvider' | 'conditionProvider' | 'createPermissionsManager' | 'sectionsBuilder'
 > & {
   conditionProvider: Core.IsStrict extends true ? StrictConditionProvider : ConditionProvider;
-  sectionsBuilder: Omit<SectionsBuilder, 'addHandler' | 'addMatcher'> & {
-    addHandler(
-      sectionName: string,
-      handler: (context: { action: Action; section: unknown }) => unknown
-    ): ReturnType<SectionsBuilder['addHandler']>;
-    addMatcher(
-      sectionName: string,
-      matcher: (action: Action) => unknown
-    ): ReturnType<SectionsBuilder['addMatcher']>;
-  };
+  sectionsBuilder: Core.IsStrict extends true
+    ? StrictSectionsBuilder
+    : Omit<SectionsBuilder, 'addHandler' | 'addMatcher'> & {
+        addHandler(
+          sectionName: string,
+          handler: (context: { action: Action; section: unknown }) => unknown
+        ): ReturnType<SectionsBuilder['addHandler']>;
+        addMatcher(
+          sectionName: string,
+          matcher: (action: Action) => unknown
+        ): ReturnType<SectionsBuilder['addMatcher']>;
+      };
   actionProvider: Core.IsStrict extends true
     ? StrictActionProvider
     : Omit<ActionProvider, 'register' | 'registerMany'> & {
