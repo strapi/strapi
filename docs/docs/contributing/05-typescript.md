@@ -89,6 +89,12 @@ const service = strapi.service<MyService>('plugin::my-plugin.my-service');
 const sameService = strapi.plugin('my-plugin').service<MyService>('my-service');
 ```
 
+A type argument also overrides a registered contract. Use it when a plugin calls a service in a way
+its contract does not describe. For example, the Content-Type Builder's `schema.updateSchema`
+contract takes the payload after its controller's validation, which defaults `options` and
+`pluginOptions` to `{}`. A plugin that calls the service directly can omit them, and passes its own
+type: `strapi.plugin('content-type-builder').service<MySchemaService>('schema')`.
+
 The packages of this monorepo declare their contracts by hand (`*Contract` types), and lookups use
 these declared contracts first. A plugin author publishes contracts the same way: read
 [Declaring a package's contracts](#declaring-a-packages-contracts).
