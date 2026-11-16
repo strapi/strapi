@@ -274,7 +274,6 @@ export const expectedMetadataResults = {
             complex_order: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_order',

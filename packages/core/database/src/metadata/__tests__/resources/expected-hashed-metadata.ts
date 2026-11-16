@@ -250,7 +250,6 @@ export const expectedMetadataHashedResults = {
             complex_ord: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_ord',
