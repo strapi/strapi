@@ -36,6 +36,12 @@ const setPathIdAndPath = async (folder: Pick<Folder, 'parent'>) => {
       .query(FOLDER_MODEL_UID)
       .findOne({ where: { id: folder.parent } });
 
+    // Request validation checks the parent exists, but it can be deleted (e.g. by another admin)
+    // before this lookup runs. Answer like the validation does instead of crashing on `null.path`.
+    if (parentFolder === null) {
+      throw new errors.ValidationError('parent folder does not exist');
+    }
+
     parentPath = parentFolder.path;
   }
 
