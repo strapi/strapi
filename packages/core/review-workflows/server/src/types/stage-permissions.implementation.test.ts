@@ -1,11 +1,9 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type createStagePermissionsService from '../services/stage-permissions';
 import type { Equal, Expect } from './assert.test';
-import type { StagePermissionsService } from './services';
+import type { RegisteredStagePermission, StagePermissionsService } from './services';
 
 type Implementation = ReturnType<typeof createStagePermissionsService>;
-
-type IsAny<T> = 0 extends 1 & T ? true : false;
 
 // The members take the parameters of the contract.
 export type StagePermissionsImplementationAssertions = [
@@ -42,8 +40,11 @@ export type StagePermissionsImplementationAssertions = [
       Parameters<StagePermissionsService['canTransitionToStage']>
     >
   >,
-  // `register` and `registerTo` resolve to `any` with strict types too: the admin `addPermissions`
-  // declares `Permission[]`, wider than the contract's `RegisteredStagePermission`.
-  Expect<IsAny<Awaited<ReturnType<Implementation['register']>>>>,
-  Expect<IsAny<Awaited<ReturnType<Implementation['registerTo']>>>>,
+  // `register` and `registerTo` resolve to the permissions the admin `addPermissions` stored.
+  Expect<
+    Equal<Awaited<ReturnType<Implementation['register']>>, RegisteredStagePermission<'from'>[]>
+  >,
+  Expect<
+    Equal<Awaited<ReturnType<Implementation['registerTo']>>, RegisteredStagePermission<'to'>[]>
+  >,
 ];
