@@ -261,10 +261,12 @@ export default {
       strapi.log.error(
         'Could not fail the interrupted AI metadata jobs before reading the latest one',
         {
+          message: error instanceof Error ? error.message : String(error),
           error,
         }
       );
     }
+
     const job = await jobService.getLatestActiveJob();
 
     if (!job) {

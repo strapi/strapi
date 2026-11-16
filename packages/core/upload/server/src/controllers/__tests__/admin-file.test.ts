@@ -154,14 +154,15 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
   });
 
   it('fails the jobs whose server stopped before reading the latest one', async () => {
-    // A single server that crashed mid-job never restarts its sweep: the read settles the job
-    mockAiMetadataJobsService.failInterruptedJobs.mockImplementation(async () => {
-      expect(mockAiMetadataJobsService.getLatestActiveJob).not.toHaveBeenCalled();
-    });
-
+    // A single server that crashed mid-job never restarts its sweep: the read settles the job.
+    // The order is read after the call: an `expect` inside the mock would land in the
+    // controller's catch and could not fail the test.
     await call();
 
     expect(mockAiMetadataJobsService.failInterruptedJobs).toHaveBeenCalledTimes(1);
+    expect(mockAiMetadataJobsService.failInterruptedJobs.mock.invocationCallOrder[0]).toBeLessThan(
+      mockAiMetadataJobsService.getLatestActiveJob.mock.invocationCallOrder[0]
+    );
     expect(mockAiMetadataJobsService.getLatestActiveJob).toHaveBeenCalledTimes(1);
   });
 
@@ -183,9 +184,10 @@ describe('Admin File Controller - getLatestAIMetadataJob', () => {
     await call();
 
     expect(ctx.body).toEqual(job);
+    // The default log format prints the message but drops other metadata, so the cause goes in it
     expect(log.error).toHaveBeenCalledWith(
       'Could not fail the interrupted AI metadata jobs before reading the latest one',
-      { error: sweepError }
+      { message: 'lock wait timeout', error: sweepError }
     );
   });
 

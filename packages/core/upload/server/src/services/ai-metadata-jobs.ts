@@ -156,8 +156,10 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     async getLatestActiveJob(): Promise<AIMetadataJob | null> {
       // Despite the name, return the most recent job regardless of status
       // This allows the frontend to see completed/failed status
+      // Ordered by id, not `createdAt`: Postgres and MySQL store a `datetime` as local time, so
+      // after a DST fall-back an older job can read as created after a newer one
       return strapi.db.query(AI_METADATA_JOB_UID).findOne({
-        orderBy: { createdAt: 'desc' },
+        orderBy: { id: 'desc' },
       });
     },
   };

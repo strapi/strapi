@@ -59,6 +59,16 @@ describe('AI metadata jobs service', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
+  it('reads the latest job by creation order, not by its local-time creation date', async () => {
+    // After a DST fall-back, a `datetime` stored as local time on Postgres and MySQL can put an
+    // older job after a newer one: here the older job reads as created later
+    const olderId = await service.createJob();
+    const newerId = await service.createJob();
+    await service.updateJob(olderId, { createdAt: new Date(Date.now() + 60 * 60_000) } as any);
+
+    expect(await service.getLatestActiveJob()).toMatchObject({ id: newerId });
+  });
+
   it('reads job dates back as ISO strings, not Date instances', async () => {
     const jobId = await service.createJob();
 
