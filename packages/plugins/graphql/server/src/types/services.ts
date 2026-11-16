@@ -98,13 +98,56 @@ export type GeneratedExtension = Omit<Extension, 'resolvers' | 'resolversConfig'
   resolversConfig: ResolversConfig;
 };
 
+/**
+ * The shadow CRUD settings of one field (`services/extension/shadow-crud-manager.ts:118-172`). Every
+ * `disable*` method returns the field manager (`:152`, `:158`, `:164`, `:170`).
+ */
+export type ShadowCRUDFieldManager = {
+  isEnabled(): boolean;
+  hasInputEnabled(): boolean;
+  hasOutputEnabled(): boolean;
+  /** The implementation's spelling. */
+  hasFiltersEnabeld(): boolean;
+  disable(): ShadowCRUDFieldManager;
+  disableOutput(): ShadowCRUDFieldManager;
+  disableInput(): ShadowCRUDFieldManager;
+  disableFilters(): ShadowCRUDFieldManager;
+};
+
+/**
+ * The shadow CRUD settings of one content type (`services/extension/shadow-crud-manager.ts:49-174`).
+ * Every `disable*` method returns the manager (`:87`, `:93`, `:99`, `:109`, `:115`).
+ */
+export type ShadowCRUDManager = {
+  isEnabled(): boolean;
+  isDisabled(): boolean;
+  areQueriesEnabled(): boolean;
+  areQueriesDisabled(): boolean;
+  areMutationsEnabled(): boolean;
+  areMutationsDisabled(): boolean;
+  isActionEnabled(action: string): boolean;
+  isActionDisabled(action: string): boolean;
+  disable(): ShadowCRUDManager;
+  disableQueries(): ShadowCRUDManager;
+  disableMutations(): ShadowCRUDManager;
+  disableAction(action: string): ShadowCRUDManager;
+  /**
+   * Each action is passed to `disableAction` (`shadow-crud-manager.ts:113`). Callers pass action
+   * names (`plugin-users-permissions` `server/src/graphql/index.js:26-29`).
+   */
+  disableActions(actions?: string[]): ShadowCRUDManager;
+  field(fieldName: string): ShadowCRUDFieldManager;
+};
+
 type ExtensionImplementation = ReturnType<typeof createExtension>;
 
 /**
  * The registered `extension` service. The implementation keeps its published `object` options, which
- * the contract types from their runtime use.
+ * the contract types from their runtime use. The declaration emitter elides the managers' `this`
+ * results to `any`, so the contract names them.
  */
-export type ExtensionService = Omit<ExtensionImplementation, 'use' | 'generate'> & {
+export type ExtensionService = Omit<ExtensionImplementation, 'shadowCRUD' | 'use' | 'generate'> & {
+  shadowCRUD(uid: string): ShadowCRUDManager;
   use(configuration: ExtensionConfiguration | ExtensionConfigurationFactory): ExtensionService;
   generate(options: { typeRegistry: TypeRegistry }): GeneratedExtension;
 };
