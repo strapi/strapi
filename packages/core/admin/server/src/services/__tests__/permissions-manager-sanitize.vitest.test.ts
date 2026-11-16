@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, expectTypeOf, beforeAll } from 'vitest';
 import { AbilityBuilder, Ability } from '@casl/ability';
 import { pick } from 'lodash';
 
@@ -84,6 +84,7 @@ const articleModel = {
     content: { type: 'text' },
     createdBy: { type: 'relation', relation: 'oneToOne', target: 'admin::user' },
     updatedBy: { type: 'relation', relation: 'oneToOne', target: 'admin::user' },
+    related: { type: 'relation', relation: 'oneToOne', target: 'api::article.article' },
   },
   config: {
     attributes: {},
@@ -154,7 +155,154 @@ describe('Permissions Manager - Sanitize', () => {
       expect(result.filters).toEqual({ c: 'Bar' });
       expect(result.sort).toEqual({ c: 'desc' });
       expect(result.populate).toEqual({ c: true });
-      expect(result.fields).toEqual([undefined, 'c']);
+      expect(result.fields).toEqual(['c']);
+    });
+  });
+
+  describe('Sanitize Query fields keep only strings', () => {
+    let restrictedSanitizeHelpers: any;
+
+    beforeAll(() => {
+      restrictedSanitizeHelpers = createSanitizeHelpers({
+        action: 'read',
+        model: articleModel.uid,
+        ability: defineAbility((can: any) => can('read', 'api::article.article', ['title'])),
+      });
+    });
+
+    it('removes a field the role cannot read without leaving a hole', async () => {
+      const result = await restrictedSanitizeHelpers.sanitizeQuery(
+        { fields: ['title', 'content'] },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.fields).toEqual(['title']);
+    });
+
+    it('removes a field the role cannot read from a comma separated string', async () => {
+      const result = await restrictedSanitizeHelpers.sanitizeQuery(
+        { fields: 'content,title' },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.fields).toEqual(['title']);
+    });
+
+    it('drops null entries before removing a field the role cannot read', async () => {
+      const result = await restrictedSanitizeHelpers.sanitizeQuery(
+        { fields: [null, 'content', 'title'] },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.fields).toEqual(['title']);
+    });
+
+    it('drops every non-string entry before removing a field the role cannot read', async () => {
+      const result = await restrictedSanitizeHelpers.sanitizeQuery(
+        { fields: [undefined, 1, {}, ['content'], 'content', 'title'] },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.fields).toEqual(['title']);
+    });
+
+    it('drops null entries inside populate before removing a field the role cannot read', async () => {
+      const relatedSanitizeHelpers = createSanitizeHelpers({
+        action: 'read',
+        model: articleModel.uid,
+        ability: defineAbility((can: any) =>
+          can('read', 'api::article.article', ['title', 'related'])
+        ),
+      });
+
+      const result: any = await relatedSanitizeHelpers.sanitizeQuery(
+        { populate: { related: { fields: [null, 'content', 'title'] } } },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.populate.related.fields).toEqual(['title']);
+    });
+
+    it('returns an empty array when every requested field is removed', async () => {
+      const result = await restrictedSanitizeHelpers.sanitizeQuery(
+        { fields: ['content'] },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.fields).toEqual([]);
+    });
+
+    it('removes disallowed fields inside populate without leaving a hole', async () => {
+      const fullReadSanitizeHelpers = createSanitizeHelpers({
+        action: 'read',
+        model: articleModel.uid,
+        ability: defineAbility((can: any) => can('read', 'api::article.article')),
+      });
+
+      const result: any = await fullReadSanitizeHelpers.sanitizeQuery(
+        { populate: { createdBy: { fields: ['password', 'firstname'] } } },
+        { subject: articleModel.uid }
+      );
+
+      expect(result.populate.createdBy.fields).toEqual(['firstname']);
+    });
+  });
+
+  describe('Result types', () => {
+    const createFooHelpers = () =>
+      createSanitizeHelpers({
+        action: 'read',
+        model: fooModel.uid,
+        ability: defineAbility((can: any) => can('read', 'api::foo.foo')),
+      });
+
+    it('sanitizeInput and sanitizeOutput keep the type of the data', async () => {
+      const helpers = createFooHelpers();
+      const data = { a: 'Foo', c: 'Bar' };
+
+      const input = helpers.sanitizeInput(data, { subject: fooModel.uid });
+      const output = helpers.sanitizeOutput(data, { subject: fooModel.uid });
+
+      expectTypeOf(input).toEqualTypeOf<Promise<{ a: string; c: string }>>();
+      expectTypeOf(output).toEqualTypeOf<Promise<{ a: string; c: string }>>();
+      expect(await input).toEqual({ c: 'Bar' });
+      expect(await output).toEqual({ c: 'Bar' });
+    });
+
+    it('sanitizeInput and sanitizeOutput keep the type of an array of data', async () => {
+      const helpers = createFooHelpers();
+      const data = [{ a: 'Foo', c: 'Bar' }];
+
+      const input = helpers.sanitizeInput(data, { subject: fooModel.uid });
+      const output = helpers.sanitizeOutput(data, { subject: fooModel.uid });
+
+      expectTypeOf(input).toEqualTypeOf<Promise<{ a: string; c: string }[]>>();
+      expectTypeOf(output).toEqualTypeOf<Promise<{ a: string; c: string }[]>>();
+      expect(await input).toEqual([{ c: 'Bar' }]);
+      expect(await output).toEqual([{ c: 'Bar' }]);
+    });
+
+    it('sanitizeInput and sanitizeOutput keep unknown data unknown', () => {
+      const helpers = createFooHelpers();
+      const data: unknown = { c: 'Bar' };
+
+      expectTypeOf(helpers.sanitizeInput(data)).toEqualTypeOf<Promise<unknown>>();
+      expectTypeOf(helpers.sanitizeOutput(data)).toEqualTypeOf<Promise<unknown>>();
+    });
+
+    it('sanitizeInput and sanitizeOutput return any for any data', () => {
+      const helpers = createFooHelpers();
+      const data: any = { c: 'Bar' };
+
+      expectTypeOf(helpers.sanitizeInput(data)).toEqualTypeOf<Promise<any>>();
+      expectTypeOf(helpers.sanitizeOutput(data)).toEqualTypeOf<Promise<any>>();
+    });
+
+    it('sanitizeQuery keeps an unknown result', () => {
+      const helpers = createFooHelpers();
+      const query = { filters: { c: 'Bar' } };
+
+      expectTypeOf(helpers.sanitizeQuery(query)).toEqualTypeOf<Promise<unknown>>();
     });
   });
 

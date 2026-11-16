@@ -108,6 +108,32 @@ describe('useFolders', () => {
     });
   });
 
+  test('asks for every folder of the location, never for one page', async () => {
+    let url: URL | undefined;
+
+    server.use(
+      http.get('/upload/folders', ({ request }) => {
+        url = new URL(request.url);
+
+        return HttpResponse.json({ data: [] });
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useFolders({ query: { folder: 1, page: 2, pageSize: 10, sort: 'updatedAt:DESC' } })
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(url?.searchParams.has('page')).toBe(false);
+    expect(url?.searchParams.has('pageSize')).toBe(false);
+    expect(url?.searchParams.has('pagination[pageSize]')).toBe(false);
+    expect(url?.searchParams.get('sort')).toBe('updatedAt:DESC');
+    expect(url?.searchParams.get('filters[$and][0][parent][id]')).toBe('1');
+
+    server.restoreHandlers();
+  });
+
   test('it does not fetch, if enabled is set to false', async () => {
     const { result } = renderHook(() => useFolders({ enabled: false }));
 

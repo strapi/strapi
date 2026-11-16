@@ -794,6 +794,23 @@ describe('AssetDetailsDrawer (controlled)', () => {
     expect(await screen.findByRole('heading', { name: 'other.png' })).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
   });
+
+  // The editor is portaled out of the panel: its Escape is the editor's alone
+  it('closes only the crop editor on Escape, not the drawer', async () => {
+    const onClose = jest.fn();
+    const { user } = render(<AssetDetailsDrawer assetId={1} onClose={onClose} />);
+
+    await user.click(await screen.findByRole('button', { name: 'Crop' }));
+    await screen.findByRole('button', { name: 'Apply' });
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument()
+    );
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
 });
 
 /* -------------------------------------------------------------------------------------------------

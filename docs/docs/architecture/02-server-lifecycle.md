@@ -5,6 +5,7 @@ status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - The statement that plugin modules and API modules have no guaranteed relative order comes from reading `loadApplicationContext` (`Promise.all`). No test confirms it.
+  - Destroy leaves the service container in place. A second call waits for an in-flight shutdown and returns immediately after it succeeds. A failed shutdown can be retried from the step that did not finish. The API test helper clears the container after destroy succeeds.
 ---
 
 This page describes the boot sequence of the server runtime in `@strapi/core`. Read it before you add code to an internal provider, a loader, or a `register` or `bootstrap` function.
@@ -131,7 +132,7 @@ Module `bootstrap` runs before provider `bootstrap`. Thus, when a plugin `bootst
 
 `strapi.start()` calls `load()` if `strapi.isLoaded` is `false`. Then it calls `listen()`. `listen()` uses `server.socket` if it is set. Otherwise it uses `server.host` and `server.port`.
 
-After the server listens, `postListen()` logs the startup message and sends the `didStartServer` telemetry event without awaiting it. In development, it opens the admin panel in a browser, unless `admin.autoOpen` is `false` or an admin user already exists.
+After the server listens, `postListen()` logs the startup message and sends the `didStartServer` telemetry event without awaiting it. In development, `openAdmin()` opens the admin panel in a browser. Without `strapi develop --open` or `--no-open`, it opens only when no admin user exists and `admin.autoOpen` is not `false`. `--open` opens it when the first worker starts. Workers forked after a reload use the default behaviour, so once an admin user exists a reload opens no new tab, while a restart with no admin user still opens one. A worker that failed before its server listened does not count as a start, and the worker that replaces it keeps `--open`. `--no-open` never opens it, including on restarts. The flag reaches `openAdmin()` through the `open` option of `createStrapi()`, not through the app config. The Vite dev server runs in middleware mode, so it never opens a browser.
 
 If `start()` catches an error, it calls `stopWithError()`. This logs the error and calls `stop()`. `stop()` calls `destroy()` without awaiting it, sends `stop` to the parent process when `autoReload` is on, and calls `process.exit(1)`.
 
@@ -147,14 +148,17 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 6. `db.destroy()`.
 7. `process.removeAllListeners()`.
 8. `delete global.strapi`. This lets a test create a new instance.
+9. The shutdown message is logged. The service container stays registered. API tests keep the instance, and the test helper clears the container after `destroy()` succeeds so the process can collect those services.
 
-`destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
+A second `destroy()` waits for the shutdown already in progress. After that shutdown succeeds, another `destroy()` returns immediately. If shutdown throws, a later `destroy()` continues from the step that failed, so a closed database is not skipped. `destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
+
+`strapi develop` also calls `destroy()` in its worker when a step fails after `load()`, for example a TypeScript compile error. The worker stays alive and keeps watching files. Step 7 removed the `disconnect` listener that the `node:cluster` module adds to make a worker exit when its primary goes away, so develop adds it back. See [develop](../packages/core/strapi/commands/02-develop.md).
 
 `destroy()` can run on an instance that did not finish `load()`. For example, `strapi build` and `strapi develop --no-watch-admin` create an instance only to read the configuration, and a signal can arrive during `load()`. A provider `destroy` must not assume that its `register` ran.
 
 ## Idempotency guards
 
-- Each module records which lifecycle functions ran. A second call to `register`, `bootstrap` or `destroy` on the same module throws, for example `Register for plugin::i18n has already been called`.
+- Each module records which lifecycle functions finished. A second call to `register` or `bootstrap` throws, for example `Register for plugin::i18n has already been called`. A second `destroy` throws when the first one finished. A `destroy` that threw is not recorded, so the next shutdown runs that module again and skips modules that already finished.
 - `start()` skips `load()` when `isLoaded` is `true`. `load()` has no guard of its own. A second `load()` throws from the module guards.
 - The `modules`, `plugins` and `apis` registries throw when a name is added twice.
 - Provider functions have no guard.

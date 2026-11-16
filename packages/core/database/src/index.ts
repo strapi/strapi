@@ -18,6 +18,32 @@ import { createRepairManager, type RepairManager } from './repairs';
 import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
 import { withStrapiKnexLog } from './utils/knex-log';
 
+/**
+ * Commit and rollback hooks run after the transaction has already settled.
+ * Log a useful message for Error instances and for thrown non-errors.
+ */
+const formatHookError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  try {
+    const serialized = JSON.stringify(error);
+    return typeof serialized === 'string' ? serialized : '';
+  } catch {
+    // Circular values have no JSON form.
+    return 'Unserializable value';
+  }
+};
+
+/** Drivers and hooks can reject with any value. Callers receive an Error. */
+const asThrownError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error));
+
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
@@ -53,6 +79,14 @@ interface Settings {
    * read as false.
    */
   poolTimeoutDiagnostics?: boolean;
+  /**
+   * Maximum time in milliseconds a query run through the query builder's `execute()` may run
+   * before the database cancels it. Unset by default (no limit). Only applied on clients that
+   * can cancel queries (postgres, mysql); ignored on sqlite. Streams, direct `db.connection`
+   * queries, schema sync, and migrations are not covered. Must be a positive number (for
+   * example `env.int('DATABASE_QUERY_TIMEOUT')`).
+   */
+  queryTimeout?: number;
   migrations: {
     dir: string;
   };
@@ -71,6 +105,24 @@ export interface DatabaseConfig {
   /** Lifecycle phase of the host application, e.g. "boot" or "runtime", for pool timeout reports. */
   getPhase?: () => string | undefined;
 }
+
+const assertValidQueryTimeout = (queryTimeout: unknown) => {
+  if (queryTimeout === undefined) {
+    return;
+  }
+
+  // A string (e.g. a raw `env('DATABASE_QUERY_TIMEOUT')`) would be silently ignored by knex, leaving
+  // users thinking they are protected when they are not
+  if (typeof queryTimeout !== 'number' || !Number.isFinite(queryTimeout) || queryTimeout <= 0) {
+    // JSON.stringify keeps strings quoted ("5000" vs 5000) but turns NaN and Infinity into null
+    const received =
+      typeof queryTimeout === 'string' ? JSON.stringify(queryTimeout) : String(queryTimeout);
+
+    throw new Error(
+      `Invalid database setting "queryTimeout": expected a positive number of milliseconds, received ${received}. Use env.int() when reading it from an environment variable.`
+    );
+  }
+};
 
 const afterCreate =
   (db: Database) =>
@@ -121,6 +173,8 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+
+    assertValidQueryTimeout(this.config.settings.queryTimeout);
 
     this.dialect = getDialect(this);
 
@@ -254,16 +308,25 @@ class Database {
     const trx = notNestedTransaction
       ? await this.startTransaction()
       : (transactionCtx.get() as Knex.Transaction);
+    const logger = this.logger;
 
     async function commit() {
       if (notNestedTransaction) {
-        await transactionCtx.commit(trx);
+        await transactionCtx.commit(trx, (error) => {
+          logger.error(
+            `Commit hook failed after the transaction committed: ${formatHookError(error)}`
+          );
+        });
       }
     }
 
     async function rollback() {
       if (notNestedTransaction) {
-        await transactionCtx.rollback(trx);
+        await transactionCtx.rollback(trx, (error) => {
+          logger.error(
+            `Rollback hook failed after the transaction rolled back: ${formatHookError(error)}`
+          );
+        });
       }
     }
 
@@ -271,23 +334,39 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return await transactionCtx.run(trx, async () => {
-      try {
-        const callbackParams = {
-          trx,
-          commit,
-          rollback,
-          onCommit: transactionCtx.onCommit,
-          onRollback: transactionCtx.onRollback,
-        };
-        const res = await cb(callbackParams);
-        await commit();
-        return res;
-      } catch (error) {
-        await rollback();
-        throw error;
-      }
-    });
+    return await transactionCtx.run(
+      trx,
+      async () => {
+        try {
+          const callbackParams = {
+            trx,
+            commit,
+            rollback,
+            onCommit: transactionCtx.onCommit,
+            onRollback: transactionCtx.onRollback,
+          };
+          const res = await cb(callbackParams);
+          await commit();
+          return res;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      },
+      this
+    );
+  }
+
+  /**
+   * Runs `cb` in a savepoint of the current transaction, so a failure undoes only `cb`'s writes.
+   * If `cb` throws, its writes are rolled back, the `onCommit` callbacks registered in it are
+   * dropped, its `onRollback` callbacks run, and the error is rethrown. The transaction stays
+   * usable, on Postgres also after a database error, but not after a MySQL deadlock, which rolls
+   * back the whole transaction: the savepoint then can't be rolled back to, and it throws an
+   * `errors.SavepointError`, as when it can't be released. Throws if called outside a transaction.
+   */
+  savepoint<T>(cb: () => Promise<T> | T): Promise<T> {
+    return transactionCtx.savepoint(cb);
   }
 
   /**
@@ -352,14 +431,56 @@ class Database {
     return this.entityManager.createQueryBuilder(uid);
   }
 
+  /**
+   * Wait for `onCommit` and `onRollback` hooks still running on this database.
+   * The transaction call itself does not wait, so a test that reads a hook's
+   * side effect does. `destroy()` stops waiting after 10 seconds.
+   */
+  settleTransactionHooks(timeoutMs?: number) {
+    return transactionCtx.settleHooks(this, timeoutMs);
+  }
+
   async destroy() {
+    // A commit hook can still write. Timestamp and model subscribers have to
+    // stay registered until that write finishes. Clearing them first stores
+    // the row with NULL createdAt and updatedAt.
+    let drained = true;
+    let settleError: unknown;
+    let failedToSettle = false;
+    try {
+      drained = await this.settleTransactionHooks();
+    } catch (error) {
+      failedToSettle = true;
+      settleError = error;
+    }
+
     try {
       await this.lifecycles.clear();
     } finally {
       this.poolDiagnostics?.dispose();
     }
 
-    await this.connection.destroy();
+    // Close the pool before reporting a drain failure. Throwing from `finally`
+    // hides a close failure, and lint rejects that throw.
+    let closeError: unknown;
+    let failedToClose = false;
+    try {
+      if (!drained) {
+        this.logger.warn('Closing the database connection with transaction hooks still running');
+      }
+      await this.connection.destroy();
+    } catch (error) {
+      failedToClose = true;
+      closeError = error;
+    }
+
+    if (failedToSettle) {
+      throw asThrownError(settleError);
+    }
+
+    if (failedToClose) {
+      throw asThrownError(closeError);
+    }
   }
 }
 

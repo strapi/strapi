@@ -1,4 +1,5 @@
 export { openBrowser } from './open-browser';
+export { shouldOpenAdmin } from './should-open-admin';
 export { isInitialized } from './is-initialized';
 export { getDirs } from '../configuration/get-dirs';
 export { ee } from './ee';

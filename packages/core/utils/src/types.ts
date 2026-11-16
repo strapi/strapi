@@ -9,6 +9,16 @@ export type Data = {
   [key: string]: string | number | ID | boolean | null | undefined | Date | Data | Data[];
 };
 
+/**
+ * A document or component entry as traversal sees it. Values are `unknown`: traversal reads
+ * only the keys that the schema describes and leaves every other value untouched.
+ */
+export type Entry = {
+  __type?: string;
+  __component?: string;
+  [key: string]: unknown;
+};
+
 export type Config = Record<string, unknown>;
 
 export interface RelationOrderingOptions {
