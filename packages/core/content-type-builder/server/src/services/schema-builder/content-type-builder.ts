@@ -106,6 +106,31 @@ const isOtherSide = ({
 };
 
 /**
+ * Reads a relation sent in the stored format (`inversedBy` or `mappedBy`, no `targetAttribute`)
+ * as the admin sends it (`targetAttribute`), so that the edit compares and rebuilds its other
+ * side. `convertAttribute` then writes `inversedBy` or `mappedBy` for the relation kind.
+ */
+const toTargetAttributeFormat = (attribute: InternalAttribute): InternalAttribute => {
+  if (isRelation(attribute) === false) {
+    return attribute;
+  }
+
+  const { inversedBy, mappedBy, ...relation } = attribute as InternalRelationAttribute;
+
+  if (relation.targetAttribute !== undefined) {
+    return attribute;
+  }
+
+  const targetAttribute = inversedBy || mappedBy;
+
+  if (_.isNil(targetAttribute)) {
+    return attribute;
+  }
+
+  return { ...relation, targetAttribute };
+};
+
+/**
  * Maps each attribute name produced by this save's rename hops to the name it
  * had before the save, by folding the hops in order (`a -> tmp, tmp -> b`
  * gives `b -> a`).
@@ -342,7 +367,12 @@ export default function createComponentBuilder() {
 
       const oldAttributes = contentType.schema.attributes;
 
-      const newAttributes = _.omitBy(infos.attributes, (attr, key) => {
+      const attributes: typeof infos.attributes = _.mapValues(
+        infos.attributes as Record<string, InternalAttribute>,
+        toTargetAttributeFormat
+      );
+
+      const newAttributes = _.omitBy(attributes, (attr, key) => {
         return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
       });
 

@@ -667,6 +667,105 @@ describe('content-type-builder editContentType with retargeted relations', () =>
       expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
     });
 
+    describe('with a body in the stored format (inversedBy or mappedBy, no targetAttribute)', () => {
+      const otherKind = kind === 'manyToMany' ? 'oneToOne' : 'manyToMany';
+      const inverseOf: Record<string, string> = {
+        manyToOne: 'oneToMany',
+        oneToOne: 'oneToOne',
+        manyToMany: 'manyToMany',
+      };
+
+      it('rebuilds the counterpart when the relation kind changes', () => {
+        const { contentTypes } = (global as any).strapi;
+        Object.assign(contentTypes[shelfUid].__schema__.attributes.books, {
+          private: true,
+          required: true,
+        });
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: {
+                type: 'relation',
+                relation: otherKind,
+                target: shelfUid,
+                inversedBy: 'books',
+              },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({ relation: otherKind });
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({
+          relation: inverseOf[otherKind],
+          private: true,
+          required: true,
+        });
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('writes only mappedBy when the kind change makes the owner a oneToMany inverse side', () => {
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: {
+                type: 'relation',
+                relation: 'oneToMany',
+                target: shelfUid,
+                inversedBy: 'books',
+              },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({
+          relation: 'oneToMany',
+          mappedBy: 'books',
+        });
+        expect(attributesOf(builder, bookUid).shelf).not.toHaveProperty('inversedBy');
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({ relation: 'manyToOne' });
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('keeps the pair when the owner is saved unchanged', () => {
+        const { contentTypes } = (global as any).strapi;
+        const books = contentTypes[shelfUid].__schema__.attributes.books;
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: { type: 'relation', relation: kind, target: shelfUid, inversedBy: 'books' },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, shelfUid).books).toMatchObject(books);
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('keeps the owner when the inverse side is saved unchanged', () => {
+        const { contentTypes } = (global as any).strapi;
+        const shelf = contentTypes[bookUid].__schema__.attributes.shelf;
+        const books = { ...contentTypes[shelfUid].__schema__.attributes.books, visible: false };
+        contentTypes[shelfUid].__schema__.attributes.books = books;
+
+        const builder = editAll(
+          { [shelfUid]: { name: { type: 'string' }, books, label: { type: 'string' } } },
+          [shelfUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject(shelf);
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({ visible: false });
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+    });
+
     describe('with a body in the format of the GET response of the single-type route', () => {
       // That body has the stored inversedBy or mappedBy next to targetAttribute
       it('renames the counterpart', () => {
