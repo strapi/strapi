@@ -25,10 +25,7 @@ const isProjectUsage = (value: unknown): value is ProjectUsage => {
   );
 };
 
-/**
- * Last license usage the license registry reported, stored by the online license check (see
- * `onlineUpdate` in @strapi/core's ee module). Null when nothing usable is stored.
- */
+/** Usage stored by the online license check (`onlineUpdate` in @strapi/core). */
 const getStoredProjectUsage = async (): Promise<ProjectUsage | null> => {
   try {
     const stored = await strapi.store.get({ type: 'ee', key: 'license_usage' });
@@ -155,8 +152,7 @@ export default {
     // came with it) stored by an earlier online run says nothing about its current state.
     const registryState = licenseMode === 'online' ? eeInformation : null;
 
-    // Counted by the license registry across every environment of the project. Offline licenses
-    // never report to the registry, so a usage stored by an earlier online run does not apply.
+    // Offline licenses don't report usage
     const projectUsage = licenseMode === 'online' ? await getStoredProjectUsage() : null;
 
     const data: GetLicenseLimitInformation.Response['data'] = {

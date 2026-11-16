@@ -13,10 +13,7 @@ import type { GetLicenseLimitInformation } from '../../../../../../../../shared/
 
 type ProjectUsage = NonNullable<GetLicenseLimitInformation.Response['data']['projectUsage']>;
 
-/**
- * Active admin users counted by the license registry across every environment of the project.
- * Informational only: being over the contracted number blocks nothing.
- */
+/** Active admin users the license registry counted across all instances. Information only. */
 const ProjectUsageInfo = ({ usage }: { usage: ProjectUsage }) => {
   const { formatMessage, formatDate } = useIntl();
   const { activeUsers, contractedUsers, updatedAt } = usage;
@@ -110,7 +107,6 @@ export const AdminSeatInfoEE = () => {
   return (
     <Flex direction="column" alignItems="start" gap={4}>
       {seatLimit ? (
-        // This instance's seats: the limit enforced when creating or re-activating users
         <Flex direction="column" alignItems="start" gap={2}>
           <Typography variant="sigma" textColor="neutral600">
             {formatMessage({
@@ -154,7 +150,6 @@ export const AdminSeatInfoEE = () => {
           </Flex>
         </Flex>
       ) : null}
-      {/* Across every environment, counted by the license registry: information only */}
       {projectUsage ? <ProjectUsageInfo usage={projectUsage} /> : null}
     </Flex>
   );

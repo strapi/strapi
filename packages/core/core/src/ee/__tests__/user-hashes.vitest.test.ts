@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { describe, it, expect, vi } from 'vitest';
 
-import { MAX_USER_HASHES, computeUserHashes, getUserHashes, hashAdminEmail } from '../user-hashes';
+import { MAX_USER_HASHES, getUserHashes, hashAdminEmail } from '../user-hashes';
 
 const LICENSE_KEY = 'the-license-key';
 
@@ -36,11 +36,11 @@ describe('hashAdminEmail', () => {
   });
 });
 
-describe('computeUserHashes', () => {
+describe('getUserHashes', () => {
   it('reads only the email of active admin users', async () => {
     const { strapi, query } = createStrapi(async () => []);
 
-    await computeUserHashes(strapi, LICENSE_KEY);
+    await getUserHashes(strapi, LICENSE_KEY);
 
     expect(query).toHaveBeenCalledWith('admin::user');
     const findMany = query.mock.results[0].value.findMany;
@@ -56,7 +56,7 @@ describe('computeUserHashes', () => {
       { email: 'b@example.com' },
     ]);
 
-    const hashes = await computeUserHashes(strapi, LICENSE_KEY);
+    const hashes = await getUserHashes(strapi, LICENSE_KEY);
 
     expect(hashes).toEqual([expectedHash('a@example.com'), expectedHash('b@example.com')]);
   });
@@ -69,7 +69,7 @@ describe('computeUserHashes', () => {
       { email: 'a@example.com' },
     ]);
 
-    expect(await computeUserHashes(strapi, LICENSE_KEY)).toEqual([expectedHash('a@example.com')]);
+    expect(await getUserHashes(strapi, LICENSE_KEY)).toEqual([expectedHash('a@example.com')]);
   });
 
   it(`caps the list at ${MAX_USER_HASHES} hashes`, async () => {
@@ -78,26 +78,10 @@ describe('computeUserHashes', () => {
     }));
     const { strapi } = createStrapi(async () => users);
 
-    const hashes = await computeUserHashes(strapi, LICENSE_KEY);
+    const hashes = await getUserHashes(strapi, LICENSE_KEY);
 
     expect(hashes).toHaveLength(MAX_USER_HASHES);
-    expect(hashes[0]).toBe(expectedHash('user-0@example.com'));
-  });
-
-  it('throws when the users cannot be read', async () => {
-    const { strapi } = createStrapi(async () => {
-      throw new Error('db down');
-    });
-
-    await expect(computeUserHashes(strapi, LICENSE_KEY)).rejects.toThrow('db down');
-  });
-});
-
-describe('getUserHashes', () => {
-  it('returns the hashes', async () => {
-    const { strapi } = createStrapi(async () => [{ email: 'a@example.com' }]);
-
-    expect(await getUserHashes(strapi, LICENSE_KEY)).toEqual([expectedHash('a@example.com')]);
+    expect(hashes?.[0]).toBe(expectedHash('user-0@example.com'));
   });
 
   it('logs a warning and returns undefined instead of throwing', async () => {
