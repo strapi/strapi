@@ -172,7 +172,8 @@ describe('Settings', () => {
         data: {
           sizeOptimization: true,
           responsiveDimensions: true,
-          // Omitted from the body, so the schema default is stored.
+          // Omitted from the body, so the schema defaults are stored.
+          autoOrientation: false,
           aiMetadata: true,
         },
       });
@@ -184,12 +185,38 @@ describe('Settings', () => {
         data: {
           sizeOptimization: true,
           responsiveDimensions: true,
+          autoOrientation: false,
           aiMetadata: true,
           aiMetadataAvailable: false,
           // Read-only echo of the app config, appended to every GET response.
           concurrentUploadRequests: 1,
         },
       });
+    });
+
+    test('resets an omitted autoOrientation to false over a stored true', async () => {
+      const enableRes = await rq({
+        method: 'PUT',
+        url: '/upload/settings',
+        body: { sizeOptimization: true, responsiveDimensions: true, autoOrientation: true },
+      });
+
+      expect(enableRes.statusCode).toBe(200);
+      expect(enableRes.body.data.autoOrientation).toBe(true);
+
+      const updateRes = await rq({
+        method: 'PUT',
+        url: '/upload/settings',
+        body: { sizeOptimization: true, responsiveDimensions: true },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data.autoOrientation).toBe(false);
+
+      const getRes = await rq({ method: 'GET', url: '/upload/settings' });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body.data.autoOrientation).toBe(false);
     });
 
     test('strips the read-only concurrentUploadRequests echo from a PUT instead of persisting it', async () => {
