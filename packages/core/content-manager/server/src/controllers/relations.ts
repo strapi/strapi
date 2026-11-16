@@ -1,7 +1,7 @@
 import { property, uniq, uniqBy, concat, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
-import type { Core, Data, Modules, UID } from '@strapi/types';
+import type { Core, Data, Modules, Schema, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -171,16 +171,17 @@ export default {
       throw new errors.ValidationError(`The model ${model} doesn't exist`);
     }
 
-    const attribute: any = sourceSchema.attributes[targetField];
+    // Without strict types, the published `attribute` stays develop's `any`
+    const attribute: Core.IsStrict extends true ? Schema.Attribute.AnyAttribute : any =
+      sourceSchema.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
       throw new errors.ValidationError(
         `The relational field ${targetField} doesn't exist on ${model}`
       );
     }
 
-    // Morph-to relations (morphToOne, morphToMany) have no single target model.
-    // `attribute` is still `any` here: the `in` check prepares the narrowing for the strict types
-    // branch, where `attribute` is typed and only the relations that declare a target pass it.
+    // Morph-to relations (morphToOne, morphToMany) have no single target model. With strict types,
+    // the `in` check narrows `attribute` to the relations that declare a target.
     if (!('target' in attribute) || attribute.target === undefined) {
       throw new errors.ValidationError(
         `The relational field ${targetField} on ${model} has no target model`
