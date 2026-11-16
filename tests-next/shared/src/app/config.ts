@@ -55,7 +55,8 @@ export const inheritedEnv = (): NodeJS.ProcessEnv => {
 
 /**
  * Env every test app (and app generation) runs with, on top of `inheritedEnv()` and the
- * caller's env.
+ * caller's env. The database env comes from the `database` option of `startServer` and
+ * `seedApp` (see app/env.ts and db/database.ts).
  */
 export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
