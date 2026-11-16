@@ -142,6 +142,11 @@ const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolea
 };
 
 // "in 2 days" reads "In 2 days": `capitalize` would also write "Days"
+const NameLink = styled(Link)`
+  display: block;
+  max-width: 100%;
+`;
+
 const SentenceCase = styled(Typography)`
   display: inline-block;
 
@@ -530,16 +535,20 @@ const ReleasesTable = ({
                 onClick={() => navigate(`${release.id}`)}
               >
                 <Table.Cell width="30%" maxWidth="30rem">
-                  <Link
+                  <NameLink
                     tag={NavLink}
                     to={`${release.id}`}
                     isExternal={false}
                     onClick={(e: React.MouseEvent) => e.stopPropagation()}
                   >
-                    <Typography textColor={isPast ? 'neutral600' : 'neutral800'} ellipsis>
+                    <Typography
+                      textColor={isPast ? 'neutral600' : 'neutral800'}
+                      ellipsis
+                      title={release.name}
+                    >
                       {release.name}
                     </Typography>
-                  </Link>
+                  </NameLink>
                 </Table.Cell>
                 <Table.Cell>
                   <ReleaseStatusBadge status={release.status} />
