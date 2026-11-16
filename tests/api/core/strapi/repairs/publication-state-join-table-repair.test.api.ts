@@ -348,7 +348,7 @@ describe('publication-state join-table repair', () => {
       tag.draft.id
     );
 
-    await strapi.store.delete({ type: 'strapi', key: 'unidirectional-join-table-repair-ran' });
+    await strapi.store.delete({ type: 'strapi', key: 'unidirectional-join-table-repair-ran-v2' });
     await strapi.destroy();
     strapi = await createStrapiInstance({ logLevel: 'error' });
 
@@ -360,7 +360,7 @@ describe('publication-state join-table repair', () => {
       )
     ).toEqual([tag.published.id]);
     await expect(
-      strapi.store.get({ type: 'strapi', key: 'unidirectional-join-table-repair-ran' })
+      strapi.store.get({ type: 'strapi', key: 'unidirectional-join-table-repair-ran-v2' })
     ).resolves.toBe(true);
   });
 });

@@ -510,16 +510,18 @@ class Strapi extends Container implements Core.Strapi {
       await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
     }
 
+    // v2: the first version of this repair deleted the published-target row for published
+    // sources. Projects that already ran it run the fixed version once more.
     const alreadyRanComponentRepair = await this.store.get({
       type: 'strapi',
-      key: 'unidirectional-join-table-repair-ran',
+      key: 'unidirectional-join-table-repair-ran-v2',
     });
 
     if (!alreadyRanComponentRepair) {
       await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable(this));
       await this.store.set({
         type: 'strapi',
-        key: 'unidirectional-join-table-repair-ran',
+        key: 'unidirectional-join-table-repair-ran-v2',
         value: true,
       });
     }
