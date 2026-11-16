@@ -144,6 +144,20 @@ export const stopAllServers = async () => {
 };
 
 /**
+ * The env of the runner, without its `DATABASE_*` variables: `databaseEnv` doesn't set every one
+ * of them (`DATABASE_URL`, for example, would override the host and database on Postgres).
+ */
+const inheritedEnv = (): NodeJS.ProcessEnv => {
+  const env = { ...process.env };
+  for (const key of Object.keys(env)) {
+    if (key.startsWith('DATABASE_')) {
+      delete env[key];
+    }
+  }
+  return env;
+};
+
+/**
  * Start a test app with `strapi develop --no-watch-admin --no-build-admin`.
  *
  * Ready means `/_health` answers 204 while the process is still alive. If the process can't
@@ -185,7 +199,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
   const child = spawn(process.execPath, [path.join(__dirname, 'serve.cjs'), strapiBin(), ...args], {
     cwd: app.dir,
     env: {
-      ...process.env,
+      ...inheritedEnv(),
       ...baseEnv(),
       ...databaseEnv(app, database),
       [TEST_PLUGIN_ENV_VAR]: String(testPlugin),

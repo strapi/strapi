@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import {
   appPort,
@@ -47,6 +47,13 @@ afterAll(async () => {
 
 describe(`per-file instance (${database.client})`, () => {
   test('a new instance starts on an empty database', async () => {
+    // From the runner's shell, it would point a Postgres app at another database (or here, at
+    // nothing): the app must only get the database env of `database`.
+    vi.stubEnv('DATABASE_URL', 'postgres://nobody:nothing@127.0.0.1:1/elsewhere');
+    onTestFinished(() => {
+      vi.unstubAllEnvs();
+    });
+
     await resetDatabase(app, database);
     let server = await startServer(app, { port, database });
     expect(await writeProbe(server)).toBe(true);
