@@ -251,7 +251,6 @@ const Providers = ({
   );
 };
 
-// eslint-disable-next-line react/jsx-no-useless-fragment
 const fallbackWrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 export interface RenderOptions {
