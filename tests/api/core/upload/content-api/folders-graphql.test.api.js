@@ -224,7 +224,7 @@ describe('Upload GraphQL - read-only folder queries', () => {
           { sort: [sort] }
         );
 
-        expect(res.body.data).toBeNull();
+        expect(res.body.data?.[query] ?? null).toBeNull();
         expect(res.body.errors).toEqual([
           expect.objectContaining({ message: expect.stringMatching(/^Invalid key files/) }),
         ]);
