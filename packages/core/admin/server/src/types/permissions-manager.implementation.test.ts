@@ -1,4 +1,6 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
+import type { Ability, ForcedSubject } from '@casl/ability';
+import type createPermissionsManager from '../services/permission/permissions-manager';
 import type createSanitizeHelpers from '../services/permission/permissions-manager/sanitize';
 
 type Equal<T, U> =
@@ -42,3 +44,53 @@ export type PermissionsManagerImplementationAssertions = [
     Equal<Parameters<typeof contract.sanitizeQuery>, [query: unknown, options?: SanitizeOptions]>
   >,
 ];
+
+type CreatePermissionsManager =
+  Strapi.Registries.PackageServices['admin::permission']['createPermissionsManager'];
+type ManagerOptions = Parameters<CreatePermissionsManager>[0];
+
+declare const ability: Ability;
+declare const action: string;
+declare const create: CreatePermissionsManager;
+
+// The admin, CM, CR and upload callers: with an action (upload `admin-file.ts:19`) or without one
+// (CM `permission-checker.ts:40`, admin `role.ts:69`).
+const managerWithAction = create({ ability, action, model: 'plugin::upload.file' });
+const managerWithoutAction = create({ ability, model: 'admin::role' });
+
+const subject = managerWithAction.toSubject(article);
+const queryWithFilters = managerWithAction.addPermissionsQueryTo(
+  { limit: 100, filters: { title: 'foo' } },
+  action
+);
+const queryWithoutQuery = managerWithAction.addPermissionsQueryTo();
+
+// With strict types, the registered contract creates a permissions manager from the user's CASL
+// ability, a model UID and an optional action. The manager exposes them as given, tags objects as
+// subjects, and adds the ability's conditions to a copy of the query as its `filters`.
+export type PermissionsManagerContractAssertions = [
+  Expect<Equal<[ManagerOptions['ability']], [Ability]>>,
+  Expect<Equal<[ManagerOptions['model']], [string]>>,
+  Expect<Equal<[ManagerOptions['action']], [string | undefined]>>,
+  Expect<Equal<[typeof managerWithAction.ability], [Ability]>>,
+  Expect<Equal<[typeof managerWithAction.model], [string]>>,
+  Expect<Equal<[typeof managerWithAction.action], [string]>>,
+  Expect<Equal<[typeof managerWithoutAction.action], [undefined]>>,
+  Expect<Equal<[typeof subject], [Article & ForcedSubject<string>]>>,
+  Expect<Equal<[Parameters<typeof managerWithAction.getQuery>], [[queryAction?: string]]>>,
+  Expect<Equal<[typeof queryWithFilters.limit], [number]>>,
+  Expect<Equal<[typeof queryWithFilters.filters], [unknown]>>,
+  Expect<Equal<[typeof queryWithoutQuery.filters], [unknown]>>,
+  Expect<Equal<[Parameters<typeof managerWithAction.validateQuery>[0]], [unknown]>>,
+  Expect<Equal<[Parameters<typeof managerWithAction.validateInput>[0]], [unknown]>>,
+];
+
+// The contract is written, so the compiler does not check it against the implementation. The
+// implementation's manager is assignable to it. Its `ability`, `action`, `model`, `toSubject` and
+// `addPermissionsQueryTo` are `any`, so this only checks the typed members (`isAllowed`,
+// `pickPermittedFieldsOf`, `getQuery`'s result, the sanitizers and the validators' results).
+type ImplementationManager = ReturnType<typeof createPermissionsManager>;
+type ContractManager = ReturnType<CreatePermissionsManager>;
+export type PermissionsManagerImplementationIsAssignable = Expect<
+  [ImplementationManager] extends [ContractManager] ? true : false
+>;

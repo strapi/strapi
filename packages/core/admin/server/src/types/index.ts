@@ -1,3 +1,4 @@
+import type { Ability, ForcedSubject } from '@casl/ability';
 import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
@@ -198,31 +199,71 @@ export type PermissionsManagerSanitizers = {
 
 type PermissionsManagerSanitizerName = keyof PermissionsManagerSanitizers;
 
+/**
+ * What a permissions manager checks against: the user's CASL ability, the model UID, and the action
+ * a check uses when it names none.
+ */
+type PermissionsManagerOptions<TAction extends string | undefined> = {
+  ability: Ability;
+  model: string;
+  action?: TAction;
+};
+
+/** The permissions manager members written for strict types; the others come from the implementation. */
+type StrictPermissionsManagerMembers<TAction extends string | undefined> = {
+  /** The options' ability, action and model, as given. */
+  ability: Ability;
+  action: TAction;
+  model: string;
+  /** Tags `target` in place as a CASL subject of `subjectType`, the manager's model by default. */
+  toSubject<TTarget extends object>(
+    target: TTarget,
+    subjectType?: string
+  ): TTarget & ForcedSubject<string>;
+  /**
+   * The ability's conditions for the action, the manager's action by default, as a query filter.
+   * Throws when neither names an action.
+   */
+  getQuery(queryAction?: string): ReturnType<PermissionsManager['getQuery']>;
+  /**
+   * A copy of the query, `{}` by default, whose `filters` also require the ability's conditions for
+   * the action, the manager's action by default.
+   */
+  addPermissionsQueryTo<TQuery extends object = object>(
+    query?: TQuery,
+    action?: string
+  ): Omit<TQuery, 'filters'> & { filters: unknown };
+  validateQuery(
+    data: unknown,
+    options?: Parameters<PermissionsManager['validateQuery']>[1]
+  ): ReturnType<PermissionsManager['validateQuery']>;
+  validateInput(
+    data: unknown,
+    options?: Parameters<PermissionsManager['validateInput']>[1]
+  ): ReturnType<PermissionsManager['validateInput']>;
+};
+
+type StrictPermissionsManager<TAction extends string | undefined> = Omit<
+  PermissionsManager,
+  keyof StrictPermissionsManagerMembers<TAction> | PermissionsManagerSanitizerName
+> &
+  StrictPermissionsManagerMembers<TAction> &
+  PermissionsManagerSanitizers;
+
 type SectionsBuilder = (typeof PermissionService)['sectionsBuilder'];
 
 /**
  * The `admin::permission` service as runtime calls it. The implementation keeps its published
  * develop signatures: the action provider requires a category, permission queries take two
  * arguments, and section hooks receive no arguments. With strict types, the permissions manager
- * sanitizers resolve to the data they were given, and the providers' `registerMany` resolves to
- * the provider.
+ * is written from its options, its sanitizers resolve to the data they were given, and the
+ * providers' `registerMany` resolves to the provider.
  */
 type PermissionServiceContract = Omit<
   typeof PermissionService,
   'actionProvider' | 'conditionProvider' | 'createPermissionsManager' | 'sectionsBuilder'
 > & {
   conditionProvider: Core.IsStrict extends true ? StrictConditionProvider : ConditionProvider;
-  createPermissionsManager(
-    ...args: Parameters<(typeof PermissionService)['createPermissionsManager']>
-  ): Omit<PermissionsManager, 'addPermissionsQueryTo' | PermissionsManagerSanitizerName> & {
-    /** The query defaults to `{}`, the action to the manager's action. */
-    addPermissionsQueryTo(
-      query?: object,
-      action?: unknown
-    ): ReturnType<PermissionsManager['addPermissionsQueryTo']>;
-  } & (Core.IsStrict extends true
-      ? PermissionsManagerSanitizers
-      : Pick<PermissionsManager, PermissionsManagerSanitizerName>);
   sectionsBuilder: Omit<SectionsBuilder, 'addHandler' | 'addMatcher'> & {
     addHandler(
       sectionName: string,
@@ -241,7 +282,25 @@ type PermissionServiceContract = Omit<
           actionsAttributes: ActionProviderInput[]
         ): ReturnType<ActionProvider['registerMany']>;
       };
-};
+} & (Core.IsStrict extends true
+    ? {
+        createPermissionsManager<TAction extends string | undefined = undefined>(
+          options: PermissionsManagerOptions<TAction>
+        ): StrictPermissionsManager<TAction>;
+      }
+    : {
+        createPermissionsManager(
+          ...args: Parameters<(typeof PermissionService)['createPermissionsManager']>
+        ): Omit<PermissionsManager, 'addPermissionsQueryTo' | PermissionsManagerSanitizerName> & {
+          /** The query defaults to `{}`, the action to the manager's action. */
+          addPermissionsQueryTo(
+            query?: object,
+            action?: unknown
+          ): ReturnType<PermissionsManager['addPermissionsQueryTo']>;
+        } & (Core.IsStrict extends true
+            ? PermissionsManagerSanitizers
+            : Pick<PermissionsManager, PermissionsManagerSanitizerName>);
+      });
 
 /**
  * EE runtime shapes of the admin services that the EE edition extends. EE code runs only with the
