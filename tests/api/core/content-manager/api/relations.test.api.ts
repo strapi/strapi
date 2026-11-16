@@ -1093,113 +1093,121 @@ describe('Relations', () => {
     }
   );
 
-  describe('Connect a new relation and reorder it in the same save (#21828)', () => {
-    test('does not 500 when adding a relation and positioning it among existing ones', async () => {
-      const existing = mapRelationsByMode('docIdObject', [docid1, docid2], [id1, id2]);
+  // Reordering only works with objects, same as the block above.
+  describe.each(testCases.filter(([_name, mode]) => mode !== 'docId'))(
+    'Connect a new relation and reorder it in the same save - %s',
+    (_name, mode) => {
+      test('Connects a new relation and positions it among existing ones', async () => {
+        const existing = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
 
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_mw: { connect: existing },
-          products_om: { connect: existing },
-          myCompo: {
-            compo_products_mw: { connect: existing },
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: existing },
+            products_mm: { connect: existing },
+            products_mw: { connect: existing },
+            myCompo: {
+              compo_products_mw: { connect: existing },
+            },
           },
-        },
-        ['myCompo']
-      );
+          ['myCompo']
+        );
 
-      const connect = [
-        {
-          id: id3,
-          documentId: docid3,
-          position: { before: docid2 },
-        },
-        {
-          id: id1,
-          documentId: docid1,
-          position: { start: true },
-        },
-      ];
+        const connect =
+          mode === 'idObject'
+            ? [
+                { id: id3, position: { before: id2 } },
+                { id: id1, position: { start: true } },
+              ]
+            : [
+                { documentId: docid3, position: { before: docid2 } },
+                { documentId: docid1, position: { start: true } },
+              ];
 
-      const updatedEntry = await updateEntry(
-        'shop',
-        createdShop.data.documentId,
-        {
-          name: 'Cazotte Shop',
-          products_mw: { connect },
-          products_om: { connect },
-          myCompo: {
-            id: createdShop.data.myCompo.id,
-            compo_products_mw: { connect },
+        const updatedEntry = await updateEntry(
+          'shop',
+          createdShop.data.documentId,
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect },
+            products_mm: { connect },
+            products_mw: { connect },
+            myCompo: {
+              id: createdShop.data.myCompo.id,
+              compo_products_mw: { connect },
+            },
           },
-        },
-        populateShop
-      );
+          populateShop
+        );
 
-      expect(updatedEntry.error).toBeUndefined();
-      expect(updatedEntry.data).toBeDefined();
+        expect(updatedEntry.error).toBeUndefined();
+        expect(updatedEntry.data).toBeDefined();
 
-      const updatedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
 
-      const expected = [{ documentId: docid1 }, { documentId: docid3 }, { documentId: docid2 }];
-      expect(updatedShop.products_mw).toMatchObject(expected);
-      expect(updatedShop.products_om).toMatchObject(expected);
-      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expected);
-    });
+        const expected = [{ documentId: docid1 }, { documentId: docid3 }, { documentId: docid2 }];
+        expect(updatedShop.products_om).toMatchObject(expected);
+        expect(updatedShop.products_mm).toMatchObject(expected);
+        expect(updatedShop.products_mw).toMatchObject(expected);
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expected);
+      });
 
-    test('does not 500 when the new relation is moved before the first existing one', async () => {
-      const existing = mapRelationsByMode('docIdObject', [docid1, docid2], [id1, id2]);
+      test('Connects a new relation at the start of the list', async () => {
+        const existing = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
 
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_mw: { connect: existing },
-          myCompo: {
-            compo_products_mw: { connect: existing },
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: existing },
+            products_mm: { connect: existing },
+            products_mw: { connect: existing },
+            myCompo: {
+              compo_products_mw: { connect: existing },
+            },
           },
-        },
-        ['myCompo']
-      );
+          ['myCompo']
+        );
 
-      const connect = [
-        {
-          id: id3,
-          documentId: docid3,
-          position: { before: docid1 },
-        },
-      ];
+        const connect =
+          mode === 'idObject'
+            ? [{ id: id3, position: { start: true } }]
+            : [{ documentId: docid3, position: { start: true } }];
 
-      const updatedEntry = await updateEntry(
-        'shop',
-        createdShop.data.documentId,
-        {
-          name: 'Cazotte Shop',
-          products_mw: { connect },
-          myCompo: {
-            id: createdShop.data.myCompo.id,
-            compo_products_mw: { connect },
+        const updatedEntry = await updateEntry(
+          'shop',
+          createdShop.data.documentId,
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect },
+            products_mm: { connect },
+            products_mw: { connect },
+            myCompo: {
+              id: createdShop.data.myCompo.id,
+              compo_products_mw: { connect },
+            },
           },
-        },
-        populateShop
-      );
+          populateShop
+        );
 
-      expect(updatedEntry.error).toBeUndefined();
-      expect(updatedEntry.data).toBeDefined();
+        expect(updatedEntry.error).toBeUndefined();
+        expect(updatedEntry.data).toBeDefined();
 
-      const updatedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
 
-      const expected = [{ documentId: docid3 }, { documentId: docid1 }, { documentId: docid2 }];
-      expect(updatedShop.products_mw).toMatchObject(expected);
-      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expected);
-    });
-  });
+        const expected = [{ documentId: docid3 }, { documentId: docid1 }, { documentId: docid2 }];
+        expect(updatedShop.products_om).toMatchObject(expected);
+        expect(updatedShop.products_mm).toMatchObject(expected);
+        expect(updatedShop.products_mw).toMatchObject(expected);
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expected);
+      });
+    }
+  );
 
   describe('Disconnect entity relations', () => {
     describe.each(testCases)('ids being %s', (name, mode) => {
