@@ -29,6 +29,17 @@ export type PaginatedResult = {
   };
 };
 
+/**
+ * Populate fragment for the loaded relation, plus the page to load. Required, since the
+ * page defaults are read from it.
+ */
+export type LoadPagesParams = Pick<
+  Params,
+  'select' | 'where' | 'filters' | 'populate' | 'orderBy' | 'page' | 'pageSize'
+> & {
+  ordering?: 'asc' | 'desc';
+};
+
 export type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
 
 export interface Repository {
@@ -51,7 +62,7 @@ export interface Repository {
   loadPages<TField extends string = string>(
     entity: any,
     field: TField,
-    populate?: Params['populate']
+    params: LoadPagesParams
   ): Promise<PaginatedResult>;
 }
 
