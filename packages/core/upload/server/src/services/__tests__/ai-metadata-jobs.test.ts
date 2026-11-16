@@ -236,10 +236,12 @@ describe('AI metadata jobs service', () => {
       expect(await service.getJob(jobId)).toMatchObject({ status: 'failed' });
     });
 
-    it('stores the heartbeat as epoch milliseconds, which no time zone or DST change shifts', async () => {
-      // Europe/Paris falls back at 01:00 UTC: 02:00:50 local comes after 02:59:00 local. A
-      // timestamp without time zone stores local wall time on Postgres and MySQL, so a heartbeat
-      // written then compared as older than the cutoff two minutes earlier.
+    it('stores the heartbeat in an integer column, as epoch milliseconds', async () => {
+      // Postgres and MySQL store a `datetime` as local wall time, which a DST change shifts. SQLite
+      // binds a `datetime` as epoch milliseconds too, so only the column type shows the difference
+      // here; the `/latest` API test, run on every database in Europe/Paris, covers the DST change.
+      expect(aiMetadataJob.attributes.heartbeatAtMs).toMatchObject({ type: 'biginteger' });
+
       jest.setSystemTime(new Date('2026-10-25T01:00:50Z'));
       const jobId = await service.createJob();
 
@@ -253,6 +255,27 @@ describe('AI metadata jobs service', () => {
       await service.failInterruptedJobs();
 
       expect(await service.getJob(jobId)).toMatchObject({ status: 'processing' });
+    });
+
+    it('logs the job and the cause when a heartbeat cannot be written', async () => {
+      const warn = jest.fn();
+      const writeError = new Error('connection lost');
+      const failingServer = createAIMetadataJobsService({
+        strapi: {
+          db: { query: () => ({ updateMany: jest.fn().mockRejectedValue(writeError) }) },
+          log: { warn },
+        } as any,
+      });
+
+      failingServer.startHeartbeat(42);
+      await jest.advanceTimersByTimeAsync(AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS);
+      failingServer.stopHeartbeat(42);
+
+      // The default log format prints the message but drops other metadata
+      expect(warn).toHaveBeenCalledWith(
+        'Could not write the heartbeat of AI metadata job 42',
+        expect.objectContaining({ message: 'connection lost', jobId: 42, error: writeError })
+      );
     });
 
     it('never fails a job this process runs, even when its heartbeat writes stop landing', async () => {

@@ -35,9 +35,12 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
         data: { heartbeatAtMs: Date.now() },
       });
     } catch (error) {
-      strapi.log.warn('Could not write the heartbeat of an AI metadata job', {
+      // The default log format prints the message but drops other metadata: the job id goes in
+      // the text, and the cause in `message`, which is appended to it
+      strapi.log.warn(`Could not write the heartbeat of AI metadata job ${jobId}`, {
+        message: error instanceof Error ? error.message : String(error),
         jobId,
-        error: error instanceof Error ? error.message : String(error),
+        error,
       });
     }
   };
