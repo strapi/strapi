@@ -1,6 +1,7 @@
 import _, { castArray, toNumber } from 'lodash';
 
 import { arrays, errors } from '@strapi/utils';
+import type { Core, Data } from '@strapi/types';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
 import constants from '../../../../server/src/services/constants';
 import type { AdminRoleWithUsersCount } from '../../../../server/src/services/role';
@@ -11,7 +12,10 @@ import {
   touchesTrackedFields,
 } from '../../../../server/src/audit-logs/admin-users';
 import { getService } from '../utils';
-import type { SanitizedAdminUser } from '../../../../shared/contracts/shared';
+import type {
+  AdminUserUpdatePayload,
+  SanitizedAdminUser,
+} from '../../../../shared/contracts/shared';
 
 const { ApplicationError, ValidationError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
@@ -41,7 +45,10 @@ const getSessionManager = () => {
  * @param {string} id
  * @param {object} input
  */
-const updateEEDisabledUsersList = async (id: string, input: any) => {
+const updateEEDisabledUsersList = async (
+  id: Core.IsStrict extends true ? Data.ID : string,
+  input: Core.IsStrict extends true ? Partial<AdminUserUpdatePayload> : any
+) => {
   const disabledUsers = await getService('seat-enforcement').getDisabledUserList();
 
   if (!disabledUsers) {
@@ -93,7 +100,7 @@ const removeFromEEDisabledUsersList = async (ids: unknown) => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const updateById = async (id: any, attributes: any) => {
+const updateById = async (id: Core.IsStrict extends true ? Data.ID : any, attributes: any) => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
@@ -202,7 +209,7 @@ const deleteById = async (id: unknown) => {
  * @param ids ids of the users to delete
  * @returns {Promise<user>}
  */
-const deleteByIds = async (ids: any) => {
+const deleteByIds = async (ids: Core.IsStrict extends true ? (string | number)[] : any) => {
   // Check at least one super admin remains
   const superAdminRole = await getSuperAdminRoleOrThrow();
   const nbOfSuperAdminToDelete = await strapi.db.query('admin::user').count({

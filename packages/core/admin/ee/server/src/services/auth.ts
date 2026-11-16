@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 import { isSsoLocked } from '../utils/sso-lock';
 import type { EmailService } from '../../../../server/src/types/plugin-services';
 import {
@@ -15,8 +16,11 @@ const { ApplicationError } = errors;
  *
  * @param {Object} param params
  * @param {string} param.email user email for which to reset the password
+ * @returns `sendTemplatedEmail`'s result, written out so its gate reaches the emitted declaration
  */
-const forgotPassword = async ({ email }: any = {}) => {
+const forgotPassword = async ({ email }: any = {}): Promise<
+  Core.IsStrict extends true ? unknown : any
+> => {
   const user = await strapi.db.query('admin::user').findOne({ where: { email, isActive: true } });
 
   if (!user || (await isSsoLocked(user))) {
