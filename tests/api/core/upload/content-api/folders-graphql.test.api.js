@@ -204,6 +204,33 @@ describe('Upload GraphQL - read-only folder queries', () => {
       expect(fields.filter((name) => /^(files|children|pathId)/.test(name))).toEqual([]);
     });
 
+    test.each([
+      ['uploadFolders', 'files.name'],
+      ['uploadFolders', 'children.files.name:desc'],
+      ['uploadFolders_connection', 'parent.files.name'],
+    ])('%s cannot sort folders by their files (%s)', async (query, sort) => {
+      const gqlReadOnly = await createTokenGraphQLRequest({ type: 'read-only' });
+      const selection = query === 'uploadFolders' ? 'name' : 'nodes { name }';
+
+      for (const gql of [gqlFullAccess, gqlReadOnly]) {
+        const res = await gql(
+          /* GraphQL */ `
+            query sortFolders($sort: [String]) {
+              ${query}(sort: $sort) {
+                ${selection}
+              }
+            }
+          `,
+          { sort: [sort] }
+        );
+
+        expect(res.body.data).toBeNull();
+        expect(res.body.errors).toEqual([
+          expect.objectContaining({ message: expect.stringMatching(/^Invalid key files/) }),
+        ]);
+      }
+    });
+
     test('cannot filter folders by their files', async () => {
       const filters = await getTypeFields('UploadFolderFiltersInput', 'inputFields');
 

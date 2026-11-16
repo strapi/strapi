@@ -3,10 +3,14 @@ import type { Core } from '@strapi/types';
 
 import { FILE_MODEL_UID, FOLDER_MODEL_UID } from './constants';
 import { resolveFileId } from './services/upload';
+import { assertNoFileRelations } from './utils/folder-query';
 
 const { NotFoundError } = errors;
 
 const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
+
+type FolderListArgs = { filters?: unknown; sort?: unknown };
+type Resolve = (parent: unknown, args: FolderListArgs, context: unknown, info: unknown) => unknown;
 
 export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => {
   const { service: getGraphQLService, config: graphQLConfig } = strapi.plugin('graphql');
@@ -32,6 +36,18 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
   const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
   const folderTypeName = getTypeName(strapi.getModel(FOLDER_MODEL_UID));
+
+  const rejectFileRelations = async (
+    resolve: Resolve,
+    parent: unknown,
+    args: FolderListArgs,
+    context: unknown,
+    info: unknown
+  ) => {
+    await assertNoFileRelations(strapi, args);
+
+    return resolve(parent, args, context, info);
+  };
 
   const pendingNamePaths = new WeakMap<
     object,
@@ -152,8 +168,14 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
         'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },
         'Query.uploadFiles_connection': { auth: { scope: 'plugin::upload.content-api.find' } },
         'Query.uploadFile': { auth: { scope: 'plugin::upload.content-api.findOne' } },
-        'Query.uploadFolders': { auth: { scope: 'plugin::upload.folder.find' } },
-        'Query.uploadFolders_connection': { auth: { scope: 'plugin::upload.folder.find' } },
+        'Query.uploadFolders': {
+          auth: { scope: 'plugin::upload.folder.find' },
+          middlewares: [rejectFileRelations],
+        },
+        'Query.uploadFolders_connection': {
+          auth: { scope: 'plugin::upload.folder.find' },
+          middlewares: [rejectFileRelations],
+        },
         'Query.uploadFolder': { auth: { scope: 'plugin::upload.folder.findOne' } },
         'Mutation.updateUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
         'Mutation.deleteUploadFile': { auth: { scope: 'plugin::upload.content-api.destroy' } },
