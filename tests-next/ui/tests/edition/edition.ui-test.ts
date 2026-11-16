@@ -16,6 +16,12 @@ test.describe('a test that needs a flag the instance does not have', () => {
   test.use({ requires: { future: ['notAFlag'] } });
 
   // Declared as expected to fail: the requirements check throws before the body runs. If the
-  // check skipped instead, or let the test pass, this test would fail.
+  // check let the test pass, test.fail would fail. A skip is reported as skipped, not failed,
+  // so the afterEach checks the status: a skip fails it.
+  // eslint-disable-next-line no-empty-pattern
+  test.afterEach(async ({}, testInfo) => {
+    expect(testInfo.status).toBe('failed');
+  });
+
   test.fail('fails instead of skipping', async () => {});
 });
