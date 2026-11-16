@@ -100,7 +100,10 @@ const actionRow = (fields: Record<string, unknown> = {}) => ({
   ...fields,
 });
 
-/** A product draft as `release-action.findPage` reads it, populated deep */
+/**
+ * A product draft as `release-action.findPage` reads it, populated deep. The review workflows
+ * attributes are added by `reviewWorkflowsAttributes` below.
+ */
 const productEntry = (fields: Record<string, unknown> = {}) => ({
   id: expect.any(Number),
   documentId: expect.any(String),
@@ -113,8 +116,6 @@ const productEntry = (fields: Record<string, unknown> = {}) => ({
   createdBy: null,
   updatedBy: null,
   localizations: [],
-  strapi_stage: null,
-  strapi_assignee: null,
   ...fields,
 });
 
@@ -155,6 +156,13 @@ describeOnCondition(edition === 'EE')('Content releases service results (api)', 
     contentType: productUID,
     entryDocumentId: documentId,
   });
+
+  // Review workflows adds `strapi_stage` and `strapi_assignee` to every Draft & Publish content type
+  // only when the license enables its feature (`packages/core/review-workflows/server/src/index.ts`)
+  const reviewWorkflowsAttributes = () =>
+    strapi.ee.features.isEnabled('review-workflows')
+      ? { strapi_stage: null, strapi_assignee: null }
+      : {};
 
   beforeAll(async () => {
     await builder.addComponent(component).addContentTypes([model]).build();
@@ -475,7 +483,12 @@ describeOnCondition(edition === 'EE')('Content releases service results (api)', 
         results: [
           {
             ...actionRow({ type: 'publish', entryDocumentId: entry.documentId }),
-            entry: productEntry({ id: entry.id, documentId: entry.documentId, name: 'Paged' }),
+            entry: productEntry({
+              id: entry.id,
+              documentId: entry.documentId,
+              name: 'Paged',
+              ...reviewWorkflowsAttributes(),
+            }),
             status: 'draft',
           },
         ],
