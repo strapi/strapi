@@ -960,19 +960,51 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             // update instead of deleting because the relation is directly on the entity table
             // and not in a join table
-            await this.createQueryBuilder(target)
-              .update({ [idColumn.name]: null, [typeColumn.name]: null })
-              .where({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .transacting(trx)
-              .execute();
-
-            if (cleanRelationData.set !== null) {
-              const relId = toIds(cleanRelationData.set?.[0]);
+            const unlink = async (where: Record<string, unknown> = {}) => {
               await this.createQueryBuilder(target)
-                .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-                .where({ id: relId })
+                .update({ [idColumn.name]: null, [typeColumn.name]: null })
+                .where({ ...where, [idColumn.name]: id, [typeColumn.name]: uid })
                 .transacting(trx)
                 .execute();
+            };
+
+            // morphOne links a single entry, morphMany links all of them
+            const link = async (relations: { id: ID }[]) => {
+              const relIds =
+                attribute.relation === 'morphOne' ? toIds(relations.slice(0, 1)) : toIds(relations);
+
+              if (relIds.length === 0) {
+                return;
+              }
+
+              await this.createQueryBuilder(target)
+                .update({ [idColumn.name]: id, [typeColumn.name]: uid })
+                .where({ id: relIds })
+                .transacting(trx)
+                .execute();
+            };
+
+            // set replaces every link: null and an empty set clear them
+            if ('set' in cleanRelationData) {
+              await unlink();
+              await link(cleanRelationData.set ?? []);
+              continue;
+            }
+
+            // connect and disconnect only change the given entries
+            const { connect = [], disconnect = [] } = cleanRelationData;
+
+            if (disconnect.length > 0) {
+              await unlink({ id: toIds(disconnect) });
+            }
+
+            if (connect.length > 0) {
+              // a morphOne links a single entry, so connecting replaces it
+              if (attribute.relation === 'morphOne') {
+                await unlink();
+              }
+
+              await link(connect);
             }
           } else if (
             targetAttribute.type === 'relation' &&
