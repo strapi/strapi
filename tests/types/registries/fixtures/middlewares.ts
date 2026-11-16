@@ -64,6 +64,26 @@ declare const inline: Core.MiddlewareHandler;
   // @ts-expect-error The favicon config is checked.
   middlewares: [{ name: 'strapi::favicon', config: { path: 1 } }],
 }) satisfies Core.RouteConfigFor;
+// `strapi::security` takes the options `koa-helmet` passes to `helmet`, typed from `helmet` itself.
+({
+  middlewares: [
+    'strapi::security',
+    {
+      name: 'strapi::security',
+      config: {
+        contentSecurityPolicy: {
+          useDefaults: true,
+          directives: { 'img-src': ["'self'", 'data:'] },
+        },
+        hsts: { maxAge: 31536000, includeSubDomains: true },
+      },
+    },
+  ],
+}) satisfies Core.RouteConfigFor;
+({
+  // @ts-expect-error The security config is checked.
+  middlewares: [{ name: 'strapi::security', config: { hsts: { maxAge: '1y' } } }],
+}) satisfies Core.RouteConfigFor;
 ({
   middlewares: [
     { name: 'admin::rateLimit', config: { interval: { min: 1 }, max: 3 } },
