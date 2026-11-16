@@ -1,8 +1,11 @@
 // Compile-only assertions. The EE server tsconfig includes this file; declaration builds exclude it.
+import type { Data } from '@strapi/types';
 import type CEAuthService from '../../../../server/src/services/auth';
 import type CEUserService from '../../../../server/src/services/user';
+import type { EnterpriseContracts } from '../../../../server/src/types';
 import type EEAuthService from '../services/auth';
 import type EEPersistTablesService from '../services/persist-tables';
+import type EERoleService from '../services/role';
 import type EEUserService from '../services/user';
 
 type Equal<T, U> =
@@ -34,4 +37,54 @@ export type EEParamsImplementationAssertions = [
   // email contract.
   Expect<Equal<[Awaited<ReturnType<typeof EEAuthService.forgotPassword>>], [unknown]>>,
   Expect<Equal<[Awaited<ReturnType<typeof CEAuthService.forgotPassword>>], [unknown]>>,
+];
+
+// With strict types, the registered contracts give the EE members that the implementation cannot
+// type without a cast the CE member's parameters. `ssoCheckRolesIdForDeletion` has no CE twin: its
+// callers pass the IDs of the roles to delete (`validation/role.ts:33`, `:58`), and the body iterates
+// them. The results stay the implementation's.
+export type EEContractAssertions = [
+  Expect<
+    Equal<
+      [Parameters<EnterpriseContracts['auth']['forgotPassword']>],
+      [Parameters<typeof CEAuthService.forgotPassword>]
+    >
+  >,
+  Expect<
+    Equal<
+      [ReturnType<EnterpriseContracts['auth']['forgotPassword']>],
+      [ReturnType<typeof EEAuthService.forgotPassword>]
+    >
+  >,
+  Expect<
+    Equal<
+      [Parameters<EnterpriseContracts['auth']['resetPassword']>],
+      [Parameters<typeof CEAuthService.resetPassword>]
+    >
+  >,
+  Expect<
+    Equal<
+      [ReturnType<EnterpriseContracts['auth']['resetPassword']>],
+      [ReturnType<typeof EEAuthService.resetPassword>]
+    >
+  >,
+  Expect<Equal<[Parameters<EnterpriseContracts['user']['updateById']>], [CEUpdateByIdParameters]>>,
+  Expect<
+    Equal<
+      [ReturnType<EnterpriseContracts['user']['updateById']>],
+      [ReturnType<typeof EEUserService.updateById>]
+    >
+  >,
+  Expect<
+    Equal<
+      [Parameters<EnterpriseContracts['role']['ssoCheckRolesIdForDeletion']>],
+      [[ids: Data.ID[]]]
+    >
+  >,
+  Expect<
+    Equal<
+      [ReturnType<EnterpriseContracts['role']['ssoCheckRolesIdForDeletion']>],
+      [ReturnType<typeof EERoleService.ssoCheckRolesIdForDeletion>]
+    >
+  >,
 ];
