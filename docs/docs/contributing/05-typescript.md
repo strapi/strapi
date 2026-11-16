@@ -241,6 +241,13 @@ declare global {
   with that export: without it, the registered type is inferred from the factory itself, so type
   generation lists the UID in `Strapi.Registries.InferredServices` or `InferredControllers`, and
   `Core.ServiceFactory` and `Core.ControllerFactory` reject it (TS2344).
+- A `createCoreService` override without a `ServiceContract` export keeps the call signature of
+  strict types off, by design (`Core.CoreAPI.Service.Extendable`). For example,
+  `async create(params) { return super.create(params); }` makes `strapi.service(uid).create` accept
+  `lookup` and any `data` key, and return `any`. The same applies to `update` and `createOrUpdate`.
+  To get the checks and the typed result back, export
+  `type ServiceContract = Core.CoreAPI.Service.ContentType<uid> & { … }` from the service module and
+  add `satisfies Core.ServiceFactory<uid>` to the factory.
 - Declare one contract per UID. Conflicting `Package*` declarations fail with TS2717, and
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by
