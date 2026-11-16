@@ -147,6 +147,22 @@ type UpdateParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContent
   NoLookup;
 
 /**
+ * The params of a core service `delete`, with strict types: those of the Document Service's
+ * `delete`, except `documentId`, which the service sets, and `lookup` (see {@link NoLookup}).
+ */
+type DeleteParams<TContentTypeUID extends UID.ContentType> = ParamsPick<
+  TContentTypeUID,
+  | 'fields'
+  | 'populate'
+  | 'filters'
+  | 'status'
+  | 'publicationFilter'
+  | 'hasPublishedVersion'
+  | 'locale:string'
+> &
+  NoLookup;
+
+/**
  * Base Core-API service type
  */
 export interface Base {
@@ -226,7 +242,7 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
   delete(
     docId: Documents.ID,
-    params: object
+    params: DeleteParams<TContentTypeUID>
   ): Promise<{
     deletedEntries: number;
   }>;
@@ -252,7 +268,7 @@ export interface StrictSingleType<TContentTypeUID extends UID.ContentType> exten
   createOrUpdate<const TParams extends UpdateParams<TContentTypeUID>>(
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
-  delete(params: object): Promise<{
+  delete(params: DeleteParams<TContentTypeUID>): Promise<{
     deletedEntries: number;
   }>;
 }
