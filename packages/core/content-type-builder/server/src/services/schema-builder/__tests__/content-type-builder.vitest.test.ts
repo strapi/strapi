@@ -666,6 +666,156 @@ describe('content-type-builder editContentType with retargeted relations', () =>
       }
     );
 
+    describe('with a body in the stored format (inversedBy or mappedBy, no targetAttribute)', () => {
+      const otherKind = kind === 'manyToMany' ? 'oneToOne' : 'manyToMany';
+      const inverseOf: Record<string, string> = {
+        manyToOne: 'oneToMany',
+        oneToOne: 'oneToOne',
+        manyToMany: 'manyToMany',
+      };
+
+      it('rebuilds the counterpart when the relation kind changes', () => {
+        const { contentTypes } = (global as any).strapi;
+        Object.assign(contentTypes[shelfUid].__schema__.attributes.books, {
+          private: true,
+          required: true,
+        });
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: {
+                type: 'relation',
+                relation: otherKind,
+                target: shelfUid,
+                inversedBy: 'books',
+              },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({ relation: otherKind });
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({
+          relation: inverseOf[otherKind],
+          private: true,
+          required: true,
+        });
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('writes only mappedBy when the kind change makes the owner a oneToMany inverse side', () => {
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: {
+                type: 'relation',
+                relation: 'oneToMany',
+                target: shelfUid,
+                inversedBy: 'books',
+              },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({
+          relation: 'oneToMany',
+          mappedBy: 'books',
+        });
+        expect(attributesOf(builder, bookUid).shelf).not.toHaveProperty('inversedBy');
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({ relation: 'manyToOne' });
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('keeps the stored side of a relation that is new in the save', () => {
+        // Book.shelf is a one-way relation; the save of Shelf adds its other side
+        const { contentTypes } = (global as any).strapi;
+        const oneWay = { type: 'relation', relation: kind, target: shelfUid };
+        contentTypes[bookUid].__schema__.attributes.shelf = oneWay;
+        delete contentTypes[shelfUid].__schema__.attributes.books;
+
+        const builder = editAll(
+          {
+            [shelfUid]: {
+              name: { type: 'string' },
+              books: {
+                type: 'relation',
+                relation: inverseOf[kind],
+                target: bookUid,
+                mappedBy: 'shelf',
+              },
+            },
+          },
+          [shelfUid]
+        );
+
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({ mappedBy: 'shelf' });
+        expect(attributesOf(builder, shelfUid).books).not.toHaveProperty('inversedBy');
+        expect(attributesOf(builder, bookUid).shelf).toEqual(oneWay);
+      });
+
+      it('makes a one-way relation the owner when the save gives it inversedBy', () => {
+        // Shelf.books (mappedBy: shelf) was added in an earlier save; Book.shelf is one-way
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[bookUid].__schema__.attributes.shelf = {
+          type: 'relation',
+          relation: kind,
+          target: shelfUid,
+        };
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: { type: 'relation', relation: kind, target: shelfUid, inversedBy: 'books' },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({ inversedBy: 'books' });
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({ mappedBy: 'shelf' });
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('keeps the pair when the owner is saved unchanged', () => {
+        const { contentTypes } = (global as any).strapi;
+        const books = contentTypes[shelfUid].__schema__.attributes.books;
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: { type: 'relation', relation: kind, target: shelfUid, inversedBy: 'books' },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, shelfUid).books).toMatchObject(books);
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('keeps the owner when the inverse side is saved unchanged', () => {
+        const { contentTypes } = (global as any).strapi;
+        const shelf = contentTypes[bookUid].__schema__.attributes.shelf;
+        const books = { ...contentTypes[shelfUid].__schema__.attributes.books, visible: false };
+        contentTypes[shelfUid].__schema__.attributes.books = books;
+
+        const builder = editAll(
+          { [shelfUid]: { name: { type: 'string' }, books, label: { type: 'string' } } },
+          [shelfUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject(shelf);
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({ visible: false });
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+    });
+
     describe('with a body in the format of the GET response of the single-type route', () => {
       // That body has the stored inversedBy or mappedBy next to targetAttribute
       it('renames the counterpart', () => {
