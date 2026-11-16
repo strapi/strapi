@@ -107,7 +107,8 @@ const filterPermissionsToRemove = async (permissions: Permission[]) => {
           permission.subject
         );
 
-        return applies && permissionDomain.getProperty(property, permission) == null;
+        // Only a missing property is invalid: `null` is a stored value (`locales: null` is every locale)
+        return applies && permissionDomain.getProperty(property, permission) === undefined;
       })
     );
 

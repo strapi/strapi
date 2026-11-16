@@ -315,6 +315,70 @@ describe('Permission Service', () => {
       expect(update).not.toHaveBeenCalled();
     });
 
+    describe('applicable properties', () => {
+      const setupPropertyCleanup = (permsInDb: Record<string, unknown>[]) => {
+        const dbDelete = vi.fn(({ where }: { where: { id: number } }) =>
+          Promise.resolve({ where: { id: where.id } })
+        );
+        // Returns the rows once, then an empty page, like the id-paged query does
+        const findMany = vi
+          .fn()
+          .mockImplementationOnce(() => Promise.resolve(permsInDb))
+          .mockImplementation(() => Promise.resolve([]));
+
+        global.strapi = merge({}, global.strapi, {
+          log: { warn: vi.fn() },
+          db: { query: () => ({ findMany, delete: dbDelete, update: vi.fn() }) },
+          admin: {
+            services: {
+              'content-type': { cleanPermissionFields: vi.fn((perms: unknown[]) => perms) },
+              permission: {
+                actionProvider: {
+                  has: vi.fn(() => true),
+                  get: vi.fn(() => ({
+                    subjects: ['api::article.article'],
+                    options: { applyToProperties: ['locales'] },
+                  })),
+                  appliesToProperty: vi.fn(() => Promise.resolve(true)),
+                },
+              },
+            },
+          },
+          eventHub: { emit: vi.fn() },
+        });
+
+        return { dbDelete };
+      };
+
+      const localizedPermission = (id: number, properties: Record<string, unknown>) => ({
+        id,
+        action: 'plugin::content-manager.explorer.delete',
+        actionParameters: {},
+        subject: 'api::article.article',
+        properties,
+        conditions: [],
+        role: { id: 1, name: 'Editor' },
+        apiToken: null,
+      });
+
+      test('keeps a permission whose applicable property is null', async () => {
+        const { dbDelete } = setupPropertyCleanup([localizedPermission(1, { locales: null })]);
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).not.toHaveBeenCalled();
+      });
+
+      test('removes a permission that lacks its applicable property', async () => {
+        const { dbDelete } = setupPropertyCleanup([localizedPermission(1, {})]);
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(1);
+        expect(dbDelete).toHaveBeenCalledWith({ where: { id: 1 } });
+      });
+    });
+
     type StoredPermission = { id: number } & Record<string, unknown>;
 
     type FindManyParams = {

@@ -37,6 +37,11 @@ interface DevelopOptions extends CLIContext {
    */
   bundler?: 'webpack' | 'vite';
   polling?: boolean;
+  /**
+   * Open the admin in a browser after the server listens. `true` opens it on the first start of
+   * the session, `false` never opens it, `undefined` keeps the default (only when no admin user
+   * exists and `admin.autoOpen` is not `false`).
+   */
   open?: boolean;
   watchAdmin?: boolean;
   buildAdmin?: boolean;
@@ -89,6 +94,17 @@ const cleanupDistDirectory = async ({
   cleaningSpinner.text = `Cleaning dist dir (${prettyTime(generatingDuration)})`;
   cleaningSpinner?.succeed();
 };
+
+// Set by the primary on workers it forks after a worker has started, so they know they are not the
+// first start. A worker that failed before its server listened does not count.
+const RESTART_ENV = 'STRAPI_DEVELOP_RESTART';
+
+/**
+ * `--open` opens the admin once per `strapi develop` session: restarted workers fall back to the
+ * default behaviour. `--no-open` applies to every start.
+ */
+const getWorkerOpenOption = (open: boolean | undefined, isRestart: boolean) =>
+  isRestart && open === true ? undefined : open;
 
 const develop = async ({
   cwd,
@@ -162,8 +178,16 @@ const develop = async ({
       adminSpinner.succeed();
     }
 
+    // Only a worker whose server listened opened the admin, so only that makes the next worker a
+    // restart. A worker that failed before start() leaves `--open` for the one that replaces it.
+    let hasStarted = false;
+
     cluster.on('message', async (worker, message) => {
       switch (message) {
+        case 'started': {
+          hasStarted = true;
+          break;
+        }
         case 'reload': {
           if (tsconfig?.config) {
             try {
@@ -182,7 +206,11 @@ const develop = async ({
         }
         case 'killed': {
           logger.debug('cluster has the killed message, forking the cluster');
-          cluster.fork();
+          if (hasStarted) {
+            cluster.fork({ [RESTART_ENV]: 'true' });
+          } else {
+            cluster.fork();
+          }
           break;
         }
         case 'stop': {
@@ -206,6 +234,7 @@ const develop = async ({
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
       serveAdminPanel: !watchAdmin,
+      open: getWorkerOpenOption(options.open, process.env[RESTART_ENV] === 'true'),
     });
 
     /**
@@ -318,7 +347,14 @@ const develop = async ({
 
       ensureWatcher();
 
-      strapiInstance.start();
+      const starting = strapiInstance.start();
+      // start() resolves after the server listens. Tell the primary, so the worker it forks after
+      // the next reload counts as a restart and drops `--open`.
+      if (starting instanceof Promise) {
+        starting.then(() => {
+          process.send?.('started');
+        });
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error(`Error during development: ${message}`);
@@ -458,5 +494,5 @@ function startWatcher(
   });
 }
 
-export { develop };
+export { develop, getWorkerOpenOption };
 export type { DevelopOptions };
