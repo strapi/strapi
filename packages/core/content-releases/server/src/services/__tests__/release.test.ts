@@ -872,7 +872,7 @@ describe('Release service', () => {
 
   describe('publish logs', () => {
     // A line break, an ANSI escape and a right-to-left override: each could split or disguise a log line
-    const SPOOFING_NAME = 'Spring\n[strapi] fake line \u001b[31m‮evil';
+    const SPOOFING_NAME = 'Spring\n[strapi] fake line \u001b[31m\u202eevil';
     const QUOTED_NAME = '"Spring\\n[strapi] fake line \\u001b[31m\\u202eevil"';
 
     const run = async ({
