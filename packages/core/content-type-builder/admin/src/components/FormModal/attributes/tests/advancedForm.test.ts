@@ -5,45 +5,72 @@ import { attributeOptions } from '../attributeOptions';
 
 import type { FormAPI } from '../../../../utils/formAPI';
 
-type Item = { name: string; tooltip?: { defaultMessage: string } };
+type Item = {
+  name: string;
+  description?: { id: string; defaultMessage: string };
+  tooltip?: { defaultMessage: string };
+};
 
 const findRequired = (sections: Array<{ items: Item[] }>) =>
   sections.flatMap((section) => section.items).find((item) => item.name === 'required');
 
+const gatedForms = {
+  relation: (options?: { strictRelations?: boolean }) =>
+    advancedForm.relation(undefined, '', options).sections,
+  'multiple media': (options?: { strictRelations?: boolean }) =>
+    advancedForm.media({ multiple: true }, '', options).sections,
+};
+
 describe('advancedForm | required on relations and media', () => {
-  describe.each(['relation', 'media'] as const)('%s', (type) => {
+  describe.each(Object.keys(gatedForms) as Array<keyof typeof gatedForms>)('%s', (type) => {
     it.each([
       ['off', { strictRelations: false }],
       ['not provided', undefined],
-    ])('disables required with a tooltip when strictRelations is %s', (_label, options) => {
-      const required = findRequired(advancedForm[type](undefined, '', options).sections);
+    ])(
+      'disables required with a hint and tooltip when strictRelations is %s',
+      (_label, options) => {
+        const required = findRequired(gatedForms[type](options));
 
-      expect(required).toMatchObject({
-        name: 'required',
-        type: 'checkbox',
-        disabled: true,
-        tooltip: { id: 'content-type-builder.form.attribute.item.requiredField.strictRelations' },
-      });
-    });
+        expect(required).toMatchObject({
+          name: 'required',
+          type: 'checkbox',
+          disabled: true,
+          description: {
+            id: 'content-type-builder.form.attribute.item.requiredField.strictRelations.description',
+          },
+          tooltip: { id: 'content-type-builder.form.attribute.item.requiredField.strictRelations' },
+        });
+      }
+    );
 
     it('keeps the default required option when strictRelations is on', () => {
-      const required = findRequired(
-        advancedForm[type](undefined, '', { strictRelations: true }).sections
-      );
+      const required = findRequired(gatedForms[type]({ strictRelations: true }));
 
       expect(required).toBe(attributeOptions.required);
     });
+  });
+
+  it.each([
+    ['single', { multiple: false }],
+    ['without a multiple setting', {}],
+  ])('leaves required editable on %s media when strictRelations is off', (_label, data) => {
+    expect(findRequired(advancedForm.media(data, '', { strictRelations: false }).sections)).toBe(
+      attributeOptions.required
+    );
   });
 
   it('leaves required editable on other attribute types', () => {
     expect(findRequired(advancedForm.text().sections)).toBe(attributeOptions.required);
   });
 
-  it('keeps the registered English tooltip aligned with the fallback copy', () => {
+  it('keeps the registered English copy aligned with the fallback messages', () => {
     const required = findRequired(advancedForm.relation(undefined, '').sections);
 
     expect(en['form.attribute.item.requiredField.strictRelations']).toBe(
       required?.tooltip?.defaultMessage
+    );
+    expect(en['form.attribute.item.requiredField.strictRelations.description']).toBe(
+      required?.description?.defaultMessage
     );
   });
 

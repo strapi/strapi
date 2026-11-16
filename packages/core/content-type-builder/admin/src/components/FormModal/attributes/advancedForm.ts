@@ -17,10 +17,14 @@ const relationalRequiredOption = ({ strictRelations }: AdvancedFormOptions = {})
   return {
     ...attributeOptions.required,
     disabled: true,
+    description: {
+      id: getTrad('form.attribute.item.requiredField.strictRelations.description'),
+      defaultMessage: 'Not enforced until documents.strictRelations is true in config/api',
+    },
     tooltip: {
       id: getTrad('form.attribute.item.requiredField.strictRelations'),
       defaultMessage:
-        'Required is only enforced on relations and media when documents.strictRelations is set to true in config/api. Set it, then restart the server. Once enabled, publishing an entry with this field empty is rejected, even if it was accepted before.',
+        'The API only enforces Required on this field when documents.strictRelations is set to true in config/api. Set it, then restart the server. Once enabled, saving or publishing an entry with this field empty is rejected, even if it was accepted before.',
     },
   };
 };
@@ -310,7 +314,11 @@ export const advancedForm = {
       ],
     };
   },
-  media(_data: unknown, _step: string, options?: AdvancedFormOptions) {
+  media(data: { multiple?: boolean } | undefined, _step: string, options?: AdvancedFormOptions) {
+    // The admin already requires a single media field on publish without strictRelations.
+    const required =
+      data?.multiple === true ? relationalRequiredOption(options) : attributeOptions.required;
+
     return {
       sections: [
         {
@@ -334,7 +342,7 @@ export const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [relationalRequiredOption(options), attributeOptions.private],
+          items: [required, attributeOptions.private],
         },
         conditionSection,
       ],

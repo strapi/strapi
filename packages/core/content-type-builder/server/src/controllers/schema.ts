@@ -17,7 +17,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async getSchema(ctx: Context) {
       const schema = await getService('schema').getSchema();
-      // Same check as the document service: only a literal `true` enforces required relations and media.
+      // Only a literal `true` enforces required relations and media; the document service rejects other non-boolean values.
       const strictRelations = strapi.config.get('api.documents.strictRelations') === true;
 
       ctx.send({ data: { ...schema, settings: { ...schema.settings, strictRelations } } });
