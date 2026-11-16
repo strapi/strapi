@@ -79,7 +79,8 @@ type RelationRequestInfo = {
   locale: string | null | undefined;
   /** `undefined` for a source content type without draft and publish. */
   status: Core.IsStrict extends true ? 'published' | 'draft' | undefined : string | undefined;
-  attribute: Schema.Attribute.Relation;
+  /** Morph-to relations (`morphToOne`, `morphToMany`) have no single target and are rejected. */
+  attribute: Schema.Attribute.RelationWithTarget;
   fieldsToSelect: string[];
   mainField: string;
   source: { schema: Struct.ContentTypeSchema | Struct.ComponentSchema; isLocalized: boolean };
