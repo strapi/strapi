@@ -30,7 +30,12 @@ import type EERoleService from '../../../ee/server/src/services/role';
 import type EESeatEnforcementService from '../../../ee/server/src/services/seat-enforcement';
 import type EEUserService from '../../../ee/server/src/services/user';
 import type { PersistedTable } from '../../../ee/server/src/services/persist-tables';
-import type { AdminRole, Permission, SanitizedAdminUser } from '../../../shared/contracts/shared';
+import type {
+  AdminRole,
+  AdminUser,
+  Permission,
+  SanitizedAdminUser,
+} from '../../../shared/contracts/shared';
 import type { AutoRegistrationEvent } from '../audit-logs/auth';
 import type { HomepageLayout } from '../controllers/validation/schema';
 
@@ -73,6 +78,30 @@ type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = 
   getSuperAdmin(): Promise<AdminRole | null>;
   getSuperAdminWithUsersCount(): Promise<AdminRoleWithUsersCount | null>;
 };
+
+type UserServiceOverride =
+  'findOne' | 'findOneByEmail' | 'updateById' | 'deleteById' | 'deleteByIds';
+
+/**
+ * The `admin::user` service as runtime calls it, in CE and EE
+ * (`tests/api/core/admin/admin-user-service-results.test.api.ts`). The query engine's results stay
+ * `any` in the implementations, and the EE `updateById`, `deleteById` and `deleteByIds` infer them.
+ * `findOne` and `updateById` resolve to `null` when no user matches; CE `updateById` keeps
+ * develop's published `Promise<AdminUser>`.
+ */
+type UserService<TService extends Record<UserServiceOverride, (...args: never[]) => unknown>> =
+  Omit<TService, UserServiceOverride> & {
+    /** The user with its roles. With a `populate` other than the default, `roles` is not loaded. */
+    findOne(...args: Parameters<(typeof CEUserService)['findOne']>): Promise<AdminUser | null>;
+    /** The user without its roles. */
+    findOneByEmail(
+      ...args: Parameters<(typeof CEUserService)['findOneByEmail']>
+    ): Promise<Omit<AdminUser, 'roles'> | null>;
+    updateById(...args: Parameters<TService['updateById']>): Promise<AdminUser | null>;
+    deleteById(...args: Parameters<TService['deleteById']>): Promise<AdminUser | null>;
+    /** The deleted users with their roles. A missing ID rejects. */
+    deleteByIds(...args: Parameters<TService['deleteByIds']>): Promise<AdminUser[]>;
+  };
 
 /**
  * What an action provider receives in the registered contract. Settings actions have a category,
@@ -293,7 +322,7 @@ declare global {
         'admin::seat-enforcement': Core.Licensed<'licensed', typeof EESeatEnforcementService>;
         'admin::token': typeof TokenService;
         'admin::transfer': typeof TransferService;
-        'admin::user': EditionService<typeof CEUserService, typeof EEUserService>;
+        'admin::user': UserService<EditionService<typeof CEUserService, typeof EEUserService>>;
       }
 
       /**
