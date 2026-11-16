@@ -3,6 +3,7 @@ import type { UID } from '@strapi/types';
 
 import { getSchema, updateSchema, renameAttribute } from '../schema';
 import type { Schema as CTBSchema } from '../../controllers/validation/schema';
+import { collectUnhandledRejections } from './unhandled-rejections';
 
 const builderServiceMock = {
   createContentType: jest.fn(),
@@ -14,6 +15,10 @@ const builderServiceMock = {
   editComponent: jest.fn(),
   deleteComponent: jest.fn(),
   writeFiles: jest.fn().mockResolvedValue(true),
+  // Like the real builder: `beforeCommit` (the folder commit) runs inside the row transaction.
+  renameComponentRows: jest.fn(
+    async ({ beforeCommit }: { beforeCommit?: () => Promise<unknown> } = {}) => beforeCommit?.()
+  ),
   rollback: jest.fn().mockResolvedValue(undefined),
   contentTypes: new Map(),
   components: new Map(),
@@ -119,6 +124,20 @@ jest.mock('../content-types', () => ({
   getRestrictRelationsTo: jest.fn(() => null),
   isContentTypeVisible: jest.fn(() => true),
 }));
+
+const mockCustomFieldRegistry = (get: (name: string) => unknown) => {
+  (global.strapi as any).get = jest.fn((name: string) => {
+    if (name === 'custom-fields') {
+      return { get };
+    }
+
+    if (name === 'content-structure') {
+      return { getCleanedFile: jest.fn().mockResolvedValue(null) };
+    }
+
+    return {};
+  });
+};
 
 describe('Content Type Builder - Schema service', () => {
   beforeEach(() => {
@@ -473,6 +492,105 @@ describe('Content Type Builder - Schema service', () => {
 
       // Verify writeFiles is called
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs a failing event listener instead of leaving an unhandled rejection', async () => {
+      const mockContentType = { uid: 'api::test.test', kind: 'collectionType' };
+      const mockComponent = { uid: 'default.test', category: 'default' };
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      jest.mocked(builderServiceMock.components.get).mockReturnValue(mockComponent);
+      // A user listener that throws makes the event hub emit reject
+      jest.mocked(strapi.eventHub.emit).mockRejectedValue(new Error('listener failed'));
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'update',
+            uid: 'api::test.test',
+            displayName: 'Test',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+          { action: 'delete', uid: 'api::other.other' },
+        ],
+        components: [
+          {
+            action: 'update',
+            uid: 'default.test',
+            displayName: 'Test',
+            attributes: [],
+          },
+          { action: 'delete', uid: 'default.other' },
+        ],
+      };
+
+      const rejections = await collectUnhandledRejections(() => updateSchema(schema));
+
+      expect(rejections).toEqual([]);
+      expect(strapi.eventHub.emit).toHaveBeenCalledTimes(4);
+      expect(strapi.log.error).toHaveBeenCalledTimes(4);
+      expect(strapi.log.error).toHaveBeenCalledWith(
+        expect.stringContaining('content-type.update listener failed: listener failed')
+      );
+    });
+
+    const updateArticleSchema: CTBSchema = {
+      contentTypes: [
+        {
+          action: 'update',
+          uid: 'api::test.test',
+          displayName: 'Test',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          pluginOptions: {},
+          options: {},
+          attributes: [],
+        },
+      ],
+      components: [],
+    };
+
+    it('does not wait forever for an event listener that never settles', async () => {
+      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+
+      try {
+        jest
+          .mocked(builderServiceMock.contentTypes.get)
+          .mockReturnValue({ uid: 'api::test.test', kind: 'collectionType' });
+        // e.g. a listener awaiting a `fetch` with no timeout
+        jest.mocked(strapi.eventHub.emit).mockReturnValue(new Promise(() => {}));
+
+        let settled = false;
+        const update = updateSchema(updateArticleSchema).then(() => {
+          settled = true;
+        });
+
+        await jest.advanceTimersByTimeAsync(10_000);
+
+        expect(settled).toBe(true);
+        await update;
+        expect(strapi.log.warn).toHaveBeenCalledWith(
+          expect.stringContaining('content-type.update')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('logs a listener rejection that cannot be converted to a string', async () => {
+      jest
+        .mocked(builderServiceMock.contentTypes.get)
+        .mockReturnValue({ uid: 'api::test.test', kind: 'collectionType' });
+      // `String()` throws on an object without `toString`
+      jest.mocked(strapi.eventHub.emit).mockRejectedValue(Object.create(null));
+
+      await expect(updateSchema(updateArticleSchema)).resolves.toBeUndefined();
+      expect(strapi.log.error).toHaveBeenCalledWith(
+        expect.stringContaining('content-type.update listener failed')
+      );
     });
 
     it('should handle errors and rollback when API clearing fails', async () => {
@@ -1257,6 +1375,411 @@ describe('Content Type Builder - Schema service', () => {
     });
   });
 
+  describe('uid targetField on renames', () => {
+    const schemaWithSlug = ({
+      renames,
+      attributes,
+      targetField,
+    }: {
+      renames?: Array<{ oldName: string; newName: string }>;
+      attributes: Array<{ action: string; name: string; properties?: Record<string, unknown> }>;
+      targetField: string;
+    }): CTBSchema =>
+      ({
+        contentTypes: [
+          {
+            action: 'update',
+            uid: 'api::article.article',
+            displayName: 'Article',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            ...(renames ? { renames } : {}),
+            attributes: [
+              ...attributes,
+              { action: 'update', name: 'slug', properties: { type: 'uid', targetField } },
+            ],
+          },
+        ],
+        components: [],
+      }) as unknown as CTBSchema;
+
+    const savedSlug = () => {
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as {
+        attributes: Record<string, { targetField?: string }>;
+      };
+
+      return editArg.attributes.slug;
+    };
+
+    it('points the uid at the new name when its target field is renamed', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('resolves a multi-hop rename to the final name', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [
+            { oldName: 'title', newName: 'a' },
+            { oldName: 'a', newName: 'heading' },
+          ],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('follows the target when renames are disabled (never mode)', async () => {
+      renameMode = 'never';
+
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('leaves a targetField that names an attribute of the saved type alone (swap)', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [
+            { oldName: 'title', newName: 'tmp' },
+            { oldName: 'subtitle', newName: 'title' },
+            { oldName: 'tmp', newName: 'subtitle' },
+          ],
+          attributes: [
+            { action: 'update', name: 'title', properties: { type: 'string' } },
+            { action: 'update', name: 'subtitle', properties: { type: 'string' } },
+          ],
+          // The admin has already rewritten it to follow the swapped field.
+          targetField: 'subtitle',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('subtitle');
+    });
+
+    it('stays attached when the renamed target changes from string to text', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'text' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('clears the targetField when the renamed target is no longer a string or text', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'count' }],
+          attributes: [{ action: 'update', name: 'count', properties: { type: 'integer' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
+    it('clears the targetField when the renamed target is deleted in the same save', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'delete', name: 'heading' }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
+    it('still clears the targetField when the target field is deleted', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          attributes: [{ action: 'update', name: 'age', properties: { type: 'integer' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
+    it('keeps the uid attached when the renamed target is a string custom field', async () => {
+      jest.mocked(strapi.get).mockImplementation((name: string) => {
+        if (name === 'custom-fields') {
+          return { get: () => ({ type: 'string' }) };
+        }
+
+        if (name === 'content-structure') {
+          return { getCleanedFile: jest.fn().mockResolvedValue(null) };
+        }
+
+        return {};
+      });
+
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [
+            {
+              action: 'update',
+              name: 'heading',
+              properties: { type: 'customField', customField: 'plugin::color-picker.color' },
+            },
+          ],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('follows the rename when the old name is only present as a delete', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [
+            { action: 'delete', name: 'title' },
+            { action: 'update', name: 'heading', properties: { type: 'string' } },
+          ],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('clears the targetField when the renamed target is a custom field that is not string or text', async () => {
+      mockCustomFieldRegistry(() => ({ type: 'integer' }));
+
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [
+            {
+              action: 'update',
+              name: 'heading',
+              properties: { type: 'customField', customField: 'plugin::rating.stars' },
+            },
+          ],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
+    it('clears the targetField when the renamed target is an unknown custom field', async () => {
+      mockCustomFieldRegistry(() => {
+        throw new Error('Could not find Custom Field: plugin::missing.field');
+      });
+
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [
+            {
+              action: 'update',
+              name: 'heading',
+              properties: { type: 'customField', customField: 'plugin::missing.field' },
+            },
+          ],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
+    it('clears the targetField when the old name is only present as a delete and the new field is not a valid target', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'count' }],
+          attributes: [
+            { action: 'delete', name: 'title' },
+            { action: 'update', name: 'count', properties: { type: 'integer' } },
+          ],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
+    it('clears the targetField when the target is deleted without a rename', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          attributes: [{ action: 'delete', name: 'title' }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+  });
+
+  describe('conditions follow attribute renames', () => {
+    const showWhen = (name: string) => ({ visible: { '==': [{ var: name }, 'x'] } });
+
+    const attribute = (name: string, dependsOn?: string, action = 'update') => ({
+      action,
+      name,
+      properties: {
+        type: 'string',
+        ...(dependsOn ? { conditions: showWhen(dependsOn) } : {}),
+      },
+    });
+
+    const contentTypeSchema = (
+      renames: Array<{ oldName: string; newName: string }> | undefined,
+      attributes: unknown[]
+    ): CTBSchema => ({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: 'api::article.article',
+          displayName: 'Article',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          pluginOptions: {},
+          options: {},
+          renames,
+          attributes,
+        } as any,
+      ],
+      components: [],
+    });
+
+    const editedConditionVar = (name: string, mock = builderServiceMock.editContentType) => {
+      const editArg = jest.mocked(mock).mock.calls[0][0] as any;
+      return editArg.attributes[name].conditions?.visible['=='][0].var;
+    };
+
+    it('rewrites a condition that still references the old name', async () => {
+      await updateSchema(
+        contentTypeSchema(
+          [{ oldName: 'type', newName: 'kind' }],
+          [attribute('kind'), attribute('details', 'type'), attribute('other', 'unrelated')]
+        )
+      );
+
+      expect(editedConditionVar('details')).toBe('kind');
+      expect(editedConditionVar('other')).toBe('unrelated');
+    });
+
+    it('composes multi-hop renames (a -> b -> c)', async () => {
+      await updateSchema(
+        contentTypeSchema(
+          [
+            { oldName: 'a', newName: 'b' },
+            { oldName: 'b', newName: 'c' },
+          ],
+          [attribute('c'), attribute('details', 'a')]
+        )
+      );
+
+      expect(editedConditionVar('details')).toBe('c');
+    });
+
+    it('rewrites the conditions of fields created in the same save', async () => {
+      await updateSchema(
+        contentTypeSchema(
+          [{ oldName: 'type', newName: 'kind' }],
+          [attribute('kind'), attribute('details', 'type', 'create')]
+        )
+      );
+
+      expect(editedConditionVar('details')).toBe('kind');
+    });
+
+    it('leaves a condition that names an attribute of the saved type alone (swap)', async () => {
+      await updateSchema(
+        contentTypeSchema(
+          [
+            { oldName: 'a', newName: 'tmp' },
+            { oldName: 'b', newName: 'a' },
+            { oldName: 'tmp', newName: 'b' },
+          ],
+          // The admin already rewrote these: `onA` followed `a` to `b`.
+          [attribute('a'), attribute('b'), attribute('onA', 'b'), attribute('onB', 'a')]
+        )
+      );
+
+      expect(editedConditionVar('onA')).toBe('b');
+      expect(editedConditionVar('onB')).toBe('a');
+    });
+
+    it('leaves the condition alone when the renamed field is deleted in the same save', async () => {
+      await updateSchema(
+        contentTypeSchema(
+          [{ oldName: 'type', newName: 'kind' }],
+          [{ action: 'delete', name: 'kind' }, attribute('details', 'type')]
+        )
+      );
+
+      expect(editedConditionVar('details')).toBe('type');
+    });
+
+    it('leaves conditions alone when a referenced field is deleted without a rename', async () => {
+      await updateSchema(
+        contentTypeSchema(undefined, [
+          { action: 'delete', name: 'type' },
+          attribute('details', 'type'),
+        ])
+      );
+
+      expect(editedConditionVar('details')).toBe('type');
+    });
+
+    it('rewrites conditions inside an updated component, scoped to that component', async () => {
+      const schema = contentTypeSchema(undefined, [attribute('details', 'type')]);
+      schema.components = [
+        {
+          action: 'update',
+          uid: 'default.seo',
+          displayName: 'Seo',
+          renames: [{ oldName: 'type', newName: 'kind' }],
+          attributes: [attribute('kind'), attribute('details', 'type')],
+        } as any,
+      ];
+
+      await updateSchema(schema);
+
+      expect(editedConditionVar('details', builderServiceMock.editComponent)).toBe('kind');
+      expect(editedConditionVar('details')).toBe('type');
+    });
+
+    it('rewrites conditions when rename migrations are disabled', async () => {
+      renameMode = 'never';
+
+      await updateSchema(
+        contentTypeSchema(
+          [{ oldName: 'type', newName: 'kind' }],
+          [attribute('kind'), attribute('details', 'type')]
+        )
+      );
+
+      expect(editedConditionVar('details')).toBe('kind');
+    });
+  });
+
   describe('renameAttribute (CLI single-step rename)', () => {
     const seedContentType = () => {
       (global.strapi as any).contentTypes = {
@@ -1297,6 +1820,46 @@ describe('Content Type Builder - Schema service', () => {
       expect(editArg.attributes).toHaveProperty('age');
 
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps a uid attached to the renamed field', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.slug = {
+        type: 'uid',
+        targetField: 'title',
+      };
+
+      await renameAttribute('api::article.article', 'title', 'heading');
+
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes.slug).toMatchObject({ type: 'uid', targetField: 'heading' });
+    });
+
+    it('keeps a uid attached to a renamed string custom field', async () => {
+      seedContentType();
+      mockCustomFieldRegistry(() => ({ type: 'string' }));
+      const { attributes } = (global.strapi as any).contentTypes['api::article.article'];
+      attributes.title = { type: 'string', customField: 'plugin::color-picker.color' };
+      attributes.slug = { type: 'uid', targetField: 'title' };
+
+      await renameAttribute('api::article.article', 'title', 'heading');
+
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes.slug).toMatchObject({ type: 'uid', targetField: 'heading' });
+    });
+
+    it('rewrites the conditions that reference the renamed attribute', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.age.conditions = {
+        visible: { '==': [{ var: 'title' }, 'x'] },
+      };
+
+      await renameAttribute('api::article.article', 'title', 'heading');
+
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes.age.conditions).toEqual({
+        visible: { '==': [{ var: 'heading' }, 'x'] },
+      });
     });
 
     it('accepts renaming a legacy status attribute and forwards the rename hop', async () => {

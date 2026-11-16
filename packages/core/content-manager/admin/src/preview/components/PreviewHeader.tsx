@@ -175,9 +175,10 @@ const PreviewHeader = () => {
     });
   };
 
+  const activeTab = query.status ?? null;
   const hasDraftAndPublish = schema.options?.draftAndPublish ?? false;
   const documentActionProps = {
-    activeTab: query.status ?? null,
+    activeTab,
     collectionType: schema.kind === 'collectionType' ? 'collection-types' : 'single-types',
     model: schema.uid,
     documentId: schema.kind === 'collectionType' ? document.documentId : undefined,
@@ -224,7 +225,7 @@ const PreviewHeader = () => {
           >
             <LinkIcon />
           </IconButton>
-          <InjectionZone area="preview.actions" />
+          <InjectionZone {...documentActionProps} area="preview.actions" />
           <DescriptionComponentRenderer
             props={documentActionProps}
             descriptions={(

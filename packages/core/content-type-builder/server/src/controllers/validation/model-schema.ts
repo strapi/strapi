@@ -22,7 +22,7 @@ export const createSchema = (
 ) => {
   const shape = {
     description: yup.string(),
-    options: yup.object(),
+    options: yup.object({ draftAndPublish: yup.boolean() }),
     pluginOptions: yup.object(),
     collectionName: yup.string().nullable().test(isValidCollectionName),
     attributes: createAttributesValidator({ types, relations, modelType }),
@@ -48,6 +48,12 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
 
           if (isConflictingKey(key, attributes)) {
             return conflictingKeysValidator(key);
+          }
+
+          // Reading `type` on a value that is not an object would throw inside this lazy
+          // callback, where yup does not await it, and the validation would never settle
+          if (_.isPlainObject(attribute) === false) {
+            return notAnObjectValidator(key);
           }
 
           if (attribute.type === 'relation') {
@@ -94,6 +100,14 @@ const conflictingKeysValidator = (key: string) => {
   return yup.mixed().test({
     name: 'conflictingKeys',
     message: `Attribute ${key} conflicts with an existing key`,
+    test: () => false,
+  });
+};
+
+const notAnObjectValidator = (key: string) => {
+  return yup.mixed().test({
+    name: 'isObject',
+    message: `Attribute ${key} must be an object`,
     test: () => false,
   });
 };

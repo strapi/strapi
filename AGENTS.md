@@ -17,6 +17,9 @@ packages/cli/        # CLI tools: create-strapi-app, cloud-cli
 examples/            # Dev sandboxes only — not published, not for production fixes
 docs/                # Contributor docs site (contributor.strapi.io); package docs mirror packages/ under docs/docs/packages/
 tests/               # Integration, E2E, and CLI test infrastructure
+tests-next/          # New test suites being built (Test Infrastructure Overhaul), renamed tests/ at cutover:
+                     #   shared/ (@strapi/tests-shared), ui/ (@strapi/tests-e2e, *.ui-test.ts),
+                     #   api/ (@strapi/tests-api, *.api-test.ts), cli/ (@strapi/tests-cli, *.cli-test.ts)
 ```
 
 The following are the most important packages (not exhaustive — run `yarn workspaces list` for the full set):
@@ -133,10 +136,8 @@ yarn test:unit:update         # update snapshots
 Frontend test files also live in `__tests__/` within their respective packages.
 
 ```bash
-yarn test:front              # runs with IS_EE=true (EE features enabled)
-yarn test:front:ce           # runs with IS_EE=false (Community Edition only)
-yarn test:front:update       # update snapshots (EE)
-yarn test:front:update:ce    # update snapshots (CE)
+yarn test:front              # run all frontend tests
+yarn test:front:update       # update snapshots
 ```
 
 ### Type checking
@@ -147,7 +148,7 @@ yarn test:ts                 # all packages + front + back
 
 ### API integration tests
 
-Integration tests live in `tests/api/`. Test apps are generated automatically — always regenerate with `yarn test:generate-app` rather than reusing a stale one (stale apps cause misleading failures).
+Integration tests live in `tests/api/`. `yarn test:api` regenerates its test app (`test-apps/api`) on every run, so never reuse a stale one with `--no-generate-app` (stale apps cause misleading failures). `yarn test:generate-app` generates `test-apps/base`, which the API tests don't use.
 
 ```bash
 yarn test:api                # SQLite
@@ -179,7 +180,6 @@ yarn test:e2e --concurrency=3                    # run 3 domains in parallel
 
 ### EE toggles
 
-- `IS_EE=true` — enables Enterprise features in frontend tests (`yarn test:front`)
 - `RUN_EE=true` — enables Enterprise features in E2E tests
 
 ### Pre-PR checklist
@@ -257,7 +257,7 @@ yarn prettier:check # check only
 ## Notes for Agents
 
 - **`examples/`** apps are sandboxes only — use them to reproduce and test fixes, never commit changes to them unless specifically asked to do so. **Exception:** `examples/complex` is the **migration test fixture** (schemas, seeds, `validate-migration.js`, DB tooling); CI runs `migration_v5` against it via `tests/migration/`. It may relocate under `tests/migration/` in the future.
-- **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps and some root devDeps.
+- **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps, the private `tests-next/*` test workspaces (never published, so they follow the workspace instead of a release version), and some root devDeps.
 - **Entity Service is deprecated** — always use the Document Service (`strapi.documents`) for content operations.
 - **Lifecycle phases** — `strapi.isLoaded` must be `true` before accessing services. Plugins and DB are not available until after the `load()` phase.
 - **Contributor docs** — Knowledge about how internals work lives in `docs/docs/packages/<repo path>/` (one folder per package, mirrors `packages/`) and `docs/docs/architecture/` (topics that cross packages). Read the page of a package before you change it. When you change behavior that a page describes, update the page or set `status: needs-review` in its frontmatter with a `review_notes` item. See [docs/AGENTS.md](docs/AGENTS.md) and the `contributor-docs` skill.

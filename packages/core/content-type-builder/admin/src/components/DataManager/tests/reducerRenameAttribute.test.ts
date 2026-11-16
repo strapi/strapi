@@ -1,6 +1,6 @@
 import { reducer, actions, type State } from '../reducer';
 
-import { initCT, init } from './utils';
+import { initCT, initCompo, init } from './utils';
 
 import type { AnyAttribute, RenameHop } from '../../../types';
 import type { Internal } from '@strapi/types';
@@ -409,5 +409,344 @@ describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () =>
         { oldName: 'children', newName: 'items' },
       ]);
     });
+  });
+
+  describe('uid fields attached to the renamed field', () => {
+    const slug = { name: 'slug', type: 'uid', targetField: 'title', status: 'UNCHANGED' };
+
+    const getTargetField = (state: State, name = 'slug') =>
+      (getAttr(state, uid, name) as { targetField?: string } | undefined)?.targetField;
+
+    it('points the uid at the new name when its target field is renamed', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'heading')
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('points the uid at the new name when a string custom field is renamed', () => {
+      // Admin state keeps custom fields with their underlying type; only the
+      // request payload rewrites them to `type: 'customField'`.
+      const customField = 'plugin::color-picker.color';
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', customField, status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'heading', { customField })
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('follows the rename when the migration is not recorded or is declined', () => {
+      const edit = (consent: { recordRename?: boolean; declineRename?: boolean }) =>
+        reducer(
+          buildState([
+            { name: 'title', type: 'string', status: 'UNCHANGED' },
+            slug,
+          ] as AnyAttribute[]),
+          actions.editAttribute({
+            attributeToSet: { type: 'string', name: 'heading' } as AnyAttribute,
+            forTarget: 'contentType',
+            targetUid: uid as Internal.UID.ContentType,
+            name: 'title',
+            ...consent,
+          })
+        );
+
+      expect(getTargetField(edit({ recordRename: false }))).toBe('heading');
+      expect(getTargetField(edit({ declineRename: true }))).toBe('heading');
+    });
+
+    it('follows the rename of a NEW field, which records no hop', () => {
+      const state = reducer(
+        buildState([{ name: 'title', type: 'string', status: 'NEW' }, slug] as AnyAttribute[]),
+        editName(uid, 'title', 'heading')
+      );
+
+      expect(getRenames(state, uid)).toBeUndefined();
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('resolves a multi-hop rename to the final name (title -> a -> heading)', () => {
+      let state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'a')
+      );
+      state = reducer(state, editName(uid, 'a', 'heading'));
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('follows each field through a swap (title -> tmp, subtitle -> title, tmp -> subtitle)', () => {
+      let state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          { name: 'subtitle', type: 'string', status: 'UNCHANGED' },
+          slug,
+          { name: 'subSlug', type: 'uid', targetField: 'subtitle', status: 'UNCHANGED' },
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'tmp')
+      );
+      state = reducer(state, editName(uid, 'subtitle', 'title'));
+      state = reducer(state, editName(uid, 'tmp', 'subtitle'));
+
+      expect(getTargetField(state)).toBe('subtitle');
+      expect(getTargetField(state, 'subSlug')).toBe('title');
+    });
+
+    it('stays attached when the renamed target changes from string to text', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        actions.editAttribute({
+          attributeToSet: { type: 'text', name: 'heading' } as AnyAttribute,
+          forTarget: 'contentType',
+          targetUid: uid as Internal.UID.ContentType,
+          name: 'title',
+        })
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('detaches the uid when the renamed target is no longer a string or text', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        actions.editAttribute({
+          attributeToSet: { type: 'integer', name: 'count' } as AnyAttribute,
+          forTarget: 'contentType',
+          targetUid: uid as Internal.UID.ContentType,
+          name: 'title',
+        })
+      );
+
+      expect(getTargetField(state)).toBeUndefined();
+    });
+
+    it('leaves uid fields attached to other fields alone', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          { name: 'subtitle', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'subtitle', 'summary')
+      );
+
+      expect(getTargetField(state)).toBe('title');
+    });
+
+    it('follows the rename of a custom field', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', customField: 'plugin::x.y', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        actions.editCustomFieldAttribute({
+          attributeToSet: {
+            type: 'string',
+            customField: 'plugin::x.y',
+            name: 'heading',
+          } as AnyAttribute,
+          forTarget: 'contentType',
+          targetUid: uid as Internal.UID.ContentType,
+          name: 'title',
+        })
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+  });
+});
+
+describe('CTB | DataManager | reducer | conditions follow a rename', () => {
+  const uid = 'api::article.article';
+
+  const showWhen = (name: string, value: string | boolean = 'x') => ({
+    visible: { '==': [{ var: name }, value] },
+  });
+
+  const conditionVar = (attribute?: AnyAttribute) =>
+    (attribute?.conditions?.visible?.['=='] ?? [])[0]?.var;
+
+  const buildState = (attributes: AnyAttribute[]) =>
+    init({ contentTypes: { [uid]: initCT('article', { attributes }) } });
+
+  const editEnum = (name: string, newName: string, extra: Record<string, unknown> = {}) =>
+    actions.editAttribute({
+      attributeToSet: { type: 'enumeration', enum: ['x', 'y'], name: newName } as AnyAttribute,
+      forTarget: 'contentType',
+      targetUid: uid as Internal.UID.ContentType,
+      name,
+      ...extra,
+    });
+
+  const enumAttribute = (name: string, status: AnyAttribute['status'] = 'UNCHANGED') =>
+    ({ name, type: 'enumeration', enum: ['x', 'y'], status }) as AnyAttribute;
+
+  const textAttribute = (name: string, dependsOn: string) =>
+    ({
+      name,
+      type: 'text',
+      status: 'UNCHANGED',
+      conditions: showWhen(dependsOn),
+    }) as AnyAttribute;
+
+  it('rewrites the conditions of sibling fields that reference the renamed field', () => {
+    const state = reducer(
+      buildState([
+        enumAttribute('type'),
+        textAttribute('details', 'type'),
+        textAttribute('other', 'unrelated'),
+      ]),
+      editEnum('type', 'kind')
+    );
+
+    expect(conditionVar(getAttr(state, uid, 'details'))).toBe('kind');
+    expect(getAttr(state, uid, 'details')?.status).toBe('CHANGED');
+    expect(conditionVar(getAttr(state, uid, 'other'))).toBe('unrelated');
+    expect(getAttr(state, uid, 'other')?.status).toBe('UNCHANGED');
+  });
+
+  it('rewrites conditions when the rename is declined or not recorded', () => {
+    const attributes = [enumAttribute('type'), textAttribute('details', 'type')];
+
+    const declined = reducer(
+      buildState(attributes),
+      editEnum('type', 'kind', { declineRename: true })
+    );
+    const unrecorded = reducer(
+      buildState(attributes),
+      editEnum('type', 'kind', { recordRename: false })
+    );
+
+    expect(getRenames(declined, uid)).toBeUndefined();
+    expect(conditionVar(getAttr(declined, uid, 'details'))).toBe('kind');
+    expect(getRenames(unrecorded, uid)).toBeUndefined();
+    expect(conditionVar(getAttr(unrecorded, uid, 'details'))).toBe('kind');
+  });
+
+  it('rewrites conditions when a NEW field is renamed', () => {
+    const state = reducer(
+      buildState([enumAttribute('type', 'NEW'), textAttribute('details', 'type')]),
+      editEnum('type', 'kind')
+    );
+
+    expect(getRenames(state, uid)).toBeUndefined();
+    expect(conditionVar(getAttr(state, uid, 'details'))).toBe('kind');
+  });
+
+  it('follows every hop of a multi-hop rename (a -> b -> c)', () => {
+    let state = reducer(
+      buildState([enumAttribute('a'), textAttribute('details', 'a')]),
+      editEnum('a', 'b')
+    );
+    state = reducer(state, editEnum('b', 'c'));
+
+    expect(conditionVar(getAttr(state, uid, 'details'))).toBe('c');
+  });
+
+  it('follows a swap (a -> tmp, b -> a, tmp -> b)', () => {
+    let state = reducer(
+      buildState([
+        enumAttribute('a'),
+        enumAttribute('b'),
+        textAttribute('onA', 'a'),
+        textAttribute('onB', 'b'),
+      ]),
+      editEnum('a', 'tmp')
+    );
+    state = reducer(state, editEnum('b', 'a'));
+    state = reducer(state, editEnum('tmp', 'b'));
+
+    expect(conditionVar(getAttr(state, uid, 'onA'))).toBe('b');
+    expect(conditionVar(getAttr(state, uid, 'onB'))).toBe('a');
+  });
+
+  it('rewrites conditions inside a component, and only there', () => {
+    const componentUid = 'default.seo';
+    const initialState = init({
+      contentTypes: {
+        [uid]: initCT('article', {
+          attributes: [enumAttribute('type'), textAttribute('details', 'type')],
+        }),
+      },
+      components: {
+        [componentUid]: initCompo('seo', {
+          attributes: [enumAttribute('type'), textAttribute('details', 'type')],
+        }),
+      },
+    });
+
+    const state = reducer(
+      initialState,
+      actions.editAttribute({
+        attributeToSet: { type: 'enumeration', enum: ['x', 'y'], name: 'kind' } as AnyAttribute,
+        forTarget: 'component',
+        targetUid: componentUid as Internal.UID.Component,
+        name: 'type',
+      })
+    );
+
+    const componentDetails = state.current.components[componentUid].attributes.find(
+      (attr) => attr.name === 'details'
+    );
+
+    expect(conditionVar(componentDetails)).toBe('kind');
+    expect(conditionVar(getAttr(state, uid, 'details'))).toBe('type');
+  });
+
+  it('rewrites conditions when a custom field is renamed', () => {
+    const state = reducer(
+      buildState([
+        { name: 'flag', type: 'boolean', customField: 'plugin::x.flag', status: 'UNCHANGED' },
+        {
+          name: 'details',
+          type: 'text',
+          status: 'UNCHANGED',
+          conditions: showWhen('flag', true),
+        } as AnyAttribute,
+      ]),
+      actions.editCustomFieldAttribute({
+        attributeToSet: {
+          type: 'boolean',
+          customField: 'plugin::x.flag',
+          name: 'toggle',
+        } as AnyAttribute,
+        forTarget: 'contentType',
+        targetUid: uid as Internal.UID.ContentType,
+        name: 'flag',
+      })
+    );
+
+    expect(conditionVar(getAttr(state, uid, 'details'))).toBe('toggle');
+  });
+
+  it('leaves conditions alone when a referenced field is removed', () => {
+    const state = reducer(
+      buildState([enumAttribute('type'), textAttribute('details', 'type')]),
+      actions.removeField({
+        forTarget: 'contentType',
+        targetUid: uid as Internal.UID.ContentType,
+        attributeToRemoveName: 'type',
+      })
+    );
+
+    expect(conditionVar(getAttr(state, uid, 'details'))).toBe('type');
   });
 });

@@ -1,0 +1,15 @@
+{
+  "color-picker.description": "تحديد أي لون",
+  "color-picker.input.aria-label": "حقل إدخال منتقي الألوان",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "اللون",
+  "color-picker.options.advanced.regex": "نمط RegExp",
+  "color-picker.options.advanced.regex.description": "أدخل تعبيرًا نمطيًا للتحقق من صحة قيمة HEX",
+  "color-picker.options.advanced.requiredField": "حقل مطلوب",
+  "color-picker.options.advanced.requiredField.description": "لن تتمكن من إنشاء إدخال إذا كان هذا الحقل فارغًا",
+  "color-picker.settings": "الإعدادات",
+  "color-picker.toggle.aria-label": "زر تبديل منتقي الألوان",
+  "plugin.description.long": "حقل مخصص لانتقاء الألوان يشرف عليه فريق Strapi. استخدم شريطَي تمرير التشبع وتدرج اللون لتحديد لون وحفظ القيمة كسلسلة HEX.",
+  "plugin.description.short": "حقل مخصص لانتقاء الألوان يشرف عليه فريق Strapi.",
+  "plugin.name": "منتقي الألوان"
+}

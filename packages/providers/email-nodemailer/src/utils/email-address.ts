@@ -51,9 +51,11 @@ export const decodeRfc2047 = (encoded: string): string => {
   return encoded.replace(rfc2047Pattern, (match, charset, encoding, text) => {
     try {
       const upperEncoding = encoding.toUpperCase();
+      // RFC 2231 allows a language suffix, e.g. "UTF-8*en"
+      const decoder = new TextDecoder(charset.split('*')[0]);
 
       if (upperEncoding === 'B') {
-        return Buffer.from(text, 'base64').toString('utf-8');
+        return decoder.decode(Buffer.from(text, 'base64'));
       }
 
       if (upperEncoding === 'Q') {
@@ -62,7 +64,7 @@ export const decodeRfc2047 = (encoded: string): string => {
           String.fromCharCode(parseInt(hex, 16))
         );
         const bytes = Buffer.from(decoded, 'binary');
-        return bytes.toString('utf-8');
+        return decoder.decode(bytes);
       }
 
       return match;

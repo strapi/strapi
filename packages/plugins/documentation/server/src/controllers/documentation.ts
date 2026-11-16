@@ -161,9 +161,13 @@ export default {
 
     const { password: hash } = (await strapi
       .store({ type: 'plugin', name: 'documentation', key: 'config' })
-      .get()) as { password: string };
+      .get()) as { password?: string };
 
-    const isValid = await bcrypt.compare(password, hash);
+    // A missing stored hash or a missing submitted password counts as a wrong password
+    const isValid =
+      typeof password === 'string' && typeof hash === 'string'
+        ? await bcrypt.compare(password, hash)
+        : false;
 
     let querystring = '?error=password';
 

@@ -66,6 +66,7 @@ export const buildDocumentOutputSchema = (
         .object({
           availableLocales: z.array(z.record(z.string(), z.unknown())).optional(),
           availableStatus: z.array(z.record(z.string(), z.unknown())).optional(),
+          defaultLocale: z.string().nullable().optional(),
         })
         .optional(),
     })

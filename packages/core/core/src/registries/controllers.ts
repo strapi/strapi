@@ -3,8 +3,7 @@ import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
 export type ControllerFactory =
-  | ((params: { strapi: Core.Strapi }) => Core.Controller)
-  | Core.Controller;
+  ((params: { strapi: Core.Strapi }) => Core.Controller) | Core.Controller;
 export type ControllerFactoryMap = Record<UID.Controller, ControllerFactory>;
 export type ControllerMap = Record<UID.Controller, Core.Controller>;
 export type ControllerExtendFn = (service: Core.Controller) => Core.Controller;

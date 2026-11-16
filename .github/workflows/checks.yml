@@ -9,8 +9,6 @@ on:
       - reopened
       - labeled
       - unlabeled
-      - milestoned
-      - demilestoned
     branches:
       - main
       - develop

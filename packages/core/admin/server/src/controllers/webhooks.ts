@@ -2,7 +2,7 @@ import isLocalhostIp from 'is-localhost-ip';
 import type { Context } from 'koa';
 import _ from 'lodash';
 
-import { yup, validateYupSchema, emitAudit } from '@strapi/utils';
+import { yup, validateYupSchema, emitAudit, errors } from '@strapi/utils';
 
 import type { Modules } from '@strapi/types';
 
@@ -60,12 +60,38 @@ const webhookValidator = yup
         .required();
     }),
     events: yup.array().of(yup.string()).required(),
+    contentTypeEvents: yup.lazy((data) =>
+      yup.object(
+        _.isPlainObject(data)
+          ? _.mapValues(data, () => yup.array().of(yup.string().required()).required())
+          : {}
+      )
+    ),
   })
   .noUnknown();
 
 const updateWebhookValidator = webhookValidator.shape({
   isEnabled: yup.boolean(),
 });
+
+type ContentTypeEvents = Modules.WebhookStore.Webhook['contentTypeEvents'];
+
+/**
+ * Content types already saved on the webhook are not checked, so that a webhook can still be
+ * updated after one of its content types has been deleted.
+ */
+const validateContentTypes = (
+  contentTypeEvents: ContentTypeEvents = {},
+  savedContentTypeEvents: ContentTypeEvents = {}
+) => {
+  Object.keys(contentTypeEvents).forEach((uid) => {
+    if (Object.hasOwn(strapi.contentTypes, uid) || Object.hasOwn(savedContentTypeEvents, uid)) {
+      return;
+    }
+
+    throw new errors.ValidationError(`Content type ${uid} does not exist`);
+  });
+};
 
 export default {
   async listWebhooks(ctx: Context) {
@@ -88,6 +114,7 @@ export default {
     const { body } = ctx.request as CreateWebhook.Request;
 
     await validateYupSchema(webhookValidator)(body);
+    validateContentTypes(body.contentTypeEvents);
 
     const webhook = await strapi.get('webhookStore').createWebhook(body);
 
@@ -109,6 +136,8 @@ export default {
     if (!webhook) {
       return ctx.notFound('webhook.notFound');
     }
+
+    validateContentTypes(body.contentTypeEvents, webhook.contentTypeEvents);
 
     const updatedWebhook = await strapi.get('webhookStore').updateWebhook(id, {
       ...webhook,

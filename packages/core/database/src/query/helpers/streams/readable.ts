@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import type { Knex } from 'knex';
 import type { QueryBuilder } from '../../query-builder';

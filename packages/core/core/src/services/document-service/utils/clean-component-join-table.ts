@@ -125,7 +125,7 @@ const findContentTypeParentForComponentInstance = async (
   if (strapi.components[parent.uid as UID.Component]) {
     // If the parent is a component, we need to check its parents recursively
     const parentComponentSchema = strapi.components[parent.uid as UID.Component];
-    return findContentTypeParentForComponentInstance(
+    return await findContentTypeParentForComponentInstance(
       strapi,
       parentComponentSchema,
       parent.parentId
@@ -256,7 +256,6 @@ const findPublicationStateMismatches = async (
     for (const [sourceId, entries] of Object.entries(entriesBySource)) {
       // Skip entries with single relations
       if (entries.length <= 1) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -268,13 +267,11 @@ const findPublicationStateMismatches = async (
         sourceState = await resolveSourcePublicationState(db, sourceModel, sourceId, strapi);
       } catch {
         // Skip on error — better to leave data alone than to delete the wrong row
-        // eslint-disable-next-line no-continue
         continue;
       }
 
       if (sourceState === null) {
         // Unknown source state — skip to avoid destroying legitimate links
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -287,7 +284,6 @@ const findPublicationStateMismatches = async (
       for (const entry of entries) {
         const docId = String(entry.target_document_id ?? '');
         if (!docId) {
-          // eslint-disable-next-line no-continue
           continue;
         }
         if (!entriesByDocument[docId]) {
@@ -298,7 +294,6 @@ const findPublicationStateMismatches = async (
 
       for (const documentEntries of Object.values(entriesByDocument)) {
         if (documentEntries.length <= 1) {
-          // eslint-disable-next-line no-continue
           continue;
         }
 
@@ -307,7 +302,6 @@ const findPublicationStateMismatches = async (
 
         // Only act when both states are present for the same document
         if (draftRows.length === 0 || publishedRows.length === 0) {
-          // eslint-disable-next-line no-continue
           continue;
         }
 

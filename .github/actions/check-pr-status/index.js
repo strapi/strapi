@@ -23,8 +23,8 @@ async function main() {
       return;
     }
 
-    const labelNames = labels.map((label) => label.name);
-    const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.includes(label));
+    const labelNames = new Set(labels.map((label) => label.name));
+    const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.has(label));
 
     if (hasQaResolution === false) {
       core.setFailed(
@@ -56,17 +56,7 @@ async function main() {
         core.setFailed(
           'Community PRs must target `develop`, not `main`. Please edit the PR and change the base branch to `develop`.'
         );
-
-        return;
       }
-    }
-
-    const milestone = github.context.payload.pull_request?.milestone;
-    const requiresMilestone = baseRef === 'develop';
-    const isMissingMilestone = milestone === null || milestone === undefined;
-
-    if (requiresMilestone === true && isMissingMilestone === true) {
-      core.setFailed(`The PR must have a milestone.`);
     }
   } catch (error) {
     core.setFailed(error.message);

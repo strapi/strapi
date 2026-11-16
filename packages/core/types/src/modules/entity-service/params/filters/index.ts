@@ -94,21 +94,20 @@ type AttributeCondition<
   TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>,
 > =
   GetScalarAttributeValue<TSchemaUID, TAttributeName> extends infer TAttributeValue
-    ?
-        | TAttributeValue // Implicit $eq operator
-        | ({
-            [TIter in Operator.BooleanValue]?: boolean;
-          } & {
-            [TIter in Operator.DynamicValue]?: TAttributeValue;
-          } & {
-            [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
-          } & {
-            [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
-          } & {
-            [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
-          } & {
-            [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
-          })
+    ? | TAttributeValue // Implicit $eq operator
+      | ({
+          [TIter in Operator.BooleanValue]?: boolean;
+        } & {
+          [TIter in Operator.DynamicValue]?: TAttributeValue;
+        } & {
+          [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
+        } & {
+          [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
+        } & {
+          [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
+        } & {
+          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
+        })
     : never;
 
 /**
@@ -158,6 +157,5 @@ type NestedAttributeCondition<
 
 export type AbstractAttributesFiltering<TSchemaUID extends UID.Schema> = {
   [TKey in string]?:
-    | AttributeCondition<TSchemaUID, never>
-    | NestedAttributeCondition<TSchemaUID, never>;
+    AttributeCondition<TSchemaUID, never> | NestedAttributeCondition<TSchemaUID, never>;
 };

@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
-import { test, expect, releaseName } from './fixtures';
+import { test, testLoggedIn, expect, releaseName } from './fixtures';
+import { createReleaseOfMatches } from './release-api';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -11,7 +12,7 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
   const addToReleaseDialog = await page.getByRole('dialog', { name: 'Add to release' });
   await expect(addToReleaseDialog).toBeVisible();
   await expect(
-    addToReleaseDialog.getByRole('radio', { name: 'publish', exact: true })
+    addToReleaseDialog.getByRole('radio', { name: 'Publish', exact: true })
   ).toBeChecked();
   // Select a release
   const submitReleaseButton = await page.getByRole('button', { name: 'Continue' });
@@ -55,8 +56,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     ).not.toBeVisible();
     await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
     await expect(
-      page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+      page.getByRole('gridcell', { name: 'Publish', exact: true }).first()
     ).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Done', exact: true }).first()).toBeVisible();
   });
 
   test('after publishing a release, the CM list view reflects the new status without a manual refresh', async ({
@@ -90,7 +92,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('button', { name: 'Release edit and delete menu' }).click();
     await page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(page.getByRole('dialog', { name: 'Edit release' })).toBeVisible();
-    await page.getByRole('textbox', { name: 'Name' }).fill('Trent Crimm: Independent');
+    await page.getByRole('textbox', { name: 'Release name' }).fill('Trent Crimm: Independent');
     await page.getByRole('button', { name: 'Save' }).click();
     const editedEntryName = 'Trent Crimm: Independent';
     await expect(page.getByRole('heading', { name: editedEntryName })).toBeVisible();
@@ -133,9 +135,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       page.getByRole('row').nth(1).getByRole('gridcell', { name: 'West Ham post match analysis' })
     ).toBeVisible();
 
-    // Navigate to a given row's entry in the content-manager
-    await row.getByRole('button', { name: 'Release action options' }).click();
-    await page.getByRole('menuitem', { name: 'Edit entry' }).click();
+    // Navigate to a given row's entry in the content-manager: the row's actions show on hover
+    await row.hover();
+    await row.getByRole('link', { name: 'Open entry' }).click();
     await page.waitForURL('**/content-manager/collection-types/api::article.article/**');
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
 
@@ -144,8 +146,8 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.waitForURL('/admin/plugins/content-releases/*');
 
     // Remove a given row's entry from the release
-    await row.getByRole('button', { name: 'Release action options' }).click();
-    await page.getByRole('menuitem', { name: 'Remove from release' }).click();
+    await row.hover();
+    await row.getByRole('button', { name: 'Remove from release' }).click();
     await expect(row).not.toBeVisible();
   });
 
@@ -154,7 +156,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
   test(
     'a release mixing publish and unpublish actions is applied atomically',
     { tag: ['@release'] },
-    async ({ page }) => {
+    async ({ page, details }) => {
       // Confirm the release is genuinely mixed: grouped by action it shows both publish and unpublish.
       await page.getByLabel('Group by').click();
       await page.getByRole('option', { name: 'Actions' }).click();
@@ -170,11 +172,54 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       await expect(page.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
       await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
       await expect(
-        page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+        page.getByRole('gridcell', { name: 'Publish', exact: true }).first()
       ).toBeVisible();
       await expect(
-        page.getByRole('gridcell', { name: 'This entry was unpublished.' }).first()
+        page.getByRole('gridcell', { name: 'Unpublish', exact: true }).first()
       ).toBeVisible();
+      await expect(page.getByRole('button', { name: /was skipped$/ })).toHaveCount(0);
+      await expect(page.getByRole('tab', { name: 'Skipped (0)', exact: true })).toBeVisible();
+      // Nothing was skipped, so there is nothing to carry over to a new release
+      await expect(details.createFromSkippedButton).toBeHidden();
+    }
+  );
+
+  // Its own release: starting on the seeded one, like `test` does, would only be navigated away from
+  testLoggedIn(
+    'a release with an entry that is not ready is blocked, shows why and cannot be published',
+    async ({ page, details }) => {
+      const releaseId = await createReleaseOfMatches(page, {
+        name: 'Matchday',
+        releaseCondition: 'all_or_nothing',
+        matches: [{ kit_man: 'Will Kitman', opponent: 'West Ham' }, { kit_man: 'Roy Kent' }],
+      });
+
+      await details.goto(releaseId);
+
+      await expect(page.getByText('Blocked', { exact: true })).toBeVisible();
+      await expect(details.tab('All', 2)).toBeVisible();
+      await expect(details.tab('Ready', 1)).toBeVisible();
+      await expect(details.tab('Not ready', 1)).toBeVisible();
+
+      await details.tab('Not ready').click();
+      await expect(page).toHaveURL(/filter=notReady/);
+      await expect(details.entryCell('Roy Kent')).toBeVisible();
+      await expect(details.entryCell('Will Kitman')).toHaveCount(0);
+
+      await details
+        .entryRow('Roy Kent')
+        .getByRole('button', { name: 'Why Roy Kent isn’t ready' })
+        .click();
+      const reason = page.getByRole('dialog');
+      // The status, and the reason beside it
+      await expect(reason.getByText('Not ready', { exact: true })).toBeVisible();
+      await expect(reason.getByText('Validation error', { exact: true })).toBeVisible();
+      await expect(reason.getByText('Opponent', { exact: true })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(reason).toBeHidden();
+
+      // Blocked means running now would release nothing
+      await expect(details.publishButton).toBeDisabled();
     }
   );
 });
