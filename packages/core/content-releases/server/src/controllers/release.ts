@@ -13,7 +13,6 @@ import type {
   UpdateRelease,
   PublishRelease,
   GetRelease,
-  Release,
   DeleteRelease,
   GetReleases,
   GetReleasesByDocumentAttached,
@@ -21,8 +20,6 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
-
-type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
 const releaseController = {
   /**
@@ -100,7 +97,7 @@ const releaseController = {
           $or: [
             {
               id: {
-                $notIn: relatedReleases.map((release: any) => release.id),
+                $notIn: relatedReleases.map((release) => release.id),
               },
             },
             {
@@ -130,12 +127,10 @@ const releaseController = {
     const { results, pagination } = await releaseService.findPage(query);
 
     const notReadyCounts = await getService('release-action', { strapi }).countNotReadyByRelease(
-      results
-        .filter((release: ReleaseWithPopulatedActions) => !release.releasedAt)
-        .map((release: ReleaseWithPopulatedActions) => release.id)
+      results.filter((release) => !release.releasedAt).map((release) => release.id)
     );
 
-    const data = results.map((release: ReleaseWithPopulatedActions) => {
+    const data = results.map((release) => {
       const { actions, ...releaseData } = release;
       const notReadyCount = notReadyCounts.get(release.id);
 
@@ -224,7 +219,7 @@ const releaseController = {
     });
 
     const mappedEntriesInReleases = releasesWithActions.reduce(
-      (acc: MapEntriesToReleases.Response['data'], release: Release) => {
+      (acc: MapEntriesToReleases.Response['data'], release) => {
         release.actions.forEach((action) => {
           if (action.contentType !== contentTypeUid) {
             return;
