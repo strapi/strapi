@@ -132,6 +132,31 @@ describe('VersionsList', () => {
       expect(await screen.findByRole('tooltip', { name: 'Deploy token' })).toBeInTheDocument();
     });
 
+    it('shows the full label of a cut deleted author on hover', async () => {
+      widthMocks = mockNameWidth(200);
+      const [currentVersion, version] = mockHistoryVersionsData.historyVersions.data;
+      const versions = {
+        ...mockHistoryVersionsData.historyVersions,
+        data: [
+          currentVersion,
+          {
+            ...version,
+            author: { type: 'token', model: 'admin::api-token', id: null, name: null },
+          },
+        ],
+      };
+      const { user } = render(
+        // @ts-expect-error we don't need all the context
+        <HistoryProvider page={1} versions={versions}>
+          <VersionsList />
+        </HistoryProvider>
+      );
+
+      await user.hover(within(screen.getAllByRole('link')[1]).getByText('Deleted token'));
+
+      expect(await screen.findByRole('tooltip', { name: 'Deleted token' })).toBeInTheDocument();
+    });
+
     it('shows no tooltip for a name that fits', async () => {
       widthMocks = mockNameWidth(100);
       const { user } = renderVersions();

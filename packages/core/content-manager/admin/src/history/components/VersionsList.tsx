@@ -29,12 +29,18 @@ const BlueText = (children: React.ReactNode) => (
  * TruncatedName
  * -----------------------------------------------------------------------------------------------*/
 
+const NameText = styled(Typography)<{ $isDeleted: boolean }>`
+  font-style: ${({ $isDeleted }) => ($isDeleted ? 'italic' : 'normal')};
+`;
+
 const TruncatedName = ({
   name,
+  isDeleted = false,
   isTooltipOpen,
   onTooltipOpenChange,
 }: {
   name: string;
+  isDeleted?: boolean;
   isTooltipOpen?: boolean;
   onTooltipOpenChange?: (open: boolean) => void;
 }) => {
@@ -68,9 +74,17 @@ const TruncatedName = ({
       open={isTooltipOpen}
       onOpenChange={onTooltipOpenChange}
     >
-      <Typography ref={attachName} tag="span" variant="pi" ellipsis onPointerEnter={measureName}>
+      <NameText
+        ref={attachName}
+        tag="span"
+        variant="pi"
+        textColor={isDeleted ? 'neutral500' : undefined}
+        ellipsis
+        onPointerEnter={measureName}
+        $isDeleted={isDeleted}
+      >
         {name}
-      </Typography>
+      </NameText>
     </Tooltip>
   );
 };
@@ -106,10 +120,6 @@ const DELETED_AUTHOR_LABELS: Record<HistoryVersions.HistoryVersionAuthorType, Me
   },
 };
 
-const ItalicName = styled(Typography)`
-  font-style: italic;
-`;
-
 const VersionDescription = styled(Typography)`
   display: flex;
   align-items: center;
@@ -136,17 +146,12 @@ const VersionAuthorName = ({
           <Icon />
         </AccessibleIcon>
       </Flex>
-      {author.name ? (
-        <TruncatedName
-          name={author.name}
-          isTooltipOpen={isNameTooltipOpen}
-          onTooltipOpenChange={onNameTooltipOpenChange}
-        />
-      ) : (
-        <ItalicName tag="span" variant="pi" textColor="neutral500">
-          {formatMessage(DELETED_AUTHOR_LABELS[author.type])}
-        </ItalicName>
-      )}
+      <TruncatedName
+        name={author.name || formatMessage(DELETED_AUTHOR_LABELS[author.type])}
+        isDeleted={!author.name}
+        isTooltipOpen={isNameTooltipOpen}
+        onTooltipOpenChange={onNameTooltipOpenChange}
+      />
     </Flex>
   );
 };
