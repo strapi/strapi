@@ -69,7 +69,7 @@ export const base = {
               'lodash/find.js',
             ],
             message:
-              'Use native Array.prototype.concat (or an array spread), filter or find instead. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
+              'Use `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), and native filter or find. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
           },
         ],
         paths: [
@@ -87,7 +87,7 @@ export const base = {
               'find',
             ],
             message:
-              'Use native Array.isArray, Array.prototype.forEach / concat / filter / find or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
+              'Use native Array.isArray, Array.prototype.forEach / filter / find, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
           },
         ],
       },
