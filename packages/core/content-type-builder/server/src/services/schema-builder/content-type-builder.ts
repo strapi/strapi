@@ -33,6 +33,9 @@ const reuseUnsetPreviousProperties = (
 /**
  * Whether `relation`, an attribute of the type being edited (as sent in the save, or as
  * stored), is a relation to `target` that names `targetAttributeName` as its other side.
+ * An attribute sent in the save names its other side with `targetAttribute`: a body in the
+ * format of the GET response of the single-type route also has the stored `inversedBy`, which
+ * names the other side before the edit. A stored attribute names it with `inversedBy`.
  */
 const namesOtherSide = (
   relation: InternalAttribute | undefined,
@@ -49,10 +52,15 @@ const namesOtherSide = (
     inversedBy,
   } = relation as InternalRelationAttribute;
 
-  return (
-    relationTarget === target &&
-    (targetAttribute === targetAttributeName || inversedBy === targetAttributeName)
-  );
+  if (relationTarget !== target) {
+    return false;
+  }
+
+  if (targetAttribute !== undefined) {
+    return targetAttribute === targetAttributeName;
+  }
+
+  return inversedBy === targetAttributeName;
 };
 
 /**
@@ -338,6 +346,13 @@ export default function createComponentBuilder() {
         return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
       });
 
+      // The attributes of the type after the edit: `setAttributes` keeps the attributes that
+      // are not configurable
+      const attributesAfterEdit = {
+        ..._.pickBy(oldAttributes, (attribute) => !isConfigurable(attribute)),
+        ...newAttributes,
+      };
+
       const newKeys = _.difference(Object.keys(newAttributes), Object.keys(oldAttributes));
       const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
@@ -353,7 +368,7 @@ export default function createComponentBuilder() {
           const targetAttributeName = relationAttribute.inversedBy || relationAttribute.mappedBy;
 
           if (targetAttributeName !== null && targetAttributeName !== undefined) {
-            this.unsetRelation({ key, uid, attribute, attributes: newAttributes });
+            this.unsetRelation({ key, uid, attribute, attributes: attributesAfterEdit });
           }
         }
       });
@@ -375,7 +390,7 @@ export default function createComponentBuilder() {
             key,
             uid,
             attribute: oldAttribute,
-            attributes: newAttributes,
+            attributes: attributesAfterEdit,
           });
         }
 
@@ -393,7 +408,12 @@ export default function createComponentBuilder() {
           const targetHasChanged = oldRelationAttribute.target !== relationAttribute.target;
 
           if (!sameRelation || targetAttributeHasChanged || targetHasChanged) {
-            this.unsetRelation({ key, uid, attribute: oldAttribute, attributes: newAttributes });
+            this.unsetRelation({
+              key,
+              uid,
+              attribute: oldAttribute,
+              attributes: attributesAfterEdit,
+            });
           }
 
           // keep extra options that were set manually on oldAttribute

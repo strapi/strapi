@@ -136,6 +136,18 @@ const bookOnlyRetarget = (extraAttributes: Array<Record<string, unknown>> = []) 
     ...extraAttributes,
   ]);
 
+const schemaFile = (folder: string) =>
+  path.join(apiDir, folder, 'content-types', folder, 'schema.json');
+
+/** Sends the GET response of the single-type route back, after `change` edits its schema. */
+const putBookFromGet = async (change: (schema: Record<string, any>) => void) => {
+  const url = `/content-type-builder/content-types/${BOOK_UID}`;
+  const { body } = await rq({ method: 'GET', url });
+  change(body.data.schema);
+
+  return rq({ method: 'PUT', url, body: { contentType: body.data.schema } });
+};
+
 describe('Content Type Builder - retarget a relation under its own name', () => {
   beforeAll(async () => {
     await boot();
@@ -231,13 +243,7 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
     await createTypes();
 
     // Shelf.books is a one-way relation to Book: not the other side of Book.shelf
-    const shelfSchemaPath = path.join(
-      apiDir,
-      'rt-shelf',
-      'content-types',
-      'rt-shelf',
-      'schema.json'
-    );
+    const shelfSchemaPath = schemaFile('rt-shelf');
     const shelfSchema = await fse.readJSON(shelfSchemaPath);
     shelfSchema.attributes.books = { type: 'relation', relation: 'oneToMany', target: BOOK_UID };
     await fse.writeJSON(shelfSchemaPath, shelfSchema, { spaces: 2 });
@@ -300,5 +306,61 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
     expect(shelves.statusCode).toBe(200);
     expect(shelves.body.data).toHaveLength(1);
     expect(shelves.body.data[0]).not.toHaveProperty('books');
+  });
+  test('renames the counterpart through the single-type route', async () => {
+    await createTypes();
+
+    // The GET response has the stored inversedBy next to targetAttribute
+    const res = await putBookFromGet((schema) => {
+      expect(schema.attributes.shelf).toMatchObject({
+        targetAttribute: 'books',
+        inversedBy: 'books',
+      });
+      schema.attributes.shelf.targetAttribute = 'tomes';
+    });
+    expect(res.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+    expect(attributesOf(SHELF_UID).tomes).toMatchObject({ mappedBy: 'shelf' });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'tomes' });
+  });
+
+  test('retargets through the single-type route next to a non-configurable owner of the same inverse side', async () => {
+    await createTypes();
+
+    // Book.mainShelf, not configurable, is the owner of Shelf.books
+    const bookSchema = await fse.readJSON(schemaFile('rt-book'));
+    bookSchema.attributes.mainShelf = {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: SHELF_UID,
+      inversedBy: 'books',
+      configurable: false,
+    };
+    await fse.writeJSON(schemaFile('rt-book'), bookSchema, { spaces: 2 });
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.books.mappedBy = 'mainShelf';
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const res = await putBookFromGet((schema) => {
+      schema.attributes.shelf.target = BOOKCASE_UID;
+    });
+    expect(res.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'mainShelf' });
+    expect(attributesOf(BOOK_UID).mainShelf).toMatchObject({
+      target: SHELF_UID,
+      inversedBy: 'books',
+    });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+      target: BOOKCASE_UID,
+      inversedBy: 'books',
+    });
+    expect(attributesOf(BOOKCASE_UID).books).toMatchObject({ mappedBy: 'shelf' });
   });
 });

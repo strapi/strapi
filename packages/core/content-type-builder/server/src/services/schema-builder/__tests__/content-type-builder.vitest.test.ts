@@ -667,6 +667,57 @@ describe('content-type-builder editContentType with retargeted relations', () =>
       expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
     });
 
+    describe('with a body in the format of the GET response of the single-type route', () => {
+      // That body has the stored inversedBy or mappedBy next to targetAttribute
+      it('renames the counterpart', () => {
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: { ...relation(kind, shelfUid, 'tomes'), inversedBy: 'books' },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'tomes']);
+      });
+
+      it('keeps an inverse side that a non-configurable owner names when the other owner is retargeted', () => {
+        // Book.mainShelf, not configurable, and Book.shelf both name Shelf.books; Shelf.books
+        // is paired with Book.mainShelf
+        const { contentTypes } = (global as any).strapi;
+        const mainShelf = {
+          type: 'relation',
+          relation: kind,
+          target: shelfUid,
+          inversedBy: 'books',
+          configurable: false,
+        };
+        contentTypes[bookUid].__schema__.attributes.mainShelf = mainShelf;
+        contentTypes[shelfUid].__schema__.attributes.books.mappedBy = 'mainShelf';
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              mainShelf: { ...mainShelf, targetAttribute: 'books' },
+              shelf: { ...relation(kind, bookcaseUid, 'books'), inversedBy: 'books' },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookUid).mainShelf).toEqual(mainShelf);
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({
+          target: bookUid,
+          mappedBy: 'mainShelf',
+        });
+        expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'books']);
+      });
+    });
+
     describe('when the save leaves out the old target type', () => {
       // Saves with only Book, as the AI chat or a direct update-schema call can send
       const counterpartOptions = {
