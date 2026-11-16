@@ -2,6 +2,10 @@
  * This hook doesn't use a context provider because we fetch directly from the server,
  * this sounds expensive but actually, it's really not. Because we have redux-toolkit-query
  * being a cache layer so if nothing invalidates the cache, we don't fetch again.
+ *
+ * The network is deduplicated, but the work done inside the hook is not: it can be mounted
+ * by hundreds of fields at once, so anything expensive it derives must be cached outside of
+ * the hook instance (see `getValidationSchema`).
  */
 
 import * as React from 'react';
@@ -44,6 +48,35 @@ type UseDocumentOpts = Parameters<typeof useGetDocumentQuery>[1];
 type Document = FindOne.Response['data'];
 
 type Schema = ContentType;
+
+type ValidationSchema = ReturnType<typeof createYupSchema>;
+
+// Building the yup schema of a model clones a schema for every nested component and dynamic
+// zone: on large models it takes seconds and gigabytes. `schema` and `components` identities
+// are shared across hook instances (see `useContentTypeSchema`), so build it once per pair,
+// and only when something actually validates.
+const validationSchemaCache = new WeakMap<
+  Schema,
+  WeakMap<ComponentsDictionary, ValidationSchema>
+>();
+
+const getValidationSchema = (schema: Schema, components: ComponentsDictionary) => {
+  let byComponents = validationSchemaCache.get(schema);
+
+  if (!byComponents) {
+    byComponents = new WeakMap();
+    validationSchemaCache.set(schema, byComponents);
+  }
+
+  let validationSchema = byComponents.get(components);
+
+  if (!validationSchema) {
+    validationSchema = createYupSchema(schema.attributes, components);
+    byComponents.set(components, validationSchema);
+  }
+
+  return validationSchema;
+};
 
 type UseDocument = (
   args: UseDocumentArgs,
@@ -179,21 +212,15 @@ const useDocument: UseDocument = (args, opts) => {
     }
   }, [toggleNotification, error, formatAPIError, args.collectionType]);
 
-  const validationSchema = React.useMemo(() => {
-    if (!schema) {
-      return null;
-    }
-
-    return createYupSchema(schema.attributes, components);
-  }, [schema, components]);
-
   const validate = React.useCallback(
     (document: Modules.Documents.AnyDocument): FormErrors | null => {
-      if (!validationSchema) {
+      if (!schema) {
         throw new Error(
           'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
         );
       }
+
+      const validationSchema = getValidationSchema(schema, components);
 
       try {
         validationSchema.validateSync(document, { abortEarly: false, strict: true });
@@ -206,7 +233,7 @@ const useDocument: UseDocument = (args, opts) => {
         throw error;
       }
     },
-    [validationSchema]
+    [schema, components]
   );
 
   /**
@@ -219,11 +246,10 @@ const useDocument: UseDocument = (args, opts) => {
    *     `pluginOptions.i18n.localized` is `undefined` count as non-localized
    *     (an attribute created without the i18n plugin has no i18n options at
    *     all but is still inherited at save by `copyNonLocalizedFields`).
-   *   - scalar or media — `component` / `dynamiczone` / `relation` are excluded
-   *     because the server doesn't populate them in `availableLocales` either,
-   *     so there'd be nothing to copy from.
+   *   - scalar, media, component, or dynamic zone — relations are excluded
+   *     because the server doesn't populate them in `availableLocales` either.
    */
-  const nonLocalizedScalarAndMediaFields = React.useMemo(() => {
+  const nonLocalizedFieldsToInherit = React.useMemo(() => {
     if (!schema?.attributes) {
       return [];
     }
@@ -235,11 +261,7 @@ const useDocument: UseDocument = (args, opts) => {
         return false;
       }
 
-      return (
-        attribute.type !== 'component' &&
-        attribute.type !== 'dynamiczone' &&
-        attribute.type !== 'relation'
-      );
+      return attribute.type !== 'relation';
     });
   }, [schema]);
 
@@ -251,12 +273,11 @@ const useDocument: UseDocument = (args, opts) => {
    *
    * We also prepare the form for new documents, so we need to:
    * - set default values on fields
-   * - inherit non-localized scalar/media values from a sibling locale.
-   *   Scope is intentionally limited to scalars and media — that is exactly
-   *   what the server populates into `meta.availableLocales` (see
+   * - inherit non-localized scalar/media/component/dynamic-zone values from a sibling locale.
+   *   Scope matches what the server populates into `meta.availableLocales` (see
    *   `packages/core/content-manager/server/src/services/document-metadata.ts`).
-   *   Components, dynamic zones, and relations are not in that payload; the
-   *   server fills them at save time via `copyNonLocalizedFields` (in
+   *   Relations are not in that payload; the server fills them at save time via
+   *   `copyNonLocalizedFields` (in
    *   `packages/core/core/src/services/document-service/internationalization.ts`)
    *   when the new locale row is first created.
    *   Baking the inheritance into `initialValues` here is what lets it survive
@@ -291,8 +312,8 @@ const useDocument: UseDocument = (args, opts) => {
       // - Avoids coupling this hook to `useGetLocalesQuery` just to find the
       //   default locale.
       const sibling = meta?.availableLocales?.[0] as Record<string, unknown> | undefined;
-      if (sibling && nonLocalizedScalarAndMediaFields.length > 0) {
-        const inherited = nonLocalizedScalarAndMediaFields.reduce<AnyData>((acc, name) => {
+      if (sibling && nonLocalizedFieldsToInherit.length > 0) {
+        const inherited = nonLocalizedFieldsToInherit.reduce<AnyData>((acc, name) => {
           if (name in sibling) {
             acc[name] = sibling[name];
           }
@@ -310,7 +331,7 @@ const useDocument: UseDocument = (args, opts) => {
       schema,
       components,
       meta?.availableLocales,
-      nonLocalizedScalarAndMediaFields,
+      nonLocalizedFieldsToInherit,
     ]
   );
 

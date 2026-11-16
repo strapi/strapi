@@ -1,0 +1,68 @@
+import { describe, expect, it, vi } from 'vitest';
+import bootstrap from '../bootstrap';
+import createValidationService from '../services/validation';
+import defaultStages from '../constants/default-stages.json';
+
+/**
+ * Runs the plugin `bootstrap` on an empty database, with the real validation service reading the
+ * license `stagesPerWorkflow`. Returns the data of the default workflow it created.
+ */
+const bootWith = async (stagesPerWorkflow: unknown) => {
+  const services: Record<string, any> = {
+    stages: { count: vi.fn().mockResolvedValue(0) },
+    'workflow-weekly-metrics': { registerCron: vi.fn() },
+    'document-service-middlewares': {},
+  };
+  // The workflows service validates the stages against the limits before creating the workflow
+  const create = vi.fn(async ({ data }: { data: { stages: unknown[] } }) => {
+    validation.validateWorkflowStages(data.stages);
+    return data;
+  });
+  services.workflows = { count: vi.fn().mockResolvedValue(0), create };
+
+  const strapi = {
+    plugin: () => ({ service: (name: string) => services[name] }),
+    service: () => ({ actionProvider: { registerMany: vi.fn() } }),
+    get: () => ({ addAllowedEvent: vi.fn() }),
+    has: () => false,
+    documents: { use: vi.fn() },
+    ee: {
+      features: {
+        get: () => ({ name: 'review-workflows', options: { stagesPerWorkflow } }),
+      },
+    },
+  } as any;
+  const validation = createValidationService({ strapi });
+  services.validation = validation;
+
+  await bootstrap({ strapi });
+
+  expect(create).toHaveBeenCalledTimes(1);
+  return create.mock.calls[0][0].data;
+};
+
+describe('review-workflows bootstrap', () => {
+  it.each([1, 2, 3])(
+    'creates the default workflow with the first %i stages when the license allows fewer than 4',
+    async (stagesPerWorkflow) => {
+      const workflow = await bootWith(stagesPerWorkflow);
+
+      expect(workflow.stages).toEqual(defaultStages.slice(0, stagesPerWorkflow));
+    }
+  );
+
+  it.each([4, 5, 200])(
+    'creates the default workflow with all 4 stages when the license allows %i',
+    async (stagesPerWorkflow) => {
+      const workflow = await bootWith(stagesPerWorkflow);
+
+      expect(workflow.stages).toEqual(defaultStages);
+    }
+  );
+
+  it('creates the default workflow with all 4 stages when the license stage limit is not a number', async () => {
+    const workflow = await bootWith('not-a-number');
+
+    expect(workflow.stages).toEqual(defaultStages);
+  });
+});

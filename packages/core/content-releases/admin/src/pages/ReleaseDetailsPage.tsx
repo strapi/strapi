@@ -6,21 +6,21 @@ import {
   Table,
   BackButton,
   ConfirmDialog,
-  useTracking,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
   useRBAC,
-  isFetchError,
   useStrapiApp,
   Layouts,
 } from '@strapi/admin/strapi-admin';
 import {
+  Box,
   Button,
   Flex,
   Main,
   Tr,
   Td,
+  Tooltip,
   Typography,
   Badge,
   SingleSelect,
@@ -30,24 +30,44 @@ import {
   Dialog,
   SimpleMenu,
   Menu,
+  Tabs,
+  Divider,
 } from '@strapi/design-system';
-import { More, Pencil, Trash } from '@strapi/icons';
+import { Download, More, Pencil, Trash, Upload } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import format from 'date-fns/format';
-import { utcToZonedTime } from 'date-fns-tz';
-import { useIntl, type MessageDescriptor } from 'react-intl';
+import { useIntl, type IntlShape, type MessageDescriptor } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { EntryValidationPopover } from '../components/EntryValidationPopover';
+import {
+  CreateReleaseFromSkippedDrawer,
+  getExistingEntries,
+  hasLoadedEveryEntry,
+  getSkippedEntriesQuery,
+} from '../components/CreateReleaseFromSkippedDrawer';
+import { EntryLinkButton } from '../components/EntryLinkButton';
+import {
+  EntryReasonDrawer,
+  getReasonTitle,
+  type EntryReasonDetails,
+} from '../components/EntryReasonDrawer';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
-import { ReleaseModal, FormValues } from '../components/ReleaseModal';
+import {
+  InlineBadge,
+  PlannedActionStatus,
+  ReleasedActionStatus,
+  hasSkipReason,
+  isActionNotReady,
+} from '../components/ReleaseActionStatus';
+import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
+import { ReleaseStatusBadge } from '../components/ReleaseStatusBadge';
 import { PERMISSIONS } from '../constants';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
+  useLazyGetReleaseActionsQuery,
   useGetReleaseQuery,
   useGetReleaseSettingsQuery,
   useUpdateReleaseMutation,
@@ -58,14 +78,148 @@ import {
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
 import { isBaseQueryError } from '../utils/api';
-import { getTimezoneOffset } from '../utils/time';
-
-import { getBadgeProps } from './ReleasesPage';
+import { getReleaseDateParts } from '../utils/time';
 
 import type {
+  FormattedReleaseAction,
   ReleaseAction,
+  ReleaseActionFilter,
   ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
+import type { ReleaseDataResponse } from '../../../shared/contracts/releases';
+
+// The drawer's rows load 100 first, then twice as many each time it needs more
+const REASON_PAGE_SIZE = 100;
+// Looking for the opened row stops there: past it, the drawer steps through the table's rows
+const MAX_REASON_SEARCH_SIZE = 500;
+// A held entry's reason names this many of the entries that held it back, then counts the rest
+const BLOCKERS_SHOWN = 5;
+
+const getRunTotals = (release: ReleaseDataResponse) => {
+  if (
+    !release.releasedAt ||
+    release.failureReason === 'failed_before_upgrade' ||
+    typeof release.totalSkippedEntries !== 'number'
+  ) {
+    return null;
+  }
+
+  const released = (release.totalPublishedEntries ?? 0) + (release.totalUnpublishedEntries ?? 0);
+
+  return {
+    released,
+    skipped: release.totalSkippedEntries,
+    total: released + release.totalSkippedEntries,
+  };
+};
+
+// A run that skipped every entry ran, but released nothing. A release that froze without running
+// (`failureReason`) isn't one: it never ran.
+const hasRunReleasedNothing = (release: ReleaseDataResponse) => {
+  const totals = getRunTotals(release);
+
+  return !release.failureReason && totals !== null && totals.total > 0 && totals.released === 0;
+};
+
+/**
+ * How a row names its entry: by its main field, else "Untitled". An entry gone once its release
+ * ran is a "Deleted entry".
+ */
+const getEntryNaming = (
+  { entry, contentType }: Pick<FormattedReleaseAction, 'entry' | 'contentType'>,
+  isFrozen: boolean,
+  formatMessage: IntlShape['formatMessage']
+) => {
+  const isDeleted = isFrozen && !entry;
+  const isUntitled = !isDeleted && !contentType.mainFieldValue;
+
+  if (isDeleted) {
+    return {
+      isDeleted,
+      isUntitled,
+      entryName: formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.table.deleted-entry',
+        defaultMessage: 'Deleted entry',
+      }),
+    };
+  }
+
+  if (isUntitled) {
+    return {
+      isDeleted,
+      isUntitled,
+      entryName: formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.table.untitled',
+        defaultMessage: 'Untitled',
+      }),
+    };
+  }
+
+  return { isDeleted, isUntitled, entryName: `${contentType.mainFieldValue}` };
+};
+
+type ReleaseTabValue = 'all' | ReleaseActionFilter;
+
+interface ReleaseTab {
+  value: ReleaseTabValue;
+  label: MessageDescriptor;
+  count?: number;
+}
+
+const ALL_TAB_LABEL = {
+  id: 'content-releases.pages.ReleaseDetails.tab.all',
+  defaultMessage: 'All',
+};
+
+const getReleaseTabs = (release: ReleaseDataResponse): ReleaseTab[] => {
+  if (release.releasedAt) {
+    const totals = getRunTotals(release);
+
+    if (!totals) {
+      return [{ value: 'all', label: ALL_TAB_LABEL }];
+    }
+
+    return [
+      { value: 'all', label: ALL_TAB_LABEL, count: totals.total },
+      {
+        value: 'released',
+        label: {
+          id: 'content-releases.pages.ReleaseDetails.tab.released',
+          defaultMessage: 'Released',
+        },
+        count: totals.released,
+      },
+      {
+        value: 'skipped',
+        label: {
+          id: 'content-releases.pages.ReleaseDetails.tab.skipped',
+          defaultMessage: 'Skipped',
+        },
+        count: totals.skipped,
+      },
+    ];
+  }
+
+  const total = release.actions.meta.count;
+  const { notReadyCount } = release.actions.meta;
+
+  return [
+    { value: 'all', label: ALL_TAB_LABEL, count: total },
+    {
+      value: 'ready',
+      label: { id: 'content-releases.pages.ReleaseDetails.tab.ready', defaultMessage: 'Ready' },
+      count: notReadyCount === undefined ? undefined : total - notReadyCount,
+    },
+    {
+      value: 'notReady',
+      label: {
+        id: 'content-releases.pages.ReleaseDetails.tab.not-ready',
+        defaultMessage: 'Not ready',
+      },
+      count: notReadyCount,
+    },
+  ];
+};
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -78,13 +232,53 @@ const ReleaseInfoWrapper = styled(Flex)`
 `;
 
 interface ReleaseDetailsLayoutProps {
-  toggleEditReleaseModal: () => void;
+  toggleEditDrawer: () => void;
   toggleWarningSubmit: () => void;
   children: React.ReactNode;
 }
 
+/**
+ * What the toast says of a run that released nothing: the entry that held back an `all_or_nothing`
+ * run, when the run recorded one. What failed in an `allow_partial` run was only skipped.
+ */
+const useFailedRunMessage = (release?: Pick<ReleaseDataResponse, 'releaseCondition'>) => {
+  const { formatMessage } = useIntl();
+  const [getBlockingActions] = useLazyGetReleaseActionsQuery();
+
+  return async (releaseId: string, error: string) => {
+    const blocking =
+      release?.releaseCondition === 'all_or_nothing'
+        ? (await getBlockingActions({ releaseId, filter: 'blocking', page: 1, pageSize: 1 })).data
+        : undefined;
+    const [blocker] = Object.values(blocking?.data ?? {}).flat();
+
+    if (!blocker) {
+      return formatMessage(
+        {
+          id: 'content-releases.pages.ReleaseDetails.publish-notification-failed',
+          defaultMessage: 'Nothing was released: {error}',
+        },
+        { error }
+      );
+    }
+
+    return formatMessage(
+      {
+        id: 'content-releases.pages.ReleaseDetails.publish-notification-failed-held',
+        defaultMessage:
+          'Nothing was released, held back by {entry}{others, plural, =0 {} one { and # other entry} other { and # other entries}}: {error}',
+      },
+      {
+        entry: getEntryNaming(blocker, true, formatMessage).entryName,
+        others: (blocking?.meta.pagination.total ?? 1) - 1,
+        error,
+      }
+    );
+  };
+};
+
 const ReleaseDetailsLayout = ({
-  toggleEditReleaseModal,
+  toggleEditDrawer,
   toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
@@ -102,39 +296,73 @@ const ReleaseDetailsLayout = ({
   );
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { allowedActions } = useRBAC(PERMISSIONS);
-  const { canUpdate, canDelete, canPublish } = allowedActions;
+  const { canCreate, canCreateAction, canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
-  const { trackUsage } = useTracking();
+  const [isSkippedDrawerOpen, setIsSkippedDrawerOpen] = React.useState(false);
 
   const release = data?.data;
+  const getFailedRunMessage = useFailedRunMessage(release);
+  // Creating the release adds its actions, so it takes both permissions, as the route does.
+  // A run that failed before the upgrade may have released some entries without recording which,
+  // so the page doesn't offer to release them again.
+  const canCreateFromSkipped =
+    Boolean(release?.releasedAt) &&
+    (release?.status === 'partial' || release?.status === 'failed') &&
+    release?.failureReason !== 'failed_before_upgrade' &&
+    canCreate &&
+    canCreateAction;
+  const { data: skippedData } = useGetReleaseActionsQuery(getSkippedEntriesQuery(releaseId!), {
+    skip: !canCreateFromSkipped,
+  });
 
   const handlePublishRelease = (id: string) => async () => {
     const response = await publishRelease({ id });
 
     if ('data' in response) {
-      // When the response returns an object with 'data', handle success
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'content-releases.pages.ReleaseDetails.publish-notification-success',
-          defaultMessage: 'Release was published successfully.',
-        }),
-      });
+      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries, totalSkippedEntries } =
+        response.data.meta;
 
-      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries } = response.data.meta;
+      if (response.data.data.status === 'partial') {
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage(
+            {
+              id: 'content-releases.pages.ReleaseDetails.publish-notification-partial',
+              defaultMessage:
+                'Released {released} of {total, plural, one {# entry} other {# entries}}, {skipped} skipped',
+            },
+            {
+              released: totalPublishedEntries + totalUnpublishedEntries,
+              total: totalEntries,
+              skipped: totalSkippedEntries,
+            }
+          ),
+        });
+      } else {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.publish-notification-success',
+            defaultMessage: 'Release was published successfully.',
+          }),
+        });
+      }
+    } else if (isBaseQueryError(response.error)) {
+      const error = response.error;
+      const apiError = formatAPIError(error);
+      // A run that failed sends the release it froze: it ran and released nothing. Without it,
+      // the publish was refused, e.g. a blocked release.
+      const hasRunFailed =
+        'details' in error &&
+        typeof error.details === 'object' &&
+        error.details !== null &&
+        'release' in error.details;
 
-      trackUsage('didPublishRelease', {
-        totalEntries,
-        totalPublishedEntries,
-        totalUnpublishedEntries,
-      });
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
-        message: formatAPIError(response.error),
+        message: hasRunFailed ? await getFailedRunMessage(id, apiError) : apiError,
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
@@ -194,9 +422,13 @@ const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
+  // Entries deleted since the run can't be carried over. Unloaded ones may still exist.
+  const hasSkippedEntriesToCarryOver =
+    skippedData !== undefined &&
+    (getExistingEntries(skippedData).length > 0 || !hasLoadedEveryEntry(skippedData));
+  const showCreateFromSkipped = canCreateFromSkipped && hasSkippedEntriesToCarryOver;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
-  const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
       id: 'content-releases.pages.Details.header-subtitle',
@@ -204,28 +436,89 @@ const ReleaseDetailsLayout = ({
     },
     { number: totalEntries }
   );
-  const scheduledText = isScheduled
-    ? formatMessage(
-        {
+
+  // A release that ran shows when. One that missed its schedule or failed before the upgrade never
+  // ran: it shows when it was scheduled for, not when it was frozen.
+  const getHeaderDate = () => {
+    if (release.releasedAt && !release.failureReason) {
+      return {
+        message: hasRunReleasedNothing(release)
+          ? {
+              id: 'content-releases.pages.ReleaseDetails.header-subtitle.ran-on',
+              defaultMessage: 'Ran on {date} at {time} ({offset})',
+            }
+          : {
+              id: 'content-releases.pages.ReleaseDetails.header-subtitle.released-on',
+              defaultMessage: 'Released on {date} at {time} ({offset})',
+            },
+        date: new Date(release.releasedAt),
+        timeZone: release.timezone,
+      };
+    }
+
+    if (release.scheduledAt && release.timezone) {
+      return {
+        message: {
           id: 'content-releases.pages.ReleaseDetails.header-subtitle.scheduled',
           defaultMessage: 'Scheduled for {date} at {time} ({offset})',
         },
-        {
-          date: formatDate(new Date(release.scheduledAt!), {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            timeZone: release.timezone!,
-          }),
-          time: formatTime(new Date(release.scheduledAt!), {
-            timeZone: release.timezone!,
-            hourCycle: 'h23',
-          }),
-          offset: getTimezoneOffset(release.timezone!, new Date(release.scheduledAt!)),
-        }
+        date: new Date(release.scheduledAt),
+        timeZone: release.timezone,
+      };
+    }
+
+    return null;
+  };
+
+  const headerDate = getHeaderDate();
+  const dateText = headerDate
+    ? formatMessage(
+        headerDate.message,
+        getReleaseDateParts({ formatDate, formatTime }, headerDate.date, headerDate.timeZone)
       )
     : '';
+
+  // Blocked means running now would release nothing. A stale Ready is still refused by the run,
+  // which re-checks every entry
+  const getPublishDisabledReason = () => {
+    if (release.status === 'empty') {
+      return formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.publish-disabled.empty',
+        defaultMessage: 'This release is empty.',
+      });
+    }
+
+    if (release.status !== 'blocked') {
+      return null;
+    }
+
+    return release.releaseCondition === 'allow_partial'
+      ? formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.publish-disabled.allow_partial',
+          defaultMessage: 'Nothing in this release is ready to publish.',
+        })
+      : formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.publish-disabled.all_or_nothing',
+          defaultMessage:
+            "Some entries aren't ready. This release only publishes when every entry is ready.",
+        });
+  };
+
+  const publishDisabledReason = getPublishDisabledReason();
+  const publishButton = (
+    <Button
+      size="S"
+      variant="default"
+      onClick={handlePublishRelease(release.id.toString())}
+      loading={isPublishing}
+      disabled={publishDisabledReason !== null}
+    >
+      {formatMessage({
+        id: 'content-releases.header.actions.publish',
+        defaultMessage: 'Publish',
+      })}
+    </Button>
+  );
 
   return (
     <Layouts.Root>
@@ -234,15 +527,37 @@ const ReleaseDetailsLayout = ({
           title={release.name}
           subtitle={
             <Flex gap={2} lineHeight={6}>
-              <Typography textColor="neutral600" variant="epsilon">
-                {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
-              </Typography>
-              <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+              <ReleaseSubtitle
+                release={release}
+                dateText={dateText}
+                numberOfEntriesText={numberOfEntriesText}
+              />
             </Flex>
           }
+          secondaryAction={<ReleaseStatusBadge status={release.status} />}
           navigationAction={<BackButton fallback=".." />}
           primaryAction={
-            !release.releasedAt && (
+            release.releasedAt ? (
+              <Flex gap={2}>
+                {/* A release that ran, failed included, can't be deleted: only a planned one can */}
+                {showCreateFromSkipped && (
+                  <Button
+                    size="S"
+                    variant="default"
+                    onClick={() => setIsSkippedDrawerOpen(true)}
+                    aria-label={formatMessage({
+                      id: 'content-releases.header.actions.create-from-skipped.label',
+                      defaultMessage: 'Create release from skipped entries',
+                    })}
+                  >
+                    {formatMessage({
+                      id: 'content-releases.header.actions.create-from-skipped',
+                      defaultMessage: 'Create release from skipped',
+                    })}
+                  </Button>
+                )}
+              </Flex>
+            ) : (
               <Flex gap={2}>
                 <SimpleMenuButton
                   label={<More />}
@@ -258,7 +573,7 @@ const ReleaseDetailsLayout = ({
                 >
                   <Menu.Item
                     disabled={!canUpdate}
-                    onSelect={toggleEditReleaseModal}
+                    onSelect={toggleEditDrawer}
                     startIcon={<Pencil />}
                   >
                     {formatMessage({
@@ -310,28 +625,121 @@ const ReleaseDetailsLayout = ({
                   })}
                 </Button>
                 {canPublish ? (
-                  <Button
-                    size="S"
-                    variant="default"
-                    onClick={handlePublishRelease(release.id.toString())}
-                    loading={isPublishing}
-                    disabled={release.actions.meta.count === 0}
-                  >
-                    {formatMessage({
-                      id: 'content-releases.header.actions.publish',
-                      defaultMessage: 'Publish',
-                    })}
-                  </Button>
+                  publishDisabledReason ? (
+                    <Tooltip label={publishDisabledReason}>
+                      {/* A disabled button takes neither focus nor hover: what holds it does */}
+                      <Box tabIndex={0}>{publishButton}</Box>
+                    </Tooltip>
+                  ) : (
+                    publishButton
+                  )
                 ) : null}
               </Flex>
             )
           }
         />
         {children}
+        {showCreateFromSkipped && (
+          <CreateReleaseFromSkippedDrawer
+            release={release}
+            open={isSkippedDrawerOpen}
+            onClose={() => setIsSkippedDrawerOpen(false)}
+          />
+        )}
       </Main>
     </Layouts.Root>
   );
 };
+
+interface ReleaseSubtitleProps {
+  release: ReleaseDataResponse;
+  dateText: string;
+  numberOfEntriesText: string;
+}
+
+const ReleaseSubtitle = ({ release, dateText, numberOfEntriesText }: ReleaseSubtitleProps) => {
+  const { formatMessage } = useIntl();
+  const totals = getRunTotals(release);
+
+  const getCountsText = () => {
+    if (!totals) {
+      return numberOfEntriesText;
+    }
+
+    if (totals.total === 0) {
+      return formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.ran-empty',
+        defaultMessage: 'This release ran with no entries.',
+      });
+    }
+
+    // Also a release that missed its schedule: it never ran, so "Released 0 of" would read as a run
+    if (totals.released === 0) {
+      return formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.header-subtitle.nothing-released',
+        defaultMessage: 'Nothing was released',
+      });
+    }
+
+    return formatMessage(
+      {
+        id: 'content-releases.pages.ReleaseDetails.header-subtitle.released',
+        defaultMessage: 'Released {released} of {total, plural, one {# entry} other {# entries}}',
+      },
+      totals
+    );
+  };
+
+  // A planned release: its entries, then when it's scheduled for. A release that ran: when, then
+  // what the run did
+  const parts = (
+    release.releasedAt ? [dateText, getCountsText()] : [numberOfEntriesText, dateText]
+  ).filter(Boolean);
+
+  return (
+    <Typography textColor="neutral600" variant="epsilon">
+      {parts.map((part, index) => (
+        <React.Fragment key={part}>
+          {index > 0 && ' • '}
+          <span>{part}</span>
+        </React.Fragment>
+      ))}
+      {totals && totals.skipped > 0 && (
+        <>
+          {' • '}
+          <Typography textColor="danger600" variant="epsilon">
+            {formatMessage(
+              {
+                id: 'content-releases.pages.ReleaseDetails.header-subtitle.skipped',
+                defaultMessage: '{skipped} skipped',
+              },
+              { skipped: totals.skipped }
+            )}
+          </Typography>
+        </>
+      )}
+    </Typography>
+  );
+};
+
+// Row actions (open entry, remove) stay out of the way until the row is hovered or focused; opacity
+// keeps their space reserved so nothing shifts, and touch devices (no hover) always show them.
+const RowActions = styled(Flex)`
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+
+  tr:hover &,
+  tr:focus-within & {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (hover: none) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+`;
 
 const SimpleMenuButton = styled(SimpleMenu)`
   & > span {
@@ -381,9 +789,12 @@ interface ReleaseDetailsBodyProps {
 
 const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const { formatMessage } = useIntl();
+  // The row whose reason the drawer shows
+  const [reasonActionId, setReasonActionId] = React.useState<ReleaseAction['id'] | null>(null);
+  const [reasonPageSize, setReasonPageSize] = React.useState(REASON_PAGE_SIZE);
   const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
   const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const {
     data: releaseData,
     isLoading: isReleaseLoading,
@@ -416,22 +827,83 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
+  const tabs = release ? getReleaseTabs(release) : [];
+  const activeTab = tabs.find(({ value }) => value === query?.filter)?.value ?? 'all';
+  const actionsQuery: GetReleaseActionsQueryParams = {
+    ...query,
+    filter: activeTab === 'all' ? undefined : activeTab,
+  };
 
   const {
     isLoading,
-    isFetching,
+    // `currentData` is cleared only when the tab, group or page changes: a reload after an
+    // entry's change keeps the rows on screen instead of the table's loader
+    currentData,
     isError,
     data,
     error: releaseActionsError,
-  } = useGetReleaseActionsQuery({
-    ...query,
-    releaseId,
-  });
+  } = useGetReleaseActionsQuery(
+    {
+      ...actionsQuery,
+      releaseId,
+    },
+    { skip: !release }
+  );
+
+  const reasonFilter: ReleaseActionFilter = release?.releasedAt ? 'skipped' : 'notReady';
+  const {
+    // `data`, not `currentData`, for the drawer: the rows already loaded stay while more load
+    data: reasonData,
+    currentData: currentReasonData,
+    isFetching: isFetchingReasons,
+  } = useGetReleaseActionsQuery(
+    {
+      releaseId,
+      filter: reasonFilter,
+      groupBy: selectedGroupBy,
+      page: 1,
+      pageSize: reasonPageSize,
+    },
+    { skip: !release || reasonActionId === null }
+  );
+
+  // A row past the rows loaded so far: load more until it's among them. On the loaded rows of
+  // these very args only, so a failed load doesn't grow it again and again.
+  React.useEffect(() => {
+    if (reasonActionId === null || !currentReasonData) {
+      return;
+    }
+
+    const { total, pageSize } = currentReasonData.meta.pagination;
+    const isLoaded = Object.values(currentReasonData.data)
+      .flat()
+      .some(({ id }) => id === reasonActionId);
+    if (!isLoaded && total > pageSize && pageSize < MAX_REASON_SEARCH_SIZE) {
+      setReasonPageSize(Math.min(pageSize * 2, MAX_REASON_SEARCH_SIZE));
+    }
+  }, [reasonActionId, currentReasonData]);
+
+  // What held back the others of an `all_or_nothing` run: a held entry's reason names them
+  const { currentData: blockingData } = useGetReleaseActionsQuery(
+    {
+      releaseId,
+      filter: 'blocking',
+      groupBy: selectedGroupBy,
+      page: 1,
+      pageSize: BLOCKERS_SHOWN,
+    },
+    {
+      skip:
+        !release?.releasedAt ||
+        release.releaseCondition !== 'all_or_nothing' ||
+        reasonActionId === null,
+    }
+  );
 
   const [updateReleaseAction] = useUpdateReleaseActionMutation();
 
   const handleChangeType = async (
-    e: React.ChangeEvent<HTMLInputElement>,
+    type: ReleaseAction['type'],
     actionId: ReleaseAction['id'],
     actionPath: [string, number]
   ) => {
@@ -441,15 +913,15 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         actionId,
       },
       body: {
-        type: e.target.value as ReleaseAction['type'],
+        type,
       },
-      query, // We are passing the query params to make optimistic updates
+      query: actionsQuery, // We are passing the query params to make optimistic updates
       actionPath, // We are passing the action path to found the position in the cache of the action for optimistic updates
     });
 
     if ('error' in response) {
-      if (isFetchError(response.error)) {
-        // When the response returns an object with 'error', handle fetch error
+      if (isBaseQueryError(response.error)) {
+        // The API's error, e.g. why the entry can't be changed
         toggleNotification({
           type: 'danger',
           message: formatAPIError(response.error),
@@ -498,7 +970,23 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     return <Page.Error />;
   }
 
-  if (Object.keys(releaseActions).length === 0) {
+  const hasNoActions = release.actions.meta.count === 0 && Object.keys(releaseActions).length === 0;
+
+  if (hasNoActions && release.releasedAt) {
+    return (
+      <Layouts.Content>
+        <EmptyStateLayout
+          icon={<EmptyDocuments width="16rem" />}
+          content={formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.ran-empty',
+            defaultMessage: 'This release ran with no entries.',
+          })}
+        />
+      </Layouts.Content>
+    );
+  }
+
+  if (hasNoActions) {
     return (
       <Layouts.Content>
         <EmptyStateLayout
@@ -548,17 +1036,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
       },
       name: 'action',
     },
-    ...(!release.releasedAt
-      ? [
-          {
-            label: {
-              id: 'content-releases.page.ReleaseDetails.table.header.label.status',
-              defaultMessage: 'status',
-            },
-            name: 'status',
-          },
-        ]
-      : []),
+    {
+      label: {
+        id: 'content-releases.page.ReleaseDetails.table.header.label.status',
+        defaultMessage: 'status',
+      },
+      name: 'status',
+    },
   ].map(({ label, name }) => ({
     label: formatMessage(label),
     name,
@@ -566,9 +1050,125 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
+  const isOutcomeUnknown = release.failureReason === 'failed_before_upgrade';
+
+  type RowAction = (typeof releaseActions)[string][number];
+
+  const hasReason = (action: RowAction) =>
+    release.releasedAt ? hasSkipReason(action.outcome, isOutcomeUnknown) : isActionNotReady(action);
+
+  // Every content type of the rows the drawer can show, whichever request loaded them
+  const reasonContentTypes = {
+    ...contentTypes,
+    ...reasonData?.meta.contentTypes,
+    ...blockingData?.meta.contentTypes,
+  };
+
+  const toReasonDetails = (action: RowAction): EntryReasonDetails => ({
+    id: action.id,
+    ...getEntryNaming(action, Boolean(release.releasedAt), formatMessage),
+    contentTypeName: action.contentType.displayName,
+    localeCode: hasI18nEnabled ? action.locale?.code : undefined,
+    action: action.type,
+    outcome: release.releasedAt ? action.outcome : null,
+    reason: action.reason,
+    missingReason:
+      !release.releasedAt && !action.reason
+        ? action.isEntryValid === false
+          ? 'unrecorded'
+          : 'unchecked'
+        : undefined,
+    location: {
+      contentTypeUid: action.contentType.uid,
+      kind: reasonContentTypes[action.contentType.uid]?.kind,
+      documentId: action.entryDocumentId,
+      locale: action.locale?.code,
+      showErrors: (action.reason?.validation?.errors.length ?? 0) > 0,
+    },
+  });
+
+  const tableOrder = new Map(
+    Object.values(releaseActions)
+      .flat()
+      .map(({ id }, index) => [id, index])
+  );
+  // The drawer steps through every row with a reason once they've loaded, the table's until then.
+  // A row that has no reason there is from other rows, e.g. the planned release's before it ran.
+  const reasonWindow =
+    reasonData &&
+    Object.values(reasonData.data)
+      .flat()
+      .some((action) => action.id === reasonActionId && hasReason(action))
+      ? reasonData
+      : undefined;
+  const reasonRows = reasonWindow?.data ?? releaseActions;
+  const reasonPagination = reasonWindow?.meta.pagination;
+  const reasonItems = Object.values(reasonRows)
+    .flat()
+    .filter(hasReason)
+    .sort(
+      (a, b) =>
+        (tableOrder.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+        (tableOrder.get(b.id) ?? Number.MAX_SAFE_INTEGER)
+    )
+    .map(toReasonDetails);
+  const blockers = blockingData && {
+    items: Object.values(blockingData.data).flat().map(toReasonDetails),
+    total: blockingData.meta.pagination.total,
+  };
+
   return (
     <Layouts.Content>
       <Flex gap={4} direction="column" alignItems="stretch">
+        <Tabs.Root
+          variant="simple"
+          value={activeTab}
+          // Tabs and grouping are views of the page: replace, so Back leaves the page
+          onValueChange={(value) =>
+            setQuery(
+              {
+                filter: value === 'all' ? undefined : (value as ReleaseActionFilter),
+                page: 1,
+              },
+              'push',
+              true
+            )
+          }
+        >
+          <Tabs.List
+            aria-label={formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.tab-group.label',
+              defaultMessage: 'Entries by status',
+            })}
+          >
+            {tabs.map(({ value, label, count }) => (
+              <Tabs.Trigger
+                key={value}
+                value={value}
+                aria-label={
+                  count !== undefined
+                    ? formatMessage(
+                        {
+                          id: 'content-releases.pages.ReleaseDetails.tab.label-with-count',
+                          defaultMessage: '{label} ({count})',
+                        },
+                        { label: formatMessage(label), count }
+                      )
+                    : undefined
+                }
+              >
+                <Flex tag="span" gap={2}>
+                  {formatMessage(label)}
+                  {/* The same badge on every tab: the count keeps its size when its tab is picked */}
+                  {count !== undefined && (
+                    <InlineBadge active={value === activeTab}>{count}</InlineBadge>
+                  )}
+                </Flex>
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
+          <Divider />
+        </Tabs.Root>
         <Flex>
           <SingleSelect
             placeholder={groupByLabel}
@@ -585,7 +1185,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               )
             }
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
-            onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
+            onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy }, 'push', true)}
           >
             {options.map((option) => (
               <SingleSelectOption key={option} value={option}>
@@ -594,18 +1194,24 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             ))}
           </SingleSelect>
         </Flex>
+        {Object.keys(releaseActions).length === 0 && (
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="16rem" />}
+            content={formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.tab.empty-filter',
+              defaultMessage: 'No entries to show here.',
+            })}
+          />
+        )}
         {Object.keys(releaseActions).map((key) => (
           <Flex key={`releases-group-${key}`} gap={4} direction="column" alignItems="stretch">
             <Flex role="separator" aria-label={key}>
               <Badge>{key}</Badge>
             </Flex>
             <Table.Root
-              rows={releaseActions[key].map((item) => ({
-                ...item,
-                id: Number(item.entry.id),
-              }))}
+              rows={releaseActions[key]}
               headers={headers}
-              isLoading={isLoading || isFetching}
+              isLoading={isLoading || !currentData}
             >
               <Table.Content>
                 <Table.Head>
@@ -615,85 +1221,130 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 </Table.Head>
                 <Table.Loading />
                 <Table.Body>
-                  {releaseActions[key].map(
-                    ({ id, contentType, locale, type, entry, status }, actionIndex) => (
+                  {releaseActions[key].map((action, actionIndex) => {
+                    const { id, contentType, locale, type, entry, isEntryValid, outcome } = action;
+                    const reasonDetails = toReasonDetails(action);
+                    const { isDeleted, isUntitled, entryName } = reasonDetails;
+                    const textColor = isDeleted ? 'neutral500' : undefined;
+                    const openReason = () => setReasonActionId(id);
+                    const reasonTitle = getReasonTitle(reasonDetails);
+                    const reasonLabel = reasonTitle ? formatMessage(reasonTitle) : null;
+                    const entryLink = !isDeleted && <EntryLinkButton {...reasonDetails.location} />;
+
+                    return (
                       <Tr key={id}>
                         <Td width="25%" maxWidth="200px">
-                          <Typography ellipsis>{`${
-                            contentType.mainFieldValue || entry.id
-                          }`}</Typography>
+                          {isDeleted || isUntitled ? (
+                            <ItalicName ellipsis textColor={isDeleted ? 'neutral500' : undefined}>
+                              {entryName}
+                            </ItalicName>
+                          ) : (
+                            <Typography ellipsis>{entryName}</Typography>
+                          )}
                         </Td>
                         {hasI18nEnabled && (
                           <Td width="10%">
-                            <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                            <Typography
+                              textColor={textColor}
+                            >{`${locale?.name ? locale.name : '-'}`}</Typography>
                           </Td>
                         )}
 
                         <Td width="10%">
-                          <Typography>{contentType.displayName || ''}</Typography>
+                          <Typography textColor={textColor}>
+                            {contentType.displayName || ''}
+                          </Typography>
                         </Td>
                         <Td width="20%">
                           {release.releasedAt ? (
-                            <Typography>
-                              {formatMessage(
-                                {
-                                  id: 'content-releases.page.ReleaseDetails.table.action-published',
-                                  defaultMessage:
-                                    'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
-                                },
-                                {
-                                  isPublish: type === 'publish',
-                                  b: (children: React.ReactNode) => (
-                                    <Typography fontWeight="bold">{children}</Typography>
-                                  ),
-                                }
+                            <Flex gap={2} alignItems="center">
+                              {type === 'publish' ? (
+                                <Upload
+                                  fill={textColor ?? 'neutral800'}
+                                  width="1.6rem"
+                                  height="1.6rem"
+                                  aria-hidden
+                                />
+                              ) : (
+                                <Download
+                                  fill={textColor ?? 'neutral800'}
+                                  width="1.6rem"
+                                  height="1.6rem"
+                                  aria-hidden
+                                />
                               )}
-                            </Typography>
+                              <Typography textColor={textColor}>
+                                {formatMessage(
+                                  {
+                                    id: 'content-releases.pages.ReleaseDetails.table.action-type',
+                                    defaultMessage:
+                                      '{isPublish, select, true {Publish} other {Unpublish}}',
+                                  },
+                                  { isPublish: type === 'publish' }
+                                )}
+                              </Typography>
+                            </Flex>
                           ) : (
                             <ReleaseActionOptions
                               selected={type}
-                              handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
+                              onChange={(nextType) =>
+                                handleChangeType(nextType, id, [key, actionIndex])
+                              }
                               name={`release-action-${id}-type`}
                               disabled={!canUpdate}
                             />
                           )}
                         </Td>
-                        {!release.releasedAt && (
+                        {release.releasedAt ? (
                           <>
                             <Td width="20%" minWidth="200px">
-                              <EntryValidationPopover
-                                action={type}
-                                schema={contentTypes?.[contentType.uid]}
-                                entry={entry}
-                                status={status}
+                              <ReleasedActionStatus
+                                reasonLabel={reasonLabel}
+                                outcome={outcome}
+                                isOutcomeUnknown={isOutcomeUnknown}
+                                entryName={entryName}
+                                onOpenReason={openReason}
                               />
                             </Td>
                             <Td>
-                              <Flex justifyContent="flex-end">
-                                <ReleaseActionMenu.Root>
-                                  <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                    contentTypeUid={contentType.uid}
-                                    documentId={entry.documentId}
-                                    locale={locale?.code}
-                                  />
-                                  <ReleaseActionMenu.DeleteReleaseActionItem
-                                    releaseId={release.id}
-                                    actionId={id}
-                                  />
-                                </ReleaseActionMenu.Root>
-                              </Flex>
+                              {/* A ran release has nothing to remove: opening the entry is its only action */}
+                              <RowActions justifyContent="flex-end">{entryLink}</RowActions>
+                            </Td>
+                          </>
+                        ) : (
+                          <>
+                            <Td width="20%" minWidth="200px">
+                              {entry && (
+                                <PlannedActionStatus
+                                  reasonLabel={reasonLabel}
+                                  action={type}
+                                  isEntryValid={isEntryValid}
+                                  entryName={entryName}
+                                  onOpenReason={openReason}
+                                />
+                              )}
+                            </Td>
+                            <Td>
+                              {/* Inline actions, aligned with a ran release: open entry + remove */}
+                              <RowActions justifyContent="flex-end" gap={1}>
+                                {entryLink}
+                                <ReleaseActionMenu.DeleteReleaseActionButton
+                                  releaseId={release.id}
+                                  actionId={id}
+                                />
+                              </RowActions>
                             </Td>
                           </>
                         )}
                       </Tr>
-                    )
-                  )}
+                    );
+                  })}
                 </Table.Body>
               </Table.Content>
             </Table.Root>
           </Flex>
         ))}
-        {releaseMeta?.pagination?.pageCount && releaseMeta.pagination.pageCount > 1 && (
+        {(releaseMeta?.pagination?.pageCount ?? 0) > 1 && (
           <Pagination.Root
             {...releaseMeta?.pagination}
             defaultPageSize={releaseMeta?.pagination?.pageSize}
@@ -703,9 +1354,29 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           </Pagination.Root>
         )}
       </Flex>
+      <EntryReasonDrawer
+        items={reasonItems}
+        total={reasonPagination?.total}
+        onLoadMore={
+          reasonPagination && reasonPagination.total > reasonPagination.pageSize
+            ? () => setReasonPageSize((size) => size * 2)
+            : undefined
+        }
+        // Only the drawer's own rows load more: the table's step right away
+        isLoadingMore={isFetchingReasons && reasonWindow !== undefined}
+        selectedId={reasonActionId}
+        onSelect={setReasonActionId}
+        onClose={() => setReasonActionId(null)}
+        release={release}
+        blockers={blockers}
+      />
     </Layouts.Content>
   );
 };
+
+const ItalicName = styled(Typography)`
+  font-style: italic;
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsPage
@@ -714,9 +1385,9 @@ const ReleaseDetailsPage = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
   const {
@@ -729,31 +1400,20 @@ const ReleaseDetailsPage = () => {
       skip: !releaseId,
     }
   );
-  const { data: dataTimezone, isLoading: isLoadingTimezone } = useGetReleaseSettingsQuery();
+  const { data: settings, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
   const [deleteRelease] = useDeleteReleaseMutation();
 
-  const toggleEditReleaseModal = () => {
-    setReleaseModalShown((prev) => !prev);
-  };
-
-  const getTimezoneValue = () => {
-    if (releaseData?.timezone) {
-      return releaseData.timezone;
-    } else {
-      if (dataTimezone?.data.defaultTimezone) {
-        return dataTimezone.data.defaultTimezone;
-      }
-      return null;
-    }
+  const toggleEditDrawer = () => {
+    setIsEditDrawerOpen((prev) => !prev);
   };
 
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  if (isLoadingDetails || isLoadingTimezone) {
+  if (isLoadingDetails || isLoadingSettings) {
     return (
       <ReleaseDetailsLayout
-        toggleEditReleaseModal={toggleEditReleaseModal}
+        toggleEditDrawer={toggleEditDrawer}
         toggleWarningSubmit={toggleWarningSubmit}
       >
         <Page.Loading />
@@ -767,21 +1427,8 @@ const ReleaseDetailsPage = () => {
 
   const releaseData = (isSuccessDetails && data?.data) || null;
 
-  const title = releaseData?.name || '';
-  const timezone = getTimezoneValue();
-  const scheduledAt =
-    releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
-  // Just get the date and time to display without considering updated timezone time
-  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : undefined;
-  const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
-
-  const handleEditRelease = async (values: FormValues) => {
-    const response = await updateRelease({
-      id: releaseId,
-      name: values.name,
-      scheduledAt: values.scheduledAt,
-      timezone: values.timezone,
-    });
+  const handleEditRelease = async (values: ReleaseDrawerValues) => {
+    const response = await updateRelease({ id: releaseId, ...values });
 
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
@@ -792,9 +1439,9 @@ const ReleaseDetailsPage = () => {
           defaultMessage: 'Release updated.',
         }),
       });
-      toggleEditReleaseModal();
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
+      toggleEditDrawer();
+    } else if (isBaseQueryError(response.error)) {
+      // The API's error, e.g. why the release can't be saved
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -815,8 +1462,8 @@ const ReleaseDetailsPage = () => {
 
     if ('data' in response) {
       navigate('..');
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
+    } else if (isBaseQueryError(response.error)) {
+      // The API's error, e.g. why the release can't be deleted
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -832,24 +1479,34 @@ const ReleaseDetailsPage = () => {
 
   return (
     <ReleaseDetailsLayout
-      toggleEditReleaseModal={toggleEditReleaseModal}
+      toggleEditDrawer={toggleEditDrawer}
       toggleWarningSubmit={toggleWarningSubmit}
     >
       <ReleaseDetailsBody releaseId={releaseId} />
-      <ReleaseModal
-        open={releaseModalShown}
-        handleClose={toggleEditReleaseModal}
-        handleSubmit={handleEditRelease}
-        isLoading={isLoadingDetails || isSubmittingForm}
-        initialValues={{
-          name: title || '',
-          scheduledAt,
-          date,
-          time,
-          isScheduled: Boolean(scheduledAt),
-          timezone,
-        }}
-      />
+      {releaseData && (
+        <ReleaseDrawer
+          open={isEditDrawerOpen}
+          onClose={toggleEditDrawer}
+          onSubmit={handleEditRelease}
+          title={formatMessage({
+            id: 'content-releases.release-drawer.edit.title',
+            defaultMessage: 'Edit release',
+          })}
+          submitLabel={formatMessage({
+            id: 'content-releases.release-drawer.form.submit.save',
+            defaultMessage: 'Save',
+          })}
+          isSubmitting={isSubmittingForm}
+          initialValues={{
+            name: releaseData.name,
+            isScheduled: Boolean(releaseData.scheduledAt && releaseData.timezone),
+            scheduledAt: releaseData.scheduledAt,
+            timezone: releaseData.timezone,
+            releaseCondition: releaseData.releaseCondition,
+          }}
+          defaultTimezone={settings?.data.defaultTimezone}
+        />
+      )}
       <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
         <ConfirmDialog onConfirm={handleDeleteRelease}>
           {formatMessage({

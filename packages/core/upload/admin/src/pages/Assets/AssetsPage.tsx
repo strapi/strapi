@@ -16,7 +16,7 @@ import { getTranslationKey } from '../../utils/translations';
 import { typeFromMime } from '../../utils/typeFromMime';
 
 import {
-  AssetDetailsDrawer,
+  AssetDetailsDrawerFromUrl,
   useAssetDetailsParam,
 } from './components/AssetDetails/AssetDetailsDrawer';
 import { AssetsSearchInput } from './components/AssetsSearchInput';
@@ -577,7 +577,7 @@ export const AssetsPage = () => {
         onClose={() => setIsUrlDialogOpen(false)}
         onUpload={handleUrlUpload}
       />
-      <AssetDetailsDrawer />
+      <AssetDetailsDrawerFromUrl />
     </>
   );
 };

@@ -43,7 +43,6 @@ const client = new QueryClient({
   },
 });
 
-// eslint-disable-next-line react/prop-types
 const ComponentFixture = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={client}>

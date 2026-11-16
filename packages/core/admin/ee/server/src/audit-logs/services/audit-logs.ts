@@ -128,8 +128,12 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
 
       const auditLog: Log = { ...rest, user: userId };
 
-      // Save to database
-      await strapi.db.query('admin::audit-log').create({ data: auditLog });
+      // create() commits the row on its own, then links the user in a second transaction.
+      // On Postgres and MySQL a reader can see the row in between, without its user.
+      // One transaction commits both together.
+      await strapi.db.transaction(() =>
+        strapi.db.query('admin::audit-log').create({ data: auditLog })
+      );
 
       return this;
     },

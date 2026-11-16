@@ -23,7 +23,7 @@ type CustomFieldOptionInput =
   | 'number'
   | 'boolean-radio-group'
   | 'select-date'
-  | 'text-area-enum'
+  | 'textarea-enum'
   | 'select-number'
   | 'radio-group';
 

@@ -50,6 +50,12 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
             return conflictingKeysValidator(key);
           }
 
+          // Reading `type` on a value that is not an object would throw inside this lazy
+          // callback, where yup does not await it, and the validation would never settle
+          if (_.isPlainObject(attribute) === false) {
+            return notAnObjectValidator(key);
+          }
+
           if (attribute.type === 'relation') {
             return getRelationValidator(attribute, relations).test(isValidKey(key));
           }
@@ -94,6 +100,14 @@ const conflictingKeysValidator = (key: string) => {
   return yup.mixed().test({
     name: 'conflictingKeys',
     message: `Attribute ${key} conflicts with an existing key`,
+    test: () => false,
+  });
+};
+
+const notAnObjectValidator = (key: string) => {
+  return yup.mixed().test({
+    name: 'isObject',
+    message: `Attribute ${key} must be an object`,
     test: () => false,
   });
 };
