@@ -55,8 +55,6 @@ const releaseController = {
     const { contentType, hasEntryAttached, entryDocumentId, locale } = query;
     const isEntryAttached =
       typeof hasEntryAttached === 'string' ? Boolean(JSON.parse(hasEntryAttached)) : false;
-    // A non-localized entry has one version, whatever the locale: the Content Manager sends the
-    // locale of its URL, and stored it on the entry's actions before 5.62
     const entryActions = {
       contentType,
       entryDocumentId: entryDocumentId ?? null,

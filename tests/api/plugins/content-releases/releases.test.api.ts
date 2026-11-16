@@ -3705,8 +3705,6 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.data[0].name).toBe(release.name);
     });
 
-    // A non-localized entry has one version, whatever the locale: the Content Manager stored the
-    // locale of its URL on its actions before 5.62, and can still send it when looking them up
     test.each([
       ['stored with a locale, looked up without one', 'en', undefined],
       ['stored without a locale, looked up with one', null, 'en'],
