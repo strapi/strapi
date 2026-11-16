@@ -147,7 +147,10 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     /** @internal */
     async clone(
       id: Modules.Documents.ID,
-      body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
+      // The clone route sets the body locale to the request locale: a string, or `undefined`
+      body: Core.IsStrict extends true
+        ? Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>> & { locale?: string }
+        : Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
       uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
