@@ -9,6 +9,7 @@ const REMARK_UID = 'api::morph-remark.morph-remark' as const;
 const CARD_UID = 'api::morph-card.morph-card' as const;
 const PIN_UID = 'api::morph-pin.morph-pin' as const;
 const BOARD_UID = 'api::morph-board.morph-board' as const;
+const LOCALIZED_NOTE_UID = 'api::morph-localized-note.morph-localized-note' as const;
 
 /**
  * Inverse `morphMany` of a `morphToOne`: the link is stored in the morph columns of the
@@ -98,7 +99,24 @@ const boardContentType = {
   },
 };
 
+/** Localized draft & publish type with an inverse `morphMany`: one published version per locale */
+const localizedNoteContentType = {
+  kind: 'collectionType' as const,
+  collectionName: 'morph_localized_notes',
+  singularName: 'morph-localized-note',
+  pluralName: 'morph-localized-notes',
+  displayName: 'Morph localized note',
+  description: '',
+  draftAndPublish: true,
+  pluginOptions: { i18n: { localized: true } },
+  attributes: {
+    title: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+    remarks: { type: 'relation', relation: 'morphMany', target: REMARK_UID, morphBy: 'subject' },
+  },
+};
+
 const resources = {
+  locales: [{ name: 'Fr', code: 'fr' }],
   schemas: {
     components: {},
     // The morphMany target must exist before the type that declares it
@@ -108,6 +126,7 @@ const resources = {
       [CARD_UID]: cardContentType,
       [PIN_UID]: pinContentType,
       [BOARD_UID]: boardContentType,
+      [LOCALIZED_NOTE_UID]: localizedNoteContentType,
     },
   },
   fixtures: {
@@ -117,6 +136,7 @@ const resources = {
       [CARD_UID]: [],
       [PIN_UID]: [],
       [BOARD_UID]: [],
+      [LOCALIZED_NOTE_UID]: [],
     },
   },
 };
@@ -140,6 +160,7 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     await strapi.db.query(CARD_UID).deleteMany({});
     await strapi.db.query(PIN_UID).deleteMany({});
     await strapi.db.query(BOARD_UID).deleteMany({});
+    await strapi.db.query(LOCALIZED_NOTE_UID).deleteMany({});
   });
 
   /** Morph columns are not mapped back on query results, so read the raw remark rows. */
@@ -221,10 +242,9 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
     ]);
   });
 
-  // A remark can point to the published row: data migrated from v4, where the existing rows
-  // became the published versions, or a subject set to the published id. Publish deletes the old
-  // published row, which clears these links: it must throw and roll back instead.
-  it('throws on republish when the published version owns links and keeps them', async () => {
+  // A remark can point to the published row: a subject set to the published id. Publish deletes
+  // the old published row, which clears these links, so it re-points them to the new one.
+  it('keeps the links the published version owns on republish', async () => {
     const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
     const note = await strapi.documents(NOTE_UID).create({
@@ -239,34 +259,93 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       data: { subject: { id: published?.id, __type: NOTE_UID } },
     });
 
-    await expect(
-      strapi.documents(NOTE_UID).publish({ documentId: note.documentId })
-    ).rejects.toThrow('expected at least one entry to link');
+    const result = await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
 
-    expect(await getNoteRow(note.documentId, 'published')).toMatchObject({ id: published?.id });
+    const republished = await getNoteRow(note.documentId, 'published');
+    expect(republished?.id).not.toBe(published?.id);
+    expect(result.entries).toMatchObject([{ id: republished?.id }]);
     expect(await getRemarkSubjects()).toEqual([
       { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
-      { id: r2.id, subjectId: published?.id, subjectType: NOTE_UID },
+      { id: r2.id, subjectId: republished?.id, subjectType: NOTE_UID },
     ]);
   });
 
-  it('answers a blocked publish from the admin with a 400 and the reason', async () => {
+  // Data migrated from v4: the existing rows became the published versions and own the links,
+  // and the draft copies own none.
+  it('keeps every link of data migrated from v4 on republish', async () => {
     const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
+    const documentId = 'morphinversepublishfromv4';
+    const published = await strapi.db.query(NOTE_UID).create({
+      data: { documentId, title: 'from v4', publishedAt: new Date(), remarks: [r1.id, r2.id] },
+    });
+    await strapi.db.query(NOTE_UID).create({
+      data: { documentId, title: 'from v4 edited', publishedAt: null },
+    });
+
+    await strapi.documents(NOTE_UID).publish({ documentId });
+
+    // Publish replaced the published row with a copy of the draft
+    const republished = await getNoteRow(documentId, 'published');
+    expect(republished?.id).not.toBe(published.id);
+    expect(republished).toMatchObject({ title: 'from v4 edited' });
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: republished?.id, subjectType: NOTE_UID },
+      { id: r2.id, subjectId: republished?.id, subjectType: NOTE_UID },
+    ]);
+
+    // The published version still exposes them
+    const found = await strapi.documents(NOTE_UID).findOne({
+      documentId,
+      status: 'published',
+      populate: { remarks: true },
+    } as any);
+    expect((found as any)?.remarks.map((remark: { id: number }) => remark.id).sort()).toEqual(
+      [r1.id, r2.id].sort()
+    );
+  });
+
+  // Publishing a document without a draft deletes its published row and creates nothing: there is
+  // no new version to re-point the links to, so it throws and rolls back.
+  it('throws on publish without a draft and keeps the links on the published row', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const published = await strapi.db.query(NOTE_UID).create({
+      data: {
+        documentId: 'morphinversepublishonly',
+        title: 'published only',
+        publishedAt: new Date(),
+        remarks: [r1.id],
+      },
+    });
+
+    // The document service turns the InvalidRelationError into a ValidationError, so a request
+    // that hits it gets a 400 instead of a 500
+    await expect(
+      strapi.documents(NOTE_UID).publish({ documentId: published.documentId })
+    ).rejects.toMatchObject({
+      name: 'ValidationError',
+      message: expect.stringContaining('it has no new version'),
+    });
+
+    expect(await getNoteRow(published.documentId, 'published')).toMatchObject({
+      id: published.id,
+    });
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: published.id, subjectType: NOTE_UID },
+    ]);
+  });
+
+  it('answers a blocked discard draft from the admin with a 400 and the reason', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
     const note = await strapi.documents(NOTE_UID).create({
       data: { title: 'with remarks', remarks: [r1.id] } as any,
     });
     await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
-    const published = await getNoteRow(note.documentId, 'published');
-
-    await strapi.db.query(REMARK_UID).update({
-      where: { id: r2.id },
-      data: { subject: { id: published?.id, __type: NOTE_UID } },
-    });
+    const draft = await getNoteRow(note.documentId, 'draft');
 
     const res = await testUtils.rq.admin({
       method: 'POST',
-      url: `/content-manager/collection-types/${NOTE_UID}/${note.documentId}/actions/publish`,
+      url: `/content-manager/collection-types/${NOTE_UID}/${note.documentId}/actions/discard`,
       body: {},
     });
 
@@ -275,27 +354,215 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       name: 'ValidationError',
       message: `Invalid ${NOTE_UID}.remarks value, expected at least one entry to link`,
     });
-    expect(await getNoteRow(note.documentId, 'published')).toMatchObject({ id: published?.id });
+    expect(await getNoteRow(note.documentId, 'draft')).toMatchObject({ id: draft?.id });
   });
 
-  // Publish makes one check per call, over every inverse attribute: a morphOne link owned by
-  // the old published version keeps the empty morphMany value too, so publish throws.
-  it('throws on republish when the published version owns a morphOne link only', async () => {
+  it('keeps a morphOne link the published version owns on republish', async () => {
     const pin = await strapi.db.query(PIN_UID).create({ data: { label: 'p1' } });
     const board = await strapi.documents(BOARD_UID).create({ data: { title: 'board' } as any });
     await strapi.documents(BOARD_UID).publish({ documentId: board.documentId });
-    const published = await strapi.db.query(BOARD_UID).findOne({
-      where: { documentId: board.documentId, publishedAt: { $notNull: true } },
-    });
+    const findPublished = () =>
+      strapi.db.query(BOARD_UID).findOne({
+        where: { documentId: board.documentId, publishedAt: { $notNull: true } },
+      });
+    const published = await findPublished();
 
     await strapi.db.query(PIN_UID).update({
       where: { id: pin.id },
       data: { holder: { id: published?.id, __type: BOARD_UID } },
     });
 
-    await expect(
-      strapi.documents(BOARD_UID).publish({ documentId: board.documentId })
-    ).rejects.toThrow(`Invalid ${BOARD_UID}.remarks value, expected at least one entry to link`);
+    await strapi.documents(BOARD_UID).publish({ documentId: board.documentId });
+
+    const republished = await findPublished();
+    const { attributes, tableName } = strapi.db.metadata.get(PIN_UID);
+    const { idColumn } = (attributes.holder as any).morphColumn;
+    const [row] = await strapi.db.getConnection(tableName).select('*').where({ id: pin.id });
+    expect(republished?.id).not.toBe(published?.id);
+    expect(row[idColumn.name]).toBe(republished?.id);
+  });
+
+  /** Points a remark to the given row, as an API client setting its subject would */
+  const setRemarkSubject = async (remarkId: number, subjectId: number, subjectType: string) => {
+    await strapi.db.query(REMARK_UID).update({
+      where: { id: remarkId },
+      data: { subject: { id: subjectId, __type: subjectType } },
+    });
+  };
+
+  // `fields` narrows what publish reads back, so the published entries it returns have no
+  // locale (REST `PUT /api/morph-notes/:id?status=published&fields[0]=title`)
+  describe('republish with a fields selection', () => {
+    it('keeps the morphMany links the published version owns', async () => {
+      const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+      const note = await strapi.documents(NOTE_UID).create({ data: { title: 'note' } as any });
+      await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+      const published = await getNoteRow(note.documentId, 'published');
+      await setRemarkSubject(r1.id, published?.id, NOTE_UID);
+
+      await strapi.documents(NOTE_UID).publish({
+        documentId: note.documentId,
+        fields: ['title'],
+      } as any);
+
+      const republished = await getNoteRow(note.documentId, 'published');
+      expect(republished?.id).not.toBe(published?.id);
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: republished?.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('keeps the morphOne link the published version owns', async () => {
+      const pin = await strapi.db.query(PIN_UID).create({ data: { label: 'p1' } });
+      const board = await strapi.documents(BOARD_UID).create({ data: { title: 'board' } as any });
+      await strapi.documents(BOARD_UID).publish({ documentId: board.documentId });
+      const findPublished = () =>
+        strapi.db.query(BOARD_UID).findOne({
+          where: { documentId: board.documentId, publishedAt: { $notNull: true } },
+        });
+      const published = await findPublished();
+      await strapi.db.query(PIN_UID).update({
+        where: { id: pin.id },
+        data: { holder: { id: published?.id, __type: BOARD_UID } },
+      });
+
+      await strapi.documents(BOARD_UID).publish({
+        documentId: board.documentId,
+        fields: ['title'],
+      } as any);
+
+      const republished = await findPublished();
+      const { attributes, tableName } = strapi.db.metadata.get(PIN_UID);
+      const { idColumn } = (attributes.holder as any).morphColumn;
+      const [row] = await strapi.db.getConnection(tableName).select('*').where({ id: pin.id });
+      expect(republished?.id).not.toBe(published?.id);
+      expect(row[idColumn.name]).toBe(republished?.id);
+    });
+
+    it('keeps the links the published version of a non-default locale owns', async () => {
+      const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+      const note = await strapi.documents(LOCALIZED_NOTE_UID).create({
+        locale: 'fr',
+        data: { title: 'note fr' } as any,
+      });
+      await strapi.documents(LOCALIZED_NOTE_UID).publish({
+        documentId: note.documentId,
+        locale: 'fr',
+      });
+      const findPublished = () =>
+        strapi.db.query(LOCALIZED_NOTE_UID).findOne({
+          where: { documentId: note.documentId, locale: 'fr', publishedAt: { $notNull: true } },
+        });
+      const published = await findPublished();
+      await setRemarkSubject(r1.id, published?.id, LOCALIZED_NOTE_UID);
+
+      await strapi.documents(LOCALIZED_NOTE_UID).publish({
+        documentId: note.documentId,
+        locale: 'fr',
+        fields: ['title'],
+      } as any);
+
+      const republished = await findPublished();
+      expect(republished?.id).not.toBe(published?.id);
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: republished?.id, subjectType: LOCALIZED_NOTE_UID },
+      ]);
+    });
+  });
+
+  it('keeps the links of every locale on a multi-locale republish', async () => {
+    const rEn = await strapi.db.query(REMARK_UID).create({ data: { text: 'en' } });
+    const rFr = await strapi.db.query(REMARK_UID).create({ data: { text: 'fr' } });
+    const note = await strapi.documents(LOCALIZED_NOTE_UID).create({
+      locale: 'en',
+      data: { title: 'note en' } as any,
+    });
+    await strapi.documents(LOCALIZED_NOTE_UID).update({
+      documentId: note.documentId,
+      locale: 'fr',
+      data: { title: 'note fr' } as any,
+    });
+    await strapi.documents(LOCALIZED_NOTE_UID).publish({
+      documentId: note.documentId,
+      locale: '*',
+    });
+    const findPublished = (locale: string) =>
+      strapi.db.query(LOCALIZED_NOTE_UID).findOne({
+        where: { documentId: note.documentId, locale, publishedAt: { $notNull: true } },
+      });
+    const publishedEn = await findPublished('en');
+    const publishedFr = await findPublished('fr');
+    await setRemarkSubject(rEn.id, publishedEn?.id, LOCALIZED_NOTE_UID);
+    await setRemarkSubject(rFr.id, publishedFr?.id, LOCALIZED_NOTE_UID);
+
+    const result = await strapi.documents(LOCALIZED_NOTE_UID).publish({
+      documentId: note.documentId,
+      locale: '*',
+    });
+
+    const republishedEn = await findPublished('en');
+    const republishedFr = await findPublished('fr');
+    expect(result.entries).toHaveLength(2);
+    expect(republishedEn?.id).not.toBe(publishedEn?.id);
+    expect(republishedFr?.id).not.toBe(publishedFr?.id);
+    // Each link moves to the new version of its own locale
+    expect(await getRemarkSubjects()).toEqual([
+      { id: rEn.id, subjectId: republishedEn?.id, subjectType: LOCALIZED_NOTE_UID },
+      { id: rFr.id, subjectId: republishedFr?.id, subjectType: LOCALIZED_NOTE_UID },
+    ]);
+  });
+
+  it('returns the re-pointed links in the publish response', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const r2 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r2' } });
+    const note = await strapi.documents(NOTE_UID).create({
+      data: { title: 'note', remarks: [r1.id] } as any,
+    });
+    await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+    const published = await getNoteRow(note.documentId, 'published');
+    await setRemarkSubject(r2.id, published?.id, NOTE_UID);
+
+    const result = await strapi.documents(NOTE_UID).publish({
+      documentId: note.documentId,
+      populate: { remarks: true },
+    } as any);
+
+    // The published version owns r2 only: r1 stays on the draft
+    expect((result.entries[0] as any).remarks.map((remark: { id: number }) => remark.id)).toEqual([
+      r2.id,
+    ]);
+  });
+
+  // Another write can re-own a target row between the load and the re-point (a concurrent
+  // request on another connection). The re-point must not take it back.
+  it('leaves a link that another write re-owned during publish', async () => {
+    const r1 = await strapi.db.query(REMARK_UID).create({ data: { text: 'r1' } });
+    const card = await strapi.db.query(CARD_UID).create({ data: { title: 'card' } });
+    const note = await strapi.documents(NOTE_UID).create({ data: { title: 'note' } as any });
+    await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+    const published = await getNoteRow(note.documentId, 'published');
+    await setRemarkSubject(r1.id, published?.id, NOTE_UID);
+
+    // Runs after publish deleted the old published version and created the new one, before the
+    // re-point
+    const unsubscribe = strapi.db.lifecycles.subscribe({
+      models: [NOTE_UID],
+      async afterCreate(event: any) {
+        if (event.result?.publishedAt !== null && event.result?.publishedAt !== undefined) {
+          await setRemarkSubject(r1.id, card.id, CARD_UID);
+        }
+      },
+    });
+
+    try {
+      await strapi.documents(NOTE_UID).publish({ documentId: note.documentId });
+    } finally {
+      unsubscribe();
+    }
+
+    expect(await getRemarkSubjects()).toEqual([
+      { id: r1.id, subjectId: card.id, subjectType: CARD_UID },
+    ]);
   });
 
   it('clones a morphOne without its link and keeps the link on the source', async () => {

@@ -663,12 +663,12 @@ export const createEntityManager = (db: Database): EntityManager => {
             // - a populate with a field selection never selects the morph id column, so the
             //   relation comes back empty (query/helpers/populate/apply.ts)
             // An empty morphOne populates as null or undefined and is skipped above.
-            // Publish omits an empty value and leaves the links on the draft, unless the old
-            // published version owned links. Every other caller is rejected here: discardDraft,
-            // clone, and the draft & publish migration, which then fails at boot on every start.
-            // Skipping the value would commit and drop the links of the deleted version. What
-            // copying these links should mean (move them to the new version, or re-point the
-            // target rows) is an open question.
+            // Publish omits an empty value: the links stay on the draft, and the document service
+            // re-points those of the old published version to the new one. Every other caller is
+            // rejected here: discardDraft, clone, and the draft & publish migration, which then
+            // fails at boot on every start. Skipping the value would commit and drop the links of
+            // the deleted version. What discardDraft and clone should do with these links is an
+            // open question.
             // An InvalidRelationError reaches the client as a 400 with this message, not a 500
             if (dataset.length === 0) {
               throw new InvalidRelationError(
