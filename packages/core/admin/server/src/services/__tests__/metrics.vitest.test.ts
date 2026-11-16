@@ -28,6 +28,26 @@ describe('Metrics', () => {
     expect(countRoles).toHaveBeenCalledWith();
   });
 
+  test('sendDidInviteUser resolves and sends nothing when a count fails', async () => {
+    const send = vi.fn(() => Promise.resolve());
+    const countUsers = vi.fn(() => Promise.resolve(2));
+    const countRoles = vi.fn(() => Promise.reject(new Error('Timeout acquiring a connection')));
+    global.strapi = {
+      telemetry: { send },
+      admin: {
+        services: {
+          user: { count: countUsers },
+          role: { count: countRoles },
+        },
+      },
+    } as any;
+
+    await expect(metrics.sendDidInviteUser()).resolves.toBeUndefined();
+
+    expect(countRoles).toHaveBeenCalledWith();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   test('sendDidUpdateRolePermissions', async () => {
     const send = vi.fn(() => Promise.resolve());
     global.strapi = {

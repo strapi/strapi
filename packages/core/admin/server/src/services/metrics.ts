@@ -1,12 +1,18 @@
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
+// Callers do not wait for this, so it must never reject: a count that fails, for example because
+// the database is closing, would otherwise be an unhandled rejection
 const sendDidInviteUser = async () => {
-  const numberOfUsers = await getService('user').count();
-  const numberOfRoles = await getService('role').count();
-  strapi.telemetry.send('didInviteUser', {
-    groupProperties: { numberOfRoles, numberOfUsers },
-  });
+  try {
+    const numberOfUsers = await getService('user').count();
+    const numberOfRoles = await getService('role').count();
+    strapi.telemetry.send('didInviteUser', {
+      groupProperties: { numberOfRoles, numberOfUsers },
+    });
+  } catch {
+    // Telemetry is best effort
+  }
 };
 
 const sendDidUpdateRolePermissions = async () => {
