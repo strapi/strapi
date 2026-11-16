@@ -106,6 +106,28 @@ const isOtherSide = ({
 };
 
 /**
+ * Whether `attribute` can be paired by `setRelation`: no attribute, or a relation with another
+ * side (`inversedBy` or `mappedBy`). A scalar, media, component or dynamic zone attribute, or a
+ * one-way relation, stores its own data: writing a counterpart over it drops that data.
+ */
+const canBeCounterpart = (attribute: Schema.Attribute.AnyAttribute | undefined) => {
+  if (attribute === undefined) {
+    return true;
+  }
+
+  if (isRelation(attribute) === false) {
+    return false;
+  }
+
+  const { inversedBy, mappedBy } = attribute as InternalRelationAttribute;
+
+  return (
+    (inversedBy !== undefined && inversedBy !== null) ||
+    (mappedBy !== undefined && mappedBy !== null)
+  );
+};
+
+/**
  * Maps each attribute name produced by this save's rename hops to the name it
  * had before the save, by folding the hops in order (`a -> tmp, tmp -> b`
  * gives `b -> a`).
@@ -150,6 +172,19 @@ export default function createComponentBuilder() {
 
       if (!attribute.targetAttribute) {
         return;
+      }
+
+      if (canBeCounterpart(targetAttribute) === false) {
+        // A relation that named this attribute before the save keeps it as it is
+        const attributeBeforeSave = this.contentTypes.get(uid)?.initialSchema?.attributes?.[key];
+
+        if (namesOtherSide(attributeBeforeSave, attribute.target, attribute.targetAttribute)) {
+          return;
+        }
+
+        throw new ApplicationError(
+          `Attribute ${attribute.targetAttribute} of ${attribute.target} exists and is not the other side of a relation: it cannot be the other side of relation ${key} of ${uid}`
+        );
       }
 
       // When generating the inverse relation, preserve existing conditions if they exist
@@ -412,6 +447,27 @@ export default function createComponentBuilder() {
               key,
               uid,
               attribute: oldAttribute,
+              attributes: attributesAfterEdit,
+            });
+          }
+
+          // An earlier type of this save can have written this attribute already: setRelation
+          // of its new target. The inverse side that this owner had before the save is then
+          // still on its old target. Only for an owner: this does not delete the old owner of
+          // a retargeted inverse side, which holds the link rows.
+          const attributeBeforeSave = contentType.initialSchema?.attributes?.[key] as
+            InternalAttribute | undefined;
+
+          if (
+            attributeBeforeSave !== undefined &&
+            isRelation(attributeBeforeSave) === true &&
+            (attributeBeforeSave as InternalRelationAttribute).inversedBy !== undefined &&
+            (attributeBeforeSave as InternalRelationAttribute).target !== relationAttribute.target
+          ) {
+            this.unsetRelation({
+              key,
+              uid,
+              attribute: attributeBeforeSave,
               attributes: attributesAfterEdit,
             });
           }

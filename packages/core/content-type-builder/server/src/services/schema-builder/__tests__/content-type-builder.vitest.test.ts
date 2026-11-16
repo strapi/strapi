@@ -646,26 +646,25 @@ describe('content-type-builder editContentType with retargeted relations', () =>
       }
     );
 
-    it('removes a counterpart that also has inversedBy pointing back when the owner is deleted', () => {
-      if (kind === 'manyToOne') {
-        // A oneToMany inverse side cannot have inversedBy
-        return;
+    // A oneToMany inverse side cannot have inversedBy
+    it.skipIf(kind === 'manyToOne')(
+      'removes a counterpart that also has inversedBy pointing back when the owner is deleted',
+      () => {
+        // Both sides own the pair: the state a one-way oneToOne or manyToMany relation made
+        // two-way in a single content type edit writes
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[shelfUid].__schema__.attributes.books = {
+          type: 'relation',
+          relation: kind,
+          target: bookUid,
+          inversedBy: 'shelf',
+        };
+
+        const builder = editAll({ [bookUid]: { title: { type: 'string' } } }, [bookUid]);
+
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
       }
-
-      // Both sides own the pair: the state a one-way oneToOne or manyToMany relation made
-      // two-way in a single content type edit writes
-      const { contentTypes } = (global as any).strapi;
-      contentTypes[shelfUid].__schema__.attributes.books = {
-        type: 'relation',
-        relation: kind,
-        target: bookUid,
-        inversedBy: 'shelf',
-      };
-
-      const builder = editAll({ [bookUid]: { title: { type: 'string' } } }, [bookUid]);
-
-      expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
-    });
+    );
 
     describe('with a body in the format of the GET response of the single-type route', () => {
       // That body has the stored inversedBy or mappedBy next to targetAttribute
@@ -718,8 +717,119 @@ describe('content-type-builder editContentType with retargeted relations', () =>
       });
     });
 
+    describe('when the counterpart name is taken on the target', () => {
+      it('rejects a new relation whose counterpart name is a scalar attribute', () => {
+        expect(() =>
+          editAll(
+            {
+              [bookUid]: {
+                title: { type: 'string' },
+                shelf: relation(kind, shelfUid, 'books'),
+                bookcase: relation(kind, bookcaseUid, 'name'),
+              },
+            },
+            [bookUid]
+          )
+        ).toThrow(
+          `Attribute name of ${bookcaseUid} exists and is not the other side of a relation`
+        );
+      });
+
+      it('rejects a new relation whose counterpart name is a one-way relation', () => {
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[bookcaseUid].__schema__.attributes.items = {
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookUid,
+        };
+
+        expect(() =>
+          editAll(
+            {
+              [bookUid]: {
+                title: { type: 'string' },
+                shelf: relation(kind, shelfUid, 'books'),
+                bookcase: relation(kind, bookcaseUid, 'items'),
+              },
+            },
+            [bookUid]
+          )
+        ).toThrow(
+          `Attribute items of ${bookcaseUid} exists and is not the other side of a relation`
+        );
+      });
+
+      it('keeps a one-way relation that the owner named before the save', () => {
+        // Book.shelf names Shelf.books, which is a one-way relation to Book
+        const oneWay = { type: 'relation', relation: oppositeRelation[kind], target: bookUid };
+        (global as any).strapi.contentTypes[shelfUid].__schema__.attributes.books = oneWay;
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: relation(kind, shelfUid, 'books'),
+              subtitle: { type: 'string' },
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, shelfUid).books).toEqual(oneWay);
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({
+          target: shelfUid,
+          inversedBy: 'books',
+        });
+      });
+    });
+
     describe('when the save leaves out the old target type', () => {
       // Saves with only Book, as the AI chat or a direct update-schema call can send
+      it('keeps the old owner when the inverse side moves with its new target first', () => {
+        // Save of Magazine then Shelf, without Book: Book.shelf holds the link rows
+        const builder = editAll(
+          {
+            [magazineUid]: {
+              title: { type: 'string' },
+              shelf: relation(kind, shelfUid, 'books'),
+            },
+            [shelfUid]: {
+              name: { type: 'string' },
+              books: relation(oppositeRelation[kind], magazineUid, 'shelf'),
+            },
+          },
+          [magazineUid, shelfUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({
+          target: shelfUid,
+          inversedBy: 'books',
+        });
+        expectValidPair(builder, [shelfUid, 'books'], [magazineUid, 'shelf']);
+      });
+
+      it.each(permutations([bookUid, bookcaseUid]))(
+        'removes the inverse side on the old target in a save of Book and Bookcase (%s, %s)',
+        (...order) => {
+          const builder = editAll(
+            {
+              [bookUid]: {
+                title: { type: 'string' },
+                shelf: relation(kind, bookcaseUid, 'books'),
+              },
+              [bookcaseUid]: {
+                name: { type: 'string' },
+                books: relation(oppositeRelation[kind], bookUid, 'shelf'),
+              },
+            },
+            order
+          );
+
+          expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+          expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'books']);
+        }
+      );
+
       const counterpartOptions = {
         private: true,
         required: true,
