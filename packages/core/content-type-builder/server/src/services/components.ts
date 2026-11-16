@@ -6,7 +6,7 @@ import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import { emitSchemaEvent } from '../utils/events';
 import createBuilder from './schema-builder';
 import type { SchemaHandler } from './schema-builder/schema-handler';
-import type { ComponentsService, EditComponentPayload } from '../types/services';
+import type { ComponentsService } from '../types/services';
 
 /**
  * Formats a component attributes
@@ -93,10 +93,7 @@ export type ComponentToCreate = {
 
 export const editComponent = (async (
   uid: Internal.UID.Component,
-  {
-    component,
-    components = [],
-  }: Core.IsStrict extends true ? EditComponentPayload : ComponentToCreate
+  { component, components = [] }: ComponentToCreate
 ): Promise<SchemaHandler<Internal.UID.Component>> => {
   const builder = createBuilder();
 
