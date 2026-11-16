@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -48,8 +49,20 @@ export const databaseFromEnv = (env: NodeJS.ProcessEnv = process.env): Database 
   };
 };
 
-/** One database per app, so a reset only touches its own instance. */
-export const databaseName = (app: App) => `tests_${app.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+/** Postgres keeps the first 63 bytes of a name (MySQL 64). */
+const MAX_DATABASE_NAME_LENGTH = 63;
+
+/**
+ * One database per app, so a reset only touches its own instance. Every checkout uses the same
+ * app names, so the name ends with a hash of the app dir: two worktrees on one database server
+ * don't drop each other's database. For example `tests_api_1_3f2a9c0d1e`.
+ */
+export const databaseName = (app: App) => {
+  const hash = crypto.createHash('sha256').update(app.dir).digest('hex').slice(0, 10);
+  const slug = app.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+  const room = MAX_DATABASE_NAME_LENGTH - 'tests_'.length - hash.length - 1;
+  return `tests_${slug.slice(0, room)}_${hash}`;
+};
 
 /** The app env that points Strapi at its database. */
 export const databaseEnv = (app: App, database: Database): NodeJS.ProcessEnv => {

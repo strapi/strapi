@@ -7,6 +7,7 @@ import {
   SQLITE_RESTORE_MARKER_FILE,
   appPort,
   databaseFromEnv,
+  databaseName,
   generateApp,
   resetDatabase,
   restoreDatabase,
@@ -68,6 +69,17 @@ describe(`per-file instance (${database.client})`, () => {
     server = await timed('boot on the empty database', () => startServer(app, { port, database }));
     expect(await writeProbe(server)).toBe(true);
     await server.stop();
+  });
+});
+
+describe('database names', () => {
+  test('differ between checkouts and fit the name length limit', () => {
+    const name = (dir: string, appName = 'api-1') =>
+      databaseName({ name: appName, dir, dbFile: `${dir}/.tmp/data.db` });
+
+    expect(name('/work/a/test-apps/next/api-1')).toMatch(/^tests_api_1_[0-9a-f]{10}$/);
+    expect(name('/work/a/test-apps/next/api-1')).not.toBe(name('/work/b/test-apps/next/api-1'));
+    expect(name('/work/a', 'a'.repeat(100)).length).toBeLessThanOrEqual(63);
   });
 });
 
@@ -152,6 +164,19 @@ describe.skipIf(database.client === 'sqlite')(`snapshots on ${database.client}`,
     await resetDatabase(app, database);
     const server = await startServer(app, { port, database });
     await expect(snapshotDatabase(server)).rejects.toThrow('Snapshots are SQLite only');
+    await server.stop();
+  });
+
+  test("another checkout's reset leaves this app's database alone", async () => {
+    await resetDatabase(app, database);
+    const server = await startServer(app, { port, database });
+    expect(await writeProbe(server)).toBe(true);
+
+    // The same app in another worktree, on the same database server.
+    const otherCheckout: App = { ...app, dir: `${app.dir}-other-checkout` };
+    await resetDatabase(otherCheckout, database);
+
+    expect(await writeProbe(server)).toBe(false);
     await server.stop();
   });
 });
