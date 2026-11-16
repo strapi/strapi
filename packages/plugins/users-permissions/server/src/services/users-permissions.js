@@ -163,7 +163,7 @@ module.exports = ({ strapi }) => ({
 
     const appActions = _.flatMap(strapi.apis, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+        return Object.keys(controller ?? {}).map((actionName) => {
           return `api::${apiName}.${controllerName}.${actionName}`;
         });
       });
@@ -171,7 +171,7 @@ module.exports = ({ strapi }) => ({
 
     const pluginsActions = _.flatMap(strapi.plugins, (plugin, pluginName) => {
       return _.flatMap(plugin.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+        return Object.keys(controller ?? {}).map((actionName) => {
           return `plugin::${pluginName}.${controllerName}.${actionName}`;
         });
       });
