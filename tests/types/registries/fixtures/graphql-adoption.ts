@@ -61,3 +61,16 @@ generated.typeDefs satisfies string[];
 generated.resolversConfig satisfies Record<string, unknown>;
 // @ts-expect-error Generation needs the registry of the schema being built.
 extension.generate({ typeRegistry: {} });
+
+// The shadow CRUD managers chain: every `disable*` method returns its manager.
+const articles = extension.use({}).shadowCRUD('api::article.article');
+articles
+  .disableQueries()
+  .disableMutations()
+  .disableActions(['create'])
+  .isDisabled() satisfies boolean;
+articles.field('title').disableInput().disableFilters().hasInputEnabled() satisfies boolean;
+// @ts-expect-error The shadow CRUD manager has no arbitrary members.
+articles.disable().missing();
+// @ts-expect-error A field manager has no arbitrary members.
+articles.field('title').disable().missing();
