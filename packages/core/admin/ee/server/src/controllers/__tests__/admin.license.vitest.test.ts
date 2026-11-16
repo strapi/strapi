@@ -663,7 +663,7 @@ describe('licenseLimitInformation (projectUsage)', () => {
       getCurrentActiveUserCount: async () => 10,
       getDisabledUserList: async () => [],
     });
-    // The registry counts fewer users across environments: it doesn't lift the local limit
+    // Fewer users across instances doesn't lift this instance's limit
     withStoredUsage({ ...USAGE, activeUsers: 4 });
 
     const { data } = await adminController.licenseLimitInformation();

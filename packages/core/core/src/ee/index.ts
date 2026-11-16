@@ -17,10 +17,7 @@ import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
 
-/**
- * Core-store entry holding the last license usage read from the registry. Read by the admin
- * `license-limit-information` endpoint.
- */
+// Last license usage read from the registry
 const LICENSE_USAGE_STORE_KEY = { type: 'ee', key: 'license_usage' } as const;
 
 type LicenseFeature = { name: string; [key: string]: any };
@@ -146,10 +143,7 @@ const init = (licenseDir: string, logger?: Logger) => {
   }
 };
 
-/**
- * Stores the license usage counted by the registry. On any failure the previously stored usage
- * is kept. Never throws.
- */
+/** Stores the usage counted by the registry. Keeps the previous value on failure. Never throws. */
 const refreshLicenseUsage = async ({ strapi }: { strapi: Core.Strapi }, licenseKey: string) => {
   try {
     const usage = await fetchLicenseUsage({ strapi }, licenseKey);
@@ -172,12 +166,9 @@ const refreshLicenseUsage = async ({ strapi }: { strapi: Core.Strapi }, licenseK
 const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
   const { licenseKey } = ee.licenseInfo;
 
-  // Read before the transaction opens: SQLite pools hold a single connection, which the
-  // transaction below keeps busy, and on Postgres a failed query would abort the transaction.
-  // Never throws: without hashes the license check is still sent, just without them.
+  // Read before the transaction: it holds SQLite's only connection
   const userHashes = licenseKey ? await getUserHashes(strapi, licenseKey) : undefined;
 
-  // Whether the registry answered this check with a license (not a fallback, not throttled)
   let registryAnswered = false;
 
   const { get, commit, rollback } = await strapi.db.transaction();
@@ -286,8 +277,6 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     await rollback();
   }
 
-  // Outside the transaction, and kept apart from `ee_information`: usage is informational and
-  // must never hold the lock nor affect the license state.
   if (registryAnswered && licenseKey) {
     await refreshLicenseUsage({ strapi }, licenseKey);
   }

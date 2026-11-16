@@ -55,9 +55,8 @@ interface License {
   licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT';
   isHostedOnStrapiCloud: boolean;
   features: LicenseFeature[];
-  // Active admin users the license registry counted across every environment of the project.
-  // Informational only: seats are still enforced per instance. null for offline licenses and until the registry reported it; absent
-  // from servers that predate it.
+  // Active admin users counted across all instances. Information only.
+  // null for offline licenses and until the registry answered.
   projectUsage?: {
     activeUsers: number;
     contractedUsers: number | null;

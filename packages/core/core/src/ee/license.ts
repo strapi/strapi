@@ -71,16 +71,9 @@ const licenseErrorSchema = z.object({
   }),
 });
 
-/**
- * Identifies this running process to the license registry, so it can tell instances of a
- * project apart. Generated once per process: it changes on every restart.
- */
+// Identifies this process. Changes on every restart.
 const INSTANCE_ID = crypto.randomUUID();
 
-/**
- * Shape of a successful (200) response from the registry's usage endpoint: the active admin users
- * it counted across every instance of the license, and the number the contract covers, if any.
- */
 const licenseUsageSchema = z.object({
   data: z.object({
     activeUsers: z.number().int().nonnegative(),
@@ -91,7 +84,6 @@ const licenseUsageSchema = z.object({
 
 type LicenseUsage = z.infer<typeof licenseUsageSchema>['data'];
 
-/** The usage is informational: never hold a license check up for long waiting for it. */
 const LICENSE_USAGE_TIMEOUT_MS = 5000;
 
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
@@ -159,7 +151,6 @@ const throwShouldFallbackError = () => {
 };
 
 interface FetchLicenseOptions {
-  /** HMAC hashes of the active admin users (see `./user-hashes`). Omitted when unavailable. */
   userHashes?: string[];
 }
 
@@ -180,8 +171,7 @@ const fetchLicense = async (
     .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // `instanceId`, `strapiVersion` and `userHashes` are optional: registries that do not know
-      // them ignore them. `JSON.stringify` drops the ones that are undefined.
+      // Older registries ignore the new fields
       body: JSON.stringify({
         key,
         projectId,
@@ -221,12 +211,7 @@ const fetchLicense = async (
   }
 };
 
-/**
- * Reads the license usage the registry counted across every instance of the license.
- *
- * Best effort and never throws: any failure (network, timeout, rate limit, a registry that does
- * not have the endpoint yet, an unexpected body) resolves to `null`.
- */
+/** Active admin users the registry counted across all instances. `null` on any failure. */
 const fetchLicenseUsage = async (
   { strapi }: { strapi: Core.Strapi },
   key: string
@@ -240,7 +225,7 @@ const fetchLicenseUsage = async (
     });
 
     if (response.status !== 200) {
-      // 404/405 from a registry without the endpoint, 429 when rate limited
+      // e.g. 404 from an older registry, 429 when rate limited
       strapi.log.debug(`License usage unavailable from the license registry (${response.status}).`);
       return null;
     }
