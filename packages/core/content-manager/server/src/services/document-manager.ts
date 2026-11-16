@@ -28,6 +28,22 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   };
 
+  /**
+   * A non-localized type has no locale, so the request locale is dropped from the data and the
+   * params. The i18n transforms of the document service skip these types: it would store a data
+   * locale, and the entity validator would filter its unique check on a locale the rows don't have.
+   */
+  const omitLocaleOfNonLocalizedType = <T extends { data: object; locale?: unknown }>(
+    uid: UID.ContentType,
+    params: T
+  ) => {
+    if (strapi.localization.isLocalizedContentType(strapi.getModel(uid)) === true) {
+      return params;
+    }
+
+    return { ...omit(params, 'locale'), data: omit(params.data, 'locale') };
+  };
+
   return {
     async findOne(
       id: string,
@@ -97,7 +113,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, status: 'draft' as const, populate };
+      const params = omitLocaleOfNonLocalizedType(uid, {
+        ...opts,
+        data: opts.data ?? {},
+        status: 'draft' as const,
+        populate,
+      });
 
       return strapi.documents(uid).create(params);
     },
@@ -109,7 +130,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, data: publishData, populate, status: 'draft' };
+      const params = omitLocaleOfNonLocalizedType(uid, {
+        ...opts,
+        data: publishData,
+        populate,
+        status: 'draft',
+      });
 
       return strapi.documents(uid).update({ ...params, documentId: id });
     },
@@ -123,12 +149,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Extract the locale to pass it as a plain param
       const locale = body?.locale;
-      const params = {
+      const params = omitLocaleOfNonLocalizedType(uid, {
         // Ensure id and documentId are not copied to the clone
         data: omit(body, ['id', 'documentId']),
         locale,
         populate,
-      };
+      });
 
       return strapi
         .documents(uid)

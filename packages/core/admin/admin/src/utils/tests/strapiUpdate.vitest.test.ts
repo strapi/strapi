@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { getReleasesBehind, getStrapiUpdateInfo, isUpdateAvailable } from '../strapiUpdate';
 
 describe('strapiUpdate', () => {
@@ -10,6 +12,15 @@ describe('strapiUpdate', () => {
 
     it('accepts release tags prefixed with "v"', () => {
       expect(isUpdateAvailable('5.0.0', 'v5.1.0')).toBe(true);
+    });
+
+    it('returns false for 0.0.0 prerelease builds (experimental, nightly)', () => {
+      expect(isUpdateAvailable('0.0.0-experimental.93dfbb8af7', 'v5.61.0')).toBe(false);
+      expect(isUpdateAvailable('0.0.0-next.93dfbb8af7', 'v5.61.0')).toBe(false);
+    });
+
+    it('returns true for a real prerelease behind the latest release', () => {
+      expect(isUpdateAvailable('5.61.0-beta.1', 'v5.61.0')).toBe(true);
     });
   });
 
@@ -70,6 +81,32 @@ describe('strapiUpdate', () => {
         severity: 'urgent',
         releasesBehind: 0,
         isMajorBehind: true,
+      });
+    });
+
+    it('returns "none" for 0.0.0 prerelease builds (experimental, nightly)', () => {
+      expect(getStrapiUpdateInfo('0.0.0-experimental.93dfbb8af7', 'v5.61.0')).toEqual({
+        severity: 'none',
+        releasesBehind: 0,
+        isMajorBehind: false,
+      });
+      expect(getStrapiUpdateInfo('0.0.0-next.93dfbb8af7', 'v5.61.0')).toEqual({
+        severity: 'none',
+        releasesBehind: 0,
+        isMajorBehind: false,
+      });
+    });
+
+    it('compares real prereleases like regular versions', () => {
+      expect(getStrapiUpdateInfo('5.62.0-beta.1', 'v5.61.0')).toEqual({
+        severity: 'none',
+        releasesBehind: 0,
+        isMajorBehind: false,
+      });
+      expect(getStrapiUpdateInfo('5.60.0-beta.1', 'v5.61.0')).toEqual({
+        severity: 'default',
+        releasesBehind: 1,
+        isMajorBehind: false,
       });
     });
 
