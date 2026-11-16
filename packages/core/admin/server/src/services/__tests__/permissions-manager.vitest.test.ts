@@ -106,6 +106,25 @@ describe('Permissions Manager', () => {
     });
   });
 
+  describe('options', () => {
+    const ability = defineAbility((can: any) => can('read', 'foo'));
+
+    test('It should expose the ability, action and model it was created with', () => {
+      const pm = createPermissionsManager({ ability, action: 'read', model: 'foo' });
+
+      expect(pm.ability).toBe(ability);
+      expect(pm.action).toBe('read');
+      expect(pm.model).toBe('foo');
+    });
+
+    test('It should leave the action undefined when none is given', () => {
+      const pm = createPermissionsManager({ ability, model: 'foo' });
+
+      expect(pm.action).toBeUndefined();
+      expect(pm.getQuery('read')).toStrictEqual({});
+    });
+  });
+
   describe('toSubject', () => {
     global.strapi = {
       getModel() {
@@ -125,6 +144,7 @@ describe('Permissions Manager', () => {
       const input = { foo: 'bar' };
       const sub = pm.toSubject(input);
 
+      expect(sub).toBe(input);
       expect(sub[attr]).toBeDefined();
       expect(sub[attr]).toEqual('foo');
       expect(sub).toStrictEqual(input);
@@ -214,6 +234,13 @@ describe('Permissions Manager', () => {
       const res = pm.addPermissionsQueryTo(query, undefined);
 
       expect(res).toStrictEqual(expected);
+      expect(res).not.toBe(query);
+      expect(query).toStrictEqual({ limit: 100 });
+    });
+
+    test('Create query without a query, for the given action', () => {
+      expect(pm.addPermissionsQueryTo(undefined, undefined)).toStrictEqual({ filters: pmQuery });
+      expect(pm.addPermissionsQueryTo({}, 'read')).toStrictEqual({ filters: pmQuery });
     });
 
     test('Create query from complex object', () => {
