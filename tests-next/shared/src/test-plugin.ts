@@ -18,6 +18,13 @@ export const TEST_PLUGIN_ENV_VAR = constants.envVar;
 /** Set it to "fake" to register the fake AI translations provider (EE with `cms-byok-ai`). */
 export const TEST_AI_PROVIDER_ENV_VAR = constants.aiProviderEnvVar;
 
+/**
+ * Files next to a SQLite database: its snapshot, and the marker of a pending `reload` restore,
+ * which makes the next boot copy the snapshot back (test-plugin/lib/sqlite-snapshot.js).
+ */
+export const SQLITE_SNAPSHOT_FILE = constants.sqliteSnapshotFile;
+export const SQLITE_RESTORE_MARKER_FILE = constants.sqliteRestoreMarkerFile;
+
 /** Access key of the transfer token that POST /api/tests/transfer-token creates. */
 export const TEST_TRANSFER_TOKEN_ACCESS_KEY = constants.transferTokenAccessKey;
 

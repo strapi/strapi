@@ -1,6 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { afterAll, beforeAll, describe, expect, onTestFinished, test, vi } from 'vitest';
 
 import {
+  SQLITE_RESTORE_MARKER_FILE,
   appPort,
   databaseFromEnv,
   generateApp,
@@ -128,6 +132,18 @@ describe.skipIf(database.client !== 'sqlite')('SQLite snapshot and restore', () 
     expect(await bootId()).not.toBe(before);
     expect(await hasAdmin()).toBe(false);
     expect(await writeProbe(server)).toBe(false);
+  });
+
+  test('a reset drops a pending reload restore', async () => {
+    // A reload restore that never ran, for example a run stopped during the restart.
+    fs.writeFileSync(path.join(path.dirname(app.dbFile), SQLITE_RESTORE_MARKER_FILE), '');
+    await server.stop();
+
+    await resetDatabase(app, database);
+    server = await startServer(app, { port, database });
+
+    // Empty: the boot did not copy the snapshot, which holds the probe, back.
+    expect(await writeProbe(server)).toBe(true);
   });
 });
 

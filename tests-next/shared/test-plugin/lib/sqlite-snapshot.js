@@ -15,14 +15,16 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+const constants = require('../constants.json');
+
 /** @param {any} strapi */
 const paths = (strapi) => {
   const dbFile = strapi.config.get('database.connection.connection.filename');
   const dir = path.dirname(dbFile);
   return {
     dbFile,
-    snapshot: path.join(dir, 'tests-snapshot.db'),
-    marker: path.join(dir, 'tests-restore-pending'),
+    snapshot: path.join(dir, constants.sqliteSnapshotFile),
+    marker: path.join(dir, constants.sqliteRestoreMarkerFile),
   };
 };
 
