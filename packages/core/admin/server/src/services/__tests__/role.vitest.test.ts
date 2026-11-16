@@ -1,4 +1,4 @@
-import { describe, test, expect, expectTypeOf, vi } from 'vitest';
+import { describe, test, expect, expectTypeOf, vi, beforeEach, afterEach } from 'vitest';
 import _ from 'lodash';
 import { queryParams, errors } from '@strapi/utils';
 import constants from '../constants';
@@ -1135,6 +1135,16 @@ describe('Role', () => {
       return { findUserPermissions, findMany };
     };
 
+    // Accepted permissions are stored as sent
+    const expectAccepted = async (
+      requester: Parameters<typeof checkPermissionsCeiling>[0],
+      permissions: any[]
+    ) => {
+      const sent = structuredClone(permissions);
+
+      await expect(checkPermissionsCeiling(requester, ROLE_ID, permissions)).resolves.toEqual(sent);
+    };
+
     const expectForbidden = async (promise: Promise<unknown>, rejectedPermissions: unknown[]) => {
       let error: any;
 
@@ -1152,11 +1162,7 @@ describe('Role', () => {
     test('Super admins are not checked', async () => {
       const { findUserPermissions, findMany } = setupStrapi();
 
-      await expect(
-        checkPermissionsCeiling({ user: superAdminUser }, ROLE_ID, [
-          { action: READ, subject: ARTICLE },
-        ])
-      ).resolves.toBeUndefined();
+      await expectAccepted({ user: superAdminUser }, [{ action: READ, subject: ARTICLE }]);
 
       expect(findUserPermissions).not.toHaveBeenCalled();
       expect(findMany).not.toHaveBeenCalled();
@@ -1192,9 +1198,7 @@ describe('Role', () => {
     test('Matches null and undefined subjects', async () => {
       setupStrapi({ userPermissions: [{ action: 'admin::roles.read', subject: null }] });
 
-      await expect(
-        checkPermissionsCeiling({ user }, ROLE_ID, [{ action: 'admin::roles.read' }])
-      ).resolves.toBeUndefined();
+      await expectAccepted({ user }, [{ action: 'admin::roles.read' }]);
     });
 
     test('Checks the other properties when a property lists no value', async () => {
@@ -1243,9 +1247,7 @@ describe('Role', () => {
       test('Ignores locales on a subject that is not localized', async () => {
         setupStrapi({ userPermissions: [heldTitle] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [requestTitle(['fr'])])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [requestTitle(['fr'])]);
       });
 
       test('Holds no locale on a token whose owner is a super admin', async () => {
@@ -1312,9 +1314,7 @@ describe('Role', () => {
       test('Ignores a requested unregistered condition next to a held one', async () => {
         setup({ userPermissions: [readTitle([IS_CREATOR])] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([IS_CREATOR, UNKNOWN])])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [readTitle([IS_CREATOR, UNKNOWN])]);
       });
 
       test('Does not count a held permission with action parameters', async () => {
@@ -1330,18 +1330,14 @@ describe('Role', () => {
         // Regression guard: the row is left unchanged
         setup({ rolePermissions: [readTitle([UNKNOWN])] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([UNKNOWN])])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [readTitle([UNKNOWN])]);
       });
 
       test('Lets a permission be resent when it is stored as a row the role carries', async () => {
         // Stored without the unregistered condition, so the row is deleted and re-added as it was
         setup({ rolePermissions: [readTitle([IS_CREATOR])] });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([IS_CREATOR, UNKNOWN])])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [readTitle([IS_CREATOR, UNKNOWN])]);
       });
     });
 
@@ -1378,16 +1374,10 @@ describe('Role', () => {
         test('Allows permissions the token holds', async () => {
           const { findUserPermissions } = setupStrapi();
 
-          await expect(
-            checkPermissionsCeiling(
-              { tokenPermissions: superAdminLikeTokenPermissions, owner },
-              ROLE_ID,
-              [
-                { action: READ, subject: ARTICLE },
-                { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
-              ]
-            )
-          ).resolves.toBeUndefined();
+          await expectAccepted({ tokenPermissions: superAdminLikeTokenPermissions, owner }, [
+            { action: READ, subject: ARTICLE },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]);
 
           expect(findUserPermissions).not.toHaveBeenCalled();
         });
@@ -1454,13 +1444,9 @@ describe('Role', () => {
         test('Allows a permission both the token and its owner hold', async () => {
           setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
 
-          await expect(
-            checkPermissionsCeiling(
-              { tokenPermissions: superAdminLikeTokenPermissions, owner },
-              ROLE_ID,
-              [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }]
-            )
-          ).resolves.toBeUndefined();
+          await expectAccepted({ tokenPermissions: superAdminLikeTokenPermissions, owner }, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]);
         });
       });
     });
@@ -1480,12 +1466,10 @@ describe('Role', () => {
           ],
         });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: READ, subject: ARTICLE },
-            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
-          ])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE },
+          { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+        ]);
 
         await expectForbidden(
           checkPermissionsCeiling({ user }, ROLE_ID, [
@@ -1541,16 +1525,14 @@ describe('Role', () => {
           ],
         });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            {
-              action: CREATE,
-              subject: ARTICLE,
-              properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
-              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
-            },
-          ])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [
+          {
+            action: CREATE,
+            subject: ARTICLE,
+            properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
+            conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+          },
+        ]);
 
         await expectForbidden(
           checkPermissionsCeiling({ user }, ROLE_ID, [
@@ -1586,11 +1568,9 @@ describe('Role', () => {
           ],
         });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'title'] } },
-          ])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [
+          { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'title'] } },
+        ]);
       });
 
       test('Allows removing an existing out-of-scope permission', async () => {
@@ -1599,7 +1579,243 @@ describe('Role', () => {
           rolePermissions: [{ id: 1, role: ROLE_ID, action: CREATE, subject: ARTICLE }],
         });
 
-        await expect(checkPermissionsCeiling({ user }, ROLE_ID, [])).resolves.toBeUndefined();
+        await expectAccepted({ user }, []);
+      });
+
+      // Default roles are stored with no `locales` when a localized content type exists at first
+      // boot. A row with no or empty `locales` grants no locale.
+      describe.each([
+        ['no locales key', {}],
+        ['empty locales', { locales: [] }],
+      ])('a localized row stored with %s', (_, storedLocales) => {
+        let defaultLocale = 'en';
+
+        const storedRow = (fields = ['title']) => ({
+          id: 1,
+          role: ROLE_ID,
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields, ...storedLocales },
+          conditions: ['admin::is-creator'],
+        });
+        const createTitle = (
+          locales: string[] | null,
+          { fields = ['title'], conditions = ['admin::is-creator'] } = {}
+        ) => ({
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields, locales },
+          conditions,
+        });
+        const asStored = (fields = ['title']) => ({
+          action: CREATE,
+          subject: ARTICLE,
+          properties: { fields, ...storedLocales },
+          conditions: ['admin::is-creator'],
+        });
+
+        // What i18n's hook does: a missing or empty `locales` becomes the default locale
+        const giveDefaultLocale = async (permissions: any[]) =>
+          permissions.map((permission) =>
+            permission.subject === ARTICLE &&
+            permission.properties?.locales !== null &&
+            !permission.properties?.locales?.length
+              ? {
+                  ...permission,
+                  properties: { ...permission.properties, locales: [defaultLocale] },
+                }
+              : permission
+          );
+
+        const readTitleEn = {
+          action: READ,
+          subject: ARTICLE,
+          properties: { fields: ['title'], locales: ['en'] },
+          conditions: [],
+        };
+
+        const setup = (fields?: string[], userPermissions: any[] = [readTitleEn]) =>
+          setupStrapi({
+            userPermissions,
+            rolePermissions: [storedRow(fields), { id: 2, role: ROLE_ID, ...readTitleEn }],
+            localizedSubjects: [ARTICLE],
+          });
+
+        beforeEach(() => {
+          defaultLocale = 'en';
+          roleService.hooks.willValidateUpdatePermissions.register(giveDefaultLocale);
+        });
+
+        afterEach(() => {
+          roleService.hooks.willValidateUpdatePermissions.delete(giveDefaultLocale);
+        });
+
+        test('Accepts the row resent with the default locale, and keeps its stored locales', async () => {
+          setup();
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        // The role editor drops a field it has nothing to show for, such as an empty component
+        test('Accepts the row narrowed to fewer fields, and keeps its stored locales', async () => {
+          setup(['title', 'socialLinks']);
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        test('Keeps the stored locales next to an unchanged localized row', async () => {
+          setup();
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [readTitleEn, createTitle(['en'])])
+          ).resolves.toEqual([readTitleEn, asStored()]);
+        });
+
+        test('Stores the default locale when the requester holds it', async () => {
+          const createEn = { action: CREATE, subject: ARTICLE, properties: { locales: ['en'] } };
+
+          setup(undefined, [readTitleEn, createEn]);
+          await expectAccepted({ user }, [createTitle(['en'])]);
+
+          setup(['title', 'socialLinks'], [readTitleEn, createEn]);
+          await expectAccepted({ user }, [createTitle(['en'])]);
+        });
+
+        test('Accepts the row narrowed to fewer conditions, and keeps its stored locales', async () => {
+          setupStrapi({
+            userPermissions: [readTitleEn],
+            rolePermissions: [
+              {
+                ...storedRow(),
+                conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+              },
+            ],
+            localizedSubjects: [ARTICLE],
+          });
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        test('Lists only the other permission when it is rejected with the row', async () => {
+          setup();
+
+          await expectForbidden(
+            checkPermissionsCeiling({ user }, ROLE_ID, [
+              createTitle(['en']),
+              { action: CREATE, subject: AUTHOR },
+            ]),
+            [{ action: CREATE, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+        });
+
+        describe('with another willValidateUpdatePermissions handler', () => {
+          const bodyDe = {
+            id: 3,
+            role: ROLE_ID,
+            action: CREATE,
+            subject: ARTICLE,
+            properties: { fields: ['body'], locales: ['de'] },
+            conditions: ['admin::is-creator'],
+          };
+
+          const withHandler = async (
+            handler: (permissions: any[]) => any,
+            run: () => Promise<void>
+          ) => {
+            roleService.hooks.willValidateUpdatePermissions.register(handler);
+
+            try {
+              await run();
+            } finally {
+              roleService.hooks.willValidateUpdatePermissions.delete(handler);
+            }
+          };
+
+          test('Pairs each row with its own reading when the handler reorders rows', async () => {
+            setupStrapi({
+              userPermissions: [readTitleEn],
+              rolePermissions: [storedRow(), bodyDe],
+              localizedSubjects: [ARTICLE],
+            });
+
+            await withHandler(
+              async (permissions) => [...permissions].reverse(),
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+
+          test('Pairs each row with its own reading when the handler drops rows', async () => {
+            setupStrapi({
+              userPermissions: [readTitleEn],
+              rolePermissions: [bodyDe, storedRow()],
+              localizedSubjects: [ARTICLE],
+            });
+
+            await withHandler(
+              async (permissions) => permissions.slice(1),
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+
+          test('Keeps the stored rows unchanged when the handler mutates its input', async () => {
+            setup();
+            roleService.hooks.willValidateUpdatePermissions.delete(giveDefaultLocale);
+
+            await withHandler(
+              async (permissions) => {
+                permissions.forEach((permission) => {
+                  if (permission.subject === ARTICLE && !permission.properties?.locales?.length) {
+                    permission.properties.locales = [defaultLocale];
+                  }
+                });
+
+                return permissions;
+              },
+              async () => {
+                await expect(
+                  checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['en'])])
+                ).resolves.toEqual([asStored()]);
+              }
+            );
+          });
+        });
+
+        test('Grants no locale when the default locale changed', async () => {
+          setup();
+          defaultLocale = 'fr';
+
+          await expect(
+            checkPermissionsCeiling({ user }, ROLE_ID, [createTitle(['fr'])])
+          ).resolves.toEqual([asStored()]);
+        });
+
+        test.each([
+          ['another locale', createTitle(['fr'])],
+          ['an added locale', createTitle(['en', 'fr'])],
+          ['every locale', createTitle(null)],
+          ['an added field', createTitle(['en'], { fields: ['title', 'body'] })],
+          ['a dropped condition', createTitle(['en'], { conditions: [] })],
+        ])('Rejects the row with %s', async (__, requested) => {
+          setup();
+
+          await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [requested]), [
+            requested,
+          ]);
+        });
       });
     });
 
@@ -1626,11 +1842,9 @@ describe('Role', () => {
       test('Allows removing a field from a row', async () => {
         setupRole([rolePermission(1, { properties: { fields: ['title', 'body'] } })]);
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
-          ])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+        ]);
       });
 
       test('Rejects a narrowed row that adds a field', async () => {
@@ -1683,16 +1897,14 @@ describe('Role', () => {
           }),
         ]);
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            {
-              action: READ,
-              subject: ARTICLE,
-              properties: { fields: ['body'] },
-              conditions: [IS_CREATOR],
-            },
-          ])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [
+          {
+            action: READ,
+            subject: ARTICLE,
+            properties: { fields: ['body'] },
+            conditions: [IS_CREATOR],
+          },
+        ]);
       });
 
       test('Rejects removing the last condition, which makes the row unconditional', async () => {
@@ -1711,11 +1923,9 @@ describe('Role', () => {
       test('Allows resending a row without the stale locales of a type no longer localized', async () => {
         setupRole([rolePermission(1, { properties: { fields: ['body'], locales: ['en'] } })]);
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [
-            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
-          ])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+        ]);
       });
 
       test('Does not treat a parameterized permission as a narrowing', async () => {
@@ -1752,9 +1962,7 @@ describe('Role', () => {
           ],
         });
 
-        await expect(
-          checkPermissionsCeiling({ user }, ROLE_ID, [request])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user }, [request]);
       });
 
       test('Rejects one the requester only holds as the plain action', async () => {
@@ -1821,9 +2029,7 @@ describe('Role', () => {
       test('Allows it for super admins', async () => {
         setupStrapi();
 
-        await expect(
-          checkPermissionsCeiling({ user: superAdminUser }, ROLE_ID, [request])
-        ).resolves.toBeUndefined();
+        await expectAccepted({ user: superAdminUser }, [request]);
       });
     });
   });

@@ -570,6 +570,30 @@ describe('metadata', () => {
                 );
               });
 
+              // The owner has the right inversedBy, but it points to another model that has an attribute of the same name
+              test('throws when the owner named by mappedBy points back to another model', () => {
+                const models = inverseModels(inverseRelation, 'article', {
+                  article: {
+                    type: 'relation',
+                    relation: ownerRelationOf[inverseRelation],
+                    target: 'api::category.category',
+                    inversedBy: 'contributors',
+                  },
+                });
+                models.find(
+                  (model: { uid: string }) => model.uid === 'api::category.category'
+                ).attributes.contributors = {
+                  type: 'relation',
+                  relation: inverseRelation,
+                  target: 'api::writer.writer',
+                  mappedBy: 'article',
+                };
+
+                expect(() => createMetadata(models)).toThrow(
+                  'Error on attribute contributors in model article(api::article.article): mappedBy attribute article in api::writer.writer must be a relation to api::article.article with inversedBy "contributors"'
+                );
+              });
+
               describe('self-referential', () => {
                 const selfModels = (nodeAttributes: Record<string, unknown>) =>
                   [

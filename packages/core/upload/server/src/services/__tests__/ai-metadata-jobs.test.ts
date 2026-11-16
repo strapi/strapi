@@ -65,4 +65,27 @@ describe('AI metadata jobs service', () => {
     expect(latest.createdAt).toMatch(ISO_DATE);
     expect(completedAt).toMatch(ISO_DATE);
   });
+
+  it('fails only the jobs still processing, and leaves settled jobs as they are', async () => {
+    const completedId = await service.createJob();
+    await service.updateJob(completedId, { status: 'completed', completedAt: new Date(0) });
+    const failedId = await service.createJob();
+    await service.updateJob(failedId, { status: 'failed', completedAt: new Date(0) });
+    const processingId = await service.createJob();
+
+    await service.failInterruptedJobs();
+
+    expect(await service.getJob(completedId)).toMatchObject({
+      status: 'completed',
+      completedAt: new Date(0).toISOString(),
+    });
+    expect(await service.getJob(failedId)).toMatchObject({
+      status: 'failed',
+      completedAt: new Date(0).toISOString(),
+    });
+
+    const interrupted = (await service.getJob(processingId)) as AIMetadataJob;
+    expect(interrupted.status).toBe('failed');
+    expect(interrupted.completedAt).toMatch(ISO_DATE);
+  });
 });

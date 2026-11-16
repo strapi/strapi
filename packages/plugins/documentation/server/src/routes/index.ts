@@ -13,8 +13,6 @@ export default [
   {
     method: 'GET',
     path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
-    // Kept in v6 syntax so the API documentation stays as it was. The router still checks each part.
-    [Symbol.for('strapi.route.keepV6Path')]: true,
     handler: 'documentation.index',
     config: {
       auth: false,

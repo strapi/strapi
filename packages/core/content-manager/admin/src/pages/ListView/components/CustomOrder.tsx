@@ -17,9 +17,24 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { QueryStatus } from '@reduxjs/toolkit/query';
-import { Table, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
-import { Flex, Td, Tooltip, Typography } from '@strapi/design-system';
-import { ArrowDown, ArrowUp, Drag } from '@strapi/icons';
+import {
+  Table,
+  useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+  withEncodedUserParams,
+} from '@strapi/admin/strapi-admin';
+import {
+  Button,
+  Field,
+  Flex,
+  Modal,
+  NumberInput,
+  Td,
+  Tooltip,
+  Typography,
+} from '@strapi/design-system';
+import { ArrowDown, ArrowUp, Drag, NumberList } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useStore } from 'react-redux';
 import { css, styled } from 'styled-components';
@@ -30,6 +45,7 @@ import { getTranslation } from '../../../utils/translations';
 
 import type { DocumentActionComponent } from '../../../content-manager';
 import type { Document } from '../../../hooks/useDocument';
+import type { InternalDocumentActionDescription } from '../../EditView/components/DocumentActions';
 import type { Store } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
@@ -41,6 +57,8 @@ interface CustomOrderState {
   isAvailable: boolean;
   /** The list is sorted by its custom order, so the position of an entry means something. */
   isActive: boolean;
+  /** The user is allowed to move entries, whatever the sort of the list. */
+  canUpdate: boolean;
   /** The user is allowed to move entries, and the list is in a state where they can be moved. */
   canReorder: boolean;
   /**
@@ -130,7 +148,7 @@ const useCustomOrder = ({
 
   /**
    * Runs a move while blocking any other one: from the moment it is asked until the list
-   * shows its result, the handles, the position inputs and the row actions are inert.
+   * shows its result, the handles and the row actions are inert.
    */
   const runExclusively = async (run: () => Promise<void>) => {
     if (isMovingRef.current) {
@@ -323,6 +341,7 @@ const useCustomOrder = ({
   return {
     isAvailable,
     isActive,
+    canUpdate,
     canReorder: isActive && canUpdate,
     isMoving,
     rows,
@@ -340,6 +359,7 @@ const useCustomOrder = ({
 const CustomOrderContext = React.createContext<CustomOrderState>({
   isAvailable: false,
   isActive: false,
+  canUpdate: false,
   canReorder: false,
   isMoving: false,
   rows: [],
@@ -352,6 +372,13 @@ const CustomOrderContext = React.createContext<CustomOrderState>({
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * Keeps the move actions together, between the other row actions and the delete actions.
+ * `group` is internal, so the actions return a typed variable: an object literal returned as a
+ * public `DocumentActionDescription` would fail the excess property check.
+ */
+const CUSTOM_ORDER_ACTIONS_GROUP = 'custom-order';
 
 const restrictToVerticalAxis: Modifier = ({ transform }) => ({ ...transform, x: 0 });
 
@@ -366,7 +393,7 @@ interface RootProps {
  */
 const Root = ({ children, state }: RootProps) => {
   // Entries are dragged with a pointer only. The grid owns the arrow keys, so the keyboard
-  // goes through the position input and the row actions instead.
+  // goes through the row actions instead (move to top, to bottom, to a position).
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const items = React.useMemo(() => state.rows.map((row) => row.documentId), [state.rows]);
 
@@ -468,18 +495,18 @@ const StyledRow = styled(Table.Row)<{ $isDragging: boolean }>`
  * -----------------------------------------------------------------------------------------------*/
 
 type PositionCellProps = React.ComponentProps<typeof Td> & {
-  documentId: string;
   position: number;
-  total: number;
 };
 
-const PositionCell = ({ documentId, position, total, ...props }: PositionCellProps) => {
+const PositionCell = ({ position, ...props }: PositionCellProps) => {
   const { formatMessage } = useIntl();
-  const { isActive, canReorder, isMoving, moveToPosition } = React.useContext(CustomOrderContext);
+  const { isActive, canUpdate, canReorder } = React.useContext(CustomOrderContext);
   const sortableRow = React.useContext(SortableRowContext);
-  const [isEditing, setIsEditing] = React.useState(false);
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const shouldRestoreFocus = React.useRef(false);
+  const [{ query }, setQuery] = useQueryParams<{
+    sort?: string;
+    filters?: unknown;
+    _q?: unknown;
+  }>();
 
   /**
    * Table rows don't forward their ref, so the row is reached through its cell.
@@ -492,86 +519,9 @@ const PositionCell = ({ documentId, position, total, ...props }: PositionCellPro
     [setRowNode]
   );
 
-  /**
-   * The button is disabled while the entry moves, and a disabled button cannot take the
-   * focus: when the input was left to move the entry, the focus comes back once the move
-   * is over.
-   */
-  React.useEffect(() => {
-    if (!isEditing && !isMoving && shouldRestoreFocus.current) {
-      shouldRestoreFocus.current = false;
-      buttonRef.current?.focus();
-    }
-  }, [isEditing, isMoving]);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Keeps the keys typed in the input away from the keyboard navigation of the grid
-    e.stopPropagation();
-
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      shouldRestoreFocus.current = true;
-      setIsEditing(false);
-
-      const nextPosition = Number.parseInt(e.currentTarget.value, 10);
-
-      if (!Number.isNaN(nextPosition)) {
-        void moveToPosition(documentId, nextPosition);
-      }
-    } else if (e.key === 'Escape') {
-      shouldRestoreFocus.current = true;
-      setIsEditing(false);
-    }
-  };
-
-  const renderPosition = () => {
-    if (!canReorder) {
-      return <Typography textColor="neutral800">{position}</Typography>;
-    }
-
-    if (isEditing) {
+  const renderContent = () => {
+    if (isActive) {
       return (
-        <PositionInput
-          // eslint-disable-next-line jsx-a11y/no-autofocus -- the input replaces the button that was just activated
-          autoFocus
-          aria-label={formatMessage(
-            {
-              id: getTranslation('custom-order.position.input'),
-              defaultMessage: 'New position, from 1 to {total}',
-            },
-            { total }
-          )}
-          defaultValue={position}
-          inputMode="numeric"
-          onBlur={() => setIsEditing(false)}
-          onFocus={(e) => e.currentTarget.select()}
-          onKeyDown={handleKeyDown}
-        />
-      );
-    }
-
-    return (
-      <PositionButton
-        ref={buttonRef}
-        type="button"
-        aria-label={formatMessage(
-          {
-            id: getTranslation('custom-order.position.button'),
-            defaultMessage: 'Position {position} of {total}, change position',
-          },
-          { position, total }
-        )}
-        disabled={isMoving}
-        onClick={() => setIsEditing(true)}
-      >
-        {position}
-      </PositionButton>
-    );
-  };
-
-  return (
-    <Td ref={setCellNode} {...props} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-      {isActive ? (
         <Flex gap={1} alignItems="center">
           {canReorder ? (
             <Handle
@@ -583,20 +533,39 @@ const PositionCell = ({ documentId, position, total, ...props }: PositionCellPro
               <Drag />
             </Handle>
           ) : null}
-          {renderPosition()}
+          <Typography textColor="neutral800">{position}</Typography>
         </Flex>
-      ) : (
-        <Tooltip
-          label={formatMessage({
-            id: getTranslation('custom-order.inactive'),
-            defaultMessage: 'Sort by order to move entries',
-          })}
+      );
+    }
+
+    // Positions mean nothing in another sort, and resetting the sort only helps to move entries
+    if (!canUpdate) {
+      return null;
+    }
+
+    const label = formatMessage({
+      id: getTranslation('custom-order.back'),
+      defaultMessage: 'Back to custom order to move entries',
+    });
+
+    return (
+      <Tooltip label={label}>
+        <InactiveHandle
+          type="button"
+          aria-label={label}
+          onClick={() => {
+            setQuery(withEncodedUserParams(query, { sort: CUSTOM_ORDER_SORT }), 'push', true);
+          }}
         >
-          <InactiveHandle>
-            <Drag />
-          </InactiveHandle>
-        </Tooltip>
-      )}
+          <Drag />
+        </InactiveHandle>
+      </Tooltip>
+    );
+  };
+
+  return (
+    <Td ref={setCellNode} {...props} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+      {renderContent()}
     </Td>
   );
 };
@@ -615,46 +584,20 @@ const Handle = styled.span<{ $isDragging: boolean }>`
   }
 `;
 
-const InactiveHandle = styled.span`
+const InactiveHandle = styled.button`
   display: inline-flex;
   align-items: center;
   padding: ${({ theme }) => theme.spaces[1]};
-  color: ${({ theme }) => theme.colors.neutral300};
-`;
-
-const positionControl = css`
-  width: 4.8rem;
-  height: 3.2rem;
-  padding: 0 ${({ theme }) => theme.spaces[2]};
-  border: 1px solid transparent;
+  border: none;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: transparent;
-  color: ${({ theme }) => theme.colors.neutral800};
-  font-size: ${({ theme }) => theme.fontSizes[2]};
-  text-align: left;
-`;
+  color: ${({ theme }) => theme.colors.neutral300};
+  cursor: pointer;
 
-const PositionButton = styled.button`
-  ${positionControl}
-  cursor: text;
-
-  &:hover:not(:disabled),
+  &:hover,
   &:focus-visible {
-    border-color: ${({ theme }) => theme.colors.neutral200};
-    background: ${({ theme }) => theme.colors.neutral0};
+    color: ${({ theme }) => theme.colors.neutral600};
   }
-
-  &:disabled {
-    cursor: default;
-  }
-`;
-
-const PositionInput = styled.input`
-  ${positionControl}
-  border-color: ${({ theme }) => theme.colors.primary600};
-  background: ${({ theme }) => theme.colors.neutral0};
-  outline: none;
-  box-shadow: ${({ theme }) => theme.colors.primary600} 0px 0px 0px 2px;
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -670,8 +613,9 @@ const MoveToTopAction: DocumentActionComponent = ({ documentId }) => {
     return null;
   }
 
-  return {
+  const description: InternalDocumentActionDescription = {
     disabled: isMoving || getPosition(documentId) === 1,
+    group: CUSTOM_ORDER_ACTIONS_GROUP,
     icon: <ArrowUp />,
     label: formatMessage({
       id: 'content-manager.actions.move-to-top.label',
@@ -682,6 +626,8 @@ const MoveToTopAction: DocumentActionComponent = ({ documentId }) => {
       void moveToPosition(documentId, 1);
     },
   };
+
+  return description;
 };
 
 MoveToTopAction.position = 'table-row';
@@ -695,8 +641,9 @@ const MoveToBottomAction: DocumentActionComponent = ({ documentId }) => {
     return null;
   }
 
-  return {
+  const description: InternalDocumentActionDescription = {
     disabled: isMoving || getPosition(documentId) === total,
+    group: CUSTOM_ORDER_ACTIONS_GROUP,
     icon: <ArrowDown />,
     label: formatMessage({
       id: 'content-manager.actions.move-to-bottom.label',
@@ -708,9 +655,142 @@ const MoveToBottomAction: DocumentActionComponent = ({ documentId }) => {
       void moveToPosition(documentId, Number.MAX_SAFE_INTEGER);
     },
   };
+
+  return description;
 };
 
 MoveToBottomAction.position = 'table-row';
+
+const MoveToPositionAction: DocumentActionComponent = ({ documentId }) => {
+  const { formatMessage } = useIntl();
+  const { canReorder, isMoving, total } = React.useContext(CustomOrderContext);
+
+  // The dialog would be remounted, and lose what was typed, if its component changed on render
+  const Content = React.useCallback(
+    ({ onClose }: { onClose: () => void }) =>
+      documentId ? <MoveToPositionForm documentId={documentId} onClose={onClose} /> : null,
+    [documentId]
+  );
+
+  if (!canReorder || !documentId) {
+    return null;
+  }
+
+  const description: InternalDocumentActionDescription = {
+    disabled: isMoving || total < 2,
+    group: CUSTOM_ORDER_ACTIONS_GROUP,
+    icon: <NumberList />,
+    label: formatMessage({
+      id: 'content-manager.actions.move-to-position.label',
+      defaultMessage: 'Move to position…',
+    }),
+    position: 'table-row',
+    dialog: {
+      type: 'modal',
+      title: formatMessage({
+        id: 'content-manager.actions.move-to-position.title',
+        defaultMessage: 'Move to position',
+      }),
+      content: Content,
+    },
+  };
+
+  return description;
+};
+
+MoveToPositionAction.position = 'table-row';
+
+interface MoveToPositionFormProps {
+  documentId: string;
+  onClose: () => void;
+}
+
+const MoveToPositionForm = ({ documentId, onClose }: MoveToPositionFormProps) => {
+  const { formatMessage } = useIntl();
+  const { total, getPosition, moveToPosition } = React.useContext(CustomOrderContext);
+  const [value, setValue] = React.useState<number | undefined>(undefined);
+  const [hasError, setHasError] = React.useState(false);
+  const position = getPosition(documentId);
+
+  const isValid = (nextPosition: number) =>
+    Number.isInteger(nextPosition) && nextPosition >= 1 && nextPosition <= total;
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Keeps the submit away from any form around the list
+    e.stopPropagation();
+
+    if (value === undefined || value === position) {
+      return;
+    }
+
+    if (!isValid(value)) {
+      setHasError(true);
+
+      return;
+    }
+
+    onClose();
+    void moveToPosition(documentId, value);
+  };
+
+  return (
+    <form noValidate onSubmit={handleSubmit}>
+      <Modal.Body>
+        <Field.Root
+          name="position"
+          hint={formatMessage(
+            {
+              id: 'content-manager.actions.move-to-position.hint',
+              defaultMessage: 'Currently at position {position} of {total}.',
+            },
+            { position, total }
+          )}
+          error={
+            hasError
+              ? formatMessage(
+                  {
+                    id: 'content-manager.actions.move-to-position.error',
+                    defaultMessage: 'Enter a whole number from 1 to {total}.',
+                  },
+                  { total }
+                )
+              : undefined
+          }
+        >
+          <Field.Label>
+            {formatMessage({
+              id: 'content-manager.actions.move-to-position.input',
+              defaultMessage: 'New position',
+            })}
+          </Field.Label>
+          <NumberInput
+            // eslint-disable-next-line jsx-a11y/no-autofocus -- the dialog is opened to type a position
+            autoFocus
+            value={value}
+            onValueChange={(nextValue) => {
+              setValue(nextValue);
+              setHasError(false);
+            }}
+          />
+          <Field.Hint />
+          <Field.Error />
+        </Field.Root>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="tertiary" onClick={onClose}>
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+        </Button>
+        <Button type="submit" disabled={value === undefined || value === position}>
+          {formatMessage({
+            id: 'content-manager.actions.move-to-position.submit',
+            defaultMessage: 'Move',
+          })}
+        </Button>
+      </Modal.Footer>
+    </form>
+  );
+};
 
 const CustomOrder = {
   Root,
@@ -718,5 +798,5 @@ const CustomOrder = {
   PositionCell,
 };
 
-export { CustomOrder, useCustomOrder, MoveToTopAction, MoveToBottomAction };
+export { CustomOrder, useCustomOrder, MoveToTopAction, MoveToBottomAction, MoveToPositionAction };
 export type { CustomOrderState };

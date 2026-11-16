@@ -1,7 +1,7 @@
 import { map, merge, difference } from 'lodash';
 
 import type { Core } from '@strapi/types';
-import { async } from '@strapi/utils';
+import { async, quoteForLog } from '@strapi/utils';
 import { getService } from './utils';
 import {
   getTokenOptions,
@@ -148,7 +148,7 @@ export const syncAPITokensPermissions = async () => {
       removedPermissions
         .map((permission) => permission.token)
         .filter((token): token is NonNullable<APITokenPermissionRow['token']> => token != null)
-        .map((token) => [token.id, `${JSON.stringify(token.name)} (id ${token.id})`])
+        .map((token) => [token.id, `${quoteForLog(token.name)} (id ${token.id})`])
     );
     const withoutTokenCount = removedPermissions.filter(
       (permission) => permission.token == null
@@ -156,7 +156,7 @@ export const syncAPITokensPermissions = async () => {
 
     strapi.log.warn(
       `Removed ${removedPermissions.length} stored API token permission(s) whose action is no longer registered. ` +
-        `Actions: ${unknownPermissions.join(', ')}. ` +
+        `Actions: ${unknownPermissions.map(quoteForLog).join(', ')}. ` +
         `API tokens: ${tokens.size === 0 ? 'none' : Array.from(tokens.values()).join(', ')}. ` +
         `Without API token: ${withoutTokenCount}.`
     );
