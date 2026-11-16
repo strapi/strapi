@@ -146,7 +146,8 @@ const findRolePermissions = async (strapi: Core.Strapi, code: string) =>
 
 describe('Default roles seeded at first boot, with a localized draft & publish content type', () => {
   const builder = createTestBuilder();
-  let strapi: Core.Strapi;
+  // `undefined` while no instance runs, so the cleanup never uses a destroyed one
+  let strapi: Core.Strapi | undefined;
   const warnings: string[] = [];
   let defaultLocale: string;
   let rolesSnapshot: RolesSnapshot;
@@ -165,29 +166,46 @@ describe('Default roles seeded at first boot, with a localized draft & publish c
       })
       .build();
 
-    strapi = await startStrapi();
-    rolesSnapshot = await snapshotRoles(strapi);
-    await deleteAllRoles(strapi);
-    await strapi.destroy();
+    const instance = await startStrapi();
+    strapi = instance;
+    rolesSnapshot = await snapshotRoles(instance);
+    await deleteAllRoles(instance);
+    await instance.destroy();
+    strapi = undefined;
 
-    strapi = await startStrapi(warnings);
-    defaultLocale = await strapi.plugin('i18n').service('locales').getDefaultLocale();
+    const firstBoot = await startStrapi(warnings);
+    strapi = firstBoot;
+    defaultLocale = await firstBoot.plugin('i18n').service('locales').getDefaultLocale();
   });
 
   afterAll(async () => {
-    if (rolesSnapshot !== undefined) {
-      await restoreRoles(strapi, rolesSnapshot);
+    try {
+      if (rolesSnapshot !== undefined) {
+        // When the first boot failed, put the roles back through a new instance
+        const instance = strapi ?? (await startStrapi());
+        strapi = instance;
+        await restoreRoles(instance, rolesSnapshot);
+      }
+    } finally {
+      await strapi?.destroy();
+      await builder.cleanup();
     }
-    await strapi.destroy();
-    await builder.cleanup();
   });
+
+  const getStrapi = () => {
+    if (strapi === undefined) {
+      throw new Error('Strapi is not running');
+    }
+
+    return strapi;
+  };
 
   test('The first boot removes none of the permissions it seeded', () => {
     expect(warnings.filter((message) => message.includes('stored admin permission'))).toEqual([]);
   });
 
   test('The Editor gets every content-manager action on the default locale', async () => {
-    const permissions = await findRolePermissions(strapi, 'strapi-editor');
+    const permissions = await findRolePermissions(getStrapi(), 'strapi-editor');
 
     expect(permissions.map(({ action }) => action)).toEqual([
       CREATE,
@@ -202,7 +220,7 @@ describe('Default roles seeded at first boot, with a localized draft & publish c
   });
 
   test('The Author gets every content-manager action but publish on the default locale', async () => {
-    const permissions = await findRolePermissions(strapi, 'strapi-author');
+    const permissions = await findRolePermissions(getStrapi(), 'strapi-author');
 
     expect(permissions.map(({ action }) => action)).toEqual([CREATE, READ, UPDATE, DELETE]);
     permissions.forEach(({ properties }) => {
