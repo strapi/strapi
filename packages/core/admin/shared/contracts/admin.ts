@@ -278,7 +278,7 @@ export declare namespace GetLicenseLimitInformation {
        * Active admin users the license registry counted across all instances. Information only.
        * `null` for offline licenses and until the registry answered.
        */
-      projectUsage?: {
+      adminUsersAcrossInstances?: {
         activeUsers: number;
         contractedUsers: number | null;
         updatedAt: string; // ISO date

@@ -1,6 +1,5 @@
 /**
- * Covers what `onlineUpdate` sends to and keeps from the license registry beyond the license
- * itself. Same module-reset dance as license-retention.vitest.test.ts: the license state is a
+ * Covers the admin users report that follows the license check. Same module-reset dance as license-retention.vitest.test.ts: the license state is a
  * closure singleton, so each test re-imports the module fresh.
  */
 
@@ -11,14 +10,14 @@ vi.mock('../license', async (importOriginal) => ({
   readLicense: vi.fn(),
   verifyLicense: vi.fn(),
   fetchLicense: vi.fn(),
-  fetchLicenseUsage: vi.fn(),
+  reportAdminUsers: vi.fn(),
 }));
 
 type LicenseModuleMock = {
   readLicense: Mock;
   verifyLicense: Mock;
   fetchLicense: Mock;
-  fetchLicenseUsage: Mock;
+  reportAdminUsers: Mock;
 };
 
 type EEModule = typeof import('../index').default;
@@ -76,6 +75,7 @@ const createMockStrapi = ({
       }),
       queryBuilder: vi.fn().mockImplementation(() => createChainableDb(storedRow)),
       query: vi.fn().mockReturnValue({ findMany }),
+      lifecycles: { subscribe: vi.fn() },
     },
     store: { get: vi.fn().mockResolvedValue(null), set: vi.fn().mockResolvedValue(undefined) },
     config: { get: vi.fn().mockReturnValue('project-uuid') },
@@ -94,7 +94,7 @@ const setup = async (strapiOptions?: Parameters<typeof createMockStrapi>[0]) => 
   license.readLicense.mockReset().mockReturnValue('raw-license');
   license.verifyLicense.mockReset().mockReturnValue({ ...GOLD_LICENSE_INFO });
   license.fetchLicense.mockReset().mockResolvedValue('fresh-license');
-  license.fetchLicenseUsage.mockReset().mockResolvedValue(null);
+  license.reportAdminUsers.mockReset().mockResolvedValue(null);
 
   delete process.env.STRAPI_LICENSE;
   delete process.env.STRAPI_DISABLE_EE;
@@ -111,87 +111,62 @@ afterEach(() => {
   delete process.env.STRAPI_DISABLE_LICENSE_PING;
 });
 
-describe('onlineUpdate user hashes', () => {
-  it('sends the hashes of the active admin users with the license check', async () => {
+const COUNT = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
+
+describe('admin users report after the license check', () => {
+  it('reports the hashed active admin users and stores the count', async () => {
     const { strapi, license, eeModule } = await setup({
       users: [{ email: 'a@example.com' }, { email: 'A@example.com' }],
     });
+    license.reportAdminUsers.mockResolvedValue(COUNT);
     const { hashAdminEmail } = await import('../user-hashes');
 
     await eeModule.checkLicense({ strapi });
 
-    expect(license.fetchLicense).toHaveBeenCalledWith({ strapi }, LICENSE_KEY, 'project-uuid', {
-      userHashes: [hashAdminEmail(LICENSE_KEY, 'a@example.com')],
-    });
-  });
-
-  it('still sends the license check, without hashes, when they cannot be computed', async () => {
-    const { strapi, license, eeModule } = await setup({ findManyError: new Error('db down') });
-
-    await eeModule.checkLicense({ strapi });
-
-    expect(license.fetchLicense).toHaveBeenCalledWith({ strapi }, LICENSE_KEY, 'project-uuid', {
-      userHashes: undefined,
-    });
-    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('db down'));
-    expect(eeModule.isEE).toBe(true);
-  });
-
-  it('does not read the admin users for an offline license', async () => {
-    const { strapi, license, eeModule } = await setup();
-    process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
-
-    await eeModule.checkLicense({ strapi });
-
-    expect(license.fetchLicense).not.toHaveBeenCalled();
-    expect(strapi.db.query).not.toHaveBeenCalled();
-  });
-});
-
-describe('onlineUpdate license usage', () => {
-  const USAGE = { activeUsers: 12, contractedUsers: 10, updatedAt: '2026-11-13T10:00:00.000Z' };
-
-  it('stores the usage after a license check the registry answered', async () => {
-    const { strapi, license, eeModule } = await setup();
-    license.fetchLicenseUsage.mockResolvedValue(USAGE);
-
-    await eeModule.checkLicense({ strapi });
-
-    expect(license.fetchLicenseUsage).toHaveBeenCalledWith({ strapi }, LICENSE_KEY);
-    expect(strapi.store.set).toHaveBeenCalledWith({
-      type: 'ee',
-      key: 'license_usage',
-      value: USAGE,
-    });
-    // After the license transaction, never inside it
-    const commit = (await strapi.db.transaction.mock.results[0].value).commit;
-    expect(commit.mock.invocationCallOrder[0]).toBeLessThan(
-      license.fetchLicenseUsage.mock.invocationCallOrder[0]
+    expect(license.fetchLicense).toHaveBeenCalledWith({ strapi }, LICENSE_KEY, 'project-uuid');
+    await vi.waitFor(() =>
+      expect(strapi.store.set).toHaveBeenCalledWith({
+        type: 'ee',
+        key: 'admin_users_across_instances',
+        value: COUNT,
+      })
     );
+    expect(license.reportAdminUsers).toHaveBeenCalledWith({ strapi }, LICENSE_KEY, [
+      hashAdminEmail(LICENSE_KEY, 'a@example.com'),
+    ]);
   });
 
-  it('keeps the stored usage when the registry has none to give', async () => {
+  it('does not delay the license check', async () => {
     const { strapi, license, eeModule } = await setup();
-    license.fetchLicenseUsage.mockResolvedValue(null);
-
-    await eeModule.checkLicense({ strapi });
-
-    expect(license.fetchLicenseUsage).toHaveBeenCalled();
-    expect(strapi.store.set).not.toHaveBeenCalled();
-    expect(eeModule.isEE).toBe(true);
-  });
-
-  it('does not affect the license when storing the usage fails', async () => {
-    const { strapi, license, eeModule } = await setup();
-    license.fetchLicenseUsage.mockResolvedValue(USAGE);
-    strapi.store.set.mockRejectedValue(new Error('db down'));
+    license.reportAdminUsers.mockReturnValue(new Promise(() => {}));
 
     await expect(eeModule.checkLicense({ strapi })).resolves.toBeUndefined();
 
     expect(eeModule.isEE).toBe(true);
   });
 
-  it('is not fetched when the license check fell back', async () => {
+  it('keeps the stored count when the registry has none to give', async () => {
+    const { strapi, license, eeModule } = await setup();
+
+    await eeModule.checkLicense({ strapi });
+
+    await vi.waitFor(() => expect(license.reportAdminUsers).toHaveBeenCalled());
+    expect(strapi.store.set).not.toHaveBeenCalled();
+  });
+
+  it('does not report when the admin users cannot be read', async () => {
+    const { strapi, license, eeModule } = await setup({ findManyError: new Error('db down') });
+
+    await eeModule.checkLicense({ strapi });
+
+    await vi.waitFor(() =>
+      expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('db down'))
+    );
+    expect(license.reportAdminUsers).not.toHaveBeenCalled();
+    expect(eeModule.isEE).toBe(true);
+  });
+
+  it('does not report when the license check fell back', async () => {
     const { strapi, license, eeModule } = await setup({
       storedRow: { license: 'cached-license', lastCheckAt: 0 },
     });
@@ -200,20 +175,21 @@ describe('onlineUpdate license usage', () => {
 
     await eeModule.checkLicense({ strapi });
 
-    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
+    expect(strapi.db.query).not.toHaveBeenCalled();
+    expect(license.reportAdminUsers).not.toHaveBeenCalled();
   });
 
-  it('is not fetched when the registry rejected the license', async () => {
+  it('does not report when the registry rejected the license', async () => {
     const { strapi, license, eeModule } = await setup();
     const { LicenseCheckError } = await import('../license');
     license.fetchLicense.mockRejectedValue(new LicenseCheckError('Invalid key.'));
 
     await eeModule.checkLicense({ strapi });
 
-    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
+    expect(license.reportAdminUsers).not.toHaveBeenCalled();
   });
 
-  it('is not fetched when the registry was checked less than a minute ago', async () => {
+  it('does not report when the registry was checked less than a minute ago', async () => {
     const { strapi, license, eeModule } = await setup({
       storedRow: { license: 'cached-license', lastCheckAt: Date.now() },
     });
@@ -221,16 +197,56 @@ describe('onlineUpdate license usage', () => {
     await eeModule.checkLicense({ strapi });
 
     expect(license.fetchLicense).not.toHaveBeenCalled();
-    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
+    expect(license.reportAdminUsers).not.toHaveBeenCalled();
   });
 
-  it('is not fetched for an offline license', async () => {
+  it('does not report for an offline license', async () => {
     const { strapi, license, eeModule } = await setup();
     process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
 
     await eeModule.checkLicense({ strapi });
 
-    expect(license.fetchLicenseUsage).not.toHaveBeenCalled();
-    expect(strapi.store.set).not.toHaveBeenCalled();
+    expect(license.fetchLicense).not.toHaveBeenCalled();
+    expect(license.reportAdminUsers).not.toHaveBeenCalled();
+    expect(strapi.db.lifecycles.subscribe).not.toHaveBeenCalled();
+  });
+});
+
+describe('admin users report after an admin user change', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const subscribed = (strapi: any) => strapi.db.lifecycles.subscribe.mock.calls[0][0];
+
+  it('reports 10 seconds after an admin user is created, deactivated or deleted', async () => {
+    const { strapi, license, eeModule } = await setup();
+    await eeModule.checkLicense({ strapi });
+    await vi.waitFor(() => expect(license.reportAdminUsers).toHaveBeenCalledTimes(1));
+    vi.useFakeTimers();
+
+    const hooks = subscribed(strapi);
+    expect(hooks.models).toEqual(['admin::user']);
+    hooks.afterCreate({ params: {} });
+    hooks.afterUpdate({ params: { data: { isActive: false } } });
+    hooks.afterDelete({ params: {} });
+
+    await vi.advanceTimersByTimeAsync(9_000);
+    expect(license.reportAdminUsers).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(license.reportAdminUsers).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores updates that change neither the status nor the email', async () => {
+    const { strapi, license, eeModule } = await setup();
+    await eeModule.checkLicense({ strapi });
+    await vi.waitFor(() => expect(license.reportAdminUsers).toHaveBeenCalledTimes(1));
+    vi.useFakeTimers();
+
+    subscribed(strapi).afterUpdate({ params: { data: { firstname: 'Ada' } } });
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    expect(license.reportAdminUsers).toHaveBeenCalledTimes(1);
   });
 });

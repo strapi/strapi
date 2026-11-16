@@ -11,19 +11,21 @@ import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
 import type { GetLicenseLimitInformation } from '../../../../../../../../shared/contracts/admin';
 
-type ProjectUsage = NonNullable<GetLicenseLimitInformation.Response['data']['projectUsage']>;
+type AdminUsersAcrossInstances = NonNullable<
+  GetLicenseLimitInformation.Response['data']['adminUsersAcrossInstances']
+>;
 
 /** Active admin users the license registry counted across all instances. Information only. */
-const ProjectUsageInfo = ({ usage }: { usage: ProjectUsage }) => {
+const AdminUsersAcrossInstancesInfo = ({ count }: { count: AdminUsersAcrossInstances }) => {
   const { formatMessage, formatDate } = useIntl();
-  const { activeUsers, contractedUsers, updatedAt } = usage;
+  const { activeUsers, contractedUsers, updatedAt } = count;
   const isOverLimit = contractedUsers !== null && activeUsers > contractedUsers;
 
   return (
     <Flex direction="column" alignItems="start" gap={2}>
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
-          id: 'Settings.application.ee.project-usage.title',
+          id: 'Settings.application.ee.admin-users-across-instances.title',
           defaultMessage: 'Active admin users across all instances',
         })}
       </Typography>
@@ -33,7 +35,7 @@ const ProjectUsageInfo = ({ usage }: { usage: ProjectUsage }) => {
             ? activeUsers
             : formatMessage(
                 {
-                  id: 'Settings.application.ee.project-usage.count',
+                  id: 'Settings.application.ee.admin-users-across-instances.count',
                   defaultMessage: '{activeUsers} / {contractedUsers}',
                 },
                 { activeUsers, contractedUsers }
@@ -43,7 +45,7 @@ const ProjectUsageInfo = ({ usage }: { usage: ProjectUsage }) => {
           <Status size="S" variant="danger">
             <Typography variant="omega" fontWeight="bold">
               {formatMessage({
-                id: 'Settings.application.ee.project-usage.over-limit',
+                id: 'Settings.application.ee.admin-users-across-instances.over-limit',
                 defaultMessage: 'Over limit',
               })}
             </Typography>
@@ -53,7 +55,7 @@ const ProjectUsageInfo = ({ usage }: { usage: ProjectUsage }) => {
       <Typography variant="pi" textColor="neutral500">
         {formatMessage(
           {
-            id: 'Settings.application.ee.project-usage.updated-at',
+            id: 'Settings.application.ee.admin-users-across-instances.updated-at',
             defaultMessage: 'Last updated {date}',
           },
           { date: formatDate(updatedAt, { dateStyle: 'medium', timeStyle: 'short' }) }
@@ -88,7 +90,7 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { enforcementUserCount, permittedSeats, seats, projectUsage } = license;
+  const { enforcementUserCount, permittedSeats, seats, adminUsersAcrossInstances } = license;
 
   // `permittedSeats` is the live enforcement limit and is wiped once the licence stops being
   // usable, so fall back to the retained `seats` to keep showing the count on an expired
@@ -96,7 +98,7 @@ export const AdminSeatInfoEE = () => {
   // `permittedSeats` server-side and is untouched by this.
   const seatLimit = permittedSeats ?? seats;
 
-  if (!seatLimit && !projectUsage) {
+  if (!seatLimit && !adminUsersAcrossInstances) {
     return null;
   }
 
@@ -150,7 +152,9 @@ export const AdminSeatInfoEE = () => {
           </Flex>
         </Flex>
       ) : null}
-      {projectUsage ? <ProjectUsageInfo usage={projectUsage} /> : null}
+      {adminUsersAcrossInstances ? (
+        <AdminUsersAcrossInstancesInfo count={adminUsersAcrossInstances} />
+      ) : null}
     </Flex>
   );
 };
