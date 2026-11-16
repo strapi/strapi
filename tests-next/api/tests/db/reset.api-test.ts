@@ -90,6 +90,12 @@ describe.skipIf(database.client !== 'sqlite')('SQLite snapshot and restore', () 
     return ((await res.json()) as { data: { hasAdmin: boolean } }).data.hasAdmin;
   };
 
+  /** Changes when the Strapi worker restarts (the spawned process keeps its pid). */
+  const bootId = async () => {
+    const res = await fetch(`${server.url}/api/tests/boot`);
+    return ((await res.json()) as { bootId: string }).bootId;
+  };
+
   beforeAll(async () => {
     await resetDatabase(app, database);
     server = await startServer(app, { port, database });
@@ -104,20 +110,22 @@ describe.skipIf(database.client !== 'sqlite')('SQLite snapshot and restore', () 
 
   test('sql restore brings back the snapshot without a restart', async () => {
     await registerAdmin();
-    const pid = server.pid;
+    const before = await bootId();
 
     await timed('restore sql', () => restoreDatabase(server));
 
-    expect(server.pid).toBe(pid);
+    expect(await bootId()).toBe(before);
     expect(await hasAdmin()).toBe(false);
     expect(await writeProbe(server)).toBe(false);
   });
 
   test('reload restore brings back the snapshot through a worker restart', async () => {
     await registerAdmin();
+    const before = await bootId();
 
     await timed('restore reload', () => restoreDatabase(server, { mode: 'reload' }));
 
+    expect(await bootId()).not.toBe(before);
     expect(await hasAdmin()).toBe(false);
     expect(await writeProbe(server)).toBe(false);
   });
