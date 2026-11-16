@@ -270,9 +270,6 @@ articles.findMany({
 });
 
 // Known gaps, as on develop:
-// - `{ author: { $not: { name: 'a' } } }` type-checks, because `$not` is part of the author's
-//   filter type, but the database throws. It reads a lone `$not` on a relation as an operator on
-//   the id (`id: { $not: { name: 'a' } }`), and `name` is not an operator.
 // - A group or logical operator next to an attribute type-checks, but the database throws: in
 //   `{ author: { $or: [{ name: 'a' }], name: 'b' } }`, it reads `$or` as an operator mixed with
 //   other keys.

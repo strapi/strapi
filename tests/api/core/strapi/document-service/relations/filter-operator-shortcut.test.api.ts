@@ -167,12 +167,9 @@ describe('Document Service relation filters with one operator', () => {
     );
   });
 
-  test('throws for a lone $not on a relation, which it reads as an operator on the id', async () => {
-    // Known gap of the types: `$not` is part of the target's filter type, so this type-checks
-    // The message names the column with its join alias, e.g. `t2.name`
-    await expect(findTitles({ tag: { $not: { name: 't1' } } })).rejects.toThrow(
-      /Undefined attribute level operator \w+\.name/
-    );
+  test('applies a lone $not on a relation to the target filter', async () => {
+    // a3 has no tag, so it does not match either
+    expect(await findTitles({ tag: { $not: { name: 't1' } } })).toEqual(['a2']);
   });
 
   test('throws for a group operator next to attribute keys', async () => {
