@@ -1,5 +1,5 @@
 import type { Ability, ForcedSubject } from '@casl/ability';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
 import type { HasPermissionsConfig } from './policies';
@@ -366,6 +366,41 @@ export type EnterpriseServices = {
 };
 
 /**
+ * The EE members of the registered `admin::auth`, `admin::role` and `admin::user` contracts. With
+ * strict types, the EE members whose implementation takes `any` take what their callers pass:
+ * `forgotPassword`, `resetPassword` and `updateById` the parameters of the CE member they replace
+ * (`services/auth.ts:139`, `:180`, `services/user.ts:162-165`), `ssoCheckRolesIdForDeletion` the
+ * IDs of the roles to delete (`ee/server/src/validation/role.ts:33`, `:58`). Results and other
+ * members stay the implementation's.
+ */
+export type EnterpriseContracts = {
+  auth: Core.IsStrict extends true
+    ? Omit<typeof EEAuthService, 'forgotPassword' | 'resetPassword'> & {
+        forgotPassword(
+          ...args: Parameters<(typeof CEAuthService)['forgotPassword']>
+        ): ReturnType<(typeof EEAuthService)['forgotPassword']>;
+        resetPassword(
+          ...args: Parameters<(typeof CEAuthService)['resetPassword']>
+        ): ReturnType<(typeof EEAuthService)['resetPassword']>;
+      }
+    : typeof EEAuthService;
+  role: Core.IsStrict extends true
+    ? Omit<typeof EERoleService, 'ssoCheckRolesIdForDeletion'> & {
+        ssoCheckRolesIdForDeletion(
+          ids: Data.ID[]
+        ): ReturnType<(typeof EERoleService)['ssoCheckRolesIdForDeletion']>;
+      }
+    : typeof EERoleService;
+  user: Core.IsStrict extends true
+    ? Omit<typeof EEUserService, 'updateById'> & {
+        updateById(
+          ...args: Parameters<(typeof CEUserService)['updateById']>
+        ): ReturnType<(typeof EEUserService)['updateById']>;
+      }
+    : typeof EEUserService;
+};
+
+/**
  * The admin authentication settings, stored under `core_admin_auth`. The admin bootstrap merges the
  * defaults over the stored value at every start, so `providers` is always set. The EE SSO settings
  * endpoint replaces `providers` with the validated body, which may leave out the optional members.
@@ -428,7 +463,7 @@ declare global {
         'admin::api-token': ContentApiTokenService;
         'admin::api-token-admin': AdminTokenService;
         'admin::api-token-content-api': ContentApiTokenService;
-        'admin::auth': EditionService<typeof CEAuthService, typeof EEAuthService>;
+        'admin::auth': EditionService<typeof CEAuthService, EnterpriseContracts['auth']>;
         'admin::condition': typeof ConditionService;
         'admin::constants': typeof ConstantsService;
         'admin::content-type': typeof ContentTypeService;
@@ -444,11 +479,15 @@ declare global {
         'admin::permission': PermissionServiceContract;
         'admin::persist-tables': Core.Licensed<'licensed', typeof EEPersistTablesService>;
         'admin::project-settings': typeof ProjectSettingsService;
-        'admin::role': RoleService<EditionService<typeof CERoleService, typeof EERoleService>>;
+        'admin::role': RoleService<
+          EditionService<typeof CERoleService, EnterpriseContracts['role']>
+        >;
         'admin::seat-enforcement': Core.Licensed<'licensed', typeof EESeatEnforcementService>;
         'admin::token': typeof TokenService;
         'admin::transfer': typeof TransferService;
-        'admin::user': UserService<EditionService<typeof CEUserService, typeof EEUserService>>;
+        'admin::user': UserService<
+          EditionService<typeof CEUserService, EnterpriseContracts['user']>
+        >;
       }
 
       /**
