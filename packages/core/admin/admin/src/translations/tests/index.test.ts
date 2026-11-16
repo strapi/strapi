@@ -3,7 +3,6 @@ import path from 'path';
 
 import { languageNativeNames } from '../languageNativeNames';
 
-// eslint-disable-next-line no-undef
 const languages = readdirSync(path.join(__dirname, '..'))
   .filter((file) => file.includes('.json'))
   .map((file) => file.replace('.json', '')) as Array<keyof typeof languageNativeNames>;

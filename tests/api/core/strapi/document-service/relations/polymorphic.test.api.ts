@@ -780,4 +780,130 @@ describe('Document Service polymorphic relations', () => {
       }
     });
   });
+
+  // The admin sends an empty delta for every relation field on save
+  describe('update with an empty connect and disconnect', () => {
+    it('keeps every morphToMany link', async () => {
+      const targets = [
+        await strapi.db.query(POLY_TARGET_UID).create({ data: { title: 't1' } }),
+        await strapi.db.query(POLY_TARGET_UID).create({ data: { title: 't2' } }),
+      ];
+      const source = await strapi.db.query(POLY_SOURCE_UID).create({
+        data: {
+          title: 'source',
+          [morphToManyAttributeName]: targets.map(({ id }) => ({ id, __type: POLY_TARGET_UID })),
+        },
+      });
+
+      try {
+        await strapi.db.query(POLY_SOURCE_UID).update({
+          where: { id: source.id },
+          data: { [morphToManyAttributeName]: { connect: [], disconnect: [] } },
+        });
+
+        const { morphColumn } = getMorphToManyMeta(POLY_SOURCE_UID);
+        const joinRows = await loadMorphToManyJoinRows(source.id);
+        expect(joinRows.map((row: any) => row[morphColumn.idColumn.name])).toEqual(
+          targets.map(({ id }) => id)
+        );
+      } finally {
+        await strapi.db.query(POLY_SOURCE_UID).delete({ where: { id: source.id } });
+        await strapi.db.query(POLY_TARGET_UID).deleteMany({
+          where: { id: targets.map(({ id }) => id) },
+        });
+      }
+    });
+
+    // Seed through the inverse side: the replace path only deletes the join rows whose `field`
+    // is the inverse attribute, so links written from the owner side could not catch a wipe
+    it('keeps every link of an inverse morphMany of a morphToMany', async () => {
+      const linkedBoxes = [
+        await strapi.db.query(MORPH_BOX_UID).create({ data: { name: 'B' } }),
+        await strapi.db.query(MORPH_BOX_UID).create({ data: { name: 'C' } }),
+      ];
+      const box = await strapi.db.query(MORPH_BOX_UID).create({
+        data: { name: 'A', mtmInverse: linkedBoxes.map(({ id }) => id) },
+      });
+
+      const { joinTable } = strapi.db.metadata.get(MORPH_BOX_UID).attributes.mtm as any;
+      const { joinColumn, morphColumn } = joinTable;
+      const loadInverseJoinRows = () =>
+        strapi.db
+          .getConnection(joinTable.name)
+          .where({
+            [morphColumn.idColumn.name]: box.id,
+            [morphColumn.typeColumn.name]: MORPH_BOX_UID,
+            field: 'mtmInverse',
+          })
+          .orderBy(joinColumn.name, 'asc');
+
+      try {
+        expect(await loadInverseJoinRows()).toHaveLength(2);
+
+        await strapi.db.query(MORPH_BOX_UID).update({
+          where: { id: box.id },
+          data: { mtmInverse: { connect: [], disconnect: [] } },
+        });
+
+        expect((await loadInverseJoinRows()).map((row: any) => row[joinColumn.name])).toEqual(
+          linkedBoxes.map(({ id }) => id)
+        );
+      } finally {
+        for (const { id } of [box, ...linkedBoxes]) {
+          await strapi.db.query(MORPH_BOX_UID).delete({ where: { id } });
+        }
+      }
+    });
+  });
+  // An inverse morphMany of a morphToMany is a join-table relation: the copy flows copy its rows
+  // per version, like a regular relation, mapping each target to its version of the same status.
+  describe('inverse morphMany of a morphToMany in the copy flows', () => {
+    // Each link names its target and the version it points to, so a link to the wrong version
+    // of B or C fails the check
+    const linksOf = async (documentId: string, status: 'draft' | 'published') => {
+      const entry = await strapi.documents(MORPH_BOX_UID).findOne({
+        documentId,
+        status,
+        populate: { mtmInverse: { fields: ['name', 'publishedAt'] } },
+      } as any);
+      return ((entry as any)?.mtmInverse ?? [])
+        .map(({ name, publishedAt }: { name: string; publishedAt: string | null }) =>
+          publishedAt === null ? `${name}:draft` : `${name}:published`
+        )
+        .sort();
+    };
+
+    it('copies the links on publish and restores them on discard draft', async () => {
+      const documentIds: string[] = [];
+
+      try {
+        for (const name of ['B', 'C']) {
+          const target = await strapi.documents(MORPH_BOX_UID).create({ data: { name } });
+          documentIds.push(target.documentId);
+          await strapi.documents(MORPH_BOX_UID).publish({ documentId: target.documentId });
+        }
+        const box = await strapi.documents(MORPH_BOX_UID).create({
+          data: {
+            name: 'A',
+            mtmInverse: documentIds.map((documentId) => ({ documentId })),
+          } as any,
+        });
+        documentIds.push(box.documentId);
+
+        await strapi.documents(MORPH_BOX_UID).publish({ documentId: box.documentId });
+
+        expect(await linksOf(box.documentId, 'draft')).toEqual(['B:draft', 'C:draft']);
+        expect(await linksOf(box.documentId, 'published')).toEqual(['B:published', 'C:published']);
+
+        await strapi.documents(MORPH_BOX_UID).discardDraft({ documentId: box.documentId });
+
+        expect(await linksOf(box.documentId, 'draft')).toEqual(['B:draft', 'C:draft']);
+        expect(await linksOf(box.documentId, 'published')).toEqual(['B:published', 'C:published']);
+      } finally {
+        for (const documentId of documentIds) {
+          await strapi.documents(MORPH_BOX_UID).delete({ documentId });
+        }
+      }
+    });
+  });
 });

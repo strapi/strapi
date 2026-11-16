@@ -25,7 +25,8 @@ export default {
 
     // Validation runs in strict mode, which skips schema defaults. Casting the
     // validated body applies them, so a body without `aiMetadata` stores `true`
-    // (the value `aiMetadata.isEnabled()` assumes) instead of no key at all.
+    // (the value `aiMetadata.isEnabled()` assumes) and a body without
+    // `autoOrientation` stores `false` (the bootstrap default) instead of no key.
     // The cast only adds defaults to an already valid body, so it is a `Settings`.
     const validated = settingsSchema.cast(await validateSettings(body)) as Settings;
     const source = validated as Record<string, unknown>;

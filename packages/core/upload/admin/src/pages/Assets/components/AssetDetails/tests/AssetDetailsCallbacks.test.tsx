@@ -107,7 +107,6 @@ describe('AssetDetails change callbacks', () => {
     await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
     // The native file picker can't be driven from jsdom: pick on the hidden input.
-    // eslint-disable-next-line testing-library/no-node-access
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(fileInput, {
       target: { files: [new File(['new'], 'photo.png', { type: 'image/png' })] },
