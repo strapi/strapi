@@ -334,7 +334,7 @@ const useReleasesFilterOptions = (): Filters.Filter[] => {
  * ReleasesSort
  * -----------------------------------------------------------------------------------------------*/
 
-const DEFAULT_SORT = 'scheduledAt:asc';
+const DEFAULT_SORT = 'scheduledAt:desc';
 // The first of the admin's page sizes
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -344,7 +344,7 @@ const SORT_OPTIONS = [
     value: 'scheduledAt:asc',
     message: {
       id: 'content-releases.pages.Releases.sort.scheduled-at-asc',
-      defaultMessage: 'Scheduled date (soonest first)',
+      defaultMessage: 'Scheduled date (earliest first)',
     },
   },
   {

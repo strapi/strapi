@@ -1,5 +1,4 @@
 /* eslint-disable no-template-curly-in-string */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import * as yup from 'yup';
 import _, { isNumber, get } from 'lodash';
 import { strings } from './primitives';

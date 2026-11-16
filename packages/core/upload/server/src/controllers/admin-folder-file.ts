@@ -151,7 +151,14 @@ export default {
           .where({ id: destinationFolderId })
           .transacting(trx.get())
           .first()
-          .execute<Folder>();
+          .execute<Folder | undefined>();
+
+        // Request validation checks the destination exists, but it can be deleted (e.g. by another
+        // admin) before this lookup runs. Answer like the validation does; the catch rolls back.
+        if (destinationFolder === undefined || destinationFolder === null) {
+          throw new errors.ValidationError('destination folder does not exist');
+        }
+
         destinationFolderPath = destinationFolder.path;
       }
 
