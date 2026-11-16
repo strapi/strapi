@@ -46,6 +46,7 @@ module.exports = {
 - Enforced only on **published** (non-draft) writes — drafts stay lenient so you can save work in progress with associations still missing.
 - Applies to required media and relations, including those nested inside components and dynamic zones.
 - On by default in newly scaffolded apps only; existing projects keep the legacy (lenient) behaviour until they opt in, so enabling it will start rejecting previously-accepted writes that omit a required association.
+- While the flag is off, the Content-Type Builder disables the **Required** checkbox of relation and media attributes and explains in a tooltip how to turn enforcement on. A `required: true` already in the schema stays checked and is kept on save.
 
 ## Content API authentication (refresh tokens)
 

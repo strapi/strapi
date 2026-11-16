@@ -50,6 +50,8 @@ The `content-structure` service writes the folder groups that the admin navigati
 
 The admin part registers a menu link and the plugin API `forms`, which other plugins use to add fields and validation to the CTB modals. `DataManagerProvider` keeps the working copy of the schema in a Redux slice with undo and redo (`undoRedo.ts`). Modals in `components/FormModal` edit attributes and types. The read permission is `plugin::content-type-builder.read`, which `bootstrap` registers.
 
+`GET /content-type-builder/schema` returns `settings` next to the schemas: the `renameMigrations` plugin setting, and `strictRelations`, which is `true` only when `api.documents.strictRelations` is `true` (the same check as the document service). The document service enforces `required` on relations and media only under that flag. When `strictRelations` is `false`, the advanced form of relation and media attributes disables the **Required** checkbox and explains the flag in a tooltip. A `required: true` already in the schema stays checked, and the save keeps it.
+
 ## Related
 
 - [Schema sync](../../../architecture/07-schema-sync.md): what happens to the tables after CTB writes a file.

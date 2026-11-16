@@ -84,6 +84,7 @@ type SchemaResponse = {
       renameMigrations?: {
         attributes?: AttributeRenameMigrationMode;
       };
+      strictRelations?: boolean;
     };
   };
 };
@@ -144,6 +145,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const { onCloseModal } = useFormModalNavigation();
 
   const [isSaving, setIsSaving] = React.useState(false);
+  const [strictRelations, setStrictRelations] = React.useState(false);
   const previousLocationRef = React.useRef<string | null>(null);
 
   const renameMigrationModeRef = React.useRef<AttributeRenameMigrationMode>('prompt-before-save');
@@ -188,6 +190,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       if (settings?.renameMigrations?.attributes) {
         renameMigrationModeRef.current = settings.renameMigrations.attributes;
       }
+
+      setStrictRelations(settings?.strictRelations === true);
 
       dispatch(
         actions.init({
@@ -433,6 +437,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       sortedContentTypesList,
       isLoading,
       attributeRenameMigrationMode: renameMigrationModeRef.current,
+      strictRelations,
       addAttribute(payload) {
         dispatch(
           actions.addAttribute({
@@ -735,6 +740,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       saveSchema,
       sortedContentTypesList,
       state,
+      strictRelations,
       trackUsage,
     ]
   );

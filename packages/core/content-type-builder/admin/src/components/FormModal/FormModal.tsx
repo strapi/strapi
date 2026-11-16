@@ -225,6 +225,7 @@ export const FormModal = () => {
     reservedNames,
     confirmAttributeRenameMigration,
     attributeRenameMigrationMode,
+    strictRelations,
   } = useDataManager();
 
   const {
@@ -1246,6 +1247,7 @@ export const FormModal = () => {
     forTarget,
     contentTypeSchema: type || {},
     customField,
+    strictRelations,
   }).sections;
   const baseForm = formToDisplay.base({
     data: modifiedData,

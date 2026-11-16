@@ -1,10 +1,11 @@
 import type { Context } from 'koa';
 import { isEmpty } from 'lodash';
+import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateUpdateSchema } from './validation/schema';
 
-export default () => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const internals = {
     isUpdating: false,
     // Held from the first line of updateSchema until it returns. isUpdating
@@ -16,8 +17,10 @@ export default () => {
   return {
     async getSchema(ctx: Context) {
       const schema = await getService('schema').getSchema();
+      // Same check as the document service: only a literal `true` enforces required relations and media.
+      const strictRelations = strapi.config.get('api.documents.strictRelations') === true;
 
-      ctx.send({ data: schema });
+      ctx.send({ data: { ...schema, settings: { ...schema.settings, strictRelations } } });
     },
 
     async updateSchema(ctx: Context) {

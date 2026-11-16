@@ -79,4 +79,32 @@ describe('CTB | GenericInput', () => {
 
     expect(screen.getByRole('checkbox', { name: 'boolean-value' })).toBeChecked();
   });
+
+  describe('checkbox tooltip', () => {
+    const tooltip = { id: 'field.tooltip', defaultMessage: 'Why this is disabled' };
+
+    it('keeps a disabled checkbox checked and explains it on hover', async () => {
+      const onChange = jest.fn();
+      const { user } = setup({ type: 'checkbox', value: true, disabled: true, tooltip, onChange });
+
+      const checkbox = screen.getByRole('checkbox', { name: 'Field' });
+      expect(checkbox).toBeChecked();
+      expect(checkbox).toBeDisabled();
+
+      await user.click(checkbox);
+      expect(onChange).not.toHaveBeenCalled();
+
+      await user.hover(screen.getByText('Field'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Why this is disabled');
+    });
+
+    it('renders no tooltip without one', async () => {
+      const { user } = setup({ type: 'checkbox', value: false });
+
+      await user.hover(screen.getByText('Field'));
+
+      expect(screen.getByRole('checkbox', { name: 'Field' })).toBeEnabled();
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+  });
 });

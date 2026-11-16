@@ -57,6 +57,7 @@ const mockDataManager = ({
   addCustomFieldAttribute() {},
   editCustomFieldAttribute() {},
   attributeRenameMigrationMode: 'prompt-before-save',
+  strictRelations: false,
   async confirmAttributeRenameMigration() {
     return true;
   },
