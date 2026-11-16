@@ -915,6 +915,132 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         expectValidPair(builder, [bookUid, owner], [shelfUid, 'books']);
       });
 
+      it('keeps the options of the counterpart when the save renames it', () => {
+        setShelfBooks({
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookUid,
+          mappedBy: 'shelf',
+          ...counterpartOptions,
+        });
+
+        const builder = editAll(
+          { [bookUid]: { title: { type: 'string' }, shelf: relation(kind, shelfUid, 'tomes') } },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+        expect(attributesOf(builder, shelfUid).tomes).toMatchObject(counterpartOptions);
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'tomes']);
+      });
+
+      it('keeps the options of the owner when a save of the inverse side renames it', () => {
+        Object.assign((global as any).strapi.contentTypes[bookUid].__schema__.attributes.shelf, {
+          private: true,
+          required: true,
+        });
+
+        const builder = editAll(
+          {
+            [shelfUid]: {
+              name: { type: 'string' },
+              books: relation(oppositeRelation[kind], bookUid, 'holder'),
+            },
+          },
+          [shelfUid]
+        );
+
+        expect(attributesOf(builder, bookUid)).not.toHaveProperty('shelf');
+        expect(attributesOf(builder, bookUid).holder).toMatchObject({
+          private: true,
+          required: true,
+        });
+        expectValidPair(builder, [bookUid, 'holder'], [shelfUid, 'books']);
+      });
+
+      it('does not give the options of the old counterpart to the counterpart on a new target', () => {
+        setShelfBooks({
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookUid,
+          mappedBy: 'shelf',
+          ...counterpartOptions,
+        });
+
+        const builder = editAll(
+          {
+            [bookUid]: { title: { type: 'string' }, shelf: relation(kind, bookcaseUid, 'tomes') },
+          },
+          [bookUid]
+        );
+
+        const tomes = attributesOf(builder, bookcaseUid).tomes;
+
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+        Object.keys(counterpartOptions).forEach((option) => {
+          expect(tomes[option]).toBeUndefined();
+        });
+        expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'tomes']);
+      });
+
+      it('does not take options from an attribute of the new target that has the old counterpart name', () => {
+        // Bookcase.books, private, is the inverse side of another pair (Book.bookcase)
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[bookUid].__schema__.attributes.bookcase = {
+          type: 'relation',
+          relation: kind,
+          target: bookcaseUid,
+          inversedBy: 'books',
+        };
+        contentTypes[bookcaseUid].__schema__.attributes.books = {
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookUid,
+          mappedBy: 'bookcase',
+          ...counterpartOptions,
+        };
+
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: relation(kind, bookcaseUid, 'tomes'),
+              bookcase: relation(kind, bookcaseUid, 'books'),
+            },
+          },
+          [bookUid]
+        );
+
+        const tomes = attributesOf(builder, bookcaseUid).tomes;
+        Object.keys(counterpartOptions).forEach((option) => {
+          expect(tomes[option]).toBeUndefined();
+        });
+        expect(attributesOf(builder, bookcaseUid).books).toMatchObject(counterpartOptions);
+        expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'tomes']);
+      });
+
+      it('does not take options from a one-way relation that has the old counterpart name', () => {
+        const oneWay = {
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookUid,
+          ...counterpartOptions,
+        };
+        setShelfBooks(oneWay);
+
+        const builder = editAll(
+          { [bookUid]: { title: { type: 'string' }, shelf: relation(kind, shelfUid, 'tomes') } },
+          [bookUid]
+        );
+
+        const tomes = attributesOf(builder, shelfUid).tomes;
+        Object.keys(counterpartOptions).forEach((option) => {
+          expect(tomes[option]).toBeUndefined();
+        });
+        expect(attributesOf(builder, shelfUid).books).toEqual(oneWay);
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'tomes']);
+      });
+
       it('keeps the options of the owner that another inverse side takes over', () => {
         // Same save shape on the inverse side: only Shelf, Shelf.stack takes over Book.shelf
         const strapiState = (global as any).strapi;

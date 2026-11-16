@@ -517,4 +517,31 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
     });
     expect(bookcaseWithItems?.items).toMatchObject([{ documentId: book.documentId }]);
   });
+  test('keeps the options of the counterpart when a save of Book renames it', async () => {
+    await createTypes({ private: true, required: true });
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'tomes')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+    expect(attributesOf(SHELF_UID).tomes).toMatchObject({
+      type: 'relation',
+      relation: 'oneToMany',
+      target: BOOK_UID,
+      mappedBy: 'shelf',
+      private: true,
+      required: true,
+    });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'tomes' });
+  });
 });

@@ -154,9 +154,25 @@ const getRenameOrigins = (renames: unknown): Map<string, string> => {
 
 export default function createComponentBuilder() {
   return {
+    /**
+     * Writes the other side of the relation `key` of `uid` on its target. The other side keeps
+     * the options (`required`, `private`, `pluginOptions`, `conditions`) of the attribute it
+     * replaces, or of `renamedCounterpart` (the other side under its name before the save) when
+     * the save renames it.
+     */
     setRelation(
       this: any,
-      { key, uid, attribute }: { key: string; uid: string; attribute: InternalRelationAttribute }
+      {
+        key,
+        uid,
+        attribute,
+        renamedCounterpart,
+      }: {
+        key: string;
+        uid: string;
+        attribute: InternalRelationAttribute;
+        renamedCounterpart?: Partial<InternalRelationAttribute>;
+      }
     ) {
       if (!_.has(attribute, 'target')) {
         return;
@@ -189,7 +205,7 @@ export default function createComponentBuilder() {
 
       // When generating the inverse relation, preserve existing conditions if they exist
       // If the target attribute already exists and has conditions, preserve them
-      const targetAttributeData = targetAttribute || {};
+      const targetAttributeData = targetAttribute || renamedCounterpart || {};
 
       // If the source doesn't have conditions but the target does, preserve target's conditions
 
@@ -442,6 +458,25 @@ export default function createComponentBuilder() {
           // counterpart name is unchanged
           const targetHasChanged = oldRelationAttribute.target !== relationAttribute.target;
 
+          // A save that renames the other side on the same target: the other side keeps its
+          // options under its new name. Read it before unsetRelation deletes it.
+          const oldCounterpart =
+            targetAttributeHasChanged && !targetHasChanged && oldTargetAttributeName
+              ? this.contentTypes
+                  .get(relationAttribute.target)
+                  ?.getAttribute(oldTargetAttributeName)
+              : undefined;
+          const renamedCounterpart =
+            oldCounterpart !== undefined &&
+            isOtherSide({
+              key,
+              uid,
+              attribute: oldRelationAttribute,
+              targetAttribute: oldCounterpart,
+            })
+              ? (oldCounterpart as InternalRelationAttribute)
+              : undefined;
+
           if (!sameRelation || targetAttributeHasChanged || targetHasChanged) {
             this.unsetRelation({
               key,
@@ -504,6 +539,7 @@ export default function createComponentBuilder() {
             key,
             uid,
             attribute: relationAttribute,
+            renamedCounterpart,
           });
         }
       });
