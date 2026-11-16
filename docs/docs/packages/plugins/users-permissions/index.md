@@ -6,8 +6,8 @@ package: '@strapi/plugin-users-permissions'
 status: draft
 review_notes:
   - Written from the package source on develop; needs a maintainer review.
-  - The `refresh` JWT mode (cookies, session routes, `sessions.*` keys) is only summarized here. The Authentication architecture page describes it. Neither page is checked against the controllers in `server/src/controllers/auth.js`.
-  - The list of OAuth providers and their `authCallback` code (`services/providers-registry.js`) is not reviewed.
+  - The `refresh` JWT mode (cookies, session routes, `sessions.*` keys) is only summarized here. The Authentication architecture page describes it. Neither page is checked against the controllers in `server/src/controllers/auth.ts`.
+  - The list of OAuth providers and their `authCallback` code (`services/providers-registry.ts`) is not reviewed.
 ---
 
 ## Purpose
@@ -22,8 +22,9 @@ The plugin adds three content types. `plugin::users-permissions.user` (table `up
 
 ### `register`
 
-[`server/src/register.js`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/register.js) does four things:
+[`server/src/register.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/register.ts) does five things:
 
+- It builds the stock actions of the `user`, `role`, `permissions`, `settings` and `contentmanageruser` controllers for the Strapi instance. These controllers are factories. An app extension can replace one with a plain object that spreads it (`{ ...plugin.controllers.user, me }`). Core does not call the factory then, so the copied stock actions call the controller that `register` builds.
 - It registers the strategy `users-permissions` for the `content-api` auth scope, with `strapi.get('auth').register`.
 - It adds a `content-api.output` sanitizer that removes the `users` relation from role entities.
 - It calls `server/src/graphql` when the `graphql` plugin exists. That code disables queries and mutations on permissions, replaces the create, update and delete mutations of users and roles, and adds the `me` query and the auth mutations (`login`, `register` and the password and email flows).
@@ -31,7 +32,7 @@ The plugin adds three content types. `plugin::users-permissions.user` (table `up
 
 ### Authentication strategy
 
-`strategies/users-permissions.js` exports `authenticate` and `verify`. `authenticate` reads the Bearer token with the `jwt` service and loads the user. It rejects blocked users, and unconfirmed users when `email_confirmation` is on. It then builds an ability from the role permissions with `strapi.contentAPI.permissions.engine.generateAbility`. A request with no token gets the permissions of the `public` role, if the role has any. `verify` checks each `config.scope` entry of the route against the ability. Read [Authentication](../../../architecture/08-authentication.md).
+`strategies/users-permissions.ts` exports `authenticate` and `verify`. `authenticate` reads the Bearer token with the `jwt` service and loads the user. It rejects blocked users, and unconfirmed users when `email_confirmation` is on. It then builds an ability from the role permissions with `strapi.contentAPI.permissions.engine.generateAbility`. A request with no token gets the permissions of the `public` role, if the role has any. `verify` checks each `config.scope` entry of the route against the ability. Read [Authentication](../../../architecture/08-authentication.md).
 
 ### `bootstrap`
 
@@ -39,7 +40,7 @@ The plugin adds three content types. `plugin::users-permissions.user` (table `up
 
 ### Config and JWT modes
 
-The defaults are in [`server/src/config.js`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/config.js): `jwtSecret` (from `JWT_SECRET`), `jwt` (`expiresIn: '30d'`), `jwtManagement`, `sessions`, `ratelimit` (60 seconds, 10 requests), `layout` and `callback.validate`. The `jwtManagement` key selects the mode. `legacy-support` (default) signs one long-lived JWT with `jsonwebtoken`. `refresh` issues short-lived access tokens and refresh tokens through the core session manager. The `jwt` service has `getToken`, `issue` and `verify`. `issue` and `verify` branch on the mode.
+The defaults are in [`server/src/config.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/config.ts): `jwtSecret` (from `JWT_SECRET`), `jwt` (`expiresIn: '30d'`), `jwtManagement`, `sessions`, `ratelimit` (60 seconds, 10 requests), `layout` and `callback.validate`. The `jwtManagement` key selects the mode. `legacy-support` (default) signs one long-lived JWT with `jsonwebtoken`. `refresh` issues short-lived access tokens and refresh tokens through the core session manager. The `jwt` service has `getToken`, `issue` and `verify`. `issue` and `verify` branch on the mode.
 
 ### Providers
 
@@ -47,11 +48,11 @@ The `providers-registry` service holds the login providers. Each entry has `enab
 
 ### Rate limit
 
-The middleware `plugin::users-permissions.rateLimit` uses `koa2-ratelimit` on the auth routes. The key holds the request path and the IP. It also holds `body.email` on routes that use `email` as the identifier. The list `ROUTES_WITHOUT_IDENTIFIER` in `middlewares/rateLimit.js` names the routes that do not. Add a new auth route there if its body has no `email` field, or callers can vary that field to get a new key.
+The middleware `plugin::users-permissions.rateLimit` uses `koa2-ratelimit` on the auth routes. The key holds the request path and the IP. It also holds `body.email` on routes that use `email` as the identifier. The list `ROUTES_WITHOUT_IDENTIFIER` in `middlewares/rateLimit.ts` names the routes that do not. Add a new auth route there if its body has no `email` field, or callers can vary that field to get a new key.
 
 ### Admin section
 
-[`admin/src/index.js`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/admin/src/index.js) calls `app.createSettingSection` with four pages: Roles, Providers, Email templates and Advanced settings. Each page has its own RBAC permissions. The admin routes have `type: 'admin'`. The role, settings and permission routes use the `admin::hasPermissions` policy.
+[`admin/src/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/admin/src/index.ts) calls `app.createSettingSection` with four pages: Roles, Providers, Email templates and Advanced settings. Each page has its own RBAC permissions. The admin routes have `type: 'admin'`. The role, settings and permission routes use the `admin::hasPermissions` policy.
 
 ## Related
 

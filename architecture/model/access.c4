@@ -8,7 +8,7 @@ model {
   application_identity = concept 'Application users and visitors' {
     summary 'Users & Permissions supplies user and public-role access.'
     description 'Requires the Users & Permissions plugin. A valid user token selects the user role; a request without credentials can use the public role when permitted. These users do not become Admin users.'
-    link https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/strategies/users-permissions.js 'Users & Permissions strategy'
+    link https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/strategies/users-permissions.ts 'Users & Permissions strategy'
   }
   content_api_credential = concept 'Content API tokens' {
     summary 'Machine access to content using configured token permissions.'
