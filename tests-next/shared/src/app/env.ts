@@ -26,7 +26,8 @@ export const appEnv = (
   ...inheritedEnv(),
   ...baseEnv(),
   ...databaseEnv(app, database),
-  ...editionEnv(edition),
+  // The license check sees the env the app gets: a license passed in `env` counts.
+  ...editionEnv(edition, { ...process.env, ...env }),
   [TEST_PLUGIN_ENV_VAR]: String(testPlugin),
   // Always written, so a value inherited from the shell can't turn the fake provider on.
   [TEST_AI_PROVIDER_ENV_VAR]: fakeAiProvider ? 'fake' : '',

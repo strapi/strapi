@@ -1,7 +1,9 @@
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 
 import {
   EDITION_ENV_VAR,
+  SQLITE,
+  appEnv,
   editionEnv,
   editionFromEnv,
   generateApp,
@@ -49,6 +51,23 @@ describe('editionEnv', () => {
       STRAPI_DISABLE_EE: 'false',
       STRAPI_LICENSE: 'key',
     });
+  });
+
+  test('sees a license passed in the env of the app, not only the shell one', () => {
+    vi.stubEnv('STRAPI_LICENSE', '');
+    try {
+      const app = { name: 'unused', dir: '/unused', dbFile: '/unused/data.db' };
+      const env = appEnv(app, {
+        database: SQLITE,
+        edition: 'ee',
+        testPlugin: true,
+        fakeAiProvider: false,
+        env: { STRAPI_LICENSE: 'passed-in-env' },
+      });
+      expect(env).toMatchObject({ STRAPI_DISABLE_EE: 'false', STRAPI_LICENSE: 'passed-in-env' });
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 
@@ -113,18 +132,9 @@ describe('the license', () => {
   });
 
   test('an EE run whose license Strapi rejects fails instead of running as CE', async () => {
-    const license = process.env.STRAPI_LICENSE;
-    process.env.STRAPI_LICENSE = 'not-a-license';
-    try {
-      const app = await generateApp({ name: `api-edition-${worker}`, overwrite: false });
-      await expect(startServer(app, { port, edition: 'ee' })).rejects.toThrow(
-        'Strapi booted as CE in an EE run'
-      );
-    } finally {
-      process.env.STRAPI_LICENSE = license;
-      if (license === undefined) {
-        delete process.env.STRAPI_LICENSE;
-      }
-    }
+    const app = await generateApp({ name: `api-edition-${worker}`, overwrite: false });
+    await expect(
+      startServer(app, { port, edition: 'ee', env: { STRAPI_LICENSE: 'not-a-license' } })
+    ).rejects.toThrow('Strapi booted as CE in an EE run');
   });
 });
