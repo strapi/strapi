@@ -130,8 +130,9 @@ type ActionRegistration = Readonly<
 /**
  * The action provider with strict types. `register` and `registerMany` check that each action's
  * computed ID is a registered permission action (`Core.PermissionActionCheck`); reads accept any
- * runtime ID and reject an unregistered literal (`Core.PermissionActionLookup`). Without strict
- * types, the contract keeps the implementation's signatures.
+ * runtime ID and reject an unregistered literal (`Core.PermissionActionLookup`). `registerMany`
+ * resolves to the provider (`return this`), named here because the declaration emitter prints
+ * `this` as `any`. Without strict types, the contract keeps the implementation's signatures.
  */
 type StrictActionProvider = Omit<
   ActionProvider,
@@ -142,7 +143,7 @@ type StrictActionProvider = Omit<
   ): ReturnType<ActionProvider['register']>;
   registerMany<const TActions extends readonly ActionRegistration[]>(actionsAttributes: {
     [TIndex in keyof TActions]: Core.PermissionActionCheck<TActions[TIndex]>;
-  }): ReturnType<ActionProvider['registerMany']>;
+  }): Promise<StrictActionProvider>;
   get<TId extends Core.PermissionActionLookupName>(
     actionId: Core.PermissionActionLookup<TId>
   ): ReturnType<ActionProvider['get']>;
@@ -159,6 +160,19 @@ type StrictActionProvider = Omit<
     subject?: string | null
   ): ReturnType<ActionProvider['unstable_aliases']>;
 };
+
+type ConditionProvider = (typeof PermissionService)['conditionProvider'];
+
+/**
+ * The condition provider with strict types. `registerMany` resolves to the provider (`return
+ * this`), named here because the declaration emitter prints `this` as `any`.
+ */
+type StrictConditionProvider = Omit<ConditionProvider, 'registerMany'> & {
+  registerMany(
+    ...args: Parameters<ConditionProvider['registerMany']>
+  ): Promise<StrictConditionProvider>;
+};
+
 type PermissionsManager = ReturnType<(typeof PermissionService)['createPermissionsManager']>;
 
 /** The subject and action a sanitizer checks the data against; both default to the manager's. */
@@ -190,12 +204,14 @@ type SectionsBuilder = (typeof PermissionService)['sectionsBuilder'];
  * The `admin::permission` service as runtime calls it. The implementation keeps its published
  * develop signatures: the action provider requires a category, permission queries take two
  * arguments, and section hooks receive no arguments. With strict types, the permissions manager
- * sanitizers resolve to the data they were given.
+ * sanitizers resolve to the data they were given, and the providers' `registerMany` resolves to
+ * the provider.
  */
 type PermissionServiceContract = Omit<
   typeof PermissionService,
-  'actionProvider' | 'createPermissionsManager' | 'sectionsBuilder'
+  'actionProvider' | 'conditionProvider' | 'createPermissionsManager' | 'sectionsBuilder'
 > & {
+  conditionProvider: Core.IsStrict extends true ? StrictConditionProvider : ConditionProvider;
   createPermissionsManager(
     ...args: Parameters<(typeof PermissionService)['createPermissionsManager']>
   ): Omit<PermissionsManager, 'addPermissionsQueryTo' | PermissionsManagerSanitizerName> & {
