@@ -81,4 +81,25 @@ describe('Metrics', () => {
       },
     });
   });
+
+  test('sendDidChangeInterfaceLanguage resolves and sends nothing when the query fails', async () => {
+    const getLanguagesInUse = vi.fn(() =>
+      Promise.reject(new Error('Timeout acquiring a connection'))
+    );
+    const send = vi.fn(() => Promise.resolve());
+
+    global.strapi = {
+      telemetry: { send },
+      admin: {
+        services: {
+          user: { getLanguagesInUse },
+        },
+      },
+    } as any;
+
+    await expect(metrics.sendDidChangeInterfaceLanguage()).resolves.toBeUndefined();
+
+    expect(getLanguagesInUse).toHaveBeenCalledWith();
+    expect(send).not.toHaveBeenCalled();
+  });
 });
