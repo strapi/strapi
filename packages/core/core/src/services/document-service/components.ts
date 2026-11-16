@@ -152,11 +152,111 @@ const getComponents = async <TUID extends UID.Schema>(
   >);
 };
 
+type RepeatedComponentId = {
+  id: Modules.EntityService.Params.Attribute.ID;
+  path: string[];
+};
+
+/**
+ * Find the first component id sent twice in one list of the update data: a repeatable component,
+ * a dynamic zone, or such a list nested in a component, at any depth.
+ *
+ * Every copy would update the same stored row, so only the last copy would be kept. Ids are
+ * compared as strings, so `1` and `"1"` are the same id. In a dynamic zone, an id is repeated only
+ * for the same component type, since each type stores its rows in its own table.
+ */
+const findRepeatedComponentId = (
+  uid: UID.Schema,
+  data: Record<string, unknown>,
+  path: string[] = []
+): RepeatedComponentId | null => {
+  const { attributes = {} } = strapi.getModel(uid);
+
+  for (const [attributeName, attribute] of Object.entries(attributes)) {
+    if (attribute.type !== 'component' && attribute.type !== 'dynamiczone') {
+      continue;
+    }
+
+    const value = data[attributeName];
+
+    if (isNil(value)) {
+      continue;
+    }
+
+    const isList =
+      attribute.type === 'dynamiczone' ||
+      (attribute.type === 'component' && attribute.repeatable === true);
+    const keys = new Set<string>();
+
+    for (const [index, item] of (_.castArray(value) as unknown[]).entries()) {
+      if (isPlainObject(item) === false) {
+        continue;
+      }
+
+      const component = item as Record<string, unknown>;
+      const itemPath = isList ? [...path, attributeName, `${index}`] : [...path, attributeName];
+      const componentUID =
+        attribute.type === 'component'
+          ? attribute.component
+          : (component.__component as UID.Component | undefined);
+
+      if (isList === true && isNil(component.id) === false) {
+        const { id } = component as { id: Modules.EntityService.Params.Attribute.ID };
+        const key =
+          attribute.type === 'dynamiczone'
+            ? `${componentUID}:${pickStringifiedId({ id })}`
+            : pickStringifiedId({ id });
+
+        if (keys.has(key) === true) {
+          return { id, path: [...itemPath, 'id'] };
+        }
+
+        keys.add(key);
+      }
+
+      if (componentUID === undefined || strapi.getModel(componentUID) === undefined) {
+        continue;
+      }
+
+      const nested = findRepeatedComponentId(componentUID, component, itemPath);
+
+      if (nested !== null) {
+        return nested;
+      }
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Update the components of an entry, after rejecting a component id sent twice in one list.
+ * The check runs on the whole data before anything is written.
+ */
+const updateComponents = async <TUID extends UID.Schema, TData extends Partial<Input<TUID>>>(
+  uid: TUID,
+  entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
+  data: TData
+) => {
+  const repeated = findRepeatedComponentId(uid, data as Record<string, unknown>);
+
+  if (repeated !== null) {
+    const listPath = repeated.path.slice(0, -2).join('.');
+    const message = `The component id ${repeated.id} appears more than once in ${listPath}`;
+
+    throw new errors.ValidationError(message, {
+      errors: [{ path: repeated.path, message, name: 'ValidationError', value: repeated.id }],
+    });
+  }
+
+  return await writeComponentUpdates(uid, entityToUpdate, data);
+};
+
 /*
   delete old components
   create or update
 */
-const updateComponents = async <TUID extends UID.Schema, TData extends Partial<Input<TUID>>>(
+const writeComponentUpdates = async <TUID extends UID.Schema, TData extends Partial<Input<TUID>>>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   data: TData
@@ -337,16 +437,13 @@ type ComponentWriteResult = {
 const getMediaPopulate = (componentUID: UID.Component) => {
   const { attributes = {} } = strapi.getModel(componentUID);
 
-  const populate = Object.entries(attributes).reduce(
-    (acc, [attributeName, attribute]) => {
-      if (attribute.type === 'media') {
-        acc[attributeName] = { select: ['id'] };
-      }
+  const populate = Object.entries(attributes).reduce((acc, [attributeName, attribute]) => {
+    if (attribute.type === 'media') {
+      acc[attributeName] = { select: ['id'] };
+    }
 
-      return acc;
-    },
-    {} as Record<string, { select: string[] }>
-  );
+    return acc;
+  }, {} as Record<string, { select: string[] }>);
 
   return isEmpty(populate) ? undefined : populate;
 };
@@ -921,7 +1018,8 @@ const updateComponent = async <TUID extends UID.Component>(
 ): Promise<ComponentWriteResult | null> => {
   const schema = strapi.getModel(uid);
 
-  const componentData = await updateComponents(uid, componentToUpdate, data);
+  // The entry's updateComponents already checked the nested lists for repeated ids
+  const componentData = await writeComponentUpdates(uid, componentToUpdate, data);
 
   // Nothing to write when the component is stored as sent. updateComponents only reports the
   // nested attributes that changed, so an empty componentData means none of them did. The write
