@@ -5,6 +5,7 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useIsAuditLogsDisabledByConfig } from '../../../../ee/admin/src/hooks/useIsAuditLogsDisabledByConfig';
 import { DragLayer, isWidgetDragItem } from '../../components/DragLayer';
 import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
@@ -32,7 +33,10 @@ import {
   canResizeBetweenWidgets,
   getWidgetWidth,
 } from '../../utils/widgetLayout';
-import { hideDeployNowWidgetInProduction } from '../../utils/widgetVisibility';
+import {
+  hideAuditLogsWidgetWhenDisabled,
+  hideDeployNowWidgetInProduction,
+} from '../../utils/widgetVisibility';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
@@ -110,9 +114,14 @@ const HomePageCE = () => {
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
   const currentEnvironment = useAppInfo('HomePageCE', (state) => state.currentEnvironment);
+  const { isDisabledByConfig: isAuditLogsDisabledByConfig } = useIsAuditLogsDisabledByConfig();
   const allWidgets = React.useMemo(
-    () => hideDeployNowWidgetInProduction(getAllWidgets(), currentEnvironment),
-    [getAllWidgets, currentEnvironment]
+    () =>
+      hideAuditLogsWidgetWhenDisabled(
+        hideDeployNowWidgetInProduction(getAllWidgets(), currentEnvironment),
+        isAuditLogsDisabledByConfig
+      ),
+    [getAllWidgets, currentEnvironment, isAuditLogsDisabledByConfig]
   );
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
   const { data: homepageLayout, isLoading: _isLoadingLayout } = useGetHomepageLayoutQuery();

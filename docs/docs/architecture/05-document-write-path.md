@@ -6,7 +6,8 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release.ts`. The rest of this page was not re-verified.
+  - 'A commit callback runs up to its first await before the write returns. destroy() waits at most 10 seconds for that database. Knex can resolve commit() when the database rejects COMMIT, and the callbacks still run.'
+  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release-run.ts`. The rest of this page was not re-verified.
 ---
 
 This page follows one write through the server. It explains the layers and the order in which they run. It is not an API reference for the Document Service.
@@ -38,7 +39,7 @@ Use `documentId` for stable references. Do not store a row `id` of a D&P content
 | 6     | Event manager   | `document-service/events.ts`         | After the commit, when something listens to the event, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                 |
 | 7     | Webhook runner  | `services/webhook-runner.ts`         | Queues the event and sends an HTTP `POST` to each enabled webhook for that event.                                                                             |
 
-The built-in middleware converts invalid date, time, datetime and relation errors from the database layer into `ValidationError`.
+The built-in middleware converts invalid date, time, datetime, relation and boolean errors from the database layer into `ValidationError`. The list of these input errors lives in `packages/core/core/src/utils/database-input-errors.ts`. The entity service uses the same list, and so does the global error middleware (`middlewares/errors.ts`). Routes that call `strapi.db.query` directly therefore also answer these errors with a 400 instead of a 500.
 
 ## A create, step by step
 
@@ -136,7 +137,9 @@ Database lifecycles run inside the transaction. If the transaction rolls back la
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context starts the commit callbacks but does not await them. The Document Service call can return before the event reaches the listeners.
+The transaction context starts those callbacks after the commit and does not wait for them. Each callback runs synchronously up to its first `await` before `strapi.db.transaction` resolves, and the rest of it runs after. Callbacks from one commit run together. A callback that throws is logged, and the other callbacks still run. A rollback callback that throws is logged and does not replace the error from the write. `db.destroy()` waits up to 10 seconds for callbacks that belong to that database, then closes the pool. Callbacks still running at the deadline are left running. `emitEvent` catches and logs its own errors.
+
+Knex resolves `commit()` even when the database rejects `COMMIT`. The rejection is on the transactor's `executionPromise`. The callbacks still run in that case, and the transaction call still resolves.
 
 When the callback runs, the event manager:
 
