@@ -207,7 +207,8 @@ const createDefaultImplementation = ({
 
       const [results, { count: total }] = await Promise.all([
         db.query(uid).load(entity, field, sliceQuery),
-        db.query(uid).load(entity, field, { ...query, count: true }),
+        // A count needs no order, and Postgres and MySQL reject an orderBy with the count's GROUP BY
+        db.query(uid).load(entity, field, { ..._.omit(query, 'orderBy'), count: true }),
       ]);
 
       return {

@@ -45,12 +45,13 @@ const builder = createTestBuilder();
 let strapi: Core.Strapi;
 let article: { id: number };
 
-const loadTags = async (pagination?: Record<string, number>) => {
+// Without a sort, related entries keep their connect order: tag-00 to tag-24
+const loadTags = async (pagination?: Record<string, number>, params: object = {}) => {
   const page = await strapi.entityService!.loadPages(
     ARTICLE_UID as any,
     article as any,
     'tags' as any,
-    { sort: 'id:asc' } as any,
+    params as any,
     pagination
   );
 
@@ -111,6 +112,13 @@ describe('Entity service loadPages', () => {
 
       expect(names).toEqual(tagNames(0, 3));
       expect(pagination).toEqual({ start: 0, limit: 3, total: TAG_COUNT });
+    });
+
+    test('applies the sort before start and limit', async () => {
+      const { names, pagination } = await loadTags({ start: 2, limit: 3 }, { sort: 'name:desc' });
+
+      expect(names).toEqual(['tag-22', 'tag-21', 'tag-20']);
+      expect(pagination).toEqual({ start: 2, limit: 3, total: TAG_COUNT });
     });
 
     test('a limit of -1 returns every entry from start', async () => {

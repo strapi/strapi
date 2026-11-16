@@ -149,6 +149,25 @@ describe('Entity service', () => {
       expect(limitOnly.pagination).toEqual({ start: 0, limit: 3, total });
     });
 
+    test('counts offset notation entries without the sort', async () => {
+      const { instance, load } = setup();
+
+      await instance.loadPages(
+        uid as any,
+        entity as any,
+        'tags' as any,
+        { orderBy: { name: 'desc' } } as any,
+        { start: 20, limit: 5 } as any
+      );
+
+      expect(load).toHaveBeenCalledWith(entity, 'tags', {
+        orderBy: { name: 'desc' },
+        offset: 20,
+        limit: 5,
+      });
+      expect(load).toHaveBeenCalledWith(entity, 'tags', { count: true });
+    });
+
     test('a limit of -1 loads every entry from start', async () => {
       const { instance, load } = setup();
 
