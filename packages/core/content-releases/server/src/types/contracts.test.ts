@@ -82,3 +82,81 @@ export type ReleaseServiceContractAssertions = [
     >
   >,
 ];
+
+// The reads that the same API test records, called as `controllers/release.ts` calls them.
+declare const releaseService: ReleaseService;
+const filters = { contentType: 'api::product.product', entryDocumentId: 'abc', locale: null };
+
+// `findByDocumentAttached`, `hasEntryAttached=true`: the requested action fields and the ids.
+const findManyWithActionFields = () =>
+  releaseService.findMany({
+    where: { releasedAt: null, actions: filters },
+    populate: { actions: { fields: ['type', 'isEntryValid', 'reason'], filters } },
+  });
+// `findByDocumentAttached`, `hasEntryAttached=false`: `where` only.
+const findManyWithoutPopulate = () => releaseService.findMany({ where: { releasedAt: null } });
+// `mapEntriesToReleases`: the full action rows, without `release`, `entry` or `status`.
+const findManyWithActions = () =>
+  releaseService.findMany({ where: { releasedAt: null }, populate: { actions: true } });
+// A populate the contract does not model gives `unknown` for that relation.
+const findManyWithActionsCount = () =>
+  releaseService.findMany({ populate: { actions: { count: true } } });
+const findManyWithCreator = () => releaseService.findMany({ populate: ['createdBy'] });
+// A populate whose value the types cannot read gives `unknown` for every relation.
+declare const anyPopulate: string | string[] | undefined;
+const findManyWithUnreadPopulate = () => releaseService.findMany({ populate: anyPopulate });
+
+export type ReleaseReadContractAssertions = [
+  Expect<
+    Equal<
+      [ReleaseResult<'findPage'>],
+      [{ results: Array<ReleaseRow & { actions: { count: number } }>; pagination: Pagination }]
+    >
+  >,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<typeof findManyWithActionFields>>],
+      [
+        Array<
+          ReleaseRow & {
+            actions: Array<
+              Pick<ActionRow, 'id' | 'documentId' | 'type' | 'isEntryValid' | 'reason'>
+            >;
+          }
+        >,
+      ]
+    >
+  >,
+  Expect<Equal<[Awaited<ReturnType<typeof findManyWithoutPopulate>>], [ReleaseRow[]]>>,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<typeof findManyWithActions>>],
+      [Array<ReleaseRow & { actions: ActionRow[] }>]
+    >
+  >,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<typeof findManyWithActionsCount>>],
+      [Array<ReleaseRow & { actions: unknown }>]
+    >
+  >,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<typeof findManyWithCreator>>],
+      [Array<ReleaseRow & { createdBy: unknown }>]
+    >
+  >,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<typeof findManyWithUnreadPopulate>>],
+      [Array<ReleaseRow & { actions: unknown; createdBy: unknown; updatedBy: unknown }>]
+    >
+  >,
+  // `findByDocumentAttached` filters with `null` values and query-string values.
+  Expect<
+    Equal<
+      [NonNullable<Parameters<ReleaseService['findMany']>[0]>['where']],
+      [Record<string, unknown> | undefined]
+    >
+  >,
+];
