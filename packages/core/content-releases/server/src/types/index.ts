@@ -1,4 +1,4 @@
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, Struct } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -98,10 +98,27 @@ type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServ
   delete(...args: Parameters<ReleaseActionService['delete']>): Promise<ReleaseActionRow>;
 };
 
+/**
+ * A release as the query engine returns it: its columns, without the relations
+ * (`tests/api/core/content-releases/content-releases-service-results.test.api.ts`).
+ */
+type ReleaseRow = Omit<Release, 'actions'>;
+
+/**
+ * The `release` service. The query engine's result stays `any` in the implementation, and the
+ * published declaration prints the content-manager components as `any`; the results below are the
+ * ones the runtime returns.
+ */
+type ReleaseServiceContract = Omit<ReleaseService, 'update' | 'getAllComponents'> & {
+  update(...args: Parameters<ReleaseService['update']>): Promise<ReleaseRow>;
+  /** The component schemas by UID. */
+  getAllComponents(): Promise<Record<Struct.ComponentSchema['uid'], Struct.ComponentSchema>>;
+};
+
 /** Content Releases services by name, as registered by the plugin. */
 export type Services = {
   homepage: ReturnType<typeof createHomepageService>;
-  release: ReleaseService;
+  release: ReleaseServiceContract;
   'release-action': ReleaseActionServiceContract;
   'release-validation': ReleaseValidationService;
   scheduling: ReturnType<typeof createSchedulingService>;

@@ -1,5 +1,5 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { Modules } from '@strapi/types';
+import type { Modules, Struct } from '@strapi/types';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { Pagination, Release, ReleaseDataResponse } from '../../../shared/contracts/releases';
@@ -62,4 +62,23 @@ export type ReleaseActionServiceContractAssertions = [
     >
   >,
   Expect<Equal<[Result<'countActions'>], [number]>>,
+];
+
+type ReleaseService = Services['release'];
+type ReleaseResult<TMember extends keyof ReleaseService> = Awaited<
+  ReturnType<ReleaseService[TMember]>
+>;
+
+// The row that the same API test records for `update`: the release columns without relations.
+type ReleaseRow = Omit<Release, 'actions'>;
+
+export type ReleaseServiceContractAssertions = [
+  Expect<Equal<[ReleaseResult<'update'>], [ReleaseRow]>>,
+  // The reducer's accumulator in `services/release.ts`: the component schemas by UID.
+  Expect<
+    Equal<
+      [ReleaseResult<'getAllComponents'>],
+      [Record<Struct.ComponentSchema['uid'], Struct.ComponentSchema>]
+    >
+  >,
 ];
