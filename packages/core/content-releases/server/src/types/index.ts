@@ -1,4 +1,3 @@
-import type { AdminUser } from '@strapi/admin/strapi-server';
 import type { Core, Modules, Struct } from '@strapi/types';
 import type { queryParams } from '@strapi/utils';
 import type { Controllers } from './controllers';
@@ -147,6 +146,15 @@ type PopulateByRelation<TPopulate> = 0 extends 1 & TPopulate
         : UnreadPopulate;
 
 /**
+ * The admin user's row without its roles, as the registered `admin::user` contract reads it. The
+ * published contracts do not import `@strapi/admin`, which is not a dependency of this package.
+ */
+type AdminUserRow = Omit<
+  NonNullable<Awaited<ReturnType<Core.ServiceFor<'admin::user'>['findOne']>>>,
+  'roles'
+>;
+
+/**
  * A populated relation as the plugin's `findMany` and `findOne` callers read it (same API test): the
  * full `actions` when the populate names them, and the `actions` with only the requested `fields`
  * (plus `id` and `documentId`), filtered or not. A named `createdBy` is the admin user's row without
@@ -167,7 +175,7 @@ type PopulatedRelation<TRelation, TValue> = TRelation extends 'actions'
       : unknown
   : TRelation extends 'createdBy'
     ? [TValue] extends [true]
-      ? Omit<AdminUser, 'roles'> | null
+      ? AdminUserRow | null
       : unknown
     : unknown;
 
