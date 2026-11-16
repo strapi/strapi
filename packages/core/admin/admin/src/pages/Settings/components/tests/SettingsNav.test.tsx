@@ -3,11 +3,13 @@ import { render, screen } from '@tests/utils';
 
 import { SettingsNav } from '../SettingsNav';
 
-let mockLicense: unknown = { features: [] };
+const originalIsTrial = window.strapi.isTrial;
+const originalIsEnabled = window.strapi.features.isEnabled;
 
-jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
-  useLicenseLimits: jest.fn(() => ({ license: mockLicense })),
-}));
+const setLicense = ({ isTrial, features }: { isTrial: boolean; features: string[] }) => {
+  window.strapi.isTrial = isTrial;
+  window.strapi.features.isEnabled = (name) => features.includes(name ?? '');
+};
 
 const menu = [
   {
@@ -27,6 +29,24 @@ const menu = [
         to: '/settings/webhooks',
         id: 'webhooks',
         isDisplayed: true,
+        permissions: [],
+      },
+      {
+        intlLabel: { id: 'content-releases.plugin.name', defaultMessage: 'Releases' },
+        to: '/settings/releases',
+        id: 'content-releases',
+        isDisplayed: true,
+        licenseOnly: true,
+        licenseFeature: 'cms-content-releases',
+        permissions: [],
+      },
+      {
+        intlLabel: { id: 'review-workflows.plugin.name', defaultMessage: 'Review Workflows' },
+        to: '/settings/review-workflows',
+        id: 'review-workflows',
+        isDisplayed: true,
+        licenseOnly: true,
+        licenseFeature: 'review-workflows',
         permissions: [],
       },
     ],
@@ -87,6 +107,7 @@ const menu = [
         id: 'auditLogs',
         isDisplayed: true,
         licenseOnly: true,
+        licenseFeature: 'audit-logs',
         permissions: [],
       },
     ],
@@ -101,6 +122,7 @@ const menu = [
         id: 'sso-purchase-page',
         isDisplayed: true,
         licenseOnly: true,
+        licenseFeature: 'sso',
         permissions: [],
       },
       {
@@ -109,6 +131,7 @@ const menu = [
         id: 'content-history-purchase-page',
         isDisplayed: true,
         licenseOnly: true,
+        licenseFeature: 'cms-content-history',
         permissions: [],
       },
     ],
@@ -182,55 +205,55 @@ const lightningFillFor = (label: string) =>
 
 describe('SettingsNav', () => {
   afterEach(() => {
-    mockLicense = { features: [] };
+    window.strapi.isTrial = originalIsTrial;
+    window.strapi.features.isEnabled = originalIsEnabled;
   });
 
-  it('marks a feature as licensed when a lapsed license granted it', () => {
-    // After expiry the live feature list is empty; the nav follows the same grant the Plan card
-    // shows until the license key or file is removed.
-    mockLicense = {
-      features: [],
-      planEntitlements: [{ feature: 'audit-logs', available: true, limits: [] }],
-    };
+  it('marks the features the trial grants in purple and the rest in grey', () => {
+    setLicense({ isTrial: true, features: ['cms-content-releases', 'sso'] });
 
     render(<SettingsNav />);
 
-    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
-  });
-
-  it('marks the SSO and content-history purchase links a lapsed license granted', () => {
-    // After expiry these features render as purchase links, under their own ids.
-    mockLicense = {
-      features: [],
-      planEntitlements: [
-        { feature: 'sso', available: true, limits: [] },
-        { feature: 'cms-content-history', available: true, limits: [] },
-      ],
-    };
-
-    render(<SettingsNav />);
-
+    expect(lightningFillFor('Releases')).toBe(lightTheme.colors.primary600);
     expect(lightningFillFor('Single Sign-On')).toBe(lightTheme.colors.primary600);
-    expect(lightningFillFor('Content History')).toBe(lightTheme.colors.primary600);
-  });
-
-  it('leaves a feature unmarked when the license never granted it', () => {
-    mockLicense = {
-      features: [],
-      planEntitlements: [{ feature: 'audit-logs', available: false, limits: [] }],
-    };
-
-    render(<SettingsNav />);
-
+    expect(lightningFillFor('Review Workflows')).toBe(lightTheme.colors.neutral300);
     expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.neutral300);
   });
 
-  it('marks a feature on the live license as licensed', () => {
-    mockLicense = { features: [{ name: 'audit-logs' }] };
+  it('shows no icon on the features a paid license grants', () => {
+    setLicense({
+      isTrial: false,
+      features: ['cms-content-releases', 'review-workflows', 'sso', 'audit-logs'],
+    });
 
     render(<SettingsNav />);
 
-    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
+    expect(lightningFillFor('Releases')).toBeUndefined();
+    expect(lightningFillFor('Review Workflows')).toBeUndefined();
+    expect(lightningFillFor('Single Sign-On')).toBeUndefined();
+    expect(lightningFillFor('Audit Logs')).toBeUndefined();
+  });
+
+  it('marks the features a paid license does not grant in grey', () => {
+    setLicense({ isTrial: false, features: ['cms-content-releases'] });
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Releases')).toBeUndefined();
+    expect(lightningFillFor('Single Sign-On')).toBe(lightTheme.colors.neutral300);
+    expect(lightningFillFor('Review Workflows')).toBe(lightTheme.colors.neutral300);
+  });
+
+  it('marks every paid feature in grey without a license', () => {
+    setLicense({ isTrial: false, features: [] });
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Releases')).toBe(lightTheme.colors.neutral300);
+    expect(lightningFillFor('Review Workflows')).toBe(lightTheme.colors.neutral300);
+    expect(lightningFillFor('Single Sign-On')).toBe(lightTheme.colors.neutral300);
+    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.neutral300);
+    expect(lightningFillFor('Content History')).toBe(lightTheme.colors.neutral300);
   });
 
   it('should render and match snapshot', () => {

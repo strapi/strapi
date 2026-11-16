@@ -68,6 +68,7 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Releases',
         },
         licenseOnly: true,
+        licenseFeature: 'cms-content-releases',
         permissions: [],
         Component() {
           return import('./pages/ReleasesSettingsPage').then((mod) => ({
@@ -132,6 +133,7 @@ const admin: Plugin.Config.AdminInput = {
           }));
         },
         licenseOnly: true,
+        licenseFeature: 'cms-content-releases',
       });
     }
   },
