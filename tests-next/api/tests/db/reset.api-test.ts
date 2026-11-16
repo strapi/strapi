@@ -70,9 +70,31 @@ describe(`per-file instance (${database.client})`, () => {
 describe.skipIf(database.client !== 'sqlite')('SQLite snapshot and restore', () => {
   let server: Server;
 
+  /** A row written after the snapshot: the first admin user, which a restore must remove. */
+  const registerAdmin = async () => {
+    const res = await fetch(`${server.url}/admin/register-admin`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: 'admin@test.io',
+        firstname: 'Admin',
+        lastname: 'User',
+        password: 'Testing123!',
+      }),
+    });
+    expect(res.status, await res.text()).toBe(200);
+  };
+
+  const hasAdmin = async () => {
+    const res = await fetch(`${server.url}/admin/init`);
+    return ((await res.json()) as { data: { hasAdmin: boolean } }).data.hasAdmin;
+  };
+
   beforeAll(async () => {
     await resetDatabase(app, database);
     server = await startServer(app, { port, database });
+    // In the snapshot: a restore must bring it back, not only remove what came after.
+    expect(await writeProbe(server)).toBe(true);
     await timed('snapshot', () => snapshotDatabase(server));
   });
 
@@ -81,21 +103,23 @@ describe.skipIf(database.client !== 'sqlite')('SQLite snapshot and restore', () 
   });
 
   test('sql restore brings back the snapshot without a restart', async () => {
-    expect(await writeProbe(server)).toBe(true);
+    await registerAdmin();
     const pid = server.pid;
 
     await timed('restore sql', () => restoreDatabase(server));
 
     expect(server.pid).toBe(pid);
-    expect(await writeProbe(server)).toBe(true);
+    expect(await hasAdmin()).toBe(false);
+    expect(await writeProbe(server)).toBe(false);
   });
 
   test('reload restore brings back the snapshot through a worker restart', async () => {
-    await writeProbe(server);
+    await registerAdmin();
 
     await timed('restore reload', () => restoreDatabase(server, { mode: 'reload' }));
 
-    expect(await writeProbe(server)).toBe(true);
+    expect(await hasAdmin()).toBe(false);
+    expect(await writeProbe(server)).toBe(false);
   });
 });
 
