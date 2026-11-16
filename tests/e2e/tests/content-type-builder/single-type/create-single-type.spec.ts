@@ -82,7 +82,6 @@ test.describe('Create single type with all field types', () => {
           type: 'media',
           name: 'testmediamultiple',
           media: { multiple: true },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -91,7 +90,6 @@ test.describe('Create single type with all field types', () => {
             type: 'oneWay',
             target: { select: 'Article', name: 'testonewayrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'relation',
@@ -100,7 +98,6 @@ test.describe('Create single type with all field types', () => {
             type: 'manyWay',
             target: { select: 'Article', name: 'testmanywayrelationtarget' },
           },
-          advanced: advancedRequired,
         },
         {
           type: 'enumeration',

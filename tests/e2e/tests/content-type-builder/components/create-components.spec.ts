@@ -88,7 +88,6 @@ test.describe('Create a new component', () => {
         type: 'media',
         name: 'testmediamultiple',
         media: { multiple: true },
-        advanced: advancedRequired,
       },
       {
         type: 'relation',
@@ -97,7 +96,6 @@ test.describe('Create a new component', () => {
           type: 'oneWay',
           target: { select: 'Article', name: 'comptestonewayrelationtarget' },
         },
-        advanced: advancedRequired,
       },
       {
         type: 'relation',
@@ -106,7 +104,6 @@ test.describe('Create a new component', () => {
           type: 'manyWay',
           target: { select: 'Article', name: 'comptestmanywayrelationtarget' },
         },
-        advanced: advancedRequired,
       },
       {
         type: 'enumeration',
