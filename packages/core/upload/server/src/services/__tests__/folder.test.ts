@@ -1,6 +1,13 @@
 import { errors } from '@strapi/utils';
+import { sortBy } from 'lodash';
 
 import folderService from '../folder';
+
+jest.mock('lodash', () => {
+  const actual = jest.requireActual('lodash');
+
+  return { ...actual, sortBy: jest.fn(actual.sortBy) };
+});
 
 const folderUID = '1';
 const rootPathRegex = /^\/[0-9]*$/i;
@@ -180,18 +187,29 @@ describe('folder', () => {
   });
 
   describe('getStructure', () => {
+    const rows = [
+      { id: 1, name: 'Zeta', parent: null },
+      { id: 2, name: 'alpha', parent: null },
+      { id: 3, name: 'Beta', parent: null },
+      { id: 4, name: 'b', parent: 1 },
+      { id: 5, name: 'a', parent: 1 },
+      { id: 6, name: 'c', parent: 5 },
+      { id: 7, name: 'a', parent: 1 },
+    ];
+
     beforeAll(() => {
-      const rows = [
-        { id: 1, name: 'b-root', parent: null },
-        { id: 2, name: 'a-root', parent: null },
-        { id: 3, name: 'child', parent: 1 },
-      ];
-      const qb = {
-        getAlias: () => 't1',
+      const queryBuilder: {
+        alias: string;
+        getAlias: () => string;
+        select: jest.Mock;
+        join: jest.Mock;
+        execute: jest.Mock;
+      } = {
         alias: 't0',
-        select: () => qb,
-        join: () => qb,
-        execute: async () => rows,
+        getAlias: () => 't1',
+        select: jest.fn(() => queryBuilder),
+        join: jest.fn(() => queryBuilder),
+        execute: jest.fn(async () => rows.map((row) => ({ ...row }))),
       };
 
       global.strapi = {
@@ -209,23 +227,55 @@ describe('folder', () => {
               },
             }),
           },
-          queryBuilder: () => qb,
+          queryBuilder: () => queryBuilder,
         },
       } as any;
     });
 
-    test('returns a tree of { id, name, children } nodes sorted by name', async () => {
-      const tree = await folderService.getStructure();
+    test('nests folders under their parent and sorts every level by name', async () => {
+      const structure = await folderService.getStructure();
 
-      expect(tree).toEqual([
-        { id: 2, name: 'a-root', children: [] },
-        { id: 1, name: 'b-root', children: [{ id: 3, name: 'child', children: [] }] },
+      // Case-sensitive code-point order ('Beta' < 'Zeta' < 'alpha') is what
+      // `sortBy` has always returned. It documents current behaviour, not a spec.
+      expect(structure).toEqual([
+        { id: 3, name: 'Beta', children: [] },
+        {
+          id: 1,
+          name: 'Zeta',
+          children: [
+            // Same name: ties keep the order the rows came back in (stable sort)
+            { id: 5, name: 'a', children: [{ id: 6, name: 'c', children: [] }] },
+            { id: 7, name: 'a', children: [] },
+            { id: 4, name: 'b', children: [] },
+          ],
+        },
+        { id: 2, name: 'alpha', children: [] },
       ]);
 
       // Type-level check: children are nodes, not ids (verified by test:ts:back)
       // @ts-expect-error - a node's children cannot be read as a list of ids
-      const childIds: number[] = tree[1].children;
-      expect(childIds).toHaveLength(1);
+      const childIds: number[] = structure[1].children;
+      expect(childIds).toHaveLength(3);
+    });
+
+    test('sorts each folder once, not once per insertion', async () => {
+      const sortBySpy = sortBy as unknown as jest.Mock;
+      sortBySpy.mockClear();
+
+      await folderService.getStructure();
+
+      // One sort per children list, each folder in exactly one of them: the
+      // sorted list lengths add up to the number of folders. Re-sorting the
+      // growing list on every insertion, as the code used to, adds up to more
+      // (1 + 2 + … + N for N siblings).
+      // This deliberately checks the implementation: it is the only guard
+      // against the quadratic loop coming back. Update it if the sort changes.
+      const sortedElements = sortBySpy.mock.calls.reduce(
+        (sum: number, [list]: [unknown[]]) => sum + list.length,
+        0
+      );
+
+      expect(sortedElements).toBe(rows.length);
     });
   });
 
