@@ -1,11 +1,11 @@
 'use strict';
 
-const { difference, map } = require('lodash');
+const { difference } = require('lodash');
 const { createAuthRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 
-const toIds = (arr) => [...new Set(map(arr, (item) => item.id))];
+const toIds = (arr) => [...new Set(arr.map((item) => item.id))];
 
 let strapi;
 let rq;

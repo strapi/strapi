@@ -53,6 +53,29 @@ describe('users-permissions strategy', () => {
     }
   );
 
+  it('generates an empty ability when the role permissions resolve to null', async () => {
+    // The role can be deleted between fetching the user and loading its permissions.
+    const generateAbility = jest.fn().mockResolvedValue({ can: jest.fn() });
+    const user = { id: 1, confirmed: true, blocked: false, role: { id: 2 } };
+    const services = {
+      jwt: { getToken: jest.fn().mockResolvedValue({ id: user.id }) },
+      user: { fetchAuthenticatedUser: jest.fn().mockResolvedValue(user) },
+      permission: {
+        findRolePermissions: jest.fn().mockResolvedValue(null),
+        toContentAPIPermission: jest.fn(),
+      },
+    };
+    getService.mockImplementation((name) => services[name]);
+    global.strapi = {
+      store: () => ({ get: jest.fn().mockResolvedValue({ email_confirmation: true }) }),
+      contentAPI: { permissions: { engine: { generateAbility } } },
+    };
+
+    await strategy.authenticate({ state: {} });
+
+    expect(generateAbility).toHaveBeenCalledWith([]);
+  });
+
   it.each([{ scope: 'article.find' }, { scope: ['article.find', 'article.findOne'] }])(
     'checks every requested scope: %s',
     async ({ scope }) => {

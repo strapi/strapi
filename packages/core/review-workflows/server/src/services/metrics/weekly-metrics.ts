@@ -1,9 +1,10 @@
 import type { Core } from '@strapi/types';
-import { defaultTo, map, size, mean, max, sum } from 'lodash';
+import { defaultTo, size, mean, max, sum } from 'lodash';
 import { add } from 'date-fns';
 import { getService } from '../../utils';
 import type workflowMetrics from './index';
 import type { WeeklyMetrics } from './index';
+import type { Workflow } from '../../../../shared/contracts/review-workflows';
 
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -27,9 +28,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // There will never be more than 200 workflow, so we can safely fetch them all
       const workflows = await workflowsService.find({ populate: 'stages' });
 
-      const stagesCount = map(workflows, (workflow) => size(workflow.stages));
+      const stagesCount = workflows.map((workflow: Workflow) => size(workflow.stages));
 
-      const contentTypesCount = map(workflows, (workflow) => size(workflow.contentTypes));
+      const contentTypesCount = workflows.map((workflow: Workflow) => size(workflow.contentTypes));
 
       return {
         numberOfActiveWorkflows: size(workflows),

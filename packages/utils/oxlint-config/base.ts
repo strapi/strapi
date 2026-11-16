@@ -1,5 +1,23 @@
 import type { OxlintConfig } from 'oxlint';
 
+// Lodash methods with a native equivalent; banned for named imports and `_.<name>` calls.
+const nativeLodash = {
+  names: [
+    'isArray',
+    'forEach',
+    'each',
+    'keys',
+    'values',
+    'entries',
+    'concat',
+    'filter',
+    'find',
+    'map',
+  ],
+  message:
+    'Use native Array.isArray, Array.prototype.forEach / filter / find / map, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead (also for map over objects). Native forEach / filter / find / map and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (`?? []` for arrays, `?? {}` for objects). Native filter / find / map need a callback, so rewrite object or shorthand iteratees such as `{ id }` or `"id"`.',
+};
+
 /**
  * Shared baseline applied to every file in the monorepo.
  *
@@ -19,7 +37,7 @@ import type { OxlintConfig } from 'oxlint';
  */
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
-  jsPlugins: ['./no-lodash-fp.js'],
+  jsPlugins: ['./lodash-rules.js'],
   categories: {
     // Blocking bar: correctness plus extra-policy `perf`.
     // Later categories (suspicious/pedantic/style) are not extra policy yet.
@@ -71,29 +89,19 @@ export const base = {
             message:
               'Use `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), and native filter or find. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
           },
-        ],
-        paths: [
           {
-            name: 'lodash',
-            importNames: [
-              'isArray',
-              'forEach',
-              'each',
-              'keys',
-              'values',
-              'entries',
-              'concat',
-              'filter',
-              'find',
-            ],
+            group: ['lodash/map', 'lodash/map.js'],
             message:
-              'Use native Array.isArray, Array.prototype.forEach / filter / find, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
+              'Use native Array.prototype.map, or Object.values / Object.entries for objects. It throws on null/undefined and needs a callback, so guard nullish input (e.g. `?? []`) and rewrite shorthand iteratees such as `"id"`.',
           },
         ],
+        paths: [{ name: 'lodash', importNames: nativeLodash.names, message: nativeLodash.message }],
       },
     ],
     // Oxlint 1.72's native rule does not check require() or import() calls.
     'strapi/no-lodash-fp-calls': 'error',
+    // Also catches `_.map(...)` and `require('lodash')`, which the native rule cannot see.
+    'strapi/no-restricted-lodash-calls': ['error', nativeLodash],
     // Yup `.when({ then, otherwise })` objects are not Promise thenables; the
     // rule cannot distinguish DSL keys from real thenable misuse.
     'unicorn/no-thenable': 'off',
