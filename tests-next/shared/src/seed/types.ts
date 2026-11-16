@@ -39,8 +39,8 @@ export interface SeedPlan {
   }>;
   /**
    * API tokens. `content-api` tokens are `full-access`, `read-only` or `custom` (with content API
-   * actions). `admin` tokens need the `adminTokens` future flag, belong to an admin user
-   * (`owner`, by email) and get admin permissions within that user's own.
+   * actions). `admin` tokens belong to an admin user (`owner`, by email) and get admin permissions
+   * within that user's own: Strapi rejects a token that asks for more, and the seed fails.
    */
   apiTokens?: Array<
     | {

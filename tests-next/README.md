@@ -54,7 +54,7 @@ await resetDatabase(app, database);
 // Scaffolders: files in the app, synced by Strapi on boot.
 scaffoldContentType(app, { singularName: 'article', attributes: { title: { type: 'string' } } });
 scaffoldComponent(app, { uid: 'shared.seo', attributes: { title: { type: 'string' } } });
-scaffoldConfig(app, 'features', { future: { adminTokens: true } }); // config/env/development/
+scaffoldConfig(app, 'features', { future: { experimental_firstPublishedAt: true } }); // read at boot
 scaffoldPlugin(app, 'users-permissions', { config: { jwt: { expiresIn: '1h' } } });
 
 // Seeders, before boot: one Strapi load for the whole plan (about 2.5 s).

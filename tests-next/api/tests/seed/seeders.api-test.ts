@@ -9,7 +9,6 @@ import {
   databaseFromEnv,
   generateApp,
   resetDatabase,
-  scaffoldConfig,
   scaffoldContentType,
   seed,
   seedApp,
@@ -55,7 +54,6 @@ beforeAll(async () => {
       title: { type: 'string', pluginOptions: { i18n: { localized: true } } },
     },
   });
-  scaffoldConfig(app, 'features', { future: { adminTokens: true } });
 
   const image = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'seed-media-')), 'pixel.png');
   fs.writeFileSync(image, PNG);
