@@ -148,6 +148,50 @@ const putBookFromGet = async (change: (schema: Record<string, any>) => void) => 
   return rq({ method: 'PUT', url, body: { contentType: body.data.schema } });
 };
 
+/**
+ * Checks the result of a retarget of Shelf.books from Book to Bookcase: the old owner Book.shelf
+ * is deleted with its link table, Bookcase.shelf owns Shelf.books, and the relation works.
+ */
+const expectInverseSideRetargeted = async (oldLinkTable: string, shelfId: string) => {
+  expect(attributesOf(BOOK_UID)).not.toHaveProperty('shelf');
+  expect(attributesOf(BOOKCASE_UID).shelf).toMatchObject({
+    type: 'relation',
+    relation: 'manyToOne',
+    target: SHELF_UID,
+    inversedBy: 'books',
+  });
+  expect(attributesOf(SHELF_UID).books).toMatchObject({
+    type: 'relation',
+    relation: 'oneToMany',
+    target: BOOKCASE_UID,
+    mappedBy: 'shelf',
+  });
+  expect(await strapi.db.connection.schema.hasTable(oldLinkTable)).toBe(false);
+
+  const bookcase = await strapi.documents(BOOKCASE_UID).create({
+    data: { name: 'Bookcase 1', shelf: shelfId },
+  });
+  const shelfWithBooks = await strapi.documents(SHELF_UID).findOne({
+    documentId: shelfId,
+    populate: ['books'],
+  });
+  expect(shelfWithBooks?.books).toMatchObject([{ documentId: bookcase.documentId }]);
+};
+
+/** Creates a shelf with one book, and returns the link table of Book.shelf. */
+const seedLinkedBook = async () => {
+  const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+  await strapi.documents(BOOK_UID).create({ data: { title: 'Book 1', shelf: shelf.documentId } });
+
+  const { joinTable } = strapi.db.metadata.get(BOOK_UID).attributes.shelf as {
+    joinTable: { name: string };
+  };
+  const [{ count }] = await strapi.db.connection(joinTable.name).count({ count: '*' });
+  expect(Number(count)).toBe(1);
+
+  return { shelfId: shelf.documentId, oldLinkTable: joinTable.name };
+};
+
 describe('Content Type Builder - retarget a relation under its own name', () => {
   beforeAll(async () => {
     await boot();
@@ -237,6 +281,56 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
         .sort()
     ).toEqual([linkedBook.documentId, newBook.documentId].sort());
     expect(newBookWithShelf?.shelf).toMatchObject({ documentId: bookcase.documentId });
+  });
+
+  // Retargeting an inverse side deletes its old owner and the link rows of that owner
+  test('retargets the inverse side as the admin form sends it, and deletes the old owner', async () => {
+    await createTypes();
+    const { shelfId, oldLinkTable } = await seedLinkedBook();
+
+    // The admin form deletes the old owner, creates the new owner and retargets Shelf.books
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('delete', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        contentType('update', 'rt-bookcase', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('oneToMany', BOOKCASE_UID, 'shelf')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    await expectInverseSideRetargeted(oldLinkTable, shelfId);
+  });
+
+  test('retargets the inverse side in a save with only Shelf, and deletes the old owner', async () => {
+    await createTypes();
+    const { shelfId, oldLinkTable } = await seedLinkedBook();
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('oneToMany', BOOKCASE_UID, 'shelf')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    await expectInverseSideRetargeted(oldLinkTable, shelfId);
   });
 
   test('keeps a one-way relation of the old target when the save has only Book', async () => {
