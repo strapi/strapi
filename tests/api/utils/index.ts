@@ -173,6 +173,10 @@ async function resetTestDatabase() {
  *
  * NOTE:
  * Only use sparingly where needed as the operation is slower than testInTransaction
+ *
+ * Only writes made through the global `strapi.db` are detected. A write through another
+ * Strapi instance (for example one a builder or model helper boots) uses its own connection,
+ * so its tables are not reset and its rows stay for the next test.
  */
 export function setupDatabaseReset() {
   let isDataCaptured = false;
