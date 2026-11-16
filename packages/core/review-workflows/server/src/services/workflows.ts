@@ -1,4 +1,4 @@
-import type { Core, Data } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { isString, map } from 'lodash';
 import { errors, emitAudit } from '@strapi/utils';
 import { ERRORS, WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
@@ -33,12 +33,9 @@ type WorkflowUpdateData = Omit<WorkflowUpdateInput, 'stages'> & {
  * `plugin::content-releases.release-action`. Review workflows does not depend on content releases,
  * so its registered contract is not loaded here.
  */
-type ReleaseActionService = {
-  /**
-   * `create` passes `undefined` when it assigns no content type: the query casts it to `''`, so no
-   * action matches and the call resolves.
-   */
-  validateActionsByContentTypes(contentTypeUids: string[] | undefined): Promise<void>;
+export type ReleaseActionService = {
+  /** Revalidates the release actions of the entries of these content types. */
+  validateActionsByContentTypes(contentTypeUids: UID.ContentType[]): Promise<void>;
 };
 
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {

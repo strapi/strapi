@@ -1,6 +1,7 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { UID } from '@strapi/types';
 import type createWorkflowsService from '../services/workflows';
+import type { ReleaseActionService } from '../services/workflows';
 import type { Equal, Expect } from './assert.test';
 import type { WorkflowsService } from './services';
 
@@ -56,4 +57,13 @@ export type WorkflowsImplementationAssertions = [
   Expect<Equal<Parameters<Implementation['create']>, Parameters<WorkflowsService['create']>>>,
   Expect<Equal<Parameters<Implementation['update']>, Parameters<WorkflowsService['update']>>>,
   Expect<Equal<Parameters<Implementation['delete']>, Parameters<WorkflowsService['delete']>>>,
+  // `create`, `update` and `delete` call the content releases `validateActionsByContentTypes`
+  // through a local type, since review workflows does not load its contract. It takes the
+  // parameter of the content releases implementation.
+  Expect<
+    Equal<
+      Parameters<ReleaseActionService['validateActionsByContentTypes']>,
+      [contentTypeUids: UID.ContentType[]]
+    >
+  >,
 ];
