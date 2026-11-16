@@ -202,8 +202,12 @@ module.exports = (context) =>
  *
  * Writes `config/env/<NODE_ENV>/<name>.js`, which Strapi merges over the generated
  * `config/<name>.js` (`.js` because Strapi reads `plugins` from a `.js` file only). Calls on the
- * same file merge. Arrays replace, in the config Strapi loads too: the generated file is changed
- * to apply the scaffolded values (Strapi alone would merge arrays index by index).
+ * same file merge. Arrays replace the app's own arrays in the config Strapi loads too: the
+ * generated `config/<name>.js` (including `config/plugins.js`) is changed to apply the scaffolded
+ * values, where Strapi alone would merge arrays index by index. A plugin's own default config
+ * is not covered: Strapi still merges its default arrays into a scaffolded plugin array index by
+ * index (`security: [{ apiKey: [] }]` over the documentation plugin's
+ * `[{ bearerAuth: [] }]` loads as `[{ apiKey: [], bearerAuth: [] }]`).
  */
 export const scaffoldConfig = (app: App, name: string, values: ConfigValue) => {
   if (!/^[a-z][a-zA-Z0-9]*$/.test(name)) {
