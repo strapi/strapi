@@ -18,6 +18,7 @@ import {
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
+import { InvalidRelationError } from '../errors';
 import { createRepository } from './entity-repository';
 import {
   cleanMorphToManyOrderColumn,
@@ -652,11 +653,35 @@ export const createEntityManager = (db: Database): EntityManager => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
-            const relId = toId(cleanRelationData.set?.[0]);
+            // set happens before connect/disconnect
+            const dataset = cleanRelationData.set ?? cleanRelationData.connect ?? [];
+
+            // Copy flows (publish, discardDraft, clone) pass the populated value of a morphMany,
+            // which can be empty:
+            // - the document service drops these ids, since inverse morph items carry no `__type`
+            //   (document-service/transform/relations/transform/data-ids.ts)
+            // - a populate with a field selection never selects the morph id column, so the
+            //   relation comes back empty (query/helpers/populate/apply.ts)
+            // An empty morphOne populates as null or undefined and is skipped above.
+            // Publish omits an empty value and leaves the links on the draft, unless the old
+            // published version owned links. Every other caller is rejected here: discardDraft,
+            // clone, and the draft & publish migration, which then fails at boot on every start.
+            // Skipping the value would commit and drop the links of the deleted version. What
+            // copying these links should mean (move them to the new version, or re-point the
+            // target rows) is an open question.
+            // An InvalidRelationError reaches the client as a 400 with this message, not a 500
+            if (dataset.length === 0) {
+              throw new InvalidRelationError(
+                `Invalid ${uid}.${attributeName} value, expected at least one entry to link`
+              );
+            }
+
+            // morphOne links a single entry, morphMany links all of them
+            const relIds = attribute.relation === 'morphOne' ? [toId(dataset[0])] : toIds(dataset);
 
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: relId })
+              .where({ id: relIds })
               .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
