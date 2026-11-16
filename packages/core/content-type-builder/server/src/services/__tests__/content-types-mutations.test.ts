@@ -287,6 +287,25 @@ describe('content type mutation compensation', () => {
     });
   });
 
+  it('emits the update event when an edit that keeps the kind succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, attributes: {} },
+    });
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', expect.anything());
+  });
+
+  it('rejects, and emits no event, when an edit that keeps the kind fails to write', async () => {
+    // The builder already rolled the files back
+    builder.writeFiles.mockResolvedValueOnce(false);
+
+    await expect(
+      editContentType(contentType.uid, { contentType: { ...contentType, attributes: {} } })
+    ).rejects.toThrow('Invalid schema edition');
+
+    expect(strapi.eventHub.emit).not.toHaveBeenCalled();
+  });
+
   describe('collectionType to singleType entry guard', () => {
     type Row = { documentId: string; locale?: string; publishedAt: string | null };
     type Where = {

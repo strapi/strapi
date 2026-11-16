@@ -200,17 +200,16 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         return;
       }
 
-      const [totalActions, invalidActions] = await Promise.all([
-        releaseActionService.countActions({
-          filters: {
-            release: releaseId,
-          },
-        }),
-        // Unpublish actions are always publishable, whatever validity an edit stored on them
-        releaseActionService.countActions({
-          filters: { release: releaseId, ...NOT_READY_ACTION_WHERE },
-        }),
-      ]);
+      // These counts share this transaction's single connection.
+      const totalActions = await releaseActionService.countActions({
+        filters: {
+          release: releaseId,
+        },
+      });
+      // Unpublish actions are always publishable, whatever validity an edit stored on them
+      const invalidActions = await releaseActionService.countActions({
+        filters: { release: releaseId, ...NOT_READY_ACTION_WHERE },
+      });
 
       let status: Release['status'] = 'empty';
 

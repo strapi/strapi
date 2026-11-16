@@ -2,7 +2,7 @@ import type { Core, Schema, UID } from '@strapi/types';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
-import { difference, keys } from 'lodash';
+import { difference } from 'lodash';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import { DEFAULT_RELEASE_CONDITION, RELEASED_OUTCOME_BY_TYPE } from '../../../shared/constants';
 import type { ReleaseActionOutcome } from '../../../shared/constants';
@@ -45,8 +45,8 @@ export async function deleteActionsOnDeleteContentType(
   { strapi }: { strapi: Core.Strapi }
 ) {
   const deletedContentTypes = difference(
-    keys(oldContentTypes),
-    keys(contentTypes)
+    Object.keys(oldContentTypes ?? {}),
+    Object.keys(contentTypes)
   ) as UID.ContentType[];
 
   if (deletedContentTypes.length > 0) {

@@ -546,6 +546,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/model'
         - $ref: '#/components/parameters/entity-id'
+        - in: query
+          name: locale
+          schema:
+            type: string
+          description: |
+            Locale of the entry, used to find it and check the permissions. The custom order itself is shared by all locales.
       requestBody:
         content:
           application/json:
