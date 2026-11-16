@@ -37,7 +37,9 @@ describe('repository loadPages', () => {
   });
 
   it('requires params', async () => {
-    // @ts-expect-error the page defaults are read from params
-    await expect(repository.loadPages({ id: 1 }, 'tags')).rejects.toThrow(TypeError);
+    // @ts-expect-error params is required
+    await expect(repository.loadPages({ id: 1 }, 'tags')).rejects.toThrow(
+      'Invalid load. Expected params to be an object'
+    );
   });
 });
