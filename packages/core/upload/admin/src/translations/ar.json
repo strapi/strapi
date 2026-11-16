@@ -1,5 +1,4 @@
 {
-  "apiError.FileTooBig": "الملف كبير جدًا ولا يمكن رفعه. يتجاوز الحد الأقصى لحجم الطلب الذي يسمح به الخادم.",
   "apiError.FolderContainsUnauthorizedAssetsError": "تحتوي المجلدات المحددة على ملفات وسائط ليس لديك إذن بحذفها.",
   "assets.uploaded": "تم رفع {number, plural, zero {# ملف وسائط} one {ملف وسائط واحد} two {ملفَي وسائط} few {# ملفات وسائط} many {# ملف وسائط} other {# ملف وسائط}} بنجاح",
   "asset-details.title": "تفاصيل الملف",

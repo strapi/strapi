@@ -4,8 +4,8 @@
 // carries its message directly on `message` — never under a `data` key.
 //
 // The message is returned as-is: it can be a machine-readable code
-// (`FileTooBig`) or a ready-made sentence, and only `useApiErrorMessage` knows
-// how to tell those apart for display.
+// (`FolderContainsUnauthorizedAssetsError`) or a ready-made sentence, and only
+// `useApiErrorMessage` knows how to tell those apart for display.
 export const getApiErrorMessage = (error: unknown): string | undefined => {
   if (!error || typeof error !== 'object') {
     return undefined;

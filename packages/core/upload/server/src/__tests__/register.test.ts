@@ -141,6 +141,40 @@ describe('Upload plugin register', () => {
     });
   });
 
+  describe('base provider checkFileSize', () => {
+    test('puts the code and the limit in the error details', async () => {
+      const plugin: { provider?: any } = {};
+
+      global.strapi = {
+        dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+        plugins: { upload: plugin },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+        server: { app: { on: jest.fn() }, routes: jest.fn() },
+        admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+        config: {
+          get: jest.fn().mockReturnValue({ provider: 'local' }),
+          set: jest.fn(),
+        },
+        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+      } as any;
+
+      await register({ strapi });
+
+      expect(() =>
+        plugin.provider.checkFileSize(
+          { originalFilename: 'big.png', size: 2000 },
+          { sizeLimit: 1000000 }
+        )
+      ).toThrow(
+        expect.objectContaining({
+          name: 'PayloadTooLargeError',
+          message: 'big.png exceeds size limit of 1 MB.',
+          details: { code: 'SizeLimitExceeded', limit: 1000000 },
+        })
+      );
+    });
+  });
+
   describe('plugin::upload config', () => {
     test('null/undefined plugin::upload: register runs, sharp cache and concurrency use defaults', async () => {
       for (const uploadFromConfig of [null, undefined]) {

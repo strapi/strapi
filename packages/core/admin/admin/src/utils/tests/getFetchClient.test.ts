@@ -280,6 +280,24 @@ describe('getFetchClient', () => {
       });
     });
 
+    it('should throw a FetchError with the status on a non-2xx response without a JSON body', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 413,
+          ok: false,
+          json: () => Promise.reject(new SyntaxError('Unexpected token <')),
+        })
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.post('/upload', {})).rejects.toMatchObject({
+        name: 'FetchError',
+        message: 'Unknown Server Error',
+        status: 413,
+      });
+    });
+
     it('should not send Accept and Content-Type headers for blob requests', async () => {
       (window.fetch as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({

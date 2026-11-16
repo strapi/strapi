@@ -6,12 +6,14 @@ import { Button, Dialog, Flex, Menu, Typography, VisuallyHidden } from '@strapi/
 import { ArrowRight, ArrowsCounterClockwise, Download, Link, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { useUploadTooLargeMessage } from '../../../components/UploadTooLargeMessage';
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { downloadFile } from '../../../utils/downloadFile';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
+import { getUploadTooLargeError } from '../../../utils/getUploadTooLargeError';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
@@ -94,6 +96,7 @@ interface AssetActionsProps {
 export const AssetActions = ({ asset, dragData, permissions, children }: AssetActionsProps) => {
   const { formatMessage } = useIntl();
   const getErrorMessage = useApiErrorMessage();
+  const getTooLargeMessage = useUploadTooLargeMessage();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
   const { deselect } = useAssetSelection();
@@ -181,6 +184,15 @@ export const AssetActions = ({ asset, dragData, permissions, children }: AssetAc
     }
 
     if ('error' in res) {
+      const tooLarge = getUploadTooLargeError(res.error);
+      if (tooLarge) {
+        toggleNotification({
+          type: 'danger',
+          message: getTooLargeMessage(tooLarge).text,
+          blockTransition: true,
+        });
+        return;
+      }
       toggleNotification({
         type: 'danger',
         message: getErrorMessage(

@@ -531,9 +531,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // comparison is realm-agnostic.
       if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
         return { data: {}, status: response.status } as FetchResponse<TData>;
-      } else {
-        throw error;
       }
+
+      // A non-JSON error body (e.g. an HTML page from a reverse proxy) still has a status worth keeping.
+      if ((error as Error | null)?.name === 'SyntaxError' && !validateStatus?.(response.status)) {
+        const fetchError = new FetchError('Unknown Server Error');
+        fetchError.status = response.status;
+        throw fetchError;
+      }
+
+      throw error;
     }
   };
 

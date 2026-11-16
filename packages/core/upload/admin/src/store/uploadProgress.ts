@@ -1,6 +1,7 @@
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import type { File } from '../../../shared/contracts/files';
+import type { UploadTooLargeError } from '../utils/getUploadTooLargeError';
 
 export interface FileUploadError {
   name: string;
@@ -29,6 +30,8 @@ export interface FileProgress {
   /** When the server confirmed the upload. Set with the row's asset. */
   completedAt?: number;
   error?: string;
+  /** Set when the row was rejected for its size, naming the limit that rejected it. */
+  tooLarge?: UploadTooLargeError;
   metadataStatus?: FileMetadataStatus;
   /**
    * Who started the row, when that is not the progress dialog alone. The Content
@@ -188,15 +191,22 @@ const uploadProgressSlice = createSlice({
     },
     setFileError(
       state,
-      action: PayloadAction<{ index: number; name: string; message: string; uploadId: number }>
+      action: PayloadAction<{
+        index: number;
+        name: string;
+        message: string;
+        uploadId: number;
+        tooLarge?: UploadTooLargeError;
+      }>
     ) {
-      const { index, name, message, uploadId } = action.payload;
+      const { index, name, message, uploadId, tooLarge } = action.payload;
       if (uploadId !== state.uploadId) {
         return;
       }
       if (state.files[index]) {
         state.files[index].status = 'error';
         state.files[index].error = message;
+        state.files[index].tooLarge = tooLarge;
       }
       state.errors = [...state.errors, { name, message }];
     },
@@ -296,6 +306,7 @@ const uploadProgressSlice = createSlice({
         file.status = 'pending';
         file.uploadedBytes = 0;
         file.error = undefined;
+        file.tooLarge = undefined;
         file.metadataStatus = undefined;
       }
     },

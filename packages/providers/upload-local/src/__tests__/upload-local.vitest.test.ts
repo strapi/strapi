@@ -48,6 +48,29 @@ describe('Local provider', () => {
     });
   });
 
+  describe('checkFileSize', () => {
+    // `size` is in KB, `sizeLimit` in bytes
+    const file = { name: 'big.png', size: 2000 } as any;
+
+    test('Puts the code and the limit in the error details', () => {
+      const providerInstance = localProvider.init({});
+
+      expect(() => providerInstance.checkFileSize(file, { sizeLimit: 1000000 })).toThrow(
+        expect.objectContaining({
+          name: 'PayloadTooLargeError',
+          message: 'big.png exceeds size limit of 1 MB.',
+          details: { code: 'SizeLimitExceeded', limit: 1000000 },
+        })
+      );
+    });
+
+    test('Accepts a file within the limit', () => {
+      const providerInstance = localProvider.init({});
+
+      expect(() => providerInstance.checkFileSize(file, { sizeLimit: 2000000 })).not.toThrow();
+    });
+  });
+
   describe('replace', () => {
     test('Should overwrite file at same hash and set url', async () => {
       const providerInstance = localProvider.init({});

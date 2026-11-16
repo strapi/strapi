@@ -29,6 +29,14 @@ The plugin declares two content types: `plugin::upload.file` and `plugin::upload
 
 The controllers call `prepareUploadRequest` to validate the MIME types before any work starts. The `upload` service in `server/src/services/upload.ts` then builds the file info, optimizes images and checks the size limit. It sends the file to the provider service, which prefers `uploadStream` over `upload`. It saves the `plugin::upload.file` entry and emits a `media.create` event, or `media.update` and `media.delete` for the other actions. The option `concurrentUploadSize` sets how many files one request processes at the same time.
 
+### Size limits
+
+Two limits apply to an uploaded file. The `strapi::body` middleware rejects a file above `formidable.maxFileSize` while it parses the request, before the plugin runs. The plugin then rejects a file above `upload.config.sizeLimit` (default 1 GB) in `checkFileSize`. The base provider in `server/src/register.ts` implements it, and a provider can override it, as `@strapi/provider-upload-local` does. A URL import checks `sizeLimit` while it downloads the file, in `fetchUrlToInputFile`.
+
+Every rejection is a 413 with a `details` object that names the limit: `{ code: 'FileTooBig', limit }` from the body parser, `{ code: 'SizeLimitExceeded', limit }` from the plugin, with the limit in bytes. A URL import sends the same details in its `file:error` event. The admin reads them in `admin/src/utils/getUploadTooLargeError.ts`, and treats a 413 without a Strapi error body as a limit outside Strapi, such as a reverse proxy.
+
+`register` calls `warnOnSizeLimitMismatch` (`server/src/size-limit-warning.ts`). It logs one warning when `sizeLimit` is higher than the body parser limit, because files between the two are rejected by the body parser. It stays quiet when both are left at their defaults, which have always been in that state.
+
 ### MIME type validation
 
 `server/src/utils/mime-validation.ts` decides whether a file is accepted. It compares the declared type, the type from the file extension and the type detected from the content against the `allowedTypes` and `deniedTypes` lists. See [MIME type validation](./01-backend/01-mime-validation.md).

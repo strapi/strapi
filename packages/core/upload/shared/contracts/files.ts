@@ -314,6 +314,7 @@ export declare namespace CreateFilesStreamEvents {
     name: string;
     index: number;
     message: string;
+    details?: Record<string, unknown>;
   }
 
   export interface StreamCompleteEvent {

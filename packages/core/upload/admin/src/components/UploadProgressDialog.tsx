@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
+import { Flex, IconButton, TextButton, Typography, VisuallyHidden } from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -18,6 +18,7 @@ import {
 import { useIntl } from 'react-intl';
 import { keyframes, styled } from 'styled-components';
 
+import { useApiErrorMessage } from '../hooks/useApiErrorMessage';
 import { abortUpload, useRetryCancelledFilesMutation } from '../services/api';
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
 import {
@@ -35,6 +36,7 @@ import { getTranslationKey } from '../utils/translations';
 
 import { Drawer } from './Drawer';
 import { TruncatedText } from './TruncatedText';
+import { UploadTooLargeMessage, useUploadTooLargeMessage } from './UploadTooLargeMessage';
 
 import type { FileMetadataStatus, FileProgress, FileProgressStatus } from '../store/uploadProgress';
 import type { MessageDescriptor } from 'react-intl';
@@ -601,8 +603,29 @@ const COMPLETED_ROW_PRESENTATION: Record<
   },
 };
 
+const GENERIC_ERROR_MESSAGE: MessageDescriptor = {
+  id: getTranslationKey('upload.generic-error'),
+  defaultMessage: 'An error occurred while uploading the file.',
+};
+
+/**
+ * The first sentence of a failed row's message: the cause of a size rejection, or the whole
+ * message for any other error.
+ */
+const useFileErrorCause = () => {
+  const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
+  const getTooLargeMessage = useUploadTooLargeMessage();
+
+  return (file: FileProgress) =>
+    file.tooLarge
+      ? getTooLargeMessage(file.tooLarge).cause
+      : getErrorMessage({ message: file.error }, formatMessage(GENERIC_ERROR_MESSAGE));
+};
+
 const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const { formatMessage } = useIntl();
+  const getErrorCause = useFileErrorCause();
   const isError = file.status === 'error';
   const isCurrentFile = file.status === 'uploading';
   const isCompleted = file.status === 'complete';
@@ -659,20 +682,7 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
     return (
       <FileRow icon={<CrossCircle fill="danger500" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
-          {file.error
-            ? /**
-               * The server may return a machine-readable code (e.g. `FileTooBig` from the
-               * body middleware) or an already human-readable sentence (e.g. the upload
-               * plugin's size-limit message). Translate the former, fall back to the latter.
-               */
-              formatMessage({
-                id: getTranslationKey(`apiError.${file.error}`),
-                defaultMessage: file.error,
-              })
-            : formatMessage({
-                id: getTranslationKey('upload.generic-error'),
-                defaultMessage: 'An error occurred while uploading the file.',
-              })}
+          {file.tooLarge ? <UploadTooLargeMessage error={file.tooLarge} /> : getErrorCause(file)}
         </Typography>
       </FileRow>
     );
@@ -710,6 +720,31 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   return null;
 };
 
+/**
+ * Announces each failed row as "{file name}: {cause}". The developer-facing sentence of a size
+ * rejection stays in the row only.
+ */
+const FileErrorAnnouncements = ({ files }: { files: FileProgress[] }) => {
+  const { formatMessage } = useIntl();
+  const getErrorCause = useFileErrorCause();
+
+  return (
+    <VisuallyHidden aria-live="polite">
+      {files.map((file) => (
+        <p key={file.index}>
+          {formatMessage(
+            {
+              id: getTranslationKey('upload.progress.file.errorAnnouncement'),
+              defaultMessage: '{fileName}: {message}',
+            },
+            { fileName: file.name, message: getErrorCause(file) }
+          )}
+        </p>
+      ))}
+    </VisuallyHidden>
+  );
+};
+
 const CompletedFilesList = styled(Flex)`
   flex-direction: column;
   gap: ${({ theme }) => theme.spaces[2]};
@@ -741,6 +776,8 @@ export const UploadProgressDialog = () => {
       return priority[a.status] - priority[b.status];
     });
 
+  const failedFiles = files.filter((f) => f.status === 'error');
+
   const handleClose = () => {
     dispatch(closeUploadProgress());
   };
@@ -749,6 +786,7 @@ export const UploadProgressDialog = () => {
     <Drawer.Root isVisible={isVisible} onClose={handleClose}>
       <Drawer.Body animationDirection="up" width="41.6rem" maxHeight="34.2rem">
         <DialogHeader handleClose={handleClose} />
+        <FileErrorAnnouncements files={failedFiles} />
         <Drawer.ScrollableContent isContentExpanded={!isMinimized}>
           <Flex
             direction="column"

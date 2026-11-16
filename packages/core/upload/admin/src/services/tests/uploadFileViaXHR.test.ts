@@ -126,6 +126,44 @@ describe('uploadFileViaXHR', () => {
     });
   });
 
+  it('keeps the details of a Strapi error envelope', async () => {
+    const controller = new AbortController();
+
+    const promise = uploadFileViaXHR(ENDPOINT, 'token', new FormData(), controller.signal);
+    lastXHR().respond(
+      413,
+      JSON.stringify({
+        data: null,
+        error: {
+          status: 413,
+          name: 'PayloadTooLargeError',
+          message: 'FileTooBig',
+          details: { code: 'FileTooBig', limit: 209715200 },
+        },
+      })
+    );
+
+    await expect(promise).rejects.toMatchObject({
+      message: 'FileTooBig',
+      status: 413,
+      hasErrorEnvelope: true,
+      details: { code: 'FileTooBig', limit: 209715200 },
+    });
+  });
+
+  it('flags a response without a Strapi error envelope', async () => {
+    const controller = new AbortController();
+
+    const promise = uploadFileViaXHR(ENDPOINT, 'token', new FormData(), controller.signal);
+    lastXHR().respond(413, '<html><body>413 Request Entity Too Large</body></html>');
+
+    await expect(promise).rejects.toMatchObject({
+      status: 413,
+      hasErrorEnvelope: false,
+      details: undefined,
+    });
+  });
+
   it('refreshes the access token and retries once on a 401 response', async () => {
     const controller = new AbortController();
     const formData = new FormData();

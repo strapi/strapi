@@ -642,21 +642,92 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText('File size exceeded')).toBeInTheDocument();
     });
 
-    it('translates machine-readable server error codes instead of showing them raw', async () => {
-      // `FileTooBig` is the code returned by the body middleware when koa-body's
-      // maxFileSize is exceeded; it has a matching `apiError.*` translation entry.
+    it('names formidable.maxFileSize when the body parser rejected the file', () => {
       setup(
         createMockState({
-          files: [createMockFile(0, 'too-big.png', 'error', 'FileTooBig')],
+          files: [
+            {
+              ...createMockFile(0, 'too-big.png', 'error', 'FileTooBig'),
+              tooLarge: { reason: 'requestLimit', limit: 200 * 1024 * 1024 },
+            },
+          ],
         })
       );
 
-      await waitFor(() => {
-        expect(screen.getByText('too-big.png')).toBeInTheDocument();
-      });
+      const row = screen.getByText('too-big.png').closest('div')!.parentElement!;
+      expect(row).toHaveTextContent(
+        'Exceeds the server request limit of 210 MB. To raise it, a developer can increase formidable.maxFileSize on the strapi::body middleware, together with upload.config.sizeLimit.'
+      );
+      expect(row).not.toHaveTextContent('too-big.png:');
+      for (const setting of ['formidable.maxFileSize', 'strapi::body', 'upload.config.sizeLimit']) {
+        expect(screen.getByText(setting).tagName).toBe('CODE');
+      }
+    });
 
-      const row = screen.getByText('too-big.png').closest('div')!;
-      expect(row).not.toHaveTextContent('FileTooBig');
+    it('names upload.config.sizeLimit when the upload plugin rejected the file', () => {
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(
+                0,
+                'too-big.png',
+                'error',
+                'too-big.png exceeds size limit of 200 MB.'
+              ),
+              tooLarge: { reason: 'sizeLimit', limit: 200 * 1000 * 1000 },
+            },
+          ],
+        })
+      );
+
+      const row = screen.getByText('too-big.png').closest('div')!.parentElement!;
+      expect(row).toHaveTextContent(
+        'Exceeds the Media Library upload limit of 200 MB. To raise it, a developer can increase upload.config.sizeLimit.'
+      );
+      expect(row).not.toHaveTextContent('exceeds size limit');
+    });
+
+    it('points outside Strapi when a 413 came without a Strapi error', () => {
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'too-big.png', 'error', 'Upload failed with status 413'),
+              tooLarge: { reason: 'external' },
+            },
+          ],
+        })
+      );
+
+      const row = screen.getByText('too-big.png').closest('div')!.parentElement!;
+      expect(row).toHaveTextContent(
+        'Rejected as too large before reaching Strapi. A limit outside Strapi, such as a reverse proxy, is the likely cause.'
+      );
+    });
+
+    it('shows each failed row its own message', () => {
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'a.png', 'error'),
+              tooLarge: { reason: 'sizeLimit', limit: 100 * 1000 * 1000 },
+            },
+            {
+              ...createMockFile(1, 'b.png', 'error'),
+              tooLarge: { reason: 'requestLimit', limit: 200 * 1024 * 1024 },
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByText('a.png').closest('div')!.parentElement!).toHaveTextContent(
+        'Exceeds the Media Library upload limit of 100 MB.'
+      );
+      expect(screen.getByText('b.png').closest('div')!.parentElement!).toHaveTextContent(
+        'Exceeds the server request limit of 210 MB.'
+      );
     });
 
     it('falls back to a generic message when the server gives no error message', async () => {
@@ -670,6 +741,44 @@ describe('UploadProgressDialog', () => {
         expect(screen.getByText('mystery.png')).toBeInTheDocument();
       });
       expect(screen.getByText('An error occurred while uploading the file.')).toBeInTheDocument();
+    });
+  });
+
+  describe('Failed row announcements', () => {
+    const getLiveRegion = () =>
+      // eslint-disable-next-line testing-library/no-node-access
+      screen.getByRole('dialog').querySelector('[aria-live="polite"]') as HTMLElement;
+
+    it('announces each failed row with its name and only the first sentence', () => {
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'too-big.png', 'error'),
+              tooLarge: { reason: 'requestLimit', limit: 200 * 1024 * 1024 },
+            },
+            createMockFile(1, 'broken.png', 'error', 'Something broke'),
+            createMockFile(2, 'fine.png', 'complete'),
+          ],
+        })
+      );
+
+      const announcements = Array.from(getLiveRegion().querySelectorAll('p')).map(
+        (p) => p.textContent
+      );
+
+      expect(announcements).toEqual([
+        'too-big.png: Exceeds the server request limit of 210 MB.',
+        'broken.png: Something broke',
+      ]);
+      expect(getLiveRegion()).not.toHaveTextContent('formidable.maxFileSize');
+    });
+
+    it('keeps the live region mounted, empty, before anything fails', () => {
+      setup(createMockState({ files: [createMockFile(0, 'a.png', 'uploading')] }));
+
+      expect(getLiveRegion()).toBeInTheDocument();
+      expect(getLiveRegion()).toBeEmptyDOMElement();
     });
   });
 
@@ -697,7 +806,7 @@ describe('UploadProgressDialog', () => {
         })
       );
 
-      const fileNames = screen.getAllByText(/file\.png/);
+      const fileNames = screen.getAllByText(/file\.png$/);
       expect(fileNames[0]).toHaveTextContent('error-file.png');
       expect(fileNames[1]).toHaveTextContent('cancelled-file.png');
       expect(fileNames[2]).toHaveTextContent('complete-file.png');

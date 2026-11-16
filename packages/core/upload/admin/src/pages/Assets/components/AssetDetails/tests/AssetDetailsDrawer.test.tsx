@@ -323,6 +323,94 @@ describe('AssetDetails (asset details drawer body)', () => {
     await screen.findByText('photo.png exceeds size limit of 100 KB.');
   });
 
+  describe('replace rejected as too large', () => {
+    const replaceWith = async (response: () => Response) => {
+      server.use(http.post('*/upload/files/:id/replace', response));
+
+      const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+      await screen.findByRole('combobox');
+
+      await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+      await screen.findByText(/Replace this media file\?/i);
+      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const file = new File(['hello'], 'photo.png', { type: 'image/png' });
+      fireEvent.change(fileInput, { target: { files: [file] } });
+    };
+
+    it('names the body parser limit and keeps the toast until dismissed', async () => {
+      // A jest spy on setTimeout would make Testing Library assume fake timers.
+      const realSetTimeout = window.setTimeout;
+      const delays: Array<number | undefined> = [];
+      window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: unknown[]) => {
+        delays.push(delay);
+        return realSetTimeout(handler, delay, ...args);
+      }) as typeof window.setTimeout;
+
+      try {
+        await replaceWith(() =>
+          HttpResponse.json(
+            {
+              data: null,
+              error: {
+                status: 413,
+                name: 'PayloadTooLargeError',
+                message: 'FileTooBig',
+                details: { code: 'FileTooBig', limit: 200 * 1024 * 1024 },
+              },
+            },
+            { status: 413 }
+          )
+        );
+
+        const cause = await screen.findByText(/Exceeds the server request limit of 210 MB\./);
+        expect(cause).toHaveTextContent(
+          'Exceeds the server request limit of 210 MB. To raise it, a developer can increase formidable.maxFileSize on the strapi::body middleware, together with upload.config.sizeLimit.'
+        );
+        expect(delays).not.toContain(5000);
+      } finally {
+        window.setTimeout = realSetTimeout;
+      }
+    });
+
+    it('names upload.config.sizeLimit when the upload plugin rejected the file', async () => {
+      await replaceWith(() =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: {
+              status: 413,
+              name: 'PayloadTooLargeError',
+              message: 'photo.png exceeds size limit of 100 KB.',
+              details: { code: 'SizeLimitExceeded', limit: 100000 },
+            },
+          },
+          { status: 413 }
+        )
+      );
+
+      const cause = await screen.findByText(/Exceeds the Media Library upload limit of 100 KB\./);
+      expect(cause).toHaveTextContent(
+        'Exceeds the Media Library upload limit of 100 KB. To raise it, a developer can increase upload.config.sizeLimit.'
+      );
+    });
+
+    it('points outside Strapi when a proxy answered 413', async () => {
+      await replaceWith(
+        () =>
+          new HttpResponse('<html><body>413 Request Entity Too Large</body></html>', {
+            status: 413,
+            headers: { 'Content-Type': 'text/html' },
+          })
+      );
+
+      await screen.findByText(
+        'Rejected as too large before reaching Strapi. A limit outside Strapi, such as a reverse proxy, is the likely cause.'
+      );
+    });
+  });
+
   it('opens the confirm dialog when the trigger is clicked and uploads the file picked after Continue', async () => {
     // The admin test environment stashes the jsdom `FormData` body on the
     // Request (see admin-test-utils request-body-stash), so `request.formData()`

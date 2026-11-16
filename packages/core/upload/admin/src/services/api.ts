@@ -17,6 +17,7 @@ import {
 } from '../store/uploadProgress';
 import { createRafBatcher } from '../utils/createRafBatcher';
 import { getFilenameFromUrl } from '../utils/files';
+import { getUploadTooLargeError } from '../utils/getUploadTooLargeError';
 
 import { uploadFileViaXHR, UploadAbortedError, UploadFileError } from './uploadFileViaXHR';
 
@@ -402,7 +403,15 @@ const runUploadPool = async ({
       }
 
       const message = err instanceof Error ? err.message : 'Upload failed';
-      dispatch(setFileError({ index, name: fileName, message, uploadId }));
+      dispatch(
+        setFileError({
+          index,
+          name: fileName,
+          message,
+          uploadId,
+          tooLarge: getUploadTooLargeError(err),
+        })
+      );
     } finally {
       abortController.signal.removeEventListener('abort', abortFile);
       fileAbortControllers.delete(fileKey);
@@ -672,7 +681,15 @@ const processSSEStream = async ({
         }
         case 'file:error': {
           const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
-          dispatch(setFileError({ index, name: payload.name, message: payload.message, uploadId }));
+          dispatch(
+            setFileError({
+              index,
+              name: payload.name,
+              message: payload.message,
+              uploadId,
+              tooLarge: getUploadTooLargeError({ details: payload.details }),
+            })
+          );
           break;
         }
         case 'stream:complete': {

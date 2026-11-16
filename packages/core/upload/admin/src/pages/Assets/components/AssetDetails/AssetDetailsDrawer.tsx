@@ -43,6 +43,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { Drawer } from '../../../../components/Drawer';
+import { UploadTooLargeMessage } from '../../../../components/UploadTooLargeMessage';
 import { ASSET_TYPES } from '../../../../enums';
 import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
 import { useApiErrorMessage } from '../../../../hooks/useApiErrorMessage';
@@ -63,6 +64,7 @@ import {
   prefixFileUrlWithBackendUrl,
 } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
+import { getUploadTooLargeError } from '../../../../utils/getUploadTooLargeError';
 import { getTranslationKey } from '../../../../utils/translations';
 import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../../constants';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
@@ -79,7 +81,9 @@ import type {
 
 interface DrawerToast {
   type: 'success' | 'danger';
-  message: string;
+  message: React.ReactNode;
+  /** Stays until dismissed instead of clearing after a few seconds. */
+  persistent?: boolean;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -779,7 +783,7 @@ export const AssetDetails = ({
   // In-drawer toast slot
   const [drawerToast, setDrawerToast] = React.useState<DrawerToast | null>(null);
   React.useEffect(() => {
-    if (!drawerToast) return;
+    if (!drawerToast || drawerToast.persistent) return;
     const timer = window.setTimeout(() => setDrawerToast(null), 5000);
     return () => window.clearTimeout(timer);
   }, [drawerToast]);
@@ -866,6 +870,15 @@ export const AssetDetails = ({
     async (file: globalThis.File) => {
       const res = await replaceMutation({ id: asset.id, file, fileInfo: { name: asset.name } });
       if ('error' in res) {
+        const tooLarge = getUploadTooLargeError(res.error);
+        if (tooLarge) {
+          notify({
+            type: 'danger',
+            message: <UploadTooLargeMessage error={tooLarge} />,
+            persistent: true,
+          });
+          return;
+        }
         notify({
           type: 'danger',
           message: getErrorMessage(

@@ -162,7 +162,8 @@ const fetchUrlToInputFile = async (
 
   const tooLargeError = () =>
     new ApplicationError(
-      `File too large: maximum allowed size is ${bytesToHumanReadable(sizeLimit ?? 0)}`
+      `File too large: maximum allowed size is ${bytesToHumanReadable(sizeLimit ?? 0)}`,
+      { code: 'SizeLimitExceeded', limit: sizeLimit }
     );
 
   const parsedContentLength = parseInt(response.headers.get('content-length') ?? '', 10);
