@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
 
 import type { Core, UID } from '@strapi/types';
-import { z, validateZodSchema, errors } from '@strapi/utils';
+import { z, validateZodSchema, errors, statusSchema } from '@strapi/utils';
 
 import { Preview } from '../../../../../shared/contracts';
 import type { HandlerParams } from '../../services/preview-config';
@@ -10,7 +10,7 @@ const getPreviewUrlSchema = z.object({
   // Will be undefined for single types
   documentId: z.string().optional(),
   locale: z.string().nullable().optional(),
-  status: z.string().optional(),
+  status: statusSchema.optional(),
 });
 
 export const validatePreviewUrl = async (

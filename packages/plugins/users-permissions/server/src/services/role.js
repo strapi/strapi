@@ -116,7 +116,7 @@ module.exports = ({ strapi }) => ({
       });
     });
 
-    const oldActions = role.permissions.map(({ action }) => action);
+    const oldActions = new Set(role.permissions.map(({ action }) => action));
 
     const toDelete = role.permissions.reduce((acc, permission) => {
       if (!newActions.includes(permission.action)) {
@@ -126,7 +126,7 @@ module.exports = ({ strapi }) => ({
     }, []);
 
     const toCreate = newActions
-      .filter((action) => !oldActions.includes(action))
+      .filter((action) => !oldActions.has(action))
       .map((action) => ({ action, role: role.id }));
 
     await Promise.all(

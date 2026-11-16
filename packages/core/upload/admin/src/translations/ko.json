@@ -97,8 +97,6 @@
   "sort.updated_at_asc": "오래된 업데이트순",
   "sort.updated_at_desc": "최근 업데이트순",
   "tabs.title": "자산을 업로드할 방법을 선택해주세요.",
-  "window.confirm.close-modal.file": "확실한가요? 변경 내용이 사라집니다.",
-  "window.confirm.close-modal.files": "확실하나요? 아직 업로드되지 않은 파일이 있습니다.",
   "apiError.FileTooBig": "파일이 너무 커서 업로드할 수 없습니다. 서버에서 허용하는 최대 요청 크기를 초과했습니다.",
   "assets.uploaded": "{number, plural, one {1 개} other {# 개}}의 에셋이 업로드되었습니다",
   "asset-details.title": "파일 상세 정보",

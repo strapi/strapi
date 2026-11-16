@@ -5,12 +5,7 @@ type IsEqual<Left, Right> =
   (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right ? 1 : 2 ? true : false;
 
 type ExpectedContextKeys =
-  | 'signal'
-  | 'requestId'
-  | 'sessionId'
-  | 'authInfo'
-  | '_meta'
-  | 'requestInfo';
+  'signal' | 'requestId' | 'sessionId' | 'authInfo' | '_meta' | 'requestInfo';
 
 true satisfies Assert<IsEqual<keyof McpCapabilityHandlerContext, ExpectedContextKeys>>;
 

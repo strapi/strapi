@@ -1,18 +1,20 @@
 import * as React from 'react';
 
 import { Button, Grid, Modal, Breadcrumbs, Crumb, VisuallyHidden } from '@strapi/design-system';
-import { Form, InputRenderer } from '@strapi/strapi/admin';
+import { Form, InputRenderer, UnsavedChangesModal } from '@strapi/strapi/admin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 
-const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
+const EMPTY_TEMPLATE = {};
+
+const EmailForm = ({ template = EMPTY_TEMPLATE, onToggle, open, onSubmit }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Modal.Root open={open} onOpenChange={onToggle}>
+    <UnsavedChangesModal open={open} onOpenChange={onToggle}>
       <Modal.Content>
         <Modal.Header>
           <Breadcrumbs
@@ -127,7 +129,7 @@ const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
           }}
         </Form>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

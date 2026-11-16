@@ -15,7 +15,7 @@ import * as sanitizers from './sanitizers';
 import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
-import type { Model, Data } from '../types';
+import type { Model, Data, Entry } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
 import { hasSort } from '../sort-query';
 
@@ -35,7 +35,7 @@ export interface Options {
 }
 
 export interface Sanitizer {
-  (schema: Model): CurriedFunction1<Data, Promise<Data>>;
+  (schema: Model): CurriedFunction1<Entry, Promise<Entry>>;
 }
 export interface SanitizeFunc {
   (data: unknown, schema: Model, options?: Options): Promise<unknown>;

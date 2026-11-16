@@ -1,4 +1,12 @@
-import { useState, createContext, useContext, useRef, useLayoutEffect } from 'react';
+import {
+  useCallback,
+  useMemo,
+  useState,
+  createContext,
+  useContext,
+  useRef,
+  useLayoutEffect,
+} from 'react';
 
 import { Box } from '@strapi/design-system';
 import { styled } from 'styled-components';
@@ -32,11 +40,10 @@ export const Collapsible = ({
   defaultOpen?: boolean;
 }) => {
   const [open, setOpen] = useState(defaultOpen);
-  return (
-    <CollapsibleContext.Provider value={{ open, toggle: () => setOpen((prev) => !prev) }}>
-      {children}
-    </CollapsibleContext.Provider>
-  );
+  const toggle = useCallback(() => setOpen((prev) => !prev), []);
+  const contextValue = useMemo(() => ({ open, toggle }), [open, toggle]);
+
+  return <CollapsibleContext.Provider value={contextValue}>{children}</CollapsibleContext.Provider>;
 };
 
 export const CollapsibleTrigger = ({

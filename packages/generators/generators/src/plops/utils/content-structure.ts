@@ -10,9 +10,7 @@ export interface FolderChoice {
 }
 
 export type ContentStructureReadResult =
-  | { status: 'ok'; file: any }
-  | { status: 'invalid' }
-  | { status: 'absent' };
+  { status: 'ok'; file: any } | { status: 'invalid' } | { status: 'absent' };
 
 export const getContentStructureFilePath = (destBasePath: string): string => {
   return join(destBasePath, 'content-structure', 'groups.json');

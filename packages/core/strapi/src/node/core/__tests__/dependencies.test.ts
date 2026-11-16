@@ -1,6 +1,7 @@
 import execa from 'execa';
 import readPkgUp from 'read-pkg-up';
 import resolveFrom from 'resolve-from';
+import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 
 import {
@@ -10,6 +11,7 @@ import {
   reexecCurrentCommand,
   reportMissingAdminPeerDeps,
   validateDeclaredAdminPeerDeps,
+  validateStrapiPackageVersions,
 } from '../dependencies';
 import { ensureAdminDependencies, handleAdminDependencies } from '../ensure-admin-dependencies';
 import { getPackageManager } from '../managers';
@@ -213,6 +215,94 @@ describe('admin peer dependency checks', () => {
       const logger = createLogger();
 
       await expect(validateDeclaredAdminPeerDeps(cwd, logger)).resolves.toBeUndefined();
+    });
+  });
+
+  describe('validateStrapiPackageVersions', () => {
+    const STRAPI_REPOSITORY = { type: 'git', url: 'https://github.com/strapi/strapi.git' };
+
+    afterEach(() => {
+      readFileMock.mockReset();
+      resolveFromSilentMock.mockReset();
+    });
+
+    const mockInstalled = (packages: Record<string, Record<string, unknown>>) => {
+      readPkgUpMock.mockResolvedValue({
+        path: `${cwd}/package.json`,
+        packageJson: {
+          dependencies: Object.fromEntries(Object.keys(packages).map((name) => [name, '*'])),
+        },
+      } as Awaited<ReturnType<typeof readPkgUp>>);
+
+      resolveFromSilentMock.mockImplementation((_, modulePath: string) =>
+        modulePath.replace('/package.json', '') in packages
+          ? `${cwd}/node_modules/${modulePath}`
+          : undefined
+      );
+
+      readFileMock.mockImplementation(async (filePath) => {
+        const name = String(filePath)
+          .replace(`${cwd}/node_modules/`, '')
+          .replace('/package.json', '');
+
+        return JSON.stringify({ name, ...packages[name] });
+      });
+    };
+
+    it('warns about Strapi packages on another version than @strapi/strapi', async () => {
+      mockInstalled({
+        '@strapi/strapi': { version: '5.46.0', repository: STRAPI_REPOSITORY },
+        '@strapi/plugin-users-permissions': { version: '5.48.0', repository: STRAPI_REPOSITORY },
+        '@strapi/plugin-i18n': { version: '5.46.0', repository: STRAPI_REPOSITORY },
+      });
+      const logger = createLogger();
+
+      await validateStrapiPackageVersions(cwd, logger);
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toContain('@strapi/plugin-users-permissions@5.48.0');
+      expect(logger.warn.mock.calls[0][0]).not.toContain('@strapi/plugin-i18n');
+    });
+
+    it('ignores @strapi packages released outside Strapi', async () => {
+      mockInstalled({
+        '@strapi/strapi': { version: '5.46.0', repository: STRAPI_REPOSITORY },
+        '@strapi/plugin-seo': {
+          version: '2.0.0',
+          repository: { type: 'git', url: 'https://github.com/strapi/strapi-plugin-seo.git' },
+        },
+        '@strapi/sdk-plugin': { version: '6.0.0' },
+      });
+      const logger = createLogger();
+
+      await validateStrapiPackageVersions(cwd, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('runs even when package.json has not changed since the last check', async () => {
+      mockInstalled({
+        '@strapi/strapi': { version: '5.46.0', repository: STRAPI_REPOSITORY },
+        '@strapi/plugin-users-permissions': { version: '5.48.0', repository: STRAPI_REPOSITORY },
+      });
+      const readPackageFile = readFileMock.getMockImplementation()!;
+      // The cached hash matches package.json, so the admin checks are skipped.
+      const appPackageJson = '{}';
+      readFileMock.mockImplementation(async (filePath, ...rest) => {
+        if (String(filePath).endsWith('deps-check.hash')) {
+          return crypto.createHash('sha1').update(appPackageJson).digest('hex');
+        }
+
+        return String(filePath) === `${cwd}/package.json`
+          ? appPackageJson
+          : readPackageFile(filePath, ...rest);
+      });
+      const logger = createLogger();
+
+      await ensureAdminDependencies({ cwd, logger, installIfMissing: false });
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toContain('@strapi/plugin-users-permissions@5.48.0');
     });
   });
 

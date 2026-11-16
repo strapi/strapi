@@ -83,6 +83,8 @@ export default function DocsHealth(): ReactNode {
                     ) : (
                       <ul className={styles.notes}>
                         {doc.reviewNotes.map((note, index) => (
+                          // Static, never reordered notes that may repeat: the position disambiguates.
+                          // eslint-disable-next-line react/no-array-index-key
                           <li key={`${index}-${note}`}>{note}</li>
                         ))}
                       </ul>

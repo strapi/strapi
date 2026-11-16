@@ -265,20 +265,20 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     return appNestedCompo;
   };
 
-  const updatePermissions = async () => {
+  const updatePermissions = React.useCallback(async () => {
     await refetchPermissions();
-  };
+  }, [refetchPermissions]);
 
-  const requestRenameDecision = async (renames: PendingRename[]) => {
+  const requestRenameDecision = React.useCallback(async (renames: PendingRename[]) => {
     const acceptedKeys = await new Promise<Set<string> | null>((resolve) => {
       setRenameModal({ renames, resolve });
     });
     setRenameModal(null);
 
     return acceptedKeys;
-  };
+  }, []);
 
-  const saveSchema = async () => {
+  const saveSchema = React.useCallback(async () => {
     setIsSaving(true);
 
     const PluginForms = plugin?.apis?.forms as FormAPI;
@@ -375,7 +375,24 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         ctbSessionId,
       });
     }
-  };
+  }, [
+    ctbSessionId,
+    dispatch,
+    dispatchGuidedTour,
+    fetchClient,
+    formatMessage,
+    initialContentTypes,
+    lockAppWithAutoreload,
+    plugin,
+    regenerateSessionId,
+    requestRenameDecision,
+    serverRestartWatcher,
+    state,
+    toggleNotification,
+    trackUsage,
+    unlockAppWithAutoreload,
+    updatePermissions,
+  ]);
 
   const componentsThatHaveOtherComponentInTheirAttributes = React.useMemo(() => {
     return getAllComponentsThatHaveAComponentInTheirAttributes(components);
@@ -397,304 +414,330 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     return sortContentType(contentTypes);
   }, [contentTypes]);
 
-  const context: DataManagerContextValue = {
-    componentsThatHaveOtherComponentInTheirAttributes,
-    nestedComponents,
-    saveSchema,
-    reservedNames,
-    components,
-    contentTypes,
-    initialComponents,
-    initialContentTypes,
-    contentStructure,
-    isSaving,
-    isModified,
-    isInDevelopmentMode,
-    allComponentsCategories,
-    componentsGroupedByCategory,
-    sortedContentTypesList,
-    isLoading,
-    attributeRenameMigrationMode: renameMigrationModeRef.current,
-    addAttribute(payload) {
-      dispatch(
-        actions.addAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    editAttribute(payload) {
-      dispatch(
-        actions.editAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    addCustomFieldAttribute(payload) {
-      dispatch(
-        actions.addCustomFieldAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    editCustomFieldAttribute(payload) {
-      dispatch(
-        actions.editCustomFieldAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    async confirmAttributeRenameMigration({ forTarget, uid, oldName, newName }) {
-      if (oldName === newName) {
-        return true;
-      }
+  const context = React.useMemo<DataManagerContextValue>(
+    () => ({
+      componentsThatHaveOtherComponentInTheirAttributes,
+      nestedComponents,
+      saveSchema,
+      reservedNames,
+      components,
+      contentTypes,
+      initialComponents,
+      initialContentTypes,
+      contentStructure,
+      isSaving,
+      isModified,
+      isInDevelopmentMode,
+      allComponentsCategories,
+      componentsGroupedByCategory,
+      sortedContentTypesList,
+      isLoading,
+      attributeRenameMigrationMode: renameMigrationModeRef.current,
+      addAttribute(payload) {
+        dispatch(
+          actions.addAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      editAttribute(payload) {
+        dispatch(
+          actions.editAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      addCustomFieldAttribute(payload) {
+        dispatch(
+          actions.addCustomFieldAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      editCustomFieldAttribute(payload) {
+        dispatch(
+          actions.editCustomFieldAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      async confirmAttributeRenameMigration({ forTarget, uid, oldName, newName }) {
+        if (oldName === newName) {
+          return true;
+        }
 
-      const schema =
-        forTarget === 'contentType'
-          ? contentTypes[uid as Internal.UID.ContentType]
-          : components[uid as Internal.UID.Component];
+        const schema =
+          forTarget === 'contentType'
+            ? contentTypes[uid as Internal.UID.ContentType]
+            : components[uid as Internal.UID.Component];
 
-      // A field that was never saved has no data to preserve: accept without
-      // prompting so neither name ends up in `declinedRenameNames`.
-      const initialAttribute = schema?.attributes.find((attribute) => attribute.name === oldName);
-      if (initialAttribute?.status === 'NEW') {
-        return true;
-      }
+        // A field that was never saved has no data to preserve: accept without
+        // prompting so neither name ends up in `declinedRenameNames`.
+        const initialAttribute = schema?.attributes.find((attribute) => attribute.name === oldName);
+        if (initialAttribute?.status === 'NEW') {
+          return true;
+        }
 
-      // Consent inherits along a chain: a hop joining an accepted chain is
-      // accepted, one touching a declined name is declined, neither prompts.
-      const consent = resolveAfterEditRenameConsent({
-        renames: schema?.renames ?? [],
-        declinedRenameNames: schema?.declinedRenameNames ?? [],
-        oldName,
-        newName,
-        mode: renameMigrationModeRef.current,
-      });
+        // Consent inherits along a chain: a hop joining an accepted chain is
+        // accepted, one touching a declined name is declined, neither prompts.
+        const consent = resolveAfterEditRenameConsent({
+          renames: schema?.renames ?? [],
+          declinedRenameNames: schema?.declinedRenameNames ?? [],
+          oldName,
+          newName,
+          mode: renameMigrationModeRef.current,
+        });
 
-      if (consent !== 'prompt') {
-        return consent === 'accept';
-      }
+        if (consent !== 'prompt') {
+          return consent === 'accept';
+        }
 
-      const key = `${uid}:edit`;
-      const acceptedKeys = await requestRenameDecision([
-        {
-          key,
-          uid,
-          typeName: schema?.info.displayName ?? uid,
-          pairs: [{ oldName, newName }],
-          via: [],
-        },
-      ]);
+        const key = `${uid}:edit`;
+        const acceptedKeys = await requestRenameDecision([
+          {
+            key,
+            uid,
+            typeName: schema?.info.displayName ?? uid,
+            pairs: [{ oldName, newName }],
+            via: [],
+          },
+        ]);
 
-      if (acceptedKeys === null) {
-        return null;
-      }
+        if (acceptedKeys === null) {
+          return null;
+        }
 
-      return acceptedKeys.has(key);
-    },
-    addCreatedComponentToDynamicZone(payload) {
-      dispatch(actions.addCreatedComponentToDynamicZone(payload));
-    },
-    createSchema(payload) {
-      const { folder, ...rest } = payload;
-      dispatch(actions.createSchema({ ...rest, folder: toFolderAssignment(folder) }));
-    },
-    createComponentSchema({ data, uid, componentCategory }) {
-      dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
-    },
-    changeDynamicZoneComponents({ forTarget, targetUid, dynamicZoneTarget, newComponents }) {
-      dispatch(
-        actions.changeDynamicZoneComponents({
-          forTarget,
-          targetUid,
-          dynamicZoneTarget,
-          newComponents,
-        })
-      );
-    },
-    removeAttribute(payload) {
-      if (payload.forTarget === 'contentType') {
-        // Note: willDeleteFieldOfContentType doesn't accept properties
-        trackUsage('willDeleteFieldOfContentType');
-      }
+        return acceptedKeys.has(key);
+      },
+      addCreatedComponentToDynamicZone(payload) {
+        dispatch(actions.addCreatedComponentToDynamicZone(payload));
+      },
+      createSchema(payload) {
+        const { folder, ...rest } = payload;
+        dispatch(actions.createSchema({ ...rest, folder: toFolderAssignment(folder) }));
+      },
+      createComponentSchema({ data, uid, componentCategory }) {
+        dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
+      },
+      changeDynamicZoneComponents({ forTarget, targetUid, dynamicZoneTarget, newComponents }) {
+        dispatch(
+          actions.changeDynamicZoneComponents({
+            forTarget,
+            targetUid,
+            dynamicZoneTarget,
+            newComponents,
+          })
+        );
+      },
+      removeAttribute(payload) {
+        if (payload.forTarget === 'contentType') {
+          // Note: willDeleteFieldOfContentType doesn't accept properties
+          trackUsage('willDeleteFieldOfContentType');
+        }
 
-      dispatch(actions.removeField(payload));
-    },
-    removeComponentFromDynamicZone(payload) {
-      dispatch(actions.removeComponentFromDynamicZone(payload));
-    },
-    deleteComponent(uid: Internal.UID.Component) {
-      const userConfirm = window.confirm(
-        formatMessage({
-          id: getTrad(`popUpWarning.bodyMessage.component.delete`),
-        })
-      );
+        dispatch(actions.removeField(payload));
+      },
+      removeComponentFromDynamicZone(payload) {
+        dispatch(actions.removeComponentFromDynamicZone(payload));
+      },
+      deleteComponent(uid: Internal.UID.Component) {
+        const userConfirm = window.confirm(
+          formatMessage({
+            id: getTrad(`popUpWarning.bodyMessage.component.delete`),
+          })
+        );
 
-      if (userConfirm) {
-        onCloseModal();
+        if (userConfirm) {
+          onCloseModal();
 
-        dispatch(actions.deleteComponent(uid));
-      }
-    },
-    deleteContentType(uid: Internal.UID.ContentType) {
-      const userConfirm = window.confirm(
-        formatMessage({
-          id: getTrad(`popUpWarning.bodyMessage.contentType.delete`),
-        })
-      );
+          dispatch(actions.deleteComponent(uid));
+        }
+      },
+      deleteContentType(uid: Internal.UID.ContentType) {
+        const userConfirm = window.confirm(
+          formatMessage({
+            id: getTrad(`popUpWarning.bodyMessage.contentType.delete`),
+          })
+        );
 
-      if (userConfirm) {
-        onCloseModal();
+        if (userConfirm) {
+          onCloseModal();
 
-        dispatch(actions.deleteContentType(uid));
-      }
-    },
+          dispatch(actions.deleteContentType(uid));
+        }
+      },
 
-    createFolder({ section, name, parentId }) {
-      dispatch(actions.createFolder({ section, name, parentId, id: generateGroupId() }));
-    },
-    renameFolder(payload) {
-      dispatch(actions.renameFolder(payload));
-    },
-    moveFolder(payload) {
-      dispatch(actions.moveFolder(payload));
-    },
-    deleteFolderOnly(payload) {
-      dispatch(actions.deleteFolderOnly(payload));
-    },
-    deleteFolderAndContent({ section, id, contentTypeUids }) {
-      dispatch(actions.deleteFolderAndContent({ section, id, contentTypeUids }));
-    },
-    assignContentTypeToFolder(payload) {
-      dispatch(actions.assignContentTypeToFolder(payload));
-    },
-    reorderFolderChildren(payload) {
-      dispatch(actions.reorderFolderChildren(payload));
-    },
+      createFolder({ section, name, parentId }) {
+        dispatch(actions.createFolder({ section, name, parentId, id: generateGroupId() }));
+      },
+      renameFolder(payload) {
+        dispatch(actions.renameFolder(payload));
+      },
+      moveFolder(payload) {
+        dispatch(actions.moveFolder(payload));
+      },
+      deleteFolderOnly(payload) {
+        dispatch(actions.deleteFolderOnly(payload));
+      },
+      deleteFolderAndContent({ section, id, contentTypeUids }) {
+        dispatch(actions.deleteFolderAndContent({ section, id, contentTypeUids }));
+      },
+      assignContentTypeToFolder(payload) {
+        dispatch(actions.assignContentTypeToFolder(payload));
+      },
+      reorderFolderChildren(payload) {
+        dispatch(actions.reorderFolderChildren(payload));
+      },
 
-    updateComponentSchema({ data, componentUID }) {
-      dispatch(
-        actions.updateComponentSchema({
-          data,
-          uid: componentUID,
-        })
-      );
-    },
+      updateComponentSchema({ data, componentUID }) {
+        dispatch(
+          actions.updateComponentSchema({
+            data,
+            uid: componentUID,
+          })
+        );
+      },
 
-    updateComponentUid({ componentUID, newComponentUID }) {
-      dispatch(
-        actions.updateComponentUid({
-          uid: componentUID,
-          newComponentUID,
-        })
-      );
-    },
+      updateComponentUid({ componentUID, newComponentUID }) {
+        dispatch(
+          actions.updateComponentUid({
+            uid: componentUID,
+            newComponentUID,
+          })
+        );
+      },
 
-    updateSchema(args) {
-      const { folder, ...rest } = args;
-      dispatch(actions.updateSchema({ ...rest, folder: toFolderAssignment(folder) }));
-    },
+      updateSchema(args) {
+        const { folder, ...rest } = args;
+        dispatch(actions.updateSchema({ ...rest, folder: toFolderAssignment(folder) }));
+      },
 
-    moveAttribute(args) {
-      dispatch(actions.moveAttribute(args));
-    },
+      moveAttribute(args) {
+        dispatch(actions.moveAttribute(args));
+      },
 
-    async applyChange({ action, schema }) {
-      const renames = schema.renames ?? [];
+      async applyChange({ action, schema }) {
+        const renames = schema.renames ?? [];
 
-      if (action !== 'update' || renames.length === 0) {
-        dispatch(actions.applyChange({ action, schema }));
-        return true;
-      }
+        if (action !== 'update' || renames.length === 0) {
+          dispatch(actions.applyChange({ action, schema }));
+          return true;
+        }
 
-      const mode = renameMigrationModeRef.current;
+        const mode = renameMigrationModeRef.current;
 
-      if (mode === 'never') {
+        if (mode === 'never') {
+          dispatch(
+            actions.applyChange({
+              action,
+              schema: omit(schema, ['renames']) as ContentType | Component,
+            })
+          );
+          return true;
+        }
+
+        // 'always' | 'prompt-before-save': the before-save modal decides per chain.
+        if (mode !== 'prompt-after-edit') {
+          dispatch(actions.applyChange({ action, schema }));
+          return true;
+        }
+
+        // 'prompt-after-edit': decide per chain now, inheriting consent already
+        // given (or refused) for the hops recorded on the type.
+        const existing =
+          schema.modelType === 'contentType'
+            ? contentTypes[schema.uid as Internal.UID.ContentType]
+            : components[schema.uid as Internal.UID.Component];
+        const chains = groupRenameChains(schema.uid, renames);
+        const { keep, prompt } = splitChainsByInheritedConsent({
+          recorded: existing?.renames ?? [],
+          declinedRenameNames: existing?.declinedRenameNames ?? [],
+          chains,
+          renames,
+        });
+
+        const accepted = new Set(keep.map((chain) => chain.id));
+        if (prompt.length > 0) {
+          const typeName = schema.info?.displayName ?? schema.uid;
+          const decision = await requestRenameDecision(
+            prompt.map((chain) => toPendingRename(chain, renames, { uid: schema.uid, typeName }))
+          );
+
+          // The user cancelled: apply nothing.
+          if (decision === null) {
+            return false;
+          }
+
+          decision.forEach((id) => accepted.add(id));
+        }
+
+        const declinedChains = chains.filter((chain) => !accepted.has(chain.id));
+        const keptRenames = filterRenamesByAcceptedChains(schema.uid, renames, accepted);
+        const declinedRenameNames = uniq([
+          ...(schema.declinedRenameNames ?? []),
+          ...namesOfChains(declinedChains, renames),
+        ]);
+
         dispatch(
           actions.applyChange({
             action,
-            schema: omit(schema, ['renames']) as ContentType | Component,
+            schema: {
+              ...omit(schema, ['renames', 'declinedRenameNames']),
+              ...(keptRenames.length > 0 ? { renames: keptRenames } : {}),
+              ...(declinedRenameNames.length > 0 ? { declinedRenameNames } : {}),
+            } as ContentType | Component,
           })
         );
         return true;
-      }
-
-      // 'always' | 'prompt-before-save': the before-save modal decides per chain.
-      if (mode !== 'prompt-after-edit') {
-        dispatch(actions.applyChange({ action, schema }));
-        return true;
-      }
-
-      // 'prompt-after-edit': decide per chain now, inheriting consent already
-      // given (or refused) for the hops recorded on the type.
-      const existing =
-        schema.modelType === 'contentType'
-          ? contentTypes[schema.uid as Internal.UID.ContentType]
-          : components[schema.uid as Internal.UID.Component];
-      const chains = groupRenameChains(schema.uid, renames);
-      const { keep, prompt } = splitChainsByInheritedConsent({
-        recorded: existing?.renames ?? [],
-        declinedRenameNames: existing?.declinedRenameNames ?? [],
-        chains,
-        renames,
-      });
-
-      const accepted = new Set(keep.map((chain) => chain.id));
-      if (prompt.length > 0) {
-        const typeName = schema.info?.displayName ?? schema.uid;
-        const decision = await requestRenameDecision(
-          prompt.map((chain) => toPendingRename(chain, renames, { uid: schema.uid, typeName }))
-        );
-
-        // The user cancelled: apply nothing.
-        if (decision === null) {
-          return false;
-        }
-
-        decision.forEach((id) => accepted.add(id));
-      }
-
-      const declinedChains = chains.filter((chain) => !accepted.has(chain.id));
-      const keptRenames = filterRenamesByAcceptedChains(schema.uid, renames, accepted);
-      const declinedRenameNames = uniq([
-        ...(schema.declinedRenameNames ?? []),
-        ...namesOfChains(declinedChains, renames),
-      ]);
-
-      dispatch(
-        actions.applyChange({
-          action,
-          schema: {
-            ...omit(schema, ['renames', 'declinedRenameNames']),
-            ...(keptRenames.length > 0 ? { renames: keptRenames } : {}),
-            ...(declinedRenameNames.length > 0 ? { declinedRenameNames } : {}),
-          } as ContentType | Component,
-        })
-      );
-      return true;
-    },
-
-    history: {
-      undo() {
-        dispatch(actions.undo());
       },
 
-      redo() {
-        dispatch(actions.redo());
-      },
+      history: {
+        undo() {
+          dispatch(actions.undo());
+        },
 
-      discardAllChanges() {
-        dispatch(actions.discardAll());
-      },
+        redo() {
+          dispatch(actions.redo());
+        },
 
-      canUndo: state.past.length > 0,
-      canRedo: state.future.length > 0,
-      canDiscardAll: isModified,
-    },
-  };
+        discardAllChanges() {
+          dispatch(actions.discardAll());
+        },
+
+        canUndo: state.past.length > 0,
+        canRedo: state.future.length > 0,
+        canDiscardAll: isModified,
+      },
+    }),
+    [
+      allComponentsCategories,
+      components,
+      componentsGroupedByCategory,
+      componentsThatHaveOtherComponentInTheirAttributes,
+      contentStructure,
+      contentTypes,
+      dispatch,
+      formatMessage,
+      initialComponents,
+      initialContentTypes,
+      isInDevelopmentMode,
+      isLoading,
+      isModified,
+      isSaving,
+      nestedComponents,
+      onCloseModal,
+      requestRenameDecision,
+      reservedNames,
+      saveSchema,
+      sortedContentTypesList,
+      state,
+      trackUsage,
+    ]
+  );
 
   return (
     <DataManagerContext.Provider value={context}>

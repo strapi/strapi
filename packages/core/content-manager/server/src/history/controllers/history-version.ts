@@ -16,7 +16,6 @@ const getValidPagination = ({ page, pageSize }: { page: any; pageSize: any }) =>
 
   if (page) {
     const parsedPage = parseInt(page, 10);
-    pageNumber = parseInt(page, 10);
 
     if (!Number.isNaN(parsedPage) && parsedPage >= 1) {
       pageNumber = parsedPage;
@@ -105,9 +104,13 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         throw new errors.ForbiddenError();
       }
 
-      const restoredDocument = await getService(strapi, 'history').restoreVersion(
-        request.params.versionId
-      );
+      // Version ids are positive integers, other values cannot match a version
+      const versionId = Number(request.params.versionId);
+      if (Number.isInteger(versionId) === false || versionId < 1) {
+        throw new errors.NotFoundError('History version not found');
+      }
+
+      const restoredDocument = await getService(strapi, 'history').restoreVersion(versionId);
 
       return {
         data: { documentId: restoredDocument.documentId },

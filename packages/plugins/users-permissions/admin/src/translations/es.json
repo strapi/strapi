@@ -46,7 +46,7 @@
   "PopUpForm.Providers.key.label": "ID de cliente",
   "PopUpForm.Providers.key.placeholder": "TEXTO",
   "PopUpForm.Providers.redirectURL.front-end.label": "La URL de redireccionamiento a su aplicación front-end",
-  "PopUpForm.Providers.redirectURL.label": "La URL de redireccionamiento para agregar en las configuraciones de su aplicación de {proveedor}",
+  "PopUpForm.Providers.redirectURL.label": "La URL de redireccionamiento para agregar en las configuraciones de su aplicación de {provider}",
   "PopUpForm.Providers.secret.label": "Secreto Cliente",
   "PopUpForm.Providers.secret.placeholder": "TEXTO",
   "PopUpForm.Providers.subdomain.label": "URI de host (subdominio)",

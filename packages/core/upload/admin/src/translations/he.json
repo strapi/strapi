@@ -66,7 +66,5 @@
   "sort.name_asc": "סדר אלפביתי (א עד ת)",
   "sort.name_desc": "סדר אלפביתי הפוך (ת עד א)",
   "sort.updated_at_asc": "העדכונים הישנים ביותר",
-  "sort.updated_at_desc": "העדכונים האחרונים",
-  "window.confirm.close-modal.file": "האם אתה בטוח? השינויים ילכו לאיבוד.",
-  "window.confirm.close-modal.files": "האם אתה בטוח? יש לך כמה קבצים שטרם הועלו."
+  "sort.updated_at_desc": "העדכונים האחרונים"
 }

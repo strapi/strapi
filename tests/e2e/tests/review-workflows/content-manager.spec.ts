@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
   clickAndWait,
@@ -69,8 +69,8 @@ const checkStage = async (page) => {
 describeOnCondition(edition === 'EE')('content-manager', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('I want to assign a document to a user and see this update in the list-view afterwards', async ({

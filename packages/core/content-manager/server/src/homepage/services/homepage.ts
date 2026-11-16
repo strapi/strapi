@@ -1,4 +1,3 @@
-/* eslint-disable func-names */
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
@@ -11,6 +10,7 @@ import type {
 import {
   buildHomepageQueryFields,
   compactSanitizedFields,
+  formatRecentDocumentTitle,
   resolveReadableMainField,
   resolveTitleField,
 } from './homepage-query-utils';
@@ -83,8 +83,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
             const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
-              | { visible?: boolean }
-              | undefined;
+              { visible?: boolean } | undefined;
 
             return contentTypeOptions?.visible !== false;
           })
@@ -169,7 +168,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
-        title: document[meta.mainField ?? 'documentId'],
+        title: formatRecentDocumentTitle(document[meta.mainField ?? 'documentId']),
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,

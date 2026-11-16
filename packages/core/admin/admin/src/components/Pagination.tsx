@@ -1,4 +1,3 @@
-/* eslint-disable import/export */
 import * as React from 'react';
 
 import {
@@ -21,6 +20,8 @@ import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 import { createContext } from './Context';
 
 import type { Pagination as PaginationApi } from '../../../shared/contracts/shared';
+
+const DEFAULT_OPTIONS: NonNullable<Pagination.PageSizeProps['options']> = ['10', '20', '50', '100'];
 
 /* -------------------------------------------------------------------------------------------------
  * Root
@@ -138,7 +139,7 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
  * the user to change the number of items displayed per page.
  * If the total number of items is less than the minimum option, this component will not render.
  */
-const PageSize = ({ options = ['10', '20', '50', '100'] }: Pagination.PageSizeProps) => {
+const PageSize = ({ options = DEFAULT_OPTIONS }: Pagination.PageSizeProps) => {
   const { formatMessage } = useIntl();
 
   const pageSize = usePagination('PageSize', (state) => state.pageSize);
@@ -250,7 +251,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...startPages,
 
     // Start ellipsis
-    // eslint-disable-next-line no-nested-ternary
     ...(siblingsStart > boundaryCount + 2
       ? ['start-ellipsis']
       : boundaryCount + 1 < pageCount - boundaryCount
@@ -261,7 +261,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...range(siblingsStart, siblingsEnd),
 
     // End ellipsis
-    // eslint-disable-next-line no-nested-ternary
     ...(siblingsEnd < pageCount - boundaryCount - 1
       ? ['end-ellipsis']
       : pageCount - boundaryCount > boundaryCount

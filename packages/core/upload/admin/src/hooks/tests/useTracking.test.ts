@@ -11,12 +11,19 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 jest.mock('../../services/settings', () => ({
-  useGetUploadSettingsQuery: () => mockUseGetSettingsQuery(),
+  useGetUploadSettingsQuery: (...args: unknown[]) => mockUseGetSettingsQuery(...args),
+}));
+
+const mockPermissions = { canRead: true };
+
+jest.mock('../useMediaLibraryPermissions', () => ({
+  useMediaLibraryPermissions: () => mockPermissions,
 }));
 
 describe('future media library useTracking', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPermissions.canRead = true;
     // The flag decides the tag, not which tree fired the event — off means the
     // project runs the current library.
     window.strapi.featureFlags.isEnabled = jest.fn(() => false);
@@ -98,6 +105,17 @@ describe('future media library useTracking', () => {
     expect(mockTrackStrapiUsage).toHaveBeenLastCalledWith('didGenerateMetadataRetroactively', {
       isAiMediaLibraryConfigured: true,
       mediaLibraryVersion: 'v2',
+    });
+  });
+
+  it('does not request the settings without read access to the Media Library', () => {
+    mockPermissions.canRead = false;
+
+    renderHook(() => useTracking());
+
+    expect(mockUseGetSettingsQuery).toHaveBeenCalled();
+    mockUseGetSettingsQuery.mock.calls.forEach(([, options]) => {
+      expect(options).toEqual({ skip: true });
     });
   });
 });

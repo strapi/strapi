@@ -1,13 +1,7 @@
 export const DID_ACT_ON_FOLDERS = 'didActOnFolders';
 
 export type FolderAction =
-  | 'create'
-  | 'rename'
-  | 'move'
-  | 'deleteOnly'
-  | 'deleteSubtree'
-  | 'assign'
-  | 'reorder';
+  'create' | 'rename' | 'move' | 'deleteOnly' | 'deleteSubtree' | 'assign' | 'reorder';
 
 export type FolderTelemetryOperation = 'create' | 'update' | 'delete';
 

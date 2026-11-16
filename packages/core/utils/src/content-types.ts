@@ -240,7 +240,7 @@ const getNonVisibleAttributes = (model: Model) => {
 };
 
 const getVisibleAttributes = (model: Model) => {
-  return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
+  return _.difference(Object.keys(model.attributes ?? {}), getNonVisibleAttributes(model));
 };
 
 const isVisibleAttribute = (model: Model, attributeName: string) => {
@@ -337,7 +337,7 @@ const getStoredPrivateAttributes = (model: Model) =>
 const getPrivateAttributes = (model: Model) => {
   return _.union(
     getStoredPrivateAttributes(model),
-    _.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
+    Object.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
   );
 };
 
@@ -370,9 +370,9 @@ const isMediaAttribute = (attribute?: Attribute) => attribute?.type === 'media';
 const isRelationalAttribute = (attribute?: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
 
-const HAS_RELATION_REORDERING = ['manyToMany', 'manyToOne', 'oneToMany'];
+const HAS_RELATION_REORDERING = new Set(['manyToMany', 'manyToOne', 'oneToMany']);
 const hasRelationReordering = (attribute?: Attribute) =>
-  isRelationalAttribute(attribute) && HAS_RELATION_REORDERING.includes(attribute.relation);
+  isRelationalAttribute(attribute) && HAS_RELATION_REORDERING.has(attribute.relation);
 
 const isComponentAttribute = (
   attribute?: Attribute

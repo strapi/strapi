@@ -76,13 +76,11 @@ describe('CM API - Pagination', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    await Promise.all([
-      createProduct({ name: 'Product 1' }),
-      createProduct({ name: 'Product 2' }),
-      createProduct({ name: 'Product 3' }),
-      createProduct({ name: 'Product 4' }),
-      createProduct({ name: 'Product 5' }),
-    ]);
+    // Default pagination orders by id. Concurrent creates commit in any order
+    // on Postgres and MySQL, so create in sequence to keep name order stable.
+    for (const name of ['Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5']) {
+      await createProduct({ name });
+    }
 
     const tieCount = 100;
     await strapi.db

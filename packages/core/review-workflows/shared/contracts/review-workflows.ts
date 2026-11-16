@@ -28,8 +28,10 @@ namespace UpdateAssignee {
   }
 }
 
-interface StagePermission
-  extends Omit<Permission, 'createdAt' | 'updatedAt' | 'properties' | 'conditions'> {
+interface StagePermission extends Omit<
+  Permission,
+  'createdAt' | 'updatedAt' | 'properties' | 'conditions'
+> {
   role: number;
 }
 

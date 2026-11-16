@@ -32,9 +32,7 @@ const defaults: Config = {
 export const matchOrigin = async (
   requestOrigin: string | undefined,
   configuredOrigin:
-    | string
-    | string[]
-    | ((ctx: any) => string | string[] | Promise<string | string[]>),
+    string | string[] | ((ctx: any) => string | string[] | Promise<string | string[]>),
   ctx?: any
 ): Promise<string> => {
   if (!requestOrigin) {
