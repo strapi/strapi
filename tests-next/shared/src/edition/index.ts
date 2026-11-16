@@ -1,3 +1,4 @@
+import { PROBE_TIMEOUT } from '../app/config';
 import type { Server } from '../app/server';
 
 /**
@@ -59,7 +60,10 @@ export interface InstanceFeatures {
 }
 
 export const getInstanceFeatures = async (server: Server): Promise<InstanceFeatures> => {
-  const res = await fetch(`${server.url}/api/tests/features`);
+  // startServer's timeout doesn't cover this request: a server that never answers must not hang.
+  const res = await fetch(`${server.url}/api/tests/features`, {
+    signal: AbortSignal.timeout(PROBE_TIMEOUT),
+  });
   if (!res.ok) {
     throw new Error(
       `GET /api/tests/features failed (${res.status}): the edition contract needs the test plugin.`

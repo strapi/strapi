@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { databaseFromEnv, type Database } from '../db/database';
 import { assertEdition, editionFromEnv, getInstanceFeatures, type Edition } from '../edition';
-import { HOST, strapiBin } from './config';
+import { HOST, PROBE_TIMEOUT, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
 import { appEnv } from './env';
 import type { App } from './generate';
@@ -52,8 +52,6 @@ export interface Server {
 }
 
 const MAX_LOG_LENGTH = 200_000;
-/** Per request: a server that accepts connections but never answers must not stall startup. */
-const PROBE_TIMEOUT = 2_000;
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
