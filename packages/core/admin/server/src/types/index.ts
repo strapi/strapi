@@ -49,7 +49,7 @@ export type * as Controllers from './controllers';
 export type * as Policies from './policies';
 export type { RateLimitOptions } from './rate-limit';
 // Also exported by `@strapi/admin/strapi-admin`, which loads the admin panel and its UI libraries.
-export type { Permission, SanitizedAdminUser };
+export type { AdminUser, Permission, SanitizedAdminUser };
 
 /**
  * A service that the EE edition deep-merges over its CE implementation when a license verifies at
@@ -86,7 +86,7 @@ type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = 
 };
 
 type UserServiceOverride =
-  'findOne' | 'findOneByEmail' | 'updateById' | 'deleteById' | 'deleteByIds';
+  'findOne' | 'findOneByEmail' | 'updateById' | 'deleteById' | 'deleteByIds' | 'sanitizeUser';
 
 /**
  * The `admin::user` service as runtime calls it, in CE and EE
@@ -107,6 +107,17 @@ type UserService<TService extends Record<UserServiceOverride, (...args: never[])
     deleteById(...args: Parameters<TService['deleteById']>): Promise<AdminUser | null>;
     /** The deleted users with their roles. A missing ID rejects. */
     deleteByIds(...args: Parameters<TService['deleteByIds']>): Promise<AdminUser[]>;
+    /** The user without its private fields and with its sanitized roles. */
+    sanitizeUser(
+      ...args: Parameters<TService['sanitizeUser']>
+    ): ReturnType<TService['sanitizeUser']>;
+    /**
+     * A user read without its roles, such as a populated `createdBy` relation, keeps `roles`
+     * undefined: the implementation maps them only when they are set (`services/user.ts:70`).
+     */
+    sanitizeUser(
+      user: Omit<AdminUser, 'roles'>
+    ): Omit<SanitizedAdminUser, 'roles'> & { roles: undefined };
   };
 
 /**
