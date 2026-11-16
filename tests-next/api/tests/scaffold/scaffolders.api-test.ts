@@ -90,6 +90,19 @@ describe('scaffoldContentType and scaffoldComponent', () => {
   });
 
   test('a single type with draft and publish', async () => {
+    const draft = await request(server, '/api/homepage?status=draft', {
+      method: 'PUT',
+      token,
+      body: { data: { title: 'Draft' } },
+    });
+    expect(draft.status).toBe(200);
+
+    // Without draft and publish, Strapi ignores `status` and this would return the entry.
+    const unpublished = await request(server, '/api/homepage', { token });
+    expect(unpublished.status).toBe(404);
+    const drafts = await request(server, '/api/homepage?status=draft', { token });
+    expect(drafts.body.data).toMatchObject({ title: 'Draft' });
+
     const put = await request(server, '/api/homepage?status=published', {
       method: 'PUT',
       token,
