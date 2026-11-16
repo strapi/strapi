@@ -1,10 +1,17 @@
 import koaCors from '@koa/cors';
+import type { Context } from 'koa';
 
 import type { Core } from '@strapi/types';
 
 export type Config = {
   enabled?: boolean;
-  origin: string | string[] | ((ctx: any) => string | string[] | Promise<string | string[]>);
+  // `@koa/cors` calls a function origin with the request's Koa context.
+  origin:
+    | string
+    | string[]
+    | ((
+        ctx: Core.IsStrict extends true ? Context : any
+      ) => string | string[] | Promise<string | string[]>);
   expose?: string | string[];
   maxAge?: number;
   credentials?: boolean;
@@ -22,6 +29,21 @@ const defaults: Config = {
   keepHeadersOnError: false,
 };
 
+// With strict types, `ctx` is required: a function origin is called with it.
+type MatchOrigin = Core.IsStrict extends true
+  ? (
+      requestOrigin: string | undefined,
+      configuredOrigin:
+        string | string[] | ((ctx: Context) => string | string[] | Promise<string | string[]>),
+      ctx: Context
+    ) => Promise<string>
+  : (
+      requestOrigin: string | undefined,
+      configuredOrigin:
+        string | string[] | ((ctx: any) => string | string[] | Promise<string | string[]>),
+      ctx?: any
+    ) => Promise<string>;
+
 /**
  * Determines if a request origin is allowed based on the configured origin list
  * @param requestOrigin - The origin from the request header
@@ -29,12 +51,7 @@ const defaults: Config = {
  * @param ctx - The Koa context (for function-based origin)
  * @returns The allowed origin string or empty string if blocked
  */
-export const matchOrigin = async (
-  requestOrigin: string | undefined,
-  configuredOrigin:
-    string | string[] | ((ctx: any) => string | string[] | Promise<string | string[]>),
-  ctx?: any
-): Promise<string> => {
+export const matchOrigin: MatchOrigin = async (requestOrigin, configuredOrigin, ctx) => {
   if (!requestOrigin) {
     return '*';
   }
