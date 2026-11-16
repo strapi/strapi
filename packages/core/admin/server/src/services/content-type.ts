@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Modules, Struct } from '@strapi/types';
+import type { Core, Modules, Schema, Struct } from '@strapi/types';
 import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import permissionDomain from '../domain/permission';
@@ -12,17 +12,23 @@ interface FieldOptions {
   requiredOnly?: boolean; // only returns required nestedFields
   existingFields?: string[]; // fields that are already selected, meaning that some sub-fields may be required
   restrictedSubjects?: string[]; // subjectsId to ignore
-  components?: {
-    // components where components attributes can be found
-    [key: string]: any;
-  };
+  // With strict types, every caller passes `strapi.components` (or the recursion its own map).
+  components?: Core.IsStrict extends true
+    ? Schema.Components
+    : {
+        // components where components attributes can be found
+        [key: string]: any;
+      };
 }
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
  */
 const getNestedFields = (
-  model: Struct.ContentTypeSchema,
+  // With strict types, the recursion passes the component schemas of component attributes.
+  model: Core.IsStrict extends true
+    ? Struct.ContentTypeSchema | Struct.ComponentSchema
+    : Struct.ContentTypeSchema,
   {
     prefix = '',
     nestingLevel = 15,
@@ -80,7 +86,10 @@ const getNestedFields = (
  * Creates an array of paths to the fields and nested fields, with path nodes
  */
 const getNestedFieldsWithIntermediate = (
-  model: Struct.ContentTypeSchema,
+  // With strict types, the recursion passes the component schemas of component attributes.
+  model: Core.IsStrict extends true
+    ? Struct.ContentTypeSchema | Struct.ComponentSchema
+    : Struct.ContentTypeSchema,
   { prefix = '', nestingLevel = 15, components = {} }: FieldOptions
 ): string[] => {
   if (nestingLevel === 0) {
