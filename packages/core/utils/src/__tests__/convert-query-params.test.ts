@@ -421,6 +421,50 @@ describe('convert-query-params', () => {
       });
     });
 
+    describe.each(['$null', '$notNull'])('%s operand', (operator) => {
+      test.each<[unknown, boolean]>([
+        [true, true],
+        ['true', true],
+        ['t', true],
+        ['1', true],
+        [1, true],
+        ['TRUE', true],
+        ['True', true],
+        ['T', true],
+        [false, false],
+        ['false', false],
+        ['f', false],
+        ['0', false],
+        [0, false],
+        ['FALSE', false],
+        ['False', false],
+        ['F', false],
+        // Kept from the loose reading: optional flags (`{ $null: someFlag }`), GraphQL's nullable
+        // input and a bare `?filters[x][$null]` (parsed with `strictNullHandling`) pass these.
+        [null, false],
+        [undefined, false],
+      ])('reads %p as %p', (operand, expected) => {
+        const res = transformer.private_convertFiltersQueryParams(
+          { title: { [operator]: operand } },
+          models['api::dog.dog']
+        );
+
+        expect(res).toEqual({ title: { [operator]: expected } });
+      });
+
+      test.each<unknown>(['no', 'yes', '', ' true ', 2, ['true'], { anything: 'anything' }])(
+        'rejects unrecognised operand %p',
+        (operand) => {
+          expect(() =>
+            transformer.private_convertFiltersQueryParams(
+              { title: { [operator]: operand } },
+              models['api::dog.dog']
+            )
+          ).toThrow(ValidationError);
+        }
+      );
+    });
+
     test.todo('partial filtering works');
   });
 

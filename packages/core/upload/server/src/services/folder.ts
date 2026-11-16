@@ -1,5 +1,5 @@
 import { map, sortBy } from 'lodash';
-import { strings, setCreatorFields } from '@strapi/utils';
+import { errors, strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 import { isIntegerId } from '../utils/integer-id';
@@ -178,7 +178,45 @@ const update = async (
         .transacting(trx.get())
         .forUpdate()
         .first()
-        .execute<Folder>();
+        .execute<Folder | undefined>();
+
+      // Answer like the rename does (404), instead of failing on the path rewrite below.
+      if (existingFolder === undefined || existingFolder === null) {
+        await trx.rollback();
+        return undefined;
+      }
+
+      const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
+      const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
+      const folderPathColumnName =
+        // @ts-expect-error - no dynamic types
+        strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
+      // @ts-expect-error - no dynamic types
+      const pathColumnName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
+
+      // fetch destinationFolder path
+      let destinationFolderPath = '/';
+      if (parent !== null) {
+        // A share lock keeps the destination from being deleted or moved until the move commits,
+        // and still lets other requests create subfolders or upload files into it (their foreign
+        // key checks take a compatible lock). SQLite ignores the clause: it serializes writers.
+        const destinationFolder: Record<string, string> | undefined = await strapi.db
+          .getConnection(folderTable)
+          .transacting(trx.get())
+          .select(pathColumnName)
+          .where('id', parent)
+          .forShare()
+          .first();
+
+        // Request validation checks the parent exists, but it can be deleted (e.g. by another admin)
+        // before this lookup runs. Answer like the validation does, before linking to it; the catch
+        // rolls back.
+        if (destinationFolder === undefined || destinationFolder === null) {
+          throw new errors.ValidationError('parent folder does not exist');
+        }
+
+        destinationFolderPath = destinationFolder[pathColumnName];
+      }
 
       // update parent folder (delete + insert; upsert not possible)
       // @ts-expect-error - no dynamic types
@@ -198,27 +236,6 @@ const update = async (
           .where({ [joinTable.joinColumn.name]: id })
           .execute();
       }
-
-      // fetch destinationFolder path
-      let destinationFolderPath = '/';
-      if (parent !== null) {
-        const destinationFolder = await strapi.db
-          .queryBuilder(FOLDER_MODEL_UID)
-          .select('path')
-          .where({ id: parent })
-          .transacting(trx.get())
-          .first()
-          .execute<Folder>();
-        destinationFolderPath = destinationFolder.path;
-      }
-
-      const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
-      const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
-      const folderPathColumnName =
-        // @ts-expect-error - no dynamic types
-        strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
-      // @ts-expect-error - no dynamic types
-      const pathColumnName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
 
       // update folders below
       await strapi.db

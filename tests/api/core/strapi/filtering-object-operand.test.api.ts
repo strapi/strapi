@@ -108,6 +108,8 @@ describe('Filtering with object operands on scalar and JSON attributes', () => {
     ['$eq with an object on id', { id: { $eq: { a: 1 } } }],
     ['an object operand on a relation id', { category: { id: { $eq: { a: 1 } } } }],
     ['an object operand on a relation documentId', { category: { documentId: { $eq: { a: 1 } } } }],
+    // Read as `$null: true` (no rows) before $null / $notNull operands were read strictly
+    ['$null with an object', { rank: { $null: { a: 1 } } }],
   ];
 
   describe('Document Service', () => {
@@ -186,8 +188,6 @@ describe('Filtering with object operands on scalar and JSON attributes', () => {
     ['a $between array', { rank: { $between: [1, 1] } }, ['Note 1']],
     ['$null', { rank: { $null: true } }, []],
     ['$notNull', { rank: { $notNull: true } }, ['Note 1', 'Note 2']],
-    // Query conversion casts any $null / $notNull operand to a boolean, so an object means true
-    ['$null with an object', { rank: { $null: { a: 1 } } }, []],
     ['the operator map of $not', { title: { $not: { $eq: 'Note 1' } } }, ['Note 2']],
     ['a nested relation filter', { category: { name: { $eq: 'Cat A' } } }, ['Note 1']],
     [

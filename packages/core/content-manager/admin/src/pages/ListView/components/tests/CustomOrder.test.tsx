@@ -1,11 +1,24 @@
+import type { KeyboardEventHandler } from 'react';
+
 import { Table } from '@strapi/admin/strapi-admin';
-import { act, render as renderRTL, renderHook, screen, server, waitFor } from '@tests/utils';
+import {
+  act,
+  fireEvent,
+  render as renderRTL,
+  renderHook,
+  screen,
+  server,
+  waitFor,
+} from '@tests/utils';
 import { delay, http, HttpResponse } from 'msw';
+import { useLocation } from 'react-router-dom';
 
 import { useGetAllDocumentsQuery } from '../../../../services/documents';
+import { DocumentActionsMenu } from '../../../EditView/components/DocumentActions';
 import {
   CustomOrder,
   MoveToBottomAction,
+  MoveToPositionAction,
   MoveToTopAction,
   useCustomOrder,
   type CustomOrderState,
@@ -23,6 +36,7 @@ const rows = [
 const createState = (overrides: Partial<CustomOrderState> = {}): CustomOrderState => ({
   isAvailable: true,
   isActive: true,
+  canUpdate: true,
   canReorder: true,
   isMoving: false,
   rows,
@@ -77,11 +91,7 @@ const List = ({ state }: { state: CustomOrderState }) => (
         <Table.Body>
           {state.rows.map((row, index) => (
             <CustomOrder.Row key={row.id} documentId={row.documentId}>
-              <CustomOrder.PositionCell
-                documentId={row.documentId}
-                position={index + 1}
-                total={state.rows.length}
-              />
+              <CustomOrder.PositionCell position={index + 1} />
               <Table.Cell>{row.name}</Table.Cell>
             </CustomOrder.Row>
           ))}
@@ -97,75 +107,77 @@ const List = ({ state }: { state: CustomOrderState }) => (
 
 const render = (state: CustomOrderState) => renderRTL(<List state={state} />);
 
+const LocationDisplay = () => {
+  const { search } = useLocation();
+
+  return <output aria-label="search">{decodeURIComponent(search)}</output>;
+};
+
+const OtherAction: DocumentActionComponent = () => ({
+  label: 'Edit',
+  position: 'table-row',
+});
+
+const DeleteAction: DocumentActionComponent = () => ({
+  label: 'Delete entry',
+  position: 'table-row',
+  variant: 'danger',
+});
+
+/**
+ * The row menu of an entry, with the move actions between the others as in the list view.
+ */
+const RowMenu = ({ documentId }: { documentId: string }) => {
+  const props = {
+    activeTab: null,
+    collectionType: 'collection-types',
+    documentId,
+    model: 'api::member.member',
+  };
+  const actions = [
+    OtherAction,
+    MoveToTopAction,
+    MoveToBottomAction,
+    MoveToPositionAction,
+    DeleteAction,
+  ].flatMap((action, index) => {
+    const description = action(props);
+
+    return description ? [{ ...description, id: String(index) }] : [];
+  });
+
+  return <DocumentActionsMenu actions={actions} label="Row actions" />;
+};
+
+const renderMenu = (
+  state: CustomOrderState,
+  documentId = 'b',
+  onGridKeyDown?: KeyboardEventHandler
+) =>
+  renderRTL(
+    <CustomOrder.Root state={state}>
+      {/* Stands for the list grid: the dialog is portaled, but React events still bubble up to it */}
+      <div onKeyDown={onGridKeyDown}>
+        <RowMenu documentId={documentId} />
+      </div>
+    </CustomOrder.Root>
+  );
+
+const openMoveToPosition = async (user: ReturnType<typeof renderRTL>['user']) => {
+  await user.click(await screen.findByRole('button', { name: 'Row actions' }));
+  await user.click(screen.getByRole('menuitem', { name: 'Move to position…' }));
+
+  return screen.findByRole('textbox', { name: 'New position' });
+};
+
 describe('CustomOrder', () => {
   describe('PositionCell', () => {
     it('shows the position of each entry', async () => {
       render(createState());
 
-      expect(
-        await screen.findByRole('button', { name: 'Position 1 of 3, change position' })
-      ).toHaveTextContent('1');
-      expect(
-        screen.getByRole('button', { name: 'Position 3 of 3, change position' })
-      ).toHaveTextContent('3');
-    });
-
-    it('moves an entry to the position typed in', async () => {
-      const state = createState();
-      const { user } = render(state);
-
-      await user.click(
-        await screen.findByRole('button', { name: 'Position 2 of 3, change position' })
-      );
-
-      const input = screen.getByRole('textbox', { name: 'New position, from 1 to 3' });
-      expect(input).toHaveValue('2');
-      expect(input).toHaveFocus();
-
-      await user.clear(input);
-      await user.type(input, '3{Enter}');
-
-      expect(state.moveToPosition).toHaveBeenCalledWith('b', 3);
+      expect(await screen.findByRole('gridcell', { name: '1' })).toBeInTheDocument();
+      expect(screen.getByRole('gridcell', { name: '3' })).toBeInTheDocument();
       expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-    });
-
-    it('leaves the entry in place when the input is left with Escape', async () => {
-      const state = createState();
-      const { user } = render(state);
-
-      await user.click(
-        await screen.findByRole('button', { name: 'Position 2 of 3, change position' })
-      );
-      await user.type(screen.getByRole('textbox'), '1{Escape}');
-
-      expect(state.moveToPosition).not.toHaveBeenCalled();
-      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-      expect(
-        screen.getByRole('button', { name: 'Position 2 of 3, change position' })
-      ).toHaveFocus();
-    });
-
-    it('ignores what is not a number', async () => {
-      const state = createState();
-      const { user } = render(state);
-
-      await user.click(
-        await screen.findByRole('button', { name: 'Position 2 of 3, change position' })
-      );
-
-      const input = screen.getByRole('textbox');
-      await user.clear(input);
-      await user.type(input, 'first{Enter}');
-
-      expect(state.moveToPosition).not.toHaveBeenCalled();
-    });
-
-    it('cannot be changed while a move is in progress', async () => {
-      render(createState({ isMoving: true }));
-
-      expect(
-        await screen.findByRole('button', { name: 'Position 2 of 3, change position' })
-      ).toBeDisabled();
     });
 
     it('only shows the position to users who cannot move entries', async () => {
@@ -173,15 +185,39 @@ describe('CustomOrder', () => {
 
       expect(await screen.findByText('Alice')).toBeInTheDocument();
       expect(screen.getByRole('gridcell', { name: '2' })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /change position/ })).not.toBeInTheDocument();
     });
 
-    it('hides the positions when the list is sorted on something else', async () => {
-      render(createState({ isActive: false, canReorder: false }));
+    it('brings the list back to the custom order when it is sorted on something else', async () => {
+      const { user } = renderRTL(
+        <>
+          <List state={createState({ isActive: false, canReorder: false })} />
+          <LocationDisplay />
+        </>,
+        { initialEntries: ['/?sort=name:ASC'] }
+      );
 
       expect(await screen.findByText('Alice')).toBeInTheDocument();
       expect(screen.queryByRole('gridcell', { name: '2' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /change position/ })).not.toBeInTheDocument();
+
+      const [backToCustomOrder] = screen.getAllByRole('button', {
+        name: 'Back to custom order to move entries',
+      });
+      await user.click(backToCustomOrder);
+
+      await waitFor(() =>
+        expect(screen.getByRole('status', { name: 'search' })).toHaveTextContent(
+          'sort=strapi_position:ASC'
+        )
+      );
+    });
+
+    it('does not offer the custom order to users who cannot move entries', async () => {
+      render(createState({ isActive: false, canUpdate: false, canReorder: false }));
+
+      expect(await screen.findByText('Alice')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Back to custom order to move entries' })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -228,6 +264,139 @@ describe('CustomOrder', () => {
       expect(await screen.findByText('Alice')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Move to top' })).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Move to bottom' })).not.toBeInTheDocument();
+    });
+
+    it('groups the move actions between separators in the row menu', async () => {
+      const { user } = renderMenu(createState());
+
+      await user.click(await screen.findByRole('button', { name: 'Row actions' }));
+
+      const menu = screen.getByRole('menu');
+      const items = Array.from(menu.querySelectorAll('[role="menuitem"], [role="separator"]')).map(
+        (item) => (item.getAttribute('role') === 'separator' ? '---' : item.textContent)
+      );
+
+      expect(items).toEqual([
+        'Edit',
+        '---',
+        'Move to top',
+        'Move to bottom',
+        'Move to position…',
+        '---',
+        'Delete entry',
+      ]);
+    });
+
+    it('has no separators when entries cannot be moved', async () => {
+      const { user } = renderMenu(createState({ canReorder: false }));
+
+      await user.click(await screen.findByRole('button', { name: 'Row actions' }));
+
+      expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+        'Edit',
+        'Delete entry',
+      ]);
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Move to position', () => {
+    it('moves an entry to the position typed in', async () => {
+      const state = createState();
+      const { user } = renderMenu(state);
+
+      const input = await openMoveToPosition(user);
+
+      expect(screen.getByText('Currently at position 2 of 3.')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+
+      await user.type(input, '3');
+      // The pointer events of the test setup do not submit forms, a plain click does
+      fireEvent.click(screen.getByRole('button', { name: 'Move' }));
+
+      expect(state.moveToPosition).toHaveBeenCalledWith('b', 3);
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    });
+
+    it('cannot move to the current position', async () => {
+      const { user } = renderMenu(createState());
+
+      await user.type(await openMoveToPosition(user), '2');
+
+      expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+    });
+
+    it.each(['4', '0', '1.5'])('refuses %s', async (value) => {
+      const state = createState();
+      const { user } = renderMenu(state);
+
+      await user.type(await openMoveToPosition(user), value);
+      fireEvent.click(screen.getByRole('button', { name: 'Move' }));
+
+      expect(await screen.findByText('Enter a whole number from 1 to 3.')).toBeInTheDocument();
+      expect(state.moveToPosition).not.toHaveBeenCalled();
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('keeps the navigation keys of the dialog away from the list grid', async () => {
+      const onGridKeyDown = jest.fn();
+      const { user } = renderMenu(createState(), 'b', onGridKeyDown);
+
+      await user.type(await openMoveToPosition(user), '3');
+      onGridKeyDown.mockClear();
+      await user.keyboard(
+        '{ArrowLeft}{ArrowRight}{ArrowUp}{ArrowDown}{Home}{End}{PageUp}{PageDown}'
+      );
+
+      // The header sits outside the form, its close button has to be covered too
+      screen.getByRole('button', { name: /close/i }).focus();
+      await user.keyboard('{ArrowDown}{End}');
+
+      expect(onGridKeyDown).not.toHaveBeenCalled();
+    });
+
+    it('lets the other keys through', async () => {
+      const onGridKeyDown = jest.fn();
+      const { user } = renderMenu(createState(), 'b', onGridKeyDown);
+
+      await openMoveToPosition(user);
+      onGridKeyDown.mockClear();
+      await user.keyboard('{Tab}');
+
+      expect(onGridKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'Tab' }));
+    });
+
+    it('still closes with Escape', async () => {
+      const state = createState();
+      const { user } = renderMenu(state);
+
+      await openMoveToPosition(user);
+      await user.keyboard('{Escape}');
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+      expect(state.moveToPosition).not.toHaveBeenCalled();
+    });
+
+    it('leaves the entry in place when cancelled', async () => {
+      const state = createState();
+      const { user } = renderMenu(state);
+
+      await user.type(await openMoveToPosition(user), '1');
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+      expect(state.moveToPosition).not.toHaveBeenCalled();
+    });
+
+    it('cannot be opened while a move is in progress', async () => {
+      const { user } = renderMenu(createState({ isMoving: true }));
+
+      await user.click(await screen.findByRole('button', { name: 'Row actions' }));
+
+      expect(screen.getByRole('menuitem', { name: 'Move to position…' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
   });
 });
@@ -617,8 +786,6 @@ const start = (move: () => Promise<void>) => {
   return moving;
 };
 
-const LiveList = () => <List state={useList()} />;
-
 describe('useCustomOrder with the list', () => {
   it('shows the new order from the start of a move until the list fetched after it has answered', async () => {
     const { result, moves, listRequests, getOrder } = await setupList({ listDelay: 100 });
@@ -739,25 +906,5 @@ describe('useCustomOrder with the list', () => {
     expect(result.current.isMoving).toBe(false);
     expect(ids(result.current.rows)).toEqual(['a', 'b', 'c']);
     expect(getOrder()).toEqual(['a', 'b', 'c', 'd']);
-  });
-
-  it('gives the focus back to the position button once the entry has moved', async () => {
-    const { getOrder } = mockServer({ listDelay: 50 });
-    const { user } = renderRTL(<LiveList />);
-
-    await user.click(
-      await screen.findByRole('button', { name: 'Position 2 of 3, change position' })
-    );
-    const input = screen.getByRole('textbox');
-    await user.clear(input);
-    await user.type(input, '3{Enter}');
-
-    await waitFor(() => expect(getOrder()).toEqual(['a', 'c', 'b', 'd']));
-
-    // Once the list has been fetched again, the entry sits at its new position with the focus
-    await waitFor(() =>
-      expect(document.activeElement).toHaveAccessibleName('Position 3 of 3, change position')
-    );
-    expect(document.activeElement?.closest('tr')).toHaveTextContent('Bob');
   });
 });
