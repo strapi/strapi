@@ -3704,6 +3704,45 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.data.length).toBe(1);
       expect(res.body.data[0].name).toBe(release.name);
     });
+
+    // A non-localized entry has one version, whatever the locale: the Content Manager stored the
+    // locale of its URL on its actions before 5.62, and can still send it when looking them up
+    test.each([
+      ['stored with a locale, looked up without one', 'en', undefined],
+      ['stored without a locale, looked up with one', null, 'en'],
+    ])(
+      'Find the releases of a non-localized entry whose action was %s',
+      async (_, storedLocale, queryLocale) => {
+        const documentId = await createProduct({ valid: true });
+        const release = await createReleaseWithActions('all_or_nothing', [{ documentId }]);
+        const otherRelease = (await createRelease()).body.data;
+        await strapi.db.query('plugin::content-releases.release-action').updateMany({
+          where: { release: { id: release.id }, entryDocumentId: documentId },
+          data: { locale: storedLocale },
+        });
+
+        const findReleases = (hasEntryAttached: boolean) =>
+          rq({
+            method: 'GET',
+            url: '/content-releases/getByDocumentAttached',
+            qs: {
+              contentType: productUID,
+              entryDocumentId: documentId,
+              hasEntryAttached,
+              ...(queryLocale && { locale: queryLocale }),
+            },
+          });
+
+        const attached = await findReleases(true);
+        expect(attached.statusCode).toBe(200);
+        expect(attached.body.data.map(({ id }) => id)).toEqual([release.id]);
+        expect(attached.body.data[0].actions).toHaveLength(1);
+
+        const notAttached = await findReleases(false);
+        expect(notAttached.statusCode).toBe(200);
+        expect(notAttached.body.data.map(({ id }) => id)).toEqual([otherRelease.id]);
+      }
+    );
   });
 
   describe('Delete Release', () => {
