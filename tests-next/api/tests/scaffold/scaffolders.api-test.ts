@@ -53,7 +53,8 @@ beforeAll(async () => {
   });
   scaffoldConfig(app, 'api', { rest: { defaultLimit: 2 } });
   scaffoldConfig(app, 'api', { rest: { maxLimit: 50 } });
-  scaffoldConfig(app, 'features', { future: { adminTokens: true } });
+  // Read at boot: draft and publish types get a `firstPublishedAt` attribute.
+  scaffoldConfig(app, 'features', { future: { experimental_firstPublishedAt: true } });
   // The app's .env has four keys: the scaffolded array replaces them, it doesn't merge with them.
   scaffoldConfig(app, 'server', { app: { keys: ['only-key'] } });
   scaffoldPlugin(app, 'users-permissions', { config: { jwt: { expiresIn: '1h' } } });
@@ -117,8 +118,14 @@ describe('scaffoldConfig and scaffoldPlugin', () => {
   });
 
   test('boot-time config, such as a future flag, applies', async () => {
-    const res = await request(server, '/api/tests/features');
-    expect(res.body.future).toMatchObject({ adminTokens: true });
+    // experimental_firstPublishedAt adds the attribute when Strapi loads the content types.
+    const res = await request(server, '/api/homepage?status=published', {
+      method: 'PUT',
+      token,
+      body: { data: { title: 'First published' } },
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.data.firstPublishedAt).toEqual(expect.any(String));
   });
 
   test('arrays replace the app config in the config Strapi loads', async () => {
