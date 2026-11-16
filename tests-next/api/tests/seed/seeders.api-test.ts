@@ -5,7 +5,6 @@ import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 
 import {
-  appEnv,
   databaseFromEnv,
   generateApp,
   resetDatabase,
@@ -41,6 +40,12 @@ let app: App;
 let server: Server;
 let seeded: SeedResult;
 let fullAccess: string;
+// Shell values the test apps must not see (README, Database), set while seedApp runs.
+const SHELL_ENV = {
+  STRAPI_TEST_AI_PROVIDER: 'fake',
+  DATABASE_URL: 'postgres://127.0.0.1:1/elsewhere',
+};
+let shellEnvDuringSeed: Record<string, string | undefined> = {};
 
 beforeAll(async () => {
   app = await generateApp({ name: `api-seed-${worker}` });
@@ -58,49 +63,61 @@ beforeAll(async () => {
   const image = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'seed-media-')), 'pixel.png');
   fs.writeFileSync(image, PNG);
 
-  // Before boot, in one Strapi load.
-  seeded = await seedApp(
-    app,
-    {
-      locales: [{ code: 'fr', name: 'French (fr)' }],
-      adminRoles: [
-        { name: 'Article reader', code: 'article-reader', permissions: [READ_ARTICLES] },
-      ],
-      adminUsers: [
-        {
-          email: 'admin@test.io',
-          password: PASSWORD,
-          firstname: 'Super',
-          lastname: 'Admin',
-          roles: ['strapi-super-admin'],
-        },
-        {
-          email: 'reader@test.io',
-          password: PASSWORD,
-          firstname: 'Article',
-          lastname: 'Reader',
-          roles: ['article-reader'],
-        },
-      ],
-      users: [{ username: 'jane', email: 'jane@test.io', password: PASSWORD }],
-      media: [{ file: image, alternativeText: 'A pixel' }],
-      entries: [
-        { uid: ARTICLE, data: { title: 'Hello' }, status: 'published' },
-        { uid: ARTICLE, data: { title: 'Bonjour' }, locale: 'fr', status: 'published' },
-      ],
-      apiTokens: [
-        { name: 'full', type: 'full-access' },
-        { kind: 'admin', name: 'reader', owner: 'admin@test.io', permissions: [READ_ARTICLES] },
-        {
-          kind: 'admin',
-          name: 'owned by the reader',
-          owner: 'reader@test.io',
-          permissions: [READ_ARTICLES],
-        },
-      ],
-    },
-    { database }
-  );
+  // Before boot, in one Strapi load. With the shell values above reaching the seed process,
+  // CE refuses the fake AI provider and a database server run connects to DATABASE_URL.
+  for (const [key, value] of Object.entries(SHELL_ENV)) {
+    vi.stubEnv(key, value);
+  }
+  shellEnvDuringSeed = {
+    STRAPI_TEST_AI_PROVIDER: process.env.STRAPI_TEST_AI_PROVIDER,
+    DATABASE_URL: process.env.DATABASE_URL,
+  };
+  try {
+    seeded = await seedApp(
+      app,
+      {
+        locales: [{ code: 'fr', name: 'French (fr)' }],
+        adminRoles: [
+          { name: 'Article reader', code: 'article-reader', permissions: [READ_ARTICLES] },
+        ],
+        adminUsers: [
+          {
+            email: 'admin@test.io',
+            password: PASSWORD,
+            firstname: 'Super',
+            lastname: 'Admin',
+            roles: ['strapi-super-admin'],
+          },
+          {
+            email: 'reader@test.io',
+            password: PASSWORD,
+            firstname: 'Article',
+            lastname: 'Reader',
+            roles: ['article-reader'],
+          },
+        ],
+        users: [{ username: 'jane', email: 'jane@test.io', password: PASSWORD }],
+        media: [{ file: image, alternativeText: 'A pixel' }],
+        entries: [
+          { uid: ARTICLE, data: { title: 'Hello' }, status: 'published' },
+          { uid: ARTICLE, data: { title: 'Bonjour' }, locale: 'fr', status: 'published' },
+        ],
+        apiTokens: [
+          { name: 'full', type: 'full-access' },
+          { kind: 'admin', name: 'reader', owner: 'admin@test.io', permissions: [READ_ARTICLES] },
+          {
+            kind: 'admin',
+            name: 'owned by the reader',
+            owner: 'reader@test.io',
+            permissions: [READ_ARTICLES],
+          },
+        ],
+      },
+      { database }
+    );
+  } finally {
+    vi.unstubAllEnvs();
+  }
   fullAccess = seeded.apiTokens[0].accessKey;
 
   server = await startServer(app, { port, database });
@@ -208,15 +225,9 @@ describe('seedApp, before boot', () => {
   });
 
   test('runs with the env the server gets, not the shell values the server ignores', () => {
-    vi.stubEnv('STRAPI_TEST_AI_PROVIDER', 'fake');
-    vi.stubEnv('DATABASE_URL', 'postgres://elsewhere/db');
-    try {
-      const env = appEnv(app, { database, testPlugin: true, fakeAiProvider: false });
-      expect(env.STRAPI_TEST_AI_PROVIDER).toBe('');
-      expect(env).not.toHaveProperty('DATABASE_URL');
-    } finally {
-      vi.unstubAllEnvs();
-    }
+    // The seeding in beforeAll succeeded with these values in process.env.
+    expect(shellEnvDuringSeed).toEqual(SHELL_ENV);
+    expect(seeded.adminUsers).toHaveLength(2);
   });
 });
 
