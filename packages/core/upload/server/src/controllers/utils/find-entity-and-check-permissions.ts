@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { errors, contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
 /**
@@ -16,7 +16,7 @@ import { getService } from '../../utils';
  * explicitly so they never bind to a different one.
  */
 const findEntityAndCheckPermissions = async (
-  ability: unknown,
+  ability: Core.IsStrict extends true ? Modules.MCP.McpHandlerContext['userAbility'] : unknown,
   action: string,
   model: string,
   id: string | number,
