@@ -402,7 +402,7 @@ export default {
 
       // Merge customParams but preserve critical security parameters
       // Bucket, Key, and Body must not be overridden by customParams
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // oxlint-disable-next-line no-unused-vars
       const { Bucket, Key, Body, ...safeCustomParams } = customParams as any;
       return { ...params, ...safeCustomParams };
     };
@@ -625,7 +625,7 @@ export default {
         await upload(newFile, customParams);
 
         if (newKey !== oldKey) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // oxlint-disable-next-line no-unused-vars
           const { Bucket, Key, ...safeParams } = customParams as any;
           const command = new DeleteObjectCommand({
             ...safeParams,
@@ -643,7 +643,7 @@ export default {
         await upload(newFile, customParams);
 
         if (newKey !== oldKey) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // oxlint-disable-next-line no-unused-vars
           const { Bucket, Key, ...safeParams } = customParams as any;
           const command = new DeleteObjectCommand({
             ...safeParams,
@@ -681,7 +681,7 @@ export default {
        */
       delete(file: File, customParams = {}): Promise<DeleteObjectCommandOutput> {
         // Spread customParams first, then override with secure values
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // oxlint-disable-next-line no-unused-vars
         const { Bucket, Key, ...safeParams } = customParams as any;
         const command = new DeleteObjectCommand({
           ...safeParams,
