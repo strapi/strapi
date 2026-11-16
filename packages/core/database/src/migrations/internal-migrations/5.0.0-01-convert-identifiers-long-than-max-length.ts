@@ -148,7 +148,6 @@ const findDiffs = (shortMap: Metadata) => {
     }
 
     // find column name diffs
-    // eslint-disable-next-line guard-for-in
     for (const attrKey in shortObj.attributes) {
       if (shortObj.attributes[attrKey].type === 'relation') {
         continue;

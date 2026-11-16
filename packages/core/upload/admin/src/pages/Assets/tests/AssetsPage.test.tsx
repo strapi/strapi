@@ -145,12 +145,19 @@ describe('AssetsPage search', () => {
 
       await findHeading();
 
-      await waitFor(() => expect(requests.length).toBeGreaterThan(0));
-      const last = decodeURIComponent(requests[requests.length - 1]);
+      // The folder item count fetches /upload/files too (pageSize=1), and request
+      // order between the two is not part of the contract — pick the list page.
+      const findListRequest = () =>
+        requests
+          .map((request) => decodeURIComponent(request))
+          .find((request) => request.includes('pageSize=20'));
+
+      await waitFor(() => expect(findListRequest()).toBeDefined());
+      const listRequest = findListRequest()!;
       // Both facets on the wire: global search + mime clause, no folder scope.
-      expect(last).toContain('_q=kitten');
-      expect(last).toContain('[mime][$contains]=image');
-      expect(last).not.toContain('[folder]');
+      expect(listRequest).toContain('_q=kitten');
+      expect(listRequest).toContain('[mime][$contains]=image');
+      expect(listRequest).not.toContain('[folder]');
     });
 
     it('shows the filter badge and the search results title together', async () => {

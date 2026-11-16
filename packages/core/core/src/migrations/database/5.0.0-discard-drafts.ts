@@ -26,7 +26,6 @@
  *   they’re tiny and reused.
  */
 
-/* eslint-disable no-continue */
 import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { createId } from '@paralleldrive/cuid2';
@@ -3266,7 +3265,7 @@ async function copyComponentRelations({
     };
 
     // Filter component relations: only propagate if component's parent in the component hierarchy doesn't have draft/publish
-    // This matches discardDraft() behavior via shouldPropagateComponentRelationToNewVersion
+    // This matches discardDraft() behavior via createComponentRelationFilter (document-service/components.ts)
     //
     // The logic: find what contains this component instance (could be a content type or another component).
     // If it's a component, recursively check its parents. If any parent in the chain has DP, filter out the relation.

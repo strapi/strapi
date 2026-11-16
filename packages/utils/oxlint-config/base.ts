@@ -21,11 +21,13 @@ export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
   jsPlugins: ['./no-lodash-fp.js'],
   categories: {
-    // Phase 1: correctness only (definitely-wrong code, lowest noise).
-    // TODO @Nico Phase 2 — port the ESLint/Airbnb policy surface here
-    // (suspicious/style/restriction) once the rule matrix is agreed. Goal is
-    // to reproduce what ESLint covers today, preferring over- to under-coverage.
+    // Blocking bar: correctness plus extra-policy `perf`.
+    // Later categories (suspicious/pedantic/style) are not extra policy yet.
+    // The category enable also accepts any new `perf` rule that a future oxlint
+    // release adds. oxlint is pinned exactly, so such a rule breaks the blocking
+    // gate on the version bump PR and not on a code merge.
     correctness: 'error',
+    perf: 'error',
   },
   rules: {
     'no-restricted-imports': [
@@ -35,6 +37,57 @@ export const base = {
           {
             group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
             message: 'Use regular lodash methods or a focused helper instead.',
+          },
+          {
+            group: ['lodash/isArray', 'lodash/isArray.js'],
+            message: 'Use native Array.isArray instead.',
+          },
+          {
+            group: ['lodash/forEach', 'lodash/forEach.js', 'lodash/each', 'lodash/each.js'],
+            message:
+              'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+          {
+            group: [
+              'lodash/keys',
+              'lodash/keys.js',
+              'lodash/values',
+              'lodash/values.js',
+              'lodash/entries',
+              'lodash/entries.js',
+            ],
+            message:
+              'Use native Object.keys / Object.values / Object.entries instead. They throw on null/undefined, so guard nullish input (e.g. `?? {}`).',
+          },
+          {
+            group: [
+              'lodash/concat',
+              'lodash/concat.js',
+              'lodash/filter',
+              'lodash/filter.js',
+              'lodash/find',
+              'lodash/find.js',
+            ],
+            message:
+              'Use `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), and native filter or find. Native filter and find throw when the array is null/undefined and need a callback, so guard nullish input and rewrite object or shorthand predicates such as `{ id }`.',
+          },
+        ],
+        paths: [
+          {
+            name: 'lodash',
+            importNames: [
+              'isArray',
+              'forEach',
+              'each',
+              'keys',
+              'values',
+              'entries',
+              'concat',
+              'filter',
+              'find',
+            ],
+            message:
+              'Use native Array.isArray, Array.prototype.forEach / filter / find, `[a, b].flat()` instead of concat (it matches `_.concat`; an array spread throws on null/undefined and splits strings), or Object.keys / Object.values / Object.entries instead. Native forEach / filter / find and Object.keys / Object.values / Object.entries throw on null/undefined, so guard nullish input (e.g. `?? {}`). Native filter / find need a callback, so rewrite object or shorthand predicates such as `{ id }`.',
           },
         ],
       },
@@ -46,6 +99,11 @@ export const base = {
     'unicorn/no-thenable': 'off',
     // Behavioral / intentional deps; revisit when enabling broader react-hooks.
     'react/exhaustive-deps': 'off',
+    // Backend ESLint turns this off on purpose (sequential await is allowed).
+    // ESLint only errors it on a 62-file frontend JS surface (2 projects).
+    // A category enable would expand that ban onto the backend (~495 of the
+    // Aug 20 +685 perf delta). Frontend JS stays covered by ESLint.
+    'eslint/no-await-in-loop': 'off',
   },
   ignorePatterns: [
     '**/dist/**',

@@ -54,8 +54,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const isPluginAiFeatureConfigured = async (plugin: string, service: string): Promise<boolean> => {
     const aiService = strapi.plugin(plugin)?.service(service) as
-      | { isEnabled?: () => Promise<boolean> | boolean }
-      | undefined;
+      { isEnabled?: () => Promise<boolean> | boolean } | undefined;
 
     if (typeof aiService?.isEnabled !== 'function') {
       return false;

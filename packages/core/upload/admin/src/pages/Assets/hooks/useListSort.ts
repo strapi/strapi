@@ -1,4 +1,6 @@
-import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
+import { withEncodedUserParams } from '@strapi/admin/strapi-admin';
+
+import { useListQueryParams } from './useListQueryParams';
 
 /**
  * Sort state for the assets list, backed by URL query params so the current
@@ -92,7 +94,7 @@ export interface ListSort {
 }
 
 export const useListSort = (): ListSort => {
-  const [{ query }, setQuery] = useQueryParams<{
+  const [{ query }, setQuery] = useListQueryParams<{
     sort?: string;
     folders?: string;
     _q?: string;

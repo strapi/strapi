@@ -90,8 +90,7 @@ export interface Strapi extends Container {
           // snapshot); returns the limit the feature enforces.
           get: (
             feature?:
-              | string
-              | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+              string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
           ) => unknown;
         }>;
       }) => void;
@@ -186,12 +185,20 @@ export interface Strapi extends Container {
     : TSchemaUID extends UID.Component
       ? Schema.Component<TSchemaUID>
       : never;
+  /**
+   * @deprecated Use {@link Database.query | strapi.db.query} instead, or the Document Service (`strapi.documents`) for most content operations. Will be removed in the next major version.
+   */
   query(uid: UID.Schema): ReturnType<Database['query']>;
 }
 
 export interface Reloader {
   isReloading: boolean;
   isWatching: boolean;
+  /**
+   * Turns file watching back on without skipping the next reload.
+   * Setting `isWatching` from `false` to `true` skips the next `reload()` call instead.
+   */
+  resumeWatching(): void;
   (): void;
 }
 

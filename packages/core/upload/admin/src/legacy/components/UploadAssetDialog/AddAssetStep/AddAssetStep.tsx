@@ -15,12 +15,11 @@ export interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
 }
 
 interface AddAssetStepProps {
-  onClose: () => void;
   onAddAsset: (assets: FileWithRawFile[]) => void;
   trackedLocation?: string;
 }
 
-export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetStepProps) => {
+export const AddAssetStep = ({ onAddAsset, trackedLocation }: AddAssetStepProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -58,18 +57,10 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetS
           <Divider />
         </Box>
         <Tabs.Content value="computer">
-          <FromComputerForm
-            onClose={onClose}
-            onAddAssets={onAddAsset}
-            trackedLocation={trackedLocation}
-          />
+          <FromComputerForm onAddAssets={onAddAsset} trackedLocation={trackedLocation} />
         </Tabs.Content>
         <Tabs.Content value="url">
-          <FromUrlForm
-            onClose={onClose}
-            onAddAsset={onAddAsset}
-            trackedLocation={trackedLocation}
-          />
+          <FromUrlForm onAddAsset={onAddAsset} trackedLocation={trackedLocation} />
         </Tabs.Content>
       </Tabs.Root>
     </>

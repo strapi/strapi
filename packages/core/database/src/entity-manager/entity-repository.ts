@@ -1,4 +1,4 @@
-import { isString } from 'lodash';
+import { isString, omit } from 'lodash';
 import type { Database } from '..';
 import type { Repository, Params } from './types';
 
@@ -36,16 +36,16 @@ const withOffsetLimit = (
 
 export const createRepository = (uid: string, db: Database): Repository => {
   return {
-    findOne(params = {}) {
-      return db.entityManager.findOne(uid, params);
+    async findOne(params = {}) {
+      return await db.entityManager.findOne(uid, params);
     },
 
-    findMany(params = {}) {
-      return db.entityManager.findMany(uid, params);
+    async findMany(params = {}) {
+      return await db.entityManager.findMany(uid, params);
     },
 
-    findWithCount(params = {}) {
-      return Promise.all([
+    async findWithCount(params = {}) {
+      return await Promise.all([
         db.entityManager.findMany(uid, params),
         db.entityManager.count(uid, params),
       ]);
@@ -70,32 +70,32 @@ export const createRepository = (uid: string, db: Database): Repository => {
       };
     },
 
-    create(params) {
-      return db.entityManager.create(uid, params);
+    async create(params) {
+      return await db.entityManager.create(uid, params);
     },
 
-    createMany(params) {
-      return db.entityManager.createMany(uid, params);
+    async createMany(params) {
+      return await db.entityManager.createMany(uid, params);
     },
 
-    update(params) {
-      return db.entityManager.update(uid, params);
+    async update(params) {
+      return await db.entityManager.update(uid, params);
     },
 
-    updateMany(params) {
-      return db.entityManager.updateMany(uid, params);
+    async updateMany(params) {
+      return await db.entityManager.updateMany(uid, params);
     },
 
-    delete(params) {
-      return db.entityManager.delete(uid, params);
+    async delete(params) {
+      return await db.entityManager.delete(uid, params);
     },
 
-    deleteMany(params = {}) {
-      return db.entityManager.deleteMany(uid, params);
+    async deleteMany(params = {}) {
+      return await db.entityManager.deleteMany(uid, params);
     },
 
-    count(params) {
-      return db.entityManager.count(uid, params);
+    async count(params) {
+      return await db.entityManager.count(uid, params);
     },
 
     async attachRelations(id, data) {
@@ -120,16 +120,16 @@ export const createRepository = (uid: string, db: Database): Repository => {
       }
     },
 
-    deleteRelations(id) {
-      return db.entityManager.deleteRelations(uid, id);
+    async deleteRelations(id) {
+      return await db.entityManager.deleteRelations(uid, id);
     },
 
-    populate(entity, populate) {
-      return db.entityManager.populate(uid, entity, populate);
+    async populate(entity, populate) {
+      return await db.entityManager.populate(uid, entity, populate);
     },
 
-    load(entity, fields, params) {
-      return db.entityManager.load(uid, entity, fields, params);
+    async load(entity, fields, params) {
+      return await db.entityManager.load(uid, entity, fields, params);
     },
 
     async loadPages(entity, field, params) {
@@ -149,12 +149,23 @@ export const createRepository = (uid: string, db: Database): Repository => {
         throw new Error(`Invalid load. Expected ${field} to be an anyToMany relational attribute`);
       }
 
-      const [query, { page, pageSize }] = withOffsetLimit(params);
+      // Only the total query counts: a count key from the caller would replace the results with a count
+      const [query, { page, pageSize }] = withOffsetLimit(omit(params, 'count'));
 
-      const [results, { count: total }] = await Promise.all([
+      const [results, countResult] = await Promise.all([
         db.entityManager.load(uid, entity, field, query),
         db.entityManager.load(uid, entity, field, { ...query, count: true }),
       ]);
+
+      // load returns null when the entity does not exist
+      if (results === null || countResult === null) {
+        return {
+          results: [],
+          pagination: { page, pageSize, pageCount: 0, total: 0 },
+        };
+      }
+
+      const { count: total } = countResult;
 
       return {
         results,

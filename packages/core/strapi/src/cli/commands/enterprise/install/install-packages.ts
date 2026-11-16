@@ -18,15 +18,18 @@ export const installPackages = async ({
   appDir,
   packageManager,
   installSpecs,
+  env,
 }: {
   appDir: string;
   packageManager: DetectedPackageManager;
   installSpecs: string[];
+  /** Added to the environment of the package manager. */
+  env?: NodeJS.ProcessEnv;
 }): Promise<void> => {
   const { command, args } = buildInstallCommand(packageManager, installSpecs);
 
   try {
-    await execa(command, args, { cwd: appDir, stdio: 'inherit' });
+    await execa(command, args, { cwd: appDir, stdio: 'inherit', env });
   } catch (error) {
     const { code, exitCode } = (error ?? {}) as { code?: string; exitCode?: number };
 

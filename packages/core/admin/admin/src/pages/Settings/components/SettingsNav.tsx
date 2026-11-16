@@ -19,11 +19,7 @@ type LinkId =
   | 'content-history-purchase-page';
 
 type FeatureName =
-  | 'cms-content-releases'
-  | 'review-workflows'
-  | 'sso'
-  | 'audit-logs'
-  | 'cms-content-history';
+  'cms-content-releases' | 'review-workflows' | 'sso' | 'audit-logs' | 'cms-content-history';
 
 const StyledBadge = styled(Badge)`
   border-radius: 50%;

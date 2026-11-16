@@ -16,6 +16,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     /**
+     * The workflow and stage limits of the current license. Bootstrap uses them to size the
+     * default workflow.
+     */
+    getLimits,
+    /**
      * Validates the stages of a workflow.
      * @param {Array} stages - Array of stages to be validated.
      * @throws {ValidationError} - If the workflow has no stages or exceeds the limit.

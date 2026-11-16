@@ -6,6 +6,8 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
+  - 'A commit callback runs up to its first await before the write returns. destroy() waits at most 10 seconds for that database. Knex can resolve commit() when the database rejects COMMIT, and the callbacks still run.'
+  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release-run.ts`. The rest of this page was not re-verified.
 ---
 
 This page follows one write through the server. It explains the layers and the order in which they run. It is not an API reference for the Document Service.
@@ -34,10 +36,10 @@ Use `documentId` for stable references. Do not store a row `id` of a D&P content
 | 3     | Repository      | `document-service/repository.ts`     | Each public method runs in `strapi.db.transaction()`. It turns the params into an internal query and calls the entries service. It schedules events.          |
 | 4     | Entries service | `document-service/entries.ts`        | Resolves relation `documentId` values to row `id` values, checks uniqueness, runs the entity validator, writes components, then calls `strapi.db.query(uid)`. |
 | 5     | Entity manager  | `@strapi/database` `entity-manager/` | Runs the database lifecycles, applies attribute defaults, inserts or updates the row, attaches relations and reads the row back.                              |
-| 6     | Event manager   | `document-service/events.ts`         | After the commit, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                                                      |
+| 6     | Event manager   | `document-service/events.ts`         | After the commit, when something listens to the event, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                 |
 | 7     | Webhook runner  | `services/webhook-runner.ts`         | Queues the event and sends an HTTP `POST` to each enabled webhook for that event.                                                                             |
 
-The built-in middleware converts invalid date, time, datetime and relation errors from the database layer into `ValidationError`.
+The built-in middleware converts invalid date, time, datetime, relation and boolean errors from the database layer into `ValidationError`. The list of these input errors lives in `packages/core/core/src/utils/database-input-errors.ts`. The entity service uses the same list, and so does the global error middleware (`middlewares/errors.ts`). Routes that call `strapi.db.query` directly therefore also answer these errors with a 400 instead of a 500.
 
 ## A create, step by step
 
@@ -95,6 +97,8 @@ Read methods use the same idea. `statusToLookup` and `localeToLookup` write cond
 - If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from an existing row. It schedules `entry.create`, not `entry.update`.
 - If the document does not exist, `update` returns `null`.
 
+For each component or dynamic zone attribute present in the data, the entries service loads the stored components (with the ids of their media), deletes the ones that are no longer sent, creates the ones sent without an id, and compares the others with the data sent for them. The components of a dynamic zone are loaded whatever their registered type, including a type the zone no longer declares, so that they are deleted when they are no longer sent. A component is not written again when its scalars and media are stored exactly as sent, its relations arrive with empty `connect` and `disconnect` lists, and none of its nested components changed. When a whole list is unchanged and kept its order, its join rows are left alone too. Dates and times are compared as the database layer would store them, so a value that the write would normalize differently or reject counts as a change, and so does a value that cannot be compared with certainty, such as a password. When a database lifecycle subscriber listens to `beforeUpdate` or `afterUpdate` of a component type (`strapi.db.lifecycles.hasSubscribers`, which leaves out the database layer's own timestamps subscriber), its components are written on every save as before, so that each of them fires its events. The entry row itself is always updated, so `updatedAt` moves on every save.
+
 If the caller passed `status: 'published'` and a row was written, `update` then calls the inner `publish` function.
 
 **`publish`** exists only on D&P content types. For the requested locales, it:
@@ -115,9 +119,11 @@ When `create` or `update` calls the inner `publish` function, the call does not 
 
 The other D&P methods follow the same model. `unpublish` deletes the published rows. `discardDraft` replaces the draft rows with copies of the published rows. `delete` removes all rows of the requested locales and throws if the caller passes `status: 'draft'`.
 
+When a row goes away, through `delete`, `unpublish`, `discardDraft` or the replacement of a published row, its components go with it. The entries service collects the whole component tree level by level, with one lifecycle-free query per component type holding nested components, then removes it with one statement per component type and per relation attribute (`entityManager.deleteManyRelations` and `deleteMany`). When a database lifecycle subscriber listens to any delete lifecycle (`beforeDelete`, `afterDelete`, `beforeDeleteMany` or `afterDeleteMany`) of one of those component types (`strapi.db.lifecycles.hasSubscribers`), the components are deleted one by one instead, so that each of them fires its events and no subscriber receives an event it did not receive before. The read lifecycles that the per-row API fires as a side effect of each update or delete (`beforeFindOne`, `afterFindOne`) are not fired for a skipped write or a bulk deletion.
+
 ## Validation
 
-The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes.
+The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes. On a non-draft update, a missing required field is accepted because the stored value is kept, but a required field set to `null` is rejected. A component sent without an `id` in a non-draft update is validated as on create, because the entries service creates it.
 
 Database lifecycles run after the entity validator. Data that a `beforeCreate` or `beforeUpdate` subscriber adds is not validated.
 
@@ -131,13 +137,16 @@ Database lifecycles run inside the transaction. If the transaction rolls back la
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context starts the commit callbacks but does not await them. The Document Service call can return before the event reaches the listeners.
+The transaction context starts those callbacks after the commit and does not wait for them. Each callback runs synchronously up to its first `await` before `strapi.db.transaction` resolves, and the rest of it runs after. Callbacks from one commit run together. A callback that throws is logged, and the other callbacks still run. A rollback callback that throws is logged and does not replace the error from the write. `db.destroy()` waits up to 10 seconds for callbacks that belong to that database, then closes the pool. Callbacks still running at the deadline are left running. `emitEvent` catches and logs its own errors.
+
+Knex resolves `commit()` even when the database rejects `COMMIT`. The rejection is on the transactor's `executionPromise`. The callbacks still run in that case, and the transaction call still resolves.
 
 When the callback runs, the event manager:
 
-1. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone;
-2. sanitizes it with `defaultSanitizeOutput`, which removes private fields;
-3. calls `strapi.eventHub.emit(eventName, { model, uid, entry })`.
+1. checks `strapi.eventHub.hasListeners(eventName)`. When no listener or subscriber would receive the event, it stops here: the deep populate below is the expensive part of an event, and nothing would read its result;
+2. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone;
+3. sanitizes it with `defaultSanitizeOutput`, which removes private fields;
+4. calls `strapi.eventHub.emit(eventName, { model, uid, entry })`.
 
 | Method         | Events                                                                                            |
 | -------------- | ------------------------------------------------------------------------------------------------- |
@@ -149,9 +158,13 @@ When the callback runs, the event manager:
 | `unpublish`    | `entry.unpublish` per deleted published row                                                       |
 | `discardDraft` | `entry.draft-discard` per new draft row                                                           |
 
-The webhook runner adds an event hub listener for an event when the first webhook for that event is registered. The listener only adds a job to an in-memory queue with a concurrency of 5. For each job, the runner sends a `POST` to each enabled webhook. The body is `{ event, createdAt, model, uid, entry }`. The headers are the `server.webhooks.defaultHeaders`, the webhook headers, `X-Strapi-Event` and `Content-Type: application/json`. Each request has a 10-second timeout. The runner does not retry. In the event path, it also does not report failed deliveries: `run()` turns network errors and non-2xx responses into a returned status object, and `executeListener()` does not read that object.
+The webhook runner adds an event hub listener for an event when the first webhook for that event is registered. Registration includes events selected for every content type and events selected for one content type. The listener only adds a job to an in-memory queue with a concurrency of 5. For each job, the runner sends a `POST` to each enabled webhook that the event triggers. An event listed in `events` triggers the webhook for every content type. An event listed only in `contentTypeEvents` triggers it when `info.uid` is that content type. The body is `{ event, createdAt, model, uid, entry }`. The headers are the `server.webhooks.defaultHeaders`, the webhook headers, `X-Strapi-Event` and `Content-Type: application/json`. Each request has a 10-second timeout. The runner does not retry. In the event path, it also does not report failed deliveries: `run()` turns network errors and non-2xx responses into a returned status object, and `executeListener()` does not read that object.
 
-When a webhook is created or updated, the webhook store rejects events that are not in its allowed list. Core allows the six `entry.*` events. Plugins add their own events with `addAllowedEvent`.
+`server.webhooks.deduplicateReleaseWebhooks` defaults to `false`. Set it to `true` to skip `entry.publish` and `entry.unpublish` for a webhook that also lists `releases.publish`, when that event is the release action in progress. The runner matches the content-type UID, `documentId`, locale, and event name. A webhook that does not list `releases.publish` still receives the entry events. Standalone publish, unpublish, and delete events stay as they are. With the option omitted or set to `false`, a release still sends one entry webhook per action and the `releases.publish` webhook.
+
+When the option is `true`, the event manager keeps the request context from the moment the event was scheduled. The commit callback emits the event inside that context, so the runner can still read the release action after the document operation has returned. Content Releases writes that action onto the context only while the option is on.
+
+When a webhook is created or updated, the webhook store rejects events that are not in its allowed list. It checks both `events` and `contentTypeEvents`. Core allows the six `entry.*` events. Plugins add their own events with `addAllowedEvent`. `contentTypeEvents` maps a content-type UID to event names. The store does not keep a per-type event that is already in `events`. A webhook saved before this field existed is read as an empty map.
 
 ## Code map
 

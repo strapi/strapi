@@ -1,8 +1,7 @@
 import type * as UID from '../uid';
 
 export type ContentStructureChild =
-  | { type: 'contentType'; uid: UID.ContentType }
-  | { type: 'group'; id: string };
+  { type: 'contentType'; uid: UID.ContentType } | { type: 'group'; id: string };
 
 export interface ContentStructureGroup {
   children: ContentStructureChild[];
@@ -31,8 +30,7 @@ export interface ResolvedGroupNode {
 }
 
 export type ResolvedStructureChild =
-  | { type: 'contentType'; uid: UID.ContentType }
-  | ResolvedGroupNode;
+  { type: 'contentType'; uid: UID.ContentType } | ResolvedGroupNode;
 
 /**
  * The resolved trees of both content type sections. Exposed by strapi.get('content-structure').resolve().

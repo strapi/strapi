@@ -132,7 +132,7 @@
   "Settings.profile.form.section.experience.interfaceLanguageHelp": "La selecció canviarà l'idioma de la interfície només per a vosaltres. Consulteu aquesta {here} perquè altres idiomes estiguin disponibles per al vostre ordinador.",
   "Settings.profile.form.section.experience.mode.hint": "Mostra la vostra interfície en el mode escollit.",
   "Settings.profile.form.section.experience.mode.label": "Mode d'interfície",
-  "Settings.profile.form.section.experience.mode.option-label": "mode {nom}",
+  "Settings.profile.form.section.experience.mode.option-label": "mode {name}",
   "Settings.profile.form.section.experience.title": "Experiència",
   "Settings.profile.form.section.head.title": "Perfil dusuari",
   "Settings.profile.form.section.profile.page.title": "Pàgina de perfil",

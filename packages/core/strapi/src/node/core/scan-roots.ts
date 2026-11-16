@@ -24,8 +24,8 @@ type ScanContext = Pick<BuildContext, 'cwd' | 'runtimeDir' | 'plugins' | 'custom
  * The directories Tailwind scans for class names. Tailwind never looks in `node_modules`, so the
  * stylesheet must name every directory that holds admin code.
  *
- * @param dev - true for the Vite development server, which serves `admin/src`. Tailwind must scan
- * what Vite serves. Every other case scans `dist`
+ * @param dev - true for the development server, which serves `admin/src`. Tailwind must scan
+ * what the bundler serves. Every other case scans `dist`
  */
 const getScanRoots = async (ctx: ScanContext, dev: boolean): Promise<string[]> => {
   const requireFromEntry = createRequire(path.join(ctx.runtimeDir, 'app.js'));
@@ -39,7 +39,7 @@ const getScanRoots = async (ctx: ScanContext, dev: boolean): Promise<string[]> =
   const hostRoots = HOST_ADMIN_PACKAGES.map((name) => {
     const modulePath = `${name}/strapi-admin`;
 
-    // The alias wins, because it names the directory Vite serves and not an unbuilt `dist`
+    // The alias wins, because it names the directory the bundler serves and not an unbuilt `dist`
     return aliases[modulePath] ?? path.dirname(requireFromHost.resolve(modulePath));
   });
 

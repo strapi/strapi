@@ -110,6 +110,7 @@ describeOnCondition(edition === 'EE')('Webhooks in audit logs (api)', () => {
       details: {
         url: 'https://example.com',
         events: ['entry.create', 'entry.update'],
+        contentTypeEvents: {},
         headers: ['Authorization', 'X-Env'],
         isEnabled: true,
       },

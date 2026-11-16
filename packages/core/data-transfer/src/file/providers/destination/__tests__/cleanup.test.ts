@@ -1,8 +1,20 @@
 import path from 'path';
 import os from 'os';
+import { Writable } from 'stream';
 import fs from 'fs-extra';
 
 import { createLocalFileDestinationProvider } from '..';
+import * as esmDeps from '../../../../utils/esm-deps';
+
+jest.mock('../../../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 describe('Local file destination cleanup', () => {
   let tempDirectory: string;
@@ -33,5 +45,39 @@ describe('Local file destination cleanup', () => {
     await provider.close();
 
     expect(await fs.pathExists(archivePath)).toBe(false);
+  });
+
+  test('close rejects and the write stream errors when stream packages fail to load', async () => {
+    const loadError = new Error("Cannot find module 'stream-chain'");
+    const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+      typeof esmDeps.loadStreamDeps
+    >;
+    loadStreamDeps.mockRejectedValue(loadError);
+
+    const outputPath = path.join(tempDirectory, 'export');
+    const provider = createLocalFileDestinationProvider({
+      encryption: { enabled: false },
+      compression: { enabled: false },
+      file: { path: outputPath },
+    });
+
+    try {
+      await provider.bootstrap({ report: jest.fn() } as never);
+      const writeStream = provider.createEntitiesWriteStream();
+      expect(writeStream).toBeInstanceOf(Writable);
+
+      const streamError = new Promise((resolve) => {
+        writeStream.once('error', resolve);
+      });
+      writeStream.write({ id: 1 });
+
+      await expect(provider.close()).rejects.toBe(loadError);
+      await expect(streamError).resolves.toBe(loadError);
+    } finally {
+      loadStreamDeps.mockReset();
+      loadStreamDeps.mockImplementation(() =>
+        jest.requireActual<typeof esmDeps>('../../../../utils/esm-deps').loadStreamDeps()
+      );
+    }
   });
 });

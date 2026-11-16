@@ -1,0 +1,84 @@
+name: 'Re-run failed tests'
+
+# Re-runs the failed jobs of a PR's Tests run once, as soon as the first attempt fails.
+# Most first-attempt failures are infrastructure stalls or known flakes, and a person
+# noticing and clicking "Re-run failed jobs" usually takes hours. A failure that is
+# still there on the second attempt is left for the author.
+#
+# Release PRs are left alone: the releaser reviews a red check there before anything is re-run.
+#
+# A run whose commit is no longer the PR's head is left alone too. The re-run joins the PR's
+# Tests concurrency group, which cancels runs in progress, so it would cancel the newer commit's run.
+#
+# Only same-repo PRs count: workflow_run matches workflows by name, so a fork could trigger this
+# with its own workflow named Tests.
+#
+# When a re-run turns the PR green, the jobs that failed on the first attempt are listed in the
+# run summary and as warnings, so a test that only passes on retry still leaves a trace.
+#
+# workflow_run only fires for workflow files on the default branch, so this has no effect
+# until it is merged there.
+
+on:
+  workflow_run:
+    workflows: ['Tests']
+    types: [completed]
+
+permissions:
+  actions: write # to re-run jobs
+  pull-requests: read # to read the PR's head commit
+
+jobs:
+  rerun:
+    if: >-
+      github.event.workflow_run.event == 'pull_request'
+      && github.event.workflow_run.head_repository.full_name == github.repository
+      && github.event.workflow_run.conclusion == 'failure'
+      && github.event.workflow_run.run_attempt == 1
+      && !startsWith(github.event.workflow_run.head_branch, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Re-run failed jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          # Empty when the PR has been closed, which skips the re-run as well.
+          PR_SHA=$(gh api -X GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open \
+            -f "head=$HEAD_OWNER:$HEAD_BRANCH" --jq '.[0].head.sha // ""')
+          if [ "$PR_SHA" != "$RUN_SHA" ]; then
+            echo "Left $RUN_URL alone: its commit is no longer the PR's head." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
+          echo "Re-ran the failed jobs of $RUN_URL once." >> "$GITHUB_STEP_SUMMARY"
+
+  passed-on-rerun:
+    if: >-
+      github.event.workflow_run.event == 'pull_request'
+      && github.event.workflow_run.head_repository.full_name == github.repository
+      && github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.run_attempt == 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: List the jobs that passed on the re-run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          # aggregate_test_result only fails because other jobs did, so it says nothing about flakes.
+          JOBS=$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/attempts/1/jobs?per_page=100" \
+            --jq '.jobs[] | select(.conclusion == "failure" and .name != "aggregate_test_result") | .name')
+          if [ -z "$JOBS" ]; then
+            exit 0
+          fi
+          echo "These jobs of $RUN_URL failed on the first attempt and passed on the re-run:" >> "$GITHUB_STEP_SUMMARY"
+          while IFS= read -r job; do
+            echo "- $job" >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning title=Passed on re-run::$job"
+          done <<< "$JOBS"

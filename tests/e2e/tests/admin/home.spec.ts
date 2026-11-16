@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { login, loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
@@ -13,8 +13,8 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('a user should have a personalized homepage', async ({ page }) => {
@@ -68,8 +68,8 @@ test.describe('Home as super admin — key statistics', () => {
     didWriteSchemaFiles = false;
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test.afterEach(async () => {
@@ -288,7 +288,7 @@ test.describe('Home as super admin — key statistics', () => {
       ]);
 
       // Go back to the home page and wait for refreshed statistics.
-      // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
+      // Don't wait for network idle: the homepage SPA often never reaches it.
       // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
       // keep that RTK query warm, so Home remount often serves cache and no GET is issued
       // (waitForResponse then times out). Entries still come from count-documents — assert

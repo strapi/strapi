@@ -21,6 +21,8 @@ import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useTypedSelector } from '../../../modules/hooks';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
 
+const EMPTY_HEADERS: NonNullable<FieldPickerProps['headers']> = [];
+
 interface ViewSettingsMenuProps extends FieldPickerProps {}
 
 const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
@@ -79,7 +81,7 @@ interface FieldPickerProps {
   resetHeaders: () => void;
 }
 
-const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProps) => {
+const FieldPicker = ({ headers = EMPTY_HEADERS, resetHeaders, setHeaders }: FieldPickerProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
 

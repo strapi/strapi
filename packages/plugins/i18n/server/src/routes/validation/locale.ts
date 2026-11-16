@@ -20,9 +20,9 @@ export class I18nLocaleRouteValidator {
   get locale() {
     return z.object({
       id: z.number().int().positive(),
-      documentId: z.string().uuid(),
+      documentId: z.string(),
       name: z.string(),
-      code: z.string().length(2, 'Locale code must be exactly 2 characters'),
+      code: z.string(),
       createdAt: z.string(),
       updatedAt: z.string(),
       publishedAt: z.string().nullable(),

@@ -71,6 +71,10 @@ const controller: Core.Controller = {
 
     const updatedLocale = await localesService.update({ id }, cleanUpdates);
 
+    if (updatedLocale === null) {
+      return ctx.notFound('locale.notFound');
+    }
+
     if (isDefault) {
       await localesService.setDefaultLocale(updatedLocale);
     }
