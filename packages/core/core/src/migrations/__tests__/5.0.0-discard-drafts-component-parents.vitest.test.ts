@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+import { describe, it, expect, vi, afterEach, afterAll } from 'vitest';
 import { Database } from '@strapi/database';
 
 import { createLocalizationService } from '../../services/localization';
@@ -122,7 +123,7 @@ const createDatabase = async () => {
   db.metadata.get = ((uid: string) => (db.metadata.has(uid) ? getMetadata(uid) : null)) as any;
 
   global.strapi = {
-    log: { info: jest.fn(), warn: jest.fn(), debug: jest.fn(), error: jest.fn() },
+    log: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() },
     getModel: (uid: string) => contentTypes[uid] ?? components[uid],
     contentTypes,
     components,
@@ -212,6 +213,7 @@ describe('5.0.0-discard-drafts migration — component parent resolution', () =>
   });
 
   afterAll(() => {
+    delete (global as any).strapi;
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
@@ -303,7 +305,23 @@ describe('5.0.0-discard-drafts migration — component parent resolution', () =>
     ]);
     await insertRows(db, 'posts_cmps', [blockRow(4, 1)]);
 
+    // sqlite returns rows in rowid (= id) order whatever the query says, so the result alone cannot
+    // show that "lowest join row wins" is enforced: check that the batched lookups sort by id
+    const batchedLookups: string[] = [];
+    db.connection.on('query', (query: { sql: string }) => {
+      const sql = query.sql.toLowerCase();
+      // identifier quoting differs per dialect, so match on bare names
+      if (sql.startsWith('select') && /cmp_id\W+in \(/.test(sql)) {
+        batchedLookups.push(sql);
+      }
+    });
+
     await runMigration(db);
+
+    expect(batchedLookups.length).toBeGreaterThan(0);
+    for (const sql of batchedLookups) {
+      expect(sql).toMatch(/order by `?"?id`?"?( asc)?\s*$/);
+    }
 
     const { rows } = await getDraftPageComponents(db);
     const blockRows = rows.filter((row: any) => row.field === 'blocks');
