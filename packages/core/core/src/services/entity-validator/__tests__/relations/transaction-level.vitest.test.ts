@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import type { Schema } from '@strapi/types';
 
 import entityValidator from '../..';
@@ -64,7 +65,7 @@ describe('Entity validator | Relations | Transaction', () => {
         query: (uid: string) => ({ count: count(uid) }),
         inTransaction: () => inTransaction,
       },
-      errors: { badRequest: jest.fn() },
+      errors: { badRequest: vi.fn() },
       getModel: () => model,
     } as any;
 

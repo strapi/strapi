@@ -840,11 +840,7 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
 
   const entries = Object.entries(relationsStore);
 
-  // Inside a transaction every query is bound to the transaction's single connection, and
-  // node-postgres deprecated (pg@8.19) and removes (pg@9) calling `client.query()` on a client
-  // that is already executing a query. The checks therefore run one after another there, which
-  // costs nothing: the driver was already serialising them on that one connection. Outside a
-  // transaction they fan out over the pool as before.
+  // One connection inside a transaction: pg rejects overlapping `client.query()` calls, so run these one at a time there
   if (strapi.db?.inTransaction?.()) {
     for (const entry of entries) {
       await evaluate(entry);

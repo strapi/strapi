@@ -122,11 +122,7 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
 
       const groups = Object.values(idsByUidAndLocale);
 
-      // Inside a transaction every query is bound to the transaction's single connection, and
-      // node-postgres deprecated (pg@8.19) and removes (pg@9) calling `client.query()` on a client
-      // that is already executing a query. The groups therefore load one after another there,
-      // which costs nothing: the driver was already serialising them on that one connection.
-      // Outside a transaction they fan out over the pool as before.
+      // One connection inside a transaction: pg rejects overlapping `client.query()` calls, so run these one at a time there
       if (strapi?.db?.inTransaction?.()) {
         for (const group of groups) {
           await loadGroup(group);

@@ -94,8 +94,9 @@ const createComponents = async <TUID extends UID.Schema, TData extends Input<TUI
           throw new Error('Expected an array to create repeatable component');
         }
 
-        const components: RepeatableComponentValue = await mapComponents(componentValue, (value: any) =>
-          createComponent(componentUID, value)
+        const components: RepeatableComponentValue = await mapComponents(
+          componentValue,
+          (value: any) => createComponent(componentUID, value)
         );
 
         componentBody[attributeName] = components.map(({ id }) => {
