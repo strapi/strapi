@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 /**
  * Members of plugin services the admin calls. `@strapi/email` and `@strapi/upload` depend on
  * `@strapi/admin`, so the admin build cannot load their registered contracts: lookups pass these
@@ -10,8 +12,9 @@ export type EmailService = {
     emailOptions: Record<string, unknown>,
     emailTemplate: unknown,
     data: Record<string, unknown>
-    // `any` as on develop: `auth.forgotPassword` returns this result in its published type.
-  ): Promise<any>;
+    // `any` as on develop without strict types: `auth.forgotPassword` returns this result in its
+    // published type. `@strapi/email` types its sends `Promise<unknown>`.
+  ): Promise<Core.IsStrict extends true ? unknown : any>;
 };
 
 /**
