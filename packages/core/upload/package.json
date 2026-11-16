@@ -98,6 +98,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@casl/ability": "6.7.5",
     "@strapi/admin": "5.63.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
