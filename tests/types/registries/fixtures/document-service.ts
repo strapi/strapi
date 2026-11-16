@@ -415,6 +415,39 @@ void articleService.update('a', updateWithLookup);
 // @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
 void homepageService.createOrUpdate(createWithLookup);
 
+// The core service `delete` passes its params to the Document Service's `delete`, which takes
+// `fields`, `populate`, `filters`, `status`, `publicationFilter`, `hasPublishedVersion` and `locale`.
+// They stay accepted, as literals and through variables. The service sets `documentId` itself.
+const coreDeleted = articleService.delete('a', { locale: 'fr', fields: ['title'] });
+void articleService.delete('a', { populate: ['category'], filters: { views: { $gt: 1 } } });
+void articleService.delete('a', {});
+const coreSingleDeleted = homepageService.delete({ locale: 'fr' });
+const deleteParams = { locale: 'fr', status: 'published' } as const;
+void articleService.delete('a', deleteParams);
+void homepageService.delete(deleteParams);
+declare const coreDeleteChecks: [
+  Expect<Equal<[Awaited<typeof coreDeleted>], [{ deletedEntries: number }]>>,
+  Expect<Equal<[Awaited<typeof coreSingleDeleted>], [{ deletedEntries: number }]>>,
+];
+coreDeleteChecks satisfies unknown;
+
+// The core service `delete` rejects `lookup`: the Document Service's `delete` throws
+// `ValidationError("Invalid params: 'lookup'")` on one from the caller. A literal with a key the
+// Document Service's `delete` does not take is rejected too.
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void articleService.delete('a', { lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void homepageService.delete({ lookup: { locale: 'fr' } });
+const deleteWithLookup = { lookup: { locale: 'fr' } };
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void articleService.delete('a', deleteWithLookup);
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void homepageService.delete(deleteWithLookup);
+// @ts-expect-error The params are those of the Document Service's `delete`.
+void articleService.delete('a', { unknownParam: 1 });
+// @ts-expect-error The params are those of the Document Service's `delete`.
+void homepageService.delete({ unknownParam: 1 });
+
 // Known gap (filters): filter values are not checked against the attribute type. This compiles,
 // so it is not an `@ts-expect-error` case.
 void articles.findMany({ filters: { views: { $eq: 'not a number' } } });
