@@ -11,9 +11,18 @@ const localizedModel = {
   pluginOptions: { i18n: { localized: true } },
 };
 
-const createContext = (user: Record<string, unknown>, properties: Record<string, unknown>) => {
+const notLocalizedModel = {
+  uid: 'api::category.category',
+  pluginOptions: {},
+};
+
+const createContext = (
+  user: Record<string, unknown>,
+  properties: Record<string, unknown>,
+  subject: unknown = localizedModel.uid
+) => {
   const and = jest.fn();
-  const permissionGetter = jest.fn(() => ({ subject: localizedModel.uid, properties }));
+  const permissionGetter = jest.fn(() => ({ subject, properties }));
 
   const context = {
     ...user,
@@ -27,10 +36,13 @@ const createContext = (user: Record<string, unknown>, properties: Record<string,
 };
 
 describe('i18n permissions engine', () => {
-  const contentTypes = jest.fn(() => ({ [localizedModel.uid]: localizedModel }));
-  const contentType = jest.fn((uid: string) =>
-    uid === localizedModel.uid ? localizedModel : undefined
-  );
+  // Same shape as the core content-types registry: a plain object indexed by the given key
+  const registry: Record<string, unknown> = {
+    [localizedModel.uid]: localizedModel,
+    [notLocalizedModel.uid]: notLocalizedModel,
+  };
+  const contentTypes = jest.fn(() => ({ ...registry }));
+  const contentType = jest.fn((uid: string) => registry[uid]);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,6 +54,7 @@ describe('i18n permissions engine', () => {
 
     global.strapi = {
       contentType,
+      get: (name: string) => (name === 'content-types' ? { get: contentType } : undefined),
       get contentTypes() {
         return contentTypes();
       },
@@ -84,5 +97,32 @@ describe('i18n permissions engine', () => {
 
     expect(contentType).toHaveBeenCalledWith(localizedModel.uid);
     expect(contentTypes).not.toHaveBeenCalled();
+  });
+
+  describe('subjects that are not a localized content type', () => {
+    const editor = { id: 1, roles: [{ code: 'strapi-editor' }] };
+
+    test.each([
+      ['a null subject', null],
+      ['a record subject', { uid: localizedModel.uid }],
+      ['a string subject that is not a content-type UID', 'plugin::foo.bar'],
+      ['a non-localized content-type UID', notLocalizedModel.uid],
+    ])('adds no locale condition for %s', (_, subject) => {
+      const { context, and } = createContext(editor, { locales: ['en'] }, subject);
+
+      expect(() => engine.willRegisterPermission(context)).not.toThrow();
+      expect(and).not.toHaveBeenCalled();
+    });
+  });
+
+  test('adds no locale condition when the locales property is null (access to all locales)', () => {
+    const { context, and } = createContext(
+      { id: 1, roles: [{ code: 'strapi-editor' }] },
+      { locales: null }
+    );
+
+    engine.willRegisterPermission(context);
+
+    expect(and).not.toHaveBeenCalled();
   });
 });
