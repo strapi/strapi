@@ -77,7 +77,7 @@ describe('the instance', () => {
 
   beforeAll(async () => {
     app = await generateApp({ name: `api-edition-${worker}` });
-    scaffoldConfig(app, 'features', { future: { testsFlag: true } });
+    scaffoldConfig(app, 'features', { future: { testsFlag: true, testsFlagOff: false } });
     server = await startServer(app, { port });
   });
 
@@ -97,6 +97,8 @@ describe('the instance', () => {
   test('reports the future flags that are on', async () => {
     const features = await getInstanceFeatures(server);
     expect(features.future).toContain('testsFlag');
+    // Strapi's isEnabled says off for a flag set to false.
+    expect(features.future).not.toContain('testsFlagOff');
     expect(() => requireFeatures(features, { future: ['testsFlag'] })).not.toThrow();
   });
 
