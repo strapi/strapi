@@ -37,18 +37,21 @@ const transformLoadParamsToQuery = (
   return res;
 };
 
-type Pagination = Modules.EntityService.Params.Pagination.Any;
+type PageNotation = Modules.EntityService.Params.Pagination.PageNotation;
 type OffsetNotation = Modules.EntityService.Params.Pagination.OffsetNotation;
 
 /**
- * Offset notation (`start`, `limit`) without any page notation key. Mixed notations keep the page
+ * Offset notation (`start`, `limit`) without page notation (`page`, `pageSize`). Like
+ * `withDefaultPagination`, a key counts only when its value is set. Mixed notations keep the page
  * notation path, which reads `page` and `pageSize` only.
  */
-const isOffsetNotation = (pagination: Pagination): pagination is OffsetNotation => {
-  const hasOffsetKey = 'start' in pagination || 'limit' in pagination;
-  const hasPageKey = 'page' in pagination || 'pageSize' in pagination;
+const isOffsetNotation = (pagination: unknown): pagination is OffsetNotation => {
+  const { start, limit, page, pageSize } = (pagination ?? {}) as PageNotation & OffsetNotation;
 
-  return hasOffsetKey === true && hasPageKey === false;
+  const hasOffsetValue = start != null || limit != null;
+  const hasPageValue = page != null || pageSize != null;
+
+  return hasOffsetValue === true && hasPageValue === false;
 };
 
 const createDefaultImplementation = ({
@@ -197,13 +200,17 @@ const createDefaultImplementation = ({
     }
 
     if (isOffsetNotation(pagination) === true) {
-      // The database repository's loadPages only reads `page` and `pageSize`, so it would
-      // return the first page. Load the requested slice and the total count directly.
       const { start, limit } = paginationUtils.withDefaultPagination(pagination);
       const query = transformLoadParamsToQuery(uid, field, params ?? {});
-      // A limit of -1 means no limit
-      const sliceQuery =
-        limit === -1 ? { ...query, offset: start } : { ...query, offset: start, limit };
+
+      // The pagination replaces any limit or offset from params. A limit of -1 means no limit.
+      const sliceQuery: Record<string, unknown> = {
+        ..._.omit(query, ['limit', 'offset']),
+        offset: start,
+      };
+      if (limit !== -1) {
+        sliceQuery.limit = limit;
+      }
 
       const [results, { count: total }] = await Promise.all([
         db.query(uid).load(entity, field, sliceQuery),

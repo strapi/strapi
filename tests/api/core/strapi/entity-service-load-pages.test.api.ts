@@ -3,12 +3,6 @@ import type { Core } from '@strapi/types';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createTestBuilder } from 'api-tests/builder';
 
-/**
- * `strapi.entityService.loadPages` takes its 5th argument as page notation (`page`, `pageSize`)
- * or offset notation (`start`, `limit`). Offset notation used to be ignored: any `start`/`limit`
- * returned the first 10 related entries.
- */
-
 const TAG_UID = 'api::lp-tag.lp-tag';
 const ARTICLE_UID = 'api::lp-article.lp-article';
 
@@ -93,7 +87,7 @@ describe('Entity service loadPages', () => {
       expect(pagination).toEqual({ start: 20, limit: 5, total: TAG_COUNT });
     });
 
-    test('a start that is not a multiple of limit', async () => {
+    test('starts at start when start is between page boundaries', async () => {
       const { names, pagination } = await loadTags({ start: 3, limit: 4 });
 
       expect(names).toEqual(tagNames(3, 7));
@@ -123,6 +117,13 @@ describe('Entity service loadPages', () => {
 
     test('a limit of -1 returns every entry from start', async () => {
       const { names, pagination } = await loadTags({ start: 18, limit: -1 });
+
+      expect(names).toEqual(tagNames(18, 25));
+      expect(pagination).toEqual({ start: 18, limit: -1, total: TAG_COUNT });
+    });
+
+    test('a limit of -1 replaces a limit from params', async () => {
+      const { names, pagination } = await loadTags({ start: 18, limit: -1 }, { limit: 2 });
 
       expect(names).toEqual(tagNames(18, 25));
       expect(pagination).toEqual({ start: 18, limit: -1, total: TAG_COUNT });

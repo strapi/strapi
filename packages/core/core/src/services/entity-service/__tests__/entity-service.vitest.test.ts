@@ -120,8 +120,18 @@ describe('Entity service', () => {
       return { instance, load, loadPages };
     };
 
-    const loadTagPages = (instance: ReturnType<typeof setup>['instance'], pagination: object) =>
-      instance.loadPages(uid as any, entity as any, 'tags' as any, {} as any, pagination as any);
+    const loadTagPages = (
+      instance: ReturnType<typeof setup>['instance'],
+      pagination: unknown,
+      params: object = {}
+    ) =>
+      instance.loadPages(
+        uid as any,
+        entity as any,
+        'tags' as any,
+        params as any,
+        pagination as any
+      );
 
     test('loads the requested slice for offset notation', async () => {
       const { instance, load, loadPages } = setup();
@@ -189,6 +199,46 @@ describe('Entity service', () => {
       expect(loadPages).toHaveBeenCalledWith(entity, 'tags', pagination);
       expect(load).not.toHaveBeenCalled();
       expect(result.pagination).toEqual({ page: 1, pageSize: 10, pageCount: 5, total });
+    });
+
+    test('takes the offset path when the page notation keys are undefined', async () => {
+      const { instance, load, loadPages } = setup();
+
+      const result = await loadTagPages(instance, { page: undefined, start: 20, limit: 5 });
+
+      expect(load).toHaveBeenCalledWith(entity, 'tags', { offset: 20, limit: 5 });
+      expect(loadPages).not.toHaveBeenCalled();
+      expect(result.pagination).toEqual({ start: 20, limit: 5, total });
+    });
+
+    test.each([
+      ['a null pagination', null],
+      ['offset notation keys set to undefined', { start: undefined }],
+    ])('passes %s to the repository loadPages', async (_name, pagination) => {
+      const { instance, load, loadPages } = setup();
+
+      const result = await loadTagPages(instance, pagination);
+
+      expect(loadPages).toHaveBeenCalledTimes(1);
+      expect(load).not.toHaveBeenCalled();
+      expect(result.pagination).toEqual({ page: 1, pageSize: 10, pageCount: 5, total });
+    });
+
+    test('a limit of -1 replaces a limit from params', async () => {
+      const { instance, load } = setup();
+
+      const result = await loadTagPages(instance, { start: 18, limit: -1 }, { limit: 2 });
+
+      expect(load).toHaveBeenCalledWith(entity, 'tags', { offset: 18 });
+      expect(result.pagination).toEqual({ start: 18, limit: -1, total });
+    });
+
+    test('pagination limit replaces a limit from params', async () => {
+      const { instance, load } = setup();
+
+      await loadTagPages(instance, { start: 4, limit: 5 }, { limit: 2 });
+
+      expect(load).toHaveBeenCalledWith(entity, 'tags', { offset: 4, limit: 5 });
     });
   });
 
