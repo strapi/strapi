@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { pick } from 'lodash';
 import { emitAudit } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { AUDITED_EVENTS, getProjectSettingsChanges } from '../audit-logs/project-settings';
 import type { ImageManipulationService, UploadService } from '../types/plugin-services';
@@ -115,7 +116,19 @@ const uploadFiles = async (files: LogoFiles = {}) => {
   );
 };
 
-const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
+/**
+ * Deletes the stored logos that the update replaces or removes. `updateProjectSettings` passes the
+ * stored settings, `null` when the store has no row, and the settings it is about to store.
+ */
+const deleteOldFiles = async ({
+  previousSettings,
+  newSettings,
+}: Core.IsStrict extends true
+  ? {
+      previousSettings: Strapi.Registries.Stores['core_admin_project-settings'] | null;
+      newSettings: Parameters<typeof updateProjectSettings>[0];
+    }
+  : any) => {
   return Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
       // Skip if the store doesn't contain project settings
