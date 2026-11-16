@@ -1,5 +1,4 @@
-// The shared foundation of the test suites. Edition lands here with the next Test Infrastructure
-// Overhaul issues.
+// The shared foundation of the test suites.
 export * from './app';
 export * from './db';
 export * from './test-plugin';
