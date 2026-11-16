@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
+import type { RegisteredStagePermission } from '../types/services';
 
 /**
  * A stage with its permissions populated with roles, what `canTransitionToStageWithPermissions`
@@ -27,9 +28,8 @@ export default (({ strapi }: { strapi: Core.Strapi }) => {
     return (requestState.user?.roles as { id: number; code: string }[] | undefined) ?? null;
   };
 
-  // `register` and `registerTo` publish develop's `Promise<any>`: the inferred admin permission type
-  // is not portable in the emitted declarations. Strict types keep it too: the admin `addPermissions`
-  // declares `Permission[]` (`Data.ID` IDs, untyped `actionParameters`), wider than the contract.
+  // `register` and `registerTo` publish develop's `Promise<any>` without strict types: the inferred
+  // admin permission type is not portable in the emitted declarations.
   return {
     async register({
       roleId,
@@ -39,7 +39,7 @@ export default (({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       fromStage: number;
-    }): Promise<any> {
+    }): Promise<Core.IsStrict extends true ? RegisteredStagePermission<'from'>[] : any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -66,7 +66,7 @@ export default (({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       toStage: number;
-    }): Promise<any> {
+    }): Promise<Core.IsStrict extends true ? RegisteredStagePermission<'to'>[] : any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
