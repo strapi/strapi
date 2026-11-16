@@ -1,5 +1,7 @@
 import { describe, test, expect, vi } from 'vitest';
 import type { Utils } from '@strapi/types';
+import { errors as databaseErrors } from '@strapi/database';
+import { errors } from '@strapi/utils';
 import createEntityService from '../index';
 
 vi.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));
@@ -74,6 +76,30 @@ describe('Entity service', () => {
       expect(fakeStrapi.documents).toHaveBeenCalledWith('api::test.test-model');
       expect(fakeDocumentService.findFirst).toHaveBeenCalledWith({});
       expect(result).toEqual(data);
+    });
+  });
+
+  describe('Database errors', () => {
+    test.each([
+      ['InvalidBooleanError', databaseErrors.InvalidBooleanError],
+      ['InvalidDateError', databaseErrors.InvalidDateError],
+    ])('transforms %s into a ValidationError', async (_name, DatabaseErrorClass) => {
+      const fakeStrapi = {
+        ...global.strapi,
+        documents: vi.fn(() => ({
+          findFirst: vi.fn(() => Promise.reject(new DatabaseErrorClass())),
+        })),
+        getModel: vi.fn(() => ({ kind: 'singleType' })),
+      };
+
+      const instance = createEntityService({
+        strapi: fakeStrapi as any,
+        db: {} as any,
+      });
+
+      await expect(instance.findMany('api::test.test-model')).rejects.toBeInstanceOf(
+        errors.ValidationError
+      );
     });
   });
 });

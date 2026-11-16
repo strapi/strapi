@@ -209,7 +209,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
                       </Field.Label>
                       <ReleaseActionOptions
                         selected={values.type}
-                        handleChange={(e) => setFieldValue('type', e.target.value)}
+                        onChange={(type) => setFieldValue('type', type)}
                         name="type"
                       />
                     </Flex>

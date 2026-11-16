@@ -1,0 +1,17 @@
+{
+  "name": "@strapi/tests-e2e",
+  "private": true,
+  "description": "End-to-end (UI) test suite, run with Playwright.",
+  "scripts": {
+    "lint": "run -T eslint . --max-warnings=0",
+    "test": "run -T playwright test",
+    "test:ts": "run -T tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@strapi/tests-shared": "workspace:*",
+    "@types/node": "22.20.0",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
+  }
+}

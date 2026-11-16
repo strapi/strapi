@@ -1,6 +1,6 @@
 {
   "name": "@strapi/email",
-  "version": "5.61.0",
+  "version": "5.62.0",
   "description": "Easily configure your Strapi application to send emails.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -62,10 +62,11 @@
     "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
-    "@strapi/design-system": "2.2.4",
-    "@strapi/icons": "2.2.4",
-    "@strapi/provider-email-sendmail": "5.61.0",
-    "@strapi/utils": "5.61.0",
+    "@strapi/design-system": "2.3.1",
+    "@strapi/icons": "2.3.1",
+    "@strapi/provider-email-sendmail": "5.62.0",
+    "@strapi/types": "5.62.0",
+    "@strapi/utils": "5.62.0",
     "koa2-ratelimit": "^1.1.3",
     "lodash": "4.18.1",
     "react-intl": "6.6.2",
@@ -74,8 +75,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@strapi/admin": "5.61.0",
-    "@strapi/types": "5.61.0",
+    "@strapi/admin": "5.62.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -91,15 +91,21 @@
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
-    "vitest-config": "5.61.0"
+    "vitest-config": "5.62.0"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
+    "@types/koa": "^2.13.5 || ^3",
     "koa": "^2.15.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=22.0.0 <=26.x.x",

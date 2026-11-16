@@ -1,6 +1,13 @@
+import { EventEmitter } from 'node:events';
+import fs from 'node:fs';
+import os from 'node:os';
 import { join } from 'path';
 
+import { Database } from '@strapi/database';
+
 import { bootstrap } from '../bootstrap';
+import { aiMetadataJob } from '../models/ai-metadata-job';
+import { createAIMetadataJobsService } from '../services/ai-metadata-jobs';
 
 jest.mock('@strapi/provider-upload-local', () => ({
   init() {
@@ -20,8 +27,13 @@ const createStrapiMock = ({
   hasProvider = jest.fn(() => false),
   registerStrapiManagedProvider = jest.fn(),
   auditLogsLifecycle = undefined as { registerEvent: jest.Mock } | undefined,
+  aiMetadataJobs = { failInterruptedJobs: jest.fn() } as Partial<
+    ReturnType<typeof createAIMetadataJobsService>
+  >,
+  httpServer = new EventEmitter(),
 } = {}) =>
   ({
+    server: { httpServer },
     has: jest.fn((name: string) => name === 'audit-logs-lifecycle' && !!auditLogsLifecycle),
     get(name: string) {
       switch (name) {
@@ -76,6 +88,7 @@ const createStrapiMock = ({
             hasProvider,
             registerStrapiManagedProvider,
           },
+          aiMetadataJobs,
         },
       },
     },
@@ -187,5 +200,69 @@ describe('Upload plugin bootstrap function', () => {
       'media-folder.delete.audit',
       'media.move',
     ]);
+  });
+
+  describe('AI metadata jobs left by a previous process', () => {
+    let db: Database;
+    let tmpDir: string;
+    let jobs: ReturnType<typeof createAIMetadataJobsService>;
+
+    beforeAll(async () => {
+      tmpDir = fs.mkdtempSync(join(os.tmpdir(), 'strapi-upload-bootstrap-'));
+      db = new Database({
+        connection: {
+          client: 'sqlite',
+          connection: { filename: join(tmpDir, 'data.db') },
+          useNullAsDefault: true,
+        },
+        settings: { migrations: { dir: join(tmpDir, 'migrations') } },
+        logger: { debug() {}, info() {}, warn() {}, error() {} } as any,
+      });
+
+      await db.init({ models: [aiMetadataJob] });
+      await db.schema.sync();
+
+      jobs = createAIMetadataJobsService({ strapi: { db } as any });
+    });
+
+    afterAll(async () => {
+      await db.destroy();
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    test('leaves a processing job alone when the app is only loaded, as CLI commands do', async () => {
+      // `strapi export`, `strapi console` and the like run `load()` but never listen. A server
+      // may be running this job right now, so the CLI process must not touch it.
+      global.strapi = { ...createStrapiMock({ aiMetadataJobs: jobs }), db };
+
+      const jobId = await jobs.createJob();
+
+      await bootstrap({ strapi });
+
+      expect(await jobs.getJob(jobId)).toMatchObject({ status: 'processing', completedAt: null });
+    });
+
+    test('fails a job left processing by a previous server once this server listens', async () => {
+      const httpServer = new EventEmitter();
+      const failInterruptedJobs = jest.spyOn(jobs, 'failInterruptedJobs');
+      // The entity manager reaches for the global `strapi.db` to open its transactions
+      global.strapi = { ...createStrapiMock({ aiMetadataJobs: jobs, httpServer }), db };
+
+      // The previous server created the job, then stopped before `processExistingFiles` settled it
+      const jobId = await jobs.createJob();
+
+      await bootstrap({ strapi });
+      expect(failInterruptedJobs).not.toHaveBeenCalled();
+
+      httpServer.emit('listening');
+      await failInterruptedJobs.mock.results[0]?.value;
+
+      // Without this, `/latest` keeps answering `processing` and the settings page polls forever
+      const job = await jobs.getJob(jobId);
+      expect(job).toMatchObject({ id: jobId, status: 'failed' });
+      expect(job?.completedAt).not.toBeNull();
+
+      failInterruptedJobs.mockRestore();
+    });
   });
 });

@@ -10,6 +10,7 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const AUDIT_LOG_ACTIONS = ['admin::audit-logs.export', 'admin::audit-logs.read'];
 
 type PermissionLike = { action: string };
+type SettingsPermission = { action: string; disabledByConfig?: boolean };
 
 const pickAuditLogActions = (permissions: PermissionLike[]) =>
   permissions
@@ -73,6 +74,23 @@ describeOnCondition(edition === 'EE')(
       return tokenRq({ method: 'GET', url: '/admin/audit-logs' });
     };
 
+    // Returns the `disabledByConfig` flag of each audit-log action of the permission editors layout
+    const getAuditLogLayoutFlags = async () => {
+      const res = await rq({ method: 'GET', url: '/admin/permissions' });
+
+      expect(res.statusCode).toBe(200);
+
+      const settings: SettingsPermission[] = res.body.data.sections.settings;
+
+      return settings
+        .filter((permission) => AUDIT_LOG_ACTIONS.includes(permission.action))
+        .sort((a, b) => a.action.localeCompare(b.action))
+        .map((permission) => ({
+          action: permission.action,
+          disabledByConfig: permission.disabledByConfig,
+        }));
+    };
+
     const getSuperAdminRoleId = async () => {
       const superAdminRole = await strapi!.service('admin::role').getSuperAdmin();
 
@@ -131,6 +149,9 @@ describeOnCondition(edition === 'EE')(
     test('a custom role and an admin token hold the audit-log grants while the config is on', async () => {
       await expectGrantsKept();
       expect((await getAuditLogsWithToken()).statusCode).toBe(200);
+      expect(await getAuditLogLayoutFlags()).toEqual(
+        AUDIT_LOG_ACTIONS.map((action) => ({ action, disabledByConfig: undefined }))
+      );
     });
 
     test('booting with the config off keeps the audit-log grants of every role and admin token', async () => {
@@ -141,11 +162,20 @@ describeOnCondition(edition === 'EE')(
       await expectGrantsKept();
     });
 
+    test('booting with the config off marks the audit-log actions as disabled by config in the permission editors', async () => {
+      expect(await getAuditLogLayoutFlags()).toEqual(
+        AUDIT_LOG_ACTIONS.map((action) => ({ action, disabledByConfig: true }))
+      );
+    });
+
     test('booting with the config back on lets the admin token read the audit logs again', async () => {
       await reboot(true);
 
       await expectGrantsKept();
       expect((await getAuditLogsWithToken()).statusCode).toBe(200);
+      expect(await getAuditLogLayoutFlags()).toEqual(
+        AUDIT_LOG_ACTIONS.map((action) => ({ action, disabledByConfig: undefined }))
+      );
     });
   }
 );

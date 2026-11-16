@@ -193,9 +193,9 @@ export const FeedbackModal: React.FC = () => {
     >
       <Modal.Content>
         <Modal.Header>
-          <Typography variant="omega" fontWeight="bold">
+          <Modal.Title variant="omega" fontWeight="bold">
             {t('chat.feedback.title', 'Give feedback')}
-          </Typography>
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Flex direction="column" alignItems="start" gap={6} width="100%">

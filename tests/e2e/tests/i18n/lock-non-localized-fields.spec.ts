@@ -62,6 +62,8 @@ test.describe('Lock non-localized fields on secondary locales', () => {
       .getByText('Pick one component', { exact: true })
       .locator('xpath=following::button[normalize-space(.)="variations"][1]')
       .click();
+    // On a collection type the tile opens a menu: empty component or copy of an existing one.
+    await page.getByRole('menuitem', { name: 'Empty component' }).click();
     const sharedDzName = page.locator('input[name="variationBlocks.0.name"]');
     // Inherited dynamic-zone items have an id, so the accordion starts collapsed and
     // the nested inputs are not mounted until it is opened.

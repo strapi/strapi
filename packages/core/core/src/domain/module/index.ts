@@ -28,6 +28,7 @@ export interface Module {
   bootstrap: () => Promise<void>;
   register: () => Promise<void>;
   destroy: () => Promise<void>;
+  isDestroyed: () => boolean;
   load: () => void;
   routes: Core.Module['routes'];
   config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
@@ -94,7 +95,15 @@ export const createModule = (
         throw new Error(`Destroy for ${namespace} has already been called`);
       }
       called.destroy = true;
-      await (rawModule.destroy && rawModule.destroy({ strapi }));
+      try {
+        await (rawModule.destroy && rawModule.destroy({ strapi }));
+      } catch (error) {
+        called.destroy = false;
+        throw error;
+      }
+    },
+    isDestroyed() {
+      return called.destroy === true;
     },
     load() {
       strapi.get('content-types').add(namespace, rawModule.contentTypes);
