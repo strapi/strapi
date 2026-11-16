@@ -58,8 +58,16 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
       },
     });
 
-  const findVersions = () =>
-    strapi.db.query(HISTORY_VERSION_UID).findMany({ where: { contentType: noteUid } });
+  const findVersions = async () => {
+    await strapi.db.settleTransactionHooks();
+
+    return strapi.db.query(HISTORY_VERSION_UID).findMany({ where: { contentType: noteUid } });
+  };
+
+  const deleteVersions = async () => {
+    await strapi.db.settleTransactionHooks();
+    await strapi.db.query(HISTORY_VERSION_UID).deleteMany({ where: {} });
+  };
 
   const expectContentApiTokenVersion = (version) => {
     expect(version).toMatchObject({
@@ -82,7 +90,7 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
   });
 
   beforeEach(async () => {
-    await strapi.db.query(HISTORY_VERSION_UID).deleteMany({ where: {} });
+    await deleteVersions();
   });
 
   test('Records a REST create and update made with an API token', async () => {
@@ -96,7 +104,7 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
 
   test('Records a GraphQL update made with an API token', async () => {
     const created = await restCreate('Hello');
-    await strapi.db.query(HISTORY_VERSION_UID).deleteMany({ where: {} });
+    await deleteVersions();
 
     await graphqlUpdate(created.body.data.documentId, 'Hello again');
 
@@ -159,6 +167,7 @@ describeOnCondition(edition === 'EE')('History of Content API writes', () => {
     };
 
     const findNoteVersions = async (documentId: string) => {
+      await strapi.db.settleTransactionHooks();
       const adminRequest = await createAuthRequest({ strapi });
       const { body } = await adminRequest({
         method: 'GET',
