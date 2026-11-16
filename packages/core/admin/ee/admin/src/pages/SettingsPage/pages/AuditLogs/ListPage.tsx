@@ -15,7 +15,9 @@ import {
   withEncodedUserParams,
 } from '../../../../../../../admin/src/hooks/useQueryParams';
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
+import { NotFoundPage } from '../../../../../../../admin/src/pages/NotFoundPage';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
+import { useIsAuditLogsDisabledByConfig } from '../../../../hooks/useIsAuditLogsDisabledByConfig';
 
 import { ExportCard } from './components/ExportCard';
 import { Modal } from './components/Modal';
@@ -284,6 +286,15 @@ const ProtectedListPage = () => {
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.auditLogs?.main
   );
+  const { isLoading, isDisabledByConfig } = useIsAuditLogsDisabledByConfig();
+
+  if (isLoading === true) {
+    return <Page.Loading />;
+  }
+
+  if (isDisabledByConfig === true) {
+    return <NotFoundPage />;
+  }
 
   return (
     <Page.Protect permissions={permissions}>

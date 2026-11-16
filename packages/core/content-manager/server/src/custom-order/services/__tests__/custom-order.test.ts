@@ -125,7 +125,7 @@ const createKnex = () => {
   return { knex, table, results, calls };
 };
 
-const createStrapi = () => {
+const createStrapi = ({ client = 'mysql' }: { client?: string } = {}) => {
   const { queryBuilder, execute, builders } = createQueryBuilder();
   const { knex, table, results: knexResults, calls: knexCalls } = createKnex();
 
@@ -144,6 +144,7 @@ const createStrapi = () => {
     db: {
       queryBuilder,
       connection: knex,
+      dialect: { client },
       getConnection: jest.fn(() => table),
       transaction: jest.fn(async (fn: (ctx: { trx: string }) => Promise<unknown>) =>
         fn({ trx: 'trx' })
@@ -455,6 +456,17 @@ describe('Custom order service', () => {
       // Rows of documents that already have a position take it
       expect(knex.raw).toHaveBeenNthCalledWith(1, '(?)', [expect.anything()]);
       // The others go above the current top
+      expect(knex.raw).toHaveBeenNthCalledWith(2, '? - CAST(? AS SIGNED)', [4, expect.anything()]);
+    });
+
+    test('Subtracts the id directly on Postgres and SQLite', async () => {
+      const { strapi, execute, knex, knexResults } = createStrapi({ client: 'postgres' });
+      execute.mockResolvedValueOnce({ id: 7 }).mockResolvedValueOnce(undefined);
+      knexResults.push({ id: 7 }, { min: 4 }, 1, 2);
+      const service = createCustomOrderService({ strapi });
+
+      await service.assignMissingPositions(ARTICLE_UID);
+
       expect(knex.raw).toHaveBeenNthCalledWith(2, '? - (?)', [4, expect.anything()]);
     });
   });

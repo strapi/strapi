@@ -316,6 +316,10 @@ const EditPage = () => {
    * API will throw an error in case they try to create a new workflow or set more
    * stages than the limit.
    *
+   * The workflow limit is only checked on the create route, because it is enforced only on
+   * creation: an existing workflow can be updated above it, and checking it on the edit page
+   * would reopen the modal every time the workflows are refetched, e.g. after a successful save.
+   *
    * If the current license does not have a limit (e.g. offline license):
    * do nothing (for now). In case they are trying to create the 201st workflow/ stage
    * the API will throw an error.
@@ -323,7 +327,12 @@ const EditPage = () => {
    */
   React.useEffect(() => {
     if (!isLoadingWorkflow && !isLicenseLoading) {
-      if (meta && numberOfWorkflows && meta?.workflowCount > parseInt(numberOfWorkflows, 10)) {
+      if (
+        isCreatingWorkflow === true &&
+        meta &&
+        numberOfWorkflows &&
+        meta?.workflowCount > parseInt(numberOfWorkflows, 10)
+      ) {
         setShowLimitModal('workflow');
       } else if (
         currentWorkflow &&
@@ -336,6 +345,7 @@ const EditPage = () => {
     }
   }, [
     currentWorkflow,
+    isCreatingWorkflow,
     isLicenseLoading,
     isLoadingWorkflow,
     limits,
@@ -551,4 +561,4 @@ const ProtectedEditPage = () => {
   );
 };
 
-export { ProtectedEditPage };
+export { EditPage, ProtectedEditPage };

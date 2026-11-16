@@ -8,6 +8,7 @@ const builder = vi.hoisted(() => ({
   components: new Map<string, unknown>(),
   editContentType: vi.fn(),
   writeFiles: vi.fn(),
+  renameComponentRows: vi.fn(),
   rollback: vi.fn(),
 }));
 

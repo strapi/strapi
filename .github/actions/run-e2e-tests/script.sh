@@ -2,7 +2,9 @@
 ## Align with `tests/utils/e2e-edition.ts`: explicit CE vs EE for the whole e2e run.
 if [[ "${RUN_EE:-}" == "true" ]]; then
   export STRAPI_E2E_EDITION=ee
-  export STRAPI_DISABLE_LICENSE_PING=true
+  if [[ "${DISABLE_LICENSE_PING:-true}" == "true" ]]; then
+    export STRAPI_DISABLE_LICENSE_PING=true
+  fi
 else
   export STRAPI_E2E_EDITION=ce
 fi

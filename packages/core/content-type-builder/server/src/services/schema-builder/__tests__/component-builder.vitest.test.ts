@@ -74,3 +74,41 @@ describe('component-builder editComponent', () => {
     expect(fse.remove).not.toHaveBeenCalled();
   });
 });
+
+describe('component-builder createComponent', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (global as any).strapi = {
+      dirs: { app: { components: COMPONENTS_DIR } },
+      telemetry: { send: vi.fn() },
+    };
+  });
+
+  it.each([
+    { name: 'is missing', displayName: undefined },
+    { name: 'is an empty string', displayName: '' },
+    { name: 'is null', displayName: null },
+    { name: 'is a number', displayName: 42 },
+  ])('rejects a component whose displayName $name', ({ displayName }) => {
+    const { builder } = createBuilder();
+
+    expect(() =>
+      builder.createComponent({ category: 'shared', displayName, attributes: {} })
+    ).toThrow('A component requires a displayName');
+
+    expect([...builder.components.keys()]).toEqual([HERO_UID]);
+  });
+
+  it('creates a component with a valid displayName', () => {
+    const { builder } = createBuilder();
+
+    const component = builder.createComponent({
+      category: 'shared',
+      displayName: 'Seo',
+      attributes: {},
+    });
+
+    expect(component.uid).toBe('shared.seo');
+    expect(component.schema.info.displayName).toBe('Seo');
+  });
+});
