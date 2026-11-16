@@ -378,6 +378,32 @@ describeOnCondition(edition === 'EE')('Content releases service results (api)', 
       ]);
     });
 
+    // controllers/release.ts findOne and services/release.ts updateReleaseStatus filter the
+    // `release` relation by a scalar ID
+    test('countActions filters the release relation by its ID', async () => {
+      expect(
+        await service('release-action').countActions({ filters: { release: planned.id } })
+      ).toBe(3);
+      expect(
+        await service('release-action').countActions({ filters: { release: scheduled.id } })
+      ).toBe(0);
+      expect(
+        await service('release-action').countActions({
+          filters: { release: planned.id, type: 'publish' },
+        })
+      ).toBe(2);
+      // updateReleaseStatus, with NOT_READY_ACTION_WHERE: every publish action here is valid
+      expect(
+        await service('release-action').countActions({
+          filters: {
+            release: planned.id,
+            type: 'publish',
+            $or: [{ isEntryValid: false }, { isEntryValid: { $null: true } }],
+          },
+        })
+      ).toBe(0);
+    });
+
     test('getAllComponents resolves the component schemas by UID', async () => {
       const components = await service('release').getAllComponents();
 
