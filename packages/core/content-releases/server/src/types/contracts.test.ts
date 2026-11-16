@@ -1,6 +1,7 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Modules, Struct } from '@strapi/types';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
+import type { AdminUser } from '@strapi/admin/strapi-server';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { Pagination, Release, ReleaseDataResponse } from '../../../shared/contracts/releases';
 import type { Services } from './index';
@@ -101,10 +102,18 @@ const findManyWithActions = () =>
 // A populate the contract does not model gives `unknown` for that relation.
 const findManyWithActionsCount = () =>
   releaseService.findMany({ populate: { actions: { count: true } } });
-const findManyWithCreator = () => releaseService.findMany({ populate: ['createdBy'] });
+// `createdBy` with an object populate, which the contract does not model.
+const findManyWithCreatorFields = () =>
+  releaseService.findMany({ populate: { createdBy: { fields: ['email'] } } });
 // A populate whose value the types cannot read gives `unknown` for every relation.
 declare const anyPopulate: string | string[] | undefined;
 const findManyWithUnreadPopulate = () => releaseService.findMany({ populate: anyPopulate });
+// `findOne` reads with the same query transform as `findMany`.
+const findOneWithoutPopulate = () => releaseService.findOne(1);
+// `controllers/release.ts` `findOne`: the creator's row without its roles, `null` once the creator
+// is deleted (the join column is set to `null`).
+const findOneWithCreator = () => releaseService.findOne(1, { populate: ['createdBy'] });
+const findManyWithCreator = () => releaseService.findMany({ populate: ['createdBy'] });
 
 export type ReleaseReadContractAssertions = [
   Expect<
@@ -142,7 +151,7 @@ export type ReleaseReadContractAssertions = [
   >,
   Expect<
     Equal<
-      [Awaited<ReturnType<typeof findManyWithCreator>>],
+      [Awaited<ReturnType<typeof findManyWithCreatorFields>>],
       [Array<ReleaseRow & { createdBy: unknown }>]
     >
   >,
@@ -150,6 +159,19 @@ export type ReleaseReadContractAssertions = [
     Equal<
       [Awaited<ReturnType<typeof findManyWithUnreadPopulate>>],
       [Array<ReleaseRow & { actions: unknown; createdBy: unknown; updatedBy: unknown }>]
+    >
+  >,
+  Expect<Equal<[Awaited<ReturnType<typeof findOneWithoutPopulate>>], [ReleaseRow | null]>>,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<typeof findOneWithCreator>>],
+      [(ReleaseRow & { createdBy: Omit<AdminUser, 'roles'> | null }) | null]
+    >
+  >,
+  Expect<
+    Equal<
+      [Awaited<ReturnType<typeof findManyWithCreator>>],
+      [Array<ReleaseRow & { createdBy: Omit<AdminUser, 'roles'> | null }>]
     >
   >,
   // `findByDocumentAttached` filters with `null` values and query-string values.

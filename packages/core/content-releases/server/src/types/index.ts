@@ -1,3 +1,4 @@
+import type { AdminUser } from '@strapi/admin/strapi-server';
 import type { Core, Modules, Struct } from '@strapi/types';
 import type { queryParams } from '@strapi/utils';
 import type { Controllers } from './controllers';
@@ -146,9 +147,11 @@ type PopulateByRelation<TPopulate> = 0 extends 1 & TPopulate
         : UnreadPopulate;
 
 /**
- * A populated relation as the plugin's `findMany` callers read it (same API test): the full
- * `actions` when the populate names them, and the `actions` with only the requested `fields` (plus
- * `id` and `documentId`), filtered or not. Any other populate gives `unknown`.
+ * A populated relation as the plugin's `findMany` and `findOne` callers read it (same API test): the
+ * full `actions` when the populate names them, and the `actions` with only the requested `fields`
+ * (plus `id` and `documentId`), filtered or not. A named `createdBy` is the admin user's row without
+ * its roles, and `null` once the user is deleted (the join column is set to `null`). Any other
+ * populate gives `unknown`.
  */
 type PopulatedRelation<TRelation, TValue> = TRelation extends 'actions'
   ? [TValue] extends [true]
@@ -162,7 +165,11 @@ type PopulatedRelation<TRelation, TValue> = TRelation extends 'actions'
             >
           : unknown
       : unknown
-  : unknown;
+  : TRelation extends 'createdBy'
+    ? [TValue] extends [true]
+      ? Omit<AdminUser, 'roles'> | null
+      : unknown
+    : unknown;
 
 /**
  * A release row with the relations that `TPopulate` populates. A populate that may be `undefined`
@@ -186,12 +193,17 @@ type ReleaseWhere = Record<string, unknown>;
 /**
  * The `release` service. The query engine's result stays `any` in the implementation, and the
  * published declaration prints the content-manager components as `any`; the results below are the
- * ones the runtime returns. `findMany` follows the caller's `populate`.
+ * ones the runtime returns. `findOne` and `findMany` follow the caller's `populate`.
  */
 type ReleaseServiceContract = Omit<
   ReleaseService,
-  'findPage' | 'findMany' | 'update' | 'getAllComponents'
+  'findOne' | 'findPage' | 'findMany' | 'update' | 'getAllComponents'
 > & {
+  /** The release with the relations that `populate` names, or `null` when no release matches. */
+  findOne<const TPopulate extends ReleasePopulate | undefined = undefined>(
+    id: Parameters<ReleaseService['findOne']>[0],
+    query?: { populate?: TPopulate }
+  ): Promise<PopulatedRelease<TPopulate> | null>;
   /** A page of releases, each with the count of its actions, whatever the query. */
   findPage(...args: Parameters<ReleaseService['findPage']>): Promise<{
     results: Array<ReleaseRow & { actions: { count: number } }>;
