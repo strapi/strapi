@@ -13,7 +13,8 @@ import _, {
 /* eslint-disable @typescript-eslint/default-param-last */
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
-import type { Data } from '@strapi/types';
+import type { queryParams } from '@strapi/utils';
+import type { Core, Data } from '@strapi/types';
 
 import permissionDomain, { type CreatePermissionPayload } from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
@@ -152,7 +153,9 @@ const find = (params = {}, populate: unknown): Promise<AdminRole[]> => {
 /**
  * Find all roles in database
  */
-const findAllWithUsersCount = async (params: any): Promise<AdminRoleWithUsersCount[]> => {
+const findAllWithUsersCount = async (
+  params: Core.IsStrict extends true ? queryParams.Params & Record<string, unknown> : any
+): Promise<AdminRoleWithUsersCount[]> => {
   const roles: AdminRoleWithUsersCount[] = await strapi.db
     .query('admin::role')
     .findMany(strapi.get('query-params').transform('admin::role', params));
@@ -169,7 +172,10 @@ const findAllWithUsersCount = async (params: any): Promise<AdminRoleWithUsersCou
  * @param params query params to find the role to update
  * @param attributes A partial role object
  */
-const update = async (params: any, attributes: Partial<AdminRole>): Promise<AdminRole> => {
+const update = async (
+  params: Core.IsStrict extends true ? { id: Data.ID } : any,
+  attributes: Partial<AdminRole>
+): Promise<AdminRole> => {
   const sanitizedAttributes = _.omit(attributes, ['code']);
 
   if (_.has(params, 'id') && _.has(sanitizedAttributes, 'name')) {
@@ -206,7 +212,9 @@ const exists = async (params = {} as unknown): Promise<boolean> => {
  * Count the number of roles based on search params
  * @param params params used for the query
  */
-const count = async (params = {} as any): Promise<number> => {
+const count = async (
+  params: Core.IsStrict extends true ? Record<string, unknown> : any = {}
+): Promise<number> => {
   return strapi.db.query('admin::role').count(params);
 };
 
