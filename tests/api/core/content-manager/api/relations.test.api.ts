@@ -1093,6 +1093,122 @@ describe('Relations', () => {
     }
   );
 
+  // Reordering only works with objects, same as the block above.
+  describe.each(testCases.filter(([_name, mode]) => mode !== 'docId'))(
+    'Connect a new relation and reorder it in the same save - %s',
+    (_name, mode) => {
+      test('Connects a new relation and positions it among existing ones', async () => {
+        const existing = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
+
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: existing },
+            products_mm: { connect: existing },
+            products_mw: { connect: existing },
+            myCompo: {
+              compo_products_mw: { connect: existing },
+            },
+          },
+          ['myCompo']
+        );
+
+        const connect =
+          mode === 'idObject'
+            ? [
+                { id: id3, position: { before: id2 } },
+                { id: id1, position: { start: true } },
+              ]
+            : [
+                { documentId: docid3, position: { before: docid2 } },
+                { documentId: docid1, position: { start: true } },
+              ];
+
+        const updatedEntry = await updateEntry(
+          'shop',
+          createdShop.data.documentId,
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect },
+            products_mm: { connect },
+            products_mw: { connect },
+            myCompo: {
+              id: createdShop.data.myCompo.id,
+              compo_products_mw: { connect },
+            },
+          },
+          populateShop
+        );
+
+        expect(updatedEntry.error).toBeUndefined();
+        expect(updatedEntry.data).toBeDefined();
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        const expected = [{ documentId: docid1 }, { documentId: docid3 }, { documentId: docid2 }];
+        expect(updatedShop.products_om).toMatchObject(expected);
+        expect(updatedShop.products_mm).toMatchObject(expected);
+        expect(updatedShop.products_mw).toMatchObject(expected);
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expected);
+      });
+
+      test('Connects a new relation at the start of the list', async () => {
+        const existing = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
+
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: existing },
+            products_mm: { connect: existing },
+            products_mw: { connect: existing },
+            myCompo: {
+              compo_products_mw: { connect: existing },
+            },
+          },
+          ['myCompo']
+        );
+
+        const connect =
+          mode === 'idObject'
+            ? [{ id: id3, position: { start: true } }]
+            : [{ documentId: docid3, position: { start: true } }];
+
+        const updatedEntry = await updateEntry(
+          'shop',
+          createdShop.data.documentId,
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect },
+            products_mm: { connect },
+            products_mw: { connect },
+            myCompo: {
+              id: createdShop.data.myCompo.id,
+              compo_products_mw: { connect },
+            },
+          },
+          populateShop
+        );
+
+        expect(updatedEntry.error).toBeUndefined();
+        expect(updatedEntry.data).toBeDefined();
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        const expected = [{ documentId: docid3 }, { documentId: docid1 }, { documentId: docid2 }];
+        expect(updatedShop.products_om).toMatchObject(expected);
+        expect(updatedShop.products_mm).toMatchObject(expected);
+        expect(updatedShop.products_mw).toMatchObject(expected);
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expected);
+      });
+    }
+  );
+
   describe('Disconnect entity relations', () => {
     describe.each(testCases)('ids being %s', (name, mode) => {
       test('Remove all relations docid1, docid2, docid3', async () => {
