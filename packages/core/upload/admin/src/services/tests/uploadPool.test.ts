@@ -89,7 +89,6 @@ const settle = async (inFlight: Deferred[], upTo: number) => {
   for (let i = 0; i < upTo; i += 1) {
     if (inFlight[i]) {
       // Each resolution frees a worker, which may enqueue the next request.
-      // eslint-disable-next-line no-await-in-loop
       await act(async () => {
         inFlight[i].resolve();
       });
