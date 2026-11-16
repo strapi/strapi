@@ -38,6 +38,10 @@ const GET_FOLDER = /* GraphQL */ `
   }
 `;
 
+const ownFolders = () => ({
+  documentId: { in: Object.values(folders).map((folder) => folder.documentId) },
+});
+
 const createFolder = async (name, parent = null) => {
   const res = await rqAdmin({ method: 'POST', url: '/upload/folders', body: { name, parent } });
 
@@ -195,13 +199,15 @@ describe('Upload GraphQL - read-only folder queries', () => {
       expect(mutations.filter((name) => /folder/i.test(name))).toEqual([]);
     });
 
-    test('exposes the folder fields REST returns, without files, children or pathId', async () => {
+    test('exposes the folder fields REST returns, without files, children, pathId or publishedAt', async () => {
       const fields = await getTypeFields('UploadFolder');
 
       expect(fields).toEqual(
         expect.arrayContaining(['documentId', 'name', 'path', 'namePath', 'parent'])
       );
-      expect(fields.filter((name) => /^(files|children|pathId)/.test(name))).toEqual([]);
+      expect(fields.filter((name) => /^(files|children|pathId|publishedAt)/.test(name))).toEqual(
+        []
+      );
     });
 
     test.each([
@@ -236,13 +242,14 @@ describe('Upload GraphQL - read-only folder queries', () => {
 
       expect(filters).toEqual(expect.arrayContaining(['name', 'path', 'parent']));
       expect(filters).not.toContain('files');
+      expect(filters).not.toContain('publishedAt');
     });
   });
 
   describe('Queries', () => {
     test('lists root folders with a null parent filter', async () => {
       const res = await gqlFullAccess(LIST_FOLDERS, {
-        filters: { parent: { documentId: { null: true } } },
+        filters: { ...ownFolders(), parent: { documentId: { null: true } } },
       });
 
       expect(res.body.errors).toBeUndefined();
@@ -283,7 +290,7 @@ describe('Upload GraphQL - read-only folder queries', () => {
 
     test('resolves the name path of every folder on a page', async () => {
       const res = await gqlFullAccess(LIST_FOLDERS, {
-        filters: { path: { startsWith: folders.clients.path } },
+        filters: { ...ownFolders(), path: { startsWith: folders.clients.path } },
       });
 
       expect(res.body.data.uploadFolders.map(({ namePath }) => namePath)).toEqual([
@@ -294,21 +301,28 @@ describe('Upload GraphQL - read-only folder queries', () => {
     });
 
     test('paginates the list', async () => {
-      const res = await gqlFullAccess(/* GraphQL */ `
-        {
-          uploadFolders_connection(pagination: { page: 1, pageSize: 2 }, sort: "name:asc") {
-            nodes {
-              name
-            }
-            pageInfo {
-              page
-              pageSize
-              pageCount
-              total
+      const res = await gqlFullAccess(
+        /* GraphQL */ `
+          query paginateFolders($filters: UploadFolderFiltersInput) {
+            uploadFolders_connection(
+              filters: $filters
+              pagination: { page: 1, pageSize: 2 }
+              sort: "name:asc"
+            ) {
+              nodes {
+                name
+              }
+              pageInfo {
+                page
+                pageSize
+                pageCount
+                total
+              }
             }
           }
-        }
-      `);
+        `,
+        { filters: ownFolders() }
+      );
 
       expect(res.body.data.uploadFolders_connection).toEqual({
         nodes: [{ name: '2026' }, { name: 'Acme' }],

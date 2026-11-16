@@ -28,6 +28,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
   folderCRUD.field('files').disable();
   folderCRUD.field('children').disableOutput();
   folderCRUD.field('pathId').disableOutput();
+  folderCRUD.field('publishedAt').disable();
 
   getGraphQLService('extension').shadowCRUD(FILE_MODEL_UID).disableMutations();
 
@@ -162,7 +163,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
     });
 
     return {
-      types: [fileInfoInputType, folderNamePath, mutations],
+      types: [fileInfoInputType, ...(folderCRUD.isEnabled() ? [folderNamePath] : []), mutations],
       resolversConfig: {
         // Use custom scopes for the upload file CRUD operations
         'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },

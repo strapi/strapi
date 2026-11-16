@@ -17,8 +17,10 @@ describe('Upload GraphQL extension', () => {
     getNamePaths: jest.Mock;
   };
   let resolvers: Record<string, Resolver>;
+  let isFolderCRUDEnabled: boolean;
+  let types: Array<{ name?: string; type?: string }>;
 
-  beforeEach(() => {
+  const install = () => {
     mockDbFindOne = jest.fn();
     mockUploadService = {
       findOne: jest.fn(),
@@ -43,10 +45,13 @@ describe('Upload GraphQL extension', () => {
     const graphqlServices: Record<string, unknown> = {
       extension: {
         shadowCRUD: () => ({
+          isEnabled: () => isFolderCRUDEnabled,
           disableMutations: jest.fn(),
           field: () => ({ disable: jest.fn(), disableOutput: jest.fn() }),
         }),
-        use: (register: (ctx: { nexus: unknown }) => unknown) => register({ nexus }),
+        use(register: (ctx: { nexus: unknown }) => { types: typeof types }) {
+          types = register({ nexus }).types;
+        },
       },
       utils: { naming: { getTypeName: () => 'UploadFile' } },
     };
@@ -66,6 +71,11 @@ describe('Upload GraphQL extension', () => {
     };
 
     installGraphqlExtension({ strapi: strapi as any });
+  };
+
+  beforeEach(() => {
+    isFolderCRUDEnabled = true;
+    install();
   });
 
   describe('updateUploadFile', () => {
@@ -175,6 +185,13 @@ describe('Upload GraphQL extension', () => {
     it('returns null for a folder without a path', async () => {
       expect(await resolvers.namePath({ path: null }, {}, {})).toBeNull();
       expect(mockUploadService.getNamePaths).not.toHaveBeenCalled();
+    });
+
+    it('leaves the folder type alone when its shadow CRUD is disabled', () => {
+      isFolderCRUDEnabled = false;
+      install();
+
+      expect(types.map((type) => type.type ?? type.name)).toEqual(['FileInfoInput', 'Mutation']);
     });
   });
 });
