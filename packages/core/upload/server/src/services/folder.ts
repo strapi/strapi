@@ -238,6 +238,20 @@ const update = async (
       }
 
       // update folders below
+      let replaceQuery;
+      switch (strapi.db.dialect?.client) {
+        case 'sqlite':
+          replaceQuery = '? || SUBSTRING(??, ?)';
+          break;
+        case 'postgres':
+          replaceQuery = 'CONCAT(?::TEXT, SUBSTRING(??, ?::INTEGER))';
+          break;
+        default:
+          replaceQuery = 'CONCAT(?, SUBSTRING(??, ?))';
+      }
+
+      const newPath = strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`);
+
       await strapi.db
         .getConnection(folderTable)
         .transacting(trx.get())
@@ -245,10 +259,10 @@ const update = async (
         .orWhere(pathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
           pathColumnName,
-          strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+          strapi.db.connection.raw(replaceQuery, [
+            newPath,
             pathColumnName,
-            existingFolder.path,
-            strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`),
+            existingFolder.path.length + 1,
           ])
         );
 
@@ -260,10 +274,10 @@ const update = async (
         .orWhere(folderPathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
           folderPathColumnName,
-          strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+          strapi.db.connection.raw(replaceQuery, [
+            newPath,
             folderPathColumnName,
-            existingFolder.path,
-            strings.joinBy('/', destinationFolderPath, `${existingFolder.pathId}`),
+            existingFolder.path.length + 1,
           ])
         );
 
