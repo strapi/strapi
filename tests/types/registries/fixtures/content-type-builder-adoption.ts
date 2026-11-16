@@ -82,6 +82,37 @@ components.editComponent('shared.seo', { component: seo });
 const schema = app.service('plugin::content-type-builder.schema');
 schema satisfies SchemaService;
 schema.renameAttribute('api::article.article', 'title', 'heading') satisfies Promise<void>;
+
+// `updateSchema` takes a schema update as the controller's validation returns it, with `options` and
+// `pluginOptions` defaulted to `{}`. A plugin that calls the service directly can send neither: the
+// contract rejects that payload, and a type argument on the lookup types the call instead.
+type PluginContentType = {
+  action: 'create';
+  uid: 'api::tag.tag';
+  displayName: string;
+  singularName: string;
+  pluralName: string;
+  kind: 'collectionType';
+  draftAndPublish: boolean;
+  attributes: [];
+};
+declare const tagCreate: PluginContentType;
+schema.updateSchema({
+  components: [],
+  contentTypes: [{ ...tagCreate, options: {}, pluginOptions: {} }],
+}) satisfies Promise<void>;
+// @ts-expect-error The contract takes the validated payload, with the defaults filled in.
+schema.updateSchema({ components: [], contentTypes: [tagCreate] });
+type PluginSchemaService = {
+  updateSchema(schema: { components: []; contentTypes: PluginContentType[] }): Promise<void>;
+};
+app
+  .plugin('content-type-builder')
+  .service<PluginSchemaService>('schema')
+  .updateSchema({ components: [], contentTypes: [tagCreate] }) satisfies Promise<void>;
+app
+  .service<PluginSchemaService>('plugin::content-type-builder.schema')
+  .updateSchema({ components: [], contentTypes: [tagCreate] }) satisfies Promise<void>;
 app.eventHub.on('component.delete', ({ component }) => {
   // The payload reads the builder's component map, so it may be `undefined`.
   if (component === undefined) {
