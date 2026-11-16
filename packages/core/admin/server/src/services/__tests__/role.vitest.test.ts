@@ -101,7 +101,9 @@ describe('Role', () => {
         name: 'super_admin',
         description: "Have all permissions. Can't be delete",
       };
-      const dbFindOne = vi.fn(({ where: { id } }) => Promise.resolve(_.find([role], { id })));
+      const dbFindOne = vi.fn(({ where: { id } }) =>
+        Promise.resolve([role].find((candidate) => candidate.id === id))
+      );
 
       global.strapi = {
         ...strapiMock,
@@ -122,7 +124,7 @@ describe('Role', () => {
         usersCount: 0,
       };
       const dbFindOne = vi.fn(({ where: { id } }) =>
-        Promise.resolve(_.find([_.omit(role, ['usersCount'])], { id }))
+        Promise.resolve([_.omit(role, ['usersCount'])].find((candidate) => candidate.id === id))
       );
       const dbCount = vi.fn(() => Promise.resolve(0));
       global.strapi = {
