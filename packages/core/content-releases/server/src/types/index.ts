@@ -1,7 +1,8 @@
 import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
-import type { Release } from '../../../shared/contracts/releases';
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
+import type { Pagination, Release } from '../../../shared/contracts/releases';
 import type { ReleaseService } from '../services/release';
 import type { FindPageQuery, ReleaseActionService } from '../services/release-action';
 import type createSchedulingService from '../services/scheduling';
@@ -28,14 +29,57 @@ type ReleaseValidationService = Omit<
 };
 
 /**
+ * A release action as the query engine returns it: its columns, without the relations
+ * (`tests/api/core/content-releases/content-releases-service-results.test.api.ts`). `locale` is
+ * `null` for a content type without i18n.
+ */
+type ReleaseActionRow = Omit<ReleaseAction, 'entry' | 'locale' | 'release' | 'status'> & {
+  locale: string | null;
+};
+
+/** A written release action, with the ID of its release. */
+type CreatedReleaseAction = ReleaseActionRow & { release: Pick<Release, 'id'> };
+
+type ReleaseActionServiceOverride =
+  | 'groupActions'
+  | 'getContentTypeModelsFromActions'
+  | 'create'
+  | 'createMany'
+  | 'findPage'
+  | 'update'
+  | 'delete';
+
+/**
  * The `release-action` service. The controller groups a page by its query's `sort`, so the `action`
  * grouping arrives as `type`; the implementation keeps its published develop parameter type.
+ * The query engine's results stay `any` in the implementation; the results below are the ones the
+ * runtime returns.
  */
-type ReleaseActionServiceContract = Omit<ReleaseActionService, 'groupActions'> & {
+type ReleaseActionServiceContract = Omit<ReleaseActionService, ReleaseActionServiceOverride> & {
   groupActions(
     actions: Parameters<ReleaseActionService['groupActions']>[0],
     groupBy?: Parameters<ReleaseActionService['groupActions']>[1] | FindPageQuery['sort']
   ): ReturnType<ReleaseActionService['groupActions']>;
+  /** Reads only the content type of each action, so it takes the rows of a page. */
+  getContentTypeModelsFromActions(
+    actions: Array<Pick<ReleaseAction, 'contentType'>>
+  ): ReturnType<ReleaseActionService['getContentTypeModelsFromActions']>;
+  create(...args: Parameters<ReleaseActionService['create']>): Promise<CreatedReleaseAction>;
+  /** `alreadyInRelease` counts the entries already in the release or listed twice. */
+  createMany(
+    ...args: Parameters<ReleaseActionService['createMany']>
+  ): Promise<{ created: CreatedReleaseAction[]; alreadyInRelease: number }>;
+  /**
+   * `entry` is the deep-populated document (the draft for a publish action); `entry` and `status`
+   * are `null` when the content type or the entry no longer exists.
+   */
+  findPage(...args: Parameters<ReleaseActionService['findPage']>): Promise<{
+    results: Array<ReleaseActionRow & Pick<ReleaseAction, 'entry' | 'status'>>;
+    pagination: Pagination;
+  }>;
+  update(...args: Parameters<ReleaseActionService['update']>): Promise<ReleaseActionRow>;
+  /** The deleted action, without its release. */
+  delete(...args: Parameters<ReleaseActionService['delete']>): Promise<ReleaseActionRow>;
 };
 
 /** Content Releases services by name, as registered by the plugin. */
