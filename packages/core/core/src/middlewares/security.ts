@@ -1,10 +1,16 @@
 import { defaultsDeep, mergeWith } from 'lodash';
-import helmet, { KoaHelmet } from 'koa-helmet';
+import helmet from 'koa-helmet';
+import type { HelmetOptions } from 'helmet';
 import { CSP_DEFAULTS } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 
-export type Config = NonNullable<Parameters<KoaHelmet>[0]>;
+/**
+ * The options `koa-helmet` passes to `helmet` as they are. Typed from `helmet` itself: the
+ * declarations of `koa-helmet` reference a `helmet` namespace that `helmet` 6 does not declare, so
+ * importing them would add an error to every application compiled with `skipLibCheck: false`.
+ */
+export type Config = HelmetOptions;
 
 /**
  * `plugin::graphql.utils`. GraphQL is an optional plugin that the core does not depend on, so its

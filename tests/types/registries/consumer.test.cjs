@@ -1447,6 +1447,36 @@ for (const strict of [false, true]) {
   });
 }
 
+// `@strapi/strapi` re-exports `@strapi/core`, so the declarations its middleware contracts import
+// are in every application program, with strict types or without. `koa-helmet` types its options
+// as `helmet.HelmetOptions`, a namespace that `helmet` 6 does not declare: loading it adds TS2503 to
+// every application compiled with `skipLibCheck: false`.
+test('application programs do not load the koa-helmet declarations', () => {
+  const compile = compiler({ ...applicationOptions, skipLibCheck: false });
+  for (const [mode, names] of [
+    ['strict types off', ['normal-entry.ts']],
+    ['strict types on', ['strapi-strict.d.ts', 'generated-strict.d.ts', 'common.ts']],
+  ]) {
+    const program = compile(names);
+    const isKoaHelmet = (filename) => filename.includes('/node_modules/koa-helmet/');
+    assert.deepEqual(
+      program
+        .getSourceFiles()
+        .filter((source) => isKoaHelmet(source.fileName))
+        .map((source) => path.relative(repository, source.fileName)),
+      [],
+      `${mode}: no declaration of koa-helmet is in the program`
+    );
+    assert.deepEqual(
+      diagnostics(program)
+        .filter((diagnostic) => isKoaHelmet(diagnostic.file?.fileName ?? ''))
+        .map((diagnostic) => `TS${diagnostic.code}`),
+      [],
+      `${mode}: koa-helmet reports no error`
+    );
+  }
+});
+
 test('conflicting declaration files need one contract per UID, even with the switch off', () => {
   const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
   for (const strict of [false, true]) {
