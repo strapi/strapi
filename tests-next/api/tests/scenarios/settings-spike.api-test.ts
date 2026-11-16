@@ -48,6 +48,11 @@ const editorCanListArticles = async () =>
     })
   ).status === 200;
 
+const defaultLocale = async () => {
+  const res = await request(server, '/i18n/locales', { token: tokens.admin });
+  return res.body.find((locale: { isDefault: boolean }) => locale.isDefault)?.code;
+};
+
 const expectSeededState = async () => {
   const roles = await request(server, '/admin/roles', { token: tokens.admin });
   expect(roles.body.data.map((role: { code: string }) => role.code).sort()).toEqual([
@@ -58,8 +63,7 @@ const expectSeededState = async () => {
 
   expect(await editorCanListArticles()).toBe(true);
 
-  const locales = await request(server, '/i18n/locales', { token: tokens.admin });
-  expect(locales.body.find((locale: { isDefault: boolean }) => locale.isDefault).code).toBe('en');
+  expect(await defaultLocale()).toBe('en');
 
   const users = await request(server, '/admin/users', { token: tokens.admin });
   expect(users.body.data.pagination.total).toBe(3);
@@ -107,6 +111,7 @@ const changeEverything = async () => {
       body: { code: 'de', name: 'German (de)', isDefault: true },
     })
   );
+  expect(await defaultLocale()).toBe('de');
 
   expectCreated(
     await request(server, '/admin/users', {
