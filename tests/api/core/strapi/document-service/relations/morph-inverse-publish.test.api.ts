@@ -779,11 +779,10 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       ]);
     });
 
-    // The admin sends an empty delta for every relation field on save
-    // toAssocs drops a null set, so `{ set: null }` reaches this branch as an empty delta, like
-    // regular relations (a bare `null` still clears). What `{ set: null }` should mean for every
-    // relation kind is still open.
-    it('keeps every link on { set: null }', async () => {
+    // toAssocs drops a null set, so `{ set: null }` reaches this branch as an empty delta. It
+    // clears every link like a bare `null`, as in released Strapi. What `{ set: null }` should
+    // mean for every relation kind is still open (#27432).
+    it('unlinks every entry on { set: null }', async () => {
       const [r1, r2] = await createRemarks(2);
       const note = await strapi.db.query(NOTE_UID).create({
         data: { title: 'linked', remarks: [r1.id, r2.id] },
@@ -795,8 +794,8 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       });
 
       expect(await getRemarkSubjects()).toEqual([
-        { id: r1.id, subjectId: note.id, subjectType: NOTE_UID },
-        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: null, subjectType: null },
       ]);
     });
 
@@ -820,6 +819,7 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       ]);
     });
 
+    // The admin sends an empty delta for every relation field on save
     it('keeps every link on an empty connect and disconnect', async () => {
       const [r1, r2] = await createRemarks(2);
       const note = await strapi.db.query(NOTE_UID).create({
@@ -850,6 +850,41 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       await strapi.db.query(NOTE_UID).update({
         where: { id: note.id },
         data: { remarks: value },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('applies the connect and disconnect given next to a null set', async () => {
+      const [r1, r2, r3] = await createRemarks(3);
+      const note = await strapi.db.query(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] },
+      });
+
+      await strapi.db.query(NOTE_UID).update({
+        where: { id: note.id },
+        data: { remarks: { set: null, connect: [r3.id], disconnect: [r1.id] } },
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: null, subjectType: null },
+        { id: r2.id, subjectId: note.id, subjectType: NOTE_UID },
+        { id: r3.id, subjectId: note.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('unlinks every entry on a null set through the document service', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id, r2.id] } as any,
+      });
+
+      await strapi.documents(NOTE_UID).update({
+        documentId: note.documentId,
+        data: { remarks: { set: null } } as any,
       });
 
       expect(await getRemarkSubjects()).toEqual([
@@ -912,10 +947,146 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
       ]);
     });
 
+    it.each([
+      ['a document of the other type', 'card'],
+      ['a document of the schema target', 'remark'],
+    ])(
+      'rejects a foreign __type given %s through the document service',
+      async (_label, documentOf) => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await strapi.documents(NOTE_UID).create({
+          data: { title: 'linked', remarks: [r1.id] } as any,
+        });
+        const draft = await getNoteRow(note.documentId, 'draft');
+        const card = await strapi.documents(CARD_UID).create({ data: { title: 'c' } as any });
+        const documentId = documentOf === 'card' ? card.documentId : r2.documentId;
+
+        await expect(
+          strapi.documents(NOTE_UID).update({
+            documentId: note.documentId,
+            data: { remarks: { connect: [{ documentId, __type: CARD_UID }] } } as any,
+          })
+        ).rejects.toMatchObject({
+          name: 'ValidationError',
+          message: expect.stringMatching(/Invalid __type/),
+        });
+
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: null, subjectType: null },
+        ]);
+      }
+    );
+
+    // A foreign __type is rejected in every write shape, and nothing is written. Each foreign item
+    // uses a remark's documentId, so only the __type check can reject it.
+    it.each([
+      [
+        'set',
+        ({ r2 }: any) => ({
+          remarks: { set: [{ documentId: r2.documentId, __type: CARD_UID }] },
+        }),
+      ],
+      [
+        'disconnect',
+        ({ r1 }: any) => ({
+          remarks: { disconnect: [{ documentId: r1.documentId, __type: CARD_UID }] },
+        }),
+      ],
+      [
+        'a mix of a valid and a foreign item',
+        ({ r1, r2 }: any) => ({
+          remarks: {
+            connect: [
+              { documentId: r2.documentId, __type: REMARK_UID },
+              { documentId: r1.documentId, __type: CARD_UID },
+            ],
+          },
+        }),
+      ],
+      [
+        'an item given by id',
+        ({ r2 }: any) => ({ remarks: { connect: [{ id: r2.id, __type: CARD_UID }] } }),
+      ],
+      [
+        'a non-string __type',
+        ({ r2 }: any) => ({
+          remarks: { connect: [{ documentId: r2.documentId, __type: { toString: 1 } }] },
+        }),
+      ],
+    ])('rejects a foreign __type in %s through the document service', async (_label, toData) => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] } as any,
+      });
+      const draft = await getNoteRow(note.documentId, 'draft');
+      const card = await strapi.documents(CARD_UID).create({ data: { title: 'c' } as any });
+
+      await expect(
+        strapi.documents(NOTE_UID).update({
+          documentId: note.documentId,
+          data: toData({ r1, r2, card }) as any,
+        })
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: expect.stringMatching(/Invalid __type/),
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
+    it('links an item whose __type is null through the document service', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const note = await strapi.documents(NOTE_UID).create({
+        data: { title: 'linked', remarks: [r1.id] } as any,
+      });
+      const draft = await getNoteRow(note.documentId, 'draft');
+
+      await strapi.documents(NOTE_UID).update({
+        documentId: note.documentId,
+        data: { remarks: { connect: [{ documentId: r2.documentId, __type: null }] } } as any,
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        { id: r2.id, subjectId: draft?.id, subjectType: NOTE_UID },
+      ]);
+    });
+
+    it('rejects a foreign __type on a morphOne through the document service', async () => {
+      const [r1, r2] = await createRemarks(2);
+      const card = await strapi.documents(CARD_UID).create({
+        data: { title: 'pinned', pinnedRemark: [r1.id] } as any,
+      });
+      const cardRow = await strapi.db.query(CARD_UID).findOne({
+        where: { documentId: card.documentId },
+      });
+
+      await expect(
+        strapi.documents(CARD_UID).update({
+          documentId: card.documentId,
+          data: {
+            pinnedRemark: { connect: [{ documentId: r2.documentId, __type: NOTE_UID }] },
+          } as any,
+        })
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: expect.stringMatching(/Invalid __type/),
+      });
+
+      expect(await getRemarkSubjects()).toEqual([
+        { id: r1.id, subjectId: cardRow?.id, subjectType: CARD_UID },
+        { id: r2.id, subjectId: null, subjectType: null },
+      ]);
+    });
+
     /**
-     * Through REST, an inverse morph item needs `__type` to resolve its target. The Content API
-     * rejects `__type` in the array form (`Invalid key __type at remarks`), so a REST client
-     * sends `{ set }`, `{ connect }` or `{ disconnect }` with `{ documentId, __type }` items.
+     * Through REST, an inverse morph item resolves its target from the schema, so `{ documentId }`
+     * is enough. `{ set }`, `{ connect }` and `{ disconnect }` also accept `{ documentId, __type }`
+     * items. The array form rejects `__type` (`Invalid key __type at remarks`).
      */
     describe('through REST', () => {
       let rqContent: ReturnType<typeof createContentAPIRequest>;
@@ -959,6 +1130,21 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
         ]);
       });
 
+      it('links every entry of an array of documentIds', async () => {
+        const [r1, r2] = await createRemarks(2);
+        const created = await strapi.documents(NOTE_UID).create({
+          data: { title: 'linked' } as any,
+        });
+
+        await updateNote(created.documentId, [{ documentId: r1.documentId }, r2.documentId]);
+
+        const draft = await getNoteRow(created.documentId, 'draft');
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: draft?.id, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: draft?.id, subjectType: NOTE_UID },
+        ]);
+      });
+
       it('keeps the existing links on connect', async () => {
         const [r1, r2] = await createRemarks(2);
         const note = await createNote([r1]);
@@ -983,15 +1169,63 @@ describe('Document Service inverse morphMany of a morphToOne', () => {
         ]);
       });
 
-      it('keeps every link on { set: null }', async () => {
+      // An inverse morph item resolves its target from the schema: a __type naming another type
+      // is rejected, whether or not the documentId exists in the schema target
+      it.each([
+        ['a document of the other type', 'card'],
+        ['a document of the schema target', 'remark'],
+      ])('rejects a foreign __type given %s', async (_label, documentOf) => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await createNote([r1]);
+        const card = await strapi.documents(CARD_UID).create({ data: { title: 'c' } as any });
+        const documentId = documentOf === 'card' ? card.documentId : r2.documentId;
+
+        const res = await rqContent({
+          method: 'PUT',
+          url: `/morph-notes/${note.documentId}`,
+          body: { data: { remarks: { connect: [{ documentId, __type: CARD_UID }] } } },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.name).toBe('ValidationError');
+        expect(res.body.error.message).toMatch(/Invalid __type/);
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: null, subjectType: null },
+        ]);
+      });
+
+      it('answers a non-string __type with a 400', async () => {
+        const [r1, r2] = await createRemarks(2);
+        const note = await createNote([r1]);
+
+        const res = await rqContent({
+          method: 'PUT',
+          url: `/morph-notes/${note.documentId}`,
+          body: {
+            data: {
+              remarks: { connect: [{ documentId: r2.documentId, __type: { toString: 1 } }] },
+            },
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toMatch(/Invalid __type/);
+        expect(await getRemarkSubjects()).toEqual([
+          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r2.id, subjectId: null, subjectType: null },
+        ]);
+      });
+
+      it('unlinks every entry on { set: null }', async () => {
         const [r1, r2] = await createRemarks(2);
         const note = await createNote([r1, r2]);
 
         await updateNote(note.documentId, { set: null });
 
         expect(await getRemarkSubjects()).toEqual([
-          { id: r1.id, subjectId: note.draftId, subjectType: NOTE_UID },
-          { id: r2.id, subjectId: note.draftId, subjectType: NOTE_UID },
+          { id: r1.id, subjectId: null, subjectType: null },
+          { id: r2.id, subjectId: null, subjectType: null },
         ]);
       });
     });
