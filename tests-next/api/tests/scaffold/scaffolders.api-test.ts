@@ -54,6 +54,8 @@ beforeAll(async () => {
   scaffoldConfig(app, 'api', { rest: { defaultLimit: 2 } });
   scaffoldConfig(app, 'api', { rest: { maxLimit: 50 } });
   scaffoldConfig(app, 'features', { future: { adminTokens: true } });
+  // The app's .env has four keys: the scaffolded array replaces them, it doesn't merge with them.
+  scaffoldConfig(app, 'server', { app: { keys: ['only-key'] } });
   scaffoldPlugin(app, 'users-permissions', { config: { jwt: { expiresIn: '1h' } } });
 
   server = await startServer(app, { port, database });
@@ -119,12 +121,17 @@ describe('scaffoldConfig and scaffoldPlugin', () => {
     expect(res.body.future).toMatchObject({ adminTokens: true });
   });
 
+  test('arrays replace the app config in the config Strapi loads', async () => {
+    const res = await request(server, '/api/tests/config?path=server.app.keys');
+    expect(res.body.value).toEqual(['only-key']);
+  });
+
   test('plugin config applies', async () => {
     const res = await request(server, '/api/tests/config?path=plugin::users-permissions.jwt');
     expect(res.body.value).toMatchObject({ expiresIn: '1h' });
   });
 
-  test('arrays replace instead of merging', () => {
+  test('calls on the same file replace arrays', () => {
     // Not in the app: `strapi develop` restarts when a config file changes.
     const offline: App = { ...app, dir: fs.mkdtempSync(path.join(os.tmpdir(), 'scaffold-')) };
     scaffoldConfig(offline, 'custom', { list: [1, 2, 3], nested: { a: 1 } });

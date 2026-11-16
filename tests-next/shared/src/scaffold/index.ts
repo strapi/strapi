@@ -149,13 +149,61 @@ export const readScaffoldedConfig = (app: App, name: string): ConfigValue => {
   ) as ConfigValue;
 };
 
+const REPLACE_MARKER = '// scaffoldConfig: the scaffolded values replace these.';
+
 /**
- * Set config of the app, for example `scaffoldConfig(app, 'features', { future: { adminTokens:
- * true } })` or `scaffoldConfig(app, 'server', { mcp: { enabled: true } })`.
+ * Make the app's own `config/<name>.js` apply the scaffolded values itself, arrays replacing its
+ * own. Strapi merges `config/env/<NODE_ENV>/<name>.js` over that file with `_.merge`, which
+ * merges arrays index by index: `{ keys: ['only-key'] }` over four keys would keep the last
+ * three. Once the base file holds the same arrays, that merge changes nothing. Done once per file.
+ */
+const applyScaffoldedConfigInBase = (app: App, name: string) => {
+  const file = path.join(app.dir, 'config', `${name}.js`);
+  if (!fs.existsSync(file)) {
+    // Nothing to merge with but Strapi's defaults.
+    return;
+  }
+  const source = fs.readFileSync(file, 'utf8');
+  if (source.includes(REPLACE_MARKER)) {
+    return;
+  }
+  const exports = source.match(/^module\.exports = /gm) ?? [];
+  if (exports.length !== 1) {
+    throw new Error(`Unexpected ${file}: cannot apply scaffolded config to it.`);
+  }
+
+  fs.writeFileSync(
+    file,
+    `${source.replace(/^module\.exports = /m, 'const generated = ')}
+${REPLACE_MARKER}
+const replace = (target, source) => {
+  const isObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
+  if (!isObject(target) || !isObject(source)) {
+    return source;
+  }
+  const result = { ...target };
+  for (const [key, value] of Object.entries(source)) {
+    result[key] = key in target ? replace(target[key], value) : value;
+  }
+  return result;
+};
+module.exports = (context) =>
+  replace(
+    typeof generated === 'function' ? generated(context) : generated,
+    require(${JSON.stringify(`./env/${APP_NODE_ENV}/${name}.js`)})
+  );
+`
+  );
+};
+
+/**
+ * Set config of the app, for example `scaffoldConfig(app, 'server', { app: { keys: ['a'] } })`
+ * or `scaffoldConfig(app, 'features', { future: { experimental_firstPublishedAt: true } })`.
  *
  * Writes `config/env/<NODE_ENV>/<name>.js`, which Strapi merges over the generated
  * `config/<name>.js` (`.js` because Strapi reads `plugins` from a `.js` file only). Calls on the
- * same file merge; arrays are replaced, not merged.
+ * same file merge. Arrays replace, in the config Strapi loads too: the generated file is changed
+ * to apply the scaffolded values (Strapi alone would merge arrays index by index).
  */
 export const scaffoldConfig = (app: App, name: string, values: ConfigValue) => {
   if (!/^[a-z][a-zA-Z0-9]*$/.test(name)) {
@@ -165,6 +213,7 @@ export const scaffoldConfig = (app: App, name: string, values: ConfigValue) => {
   const current = readScaffoldedConfig(app, name);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, `${CONFIG_PREFIX}${JSON.stringify(merge(current, values), null, 2)};\n`);
+  applyScaffoldedConfigInBase(app, name);
 };
 
 export interface PluginDefinition {
