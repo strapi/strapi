@@ -361,6 +361,37 @@ describe('User', () => {
       expect(result).toBe(user);
     });
 
+    test.each([[{ password: 'Testing1234' }], [{ firstname: 'Kai' }]])(
+      'Resolves null and emits nothing when the user does not exist (%o)',
+      async (input) => {
+        const findOne = vi.fn(() => Promise.resolve(null));
+        const update = vi.fn(() => Promise.resolve(null));
+        const hashPassword = vi.fn(() => Promise.resolve('hash'));
+        const emit = vi.fn();
+
+        global.strapi = {
+          ...global.strapi,
+          eventHub: { emit },
+          db: {
+            query() {
+              return { update, findOne };
+            },
+          },
+          admin: {
+            services: {
+              auth: { hashPassword },
+            },
+          },
+        } as any;
+        vi.mocked(emitAudit).mockClear();
+
+        await expect(updateById(404, input)).resolves.toBeNull();
+
+        expect(emit).not.toHaveBeenCalled();
+        expect(emitAudit).not.toHaveBeenCalled();
+      }
+    );
+
     test('Call the update function with the expected params', async () => {
       const email = 'email@email.fr';
       const password = 'Testing1234';

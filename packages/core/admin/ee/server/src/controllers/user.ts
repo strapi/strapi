@@ -83,6 +83,10 @@ export default {
 
     const user = await getService('user').findOne(id, null);
 
+    if (user === null) {
+      return ctx.notFound('User does not exist');
+    }
+
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
     }
