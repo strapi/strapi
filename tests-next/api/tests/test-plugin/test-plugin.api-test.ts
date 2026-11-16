@@ -8,8 +8,10 @@ import {
   TEST_PLUGIN_ENV_VAR,
   appPort,
   createFakeAiTranslationsProvider,
+  databaseFromEnv,
   generateApp,
   isLoopbackAddress,
+  resetDatabase,
   startServer,
   stopAllServers,
   type App,
@@ -18,6 +20,8 @@ import {
 
 const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 const port = appPort('api', worker - 1);
+// The boots of this file share one database: nothing here depends on what an earlier boot wrote.
+const database = databaseFromEnv();
 
 /** A non-loopback IPv4 address of this machine, if it has one. */
 const externalAddress = Object.values(os.networkInterfaces())
@@ -35,6 +39,7 @@ let app: App;
 
 beforeAll(async () => {
   app = await generateApp({ name: `api-plugin-${worker}` });
+  await resetDatabase(app, database);
   // A known feature config, to check how /features splits it.
   fs.writeFileSync(
     path.join(app.dir, 'config', 'features.js'),
@@ -51,7 +56,7 @@ describe('test plugin routes', () => {
 
   beforeAll(async () => {
     // Listen on every interface, so the loopback check can be tried from another address.
-    server = await startServer(app, { port, env: { HOST: '0.0.0.0' } });
+    server = await startServer(app, { port, database, env: { HOST: '0.0.0.0' } });
   });
 
   afterAll(async () => {
@@ -131,7 +136,7 @@ describe('test plugin boot options', () => {
   (process.env.STRAPI_LICENSE ? test.skip : test)(
     'fails the boot when the fake AI provider is requested but rejected',
     async () => {
-      await expect(startServer(app, { port, fakeAiProvider: true })).rejects.toThrow(
+      await expect(startServer(app, { port, database, fakeAiProvider: true })).rejects.toThrow(
         // Strapi wraps the error in a box: match the start, which stays on one line.
         'STRAPI_TEST_AI_PROVIDER=fake, but Strapi rejected the fake AI'
       );
@@ -142,7 +147,7 @@ describe('test plugin boot options', () => {
     const inherited = process.env[TEST_AI_PROVIDER_ENV_VAR];
     process.env[TEST_AI_PROVIDER_ENV_VAR] = 'fake';
     try {
-      const server = await startServer(app, { port });
+      const server = await startServer(app, { port, database });
       expect(await (await call(server, 'GET', '/ai/calls')).json()).toEqual({
         registered: false,
         calls: [],
@@ -158,12 +163,12 @@ describe('test plugin boot options', () => {
 
   test('refuses fakeAiProvider without the test plugin', async () => {
     await expect(
-      startServer(app, { port, fakeAiProvider: true, testPlugin: false })
+      startServer(app, { port, database, fakeAiProvider: true, testPlugin: false })
     ).rejects.toThrow('fakeAiProvider needs the test plugin');
   });
 
   test(`is not loaded without ${TEST_PLUGIN_ENV_VAR}=true`, async () => {
-    const server = await startServer(app, { port, testPlugin: false });
+    const server = await startServer(app, { port, database, testPlugin: false });
     expect((await call(server, 'GET', '/features')).status).toBe(404);
   });
 });
