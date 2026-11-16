@@ -34,6 +34,7 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
   A `DATABASE_*` variable exported in your shell doesn't reach the test apps.
 - **Resets** (RFC D4): api and cli start one instance per file on an empty database. The ui
   suite snapshots its SQLite database when the worker starts, then restores it before each spec
-  file (`resetScope: 'file'`, default) or each test (`test.use({ resetScope: 'test' })`).
+  file (`resetScope: 'file'`, default) or each test (`test.use({ resetScope: 'test' })`). The
+  reset runs before the file's `beforeAll`.
 - **One ui worker** for now: each worker will need its own app and database first.
 - **Windows** is not supported yet: stopping a server signals its process group.

@@ -17,9 +17,10 @@ export const UI_APP_NAME = 'ui';
 
 /**
  * When the database goes back to the worker's snapshot (RFC D4):
- * - `file` (default): before the first test of each spec file, so the tests of a file can build
- *   on each other's data but never see another file's;
- * - `test`: before every test.
+ * - `file` (default): before the first `beforeAll` or test of each spec file, so a file's
+ *   `beforeAll` and tests can build on each other's data but never see another file's;
+ * - `test`: before every test (and before `beforeAll`), so data a `beforeAll` writes is gone
+ *   by the first test.
  * Override it per file with `test.use({ resetScope: 'test' })`.
  */
 export type ResetScope = 'file' | 'test';
@@ -41,7 +42,7 @@ export interface AppWorkerFixtures {
 }
 
 export interface ResetFixtures {
-  /** Restores the snapshot before a test, following `resetScope`. Automatic. */
+  /** Restores the snapshot before a test or hook, following `resetScope`. Automatic. */
   databaseReset: void;
 }
 
@@ -99,7 +100,10 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
 
       await use();
     },
-    { auto: true },
+    // Also before `beforeAll` and `afterAll` hooks: with `auto: true`, Playwright sets the
+    // fixture up for tests only, so a file's reset would run after its `beforeAll` and wipe what
+    // it wrote. Playwright's own fixtures use this value; its types only declare a boolean.
+    { auto: 'all-hooks-included' as unknown as true },
   ],
 });
 
