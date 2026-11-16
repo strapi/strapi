@@ -91,6 +91,12 @@ beforeAll(async () => {
       apiTokens: [
         { name: 'full', type: 'full-access' },
         { kind: 'admin', name: 'reader', owner: 'admin@test.io', permissions: [READ_ARTICLES] },
+        {
+          kind: 'admin',
+          name: 'owned by the reader',
+          owner: 'reader@test.io',
+          permissions: [READ_ARTICLES],
+        },
       ],
     },
     { database }
@@ -115,6 +121,7 @@ describe('seedApp, before boot', () => {
     expect(seeded.entries).toHaveLength(2);
     expect(seeded.entries[0].documentId).toEqual(expect.any(String));
     expect(seeded.apiTokens.map((token) => token.accessKey)).toEqual([
+      expect.any(String),
       expect.any(String),
       expect.any(String),
     ]);
@@ -175,6 +182,29 @@ describe('seedApp, before boot', () => {
 
     const users = await request(server, '/admin/users', { token });
     expect(users.status).toBe(403);
+  });
+
+  test("admin tokens, within their owner's permissions", async () => {
+    // The reader's own token: what the reader has works.
+    const token = seeded.apiTokens[2].accessKey;
+    const articles = await request(server, `/content-manager/collection-types/${ARTICLE}`, {
+      token,
+    });
+    expect(articles.status).toBe(200);
+
+    // A token that asks for more than the reader has is rejected.
+    await expect(
+      seed(server, {
+        apiTokens: [
+          {
+            kind: 'admin',
+            name: 'more than the reader',
+            owner: 'reader@test.io',
+            permissions: [READ_ARTICLES, { action: 'admin::users.read' }],
+          },
+        ],
+      })
+    ).rejects.toThrow('Cannot assign admin permissions that exceed your own');
   });
 
   test('runs with the env the server gets, not the shell values the server ignores', () => {
