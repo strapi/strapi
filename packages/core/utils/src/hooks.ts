@@ -46,17 +46,30 @@ type TypedHookCallArgs<T extends Handler> =
 
 /**
  * A handler of a waterfall hook: it receives what the previous handler resolved to, and resolves to
- * the value the next handler receives.
+ * the value the next handler receives. The next handler receives the awaited value, so a context
+ * that does not accept its awaited value, for example a promise, has no waterfall handler (`never`).
  */
 export type WaterfallHandler<T extends Handler> = (
   value: HookContext<T>
-) => HookContext<T> | Promise<HookContext<T>>;
+) => Awaited<HookContext<T>> extends HookContext<T>
+  ? HookContext<T> | Promise<HookContext<T>>
+  : never;
 
 /**
  * What a waterfall hook of handler `T` resolves to: the value its handlers pass along. `any` when
  * the handler's first parameter is `any`, as for the default {@link Handler}.
  */
 type WaterfallResult<T extends Handler> = 0 extends 1 & Parameters<T>[0] ? any : HookContext<T>;
+
+/**
+ * What a waterfall factory hook of handler `T` resolves to: the context when no handler is
+ * registered, else what the last handler resolves to. The factory does not require `T` to be a
+ * {@link WaterfallHandler}, so the result can be either. `unknown` when the handler's first
+ * parameter is `any`, as for the default {@link Handler}.
+ */
+type FactoryWaterfallResult<T extends Handler> = 0 extends 1 & Parameters<T>[0]
+  ? unknown
+  : Awaited<HookContext<T>> | HookResult<T>;
 
 export interface Hook<T extends Handler = Handler> {
   getHandlers(): T[];
@@ -136,14 +149,16 @@ const createAsyncSeriesHook = <T extends Handler = Handler>() => ({
 const createAsyncSeriesWaterfallHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(...[param]: FactoryWaterfallCallArgs<T>): Promise<HookContext<T>> {
+  async call(...[param]: FactoryWaterfallCallArgs<T>): Promise<FactoryWaterfallResult<T>> {
     let res = param;
 
     for (const handler of this.getHandlers()) {
       res = await handler(res);
     }
 
-    return res;
+    // TypeScript does not resolve the conditional result while `T` is generic. `res` is the context
+    // or what the last handler resolved to, which is what `FactoryWaterfallResult<T>` describes.
+    return res as FactoryWaterfallResult<T>;
   },
 });
 

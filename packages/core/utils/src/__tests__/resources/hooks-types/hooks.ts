@@ -226,20 +226,57 @@ export const callWithoutContext = async () => {
 // A waterfall handler resolves to the value it takes, and the interface and the factory agree
 type Formatter = (value: string) => string | Promise<string>;
 type MisshapedFormatter = (value: string) => number;
+type PromiseFormatter = (value: Promise<string>) => Promise<string>;
+type MaybePromiseFormatter = (value: string | Promise<string>) => string | Promise<string>;
 const formatter: AsyncSeriesWaterfallHook<Formatter> = createAsyncSeriesWaterfallHook<Formatter>();
+export const maybePromiseFormatter: AsyncSeriesWaterfallHook<MaybePromiseFormatter> =
+  createAsyncSeriesWaterfallHook<MaybePromiseFormatter>();
 // The factory keeps `T extends Handler`: `ReturnType<typeof createAsyncSeriesWaterfallHook>` reads
 // the constraint, and an untyped waterfall hook must keep taking typed handlers
 declare const untypedWaterfall: ReturnType<typeof createAsyncSeriesWaterfallHook>;
 untypedWaterfall.register((value: string) => value.trim());
 // @ts-expect-error the next handler receives what this one resolves to, so the types must match
 export type MisshapedWaterfall = AsyncSeriesWaterfallHook<MisshapedFormatter>;
+// @ts-expect-error the next handler receives the awaited value, not a promise
+export type PromiseWaterfall = AsyncSeriesWaterfallHook<PromiseFormatter>;
+
+type FactoryWaterfallResultOf<T extends Handler> = Awaited<
+  ReturnType<ReturnType<typeof createAsyncSeriesWaterfallHook<T>>['call']>
+>;
 
 export type WaterfallResults = [
   Expect<Equal<[Awaited<ReturnType<typeof formatter.call>>], [string]>>,
   Expect<
     Equal<
       [Awaited<ReturnType<AsyncSeriesWaterfallHook<Formatter>['call']>>],
-      [Awaited<ReturnType<ReturnType<typeof createAsyncSeriesWaterfallHook<Formatter>>['call']>>]
+      [FactoryWaterfallResultOf<Formatter>]
     >
   >,
+  // The factory does not check the handler, so it resolves to the context or the handler result
+  Expect<Equal<[FactoryWaterfallResultOf<MisshapedFormatter>], [string | number]>>,
+  Expect<Equal<[FactoryWaterfallResultOf<() => number>], [number | undefined]>>,
+  Expect<Equal<[FactoryWaterfallResultOf<PromiseFormatter>], [string]>>,
 ];
+
+/*
+ * 3. A generic helper forwards the arguments of `call`, as `HookContext<T>` does not match them
+ * while `T` is generic.
+ */
+
+export const forwardCall = <T extends Handler>(
+  forwardedHook: AsyncSeriesHook<T>,
+  ...args: Parameters<AsyncSeriesHook<T>['call']>
+) => forwardedHook.call(...args);
+
+export const forwardContext = <T extends Handler>(
+  forwardedHook: AsyncSeriesHook<T>,
+  context: HookContext<T>
+) =>
+  // @ts-expect-error `call` takes `Parameters<AsyncSeriesHook<T>['call']>`, not a `HookContext<T>`
+  forwardedHook.call(context);
+
+export const callForwarded = async () => {
+  await forwardCall(series, { id: 1 });
+  // @ts-expect-error the forwarded arguments are checked once `T` is known
+  await forwardCall(series, 'not a context');
+};
