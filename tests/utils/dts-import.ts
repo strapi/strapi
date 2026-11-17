@@ -20,6 +20,9 @@ interface RestoreConfiguration {
   coreStore: boolean;
 }
 
+/** Fixtures under `tests/e2e/data` the test app can restore itself (see `reset-admin-fixture.js`). */
+const IN_APP_FIXTURES = new Set(['with-admin', 'without-admin']);
+
 /**
  * Base URL for the Strapi instance under test (HTTP DTS). **Requires a non-empty `process.env.PORT`.**
  *
@@ -76,10 +79,26 @@ export const resetDatabaseAndImportDataFromPath = async (
   const filePath =
     file.startsWith('/') || file.includes('\\') ? file : resolve(__dirname, '../e2e/data/', file);
   const fixture = basename(filePath);
-  const source = createSourceProvider(filePath);
   const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES).filter(
     (uid) => !isProtectedRemotePushType(uid)
   );
+
+  // The app restores its own fixtures in-process (test app `api/config/utils/reset-fixture.js`):
+  // the same restore the remote push below runs, without the websocket round trips.
+  if (IN_APP_FIXTURES.has(fixture) && filePath === resolve(__dirname, '../e2e/data', fixture)) {
+    const res = await fetch(new URL('/api/config/reset-fixture', getStrapiTestBaseUrl()), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ fixture, includedTypes, configuration }),
+    });
+    if (!res.ok) {
+      console.error(`Import process failed: HTTP ${res.status} ${await res.text()}`);
+      process.exit(1);
+    }
+    return;
+  }
+
+  const source = createSourceProvider(filePath);
   const destination = createRemoteDestinationProvider(includedTypes, configuration);
 
   const engine = createTransferEngine(source, destination, {

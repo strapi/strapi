@@ -60,7 +60,6 @@ const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlocker
     setConfig({});
   }, []);
 
-  // eslint-disable-next-line consistent-return
   React.useEffect(() => {
     if (isOpen) {
       const timeout = setTimeout(() => {
@@ -131,7 +130,6 @@ interface BlockerProps {
 const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) => {
   const { formatMessage } = useIntl();
 
-  // eslint-disable-next-line no-undef
   return isOpen && globalThis?.document?.body
     ? createPortal(
         <Overlay id="autoReloadOverlayBlocker" direction="column" alignItems="center" gap={6}>
@@ -162,7 +160,6 @@ const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) =>
             </Link>
           </Box>
         </Overlay>,
-        // eslint-disable-next-line no-undef
         globalThis.document.body
       )
     : null;

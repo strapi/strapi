@@ -102,6 +102,7 @@ updates:
         applies-to: version-updates
         patterns:
           - 'vitest'
+          - '@vitest/*'
 
       webpack:
         applies-to: version-updates
@@ -203,6 +204,7 @@ updates:
         applies-to: security-updates
         patterns:
           - 'vitest'
+          - '@vitest/*'
 
       webpack-security:
         applies-to: security-updates

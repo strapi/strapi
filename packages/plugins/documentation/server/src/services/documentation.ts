@@ -19,7 +19,7 @@ export type DocumentationService = ReturnType<typeof createService>;
 
 const createService = ({ strapi }: { strapi: Core.Strapi }) => {
   const config = strapi.config.get('plugin::documentation') as PluginConfig;
-  const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(config);
+  const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(strapi, config);
   const overrideService = getService('override');
 
   return {

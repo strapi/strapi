@@ -214,7 +214,6 @@ export interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease'
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
@@ -401,15 +400,6 @@ interface DidFilterEntriesEvent {
   };
 }
 
-interface DidPublishRelease {
-  name: 'didPublishRelease';
-  properties: {
-    totalEntries: number;
-    totalPublishedEntries: number;
-    totalUnpublishedEntries: number;
-  };
-}
-
 interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
@@ -515,7 +505,6 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidClickOnDocLink
-  | DidPublishRelease
   | MediaEvents
   | DidUpdateCTBSchema
   | DidSkipGuidedTour
@@ -539,7 +528,6 @@ export interface UseTrackingReturn {
     event: TEvent['name'],
     properties?: never
   ): Promise<null | AxiosResponse<string>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trackUsage<TEvent extends Extract<TrackingEvent, { properties: object }>>(
     event: TEvent['name'],
     properties: TEvent['properties']

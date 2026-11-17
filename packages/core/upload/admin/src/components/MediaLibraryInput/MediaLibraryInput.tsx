@@ -8,10 +8,7 @@ import { useIntl } from 'react-intl';
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../hooks/useTracking';
-import {
-  EditAssetDialog,
-  type Asset as EditableAsset,
-} from '../../legacy/components/EditAssetDialog/EditAssetContent';
+import { AssetDetailsDrawer } from '../../pages/Assets/components/AssetDetails/AssetDetailsDrawer';
 import { ImportFromUrlDialog } from '../../pages/Assets/components/ImportFromUrlDialog';
 import { useUploadFilesMutation, useUploadFromUrlsMutation } from '../../services/api';
 import { useGetUploadSettingsQuery } from '../../services/settings';
@@ -30,9 +27,10 @@ import { AssetCard, UploadCard } from './AssetCard';
 import { AssetCarousel } from './AssetCarousel';
 import { AssetDropZone, type ZoneVariant } from './AssetDropZone';
 import { AssetRow, UploadRow } from './AssetRow';
+import { isAnyAssetDetailsOpen, useOpenAssetDetails } from './openAssetDetails';
 import { useFieldUploads, type FieldUpload } from './useFieldUploads';
 
-import type { File } from '../../../../shared/contracts/files';
+import type { AssetWithPopulatedCreatedBy, File } from '../../../../shared/contracts/files';
 
 /**
  * What a field wrote that its form has not rendered yet, per form and field.
@@ -107,7 +105,8 @@ export const MediaLibraryInput = ({
   const getValues = useForm('MediaLibraryInput', (state) => state.getValues);
 
   const [step, setStep] = useState<Step | undefined>(undefined);
-  const [editedAsset, setEditedAsset] = useState<File | null>(null);
+  const [editedAssetId, setEditedAssetId] = useState<number | null>(null);
+  const isAnyDrawerOpen = useOpenAssetDetails(editedAssetId !== null);
   const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,8 +114,7 @@ export const MediaLibraryInput = ({
   const [uploadFromUrls] = useUploadFromUrlsMutation();
   // Echoes the app config; a missing payload (still loading) falls back to
   // sequential rather than outpacing what the server asked for.
-  const { isLoading, canRead, canCreate, canUpdate, canCopyLink, canDownload } =
-    useMediaLibraryPermissions();
+  const { isLoading, canRead, canCreate } = useMediaLibraryPermissions();
   // Not while permissions load: `useRBAC` starts with every flag false, and an
   // upload sent before it settles can end in a 403.
   const canUpload = !isLoading && canCreate;
@@ -187,25 +185,36 @@ export const MediaLibraryInput = ({
     });
   };
 
-  const handleEditClose = (result?: EditableAsset | null | boolean) => {
-    const asset = editedAsset;
-    setEditedAsset(null);
-
-    if (!asset) {
-      return;
+  /**
+   * Opens only when no drawer is open, in this field or another. Pressing a row's
+   * button is a press outside the open drawer, which closes it — or, with unsaved
+   * edits, asks first. Opening on the click that follows would put a second
+   * drawer, or a new asset, under that question and drop the edits it is asking
+   * about.
+   */
+  const handleEdit = (asset: File) => {
+    if (!isAnyAssetDetailsOpen()) {
+      setEditedAssetId(asset.id);
     }
+  };
 
-    // `null` means the asset was deleted from the library from inside the dialog.
-    if (result === null) {
-      setAssets(assetsRef.current.filter((current) => current.id !== asset.id));
-      return;
-    }
+  // The drawer saves to the library itself; the field holds its own copy of the
+  // asset, so it takes the server's after every change. Read from the ref: the
+  // drawer reports after a request, by which time this render's `assets` may
+  // be stale.
+  const handleAssetChange = (changedAsset: AssetWithPopulatedCreatedBy) => {
+    setAssets(
+      assetsRef.current.map((current) =>
+        // The populated `createdBy` is the one shape difference, and the entry
+        // only keeps the asset's id on save.
+        current.id === changedAsset.id ? (changedAsset as unknown as File) : current
+      )
+    );
+  };
 
-    if (result && typeof result !== 'boolean') {
-      setAssets(
-        assetsRef.current.map((current) => (current.id === asset.id ? (result as File) : current))
-      );
-    }
+  // Deleting from the library leaves nothing for the field to point at.
+  const handleAssetDelete = (id: number) => {
+    setAssets(assetsRef.current.filter((current) => current.id !== id));
   };
 
   const handleSelect = (selectedAssets: File[]) => {
@@ -425,8 +434,8 @@ export const MediaLibraryInput = ({
           asset={assets[0]}
           disabled={disabled}
           onCopyLink={handleCopyLink}
-          // The details dialog needs the library's folder tree, which needs read access.
-          onEdit={canRead ? setEditedAsset : undefined}
+          // The details drawer fetches the asset from the library, which needs read access.
+          onEdit={canRead ? handleEdit : undefined}
           onRemove={handleRemove}
         />
       );
@@ -440,7 +449,7 @@ export const MediaLibraryInput = ({
             asset={asset}
             disabled={disabled}
             onCopyLink={handleCopyLink}
-            onEdit={canRead ? setEditedAsset : undefined}
+            onEdit={canRead ? handleEdit : undefined}
             onRemove={handleRemove}
           />
         ))}
@@ -457,6 +466,7 @@ export const MediaLibraryInput = ({
         <Field.Label action={labelAction}>{label}</Field.Label>
         <AddAssetMenu
           disabled={disabled}
+          preventOpen={isAnyDrawerOpen}
           onBrowseLibrary={() => setStep('browse')}
           onUploadFromDevice={() => fileInputRef.current?.click()}
           onUploadFromUrl={() => setIsUrlDialogOpen(true)}
@@ -497,17 +507,13 @@ export const MediaLibraryInput = ({
         />
       )}
 
-      {editedAsset && (
-        <EditAssetDialog
-          open
-          asset={editedAsset as EditableAsset}
-          canUpdate={canUpdate && !disabled}
-          canCopyLink={canCopyLink}
-          canDownload={canDownload}
-          trackedLocation={CONTENT_MANAGER_LOCATION}
-          onClose={handleEditClose}
-        />
-      )}
+      <AssetDetailsDrawer
+        assetId={editedAssetId}
+        onClose={() => setEditedAssetId(null)}
+        onAssetChange={handleAssetChange}
+        onAssetDelete={handleAssetDelete}
+        trackedLocation={CONTENT_MANAGER_LOCATION}
+      />
 
       <ImportFromUrlDialog
         open={isUrlDialogOpen}

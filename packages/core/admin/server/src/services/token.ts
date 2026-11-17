@@ -35,6 +35,24 @@ const hasUserConfiguredAuthOptionsExpiresIn = (adminAuthOptions: unknown): boole
 };
 
 /**
+ * Seconds from the `expiresIn` the project set in `admin.auth.sessions.options` or the deprecated
+ * `admin.auth.options` (same precedence as {@link getTokenOptions}), the legacy fallback for
+ * `admin.auth.sessions.maxRefreshTokenLifespan` and `admin.auth.sessions.maxSessionLifespan`.
+ * Undefined when neither is set. Do not read merged options here: the injected `expiresIn: '30d'`
+ * would replace the lifespan defaults.
+ */
+const getLegacyExpiresInSeconds = (): number | undefined => {
+  const { options } = strapi.config.get<Core.Config.Admin['auth']>(
+    'admin.auth',
+    {} as Core.Config.Admin['auth']
+  );
+  const sessionsOptions = strapi.config.get('admin.auth.sessions.options', {});
+  const userOptions = _.merge({}, options, sessionsOptions);
+
+  return expiresInToSeconds(userOptions.expiresIn);
+};
+
+/**
  * Create a random token
  */
 const createToken = (): string => {
@@ -55,6 +73,7 @@ export {
   getTokenOptions,
   checkSecretIsDefined,
   hasUserConfiguredAuthOptionsExpiresIn,
+  getLegacyExpiresInSeconds,
 };
 
 /**

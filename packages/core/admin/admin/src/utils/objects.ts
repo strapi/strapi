@@ -86,6 +86,9 @@ export const isInteger = (obj: unknown): boolean => String(Math.floor(Number(obj
  * shallow copy of the objects along the update path
  * so no object is mutated in place.
  *
+ * `clone` also keeps the symbol keys of the copied objects: the Content Manager marks the
+ * components copied from another entry with one (see `CopiedComponents.tsx`).
+ *
  * Before changing this function, please read through the following
  * discussions.
  *

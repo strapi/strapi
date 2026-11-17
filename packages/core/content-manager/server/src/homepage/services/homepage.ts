@@ -1,4 +1,3 @@
-/* eslint-disable func-names */
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
@@ -10,7 +9,7 @@ import type {
 
 import {
   buildHomepageQueryFields,
-  compactSanitizedFields,
+  formatRecentDocumentTitle,
   resolveReadableMainField,
   resolveTitleField,
 } from './homepage-query-utils';
@@ -168,7 +167,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
-        title: document[meta.mainField ?? 'documentId'],
+        title: formatRecentDocumentTitle(document[meta.mainField ?? 'documentId']),
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
@@ -194,14 +193,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       locale: '*',
     });
 
-    const sanitizedFields = compactSanitizedFields(permissionQuery.fields);
-    if (sanitizedFields !== undefined) {
-      permissionQuery.fields = sanitizedFields;
-    }
-
     return {
       permissionQuery,
-      titleField: resolveTitleField(meta.mainField, sanitizedFields),
+      titleField: resolveTitleField(meta.mainField, permissionQuery.fields),
     };
   };
 

@@ -17,7 +17,7 @@ import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort } from '../traverse';
 
-import { Model, Data } from '../types';
+import type { Model, Data, Entry } from '../types';
 import { ValidationError } from '../errors';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
 
@@ -38,7 +38,7 @@ export interface Options {
 }
 
 export interface Validator {
-  (schema: Model): CurriedFunction1<Data, Promise<Data>>;
+  (schema: Model): CurriedFunction1<Entry, Promise<Entry>>;
 }
 export interface ValidateFunc {
   (data: unknown, schema: Model, options?: Options): Promise<void>;

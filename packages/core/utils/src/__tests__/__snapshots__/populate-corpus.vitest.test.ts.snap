@@ -1,0 +1,2965 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`populate validation and sanitization corpus > boolean object 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "e54ee28fc042",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 1 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "036108a3ef96",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 1 ending in a dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "f957800d2b2e",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 1 ending in a nested wildcard populate 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "e710d33a0653",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.author": true,
+      "categories.populate.articles.populate.categories": true,
+      "categories.populate.articles.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.image": true,
+      "categories.populate.articles.populate.related": true,
+      "categories.populate.articles.populate.seo": true,
+    },
+    "sha1": "90b75cf1e0b1",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.author": true,
+      "categories.populate.articles.populate.categories": true,
+      "categories.populate.articles.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.image": true,
+      "categories.populate.articles.populate.related": true,
+      "categories.populate.articles.populate.secret": true,
+      "categories.populate.articles.populate.seo": true,
+    },
+    "sha1": "208fdfb7fe1d",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 1 ending in a string array 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "29be3ab887e7",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 1 ending in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "dcd17ffee8c2",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles",
+    ],
+    "set": {
+      "categories.populate.articles.author": true,
+      "categories.populate.articles.categories": true,
+      "categories.populate.articles.dynamic_zone": true,
+      "categories.populate.articles.image": true,
+      "categories.populate.articles.related": true,
+      "categories.populate.articles.seo": true,
+    },
+    "sha1": "c7df6cbd89c6",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles",
+    ],
+    "set": {
+      "categories.populate.articles.author": true,
+      "categories.populate.articles.categories": true,
+      "categories.populate.articles.dynamic_zone": true,
+      "categories.populate.articles.image": true,
+      "categories.populate.articles.related": true,
+      "categories.populate.articles.secret": true,
+      "categories.populate.articles.seo": true,
+    },
+    "sha1": "1822d27b69ab",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 2 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "85141d4220bc",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 2 ending in a dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "cab15938a46a",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 2 ending in a nested wildcard populate 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "b1ef98214642",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.author": true,
+      "categories.populate.articles.populate.related.populate.categories": true,
+      "categories.populate.articles.populate.related.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.related.populate.image": true,
+      "categories.populate.articles.populate.related.populate.related": true,
+      "categories.populate.articles.populate.related.populate.seo": true,
+    },
+    "sha1": "db41b823b4e1",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.author": true,
+      "categories.populate.articles.populate.related.populate.categories": true,
+      "categories.populate.articles.populate.related.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.related.populate.image": true,
+      "categories.populate.articles.populate.related.populate.related": true,
+      "categories.populate.articles.populate.related.populate.secret": true,
+      "categories.populate.articles.populate.related.populate.seo": true,
+    },
+    "sha1": "4ece642942ef",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 2 ending in a string array 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "ffffb8d8c799",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 2 ending in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "ba8293e3b71e",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.author": true,
+      "categories.populate.articles.populate.related.categories": true,
+      "categories.populate.articles.populate.related.dynamic_zone": true,
+      "categories.populate.articles.populate.related.image": true,
+      "categories.populate.articles.populate.related.related": true,
+      "categories.populate.articles.populate.related.seo": true,
+    },
+    "sha1": "2736ea8c032b",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.author": true,
+      "categories.populate.articles.populate.related.categories": true,
+      "categories.populate.articles.populate.related.dynamic_zone": true,
+      "categories.populate.articles.populate.related.image": true,
+      "categories.populate.articles.populate.related.related": true,
+      "categories.populate.articles.populate.related.secret": true,
+      "categories.populate.articles.populate.related.seo": true,
+    },
+    "sha1": "e98519ef5cb0",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 3 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "b31b405a832f",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 3 ending in a dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "2bbd5fadebd8",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 3 ending in a nested wildcard populate 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "af8d57812ff4",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.seo": true,
+    },
+    "sha1": "2617eda2aed4",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.seo": true,
+    },
+    "sha1": "0242bb2c8a0b",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 3 ending in a string array 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "d3ff2499b54f",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 3 ending in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "71f40a93ff9a",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.seo": true,
+    },
+    "sha1": "3a032e1dd7cf",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.seo": true,
+    },
+    "sha1": "661109c980f8",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 4 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "970685d30f51",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 4 ending in a dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "88b238f2b1dd",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 4 ending in a nested wildcard populate 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "61dc5028ce81",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo": true,
+    },
+    "sha1": "6be92e169267",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo": true,
+    },
+    "sha1": "cc45b49aa1bb",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 4 ending in a string array 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "a56b45608d8b",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 4 ending in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "e614fa0d28a9",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.seo": true,
+    },
+    "sha1": "9f80184932b0",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.seo": true,
+    },
+    "sha1": "45b5b81f16cb",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 5 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "50b63f04b6b8",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 5 ending in a dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "e4efece955d2",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 5 ending in a nested wildcard populate 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "d914217604c3",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.seo": true,
+    },
+    "sha1": "cf31dc765417",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.seo": true,
+    },
+    "sha1": "fbd7e1015558",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 5 ending in a string array 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "4fcfe3bc40b0",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 5 ending in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "f79d96c01603",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.seo": true,
+    },
+    "sha1": "9a10659011d9",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.seo": true,
+    },
+    "sha1": "104d60113b87",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 6 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "a23c03e50183",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 6 ending in a dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "d0656c9c3c0f",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 6 ending in a nested wildcard populate 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "e243729cbc7c",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo": true,
+    },
+    "sha1": "d4f4c45dbd5d",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo": true,
+    },
+    "sha1": "6ada2912487e",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 6 ending in a string array 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "85d4195d70a6",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > chain depth 6 ending in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "588951400554",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.seo": true,
+    },
+    "sha1": "8234369fff80",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.categories": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.dynamic_zone": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.image": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.related": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.secret": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.seo": true,
+    },
+    "sha1": "a8f993ce8aec",
+  },
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > comma string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "873bfe1ef0af",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > count 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "602e45779030",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: components 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalNotes",
+      "path": "internalNotes",
+    },
+    "throws": "ValidationError: Invalid key internalNotes",
+  },
+  "queryLayer": "1d13f2480683",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.seo.fields[1]",
+      "categories.populate.articles.populate.related.populate.seo.populate.metaImage.fields[1]",
+    ],
+    "set": {},
+    "sha1": "7e4209ab662e",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalNotes",
+      "param": "populate",
+      "path": "internalNotes",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalNotes",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: count 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "efc3c996a764",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: dynamic zone dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "populate",
+      "path": "categories.populate.articles.populate.related.populate.dynamic_zone",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+  "queryLayer": "6cd4102252f9",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "populate",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.related.populate.dynamic_zone",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: dynamic zone fragments 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "5386d04452a5",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.fields[1]",
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.createdBy",
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.secret",
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.article": true,
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.page": true,
+    },
+    "sha1": "54823e048aa6",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.fields[1]",
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.createdBy",
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.article": true,
+      "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.page": true,
+    },
+    "sha1": "453271b4c9e1",
+  },
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: dynamic zone nested populate 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "populate",
+      "path": "categories.populate.articles.populate.related.populate.dynamic_zone",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+  "queryLayer": "throws Invalid nested population query detected. When using 'populate' within polymorphic structures, its value must be '*' to indicate all second level links. Specific field targeting is not supported here. Consider using the fragment API for more granular population control.",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "populate",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.related.populate.dynamic_zone",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: dynamic zone wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "5edf752c3fa4",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: filters that empty out 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "$notAnOperator",
+      "path": "author.name",
+    },
+    "throws": "ValidationError: Invalid key $notAnOperator at author.name",
+  },
+  "queryLayer": "ba89533f7354",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.filters.author.name.$notAnOperator",
+      "categories.populate.articles.populate.related.filters.$and[0].title.$notAnOperator",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.filters.$and": [],
+      "categories.populate.articles.populate.related.filters.author": {},
+    },
+    "sha1": "927d2b258da4",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "$notAnOperator",
+      "param": "populate",
+      "path": "author.name",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key $notAnOperator at author.name",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: invalid fields key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "f8882ff52d0d",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.fields[0]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.fields": [],
+    },
+    "sha1": "dfb201c27481",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: invalid filter key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "b15e81977948",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.filters.notAnAttribute.$eq",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.filters": {},
+    },
+    "sha1": "137dbb575b82",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: invalid fragment target 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "dz.unknown",
+      "path": "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+    },
+    "throws": "ValidationError: Invalid key dz.unknown at categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+  },
+  "queryLayer": "82def559bb8b",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "dz.unknown",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key dz.unknown at categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: invalid nested dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": "author.notAnAttribute",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at author.notAnAttribute",
+  },
+  "queryLayer": "99881a4558c3",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": "author.notAnAttribute",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at author.notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: invalid populate key 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "4b0d0ec98473",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": "categories.articles.related",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at categories.articles.related",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: invalid sort key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "ba8293e3b71e",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.sort.notAnAttribute",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.sort": {},
+    },
+    "sha1": "3cfdc8418bd8",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: media dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "image",
+      "path": "image",
+    },
+    "throws": "ValidationError: Invalid key image",
+  },
+  "queryLayer": "ec10351197ca",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::author.author": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::category.category": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::page.page": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.file": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.folder": true,
+    },
+    "sha1": "a67d1d59d08a",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": {
+    "details": {
+      "key": "image",
+      "param": "populate",
+      "path": "image",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key image",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: password filters and sort 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "throws Invalid sort type expected object or string got undefined",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.filters.author.password.$startsWith",
+      "categories.populate.articles.populate.related.sort.author.password",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.filters": {},
+      "categories.populate.articles.populate.related.sort.author": undefined,
+    },
+    "sha1": "b7289f5b1874",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "password",
+      "param": "populate",
+      "path": "author.password",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key password at author.password",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: polymorphic fragments 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "212fd0357dab",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article.fields[1]",
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::secret.secret.fields[0]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.image.populate.related.count": undefined,
+    },
+    "sha1": "4efa714ec10e",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article.fields[1]",
+    ],
+    "set": {},
+    "sha1": "7cb14331baaa",
+  },
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: polymorphic wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "ec10351197ca",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.image.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::author.author": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::category.category": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.api::page.page": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.file": true,
+      "categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.folder": true,
+    },
+    "sha1": "a67d1d59d08a",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: private attributes in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "9675208abd4a",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.author.populate",
+      "categories.populate.articles.populate.related.populate.seo.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.author.populate.articles": true,
+      "categories.populate.articles.populate.related.populate.author.populate.avatar": true,
+      "categories.populate.articles.populate.related.populate.author.populate.profile": true,
+      "categories.populate.articles.populate.related.populate.seo.populate.keywords": true,
+      "categories.populate.articles.populate.related.populate.seo.populate.metaImage": true,
+    },
+    "sha1": "f6c913c17e38",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: private fields 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "74b5ee014b89",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.fields[2]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.fields[1]": "documentId",
+    },
+    "sha1": "5f160e766913",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: private filters 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "7c47be976674",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.filters.author.email.$eq",
+      "categories.populate.articles.populate.related.filters.author.internalRef.$eq",
+      "categories.populate.articles.populate.related.filters.internalCode.$eq",
+    ],
+    "set": {},
+    "sha1": "8fde32e84534",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "email",
+      "param": "populate",
+      "path": "author.email",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key email at author.email",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: private relation 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "c2a7e7914569",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.createdBy",
+      "categories.populate.articles.populate.related.populate.image.populate.folder",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.populate.image.populate": {},
+    },
+    "sha1": "274ccaccedb5",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "createdBy",
+      "param": "populate",
+      "path": "categories.articles.related.createdBy",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key createdBy at categories.articles.related.createdBy",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: private sort 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "58b907a5efb0",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.sort[1]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.related.sort[0]": "title:desc",
+    },
+    "sha1": "2942bd569a53",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: restricted relation 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "e6772039665d",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.related.populate.secret.populate.owner",
+    ],
+    "set": {},
+    "sha1": "8d34b3916a6a",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: root-only key 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "ba8293e3b71e",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "status",
+      "param": "populate",
+      "path": "categories.articles.related",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key status at categories.articles.related: status is only accepted at the root of the query, and it also applies to populated relations",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 2: scalar populate key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "title",
+      "path": "categories.populate.articles.populate.related.populate.title",
+    },
+    "throws": "ValidationError: Invalid key title at categories.populate.articles.populate.related.populate.title",
+  },
+  "queryLayer": "ae86a836e980",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "title",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.related.populate.title",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key title at categories.populate.articles.populate.related.populate.title",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: components 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalNotes",
+      "path": "internalNotes",
+    },
+    "throws": "ValidationError: Invalid key internalNotes",
+  },
+  "queryLayer": "a277af11c155",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate.metaImage.fields[1]",
+    ],
+    "set": {},
+    "sha1": "5cb9bcfc47be",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalNotes",
+      "param": "populate",
+      "path": "internalNotes",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalNotes",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: count 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "787779eed700",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: dynamic zone dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+  "queryLayer": "ae5e75e09d7e",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "populate",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: dynamic zone fragments 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "de2808241759",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.createdBy",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.secret",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.page": true,
+    },
+    "sha1": "038798441119",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.createdBy",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.page": true,
+    },
+    "sha1": "251bf0583e56",
+  },
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: dynamic zone nested populate 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+  "queryLayer": "throws Invalid nested population query detected. When using 'populate' within polymorphic structures, its value must be '*' to indicate all second level links. Specific field targeting is not supported here. Consider using the fragment API for more granular population control.",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "populate",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: dynamic zone wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "a391d1cf1b1a",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: filters that empty out 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "$notAnOperator",
+      "path": "author.name",
+    },
+    "throws": "ValidationError: Invalid key $notAnOperator at author.name",
+  },
+  "queryLayer": "452280d6e24d",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.name.$notAnOperator",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and[0].title.$notAnOperator",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and": [],
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author": {},
+    },
+    "sha1": "f4fce4b29618",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "$notAnOperator",
+      "param": "populate",
+      "path": "author.name",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key $notAnOperator at author.name",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: invalid fields key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "6249e405ead3",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.fields[0]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.fields": [],
+    },
+    "sha1": "aa3a6a4a6b33",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: invalid filter key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "7865a870d970",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.notAnAttribute.$eq",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters": {},
+    },
+    "sha1": "9542143dc599",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: invalid fragment target 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "dz.unknown",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+    },
+    "throws": "ValidationError: Invalid key dz.unknown at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+  },
+  "queryLayer": "052eea1bd653",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "dz.unknown",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key dz.unknown at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: invalid nested dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": "author.notAnAttribute",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at author.notAnAttribute",
+  },
+  "queryLayer": "601f107ed09e",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": "author.notAnAttribute",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at author.notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: invalid populate key 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "b380b1c8f903",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": "categories.articles.categories.articles.related",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at categories.articles.categories.articles.related",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: invalid sort key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "e614fa0d28a9",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.sort.notAnAttribute",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.sort": {},
+    },
+    "sha1": "333300bc6fc0",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: media dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "image",
+      "path": "image",
+    },
+    "throws": "ValidationError: Invalid key image",
+  },
+  "queryLayer": "c6a2602dcf71",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::author.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::category.category": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::page.page": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.file": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.folder": true,
+    },
+    "sha1": "464cb68c2789",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": {
+    "details": {
+      "key": "image",
+      "param": "populate",
+      "path": "image",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key image",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: password filters and sort 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "throws Invalid sort type expected object or string got undefined",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.password.$startsWith",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.sort.author.password",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters": {},
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.sort.author": undefined,
+    },
+    "sha1": "08ffe2307e40",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "password",
+      "param": "populate",
+      "path": "author.password",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key password at author.password",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: polymorphic fragments 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "79ca3ad52fe9",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::secret.secret.fields[0]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.count": undefined,
+    },
+    "sha1": "ad89ac8fa202",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article.fields[1]",
+    ],
+    "set": {},
+    "sha1": "69ab04d02ddd",
+  },
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: polymorphic wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "c6a2602dcf71",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::author.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::category.category": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::page.page": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.file": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.folder": true,
+    },
+    "sha1": "464cb68c2789",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: private attributes in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "08714dea6624",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate.articles": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate.avatar": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate.profile": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate.keywords": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate.metaImage": true,
+    },
+    "sha1": "6c6fe756d562",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: private fields 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "9dc6d74ec801",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.fields[2]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.fields[1]": "documentId",
+    },
+    "sha1": "daa4c9e6868b",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: private filters 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "f41bfbe42d13",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.email.$eq",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.internalRef.$eq",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.internalCode.$eq",
+    ],
+    "set": {},
+    "sha1": "7c1bbebfaabb",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "email",
+      "param": "populate",
+      "path": "author.email",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key email at author.email",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: private relation 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "dd2c7598649a",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.createdBy",
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.folder",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate": {},
+    },
+    "sha1": "36281ef1f108",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "createdBy",
+      "param": "populate",
+      "path": "categories.articles.categories.articles.related.createdBy",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key createdBy at categories.articles.categories.articles.related.createdBy",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: private sort 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "3984adce8279",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.sort[1]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.sort[0]": "title:desc",
+    },
+    "sha1": "f29fb536a5e2",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: restricted relation 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "9c95ce0d57a5",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.secret.populate.owner",
+    ],
+    "set": {},
+    "sha1": "261a5855d33f",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: root-only key 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "e614fa0d28a9",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "status",
+      "param": "populate",
+      "path": "categories.articles.categories.articles.related",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key status at categories.articles.categories.articles.related: status is only accepted at the root of the query, and it also applies to populated relations",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 4: scalar populate key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "title",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+    },
+    "throws": "ValidationError: Invalid key title at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+  },
+  "queryLayer": "1ec8e836bfc2",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "title",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key title at categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: components 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalNotes",
+      "path": "internalNotes",
+    },
+    "throws": "ValidationError: Invalid key internalNotes",
+  },
+  "queryLayer": "adbebd6a004a",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate.metaImage.fields[1]",
+    ],
+    "set": {},
+    "sha1": "af66f3e79078",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalNotes",
+      "param": "populate",
+      "path": "internalNotes",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalNotes",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: count 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "68d0aa50a468",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: dynamic zone dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+  "queryLayer": "a24e7bf71b18",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "populate",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: dynamic zone fragments 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "d79995948aea",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.createdBy",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.secret",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.page": true,
+    },
+    "sha1": "9136d163f084",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.related-articles.populate.articles.populate.createdBy",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.cta.populate.CTAs.populate.link.populate.page": true,
+    },
+    "sha1": "1693a6321f8a",
+  },
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: dynamic zone nested populate 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+  "queryLayer": "throws Invalid nested population query detected. When using 'populate' within polymorphic structures, its value must be '*' to indicate all second level links. Specific field targeting is not supported here. Consider using the fragment API for more granular population control.",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "populate",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key populate at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: dynamic zone wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "061a1920b168",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: filters that empty out 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "$notAnOperator",
+      "path": "author.name",
+    },
+    "throws": "ValidationError: Invalid key $notAnOperator at author.name",
+  },
+  "queryLayer": "41d3734f7cbe",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.name.$notAnOperator",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and[0].title.$notAnOperator",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and": [],
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author": {},
+    },
+    "sha1": "9cb726b638b7",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "$notAnOperator",
+      "param": "populate",
+      "path": "author.name",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key $notAnOperator at author.name",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: invalid fields key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "baa98f80501b",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.fields[0]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.fields": [],
+    },
+    "sha1": "ce86c6215bbc",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: invalid filter key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "2346f3b4b2db",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.notAnAttribute.$eq",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters": {},
+    },
+    "sha1": "0680776906e7",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: invalid fragment target 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "dz.unknown",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+    },
+    "throws": "ValidationError: Invalid key dz.unknown at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+  },
+  "queryLayer": "4e8831371003",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "dz.unknown",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key dz.unknown at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.dynamic_zone.on.dz.unknown",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: invalid nested dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": "author.notAnAttribute",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at author.notAnAttribute",
+  },
+  "queryLayer": "533ac4a1dc8a",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": "author.notAnAttribute",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at author.notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: invalid populate key 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "0b08a29856df",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": "categories.articles.categories.articles.categories.articles.related",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute at categories.articles.categories.articles.categories.articles.related",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: invalid sort key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "notAnAttribute",
+      "path": null,
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+  "queryLayer": "588951400554",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.sort.notAnAttribute",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.sort": {},
+    },
+    "sha1": "f893bbe847c4",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "notAnAttribute",
+      "param": "populate",
+      "path": null,
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key notAnAttribute",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: media dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "image",
+      "path": "image",
+    },
+    "throws": "ValidationError: Invalid key image",
+  },
+  "queryLayer": "ea309278aed2",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::author.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::category.category": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::page.page": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.file": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.folder": true,
+    },
+    "sha1": "2033fbd06aee",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": {
+    "details": {
+      "key": "image",
+      "param": "populate",
+      "path": "image",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key image",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: password filters and sort 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "throws Invalid sort type expected object or string got undefined",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.password.$startsWith",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.sort.author.password",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters": {},
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.sort.author": undefined,
+    },
+    "sha1": "33bf21eca731",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "password",
+      "param": "populate",
+      "path": "author.password",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key password at author.password",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: polymorphic fragments 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "d71bb26a5c09",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article.fields[1]",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::secret.secret.fields[0]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.count": undefined,
+    },
+    "sha1": "2062194a0879",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article.fields[1]",
+    ],
+    "set": {},
+    "sha1": "2535abeb4ecc",
+  },
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: polymorphic wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "ea309278aed2",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::article.article": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::author.author": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::category.category": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.api::page.page": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.file": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.related.on.plugin::upload.folder": true,
+    },
+    "sha1": "2033fbd06aee",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: private attributes in a wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "5dbdbcfa17d2",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate.articles": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate.avatar": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.author.populate.profile": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate.keywords": true,
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.seo.populate.metaImage": true,
+    },
+    "sha1": "442943c8965f",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: private fields 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "internalCode",
+      "path": "internalCode",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+  "queryLayer": "ce05ee421f7a",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.fields[2]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.fields[1]": "documentId",
+    },
+    "sha1": "3b56f84b5f16",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: private filters 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "79c4802febc7",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.email.$eq",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.internalRef.$eq",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.internalCode.$eq",
+    ],
+    "set": {},
+    "sha1": "06976673b8e2",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "email",
+      "param": "populate",
+      "path": "author.email",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key email at author.email",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: private relation 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "eb4c38353e9e",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.createdBy",
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate.folder",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.image.populate": {},
+    },
+    "sha1": "5055368d9000",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "createdBy",
+      "param": "populate",
+      "path": "categories.articles.categories.articles.categories.articles.related.createdBy",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key createdBy at categories.articles.categories.articles.categories.articles.related.createdBy",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: private sort 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "b18d26f0a7ba",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.sort[1]",
+    ],
+    "set": {
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.sort[0]": "title:desc",
+    },
+    "sha1": "5678c7e8446d",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "internalCode",
+      "param": "populate",
+      "path": "internalCode",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key internalCode",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: restricted relation 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "1b4dd1db3850",
+  "sanitized": {
+    "removed": [
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.secret.populate.owner",
+    ],
+    "set": {},
+    "sha1": "a215fd309f48",
+  },
+  "sanitizedWithoutAuth": "unchanged",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: root-only key 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "588951400554",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "status",
+      "param": "populate",
+      "path": "categories.articles.categories.articles.categories.articles.related",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key status at categories.articles.categories.articles.categories.articles.related: status is only accepted at the root of the query, and it also applies to populated relations",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > depth 6: scalar populate key 1`] = `
+{
+  "documentServiceValidate": {
+    "details": {
+      "key": "title",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+    },
+    "throws": "ValidationError: Invalid key title at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+  },
+  "queryLayer": "6b2c506f1398",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": {
+    "details": {
+      "key": "title",
+      "param": "populate",
+      "path": "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+      "source": "query",
+    },
+    "throws": "ValidationError: Invalid key title at categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.populate.title",
+  },
+}
+`;
+
+exports[`populate validation and sanitization corpus > dot string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "60792a8b387f",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > page depth 1 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "b1c8f0503234",
+  "sanitized": {
+    "removed": [
+      "author.populate.profile.populate",
+    ],
+    "set": {
+      "author.populate.profile.populate.picture": true,
+    },
+    "sha1": "070db1fc3aaa",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > page depth 2 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "f20c63ada48f",
+  "sanitized": {
+    "removed": [
+      "author.populate.profile.populate",
+    ],
+    "set": {
+      "author.populate.profile.populate.picture": true,
+    },
+    "sha1": "1fac0899c888",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > page depth 3 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "6b42fb4f86bb",
+  "sanitized": {
+    "removed": [
+      "author.populate.profile.populate",
+    ],
+    "set": {
+      "author.populate.profile.populate.picture": true,
+    },
+    "sha1": "c61d216438d2",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > page depth 4 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "4d632a39c42e",
+  "sanitized": {
+    "removed": [
+      "author.populate.profile.populate",
+    ],
+    "set": {
+      "author.populate.profile.populate.picture": true,
+    },
+    "sha1": "a0dec3499dca",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > page depth 5 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "36a39c19de34",
+  "sanitized": {
+    "removed": [
+      "author.populate.profile.populate",
+    ],
+    "set": {
+      "author.populate.profile.populate.picture": true,
+    },
+    "sha1": "29b014ecab75",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > page depth 6 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "80cf7f222645",
+  "sanitized": {
+    "removed": [
+      "author.populate.profile.populate",
+    ],
+    "set": {
+      "author.populate.profile.populate.picture": true,
+    },
+    "sha1": "06e0d76a653f",
+  },
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > string 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "c562f12dd91a",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > string array 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "a1749cb9fdd7",
+  "sanitized": "unchanged",
+  "sanitizedWithoutAuth": "same as with auth",
+  "validate": "passes",
+}
+`;
+
+exports[`populate validation and sanitization corpus > wildcard 1`] = `
+{
+  "documentServiceValidate": {
+    "passes": "unchanged",
+  },
+  "queryLayer": "23a1ec781805",
+  "sanitized": {
+    "removed": [
+      "(root)",
+    ],
+    "set": {
+      "author": true,
+      "categories": true,
+      "dynamic_zone": true,
+      "image": true,
+      "related": true,
+      "seo": true,
+    },
+    "sha1": "e9b4c856eb6c",
+  },
+  "sanitizedWithoutAuth": {
+    "removed": [
+      "(root)",
+    ],
+    "set": {
+      "author": true,
+      "categories": true,
+      "dynamic_zone": true,
+      "image": true,
+      "related": true,
+      "secret": true,
+      "seo": true,
+    },
+    "sha1": "fdfae2936222",
+  },
+  "validate": "passes",
+}
+`;
