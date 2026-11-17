@@ -746,7 +746,6 @@ describe('UploadProgressDialog', () => {
 
   describe('Failed row announcements', () => {
     const getLiveRegion = () =>
-      // eslint-disable-next-line testing-library/no-node-access
       screen.getByRole('dialog').querySelector('[aria-live="polite"]') as HTMLElement;
 
     it('announces each failed row with its name and only the first sentence', () => {
