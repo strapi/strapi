@@ -34,7 +34,7 @@ export const useRemoveAsset = (onSuccess: () => void): UseRemoveAsset => {
         toggleNotification({
           type: 'success',
           message: formatMessage({
-            id: 'modal.remove.success-label',
+            id: getTrad('modal.remove.success-label'),
             defaultMessage: 'Elements have been successfully deleted.',
           }),
         });
