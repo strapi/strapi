@@ -239,6 +239,40 @@ describe('per-file upload control', () => {
     expect(statuses()).toEqual(['complete', 'complete', 'complete']);
   });
 
+  it('uploads a queued cancelled file once when retrying while the batch still runs', async () => {
+    const { requests, request, result, statuses } = setup(['a.png', 'b.png', 'c.png']);
+
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      abortUploadFile(result.current.progress.uploadId, 2);
+      result.current.dispatch(cancelFile({ uploadId: result.current.progress.uploadId, index: 2 }));
+    });
+
+    let retried: Promise<unknown> | undefined;
+    act(() => {
+      retried = result.current.retryAll().unwrap();
+    });
+    await flush();
+
+    await act(async () => {
+      request('a.png').resolve();
+      request('b.png').resolve();
+    });
+    await flush();
+
+    await act(async () => {
+      requests
+        .filter((pending) => pending.name === 'c.png')
+        .forEach((pending) => pending.resolve());
+    });
+    await flush();
+    await retried;
+
+    expect(requests.filter((pending) => pending.name === 'c.png')).toHaveLength(1);
+    expect(statuses()).toEqual(['complete', 'complete', 'complete']);
+  });
+
   it('refuses to retry a row from a batch that is no longer current', async () => {
     const { result } = setup(['a.png']);
 

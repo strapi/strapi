@@ -130,18 +130,6 @@ const unregisterAbortController = (uploadId: number) => {
 };
 
 /**
- * Aborts an upload by its uploadId.
- * Called from the UploadProgressDialog when the user clicks cancel or close.
- */
-export const abortUpload = (uploadId: number) => {
-  const controller = abortControllers.get(uploadId);
-  if (controller) {
-    controller.abort();
-    unregisterAbortController(uploadId);
-  }
-};
-
-/**
  * One controller per file in flight, keyed by `uploadId:index`, so a single row
  * can be cancelled without stopping the rest of its batch. Files still queued
  * have no request to abort yet; they are remembered in `skippedFiles` instead
@@ -151,6 +139,26 @@ const fileAbortControllers = new Map<string, AbortController>();
 const skippedFiles = new Set<string>();
 
 const getFileKey = (uploadId: number, index: number) => `${uploadId}:${index}`;
+
+/**
+ * Aborts an upload by its uploadId.
+ * Called from the UploadProgressDialog when the user clicks cancel or close.
+ */
+export const abortUpload = (uploadId: number) => {
+  const controller = abortControllers.get(uploadId);
+  if (controller) {
+    controller.abort();
+    unregisterAbortController(uploadId);
+  }
+
+  // A cancelled batch stops its workers before they reach the queued files, so
+  // their skip markers would otherwise outlive it and make a retry skip them.
+  for (const key of skippedFiles) {
+    if (key.startsWith(`${uploadId}:`)) {
+      skippedFiles.delete(key);
+    }
+  }
+};
 
 /**
  * Aborts one file of a batch. Pair it with `cancelFile` to mark the row, the
@@ -868,7 +876,6 @@ const uploadApi = adminApi
           }
 
           // Reset cancelled files back to pending
-          cancelledIndices.forEach((index) => skippedFiles.delete(getFileKey(uploadId, index)));
           dispatch(retryCancelledFiles());
 
           // Fresh AbortController for the retry run
