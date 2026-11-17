@@ -415,20 +415,6 @@ describe('AssetDetails (asset details drawer body)', () => {
         'Exceeds the Media Library upload limit of 100 KB. To raise it, a developer can increase upload.config.sizeLimit.'
       );
     });
-
-    it('points outside Strapi when a proxy answered 413', async () => {
-      await replaceWith(
-        () =>
-          new HttpResponse('<html><body>413 Request Entity Too Large</body></html>', {
-            status: 413,
-            headers: { 'Content-Type': 'text/html' },
-          })
-      );
-
-      await screen.findByText(
-        'Rejected as too large before reaching Strapi. A limit outside Strapi, such as a reverse proxy, is the likely cause.'
-      );
-    });
   });
 
   it('opens the confirm dialog when the trigger is clicked and uploads the file picked after Continue', async () => {

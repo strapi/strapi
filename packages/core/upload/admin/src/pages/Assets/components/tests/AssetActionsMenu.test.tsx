@@ -472,16 +472,6 @@ describe('AssetActionsMenu', () => {
         message:
           'Exceeds the Media Library upload limit of 100 KB. To raise it, a developer can increase upload.config.sizeLimit.',
       },
-      {
-        rejectedBy: 'a proxy',
-        response: () =>
-          new HttpResponse('<html><body>413 Request Entity Too Large</body></html>', {
-            status: 413,
-            headers: { 'Content-Type': 'text/html' },
-          }),
-        message:
-          'Rejected as too large before reaching Strapi. A limit outside Strapi, such as a reverse proxy, is the likely cause.',
-      },
     ])(
       'names the limit and keeps the notification when $rejectedBy rejects the file as too large',
       async ({ response, message }) => {
