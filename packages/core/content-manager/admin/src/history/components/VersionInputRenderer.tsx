@@ -290,9 +290,15 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
   }
 
   // TODO: find a better way to do this rather than access internals.
-  // Shared-field lock actions can be stamped without a title; don't throw.
-  const labelActionTitleId = labelAction.props?.title?.id;
-  if (typeof labelActionTitleId !== 'string') {
+  // Shared-field lock actions or custom plugin actions can be stamped without a title,
+  // with a plain string title, or with a custom title structure; don't throw.
+  const title = labelAction.props?.title;
+  const labelActionTitleId =
+    typeof title === 'object' && title !== null && 'id' in title && typeof title.id === 'string'
+      ? title.id
+      : undefined;
+
+  if (!labelActionTitleId) {
     return labelAction;
   }
 
