@@ -4,10 +4,12 @@ import {
   EDITION_ENV_VAR,
   SQLITE,
   appEnv,
+  databaseFromEnv,
   editionEnv,
   editionFromEnv,
   generateApp,
   getInstanceFeatures,
+  resetDatabase,
   requireFeatures,
   scaffoldConfig,
   startServer,
@@ -78,6 +80,7 @@ describe('the instance', () => {
   beforeAll(async () => {
     app = await generateApp({ name: `api-edition-${worker}` });
     scaffoldConfig(app, 'features', { future: { testsFlag: true, testsFlagOff: false } });
+    await resetDatabase(app, databaseFromEnv());
     server = await startServer(app, { port });
   });
 
@@ -150,6 +153,7 @@ describe('the license', () => {
 
   test('an EE run whose license Strapi rejects fails instead of running as CE', async () => {
     const app = await generateApp({ name: `api-edition-${worker}`, overwrite: false });
+    await resetDatabase(app, databaseFromEnv());
     await expect(
       startServer(app, { port, edition: 'ee', env: { STRAPI_LICENSE: 'not-a-license' } })
     ).rejects.toThrow('Strapi booted as CE in an EE run');

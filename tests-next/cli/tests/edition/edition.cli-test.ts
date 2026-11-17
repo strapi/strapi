@@ -2,9 +2,11 @@ import { afterAll, beforeAll, expect, test } from 'vitest';
 
 import {
   appPort,
+  databaseFromEnv,
   editionFromEnv,
   generateApp,
   getInstanceFeatures,
+  resetDatabase,
   startServer,
   stopAllServers,
   type Server,
@@ -18,6 +20,8 @@ let server: Server;
 
 beforeAll(async () => {
   const app = await generateApp({ name: `cli-edition-${worker}` });
+  // startServer runs on the run's database (TESTS_DATABASE): give it an empty one.
+  await resetDatabase(app, databaseFromEnv());
   server = await startServer(app, { port: appPort('cli', worker - 1) });
 });
 
