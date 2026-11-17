@@ -58,3 +58,18 @@ describe('server route registration', () => {
     }
   });
 });
+
+describe('server route registration — string handlers', () => {
+  test('resolves a string handler written with surrounding whitespace', () => {
+    const router = new Router();
+    const find = () => undefined;
+    const controller = (uid: string) => (uid === 'api::article.article' ? { find } : undefined);
+
+    composeEndpoint({ ...strapi, controller } as any)(
+      { method: 'GET', path: '/articles', handler: '  api::article.article.find  ' } as any,
+      { router }
+    );
+
+    expect(router.stack.map((layer) => layer.path)).toContain('/articles');
+  });
+});
