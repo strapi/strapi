@@ -279,6 +279,19 @@ Results that come from `strapi.db.query` are `any`, because the repository retur
 so the check passes whatever the contract says for them: runtime tests that read the rows back
 pin those results until the repository is typed.
 
+- Type such a result from the schema of its content type, with the `populate` and `select` of the
+  call, as `strapi.documents(uid)` types its entries:
+  `Modules.Documents.StrictResult<uid, params, 'published'>` gives every column, possibly `null`,
+  and only the populated relations. Pick the selected columns from it, e.g. `regenerate` of
+  `admin::api-token`. The admin services do so with strict types (`AdminRow` in
+  `packages/core/admin/server/src/types/index.ts`).
+- Check the rows against the types with a shape comparison: the probe module
+  `tests/api/core/admin/admin-service-shapes/probe.ts` makes the calls, and the API test compares
+  the shape of each runtime result with the type of its variable in a strict program
+  (`tests/api/utils/shapes.ts`).
+- Keep the members that the package itself calls on the implementation's types: internal code reads
+  them through its own `getService` (`ImplementationServices` in the admin).
+
 Leave a member unchecked, and keep the rest of the service tied, when the tie cannot express it
 without a cast:
 

@@ -146,13 +146,15 @@ type PopulateByRelation<TPopulate> = 0 extends 1 & TPopulate
         : UnreadPopulate;
 
 /**
- * The admin user's row without its roles, as the registered `admin::user` contract reads it. The
- * published contracts do not import `@strapi/admin`, which is not a dependency of this package.
+ * The admin user's row without its relations, as a populated `createdBy` holds it: with strict
+ * types, the `admin::user` row of the schema the admin declares, every column possibly `null`
+ * (`Modules.Documents.StrictResult`, as the registered `admin::user` contract reads it). Without
+ * strict types, the registered contract's `findOne` result without its roles. The published
+ * contracts do not import `@strapi/admin`, which is not a dependency of this package.
  */
-type AdminUserRow = Omit<
-  NonNullable<Awaited<ReturnType<Core.ServiceFor<'admin::user'>['findOne']>>>,
-  'roles'
->;
+type AdminUserRow = Core.IsStrict extends true
+  ? Modules.Documents.StrictResult<'admin::user', Record<never, never>, 'published'>
+  : Omit<NonNullable<Awaited<ReturnType<Core.ServiceFor<'admin::user'>['findOne']>>>, 'roles'>;
 
 /**
  * A populated relation as the plugin's `findMany` and `findOne` callers read it (same API test): the
