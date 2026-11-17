@@ -14,7 +14,6 @@ import { Page } from '../../components/PageHelpers';
 import { WidgetResizeHandle } from '../../components/ResizeIndicator';
 import { Widget } from '../../components/WidgetHelpers';
 import { WidgetRoot } from '../../components/WidgetRoot';
-import { useEnterprise } from '../../ee';
 import { useAppInfo } from '../../features/AppInfo';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
@@ -423,23 +422,6 @@ const HomePageCE = () => {
   );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * HomePage
- * -----------------------------------------------------------------------------------------------*/
-
-const HomePage = () => {
-  const Page = useEnterprise(
-    HomePageCE,
-    // eslint-disable-next-line import/no-cycle
-    async () => (await import('../../../../ee/admin/src/pages/HomePage')).HomePageEE
-  );
-
-  // block rendering until the EE component is fully loaded
-  if (!Page) {
-    return null;
-  }
-
-  return <Page />;
-};
+const HomePage = HomePageCE;
 
 export { HomePage, HomePageCE };

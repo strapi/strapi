@@ -117,7 +117,7 @@ describe('LicenseInfoEE', () => {
   it('shows the admin seat count for a non-Growth plan that has a seat limit', async () => {
     render(<LicenseInfoEE />);
 
-    expect(await screen.findByText('Active admin users in this instance')).toBeInTheDocument();
+    expect(await screen.findByText('Admin users')).toBeInTheDocument();
   });
 
   it('omits the admin seat count when the licence carries no seat limit', async () => {
@@ -131,7 +131,7 @@ describe('LicenseInfoEE', () => {
     render(<LicenseInfoEE />);
 
     expect(await screen.findByText('Active')).toBeInTheDocument();
-    expect(screen.queryByText('Active admin users in this instance')).not.toBeInTheDocument();
+    expect(screen.queryByText('Admin users')).not.toBeInTheDocument();
   });
 
   it('shows the In Trial badge instead of Active while a trial is running', async () => {
