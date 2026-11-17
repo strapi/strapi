@@ -2,6 +2,7 @@ import { get, xor, differenceWith } from 'lodash';
 
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
+import { quoteForLog } from '@strapi/utils';
 import { getService } from '../../utils';
 import permissionDomain, { CreatePermissionPayload } from '../../domain/permission';
 import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
@@ -88,44 +89,86 @@ export const findUserPermissions = async (user: AdminUser): Promise<Permission[]
   return findMany({ where: { role: { users: { id: user.id } } } });
 };
 
-const filterPermissionsToRemove = async (permissions: Permission[]) => {
+const isNil = (value: unknown) => value === undefined || value === null;
+
+type ApplicableProperty = { property: string; applies: boolean; value: unknown };
+
+/**
+ * Whether each property the action lists is applicable and missing on the stored permission.
+ * A `null` or `undefined` property is missing, with one exception: `locales: null` grants every
+ * locale (i18n), so it counts as set as long as no other applicable property is missing.
+ */
+const findMissingProperties = (properties: ApplicableProperty[]) => {
+  const hasOtherMissingProperty = properties.some(
+    ({ property, applies, value }) => applies === true && property !== 'locales' && isNil(value)
+  );
+
+  return properties.map(({ property, applies, value }) => {
+    if (applies === false) {
+      return false;
+    }
+
+    if (property === 'locales' && value === null) {
+      return hasOtherMissingProperty;
+    }
+
+    return isNil(value);
+  });
+};
+
+/**
+ * The reason the boot cleanup removes a stored permission, or `undefined` when it keeps it
+ */
+const findRemovalReason = async (permission: Permission): Promise<string | undefined> => {
   const { actionProvider } = getService('permission');
 
-  const permissionsToRemove: Permission[] = [];
-
-  for (const permission of permissions) {
-    const { subjects, options = {} as Action['options'] } =
-      (actionProvider.get(permission.action) as Action) || {};
-    const { applyToProperties } = options;
-
-    const invalidProperties = await Promise.all(
-      (applyToProperties || []).map(async (property) => {
-        const applies = await actionProvider.appliesToProperty(
-          property,
-          permission.action,
-          permission.subject
-        );
-
-        return applies && permissionDomain.getProperty(property, permission) == null;
-      })
-    );
-
-    const isRegisteredAction = actionProvider.has(permission.action);
-    const hasInvalidProperties =
-      Array.isArray(applyToProperties) && invalidProperties.every((result) => result === true);
-    const isInvalidSubject =
-      Array.isArray(subjects) && !subjects.includes(permission.subject as string);
-    // On an api token permission, nil properties mean "everything", not "invalid"
-    const hasApiToken = get(permission, 'apiToken') != null;
-
-    // If the permission has an invalid action, an invalid subject or invalid properties, then add it to the toBeRemoved collection
-    if (!isRegisteredAction || isInvalidSubject || (hasInvalidProperties && !hasApiToken)) {
-      permissionsToRemove.push(permission);
-    }
+  if (actionProvider.has(permission.action) === false) {
+    return 'unregistered action';
   }
 
-  return permissionsToRemove;
+  const { subjects, options = {} as Action['options'] } = actionProvider.get(
+    permission.action
+  ) as Action;
+
+  if (Array.isArray(subjects) && subjects.includes(permission.subject as string) === false) {
+    return 'subject not handled';
+  }
+
+  const { applyToProperties } = options;
+
+  if (Array.isArray(applyToProperties) === false) {
+    return undefined;
+  }
+
+  const properties = await Promise.all(
+    applyToProperties.map(async (property) => ({
+      property,
+      applies: await actionProvider.appliesToProperty(
+        property,
+        permission.action,
+        permission.subject
+      ),
+      value: permissionDomain.getProperty(property, permission) as unknown,
+    }))
+  );
+  const missing = findMissingProperties(properties);
+
+  // On an api token permission, nil properties mean "everything", not "invalid"
+  const hasApiToken = get(permission, 'apiToken') != null;
+
+  // A permission is invalid when it misses every property of its action
+  if (missing.every((isMissing) => isMissing === true) && hasApiToken === false) {
+    const missingNames = properties.map(({ property }) => property);
+
+    return missingNames.length === 0
+      ? 'missing properties'
+      : `missing properties (${missingNames.join(', ')})`;
+  }
+
+  return undefined;
 };
+
+type RemovedPermission = { permission: Permission; reason: string };
 
 type PermissionOwner = { id: Data.ID; name?: string };
 
@@ -136,16 +179,22 @@ const formatOwners = (owners: PermissionOwner[]) => {
     return 'none';
   }
 
-  return uniqueOwners.map((owner) => `${JSON.stringify(owner.name)} (id ${owner.id})`).join(', ');
+  return uniqueOwners.map((owner) => `${quoteForLog(owner.name)} (id ${owner.id})`).join(', ');
 };
 
 /**
  * Warns about the stored permissions the boot cleanup deleted, so a lost grant leaves a trace
  */
-const logRemovedPermissions = (removedPermissions: Permission[]) => {
-  if (removedPermissions.length === 0) {
+const logRemovedPermissions = (removed: RemovedPermission[]) => {
+  if (removed.length === 0) {
     return;
   }
+
+  const removedPermissions = removed.map(({ permission }) => permission);
+
+  const reasonCounts = new Map<string, number>();
+  removed.forEach(({ reason }) => reasonCounts.set(reason, (reasonCounts.get(reason) ?? 0) + 1));
+  const reasons = Array.from(reasonCounts, ([reason, count]) => `${reason}: ${count}`);
 
   const ownerOf = (permission: Permission, key: 'role' | 'apiToken') =>
     get(permission, key) as PermissionOwner | null | undefined;
@@ -170,8 +219,9 @@ const logRemovedPermissions = (removedPermissions: Permission[]) => {
 
   strapi.log.warn(
     `Removed ${removedPermissions.length} stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ` +
-      `Actions: ${actions.join(', ')}. ` +
-      `Subjects: ${subjects.length === 0 ? 'none' : subjects.join(', ')}. ` +
+      `Reasons: ${reasons.join(', ')}. ` +
+      `Actions: ${actions.map(quoteForLog).join(', ')}. ` +
+      `Subjects: ${subjects.length === 0 ? 'none' : subjects.map(quoteForLog).join(', ')}. ` +
       `Roles: ${formatOwners(roles)}. ` +
       `Admin tokens: ${formatOwners(tokens)}. ` +
       `Without role or admin token: ${withoutOwnerCount}.`
@@ -183,7 +233,7 @@ const logRemovedPermissions = (removedPermissions: Permission[]) => {
  */
 export const cleanPermissionsInDatabase = async (): Promise<void> => {
   const pageSize = 200;
-  const removedPermissions: Permission[] = [];
+  const removedPermissions: RemovedPermission[] = [];
 
   const contentTypeService = getService('content-type');
 
@@ -206,20 +256,21 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
     lastId = results[results.length - 1].id;
 
     const permissions = permissionDomain.toPermission(results);
-    const permissionsToRemove = await filterPermissionsToRemove(permissions);
 
-    // Also remove orphaned permissions (no role AND no apiToken)
-    const orphanedPermissions = permissions.filter(
-      (permission: any) => !permission.role && !permission.apiToken
-    );
+    // Find invalid permissions, and orphaned ones (no role AND no apiToken)
+    const pageRemovedPermissions: RemovedPermission[] = [];
+    for (const permission of permissions) {
+      const isOrphaned = get(permission, 'role') == null && get(permission, 'apiToken') == null;
+      const reason = (await findRemovalReason(permission)) ?? (isOrphaned ? 'no owner' : undefined);
 
-    const permissionsIdToRemove = Array.from(
-      new Set([...permissionsToRemove, ...orphanedPermissions].map((p) => p.id))
-    );
+      if (reason !== undefined) {
+        pageRemovedPermissions.push({ permission, reason });
+      }
+    }
 
-    removedPermissions.push(
-      ...permissions.filter((permission) => permissionsIdToRemove.includes(permission.id))
-    );
+    removedPermissions.push(...pageRemovedPermissions);
+
+    const permissionsIdToRemove = pageRemovedPermissions.map(({ permission }) => permission.id);
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
     const remainingPermissions = permissions.filter(

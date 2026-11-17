@@ -64,6 +64,11 @@ const completePasswordReset = async (user: AdminUser, password: string): Promise
     resetPasswordTokenExpiresAt: null,
   });
 
+  // null when the account was deleted after the caller's token lookup
+  if (updatedUser === null) {
+    throw new ApplicationError();
+  }
+
   await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CONFIRM, toAdminUserEvent(updatedUser));
 
   return updatedUser;
