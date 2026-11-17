@@ -14,7 +14,8 @@ import { createTestBuilder } from 'api-tests/builder';
 const SHELF_UID = 'api::rt-shelf.rt-shelf';
 const BOOKCASE_UID = 'api::rt-bookcase.rt-bookcase';
 const BOOK_UID = 'api::rt-book.rt-book';
-const TYPE_FOLDERS = ['rt-book', 'rt-bookcase', 'rt-shelf'];
+const MAGAZINE_UID = 'api::rt-magazine.rt-magazine';
+const TYPE_FOLDERS = ['rt-book', 'rt-bookcase', 'rt-shelf', 'rt-magazine'];
 
 type Request = (options: {
   method: string;
@@ -111,7 +112,9 @@ const createTypes = async (shelfBooksOptions: Record<string, unknown> = {}) => {
 const resetTypes = async () => {
   try {
     await updateSchema({
-      contentTypes: [BOOK_UID, BOOKCASE_UID, SHELF_UID].map((uid) => ({ action: 'delete', uid })),
+      contentTypes: [BOOK_UID, BOOKCASE_UID, SHELF_UID]
+        .filter((uid) => strapi.contentTypes[uid as keyof typeof strapi.contentTypes] !== undefined)
+        .map((uid) => ({ action: 'delete', uid })),
       components: [],
     });
   } catch {
@@ -200,6 +203,21 @@ const seedLinkedBook = async () => {
 
   return { shelfId: shelf.documentId, oldLinkTable: joinTable.name };
 };
+
+/** Every order of `items`, as the order of the types in a save. */
+const permutations = <T>(items: T[]): T[][] =>
+  items.length <= 1
+    ? [items]
+    : items.flatMap((item, index) =>
+        permutations([...items.slice(0, index), ...items.slice(index + 1)]).map((rest) => [
+          item,
+          ...rest,
+        ])
+      );
+
+/** Reads a schema file of this file's types from the disk (written by a save, before a restart). */
+const readSchemaAttributes = async (folder: string) =>
+  (await fse.readJSON(schemaFile(folder))).attributes as Record<string, Record<string, unknown>>;
 
 describe('Content Type Builder - retarget a relation under its own name', () => {
   beforeAll(async () => {
@@ -744,5 +762,227 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
       required: true,
     });
     expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'tomes' });
+  });
+  test.each(permutations(['rt-book', 'rt-bookcase', 'rt-shelf']))(
+    'retargets Book.shelf as the admin form sends it, with the types in the order %s, %s, %s',
+    async (...order) => {
+      await createTypes();
+
+      const payloads: Record<string, Record<string, unknown>> = {
+        'rt-book': bookOnlyRetarget(),
+        'rt-bookcase': contentType('update', 'rt-bookcase', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+        'rt-shelf': contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('delete', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+      };
+
+      const res = await updateSchema({
+        contentTypes: order.map((type) => payloads[type]),
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(attributesOf(SHELF_UID)).not.toHaveProperty('books');
+      expect(attributesOf(BOOK_UID).shelf).toMatchObject({
+        target: BOOKCASE_UID,
+        inversedBy: 'books',
+      });
+      expect(attributesOf(BOOKCASE_UID).books).toMatchObject({
+        target: BOOK_UID,
+        mappedBy: 'shelf',
+      });
+    }
+  );
+
+  test.each(permutations(['rt-book', 'rt-shelf']))(
+    'makes a one-way Book.shelf two-way as the admin form sends it, with the types in the order %s, %s',
+    async (...order) => {
+      await createTypes();
+
+      // Book.shelf is a one-way relation to Shelf
+      const bookSchema = await fse.readJSON(schemaFile('rt-book'));
+      delete bookSchema.attributes.shelf.inversedBy;
+      await fse.writeJSON(schemaFile('rt-book'), bookSchema, { spaces: 2 });
+      const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+      delete shelfSchema.attributes.books;
+      await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+      await restart();
+
+      const payloads: Record<string, Record<string, unknown>> = {
+        'rt-book': contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        'rt-shelf': contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('oneToMany', BOOK_UID, 'shelf')),
+        ]),
+      };
+
+      const res = await updateSchema({
+        contentTypes: order.map((type) => payloads[type]),
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+      expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'shelf' });
+    }
+  );
+
+  test.each(permutations(['rt-book', 'rt-bookcase']))(
+    'gives a new relation a counterpart name that Bookcase frees in the same save, with the types in the order %s, %s',
+    async (...order) => {
+      await createTypes();
+
+      const payloads: Record<string, Record<string, unknown>> = {
+        'rt-book': contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'bookcase', relation('manyToOne', BOOKCASE_UID, 'name')),
+        ]),
+        'rt-bookcase': {
+          ...contentType('update', 'rt-bookcase', [
+            nameAttribute('update', 'label'),
+            attribute('create', 'name', relation('oneToMany', BOOK_UID, 'bookcase')),
+          ]),
+          renames: [{ oldName: 'name', newName: 'label' }],
+        },
+      };
+
+      const res = await updateSchema({
+        contentTypes: order.map((type) => payloads[type]),
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(attributesOf(BOOKCASE_UID).label).toMatchObject({ type: 'string' });
+      expect(attributesOf(BOOK_UID).bookcase).toMatchObject({ inversedBy: 'name' });
+      expect(attributesOf(BOOKCASE_UID).name).toMatchObject({ mappedBy: 'bookcase' });
+    }
+  );
+
+  test('renames a string of Book and gives its name to the other side of a self relation', async () => {
+    await createTypes();
+
+    const added = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          nameAttribute('create', 'children'),
+        ]),
+      ],
+      components: [],
+    });
+    expect(added.statusCode).toBe(200);
+    await restart();
+
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          ...contentType('update', 'rt-book', [
+            nameAttribute('update', 'title'),
+            attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+            nameAttribute('update', 'kids'),
+            attribute('create', 'parent', relation('manyToOne', BOOK_UID, 'children')),
+            attribute('create', 'children', relation('oneToMany', BOOK_UID, 'parent')),
+          ]),
+          renames: [{ oldName: 'children', newName: 'kids' }],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).kids).toMatchObject({ type: 'string' });
+    expect(attributesOf(BOOK_UID).parent).toMatchObject({ inversedBy: 'children' });
+    expect(attributesOf(BOOK_UID).children).toMatchObject({ mappedBy: 'parent' });
+  });
+
+  test('removes the old counterpart when a new relation in the stored format names it', async () => {
+    await createTypes();
+
+    // Book drops shelf and adds rack, in the stored format, with the other side of shelf
+    const res = await putFromGet(BOOK_UID, (schema) => {
+      delete schema.attributes.shelf;
+      schema.attributes.rack = {
+        type: 'relation',
+        relation: 'manyToOne',
+        target: SHELF_UID,
+        inversedBy: 'books',
+      };
+    });
+    expect(res.statusCode).toBe(201);
+
+    // A later save of Shelf cannot rebuild a second owner from a stale Shelf.books
+    expect(await readSchemaAttributes('rt-shelf')).not.toHaveProperty('books');
+
+    // The second save of the pair, in the stored format, completes it
+    const completed = await putFromGet(SHELF_UID, (schema) => {
+      schema.attributes.books = {
+        type: 'relation',
+        relation: 'oneToMany',
+        target: BOOK_UID,
+        mappedBy: 'rack',
+      };
+    });
+    expect(completed.statusCode).toBe(201);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID)).not.toHaveProperty('shelf');
+    expect(attributesOf(BOOK_UID).rack).toMatchObject({ inversedBy: 'books' });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'rack' });
+  });
+
+  test('rejects a relation whose other side in the stored format is a scalar attribute', async () => {
+    await createTypes();
+    const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+
+    const res = await putFromGet(BOOK_UID, (schema) => {
+      delete schema.attributes.shelf.targetAttribute;
+      schema.attributes.shelf.inversedBy = 'name';
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(attributesOf(SHELF_UID).name).toMatchObject({ type: 'string' });
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+    const stored = await strapi.documents(SHELF_UID).findOne({ documentId: shelf.documentId });
+    expect(stored?.name).toBe('Shelf 1');
+  });
+
+  test('rejects a new type whose relation names a scalar attribute of an existing type', async () => {
+    await createTypes();
+
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('create', 'rt-magazine', [
+          nameAttribute('create', 'title'),
+          attribute('create', 'bookcase', relation('manyToOne', BOOKCASE_UID, 'name')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(strapi.contentTypes[MAGAZINE_UID as keyof typeof strapi.contentTypes]).toBeUndefined();
+    expect(attributesOf(BOOKCASE_UID).name).toMatchObject({ type: 'string' });
   });
 });

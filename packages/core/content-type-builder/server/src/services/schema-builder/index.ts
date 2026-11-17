@@ -165,6 +165,9 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
      * a rollback failed
      */
     async writeFiles({ renameComponentRows = true }: { renameComponentRows?: boolean } = {}) {
+      // Nothing is written when a relation pair of the save is not valid
+      this.assertRelationPairs();
+
       const schemas = [
         ...Array.from(tmpComponents.values()),
         ...Array.from(tmpContentTypes.values()),

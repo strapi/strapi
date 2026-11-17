@@ -388,6 +388,8 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         attributes: edits[uid],
       });
     });
+    // The check that runs before the schema files are written
+    builder.assertRelationPairs();
     return builder;
   };
 
@@ -781,6 +783,26 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
       });
 
+      it('removes the old counterpart when a new relation in the stored format names it', () => {
+        // Book drops shelf and adds rack, in the stored format, with the other side of shelf
+        const builder = createBuilder();
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          attributes: {
+            title: { type: 'string' },
+            rack: { type: 'relation', relation: kind, target: shelfUid, inversedBy: 'books' },
+          },
+        });
+        builder.assertRelationPairs();
+
+        // A later save of Shelf cannot rebuild a second owner from a stale Shelf.books
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
+        expect(attributesOf(builder, bookUid).rack).toMatchObject({ inversedBy: 'books' });
+      });
+
       it('keeps the pair when the owner is saved unchanged', () => {
         const { contentTypes } = (global as any).strapi;
         const books = contentTypes[shelfUid].__schema__.attributes.books;
@@ -818,6 +840,24 @@ describe('content-type-builder editContentType with retargeted relations', () =>
 
     describe('with a body in the format of the GET response of the single-type route', () => {
       // That body has the stored inversedBy or mappedBy next to targetAttribute
+      it('makes a one-way relation the owner when a save of its type alone gives it another side', () => {
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[bookUid].__schema__.attributes.shelf = {
+          type: 'relation',
+          relation: kind,
+          target: shelfUid,
+        };
+        delete contentTypes[shelfUid].__schema__.attributes.books;
+
+        const builder = editAll(
+          { [bookUid]: { title: { type: 'string' }, shelf: relation(kind, shelfUid, 'books') } },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookUid).shelf).toMatchObject({ inversedBy: 'books' });
+        expect(attributesOf(builder, shelfUid).books).toMatchObject({ mappedBy: 'shelf' });
+      });
+
       it('renames the counterpart', () => {
         const builder = editAll(
           {
@@ -881,7 +921,7 @@ describe('content-type-builder editContentType with retargeted relations', () =>
             [bookUid]
           )
         ).toThrow(
-          `Attribute name of ${bookcaseUid} exists and is not the other side of a relation`
+          `Relation bookcase of ${bookUid} cannot have name of ${bookcaseUid} as its other side: the save would replace name, which stores its own data`
         );
       });
 
@@ -905,8 +945,172 @@ describe('content-type-builder editContentType with retargeted relations', () =>
             [bookUid]
           )
         ).toThrow(
-          `Attribute items of ${bookcaseUid} exists and is not the other side of a relation`
+          `Relation bookcase of ${bookUid} cannot have items of ${bookcaseUid} as its other side: the save would replace items, which stores its own data`
         );
+      });
+
+      it('rejects a relation whose other side in the stored format is a scalar attribute', () => {
+        // The stored format names the other side with inversedBy only
+        expect(() =>
+          editAll(
+            {
+              [bookUid]: {
+                title: { type: 'string' },
+                shelf: { type: 'relation', relation: kind, target: shelfUid, inversedBy: 'name' },
+              },
+            },
+            [bookUid]
+          )
+        ).toThrow(
+          `Relation shelf of ${bookUid} cannot have name of ${shelfUid} as its other side: the save would replace name, which stores its own data`
+        );
+      });
+
+      it('rejects a new relation whose counterpart name is the other side of another pair', () => {
+        // Bookcase.items is the inverse side of Book.bookcase, which the save keeps
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[bookUid].__schema__.attributes.bookcase = {
+          type: 'relation',
+          relation: kind,
+          target: bookcaseUid,
+          inversedBy: 'items',
+        };
+        contentTypes[bookcaseUid].__schema__.attributes.items = {
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookUid,
+          mappedBy: 'bookcase',
+        };
+
+        expect(() =>
+          editAll(
+            {
+              [bookUid]: {
+                title: { type: 'string' },
+                shelf: relation(kind, shelfUid, 'books'),
+                bookcase: relation(kind, bookcaseUid, 'items'),
+                stack: relation(kind, bookcaseUid, 'items'),
+              },
+            },
+            [bookUid]
+          )
+        ).toThrow(
+          `Relation stack of ${bookUid} cannot have items of ${bookcaseUid} as its other side`
+        );
+      });
+
+      it.each(permutations([bookUid, shelfUid]))(
+        'rejects a save whose target type makes the counterpart name a scalar attribute (%s, %s)',
+        (...order) => {
+          // Book keeps Shelf.books as the other side of shelf, Shelf makes books a string
+          expect(() =>
+            editAll(
+              {
+                [bookUid]: { title: { type: 'string' }, shelf: relation(kind, shelfUid, 'books') },
+                [shelfUid]: { name: { type: 'string' }, books: { type: 'string' } },
+              },
+              order
+            )
+          ).toThrow(
+            `Relation shelf of ${bookUid} cannot have books of ${shelfUid} as its other side`
+          );
+        }
+      );
+
+      it('keeps the last of two relations of the save that name the same other side', () => {
+        // Same result as before the check: the other side points back to the last one written
+        const builder = editAll(
+          {
+            [bookUid]: {
+              title: { type: 'string' },
+              shelf: relation(kind, shelfUid, 'books'),
+              first: relation(kind, bookcaseUid, 'items'),
+              second: relation(kind, bookcaseUid, 'items'),
+            },
+          },
+          [bookUid]
+        );
+
+        expect(attributesOf(builder, bookcaseUid).items).toMatchObject({ target: bookUid });
+        expect([
+          attributesOf(builder, bookcaseUid).items.mappedBy,
+          attributesOf(builder, bookcaseUid).items.inversedBy,
+        ]).toContain('second');
+      });
+
+      it('rejects an other side that does not point back in the state that the save leaves', () => {
+        const builder = createBuilder();
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          attributes: { title: { type: 'string' }, shelf: relation(kind, bookcaseUid, 'books') },
+        });
+
+        // Bookcase.books no longer points back to Book.shelf
+        builder.contentTypes.get(bookcaseUid).setAttribute('books', {
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookUid,
+          mappedBy: 'other',
+        });
+
+        expect(() => builder.assertRelationPairs()).toThrow(
+          `Relation shelf of ${bookUid} cannot have books of ${bookcaseUid} as its other side: books is not a relation that points back to shelf`
+        );
+      });
+
+      it('accepts a self relation whose other side takes the name of a renamed attribute', () => {
+        // Book renames the string children to kids and adds parent, whose other side is children
+        (global as any).strapi.contentTypes[bookUid].__schema__.attributes.children = {
+          type: 'string',
+        };
+        const selfKind = kind === 'manyToOne' ? 'oneToMany' : oppositeRelation[kind];
+
+        const builder = createBuilder();
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          renames: [{ oldName: 'children', newName: 'kids' }],
+          attributes: {
+            title: { type: 'string' },
+            shelf: relation(kind, shelfUid, 'books'),
+            kids: { type: 'string' },
+            parent: relation(kind, bookUid, 'children'),
+            children: relation(selfKind, bookUid, 'parent'),
+          },
+        });
+        builder.assertRelationPairs();
+
+        expect(attributesOf(builder, bookUid).kids).toEqual({ type: 'string' });
+        expectValidPair(builder, [bookUid, 'parent'], [bookUid, 'children']);
+      });
+
+      it('accepts a counterpart under a name that the target type frees in the same save', () => {
+        // Bookcase renames name to label, and Book.bookcase takes name as its other side
+        permutations([bookUid, bookcaseUid]).forEach((order) => {
+          setStrapi(kind);
+          const builder = editAll(
+            {
+              [bookUid]: {
+                title: { type: 'string' },
+                shelf: relation(kind, shelfUid, 'books'),
+                bookcase: relation(kind, bookcaseUid, 'name'),
+              },
+              [bookcaseUid]: {
+                label: { type: 'string' },
+                name: relation(oppositeRelation[kind], bookUid, 'bookcase'),
+              },
+            },
+            order
+          );
+
+          expect(attributesOf(builder, bookcaseUid).label).toEqual({ type: 'string' });
+          expectValidPair(builder, [bookUid, 'bookcase'], [bookcaseUid, 'name']);
+        });
       });
 
       it('keeps a one-way relation that the owner named before the save', () => {
@@ -935,8 +1139,8 @@ describe('content-type-builder editContentType with retargeted relations', () =>
 
     describe('when the save leaves out the old target type', () => {
       // Saves with only Book, as the AI chat or a direct update-schema call can send
-      it('keeps the old owner when the inverse side moves with its new target first', () => {
-        // Save of Magazine then Shelf, without Book: Book.shelf holds the link rows
+      it('deletes the old owner when the inverse side moves with its new target first', () => {
+        // Save of Magazine then Shelf, without Book: same result as with Shelf first
         const builder = editAll(
           {
             [magazineUid]: {
@@ -951,10 +1155,7 @@ describe('content-type-builder editContentType with retargeted relations', () =>
           [magazineUid, shelfUid]
         );
 
-        expect(attributesOf(builder, bookUid).shelf).toMatchObject({
-          target: shelfUid,
-          inversedBy: 'books',
-        });
+        expect(attributesOf(builder, bookUid)).not.toHaveProperty('shelf');
         expectValidPair(builder, [shelfUid, 'books'], [magazineUid, 'shelf']);
       });
 

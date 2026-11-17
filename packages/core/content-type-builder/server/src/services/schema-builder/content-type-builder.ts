@@ -31,11 +31,12 @@ const reuseUnsetPreviousProperties = (
 };
 
 /**
- * Whether `relation`, an attribute of the type being edited (as sent in the save, or as
- * stored), is a relation to `target` that names `targetAttributeName` as its other side.
- * An attribute sent in the save names its other side with `targetAttribute`: a body in the
- * format of the GET response of the single-type route also has the stored `inversedBy`, which
- * names the other side before the edit. A stored attribute names it with `inversedBy`.
+ * Whether `relation`, an attribute of the type being edited after the edit, is a relation to
+ * `target` whose other side is `targetAttributeName`: `setRelation` then writes that other
+ * side. Only `targetAttribute` counts. A body in the format of the GET response of the
+ * single-type route also has the stored `inversedBy`, which names the other side before the
+ * edit. A relation that is new in the save and sent in the stored format (`inversedBy`, no
+ * `targetAttribute`) is written as it is sent, and does not write its other side.
  */
 const namesOtherSide = (
   relation: InternalAttribute | undefined,
@@ -46,22 +47,27 @@ const namesOtherSide = (
     return false;
   }
 
-  const {
-    target: relationTarget,
-    targetAttribute,
-    inversedBy,
-  } = relation as InternalRelationAttribute;
+  const { target: relationTarget, targetAttribute } = relation as InternalRelationAttribute;
 
-  if (relationTarget !== target) {
-    return false;
-  }
-
-  if (targetAttribute !== undefined) {
-    return targetAttribute === targetAttributeName;
-  }
-
-  return inversedBy === targetAttributeName;
+  return relationTarget === target && targetAttribute === targetAttributeName;
 };
+
+/** The name of the other side of a stored relation (`inversedBy` or `mappedBy`), if any. */
+const otherSideName = (attribute: Schema.Attribute.AnyAttribute | undefined) => {
+  if (attribute === undefined || isRelation(attribute) === false) {
+    return undefined;
+  }
+
+  const { inversedBy, mappedBy } = attribute as InternalRelationAttribute;
+
+  return inversedBy || mappedBy || undefined;
+};
+
+/** The fields of a stored attribute that decide which pair it belongs to. */
+const pairFields = (attribute: Schema.Attribute.AnyAttribute | undefined) =>
+  attribute === undefined
+    ? undefined
+    : _.pick(attribute, ['type', 'relation', 'target', 'inversedBy', 'mappedBy']);
 
 /**
  * Whether `targetAttribute`, the attribute named by `inversedBy` or `mappedBy` on the
@@ -102,28 +108,6 @@ const isOtherSide = ({
   return (
     (counterpart.mappedBy !== undefined && counterpart.mappedBy !== null) ||
     counterpart.inversedBy === key
-  );
-};
-
-/**
- * Whether `attribute` can be paired by `setRelation`: no attribute, or a relation with another
- * side (`inversedBy` or `mappedBy`). A scalar, media, component or dynamic zone attribute, or a
- * one-way relation, stores its own data: writing a counterpart over it drops that data.
- */
-const canBeCounterpart = (attribute: Schema.Attribute.AnyAttribute | undefined) => {
-  if (attribute === undefined) {
-    return true;
-  }
-
-  if (isRelation(attribute) === false) {
-    return false;
-  }
-
-  const { inversedBy, mappedBy } = attribute as InternalRelationAttribute;
-
-  return (
-    (inversedBy !== undefined && inversedBy !== null) ||
-    (mappedBy !== undefined && mappedBy !== null)
   );
 };
 
@@ -183,8 +167,17 @@ const getRenameOrigins = (renames: unknown): Map<string, string> => {
   return originOf;
 };
 
+/** A relation (`key` of `uid`) and the other side that `setRelation` wrote for it. */
+type BuiltPair = { uid: string; key: string; target: string; name: string };
+
 export default function createComponentBuilder() {
   return {
+    // The pairs that setRelation wrote in this save, checked by assertRelationPairs
+    builtPairs: [] as BuiltPair[],
+
+    // The attributes that the save sends for each type it creates or edits
+    savedAttributes: new Map<string, Record<string, unknown>>(),
+
     /**
      * Writes the other side of the relation `key` of `uid` on its target. The other side keeps
      * the options (`required`, `private`, `pluginOptions`, `conditions`) of the attribute it
@@ -221,19 +214,6 @@ export default function createComponentBuilder() {
         return;
       }
 
-      if (canBeCounterpart(targetAttribute) === false) {
-        // A relation that named this attribute before the save keeps it as it is
-        const attributeBeforeSave = this.contentTypes.get(uid)?.initialSchema?.attributes?.[key];
-
-        if (namesOtherSide(attributeBeforeSave, attribute.target, attribute.targetAttribute)) {
-          return;
-        }
-
-        throw new ApplicationError(
-          `Attribute ${attribute.targetAttribute} of ${attribute.target} exists and is not the other side of a relation: it cannot be the other side of relation ${key} of ${uid}`
-        );
-      }
-
       // When generating the inverse relation, preserve existing conditions if they exist
       // If the target attribute already exists and has conditions, preserve them
       const targetAttributeData = targetAttribute || renamedCounterpart || {};
@@ -244,6 +224,139 @@ export default function createComponentBuilder() {
         attribute.targetAttribute,
         generateRelation({ key, attribute, uid, targetAttribute: targetAttributeData })
       );
+
+      // assertRelationPairs checks this pair against the state that the save leaves
+      this.builtPairs.push({ uid, key, target: attribute.target, name: attribute.targetAttribute });
+    },
+
+    /**
+     * Checks the relation pairs of the save against the state that the save leaves, before any
+     * schema file is written. Run once, after the create and edit steps of the save, so that the
+     * order of the types in the save does not change the result.
+     *
+     * For each relation that the save sends with another side (`targetAttribute`):
+     * - a later step of the save did not change or remove it (the payloads of two types do not
+     *   agree).
+     *
+     * For each of these relations whose other side `setRelation` wrote (a pair that the save
+     * does not change is kept as it is, see `editContentType`):
+     * - the other side is a relation that points back to the relation (owner and inverse side),
+     *   and the save of the target type does not make it another kind of attribute. When two
+     *   relations of the save name the same other side, the last one written keeps it, as
+     *   before this check;
+     * - the other side did not replace an attribute that stores its own data (not a relation,
+     *   or a one-way relation), unless the save of the target type removed that attribute or
+     *   made it a relation;
+     * - no relation that the save keeps is still paired with the attribute that became the
+     *   other side.
+     *
+     * @throws ApplicationError when a pair is not valid
+     */
+    assertRelationPairs(this: any) {
+      const builtPairs = new Set(
+        (this.builtPairs as BuiltPair[]).map(({ uid, key }) => `${uid}.${key}`)
+      );
+
+      for (const [uid, savedAttributes] of this.savedAttributes as Map<
+        string,
+        Record<string, unknown>
+      >) {
+        for (const [key, saved] of Object.entries(savedAttributes)) {
+          if (isRelation(saved as Schema.Attribute.AnyAttribute) === false) {
+            continue;
+          }
+
+          const { target, targetAttribute: name } = saved as InternalRelationAttribute;
+
+          if (name === undefined || name === null) {
+            continue;
+          }
+
+          const error = (reason: string) =>
+            new ApplicationError(
+              `Relation ${key} of ${uid} cannot have ${name} of ${target} as its other side: ${reason}`
+            );
+
+          const relation = this.contentTypes.get(uid)?.schema.attributes[key];
+
+          if (otherSideName(relation) !== name || relation.target !== target) {
+            throw error(`another type of the save changes or removes ${key} of ${uid}`);
+          }
+
+          if (builtPairs.has(`${uid}.${key}`) === false) {
+            continue;
+          }
+
+          const targetCT = this.contentTypes.get(target);
+          const counterpart = targetCT?.schema.attributes[name] as InternalRelationAttribute;
+          const isOwner = (relation as InternalRelationAttribute).inversedBy === name;
+          const pointsBack =
+            counterpart !== undefined &&
+            isRelation(counterpart) &&
+            counterpart.target === uid &&
+            (isOwner ? counterpart.mappedBy === key : counterpart.inversedBy === key);
+
+          if (pointsBack === false) {
+            // Two relations of the save name the same other side: the last one written keeps
+            // it, as before this check
+            const claimant = otherSideName(counterpart);
+            const isClaimedBySave =
+              claimant !== undefined &&
+              counterpart.target === uid &&
+              namesOtherSide(
+                savedAttributes[claimant] as InternalAttribute | undefined,
+                target,
+                name
+              );
+
+            if (isClaimedBySave === false) {
+              throw error(`${name} is not a relation that points back to ${key}`);
+            }
+
+            continue;
+          }
+
+          const savedCounterpart = this.savedAttributes.get(target)?.[name];
+
+          if (savedCounterpart !== undefined && isRelation(savedCounterpart) === false) {
+            throw error(`the save of ${target} makes ${name} a ${savedCounterpart.type} attribute`);
+          }
+
+          const beforeSave = targetCT.initialSchema?.attributes?.[name];
+
+          if (beforeSave === undefined) {
+            continue;
+          }
+
+          const partnerName = otherSideName(beforeSave);
+
+          if (partnerName === undefined) {
+            const savedTargetAttributes = this.savedAttributes.get(target);
+            const isReplacedBySave =
+              savedTargetAttributes !== undefined &&
+              (_.has(savedTargetAttributes, name) === false ||
+                isRelation(savedTargetAttributes[name]));
+
+            if (isReplacedBySave === false) {
+              throw error(`the save would replace ${name}, which stores its own data`);
+            }
+
+            continue;
+          }
+
+          const partnerUid = beforeSave.target;
+
+          if (partnerUid === uid && partnerName === key) {
+            continue;
+          }
+
+          const partner = this.contentTypes.get(partnerUid)?.schema.attributes[partnerName];
+
+          if (otherSideName(partner) === name && partner.target === target) {
+            throw error(`${name} is the other side of ${partnerName} of ${partnerUid}`);
+          }
+        }
+      }
     },
 
     /**
@@ -321,6 +434,7 @@ export default function createComponentBuilder() {
         }
       });
 
+      this.savedAttributes.set(uid, attributes);
       contentType.setAttributes(this.convertAttributes(attributes));
 
       Object.keys(attributes).forEach((key) => {
@@ -432,6 +546,8 @@ export default function createComponentBuilder() {
           _.has(oldAttributes, key) ? toTargetAttributeFormat(attribute) : attribute
       );
 
+      this.savedAttributes.set(uid, attributes);
+
       const newAttributes = _.omitBy(attributes, (attr, key) => {
         return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
       });
@@ -439,7 +555,10 @@ export default function createComponentBuilder() {
       // The attributes of the type after the edit: `setAttributes` keeps the attributes that
       // are not configurable
       const attributesAfterEdit = {
-        ..._.pickBy(oldAttributes, (attribute) => !isConfigurable(attribute)),
+        ..._.mapValues(
+          _.pickBy(oldAttributes, (attribute) => !isConfigurable(attribute)),
+          toTargetAttributeFormat
+        ),
         ...newAttributes,
       };
 
@@ -468,10 +587,23 @@ export default function createComponentBuilder() {
         const newAttribute = newAttributes[key] as InternalAttribute;
 
         if (!isRelation(oldAttribute) && isRelation(newAttribute)) {
+          const relationAttribute = newAttribute as InternalRelationAttribute;
+
+          // Same owner and inverse side as a new relation (see newKeys below)
+          if (['manyToMany', 'oneToOne'].includes(relationAttribute.relation)) {
+            const otherSide =
+              relationAttribute.target === uid && relationAttribute.targetAttribute !== undefined
+                ? (newAttributes[relationAttribute.targetAttribute] as InternalRelationAttribute)
+                : undefined;
+
+            relationAttribute.dominant =
+              otherSide === undefined || otherSide.dominant === undefined;
+          }
+
           return this.setRelation({
             key,
             uid,
-            attribute: newAttribute as InternalRelationAttribute,
+            attribute: relationAttribute,
           });
         }
 
@@ -498,12 +630,13 @@ export default function createComponentBuilder() {
           const targetHasChanged = oldRelationAttribute.target !== relationAttribute.target;
 
           // A save that renames the other side on the same target: the other side keeps its
-          // options under its new name. Read it before unsetRelation deletes it.
+          // options under its new name. Read it as it was before the save, so that an earlier
+          // step of the save that rewrote it does not change the result.
           const oldCounterpart =
             targetAttributeHasChanged && !targetHasChanged && oldTargetAttributeName
-              ? this.contentTypes
-                  .get(relationAttribute.target)
-                  ?.getAttribute(oldTargetAttributeName)
+              ? this.contentTypes.get(relationAttribute.target)?.initialSchema?.attributes?.[
+                  oldTargetAttributeName
+                ]
               : undefined;
           const renamedCounterpart =
             oldCounterpart !== undefined &&
@@ -516,7 +649,36 @@ export default function createComponentBuilder() {
               ? (oldCounterpart as InternalRelationAttribute)
               : undefined;
 
-          if (!sameRelation || targetAttributeHasChanged || targetHasChanged) {
+          const attributeBeforeSave = contentType.initialSchema?.attributes?.[key] as
+            InternalAttribute | undefined;
+
+          // A pair that the save does not change is not rebuilt: same target, kind and other
+          // side as before the save, and the other side as it was before the save. A schema
+          // whose other side is not a valid pair (written by hand) stays as it is.
+          const otherSide = relationAttribute.targetAttribute;
+          const isPairUnchanged =
+            attributeBeforeSave !== undefined &&
+            isRelation(attributeBeforeSave) &&
+            otherSide !== undefined &&
+            otherSide !== null &&
+            (attributeBeforeSave as InternalRelationAttribute).target ===
+              relationAttribute.target &&
+            (attributeBeforeSave as InternalRelationAttribute).relation ===
+              relationAttribute.relation &&
+            otherSideName(attributeBeforeSave) === otherSide &&
+            _.isEqual(
+              pairFields(this.contentTypes.get(relationAttribute.target)?.getAttribute(otherSide)),
+              pairFields(
+                this.contentTypes.get(relationAttribute.target)?.initialSchema?.attributes?.[
+                  otherSide
+                ]
+              )
+            );
+
+          if (
+            isPairUnchanged === false &&
+            (!sameRelation || targetAttributeHasChanged || targetHasChanged)
+          ) {
             this.unsetRelation({
               key,
               uid,
@@ -526,16 +688,13 @@ export default function createComponentBuilder() {
           }
 
           // An earlier type of this save can have written this attribute already: setRelation
-          // of its new target. The inverse side that this owner had before the save is then
-          // still on its old target. Only for an owner: this does not delete the old owner of
-          // a retargeted inverse side, which holds the link rows.
-          const attributeBeforeSave = contentType.initialSchema?.attributes?.[key] as
-            InternalAttribute | undefined;
-
+          // of its new target. The other side that this relation had before the save is then
+          // still on its old target. For a retargeted inverse side, this deletes its old owner,
+          // as when the inverse side is saved first.
           if (
+            isPairUnchanged === false &&
             attributeBeforeSave !== undefined &&
             isRelation(attributeBeforeSave) === true &&
-            (attributeBeforeSave as InternalRelationAttribute).inversedBy !== undefined &&
             (attributeBeforeSave as InternalRelationAttribute).target !== relationAttribute.target
           ) {
             this.unsetRelation({
@@ -572,6 +731,13 @@ export default function createComponentBuilder() {
             relationAttribute.dominant = true;
           } else if (oldRelationAttribute.mappedBy) {
             relationAttribute.dominant = false;
+          } else if (relationAttribute.dominant === undefined) {
+            // A one-way relation that gets another side owns the pair, as a new relation does
+            relationAttribute.dominant = true;
+          }
+
+          if (isPairUnchanged === true) {
+            return;
           }
 
           return this.setRelation({
