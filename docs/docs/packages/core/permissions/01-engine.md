@@ -190,11 +190,12 @@ const permission = domain.permission.create({
   conditions: ['isOwner'],
 });
 
-engine.on('before-evaluate.permission', ({ permission }) => {
+engine.on('before-evaluate.permission', (context) => {
   // Add dynamic conditions based on context
-  if (permission.action === 'update') {
-    permission.conditions.push('isNotLocked');
-    permission.conditions.push('isWithinBusinessHours');
+  if (context.permission.action === 'update') {
+    context.addCondition('isNotLocked').addCondition('isWithinBusinessHours');
   }
 });
 ```
+
+`context.permission` is a copy of the permission, so changing it has no effect. `addCondition` adds the condition to the permission the engine evaluates.
