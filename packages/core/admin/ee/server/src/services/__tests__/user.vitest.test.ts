@@ -87,6 +87,18 @@ describe('EE user service audit events', () => {
     expect(JSON.stringify(vi.mocked(emitAudit).mock.calls)).not.toMatch(/Secret1234|hash/);
   });
 
+  test.each([[{ password: 'Secret1234' }], [{ firstname: 'Kai' }]])(
+    'updateById resolves null and records nothing for a missing user (%o)',
+    async (attributes) => {
+      setup({ updated: null as unknown as Record<string, unknown> });
+
+      await expect(updateById(404, attributes)).resolves.toBeNull();
+
+      expect(global.strapi.eventHub.emit).not.toHaveBeenCalled();
+      expect(emitAudit).not.toHaveBeenCalled();
+    }
+  );
+
   test('deleteById records the deleted account', async () => {
     setup();
 

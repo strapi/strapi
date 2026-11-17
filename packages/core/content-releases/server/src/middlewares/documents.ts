@@ -78,6 +78,7 @@ const createRevalidateActionsOnDraftChange =
     }
 
     const contentType = ctx.contentType.uid;
+    const isLocalized = strapi.localization.isLocalizedContentType(ctx.contentType);
     const { action } = ctx;
 
     const result = await next();
@@ -97,7 +98,7 @@ const createRevalidateActionsOnDraftChange =
           await getService('release-action', { strapi }).revalidatePlannedActions({
             contentType,
             entryDocumentId: draft.documentId,
-            locale: draft.locale,
+            ...(isLocalized && { locale: draft.locale }),
           });
         }
       },

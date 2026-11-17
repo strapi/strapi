@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import _, { defaults } from 'lodash';
 
 import { arrays, errors, emitAudit } from '@strapi/utils';
@@ -20,7 +19,6 @@ import type {
   SanitizedAdminUser,
   SanitizedAdminRole,
   AdminUserUpdatePayload,
-  // eslint-disable-next-line node/no-unpublished-import
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
@@ -159,11 +157,12 @@ const createFirstAdmin = async (
  * Update a user in database
  * @param id query params to find the user to update
  * @param attributes A partial user object
+ * @returns the updated user, or null when no user has this id
  */
 const updateById = async (
   id: Data.ID,
   attributes: Partial<AdminUserUpdatePayload>
-): Promise<AdminUser> => {
+): Promise<AdminUser | null> => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
@@ -201,8 +200,11 @@ const updateById = async (
       populate: ['roles'],
     });
 
-    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
-    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    // The update resolves null when no user has this id
+    if (updatedUser !== null) {
+      strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+      await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    }
 
     return updatedUser;
   }
@@ -343,6 +345,11 @@ const register = async ({
     registrationToken: null,
     isActive: true,
   });
+
+  // null when the account was deleted after the registration token lookup
+  if (registeredUser === null) {
+    throw new ValidationError('Invalid registration info');
+  }
 
   await emitAudit({ strapi }, AUDITED_EVENTS.INVITE_ACCEPT, toAdminUserEvent(registeredUser));
 
