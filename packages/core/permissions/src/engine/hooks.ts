@@ -7,11 +7,7 @@ import type { PermissionRule } from '../types';
 
 export interface PermissionEngineHooks {
   'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
-  /**
-   * The untyped waterfall interface, which resolves to `any` (the factory resolves to `unknown`), so
-   * the engine assigns to {@link TypedPermissionEngineHooks}.
-   */
-  'format.permission': hooks.AsyncSeriesWaterfallHook;
+  'format.permission': ReturnType<typeof hooks.createAsyncSeriesWaterfallHook>;
   'after-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
   'before-evaluate.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
   'before-register.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
@@ -160,6 +156,11 @@ export type WillRegisterContext = {
   readonly condition: WillRegisterCondition;
 };
 
+/** A typed `format.permission` handler: it resolves to the permission the next handler receives. */
+type FormatPermissionHandler = (
+  permission: TypedPermission
+) => TypedPermission | Promise<TypedPermission>;
+
 /**
  * The engine hooks with typed handlers. {@link PermissionEngineHooks}, what the engine exposes,
  * keeps untyped handlers; a typed contract can declare this map instead. A validate hook stops at
@@ -170,9 +171,13 @@ export interface TypedPermissionEngineHooks {
   'before-format::validate.permission': hooks.AsyncBailHook<
     (context: BeforeEvaluateContext) => unknown
   >;
-  'format.permission': hooks.AsyncSeriesWaterfallHook<
-    (permission: TypedPermission) => TypedPermission | Promise<TypedPermission>
-  >;
+  /**
+   * Its handlers are typed. `call` resolves to `unknown`: the same hook also runs the handlers that
+   * untyped code registers, which can resolve to anything.
+   */
+  'format.permission': Omit<hooks.AsyncSeriesWaterfallHook<FormatPermissionHandler>, 'call'> & {
+    call(permission: TypedPermission): Promise<unknown>;
+  };
   'after-format::validate.permission': hooks.AsyncBailHook<(context: ValidateContext) => unknown>;
   'before-evaluate.permission': hooks.AsyncSeriesHook<(context: BeforeEvaluateContext) => unknown>;
   'before-register.permission': hooks.AsyncSeriesHook<(context: WillRegisterContext) => unknown>;

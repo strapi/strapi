@@ -40,10 +40,14 @@ export type DefaultTypes = [
   Expect<
     IsAny<Awaited<ReturnType<PermissionEngineHooks['before-format::validate.permission']['call']>>>
   >,
-  // `any`, as the untyped waterfall interface resolves, so the engine assigns to its typed view
-  Expect<IsAny<Awaited<ReturnType<PermissionEngineHooks['format.permission']['call']>>>>,
-  // The untyped waterfall interface takes any arguments
-  Expect<Equal<[Parameters<PermissionEngineHooks['format.permission']['call']>], [any[]]>>,
+  // `format.permission` is the untyped waterfall factory hook, as before: one `unknown` context,
+  // an `unknown` result
+  Expect<
+    Equal<[Awaited<ReturnType<PermissionEngineHooks['format.permission']['call']>>], [unknown]>
+  >,
+  Expect<
+    Equal<[Parameters<PermissionEngineHooks['format.permission']['call']>], [[param: unknown]]>
+  >,
   // The contexts the engine builds keep their inferred types: property values are `any`
   Expect<
     IsAny<NonNullable<ReturnType<typeof createValidateContext>['permission']['properties']>['a']>
@@ -110,8 +114,10 @@ export type TypedContexts = [
       [engine.WillRegisterCondition]
     >
   >,
+  // The same hook runs the handlers untyped code registers, so its result stays `unknown`
+  Expect<Equal<[Awaited<ReturnType<Hooks['format.permission']['call']>>], [unknown]>>,
   Expect<
-    Equal<[Awaited<ReturnType<Hooks['format.permission']['call']>>], [engine.TypedPermission]>
+    Equal<[Parameters<Hooks['format.permission']['call']>], [[permission: engine.TypedPermission]]>
   >,
 ];
 
