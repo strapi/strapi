@@ -48,6 +48,24 @@ describe('server route registration', () => {
     expect(router.stack.map((layer) => layer.path)).toContain('/users/:id(\\d+)');
   });
 
+  test('trims a string handler before resolving its controller', () => {
+    const router = new Router();
+    const controllers: Record<string, unknown> = {
+      'api::article.article': { find: () => undefined },
+    };
+
+    composeEndpoint({ ...strapi, controller: (uid: string) => controllers[uid] })(
+      {
+        method: 'GET',
+        path: '/articles',
+        handler: '  api::article.article.find  ',
+      } as any,
+      { router }
+    );
+
+    expect(router.stack.map((layer) => layer.path)).toContain('/articles');
+  });
+
   test('lists routes registered on the root router', async () => {
     const server = createServer(strapi);
 
