@@ -42,6 +42,8 @@ export type DefaultTypes = [
   >,
   // `any`, as the untyped waterfall interface resolves, so the engine assigns to its typed view
   Expect<IsAny<Awaited<ReturnType<PermissionEngineHooks['format.permission']['call']>>>>,
+  // The untyped waterfall interface takes any arguments
+  Expect<Equal<[Parameters<PermissionEngineHooks['format.permission']['call']>], [any[]]>>,
   // The contexts the engine builds keep their inferred types: property values are `any`
   Expect<
     IsAny<NonNullable<ReturnType<typeof createValidateContext>['permission']['properties']>['a']>

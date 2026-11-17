@@ -4,5 +4,5 @@
     "noEmit": true,
     "types": []
   },
-  "files": ["engine-hooks.ts"]
+  "files": ["engine-hooks.ts", "call-args.ts"]
 }

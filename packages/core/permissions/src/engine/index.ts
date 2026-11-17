@@ -25,8 +25,9 @@ import { Permission } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
 export { abilities };
+// `PermissionEngineHooks` stays unexported here: a re-export changes how downstream declarations
+// print the engine's `hooks` (`engine.PermissionEngineHooks` instead of the path to `engine/hooks`)
 export type {
-  PermissionEngineHooks,
   HookName,
   TypedPermissionEngineHooks,
   TypedPermission,

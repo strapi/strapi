@@ -101,7 +101,7 @@ const engine = permissions.engine.new({ providers });
 
 // Validation hook
 engine.on('before-format::validate.permission', ({ permission }) => {
-  if (permission.action === 'delete' && !permission.conditions.includes('isAdmin')) {
+  if (permission.action === 'delete' && !permission.conditions?.includes('isAdmin')) {
     return false; // Prevent non-admin delete
   }
   // Return nothing, so the next validators still run

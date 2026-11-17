@@ -36,11 +36,15 @@ type FactoryWaterfallCallArgs<T extends Handler> = 0 extends 1 & Parameters<T>[0
   ? [param: unknown]
   : TypedHookCallArgs<T>;
 
-/** The arguments of `call` for a typed handler: its first parameter, if it takes one. */
+/**
+ * The arguments of `call` for a typed handler: its first parameter, optional when the handler can
+ * be called without it, as for a plain function. The test reads the parameter list rather than
+ * whether the parameter accepts `undefined`, so it holds without `strictNullChecks` too.
+ */
 type TypedHookCallArgs<T extends Handler> =
   Parameters<T> extends []
     ? []
-    : undefined extends Parameters<T>[0]
+    : [] extends Parameters<T>
       ? [context?: HookContext<T>]
       : [context: HookContext<T>];
 

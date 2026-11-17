@@ -4,17 +4,23 @@ import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 const TSC_PATH = require.resolve('typescript/bin/tsc');
-const FIXTURE_TSCONFIG = path.join(__dirname, 'resources', 'hooks-types', 'tsconfig.json');
+const FIXTURE_DIR = path.join(__dirname, 'resources', 'hooks-types');
 const TIMEOUT_MS = 60_000;
 
 describe('Hook types', () => {
-  test(
-    'untyped hooks keep their types, and typed hooks check handlers and contexts',
-    () => {
-      const result = spawnSync(process.execPath, [TSC_PATH, '--project', FIXTURE_TSCONFIG], {
-        encoding: 'utf8',
-        timeout: TIMEOUT_MS,
-      });
+  // `tsconfig.non-strict.json` compiles the `call` arguments with the server preset of
+  // `@strapi/typescript-utils` (`strict: false`), as many applications do
+  test.each(['tsconfig.json', 'tsconfig.non-strict.json'])(
+    'untyped hooks keep their types, and typed hooks check handlers and contexts (%s)',
+    (tsconfig) => {
+      const result = spawnSync(
+        process.execPath,
+        [TSC_PATH, '--project', path.join(FIXTURE_DIR, tsconfig)],
+        {
+          encoding: 'utf8',
+          timeout: TIMEOUT_MS,
+        }
+      );
       const output = `${result.stdout ?? ''}${result.stderr ?? ''}`;
 
       expect({ status: result.status, signal: result.signal }, output).toEqual({
