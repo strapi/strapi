@@ -65,7 +65,14 @@ await strapi.db.transaction(async () => {
 });
 ```
 
-A nested transaction has no savepoint of its own: an error inside it that is caught in the outer transaction does not undo the writes it made before the error.
+A nested transaction has no savepoint of its own: an error inside it that is caught in the outer transaction does not undo the writes it made before the error. Run that work in `strapi.db.savepoint` (see below) when a caller catches its errors.
+
+Document service writes (`create`, `update`, `delete`, `clone`, `publish`, `unpublish`, `discardDraft`) do this for you: called inside a transaction, each one runs in a savepoint. A publish that throws after it deleted the old published version restores it, even when the caller catches the error and the outer transaction commits. Reads (`findOne`, `findMany`, `findFirst`, `count`) join the transaction without a savepoint.
+
+Two limits apply:
+
+- The savepoint wraps the repository method only. Writes a document middleware makes after it, such as the i18n locale sync or the custom-order position sync, are not undone when the write fails and the caller catches the error.
+- Rolling back to a savepoint undoes every query run on the transaction since the savepoint was created, including queries of other calls running concurrently on the same transaction. With `Promise.allSettled([publish(a), update(b)])` inside `strapi.db.transaction`, a failed publish also undoes the update, although its promise resolved. Run the writes of one transaction one after another.
 
 ### Savepoints
 

@@ -1,4 +1,5 @@
 import type { Context } from 'koa';
+import { errors } from '@strapi/utils';
 
 import adminFolderFileController from '../admin-folder-file';
 import { getService } from '../../utils';
@@ -151,6 +152,24 @@ describe('Admin Folder File Controller - moveMany', () => {
     );
 
     expect(trx.rollback).toHaveBeenCalled();
+    expect(emitMediaMoves).not.toHaveBeenCalled();
+  });
+
+  test('rejects with a ValidationError when the destination folder no longer exists', async () => {
+    // The destination is deleted after the request validation: the folders lookup answers
+    // `[]` and the destination lookup (`first()`) answers nothing.
+    const folderResults: unknown[] = [[], undefined];
+    global.strapi.db.queryBuilder = jest.fn((uid: string) =>
+      chain(uid === 'plugin::upload.file' ? [{ id: 1, name: 'a.png' }] : folderResults.shift())
+    );
+    ctx.request.body.destinationFolderId = 2;
+
+    await expect(adminFolderFileController.moveMany(ctx as Context)).rejects.toThrow(
+      new errors.ValidationError('destination folder does not exist')
+    );
+
+    expect(trx.rollback).toHaveBeenCalled();
+    expect(trx.commit).not.toHaveBeenCalled();
     expect(emitMediaMoves).not.toHaveBeenCalled();
   });
 });
