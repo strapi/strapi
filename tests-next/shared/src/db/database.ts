@@ -2,6 +2,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
+import type { Knex } from 'knex';
+
 import type { App } from '../app/generate';
 import { SQLITE_SNAPSHOT_FILE } from '../test-plugin';
 
@@ -82,21 +84,14 @@ export const databaseEnv = (app: App, database: Database): NodeJS.ProcessEnv => 
 };
 
 /**
- * Give the app an empty database, before Strapi boots and initializes it: delete the SQLite
- * file with its snapshot (a restore must never bring back an earlier run's data), or drop and
- * recreate the app's Postgres or MySQL database. Each API and CLI test file calls it before
- * starting its instance, so no file sees another file's data.
+ * Runs `fn` with an admin connection to the database server and the app's database name,
+ * quoted for that server.
  */
-export const resetDatabase = async (app: App, database: Database) => {
-  if (database.client === 'sqlite') {
-    for (const suffix of ['', '-wal', '-shm', '-journal']) {
-      fs.rmSync(`${app.dbFile}${suffix}`, { force: true });
-    }
-    fs.rmSync(path.join(path.dirname(app.dbFile), SQLITE_SNAPSHOT_FILE), { force: true });
-    return;
-  }
-
-  const name = databaseName(app);
+const onServer = async (
+  app: App,
+  database: Exclude<Database, { client: 'sqlite' }>,
+  fn: (admin: Knex, name: string) => Promise<void>
+) => {
   // Loaded on demand: SQLite runs don't need the server drivers (pg, mysql2).
   const { default: knex } = await import('knex');
   const admin = knex({
@@ -111,16 +106,49 @@ export const resetDatabase = async (app: App, database: Database) => {
     },
     pool: { min: 0, max: 1 },
   });
+  const name = databaseName(app);
 
   try {
-    if (database.client === 'postgres') {
-      await admin.raw(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
-      await admin.raw(`CREATE DATABASE "${name}"`);
-    } else {
-      await admin.raw(`DROP DATABASE IF EXISTS \`${name}\``);
-      await admin.raw(`CREATE DATABASE \`${name}\``);
-    }
+    await fn(admin, database.client === 'postgres' ? `"${name}"` : `\`${name}\``);
   } finally {
     await admin.destroy();
   }
+};
+
+/** On Postgres, `WITH (FORCE)` also closes the connections still open on the database. */
+const dropStatement = (database: Database, name: string) =>
+  `DROP DATABASE IF EXISTS ${name}${database.client === 'postgres' ? ' WITH (FORCE)' : ''}`;
+
+/**
+ * Give the app an empty database, before Strapi boots and initializes it: delete the SQLite
+ * file with its snapshot (a restore must never bring back an earlier run's data), or drop and
+ * recreate the app's Postgres or MySQL database. Each API and CLI test file calls it before
+ * starting its instance, so no file sees another file's data.
+ */
+export const resetDatabase = async (app: App, database: Database) => {
+  if (database.client === 'sqlite') {
+    for (const suffix of ['', '-wal', '-shm', '-journal']) {
+      fs.rmSync(`${app.dbFile}${suffix}`, { force: true });
+    }
+    fs.rmSync(path.join(path.dirname(app.dbFile), SQLITE_SNAPSHOT_FILE), { force: true });
+    return;
+  }
+
+  await onServer(app, database, async (admin, name) => {
+    await admin.raw(dropStatement(database, name));
+    await admin.raw(`CREATE DATABASE ${name}`);
+  });
+};
+
+/**
+ * Drop the app's Postgres or MySQL database. The suites don't call it for their own apps: the
+ * next reset drops and recreates it, so per-app databases stay on the server between runs.
+ */
+export const dropDatabase = async (app: App, database: Database) => {
+  if (database.client === 'sqlite') {
+    return;
+  }
+  await onServer(app, database, async (admin, name) => {
+    await admin.raw(dropStatement(database, name));
+  });
 };

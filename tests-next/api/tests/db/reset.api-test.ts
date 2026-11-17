@@ -4,6 +4,7 @@ import {
   appPort,
   databaseFromEnv,
   databaseName,
+  dropDatabase,
   generateApp,
   resetDatabase,
   restoreDatabase,
@@ -168,6 +169,7 @@ describe.skipIf(database.client === 'sqlite')(`snapshots on ${database.client}`,
 
     // The same app in another worktree, on the same database server.
     const otherCheckout: App = { ...app, dir: `${app.dir}-other-checkout` };
+    onTestFinished(() => dropDatabase(otherCheckout, database));
     await resetDatabase(otherCheckout, database);
 
     expect(await writeProbe(server)).toBe(false);

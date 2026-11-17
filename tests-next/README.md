@@ -31,14 +31,14 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
   suites on a database server instead, with `TESTS_DATABASE_HOST`, `_PORT`, `_USER` and
   `_PASSWORD` (defaults match the CI services). CI runs both suites on all three. Each app gets
   its own database, named after the app and a hash of its folder so two checkouts can share a
-  server, and emptied before it boots. A `DATABASE_*` variable exported in your shell doesn't
-  reach the test apps.
+  server, and emptied before it boots. These `tests_*` databases stay on the server after a run:
+  the next run drops and recreates them, and nothing else removes them. A `DATABASE_*` variable
+  exported in your shell doesn't reach the test apps.
 - **Resets** (RFC D4): api and cli start one instance per file on an empty database. The ui
   suite snapshots its SQLite database when the worker starts, then restores it before each spec
   file (`resetScope: 'file'`, default) or each test (`test.use({ resetScope: 'test' })`). The
   reset runs before the file's `beforeAll`, and never before its `afterAll`, which sees what the
-  tests wrote. The restore needs the snapshot's schema: specs that
-  change the schema (Content-Type Builder) aren't supported yet, and will come with the first
-  such spec.
+  tests wrote. The restore needs the snapshot's schema: specs that change the schema
+  (Content-Type Builder) aren't supported yet, and will come with the first such spec.
 - **One ui worker** for now: each worker will need its own app and database first.
 - **Windows** is not supported yet: stopping a server signals its process group.

@@ -1,3 +1,10 @@
-export { SQLITE, databaseEnv, databaseFromEnv, databaseName, resetDatabase } from './database';
+export {
+  SQLITE,
+  databaseEnv,
+  databaseFromEnv,
+  databaseName,
+  dropDatabase,
+  resetDatabase,
+} from './database';
 export type { Database, DatabaseClient } from './database';
 export { restoreDatabase, snapshotDatabase } from './snapshot';
