@@ -10588,6 +10588,8 @@ __metadata:
     eslint-config-custom: "npm:5.62.0"
     into-stream: "npm:^5.1.0"
     tsconfig: "npm:5.62.0"
+    vitest: "catalog:"
+    vitest-config: "npm:5.62.0"
   languageName: unknown
   linkType: soft
 
