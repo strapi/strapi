@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
 import { SQLITE, databaseEnv, type Database } from '../db/database';
-import { HOST, baseEnv, strapiBin } from './config';
+import { HOST, baseEnv, inheritedEnv, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
 import type { App } from './generate';
 
@@ -141,20 +141,6 @@ export const stopAllServers = async () => {
       await waitForPortFree(port);
     })
   );
-};
-
-/**
- * The env of the runner, without its `DATABASE_*` variables: `databaseEnv` doesn't set every one
- * of them (`DATABASE_URL`, for example, would override the host and database on Postgres).
- */
-const inheritedEnv = (): NodeJS.ProcessEnv => {
-  const env = { ...process.env };
-  for (const key of Object.keys(env)) {
-    if (key.startsWith('DATABASE_')) {
-      delete env[key];
-    }
-  }
-  return env;
 };
 
 /**

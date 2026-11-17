@@ -35,9 +35,24 @@ export const strapiBin = () =>
   path.join(path.dirname(require.resolve('@strapi/strapi/package.json')), 'bin', 'strapi.js');
 
 /**
- * Env every test app (and app generation) runs with, on top of the caller's env. The database
- * env comes from `startServer({ database })` (see db/database.ts), so a `DATABASE_*` exported
- * in the shell never reaches the apps.
+ * The env of the runner, without its `DATABASE_*` variables. Every spawn of a test app (generation,
+ * admin build, server) starts from it: the database env comes from `startServer({ database })`
+ * only (see db/database.ts), and `databaseEnv` doesn't set every `DATABASE_*` variable
+ * (`DATABASE_URL`, for example, would override the host and database on Postgres).
+ */
+export const inheritedEnv = (): NodeJS.ProcessEnv => {
+  const env = { ...process.env };
+  for (const key of Object.keys(env)) {
+    if (key.startsWith('DATABASE_')) {
+      delete env[key];
+    }
+  }
+  return env;
+};
+
+/**
+ * Env every test app (and app generation) runs with, on top of `inheritedEnv()` and the
+ * caller's env.
  */
 export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
