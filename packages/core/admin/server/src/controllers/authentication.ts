@@ -5,17 +5,20 @@ import '@strapi/types';
 import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
+import { PASSKEY_VERIFY_FAILED } from '../services/mfa-passkeys';
 import { emitLoginFailure, type LoginFailureReason } from '../audit-logs/auth';
 import { USER_NOT_ACTIVE_MESSAGE } from '../services/auth';
 import {
   REFRESH_COOKIE_NAME,
+  MFA_TRUST_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
-  buildSessionMetadataFromContext,
   getSessionManager,
-  extractDeviceParams,
   generateDeviceId,
   getRefreshCookieOptions,
   resolveLogoutDeviceId,
+  issueSession,
+  clearTrustCookie,
+  setTrustCookie,
 } from '../../../shared/utils/session-auth';
 
 import {
@@ -26,18 +29,92 @@ import {
   validateResetPasswordInput,
   validateLoginSessionInput,
 } from '../validation/authentication';
+import {
+  validateMfaLoginInput,
+  validateMfaWebauthnLoginInput,
+  validateMfaWebauthnOptionsInput,
+} from '../validation/authentication/mfa';
 
 import type {
   ForgotPassword,
   Login,
+  LoginMfa,
+  MfaChallengeResponse,
   Register,
   RegisterAdmin,
   RegistrationInfo,
   ResetPassword,
 } from '../../../shared/contracts/authentication';
+import type { MfaWebauthnLogin, MfaWebauthnOptions } from '../../../shared/contracts/mfa';
 import { AdminUser } from '../../../shared/contracts/shared';
+import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 
-const { ApplicationError, ValidationError } = errors;
+const { ApplicationError, RateLimitError, ValidationError } = errors;
+
+/**
+ * `issueSession`, then hands the security events this login recorded (a recovery code, a trusted
+ * device) to the login family it just created, which must not then notify about them.
+ */
+const issueAdminSession = async (...args: Parameters<typeof issueSession>): Promise<void> => {
+  const issued = await issueSession(...args);
+  if (issued) {
+    await getService('mfa').claimRequestEvents(issued.familyId);
+  }
+};
+
+/** Throws 403 `MFA_LOCKED` on refusal, after `admin.auth.error`; else the grace deadline options. */
+const enforceMfaOrThrow = async (
+  user: AdminUser
+): Promise<{ mfaEnrolment?: { graceUntil: Date } }> => {
+  const result = await getService('mfa').enforce(user);
+
+  if (result.outcome === 'refused') {
+    // `PolicyError`: the authorize middleware turns other 403s into a bare `ctx.forbidden()`
+    const error = new errors.PolicyError(
+      'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
+      { code: MFA_ERROR_CODES.LOCKED }
+    );
+    emitLoginFailure(
+      { strapi },
+      {
+        error,
+        provider: 'local',
+        reason: 'mfa_locked',
+        ...(user.email ? { user: { id: user.id, email: user.email } } : {}),
+      }
+    );
+    throw error;
+  }
+
+  return result.outcome === 'grace' ? { mfaEnrolment: { graceUntil: result.graceUntil } } : {};
+};
+
+/**
+ * Commits a password reset the challenge carried (see `PasswordResetResult`), and returns the
+ * session options a reset gets: a fresh device id and a non-persistent cookie, whatever the body
+ * carries, exactly as an unenrolled reset does. Nothing to do for an ordinary login.
+ */
+const commitStagedReset = async (
+  user: AdminUser,
+  pendingPasswordHash: string | undefined
+): Promise<{ deviceId?: string; rememberMe?: boolean }> => {
+  if (!pendingPasswordHash) {
+    return {};
+  }
+  await getService('auth').commitStagedPasswordReset(user.id, pendingPasswordHash);
+  return { deviceId: generateDeviceId(), rememberMe: false };
+};
+
+/** Read per challenge, never cached, so a settings change shows on the next login screen. */
+const offeredTrustDays = async (): Promise<number | null> => {
+  const settings = await getService('mfa').trustedDeviceSettings();
+  return settings.enabled ? settings.days : null;
+};
+
+/** The RP must resolve as well as the account holding a credential, so a misconfigured deployment
+ * never offers a button every ceremony would refuse. */
+const passkeyAvailableFor = async (userId: string): Promise<boolean> =>
+  (await getService('mfa').countPasskeys(userId)) > 0 && getService('mfa').passkeysConfigured();
 
 /**
  * Emits `admin.auth.error` without delaying the response. The account is looked up by
@@ -105,55 +182,167 @@ export default {
         const query = ctx.state as Login.Request['query'];
         query.user = user;
 
-        const sanitizedUser = getService('user').sanitizeUser(user);
-        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
-
+        // Not `admin.auth.success`: the second-factor check below can still gate this login, and that
+        // event fires only when a session is issued.
         return next();
       })(ctx, next);
     },
     async (ctx: Context) => {
       const { user } = ctx.state as { user: AdminUser };
+      const userId = String(user.id);
 
-      try {
-        const sessionManager = getSessionManager();
-        if (!sessionManager) {
-          return ctx.internalServerError();
+      const mfa = getService('mfa');
+
+      // Enforcement first: a locked account is refused before anything else.
+      const sessionOptions = await enforceMfaOrThrow(user);
+
+      if (mfa.isEnabled() && (await mfa.isEnrolled(userId))) {
+        // Every store read happens before `createChallenge`, so a failure cannot orphan a challenge.
+        // A trust cookie that is refused is cleared.
+        const trustedDeviceDays = await offeredTrustDays();
+
+        const trustToken = ctx.cookies.get(MFA_TRUST_COOKIE_NAME);
+        const trusted = trustToken ? await mfa.consumeTrustedDevice(userId, trustToken) : false;
+
+        if (!trusted) {
+          if (trustToken) {
+            clearTrustCookie(ctx);
+          }
+
+          // Before `createChallenge`, as above; a trusted browser never needs it
+          const passkeyAvailable = await passkeyAvailableFor(userId);
+
+          const { token: challengeToken, expiresIn } = await mfa.createChallenge(userId);
+
+          // The password matched but no session was issued
+          const sanitizedUser = getService('user').sanitizeUser(user);
+          strapi.eventHub.emit('admin.auth.mfa_required', {
+            user: sanitizedUser,
+            provider: 'local',
+          });
+
+          // No cookie and no access token until the second factor passes
+          ctx.body = {
+            data: {
+              mfaRequired: true,
+              challengeToken,
+              expiresIn,
+              trustedDeviceDays,
+              passkeyAvailable,
+            },
+          } satisfies MfaChallengeResponse;
+          return;
         }
-        const userId = String(user.id);
-        const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
-
-        const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-          'admin'
-        ).generateRefreshToken(userId, deviceId, {
-          type: rememberMe ? 'refresh' : 'session',
-          metadata: buildSessionMetadataFromContext(ctx),
-        });
-
-        const cookieOptions = buildCookieOptionsWithExpiry(
-          rememberMe ? 'refresh' : 'session',
-          absoluteExpiresAt,
-          ctx.request.secure
-        );
-        ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-        const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-        if ('error' in accessResult) {
-          return ctx.internalServerError();
-        }
-
-        const { token: accessToken } = accessResult;
-
-        ctx.body = {
-          data: {
-            token: accessToken,
-            accessToken,
-            user: getService('user').sanitizeUser(ctx.state.user),
-          },
-        } satisfies Login.Response;
-      } catch (error) {
-        strapi.log.error('Failed to create admin refresh session', error);
-        return ctx.internalServerError();
       }
+
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+
+      return issueAdminSession(ctx, user, sessionOptions);
+    },
+  ]),
+
+  loginMfa: compose([
+    async (ctx: Context) => {
+      await validateMfaLoginInput(ctx.request.body ?? {});
+
+      const mfa = getService('mfa');
+      const { challengeToken, code, trustDevice, deviceId } = ctx.request
+        .body as LoginMfa.Request['body'];
+
+      // The validator deliberately does not trim, so a whitespace-only code still fails `required`.
+      const result = await mfa.verifyChallenge(challengeToken, code.trim());
+
+      if (!result.ok) {
+        if (result.reason === 'throttled') {
+          throw new RateLimitError();
+        }
+
+        // One generic message, so a caller cannot tell an expired challenge from a wrong code.
+        throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
+      }
+
+      const user = await getService('user').findOne(result.userId);
+
+      // The account may have been deactivated since the challenge; mirrors `checkCredentials`
+      if (!user || user.isActive !== true) {
+        throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
+      }
+
+      // A staged password reset commits now, before the trust grant it would otherwise revoke
+      const reset = await commitStagedReset(user, result.pendingPasswordHash);
+
+      // Null when trust is not offered; the raw token exists only here and in Set-Cookie
+      if (trustDevice) {
+        const granted = await mfa.trustDevice(String(user.id), {
+          deviceId,
+          userAgent: ctx.request.headers['user-agent'],
+        });
+        if (granted) {
+          setTrustCookie(ctx, granted.token, granted.expiresAt);
+        }
+      }
+
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+
+      return issueAdminSession(ctx, user, reset);
+    },
+  ]),
+
+  /**
+   * Starts a passkey ceremony against a challenge `/login` or `/reset-password` minted. Charges no
+   * attempt, but the service still checks the throttle and the challenge.
+   */
+  loginMfaWebauthnOptions: compose([
+    async (ctx: Context) => {
+      await validateMfaWebauthnOptionsInput(ctx.request.body ?? {});
+      const { challengeToken } = ctx.request.body as MfaWebauthnOptions.Request['body'];
+
+      const options = await getService('mfa').authenticationOptions(challengeToken);
+
+      ctx.body = { data: options } satisfies MfaWebauthnOptions.Response;
+    },
+  ]),
+
+  /** Not folded into `verifyChallenge`, which dispatches on the submitted code's own shape -- an
+   * assertion is not a code. Both counters are still charged. */
+  loginMfaWebauthn: compose([
+    async (ctx: Context) => {
+      await validateMfaWebauthnLoginInput(ctx.request.body ?? {});
+
+      const mfa = getService('mfa');
+      const { challengeToken, assertion, trustDevice, deviceId } = ctx.request
+        .body as MfaWebauthnLogin.Request['body'];
+
+      // One generic error for every outcome but throttling
+      const { userId, pendingPasswordHash } = await mfa.verifyAssertion(challengeToken, assertion);
+
+      const user = await getService('user').findOne(userId);
+
+      // As in `loginMfa`, before the trust grant
+      if (!user || user.isActive !== true) {
+        throw new ValidationError(PASSKEY_VERIFY_FAILED);
+      }
+
+      // As in `loginMfa`, and before the trust grant for the same reason.
+      const reset = await commitStagedReset(user, pendingPasswordHash);
+
+      // Byte for byte what `/login/mfa` does: the trust grant is factor-agnostic.
+      if (trustDevice) {
+        const granted = await mfa.trustDevice(String(user.id), {
+          deviceId,
+          userAgent: ctx.request.headers['user-agent'],
+        });
+        if (granted) {
+          setTrustCookie(ctx, granted.token, granted.expiresAt);
+        }
+      }
+
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+
+      return issueAdminSession(ctx, user, reset);
     },
   ]),
 
@@ -178,46 +367,9 @@ export default {
 
     const user = await getService('user').register(input);
 
-    try {
-      const sessionManager = getSessionManager();
-      if (!sessionManager) {
-        return ctx.internalServerError();
-      }
-      const userId = String(user.id);
-      const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
+    const sessionOptions = await enforceMfaOrThrow(user);
 
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-        'admin'
-      ).generateRefreshToken(userId, deviceId, {
-        type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadataFromContext(ctx),
-      });
-
-      const cookieOptions = buildCookieOptionsWithExpiry(
-        rememberMe ? 'refresh' : 'session',
-        absoluteExpiresAt,
-        ctx.request.secure
-      );
-      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-      if ('error' in accessResult) {
-        return ctx.internalServerError();
-      }
-
-      const { token: accessToken } = accessResult;
-
-      ctx.body = {
-        data: {
-          token: accessToken,
-          accessToken,
-          user: getService('user').sanitizeUser(user),
-        },
-      } satisfies Register.Response;
-    } catch (error) {
-      strapi.log.error('Failed to create admin refresh session during register', error);
-      return ctx.internalServerError();
-    }
+    return issueAdminSession(ctx, user, sessionOptions);
   },
 
   async registerAdmin(ctx: Context) {
@@ -229,46 +381,9 @@ export default {
 
     strapi.telemetry.send('didCreateFirstAdmin');
 
-    try {
-      const sessionManager = getSessionManager();
-      if (!sessionManager) {
-        return ctx.internalServerError();
-      }
-      const userId = String(user.id);
-      const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
+    const sessionOptions = await enforceMfaOrThrow(user);
 
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-        'admin'
-      ).generateRefreshToken(userId, deviceId, {
-        type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadataFromContext(ctx),
-      });
-
-      const cookieOptions = buildCookieOptionsWithExpiry(
-        rememberMe ? 'refresh' : 'session',
-        absoluteExpiresAt,
-        ctx.request.secure
-      );
-      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-      if ('error' in accessResult) {
-        return ctx.internalServerError();
-      }
-
-      const { token: accessToken } = accessResult;
-
-      ctx.body = {
-        data: {
-          token: accessToken,
-          accessToken,
-          user: getService('user').sanitizeUser(user),
-        },
-      } satisfies RegisterAdmin.Response;
-    } catch (error) {
-      strapi.log.error('Failed to create admin refresh session during register-admin', error);
-      return ctx.internalServerError();
-    }
+    return issueAdminSession(ctx, user, sessionOptions);
   },
 
   async forgotPassword(ctx: Context) {
@@ -293,53 +408,55 @@ export default {
 
     await validateResetPasswordInput(input);
 
-    const user = await getService('auth').resetPassword(input);
+    const sessionManager = getSessionManager();
+    if (!sessionManager) {
+      return ctx.internalServerError();
+    }
 
-    // Issue a new admin refresh session and access token after password reset.
-    try {
-      const sessionManager = getSessionManager();
-      if (!sessionManager) {
-        return ctx.internalServerError();
-      }
+    const { user, pendingPasswordHash } = await getService('auth').resetPassword(input);
+    const mfa = getService('mfa');
 
-      const userId = String(user.id);
-      const deviceId = generateDeviceId();
+    if (pendingPasswordHash) {
+      // An enrolled account gets a challenge, not a session: the new password is staged on it and
+      // commits only once the second factor passes. No trust cookie check on a reset, by design.
+      const trustedDeviceDays = await offeredTrustDays();
+      const passkeyAvailable = await passkeyAvailableFor(String(user.id));
 
-      // Invalidate all existing sessions before creating a new one
-      await sessionManager('admin').invalidateRefreshToken(userId);
-
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-        'admin'
-      ).generateRefreshToken(userId, deviceId, {
-        type: 'session',
-        metadata: buildSessionMetadataFromContext(ctx),
+      const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id), {
+        pendingPasswordHash,
       });
 
-      // No rememberMe flow here; expire with session by default (session cookie)
-      const cookieOptions = buildCookieOptionsWithExpiry(
-        'session',
-        absoluteExpiresAt,
-        ctx.request.secure
-      );
-      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-      if ('error' in accessResult) {
-        return ctx.internalServerError();
-      }
-
-      const { token } = accessResult;
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.mfa_required', { user: sanitizedUser, provider: 'local' });
 
       ctx.body = {
         data: {
-          token,
-          user: getService('user').sanitizeUser(user),
+          mfaRequired: true,
+          challengeToken,
+          expiresIn,
+          trustedDeviceDays,
+          passkeyAvailable,
         },
-      } satisfies ResetPassword.Response;
+      } satisfies MfaChallengeResponse;
+      return;
+    }
+
+    try {
+      // Invalidate all existing sessions before creating a new one
+      await sessionManager('admin').invalidateRefreshToken(String(user.id));
     } catch (err) {
       strapi.log.error('Failed to create admin refresh session during reset-password', err as any);
       return ctx.internalServerError();
     }
+
+    const sessionOptions = await enforceMfaOrThrow(user);
+
+    // A fresh device id and a non-persistent cookie, whatever the body carries.
+    return issueAdminSession(ctx, user, {
+      deviceId: generateDeviceId(),
+      rememberMe: false,
+      ...sessionOptions,
+    });
   },
 
   async accessToken(ctx: Context) {
@@ -353,6 +470,29 @@ export default {
       const sessionManager = getSessionManager();
       if (!sessionManager) {
         return ctx.internalServerError();
+      }
+
+      // Enforcement before rotation, so a failure here does not spend the presented token. A
+      // refusal is a bare 401 that invalidates every refresh token and clears the cookie.
+      const validation = await sessionManager('admin').validateRefreshToken(refreshToken);
+      if (!validation.isValid || !validation.userId) {
+        return ctx.unauthorized('Invalid refresh token');
+      }
+
+      const mfa = getService('mfa');
+      // A login an identity provider authenticated is exempt, as it was at the SSO callback: the
+      // provider owns the second factor (see `buildAdminSessionMetadata`).
+      const family = await mfa.sessionFamily(validation.sessionId);
+      if (!family?.sso) {
+        const enforcement = await mfa.enforce({ id: validation.userId });
+        if (enforcement.outcome === 'refused') {
+          await sessionManager('admin').invalidateRefreshToken(validation.userId);
+          ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
+            ...getRefreshCookieOptions(ctx.request.secure),
+            expires: new Date(0),
+          });
+          return ctx.unauthorized('Invalid refresh token');
+        }
       }
 
       // Single-use renewal: rotate on access exchange, then create access token

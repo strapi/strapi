@@ -20,5 +20,6 @@ exports[`middlewares:list should output list of middlewares 1`] = `
 │ plugin::email.rateLimit                        │
 │ plugin::users-permissions.rateLimit            │
 │ admin::rateLimit                               │
+│ admin::mfa-rate-limit                          │
 │ admin::data-transfer                           │"
 `;

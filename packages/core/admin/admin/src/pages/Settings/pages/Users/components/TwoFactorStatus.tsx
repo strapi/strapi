@@ -1,0 +1,90 @@
+import { Flex, Status, Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+
+import { MFA_DATE_TIME_FORMAT } from '../../../../../utils/mfaDates';
+
+import type { AdminUserMfaState } from '../../../../../../../shared/contracts/user';
+
+/**
+ * One account's enforcement state, compact enough for a table cell: the same four states
+ * `TwoFactorPanel` describes in full on the user's own page. Status text, not colour alone, carries
+ * the meaning.
+ */
+const TwoFactorStatus = ({ user }: { user: AdminUserMfaState }) => {
+  const { formatMessage, formatDate } = useIntl();
+
+  if (user.mfaLockedAt) {
+    return (
+      <Flex>
+        <Status size="S" variant="danger">
+          <Typography tag="span" variant="omega" fontWeight="bold">
+            {formatMessage({
+              id: 'Settings.permissions.users.mfa.status.locked',
+              defaultMessage: 'Locked',
+            })}
+          </Typography>
+        </Status>
+      </Flex>
+    );
+  }
+
+  if (user.mfaEnabledAt) {
+    return (
+      <Flex>
+        <Status size="S" variant="success">
+          <Typography tag="span" variant="omega" fontWeight="bold">
+            {formatMessage({
+              id: 'Settings.permissions.users.mfa.status.enrolled',
+              defaultMessage: 'Enabled',
+            })}
+          </Typography>
+        </Status>
+      </Flex>
+    );
+  }
+
+  if (user.mfaGraceUntil) {
+    return (
+      <Flex>
+        <Status size="S" variant="warning">
+          <Typography tag="span" variant="omega" fontWeight="bold">
+            {formatMessage(
+              {
+                id: 'Settings.permissions.users.mfa.status.grace',
+                defaultMessage: 'Set up by {date}',
+              },
+              { date: formatDate(user.mfaGraceUntil, MFA_DATE_TIME_FORMAT) }
+            )}
+          </Typography>
+        </Status>
+      </Flex>
+    );
+  }
+
+  // Required but not yet on the clock: the grace period starts at their next login.
+  if (user.mfaRequired) {
+    return (
+      <Flex>
+        <Status size="S" variant="neutral">
+          <Typography tag="span" variant="omega" fontWeight="bold">
+            {formatMessage({
+              id: 'Settings.permissions.users.mfa.status.required',
+              defaultMessage: 'Required, not set up',
+            })}
+          </Typography>
+        </Status>
+      </Flex>
+    );
+  }
+
+  return (
+    <Typography textColor="neutral600">
+      {formatMessage({
+        id: 'Settings.permissions.users.mfa.status.none',
+        defaultMessage: 'Not enabled',
+      })}
+    </Typography>
+  );
+};
+
+export { TwoFactorStatus };

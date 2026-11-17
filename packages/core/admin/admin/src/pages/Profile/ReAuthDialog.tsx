@@ -1,0 +1,273 @@
+import * as React from 'react';
+
+import { Button, Flex, Modal, Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+
+import { ErrorMessage } from '../../components/ErrorMessage';
+import { useNotification } from '../../features/Notifications';
+import { useMfaErrorMessage } from '../../hooks/useMfaErrorMessage';
+import {
+  useAcknowledgeRecoveryCodesMutation,
+  useDisableMfaMutation,
+  useRegenerateRecoveryCodesMutation,
+} from '../../services/mfa';
+
+import { CredentialFields } from './CredentialFields';
+import { RecoveryCodes, RecoveryCodesDismissAlert } from './RecoveryCodes';
+
+interface ReAuthDialogProps {
+  open: boolean;
+  onClose: () => void;
+  intent: 'regenerate' | 'disable';
+}
+
+/**
+ * `fixedCacheKey`s for the three mutations below -- see `MFA_ENROL_CACHE_KEYS` in
+ * `EnrolDialog.tsx` for the full rationale (store-global keys into `state.adminApi.mutations`).
+ * Must not collide with `MFA_ENROL_CACHE_KEYS`.
+ */
+const MFA_REAUTH_CACHE_KEYS = {
+  regenerate: 'mfa-reauth-regenerate',
+  disable: 'mfa-reauth-disable',
+  acknowledge: 'mfa-reauth-acknowledge',
+} as const;
+
+type Step = { name: 'form' } | { name: 'codes'; recoveryCodes: string[] };
+
+const COPY = {
+  regenerate: {
+    title: {
+      id: 'Settings.profile.form.section.mfa.regenerate.title',
+      defaultMessage: 'Generate new recovery codes',
+    },
+    intro: {
+      id: 'Settings.profile.form.section.mfa.regenerate.intro',
+      defaultMessage:
+        'Your current recovery codes stop working as soon as new ones are generated. Confirm your password and a code from your authenticator app or an unused recovery code.',
+    },
+    submit: {
+      id: 'Settings.profile.form.section.mfa.regenerate.submit',
+      defaultMessage: 'Generate new recovery codes',
+    },
+  },
+  disable: {
+    title: {
+      id: 'Settings.profile.form.section.mfa.disable.title',
+      defaultMessage: 'Disable two-factor authentication',
+    },
+    intro: {
+      id: 'Settings.profile.form.section.mfa.disable.intro',
+      defaultMessage:
+        'Your passkeys, recovery codes and trusted devices will be removed, and every other device signed in to this account will be logged out. Confirm your password and a code to continue.',
+    },
+    submit: {
+      id: 'Settings.profile.form.section.mfa.disable.submit',
+      defaultMessage: 'Disable two-factor authentication',
+    },
+  },
+} as const;
+
+/**
+ * Re-authenticates with the current password and a second factor, then regenerates the recovery
+ * codes or disables two-factor authentication, by `intent`.
+ *
+ * The footer button is `type="submit"` so Enter works with two fields, so a click runs both
+ * `onClick` and the native submit in one tick: `inFlightRef` is the synchronous guard, since
+ * `isLoading` is still stale for the second call.
+ */
+const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const toMessage = useMfaErrorMessage();
+  const [step, setStep] = React.useState<Step>({ name: 'form' });
+  const [password, setPassword] = React.useState('');
+  const [code, setCode] = React.useState('');
+  const [error, setError] = React.useState<string>();
+  // The regenerated codes replace the old set the moment they are issued, so the codes step guards
+  // dismissal exactly as `EnrolDialog` does: closing before the box is ticked is refused.
+  const [dismissBlocked, setDismissBlocked] = React.useState(false);
+  const [codesSaved, setCodesSaved] = React.useState(false);
+  // Synchronous re-entrancy guard for `handleSubmit`
+  const inFlightRef = React.useRef(false);
+
+  const [regenerateRecoveryCodes, { isLoading: isRegenerating, reset: resetRegenerate }] =
+    useRegenerateRecoveryCodesMutation({
+      fixedCacheKey: MFA_REAUTH_CACHE_KEYS.regenerate,
+    });
+  const [disableMfa, { isLoading: isDisabling, reset: resetDisable }] = useDisableMfaMutation({
+    fixedCacheKey: MFA_REAUTH_CACHE_KEYS.disable,
+  });
+  const [acknowledge, { reset: resetAck }] = useAcknowledgeRecoveryCodesMutation({
+    fixedCacheKey: MFA_REAUTH_CACHE_KEYS.acknowledge,
+  });
+
+  // Unmount-only safety net: a `fixedCacheKey` mutation is deliberately *not* cleared by RTK
+  // Query's own unmount cleanup (it's meant to survive a remount), so if this component unmounts
+  // without `close()` having run first, nothing else would ever clear these three cache entries.
+  // `removeMutationResult` keys on `fixedCacheKey`, not `requestId`, so the closures captured on
+  // mount delete the right store entries regardless of which render produced them -- the effect
+  // intentionally never needs to re-run.
+  React.useEffect(() => {
+    return () => {
+      resetRegenerate();
+      resetDisable();
+      resetAck();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally mount-only, see the comment above
+  }, []);
+
+  const reset = () => {
+    setStep({ name: 'form' });
+    setPassword('');
+    setCode('');
+    setError(undefined);
+    setDismissBlocked(false);
+    setCodesSaved(false);
+    resetRegenerate();
+    resetDisable();
+    resetAck();
+  };
+
+  const close = () => {
+    reset();
+    onClose();
+  };
+
+  const isSubmitting = intent === 'regenerate' ? isRegenerating : isDisabling;
+
+  const handleSubmit = async (event?: React.FormEvent) => {
+    event?.preventDefault();
+    if (inFlightRef.current || password.length === 0 || code.trim().length < 6) {
+      return;
+    }
+    inFlightRef.current = true;
+    setError(undefined);
+
+    try {
+      // The server treats a code with surrounding whitespace as wrong rather than trimming it
+      // itself (a pasted TOTP or recovery code commonly picks up a trailing space/newline).
+      const trimmedCode = code.trim();
+
+      if (intent === 'regenerate') {
+        const res = await regenerateRecoveryCodes({ password, code: trimmedCode });
+        if ('error' in res) {
+          setError(toMessage(res.error));
+          return;
+        }
+        setPassword('');
+        setCode('');
+        setStep({ name: 'codes', recoveryCodes: res.data.recoveryCodes });
+        return;
+      }
+
+      const res = await disableMfa({ password, code: trimmedCode });
+      if ('error' in res) {
+        setError(toMessage(res.error));
+        return;
+      }
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'Settings.profile.form.section.mfa.disable.success',
+          defaultMessage: 'Two-factor authentication disabled.',
+        }),
+      });
+      close();
+    } finally {
+      inFlightRef.current = false;
+    }
+  };
+
+  const handleAcknowledged = async () => {
+    setError(undefined);
+    const res = await acknowledge();
+    if ('error' in res) {
+      setError(toMessage(res.error));
+      return;
+    }
+    close();
+  };
+
+  const copy = COPY[intent];
+
+  return (
+    <Modal.Root
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (isOpen) {
+          return;
+        }
+        if (step.name === 'codes' && !codesSaved) {
+          setDismissBlocked(true);
+          return;
+        }
+        close();
+      }}
+    >
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>
+            {formatMessage(
+              step.name === 'codes'
+                ? {
+                    id: 'Settings.profile.form.section.mfa.codes.title',
+                    defaultMessage: 'Save your recovery codes',
+                  }
+                : copy.title
+            )}
+          </Modal.Title>
+        </Modal.Header>
+
+        {step.name === 'form' ? (
+          <form onSubmit={handleSubmit}>
+            <Modal.Body>
+              <Flex direction="column" alignItems="stretch" gap={4}>
+                <Typography>{formatMessage(copy.intro)}</Typography>
+                <CredentialFields
+                  password={password}
+                  onPasswordChange={setPassword}
+                  code={code}
+                  onCodeChange={setCode}
+                  error={error}
+                />
+              </Flex>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button type="button" variant="tertiary" onClick={close}>
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+              <Button
+                type="submit"
+                variant={intent === 'disable' ? 'danger' : undefined}
+                onClick={() => handleSubmit()}
+                loading={isSubmitting}
+                disabled={password.length === 0 || code.trim().length < 6}
+              >
+                {formatMessage(copy.submit)}
+              </Button>
+            </Modal.Footer>
+          </form>
+        ) : null}
+
+        {step.name === 'codes' ? (
+          <Modal.Body>
+            <Flex direction="column" alignItems="stretch" gap={4}>
+              <ErrorMessage error={error} />
+              {dismissBlocked ? (
+                <RecoveryCodesDismissAlert onClose={() => setDismissBlocked(false)} />
+              ) : null}
+              <RecoveryCodes
+                codes={step.recoveryCodes}
+                onAcknowledged={handleAcknowledged}
+                onSavedChange={setCodesSaved}
+              />
+            </Flex>
+          </Modal.Body>
+        ) : null}
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
+export { ReAuthDialog };
+export type { ReAuthDialogProps };

@@ -1,4 +1,5 @@
 import { PermissionMap } from './types/permissions';
+import { isMfaFeatureEnabled } from './utils/mfaFeature';
 
 import type { StrapiAppSettingLink } from './core/apis/router';
 
@@ -40,6 +41,11 @@ export const ADMIN_PERMISSIONS_CE = {
       delete: [{ action: 'admin::roles.delete', subject: null }],
       read: [{ action: 'admin::roles.read', subject: null }],
       update: [{ action: 'admin::roles.update', subject: null }],
+    },
+    security: {
+      main: [{ action: 'admin::security-settings.read', subject: null }],
+      read: [{ action: 'admin::security-settings.read', subject: null }],
+      update: [{ action: 'admin::security-settings.update', subject: null }],
     },
     users: {
       main: [
@@ -230,6 +236,16 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/admin-tokens',
       id: 'admin-tokens',
     },
+    // Enforcement of admin two-factor authentication, only in a build with the feature.
+    ...(isMfaFeatureEnabled()
+      ? [
+          {
+            intlLabel: { id: 'Settings.security.title', defaultMessage: 'Security' },
+            to: '/settings/security',
+            id: 'security',
+          },
+        ]
+      : []),
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
     window.strapi?.flags?.promoteEE
       ? [

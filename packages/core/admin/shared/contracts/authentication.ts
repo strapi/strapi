@@ -1,9 +1,6 @@
 import type { errors } from '@strapi/utils';
 import type { AdminUser, SanitizedAdminUser } from './shared';
 
-/**
- * /login - Log in as an admin user
- */
 export declare namespace Login {
   export interface Request {
     query: {
@@ -21,9 +18,54 @@ export declare namespace Login {
       token: string;
       accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
     errors?: errors.ApplicationError | errors.NotImplementedError;
   }
+}
+
+/** Sent instead of `Login.Response` when the account is enrolled: no session yet, so no cookie and
+ * no access token. `challengeToken` authorises exactly one follow-up call.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag. */
+export interface MfaChallengeResponse {
+  data: {
+    mfaRequired: true;
+    challengeToken: string;
+    expiresIn: number;
+    /** Null when the organisation does not offer trust. Never absent. */
+    trustedDeviceDays: number | null;
+    /** Not a new disclosure: the challenge already reveals the account is enrolled. Never absent. */
+    passkeyAvailable: boolean;
+  };
+}
+
+/**
+ * What `POST /login` answers with the feature on: a session, or a second-factor challenge. Narrow
+ * on `'mfaRequired' in data` before treating it as a session.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag.
+ */
+export type LoginOrMfaChallenge = Login.Response['data'] | MfaChallengeResponse['data'];
+
+/** The session is real; `mfaGraceUntil` is when the account locks if it stays unenrolled. */
+export interface MfaEnrolmentRequiredFields {
+  mfaEnrolmentRequired?: true;
+  mfaGraceUntil?: string;
+}
+
+/** Accepts either a TOTP code or a recovery code. */
+export declare namespace LoginMfa {
+  export interface Request {
+    body: {
+      challengeToken: string;
+      code: string;
+      deviceId?: string;
+      rememberMe?: boolean;
+      trustDevice?: boolean;
+    };
+  }
+
+  export type Response = Login.Response;
 }
 
 /**
@@ -80,7 +122,7 @@ export declare namespace Register {
       token: string;
       accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
     errors?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -101,7 +143,7 @@ export declare namespace RegisterAdmin {
       token: string;
       accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
     errors?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -132,9 +174,18 @@ export declare namespace ResetPassword {
     data: {
       token: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
   }
 }
+
+/**
+ * What `POST /reset-password` answers: a session, or a second-factor challenge for an enrolled
+ * account. Narrow on `'mfaRequired' in data`.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag.
+ */
+export type ResetPasswordOrMfaChallenge =
+  ResetPassword.Response['data'] | MfaChallengeResponse['data'];
 
 /**
  * /logout - Log out an admin user

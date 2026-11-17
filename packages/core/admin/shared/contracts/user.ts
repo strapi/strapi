@@ -53,12 +53,26 @@ export declare namespace FindAll {
 
   export interface Response {
     data: {
-      results: SanitizedAdminUser[];
+      results: Array<SanitizedAdminUser & AdminUserMfaState>;
       pagination: Pagination;
     };
     error?: errors.ApplicationError;
   }
 }
+/**
+ * Enforcement state appended to `GET /admin/users` and `GET /admin/users/:id` for callers holding
+ * `admin::users.update` while the feature is on.
+ */
+export interface AdminUserMfaState {
+  mfaEnabledAt?: string | Date | null;
+  mfaGraceUntil?: string | Date | null;
+  mfaLockedAt?: string | Date | null;
+  /** Whether the enforcement settings require two-factor authentication of this account now,
+   * exemptions applied. Tells a required account that has not started its grace period yet from
+   * one that is not required at all. */
+  mfaRequired?: boolean;
+}
+
 /**
  * /findOne - Find an admin user
  */
@@ -73,7 +87,7 @@ export declare namespace FindOne {
   }
 
   export interface Response {
-    data: SanitizedAdminUser;
+    data: SanitizedAdminUser & AdminUserMfaState;
     error?: errors.ApplicationError;
   }
 }

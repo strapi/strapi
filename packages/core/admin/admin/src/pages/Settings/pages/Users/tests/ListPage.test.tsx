@@ -1,4 +1,5 @@
-import { render } from '@tests/utils';
+import { render, screen, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { ListPageCE } from '../ListPage';
 
@@ -12,5 +13,85 @@ describe('Users | ListPage', () => {
 
     await findByText('John');
     await findByText('Kai');
+  });
+
+  it('has no two-factor column when the rows carry no enforcement state', async () => {
+    render(<ListPageCE />);
+
+    await screen.findByText('John');
+    expect(screen.queryByText('Two-factor')).not.toBeInTheDocument();
+  });
+
+  /**
+   * The server appends enforcement state for callers who can act on it, while the feature is on.
+   */
+  it('shows each account’s two-factor state when the rows carry it', async () => {
+    server.use(
+      http.get('/admin/users', () =>
+        HttpResponse.json({
+          data: {
+            results: [
+              {
+                id: 1,
+                firstname: 'Set',
+                lastname: 'Up',
+                roles: [],
+                mfaEnabledAt: '2026-09-01T10:00:00.000Z',
+                mfaGraceUntil: null,
+                mfaLockedAt: null,
+              },
+              {
+                id: 2,
+                firstname: 'On',
+                lastname: 'Clock',
+                roles: [],
+                mfaEnabledAt: null,
+                mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+                mfaLockedAt: null,
+              },
+              {
+                id: 3,
+                firstname: 'Was',
+                lastname: 'Out',
+                roles: [],
+                mfaEnabledAt: null,
+                mfaGraceUntil: null,
+                mfaLockedAt: '2026-09-12T10:00:00.000Z',
+              },
+              {
+                id: 4,
+                firstname: 'Never',
+                lastname: 'Asked',
+                roles: [],
+                mfaEnabledAt: null,
+                mfaGraceUntil: null,
+                mfaLockedAt: null,
+              },
+              {
+                id: 5,
+                firstname: 'Not',
+                lastname: 'Started',
+                roles: [],
+                mfaEnabledAt: null,
+                mfaGraceUntil: null,
+                mfaLockedAt: null,
+                mfaRequired: true,
+              },
+            ],
+            pagination: { page: 1 },
+          },
+        })
+      )
+    );
+    render(<ListPageCE />);
+
+    await screen.findByText('Was');
+    expect(screen.getByText('Two-factor')).toBeInTheDocument();
+    expect(screen.getByText('Enabled')).toBeInTheDocument();
+    expect(screen.getByText(/^Set up by .+\d{1,2}:\d{2}/)).toBeInTheDocument();
+    expect(screen.getByText('Locked')).toBeInTheDocument();
+    expect(screen.getByText('Not enabled')).toBeInTheDocument();
+    // Required, but the grace period has not started: it starts at their next login.
+    expect(screen.getByText('Required, not set up')).toBeInTheDocument();
   });
 });

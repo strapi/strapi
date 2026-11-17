@@ -109,6 +109,10 @@ describe('redirectWithAuth', () => {
       metadata: expect.objectContaining({
         deviceName: 'Chrome on macOS',
         loginAt: expect.any(String),
+        // The identity provider owns the second factor: the refresh path reads this to skip
+        // two-factor enforcement for the login.
+        authMethod: 'sso',
+        familyId: expect.any(String),
       }),
     });
     expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/success');

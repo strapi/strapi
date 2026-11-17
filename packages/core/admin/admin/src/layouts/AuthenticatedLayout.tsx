@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
+import { MfaBanners } from '../components/MfaBanners';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
@@ -119,6 +120,7 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
+                <MfaBanners />
                 <TopBanners />
                 {/*
                  * Top-level Suspense only — nested layouts (Settings, Content Manager) use

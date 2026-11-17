@@ -1,0 +1,1751 @@
+import crypto from 'node:crypto';
+import { errors } from '@strapi/utils';
+import type { Core, Data } from '@strapi/types';
+import type { RegistrationResponseJSON } from '@simplewebauthn/server';
+import {
+  base32Decode,
+  base32Encode,
+  buildOtpauthUri,
+  generateRecoveryCodes,
+  generateTotpSecret,
+  normaliseRecoveryCode,
+  verifyTotp,
+} from '../utils/totp';
+import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
+import mfaChangedTemplate from '../config/email-templates/mfa-changed';
+import type {
+  MfaAuditOnlyNotice,
+  MfaEventNotice,
+  MfaEventType,
+} from '../../../shared/contracts/mfa';
+import {
+  readMfaEnforcement,
+  readPasskeySettings,
+  readTrustedDeviceSettings,
+} from './security-settings';
+import type {
+  MfaEnforcement,
+  MfaEnforcementMode,
+} from '../../../shared/contracts/security-settings';
+import { createTrustedDevices, hashTrustToken } from './mfa-trusted-devices';
+import { createPasskeys, PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from './mfa-passkeys';
+import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
+import { sessionFamilyOf, type AdminSessionFamily } from '../../../shared/utils/session-auth';
+
+const { ApplicationError, RateLimitError, ValidationError } = errors;
+
+export const FUTURE_FLAG = 'unstableAdminMfa';
+
+const USER_UID = 'admin::user';
+const RECOVERY_CODE_UID = 'admin::mfa-recovery-code';
+const CHALLENGE_UID = 'admin::mfa-challenge';
+const EVENT_UID = 'admin::mfa-event';
+const SESSION_UID = 'admin::session';
+const TRUSTED_DEVICE_UID = 'admin::mfa-trusted-device';
+const PASSKEY_UID = 'admin::mfa-passkey';
+
+const MAX_TOTP_CODE_LENGTH = 8;
+
+/** `core_store` key (admin scope) recording whether the feature was on at the last boot. */
+const FEATURE_STATE_KEY = 'mfa-feature-state';
+
+const RECOVERY_CODE_LENGTH = 10;
+
+/** Well above anything the attempt caps produce: `pruneEvents`' exemptions, not this cap, are what
+ * `isAccountThrottled` relies on. */
+export const MAX_EVENTS_PER_USER = 500;
+
+export type { MfaEventType };
+
+/** Every field is optional, so an undeclared key is only rejected in a literal passed directly.
+ * "Nothing declared here is a secret", not "nothing else reaches the database". */
+export type MfaEventMetadata = {
+  loginAt?: string;
+  deviceName?: string;
+  via?: 'cli';
+  graceUntil?: string;
+  byUserId?: string;
+  days?: number;
+  count?: number;
+};
+
+export type VerifyChallengeResult =
+  /** `pendingPasswordHash` is set when the challenge came from a password reset: see
+   * `createChallenge`. */
+  | { ok: true; userId: string; pendingPasswordHash?: string }
+  | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
+
+/** See `reserveAttempt`. */
+export interface AttemptReservation {
+  /** Keep the reserved row as this attempt's failure, and send the notice. */
+  spend(): void;
+  /** Delete the reserved row unless it was spent. Idempotent. */
+  settle(): Promise<void>;
+}
+
+export type EnforceOutcome =
+  { outcome: 'none' } | { outcome: 'grace'; graceUntil: Date } | { outcome: 'refused' };
+
+/** Roles are optional: the login path does not populate them, so the resolver loads them rather
+ * than read "not populated" as "no roles". */
+export type AdminUserRow = {
+  id: Data.ID;
+  password?: string | null;
+  roles?: Array<{ id: Data.ID; mfaRequired?: boolean | null }> | null;
+  mfaSecret?: string | null;
+  mfaEnabledAt?: string | Date | null;
+  mfaGraceUntil?: string | Date | null;
+  mfaLockedAt?: string | Date | null;
+};
+
+interface EncryptionLike {
+  encrypt(value: string): string | null;
+  decrypt(value: string): string | null;
+}
+
+interface AuthLike {
+  validatePassword(password: string, hash: string): Promise<boolean>;
+  hashPassword(password: string): Promise<string>;
+}
+
+export interface MfaServiceDeps {
+  strapi: Core.Strapi;
+  encryption: EncryptionLike;
+  auth: AuthLike;
+}
+
+/** The two passkey registration functions are wrapped rather than re-exported, so their invariants
+ * hold for any caller and not only `controllers/mfa.ts`. */
+const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
+  let cachedConfig: MfaConfig | null = null;
+
+  const config = (): MfaConfig => {
+    if (!cachedConfig) {
+      cachedConfig = validateMfaConfig(
+        strapi.config.get('admin.auth.mfa', MFA_DEFAULTS),
+        strapi.log
+      );
+    }
+    return cachedConfig;
+  };
+
+  /** Whether a secret could be stored at all. Without `ENCRYPTION_KEY` nobody can enrol, so
+   * requiring a second factor would only start every user's clock towards a lock. */
+  const canEncryptSecrets = (): boolean => {
+    try {
+      return encryption.encrypt('probe') !== null;
+    } catch {
+      return false;
+    }
+  };
+
+  /** Enrolment data is left intact when off, so re-enabling restores the previous state. */
+  const isEnabled = (): boolean =>
+    strapi.features.future.isEnabled(FUTURE_FLAG) && config().enabled;
+
+  const userQuery = () => strapi.db.query(USER_UID);
+
+  const loadUser = async (userId: string) => {
+    const user = await userQuery().findOne({ where: { id: userId } });
+    if (!user) {
+      throw new ValidationError('User not found');
+    }
+    return user;
+  };
+
+  const isEnrolled = async (userId: string): Promise<boolean> => {
+    const user = await userQuery().findOne({ where: { id: userId } });
+    return Boolean(user?.mfaEnabledAt && user?.mfaSecret);
+  };
+
+  /** Memoised onto the row: `isMfaRequiredFor` can need roles twice in one call and both reads
+   * must agree. */
+  const loadRoles = async (
+    user: AdminUserRow
+  ): Promise<Array<{ id: Data.ID; mfaRequired?: boolean | null }>> => {
+    if (Array.isArray(user.roles)) {
+      return user.roles;
+    }
+    const loaded = await userQuery().load(user, 'roles', { select: ['id', 'mfaRequired'] });
+    const roles = Array.isArray(loaded) ? loaded : [];
+    user.roles = roles;
+    return roles;
+  };
+
+  /** The EE SSO-locked role ids, or none when SSO is not licensed. Read once per decision batch:
+   * `enforcementImpact` walks every user, and a store read each was an N+1 on `core_store`. */
+  const readSsoLockedRoles = async (): Promise<Array<string | number>> => {
+    if (!strapi.ee.features.isEnabled('sso')) {
+      return [];
+    }
+
+    const adminStore = strapi.store({ type: 'core', name: 'admin' });
+    const auth = (await adminStore.get({ key: 'auth' })) as
+      { providers?: { ssoLockedRoles?: Array<string | number> } } | null | undefined;
+    return auth?.providers?.ssoLockedRoles ?? [];
+  };
+
+  /** Mirrors `ee/server/src/utils/sso-lock.ts` (CE cannot import from `ee/`) **including its
+   * uncoerced `lockedId === String(role.id)` comparison**: widening it would exempt from MFA a
+   * password-holding user EE never actually locked out of local login. */
+  const isExemptGiven = async (
+    user: AdminUserRow,
+    lockedRoles: Array<string | number>
+  ): Promise<boolean> => {
+    if (!user.password) {
+      return true;
+    }
+    if (lockedRoles.length === 0) {
+      return false;
+    }
+
+    const roles = await loadRoles(user);
+    return lockedRoles.some((lockedId) => roles.some((role) => lockedId === String(role.id)));
+  };
+
+  const isExemptFromMfa = async (user: AdminUserRow): Promise<boolean> =>
+    // No store read for a password-less account: it is exempt whatever SSO says.
+    !user.password || isExemptGiven(user, await readSsoLockedRoles());
+
+  const isMfaRequiredFor = async (
+    user: AdminUserRow,
+    enforcement?: MfaEnforcement
+  ): Promise<boolean> => {
+    if (!isEnabled()) {
+      return false;
+    }
+
+    if (await isExemptFromMfa(user)) {
+      return false;
+    }
+
+    const { mode } = enforcement ?? (await readMfaEnforcement(strapi));
+    if (mode === 'off') {
+      return false;
+    }
+    if (mode === 'required') {
+      return true;
+    }
+
+    const roles = await loadRoles(user);
+    return roles.some((role) => role.mfaRequired === true);
+  };
+
+  /**
+   * `isMfaRequiredFor` for a page of users, with the enforcement settings and the SSO-locked roles
+   * read once rather than once per row. For the users list, which shows a required account that has
+   * not started its grace period yet, and must not cost two store reads a row to do it.
+   */
+  const requiredForUsers = async (users: AdminUserRow[]): Promise<boolean[]> => {
+    if (!isEnabled() || users.length === 0) {
+      return users.map(() => false);
+    }
+
+    const { mode } = await readMfaEnforcement(strapi);
+    if (mode === 'off') {
+      return users.map(() => false);
+    }
+
+    const lockedRoles = await readSsoLockedRoles();
+    return Promise.all(
+      users.map(async (user) => {
+        if (await isExemptGiven(user, lockedRoles)) {
+          return false;
+        }
+        if (mode === 'required') {
+          return true;
+        }
+        const roles = await loadRoles(user);
+        return roles.some((role) => role.mfaRequired === true);
+      })
+    );
+  };
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  const isEnrolledRow = (user: AdminUserRow): boolean =>
+    Boolean(user.mfaEnabledAt && user.mfaSecret);
+
+  /**
+   * How many active accounts a proposed enforcement would put on the clock, and how many of those
+   * are already enrolled. Read before raising enforcement, so the administrator sees the blast
+   * radius before the click rather than after it.
+   *
+   * Decided per user with the same rules `isMfaRequiredFor` applies -- an account with no local
+   * password is exempt, and so is one holding an SSO-locked role -- but against the *proposed*
+   * roles rather than the stored flags. Iterated in memory: admin user tables are small, and
+   * exact parity with the enforcement path matters more than a clever query that could drift
+   * from it. Inactive accounts cannot sign in at all, so they are nobody's problem here.
+   *
+   * Only the accounts this change adds are counted: an account the stored settings already
+   * require was asked before and is not asked again. Counting everyone the proposal covers made
+   * requiring a role with no users report the users of the roles already required.
+   */
+  const enforcementImpact = async (proposal: {
+    mode: MfaEnforcementMode;
+    requiredRoles: string[];
+  }): Promise<{ affected: number; enrolled: number }> => {
+    if (proposal.mode === 'off') {
+      return { affected: 0, enrolled: 0 };
+    }
+
+    const { mode: currentMode } = await readMfaEnforcement(strapi);
+    if (currentMode === 'required') {
+      return { affected: 0, enrolled: 0 };
+    }
+
+    const users = (await userQuery().findMany({
+      where: { isActive: true },
+      select: ['id', 'password', 'mfaEnabledAt', 'mfaSecret'],
+      populate: { roles: { select: ['id', 'mfaRequired'] } },
+    })) as AdminUserRow[];
+
+    const required = new Set(proposal.requiredRoles.map(String));
+    const lockedRoles = await readSsoLockedRoles();
+    let affected = 0;
+    let enrolled = 0;
+
+    for (const user of users) {
+      // eslint-disable-next-line no-await-in-loop -- roles are populated above, so this reads nothing
+      if (await isExemptGiven(user, lockedRoles)) {
+        continue;
+      }
+      const roles = Array.isArray(user.roles) ? user.roles : [];
+      const subject =
+        proposal.mode === 'required' || roles.some((role) => required.has(String(role.id)));
+      const alreadyRequired =
+        currentMode === 'optional' && roles.some((role) => role.mfaRequired === true);
+      if (!subject || alreadyRequired) {
+        continue;
+      }
+      affected += 1;
+      if (isEnrolledRow(user)) {
+        enrolled += 1;
+      }
+    }
+
+    return { affected, enrolled };
+  };
+
+  /** One conditional UPDATE each; read-then-write would let a refresh-path lock race an
+   * administrator's unlock and silently win. */
+  const stampGrace = async (userId: string, graceUntil: Date): Promise<boolean> => {
+    const { count } = await userQuery().updateMany({
+      where: { id: userId, mfaGraceUntil: null, mfaLockedAt: null },
+      data: { mfaGraceUntil: graceUntil },
+    });
+    return count === 1;
+  };
+
+  /** The `$lte now` precondition fails the lock if anything rewrote `mfaGraceUntil` since the read. */
+  const lockAccount = async (userId: string, now: Date): Promise<boolean> => {
+    const { count } = await userQuery().updateMany({
+      where: { id: userId, mfaLockedAt: null, mfaGraceUntil: { $lte: now } },
+      data: { mfaLockedAt: now },
+    });
+    return count === 1;
+  };
+
+  /**
+   * A role change can make an account newly required while it still carries a grace stamp from an
+   * earlier requirement, whose clock kept running: it would be locked at its next session with no
+   * warning. A stamp on an account that was *not* required before the change is stale by
+   * definition -- its next session would have cleared it -- so it is cleared here. Locks stay.
+   * `previous` is the row before the change, with its roles.
+   */
+  const clearGraceIfStale = async (previous: AdminUserRow): Promise<void> => {
+    if (!previous.mfaGraceUntil || previous.mfaLockedAt) {
+      return;
+    }
+    if (await isMfaRequiredFor(previous)) {
+      return;
+    }
+    await userQuery().updateMany({
+      where: { id: String(previous.id), mfaLockedAt: null },
+      data: { mfaGraceUntil: null },
+    });
+  };
+
+  /**
+   * Whether enforcement ran at the last boot, so the first boot after the future flag or
+   * `admin.auth.mfa.enabled` was off can tell. Grace clocks kept running while it was off, so
+   * without this a re-enable after more than `graceDays` locks every graced user at their next
+   * session with no warning. The stamps are cleared instead, and each user's next session starts a
+   * fresh window; locks stay. The settings-level `off` has the same treatment in `updateSettings`.
+   *
+   * No stored marker counts as "was off": that is the first boot of a version with the feature.
+   */
+  const syncFeatureState = async (): Promise<void> => {
+    const store = strapi.store({ type: 'core', name: 'admin' });
+    const stored = (await store.get({ key: FEATURE_STATE_KEY })) as
+      { enabled?: unknown } | null | undefined;
+    const enabled = isEnabled();
+
+    if (enabled && stored?.enabled !== true) {
+      await userQuery().updateMany({
+        where: { mfaLockedAt: null, mfaGraceUntil: { $notNull: true } },
+        data: { mfaGraceUntil: null },
+      });
+    }
+    if (stored?.enabled !== enabled) {
+      await store.set({ key: FEATURE_STATE_KEY, value: { enabled } });
+    }
+  };
+
+  const clearEnforcementStamps = async (userId: string): Promise<void> => {
+    await userQuery().updateMany({
+      where: { id: userId },
+      data: { mfaGraceUntil: null, mfaLockedAt: null },
+    });
+  };
+
+  const invalidateAllSessions = async (userId: string): Promise<void> => {
+    if (strapi.sessionManager?.hasOrigin('admin')) {
+      await strapi.sessionManager('admin').invalidateRefreshToken(userId);
+      return;
+    }
+    // User id only, never anything session- or token-shaped.
+    strapi.log.warn(
+      `Admin session origin is not registered; sessions for admin user ${userId} were not invalidated on lock.`
+    );
+  };
+
+  /** Reloads the row itself, so callers may pass a partial user. `retried` bounds the single re-read
+   * taken when a conditional update finds its precondition gone. */
+  const evaluateEnforcement = async (
+    user: { id: Data.ID },
+    retried: boolean
+  ): Promise<EnforceOutcome> => {
+    if (!isEnabled()) {
+      return { outcome: 'none' };
+    }
+
+    const row = (await userQuery().findOne({
+      where: { id: user.id },
+      populate: ['roles'],
+    })) as AdminUserRow | null;
+    if (!row) {
+      return { outcome: 'refused' };
+    }
+    const userId = String(row.id);
+
+    const enforcement = await readMfaEnforcement(strapi);
+    if (enforcement.mode === 'off') {
+      return { outcome: 'none' };
+    }
+
+    if (!(await isMfaRequiredFor(row, enforcement))) {
+      if (row.mfaGraceUntil || row.mfaLockedAt) {
+        await clearEnforcementStamps(userId);
+      }
+      return { outcome: 'none' };
+    }
+
+    if (isEnrolledRow(row)) {
+      return { outcome: 'none' };
+    }
+
+    if (row.mfaLockedAt) {
+      return { outcome: 'refused' };
+    }
+
+    const now = new Date();
+
+    if (!row.mfaGraceUntil) {
+      const graceUntil = new Date(now.getTime() + enforcement.graceDays * DAY_MS);
+      if (await stampGrace(userId, graceUntil)) {
+        await recordEvent(userId, 'grace_started', { graceUntil: graceUntil.toISOString() });
+        return { outcome: 'grace', graceUntil };
+      }
+      // Lost a race with another first session (or an unlock). The row now says what to do.
+      if (retried) {
+        strapi.log.warn(
+          `Two-factor enforcement could not stamp or lock admin user ${userId} after a retry; refusing the session.`
+        );
+        return { outcome: 'refused' };
+      }
+      return evaluateEnforcement(user, true);
+    }
+
+    const graceUntil = new Date(row.mfaGraceUntil);
+    if (graceUntil > now) {
+      return { outcome: 'grace', graceUntil };
+    }
+
+    if (await lockAccount(userId, now)) {
+      // Sessions first: a failing event write must never leave a live session past the lock.
+      await invalidateAllSessions(userId);
+      await recordEvent(userId, 'locked', { graceUntil: graceUntil.toISOString() });
+      notify(userId, 'locked');
+      return { outcome: 'refused' };
+    }
+
+    // Precondition gone: an unlock landed between the read and the lock. Re-read once.
+    if (retried) {
+      strapi.log.warn(
+        `Two-factor enforcement could not stamp or lock admin user ${userId} after a retry; refusing the session.`
+      );
+      return { outcome: 'refused' };
+    }
+    return evaluateEnforcement(user, true);
+  };
+
+  const enforce = (user: { id: Data.ID }): Promise<EnforceOutcome> =>
+    evaluateEnforcement(user, false);
+
+  /** No grace is stamped here: the user's next session starts a fresh window, so an unlock while
+   * they are away cannot re-lock them unseen. */
+  const unlock = async (
+    userId: string,
+    actor: { byUserId?: string; via?: 'cli' }
+  ): Promise<boolean> => {
+    const { count } = await userQuery().updateMany({
+      where: { id: userId, mfaLockedAt: { $notNull: true } },
+      data: { mfaLockedAt: null, mfaGraceUntil: null },
+    });
+    if (count !== 1) {
+      return false;
+    }
+
+    await recordEvent(userId, 'unlocked', {
+      ...(actor.byUserId ? { byUserId: actor.byUserId } : {}),
+      ...(actor.via ? { via: actor.via } : {}),
+    });
+    notify(userId, 'unlocked', actor.byUserId ? { byUserId: actor.byUserId } : {});
+    return true;
+  };
+
+  /**
+   * Everything this feature stored about a user, for when the user itself is deleted. Not
+   * `disable`: that nulls the MFA columns on the user row, which bumps its `updatedAt` and so
+   * changes the row the delete response echoes back -- pointless work on a row about to go. The
+   * event rows are included here and not in `disable`, where the notice feed still needs them.
+   */
+  const purgeUser = async (userId: string): Promise<void> => {
+    await strapi.db.transaction(async () => {
+      await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+      await challengeQuery().deleteMany({ where: { userId: String(userId) } });
+      await trustedDevices.clearTrustedDevices(userId);
+      await passkeys.clearPasskeys(userId);
+      await eventQuery().deleteMany({ where: { userId: String(userId) } });
+    });
+  };
+
+  /** The only operation that lowers someone's protection without their consent, hence the session
+   * eviction: a reset prompted by a suspected compromise must not leave the attacker signed in. */
+  const resetUser = async (
+    userId: string,
+    actor: { byUserId?: string; via?: 'cli' } = {}
+  ): Promise<void> => {
+    await disable(userId);
+
+    // Before the event write, which must never leave an attacker holding a live session.
+    await invalidateAllSessions(userId);
+
+    await recordEvent(userId, 'reset', {
+      ...(actor.byUserId ? { byUserId: actor.byUserId } : {}),
+      ...(actor.via ? { via: actor.via } : {}),
+    });
+
+    return sendNotice(userId, 'reset', actor.byUserId ? { byUserId: actor.byUserId } : {});
+  };
+
+  /** Both calls must sit inside the guard: `encryption.decrypt` and `base32Decode` throw rather than
+   * returning null, so a malformed stored value otherwise becomes an unhandled 500. */
+  const readSecret = (userId: string, ciphertext: string | null | undefined): Buffer => {
+    if (!ciphertext) {
+      throw new ValidationError('Two-factor authentication is not set up for this account');
+    }
+
+    let secret: Buffer | null = null;
+    try {
+      const decrypted = encryption.decrypt(ciphertext);
+      if (decrypted) {
+        secret = base32Decode(decrypted);
+      }
+    } catch {
+      secret = null;
+    }
+
+    if (!secret) {
+      // The operator gets the diagnosis; the user gets what they can do about it. A Cloud customer
+      // has no shell to run a CLI command in, and backticks render literally in the panel.
+      strapi.log.error(
+        `The two-factor secret of admin user ${userId} could not be decrypted. This usually means the admin encryption key changed. Recover the account with \`strapi admin:reset-user-mfa\`, or have the user sign in with a recovery code.`
+      );
+      throw new ApplicationError(
+        'Your two-factor secret could not be read. Use a recovery code to sign in, or ask an administrator to reset two-factor authentication for your account.',
+        { code: MFA_ERROR_CODES.SECRET_UNREADABLE }
+      );
+    }
+
+    return secret;
+  };
+
+  /** `bcryptjs.compare(pw, null)` *rejects* rather than returning false, so without the first guard
+   * an SSO-only administrator gets a 500 instead of a clean refusal. */
+  const assertPassword = async (
+    user: { password?: string | null },
+    password: string
+  ): Promise<void> => {
+    if (!user.password) {
+      throw new ValidationError(
+        'Your account has no local password, so it cannot manage two-factor authentication. Ask an administrator who signs in with a password.',
+        { code: MFA_ERROR_CODES.NO_LOCAL_PASSWORD }
+      );
+    }
+    if (!(await auth.validatePassword(password, user.password))) {
+      throw new ValidationError('Invalid credentials');
+    }
+  };
+
+  const beginEnrolment = async (userId: string, password: string, code?: string) => {
+    const user = await loadUser(userId);
+
+    await assertPassword(user, password);
+
+    // The password alone is the credential 2FA exists to back up, so it cannot authorise swapping
+    // the factor.
+    if (user.mfaEnabledAt && user.mfaSecret) {
+      if (!code) {
+        throw new ValidationError(
+          'A current two-factor code or a recovery code is required to replace your authenticator'
+        );
+      }
+      await assertFactor(userId, code);
+    }
+
+    const secret = generateTotpSecret();
+    const encoded = base32Encode(secret);
+    const encrypted = encryption.encrypt(encoded);
+
+    if (!encrypted) {
+      throw new ApplicationError(
+        'Cannot enable two-factor authentication because the admin encryption key is not configured. Set ENCRYPTION_KEY and restart.'
+      );
+    }
+
+    // Pending, never active: the next attempt overwrites it, so an abandoned flow needs no cleanup.
+    await userQuery().update({
+      where: { id: userId },
+      data: { mfaPendingSecret: encrypted },
+    });
+
+    return {
+      secret: encoded,
+      otpauthUri: buildOtpauthUri({
+        secret,
+        label: user.email,
+        issuer: config().issuer ?? strapi.config.get('info.name', 'Strapi'),
+        digits: config().digits,
+        step: config().step,
+      }),
+    };
+  };
+
+  const verifyTotpForUser = async (userId: string, code: string) => {
+    const user = await loadUser(userId);
+    const secret = readSecret(userId, user.mfaSecret);
+    const { digits, step, window } = config();
+
+    return verifyTotp({ secret, code, digits, step, window });
+  };
+
+  /** The replay guard: one conditional UPDATE whose affected-row count is the decision, so two
+   * concurrent requests carrying the same code cannot both succeed. */
+  const consumeTotpStep = async (userId: string, step: number): Promise<boolean> => {
+    // A single watermark, not a set of spent steps: with `window.back` set, a legitimate code for
+    // an earlier step is refused once a later one has been spent.
+    const { count } = await userQuery().updateMany({
+      where: {
+        id: userId,
+        $or: [{ mfaLastUsedStep: null }, { mfaLastUsedStep: { $lt: step } }],
+      },
+      data: { mfaLastUsedStep: step },
+    });
+
+    return count === 1;
+  };
+
+  const completeEnrolment = async (userId: string, code: string) => {
+    // Charged at the account tier like every other code check, so the bound on guesses against
+    // this account does not depend on how the route limiter happens to key the request.
+    const attempt = await reserveAttempt(userId);
+    if (!attempt) {
+      throw new RateLimitError();
+    }
+    try {
+      return await promotePendingSecret(userId, code, attempt);
+    } finally {
+      await attempt.settle();
+    }
+  };
+
+  const promotePendingSecret = async (
+    userId: string,
+    code: string,
+    attempt: AttemptReservation
+  ) => {
+    const user = await loadUser(userId);
+    if (!user.mfaPendingSecret) {
+      throw new ValidationError('No enrolment in progress', { code: MFA_ERROR_CODES.NO_ENROLMENT });
+    }
+
+    const pending = readSecret(userId, user.mfaPendingSecret);
+    const { digits, step, window } = config();
+    const result = verifyTotp({
+      secret: pending,
+      code: code.replace(/\s+/g, ''),
+      digits,
+      step,
+      window,
+    });
+    if (!result.valid) {
+      attempt.spend();
+      throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
+    }
+
+    // Steps are wall-clock indices shared by both secrets, so one guard covers both. A
+    // replacement must not reset `mfaLastUsedStep`, or a code accepted here replays at login.
+    const consumed = await consumeTotpStep(userId, result.step);
+    if (!consumed) {
+      attempt.spend();
+      throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
+    }
+
+    const replaced = Boolean(user.mfaEnabledAt && user.mfaSecret);
+
+    // `storeRecoveryCodes` deletes the existing set first, so committing it alone would rotate a
+    // replacing user's codes to values the errored response never returned. `mfaPendingSecret` is in
+    // the `where`, so a `disable` racing in between is not silently undone. The codes are hashed
+    // before the transaction opens, for the reason `hashRecoveryCodes` gives.
+    const { codes, rows } = await hashRecoveryCodes(userId);
+
+    const recoveryCodes = await strapi.db.transaction(async () => {
+      await storeRecoveryCodes(userId, rows);
+
+      const { count } = await userQuery().updateMany({
+        where: { id: userId, mfaPendingSecret: user.mfaPendingSecret },
+        data: {
+          mfaSecret: user.mfaPendingSecret,
+          mfaPendingSecret: null,
+          mfaEnabledAt: replaced ? user.mfaEnabledAt : new Date(),
+          // Enrolling satisfies any enforcement requirement. Clearing the lock is defensive: it
+          // cannot be set on an account holding a session.
+          mfaGraceUntil: null,
+          mfaLockedAt: null,
+        },
+      });
+
+      if (count !== 1) {
+        throw new ValidationError('No enrolment in progress', {
+          code: MFA_ERROR_CODES.NO_ENROLMENT,
+        });
+      }
+
+      // The trusts on file were granted against the authenticator just retired. On a first
+      // enrolment there should be none, nor any passkey or challenge: anything found belongs to an
+      // earlier enrolment whose columns were lost (a rollback drops the `mfa*` columns on
+      // `admin_users` but keeps these tables), and must not be honoured against this one. A
+      // replacement keeps its passkeys: they are separate credentials the user still holds.
+      // Recovery codes need nothing here: `issueRecoveryCodes` above replaced the whole set.
+      await trustedDevices.clearTrustedDevices(userId);
+      if (!replaced) {
+        await passkeys.clearPasskeys(userId);
+        await challengeQuery().deleteMany({ where: { userId: String(userId) } });
+      }
+
+      return codes;
+    });
+
+    return { recoveryCodes, replaced };
+  };
+
+  // --- Recovery codes ---------------------------------------------------
+
+  const recoveryQuery = () => strapi.db.query(RECOVERY_CODE_UID);
+
+  /** bcrypt-hashed rather than encrypted, so a rotated `ENCRYPTION_KEY` cannot take the escape hatch
+   * with it -- rotation is the exact moment a user needs these (ASVS 6.5.2). Hashed apart from the
+   * write so a caller holding a transaction can do this first: ten bcrypt rounds inside one would
+   * hold it open, and on SQLite that blocks every other write. */
+  const hashRecoveryCodes = async (userId: string) => {
+    const codes = generateRecoveryCodes(config().recoveryCodeCount);
+    const rows = await Promise.all(
+      codes.map(async (code) => ({
+        userId: String(userId),
+        codeHash: await auth.hashPassword(code),
+        usedAt: null,
+      }))
+    );
+    return { codes, rows };
+  };
+
+  const storeRecoveryCodes = async (
+    userId: string,
+    rows: Array<{ userId: string; codeHash: string; usedAt: null }>
+  ): Promise<void> => {
+    // One transaction: a `createMany` failure after the delete commits would leave the account
+    // with zero recovery codes and no way to get any.
+    await strapi.db.transaction(async () => {
+      await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+
+      // `recoveryCodeCount: 0` is valid config. Rather than trust every query engine to no-op on
+      // an empty `createMany`, skip it.
+      if (rows.length > 0) {
+        await recoveryQuery().createMany({ data: rows });
+      }
+
+      // A fresh, unacknowledged marker every time, so `areCodesAcknowledged` never reports a stale
+      // acknowledgement of codes already replaced.
+      await recordEvent(userId, 'recovery_codes_issued');
+    });
+  };
+
+  const issueRecoveryCodes = async (userId: string): Promise<string[]> => {
+    const { codes, rows } = await hashRecoveryCodes(userId);
+    await storeRecoveryCodes(userId, rows);
+    return codes;
+  };
+
+  const countUnusedRecoveryCodes = (userId: string): Promise<number> =>
+    recoveryQuery().count({ where: { userId: String(userId), usedAt: null } });
+
+  /** Verification is separated from the consume, which is `consumeTotpStep`'s conditional UPDATE. */
+  const consumeRecoveryCode = async (userId: string, code: string): Promise<boolean> => {
+    const normalised = normaliseRecoveryCode(code);
+    if (!normalised) {
+      return false;
+    }
+
+    const candidates = await recoveryQuery().findMany({
+      where: { userId: String(userId), usedAt: null },
+    });
+
+    for (const candidate of candidates) {
+      // Sequential: no reason to burn every bcrypt comparison once one matches.
+      // eslint-disable-next-line no-await-in-loop
+      const matches = await auth.validatePassword(normalised, candidate.codeHash);
+      if (!matches) {
+        continue;
+      }
+
+      // Conditional update: whoever flips usedAt from null wins, so a code cannot be spent twice
+      // by two concurrent requests.
+      const { count } = await recoveryQuery().updateMany({
+        where: { id: candidate.id, usedAt: null },
+        data: { usedAt: new Date() },
+      });
+
+      return count === 1;
+    }
+
+    return false;
+  };
+
+  // --- Challenge lifecycle and two-tier rate limiting -------------------
+  // Two tiers because either alone is a bypass: the per-challenge cap is exact, and the per-account
+  // one stops an attacker with a valid password minting a fresh challenge after every few guesses
+  // (NIST SP 800-63B). Expiry is enforced lazily on read, so a sweep that never runs cannot make a
+  // stale challenge usable.
+
+  const challengeQuery = () => strapi.db.query(CHALLENGE_UID);
+  const eventQuery = () => strapi.db.query(EVENT_UID);
+
+  /** A migration problem must surface as an error, not as an UPDATE that affects nothing and so
+   * reads as "cap already reached". */
+  /** The physical attempts column, for the one statement the query engine cannot express as
+   * `updateMany`: an increment. */
+  const attemptsColumnName = () => {
+    const metadata = strapi.db.metadata.get(CHALLENGE_UID);
+    // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
+    // know that.
+    const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
+
+    if (!attemptsColumn) {
+      throw new Error(
+        'Could not resolve the physical column name for admin::mfa-challenge.attempts'
+      );
+    }
+
+    return attemptsColumn;
+  };
+
+  /** Events a request recorded before it had a session, keyed by that request: a login writes them,
+   * then `claimRequestEvents` hands them to the login family the login issues. */
+  const pendingRequestEvents = new WeakMap<object, Data.ID[]>();
+
+  const currentRequest = () =>
+    strapi.requestContext?.get?.() as { state?: { session?: { id?: string } } } | undefined;
+
+  /**
+   * The login family behind a session id (see `buildAdminSessionMetadata`). Events are owned by a
+   * family, not a session: every refresh mints a new `sessionId`, so an event keyed on the session
+   * that caused it stopped being recognised as its own after the first refresh.
+   */
+  const sessionFamily = async (sessionId?: string): Promise<AdminSessionFamily | null> => {
+    if (!sessionId) {
+      return null;
+    }
+    const row = await strapi.db.query(SESSION_UID).findOne({ where: { sessionId } });
+    return row && row.origin === 'admin' ? sessionFamilyOf(row) : null;
+  };
+
+  /** Read once per request: `recordEvent` can run several times in one. */
+  const requestFamilies = new WeakMap<
+    object,
+    { sessionId: string; family: Promise<AdminSessionFamily | null> }
+  >();
+  const currentFamilyId = async (): Promise<string | null> => {
+    const request = currentRequest();
+    const sessionId = request?.state?.session?.id;
+    if (!request || !sessionId) {
+      return null;
+    }
+    let cached = requestFamilies.get(request);
+    if (cached?.sessionId !== sessionId) {
+      cached = { sessionId, family: sessionFamily(sessionId) };
+      requestFamilies.set(request, cached);
+    }
+    const { family } = cached;
+    // A session row gone mid-request still names *a* session: keep it rather than drop ownership.
+    return (await family)?.familyId ?? sessionId;
+  };
+
+  /** Metadata is neutral context only: these rows are readable wherever admin data is. The
+   * `sessionId` column holds the login family whose request caused the event, so that family is
+   * not notified of its own actions. */
+  const recordEvent = async (
+    userId: string,
+    type: MfaEventType,
+    metadata: MfaEventMetadata = {}
+  ): Promise<Data.ID | undefined> => {
+    const request = currentRequest();
+    const sessionId = await currentFamilyId();
+    const row = await eventQuery().create({
+      data: { userId: String(userId), type, metadata, seenAt: null, sessionId },
+    });
+    if (request && !sessionId && row?.id !== undefined) {
+      pendingRequestEvents.set(request, [...(pendingRequestEvents.get(request) ?? []), row.id]);
+    }
+
+    // The prune is housekeeping against a soft cap, and it must never cost the caller its write.
+    // Inside an ambient transaction it cannot be made safe by catching: on Postgres and MySQL a
+    // failed statement aborts the whole transaction, so the catch below would return normally
+    // while every later statement -- and the commit -- fails. `recordEvent` runs inside three
+    // transactions (`issueRecoveryCodes`, `trustDevice`, `registerPasskey`), and the first is
+    // itself nested in `completeEnrolment`'s, so the blast radius is an entire enrolment.
+    //
+    // So: skip it there and let the next untransacted event for this user do it. Rows past the cap
+    // live a little longer; nothing reads them by position. SQLite would survive the catch, but
+    // one behaviour on every dialect is worth more than pruning a few events sooner on one.
+    if (strapi.db.inTransaction()) {
+      return row?.id;
+    }
+
+    try {
+      await pruneEvents(userId);
+    } catch (error) {
+      strapi.log.error('Failed to prune admin::mfa-event rows', error);
+    }
+    return row?.id;
+  };
+
+  /**
+   * Derived so it cannot drift from the row types. The exclusions are rows `recordEvent` alone
+   * serves: emailing every recovery-code use would tell an attacker who has already stolen one that
+   * the account holder is about to find out.
+   */
+  type MfaChangeNotice =
+    | Exclude<MfaEventType, 'recovery_code_used' | 'recovery_codes_issued' | 'grace_started'>
+    | MfaAuditOnlyNotice;
+
+  /** Written out rather than derived, so a new hub-only notice cannot start demanding an email
+   * phrase. */
+  type EmailedNotice = 'enabled' | 'disabled' | 'reset' | 'authenticator_replaced';
+
+  const EMAILED_NOTICES: ReadonlySet<MfaChangeNotice> = new Set<EmailedNotice>([
+    'enabled',
+    'disabled',
+    'reset',
+    'authenticator_replaced',
+  ]);
+
+  const isEmailedNotice = (type: MfaChangeNotice): type is EmailedNotice =>
+    EMAILED_NOTICES.has(type);
+
+  /** Keyed on `EmailedNotice`, so the typecheck holds it exhaustive. */
+  const CHANGE_NOTICE_TEXT: Record<EmailedNotice, string> = {
+    enabled: 'enabled',
+    disabled: 'disabled',
+    reset: 'reset',
+    authenticator_replaced: 'moved to a new authenticator app',
+  };
+
+  /**
+   * Fire and forget, as `forgotPassword` is: many self-hosted instances configure no provider, so
+   * email cannot be a hard dependency of a security control.
+   *
+   * The hub event fires for every notice type and is how EE audit logging observes them. Email goes
+   * only to `EmailedNotice` -- mailing every wrong code would let anyone who knows the password
+   * flood the account holder's inbox.
+   *
+   * The returned promise never rejects; only the CLI awaits it, through `resetUser`. The hub emit
+   * is detached rather than part of it: `eventHub.emit` awaits every subscriber, and with EE audit
+   * logging on that means a `findOne` and an insert, either of which can throw. Its failures are
+   * logged, not propagated. Request paths use `notify` instead, which does not return the promise.
+   */
+  const sendNotice = (
+    userId: string,
+    type: MfaChangeNotice,
+    extra: { byUserId?: string; count?: number } = {}
+  ): Promise<void> => {
+    const event = `admin.mfa.${type.replaceAll('_', '.')}`;
+    strapi.eventHub.emit(event, { userId, ...extra }).catch((error) => {
+      strapi.log.error(`An event listener failed while handling ${event}`, { error });
+    });
+
+    if (!isEmailedNotice(type)) {
+      return Promise.resolve();
+    }
+
+    const change = CHANGE_NOTICE_TEXT[type];
+
+    return (async () => {
+      try {
+        const user = await userQuery().findOne({
+          where: { id: userId },
+          select: ['email', 'firstname'],
+        });
+        if (!user?.email) return;
+
+        await strapi
+          .plugin('email')
+          .service('email')
+          .sendTemplatedEmail(
+            {
+              to: user.email,
+              from: strapi.config.get('admin.forgotPassword.from'),
+              replyTo: strapi.config.get('admin.forgotPassword.replyTo'),
+            },
+            strapi.config.get('admin.auth.mfa.emailTemplate', mfaChangedTemplate),
+            {
+              user: { email: user.email, firstname: user.firstname },
+              change,
+              changedAt: new Date().toISOString(),
+            }
+          );
+      } catch (error) {
+        strapi.log.error('Failed to send the two-factor change notification', error);
+      }
+    })();
+  };
+
+  /**
+   * `sendNotice` for request paths: an email send must not sit on the request's critical path, so
+   * nothing here is awaited. `sendNotice` already never rejects; the `.catch` keeps it that way
+   * should that ever change, rather than turning into an unhandled rejection.
+   */
+  const notify = (
+    userId: string,
+    type: MfaChangeNotice,
+    extra: { byUserId?: string; count?: number } = {}
+  ): void => {
+    sendNotice(userId, type, extra).catch((error) => {
+      strapi.log.error('Failed to send the two-factor change notification', error);
+    });
+  };
+
+  /**
+   * Caps the `admin::mfa-event` rows one account can accumulate. Two exemptions, at any age:
+   *  - the *newest* `recovery_codes_issued` row, the only marker `areCodesAcknowledged` reads.
+   *    Exempting every marker instead would let a repeatedly regenerating account grow forever.
+   *  - a `challenge_failed` row inside `userAttemptWindow`, which `isAccountThrottled` counts.
+   *    Pruning one early lets an attacker outlast the throttle by generating other traffic.
+   */
+  const pruneEvents = async (userId: string): Promise<void> => {
+    const total = await eventQuery().count({ where: { userId: String(userId) } });
+    if (total <= MAX_EVENTS_PER_USER) {
+      return;
+    }
+
+    const [cutoff] = await eventQuery().findMany({
+      where: { userId: String(userId) },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      offset: MAX_EVENTS_PER_USER - 1,
+      limit: 1,
+    });
+
+    if (!cutoff) {
+      return;
+    }
+
+    // The newest marker is the only one `areCodesAcknowledged` reads, so the only one worth keeping.
+    const newestMarker = await eventQuery().findOne({
+      where: { userId: String(userId), type: 'recovery_codes_issued' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+
+    const { userAttemptWindow } = config();
+    const attemptWindowStart = new Date(Date.now() - userAttemptWindow * 1000);
+
+    await eventQuery().deleteMany({
+      where: {
+        userId: String(userId),
+        createdAt: { $lt: new Date(cutoff.createdAt) },
+        $and: [
+          newestMarker
+            ? {
+                $or: [{ type: { $ne: 'recovery_codes_issued' } }, { id: { $ne: newestMarker.id } }],
+              }
+            : { type: { $ne: 'recovery_codes_issued' } },
+          {
+            $or: [
+              { type: { $ne: 'challenge_failed' } },
+              { createdAt: { $lte: attemptWindowStart } },
+            ],
+          },
+        ],
+      },
+    });
+  };
+
+  // --- Trusted devices ------------------------------------------
+  // `settings` is injected rather than imported inside the module, so its tests can hand it any
+  // policy without a store double.
+  const trustedDevices = createTrustedDevices({
+    strapi,
+    settings: () => readTrustedDeviceSettings(strapi),
+    recordEvent,
+    notify,
+  });
+
+  /** Only `acknowledgeCodes` may ever clear the marker, even if a caller passes its id in `ids`. */
+  const NOT_ACKNOWLEDGEMENT_MARKER = { $ne: 'recovery_codes_issued' as const };
+
+  /** Matches every event except the ones login family `familyId` caused. Spelled with the null
+   * branch because SQL's `<>` never matches a NULL column. */
+  const notFromFamily = (familyId?: string) =>
+    familyId ? { $or: [{ sessionId: null }, { sessionId: { $ne: familyId } }] } : {};
+
+  /** Called once a login has issued its session: the events it recorded on the way (a recovery
+   * code, a device trusted) were caused by that login's family. */
+  const claimRequestEvents = async (familyId: string): Promise<void> => {
+    const request = currentRequest();
+    const ids = request ? pendingRequestEvents.get(request) : undefined;
+    if (!request || !ids?.length) {
+      return;
+    }
+    pendingRequestEvents.delete(request);
+    await eventQuery().updateMany({
+      where: { id: { $in: ids }, sessionId: null },
+      data: { sessionId: familyId },
+    });
+  };
+
+  /** `currentSessionId` leaves out what the caller's own login did: it already knows. */
+  const unseenEvents = async (
+    userId: string,
+    currentSessionId?: string
+  ): Promise<MfaEventNotice[]> => {
+    const family = await sessionFamily(currentSessionId);
+    const rows = await eventQuery().findMany({
+      where: {
+        userId: String(userId),
+        seenAt: null,
+        type: NOT_ACKNOWLEDGEMENT_MARKER,
+        ...notFromFamily(family?.familyId ?? currentSessionId),
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      type: row.type,
+      metadata: row.metadata ?? {},
+      createdAt: new Date(row.createdAt).toISOString(),
+      seenAt: row.seenAt ? new Date(row.seenAt).toISOString() : null,
+    }));
+  };
+
+  /**
+   * Whether another live login of this user began before `family`. When one did, `family` is not
+   * the only witness of what happened before it began, so it must not clear those notices: an
+   * attacker who signs in beside the holder would otherwise dismiss the evidence of their own
+   * arrival before the holder's session ever showed it. With no older login, nobody else could
+   * have seen them, and this one must be able to dismiss them or they never go away.
+   */
+  const hasOlderLiveFamily = async (userId: string, family: AdminSessionFamily) => {
+    if (!strapi.sessionManager?.hasOrigin('admin')) {
+      return true;
+    }
+    const sessions = await strapi.sessionManager('admin').listSessions(String(userId));
+    return sessions.some((session) => {
+      const other = sessionFamilyOf(session);
+      return other.familyId !== family.familyId && other.startedAt < family.startedAt;
+    });
+  };
+
+  /**
+   * `userId` is always in the `where` and `ids` only narrows further, so a foreign id can never
+   * reach another user's row. An *absent* `ids` marks everything; an *empty* array marks nothing.
+   *
+   * A login never clears its own family's events (the other logins still need them) and, while an
+   * older login is live, never clears events from before it began (see `hasOlderLiveFamily`).
+   */
+  const markEventsSeen = async (
+    userId: string,
+    ids?: Data.ID[],
+    currentSessionId?: string
+  ): Promise<void> => {
+    const family = await sessionFamily(currentSessionId);
+    const where: Record<string, unknown> = {
+      userId: String(userId),
+      type: NOT_ACKNOWLEDGEMENT_MARKER,
+      ...notFromFamily(family?.familyId ?? currentSessionId),
+    };
+    if (ids) {
+      where.id = { $in: ids };
+    }
+    if (family && (await hasOlderLiveFamily(userId, family))) {
+      where.createdAt = { $gte: family.startedAt };
+    }
+
+    await eventQuery().updateMany({ where, data: { seenAt: new Date() } });
+  };
+
+  /**
+   * Reads only the newest marker, or an already-acknowledged older one makes a just-regenerated set
+   * read as acknowledged. Ordered by `createdAt` *and* `id`, because two can share a millisecond.
+   */
+  const areCodesAcknowledged = async (userId: string): Promise<boolean> => {
+    const latest = await eventQuery().findOne({
+      where: { userId: String(userId), type: 'recovery_codes_issued' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+
+    return Boolean(latest?.seenAt);
+  };
+
+  const acknowledgeCodes = async (userId: string): Promise<void> => {
+    await eventQuery().updateMany({
+      where: { userId: String(userId), type: 'recovery_codes_issued', seenAt: null },
+      data: { seenAt: new Date() },
+    });
+  };
+
+  /**
+   * Approximate under concurrency, deliberately: this is the backstop against sustained challenge
+   * recycling, while the exact per-challenge limit is the conditional increment in `verifyChallenge`.
+   */
+  const isAccountThrottled = async (userId: string): Promise<boolean> => {
+    const { maxUserAttempts, userAttemptWindow } = config();
+    const since = new Date(Date.now() - userAttemptWindow * 1000);
+
+    const failures = await eventQuery().count({
+      where: { userId: String(userId), type: 'challenge_failed', createdAt: { $gt: since } },
+    });
+
+    return failures >= maxUserAttempts;
+  };
+
+  /**
+   * The exact per-account tier. Checking `isAccountThrottled` and then verifying lets every
+   * concurrent request read the same count, so a burst could spend far more than
+   * `maxUserAttempts` guesses. The attempt is recorded *first*, as the `challenge_failed` row a
+   * wrong code would leave anyway, and the count taken afterwards includes it: the k-th concurrent
+   * request sees at least k rows, so no more than `maxUserAttempts` of them ever verify.
+   *
+   * Every caller must `settle` in a `finally`. A spent attempt keeps its row and sends the notice;
+   * anything else -- a success, a refusal that verified nothing, an error -- deletes the row, so
+   * only wrong codes count against the account.
+   */
+  const reserveAttempt = async (userId: string): Promise<AttemptReservation | null> => {
+    const { maxUserAttempts, userAttemptWindow } = config();
+    const id = await recordEvent(userId, 'challenge_failed');
+    const release = async () => {
+      if (id !== undefined) {
+        await eventQuery().deleteMany({ where: { id } });
+      }
+    };
+
+    const since = new Date(Date.now() - userAttemptWindow * 1000);
+    const failures = await eventQuery().count({
+      where: { userId: String(userId), type: 'challenge_failed', createdAt: { $gt: since } },
+    });
+    if (failures > maxUserAttempts) {
+      await release();
+      return null;
+    }
+
+    let spent = false;
+    let settled = false;
+    return {
+      spend() {
+        spent = true;
+        notify(userId, 'challenge_failed');
+      },
+      async settle() {
+        if (spent || settled) {
+          return;
+        }
+        settled = true;
+        await release();
+      },
+    };
+  };
+
+  // --- Passkeys -------------------------------------------------
+  // Not beside the trusted-device composition above: this needs `isAccountThrottled`, and a `const`
+  // is hoisted uninitialised, so composing earlier throws a TDZ ReferenceError at construction.
+  const passkeys = createPasskeys({
+    strapi,
+    settings: () => readPasskeySettings(strapi),
+    config,
+    recordEvent,
+    notify,
+    isAccountThrottled,
+    reserveAttempt,
+  });
+
+  /**
+   * Duplicated from `controllers/mfa.ts` so the service is safe for any caller. The controller keeps
+   * its copy for the ordering, which is what stops an attempt being spent on a doomed request.
+   */
+  const assertPasskeyRegistrationAllowed = async (userId: string): Promise<void> => {
+    if (!(await readPasskeySettings(strapi)).enabled) {
+      throw new ValidationError(PASSKEYS_DISABLED);
+    }
+    if (!(await isEnrolled(userId))) {
+      throw new ValidationError(PASSKEY_NEEDS_TOTP);
+    }
+  };
+
+  /** `pendingPasswordHash` stages a password reset on the challenge (see the content type). */
+  const createChallenge = async (
+    userId: string,
+    options: { pendingPasswordHash?: string } = {}
+  ): Promise<{ token: string; expiresIn: number }> => {
+    // Checked here as well as in `verifyChallenge`: throttling only one of the two leaves the
+    // other as the way around it.
+    if (await isAccountThrottled(userId)) {
+      throw new RateLimitError();
+    }
+
+    const { challengeTtl } = config();
+    // Sized as a credential: it is the only thing between an accepted password and a session.
+    const token = crypto.randomBytes(32).toString('hex');
+
+    await challengeQuery().create({
+      data: {
+        token: hashTrustToken(token),
+        userId: String(userId),
+        // Not `'totp'`: nothing reads this column to dispatch, and either factor may satisfy the row.
+        factorType: 'any',
+        attempts: 0,
+        expiresAt: new Date(Date.now() + challengeTtl * 1000),
+        consumedAt: null,
+        pendingPasswordHash: options.pendingPasswordHash ?? null,
+      },
+    });
+
+    return { token, expiresIn: challengeTtl };
+  };
+
+  /** The DELETE is the consume: whoever removes the row wins, so a token cannot authorise two
+   * operations even if both requests present a valid factor. */
+  const consumeChallenge = async (challenge: {
+    id: unknown;
+    userId: string;
+    pendingPasswordHash?: string | null;
+  }): Promise<VerifyChallengeResult> => {
+    const { count } = await challengeQuery().deleteMany({ where: { id: challenge.id } });
+
+    if (count !== 1) {
+      return { ok: false as const, reason: 'unusable' as const };
+    }
+    return challenge.pendingPasswordHash
+      ? {
+          ok: true as const,
+          userId: challenge.userId,
+          pendingPasswordHash: challenge.pendingPasswordHash,
+        }
+      : { ok: true as const, userId: challenge.userId };
+  };
+
+  /**
+   * For `verifyChallenge` only, where an unreadable secret must read as "did not match" rather than
+   * throw: propagating would make the recovery-code escape hatch unreachable at the one endpoint
+   * that accepts it, and would skip the `challenge_failed` event that feeds the throttle.
+   */
+  const attemptTotp = async (userId: string, code: string) => {
+    try {
+      return await verifyTotpForUser(userId, code);
+    } catch (error) {
+      // Fires only on a broken or absent secret, never on an ordinary wrong code, so it cannot be used
+      // to flood the log.
+      strapi.log.warn(
+        `Two-factor verification could not check a TOTP code for admin user ${userId}. A recovery code is the way back into this account. Cause: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return { valid: false as const };
+    }
+  };
+
+  /** No client-supplied factor selector: letting the caller pick which check runs is the classic
+   * factor-switching bypass. */
+  const verifyChallenge = async (token: string, code: string): Promise<VerifyChallengeResult> => {
+    const challenge = await challengeQuery().findOne({ where: { token: hashTrustToken(token) } });
+
+    if (!challenge || challenge.consumedAt) {
+      return { ok: false as const, reason: 'unusable' as const };
+    }
+
+    // Fails closed: `new Date('nonsense') <= new Date()` is false, so a malformed `expiresAt` would
+    // otherwise be a challenge that never expires.
+    const expiresAt = new Date(challenge.expiresAt);
+    if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
+      return { ok: false as const, reason: 'unusable' as const };
+    }
+
+    const attempt = await reserveAttempt(challenge.userId);
+    if (!attempt) {
+      return { ok: false as const, reason: 'throttled' as const };
+    }
+    try {
+      return await checkChallengeCode(challenge, code, attempt);
+    } finally {
+      await attempt.settle();
+    }
+  };
+
+  const checkChallengeCode = async (
+    challenge: { id: unknown; userId: string; pendingPasswordHash?: string | null },
+    code: string,
+    attempt: AttemptReservation
+  ): Promise<VerifyChallengeResult> => {
+    // `returning` would be the obvious way to judge the new value, but it is unsupported on MySQL.
+    // Runs *before* any code is checked, so a crash mid-verification still costs an attempt.
+    const accepted = await strapi.db
+      .queryBuilder(CHALLENGE_UID)
+      .where({ id: challenge.id, attempts: { $lt: config().maxChallengeAttempts } })
+      .increment(attemptsColumnName(), 1)
+      .execute<number>();
+
+    if (accepted !== 1) {
+      // Destroyed rather than left as a dead row a later path could revive by resetting the counter.
+      await challengeQuery().deleteMany({ where: { id: challenge.id } });
+      return { ok: false as const, reason: 'exhausted' as const };
+    }
+
+    // Dispatch on the code's own shape, never on a client-supplied selector -- that is the
+    // factor-switching bypass. It also stops a wrong 6-digit code buying one bcrypt per unused
+    // recovery code on an unauthenticated endpoint.
+    const normalised = normaliseRecoveryCode(code);
+
+    // The TOTP branch needs the whitespace-stripped code, not the raw submission: `verifyTotp` only
+    // trims the ends, so a display-formatted "123 456" dispatches here and then fails its digit check.
+    if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
+      const totpResult = await attemptTotp(challenge.userId, code.replace(/\s+/g, ''));
+
+      // Single-use across the account, not within one challenge, so a spent code cannot be replayed
+      // against a freshly created one (RFC 6238 section 5.2).
+      if (totpResult.valid && (await consumeTotpStep(challenge.userId, totpResult.step))) {
+        return consumeChallenge(challenge);
+      }
+    }
+
+    if (
+      normalised.length === RECOVERY_CODE_LENGTH &&
+      (await consumeRecoveryCode(challenge.userId, code))
+    ) {
+      await recordEvent(challenge.userId, 'recovery_code_used');
+      return consumeChallenge(challenge);
+    }
+
+    // Also reached when the code matched no factor's shape. A path that charges one tier but not the
+    // other is a hole in the other.
+    attempt.spend();
+    return { ok: false as const, reason: 'invalid' as const };
+  };
+
+  const assertFactor = async (userId: string, code: string): Promise<void> => {
+    const attempt = await reserveAttempt(userId);
+    if (!attempt) {
+      throw new RateLimitError();
+    }
+
+    try {
+      const normalised = normaliseRecoveryCode(code);
+
+      if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
+        const totpResult = await verifyTotpForUser(userId, code.replace(/\s+/g, ''));
+        if (totpResult.valid && (await consumeTotpStep(userId, totpResult.step))) {
+          return;
+        }
+      }
+
+      if (normalised.length === RECOVERY_CODE_LENGTH && (await consumeRecoveryCode(userId, code))) {
+        await recordEvent(userId, 'recovery_code_used');
+        return;
+      }
+
+      attempt.spend();
+      throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
+    } finally {
+      await attempt.settle();
+    }
+  };
+
+  /**
+   * The gate for disable and regenerate -- both are the "attacker holds a session" case. Uses
+   * `verifyTotpForUser`, not `attemptTotp`, so the "secret could not be read" error survives; a
+   * recovery-shaped code never reaches that branch, so an account with an undecryptable secret can
+   * still be disabled.
+   */
+  const assertPasswordAndFactor = async (
+    userId: string,
+    password: string,
+    code: string
+  ): Promise<void> => {
+    const user = await loadUser(userId);
+
+    // Wrong password is not a second-factor attempt: it charges neither throttle tier.
+    await assertPassword(user, password);
+
+    await assertFactor(userId, code);
+  };
+
+  /**
+   * Re-authentication for an administrator acting on *another* user's second factor (reset, unlock,
+   * removing their passkeys): each lowers someone else's protection, so a stolen administrator
+   * session alone must not be enough. The same rule the security settings apply to a downgrade:
+   *  - an actor with no local password (SSO only) has nothing to present and is let through on
+   *    session authority, as for the passkeys toggle;
+   *  - otherwise the password, and a live code too when the actor has a second factor.
+   * A wrong password charges no throttle; a wrong code charges both tiers, through `assertFactor`.
+   */
+  const assertActorReauth = async (
+    actorId: string,
+    credentials: { password?: string; code?: string }
+  ): Promise<void> => {
+    const actor = await loadUser(actorId);
+    if (!actor.password) {
+      return;
+    }
+    if (!credentials.password) {
+      throw new ValidationError('Your password is required for this action', {
+        code: MFA_ERROR_CODES.REAUTH_REQUIRED,
+      });
+    }
+    if (isEnrolledRow(actor)) {
+      if (!credentials.code) {
+        throw new ValidationError('A two-factor code is required for this action', {
+          code: MFA_ERROR_CODES.REAUTH_REQUIRED,
+        });
+      }
+      await assertPasswordAndFactor(actorId, credentials.password, credentials.code.trim());
+      return;
+    }
+    await assertPassword(actor, credentials.password);
+  };
+
+  /**
+   * One transaction, all of it: a failure on the user `update` alone leaves `mfaEnabledAt` set with
+   * the recovery codes already deleted -- a permanent lockout with no way back but the CLI reset.
+   */
+  const disable = async (userId: string): Promise<void> => {
+    await strapi.db.transaction(async () => {
+      await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+      await challengeQuery().deleteMany({ where: { userId: String(userId) } });
+      await trustedDevices.clearTrustedDevices(userId);
+      // A passkey that still satisfied challenges would be a second factor on an account that has
+      // none. The pending-ceremony columns are nulled in the same update.
+      await passkeys.clearPasskeys(userId);
+      await userQuery().update({
+        where: { id: userId },
+        data: {
+          mfaSecret: null,
+          mfaPendingSecret: null,
+          mfaEnabledAt: null,
+          mfaLastUsedStep: null,
+          mfaPasskeyChallenge: null,
+          mfaPasskeyChallengeExpiresAt: null,
+        },
+      });
+    });
+  };
+
+  /**
+   * Boot-time repair for rows the user table no longer vouches for. The `strapi_admin_mfa*` tables
+   * are persisted across a rollback while the `mfa*` columns on `admin_users` are not, so a roll
+   * forward can find recovery codes, trusted devices, passkeys and challenges for accounts that are
+   * no longer enrolled, and rows for accounts that no longer exist. None of those may be honoured,
+   * so they are deleted. Events are kept for any existing user: they are the notice history, not a
+   * credential.
+   */
+  const reconcileOrphanedRows = async (): Promise<number> => {
+    const users = (await userQuery().findMany({
+      select: ['id', 'mfaSecret', 'mfaEnabledAt'],
+    })) as AdminUserRow[];
+    const allIds = users.map((user) => String(user.id));
+    const enrolledIds = users.filter(isEnrolledRow).map((user) => String(user.id));
+
+    // `$notIn: []` is not something to trust every dialect with; no ids means every row goes.
+    const notIn = (ids: string[]) => (ids.length > 0 ? { userId: { $notIn: ids } } : {});
+
+    let removed = 0;
+    for (const uid of [RECOVERY_CODE_UID, CHALLENGE_UID, TRUSTED_DEVICE_UID, PASSKEY_UID]) {
+      // eslint-disable-next-line no-await-in-loop -- four statements, run once at boot
+      const result = await strapi.db.query(uid).deleteMany({ where: notIn(enrolledIds) });
+      removed += result?.count ?? 0;
+    }
+    const events = await eventQuery().deleteMany({ where: notIn(allIds) });
+    removed += events?.count ?? 0;
+
+    return removed;
+  };
+
+  /**
+   * Housekeeping: expired challenges are already rejected on read, so nothing depends on this
+   * running. The DELETE is unbounded by choice -- `createChallenge` is throttled and rate limited,
+   * so the expired set stays small.
+   */
+  const sweepExpiredChallenges = async (): Promise<number> => {
+    const result = await challengeQuery().deleteMany({
+      where: { expiresAt: { $lt: new Date() } },
+    });
+
+    return result?.count ?? 0;
+  };
+
+  const warnOnFailure = async (what: string, run: () => Promise<unknown>) => {
+    try {
+      await run();
+    } catch (error) {
+      strapi.log.warn(
+        `Could not ${what}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  };
+
+  /**
+   * Boot-time housekeeping, called from the admin bootstrap. None of it may stop the admin from
+   * booting: expired and orphaned rows are already refused on read.
+   */
+  const bootstrap = async (): Promise<void> => {
+    // In every state of the flag: the boot that turns it back on needs to know it was off
+    await warnOnFailure('record the two-factor feature state', syncFeatureState);
+
+    if (!isEnabled()) {
+      return;
+    }
+
+    if (!canEncryptSecrets()) {
+      strapi.log.error(
+        'Admin two-factor authentication is enabled but the admin encryption key (admin.secrets.encryptionKey, usually ENCRYPTION_KEY) is not configured, so nobody can set it up. Set the key and restart.'
+      );
+    }
+
+    const sweep = () =>
+      warnOnFailure('sweep expired two-factor challenges or trusted devices', async () => {
+        await sweepExpiredChallenges();
+        await trustedDevices.sweepExpiredTrustedDevices();
+      });
+
+    await sweep();
+    strapi.cron.add({ sweepExpiredMfaRows: { task: sweep, options: '0 30 3 * * *' } });
+
+    // Boot only: rows lose their owner's enrolment only through a schema change, which restarts
+    await warnOnFailure('reconcile two-factor rows with admin users', async () => {
+      const removed = await reconcileOrphanedRows();
+      if (removed > 0) {
+        strapi.log.warn(
+          `Removed ${removed} two-factor rows belonging to deleted or unenrolled admin users.`
+        );
+      }
+    });
+
+    // In the startup log, where an operator looks, rather than as silently hidden passkey surfaces
+    await warnOnFailure(
+      'check the passkey relying-party configuration',
+      passkeys.warnIfPasskeysMisconfigured
+    );
+  };
+
+  return {
+    bootstrap,
+    isEnabled,
+    canEncryptSecrets,
+    config,
+    isEnrolled,
+    isExemptFromMfa,
+    isMfaRequiredFor,
+    requiredForUsers,
+    enforce,
+    clearGraceIfStale,
+    syncFeatureState,
+    unlock,
+    resetUser,
+    purgeUser,
+    beginEnrolment,
+    completeEnrolment,
+    verifyTotpForUser,
+    consumeTotpStep,
+    issueRecoveryCodes,
+    consumeRecoveryCode,
+    countUnusedRecoveryCodes,
+    recordEvent,
+    notify,
+    sendNotice,
+    pruneEvents,
+    unseenEvents,
+    sessionFamily,
+    claimRequestEvents,
+    markEventsSeen,
+    areCodesAcknowledged,
+    acknowledgeCodes,
+    isAccountThrottled,
+    reserveAttempt,
+    enforcementImpact,
+    createChallenge,
+    verifyChallenge,
+    assertFactor,
+    assertPasswordAndFactor,
+    assertActorReauth,
+    disable,
+    sweepExpiredChallenges,
+    reconcileOrphanedRows,
+    trustDevice: trustedDevices.trustDevice,
+    consumeTrustedDevice: trustedDevices.consumeTrustedDevice,
+    listTrustedDevices: trustedDevices.listTrustedDevices,
+    revokeTrustedDevice: trustedDevices.revokeTrustedDevice,
+    revokeAllTrustedDevices: trustedDevices.revokeAllTrustedDevices,
+    clearTrustedDevices: trustedDevices.clearTrustedDevices,
+    clearAllTrustedDevices: trustedDevices.clearAllTrustedDevices,
+    sweepExpiredTrustedDevices: trustedDevices.sweepExpiredTrustedDevices,
+    trustedDeviceSettings: trustedDevices.trustedDeviceSettings,
+    async passkeyRegistrationOptions(userId: string) {
+      await assertPasskeyRegistrationAllowed(userId);
+      return passkeys.passkeyRegistrationOptions(userId);
+    },
+    async registerPasskey(userId: string, name: string, registration: RegistrationResponseJSON) {
+      await assertPasskeyRegistrationAllowed(userId);
+      return passkeys.registerPasskey(userId, name, registration);
+    },
+    listPasskeys: passkeys.listPasskeys,
+    countPasskeys: passkeys.countPasskeys,
+    countAllPasskeys: passkeys.countAllPasskeys,
+    deletePasskey: passkeys.deletePasskey,
+    clearPasskeys: passkeys.clearPasskeys,
+    clearAllPasskeys: passkeys.clearAllPasskeys,
+    authenticationOptions: passkeys.authenticationOptions,
+    verifyAssertion: passkeys.verifyAssertion,
+    passkeySettings: passkeys.passkeySettings,
+    passkeysConfigured: passkeys.passkeysConfigured,
+    warnIfPasskeysMisconfigured: passkeys.warnIfPasskeysMisconfigured,
+  };
+};
+
+export default createMfaService;

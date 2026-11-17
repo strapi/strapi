@@ -1,0 +1,157 @@
+import type { Core } from '@strapi/types';
+
+// `webauthn` is omitted rather than defaulted: a wrong relying-party id is a refusal, not a value
+// to fall back to.
+export type MfaConfig = Required<
+  Omit<NonNullable<Core.Config.Admin['auth']['mfa']>, 'issuer' | 'emailTemplate' | 'webauthn'>
+> & {
+  issuer?: string;
+};
+
+export const MFA_DEFAULTS: MfaConfig = {
+  enabled: true,
+  digits: 6,
+  step: 30,
+  // Asymmetric on purpose: a future code is not yet legitimate. This is why every e2e and API
+  // helper waits out a step boundary rather than reusing a code.
+  window: { back: 1, forward: 0 },
+  challengeTtl: 300,
+  maxChallengeAttempts: 5,
+  maxUserAttempts: 10,
+  userAttemptWindow: 900,
+  recoveryCodeCount: 10,
+};
+
+interface Logger {
+  warn(message: string): void;
+}
+
+const PREFIX = '[admin.auth.mfa]';
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** Every outcome is a warning: interop breakers fall back to the default, weakenings are honoured
+ * because that is the operator's decision. */
+export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
+  // A string or an array is truthy, so it passes `raw ?? {}` and then spreads over the defaults
+  // as indexed keys ("0", "1", ...) rather than merging as settings. Caught before that spread.
+  let safeRaw: unknown = raw;
+  if (raw !== undefined && raw !== null && !isPlainObject(raw)) {
+    logger.warn(
+      `${PREFIX} config must be a plain object. Got ${
+        Array.isArray(raw) ? 'an array' : typeof raw
+      }, using the defaults.`
+    );
+    safeRaw = {};
+  }
+
+  const input = (safeRaw ?? {}) as Partial<MfaConfig>;
+  const result: MfaConfig = {
+    ...MFA_DEFAULTS,
+    ...input,
+    window: { ...MFA_DEFAULTS.window, ...input.window },
+  };
+
+  // The spread above would carry `webauthn` through untyped, so the runtime object would not match
+  // what `MfaConfig` says it is.
+  delete (result as MfaConfig & { webauthn?: unknown }).webauthn;
+
+  if (![6, 7, 8].includes(result.digits)) {
+    logger.warn(
+      `${PREFIX} digits must be 6, 7 or 8 for authenticator app compatibility. Got ${result.digits}, using ${MFA_DEFAULTS.digits}.`
+    );
+    result.digits = MFA_DEFAULTS.digits;
+  }
+
+  if (!Number.isFinite(result.step) || result.step <= 0) {
+    logger.warn(
+      `${PREFIX} step must be a positive number of seconds. Got ${result.step}, using ${MFA_DEFAULTS.step}.`
+    );
+    result.step = MFA_DEFAULTS.step;
+  }
+
+  if (!Number.isFinite(result.window.back) || result.window.back < 0) {
+    logger.warn(
+      `${PREFIX} window.back must be a non-negative number. Got ${result.window.back}, using ${MFA_DEFAULTS.window.back}.`
+    );
+    result.window.back = MFA_DEFAULTS.window.back;
+  }
+
+  if (!Number.isFinite(result.window.forward) || result.window.forward < 0) {
+    logger.warn(
+      `${PREFIX} window.forward must be a non-negative number. Got ${result.window.forward}, using ${MFA_DEFAULTS.window.forward}.`
+    );
+    result.window.forward = MFA_DEFAULTS.window.forward;
+  }
+
+  // A NaN, zero or negative TTL makes every challenge born already expired, so nobody could ever
+  // complete a second factor. Hence a positive check, not the non-negative one used below.
+  if (!Number.isFinite(result.challengeTtl) || result.challengeTtl <= 0) {
+    logger.warn(
+      `${PREFIX} challengeTtl must be a positive number of seconds; anything else expires every challenge the moment it is created, locking everyone out of the second factor. Got ${result.challengeTtl}, using ${MFA_DEFAULTS.challengeTtl}.`
+    );
+    result.challengeTtl = MFA_DEFAULTS.challengeTtl;
+  }
+
+  // Zero is rejected too: `maxChallengeAttempts: 0` makes the increment's `attempts < 0` condition
+  // impossible, so every verify reports `exhausted` before a code is checked.
+  if (!Number.isFinite(result.maxChallengeAttempts) || result.maxChallengeAttempts < 1) {
+    logger.warn(
+      `${PREFIX} maxChallengeAttempts must be a positive number; anything else rejects every code on every challenge before it is checked, since the per-challenge attempt cap can never be satisfied. Got ${result.maxChallengeAttempts}, using ${MFA_DEFAULTS.maxChallengeAttempts}.`
+    );
+    result.maxChallengeAttempts = MFA_DEFAULTS.maxChallengeAttempts;
+  }
+
+  // Same, for the account tier: `maxUserAttempts: 0` makes `failures >= 0` true for every account,
+  // locking out every enrolled admin before they present a code.
+  if (!Number.isFinite(result.maxUserAttempts) || result.maxUserAttempts < 1) {
+    logger.warn(
+      `${PREFIX} maxUserAttempts must be a positive number; anything else throttles every account immediately, since the account-scoped failure count is never below it. Got ${result.maxUserAttempts}, using ${MFA_DEFAULTS.maxUserAttempts}.`
+    );
+    result.maxUserAttempts = MFA_DEFAULTS.maxUserAttempts;
+  }
+
+  // A non-positive window makes `createdAt > now - window` match nothing, so the counter always
+  // reads zero and the account tier is silently disabled. A looser tier means a higher
+  // `maxUserAttempts`, never a zero-length window.
+  if (!Number.isFinite(result.userAttemptWindow) || result.userAttemptWindow <= 0) {
+    logger.warn(
+      `${PREFIX} userAttemptWindow must be a positive number of seconds; anything else silently disables the account-scoped attempt throttle. Got ${result.userAttemptWindow}, using ${MFA_DEFAULTS.userAttemptWindow}.`
+    );
+    result.userAttemptWindow = MFA_DEFAULTS.userAttemptWindow;
+  }
+
+  if (!Number.isFinite(result.recoveryCodeCount) || result.recoveryCodeCount < 0) {
+    logger.warn(
+      `${PREFIX} recoveryCodeCount must be a non-negative number. Got ${result.recoveryCodeCount}, using ${MFA_DEFAULTS.recoveryCodeCount}.`
+    );
+    result.recoveryCodeCount = MFA_DEFAULTS.recoveryCodeCount;
+  }
+
+  if (result.window.back > 1 || result.window.forward > 1) {
+    logger.warn(
+      `${PREFIX} window wider than 1 step multiplies the brute force surface: every extra step adds another simultaneously valid code. Honouring back=${result.window.back} forward=${result.window.forward}.`
+    );
+  }
+
+  if (result.maxChallengeAttempts > 10) {
+    logger.warn(
+      `${PREFIX} maxChallengeAttempts is ${result.maxChallengeAttempts}, which allows that many guesses per challenge. Honouring it.`
+    );
+  }
+
+  if (result.maxUserAttempts > 100) {
+    logger.warn(
+      `${PREFIX} maxUserAttempts is ${result.maxUserAttempts}, above the 100 consecutive failures NIST SP 800-63B allows. Honouring it.`
+    );
+  }
+
+  if (result.recoveryCodeCount > 20) {
+    logger.warn(
+      `${PREFIX} recoveryCodeCount is ${result.recoveryCodeCount}. Each code adds a bcrypt comparison to an unauthenticated request. Honouring it.`
+    );
+  }
+
+  return result;
+};

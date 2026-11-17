@@ -25,6 +25,9 @@ import { getDisplayName } from '../../../../utils/users';
 
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
+import { TwoFactorStatus } from './components/TwoFactorStatus';
+
+import type { AdminUserMfaState } from '../../../../../../shared/contracts/user';
 
 /* -------------------------------------------------------------------------------------------------
  * ListPageCE
@@ -55,10 +58,14 @@ const ListPageCE = () => {
       ).CreateActionEE
   );
 
-  const headers = TABLE_HEADERS.map((header) => ({
-    ...header,
-    label: formatMessage(header.label),
-  }));
+  // Only when the rows carry two-factor state
+  const showTwoFactor = users.some((user) => 'mfaEnabledAt' in user);
+  const headers = [...TABLE_HEADERS, ...(showTwoFactor ? [TWO_FACTOR_HEADER] : [])].map(
+    (header) => ({
+      ...header,
+      label: formatMessage(header.label),
+    })
+  );
 
   const title = formatMessage({
     id: 'global.users',
@@ -297,6 +304,20 @@ const TABLE_HEADERS: Array<
     },
   },
 ];
+
+/** Two-factor enforcement state per row. */
+const TWO_FACTOR_HEADER: (typeof TABLE_HEADERS)[number] = {
+  // Not a column on the row type; the cell reads the appended state directly.
+  name: 'mfaEnabledAt' as keyof SanitizedAdminUser,
+  label: {
+    id: 'Settings.permissions.users.mfa.column',
+    defaultMessage: 'Two-factor',
+  },
+  sortable: false,
+  cellFormatter(user) {
+    return <TwoFactorStatus user={user as AdminUserMfaState} />;
+  },
+};
 
 const FILTERS = [
   {

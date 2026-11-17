@@ -31,6 +31,15 @@ export interface AdminUser extends Entity {
   roles: AdminRole[];
   blocked: boolean;
   preferedLanguage?: string;
+  // Private two-factor columns, declared so `SanitizedAdminUser` can omit them by name
+  mfaSecret?: string | null;
+  mfaEnabledAt?: string | Date | null;
+  mfaLastUsedStep?: number | null;
+  mfaPendingSecret?: string | null;
+  mfaGraceUntil?: string | Date | null;
+  mfaLockedAt?: string | Date | null;
+  mfaPasskeyChallenge?: string | null;
+  mfaPasskeyChallengeExpiresAt?: string | Date | null;
 }
 
 export type AdminUserCreationPayload = Omit<
@@ -46,10 +55,24 @@ export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
 
 export type SanitizedAdminUser = Omit<
   AdminUser,
-  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'roles'
+  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'roles' | PrivateMfaField
 > & {
   roles: SanitizedAdminRole[];
 };
+
+/**
+ * The private two-factor columns; `PRIVATE_MFA_FIELDS` in `server/src/services/constants.ts` is the
+ * runtime list, kept equal by a test since a shared contract cannot import server code.
+ */
+export type PrivateMfaField =
+  | 'mfaSecret'
+  | 'mfaEnabledAt'
+  | 'mfaLastUsedStep'
+  | 'mfaPendingSecret'
+  | 'mfaGraceUntil'
+  | 'mfaLockedAt'
+  | 'mfaPasskeyChallenge'
+  | 'mfaPasskeyChallengeExpiresAt';
 
 export type AdminTokenOwner = Pick<
   AdminUser,
@@ -59,6 +82,7 @@ export interface AdminRole extends Entity {
   name: string;
   code: string;
   description?: string;
+  mfaRequired?: boolean | null;
   users: AdminUser[];
   permissions: Permission[];
 }

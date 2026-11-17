@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 // NOTE: Make sure to use default export for services overwritten in EE
 import auth from './auth';
 import user from './user';
@@ -15,6 +17,8 @@ import { createTokenService } from './api-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
+import createMfaService from './mfa';
+import { createSecuritySettingsService } from './security-settings';
 import debugDump from './debug-dump';
 
 const contentApiTokenService = createTokenService('content-api');
@@ -41,5 +45,14 @@ export default {
   'project-settings': projectSettings,
   encryption,
   homepage: homepageService,
+  // Factories, so they receive `strapi` instead of reading the global
+  mfa: ({ strapi }: { strapi: Core.Strapi }) =>
+    createMfaService({
+      strapi,
+      encryption,
+      auth: { validatePassword: auth.validatePassword, hashPassword: auth.hashPassword },
+    }),
+  'security-settings': ({ strapi }: { strapi: Core.Strapi }) =>
+    createSecuritySettingsService({ strapi }),
   'debug-dump': debugDump,
 };
