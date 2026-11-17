@@ -1,3 +1,5 @@
+import type { Providers } from '@strapi/types';
+
 import type { File, UploadableFile } from '../types';
 
 /**
@@ -139,5 +141,14 @@ describe('UploadableFile type', () => {
     };
 
     expect(input).not.toHaveProperty('width');
+  });
+});
+
+describe('upload provider contract', () => {
+  test('accepts the files upload hands to a provider', () => {
+    // `tsc` fails here when a stored row or an uploaded file stops satisfying the provider contract
+    const toProviderFile = (file: File | UploadableFile): Providers.Upload.ProviderFile => file;
+
+    expect(toProviderFile(imageRowWithPopulate)).toBe(imageRowWithPopulate);
   });
 });

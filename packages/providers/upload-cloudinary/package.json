@@ -51,6 +51,7 @@
     "into-stream": "^5.1.0"
   },
   "devDependencies": {
+    "@strapi/types": "5.62.0",
     "@types/node": "22.20.0",
     "eslint-config-custom": "5.62.0",
     "tsconfig": "5.62.0"

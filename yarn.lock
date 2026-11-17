@@ -10567,6 +10567,7 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:3.1023.0"
     "@aws-sdk/s3-request-presigner": "npm:3.1023.0"
     "@aws-sdk/types": "npm:3.973.6"
+    "@strapi/types": "npm:5.62.0"
     "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.62.0"
     lodash: "npm:4.18.1"
@@ -10580,6 +10581,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
+    "@strapi/types": "npm:5.62.0"
     "@strapi/utils": "npm:5.62.0"
     "@types/node": "npm:22.20.0"
     cloudinary: "npm:^2.7.0"

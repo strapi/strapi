@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sharp from 'sharp';
 
 import { errors, file } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Providers } from '@strapi/types';
 
 import registerUploadMiddleware from './middlewares/upload';
 import { unsignRichtextAndBlocksUrls } from './migrations/unsign-richtext-and-blocks-urls';
@@ -61,11 +61,18 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   }
 }
 
+/**
+ * A provider module's `init` result, as `createProvider` treats it: the upload provider contract,
+ * whose members it then wraps all alike, contract or not.
+ */
+type LoadedProvider = Providers.Upload.Provider &
+  Record<string, (file: File, options: unknown) => unknown>;
+
 const createProvider = (config: Config) => {
   const { providerOptions, actionOptions = {} } = config;
 
   const providerName = _.toLower(config.provider);
-  let provider;
+  let provider: Providers.Upload.Factory<Config['providerOptions'], LoadedProvider>;
 
   let modulePath;
   try {
