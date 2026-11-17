@@ -248,6 +248,9 @@ declare global {
   To get the checks and the typed result back, export
   `type ServiceContract = Core.CoreAPI.Service.ContentType<uid> & { … }` from the service module and
   add `satisfies Core.ServiceFactory<uid>` to the factory.
+- A `createCoreService(uid)` without config, as `strapi generate` writes it, has no override: with
+  strict types it is the strict core service of `uid` (`Core.CoreAPI.Service.ContentType<uid>`),
+  with every check and the typed results.
 - Declare one contract per UID. Conflicting `Package*` declarations fail with TS2717, and
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by
