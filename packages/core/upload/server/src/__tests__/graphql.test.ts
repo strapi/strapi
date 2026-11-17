@@ -18,6 +18,7 @@ describe('Upload GraphQL extension', () => {
   };
   let resolvers: Record<string, Resolver>;
   let isFolderCRUDEnabled: boolean;
+  let model: { uid: string; attributes?: Record<string, { private?: boolean }> };
   let types: Array<{ name?: string; type?: string }>;
 
   const install = () => {
@@ -57,7 +58,7 @@ describe('Upload GraphQL extension', () => {
     };
 
     const strapi = {
-      getModel: jest.fn().mockReturnValue({ uid: 'plugin::upload.file' }),
+      getModel: jest.fn(() => model),
       db: { query: jest.fn().mockReturnValue({ findOne: mockDbFindOne }) },
       plugin(name: string) {
         if (name === 'graphql') {
@@ -75,6 +76,7 @@ describe('Upload GraphQL extension', () => {
 
   beforeEach(() => {
     isFolderCRUDEnabled = true;
+    model = { uid: 'plugin::upload.file' };
     install();
   });
 
@@ -189,6 +191,13 @@ describe('Upload GraphQL extension', () => {
 
     it('leaves the folder type alone when its shadow CRUD is disabled', () => {
       isFolderCRUDEnabled = false;
+      install();
+
+      expect(types.map((type) => type.type ?? type.name)).toEqual(['FileInfoInput', 'Mutation']);
+    });
+
+    it('is not added when the folder name is private', () => {
+      model = { uid: 'plugin::upload.folder', attributes: { name: { private: true } } };
       install();
 
       expect(types.map((type) => type.type ?? type.name)).toEqual(['FileInfoInput', 'Mutation']);

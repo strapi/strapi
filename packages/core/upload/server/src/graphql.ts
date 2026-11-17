@@ -1,4 +1,4 @@
-import { errors } from '@strapi/utils';
+import { contentTypes, errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { FILE_MODEL_UID, FOLDER_MODEL_UID } from './constants';
@@ -36,7 +36,8 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
 
   const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
-  const folderTypeName = getTypeName(strapi.getModel(FOLDER_MODEL_UID));
+  const folderModel = strapi.getModel(FOLDER_MODEL_UID);
+  const folderTypeName = getTypeName(folderModel);
 
   const rejectFileRelations = async (
     resolve: Resolve,
@@ -94,6 +95,9 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
         t.string('caption');
       },
     });
+
+    const exposesNamePath =
+      folderCRUD.isEnabled() && !contentTypes.isPrivateAttribute(folderModel, 'name');
 
     const folderNamePath = extendType({
       type: folderTypeName,
@@ -163,7 +167,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
     });
 
     return {
-      types: [fileInfoInputType, ...(folderCRUD.isEnabled() ? [folderNamePath] : []), mutations],
+      types: [fileInfoInputType, ...(exposesNamePath ? [folderNamePath] : []), mutations],
       resolversConfig: {
         // Use custom scopes for the upload file CRUD operations
         'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },
