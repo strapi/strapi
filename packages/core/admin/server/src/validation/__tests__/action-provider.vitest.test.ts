@@ -8,6 +8,7 @@ import { describe, test, expect, beforeEach } from 'vitest';
 import { errors } from '@strapi/utils';
 
 import { validateRegisterProviderAction } from '../action-provider';
+import createActionProvider from '../../domain/action/provider';
 
 type Case =
   | { name: string; input: unknown; verdict: 'accept' }
@@ -109,6 +110,7 @@ const cases: Case[] = [
   accept('contentTypes with empty subjects', [{ ...contentTypes, subjects: [] }]),
   accept('contentTypes with an empty subject', [{ ...contentTypes, subjects: [''] }]),
   accept('contentTypes with an admin pluginName', [{ ...contentTypes, pluginName: 'admin' }]),
+  accept('contentTypes with an undefined subject', [{ ...contentTypes, subjects: [undefined] }]),
   reject(
     'contentTypes without subjects',
     [{ ...contentTypes, subjects: undefined }],
@@ -196,6 +198,9 @@ const cases: Case[] = [
   accept('options with an undefined applyToProperties', [
     { ...plugins, options: { applyToProperties: undefined } },
   ]),
+  accept('options with an undefined property', [
+    { ...plugins, options: { applyToProperties: [undefined] } },
+  ]),
   accept('options with an unknown key', [
     { ...plugins, options: { applyToProperties: ['fields'], unknown: true } },
   ]),
@@ -223,16 +228,25 @@ const cases: Case[] = [
     { ...plugins, aliases: [{ actionId: 'plugin::my-plugin.write', unknown: true }] },
   ]),
   accept('null aliases', [{ ...plugins, aliases: null }]),
+  accept('an undefined alias', [{ ...plugins, aliases: [undefined] }]),
+  accept('an alias with an undefined subject', [
+    { ...plugins, aliases: [{ actionId: 'plugin::my-plugin.write', subjects: [undefined] }] },
+  ]),
 
   // item and list
   reject('an unknown key', [{ ...plugins, unknown: true }], '[0] Unrecognized key: "unknown"'),
   reject(
     'two invalid fields in one item',
     [{ ...settings, category: undefined, displayName: 1 }],
-    '2 errors occurred'
+    [
+      '2 errors occurred:',
+      '- [0].displayName Invalid input: expected string, received number',
+      '- [0].category Invalid input: expected string, received undefined',
+    ].join('\n')
   ),
   reject('a null item', [null], '[0] Invalid input: expected object, received null'),
   accept('an empty list', []),
+  accept('an undefined item', [undefined]),
   reject('an item instead of a list', internal, 'Invalid input: expected array, received object'),
   reject('undefined', undefined, 'Invalid input: expected array, received undefined'),
 ];
@@ -242,8 +256,8 @@ describe('validateRegisterProviderAction', () => {
     global.strapi = { plugins: { 'my-plugin': {} } } as any;
   });
 
-  test('the table covers 55 inputs', () => {
-    expect(cases).toHaveLength(55);
+  test('the table covers 60 inputs', () => {
+    expect(cases).toHaveLength(60);
   });
 
   test.each(cases.filter((c) => c.verdict === 'accept'))('accepts $name', ({ input }) => {
@@ -283,5 +297,65 @@ describe('validateRegisterProviderAction', () => {
         },
       })
     );
+  });
+
+  describe('through the action provider', () => {
+    const multiFaultMessage = [
+      '3 errors occurred:',
+      '- [0].uid The uid can only contain lowercase letters, dots and hyphens.',
+      '- [0].pluginName Invalid input: expected string, received undefined',
+      '- [1].category should only be defined for the "settings" section',
+    ].join('\n');
+
+    const multiFaultErrors = [
+      expect.objectContaining({ path: ['0', 'uid'] }),
+      expect.objectContaining({ path: ['0', 'pluginName'] }),
+      expect.objectContaining({ path: ['1', 'category'] }),
+    ];
+
+    test('registerMany names every issue of every action', async () => {
+      const actionProvider = createActionProvider();
+
+      await expect(
+        actionProvider.registerMany([
+          { section: 'plugins', displayName: 'Read', uid: 'Read' },
+          { ...plugins, category: 'general' },
+        ] as any)
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: multiFaultMessage,
+        details: { errors: multiFaultErrors },
+      });
+      expect(actionProvider.size()).toBe(0);
+    });
+
+    test('register names every issue of the action', async () => {
+      const actionProvider = createActionProvider();
+
+      await expect(
+        actionProvider.register({
+          section: 'plugins',
+          displayName: 'Read',
+          uid: 'Read',
+          category: 'general',
+        } as any)
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: [
+          '3 errors occurred:',
+          '- [0].uid The uid can only contain lowercase letters, dots and hyphens.',
+          '- [0].pluginName Invalid input: expected string, received undefined',
+          '- [0].category should only be defined for the "settings" section',
+        ].join('\n'),
+        details: {
+          errors: [
+            expect.objectContaining({ path: ['0', 'uid'] }),
+            expect.objectContaining({ path: ['0', 'pluginName'] }),
+            expect.objectContaining({ path: ['0', 'category'] }),
+          ],
+        },
+      });
+      expect(actionProvider.size()).toBe(0);
+    });
   });
 });

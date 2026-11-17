@@ -1,12 +1,13 @@
 import { z, errors } from '@strapi/utils';
 
 /**
- * A permission action registration, one member per section. It is the single source of the
- * runtime check (`validateRegisterProviderAction`) and of the registration type derived from it.
+ * A permission action registration, one member per section. `validateRegisterProviderAction`
+ * checks registrations with it, and a registration type can be derived from it.
  *
  * It accepts what the previous yup schema accepted: `options` and alias items accept unknown keys,
- * `options.applyToProperties` is not nullable, an alias may leave `actionId` out, and a key that
- * a section forbids may still be present with an `undefined` value.
+ * `options.applyToProperties` is not nullable, an alias may leave `actionId` out, a key that a
+ * section forbids may still be present with an `undefined` value, and arrays may hold `undefined`
+ * items.
  */
 
 // `admin` or a loaded plugin, read from `strapi.plugins` when the schema runs.
@@ -27,13 +28,15 @@ const base = {
     error: 'The uid can only contain lowercase letters, dots and hyphens.',
   }),
   displayName: z.string().min(1),
-  options: z.object({ applyToProperties: z.array(z.string()).optional() }).optional(),
+  options: z.object({ applyToProperties: z.array(z.string().optional()).optional() }).optional(),
   aliases: z
     .array(
-      z.object({
-        actionId: z.string().optional(),
-        subjects: z.array(z.string()).nullable().optional(),
-      })
+      z
+        .object({
+          actionId: z.string().optional(),
+          subjects: z.array(z.string().optional()).nullable().optional(),
+        })
+        .optional()
     )
     .nullable()
     .optional(),
@@ -44,7 +47,7 @@ export const actionRegistrationSchema = z.discriminatedUnion('section', [
     ...base,
     section: z.literal('contentTypes'),
     pluginName: pluginName.optional(),
-    subjects: z.array(z.string()),
+    subjects: z.array(z.string().optional()),
     category: categoryAbsent,
     subCategory: subCategoryAbsent,
   }),
@@ -74,7 +77,7 @@ export const actionRegistrationSchema = z.discriminatedUnion('section', [
   }),
 ]);
 
-const registerProviderActionSchema = z.array(actionRegistrationSchema);
+const registerProviderActionSchema = z.array(actionRegistrationSchema.optional());
 
 // `[0].options.applyToProperties`, as yup names a path.
 const formatPath = (path: PropertyKey[]) =>
@@ -87,8 +90,9 @@ const formatPath = (path: PropertyKey[]) =>
   }, '');
 
 /**
- * Throws a `ValidationError` whose message names the failing path: `<path> <message>` for one
- * issue, `<count> errors occurred` for several. `details.errors` lists every issue.
+ * Throws a `ValidationError` whose message names every failing path: `<path> <message>` for one
+ * issue, `<count> errors occurred:` followed by one `<path> <message>` line per issue for several.
+ * `details.errors` lists every issue.
  */
 export const validateRegisterProviderAction = (actions: unknown): void => {
   const result = registerProviderActionSchema.safeParse(actions);
@@ -108,7 +112,12 @@ export const validateRegisterProviderAction = (actions: unknown): void => {
     };
   });
 
-  const message = issues.length === 1 ? issues[0].message : `${issues.length} errors occurred`;
+  const message =
+    issues.length === 1
+      ? issues[0].message
+      : [`${issues.length} errors occurred:`, ...issues.map((issue) => `- ${issue.message}`)].join(
+          '\n'
+        );
 
   throw new errors.ValidationError(message, { errors: issues });
 };
