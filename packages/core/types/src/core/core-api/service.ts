@@ -65,6 +65,14 @@ type ReadParams<TContentTypeUID extends UID.ContentType> = ParamsPick<
 type NoLookup = { lookup?: undefined };
 
 /**
+ * The params of a read called without params: the core service defaults `find`, `findOne` and
+ * `delete` params to `{}` (`core-api/service/collection-type.ts` and `single-type.ts` in
+ * `@strapi/core`).
+ */
+// eslint-disable-next-line @typescript-eslint/ban-types
+type DefaultParams = {};
+
+/**
  * The params of a collection type's `find`, with strict types. The core service passes them to the
  * Document Service's `findMany` and `count`, so it takes their params, except `lookup` and the
  * top-level `start`, `limit`, `page` and `pageSize`: the service sets those from `pagination`, the
@@ -215,15 +223,15 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
    * `results` holds the entries of the page; `pagination` keeps the notation of the request, with
    * `total` (and `pageCount` for pages) when the service counts the entries.
    */
-  find<const TParams extends FindParams<TContentTypeUID>>(
-    params: TParams
+  find<const TParams extends FindParams<TContentTypeUID> = DefaultParams>(
+    params?: TParams
   ): Promise<
     Omit<StrictPaginatedEntities, 'results'> & { results: Entry<TContentTypeUID, TParams>[] }
   >;
   /** `null` when no entry of the document matches. */
-  findOne<const TParams extends FindOneParams<TContentTypeUID>>(
+  findOne<const TParams extends FindOneParams<TContentTypeUID> = DefaultParams>(
     docId: Documents.ID,
-    params: TParams
+    params?: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
   /**
    * The created entry, published unless the params pass another `status`. `data` follows the write
@@ -242,7 +250,7 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
   delete(
     docId: Documents.ID,
-    params: DeleteParams<TContentTypeUID>
+    params?: DeleteParams<TContentTypeUID>
   ): Promise<{
     deletedEntries: number;
   }>;
@@ -254,8 +262,8 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
  */
 export interface StrictSingleType<TContentTypeUID extends UID.ContentType> extends Base {
   /** `null` when the single type has no entry. */
-  find<const TParams extends FindFirstParams<TContentTypeUID>>(
-    params: TParams
+  find<const TParams extends FindFirstParams<TContentTypeUID> = DefaultParams>(
+    params?: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
   /**
    * Updates the entry, or creates it when there is none. `data` follows the update rules of the
@@ -268,7 +276,7 @@ export interface StrictSingleType<TContentTypeUID extends UID.ContentType> exten
   createOrUpdate<const TParams extends UpdateParams<TContentTypeUID>>(
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
-  delete(params: DeleteParams<TContentTypeUID>): Promise<{
+  delete(params?: DeleteParams<TContentTypeUID>): Promise<{
     deletedEntries: number;
   }>;
 }
