@@ -9,7 +9,7 @@ import {
 } from '@strapi/utils';
 
 import type { UID, Modules } from '@strapi/types';
-import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
+import { wrapInTransaction, wrapWriteInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
 import { copyNonLocalizedFields } from './internationalization';
@@ -899,14 +899,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     findMany: wrapInTransaction(findMany),
     findFirst: wrapInTransaction(findFirst),
     findOne: wrapInTransaction(findOne),
-    delete: wrapInTransaction(deleteDocument),
-    create: wrapInTransaction(create),
-    clone: wrapInTransaction(clone),
-    update: wrapInTransaction(update),
+    delete: wrapWriteInTransaction(deleteDocument),
+    create: wrapWriteInTransaction(create),
+    clone: wrapWriteInTransaction(clone),
+    update: wrapWriteInTransaction(update),
     count: wrapInTransaction(count),
-    publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
-    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
-    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
+    publish: hasDraftAndPublish ? wrapWriteInTransaction(publish) : (undefined as any),
+    unpublish: hasDraftAndPublish ? wrapWriteInTransaction(unpublish) : (undefined as any),
+    discardDraft: hasDraftAndPublish ? wrapWriteInTransaction(discardDraft) : (undefined as any),
 
     updateComponents,
     omitComponentData,
