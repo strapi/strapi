@@ -3,7 +3,7 @@ import net from 'node:net';
 import path from 'node:path';
 
 import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
-import { SQLITE, databaseEnv, type Database } from '../db/database';
+import { databaseEnv, databaseFromEnv, type Database } from '../db/database';
 import { HOST, baseEnv, inheritedEnv, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
 import type { App } from './generate';
@@ -19,7 +19,10 @@ export interface StartServerOptions {
   mode?: ServerMode;
   /** Fail before starting when the admin build is missing. Set it for UI tests. */
   requireAdmin?: boolean;
-  /** Default: the app's SQLite file. Call resetDatabase() first for an empty database. */
+  /**
+   * Default: the database of the run (`databaseFromEnv()`, from `TESTS_DATABASE`). Call
+   * resetDatabase() first for an empty database.
+   */
   database?: Database;
   env?: NodeJS.ProcessEnv;
   /** Load the test plugin (tests-next/shared/test-plugin). Default: true. */
@@ -155,7 +158,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     mode = 'develop',
     requireAdmin = false,
     env,
-    database = SQLITE,
+    database = databaseFromEnv(),
     testPlugin = true,
     fakeAiProvider = false,
     timeout = 120_000,

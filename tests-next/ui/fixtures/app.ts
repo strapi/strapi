@@ -77,6 +77,8 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
         // after a failure, which would walk the port out of the ui range.
         port: appPort('ui', workerInfo.parallelIndex),
         requireAdmin: true,
+        // Snapshots are SQLite only, whatever TESTS_DATABASE says.
+        database: SQLITE,
       });
       // The state every reset goes back to. Seeding and role logins (CMS-1947, CMS-1951) come
       // before this, so their admin sessions survive the resets.

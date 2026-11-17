@@ -68,6 +68,17 @@ describe(`per-file instance (${database.client})`, () => {
   });
 });
 
+describe('startServer', () => {
+  test("runs on the run's database when none is given", async () => {
+    await resetDatabase(app, database);
+    const server = await startServer(app, { port });
+    onTestFinished(() => server.stop());
+    expect(server.database).toEqual(database);
+    // The app answers, so it really runs on that database.
+    expect(await writeProbe(server)).toBe(true);
+  });
+});
+
 describe('database names', () => {
   test('differ between checkouts and fit the name length limit', () => {
     const name = (dir: string, appName = 'api-1') =>
