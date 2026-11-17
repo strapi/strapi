@@ -14,6 +14,8 @@
  * - GET  /features                feature flags and license features, to gate tests on them
  * - GET  /ai/calls, DELETE /ai/calls   what the fake AI translations provider received
  * - GET  /boot                    an id of the running worker, to tell whether Strapi restarted
+ * - POST /db/probe                write the probe row if missing: `created: true` means the
+ *                                  database didn't have it, so a reset happened
  * - POST /db/snapshot             SQLite snapshot of the live DB (lib/sqlite-snapshot.js)
  * - POST /db/restore              restore it, without a restart
  *
@@ -86,6 +88,7 @@ module.exports = {
         route('GET', '/ai/calls', 'aiCalls'),
         route('DELETE', '/ai/calls', 'clearAiCalls'),
         route('GET', '/boot', 'boot'),
+        route('POST', '/db/probe', 'probeDb'),
         route('POST', '/db/snapshot', 'snapshotDb'),
         route('POST', '/db/restore', 'restoreDb'),
       ],
@@ -142,6 +145,16 @@ module.exports = {
 
       boot(ctx) {
         ctx.body = { bootId: BOOT_ID };
+      },
+
+      async probeDb(ctx) {
+        // One row in Strapi's core store, a table every app has.
+        const probe = { type: 'plugin', name: 'tests', key: 'probe' };
+        const exists = (await strapi.store.get(probe)) !== null;
+        if (!exists) {
+          await strapi.store.set({ ...probe, value: true });
+        }
+        ctx.body = { created: !exists };
       },
 
       async snapshotDb(ctx) {

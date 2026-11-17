@@ -1,10 +1,10 @@
 import type { Server } from '@strapi/tests-shared';
 
 /**
- * Writes one row: the test transfer token. `created: true` means the database didn't have it,
- * so the token is a cheap probe of whether a reset happened before the test.
+ * Writes the probe row (POST /api/tests/db/probe). `created: true` means the database didn't
+ * have it, so a reset happened before the call.
  */
 export const writeProbe = async (server: Server) => {
-  const res = await fetch(`${server.url}/api/tests/transfer-token`, { method: 'POST' });
+  const res = await fetch(`${server.url}/api/tests/db/probe`, { method: 'POST' });
   return ((await res.json()) as { created: boolean }).created;
 };

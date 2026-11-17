@@ -107,6 +107,11 @@ describe('test plugin routes', () => {
     expect((await call(server, 'POST', '/rate-limit', { enabled: 'yes' })).status).toBe(400);
   });
 
+  test('writes the probe row once', async () => {
+    expect(await (await call(server, 'POST', '/db/probe')).json()).toEqual({ created: true });
+    expect(await (await call(server, 'POST', '/db/probe')).json()).toEqual({ created: false });
+  });
+
   test('creates the test transfer token once', async () => {
     expect(await (await call(server, 'POST', '/transfer-token')).json()).toEqual({ created: true });
     expect(await (await call(server, 'POST', '/transfer-token')).json()).toEqual({
