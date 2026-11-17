@@ -16232,7 +16232,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
-    "@strapi/cloud-cli": "npm:5.63.0"
     "@strapi/database": "npm:5.63.0"
     "@strapi/utils": "npm:5.63.0"
     "@types/async-retry": "npm:^1"

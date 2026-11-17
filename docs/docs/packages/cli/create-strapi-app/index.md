@@ -10,13 +10,13 @@ review_notes:
 
 ## Purpose
 
-Provides the official CLI for Strapi app developers to create new Strapi projects. Available via `yarn create strapi-app` or `npx create-strapi-app`. Handles project initialization, prompts for configuration, and can integrate with Strapi Cloud.
+Provides the official CLI for Strapi app developers to create new Strapi projects. Available via `yarn create strapi-app` or `npx create-strapi-app`. Handles project initialization and prompts for configuration.
 
 ## Key concepts
 
 - **Entry point**: `run()` function processes CLI arguments and guides project creation. See [index.ts](https://github.com/strapi/strapi/tree/develop/packages/cli/create-strapi-app).
-- **Interactive prompts**: Collects project name, database choice, and optional Cloud integration via `prompts.ts`.
-- **Dual mode**: Supports local project creation and Strapi Cloud project creation with API integration.
+- **Interactive prompts**: `prompts.ts` asks for the project directory, the language, the example app, git initialization, and dependency installation. `utils/database.ts` asks for the database.
+- **No Cloud login**: The CLI does not ask the user to log in to Strapi Cloud. It accepts `--skip-cloud` as a hidden flag that does nothing, so old scripts keep working.
 
 ## Telemetry
 
