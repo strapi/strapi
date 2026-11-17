@@ -61,6 +61,7 @@ export type Delete<TContentTypeUID extends UID.ContentType> = Pick<
   | 'lookup'
 > & {
   documentId: ID;
+  // Intersects with the `status` that the `hasPublishedVersion` kind also adds
   status?: DeleteStatus<TContentTypeUID>;
 };
 
