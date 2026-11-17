@@ -1,4 +1,4 @@
-import type { Core, Modules, Struct } from '@strapi/types';
+import type { Core, Data, Modules, Struct } from '@strapi/types';
 import type { queryParams } from '@strapi/utils';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
@@ -201,14 +201,36 @@ type PopulatedRelease<TPopulate> = [TPopulate] extends [undefined]
 type ReleaseWhere = Record<string, unknown>;
 
 /**
+ * The user a release write records as its creator or editor: the service reads its `id` only
+ * (`setCreatorFields` in `services/release.ts`), so a user read from the `admin::user` service or
+ * `ctx.state.user` is accepted.
+ */
+type ReleaseWriter = { user: { id: Data.ID } };
+
+/**
  * The `release` service. The query engine's result stays `any` in the implementation, and the
  * published declaration prints the content-manager components as `any`; the results below are the
  * ones the runtime returns. `findOne` and `findMany` follow the caller's `populate`.
  */
 type ReleaseServiceContract = Omit<
   ReleaseService,
-  'findOne' | 'findPage' | 'findMany' | 'update' | 'getAllComponents'
+  | 'create'
+  | 'createFromSkippedEntries'
+  | 'findOne'
+  | 'findPage'
+  | 'findMany'
+  | 'update'
+  | 'getAllComponents'
 > & {
+  create(
+    releaseData: Parameters<ReleaseService['create']>[0],
+    creator: ReleaseWriter
+  ): ReturnType<ReleaseService['create']>;
+  createFromSkippedEntries(
+    releaseId: Parameters<ReleaseService['createFromSkippedEntries']>[0],
+    releaseData: Parameters<ReleaseService['createFromSkippedEntries']>[1],
+    creator: ReleaseWriter
+  ): ReturnType<ReleaseService['createFromSkippedEntries']>;
   /** The release with the relations that `populate` names, or `null` when no release matches. */
   findOne<const TPopulate extends ReleasePopulate | undefined = undefined>(
     id: Parameters<ReleaseService['findOne']>[0],
@@ -224,7 +246,11 @@ type ReleaseServiceContract = Omit<
     where?: ReleaseWhere;
     populate?: TPopulate;
   }): Promise<PopulatedRelease<TPopulate>[]>;
-  update(...args: Parameters<ReleaseService['update']>): Promise<ReleaseRow>;
+  update(
+    id: Parameters<ReleaseService['update']>[0],
+    releaseData: Parameters<ReleaseService['update']>[1],
+    creator: ReleaseWriter
+  ): Promise<ReleaseRow>;
   /** The component schemas by UID. */
   getAllComponents(): Promise<Record<Struct.ComponentSchema['uid'], Struct.ComponentSchema>>;
 };
