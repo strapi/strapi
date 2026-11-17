@@ -1,5 +1,5 @@
 import { test, expect, type APIRequestContext, type Browser, type Page } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
@@ -22,8 +22,8 @@ test.describe('i18n - create, publish and fetch per locale', { tag: ['@extended'
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   // Fill the title, working around a webkit quirk where `fill` doesn't register until the field is

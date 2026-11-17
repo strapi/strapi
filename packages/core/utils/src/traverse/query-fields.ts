@@ -1,5 +1,6 @@
-import { curry, isString, eq, constant } from 'lodash';
+import { isString, eq, constant } from 'lodash';
 
+import { curry } from '../curry';
 import traverseFactory from './factory';
 
 const isStringArray = (value: unknown): value is string[] => {

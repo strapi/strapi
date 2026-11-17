@@ -73,7 +73,7 @@ One of `register`, `bootstrap` or `destroy`. Providers, modules, the admin and t
 
 ### Hook
 
-A named list of handlers in the `hooks` registry. `strapi.hook(uid)` returns it. The hook objects come from the `hooks` module of `@strapi/utils` (series, waterfall, parallel or bail). Core defines `strapi::content-types.beforeSync` and `strapi::content-types.afterSync`. See [Hooks registry](./04-extension-points.md#hooks-registry).
+A named list of handlers in the `hooks` registry. `strapi.hook(uid)` returns it. The hook objects come from the `hooks` module of `@strapi/utils` (series, waterfall, parallel or bail). Core defines `strapi::content-types.beforeSync`, `strapi::content-types.afterSync` and `strapi::app.afterBootstrap`. See [Hooks registry](./04-extension-points.md#hooks-registry).
 
 ### Database lifecycle
 

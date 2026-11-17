@@ -31,11 +31,13 @@ If any changes are made to the template, or other issues are being encountered, 
 
 ### Environment variables
 
-Jest is started from `tests/utils/runners/cli-runner.js` via **execa** with a **small** `env` object: only what the runner must inject (`TEST_APPS`, `JWT_SECRET`). Execa’s default **`extendEnv: true`** merges that object **on top of** the parent `process.env`.
+Jest is started from `tests/utils/runners/cli-runner.js` via **execa** with a **small** `env` object: only what the runner must inject (`TEST_APPS`, `JWT_SECRET`, and `NODE_OPTIONS` with `--experimental-vm-modules`). Execa’s default **`extendEnv: true`** merges that object **on top of** the parent `process.env`.
+
+`--experimental-vm-modules` is required. Suites that import or export in process (`tests/utils/dts-import.ts`) load the ESM-only `stream-chain` package with `import()`. Jest rejects that import without the flag. The runner sets it. A direct Jest command has to set it too, for example `NODE_OPTIONS=--experimental-vm-modules`.
 
 So you do **not** need to whitelist variables in the runner. For **stress runs**, set `TRANSFER_CLI_MEDIA_COUNT` / `TRANSFER_CLI_MEDIA_BYTES` in the same shell as `yarn test:cli` so the seed scripts see them (defaults are tiny: 2 files × 2048 bytes).
 
-The same merge behavior applies to **e2e**: `tests/utils/runners/browser-runner.js` only sets `PORT`, `HOST`, `TEST_APP_PATH`, and `STRAPI_DISABLE_EE`; the rest of the environment is inherited from how you invoked `yarn test:e2e`.
+The same merge behavior applies to **e2e**: `tests/utils/runners/browser-runner.js` only sets `PORT`, `HOST` and `TEST_APP_PATH`; the rest of the environment is inherited from how you invoked `yarn test:e2e`, including the edition (`STRAPI_E2E_EDITION`, `STRAPI_DISABLE_EE`) that `applyE2eEditionEnv()` sets when `tests/scripts/run-tests.js` starts.
 
 ### Remote transfer e2e (pull and push, generated media)
 
@@ -144,6 +146,6 @@ See the available tests in the `tests` directory for examples.
 Some CLI tests (for example `strapi/strapi/openapi-generate.test.cli.ts`) commit **Jest snapshot** files. After intentional changes to the app template, generator output, or CLI output, regenerate snapshots with Jest’s `-u` instead of editing `.snap` files by hand.
 
 - **From the repo root:** `yarn test:cli:update` runs the CLI test runner with `-u` forwarded to Jest (same as `yarn test:cli -u`). Limit domains or add extra Jest flags when needed, for example `yarn test:cli -d strapi -u -- --testPathPattern=openapi-generate`.
-- **Direct Jest** (single file or when you only want to refresh snapshots without touching every domain): see **[tests/strapi/strapi/README.md](tests/strapi/strapi/README.md)** — you must set `TEST_APPS` and `JWT_SECRET` like the runner does.
+- **Direct Jest** (single file or when you only want to refresh snapshots without touching every domain): see **[tests/strapi/strapi/README.md](tests/strapi/strapi/README.md)** — you must set `TEST_APPS`, `JWT_SECRET`, and `NODE_OPTIONS=--experimental-vm-modules` like the runner does.
 
 See **[tests/strapi/strapi/README.md](tests/strapi/strapi/README.md)** for how snapshots work in the `strapi` domain (including OpenAPI and list-output tests) and when to run `yarn test:cli:clean` / `yarn test:cli --setup`.

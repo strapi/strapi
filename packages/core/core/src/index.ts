@@ -50,6 +50,5 @@ declare module 'koa' {
   // `BaseResponse` and `BaseContext` both extend `DefaultContextDelegatedResponse`, so augmenting it
   // once covers `ctx.*` and `ctx.response.*`.
   export interface DefaultContextDelegatedResponse
-    extends ContextDelegatedResponseErrorMethods,
-      ContextDelegatedResponseSuccessMethods {}
+    extends ContextDelegatedResponseErrorMethods, ContextDelegatedResponseSuccessMethods {}
 }

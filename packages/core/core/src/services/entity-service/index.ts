@@ -1,13 +1,15 @@
 import _ from 'lodash';
 import delegate from 'delegates';
-import { errors as databaseErrors } from '@strapi/database';
 import {
   contentTypes as contentTypesUtils,
   errors,
+  pagination as paginationUtils,
   relations as relationUtils,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 import type { Core, Modules, Utils } from '@strapi/types';
+
+import { isDatabaseInputError } from '../../utils/database-input-errors';
 
 type Decoratable<T> = T & {
   decorate(
@@ -35,12 +37,22 @@ const transformLoadParamsToQuery = (
   return res;
 };
 
-const databaseErrorsToTransform = [
-  databaseErrors.InvalidTimeError,
-  databaseErrors.InvalidDateTimeError,
-  databaseErrors.InvalidDateError,
-  databaseErrors.InvalidRelationError,
-];
+type PageNotation = Modules.EntityService.Params.Pagination.PageNotation;
+type OffsetNotation = Modules.EntityService.Params.Pagination.OffsetNotation;
+
+/**
+ * Offset notation (`start`, `limit`) without page notation (`page`, `pageSize`). Like
+ * `withDefaultPagination`, a key counts only when its value is set. Mixed notations keep the page
+ * notation path, which reads `page` and `pageSize` only.
+ */
+const isOffsetNotation = (pagination: unknown): pagination is OffsetNotation => {
+  const { start, limit, page, pageSize } = (pagination ?? {}) as PageNotation & OffsetNotation;
+
+  const hasOffsetValue = start != null || limit != null;
+  const hasPageValue = page != null || pageSize != null;
+
+  return hasOffsetValue === true && hasPageValue === false;
+};
 
 const createDefaultImplementation = ({
   strapi,
@@ -187,6 +199,31 @@ const createDefaultImplementation = ({
       throw new Error(`Invalid load. Expected "${field}" to be an anyToMany relational attribute`);
     }
 
+    if (isOffsetNotation(pagination) === true) {
+      const { start, limit } = paginationUtils.withDefaultPagination(pagination);
+      const query = transformLoadParamsToQuery(uid, field, params ?? {});
+
+      // The pagination replaces any limit or offset from params. A limit of -1 means no limit.
+      const sliceQuery: Record<string, unknown> = {
+        ..._.omit(query, ['limit', 'offset']),
+        offset: start,
+      };
+      if (limit !== -1) {
+        sliceQuery.limit = limit;
+      }
+
+      const [results, { count: total }] = await Promise.all([
+        db.query(uid).load(entity, field, sliceQuery),
+        // A count needs no order, and Postgres and MySQL reject an orderBy with the count's GROUP BY
+        db.query(uid).load(entity, field, { ..._.omit(query, 'orderBy'), count: true }),
+      ]);
+
+      return {
+        results: await this.wrapResult(results, { uid, field, action: 'load' }),
+        pagination: { start, limit, total },
+      };
+    }
+
     const query = transformLoadParamsToQuery(uid, field, params ?? {}, pagination);
 
     const loadedPage = await db.query(uid).loadPages(entity, field, query);
@@ -233,16 +270,8 @@ export default (ctx: {
           try {
             return await (oldService[methodName] as Utils.Function.AnyPromise).call(this, ...args);
           } catch (error) {
-            if (
-              databaseErrorsToTransform.some(
-                (errorToTransform) => error instanceof errorToTransform
-              )
-            ) {
-              if (error instanceof Error) {
-                throw new errors.ValidationError(error.message);
-              }
-
-              throw error;
+            if (isDatabaseInputError(error) === true) {
+              throw new errors.ValidationError(error.message);
             }
             throw error;
           }

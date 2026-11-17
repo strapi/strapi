@@ -5,7 +5,7 @@ import { type Data } from './types';
 import { transformFields } from './fields';
 
 export const transformPopulate = async (data: Data, opts: { uid: UID.Schema }) => {
-  return traverse.traverseQueryPopulate(
+  return await traverse.traverseQueryPopulate(
     async ({ attribute, key, value }, { set }) => {
       if (!value || typeof value !== 'object' || attribute?.type !== 'relation') {
         return;

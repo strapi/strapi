@@ -1,7 +1,10 @@
-import { createContext, useCallback, useContext, useEffect } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 
 import { Flex, Box, Typography } from '@strapi/design-system';
 import { useDropzone } from 'react-dropzone';
+
+const DEFAULT_ON_ADD_FILES: NonNullable<DropzoneRootProps['onAddFiles']> = () => {};
+const DEFAULT_ACCEPT: NonNullable<DropzoneRootProps['accept']> = { 'image/*': [] };
 
 /* -------------------------------------------------------------------------------------------------
  * Hooks
@@ -86,8 +89,8 @@ export interface DropzoneRootProps extends React.ComponentPropsWithoutRef<typeof
 export const Root = ({
   children,
   isEnabled = true,
-  onAddFiles = () => {},
-  accept = { 'image/*': [] },
+  onAddFiles = DEFAULT_ON_ADD_FILES,
+  accept = DEFAULT_ACCEPT,
   ...props
 }: DropzoneRootProps) => {
   // Use clipboard paste hook for handling clipboard events
@@ -100,15 +103,13 @@ export const Root = ({
     noKeyboard: true,
     accept,
   });
+  const contextValue = useMemo(
+    () => ({ isEnabled, isDragActive, onAddFiles }),
+    [isEnabled, isDragActive, onAddFiles]
+  );
 
   return (
-    <DropzoneContext.Provider
-      value={{
-        isEnabled,
-        isDragActive,
-        onAddFiles,
-      }}
-    >
+    <DropzoneContext.Provider value={contextValue}>
       <Flex
         direction="column"
         alignItems="flex-start"

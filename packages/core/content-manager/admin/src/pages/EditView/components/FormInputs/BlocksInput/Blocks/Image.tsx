@@ -3,8 +3,8 @@ import * as React from 'react';
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FlexComponent } from '@strapi/design-system';
 import { Image as Picture } from '@strapi/icons';
-import { type Element, Transforms, Editor } from 'slate';
-import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
+import { Element, Transforms, Editor, Node, Path, Range, type RangeRef } from 'slate';
+import { ReactEditor, useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import { styled, css } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
@@ -55,6 +55,77 @@ const pick = <T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T
   return Object.fromEntries(entries);
 };
 
+type MediaAsset = Schema.Attribute.MediaValue<true>[number];
+
+/** A Media Library asset as an image block stores it. */
+const toBlockImage = (asset: MediaAsset): Block<'image'>['image'] => {
+  // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
+  const expectedImage = pick(asset, IMAGE_SCHEMA_FIELDS);
+
+  return {
+    ...expectedImage,
+    alternativeText: expectedImage.alternativeText || expectedImage.name,
+    url: prefixFileUrlWithBackendUrl(asset.url),
+  };
+};
+
+const isEmptyParagraph = (node: Node) =>
+  Element.isElement(node) && node.type === 'paragraph' && Node.string(node) === '';
+
+/**
+ * For files dropped onto the editor: returns what inserts each of them, once
+ * uploaded, as an image block below the block they were dropped on (or at the
+ * end, below the last block). An empty paragraph there is replaced instead.
+ * Each image goes below the previous one from the same drop, and a path ref
+ * keeps that position right while the content is edited during the upload.
+ */
+const createDroppedImagesInserter = (editor: Editor, event: React.DragEvent) => {
+  let targetPath: Path | null = null;
+
+  try {
+    const range = ReactEditor.findEventRange(editor, event);
+    targetPath = [range.anchor.path[0]];
+  } catch {
+    // Dropped below the content or on its padding: no block under the pointer.
+  }
+
+  const lastIndex = editor.children.length - 1;
+  const target = targetPath ?? (lastIndex >= 0 ? [lastIndex] : null);
+  let previousRef = target ? Editor.pathRef(editor, target) : null;
+  let replacesTarget = target !== null && isEmptyParagraph(Node.get(editor, target));
+
+  return (asset: MediaAsset) => {
+    const imageNode: Block<'image'> = {
+      type: 'image',
+      image: toBlockImage(asset),
+      children: [{ type: 'text', text: '' }],
+    };
+
+    const previousPath = previousRef?.current;
+    let at: Path;
+
+    if (previousPath && replacesTarget && isEmptyParagraph(Node.get(editor, previousPath))) {
+      at = previousPath;
+    } else {
+      at = previousPath ? Path.next(previousPath) : [editor.children.length];
+    }
+
+    // Same as the image dialog: normalize once the image is in, or replacing the only block
+    // leaves a paragraph after it
+    Editor.withoutNormalizing(editor, () => {
+      if (replacesTarget && previousPath && Path.equals(at, previousPath)) {
+        Transforms.removeNodes(editor, { at });
+      }
+
+      Transforms.insertNodes(editor, imageNode, { at });
+    });
+    replacesTarget = false;
+
+    previousRef?.unref();
+    previousRef = Editor.pathRef(editor, at);
+  };
+};
+
 // Type guard to force TypeScript to narrow the type of the element in Blocks component
 const isImage = (element: Element): element is Block<'image'> => {
   return element.type === 'image';
@@ -89,6 +160,26 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
 const ImageDialog = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const { editor } = useBlocksEditorContext('ImageDialog');
+  // Where the caret was when Image was picked: the editor can lose its selection while the
+  // Media Library dialog is open
+  const [initialSelection] = React.useState(() => editor.selection);
+  // Follows the content if it changes meanwhile. Created in an effect so that its cleanup can
+  // release it when the dialog unmounts: StrictMode runs that cleanup right after the first mount,
+  // then the effect runs again and creates a new ref.
+  const targetRef = React.useRef<RangeRef | null>(null);
+
+  React.useEffect(() => {
+    if (!initialSelection) return;
+
+    const rangeRef = Editor.rangeRef(editor, initialSelection);
+    targetRef.current = rangeRef;
+
+    return () => {
+      rangeRef.unref();
+      targetRef.current = null;
+    };
+  }, [editor, initialSelection]);
+
   const components = useStrapiApp('ImageDialog', (state) => state.components);
 
   if (!components || !isOpen) return null;
@@ -100,31 +191,28 @@ const ImageDialog = () => {
   }>;
 
   const insertImages = (images: Block<'image'>['image'][]) => {
-    // If the selection is inside a list, split the list so that the modified block is outside of it
-    Transforms.unwrapNodes(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-      split: true,
-    });
+    const target = targetRef.current?.current ?? editor.selection;
+    if (!target) return;
 
-    // Save the path of the node that is being replaced by an image to insert the images there later
-    // It's the closest full block node above the selection
-    const nodeEntryBeingReplaced = Editor.above(editor, {
-      match(node) {
-        if (Editor.isEditor(node)) return false;
+    Transforms.select(editor, target);
+    if (!editor.selection) return;
 
-        const isInlineNode = ['text', 'link'].includes(node.type);
+    // A selection across several blocks has no single block to work from: use where it ends
+    if (Range.isExpanded(editor.selection)) {
+      Transforms.collapse(editor, { edge: 'end' });
+    }
 
-        return !isInlineNode;
-      },
-    });
+    // The closest full block node above the selection
+    const matchBlock = (node: Node) => {
+      if (Editor.isEditor(node)) return false;
 
-    if (!nodeEntryBeingReplaced) return;
-    const [, pathToInsert] = nodeEntryBeingReplaced;
+      return !['text', 'link'].includes(node.type);
+    };
+    const currentBlockEntry = Editor.above(editor, { match: matchBlock });
 
-    // Remove the previous node that is being replaced by an image
-    Transforms.removeNodes(editor);
+    if (!currentBlockEntry) return;
+    const [currentBlock, currentBlockPath] = currentBlockEntry;
 
-    // Convert images to nodes and insert them
     const nodesToInsert = images.map((image) => {
       const imageNode: Block<'image'> = {
         type: 'image',
@@ -133,34 +221,58 @@ const ImageDialog = () => {
       };
       return imageNode;
     });
-    Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
 
-    // Set the selection on the image since it was cleared by calling removeNodes
-    Transforms.select(editor, pathToInsert);
+    // Normalize once the images are in: replacing the only block would otherwise leave an empty
+    // document for a moment, which normalization fills with a paragraph that stays after the images
+    Editor.withoutNormalizing(editor, () => {
+      let pathToInsert: Path;
+
+      // An image has no text but isn't empty: inserting next to it must not replace it
+      const isEmptyBlock =
+        !(Element.isElement(currentBlock) && Editor.isVoid(editor, currentBlock)) &&
+        Node.string(currentBlock) === '';
+
+      if (isEmptyBlock) {
+        // An empty block (paragraph, list item…) is replaced by the images. If it's inside a
+        // list, split the list so that the images end up between the two halves.
+        Transforms.unwrapNodes(editor, {
+          match: (node) => !Editor.isEditor(node) && node.type === 'list',
+          split: true,
+        });
+
+        pathToInsert = Editor.above(editor, { match: matchBlock })![1];
+        Transforms.removeNodes(editor, { at: pathToInsert });
+      } else {
+        // A block with content is kept and the images go below it, like images dropped on the
+        // editor. In a list, they go below the whole list: splitting it would restart numbered
+        // lists and could separate an item from its nested list.
+        pathToInsert = Path.next(currentBlockPath.slice(0, 1));
+      }
+
+      Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
+
+      // Select the last inserted image: Enter then adds a paragraph below the images
+      Transforms.select(
+        editor,
+        pathToInsert.slice(0, -1).concat(pathToInsert.at(-1)! + images.length - 1)
+      );
+    });
+  };
+
+  const close = () => {
+    targetRef.current?.unref();
+    setIsOpen(false);
   };
 
   const handleSelectAssets = (images: Schema.Attribute.MediaValue<true>) => {
-    const formattedImages = images.map((image) => {
-      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
-      const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
-
-      const nodeImage: Block<'image'>['image'] = {
-        ...expectedImage,
-        alternativeText: expectedImage.alternativeText || expectedImage.name,
-        url: prefixFileUrlWithBackendUrl(image.url),
-      };
-
-      return nodeImage;
-    });
-
-    insertImages(formattedImages);
-    setIsOpen(false);
+    insertImages(images.map(toBlockImage));
+    close();
   };
 
   return (
     <MediaLibraryDialog
       allowedTypes={['images']}
-      onClose={() => setIsOpen(false)}
+      onClose={close}
       onSelectAssets={handleSelectAssets}
     />
   );
@@ -192,7 +304,15 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
     },
     matchNode: (node) => node.type === 'image',
     isInBlocksSelector: true,
-    handleBackspaceKey(editor) {
+    handleBackspaceKey(editor, event) {
+      // A selection across several blocks is Slate's own deletion to make
+      if (editor.selection && Range.isExpanded(editor.selection)) {
+        return;
+      }
+
+      // The image is removed here: Slate's own Backspace would then delete the block before it
+      event.preventDefault();
+
       // Prevent issue where the image remains when it's the only block in the document
       if (editor.children.length === 1) {
         Transforms.setNodes(editor, {
@@ -224,4 +344,4 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
   },
 };
 
-export { imageBlocks };
+export { imageBlocks, createDroppedImagesInserter };

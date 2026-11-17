@@ -41,7 +41,7 @@
   "input.placeholder.icon": "將素材拖曳至此區域",
   "input.url.description": "以跳行符號分隔連結",
   "input.url.label": "連結",
-  "list.assets.title": "素材",
+  "list.assets.title": "素材（{count}）",
   "list.asset.at.finished": "素材已完成載入。",
   "list.assets-empty.search": "找不到結果",
   "list.assets-empty.subtitle": "從開頭新增",
@@ -58,7 +58,7 @@
   "list.assets.to-upload": "{number, plural, =0 {沒有} one {1 個} other {# 個}}素材準備上傳",
   "list.folder.edit": "編輯資料夾",
   "list.folder.subtitle": "{folderCount, plural, =0 {# 資料夾} one {# 資料夾} other {# 資料夾}}, {filesCount, plural, =0 {# 素材} one {# 素材} other {# 素材}}",
-  "list.folders.title": "資料夾",
+  "list.folders.title": "資料夾（{count}）",
   "mediaLibraryInput.actions.nextSlide": "下一張投影片",
   "mediaLibraryInput.actions.previousSlide": "上一張投影片",
   "mediaLibraryInput.placeholder": "點擊以新增素材，或拖曳至此區域",
@@ -119,7 +119,5 @@
   "sort.name_desc": "依字母倒序 (Z to A)",
   "sort.updated_at_asc": "最早的更新",
   "sort.updated_at_desc": "最近的更新",
-  "tabs.title": "您想要如何上傳您的素材？",
-  "window.confirm.close-modal.file": "你確定嗎？所有的變更將會遺失。",
-  "window.confirm.close-modal.files": "你確定嗎？仍有部份檔案尚未上傳。"
+  "tabs.title": "您想要如何上傳您的素材？"
 }

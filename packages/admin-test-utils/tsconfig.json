@@ -1,7 +1,7 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["src", "./custom.d.ts"],
+  "include": ["src"],
   "compilerOptions": {
-    "types": ["@testing-library/jest-dom"]
+    "types": ["@testing-library/jest-dom", "vite/client", "@strapi/types/globals-admin"]
   }
 }

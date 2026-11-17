@@ -4,7 +4,7 @@ export type SortOrder = 'ASC' | 'DESC';
 
 export type SortKey = 'createdAt' | 'name' | 'updatedAt';
 
-import type { File } from './files';
+import type { File, Pagination } from './files';
 
 export interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'parent'> {
   children?: {
@@ -45,11 +45,6 @@ export type FolderNode = Partial<Omit<Folder, 'children'>> & {
   children: FolderNode[];
 };
 
-type FolderNodeWithValue = Omit<FolderNode, 'children'> & {
-  value: string | number | null;
-  children: FolderNodeWithValue[];
-};
-
 /**
  * GET /upload/folders/:id - Get specific folder
  */
@@ -72,6 +67,13 @@ export declare namespace GetFolders {
   export interface Request {
     body: {};
     query: {
+      /**
+       * Pagination is opt-in: sending `page` and/or `pageSize` returns one page
+       * and the `pagination` metadata (`pageSize` defaults to 10 when only
+       * `page` is sent). Without them `pagination` is absent and every matching
+       * folder is returned, unless the offset parameters `start`/`limit` are
+       * used to slice the list.
+       */
       page?: string;
       pageSize?: string;
       sort?: `${SortKey}:${SortOrder}`;
@@ -80,6 +82,7 @@ export declare namespace GetFolders {
 
   export interface Response {
     data: Folder[];
+    pagination?: Pagination;
     error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
@@ -129,7 +132,7 @@ export declare namespace GetFolderStructure {
 
   export interface Response {
     data: {
-      data: number[] & FolderNodeWithValue[];
+      data: FolderNode[];
     };
     error?: errors.ApplicationError | errors.NotFoundError;
   }

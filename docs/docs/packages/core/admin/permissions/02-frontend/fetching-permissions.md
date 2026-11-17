@@ -6,7 +6,7 @@ tags:
   - frontend
 status: needs-review
 review_notes:
-  - '`admin/src/AuthenticatedApp` no longer exists.'
+  - 'The RBACProvider data-flow section still describes the former provider architecture.'
 ---
 
 This document lays out the code-flow of fetching the permissions in the CMS and how the data is then injected in to the app
@@ -21,9 +21,13 @@ At the very root of the entire admin panel we handle 4 routes:
 - Collecting information from a first time user
 - The authenticated application (where you use the CMS)
 
-Permissions, along with other vital application information is fetched in the `AuthenticatedApp` component, located
-in the `packages/core/admin/admin/src/AuthenticatedApp` folder. The cache key (used with `react-query`'s `useQueries` hook)
-for the particular call is `admin-users-permission`.
+The `AuthProvider` component in
+[`packages/core/admin/admin/src/features/Auth.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/features/Auth.tsx)
+fetches the current user and their permissions through Redux Toolkit Query. The `getMyPermissions`
+endpoint is defined in
+[`packages/core/admin/admin/src/services/auth.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/services/auth.ts).
+The query is cached by its endpoint and arguments. Establishing a new admin session clears the
+admin API cache before loading data for the new credential.
 
 ## What do we fetch?
 

@@ -109,6 +109,12 @@ describe('Content types utils', () => {
 
       expect(getVisibleAttributes(model)).toEqual(['title']);
     });
+
+    test('Returns an empty list when the model has no attributes', () => {
+      const model = createModel({ uid: 'myModel' });
+
+      expect(getVisibleAttributes(model)).toEqual([]);
+    });
   });
 
   describe('getDoesAttributeRequireValidation', () => {

@@ -45,8 +45,7 @@ const validateUploadBody = (data = {}, isMulti = false) => {
 export { validateUploadBody };
 
 export type UploadBody =
-  | yup.InferType<typeof uploadSchema>
-  | yup.InferType<typeof multiUploadSchema>;
+  yup.InferType<typeof uploadSchema> | yup.InferType<typeof multiUploadSchema>;
 
 const bulkUpdatesSchema = yup.object({
   updates: yup

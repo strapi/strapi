@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
-
 import { encodeSearchQuery } from '../../../utils/searchQueryParam';
+
+import { useListQueryParams } from './useListQueryParams';
 
 /**
  * Reads and writes the global asset search term held in `?_q=`.
@@ -11,7 +11,7 @@ import { encodeSearchQuery } from '../../../utils/searchQueryParam';
  * is a thin URL accessor so every consumer reads the same source of truth.
  */
 export const useAssetSearch = () => {
-  const [{ query }, setQuery] = useQueryParams<{ _q?: string }>();
+  const [{ query }, setQuery] = useListQueryParams<{ _q?: string }>();
 
   const searchQuery = query?._q ?? '';
 

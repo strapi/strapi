@@ -24,11 +24,11 @@ The default config uses the `sendmail` provider and a `defaultFrom` address. The
 
 ### Email service
 
-The `email` service has three functions: `send`, `sendTemplatedEmail` and `getProviderSettings`. `send` passes the options to the provider. `sendTemplatedEmail` fills `subject`, `text` and `html` with a lodash template, and allows only the variables that exist in the data object. Other code calls it as `strapi.plugin('email').service('email')`. See [`services/email.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/services/email.ts).
+The `email` service has three functions: `send`, `sendTemplatedEmail` and `getProviderSettings`. `send` passes the options to the provider. `sendTemplatedEmail` fills `subject`, `text` and `html` with a lodash template, and allows only the variables that exist in the data object. The template must have `subject` and `text`; `html` is optional. Other code calls it as `strapi.plugin('email').service('email')`. See [`services/email.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/services/email.ts).
 
 ### Routes
 
-The plugin has two route sets. The `content-api` route `POST /` sends an email and validates its input and response with an `EmailRouteValidator`. The `admin` routes (`send`, `test`, `settings`, `verify`) serve the settings page. The `test`, `settings` and `verify` routes require the `plugin::email.settings.read` permission, which `bootstrap` registers in the admin action provider.
+The plugin has two route sets. The `content-api` route `POST /` sends an email. Its request body and response schemas come from an `EmailRouteValidator` and feed the generated OpenAPI document; the body schema describes the documented fields (`from`, `to`, `cc`, `bcc`, `replyTo`, `subject`, `text`, `html`) and accepts any other key as a provider option. The `send` controller does not validate against that schema: it answers `400 ValidationError` only when the body is not a JSON object (an array; the JSON body parser already answers 400 for a top-level primitive or `null`) and passes every field to the provider unchanged. A malformed field gets whatever the provider answers. The admin `POST /` route shares this controller. The `admin` routes (`send`, `test`, `settings`, `verify`) serve the settings page. The `test`, `settings` and `verify` routes require the `plugin::email.settings.read` permission, which `bootstrap` registers in the admin action provider.
 
 ### Rate limit middleware
 

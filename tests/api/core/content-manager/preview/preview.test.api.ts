@@ -45,6 +45,7 @@ describe('Preview', () => {
   let strapi;
   let rq;
   let singleTypeEntry;
+  const handlerCalls: Array<Record<string, unknown>> = [];
 
   const updateEntry = async ({ uid, documentId, data, locale }) => {
     const type = documentId ? 'collection-types' : 'single-types';
@@ -88,7 +89,9 @@ describe('Preview', () => {
     strapi.config.set('admin.preview', {
       enabled: true,
       config: {
-        handler: (uid, { documentId, locale, status }) => {
+        handler: (uid, params) => {
+          handlerCalls.push(params);
+          const { documentId, locale, status } = params;
           return `/preview/${uid}/${documentId}?locale=${locale}&status=${status}`;
         },
       },
@@ -124,5 +127,58 @@ describe('Preview', () => {
     expect(body.data.url).toEqual(
       `/preview/${singleTypeUid}/${singleTypeEntry.documentId}?locale=en&status=draft`
     );
+  });
+
+  test('Reject an unknown status', async () => {
+    const { body, statusCode } = await getPreviewUrl({
+      uid: collectionTypeUid,
+      documentId: '1',
+      locale: 'en',
+      status: 'foo',
+    });
+
+    expect(statusCode).toBe(400);
+    expect(body.error.name).toBe('ValidationError');
+  });
+
+  describe('Locale passed to the handler', () => {
+    const getPreviewUrlWithQueryString = async (queryString: string) => {
+      handlerCalls.length = 0;
+
+      const { statusCode } = await rq({
+        method: 'GET',
+        url: `/content-manager/preview/url/${collectionTypeUid}?${queryString}`,
+      });
+
+      expect(statusCode).toBe(200);
+      expect(handlerCalls).toHaveLength(1);
+
+      return handlerCalls[0];
+    };
+
+    test('Omits the locale when the query has none', async () => {
+      const params = await getPreviewUrlWithQueryString('documentId=1&status=draft');
+
+      expect(params).not.toHaveProperty('locale');
+    });
+
+    test('Omits the locale when the query has a bare locale parameter', async () => {
+      // A bare `locale` is parsed as null, which the handler params type does not admit
+      const params = await getPreviewUrlWithQueryString('documentId=1&status=draft&locale');
+
+      expect(params).not.toHaveProperty('locale');
+    });
+
+    test('Keeps an empty locale as an empty string', async () => {
+      const params = await getPreviewUrlWithQueryString('documentId=1&status=draft&locale=');
+
+      expect(params).toHaveProperty('locale', '');
+    });
+
+    test('Passes the locale when the query has one', async () => {
+      const params = await getPreviewUrlWithQueryString('documentId=1&status=draft&locale=en');
+
+      expect(params).toEqual({ documentId: '1', locale: 'en', status: 'draft' });
+    });
   });
 });

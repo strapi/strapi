@@ -53,12 +53,8 @@ On `register()` (when telemetry is enabled):
 ```typescript
 strapi.telemetry.send('didCreateContentType', {
   eventProperties: { kind: 'collectionType' },
-  userProperties: {
-    /* optional, per-user */
-  },
-  groupProperties: {
-    /* optional, project-level */
-  },
+  userProperties: {}, // optional, per-user
+  groupProperties: {}, // optional, project-level
 });
 ```
 
@@ -189,7 +185,18 @@ Metrics service: `packages/core/content-manager/server/src/services/metrics.ts`.
 
 ### Content releases
 
-`didCreateContentRelease`, `didUpdateContentRelease`, `didDeleteContentRelease`, `didPublishContentRelease` — `packages/core/content-releases/server/src/services/release.ts`.
+Sent from `packages/core/content-releases/server/src/services/release.ts`. They count every release, whether it runs by hand, on schedule or through the API; the admin sends none of them. Its only release event is `willEditReleaseFromHome`, from the home page widget.
+
+| Event                      | Trigger                                                                       | Properties                                                                                                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `didCreateContentRelease`  | Release created, from scratch or from a release's skipped entries             | `releaseCondition`, `isScheduled`, `fromSkipped`                                                                                                                                                                                                            |
+| `didUpdateContentRelease`  | Release edited                                                                | `releaseConditionChanged`, `isScheduledChanged`                                                                                                                                                                                                             |
+| `didDeleteContentRelease`  | Release deleted                                                               | none                                                                                                                                                                                                                                                        |
+| `didPublishContentRelease` | Run that ended done, partial or failed, or a release that missed its schedule | `releaseCondition`, `trigger` (`manual`, `scheduled`), `status` (`done`, `partial`, `failed`), `totalEntries`, `totalPublishedEntries`, `totalUnpublishedEntries`, `totalSkippedEntries`, and when failed `failureReason` (`run_failed`, `missed_schedule`) |
+
+A release that missed its schedule is sent by the overdue sweep as `trigger: scheduled` with `failureReason: missed_schedule`. An empty release the sweep freezes as done sends nothing: it published nothing.
+
+They replace the admin events `didCreateRelease` and `didPublishRelease`, which only counted releases created or published from the admin: a dashboard on those names gets no new data and must move to `didCreateContentRelease` and `didPublishContentRelease`.
 
 ### Review workflows (EE)
 
@@ -225,6 +232,8 @@ Metrics wrapper: `packages/core/upload/server/src/services/metrics.ts` → `trac
 | `didOptOutTelemetry`               | `strapi telemetry:disable`                   |
 | `will/did*` project creation       | `packages/cli/create-strapi-app`             |
 | Cloud CLI events                   | Proxied via Cloud API (`packages/cli/cloud`) |
+
+Project-creation events carry `invocation` and `agentName` in `eventProperties`. These show whether an agent, CI, or a person ran the command. `STRAPI_TELEMETRY_DISABLED` also stops these events. See [create-strapi-app](../../cli/create-strapi-app/index.md#telemetry).
 
 ---
 

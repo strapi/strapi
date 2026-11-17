@@ -52,6 +52,7 @@ const makeDb = () => {
   const metadata = createMetadata(models as any);
 
   const db = {
+    config: { settings: {} },
     connection,
     metadata,
     getConnection: (table?: string) => (table ? connection(table) : connection),
