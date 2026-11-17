@@ -430,6 +430,14 @@ describeOnCondition(edition === 'EE')('Content releases service results (api)', 
       await deleteReleasesFrom(0);
     });
 
+    test('create resolves the inserted row without relations', async () => {
+      const release = await createRelease('To create');
+
+      expect(release).toStrictEqual(
+        releaseRow({ id: release.id, name: 'To create', status: 'empty' })
+      );
+    });
+
     test('update resolves the row without relations', async () => {
       const release = await createRelease('To update');
 

@@ -222,10 +222,11 @@ type ReleaseServiceContract = Omit<
   | 'update'
   | 'getAllComponents'
 > & {
+  /** The inserted release row, without its `actions`. */
   create(
     releaseData: Parameters<ReleaseService['create']>[0],
     creator: ReleaseWriter
-  ): ReturnType<ReleaseService['create']>;
+  ): Promise<ReleaseRow>;
   createFromSkippedEntries(
     releaseId: Parameters<ReleaseService['createFromSkippedEntries']>[0],
     releaseData: Parameters<ReleaseService['createFromSkippedEntries']>[1],
