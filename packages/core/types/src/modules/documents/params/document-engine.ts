@@ -79,12 +79,12 @@ type DraftAndPublishOption<TContentTypeUID extends UID.ContentType> = NonNullabl
  * Code generic over the UID cannot pass a status, since the option is unknown until the UID is.
  */
 export type DeleteStatus<TContentTypeUID extends UID.ContentType> = [
-  DraftAndPublishOption<TContentTypeUID>
+  DraftAndPublishOption<TContentTypeUID>,
 ] extends [true]
   ? Extract<PublicationStatus.Kind, 'published'>
   : true extends DraftAndPublishOption<TContentTypeUID>
-  ? PublicationStatus.Kind
-  : never;
+    ? PublicationStatus.Kind
+    : never;
 
 export type Create<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
