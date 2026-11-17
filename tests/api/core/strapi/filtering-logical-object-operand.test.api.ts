@@ -187,6 +187,54 @@ describe('Filtering with object-shaped $or and $and operands', () => {
     });
   });
 
+  // The database layer has no attribute level $or / $and. The object form is rejected above, and a list
+  // or a single value failed with a 500 too
+  const attributeGroupFilters: Array<[string, string, string, string]> = [
+    [
+      'a $or list on a scalar attribute',
+      'filters[title][$or][0][$eq]=Note%201&filters[title][$or][1][$eq]=Note%202',
+      '$or',
+      'title.$or',
+    ],
+    [
+      'a $and list on a scalar attribute',
+      'filters[title][$and][0][$eq]=Note%201',
+      '$and',
+      'title.$and',
+    ],
+    [
+      'a $or list of values on a scalar attribute',
+      'filters[title][$or][0]=Note%201&filters[title][$or][1]=Note%202',
+      '$or',
+      'title.$or',
+    ],
+    [
+      'a $or list under $not on a scalar attribute',
+      'filters[title][$not][$or][0][$eq]=Note%201',
+      '$or',
+      'title.$not.$or',
+    ],
+    [
+      'a $or list on an attribute of a relation',
+      'filters[category][name][$or][0][$eq]=Cat%20A',
+      '$or',
+      'category.name.$or',
+    ],
+  ];
+
+  test.each(attributeGroupFilters)('returns a 400 for %s', async (_, query, operator, path) => {
+    const res = await rq({ method: 'GET', url: `/lop-notes?${query}` });
+
+    expect(res.body.data).toBeNull();
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toMatchObject({
+      status: 400,
+      name: 'ValidationError',
+      message: `Invalid operator ${operator} at ${path}: use $and and $or at the root of the filters or under a relation, not on an attribute`,
+      details: { key: operator, path },
+    });
+  });
+
   const acceptedFilters: Array<[string, Record<string, unknown>, string[]]> = [
     ['$or with 100 conditions', { $or: conditions(100, 'title', 'Note 1') }, ['Note 1']],
     ['$and with 100 conditions', { $and: noteOneConditions(100) }, ['Note 1']],
@@ -201,6 +249,11 @@ describe('Filtering with object-shaped $or and $and operands', () => {
       ['Note 1'],
     ],
     ['a $or list', { $or: [{ title: 'Note 1' }, { rank: { $gt: 1 } }] }, ['Note 1', 'Note 2']],
+    [
+      'a $or list around attribute filters',
+      { $or: [{ title: { $eq: 'Note 1' } }, { title: { $eq: 'Note 2' } }] },
+      ['Note 1', 'Note 2'],
+    ],
   ];
 
   test.each(acceptedFilters)('accepts %s', async (_, filters, expected) => {
