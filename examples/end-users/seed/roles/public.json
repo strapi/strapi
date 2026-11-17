@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "role": {
+    "name": "Public",
+    "description": "Default role given to unauthenticated requests.",
+    "type": "public",
+    "requireTwoFactor": false
+  },
+  "permissions": [
+    {
+      "action": "api::article.article.find",
+      "subject": null,
+      "properties": {
+        "fields": ["title", "body", "author"]
+      },
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.findOne",
+      "subject": null,
+      "properties": {
+        "fields": ["title", "body", "author"]
+      },
+      "conditions": []
+    }
+  ]
+}

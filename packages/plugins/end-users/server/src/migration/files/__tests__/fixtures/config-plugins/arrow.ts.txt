@@ -1,0 +1,25 @@
+export default ({ env }) => ({
+  'users-permissions': {
+    config: {
+      jwtSecret: env('JWT_SECRET'),
+      jwt: { expiresIn: '7d', algorithm: 'HS512' },
+      jwtManagement: 'refresh',
+      sessions: {
+        maxRefreshTokenLifespan: 2592000,
+        idleRefreshTokenLifespan: 604800,
+        httpOnly: true,
+        cookie: { name: 'shop_refresh', sameSite: 'strict' },
+      },
+      ratelimit: { interval: 120000, max: 5 },
+      register: { allowedFields: ['nickname'] },
+      validationRules: {
+        validatePassword(value) {
+          return value.length > 12;
+        },
+      },
+    },
+  },
+  email: {
+    config: { provider: 'sendmail' },
+  },
+});

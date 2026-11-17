@@ -4,6 +4,13 @@ import { AbilityBuilder, Ability } from '@casl/ability';
 import { pick, isObject } from 'lodash';
 import type { ParametrizedAction, PermissionRule } from '../../types';
 
+export interface CaslAbilityOptions {
+  /** The action that stands for every action. CASL's own is `manage` */
+  anyAction?: string;
+  /** The subject type that stands for every subject, and what a rule without a subject gets. CASL's own is `all` */
+  anySubjectType?: string;
+}
+
 export interface CustomAbilityBuilder {
   can(permission: PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;
   buildParametrizedAction: (parametrizedAction: ParametrizedAction) => string;
@@ -56,9 +63,14 @@ const buildParametrizedAction = ({ name, params }: ParametrizedAction) => {
 
 /**
  * Casl Ability Builder.
+ *
+ * By default `manage` is every action and `all` every subject, as in CASL. A caller whose actions
+ * or subjects may be called `manage` or `all` passes names that cannot be theirs, so the two are
+ * ordinary names for it.
  */
-export const caslAbilityBuilder = (): CustomAbilityBuilder => {
+export const caslAbilityBuilder = (options: CaslAbilityOptions = {}): CustomAbilityBuilder => {
   const { can, build, ...rest } = new AbilityBuilder(Ability);
+  const { anyAction, anySubjectType = 'all' } = options;
 
   return {
     can(permission: PermissionRule) {
@@ -69,7 +81,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
 
       return can(
         caslAction,
-        subject == null ? 'all' : subject,
+        subject == null ? anySubjectType : subject,
         fields,
         isObject(condition) ? condition : undefined
       );
@@ -80,7 +92,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
     },
 
     build() {
-      const ability = build({ conditionsMatcher });
+      const ability = build({ conditionsMatcher, anyAction, anySubjectType });
 
       function decorateCan(originalCan: Ability['can']) {
         return function canWithParametrizedAction(...args: Parameters<Ability['can']>) {

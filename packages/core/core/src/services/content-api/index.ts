@@ -81,6 +81,21 @@ function resolveSchema<T>(schemaOrFactory: T | ((zInstance: typeof z) => T)): T 
   return schemaOrFactory;
 }
 
+/**
+ * The params this module merged into a route's `request.query` object or `application/json` body
+ * schema, by that object. A route definition is a module's object, so a second Strapi instance in
+ * the same process (tests, scripts) gets the route as the first one left it: a param merged then is
+ * merged again (replaced), and only a param the route declares itself is refused.
+ */
+const mergedParams = new WeakMap<object, Set<string>>();
+
+const mergedBy = (target: unknown, param: string) =>
+  typeof target === 'object' && target !== null && mergedParams.get(target)?.has(param) === true;
+
+const rememberMerged = (target: object, params: Iterable<string>) => {
+  mergedParams.set(target, new Set(params));
+};
+
 const mergeOneQueryParamIntoRoute = (
   route: Core.Route,
   param: string,
@@ -88,13 +103,16 @@ const mergeOneQueryParamIntoRoute = (
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
   if (matchRoute && !matchRoute(route)) return;
-  const query = { ...route.request?.query };
-  if (param in query) {
+  const current = route.request?.query;
+  const query = { ...current };
+  if (param in query && !mergedBy(current, param)) {
     throw new Error(
       `contentAPI.addQueryParams: param "${param}" already exists on route ${route.method} ${route.path}`
     );
   }
-  route.request = { ...route.request, query: { ...query, [param]: schema } };
+  const merged = { ...query, [param]: schema };
+  rememberMerged(merged, [...Object.keys(query).filter((key) => mergedBy(current, key)), param]);
+  route.request = { ...route.request, query: merged };
 };
 
 const mergeOneInputParamIntoRoute = (
@@ -112,12 +130,14 @@ const mergeOneInputParamIntoRoute = (
     existing && typeof existing === 'object' && 'shape' in existing
       ? (existing as { shape: Record<string, z.ZodType> }).shape
       : {};
-  if (param in base) {
+  if (param in base && !mergedBy(existing, param)) {
     throw new Error(
       `contentAPI.addInputParams: param "${param}" already exists on route ${route.method} ${route.path}`
     );
   }
-  body[jsonKey] = z.object({ ...base, [param]: schema }) as RouteBody[keyof RouteBody];
+  const merged = z.object({ ...base, [param]: schema });
+  rememberMerged(merged, [...Object.keys(base).filter((key) => mergedBy(existing, key)), param]);
+  body[jsonKey] = merged as RouteBody[keyof RouteBody];
   route.request = { ...route.request, body };
 };
 
@@ -244,6 +264,32 @@ const createContentAPI = (strapi: Core.Strapi) => {
     return sanitizeRoutesMapForSerialization(routesMap);
   };
 
+  // Built first: the sanitizers and validators ask its checker about the caller's data rules
+  const permissions = instantiatePermissionsUtilities(strapi);
+
+  /**
+   * Which of some documents match a filter, for the fields of a caller's conditioned rows. The
+   * filter is the resolved condition (never sanitized: it may name private fields), asked of the
+   * Document Service like the stored-entry check.
+   */
+  const matchEntries: sanitize.APIOptions['matchEntries'] = async ({
+    uid,
+    documentIds,
+    filter,
+    status,
+    locale,
+  }) => {
+    const entries = await strapi.documents(uid as UID.ContentType).findMany({
+      filters: { $and: [{ documentId: { $in: documentIds } }, filter] } as never,
+      fields: ['documentId'] as never,
+      limit: -1,
+      ...(status === undefined ? {} : { status }),
+      ...(locale === undefined ? {} : { locale }),
+    });
+
+    return entries.map((entry) => entry.documentId);
+  };
+
   const sanitizer = sanitize.createAPISanitizers({
     getModel(uid: string) {
       return strapi.getModel(uid as UID.Schema);
@@ -254,6 +300,8 @@ const createContentAPI = (strapi: Core.Strapi) => {
         output: strapi.sanitizers.get('content-api.output'),
       };
     },
+    permissions: permissions.checker,
+    matchEntries,
   });
 
   const validator = validate.createAPIValidators({
@@ -265,10 +313,12 @@ const createContentAPI = (strapi: Core.Strapi) => {
         input: strapi.validators.get('content-api.input'),
       };
     },
+    permissions: permissions.checker,
+    matchEntries,
   });
 
   return {
-    permissions: instantiatePermissionsUtilities(strapi),
+    permissions,
     getRoutesMap,
     sanitize: sanitizer,
     validate: validator,

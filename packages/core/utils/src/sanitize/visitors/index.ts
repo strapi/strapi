@@ -7,3 +7,4 @@ export { default as removeDisallowedFields } from './remove-disallowed-fields';
 export { default as removeRestrictedFields } from './remove-restricted-fields';
 export { default as removeUnrecognizedFields } from './remove-unrecognized-fields';
 export { default as expandWildcardPopulate } from './expand-wildcard-populate';
+export { default as removeUnauthorizedFields } from './remove-unauthorized-fields';

@@ -13,16 +13,29 @@ import type { PermissionEngineHooks, HookName } from './hooks';
 
 import * as abilities from './abilities';
 import { Permission } from '../domain/permission';
+import type { ConditionRef } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
 export { abilities };
+
+/** Turn an ability's rules for an action and subject into Strapi query filters (admin RBAC, Content API) */
+export { buildCaslQuery, buildStrapiQuery } from './query-builders';
 
 type Provider = Omit<ReturnType<typeof providerFactory>, 'register'> & {
   register(...args: unknown[]): Promise<Provider> | Provider;
 };
 
 type ActionProvider = Provider;
-type ConditionProvider = Provider;
+
+/**
+ * `get` receives each entry of a permission's `conditions` as it is: a name, or `{ name, params }`
+ * for a provider that binds params (the Content API's). Admin's provider takes names only.
+ * The engine never registers conditions, so what `register` resolves to is the provider's own
+ */
+type ConditionProvider = Omit<Provider, 'get' | 'register'> & {
+  get(ref: ConditionRef): unknown;
+  register(...args: unknown[]): unknown;
+};
 
 export interface Engine {
   hooks: PermissionEngineHooks;
@@ -116,8 +129,8 @@ const newEngine = (params: EngineParams): Engine => {
       return register({ action, subject, properties });
     }
 
-    const resolveConditions = (ids: string[]): (Condition | undefined)[] =>
-      ids.map((id) => providers.condition.get(id) as Condition | undefined);
+    const resolveConditions = (refs: ConditionRef[]): (Condition | undefined)[] =>
+      refs.map((ref) => providers.condition.get(ref) as Condition | undefined);
 
     const removeInvalidConditions = (conditions: (Condition | undefined)[]) =>
       conditions.filter(

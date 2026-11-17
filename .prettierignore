@@ -10,5 +10,7 @@ build
 tests/e2e/data/**
 # Local DTS export trees (e.g. examples/complex/tmp-dts-export) — same layout; avoid Prettier EOF/newline churn
 **/tmp-dts-export/**
+# Project files the end-users migration scans as text: quotes and line breaks are part of what the tests check
+packages/plugins/end-users/server/src/migration/files/__tests__/fixtures/**
 /docs/.docusaurus
 /packages/generators/generators/src/templates/**/*.hbs

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "role": {
+    "name": "Editor",
+    "description": "Can read, write, publish and delete anyone's articles, and sees their internal notes.",
+    "type": "custom",
+    "requireTwoFactor": false
+  },
+  "permissions": [
+    {
+      "action": "api::article.article.find",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.findOne",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.create",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.update",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.delete",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.read-drafts",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    },
+    {
+      "action": "api::article.article.publish",
+      "subject": null,
+      "properties": {},
+      "conditions": []
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "eu_profiles",
+  "info": {
+    "singularName": "profile",
+    "pluralName": "profiles",
+    "displayName": "Profile",
+    "description": "Custom data of an end user"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::end-users.user",
+      "required": true,
+      "configurable": false
+    },
+    "company": {
+      "type": "string"
+    },
+    "newsletter": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

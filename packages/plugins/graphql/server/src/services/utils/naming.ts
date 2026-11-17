@@ -1,4 +1,4 @@
-import { get, camelCase, upperFirst, lowerFirst } from 'lodash';
+import { get, camelCase, upperFirst, lowerFirst, isString } from 'lodash';
 import { singular } from 'pluralize';
 import { errors } from '@strapi/utils';
 import type { Struct, Schema } from '@strapi/types';
@@ -25,6 +25,11 @@ export default ({ strapi }: Context) => {
 
   /**
    * Build the base type name for a given content type
+   *
+   * A type that sets `pluginOptions.graphql.typeName` (`{ singular, plural }`) is named by it,
+   * with no plugin prefix, and every name derived from this one follows: the queries, mutations,
+   * input, filters, entity and response types. The override has to be a valid GraphQL name; it is
+   * used as it is.
    */
   const getTypeName = (
     contentType: Struct.Schema,
@@ -34,6 +39,12 @@ export default ({ strapi }: Context) => {
       plurality?: 'singular' | 'plural';
     } = {}
   ) => {
+    const override = get(contentType, ['pluginOptions', 'graphql', 'typeName', plurality]);
+
+    if (isString(override) && override !== '') {
+      return override;
+    }
+
     const plugin = contentType?.plugin;
     const modelName = contentType?.modelName;
     const name =

@@ -29,6 +29,20 @@ export * from './components/Table';
 export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
+/**
+ * The permissions editor, for a plugin that edits the permissions of its own roles.
+ *
+ * @experimental Public for now, but coupled to the admin's role editor and used by one plugin
+ * (`@strapi/plugin-end-users`). Its props and exported types may change in a minor release.
+ */
+export {
+  Permissions,
+  type PermissionsAPI,
+  type PermissionsProps,
+  type PermissionsLayout,
+  type PermissionsRow,
+  type PermissionsTabId,
+} from './pages/Settings/pages/Roles/components/Permissions';
 
 /** @internal */
 export { tours } from './components/GuidedTour/Tours';

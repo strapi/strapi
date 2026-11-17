@@ -118,6 +118,7 @@ const resolvePermissionPropertyValues = (
 const createDefaultPropertiesForm = (
   properties: string[],
   subject: Subject,
+  actionId: string,
   matchingPermission?: Permission
 ): PropertyForm => {
   const recursivelyCreatePropertyForm = (
@@ -126,6 +127,12 @@ const createDefaultPropertiesForm = (
     prefix = ''
   ): PropertyChildForm => {
     return children.reduce<PropertyChildForm>((acc, current) => {
+      // The action cannot set it: it has no value, so it is in no count, no bulk tick reaches it
+      // and it is never sent
+      if (current.disabledActions?.includes(actionId)) {
+        return acc;
+      }
+
       if (current.children) {
         return {
           ...acc,
@@ -230,6 +237,7 @@ const createDefaultCTForm = (
       const propertiesForm = createDefaultPropertiesForm(
         applyToProperties,
         subjectLayouts[currentCTUID],
+        actionId,
         matchingPermission
       );
 

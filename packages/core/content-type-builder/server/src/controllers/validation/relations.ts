@@ -2,9 +2,8 @@ import { yup } from '@strapi/utils';
 import type { TestContext, TestFunction } from 'yup';
 import type { Schema, UID } from '@strapi/types';
 import { typeKinds, coreUids } from '../../services/constants';
+import { getRelationKindError } from '../../utils/relation-kinds';
 import { isValidName } from './common';
-
-const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
 const isValidRelation = (validNatures: ReadonlyArray<string>): TestFunction<string | undefined> =>
   function isValidRelationValue(this: TestContext, value) {
@@ -13,13 +12,12 @@ const isValidRelation = (validNatures: ReadonlyArray<string>): TestFunction<stri
       return true;
     }
 
-    if (this.parent.target === coreUids.STRAPI_USER) {
-      if (!validNatures.includes(value) || this.parent.targetAttribute !== undefined) {
-        return this.createError({
-          path: this.path,
-          message: `must be one of the following values: ${STRAPI_USER_RELATIONS.join(', ')}`,
-        });
-      }
+    // A target can declare the relation kinds it accepts (`restrictRelationsTo`). The payload may
+    // carry the counterpart as `targetAttribute` or, hand-written, as `inversedBy` / `mappedBy`.
+    const kindError = getRelationKindError({ ...this.parent, relation: value });
+
+    if (kindError !== null) {
+      return this.createError({ path: this.path, message: kindError });
     }
 
     return validNatures.includes(value)

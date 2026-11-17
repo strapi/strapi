@@ -1,0 +1,18 @@
+export default ({ env }) => ({
+  'users-permissions': {
+    enabled: true,
+    config: { jwtSecret: env('JWT_SECRET'), register: { allowedFields: ['nickname'] } },
+  },
+  'end-users': {
+    enabled: true,
+    config: {
+      secret: env('END_USERS_SECRET'),
+      legacy: 'old',
+      migration: {
+        duplicates: 'abort',
+        registrationFields: ['company'],
+        rollback: false,
+      },
+    },
+  },
+});

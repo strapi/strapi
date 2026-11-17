@@ -2,6 +2,7 @@ import { isObject } from 'lodash';
 import * as contentTypeUtils from '../../content-types';
 import type { Model, RelationOrderingOptions } from '../../types';
 import type { Visitor } from '../../traverse/factory';
+import type { ExplainEntry } from '../../content-api-permissions';
 import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
 
 const ACTIONS_TO_VERIFY = ['find'];
@@ -20,7 +21,11 @@ type MorphPopulatePayload = {
   count?: unknown;
 };
 
-export default (auth: unknown): Visitor =>
+/**
+ * Removes the relations whose target the caller may not `find`. `onRemove` is told about each
+ * relation, or morph target, it takes out (explain mode); it is left out for callers that don't ask.
+ */
+export default (auth: unknown, onRemove?: (entry: ExplainEntry) => void): Visitor =>
   (visitorOptions, visitorUtils) => {
     const { attribute } = visitorOptions;
 
@@ -33,18 +38,28 @@ export default (auth: unknown): Visitor =>
       return;
     }
 
-    return visitRelationAttribute(auth, visitorOptions, visitorUtils) as unknown as void;
+    return visitRelationAttribute(auth, visitorOptions, visitorUtils, onRemove) as unknown as void;
   };
 
 const visitRelationAttribute = async (
   auth: unknown,
   { data, key, attribute, schema }: Parameters<Visitor>[0],
-  { remove, set }: Parameters<Visitor>[1]
+  { remove, set }: Parameters<Visitor>[1],
+  onRemove?: (entry: ExplainEntry) => void
 ) => {
   // Narrowing only; the caller reaches this for relation attributes exclusively.
   if (!attribute) {
     return;
   }
+
+  /** A relation, or a target of a morph relation, the caller can't read */
+  const removed = (target: unknown) =>
+    onRemove?.({
+      kind: 'relation-removed',
+      uid: schema.uid as string,
+      path: key,
+      target: typeof target === 'string' ? target : 'unknown',
+    });
 
   const handleMorphRelation = async () => {
     const elements = (data as Record<string, MorphArray | MorphElement | MorphMutationPayload>)[
@@ -104,6 +119,8 @@ const visitRelationAttribute = async (
 
         if (isAllowed) {
           newOn[uid] = subPopulate;
+        } else {
+          removed(uid);
         }
       }
 
@@ -191,6 +208,8 @@ const visitRelationAttribute = async (
 
       if (isAllowed) {
         allowedElements.push(element);
+      } else {
+        removed(element.__type);
       }
     }
 
@@ -202,6 +221,7 @@ const visitRelationAttribute = async (
     const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
     if (!isAllowed) {
+      removed(attribute.target);
       remove(key);
     }
   };

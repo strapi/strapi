@@ -1,0 +1,634 @@
+import { errors } from '@strapi/utils';
+import type Koa from 'koa';
+import type { Core, Struct } from '@strapi/types';
+
+import { PER_USER_CACHE_CONTROL, PLUGIN_ID, PROFILE_UID, ROLE_UID, USER_UID } from '../constants';
+import type profileService from '../services/profile';
+import { readCompatConfig } from './config';
+import { invalidParameters, missingFieldBody } from './errors';
+import { toUpRole, toUpUser, translateRoleQuery } from './shapes';
+import type { UpRole, UpUser, UpUserSource } from './shapes';
+import { loadUserExtras, splitUserWrites } from './user-extras';
+import { isPlain } from '../utils/is-plain';
+import { controllerOf, documentsOf, serviceOf } from '../utils/typed-strapi';
+
+type Plain = Record<string, unknown>;
+
+/** What the core controller of the user type gives: the output sanitizing every action runs. */
+interface CoreController {
+  sanitizeOutput(data: unknown, ctx: Koa.Context): Promise<unknown>;
+}
+
+interface Documents {
+  create(params: Plain): Promise<{ documentId: string }>;
+  update(params: Plain): Promise<unknown>;
+  delete(params: Plain): Promise<unknown>;
+  count(params: Plain): Promise<number>;
+}
+
+interface UserEntries {
+  find(query: Plain): Promise<{ results: Plain[] }>;
+  findOne(documentId: string, query: Plain): Promise<Plain | null>;
+}
+
+type QueryAction = 'find' | 'findOne' | 'count' | 'create';
+
+/** A numeric id as a URL gives it; a `documentId` is never this short a run of digits. */
+const NUMERIC_ID = /^\d{1,15}$/;
+
+const NOT_FOUND = 'User not found';
+
+/**
+ * What a write answers for a user that is missing, word for word what the entry check answers for
+ * one the caller may not write, so the two cannot be told apart.
+ */
+const NOT_FOUND_ON_WRITE = 'Not Found';
+
+/** What of a role the payload can show, besides its `id`, which every caller reads. */
+const ROLE_KEYS = ['name', 'description', 'type'] as const;
+
+export const isUsersCompat = (strapi: Core.Strapi): boolean =>
+  readCompatConfig(strapi).usersPermissions;
+
+/**
+ * Runs the Users & Permissions shaped action while that mode is on, and the core one otherwise, so
+ * a route answers in the shape of the mode the application is in.
+ */
+export const compatOr = <T>(strapi: Core.Strapi, compat: () => T, core: () => T): T =>
+  isUsersCompat(strapi) ? compat() : core();
+
+/**
+ * The part of a query that asks for the user's role, which users-permissions populates and the
+ * engine does not (the engine's relation is `roles`, and its output is shaped from a lookup of its
+ * own). `role` alone is taken out of the populate and reported; a populate that goes below it
+ * (`role.users`) is renamed with the rest of the query, and the engine answers for it.
+ */
+export const splitRoleQuery = (
+  query: Record<string, unknown>
+): { query: Record<string, unknown>; wantsRole: boolean } => {
+  const { populate, ...rest } = query;
+  let wantsRole = false;
+  let kept: unknown = populate;
+
+  const tokensOf = (value: string) => value.split(',').map((token) => token.trim());
+  const isRole = (token: unknown) => token === 'role';
+  const mentionsRole = (token: unknown) =>
+    typeof token === 'string' && (token === '*' || token === 'role' || token.startsWith('role.'));
+
+  if (typeof populate === 'string') {
+    const tokens = tokensOf(populate);
+
+    wantsRole = tokens.some(mentionsRole);
+    kept = tokens.filter((token) => !isRole(token)).join(',') || undefined;
+  } else if (Array.isArray(populate)) {
+    const tokens = populate.flatMap((entry) =>
+      typeof entry === 'string' ? tokensOf(entry) : [entry]
+    );
+
+    wantsRole = tokens.some(mentionsRole);
+    kept = tokens.filter((token) => !isRole(token));
+
+    if ((kept as unknown[]).length === 0) {
+      kept = undefined;
+    }
+  } else if (isPlain(populate) && 'role' in populate) {
+    const { role, ...others } = populate;
+
+    wantsRole = true;
+    // A nested populate stays, and is renamed to the engine's relation with the rest
+    kept = isPlain(role) && 'populate' in role ? populate : others;
+
+    if (Object.keys(kept as Plain).length === 0) {
+      kept = undefined;
+    }
+  }
+
+  const out: Record<string, unknown> = kept === undefined ? rest : { ...rest, populate: kept };
+
+  return { query: translateRoleQuery(out), wantsRole };
+};
+
+/**
+ * The `/api/users*` actions in the shapes Users & Permissions answered with: a bare list, a bare
+ * count, a bare user with a numeric `id` next to its `documentId`, the profile's readable fields
+ * merged into it, and a `role` only where one was asked for. The checks the core controller runs
+ * (query, input, output, the rules of the caller's role) run here too, on the same content API
+ * entry points.
+ */
+export const createUsersCompat = (strapi: Core.Strapi) => {
+  const core = () => controllerOf<CoreController>(strapi, USER_UID);
+  const profiles = () =>
+    strapi.plugin(PLUGIN_ID).service('profile') as ReturnType<typeof profileService>;
+  const userSchema = () => strapi.contentType(USER_UID) as Struct.ContentTypeSchema;
+  const profileSchema = () => strapi.contentType(PROFILE_UID) as Struct.ContentTypeSchema;
+  const roleSchema = () => strapi.contentType(ROLE_UID) as Struct.ContentTypeSchema;
+  const documents = () => documentsOf<Documents>(strapi, USER_UID);
+  const entries = () => serviceOf<UserEntries>(strapi, USER_UID);
+
+  /** What the core controllers hand the content API: the caller, the route and the action. */
+  const options = (ctx: Koa.Context, action: string) => {
+    const strictParams = strapi.config.get('api.rest.strictParams');
+
+    return {
+      auth: (ctx.state?.auth as unknown) ?? {},
+      action,
+      route: ctx.state?.route,
+      ...(typeof strictParams === 'boolean' ? { strictParams } : {}),
+    };
+  };
+
+  /** Whether a sanitized populate still asks for the engine's `roles` relation. */
+  const populatesRoles = (populate: unknown): boolean => {
+    if (typeof populate === 'string') {
+      return populate.split(',').some((token) => /^roles(\.|$)/.test(token.trim()));
+    }
+
+    if (Array.isArray(populate)) {
+      return populate.some(populatesRoles);
+    }
+
+    return isPlain(populate) && 'roles' in populate;
+  };
+
+  /**
+   * The query, checked and sanitized as the core controller does. The role is asked for as the
+   * engine's `roles` relation and goes through the sanitizer with the caller's auth, so a caller who
+   * may not read roles has the populate dropped like any other they may not read. Only `/users/me`
+   * (`ownRole`) loads the caller's own role without that check: it is no secret from them.
+   */
+  const readQuery = async (ctx: Koa.Context, action: QueryAction, ownRole = false) => {
+    const raw = (ctx.query ?? {}) as Record<string, unknown>;
+    const { query, wantsRole } = splitRoleQuery(raw);
+    const opts = options(ctx, action);
+
+    await strapi.contentAPI.validate.query(query, userSchema(), opts as never);
+
+    const sanitized = (await strapi.contentAPI.sanitize.query(
+      translateRoleQuery(raw),
+      userSchema(),
+      opts as never
+    )) as Plain;
+
+    return {
+      query: sanitized,
+      wantsRole: ownRole ? wantsRole : populatesRoles(sanitized.populate),
+    };
+  };
+
+  /** The `documentId` a numeric id or a `documentId` names, or `null` when no user has it. */
+  const resolve = async (id: unknown): Promise<string | null> => {
+    const key = typeof id === 'string' || typeof id === 'number' ? String(id) : '';
+
+    if (key === '') {
+      return null;
+    }
+
+    if (!NUMERIC_ID.test(key)) {
+      return key;
+    }
+
+    const found = (await strapi.db
+      .query(USER_UID)
+      .findOne({ where: { id: Number(key) }, select: ['documentId'] })) as {
+      documentId: string;
+    } | null;
+
+    return found?.documentId ?? null;
+  };
+
+  /** The first of the roles as users-permissions shows its one role, limited to what the caller may read. */
+  const roleOf = async (
+    ctx: Koa.Context,
+    roles: Array<Plain & { id: number }>,
+    ownRole: boolean
+  ): Promise<UpRole | null> => {
+    if (ownRole) {
+      return toUpRole(roles as unknown as Parameters<typeof toUpRole>[0]);
+    }
+
+    const [first] = roles;
+
+    if (!first) {
+      return null;
+    }
+
+    const readable = (await strapi.contentAPI.sanitize.output(
+      first,
+      roleSchema(),
+      options(ctx, 'find') as never
+    )) as Plain;
+    const shown = Object.fromEntries(
+      ROLE_KEYS.filter((key) => key in readable).map((key) => [key, readable[key]])
+    );
+
+    return { id: first.id, ...shown } as unknown as UpRole;
+  };
+
+  /**
+   * What the engine stores that the payload shows and the output rules hide: whether the email is
+   * confirmed and whether the user is blocked (both private or engine-owned to the core payload),
+   * and, when asked for, the first role of the user as users-permissions shows its one role.
+   *
+   * The role goes through the output rules of the role type for the caller, so it shows the fields
+   * their `find` row on it lists (`id` always) and no more. `ownRole` skips that: the caller's own
+   * role is no secret from them.
+   */
+  const loadStored = async (
+    ctx: Koa.Context,
+    documentIds: string[],
+    withRoles: boolean,
+    ownRole: boolean
+  ): Promise<Map<string, { emailVerified: boolean; banned: boolean; role?: UpRole | null }>> => {
+    const stored = new Map<
+      string,
+      { emailVerified: boolean; banned: boolean; role?: UpRole | null }
+    >();
+
+    if (documentIds.length === 0) {
+      return stored;
+    }
+
+    const rows = (await strapi.db.query(USER_UID).findMany({
+      where: { documentId: { $in: documentIds } },
+      select: ['documentId', 'emailVerified', 'banned'],
+      ...(withRoles && {
+        populate: {
+          roles: {
+            select: ['id', 'documentId', 'name', 'description', 'type'],
+            orderBy: { id: 'asc' },
+          },
+        },
+      }),
+    })) as Array<{
+      documentId: string;
+      emailVerified: boolean;
+      banned: boolean;
+      roles?: Array<Plain & { id: number }>;
+    }>;
+
+    for (const row of rows) {
+      stored.set(row.documentId, {
+        emailVerified: row.emailVerified,
+        banned: row.banned,
+        ...(withRoles && { role: await roleOf(ctx, row.roles ?? [], ownRole) }),
+      });
+    }
+
+    return stored;
+  };
+
+  /**
+   * Whether the caller's field rules let them read `banned`, which is private to the core payload
+   * and so never in what the output rules return. The rules are asked about the field itself, on a
+   * copy of the type that does not call it private: the sanitizer then keeps it exactly when the
+   * caller's role lists it (or lists every field of the type).
+   */
+  const mayReadBanned = async (ctx: Koa.Context): Promise<boolean> => {
+    const schema = userSchema();
+    const open = {
+      ...schema,
+      attributes: { ...schema.attributes, banned: { ...schema.attributes.banned, private: false } },
+    };
+    const readable = await strapi.contentAPI.sanitize.output(
+      { banned: true },
+      open as Struct.ContentTypeSchema,
+      options(ctx, 'find') as never
+    );
+
+    return isPlain(readable) && 'banned' in readable;
+  };
+
+  /** Users as the core output rules let the caller read them, in the shape of the mode. */
+  const shape = async (
+    ctx: Koa.Context,
+    found: Plain[],
+    wantsRole: boolean,
+    ownRole = false
+  ): Promise<UpUser[]> => {
+    const readable = (await core().sanitizeOutput(found, ctx)) as UpUserSource[];
+    // The caller's own record (`/users/me`, or their own id) is no secret from them. Whether the
+    // field rules show `banned` to others is decided once for the request.
+    const ownId = (ctx.state?.user as { documentId?: unknown } | undefined)?.documentId;
+    const showOthers = ownRole ? true : await mayReadBanned(ctx);
+    const [extras, stored] = await Promise.all([
+      loadUserExtras(strapi, ctx.state?.auth, readable),
+      loadStored(
+        ctx,
+        readable.map(({ documentId }) => documentId),
+        wantsRole,
+        ownRole
+      ),
+    ]);
+
+    return readable.map((user) => {
+      const own = stored.get(user.documentId);
+      const showBlocked = showOthers || (typeof ownId === 'string' && user.documentId === ownId);
+
+      // `confirmed` follows the caller's field rules for `emailVerified`, and `blocked` follows
+      // those for `banned`: the native payload keeps the moderation state private, so the compat
+      // one does not show it to every caller who can read a user.
+      const shown = 'emailVerified' in user ? { emailVerified: own?.emailVerified ?? false } : {};
+      const upUser = toUpUser({ ...user, ...shown, banned: own?.banned ?? false } as UpUserSource, {
+        extras: extras.get(user.documentId),
+        ...(wantsRole && { role: own?.role ?? null }),
+      });
+
+      if (showBlocked) {
+        return upUser;
+      }
+
+      const { blocked: _blocked, ...rest } = upUser;
+
+      return rest as UpUser;
+    });
+  };
+
+  /** The body of a write: users-permissions' flat body, not Strapi's `{ data }`. */
+  const bodyOf = (ctx: Koa.Context): Plain => {
+    const body = (ctx.request as { body?: unknown }).body;
+
+    return isPlain(body) ? body : {};
+  };
+
+  /**
+   * The writes sorted for the user and for the profile; a key the engine owns is refused, and so is
+   * the password unless the user is being created.
+   */
+  const sortWrites = (body: Plain, mayHavePassword: boolean) => {
+    const split = splitUserWrites(strapi, body);
+    const { user, profile } = split;
+    // A password is set when a user is made; after that it changes through its own routes
+    const refused =
+      mayHavePassword || !('password' in user) ? split.refused : [...split.refused, 'password'];
+
+    if (refused.length > 0) {
+      throw new errors.ApplicationError(invalidParameters(refused));
+    }
+
+    const { password, ...rest } = user;
+
+    return {
+      user: rest,
+      profile,
+      password: typeof password === 'string' ? password : undefined,
+    };
+  };
+
+  /**
+   * The user's input as the caller's rules for `action` allow it. The password is not a field of
+   * the user type, so it is set aside and handed back: the Document Service takes it from the data.
+   */
+  const userInput = async (
+    ctx: Koa.Context,
+    action: 'create' | 'update',
+    data: Plain,
+    documentId?: string
+  ): Promise<Plain> => {
+    const opts = { ...options(ctx, action), ...(documentId !== undefined && { documentId }) };
+
+    await strapi.contentAPI.validate.input(data, userSchema(), opts as never);
+
+    return (await strapi.contentAPI.sanitize.input(data, userSchema(), opts as never)) as Plain;
+  };
+
+  /**
+   * Writes the profile keys of a body to the profile of the user, under the caller's `update` rule
+   * for the profile type, in the way the profile route of `me` does.
+   */
+  const writeProfile = async (ctx: Koa.Context, userDocumentId: string, input: Plain) => {
+    if (Object.keys(input).length === 0) {
+      return;
+    }
+
+    const { contentAPI } = strapi;
+    const auth = (ctx.state?.auth as unknown) ?? {};
+    const own = await profiles().findForUser(userDocumentId, { fields: ['documentId'] });
+
+    if (!own) {
+      throw new errors.NotFoundError('Profile not found');
+    }
+
+    const opts = { ...options(ctx, 'update'), documentId: own.documentId };
+
+    await contentAPI.permissions.assertEntry(auth as never, 'update', PROFILE_UID, own.documentId);
+    await contentAPI.validate.input(input, profileSchema(), opts as never);
+
+    const data = (await contentAPI.sanitize.input(input, profileSchema(), opts as never)) as Plain;
+
+    await profiles().updateForUser(userDocumentId, { data });
+    await contentAPI.permissions.assertWritten(
+      auth as never,
+      'update',
+      PROFILE_UID,
+      own.documentId,
+      {}
+    );
+  };
+
+  /** The user as it is stored now, shaped for the caller; `null` when it is not there. */
+  const present = async (
+    ctx: Koa.Context,
+    documentId: string,
+    query: Plain,
+    wantsRole: boolean,
+    ownRole = false
+  ): Promise<UpUser | null> => {
+    const found = await entries().findOne(documentId, query);
+
+    if (!found) {
+      return null;
+    }
+
+    const [user] = await shape(ctx, [found], wantsRole, ownRole);
+
+    return user;
+  };
+
+  /** The numeric id of a user, which the payload carries next to its `documentId`. */
+  const numericIdOf = async (documentId: string): Promise<number | null> => {
+    const found = (await strapi.db
+      .query(USER_UID)
+      .findOne({ where: { documentId }, select: ['id'] })) as { id: number } | null;
+
+    return found?.id ?? null;
+  };
+
+  /** The query without its filters, which carry the caller's read conditions. */
+  const unfiltered = (query: Plain): Plain => {
+    const { filters: _filters, ...rest } = query;
+
+    return rest;
+  };
+
+  const textOf = (value: unknown) =>
+    typeof value === 'string' && value !== '' ? value : undefined;
+
+  /** The display name of a new user, from what the caller's create rules let through. */
+  const nameFor = (input: Plain): string =>
+    textOf(input.name) ?? textOf(input.username) ?? textOf(input.email)?.split('@')[0] ?? 'user';
+
+  const requireFields = (body: Plain) => {
+    for (const field of ['email', 'username', 'password']) {
+      const value = body[field];
+
+      if (typeof value !== 'string' || value === '') {
+        const { error } = missingFieldBody(field);
+
+        throw new errors.ValidationError(error.message, error.details);
+      }
+    }
+  };
+
+  return {
+    /** A bare array of users. */
+    async find(ctx: Koa.Context) {
+      const { query, wantsRole } = await readQuery(ctx, 'find');
+      const { results } = await entries().find(query);
+
+      ctx.body = await shape(ctx, results, wantsRole);
+    },
+
+    /** A bare number: the users that match the filters. */
+    async count(ctx: Koa.Context) {
+      const { query } = await readQuery(ctx, 'count');
+      const { filters } = (ctx.query ?? {}) as Plain;
+
+      // The conditions of the count rows are in `query`. What the filters may name is what `find`
+      // lets the caller read: a count must not answer for a field they cannot see
+      if (filters !== undefined) {
+        await strapi.contentAPI.validate.query(
+          { filters },
+          userSchema(),
+          options(ctx, 'find') as never
+        );
+      }
+
+      ctx.body = await documents().count({
+        ...(query.filters !== undefined && { filters: query.filters }),
+      });
+    },
+
+    async findOne(ctx: Koa.Context) {
+      const { query, wantsRole } = await readQuery(ctx, 'findOne');
+      const documentId = await resolve(ctx.params?.id);
+      const user = documentId && (await present(ctx, documentId, query, wantsRole));
+
+      if (!user) {
+        throw new errors.NotFoundError(NOT_FOUND);
+      }
+
+      ctx.body = user;
+    },
+
+    async create(ctx: Koa.Context) {
+      const body = bodyOf(ctx);
+
+      requireFields(body);
+
+      const { query, wantsRole } = await readQuery(ctx, 'create');
+      const writes = sortWrites(body, true);
+      const input = await userInput(ctx, 'create', writes.user);
+      const name = nameFor(input);
+
+      const documentId = await strapi.db.transaction(async () => {
+        const created = await documents().create({
+          data: { ...input, name, password: writes.password },
+        });
+
+        await strapi.contentAPI.permissions.assertWritten(
+          (ctx.state?.auth as never) ?? {},
+          'create',
+          USER_UID,
+          created.documentId,
+          {}
+        );
+        await writeProfile(ctx, created.documentId, writes.profile);
+
+        return created.documentId;
+      });
+
+      ctx.status = 201;
+      ctx.body = await present(ctx, documentId, unfiltered(query), wantsRole);
+    },
+
+    async update(ctx: Koa.Context) {
+      const documentId = await resolve(ctx.params?.id);
+
+      if (!documentId || !(await entries().findOne(documentId, { fields: ['documentId'] }))) {
+        throw new errors.NotFoundError(NOT_FOUND_ON_WRITE);
+      }
+
+      const writes = sortWrites(bodyOf(ctx), false);
+
+      const auth = (ctx.state?.auth as never) ?? {};
+      const { query, wantsRole } = await readQuery(ctx, 'findOne');
+
+      await strapi.contentAPI.permissions.assertEntry(auth, 'update', USER_UID, documentId);
+
+      const input = await userInput(ctx, 'update', writes.user, documentId);
+
+      await strapi.db.transaction(async () => {
+        if (Object.keys(input).length > 0) {
+          await documents().update({ documentId, data: input });
+          await strapi.contentAPI.permissions.assertWritten(
+            auth,
+            'update',
+            USER_UID,
+            documentId,
+            {}
+          );
+        }
+
+        await writeProfile(ctx, documentId, writes.profile);
+      });
+
+      // Read again under the caller's read conditions. A write may have moved the user out of them;
+      // then the answer is the identity alone, which the caller already holds
+      ctx.body = (await present(ctx, documentId, query, wantsRole)) ?? {
+        id: await numericIdOf(documentId),
+        documentId,
+      };
+    },
+
+    /** The deleted user, as it was. */
+    async delete(ctx: Koa.Context) {
+      const documentId = await resolve(ctx.params?.id);
+      const { wantsRole } = await readQuery(ctx, 'findOne');
+      const user = documentId && (await present(ctx, documentId, {}, wantsRole));
+
+      if (!documentId || !user) {
+        throw new errors.NotFoundError(NOT_FOUND_ON_WRITE);
+      }
+
+      await strapi.contentAPI.permissions.assertEntry(
+        (ctx.state?.auth as never) ?? {},
+        'delete',
+        USER_UID,
+        documentId
+      );
+      await documents().delete({ documentId });
+
+      ctx.body = user;
+    },
+
+    /** The signed-in user; `role` only with `populate=role`. */
+    async me(ctx: Koa.Context) {
+      ctx.set('Cache-Control', PER_USER_CACHE_CONTROL);
+
+      const { documentId } = (ctx.state?.user ?? {}) as { documentId?: unknown };
+
+      if (typeof documentId !== 'string' || documentId === '') {
+        throw new errors.UnauthorizedError();
+      }
+
+      const { query, wantsRole } = await readQuery(ctx, 'find', true);
+      const user = await present(ctx, documentId, query, wantsRole, true);
+
+      if (!user) {
+        throw new errors.NotFoundError(NOT_FOUND);
+      }
+
+      ctx.body = user;
+    },
+  };
+};

@@ -1,0 +1,14 @@
+{
+  "kind": "collectionType",
+  "collectionName": "books",
+  "info": { "singularName": "book", "pluralName": "books", "displayName": "Book" },
+  "attributes": {
+    "title": { "type": "string" },
+    "fans": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "favoriteBooks"
+    }
+  }
+}

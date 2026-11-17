@@ -1,7 +1,24 @@
 import _ from 'lodash';
-import type { Core } from '@strapi/types';
-import { createActionProvider, createConditionProvider } from './providers';
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import type { Core, Modules, UID } from '@strapi/types';
+import {
+  createActionProvider,
+  createConditionProvider,
+  createSyntheticActionProvider,
+} from './providers';
 import createPermissionEngine from './engine';
+import { createEntryCheck } from './assert-entry';
+import { createWrittenCheck } from './assert-written';
+import { createWriteStatus } from './write-status';
+import { createPermissionChecker } from './checker';
+import { appliesTo, evaluateCondition, freezeConditionDefinition } from './conditions';
+import { describePermissions } from './describe';
+import * as explain from './explain';
+import { compiledPermissionsOf, createAbilityGenerator, isSubjectAware } from './generate-ability';
+import { contentTypeUidOfAction } from './materialize';
+import { SINGLE_TYPE_CREATE, SYNTHETIC_ACTIONS } from './types';
+
+type PermissionUtilities = Modules.ContentAPI.PermissionUtilities;
 
 const typeSymbol = Symbol.for('__type__');
 
@@ -34,11 +51,33 @@ const createValidatePermissionHandler =
  * Also, expose utilities to get information about available actions and such.
  */
 export default (strapi: Core.Strapi) => {
-  // NOTE: Here we define both an action and condition provider,
-  // but at the moment, we're only using the action one.
   const providers = {
     action: createActionProvider(),
+    // `read-drafts` and `publish`: data actions no controller backs, kept out of `action`, whose
+    // keys are what API tokens may be granted
+    syntheticAction: createSyntheticActionProvider(),
     condition: createConditionProvider(),
+  };
+
+  const contentTypes = () => strapi.contentTypes ?? {};
+
+  /**
+   * The content type whose controller owns the action: `api::note.note` for
+   * `api::note.note.find`, null for `plugin::end-users.me.find` or a custom API without one.
+   */
+  const subjectOf: PermissionUtilities['subjectOf'] = (action: string): UID.ContentType | null => {
+    const uid = contentTypeUidOfAction(action);
+
+    if (uid === null) {
+      return null;
+    }
+
+    // One lookup of the one uid: reading `strapi.contentTypes` builds the map of every schema each
+    // time. The registry is a plain object, so a key like `constructor` finds an inherited value;
+    // only a schema that names itself by the uid counts.
+    const contentType: { uid?: unknown } | undefined = strapi.contentType(uid as UID.ContentType);
+
+    return contentType?.uid === uid ? (uid as UID.ContentType) : null;
   };
 
   /**
@@ -106,6 +145,9 @@ export default (strapi: Core.Strapi) => {
   /**
    * Register all the content-API controllers actions into the action provider.
    * This method make use of the {@link getActionsMap} to generate the list of actions to register.
+   *
+   * Then register `<uid>.read-drafts` and `<uid>.publish` into the synthetic action provider for
+   * every content type with draft & publish.
    */
   const registerActions = async () => {
     const actionsMap = getActionsMap();
@@ -131,6 +173,28 @@ export default (strapi: Core.Strapi) => {
         );
       }
     }
+
+    // Reading drafts and publishing, for each content type with draft & publish; creating, for
+    // each single type: its first document is created by the `update` route, so who may create it
+    // and the owner it is stamped with are a `create` row's, which no controller backs
+    for (const [uid, contentType] of Object.entries(contentTypes())) {
+      const actions: string[] = [
+        ...(contentTypesUtils.hasDraftAndPublish(contentType) ? SYNTHETIC_ACTIONS : []),
+        ...(contentTypesUtils.isSingleType(contentType) ? [SINGLE_TYPE_CREATE] : []),
+      ];
+
+      await Promise.all(
+        actions.map((action) => {
+          const actionUID = `${uid}.${action}`;
+
+          return providers.syntheticAction.register(actionUID, {
+            subject: uid,
+            action,
+            uid: actionUID,
+          });
+        })
+      );
+    }
   };
 
   // Create an instance of a content-API permission engine
@@ -142,10 +206,56 @@ export default (strapi: Core.Strapi) => {
     createValidatePermissionHandler(providers.action)
   );
 
+  const generateAbility: PermissionUtilities['generateAbility'] = createAbilityGenerator({
+    engine,
+    providers,
+    getContentTypes: contentTypes,
+  });
+
+  // What a condition editor asks about a definition it holds: none of it registers anything, so it
+  // works after load
+  const conditions: PermissionUtilities['conditions'] = {
+    validate: freezeConditionDefinition,
+    evaluate: (definition, params, ctx) =>
+      evaluateCondition(definition, params, { ...ctx, now: new Date() }),
+    appliesTo,
+    readsProfile: () =>
+      providers.condition.values().some((definition) => definition.usesProfile === true),
+  };
+
+  // What the Content API sanitizers and validators ask about a caller's data rules
+  const checker: PermissionUtilities['checker'] = createPermissionChecker({ providers });
+
+  // The stored-entry check before writes, which the Document Service doesn't filter
+  const { entryMatches, assertEntry } = createEntryCheck({ strapi, checker });
+
+  // The data a create or update wrote, judged in the transaction that wrote it
+  const { assertWritten } = createWrittenCheck({ strapi, checker });
+
+  // Who may publish: a write is a draft without the `publish` action
+  const { resolveWriteStatus, publishIfAllowed } = createWriteStatus({
+    strapi,
+    checker,
+    entryMatches,
+  });
+
   return {
     engine,
     providers,
+    conditions,
     registerActions,
     getActionsMap,
+    generateAbility,
+    isSubjectAware: isSubjectAware satisfies PermissionUtilities['isSubjectAware'],
+    subjectOf,
+    checker,
+    describe: describePermissions satisfies PermissionUtilities['describe'],
+    readExplain: ((auth) =>
+      explain.read(compiledPermissionsOf(auth))) satisfies PermissionUtilities['readExplain'],
+    entryMatches,
+    assertEntry,
+    assertWritten,
+    resolveWriteStatus,
+    publishIfAllowed,
   };
 };

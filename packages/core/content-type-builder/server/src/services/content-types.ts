@@ -5,6 +5,7 @@ import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import { emitSchemaEvent } from '../utils/events';
 import { getService } from '../utils';
+import { getDeclaredRelationKinds } from '../utils/relation-kinds';
 import createBuilder from './schema-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { coreUids, pluginsUids } from './constants';
@@ -28,11 +29,15 @@ export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
   get(model, 'pluginOptions.content-type-builder.visible', true) === true;
 
 export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) => {
-  const { uid } = contentType;
-  if (uid === coreUids.STRAPI_USER) {
-    // TODO: replace with an obj { relation: 'x', bidirectional: true|false }
-    return ['oneWay', 'manyWay'];
+  // The option comes first: a type that is hidden from the Content-Type Builder (the end-user
+  // type) can still declare the relation kinds it accepts.
+  const declared = getDeclaredRelationKinds(contentType);
+
+  if (declared) {
+    return declared;
   }
+
+  const { uid } = contentType;
 
   if (
     uid.startsWith(coreUids.PREFIX) ||

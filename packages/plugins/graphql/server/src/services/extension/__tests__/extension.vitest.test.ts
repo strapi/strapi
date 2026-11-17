@@ -40,4 +40,21 @@ describe('GraphQL extension merging', () => {
     expect(second.resolversConfig['Query.article'].policies).toEqual(['second', 'additional']);
     expect(extension.generate({ typeRegistry: {} })).toEqual(result);
   });
+
+  describe('required output fields', () => {
+    it('stay non-null until a plugin asks for them to be relaxed', () => {
+      const extension = createExtension({ strapi: {} as Core.Strapi });
+
+      expect(extension.isRequiredOutputRelaxed()).toBe(false);
+
+      extension.relaxRequiredOutput();
+      expect(extension.isRequiredOutputRelaxed()).toBe(true);
+    });
+
+    it('are not changed by another instance', () => {
+      createExtension({ strapi: {} as Core.Strapi }).relaxRequiredOutput();
+
+      expect(createExtension({ strapi: {} as Core.Strapi }).isRequiredOutputRelaxed()).toBe(false);
+    });
+  });
 });

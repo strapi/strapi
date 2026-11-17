@@ -1,4 +1,4 @@
-import { merge, property } from 'lodash';
+import { merge, omit, property } from 'lodash';
 import {
   async,
   contentTypes,
@@ -9,6 +9,14 @@ import {
 import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
+import { getOutputScope, stringArg } from '../permissions';
+import {
+  assertNestedDepth,
+  nestedScopeOf,
+  readsAttribute,
+  sanitizeEntries,
+} from '../nested-output';
+import type { EntryScope } from '../nested-output';
 
 const { ApplicationError } = errors;
 
@@ -47,23 +55,37 @@ export default ({ strapi }: Context) => {
       return async (parent: any, args: any, context: any, info: any) => {
         const { auth } = context.state;
 
+        const isActive = strapi.contentAPI.permissions.isSubjectAware(auth);
+        let parentScope: EntryScope | null = null;
+
+        if (isActive) {
+          // The field is the parent's: where the rules of its entry hide it from the caller, it is
+          // null, whatever the target's rules say
+          parentScope = await nestedScopeOf(strapi, context, parent, contentType);
+
+          if (!(
+            parentScope &&
+            (await readsAttribute(strapi, context, parentScope, contentType, attributeName))
+          )) {
+            return null;
+          }
+
+          // One level below the parent: within the populate depth of the request's root, as REST
+          // counts it
+          assertNestedDepth(strapi, context, parentScope);
+
+          // A polymorphic relation has no one target to read the query, the drafts gate and the
+          // conditions of, and its items would need each one's own: not read for these callers
+          // (the branch below was never reachable: a morph has no `target` to take the model of)
+          if (isMorphAttribute) {
+            throw new errors.ForbiddenError('Reading a polymorphic relation is not allowed');
+          }
+        }
+
         const transformedArgs = transformArgs(args, {
           contentType: targetContentType,
           usePagination: true,
         });
-
-        await strapi.contentAPI.validate.query(transformedArgs, targetContentType, {
-          auth,
-        });
-
-        const sanitizedQuery = await strapi.contentAPI.sanitize.query(
-          transformedArgs,
-          targetContentType,
-          {
-            auth,
-          }
-        );
-        const transformedQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
 
         const isTargetDraftAndPublishContentType =
           contentTypes.hasDraftAndPublish(targetContentType);
@@ -85,23 +107,20 @@ export default ({ strapi }: Context) => {
         const shouldInheritRootQueryStatus =
           rootQueryArgs?._originField && isBuiltInQueryField(rootQueryArgs._originField);
 
+        // The version a built-in mutation returned, for a caller with subject-aware permissions
+        // (nothing is recorded for anyone else): its relations are read as a query's would be
+        const writeScope = rootPath ? context.writeScopeByPath?.get(rootPath.key) : undefined;
+
         // Only inherit status from built-in queries to avoid conflicts with custom resolvers.
         // Built-in root queries default to published results; draft/preview queries pass `status`.
         // Nested relations should match that parent query.
         const inheritedStatus = shouldInheritRootQueryStatus
           ? rootQueryArgs.status || 'published'
-          : null;
+          : (writeScope?.status ?? null);
 
-        const statusToApply = args.status || inheritedStatus;
-
-        const defaultFilters =
-          isTargetDraftAndPublishContentType && statusToApply
-            ? {
-                where: {
-                  publishedAt: statusToApply === 'published' ? { $notNull: true } : { $null: true },
-                },
-              }
-            : {};
+        // A caller with subject-aware permissions reads published where nothing says which
+        // version (a custom resolver's root): never drafts it was not asked for
+        const statusToApply = args.status || inheritedStatus || (isActive ? 'published' : null);
 
         const inheritedPublicationFilter =
           rootQueryArgs?.publicationFilter !== undefined &&
@@ -126,6 +145,49 @@ export default ({ strapi }: Context) => {
             ? 'has-published-version-document'
             : 'never-published-document';
         }
+
+        // What the query layer applies to the target besides the caller's own query: the status and
+        // publication filter inherited from the root. A caller with subject-aware permissions has
+        // them validated and sanitized as the query's own (the drafts gate, and the target's
+        // `read-drafts` conditions): the root asked for them on its own type, not on this one.
+        // Only a status that is set goes in: a `status` key that is undefined or null reads drafts.
+        const inheritedRead: Record<string, unknown> = isActive
+          ? {
+              ...(statusToApply ? { status: statusToApply } : {}),
+              ...(effectivePublicationFilter !== undefined
+                ? { publicationFilter: effectivePublicationFilter }
+                : {}),
+            }
+          : {};
+        const queryToCheck = isActive ? { ...transformedArgs, ...inheritedRead } : transformedArgs;
+
+        await strapi.contentAPI.validate.query(queryToCheck, targetContentType, {
+          auth,
+          action: 'find',
+        });
+
+        const sanitizedWithRead = await strapi.contentAPI.sanitize.query(
+          queryToCheck,
+          targetContentType,
+          {
+            auth,
+            action: 'find',
+          }
+        );
+        // The resolver applies the inherited status itself (below): keep it out of the load
+        const sanitizedQuery = isActive
+          ? omit(sanitizedWithRead, Object.keys(inheritedRead))
+          : sanitizedWithRead;
+        const transformedQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
+
+        const defaultFilters =
+          isTargetDraftAndPublishContentType && statusToApply
+            ? {
+                where: {
+                  publishedAt: statusToApply === 'published' ? { $notNull: true } : { $null: true },
+                },
+              }
+            : {};
 
         let publicationFilterWhere: Record<string, any> = {};
         if (isTargetDraftAndPublishContentType && effectivePublicationFilter !== undefined) {
@@ -195,15 +257,31 @@ export default ({ strapi }: Context) => {
           return sanitizeMorphAttribute(data);
         }
 
+        // A caller with subject-aware permissions gets the target's output rules too (private
+        // fields, the field rules of its `find` row), in the status and locale it was read in
+        const output =
+          isActive && data !== null && data !== undefined
+            ? await sanitizeEntries(strapi, context, targetContentType, data, {
+                action: 'find',
+                ...(await getOutputScope(strapi, targetContentType, {
+                  status: isTargetDraftAndPublishContentType ? statusToApply : undefined,
+                  locale: stringArg(rootQueryArgs?.locale),
+                })),
+                ...(parentScope
+                  ? { depth: parentScope.depth + 1, depthRoot: parentScope.depthRoot }
+                  : {}),
+              })
+            : data;
+
         // If this is a to-many relation, it returns an object that
         // matches what the entity-response-collection's resolvers expect
         if (isToMany) {
-          return toEntityResponseCollection(data, sanitizeInfo);
+          return toEntityResponseCollection(output, sanitizeInfo);
         }
 
         // Else, it returns an object that matches
         // what the entity-response's resolvers expect
-        return toEntityResponse(data, sanitizeInfo);
+        return toEntityResponse(output, sanitizeInfo);
       };
     },
   };
