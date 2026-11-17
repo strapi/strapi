@@ -452,6 +452,12 @@ names. A package that registers policies or middlewares registers all of them.
   `{ resolve, config }` entries are not checked. `Core.RouteConfig` keeps its unchecked type.
 - `auth.strategies` accepts strategy names and strategy objects, as the runtime does (admin's
   transfer routes pass the data-transfer strategy). `Core.RouteConfig` keeps names only.
+- In `config/middlewares.ts` (`Core.Config.Middlewares`), an entry that names a registered
+  middleware types its `config` by the contract, e.g. the Koa context of a function `origin` of
+  `strapi::cors`. Unregistered names and `resolve` entries keep develop's type, so the file is not a
+  complete inventory: an entry with a registered name and a config outside its contract also matches
+  the unregistered entry, and compiles. The file is checked only where its export is typed with
+  `Core.Config.Middlewares`, as in the create-strapi-app templates.
 - `strapi.middleware(name)` resolves a registered name to `MiddlewareFactory<Config>`, and an
   unregistered or dynamic name to `unknown`. Code that resolves dynamic names passes the factory type
   explicitly: `strapi.middleware<Core.MiddlewareFactory>(name)`.
