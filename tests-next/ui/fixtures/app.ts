@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base, type TestInfo } from '@playwright/test';
 
 import {
   SQLITE,
@@ -20,7 +20,7 @@ export const UI_APP_NAME = 'ui';
  * - `file` (default): before the first `beforeAll` or test of each spec file, so a file's
  *   `beforeAll` and tests can build on each other's data but never see another file's;
  * - `test`: before every test (and before `beforeAll`), so data a `beforeAll` writes is gone
- *   by the first test.
+ *   by the first test. Not before `afterAll`, which sees what the last test wrote.
  * Override it per file with `test.use({ resetScope: 'test' })`.
  */
 export type ResetScope = 'file' | 'test';
@@ -45,6 +45,14 @@ export interface ResetFixtures {
   /** Restores the snapshot before a test or hook, following `resetScope`. Automatic. */
   databaseReset: void;
 }
+
+/**
+ * The hook the fixture is set up for (`beforeAll`, `afterAll`…), or undefined for a test.
+ * Playwright doesn't expose it: this reads the same internal method its own fixtures use.
+ * `reset-test-scope.ui-test.ts` fails if it stops working.
+ */
+const currentHookType = (testInfo: TestInfo) =>
+  (testInfo as TestInfo & { _currentHookType?: () => string | undefined })._currentHookType?.();
 
 export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWorkerFixtures>({
   serverMode: ['develop', { scope: 'worker', option: true }],
@@ -93,7 +101,11 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
     async ({ server, resetScope, databaseOwner }, use, testInfo) => {
       // The first test of a worker already starts on the snapshot.
       const dirty = databaseOwner.file !== undefined;
-      if (dirty && (resetScope === 'test' || databaseOwner.file !== testInfo.file)) {
+      const newFile = databaseOwner.file !== testInfo.file;
+      if (
+        dirty &&
+        (newFile || (resetScope === 'test' && currentHookType(testInfo) !== 'afterAll'))
+      ) {
         await restoreDatabase(server);
       }
       databaseOwner.file = testInfo.file;
