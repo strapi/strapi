@@ -1243,9 +1243,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^6.25.0":
-  version: 6.25.0
-  resolution: "undici@npm:6.25.0"
-  checksum: 10c0/2597cc6689bdb02c210c557b1f85febbfda65becae6e6fc1061508e2f33734d25207f81cd8af56ada9956329eb3a7bd7431e87dcfeceba20ee87059b57dcf985
+  version: 6.29.1
+  resolution: "undici@npm:6.29.1"
+  checksum: 10c0/2d6970289fcbaca69a484e968fbb5e6fdadf7d9bff30bb5476f71b619d143ec76df1c75a309ac3cb3b3d78238793c613dcaad47dc9d92b63f9e8e73b86ffec23
   languageName: node
   linkType: hard
 
@@ -1380,8 +1380,8 @@ __metadata:
   linkType: hard
 
 "zod@npm:^4.3.6":
-  version: 4.4.3
-  resolution: "zod@npm:4.4.3"
-  checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard
