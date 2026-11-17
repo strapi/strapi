@@ -373,7 +373,7 @@ jobs:
       - name: Upload results to trunk
         id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
+        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
@@ -442,7 +442,7 @@ jobs:
       - name: Upload results to trunk
         id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
+        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
@@ -503,7 +503,7 @@ jobs:
       - name: Upload results to trunk
         id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
+        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
@@ -664,7 +664,7 @@ jobs:
       - name: Upload results to trunk
         id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
+        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
