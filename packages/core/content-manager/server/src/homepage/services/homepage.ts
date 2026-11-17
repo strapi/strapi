@@ -9,7 +9,6 @@ import type {
 
 import {
   buildHomepageQueryFields,
-  compactSanitizedFields,
   formatRecentDocumentTitle,
   resolveReadableMainField,
   resolveTitleField,
@@ -194,14 +193,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       locale: '*',
     });
 
-    const sanitizedFields = compactSanitizedFields(permissionQuery.fields);
-    if (sanitizedFields !== undefined) {
-      permissionQuery.fields = sanitizedFields;
-    }
-
     return {
       permissionQuery,
-      titleField: resolveTitleField(meta.mainField, sanitizedFields),
+      titleField: resolveTitleField(meta.mainField, permissionQuery.fields),
     };
   };
 

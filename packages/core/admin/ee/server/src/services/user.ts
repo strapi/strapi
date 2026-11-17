@@ -130,8 +130,11 @@ const updateById = async (id: any, attributes: any) => {
       populate: ['roles'],
     });
 
-    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
-    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    // The update resolves null when no user has this id
+    if (updatedUser !== null) {
+      strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+      await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    }
 
     return updatedUser;
   }
