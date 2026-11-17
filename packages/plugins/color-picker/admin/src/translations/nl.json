@@ -1,0 +1,15 @@
+{
+  "color-picker.description": "Kies een kleur",
+  "color-picker.input.aria-label": "Invoerveld kleurkiezer",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "Kleur",
+  "color-picker.options.advanced.regex": "RegExp patroon",
+  "color-picker.options.advanced.regex.description": "Geef een reguliere expressie op om de HEX-waarde te valideren",
+  "color-picker.options.advanced.requiredField": "Verplicht veld",
+  "color-picker.options.advanced.requiredField.description": "Je kunt geen item aanmaken als dit veld leeg is",
+  "color-picker.settings": "Instellingen",
+  "color-picker.toggle.aria-label": "Kleurkiezer openen of sluiten",
+  "plugin.description.long": "Een door Strapi onderhouden kleurkiezer als custom field. Kies een kleur met de schuifregelaars voor verzadiging en tint en sla de waarde op als HEX-string.",
+  "plugin.description.short": "Een door Strapi onderhouden kleurkiezer als custom field.",
+  "plugin.name": "Kleurkiezer"
+}

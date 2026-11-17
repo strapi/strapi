@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "Voegt een GraphQL-endpoint met standaard API-methoden toe.",
+  "plugin.description.short": "Voegt een GraphQL-endpoint met standaard API-methoden toe.",
+  "plugin.name": "GraphQL"
+}
