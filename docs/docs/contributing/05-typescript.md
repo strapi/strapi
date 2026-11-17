@@ -464,11 +464,18 @@ names. A package that registers policies or middlewares registers all of them.
 - `auth.strategies` accepts strategy names and strategy objects, as the runtime does (admin's
   transfer routes pass the data-transfer strategy). `Core.RouteConfig` keeps names only.
 - In `config/middlewares.ts` (`Core.Config.Middlewares`), an entry that names a registered
-  middleware types its `config` by the contract, e.g. the Koa context of a function `origin` of
-  `strapi::cors`. Unregistered names and `resolve` entries keep develop's type, so the file is not a
-  complete inventory: an entry with a registered name and a config outside its contract also matches
-  the unregistered entry, and compiles. The file is checked only where its export is typed with
-  `Core.Config.Middlewares`, as in the create-strapi-app templates.
+  middleware is checked against its contract, as a route reference is: unknown keys and wrong value
+  types are rejected, the name alone is accepted only when the config is optional, and a function
+  `origin` of `strapi::cors` receives the Koa context. Each `strapi::*` middleware defaults its
+  config, so the create-strapi-app list compiles as names alone. Type generation registers the
+  application middlewares (`global::*`, `api::*`). Two forms stay open: `plugin::*` names, for
+  third-party plugins that register no contract, and `{ resolve, config }` entries, for npm packages
+  and paths. Other unregistered names, which the runtime cannot resolve, and handler functions are
+  rejected. A registered `plugin::*` name with a config outside its contract also matches the open
+  `plugin::*` form, and compiles. The file is checked only where its export is typed, e.g.
+  `export default [...] satisfies Core.Config.Middlewares` or
+  `const config: Core.Config.Middlewares = [...]`, as in the create-strapi-app templates; a function
+  export annotates its return type.
 - `strapi.middleware(name)` resolves a registered name to `MiddlewareFactory<Config>`, and an
   unregistered or dynamic name to `unknown`. Code that resolves dynamic names passes the factory type
   explicitly: `strapi.middleware<Core.MiddlewareFactory>(name)`.

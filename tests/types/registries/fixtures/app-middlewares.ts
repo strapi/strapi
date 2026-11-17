@@ -86,3 +86,32 @@ declare const koaContext: Parameters<Core.MiddlewareHandler>[0];
   // @ts-expect-error Its first parameter is not a config: nothing can be passed to it.
   middlewares: [{ name: 'global::koaHandler', config: koaContext }],
 }) satisfies Core.RouteConfigFor<'api::article'>;
+
+// `config/middlewares.ts` checks the application middlewares type generation registers, as route
+// references do.
+const globalMiddlewares: Core.Config.Middlewares = [
+  'strapi::logger',
+  'global::timer',
+  { name: 'global::rateLimit', config: { max: 10 } },
+  'api::article.audit-log',
+  { name: 'api::article.audit-log', config: { level: 'warn' } },
+  'global::legacy',
+  { name: 'global::legacy', config: { anything: true } },
+];
+globalMiddlewares satisfies unknown;
+[
+  // @ts-expect-error A required config cannot be left out.
+  'global::rateLimit',
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error The config is checked against the factory's first parameter.
+  { name: 'global::rateLimit', config: { max: '10' } },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error Unknown application middlewares are rejected.
+  'global::isMissing',
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error A Koa handler is not a factory, runtime cannot call it by name.
+  'global::koaHandler',
+] satisfies Core.Config.Middlewares;
