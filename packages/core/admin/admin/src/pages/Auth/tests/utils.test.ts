@@ -1,4 +1,4 @@
-import { getRedirectTo } from '../utils';
+import { getLoginSearch, getRedirectTo } from '../utils';
 
 describe('Auth | getRedirectTo', () => {
   it('returns the decoded `redirectTo` param', () => {
@@ -40,5 +40,26 @@ describe('Auth | getRedirectTo', () => {
     ['a relative path', '?redirectTo=settings'],
   ])('rejects open-redirect via %s', (_label, search) => {
     expect(getRedirectTo(search)).toBe('/');
+  });
+});
+
+describe('Auth | getLoginSearch', () => {
+  it('round-trips through getRedirectTo, query string included', () => {
+    const target = '/content-manager/collection-types/api::page.page/abc?plugins[i18n][locale]=it';
+
+    expect(
+      getRedirectTo(
+        getLoginSearch(
+          '/content-manager/collection-types/api::page.page/abc',
+          '?plugins[i18n][locale]=it'
+        )
+      )
+    ).toBe(target);
+  });
+
+  it('is empty for the home page and the auth pages', () => {
+    expect(getLoginSearch('/')).toBe('');
+    expect(getLoginSearch('')).toBe('');
+    expect(getLoginSearch('/auth/login', '?redirectTo=%2Fsettings')).toBe('');
   });
 });

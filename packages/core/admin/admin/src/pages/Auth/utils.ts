@@ -34,3 +34,13 @@ export const getRedirectTo = (search: string): string => {
 
   return redirectTo;
 };
+
+/**
+ * The login page search that brings the user back to `pathname` (+ `search`) once they
+ * log in again; the counterpart of `getRedirectTo`. Empty for the home page and for the
+ * auth pages themselves, so logging in from there still lands on the home page.
+ */
+export const getLoginSearch = (pathname: string, search = ''): string =>
+  !pathname || pathname === '/' || pathname.startsWith('/auth/')
+    ? ''
+    : `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`;

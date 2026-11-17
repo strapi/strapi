@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../features/Auth';
+import { getLoginSearch } from '../pages/Auth/utils';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -18,10 +19,7 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
     <Navigate
       to={{
         pathname: '/auth/login',
-        search:
-          pathname !== '/'
-            ? `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`
-            : undefined,
+        search: getLoginSearch(pathname, search) || undefined,
       }}
     />
   );

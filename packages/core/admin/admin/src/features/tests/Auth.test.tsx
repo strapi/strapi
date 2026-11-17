@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 
 import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedDispatch } from '../../core/store/hooks';
@@ -1073,6 +1073,49 @@ describe('AuthProvider', () => {
 
       await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
       expect(screen.getByTestId('token')).toHaveTextContent(TOKEN);
+    });
+  });
+
+  describe('where a logout leads', () => {
+    const DEEP_LINK =
+      '/content-manager/collection-types/api::page.page/abc?plugins[i18n][locale]=it';
+
+    const LocationProbe = () => {
+      const { pathname, search } = useLocation();
+      const logout = useAuth('LocationProbe', (state) => state.logout);
+
+      return (
+        <>
+          <button type="button" onClick={() => void logout()}>
+            Log out
+          </button>
+          <span data-testid="location">{`${pathname}${search}`}</span>
+        </>
+      );
+    };
+
+    it('returns to the page the user was on when their session ends', async () => {
+      render(<LocationProbe />, { initialEntries: [DEEP_LINK] });
+
+      act(() => {
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
+      });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('location')).toHaveTextContent(
+          `/auth/login?redirectTo=${encodeURIComponent(DEEP_LINK)}`
+        )
+      );
+    });
+
+    it('goes to the plain login page when the user logs out', async () => {
+      const { user } = render(<LocationProbe />, { initialEntries: [DEEP_LINK] });
+
+      await user.click(screen.getByRole('button', { name: /log out/i }));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('location')).toHaveTextContent(/^\/auth\/login$/)
+      );
     });
   });
 });
