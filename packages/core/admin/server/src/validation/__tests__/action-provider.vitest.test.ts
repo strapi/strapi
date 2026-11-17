@@ -45,39 +45,39 @@ const cases: Case[] = [
   reject(
     'settings without category',
     [{ ...settings, category: undefined }],
-    '[0].category is a required field'
+    '[0].category Invalid input: expected string, received undefined'
   ),
   reject(
     'settings with an empty category',
     [{ ...settings, category: '' }],
-    '[0].category is a required field'
+    '[0].category Too small: expected string to have >=1 characters'
   ),
   reject(
     'settings with subjects',
     [{ ...settings, subjects: ['api::article.article'] }],
-    'subjects should only be defined for the "contentTypes" section'
+    '[0].subjects should only be defined for the "contentTypes" section'
   ),
   reject(
     'settings with null subjects',
     [{ ...settings, subjects: null }],
-    'subjects should only be defined for the "contentTypes" section'
+    '[0].subjects should only be defined for the "contentTypes" section'
   ),
   reject(
     'settings with a null pluginName',
     [{ ...settings, pluginName: null }],
-    '[0].pluginName must be a `string` type, but the final value was: `null`.'
+    '[0].pluginName Invalid input: expected string, received null'
   ),
   reject(
     'settings with a null subCategory',
     [{ ...settings, subCategory: null }],
-    '[0].subCategory must be a `string` type, but the final value was: `null`.'
+    '[0].subCategory Invalid input: expected string, received null'
   ),
 
   // plugins
   reject(
     'plugins without pluginName (the documented example)',
     [{ section: 'plugins', displayName: 'Export reports', uid: 'report.export' }],
-    '[0].pluginName is a required field'
+    '[0].pluginName Invalid input: expected string, received undefined'
   ),
   accept('plugins', [plugins]),
   accept('plugins with subCategory', [{ ...plugins, subCategory: 'general' }]),
@@ -85,20 +85,24 @@ const cases: Case[] = [
   reject(
     'plugins with category',
     [{ ...plugins, category: 'general' }],
-    'category should only be defined for the "settings" section'
+    '[0].category should only be defined for the "settings" section'
   ),
   accept('plugins with an undefined category', [{ ...plugins, category: undefined }]),
   reject(
     'plugins with a null category',
     [{ ...plugins, category: null }],
-    'category should only be defined for the "settings" section'
+    '[0].category should only be defined for the "settings" section'
   ),
   reject(
     'plugins with an unknown pluginName',
     [{ ...plugins, pluginName: 'unknown-plugin' }],
     '[0].pluginName is not an existing plugin'
   ),
-  reject('plugins with an empty pluginName', [{ ...plugins, pluginName: '' }], '2 errors occurred'),
+  reject(
+    'plugins with an empty pluginName',
+    [{ ...plugins, pluginName: '' }],
+    '[0].pluginName is not an existing plugin'
+  ),
 
   // contentTypes
   accept('contentTypes', [contentTypes]),
@@ -108,22 +112,22 @@ const cases: Case[] = [
   reject(
     'contentTypes without subjects',
     [{ ...contentTypes, subjects: undefined }],
-    '[0].subjects is a required field'
+    '[0].subjects Invalid input: expected array, received undefined'
   ),
   reject(
     'contentTypes with null subjects',
     [{ ...contentTypes, subjects: null }],
-    '[0].subjects must be a `array` type, but the final value was: `null`.'
+    '[0].subjects Invalid input: expected array, received null'
   ),
   reject(
     'contentTypes with a non-string subject',
     [{ ...contentTypes, subjects: [1] }],
-    '[0].subjects[0] must be a `string` type, but the final value was: `1`.'
+    '[0].subjects[0] Invalid input: expected string, received number'
   ),
   reject(
     'contentTypes with subCategory',
     [{ ...contentTypes, subCategory: 'general' }],
-    'subCategory should only be defined for "plugins" and "settings" sections'
+    '[0].subCategory should only be defined for "plugins" and "settings" sections'
   ),
 
   // internal
@@ -131,7 +135,7 @@ const cases: Case[] = [
   reject(
     'internal with subCategory',
     [{ ...internal, subCategory: 'general' }],
-    'subCategory should only be defined for "plugins" and "settings" sections'
+    '[0].subCategory should only be defined for "plugins" and "settings" sections'
   ),
   reject(
     'internal with an unknown pluginName',
@@ -143,17 +147,17 @@ const cases: Case[] = [
   reject(
     'an unknown section',
     [{ ...internal, section: 'unknown' }],
-    '[0].section must be one of the following values: contentTypes, plugins, settings, internal'
+    "[0].section Invalid discriminator value. Expected 'contentTypes' | 'plugins' | 'settings' | 'internal'"
   ),
   reject(
     'a section in the wrong case',
     [{ ...internal, section: 'Internal' }],
-    '[0].section must be one of the following values: contentTypes, plugins, settings, internal'
+    "[0].section Invalid discriminator value. Expected 'contentTypes' | 'plugins' | 'settings' | 'internal'"
   ),
   reject(
     'a missing section',
     [{ ...internal, section: undefined }],
-    '[0].section is a required field'
+    "[0].section Invalid discriminator value. Expected 'contentTypes' | 'plugins' | 'settings' | 'internal'"
   ),
 
   // uid
@@ -162,29 +166,29 @@ const cases: Case[] = [
   reject(
     'an uppercase uid',
     [{ ...plugins, uid: 'Read' }],
-    '[0].uid: The uid can only contain lowercase letters, dots and hyphens.'
+    '[0].uid The uid can only contain lowercase letters, dots and hyphens.'
   ),
   reject(
     'a 2-character uid',
     [{ ...plugins, uid: 'ab' }],
-    '[0].uid: The uid can only contain lowercase letters, dots and hyphens.'
+    '[0].uid The uid can only contain lowercase letters, dots and hyphens.'
   ),
   reject(
     'a number uid',
     [{ ...plugins, uid: 123 }],
-    '[0].uid must be a `string` type, but the final value was: `123`.'
+    '[0].uid Invalid input: expected string, received number'
   ),
 
   // displayName
   reject(
     'an empty displayName',
     [{ ...plugins, displayName: '' }],
-    '[0].displayName is a required field'
+    '[0].displayName Too small: expected string to have >=1 characters'
   ),
   reject(
     'a number displayName',
     [{ ...plugins, displayName: 1 }],
-    '[0].displayName must be a `string` type, but the final value was: `1`.'
+    '[0].displayName Invalid input: expected string, received number'
   ),
 
   // options
@@ -198,12 +202,12 @@ const cases: Case[] = [
   reject(
     'options with a null applyToProperties',
     [{ ...plugins, options: { applyToProperties: null } }],
-    '[0].options.applyToProperties must be a `array` type, but the final value was: `null`.'
+    '[0].options.applyToProperties Invalid input: expected array, received null'
   ),
   reject(
     'null options',
     [{ ...plugins, options: null }],
-    '[0].options must be a `object` type, but the final value was: `null`.'
+    '[0].options Invalid input: expected object, received null'
   ),
 
   // aliases
@@ -221,24 +225,16 @@ const cases: Case[] = [
   accept('null aliases', [{ ...plugins, aliases: null }]),
 
   // item and list
-  reject(
-    'an unknown key',
-    [{ ...plugins, unknown: true }],
-    '[0] field has unspecified keys: unknown'
-  ),
+  reject('an unknown key', [{ ...plugins, unknown: true }], '[0] Unrecognized key: "unknown"'),
   reject(
     'two invalid fields in one item',
     [{ ...settings, category: undefined, displayName: 1 }],
     '2 errors occurred'
   ),
-  reject('a null item', [null], '[0] must be a `object` type, but the final value was: `null`.'),
+  reject('a null item', [null], '[0] Invalid input: expected object, received null'),
   accept('an empty list', []),
-  reject(
-    'an item instead of a list',
-    internal,
-    'this must be a `array` type, but the final value was: `{\n  "section": "\\"internal\\"",\n  "displayName": "\\"Read\\"",\n  "uid": "\\"read\\""\n}`.'
-  ),
-  reject('undefined', undefined, 'this is a required field'),
+  reject('an item instead of a list', internal, 'Invalid input: expected array, received object'),
+  reject('undefined', undefined, 'Invalid input: expected array, received undefined'),
 ];
 
 describe('validateRegisterProviderAction', () => {
