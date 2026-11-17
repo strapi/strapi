@@ -30,6 +30,8 @@ const BlueText = (children: React.ReactNode) => (
  * -----------------------------------------------------------------------------------------------*/
 
 const NameText = styled(Typography)<{ $isDeleted: boolean }>`
+  font-size: inherit;
+  line-height: inherit;
   font-style: ${({ $isDeleted }) => ($isDeleted ? 'italic' : 'normal')};
 `;
 
@@ -77,7 +79,6 @@ const TruncatedName = ({
       <NameText
         ref={attachName}
         tag="span"
-        variant="pi"
         textColor={isDeleted ? 'neutral500' : undefined}
         ellipsis
         onPointerEnter={measureName}
@@ -451,18 +452,12 @@ const VersionsList = () => {
           {currentVersion && (
             <Flex gap={2} overflow="hidden">
               <Box flex={1} overflow="hidden">
-                <Typography
-                  display="block"
-                  variant="omega"
-                  textColor="neutral600"
-                  overflow="hidden"
-                  style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
+                <VersionDescription variant="omega" textColor="neutral600">
                   <VersionAuthor
                     version={currentVersion}
                     isCurrent={page === 1 && versions.data.indexOf(currentVersion) === 0}
                   />
-                </Typography>
+                </VersionDescription>
               </Box>
               {currentVersion.status && <DocumentStatus status={currentVersion.status} size="XS" />}
             </Flex>
