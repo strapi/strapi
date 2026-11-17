@@ -102,3 +102,9 @@ export function isStderrError(error: unknown): error is StderrError {
     typeof error.stderr === 'string'
   );
 }
+
+export function isAllOutputError(error: unknown): error is { all: string } {
+  return (
+    typeof error === 'object' && error !== null && 'all' in error && typeof error.all === 'string'
+  );
+}

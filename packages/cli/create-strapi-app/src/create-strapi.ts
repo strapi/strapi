@@ -3,6 +3,7 @@ import { isAbsolute, join, relative, sep } from 'node:path';
 import chalk from 'chalk';
 import execa from 'execa';
 import fse from 'fs-extra';
+import ora from 'ora';
 import semver from 'semver';
 
 import { createGrowthSsoTrial } from '@strapi/cloud-cli';
@@ -13,7 +14,7 @@ import { trackUsage } from './utils/usage';
 import { createPackageJSON } from './utils/package-json';
 import { writePnpmWorkspaceConfig } from './utils/pnpm-config';
 import { generateDotEnv } from './utils/dot-env';
-import { isStderrError } from './types';
+import { isAllOutputError, isStderrError } from './types';
 
 import type { Scope } from './types';
 import { logger } from './utils/logger';
@@ -187,18 +188,31 @@ async function createApp(scope: Scope) {
   }
 
   if (installDependencies) {
-    try {
-      logger.title('deps', `Installing dependencies with ${chalk.cyan(packageManager)}`);
+    logger.title('deps', `Installing dependencies with ${chalk.cyan(packageManager)}`);
 
+    // Show a spinner instead of the package manager output
+    const spinner = ora({ text: 'Installing dependencies', indent: 7 });
+
+    try {
       await trackUsage({ event: 'willInstallProjectDependencies', scope });
 
+      spinner.start();
       await runInstall(scope);
+      spinner.stop();
 
       await trackUsage({ event: 'didInstallProjectDependencies', scope });
 
       logger.success(`Dependencies installed`);
     } catch (error) {
+      spinner.fail('Dependencies could not be installed');
+
       const stderr = isStderrError(error) ? error.stderr : '';
+
+      // The output was hidden during the install, so show it now to help the user fix the error
+      const output = isAllOutputError(error) ? error.all : stderr;
+      if (output) {
+        console.error(`\n${output}`);
+      }
 
       await trackUsage({
         event: 'didNotInstallProjectDependencies',
@@ -338,7 +352,10 @@ async function runInstall({ rootPath, packageManager }: Scope) {
 
   const options: execa.Options = {
     cwd: rootPath,
-    stdio: 'inherit',
+    // Ignore stdin so that a prompt or a script that reads stdin gets EOF and cannot hang the install.
+    // Capture stdout and stderr, and keep them together in `all` for the error message.
+    stdio: ['ignore', 'pipe', 'pipe'],
+    all: true,
     env: {
       ...process.env,
       ...envArgs,
