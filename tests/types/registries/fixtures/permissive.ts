@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { factories, type Core } from '@strapi/strapi';
 
 declare const app: Core.Strapi;
 
@@ -82,3 +83,19 @@ declare const lookupChecks: [
 lookupChecks satisfies unknown;
 const contextualApiService: { greet(): string } = app.api('article').service('article');
 contextualApiService.greet() satisfies string;
+
+// A core service without config, as `strapi generate` writes it, keeps develop's type without the
+// switch: the factory's default override (`Core.CoreAPI.Service.Extendable`) and the core service.
+const scaffoldedService = factories.createCoreService('api::article.article');
+declare const scaffoldedServiceChecks: [
+  Expect<
+    Equal<
+      [ReturnType<typeof scaffoldedService>],
+      [
+        Core.CoreAPI.Service.Extendable<'api::article.article'> &
+          Core.CoreAPI.Service.ContentType<'api::article.article'>,
+      ]
+    >
+  >,
+];
+scaffoldedServiceChecks satisfies unknown;

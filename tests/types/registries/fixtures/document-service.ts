@@ -1,6 +1,7 @@
 // Document Service types on registered schemas. Its own program: the entries narrow every lookup.
 // Known gaps are `@ts-expect-error` cases with a comment: fixing one makes its directive unused.
-import type { Core, Data, Schema, Struct } from '@strapi/strapi';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { factories, type Core, type Data, type Schema, type Struct } from '@strapi/strapi';
 
 interface ArticleSchema extends Struct.CollectionTypeSchema {
   collectionName: 'articles';
@@ -447,6 +448,42 @@ void homepageService.delete(deleteWithLookup);
 void articleService.delete('a', { unknownParam: 1 });
 // @ts-expect-error The params are those of the Document Service's `delete`.
 void homepageService.delete({ unknownParam: 1 });
+
+// A core service without config, as `strapi generate` writes it (`createCoreService(uid)`), is the
+// core service of its content type: the factory adds no override, so the strict signatures apply
+// alone. A factory with a config keeps the override types of `Core.CoreAPI.Service.Extendable`.
+const scaffoldedArticles = factories.createCoreService('api::article.article');
+const scaffoldedHomepage = factories.createCoreService('api::homepage.homepage');
+const scaffoldedArticleService = scaffoldedArticles({ strapi: app });
+const scaffoldedHomepageService = scaffoldedHomepage({ strapi: app });
+const scaffoldedCreated = scaffoldedArticleService.create({ data: { title: 'Title' } });
+declare const scaffoldedServiceChecks: [
+  Expect<
+    Equal<
+      [typeof scaffoldedArticleService],
+      [Core.CoreAPI.Service.ContentType<'api::article.article'>]
+    >
+  >,
+  Expect<
+    Equal<
+      [typeof scaffoldedHomepageService],
+      [Core.CoreAPI.Service.ContentType<'api::homepage.homepage'>]
+    >
+  >,
+  Expect<Equal<[Awaited<typeof scaffoldedCreated>['title']], [string | null]>>,
+];
+scaffoldedServiceChecks satisfies unknown;
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void scaffoldedArticleService.create({ data: { title: 'Title' }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void scaffoldedArticleService.update('a', { data: { views: 1 }, lookup: { locale: 'fr' } });
+// @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+void scaffoldedArticleService.delete('a', { lookup: { locale: 'fr' } });
+void scaffoldedHomepageService.createOrUpdate({
+  data: { title: 'Title' },
+  // @ts-expect-error The Document Service builds `lookup` itself and rejects one from the caller.
+  lookup: { locale: 'fr' },
+});
 
 // Known gap (filters): filter values are not checked against the attribute type. This compiles,
 // so it is not an `@ts-expect-error` case.
