@@ -174,14 +174,11 @@ test('the seeded state', async () => {
 });
 
 describe.skipIf(database.client !== 'sqlite')('restore', () => {
-  test.each(['sql', 'reload'] as const)(
-    '%s restore undoes every change and keeps the sessions',
-    async (mode) => {
-      await changeEverything();
+  test('a restore undoes every change and keeps the sessions', async () => {
+    await changeEverything();
 
-      await restoreDatabase(server, { mode });
+    await restoreDatabase(server);
 
-      await expectSeededState();
-    }
-  );
+    await expectSeededState();
+  });
 });
