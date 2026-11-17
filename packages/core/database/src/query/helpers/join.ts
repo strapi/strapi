@@ -10,6 +10,15 @@ export interface Join {
   rootTable?: string;
   on?: Record<string, any>;
   orderBy?: Record<string, 'asc' | 'desc'>;
+  /**
+   * Model whose scopes narrow this join: the joined model, or the target of a join table. A join
+   * table carries it so a link to a hidden target matches nothing, not a row of NULLs
+   */
+  uid?: string;
+  /** Column of this join that holds the ids of `uid` rows. Defaults to id */
+  idColumn?: string;
+  /** ON condition that keeps only the rows (or join-table links) whose `uid` row is visible */
+  scope?: Knex.Raw;
 }
 
 interface JoinOptions {
@@ -39,6 +48,8 @@ const createPivotJoin = (
     rootColumn: joinTable.joinColumn.referencedColumn,
     rootTable: alias,
     on: joinTable.on,
+    uid: targetMeta.uid,
+    idColumn: joinTable.inverseJoinColumn.name,
   });
 
   const subAlias = refAlias || qb.getAlias();
@@ -81,6 +92,7 @@ const createJoin = (ctx: Ctx, { alias, refAlias, attributeName, attribute }: Joi
           [morphColumn.typeColumn.name]: uid,
           ...morphColumn.on,
         },
+        uid: targetMeta.uid,
       });
 
       return subAlias;
@@ -99,6 +111,8 @@ const createJoin = (ctx: Ctx, { alias, refAlias, attributeName, attribute }: Joi
           [joinTable.morphColumn.typeColumn.name]: uid,
           field: attributeName,
         },
+        uid: targetMeta.uid,
+        idColumn: joinTable.joinColumn.name,
       });
 
       const subAlias = refAlias || qb.getAlias();
@@ -127,6 +141,7 @@ const createJoin = (ctx: Ctx, { alias, refAlias, attributeName, attribute }: Joi
       referencedColumn: joinColumn.referencedColumn,
       rootColumn: joinColumn.name,
       rootTable: alias,
+      uid: targetMeta.uid,
     });
     return subAlias;
   }
@@ -151,6 +166,7 @@ const applyJoin = (qb: Knex.QueryBuilder, join: Join) => {
     rootTable, // = qb.alias
     on,
     orderBy,
+    scope,
   } = join;
 
   qb[method](`${referencedTable} as ${alias}`, (inner) => {
@@ -160,6 +176,10 @@ const applyJoin = (qb: Knex.QueryBuilder, join: Join) => {
       for (const key of Object.keys(on)) {
         inner.onVal(`${alias}.${key}`, on[key]);
       }
+    }
+
+    if (scope) {
+      inner.andOn(scope);
     }
   });
 

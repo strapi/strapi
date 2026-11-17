@@ -36,6 +36,8 @@ interface State {
   filters: any;
   search: string;
   processed: boolean;
+  /** False for the subquery of a join scope, so a scope where that names a relation cannot recurse */
+  scoped: boolean;
 }
 
 export interface QueryBuilder {
@@ -164,10 +166,27 @@ const createQueryBuilder = (
     filters: null,
     search: null,
     processed: false,
+    scoped: true,
   });
 
   // Joins reference the root alias, which max and min do not use without joins
   const isAggregateWithJoins = () => ['max', 'min'].includes(state.type) && state.joins.length > 0;
+
+  const isScoped = () => state.scoped && !db.scopes.isEmpty();
+
+  // `<alias>.<idColumn> IN (SELECT id FROM <target> WHERE <scopes>)`, or undefined without a scope
+  const scopeJoin = (alias: string, targetUid: string, idColumn = 'id') => {
+    const wheres = db.scopes.where({ uid: targetUid, meta: db.metadata.get(targetUid) });
+
+    if (wheres.length === 0) {
+      return undefined;
+    }
+
+    const sub = createQueryBuilder(targetUid, db, { scoped: false }).select('id');
+    wheres.forEach((where) => sub.where(where));
+
+    return db.connection.raw('?? in ?', [`${alias}.${idColumn}`, sub.getKnexQuery()]);
+  };
 
   const getAlias = () => {
     const alias = `t${state.aliasCounter}`;
@@ -492,11 +511,18 @@ const createQueryBuilder = (
       }
 
       // Copy instead of push: clones share the state.where array, so a push would scope them twice
-      if (!db.scopes.isEmpty() && !UNSCOPED_TYPES.includes(state.type)) {
+      if (isScoped() && !UNSCOPED_TYPES.includes(state.type)) {
         state.where = [...state.where, ...db.scopes.where({ uid, meta })];
       }
 
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
+
+      // After processWhere, so the joins that filters and scope wheres add are scoped too
+      if (isScoped()) {
+        state.joins = state.joins.map((join) =>
+          join.uid ? { ...join, scope: scopeJoin(join.alias, join.uid, join.idColumn) } : join
+        );
+      }
 
       // Update, delete, max and min leave root columns bare: qualify them so joins on tables
       // with the same column names (id, locale) do not make them ambiguous
