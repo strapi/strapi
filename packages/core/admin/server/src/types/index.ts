@@ -132,11 +132,14 @@ type ActionProvider = (typeof PermissionService)['actionProvider'];
 
 /**
  * An action to register, as `as const` arrays and inline literals type it: arrays may be readonly.
- * Same fields as {@link ActionProviderInput}.
+ * Same fields as {@link ActionProviderInput}. The runtime validator accepts an optional
+ * `subCategory` left out or `undefined` (`validation/action-provider.ts`), also under
+ * `exactOptionalPropertyTypes`.
  */
 type ActionRegistration = Readonly<
-  Omit<ActionProviderInput, 'subjects' | 'options' | 'aliases'>
+  Omit<ActionProviderInput, 'subCategory' | 'subjects' | 'options' | 'aliases'>
 > & {
+  readonly subCategory?: string | undefined;
   readonly subjects?: readonly string[] | undefined;
   readonly options?: { readonly applyToProperties: readonly string[] | null } | undefined;
   readonly aliases?:

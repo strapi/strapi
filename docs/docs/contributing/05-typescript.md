@@ -471,7 +471,7 @@ the declaration cannot drift from the registration:
 import type { Core } from '@strapi/strapi';
 
 export const actions = [
-  { section: 'plugins', displayName: 'Export reports', uid: 'report.export' },
+  { section: 'settings', category: 'reports', displayName: 'Export reports', uid: 'report.export' },
   { section: 'plugins', displayName: 'Read items', uid: 'items.read', pluginName: 'my-plugin' },
 ] as const;
 
@@ -486,6 +486,15 @@ declare global {
 
 - The list must be `as const`. Without it, each `uid` is a `string`, and the declaration opens the
   whole `api::` namespace: every `api::*` ID is accepted.
+- The admin validates each registration at boot
+  (`packages/core/admin/server/src/validation/action-provider.ts`), and Strapi does not start when
+  one fails: a `plugins` action needs a `pluginName`, a `settings` action a `category`, and a
+  `contentTypes` action `subjects`. An application's own action, with an `api::` ID, is a
+  `settings` action.
+- With strict types, `register` and `registerMany` check the computed ID of each action from its
+  literal fields, so pass the actions inline or as an `as const` list. A list without `as const`
+  widens `uid` to `string`, and its IDs are not checked. The types do not check the fields each
+  section requires yet: a `plugins` action without `pluginName` compiles.
 - The declaration must be an `interface` to merge into the registry. The repository ESLint config
   flags an empty interface (`@typescript-eslint/no-empty-interface`), hence the disable comment.
 - The application program excludes `src/plugins/**`, so the application declares the IDs of its
