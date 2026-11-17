@@ -33,7 +33,7 @@ export const CellContent = ({ cellType, contentType, content, name }: CellConten
         return (
           <Typography
             aria-label={formatMessage({
-              id: 'list.table.content.empty-label',
+              id: getTrad('list.table.content.empty-label'),
               defaultMessage: 'This field is empty',
             })}
           >
@@ -49,7 +49,7 @@ export const CellContent = ({ cellType, contentType, content, name }: CellConten
         return (
           <Typography
             aria-label={formatMessage({
-              id: 'list.table.content.empty-label',
+              id: getTrad('list.table.content.empty-label'),
               defaultMessage: 'This field is empty',
             })}
           >
@@ -69,7 +69,7 @@ export const CellContent = ({ cellType, contentType, content, name }: CellConten
       return (
         <Typography
           aria-label={formatMessage({
-            id: 'list.table.content.empty-label',
+            id: getTrad('list.table.content.empty-label'),
             defaultMessage: 'This field is empty',
           })}
         >
