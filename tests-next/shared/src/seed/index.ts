@@ -7,13 +7,16 @@ import { promisify } from 'node:util';
 import { appEnv } from '../app/env';
 import type { App } from '../app/generate';
 import type { Server } from '../app/server';
-import { SQLITE, type Database } from '../db/database';
+import { databaseFromEnv, type Database } from '../db/database';
 import type { SeedPlan, SeedResult } from './types';
 
 export type { AdminPermission, SeedPlan, SeedResult } from './types';
 
 export interface SeedAppOptions {
-  /** The database the server will start on. Default: the app's SQLite file. */
+  /**
+   * The database the server will start on. Default: the database of the run
+   * (`databaseFromEnv()`), like `startServer`.
+   */
   database?: Database;
   env?: NodeJS.ProcessEnv;
   /** Default: 120 s. */
@@ -31,7 +34,7 @@ export interface SeedAppOptions {
 export const seedApp = async (
   app: App,
   plan: SeedPlan,
-  { database = SQLITE, env, timeout = 120_000 }: SeedAppOptions = {}
+  { database = databaseFromEnv(), env, timeout = 120_000 }: SeedAppOptions = {}
 ): Promise<SeedResult> => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tests-seed-'));
   const planFile = path.join(dir, 'plan.json');

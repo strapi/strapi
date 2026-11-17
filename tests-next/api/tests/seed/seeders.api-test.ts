@@ -73,48 +73,45 @@ beforeAll(async () => {
     DATABASE_URL: process.env.DATABASE_URL,
   };
   try {
-    seeded = await seedApp(
-      app,
-      {
-        locales: [{ code: 'fr', name: 'French (fr)' }],
-        adminRoles: [
-          { name: 'Article reader', code: 'article-reader', permissions: [READ_ARTICLES] },
-        ],
-        adminUsers: [
-          {
-            email: 'admin@test.io',
-            password: PASSWORD,
-            firstname: 'Super',
-            lastname: 'Admin',
-            roles: ['strapi-super-admin'],
-          },
-          {
-            email: 'reader@test.io',
-            password: PASSWORD,
-            firstname: 'Article',
-            lastname: 'Reader',
-            roles: ['article-reader'],
-          },
-        ],
-        users: [{ username: 'jane', email: 'jane@test.io', password: PASSWORD }],
-        media: [{ file: image, alternativeText: 'A pixel' }],
-        entries: [
-          { uid: ARTICLE, data: { title: 'Hello' }, status: 'published' },
-          { uid: ARTICLE, data: { title: 'Bonjour' }, locale: 'fr', status: 'published' },
-        ],
-        apiTokens: [
-          { name: 'full', type: 'full-access' },
-          { kind: 'admin', name: 'reader', owner: 'admin@test.io', permissions: [READ_ARTICLES] },
-          {
-            kind: 'admin',
-            name: 'owned by the reader',
-            owner: 'reader@test.io',
-            permissions: [READ_ARTICLES],
-          },
-        ],
-      },
-      { database }
-    );
+    // No { database }: seedApp seeds the run's database by default, like startServer.
+    seeded = await seedApp(app, {
+      locales: [{ code: 'fr', name: 'French (fr)' }],
+      adminRoles: [
+        { name: 'Article reader', code: 'article-reader', permissions: [READ_ARTICLES] },
+      ],
+      adminUsers: [
+        {
+          email: 'admin@test.io',
+          password: PASSWORD,
+          firstname: 'Super',
+          lastname: 'Admin',
+          roles: ['strapi-super-admin'],
+        },
+        {
+          email: 'reader@test.io',
+          password: PASSWORD,
+          firstname: 'Article',
+          lastname: 'Reader',
+          roles: ['article-reader'],
+        },
+      ],
+      users: [{ username: 'jane', email: 'jane@test.io', password: PASSWORD }],
+      media: [{ file: image, alternativeText: 'A pixel' }],
+      entries: [
+        { uid: ARTICLE, data: { title: 'Hello' }, status: 'published' },
+        { uid: ARTICLE, data: { title: 'Bonjour' }, locale: 'fr', status: 'published' },
+      ],
+      apiTokens: [
+        { name: 'full', type: 'full-access' },
+        { kind: 'admin', name: 'reader', owner: 'admin@test.io', permissions: [READ_ARTICLES] },
+        {
+          kind: 'admin',
+          name: 'owned by the reader',
+          owner: 'reader@test.io',
+          permissions: [READ_ARTICLES],
+        },
+      ],
+    });
   } finally {
     vi.unstubAllEnvs();
   }
