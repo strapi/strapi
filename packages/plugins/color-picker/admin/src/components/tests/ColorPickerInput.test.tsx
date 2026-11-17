@@ -1,6 +1,6 @@
 import { DesignSystemProvider } from '@strapi/design-system';
 import { Form } from '@strapi/strapi/admin';
-import { render as renderRTL } from '@testing-library/react';
+import { fireEvent, render as renderRTL } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
@@ -129,6 +129,26 @@ describe('<ColorPickerInput />', () => {
       expect(textInput).toHaveValue('');
     }
   );
+
+  it.each(['rgb(255,0,0', 'gb(255,0,0)'])('allows trimming a legacy value to %j', async (value) => {
+    const { user, getByRole } = render({ color: 'rgb(255,0,0)' });
+
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+    const textInput = getByRole('textbox', { name: 'Color picker input' });
+    fireEvent.change(textInput, { target: { value } });
+
+    expect(textInput).toHaveValue(value);
+  });
+
+  it('rejects shorter replacement text in a saved legacy value', async () => {
+    const { user, getByRole } = render({ color: 'rgb(255,0,0)' });
+
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+    const textInput = getByRole('textbox', { name: 'Color picker input' });
+    fireEvent.change(textInput, { target: { value: 'rgb(x,0,0)' } });
+
+    expect(textInput).toHaveValue('rgb(255,0,0)');
+  });
 
   it('ignores non-HEX characters while typing', async () => {
     const { user, getByRole } = render();
