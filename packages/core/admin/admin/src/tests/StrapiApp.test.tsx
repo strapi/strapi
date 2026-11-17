@@ -1,6 +1,7 @@
 import { render, waitFor } from '@testing-library/react';
 
 import { StrapiApp } from '../StrapiApp';
+import { getFetchClient } from '../utils/getFetchClient';
 
 describe('ADMIN | new StrapiApp', () => {
   it('should render the app without plugins', async () => {
@@ -474,6 +475,37 @@ describe('ADMIN | new StrapiApp', () => {
       expect(() => app.customFields.register(field)).toThrowError(
         "The 'name' property is required on an options object"
       );
+    });
+  });
+
+  describe('Request headers api', () => {
+    const originalFetch = window.fetch;
+    let removeHeaders: (() => void) | undefined;
+
+    afterEach(() => {
+      removeHeaders?.();
+      window.fetch = originalFetch;
+    });
+
+    it('adds the headers a plugin registers to admin requests', async () => {
+      window.fetch = jest.fn().mockResolvedValue({ status: 200, ok: true, json: async () => ({}) });
+      const app = new StrapiApp({
+        appPlugins: {
+          spaces: {
+            register(strapiApp) {
+              removeHeaders = strapiApp.unstable_addRequestHeaders(() => ({
+                'x-strapi-space': 'france',
+              }));
+            },
+          },
+        },
+      });
+
+      await app.register();
+      await getFetchClient().get('/admin/init');
+
+      const sent: Headers = (window.fetch as jest.Mock).mock.calls[0][1].headers;
+      expect(sent.get('x-strapi-space')).toBe('france');
     });
   });
 

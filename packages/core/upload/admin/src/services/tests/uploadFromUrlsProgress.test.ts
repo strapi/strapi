@@ -1,4 +1,4 @@
-import { adminApi } from '@strapi/admin/strapi-admin';
+import { adminApi, unstable_addRequestHeaders } from '@strapi/admin/strapi-admin';
 import { renderHook, act, waitFor } from '@tests/utils';
 
 import { useTypedSelector } from '../../store/hooks';
@@ -101,5 +101,25 @@ describe('file:progress on a URL upload', () => {
     await waitFor(() => expect(result.current.files).toHaveLength(1));
     expect(result.current.files[0].size).toBe(0);
     expect(result.current.files[0].uploadedBytes).toBe(0);
+  });
+});
+
+describe('headers a plugin registered on a URL upload', () => {
+  const originalFetch = global.fetch;
+  let removeHeaders: (() => void) | undefined;
+
+  afterEach(() => {
+    removeHeaders?.();
+    global.fetch = originalFetch;
+  });
+
+  it('sends them with the request', async () => {
+    removeHeaders = unstable_addRequestHeaders(() => ({ 'x-strapi-space': 'france' }));
+
+    setup([['stream:complete', { data: [], errors: [] }]]);
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(new Headers(init.headers).get('x-strapi-space')).toBe('france');
   });
 });

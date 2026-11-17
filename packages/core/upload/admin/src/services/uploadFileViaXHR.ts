@@ -1,4 +1,4 @@
-import { attemptTokenRefresh } from '@strapi/admin/strapi-admin';
+import { attemptTokenRefresh, unstable_getRequestHeaders } from '@strapi/admin/strapi-admin';
 
 import type { File } from '../../../shared/contracts/files';
 
@@ -56,6 +56,7 @@ export type UploadProgressCallback = (bytes: number, total: number) => void;
 const sendUploadViaXHR = <T>(
   url: string,
   token: string | null | undefined,
+  requestHeaders: Headers,
   formData: FormData,
   signal: AbortSignal,
   onProgress?: UploadProgressCallback
@@ -72,6 +73,8 @@ const sendUploadViaXHR = <T>(
     if (token) {
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     }
+
+    requestHeaders.forEach((value, name) => xhr.setRequestHeader(name, value));
 
     const handleAbort = () => xhr.abort();
     signal.addEventListener('abort', handleAbort);
@@ -134,8 +137,11 @@ export const uploadFileViaXHR = async <T = File>(
   signal: AbortSignal,
   onProgress?: UploadProgressCallback
 ): Promise<T> => {
+  // Read once, so a retry after a 401 sends the same values as the first attempt.
+  const requestHeaders = unstable_getRequestHeaders();
+
   try {
-    return await sendUploadViaXHR<T>(url, token, formData, signal, onProgress);
+    return await sendUploadViaXHR<T>(url, token, requestHeaders, formData, signal, onProgress);
   } catch (error) {
     if (!(error instanceof UploadFileError) || error.status !== 401) {
       throw error;
@@ -144,7 +150,14 @@ export const uploadFileViaXHR = async <T = File>(
     try {
       const refreshedToken = await attemptTokenRefresh();
 
-      return await sendUploadViaXHR<T>(url, refreshedToken, formData, signal, onProgress);
+      return await sendUploadViaXHR<T>(
+        url,
+        refreshedToken,
+        requestHeaders,
+        formData,
+        signal,
+        onProgress
+      );
     } catch (refreshError) {
       if (refreshError instanceof UploadFileError) {
         throw refreshError;

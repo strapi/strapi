@@ -1,5 +1,5 @@
 import { Dispatch } from '@reduxjs/toolkit';
-import { adminApi } from '@strapi/admin/strapi-admin';
+import { adminApi, unstable_getRequestHeaders } from '@strapi/admin/strapi-admin';
 
 import {
   openUploadProgress,
@@ -562,11 +562,10 @@ const fetchUrlUploadStream = async ({
   signal: AbortSignal;
 }): Promise<Response> => {
   const backendURL = window.strapi.backendURL;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers = unstable_getRequestHeaders();
+  headers.set('Content-Type', 'application/json');
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   return fetch(`${backendURL}/upload/actions/upload-from-urls`, {

@@ -30,7 +30,9 @@ import {
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
+import { unstable_addRequestHeaders as addRequestHeaders } from './utils/getFetchClient';
 
+import type { RequestHeadersProvider } from './utils/getFetchClient';
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 import type { DefaultTheme } from 'styled-components';
 
@@ -240,6 +242,21 @@ class StrapiApp {
     this.router.addSettingsLink(sectionId, link);
   };
 
+  /**
+   * Adds headers to every request the admin sends to the Strapi server through its
+   * fetch client and Media Library uploads, e.g. the space a browser tab works in.
+   * The provider is called when a request starts, so it returns the current value;
+   * a retry after a 401 reuses it. A provider cannot replace `Authorization`,
+   * `Content-Type` or `Accept`. If a provider throws or returns a header the
+   * browser cannot send, the request fails with a `RequestHeadersError` instead
+   * of being sent without the header.
+   * Unstable: the API can change in a minor release.
+   *
+   * @returns A function that removes the provider.
+   */
+  unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => void) =>
+    addRequestHeaders(provider);
+
   async bootstrap(customBootstrap?: unknown) {
     Object.keys(this.appPlugins).forEach((plugin) => {
       const bootstrap = this.appPlugins[plugin].bootstrap;
@@ -406,8 +423,9 @@ class StrapiApp {
             defaultMessage: 'Last activity',
           },
           component: async () => {
-            const { AuditLogsWidget } =
-              await import('../../ee/admin/src/components/AuditLogs/Widgets');
+            const { AuditLogsWidget } = await import(
+              '../../ee/admin/src/components/AuditLogs/Widgets'
+            );
             return AuditLogsWidget;
           },
           pluginId: 'admin',

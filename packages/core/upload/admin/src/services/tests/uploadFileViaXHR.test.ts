@@ -1,4 +1,4 @@
-import { attemptTokenRefresh } from '@strapi/admin/strapi-admin';
+import { attemptTokenRefresh, unstable_addRequestHeaders } from '@strapi/admin/strapi-admin';
 
 import { uploadFileViaXHR, UploadAbortedError, UploadFileError } from '../uploadFileViaXHR';
 
@@ -40,8 +40,16 @@ class MockXHR {
     this.url = url;
   }
 
+  /** Like a browser: a name set twice, in any case, gets both values joined by a comma. */
   setRequestHeader(key: string, value: string) {
-    this.headers[key] = value;
+    const existing = Object.keys(this.headers).find(
+      (name) => name.toLowerCase() === key.toLowerCase()
+    );
+    if (existing) {
+      this.headers[existing] = `${this.headers[existing]}, ${value}`;
+    } else {
+      this.headers[key] = value;
+    }
   }
 
   send(body: unknown) {
@@ -248,5 +256,76 @@ describe('uploadFileViaXHR', () => {
     expect(lastXHR().headers.Authorization).toBeUndefined();
     lastXHR().respond(201, '{}');
     await withoutToken;
+  });
+
+  describe('headers a plugin registered', () => {
+    let removeHeaders: (() => void) | undefined;
+
+    afterEach(() => {
+      removeHeaders?.();
+    });
+
+    it('sends them with the upload', async () => {
+      removeHeaders = unstable_addRequestHeaders(() => ({ 'x-strapi-space': 'france' }));
+
+      const promise = uploadFileViaXHR(
+        ENDPOINT,
+        'token',
+        new FormData(),
+        new AbortController().signal
+      );
+      expect(lastXHR().headers['x-strapi-space']).toBe('france');
+      lastXHR().respond(201, '{}');
+      await promise;
+    });
+
+    it('sends the session token once when a plugin header names Authorization', async () => {
+      removeHeaders = unstable_addRequestHeaders(() => ({ authorization: 'Bearer plugin-token' }));
+
+      const promise = uploadFileViaXHR(
+        ENDPOINT,
+        'token',
+        new FormData(),
+        new AbortController().signal
+      );
+      expect(lastXHR().headers.Authorization).toBe('Bearer token');
+      lastXHR().respond(201, '{}');
+      await promise;
+    });
+
+    it('sends the headers read when the upload started on its 401 retry', async () => {
+      let space = 'france';
+      removeHeaders = unstable_addRequestHeaders(() => ({ 'x-strapi-space': space }));
+      attemptTokenRefreshMock.mockResolvedValue('refreshed-token');
+
+      const promise = uploadFileViaXHR(
+        ENDPOINT,
+        'expired-token',
+        new FormData(),
+        new AbortController().signal
+      );
+      // The tab switches space while the first attempt is in flight.
+      space = 'spain';
+      lastXHR().respond(401, JSON.stringify({ error: { message: 'Unauthorized' } }));
+
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(MockXHR.instances).toHaveLength(2);
+      expect(lastXHR().headers['x-strapi-space']).toBe('france');
+      lastXHR().respond(201, '{}');
+      await promise;
+    });
+
+    it('does not send the upload when a provider throws', async () => {
+      removeHeaders = unstable_addRequestHeaders(() => {
+        throw new Error('provider failed');
+      });
+
+      await expect(
+        uploadFileViaXHR(ENDPOINT, 'token', new FormData(), new AbortController().signal)
+      ).rejects.toMatchObject({ name: 'RequestHeadersError' });
+      expect(MockXHR.instances).toHaveLength(0);
+    });
   });
 });

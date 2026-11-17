@@ -35,6 +35,95 @@ let refreshPromise: Promise<string | null> | null = null;
 let onTokenUpdate: ((token: string) => void) | null = null;
 
 /**
+ * Returns headers to add to an admin request. A request reads the providers once,
+ * when it starts, and sends the same values on its retry after a 401 (e.g. the
+ * space a browser tab worked in when it sent a write). A header whose value is
+ * `undefined` or `null` is not sent. Values must be valid HTTP header values
+ * (Latin-1, no line breaks): send identifiers, not display names.
+ */
+type RequestHeadersProvider = () => Record<string, string | null | undefined>;
+
+/**
+ * Thrown, instead of sending the request, when a provider fails or returns a
+ * header the browser cannot send. Sending the request without the header could
+ * run it in the wrong context (e.g. the wrong space), so the request fails.
+ */
+class RequestHeadersError extends Error {
+  constructor(message: string, cause: unknown) {
+    super(message, { cause });
+    this.name = 'RequestHeadersError';
+  }
+}
+
+const requestHeadersProviders = new Set<RequestHeadersProvider>();
+
+/**
+ * Headers that core sets itself. A provider that returns one of them is ignored
+ * for that header: replacing them would break authentication or how the server
+ * reads the request body.
+ */
+const CORE_HEADERS = new Set(['authorization', 'content-type', 'accept']);
+
+/**
+ * Registers a function whose headers are added to every request the admin sends
+ * to the Strapi server through the fetch client. Unstable: the API can change in
+ * a minor release.
+ *
+ * @returns A function that removes the provider.
+ */
+const unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => void) => {
+  requestHeadersProviders.add(provider);
+
+  return () => {
+    requestHeadersProviders.delete(provider);
+  };
+};
+
+/**
+ * Calls every registered provider and returns the headers to add to a request,
+ * for request code that does not go through `getFetchClient` (e.g. an
+ * `XMLHttpRequest` upload). Call it once per request and reuse the result for a
+ * retry. Values that are `undefined` or `null` are left out, and so are
+ * `Authorization`, `Content-Type` and `Accept`, which core sets itself.
+ * Unstable: the API can change in a minor release.
+ *
+ * @throws {RequestHeadersError} When a provider throws or returns a header the
+ * browser cannot send. Do not send the request.
+ */
+const unstable_getRequestHeaders = (): Headers => {
+  const headers = new Headers();
+
+  requestHeadersProviders.forEach((provider) => {
+    let entries: Array<[string, string | null | undefined]>;
+    try {
+      entries = Object.entries(provider());
+    } catch (error) {
+      throw new RequestHeadersError(
+        'A plugin failed to provide its request headers, so the request was not sent.',
+        error
+      );
+    }
+
+    entries.forEach(([name, value]) => {
+      if (value === undefined || value === null || CORE_HEADERS.has(name.toLowerCase())) {
+        return;
+      }
+
+      try {
+        headers.set(name, value);
+      } catch (error) {
+        throw new RequestHeadersError(
+          `The request header "${name}" from a plugin is not valid, so the request was not sent.`,
+          error
+        );
+      }
+    });
+  });
+
+  return headers;
+};
+
+/**
  * Callback to notify the app when the session has been terminated and the user
  * should be redirected to the login page (e.g., refresh token rejected, idle
  * session expired). The React layer registers a handler that clears local
@@ -414,10 +503,9 @@ type FetchClient = {
   get: {
     (url: string, config: FetchOptions & { responseType: 'blob' }): Promise<FetchResponse<Blob>>;
     (url: string, config: FetchOptions & { responseType: 'text' }): Promise<FetchResponse<string>>;
-    (
-      url: string,
-      config: FetchOptions & { responseType: 'arrayBuffer' }
-    ): Promise<FetchResponse<ArrayBuffer>>;
+    (url: string, config: FetchOptions & { responseType: 'arrayBuffer' }): Promise<
+      FetchResponse<ArrayBuffer>
+    >;
     <TData = unknown>(url: string, config?: FetchOptions): Promise<FetchResponse<TData>>;
   };
   put: <TData = unknown, TSend = unknown>(
@@ -465,6 +553,28 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   });
+
+  /**
+   * Header names are case-insensitive, so the merge goes through `Headers.set()`:
+   * a later source replaces an earlier one whatever its casing. Spreading objects
+   * would keep `Authorization` and `authorization` as two keys, and `Headers`
+   * would then join them into one comma-separated value.
+   *
+   * `providerHeaders` is read once per call, outside `executeRequest`, so a retry
+   * after a 401 sends the same values as the first attempt.
+   */
+  const buildHeaders = (
+    defaults: Record<string, string>,
+    providerHeaders: Headers,
+    perCall?: Record<string, string>
+  ) => {
+    const headers = new Headers(defaults);
+
+    providerHeaders.forEach((value, name) => headers.set(name, value));
+    Object.entries(perCall ?? {}).forEach(([name, value]) => headers.set(name, value));
+
+    return headers;
+  };
 
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
@@ -613,6 +723,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
       const responseType = options?.responseType ?? 'json';
+      const providerHeaders = unstable_getRequestHeaders();
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
@@ -623,10 +734,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const defaultHeaders =
           responseType === 'json' ? getDefaultHeaders(requestToken) : { Authorization };
 
-        const headers = new Headers({
-          ...defaultHeaders,
-          ...options?.headers,
-        });
+        const headers = buildHeaders(defaultHeaders, providerHeaders, options?.headers);
 
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
@@ -646,14 +754,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = unstable_getRequestHeaders();
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
         requestToken = getToken();
-        const headers = new Headers({
-          ...getDefaultHeaders(requestToken),
-          ...options?.headers,
-        });
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         /**
          * we have to remove the Content-Type value if it was a formData request
@@ -681,14 +791,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = unstable_getRequestHeaders();
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
         requestToken = getToken();
-        const headers = new Headers({
-          ...getDefaultHeaders(requestToken),
-          ...options?.headers,
-        });
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         /**
          * we have to remove the Content-Type value if it was a formData request
@@ -713,14 +825,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const providerHeaders = unstable_getRequestHeaders();
       let requestToken: string | null = null;
 
       const executeRequest = async () => {
         requestToken = getToken();
-        const headers = new Headers({
-          ...getDefaultHeaders(requestToken),
-          ...options?.headers,
-        });
+        const headers = buildHeaders(
+          getDefaultHeaders(requestToken),
+          providerHeaders,
+          options?.headers
+        );
 
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
@@ -751,6 +865,15 @@ export {
   setOnSessionExpired,
   triggerSessionExpired,
   resetSessionExpiredNotification,
+  unstable_addRequestHeaders,
+  unstable_getRequestHeaders,
   ADMIN_REFRESH_LOCK,
 };
-export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };
+export type {
+  FetchOptions,
+  FetchResponse,
+  FetchConfig,
+  FetchClient,
+  ErrorResponse,
+  RequestHeadersProvider,
+};
