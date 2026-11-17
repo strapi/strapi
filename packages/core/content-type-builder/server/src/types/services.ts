@@ -1,4 +1,4 @@
-import type { Modules, Schema, Struct, UID } from '@strapi/types';
+import type { Internal, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { AttributeRenameMigrationMode } from '../config';
 import type { Schema as UpdateSchemaInput } from '../controllers/validation/schema';
 
@@ -510,11 +510,21 @@ export type ContentTypeBuilderSchema = {
 };
 
 /**
+ * A content type change of a schema update. A created content type is not registered yet, so its
+ * `uid` is any content type uid; an update or a delete names a registered content type.
+ */
+type ContentTypeChange<TChange> = TChange extends { action: 'create' }
+  ? Omit<TChange, 'uid'> & { uid: Internal.UID.ContentType }
+  : TChange;
+
+/**
  * The validated body of a schema update (`POST /update-schema`): the components and content types
  * to create, update or delete, and the content-type groups. Validation fills in the defaults of
  * `options`, `pluginOptions` and `config`.
  */
-export type UpdateSchemaPayload = UpdateSchemaInput;
+export type UpdateSchemaPayload = Omit<UpdateSchemaInput, 'contentTypes'> & {
+  contentTypes: Array<ContentTypeChange<UpdateSchemaInput['contentTypes'][number]>>;
+};
 
 /**
  * The `schema` service: reads the schema for the admin, applies schema updates and renames
