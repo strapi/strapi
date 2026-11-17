@@ -76,7 +76,9 @@ export const maybeUndefinedContext = async () => {
   const maybeUndefined = createAsyncSeriesHook<MaybeUndefinedContext>();
   // @ts-expect-error the context is required, even when it can be undefined
   await maybeUndefined.call();
-  await maybeUndefined.call(undefined);
+  // Through a constant: lint reads `.call(undefined)` as `Function.prototype.call`
+  const noContext: Context | undefined = undefined;
+  await maybeUndefined.call(noContext);
 };
 
 // A handler with an optional parameter, or none, lets `call` go without a context
