@@ -1,3 +1,4 @@
+import type { Context } from 'koa';
 import type { Core } from '@strapi/strapi';
 import type { RateLimitOptions } from '@strapi/email/strapi-server';
 
@@ -131,3 +132,31 @@ declare const checks: [
   Expect<Equal<typeof dynamic, unknown>>,
 ];
 checks satisfies unknown;
+
+// `config/middlewares.ts` (`Core.Config.Middlewares`) types the config of a registered middleware by
+// its name, as route references do: a function `origin` of `strapi::cors` receives the Koa context.
+// Unregistered names and `resolve` entries keep develop's type: their config is not checked.
+const appMiddlewares: Core.Config.Middlewares = [
+  'strapi::logger',
+  {
+    name: 'strapi::cors',
+    config: {
+      origin: (ctx) => {
+        type OriginContext = Core.Assert<Equal<[typeof ctx], [Context]>>;
+        return ctx.request.header.origin ?? '*';
+      },
+    },
+  },
+  { name: 'strapi::poweredBy', config: { poweredBy: 'Example' } },
+  'plugin::third-party.unregistered',
+  { name: 'plugin::third-party.unregistered', config: { anything: true } },
+  { resolve: './src/middlewares/custom', config: { enabled: true } },
+];
+appMiddlewares satisfies unknown;
+// Known gap: an entry that names a registered middleware with a config outside its contract also
+// matches the entry of unregistered names, `{ name?: string; config?: unknown }`, so it compiles.
+// This compiles, so it is not an `@ts-expect-error` case.
+const mismatchedConfig: Core.Config.Middlewares = [
+  { name: 'strapi::poweredBy', config: { poweredBy: 1 } },
+];
+mismatchedConfig satisfies unknown;
