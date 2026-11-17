@@ -90,6 +90,8 @@ type ReleaseRow = Omit<Release, 'actions'>;
 
 export type ReleaseServiceContractAssertions = [
   Expect<Equal<[ReleaseResult<'update'>], [ReleaseRow]>>,
+  // `create` resolves the inserted row, without its `actions` (same API test).
+  Expect<Equal<[ReleaseResult<'create'>], [ReleaseRow]>>,
   // The reducer's accumulator in `services/release.ts`: the component schemas by UID.
   Expect<
     Equal<
