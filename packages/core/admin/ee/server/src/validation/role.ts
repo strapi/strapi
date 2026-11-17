@@ -29,7 +29,10 @@ const rolesDeleteSchema = yup
 
             if (strapi.ee.features.isEnabled('sso')) {
               await (
-                strapi.service('admin::role') as EnterpriseServices['role']
+                strapi.service('admin::role') as Pick<
+                  EnterpriseServices['role'],
+                  'ssoCheckRolesIdForDeletion'
+                >
               ).ssoCheckRolesIdForDeletion(ids);
             }
           } catch (e: any) {
@@ -54,7 +57,10 @@ const roleDeleteSchema = yup
 
         if (strapi.ee.features.isEnabled('sso')) {
           await (
-            strapi.service('admin::role') as EnterpriseServices['role']
+            strapi.service('admin::role') as Pick<
+              EnterpriseServices['role'],
+              'ssoCheckRolesIdForDeletion'
+            >
           ).ssoCheckRolesIdForDeletion([id]);
         }
       } catch (e: any) {

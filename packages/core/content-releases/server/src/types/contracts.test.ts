@@ -1,7 +1,6 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Modules, Struct } from '@strapi/types';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
-import type { AdminUser } from '@strapi/admin/strapi-server';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { Pagination, Release, ReleaseDataResponse } from '../../../shared/contracts/releases';
 import type { Services } from './index';
@@ -13,6 +12,21 @@ type Expect<T extends true> = T;
 // The shared contracts name the admin user that the admin panel exports, without loading the panel.
 declare const checks: [Expect<Equal<ReleaseDataResponse['createdBy'], SanitizedAdminUser>>];
 checks satisfies unknown;
+
+/**
+ * A populated `createdBy`: the `admin::user` row without its relations
+ * (`content-releases-service-results.test.api.ts`), every column possibly `null`.
+ */
+type AdminUserRow = Modules.Documents.StrictResult<
+  'admin::user',
+  Record<never, never>,
+  'published'
+>;
+export type AdminUserRowAssertions = [
+  Expect<Equal<[AdminUserRow['username']], [string | null]>>,
+  Expect<Equal<[AdminUserRow['preferedLanguage']], [string | null]>>,
+  Expect<Equal<['roles' extends keyof AdminUserRow ? true : false], [false]>>,
+];
 
 type ReleaseActionService = Services['release-action'];
 type Result<TMember extends keyof ReleaseActionService> = Awaited<
@@ -165,13 +179,13 @@ export type ReleaseReadContractAssertions = [
   Expect<
     Equal<
       [Awaited<ReturnType<typeof findOneWithCreator>>],
-      [(ReleaseRow & { createdBy: Omit<AdminUser, 'roles'> | null }) | null]
+      [(ReleaseRow & { createdBy: AdminUserRow | null }) | null]
     >
   >,
   Expect<
     Equal<
       [Awaited<ReturnType<typeof findManyWithCreator>>],
-      [Array<ReleaseRow & { createdBy: Omit<AdminUser, 'roles'> | null }>]
+      [Array<ReleaseRow & { createdBy: AdminUserRow | null }>]
     >
   >,
   // `findByDocumentAttached` filters with `null` values and query-string values.

@@ -26,14 +26,14 @@ void app
   .service('admin::debug-dump')
   .generate()
   .then((dump) => dump.dumpVersion satisfies 1);
-// No role may match: `findOne` resolves to `null`.
+// No role may match: `findOne` resolves to `null`. The role is its row: every column may be `null`.
 void app
   .service('admin::role')
   .findOne({ id: 1 })
   .then((role) => {
     // @ts-expect-error The role may be null.
-    role.code satisfies string;
-    role?.code satisfies string | undefined;
+    role.code satisfies string | null;
+    role?.code satisfies string | null | undefined;
   });
 // The super admin role may be missing: `getSuperAdmin` resolves to `null`, not `undefined`.
 void app

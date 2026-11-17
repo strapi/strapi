@@ -1,11 +1,13 @@
 import type { Ability, ForcedSubject } from '@casl/ability';
-import type { Core, Data } from '@strapi/types';
+import type { Core, Data, Modules, UID } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
 import type { HasPermissionsConfig } from './policies';
 import type { RateLimitOptions } from './rate-limit';
 import type * as ActionService from '../services/action';
 import type { AdminTokenService, ContentApiTokenService } from '../services/api-token';
+import type { AdminApiToken } from '../../../shared/contracts/admin-token';
+import type { ContentApiApiToken } from '../../../shared/contracts/content-api-token';
 import type CEAuthService from '../services/auth';
 import type * as ConditionService from '../services/condition';
 import type * as ConstantsService from '../services/constants';
@@ -66,14 +68,223 @@ type EditionService<TCE, TEE> = Core.LicensedExtension<TCE, TEE>;
  */
 type EnterpriseService<TCE, TEE> = Omit<TCE, keyof TEE> & TEE;
 
+/** A call that populates no relation. */
+type NoPopulate = Record<never, never>;
+
 /**
- * The `admin::role` service as runtime calls it: `findOne`, `findOneWithUsersCount`,
- * `getSuperAdmin` and `getSuperAdminWithUsersCount` resolve to `null` when no role matches, the
- * result of the query engine's `findOne` (`services/role.ts:87-107`, `:228-233`). The implementation
- * keeps develop's published `Promise<AdminRole>`, `Promise<AdminRoleWithUsersCount>` and
- * `Promise<AdminRole | undefined>`.
+ * A row of the admin content type `TUID` as the query engine returns it, read with the `populate` of
+ * the call: the strict result model of the Document Service (`Modules.Documents.StrictResult`) on
+ * the schema the admin declares (`./content-types.ts`), as `strapi.documents(uid)` reads it. Every
+ * column is present and may be `null`, a required one included: the database does not enforce
+ * `required`. Only the populated relations are present. `TPopulate` is `undefined` when the call
+ * populates nothing.
  */
-type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = Omit<
+type AdminRow<TUID extends UID.ContentType, TPopulate = undefined> = Modules.Documents.StrictResult<
+  TUID,
+  [TPopulate] extends [undefined] ? NoPopulate : { populate: TPopulate },
+  'published'
+>;
+
+/** The `populate` of a read of `TUID`: the notations of the Document Service. */
+type AdminPopulate<TUID extends UID.ContentType> = Modules.Documents.Params.Populate.Any<TUID>;
+
+/** The `populate` in the query params of a read, when it is one the types can read. */
+type PopulateOfParams<TUID extends UID.ContentType, TParams> = TParams extends {
+  populate: infer TPopulate extends AdminPopulate<TUID>;
+}
+  ? TPopulate
+  : undefined;
+
+/** An `admin::role` row, with the relations `TPopulate` populates. */
+type RoleRow<TPopulate = undefined> = AdminRow<'admin::role', TPopulate>;
+
+/** An `admin::role` row with the count of its users (`services/role.ts`, `getUsersCount`). */
+type RoleRowWithUsersCount<TPopulate = undefined> = RoleRow<TPopulate> & { usersCount: number };
+
+/**
+ * An `admin::user` row, with the relations `TPopulate` populates. The default `populate` of the user
+ * service reads (`['roles']`) gives each role as its row.
+ */
+type UserRow<TPopulate = undefined> = AdminRow<'admin::user', TPopulate>;
+
+/** An `admin::user` row with its roles, as the user service writes and reads it by default. */
+type UserRowWithRoles = UserRow<['roles']>;
+
+/**
+ * A user passed to an admin service: develop's `AdminUser`, such as `ctx.state.user`, or a row the
+ * user service returns, with or without its roles.
+ */
+type UserInput = AdminUser | UserRow | UserRowWithRoles;
+
+/**
+ * An `admin::permission` as the permission queries return it (`domain/permission`, `toPermission`):
+ * the `id`, `action` and `subject` columns, and the JSON columns with the defaults and shapes of the
+ * permission domain. The timestamps are not kept.
+ */
+type PermissionRow = Pick<AdminRow<'admin::permission'>, 'id' | 'action' | 'subject'> &
+  Pick<Permission, 'actionParameters' | 'properties' | 'conditions'>;
+
+/** The fields `sanitizeUser` removes (`services/user.ts`). */
+type PrivateUserField =
+  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'registrationToken';
+
+/** The roles of a sanitized user: each with its `id`, `name`, `description` and `code` only. */
+type SanitizedRoles<TRoles> = TRoles extends readonly (infer TRole)[]
+  ? Array<Pick<TRole, Extract<keyof TRole, 'id' | 'name' | 'description' | 'code'>>>
+  : undefined;
+
+/**
+ * `TUser` as `sanitizeUser` returns it: without its private fields, and with its roles sanitized when
+ * it has them. A user read without its roles keeps `roles` undefined: the implementation maps them
+ * only when they are set.
+ */
+type SanitizedUser<TUser> = Omit<TUser, PrivateUserField | 'roles'> & {
+  roles: TUser extends { roles?: infer TRoles } ? SanitizedRoles<TRoles> : undefined;
+};
+
+/** An `admin::api-token` row. */
+type ApiTokenRow = AdminRow<'admin::api-token'>;
+
+/**
+ * A token as the token services return it (`services/api-token.ts`): the shape of `TToken`, with
+ * `expiresAt` read from its column, `null` for a token without a lifespan.
+ */
+type TokenResult<TToken> = TToken extends unknown
+  ? Omit<TToken, 'expiresAt'> & { expiresAt: ApiTokenRow['expiresAt'] }
+  : never;
+
+/**
+ * A regenerated token: the `id`, `name` and `kind` columns `regenerate` selects, and the new access
+ * key in clear, the only time it is returned.
+ */
+type RegeneratedToken<TToken extends { kind: string }> = Pick<ApiTokenRow, 'id' | 'name'> & {
+  kind: TToken['kind'];
+  accessKey: string;
+};
+
+type TokenServiceOverride =
+  | 'create'
+  | 'list'
+  | 'getById'
+  | 'getByName'
+  | 'getByAccessKey'
+  | 'update'
+  | 'revoke'
+  | 'regenerate';
+
+/**
+ * The token reads and writes with strict types, for the token type of the service: the results of
+ * `tests/api/core/admin/admin-service-shapes.test.api.ts`, and a user read from the user service
+ * accepted where the service takes the calling user.
+ */
+type StrictTokenReads<TService extends ContentApiTokenService | AdminTokenService, TToken> = Omit<
+  TService,
+  TokenServiceOverride
+> & {
+  /** The tokens the user may see. Reads the user's `id` and roles. */
+  list(callingUser: UserInput): Promise<TokenResult<TToken>[]>;
+  getById(...args: Parameters<TService['getById']>): Promise<TokenResult<TToken> | null>;
+  getByName(...args: Parameters<TService['getByName']>): Promise<TokenResult<TToken> | null>;
+  getByAccessKey(
+    ...args: Parameters<TService['getByAccessKey']>
+  ): Promise<TokenResult<ContentApiApiToken | AdminApiToken> | null>;
+  update(...args: Parameters<TService['update']>): Promise<TokenResult<TToken>>;
+  revoke(...args: Parameters<TService['revoke']>): Promise<TokenResult<TToken>>;
+  regenerate(
+    ...args: Parameters<TService['regenerate']>
+  ): Promise<RegeneratedToken<ContentApiApiToken | AdminApiToken>>;
+};
+
+/** The content API token service with strict types. */
+type StrictContentApiTokenService = StrictTokenReads<ContentApiTokenService, ContentApiApiToken> & {
+  create(
+    attributes: Parameters<ContentApiTokenService['create']>[0],
+    callingUser?: UserInput
+  ): Promise<TokenResult<ContentApiApiToken>>;
+};
+
+/** The admin token service with strict types. */
+type StrictAdminTokenService = Omit<
+  StrictTokenReads<AdminTokenService, AdminApiToken>,
+  'assignAdminPermissionsToToken'
+> & {
+  create(
+    attributes: Parameters<AdminTokenService['create']>[0],
+    callingUser: UserInput,
+    callingTokenPermissions?: Parameters<AdminTokenService['create']>[2]
+  ): Promise<TokenResult<AdminApiToken>>;
+  assignAdminPermissionsToToken(
+    tokenId: Parameters<AdminTokenService['assignAdminPermissionsToToken']>[0],
+    permissions: Parameters<AdminTokenService['assignAdminPermissionsToToken']>[1],
+    ceilingUser: UserInput,
+    callingTokenPermissions?: Parameters<AdminTokenService['assignAdminPermissionsToToken']>[3]
+  ): ReturnType<AdminTokenService['assignAdminPermissionsToToken']>;
+};
+
+type RoleServiceOverride =
+  | 'create'
+  | 'findOne'
+  | 'findOneWithUsersCount'
+  | 'find'
+  | 'findAllWithUsersCount'
+  | 'update'
+  | 'deleteByIds'
+  | 'getSuperAdmin'
+  | 'getSuperAdminWithUsersCount'
+  | 'assignPermissions'
+  | 'hasSuperAdminRole';
+
+/**
+ * The `admin::role` service with strict types: each result is the role row the query engine returns,
+ * with the relations the call populates (`tests/api/core/admin/admin-service-shapes.test.api.ts`).
+ * The reads resolve to `null` when no role matches.
+ */
+type StrictRoleService<TService> = Omit<TService, RoleServiceOverride> & {
+  create(...args: Parameters<(typeof CERoleService)['create']>): Promise<RoleRow>;
+  findOne<const TPopulate extends AdminPopulate<'admin::role'> | undefined = undefined>(
+    params?: Parameters<(typeof CERoleService)['findOne']>[0],
+    populate?: TPopulate
+  ): Promise<RoleRow<TPopulate> | null>;
+  findOneWithUsersCount<
+    const TPopulate extends AdminPopulate<'admin::role'> | undefined = undefined,
+  >(
+    params?: Parameters<(typeof CERoleService)['findOneWithUsersCount']>[0],
+    populate?: TPopulate
+  ): Promise<RoleRowWithUsersCount<TPopulate> | null>;
+  find<const TPopulate extends AdminPopulate<'admin::role'> | undefined = undefined>(
+    params?: Parameters<(typeof CERoleService)['find']>[0],
+    populate?: TPopulate
+  ): Promise<RoleRow<TPopulate>[]>;
+  /** The roles that match the query params, with the relations their `populate` names. */
+  findAllWithUsersCount<
+    const TParams extends Parameters<(typeof CERoleService)['findAllWithUsersCount']>[0],
+  >(
+    params: TParams
+  ): Promise<RoleRowWithUsersCount<PopulateOfParams<'admin::role', TParams>>[]>;
+  update(...args: Parameters<(typeof CERoleService)['update']>): Promise<RoleRow>;
+  /** The deleted roles. */
+  deleteByIds(...args: Parameters<(typeof CERoleService)['deleteByIds']>): Promise<RoleRow[]>;
+  getSuperAdmin(): Promise<RoleRow | null>;
+  getSuperAdminWithUsersCount(): Promise<RoleRowWithUsersCount | null>;
+  /**
+   * The permissions added to the role: the removed ones are all read from the role, so none of them
+   * is returned (`differenceBy` in `services/role.ts`).
+   */
+  assignPermissions(
+    ...args: Parameters<(typeof CERoleService)['assignPermissions']>
+  ): Promise<PermissionRow[]>;
+  /** Whether the user has the super admin role. Reads the user's roles. */
+  hasSuperAdminRole(user: UserInput): boolean;
+};
+
+/**
+ * The `admin::role` service as the admin's own code calls it, with the implementation's result types:
+ * `findOne`, `findOneWithUsersCount`, `getSuperAdmin` and `getSuperAdminWithUsersCount` resolve to
+ * `null` when no role matches, the result of the query engine's `findOne`
+ * (`services/role.ts:87-107`, `:228-233`). The implementation keeps develop's published
+ * `Promise<AdminRole>`, `Promise<AdminRoleWithUsersCount>` and `Promise<AdminRole | undefined>`.
+ */
+type ImplementationRoleService<TService extends { findOne: (...args: never[]) => unknown }> = Omit<
   TService,
   'findOne' | 'findOneWithUsersCount' | 'getSuperAdmin' | 'getSuperAdminWithUsersCount'
 > & {
@@ -85,40 +296,82 @@ type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = 
   getSuperAdminWithUsersCount(): Promise<AdminRoleWithUsersCount | null>;
 };
 
+/**
+ * The registered `admin::role` service: {@link StrictRoleService} with strict types,
+ * {@link ImplementationRoleService} without them.
+ */
+type RoleService<TService extends { findOne: (...args: never[]) => unknown }> =
+  Core.IsStrict extends true ? StrictRoleService<TService> : ImplementationRoleService<TService>;
+
 type UserServiceOverride =
   'findOne' | 'findOneByEmail' | 'updateById' | 'deleteById' | 'deleteByIds' | 'sanitizeUser';
 
 /**
- * The `admin::user` service as runtime calls it, in CE and EE
+ * The registered `admin::user` service: {@link StrictUserService} with strict types,
+ * {@link LegacyUserService} without them.
+ */
+type UserService<TService extends Record<UserServiceOverride, (...args: never[]) => unknown>> =
+  Core.IsStrict extends true ? StrictUserService<TService> : LegacyUserService<TService>;
+
+/**
+ * The `admin::user` service with strict types: each result is the user row the query engine returns,
+ * with the relations the call populates, in CE and EE
+ * (`tests/api/core/admin/admin-service-shapes.test.api.ts`). The reads resolve to `null` when no
+ * user matches.
+ */
+type StrictUserService<
+  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>,
+> = Omit<TService, UserServiceOverride | 'create'> & {
+  /** The created user with its roles. */
+  create(...args: Parameters<(typeof CEUserService)['create']>): Promise<UserRowWithRoles>;
+  /** The user with the relations `populate` names, its roles by default. */
+  findOne<const TPopulate extends AdminPopulate<'admin::user'> = ['roles']>(
+    id: Data.ID,
+    populate?: TPopulate
+  ): Promise<UserRow<TPopulate> | null>;
+  /** The user with the relations `populate` names, none by default. */
+  findOneByEmail<const TPopulate extends AdminPopulate<'admin::user'> = []>(
+    email: string,
+    populate?: TPopulate
+  ): Promise<UserRow<TPopulate> | null>;
+  updateById(...args: Parameters<TService['updateById']>): Promise<UserRowWithRoles | null>;
+  deleteById(...args: Parameters<TService['deleteById']>): Promise<UserRowWithRoles | null>;
+  /** The deleted users with their roles. A missing ID rejects. */
+  deleteByIds(...args: Parameters<TService['deleteByIds']>): Promise<UserRowWithRoles[]>;
+  /** The user without its private fields, and with its roles sanitized when it has them. */
+  sanitizeUser<TUser extends object>(user: TUser): SanitizedUser<TUser>;
+};
+
+/**
+ * The `admin::user` service without strict types, as runtime calls it, in CE and EE
  * (`tests/api/core/admin/admin-user-service-results.test.api.ts`). The query engine's results stay
  * `any` in the implementations, and the EE `updateById`, `deleteById` and `deleteByIds` infer them.
  * `findOne` and `updateById` resolve to `null` when no user matches; CE `updateById` keeps
  * develop's published `Promise<AdminUser>`.
  */
-type UserService<TService extends Record<UserServiceOverride, (...args: never[]) => unknown>> =
-  Omit<TService, UserServiceOverride> & {
-    /** The user with its roles. With a `populate` other than the default, `roles` is not loaded. */
-    findOne(...args: Parameters<(typeof CEUserService)['findOne']>): Promise<AdminUser | null>;
-    /** The user without its roles. */
-    findOneByEmail(
-      ...args: Parameters<(typeof CEUserService)['findOneByEmail']>
-    ): Promise<Omit<AdminUser, 'roles'> | null>;
-    updateById(...args: Parameters<TService['updateById']>): Promise<AdminUser | null>;
-    deleteById(...args: Parameters<TService['deleteById']>): Promise<AdminUser | null>;
-    /** The deleted users with their roles. A missing ID rejects. */
-    deleteByIds(...args: Parameters<TService['deleteByIds']>): Promise<AdminUser[]>;
-    /** The user without its private fields and with its sanitized roles. */
-    sanitizeUser(
-      ...args: Parameters<TService['sanitizeUser']>
-    ): ReturnType<TService['sanitizeUser']>;
-    /**
-     * A user read without its roles, such as a populated `createdBy` relation, keeps `roles`
-     * undefined: the implementation maps them only when they are set (`services/user.ts:70`).
-     */
-    sanitizeUser(
-      user: Omit<AdminUser, 'roles'>
-    ): Omit<SanitizedAdminUser, 'roles'> & { roles: undefined };
-  };
+type LegacyUserService<
+  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>,
+> = Omit<TService, UserServiceOverride> & {
+  /** The user with its roles. With a `populate` other than the default, `roles` is not loaded. */
+  findOne(...args: Parameters<(typeof CEUserService)['findOne']>): Promise<AdminUser | null>;
+  /** The user without its roles. */
+  findOneByEmail(
+    ...args: Parameters<(typeof CEUserService)['findOneByEmail']>
+  ): Promise<Omit<AdminUser, 'roles'> | null>;
+  updateById(...args: Parameters<TService['updateById']>): Promise<AdminUser | null>;
+  deleteById(...args: Parameters<TService['deleteById']>): Promise<AdminUser | null>;
+  /** The deleted users with their roles. A missing ID rejects. */
+  deleteByIds(...args: Parameters<TService['deleteByIds']>): Promise<AdminUser[]>;
+  /** The user without its private fields and with its sanitized roles. */
+  sanitizeUser(...args: Parameters<TService['sanitizeUser']>): ReturnType<TService['sanitizeUser']>;
+  /**
+   * A user read without its roles, such as a populated `createdBy` relation, keeps `roles`
+   * undefined: the implementation maps them only when they are set (`services/user.ts:70`).
+   */
+  sanitizeUser(
+    user: Omit<AdminUser, 'roles'>
+  ): Omit<SanitizedAdminUser, 'roles'> & { roles: undefined };
+};
 
 /**
  * What an action provider receives in the registered contract. Settings actions have a category,
@@ -314,15 +567,37 @@ type StrictSectionsBuilderMembers = {
 type StrictSectionsBuilder = Omit<SectionsBuilder, keyof StrictSectionsBuilderMembers> &
   StrictSectionsBuilderMembers;
 
+type PermissionEngine = (typeof PermissionService)['engine'];
+
 /**
- * The `admin::permission` service as runtime calls it. The implementation keeps its published
- * develop signatures: the action provider requires a category, permission queries take two
- * arguments, and section hooks receive no arguments. With strict types, the permissions manager
- * is written from its options, its sanitizers resolve to the data they were given, the
- * providers' `registerMany` resolves to the provider, and the sections builder hands each handler
- * the section it is registered on.
+ * The permission queries and engine members written for strict types: the permissions are the rows
+ * the permission domain returns, and a user read from the user service is accepted where the engine
+ * takes a user.
  */
-type PermissionServiceContract = Omit<
+type StrictPermissionQueries = {
+  findMany(...args: Parameters<(typeof PermissionService)['findMany']>): Promise<PermissionRow[]>;
+  createMany(
+    ...args: Parameters<(typeof PermissionService)['createMany']>
+  ): Promise<PermissionRow[]>;
+  /** The permissions of the user's roles. Reads the user's `id`. */
+  findUserPermissions(user: { id: Data.ID }): Promise<PermissionRow[]>;
+  engine: Omit<PermissionEngine, 'generateUserAbility'> & {
+    /** The ability of the user's permissions. The conditions receive the user. */
+    generateUserAbility(user: UserInput): ReturnType<PermissionEngine['generateUserAbility']>;
+  };
+};
+
+type StrictPermissionQueryName = keyof StrictPermissionQueries;
+
+/**
+ * The `admin::permission` service as the admin's own code calls it. The implementation keeps its
+ * published develop signatures: the action provider requires a category, permission queries take
+ * two arguments, and section hooks receive no arguments. With strict types, the permissions manager
+ * is written from its options, its sanitizers resolve to the data they were given, the providers'
+ * `registerMany` resolves to the provider, and the sections builder hands each handler the section
+ * it is registered on.
+ */
+type ImplementationPermissionService = Omit<
   typeof PermissionService,
   'actionProvider' | 'conditionProvider' | 'createPermissionsManager' | 'sectionsBuilder'
 > & {
@@ -368,14 +643,36 @@ type PermissionServiceContract = Omit<
       });
 
 /**
+ * The registered `admin::permission` service. With strict types, the queries resolve to the
+ * permission rows and the engine takes a user read from the user service
+ * ({@link StrictPermissionQueries}).
+ */
+type PermissionServiceContract = Core.IsStrict extends true
+  ? Omit<ImplementationPermissionService, StrictPermissionQueryName> & StrictPermissionQueries
+  : ImplementationPermissionService;
+
+/**
+ * The `role` and `permission` services as the admin's own code reads them with `getService`
+ * (`utils/index.d.ts`) under strict types: with the implementation's result types. Applications
+ * read the registered contracts, whose results are the rows the query engine returns.
+ */
+export type ImplementationServices = {
+  role: ImplementationRoleService<
+    EditionService<typeof CERoleService, EnterpriseContracts['role']>
+  >;
+  permission: ImplementationPermissionService;
+};
+
+/**
  * EE runtime shapes of the admin services that the EE edition extends. EE code runs only with the
- * EE edition merged, so it passes them whatever the program's license scope.
+ * EE edition merged, so it passes them whatever the program's license scope. They keep the
+ * implementation's result types, as the admin's own code reads them.
  */
 export type EnterpriseServices = {
   auth: EnterpriseService<typeof CEAuthService, typeof EEAuthService>;
   metrics: EnterpriseService<typeof CEMetricsService, typeof EEMetricsService>;
   passport: EnterpriseService<typeof CEPassportService, typeof EEPassportService>;
-  role: RoleService<EnterpriseService<typeof CERoleService, typeof EERoleService>>;
+  role: ImplementationRoleService<EnterpriseService<typeof CERoleService, typeof EERoleService>>;
   user: EnterpriseService<typeof CEUserService, typeof EEUserService>;
 };
 
@@ -474,9 +771,15 @@ declare global {
       interface PackageServices {
         'admin::action': typeof ActionService;
         /** @deprecated Use 'admin::api-token-content-api' instead */
-        'admin::api-token': ContentApiTokenService;
-        'admin::api-token-admin': AdminTokenService;
-        'admin::api-token-content-api': ContentApiTokenService;
+        'admin::api-token': Core.IsStrict extends true
+          ? StrictContentApiTokenService
+          : ContentApiTokenService;
+        'admin::api-token-admin': Core.IsStrict extends true
+          ? StrictAdminTokenService
+          : AdminTokenService;
+        'admin::api-token-content-api': Core.IsStrict extends true
+          ? StrictContentApiTokenService
+          : ContentApiTokenService;
         'admin::auth': EditionService<typeof CEAuthService, EnterpriseContracts['auth']>;
         'admin::condition': typeof ConditionService;
         'admin::constants': typeof ConstantsService;
