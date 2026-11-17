@@ -15,12 +15,34 @@ export type HookContext<T extends Handler> = 0 extends 1 & Parameters<T>[0]
 export type HookResult<T extends Handler> = Awaited<ReturnType<T>>;
 
 /**
- * The arguments `call` takes: the one context every handler of type `T` receives. Any arguments
- * when the handler's first parameter is `any`, as for the default {@link Handler}.
+ * The arguments `call` takes: the one context every handler of type `T` receives, none when the
+ * handler takes no parameter, optional when its parameter is optional. Any arguments when the
+ * handler's first parameter is `any`, as for the default {@link Handler}.
  */
-export type HookCallArgs<T extends Handler> = 0 extends 1 & Parameters<T>[0]
+type HookCallArgs<T extends Handler> = 0 extends 1 & Parameters<T>[0]
   ? any[]
-  : [context: HookContext<T>];
+  : TypedHookCallArgs<T>;
+
+/**
+ * The arguments of a factory hook's `call`. One `unknown` context when the handler's first
+ * parameter is `any`, as for the default {@link Handler}.
+ */
+type FactoryHookCallArgs<T extends Handler> = 0 extends 1 & Parameters<T>[0]
+  ? [context: unknown]
+  : TypedHookCallArgs<T>;
+
+/** {@link FactoryHookCallArgs}, with the parameter name the waterfall factory has always printed. */
+type FactoryWaterfallCallArgs<T extends Handler> = 0 extends 1 & Parameters<T>[0]
+  ? [param: unknown]
+  : TypedHookCallArgs<T>;
+
+/** The arguments of `call` for a typed handler: its first parameter, if it takes one. */
+type TypedHookCallArgs<T extends Handler> =
+  Parameters<T> extends []
+    ? []
+    : undefined extends Parameters<T>[0]
+      ? [context?: HookContext<T>]
+      : [context: HookContext<T>];
 
 /**
  * A handler of a waterfall hook: it receives what the previous handler resolved to, and resolves to
@@ -34,9 +56,7 @@ export type WaterfallHandler<T extends Handler> = (
  * What a waterfall hook of handler `T` resolves to: the value its handlers pass along. `any` when
  * the handler's first parameter is `any`, as for the default {@link Handler}.
  */
-export type WaterfallResult<T extends Handler> = 0 extends 1 & Parameters<T>[0]
-  ? any
-  : HookContext<T>;
+type WaterfallResult<T extends Handler> = 0 extends 1 & Parameters<T>[0] ? any : HookContext<T>;
 
 export interface Hook<T extends Handler = Handler> {
   getHandlers(): T[];
@@ -102,7 +122,7 @@ const createHook = <T extends Handler = Handler>(): Hook<T> => {
 const createAsyncSeriesHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(context: HookContext<T>) {
+  async call(...[context]: FactoryHookCallArgs<T>) {
     for (const handler of this.getHandlers()) {
       await handler(context);
     }
@@ -116,7 +136,7 @@ const createAsyncSeriesHook = <T extends Handler = Handler>() => ({
 const createAsyncSeriesWaterfallHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(param: HookContext<T>): Promise<HookContext<T>> {
+  async call(...[param]: FactoryWaterfallCallArgs<T>): Promise<HookContext<T>> {
     let res = param;
 
     for (const handler of this.getHandlers()) {
@@ -134,7 +154,7 @@ const createAsyncSeriesWaterfallHook = <T extends Handler = Handler>() => ({
 const createAsyncParallelHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(context: HookContext<T>): Promise<HookResult<T>[]> {
+  async call(...[context]: FactoryHookCallArgs<T>): Promise<HookResult<T>[]> {
     const promises = this.getHandlers().map((handler) => handler(cloneDeep(context)));
 
     return Promise.all(promises);
@@ -148,7 +168,7 @@ const createAsyncParallelHook = <T extends Handler = Handler>() => ({
 const createAsyncBailHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
-  async call(context: HookContext<T>): Promise<HookResult<T> | undefined> {
+  async call(...[context]: FactoryHookCallArgs<T>): Promise<HookResult<T> | undefined> {
     for (const handler of this.getHandlers()) {
       const result = await handler(context);
 

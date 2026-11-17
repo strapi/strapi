@@ -199,6 +199,30 @@ export const callWithOneContext = async () => {
   twoParametersHook.call('first', 2);
 };
 
+// A handler without parameters, or with an optional one, lets `call` go without a context
+type NoParameter = () => void;
+type OptionalParameter = (context?: { a: number }) => void;
+declare const noParameterHook: Hook<NoParameter>;
+declare const optionalParameterHook: Hook<OptionalParameter>;
+const noParameter: AsyncSeriesHook<NoParameter> = createAsyncSeriesHook<NoParameter>();
+const optionalParameter: AsyncParallelHook<OptionalParameter> =
+  createAsyncParallelHook<OptionalParameter>();
+
+export const callWithoutContext = async () => {
+  noParameterHook.call();
+  // @ts-expect-error the handler takes no context
+  noParameterHook.call({ a: 1 });
+  optionalParameterHook.call();
+  optionalParameterHook.call({ a: 1 });
+  // @ts-expect-error the context is the handler's parameter
+  optionalParameterHook.call('not a context');
+  await noParameter.call();
+  await createAsyncSeriesHook<NoParameter>().call();
+  await optionalParameter.call();
+  await createAsyncParallelHook<OptionalParameter>().call();
+  await createAsyncParallelHook<OptionalParameter>().call({ a: 1 });
+};
+
 // A waterfall handler resolves to the value it takes, and the interface and the factory agree
 type Formatter = (value: string) => string | Promise<string>;
 type MisshapedFormatter = (value: string) => number;
