@@ -38,12 +38,16 @@ export default config;
   generates types
   ([typescript-utils, strict opt-in](../packages/utils/typescript/index.md#strict-opt-in),
   [`strapi develop`](../packages/core/strapi/commands/02-develop.md#how-it-works)).
-- A frontend or a types-only package includes only `contentTypes.d.ts` and `components.d.ts`,
-  and is typed as without strict types. Read
+- A frontend or a types-only package includes `contentTypes.d.ts` and `components.d.ts`, and is
+  typed as without strict types unless it also includes `strict.d.ts`. Read
   [Frontends and types-only packages](../packages/core/types/type-system/02-concepts/03-public-registry.mdx#frontends-and-types-only-packages).
 - To opt out, set `strictTypes: false` or remove the key. The next type generation removes the
   strict files, and the types are those of the previous release. A value that is not a boolean
   fails type generation with a `ValidationError`.
+- Code that must compile with strict types on and off, such as a plugin or a library, annotates its
+  callback parameters. With strict types on, the contracts type them by context. With strict types
+  off, the services are `any`, so the template's `strict: true` reports each unannotated parameter
+  (TS7006, TS7031).
 
 ### Strict errors fail the build
 
@@ -135,6 +139,11 @@ declare global {
 `strapi.plugin('email').provider.outboxPath()` is then a `string`. Do not add the plugin to
 `PackagePluginProviders` instead: the package already declares that key, and a second declaration
 fails with TS2717. Without strict types, `provider` stays `any`.
+
+The import needs `@strapi/email` in the application's dependencies, at the version of
+`@strapi/strapi`: a created application lists only `@strapi/strapi`, which depends on it. npm
+hoists it, but under the isolated layout of pnpm the import fails with TS2307 until the
+application adds it.
 
 ### Permission action IDs
 
