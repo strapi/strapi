@@ -2678,11 +2678,22 @@ Every time a new EE feature is added in Strapi, in the settings menu, you should
             to: '/settings/purchase-new-ee-feature',
             id: 'new-ee-feature',
             licenseOnly: true,
+            licenseFeature: 'new-ee-feature',
           },
         ]
       : []),
 ...
 ```
+
+### The ⚡ on paid-feature links
+
+A main navigation or settings link with `licenseOnly: true` shows a ⚡. Its `licenseFeature` names the license feature it needs. `getLicenseIconFill` in `admin/src/utils/licenseFeature.ts` picks the colour for both menus:
+
+- Purple: a trial grants the feature.
+- No icon: a paid license includes the feature.
+- Grey: the license doesn't include the feature, so the link opens its purchase page. A link that names no `licenseFeature` is grey too, since its availability can't be checked.
+
+The colour comes from `window.strapi.features.isEnabled` and `window.strapi.isTrial`, the same flags that decide whether a plugin registers the feature page or its purchase page. A lapsed license grants nothing here, even while the Plan card still lists what it included.
 
 ---
 
