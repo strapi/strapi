@@ -1,6 +1,7 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Modules, Struct } from '@strapi/types';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
+import type { AdminUser } from '@strapi/admin/strapi-server';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { Pagination, Release, ReleaseDataResponse } from '../../../shared/contracts/releases';
 import type { Services } from './index';
@@ -196,3 +197,20 @@ export type ReleaseReadContractAssertions = [
     >
   >,
 ];
+
+// The release writes read the user's `id` only (`setCreatorFields` in `services/release.ts`): a
+// user read from the `admin::user` service, or `ctx.state.user`, is accepted outside an admin
+// request too, e.g. in a bootstrap or a cron.
+declare const userRow: AdminUserRow;
+declare const developUser: AdminUser;
+declare const createBody: Parameters<ReleaseService['create']>[0];
+declare const updateBody: Parameters<ReleaseService['update']>[1];
+declare const skippedBody: Parameters<ReleaseService['createFromSkippedEntries']>[1];
+export const releaseWritesAcceptAdminUsers = async () => {
+  await releaseService.create(createBody, { user: userRow });
+  await releaseService.create(createBody, { user: developUser });
+  await releaseService.update(1, updateBody, { user: userRow });
+  await releaseService.createFromSkippedEntries(1, skippedBody, { user: userRow });
+  // @ts-expect-error The user's `id` is read.
+  await releaseService.create(createBody, { user: {} });
+};
