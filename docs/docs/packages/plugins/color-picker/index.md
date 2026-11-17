@@ -34,7 +34,7 @@ The admin call sets `icon` (`ColorPickerIcon`), `intlLabel`, `intlDescription` a
 
 ### Input component
 
-`ColorPickerInput` in `admin/src/components/` reads and writes the value with `useField` from `@strapi/strapi/admin`. It shows a toggle button and a design system `Popover`. The popover holds a `HexColorPicker` from `react-colorful` and a text input for the HEX value. An empty value means no color, and the component does not default to black.
+`ColorPickerInput` in `admin/src/components/` reads and writes the value with `useField` from `@strapi/strapi/admin`. It shows a toggle button and a design system `Popover`. The popover holds a `HexColorPicker` from `react-colorful` and a text input for the HEX value. An empty value means no color, and the component does not default to black. The HEX input accepts an optional `#` followed by up to six hexadecimal characters, including partial values while typing. Invalid edits leave the current value unchanged. The preview uses an inline background style so stored invalid values cannot corrupt the shared admin stylesheet.
 
 ### Translations
 

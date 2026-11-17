@@ -115,7 +115,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 <Flex>
                   {/* An inline style keeps typed values (e.g. `#ff(`) out of the shared
                       stylesheet, where they would break parsing of the rules after them. */}
-                  <ColorPreview style={{ backgroundColor: color }} />
+                  <ColorPreview data-testid="color-preview" style={{ backgroundColor: color }} />
                   <Typography
                     style={{ textTransform: 'uppercase' }}
                     textColor={hasColor === true ? undefined : 'neutral500'}
@@ -146,13 +146,18 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     })}
                     style={{ textTransform: 'uppercase' }}
                     name={name}
-                    // No default value. If nothing is selected, the input will be empty.
-                    defaultValue={field.value ?? ''}
+                    // If nothing is selected, the input will be empty.
+                    value={field.value ?? ''}
                     // Here we default to #000000 as the placeholder, because, absent a
                     //   user defined placeholder, we want to indicate the desired format.
                     placeholder="#000000"
-                    onChange={field.onChange}
                     {...props}
+                    maxLength={7}
+                    onChange={(event) => {
+                      if (/^#?[0-9a-f]{0,6}$/i.test(event.target.value)) {
+                        field.onChange(event);
+                      }
+                    }}
                   />
                 </Field.Root>
               </Flex>

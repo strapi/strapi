@@ -13,14 +13,14 @@ jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
   virtual: true,
 });
 
-const render = () => ({
+const render = (initialValues = {}) => ({
   ...renderRTL(<ColorPickerInput name="color" label={'color-picker'} type="string" />, {
     wrapper: ({ children }) => {
       const locale = 'en';
       return (
         <IntlProvider locale={locale} messages={{}} textComponent="span">
           <DesignSystemProvider locale={locale}>
-            <Form onSubmit={jest.fn()} method="POST">
+            <Form onSubmit={jest.fn()} method="POST" initialValues={initialValues}>
               {children}
             </Form>
           </DesignSystemProvider>
@@ -71,7 +71,7 @@ describe('<ColorPickerInput />', () => {
   });
 
   it('shows the typed color in the preview', async () => {
-    const { user, getByRole } = render();
+    const { user, getByRole, getByTestId } = render();
 
     await user.click(getByRole('button', { name: 'Color picker toggle' }));
 
@@ -80,21 +80,71 @@ describe('<ColorPickerInput />', () => {
     await user.clear(textInput);
     await user.type(textInput, '#ff3c0c');
 
-    const preview = getByRole('button', { name: 'Color picker toggle' })
-      // eslint-disable-next-line testing-library/no-node-access
-      .querySelector('div[style]');
+    const preview = getByTestId('color-preview');
     expect(preview).toHaveStyle({ backgroundColor: '#ff3c0c' });
   });
 
-  it('does not write a typed value into the shared stylesheet', async () => {
+  it.each(['', '#', '#a', '#abc', '#aBcDeF', 'ABCDEF'])(
+    'accepts the partial or complete HEX value %j',
+    async (value) => {
+      const { user, getByRole } = render({ color: '#ff3c0c' });
+
+      await user.click(getByRole('button', { name: 'Color picker toggle' }));
+      const textInput = getByRole('textbox', { name: 'Color picker input' });
+
+      await user.clear(textInput);
+      if (value) {
+        await user.type(textInput, value);
+      }
+
+      expect(textInput).toHaveValue(value);
+    }
+  );
+
+  it('ignores non-HEX characters while typing', async () => {
     const { user, getByRole } = render();
 
     await user.click(getByRole('button', { name: 'Color picker toggle' }));
-
     const textInput = getByRole('textbox', { name: 'Color picker input' });
 
-    await user.clear(textInput);
+    await user.type(textInput, 'HUHIUHIHIHI');
+    expect(textInput).toHaveValue('');
+
     await user.type(textInput, '#ff(');
+    expect(textInput).toHaveValue('#ff');
+  });
+
+  it('ignores an invalid pasted value', async () => {
+    const { user, getByRole, getByTestId } = render({ color: '#ff3c0c' });
+
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+    const textInput = getByRole('textbox', { name: 'Color picker input' });
+
+    await user.click(textInput);
+    await user.keyboard('{Control>}a{/Control}');
+    await user.paste('#ff(');
+
+    expect(textInput).toHaveValue('#ff3c0c');
+    expect(getByTestId('color-preview')).toHaveStyle({ backgroundColor: '#ff3c0c' });
+  });
+
+  it('limits the input to an optional hash and six HEX characters', async () => {
+    const { user, getByRole } = render();
+
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+    const textInput = getByRole('textbox', { name: 'Color picker input' });
+
+    expect(textInput).toHaveAttribute('maxlength', '7');
+    await user.type(textInput, '#1234567');
+    expect(textInput).toHaveValue('#123456');
+
+    await user.clear(textInput);
+    await user.type(textInput, '1234567');
+    expect(textInput).toHaveValue('123456');
+  });
+
+  it('does not write a stored invalid value into the shared stylesheet', () => {
+    render({ color: '#ff(' });
 
     // eslint-disable-next-line testing-library/no-node-access
     const styles = Array.from(document.querySelectorAll('style'), (style) => style.textContent);
