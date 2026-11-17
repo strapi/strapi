@@ -82,5 +82,6 @@
   "plugin.schema.i18n.localized.description-content-type": "Maakt het mogelijk om een item in verschillende talen te vertalen",
   "plugin.schema.i18n.localized.description-field": "Het veld kan in elke taal een andere waarde hebben",
   "plugin.schema.i18n.localized.label-content-type": "Internationalisatie",
-  "plugin.schema.i18n.localized.label-field": "Lokalisatie inschakelen voor dit veld"
+  "plugin.schema.i18n.localized.label-field": "Lokalisatie inschakelen voor dit veld",
+  "list-view.table.header.label": "Beschikbaar in"
 }
