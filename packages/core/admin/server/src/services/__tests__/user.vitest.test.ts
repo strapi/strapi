@@ -617,6 +617,41 @@ describe('User', () => {
 
       expect(res).toEqual(users);
     });
+
+    test('Skips an ID that matches no user', async () => {
+      const users = [
+        { id: 2, email: 'a@strapi.io', roles: [] },
+        { id: 4, email: 'b@strapi.io', roles: [] },
+      ];
+      const count = vi.fn(() => Promise.resolve(0));
+      const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve({ id: 1, usersCount: 1 }));
+      const deleteFn = vi
+        .fn()
+        .mockResolvedValueOnce(users[0])
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(users[1]);
+      const emit = vi.fn();
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit },
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+      } as any;
+      vi.mocked(emitAudit).mockClear();
+
+      const res = await deleteByIds([2, 3, 4]);
+
+      expect(deleteFn).toHaveBeenCalledTimes(3);
+      expect(res).toEqual(users);
+      expect(emit).toHaveBeenCalledWith('user.delete', {
+        users: users.map((user) => sanitizeUser(user as any)),
+      });
+      expect(vi.mocked(emitAudit).mock.calls.map((call) => call[2])).toEqual([
+        { userId: 2, email: 'a@strapi.io' },
+        { userId: 4, email: 'b@strapi.io' },
+      ]);
+    });
   });
 
   describe('Session invalidation on user deletion', () => {

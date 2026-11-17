@@ -222,6 +222,11 @@ const deleteByIds = async (ids: any) => {
       populate: ['roles'],
     });
 
+    // The ID matches no user (e.g. deleted in the meantime): nothing to clean up or report
+    if (deletedUser === null) {
+      continue;
+    }
+
     // Invalidate all sessions for the deleted user
     const sessionManager = getSessionManager();
     if (sessionManager && sessionManager.hasOrigin('admin')) {
