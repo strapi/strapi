@@ -940,10 +940,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
   describe('Source and author of history versions', () => {
     const findVersions = async (documentId: string) => {
-      const { body } = await rq({
-        method: 'GET',
-        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${documentId}`,
-      });
+      const { body } = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${documentId}`
+      );
 
       return body.data;
     };
