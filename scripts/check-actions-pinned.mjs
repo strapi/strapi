@@ -19,7 +19,11 @@ const ROOT = path.resolve(__dirname, '..');
 const WORKFLOWS_DIR = path.join(ROOT, '.github/workflows');
 const ACTIONS_DIR = path.join(ROOT, '.github/actions');
 
-const USES_LINE = /^\s*(?:-\s+)?uses:\s*(.*)$/;
+// Block style: `uses: ref # comment` or `- uses: ref # comment`
+const BLOCK_USES = /^\s*(?:-\s+)?(['"]?)uses\1\s*:\s*(.*)$/;
+// Flow style: `- { uses: ref, with: {...} } # comment` (possibly several per line)
+const FLOW_USES = /[{,]\s*(['"]?)uses\1\s*:\s*(['"]?)([^'"\s,{}#]*)\2/g;
+const TRAILING_COMMENT = /\s(#.*)$/;
 const PINNED_REF = /^[\w.-]+\/[\w.-]+(?:\/[\w./-]+)?@[0-9a-f]{40}$/;
 const PINNED_DOCKER_REF = /^docker:\/\/\S+@sha256:[0-9a-f]{64}$/;
 const VERSION_COMMENT = /^#\s*v\S+/;
@@ -62,6 +66,15 @@ function parseUses(value) {
   return { ref: match[2], comment: (match[3] || '').trim() };
 }
 
+// Returns every `uses:` reference on a line, in block or flow style.
+function extractUses(line) {
+  const block = line.match(BLOCK_USES);
+  if (block) return [parseUses(block[2])];
+
+  const comment = (line.match(TRAILING_COMMENT)?.[1] || '').trim();
+  return [...line.matchAll(FLOW_USES)].map((match) => ({ ref: match[3], comment }));
+}
+
 function checkRef(ref, comment) {
   if (ref.startsWith('./')) return null;
   if (ref.startsWith('docker://')) {
@@ -79,14 +92,13 @@ function main() {
 
   for (const file of files) {
     const rel = path.relative(ROOT, file);
-    const lines = fs.readFileSync(file, 'utf8').split('\n');
+    const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
     lines.forEach((line, index) => {
-      const match = line.match(USES_LINE);
-      if (!match) return;
-      count += 1;
-      const { ref, comment } = parseUses(match[1]);
-      const reason = checkRef(ref, comment);
-      if (reason) failures.push({ rel, line: index + 1, ref, reason });
+      for (const { ref, comment } of extractUses(line)) {
+        count += 1;
+        const reason = checkRef(ref, comment);
+        if (reason) failures.push({ rel, line: index + 1, ref, reason });
+      }
     });
   }
 
