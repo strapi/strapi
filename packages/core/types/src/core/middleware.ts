@@ -84,6 +84,16 @@ type RegisteredMiddlewareReference<
     ? TName | { name: TName; config?: TConfig }
     : { name: TName; config: TConfig };
 
+/**
+ * An entry of `config/middlewares.ts` ({@link Config.Middlewares}) that names a registered middleware,
+ * with its config contract, as in a route reference. Unregistered names keep the open
+ * {@link MiddlewareConfig} entry, which an entry with a registered name matches too: the registered
+ * entry types its `config` by name, it does not reject a config outside the contract.
+ */
+export type RegisteredMiddlewareEntry = {
+  [TName in RegisteredMiddlewareName]: RegisteredMiddlewareReference<TName>;
+}[RegisteredMiddlewareName];
+
 /** Any middleware name. Registered names are listed for completion. */
 type SuggestedMiddlewareName = SuggestedString<RegisteredMiddlewareName>;
 
