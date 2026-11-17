@@ -134,3 +134,25 @@ void app.eventHub.emit('ee.enable');
 void app.eventHub.emit('entry.create', { model: 'article' });
 // Unregistered events keep their permissive types.
 void app.eventHub.emit('my-app.custom', 1, 2);
+
+// A schema update that creates a content type names a uid that no schema registers yet.
+void app
+  .plugin('content-type-builder')
+  .service('schema')
+  .updateSchema({
+    components: [],
+    contentTypes: [
+      {
+        action: 'create',
+        uid: 'api::tag.tag',
+        displayName: 'Tag',
+        singularName: 'tag',
+        pluralName: 'tags',
+        kind: 'collectionType',
+        draftAndPublish: false,
+        attributes: [],
+        options: {},
+        pluginOptions: {},
+      },
+    ],
+  });
