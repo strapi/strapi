@@ -432,6 +432,23 @@ declare const coreDeleteChecks: [
 ];
 coreDeleteChecks satisfies unknown;
 
+// The core service defaults the params of `find`, `findOne` and `delete` to `{}`
+// (`core-api/service/collection-type.ts` and `single-type.ts` in `@strapi/core`): a call without
+// params compiles, and reads as with `{}`.
+const coreFoundWithoutParams = articleService.find();
+const coreFoundOneWithoutParams = articleService.findOne('a');
+const coreDeletedWithoutParams = articleService.delete('a');
+const homepageWithoutParams = homepageService.find();
+const homepageDeletedWithoutParams = homepageService.delete();
+declare const coreWithoutParamsChecks: [
+  Expect<Equal<[Awaited<typeof coreFoundWithoutParams>['results'][number]], [Article]>>,
+  Expect<Equal<[Awaited<typeof coreFoundOneWithoutParams>], [Article | null]>>,
+  Expect<Equal<[Awaited<typeof coreDeletedWithoutParams>], [{ deletedEntries: number }]>>,
+  Expect<Equal<[Awaited<typeof homepageWithoutParams>], [Homepage | null]>>,
+  Expect<Equal<[Awaited<typeof homepageDeletedWithoutParams>], [{ deletedEntries: number }]>>,
+];
+coreWithoutParamsChecks satisfies unknown;
+
 // The core service `delete` rejects `lookup`: the Document Service's `delete` throws
 // `ValidationError("Invalid params: 'lookup'")` on one from the caller. A literal with a key the
 // Document Service's `delete` does not take is rejected too.
