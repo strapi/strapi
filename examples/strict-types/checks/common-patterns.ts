@@ -138,9 +138,23 @@ export type PluginsWithoutContracts = [
 // An application permission action: the `as const` list an application passes to `registerMany`,
 // its declared ID, and the ID in the typed config of `admin::hasPermissions`. The IDs bundled
 // packages declare close the inventory, so an ID the application does not declare is rejected.
+// An application's own action (an `api::` ID) is a `settings` action, with a `category`: the admin
+// requires a `pluginName` for a `plugins` action and stops at boot without one.
 export const reportActions = [
-  { section: 'plugins', displayName: 'Export reports', uid: 'report.export' },
+  { section: 'settings', category: 'reports', displayName: 'Export reports', uid: 'report.export' },
 ] as const;
+export const registerReportActions = async () => {
+  const { actionProvider } = strapi.service('admin::permission');
+  await actionProvider.registerMany(reportActions);
+  // Known gap: a `plugins` action without `pluginName` compiles, and the admin rejects it at boot
+  // (`[0].pluginName is a required field`). The types check the computed ID only, not the fields
+  // each section requires.
+  await actionProvider.register({
+    section: 'plugins',
+    displayName: 'Export reports',
+    uid: 'report.export',
+  });
+};
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Strapi {
