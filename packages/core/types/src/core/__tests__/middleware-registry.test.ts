@@ -180,10 +180,17 @@ mapChecks satisfies unknown;
 cache({ ttl: 1 }, { strapi });
 
 // The global middlewares config accepts names and config objects, not handlers: runtime rejects
-// them when Strapi starts.
+// them when Strapi starts. Registered names are checked against their config contract; unregistered
+// names are open only for `plugin::*` names, and `resolve` entries are open.
 const middlewaresConfig: Core.Config.Middlewares = [
-  'strapi::logger',
-  { name: 'strapi::cors', config: {} },
+  'strapi::middlewareLab',
+  'plugin::middleware-lab.compress',
+  { name: 'plugin::middleware-lab.cache', config: { maxAge: 1 } },
+  { name: 'api::middleware-lab.audit', config: { channel: 'audit' } },
+  'admin::middlewareLab',
+  { name: 'admin::middlewareLab', config: { anything: true } },
+  'plugin::unregistered-lab.timer',
+  { name: 'plugin::unregistered-lab.timer', config: { anything: true } },
   { resolve: './src/middlewares/custom' },
 ];
 middlewaresConfig satisfies unknown;
@@ -192,3 +199,15 @@ const handlerConfig: Core.Config.Middlewares = [
   async (_ctx: unknown, next: () => unknown) => next(),
 ];
 handlerConfig satisfies unknown;
+[
+  // @ts-expect-error A required config cannot be left out.
+  'api::middleware-lab.audit',
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error The config is checked against the registered contract.
+  { name: 'api::middleware-lab.audit', config: { channel: 1 } },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error Unregistered names outside `plugin::*` are rejected.
+  'strapi::logger',
+] satisfies Core.Config.Middlewares;

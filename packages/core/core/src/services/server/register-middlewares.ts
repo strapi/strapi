@@ -2,7 +2,7 @@ import { yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { resolveMiddlewares } from './middleware';
 
-const defaultConfig = [
+const defaultConfig: Core.Config.Middlewares = [
   'strapi::logger',
   'strapi::errors',
   'strapi::security',

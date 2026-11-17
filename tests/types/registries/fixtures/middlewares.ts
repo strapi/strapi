@@ -133,30 +133,118 @@ declare const checks: [
 ];
 checks satisfies unknown;
 
-// `config/middlewares.ts` (`Core.Config.Middlewares`) types the config of a registered middleware by
-// its name, as route references do: a function `origin` of `strapi::cors` receives the Koa context.
-// Unregistered names and `resolve` entries keep develop's type: their config is not checked.
+// `config/middlewares.ts` (`Core.Config.Middlewares`) checks every registered middleware against
+// its registered config, as route references do. The create-strapi-app template list compiles: each
+// of its middlewares defaults its config, so its name alone is enough.
+[
+  'strapi::logger',
+  'strapi::errors',
+  'strapi::security',
+  'strapi::cors',
+  'strapi::poweredBy',
+  'strapi::query',
+  'strapi::body',
+  'strapi::session',
+  'strapi::favicon',
+  'strapi::public',
+] satisfies Core.Config.Middlewares;
+
+// Every `strapi::*` middleware defaults its config, as the runtime passes `{}` to a bare name.
+[
+  'strapi::body',
+  'strapi::compression',
+  'strapi::cors',
+  'strapi::errors',
+  'strapi::favicon',
+  'strapi::ip',
+  'strapi::logger',
+  'strapi::poweredBy',
+  'strapi::public',
+  'strapi::query',
+  'strapi::responseTime',
+  'strapi::responses',
+  'strapi::security',
+  'strapi::session',
+] satisfies Core.Config.Middlewares;
+
 const appMiddlewares: Core.Config.Middlewares = [
   'strapi::logger',
+  { name: 'strapi::cors', config: { origin: ['https://example.com'], credentials: true } },
   {
     name: 'strapi::cors',
     config: {
-      origin: (ctx) => {
-        type OriginContext = Core.Assert<Equal<[typeof ctx], [Context]>>;
+      // A function origin receives the Koa context.
+      origin(ctx) {
+        true satisfies Equal<[typeof ctx], [Context]>;
         return ctx.request.header.origin ?? '*';
       },
     },
   },
+  {
+    name: 'strapi::security',
+    config: {
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: { 'connect-src': ["'self'", 'https:'], 'img-src': ["'self'", 'data:'] },
+      },
+    },
+  },
+  { name: 'strapi::body', config: { jsonLimit: '1mb', formLimit: '1mb', textLimit: '1mb' } },
+  { name: 'strapi::body', config: { formidable: { maxFileSize: 200 * 1024 * 1024 } } },
+  { name: 'strapi::session', config: { secure: true, sameSite: 'lax' } },
   { name: 'strapi::poweredBy', config: { poweredBy: 'Example' } },
+  { name: 'plugin::email.rateLimit', config: { max: 10 } },
+  // Third-party plugins that register no contract stay open, by name or with any config.
   'plugin::third-party.unregistered',
   { name: 'plugin::third-party.unregistered', config: { anything: true } },
+  // `resolve` entries load a package or a path, which registers nothing: their config is open.
   { resolve: './src/middlewares/custom', config: { enabled: true } },
+  { resolve: 'koa-third-party' },
 ];
 appMiddlewares satisfies unknown;
-// Known gap: an entry that names a registered middleware with a config outside its contract also
-// matches the entry of unregistered names, `{ name?: string; config?: unknown }`, so it compiles.
-// This compiles, so it is not an `@ts-expect-error` case.
-const mismatchedConfig: Core.Config.Middlewares = [
+
+[
+  // @ts-expect-error The runtime matches cors origins as strings: a RegExp never matches.
+  { name: 'strapi::cors', config: { origin: [/^https:\/\/.*\.example\.com$/] } },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error A registered config rejects unknown keys.
+  { name: 'strapi::poweredBy', config: { poweredBy: 'Example', extra: true } },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error A registered config rejects wrong value types.
   { name: 'strapi::poweredBy', config: { poweredBy: 1 } },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error A registered config rejects wrong value types.
+  { name: 'strapi::body', config: { jsonLimit: true } },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error A middleware without config takes none.
+  { name: 'strapi::logger', config: { level: 'debug' } },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error An unregistered name outside `plugin::*` cannot be resolved by the runtime.
+  'global::unregistered',
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error An unregistered name outside `plugin::*` cannot be resolved by the runtime.
+  { name: 'strapi::unregistered', config: {} },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error The runtime resolves `name` and ignores `resolve`, so an entry takes one of them.
+  { name: 'strapi::cors', resolve: './src/middlewares/custom' },
+] satisfies Core.Config.Middlewares;
+[
+  // @ts-expect-error A handler function is not a global middleware entry: Strapi fails to start.
+  inline,
+] satisfies Core.Config.Middlewares;
+
+// Known gap: a registered `plugin::*` name with a config outside its contract also matches the open
+// `plugin::*` entry, which third-party plugins that register nothing need, so it compiles. Types
+// cannot exclude the registered names from the `plugin::${string}` pattern.
+// This compiles, so it is not an `@ts-expect-error` case.
+const pluginMismatch: Core.Config.Middlewares = [
+  { name: 'plugin::email.rateLimit', config: { max: '10' } },
 ];
-mismatchedConfig satisfies unknown;
+pluginMismatch satisfies unknown;
