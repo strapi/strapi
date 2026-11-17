@@ -51,7 +51,7 @@ const createEngineHooks = (): PermissionEngineHooks => ({
 /**
  * Create a context from a domain {@link Permission} used by the validate hooks
  */
-const createValidateContext = (permission: Permission): ValidateContext => ({
+const createValidateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
     return clonePermission(permission);
   },
@@ -60,7 +60,7 @@ const createValidateContext = (permission: Permission): ValidateContext => ({
 /**
  * Create a context from a domain {@link Permission} used by the before valuate hook
  */
-const createBeforeEvaluateContext = (permission: Permission): BeforeEvaluateContext => ({
+const createBeforeEvaluateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
     return clonePermission(permission);
   },
@@ -81,10 +81,7 @@ interface WillRegisterContextParams {
  * Create a context from a casl Permission & some options
  * @param caslPermission
  */
-const createWillRegisterContext = ({
-  permission,
-  options,
-}: WillRegisterContextParams): WillRegisterContext => ({
+const createWillRegisterContext = ({ permission, options }: WillRegisterContextParams) => ({
   ...options,
 
   get permission() {
@@ -124,9 +121,12 @@ const createWillRegisterContext = ({
   },
 });
 
-/** A permission whose properties a typed handler reads as `unknown`. */
+/**
+ * A permission whose properties a typed handler reads as `unknown`, except `fields`, which the
+ * engine passes to CASL as a list of field names ({@link PermissionRule}).
+ */
 export type TypedPermission = Omit<Permission, 'properties'> & {
-  properties?: Record<string, unknown>;
+  properties?: Record<string, unknown> & NonNullable<PermissionRule['properties']>;
 };
 
 /** The context of `before-format::validate.permission` and `before-evaluate.permission`. */

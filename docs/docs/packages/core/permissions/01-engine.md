@@ -5,7 +5,7 @@ tags:
   - rbac
   - hooks
 review_notes:
-  - 'The usage example calls `engine.generate(...)`. The engine method is `generateAbility`.'
+  - 'The usage example now calls `await engine.generateAbility(...)`. The rest of the page is not checked against the code.'
 status: needs-review
 ---
 
@@ -38,7 +38,7 @@ const permission = {
   conditions: ['isPublished'],
 };
 
-const ability = engine.generate([permission]);
+const ability = await engine.generateAbility([permission]);
 
 console.log('Can read article?:', ability.can('read', 'article'));
 ```
@@ -90,7 +90,7 @@ sequenceDiagram
 
 ### Typed Hooks
 
-`engine.Engine`, what `engine.new` returns, and its `PermissionEngineHooks` take untyped handlers. `engine.TypedEngine` and `engine.TypedPermissionEngineHooks` describe the same hooks with typed handlers and contexts (`BeforeEvaluateContext`, `ValidateContext`, `WillRegisterContext`). They are opt-in: a typed contract can declare them instead of the untyped ones, and the engine `engine.new` returns is assignable to `TypedEngine` without a cast.
+`engine.Engine`, what `engine.new` returns, and its `PermissionEngineHooks` take untyped handlers. `engine.TypedEngine` and `engine.TypedPermissionEngineHooks` describe the same hooks with typed handlers and contexts (`BeforeEvaluateContext`, `ValidateContext`, `WillRegisterContext`). They are opt-in: a typed contract can declare them instead of the untyped ones, and the engine `engine.new` returns is assignable to `TypedEngine` without a cast. `TypedPermission` reads the permission properties as `unknown`, except `fields`, which is a list of field names (`string[]`).
 
 A validate hook stops at the first handler that returns a value other than `undefined`, and the engine rejects the permission when that value is `false`. A validator that lets the permission through returns nothing, so the next validators still run.
 

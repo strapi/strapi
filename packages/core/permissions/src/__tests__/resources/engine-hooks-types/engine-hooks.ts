@@ -42,6 +42,16 @@ export type DefaultTypes = [
   >,
   // `any`, as the untyped waterfall interface resolves, so the engine assigns to its typed view
   Expect<IsAny<Awaited<ReturnType<PermissionEngineHooks['format.permission']['call']>>>>,
+  // The contexts the engine builds keep their inferred types: property values are `any`
+  Expect<
+    IsAny<NonNullable<ReturnType<typeof createValidateContext>['permission']['properties']>['a']>
+  >,
+  Expect<
+    IsAny<
+      NonNullable<ReturnType<typeof createBeforeEvaluateContext>['permission']['properties']>['a']
+    >
+  >,
+  Expect<Equal<[ReturnType<typeof createWillRegisterContext>['permission']], [PermissionRule]>>,
 ];
 
 declare const untypedEngine: engine.Engine;
@@ -83,9 +93,14 @@ export type TypedContexts = [
   Expect<
     Equal<
       [engine.ValidateContext['permission']['properties']],
-      [Record<string, unknown> | undefined]
+      [(Record<string, unknown> & { fields?: string[] }) | undefined]
     >
   >,
+  // The engine passes `fields` to CASL as field names, so it is the one typed property
+  Expect<
+    Equal<[NonNullable<engine.TypedPermission['properties']>['fields']], [string[] | undefined]>
+  >,
+  Expect<Equal<[NonNullable<engine.TypedPermission['properties']>['other']], [unknown]>>,
   Expect<Equal<[engine.WillRegisterContext['permission']], [PermissionRule]>>,
   Expect<
     Equal<
@@ -104,6 +119,17 @@ typedEngine.on('before-register.permission', ({ condition }) => condition.or({ i
 typedEngine.on('format.permission', (context: engine.BeforeEvaluateContext) => context);
 // @ts-expect-error the hook name is checked
 typedEngine.on('not.a.hook', () => undefined);
+typedEngine.on('before-register.permission', ({ permission }) => {
+  permission.properties?.fields?.map((field) => field.toUpperCase());
+});
+
+export const generateTypedAbility = async () => {
+  await typedEngine.generateAbility([
+    { action: 'read', properties: { fields: ['title'], locales: ['en'] } },
+  ]);
+  // @ts-expect-error `fields` is a list of field names
+  await typedEngine.generateAbility([{ action: 'read', properties: { fields: 42 } }]);
+};
 
 /*
  * 3. The engine and the contexts it builds at runtime are their typed views, without a cast.
