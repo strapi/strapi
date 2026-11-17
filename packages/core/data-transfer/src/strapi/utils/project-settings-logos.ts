@@ -116,7 +116,9 @@ const readLocalLogoBuffer = async (strapi: Core.Strapi, logo: ProjectSettingsLog
 
     if (code === 'ENOENT') {
       strapi.log.warn(
-        `[Data transfer] Admin logo "${logoLabel(logo)}" exists in project settings but no corresponding file was found to transfer. Path: ${filepath}`
+        `[Data transfer] Admin logo "${logoLabel(
+          logo
+        )}" exists in project settings but no corresponding file was found to transfer. Path: ${filepath}`
       );
       return undefined;
     }
@@ -131,7 +133,11 @@ const readRemoteLogoBuffer = async (strapi: Core.Strapi, logo: ProjectSettingsLo
 
   if (response.status !== 200 || !response.body) {
     strapi.log.warn(
-      `[Data transfer] Admin logo "${logoLabel(logo)}" exists in project settings but could not be fetched for transfer. URL: ${url} (status: ${response.status})`
+      `[Data transfer] Admin logo "${logoLabel(
+        logo
+      )}" exists in project settings but could not be fetched for transfer. URL: ${url} (status: ${
+        response.status
+      })`
     );
     return undefined;
   }
@@ -221,14 +227,23 @@ const uploadLogoFromTransferBuffer = async (strapi: Core.Strapi, logo: ProjectSe
   const provider = getConfiguredUploadProvider(strapi);
   const mime = getLogoMimeType(logoWithoutBuffer);
 
+  const content = Buffer.from(transferBuffer, 'base64');
+  const uploadProvider = strapi.plugin('upload').provider;
+  // A provider can implement only `upload`, which reads a buffer (same fallback as the upload plugin)
+  const canUploadStream = typeof uploadProvider.uploadStream === 'function';
+
   const file = {
     ...logoWithoutBuffer,
     ...(mime ? { mime } : {}),
-    stream: Readable.from(Buffer.from(transferBuffer, 'base64')),
+    ...(canUploadStream ? { stream: Readable.from(content) } : { buffer: content }),
     provider,
   };
 
-  await strapi.plugin('upload').provider.uploadStream(file);
+  if (canUploadStream) {
+    await uploadProvider.uploadStream(file);
+  } else {
+    await uploadProvider.upload(file);
+  }
 
   return pick(file, LOGO_PERSISTED_FIELDS);
 };
