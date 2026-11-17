@@ -26,7 +26,7 @@ export const CreateActionEE = React.forwardRef<HTMLButtonElement, CreateActionCE
           <Tooltip
             label={formatMessage({
               id: 'Settings.application.admin-seats.at-limit-tooltip',
-              defaultMessage: 'Limit reached: upgrade your license to invite more admin users',
+              defaultMessage: 'Your license user limit is reached. Remove a user or contact sales.',
             })}
             side="left"
           >
