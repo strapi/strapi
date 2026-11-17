@@ -50,11 +50,19 @@ const pageModel = {
     items: { type: 'component', component: ITEM_UID, repeatable: true },
     zone: { type: 'dynamiczone', components: [ITEM_UID, BLOCK_UID] },
     blocks: { type: 'component', component: BLOCK_UID, repeatable: true },
+    hero: { type: 'component', component: BLOCK_UID, repeatable: false },
   },
 };
 
 type Row = { id: number; label?: string; name?: string; __component?: string; inner?: Row[] };
-type Page = { documentId: string; title: string; items: Row[]; zone: Row[]; blocks: Row[] };
+type Page = {
+  documentId: string;
+  title: string;
+  items: Row[];
+  zone: Row[];
+  blocks: Row[];
+  hero: Row;
+};
 type Response = { statusCode: number; body: Record<string, any> };
 type Request = (options: Record<string, unknown>) => Promise<Response>;
 
@@ -62,11 +70,13 @@ const builder = createTestBuilder();
 let strapi: Core.Strapi;
 let rqContent: Request;
 let rqAdmin: Request;
+let graphqlQuery: (body: Record<string, unknown>) => Promise<Response>;
 
 const populate = {
   items: true,
   zone: { on: { [ITEM_UID]: true, [BLOCK_UID]: { populate: { inner: true } } } },
   blocks: { populate: { inner: true } },
+  hero: { populate: { inner: true } },
 } as const;
 
 const findPage = async (documentId: string) => {
@@ -88,6 +98,7 @@ const seedPage = async () => {
         { name: 'b1', inner: [{ label: 'n1' }, { label: 'n2' }] },
         { name: 'b2', inner: [{ label: 'n3' }] },
       ],
+      hero: { name: 'h', inner: [{ label: 'h1' }, { label: 'h2' }] },
     },
   } as any);
 
@@ -156,7 +167,79 @@ const repeatedIdCases: Array<[string, (page: Page) => Record<string, unknown>, s
     }),
     ['blocks', '0', 'inner', '1', 'id'],
   ],
+  [
+    'a list nested in a single component',
+    (page) => ({
+      hero: {
+        id: page.hero.id,
+        inner: [
+          { id: page.hero.inner![0].id, label: 'dup-1' },
+          { id: page.hero.inner![0].id, label: 'dup-2' },
+        ],
+      },
+    }),
+    ['hero', 'inner', '1', 'id'],
+  ],
 ];
+
+/**
+ * A component sent without an id is created, and creating a component drops the ids nested in
+ * it. So repeated ids inside it lose no data, and the update is accepted as before.
+ */
+const createdComponentCases: Array<[string, (page: Page) => Record<string, unknown>]> = [
+  [
+    'a new item of a repeatable component',
+    (page) => ({
+      blocks: [
+        {
+          name: 'new',
+          inner: [
+            { id: page.blocks[0].inner![0].id, label: 'copy-1' },
+            { id: page.blocks[0].inner![0].id, label: 'copy-2' },
+          ],
+        },
+      ],
+    }),
+  ],
+  [
+    'a new single component',
+    (page) => ({
+      hero: {
+        name: 'new',
+        inner: [
+          { id: page.hero.inner![0].id, label: 'copy-1' },
+          { id: page.hero.inner![0].id, label: 'copy-2' },
+        ],
+      },
+    }),
+  ],
+  [
+    'a new item of a dynamic zone',
+    (page) => ({
+      zone: [
+        {
+          __component: BLOCK_UID,
+          name: 'new',
+          inner: [
+            { id: page.blocks[0].inner![0].id, label: 'copy-1' },
+            { id: page.blocks[0].inner![0].id, label: 'copy-2' },
+          ],
+        },
+      ],
+    }),
+  ],
+];
+
+/**
+ * Create and delete one row of a component type, and return the id it was given.
+ * Ids are not reused, so this moves the next id of that type forward.
+ */
+const takeNextId = async (uid: typeof ITEM_UID | typeof BLOCK_UID) => {
+  const row = await strapi.db.query(uid).create({ data: {} });
+  await strapi.db.query(uid).delete({ where: { id: row.id } });
+
+  return row.id as number;
+};
 
 const expectedError = (path: string[]) => ({
   name: 'ValidationError',
@@ -175,6 +258,7 @@ describe('Repeated component id in one list', () => {
     strapi = await createStrapiInstance();
     rqContent = await createContentAPIRequest({ strapi });
     rqAdmin = await createAuthRequest({ strapi });
+    graphqlQuery = (body) => rqAdmin({ url: '/graphql', method: 'POST', body });
   });
 
   afterAll(async () => {
@@ -235,7 +319,110 @@ describe('Repeated component id in one list', () => {
     );
   });
 
+  describe('GraphQL update', () => {
+    test('answers BAD_USER_INPUT for a repeated id in a repeatable component', async () => {
+      const page = await seedPage();
+
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation UpdatePage($documentId: ID!, $data: RciPageInput!) {
+            updateRciPage(documentId: $documentId, data: $data) {
+              documentId
+            }
+          }
+        `,
+        variables: {
+          documentId: page.documentId,
+          data: {
+            items: [
+              { id: page.items[0].id, label: 'dup-1' },
+              { id: page.items[0].id, label: 'dup-2' },
+            ],
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual({ updateRciPage: null });
+      expect(res.body.errors).toMatchObject([
+        {
+          message: `The component id ${page.items[0].id} appears more than once in items`,
+          extensions: { code: 'BAD_USER_INPUT' },
+        },
+      ]);
+      expect(await findPage(page.documentId)).toEqual(page);
+    });
+  });
+
   describe('unchanged behaviour', () => {
+    test.each(createdComponentCases)(
+      'accepts repeated ids nested in %s, which is created',
+      async (_, buildData) => {
+        const page = await seedPage();
+        const copiedId = page.blocks[0].inner![0].id;
+
+        const res = await rqContent({
+          method: 'PUT',
+          url: `/rci-pages/${page.documentId}`,
+          body: { data: buildData(page) },
+        });
+
+        expect(res.statusCode).toBe(200);
+        const stored = await findPage(page.documentId);
+        const created = [...stored.blocks, ...stored.zone, stored.hero].find(
+          (component) => component.name === 'new'
+        );
+        expect(labels(created!.inner!)).toEqual(['copy-1', 'copy-2']);
+        expect(created!.inner!.map((inner) => inner.id)).not.toContain(copiedId);
+      }
+    );
+
+    test('the same id under two component types of a dynamic zone is accepted', async () => {
+      // Each component type has its own table, so give the next item and the next block the
+      // same id
+      let itemId = await takeNextId(ITEM_UID);
+      let blockId = await takeNextId(BLOCK_UID);
+      while (itemId < blockId) {
+        itemId = await takeNextId(ITEM_UID);
+      }
+      while (blockId < itemId) {
+        blockId = await takeNextId(BLOCK_UID);
+      }
+
+      const created = await strapi.documents(PAGE_UID).create({
+        data: {
+          title: 'zone',
+          zone: [
+            { __component: ITEM_UID, label: 'z1' },
+            { __component: BLOCK_UID, name: 'zb' },
+          ],
+        },
+      } as any);
+      const page = await findPage(created.documentId);
+      const [item, block] = page.zone;
+      expect(item.id).toBe(block.id);
+
+      const res = await rqContent({
+        method: 'PUT',
+        url: `/rci-pages/${page.documentId}`,
+        body: {
+          data: {
+            zone: [
+              { __component: BLOCK_UID, id: block.id, name: 'zb updated' },
+              { __component: ITEM_UID, id: item.id, label: 'z1 updated' },
+            ],
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const stored = await findPage(page.documentId);
+      expect(stored.zone).toMatchObject([
+        { __component: BLOCK_UID, id: block.id, name: 'zb updated' },
+        { __component: ITEM_UID, id: item.id, label: 'z1 updated' },
+      ]);
+    });
+
     test('distinct ids keep and update each row', async () => {
       const page = await seedPage();
 

@@ -159,7 +159,8 @@ type RepeatedComponentId = {
 
 /**
  * Find the first component id sent twice in one list of the update data: a repeatable component,
- * a dynamic zone, or such a list nested in a component, at any depth.
+ * a dynamic zone, or such a list nested in a component, at any depth. Only the lists inside
+ * components that are updated (sent with an id) are checked.
  *
  * Every copy would update the same stored row, so only the last copy would be kept. Ids are
  * compared as strings, so `1` and `"1"` are the same id. In a dynamic zone, an id is repeated only
@@ -194,14 +195,21 @@ const findRepeatedComponentId = (
       }
 
       const component = item as Record<string, unknown>;
+
+      // A component sent without an id is created, and creating a component drops the ids nested
+      // in it, so nothing inside it can update a stored row twice
+      if (isNil(component.id) === true) {
+        continue;
+      }
+
+      const { id } = component as { id: Modules.EntityService.Params.Attribute.ID };
       const itemPath = isList ? [...path, attributeName, `${index}`] : [...path, attributeName];
       const componentUID =
         attribute.type === 'component'
           ? attribute.component
           : (component.__component as UID.Component | undefined);
 
-      if (isList === true && isNil(component.id) === false) {
-        const { id } = component as { id: Modules.EntityService.Params.Attribute.ID };
+      if (isList === true) {
         const key =
           attribute.type === 'dynamiczone'
             ? `${componentUID}:${pickStringifiedId({ id })}`
