@@ -138,6 +138,89 @@ const mergeUnsupportedFields = async (
   return deepMerge(unsupportedFieldsOnly, targetData);
 };
 
+type ComponentLayout = {
+  [key: string]: ComponentLayout | ComponentLayout[] | string | null;
+};
+
+/**
+ * Describes the component and dynamic zone items of `data` (item count, order and component uid),
+ * so that two documents can be checked for items that line up by array index.
+ */
+const getComponentLayout = (
+  data: Record<string, any> | null | undefined,
+  schema: Schema.Schema | undefined,
+  getModel: (uid: UID.Schema) => Schema.Schema | undefined
+): ComponentLayout => {
+  const layout: ComponentLayout = {};
+
+  if (!data || !schema) {
+    return layout;
+  }
+
+  for (const [key, attribute] of Object.entries(schema.attributes)) {
+    const value = data[key];
+
+    if (attribute.type === 'dynamiczone') {
+      layout[key] = (Array.isArray(value) ? value : []).map((item) => ({
+        __component: item?.__component ?? null,
+        fields: getComponentLayout(item, getModel(item?.__component), getModel),
+      }));
+    } else if (attribute.type === 'component') {
+      const componentSchema = getModel(attribute.component);
+
+      if (attribute.repeatable) {
+        layout[key] = (Array.isArray(value) ? value : []).map((item) =>
+          getComponentLayout(item, componentSchema, getModel)
+        );
+      } else {
+        layout[key] = getComponentLayout(value, componentSchema, getModel);
+      }
+    }
+  }
+
+  return layout;
+};
+
+const hasSameComponentLayout = (
+  a: Record<string, any> | null | undefined,
+  b: Record<string, any> | null | undefined,
+  schema: Schema.Schema | undefined,
+  getModel: (uid: UID.Schema) => Schema.Schema | undefined
+) =>
+  JSON.stringify(getComponentLayout(a, schema, getModel)) ===
+  JSON.stringify(getComponentLayout(b, schema, getModel));
+
+/**
+ * Picks where each attribute's unsupported fields come from for a locale that already exists.
+ * A component or dynamic zone whose items no longer line up with the source locale takes its
+ * values from the source locale, since the existing locale's items can't be matched by index.
+ */
+const getUnsupportedFieldsSource = (
+  derivedDoc: Record<string, any> | null,
+  sourceDoc: Record<string, any> | null,
+  schema: Schema.Schema,
+  getModel: (uid: UID.Schema) => Schema.Schema | undefined
+): Record<string, any> | null => {
+  if (!derivedDoc || !sourceDoc) {
+    return derivedDoc || sourceDoc;
+  }
+
+  const result = { ...derivedDoc };
+
+  for (const [key, attribute] of Object.entries(schema.attributes)) {
+    if (attribute.type !== 'component' && attribute.type !== 'dynamiczone') {
+      continue;
+    }
+
+    const attributeSchema = { ...schema, attributes: { [key]: attribute } } as Schema.Schema;
+    if (!hasSameComponentLayout(derivedDoc, sourceDoc, attributeSchema, getModel)) {
+      result[key] = sourceDoc[key];
+    }
+  }
+
+  return result;
+};
+
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
@@ -336,6 +419,10 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         aiResult.localizations.map(async (localization) => {
           const { content, locale } = localization;
 
+          if (!hasSameComponentLayout(content, translateableContent, schema, getModelBound)) {
+            throw new Error('translated components do not match the source locale components');
+          }
+
           const derivedDoc = await strapi.documents(model).findOne({
             documentId,
             locale,
@@ -344,7 +431,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           let mergedData = structuredClone(content);
 
-          const sourceForUnsupportedFields = derivedDoc || sourceDocWithAllFields;
+          const sourceForUnsupportedFields = getUnsupportedFieldsSource(
+            derivedDoc,
+            sourceDocWithAllFields,
+            schema,
+            getModelBound
+          );
           mergedData = await mergeUnsupportedFields(
             mergedData,
             sourceForUnsupportedFields,
