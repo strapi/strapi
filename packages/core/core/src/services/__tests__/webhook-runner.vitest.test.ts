@@ -7,6 +7,11 @@ import createEventHub from '../event-hub';
 import requestContext from '../request-context';
 import createWebhookRunner from '../webhook-runner';
 
+// `isPrivateAttribute`, used to check body template fields, reads `api.responses.privateAttributes`
+beforeEach(() => {
+  global.strapi = { config: { get: (_key: string, fallback?: unknown) => fallback } } as any;
+});
+
 type Webhook = Modules.WebhookStore.Webhook;
 
 const ARTICLE_UID = 'api::article.article';
@@ -42,7 +47,7 @@ const setup = ({ isBodyTemplateEnabled = false } = {}) => {
     logger: logger as any,
     isBodyTemplateEnabled: () => isBodyTemplateEnabled,
     getContentTypes: () =>
-      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } }) as any,
+      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } } as any),
   });
 
   const emit = async (event: string, info: Record<string, unknown>) => {

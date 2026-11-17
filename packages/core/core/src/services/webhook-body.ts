@@ -22,15 +22,21 @@
  */
 
 import _ from 'lodash';
-import { errors } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { Modules, Schema, UID } from '@strapi/types';
 
 type Payload = Record<string, unknown>;
 type Template = Record<string, unknown>;
 type Webhook = Modules.WebhookStore.Webhook;
-export type ContentTypes = Record<string, Pick<Schema.ContentType, 'attributes'>>;
+export type ContentTypes = Record<string, Pick<Schema.ContentType, 'attributes' | 'options'>>;
 
 const { ValidationError } = errors;
+
+/** Points at the `body` field, so the admin form shows the message under the template input. */
+const bodyError = (message: string) =>
+  new ValidationError(message, {
+    errors: [{ path: ['body'], message, name: 'ValidationError', value: null }],
+  });
 
 const BODY_TEMPLATE_FUTURE_FLAG = 'unstableWebhookBodyTemplate';
 
@@ -46,6 +52,8 @@ const ENTRY_EVENT_PREFIX = 'entry.';
 // The fields of every entry that are not in the attributes of every content type
 const COMMON_ENTRY_FIELDS = new Set(['id', 'documentId', 'createdAt', 'updatedAt']);
 const NON_SCALAR_TYPES = new Set(['relation', 'media', 'component', 'dynamiczone', 'password']);
+// Far deeper than any real payload, and well below what the recursive checks below can handle
+const MAX_DEPTH = 32;
 
 const getOwn = (value: unknown, key: string): unknown =>
   _.isPlainObject(value) && Object.hasOwn(value as object, key)
@@ -130,12 +138,22 @@ export const renderWebhookBody = (
   return renderValue(template) as Template;
 };
 
-const listPlaceholders = (value: unknown): string[] => {
+/*
+ * The admin passes these messages to `formatMessage` as default messages, where braces are ICU
+ * syntax: they name variables without the `{{ }}` around them.
+ */
+
+const listPlaceholders = (value: unknown, depth = 0): string[] => {
+  // Levels are the objects and arrays around a value: the root object is the first one
+  if (depth >= MAX_DEPTH && (Array.isArray(value) || _.isPlainObject(value))) {
+    throw bodyError(`Webhook body can't be nested more than ${MAX_DEPTH} levels deep`);
+  }
+
   if (typeof value === 'string') {
     // An unterminated `{{ entry.title` is not a placeholder: it would be sent as text, unnoticed
     if (/\{\{|\}\}/.test(value.replace(ANY_PLACEHOLDER, ''))) {
-      throw new ValidationError(
-        'Webhook body has a "{{" or "}}" that is not part of a {{ variable }} placeholder'
+      throw bodyError(
+        'Webhook body has double braces that do not open and close a variable placeholder'
       );
     }
 
@@ -143,65 +161,111 @@ const listPlaceholders = (value: unknown): string[] => {
   }
 
   if (Array.isArray(value)) {
-    return value.flatMap(listPlaceholders);
+    return value.flatMap((item) => listPlaceholders(item, depth + 1));
   }
 
   if (_.isPlainObject(value)) {
     return Object.entries(value as Template).flatMap(([key, item]) => {
-      if (listPlaceholders(key).length > 0) {
-        throw new ValidationError(`Webhook body keys can't hold a variable: ${key}`);
+      if (/\{\{|\}\}/.test(key)) {
+        throw bodyError("Webhook body keys can't hold a variable placeholder");
       }
 
-      return listPlaceholders(item);
+      return listPlaceholders(item, depth + 1);
     });
   }
 
   return [];
 };
 
-const getTargetContentTypes = ({ events, contentTypeEvents = {} }: Webhook) => {
+export const getTargetContentTypes = ({ events, contentTypeEvents = {} }: Webhook) => {
   // Events selected for every content type, or none selected yet: no content type in particular
   const uids = Object.keys(contentTypeEvents);
 
   return events.length > 0 || uids.length === 0 ? null : uids;
 };
 
+/**
+ * Private as the sanitizer of the event payload sees it: the attribute's `private`, the content
+ * type's `options.privateAttributes` or the `api.responses.privateAttributes` config.
+ */
+const isPrivate = (contentType: ContentTypes[string], field: string) =>
+  contentTypesUtils.isPrivateAttribute(contentType as Schema.ContentType, field);
+
 const isSendableField = (contentType: ContentTypes[string], field: string) => {
   const attribute = Object.hasOwn(contentType.attributes, field)
-    ? (contentType.attributes[field] as Schema.Attribute.AnyAttribute & { private?: boolean })
+    ? (contentType.attributes[field] as Schema.Attribute.AnyAttribute)
     : undefined;
 
   return (
-    attribute !== undefined && !NON_SCALAR_TYPES.has(attribute.type) && attribute.private !== true
+    attribute !== undefined &&
+    !NON_SCALAR_TYPES.has(attribute.type) &&
+    !isPrivate(contentType, field)
   );
 };
 
-const validateEntryField = (webhook: Webhook, field: string, contentTypes: ContentTypes) => {
+// The fields every entry has, outside the attributes: only the global config can make them private
+const noContentType = (): ContentTypes[string] => ({ attributes: {}, options: {} });
+
+interface ValidateOptions {
+  /**
+   * Content types whose missing fields are accepted: those a saved, unchanged template already
+   * targeted, so it stays editable once a field it uses is removed (the runner logs the missing
+   * value). A content type the webhook did not target before is always checked in full.
+   */
+  allowRemovedFieldsOf?: string[];
+}
+
+const validateEntryField = (
+  webhook: Webhook,
+  field: string,
+  contentTypes: ContentTypes,
+  { allowRemovedFieldsOf = [] }: ValidateOptions
+) => {
+  const uids = getTargetContentTypes(webhook);
+
   if (COMMON_ENTRY_FIELDS.has(field)) {
+    // Events for every content type: any of them can be sent, as can none (global config only)
+    const targets = [
+      noContentType(),
+      ...(uids ?? Object.keys(contentTypes))
+        .filter((uid) => Object.hasOwn(contentTypes, uid))
+        .map((uid) => contentTypes[uid]),
+    ];
+
+    if (targets.some((contentType) => isPrivate(contentType, field))) {
+      throw bodyError(`Webhook body variable entry.${field} is a private field`);
+    }
+
     return;
   }
 
-  const uids = getTargetContentTypes(webhook);
-
   if (uids === null) {
-    throw new ValidationError(
-      `Webhook body variable {{ entry.${field} }} can only be used when the events are selected per content type`
+    throw bodyError(
+      `Webhook body variable entry.${field} can only be used when the events are selected per content type`
     );
   }
 
   // A content type that was deleted has no fields to check against
-  const invalidUid = uids.find(
-    (uid) => Object.hasOwn(contentTypes, uid) && !isSendableField(contentTypes[uid], field)
-  );
+  for (const uid of uids.filter((target) => Object.hasOwn(contentTypes, target))) {
+    const contentType = contentTypes[uid];
 
-  if (invalidUid) {
-    throw new ValidationError(
-      `Webhook body variable {{ entry.${field} }} is not a scalar field of ${invalidUid}`
-    );
+    if (!Object.hasOwn(contentType.attributes, field)) {
+      if (!allowRemovedFieldsOf.includes(uid)) {
+        throw bodyError(`Webhook body variable entry.${field} is not a field of ${uid}`);
+      }
+    } else if (!isSendableField(contentType, field)) {
+      throw bodyError(
+        `Webhook body variable entry.${field} is not a scalar, non-private field of ${uid}`
+      );
+    }
   }
 };
 
-export const validateWebhookBody = (webhook: Webhook, contentTypes: ContentTypes) => {
+export const validateWebhookBody = (
+  webhook: Webhook,
+  contentTypes: ContentTypes,
+  options: ValidateOptions = {}
+) => {
   const { body, events, contentTypeEvents = {} } = webhook;
 
   if (body === null || body === undefined) {
@@ -209,7 +273,7 @@ export const validateWebhookBody = (webhook: Webhook, contentTypes: ContentTypes
   }
 
   if (!_.isPlainObject(body)) {
-    throw new ValidationError('Webhook body must be a JSON object');
+    throw bodyError('Webhook body must be a JSON object');
   }
 
   const nonEntryEvent = [...events, ...Object.values(contentTypeEvents).flat()].find(
@@ -221,29 +285,40 @@ export const validateWebhookBody = (webhook: Webhook, contentTypes: ContentTypes
 
     if (!EVENT_VARIABLES.has(variable)) {
       if (!ENTRY_VARIABLES.has(variable) && !isEntryField) {
-        throw new ValidationError(`Webhook body variable {{ ${variable} }} is not supported`);
+        throw bodyError(`Webhook body variable ${variable} is not supported`);
       }
 
       if (nonEntryEvent) {
-        throw new ValidationError(
-          `Webhook body variable {{ ${variable} }} is not available for the event ${nonEntryEvent}`
+        throw bodyError(
+          `Webhook body variable ${variable} is not available for the event ${nonEntryEvent}`
         );
       }
 
       if (isEntryField) {
-        validateEntryField(webhook, variable.slice(ENTRY_FIELD_PREFIX.length), contentTypes);
+        validateEntryField(
+          webhook,
+          variable.slice(ENTRY_FIELD_PREFIX.length),
+          contentTypes,
+          options
+        );
       }
     }
   }
 };
 
-const getSampleValue = (name: string, { type }: Schema.Attribute.AnyAttribute): unknown => {
-  switch (type) {
+/**
+ * A value of the JSON type the delivered entry has for this attribute, so a receiver that checks
+ * types gets the same ones from a test trigger as from a real delivery.
+ */
+const getSampleValue = (name: string, attribute: Schema.Attribute.AnyAttribute): unknown => {
+  switch (attribute.type) {
     case 'integer':
-    case 'biginteger':
     case 'float':
     case 'decimal':
       return 1;
+    // The database returns big integers as strings
+    case 'biginteger':
+      return '1';
     case 'boolean':
       return true;
     case 'date':
@@ -255,6 +330,10 @@ const getSampleValue = (name: string, { type }: Schema.Attribute.AnyAttribute): 
       return '2026-01-01T12:00:00.000Z';
     case 'json':
       return {};
+    case 'blocks':
+      return [{ type: 'paragraph', children: [{ type: 'text', text: `Sample ${name}` }] }];
+    case 'enumeration':
+      return (attribute as Schema.Attribute.Enumeration<string[]>).enum?.[0] ?? null;
     default:
       return `Sample ${name}`;
   }
@@ -266,10 +345,10 @@ const getSampleValue = (name: string, { type }: Schema.Attribute.AnyAttribute): 
  */
 export const createSampleEvent = (webhook: Webhook, contentTypes: ContentTypes): Payload => {
   const uid = getTargetContentTypes(webhook)?.find((target) => Object.hasOwn(contentTypes, target));
-  const attributes = uid ? contentTypes[uid].attributes : {};
+  const contentType = uid ? contentTypes[uid] : noContentType();
 
-  const fields = Object.entries(attributes).filter(([name]) =>
-    isSendableField({ attributes }, name)
+  const fields = Object.entries(contentType.attributes).filter(([name]) =>
+    isSendableField(contentType, name)
   );
 
   return {
@@ -282,10 +361,15 @@ export const createSampleEvent = (webhook: Webhook, contentTypes: ContentTypes):
           getSampleValue(name, attribute as Schema.Attribute.AnyAttribute),
         ])
       ),
-      id: 1,
-      documentId: 'sample-document-id',
-      createdAt: '2026-01-01T12:00:00.000Z',
-      updatedAt: '2026-01-01T12:00:00.000Z',
+      ..._.omitBy(
+        {
+          id: 1,
+          documentId: 'sample-document-id',
+          createdAt: '2026-01-01T12:00:00.000Z',
+          updatedAt: '2026-01-01T12:00:00.000Z',
+        },
+        (_value, field) => isPrivate(contentType, field)
+      ),
     },
   };
 };

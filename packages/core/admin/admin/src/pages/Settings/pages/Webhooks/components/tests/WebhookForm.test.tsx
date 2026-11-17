@@ -169,7 +169,7 @@ describe('WebhookForm', () => {
       expect(getEditorText(container)).toContain('"ref": "main"');
       expect(
         screen.getByText(
-          'Sent in place of the default payload, leave empty to keep it. Available variables: {{ event }}, {{ createdAt }}. For entry events: {{ model }}, {{ uid }}, {{ documentId }}, {{ entry }}, and {{ entry.title }} when the events are selected per content type.'
+          'Sent in place of the default payload, leave empty to keep it. Available variables: {{ event }}, {{ createdAt }}. For entry events only: {{ model }}, {{ uid }}, {{ documentId }}, {{ entry }}, plus {{ entry.id }}, {{ entry.documentId }}, {{ entry.createdAt }}, {{ entry.updatedAt }} for any content type and {{ entry.<field> }} (a scalar, non-private field, e.g. {{ entry.title }}) when the events are selected per content type. Selecting a media, release or review workflow event rules out every entry variable.'
         )
       ).toBeInTheDocument();
     });

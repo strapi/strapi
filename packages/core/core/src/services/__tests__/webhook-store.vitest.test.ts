@@ -1,7 +1,12 @@
-import { describe, test, expect, vi } from 'vitest';
+import { beforeEach, describe, test, expect, vi } from 'vitest';
 import type { Modules } from '@strapi/types';
 
 import { createWebhookStore } from '../webhook-store';
+
+// `isPrivateAttribute`, used to check body template fields, reads `api.responses.privateAttributes`
+beforeEach(() => {
+  global.strapi = { config: { get: (_key: string, fallback?: unknown) => fallback } } as any;
+});
 
 type Webhook = Modules.WebhookStore.Webhook;
 
@@ -50,7 +55,10 @@ const setup = ({ isBodyTemplateEnabled = true } = {}) => {
     db: db as any,
     isBodyTemplateEnabled: () => isBodyTemplateEnabled,
     getContentTypes: () =>
-      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } }) as any,
+      ({
+        [ARTICLE_UID]: { attributes: { title: { type: 'string' } } },
+        [PAGE_UID]: { attributes: { slug: { type: 'uid' } } },
+      } as any),
   });
 
   return { store, query };
@@ -226,7 +234,7 @@ describe('Webhook store', () => {
 
       await expect(
         store.updateWebhook('1', { ...saved, body: { text: '{{ unknown }}' } })
-      ).rejects.toThrow('{{ unknown }} is not supported');
+      ).rejects.toThrow('variable unknown is not supported');
       expect(query.update).not.toHaveBeenCalled();
     });
 
@@ -255,6 +263,84 @@ describe('Webhook store', () => {
       await store.updateWebhook('1', { ...saved, isEnabled: false, name: 'Renamed' });
 
       expect(query.update).toHaveBeenCalled();
+    });
+
+    test('Checks a saved template against events changed while the flag was off', async () => {
+      // Saved with the flag on for an entry event, then the events changed to media.create while
+      // the flag was off, which kept the template as is
+      const changed = createWebhook({ body: { t: '{{ entry.title }}' }, events: ['media.create'] });
+      const { store, query } = setup();
+      store.addAllowedEvent('MEDIA_CREATE', 'media.create');
+      query.findOne.mockResolvedValue(toRow(changed));
+
+      // Flag on again: a save that only renames the webhook
+      await expect(store.updateWebhook('1', { ...changed, name: 'Renamed' })).rejects.toThrow(
+        'not available for the event media.create'
+      );
+      expect(query.update).not.toHaveBeenCalled();
+    });
+
+    test('Checks a saved template against a content type the webhook did not target before', async () => {
+      const { store, query } = setup();
+      const saved = createWebhook({
+        events: [],
+        contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] },
+        body: { t: '{{ entry.title }}' },
+      });
+      query.findOne.mockResolvedValue(toRow(saved));
+
+      // Same template, one more content type, which has no title
+      await expect(
+        store.updateWebhook('1', {
+          ...saved,
+          contentTypeEvents: { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.create'] },
+        })
+      ).rejects.toThrow(`entry.title is not a field of ${PAGE_UID}`);
+      expect(query.update).not.toHaveBeenCalled();
+    });
+
+    test('Lets a webhook whose saved template no longer validates be disabled', async () => {
+      const { store, query } = setup();
+      store.addAllowedEvent('MEDIA_CREATE', 'media.create');
+      const broken = createWebhook({ body: { t: '{{ entry.title }}' }, events: ['media.create'] });
+      query.findOne.mockResolvedValue(toRow(broken));
+      query.update.mockResolvedValue(toRow(broken, { enabled: false }));
+
+      await store.updateWebhook('1', { ...broken, isEnabled: false });
+
+      expect(query.update).toHaveBeenCalled();
+      await expect(store.updateWebhook('1', { ...broken, isEnabled: true })).rejects.toThrow(
+        'not available for the event media.create'
+      );
+    });
+
+    test('Keeps the saved template when the update has no body', async () => {
+      const { store, query } = setup();
+      const saved = createWebhook({ body: { text: '{{ uid }}' } });
+      query.findOne.mockResolvedValue(toRow(saved));
+      query.update.mockResolvedValue(toRow(saved, { name: 'Renamed' }));
+
+      const { body: _body, ...withoutBody } = saved;
+      const updated = await store.updateWebhook('1', {
+        ...withoutBody,
+        name: 'Renamed',
+      } as Webhook);
+
+      expect(query.update.mock.calls[0][0].data).not.toHaveProperty('body');
+      expect(updated).toMatchObject({ body: { text: '{{ uid }}' } });
+    });
+
+    test('Checks the saved template against new events when the update has no body', async () => {
+      const { store, query } = setup();
+      const saved = createWebhook({ body: { text: '{{ uid }}' } });
+      query.findOne.mockResolvedValue(toRow(saved));
+      store.addAllowedEvent('MEDIA_CREATE', 'media.create');
+
+      const { body: _body, ...withoutBody } = saved;
+
+      await expect(
+        store.updateWebhook('1', { ...withoutBody, events: ['media.create'] } as Webhook)
+      ).rejects.toThrow('not available for the event media.create');
     });
 
     test('Keeps the saved template without changing it when the flag is off', async () => {

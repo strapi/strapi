@@ -8,6 +8,8 @@ export default defineProvider({
     strapi.get('models').add(webhookModel);
 
     const isBodyTemplateEnabled = () => strapi.features.future.isEnabled(BODY_TEMPLATE_FUTURE_FLAG);
+    // The registry type has no string index signature, so a plain cast fails (TS2352). Only the
+    // `attributes` and `options` of each content type are read.
     const getContentTypes = () => strapi.contentTypes as unknown as ContentTypes;
 
     strapi.add('webhookStore', () =>

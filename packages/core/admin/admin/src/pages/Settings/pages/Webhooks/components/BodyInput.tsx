@@ -27,13 +27,16 @@ const BodyInput = () => {
         {
           id: 'Settings.webhooks.body.hint',
           defaultMessage:
-            'Sent in place of the default payload, leave empty to keep it. Available variables: {eventVariables}. For entry events: {entryVariables}, and {entryField} when the events are selected per content type.',
+            'Sent in place of the default payload, leave empty to keep it. Available variables: {eventVariables}. For entry events only: {entryVariables}, plus {commonFields} for any content type and {entryField} (a scalar, non-private field, e.g. {entryFieldExample}) when the events are selected per content type. Selecting a media, release or review workflow event rules out every entry variable.',
         },
         // Passed as values: the braces of a placeholder are ICU syntax in a message
         {
           eventVariables: '{{ event }}, {{ createdAt }}',
           entryVariables: '{{ model }}, {{ uid }}, {{ documentId }}, {{ entry }}',
-          entryField: '{{ entry.title }}',
+          commonFields:
+            '{{ entry.id }}, {{ entry.documentId }}, {{ entry.createdAt }}, {{ entry.updatedAt }}',
+          entryField: '{{ entry.<field> }}',
+          entryFieldExample: '{{ entry.title }}',
         }
       )}
     >

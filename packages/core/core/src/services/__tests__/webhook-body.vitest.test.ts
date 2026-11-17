@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Modules } from '@strapi/types';
 
 import { createSampleEvent, renderWebhookBody, validateWebhookBody } from '../webhook-body';
@@ -20,6 +20,19 @@ const payload = {
     tags: [{ name: 'news' }, { name: 'tech' }],
   },
 };
+
+/** `api.responses.privateAttributes`, read by the sanitizer's `isPrivateAttribute`. */
+let globalPrivateAttributes: string[] = [];
+
+beforeEach(() => {
+  globalPrivateAttributes = [];
+  global.strapi = {
+    config: {
+      get: (key: string, fallback?: unknown) =>
+        key === 'api.responses.privateAttributes' ? globalPrivateAttributes : fallback,
+    },
+  } as any;
+});
 
 const ARTICLE_UID = 'api::article.article';
 const PAGE_UID = 'api::page.page';
@@ -209,34 +222,42 @@ describe('validateWebhookBody', () => {
   test.each(['{{ entry.title', 'Title: {{ event }} {{ uid', 'event }}', '{{ event }} }}', '{{'])(
     'Rejects %j, a "{{" or "}}" outside of a placeholder',
     (value) => {
-      expect(() => validate({ text: value })).toThrow('not part of a {{ variable }} placeholder');
-      expect(() => validate({ nested: [{ text: value }] })).toThrow('not part of a {{ variable }}');
+      expect(() => validate({ text: value })).toThrow(
+        'do not open and close a variable placeholder'
+      );
+      expect(() => validate({ nested: [{ text: value }] })).toThrow('do not open and close');
     }
   );
 
   test('Rejects an unterminated placeholder in a key', () => {
-    expect(() => validate({ '{{ event': 'x' })).toThrow('not part of a {{ variable }}');
+    expect(() => validate({ '{{ event': 'x' })).toThrow("keys can't hold a variable");
   });
 
   test('Rejects a variable in a key', () => {
     expect(() => validate({ '{{ event }}': 'x' })).toThrow("keys can't hold a variable");
   });
 
-  test.each(['tags', 'cover', 'seo', 'blocks', 'secret', 'password', 'unknown', 'constructor'])(
+  test.each(['tags', 'cover', 'seo', 'blocks', 'secret', 'password'])(
     'Rejects the field %s, which is not a scalar field that is always sent',
     (field) => {
       expect(() => validate({ value: `{{ entry.${field} }}` })).toThrow(
-        `{{ entry.${field} }} is not a scalar field of ${ARTICLE_UID}`
+        `entry.${field} is not a scalar, non-private field of ${ARTICLE_UID}`
       );
     }
   );
+
+  test.each(['unknown', 'constructor'])('Rejects %s, which is not a field at all', (field) => {
+    expect(() => validate({ value: `{{ entry.${field} }}` })).toThrow(
+      `entry.${field} is not a field of ${ARTICLE_UID}`
+    );
+  });
 
   test('Checks a field against every content type the webhook targets', () => {
     const contentTypeEvents = { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.create'] };
 
     expect(() => validate({ value: '{{ entry.title }}' }, { contentTypeEvents })).not.toThrow();
     expect(() => validate({ value: '{{ entry.views }}' }, { contentTypeEvents })).toThrow(
-      `{{ entry.views }} is not a scalar field of ${PAGE_UID}`
+      `entry.views is not a field of ${PAGE_UID}`
     );
   });
 
@@ -290,6 +311,172 @@ describe('validateWebhookBody', () => {
   });
 });
 
+describe('validateWebhookBody: what the event payload sanitizer removes', () => {
+  // A fresh schema per test: `isPrivateAttribute` caches the private fields of each schema
+  const noteContentTypes = () =>
+    ({
+      [ARTICLE_UID]: {
+        attributes: { title: { type: 'string' }, secretNote: { type: 'string' } },
+        options: { privateAttributes: ['secretNote'] },
+      },
+    } as any);
+
+  test('Rejects a field made private by the content type options', () => {
+    expect(() =>
+      validateWebhookBody(
+        createWebhook({ body: { s: '{{ entry.secretNote }}' } }),
+        noteContentTypes()
+      )
+    ).toThrow(`entry.secretNote is not a scalar, non-private field of ${ARTICLE_UID}`);
+  });
+
+  test('Rejects a field made private by api.responses.privateAttributes', () => {
+    globalPrivateAttributes = ['title'];
+
+    expect(() =>
+      validateWebhookBody(createWebhook({ body: { t: '{{ entry.title }}' } }), noteContentTypes())
+    ).toThrow(`entry.title is not a scalar, non-private field of ${ARTICLE_UID}`);
+  });
+
+  test.each([
+    ['per content type', {}],
+    ['for every content type', { events: ['entry.create'], contentTypeEvents: {} }],
+  ])('Rejects a common field made private by the global config, events %s', (_, webhook) => {
+    globalPrivateAttributes = ['createdAt'];
+
+    expect(() =>
+      validateWebhookBody(
+        createWebhook({ body: { c: '{{ entry.createdAt }}' }, ...webhook }),
+        noteContentTypes()
+      )
+    ).toThrow('entry.createdAt is a private field');
+  });
+
+  test('Leaves the private fields out of the test trigger sample', () => {
+    globalPrivateAttributes = ['updatedAt'];
+
+    const { entry } = createSampleEvent(createWebhook(), noteContentTypes()) as {
+      entry: Record<string, unknown>;
+    };
+
+    expect(entry).toHaveProperty('title');
+    expect(entry).not.toHaveProperty('secretNote');
+    expect(entry).not.toHaveProperty('updatedAt');
+  });
+});
+
+describe('validateWebhookBody: limits and messages', () => {
+  const validate = (body: Webhook['body'], webhook: Partial<Webhook> = {}) =>
+    validateWebhookBody(createWebhook({ body, ...webhook }), contentTypes);
+
+  const nest = (levels: number) => {
+    let body: any = { leaf: '{{ event }}' };
+    for (let i = 0; i < levels; i += 1) body = { n: i % 2 ? body : [body] };
+    return body;
+  };
+
+  test('Rejects a body nested too deeply with a validation error, not a stack overflow', () => {
+    expect(() => validate(nest(2000))).toThrow("can't be nested more than 32 levels deep");
+    // About 22 levels: every other wrapper adds an array
+    expect(() => validate(nest(15))).not.toThrow();
+  });
+
+  test.each([
+    [{ v: '{{ unknown }}' }, {}],
+    [{ v: '{{ entry.title' }, {}],
+    [{ '{{ event }}': 'x' }, {}],
+    [{ v: '{{ entry.tags }}' }, {}],
+    [{ v: '{{ entry.title }}' }, { events: ['entry.create'], contentTypeEvents: {} }],
+    [{ v: '{{ entry.title }}' }, { events: ['media.create'], contentTypeEvents: {} }],
+  ])('Writes %j errors without braces, which the admin reads as ICU syntax', (body, webhook) => {
+    expect(() => validate(body, webhook)).toThrow(/^[^{}]*$/);
+  });
+
+  test('Points its errors at the body field, so the admin shows them under the input', () => {
+    try {
+      validate({ v: '{{ unknown }}' });
+      throw new Error('expected a validation error');
+    } catch (error: any) {
+      expect(error.details).toEqual({
+        errors: [expect.objectContaining({ path: ['body'], message: error.message })],
+      });
+    }
+  });
+
+  test('Accepts a field gone from its content type only when asked to', () => {
+    const body = { v: '{{ entry.removed }}' };
+
+    expect(() => validate(body)).toThrow('entry.removed is not a field');
+    expect(() =>
+      validateWebhookBody(createWebhook({ body }), contentTypes, {
+        allowRemovedFieldsOf: [ARTICLE_UID],
+      })
+    ).not.toThrow();
+  });
+
+  test('Only accepts a missing field for the content types it is asked to', () => {
+    const body = { v: '{{ entry.title }}' };
+    // Page has a title, Article has one too: drop it from a copy of Article
+    const withoutTitle = {
+      ...contentTypes,
+      [ARTICLE_UID]: { attributes: { views: { type: 'integer' } } },
+    };
+    const webhook = createWebhook({
+      body,
+      contentTypeEvents: { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.create'] },
+    });
+
+    expect(() =>
+      validateWebhookBody(webhook, withoutTitle, { allowRemovedFieldsOf: [PAGE_UID] })
+    ).toThrow(`entry.title is not a field of ${ARTICLE_UID}`);
+    expect(() =>
+      validateWebhookBody(webhook, withoutTitle, { allowRemovedFieldsOf: [ARTICLE_UID] })
+    ).not.toThrow();
+  });
+
+  test('Rejects one level deeper than the limit, not the limit itself', () => {
+    const atDepth = (levels: number) => {
+      let body: any = '{{ event }}';
+      for (let i = 0; i < levels; i += 1) body = { n: body };
+      return body;
+    };
+
+    expect(() => validate(atDepth(32))).not.toThrow();
+    expect(() => validate(atDepth(33))).toThrow("can't be nested more than 32 levels deep");
+  });
+
+  test('Checks a common field against every content type when events are for all of them', () => {
+    const privateCreatedAt = {
+      [ARTICLE_UID]: { attributes: {}, options: { privateAttributes: ['createdAt'] } },
+    } as any;
+
+    expect(() =>
+      validateWebhookBody(
+        createWebhook({
+          body: { c: '{{ entry.createdAt }}' },
+          events: ['entry.create'],
+          contentTypeEvents: {},
+        }),
+        privateCreatedAt
+      )
+    ).toThrow('entry.createdAt is a private field');
+  });
+
+  test('Still checks the events when it accepts removed fields', () => {
+    expect(() =>
+      validateWebhookBody(
+        createWebhook({
+          body: { v: '{{ entry.title }}' },
+          events: ['media.create'],
+          contentTypeEvents: {},
+        }),
+        contentTypes,
+        { allowRemovedFieldsOf: [ARTICLE_UID] }
+      )
+    ).toThrow('not available for the event media.create');
+  });
+});
+
 describe('createSampleEvent', () => {
   test('Gives a value to every variable a valid template can use', () => {
     const webhook = createWebhook();
@@ -320,6 +507,30 @@ describe('createSampleEvent', () => {
       views: 1,
       updatedAt: expect.any(String),
     });
+  });
+
+  test('Uses the JSON types a real delivery sends', () => {
+    const typed = {
+      [ARTICLE_UID]: {
+        attributes: {
+          views: { type: 'biginteger' },
+          content: { type: 'blocks' },
+          status: { type: 'enumeration', enum: ['draft', 'live'] },
+          score: { type: 'decimal' },
+        },
+      },
+    } as any;
+
+    const { entry } = createSampleEvent(createWebhook(), typed) as {
+      entry: Record<string, unknown>;
+    };
+
+    expect(entry.views).toBe('1');
+    expect(entry.content).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'Sample content' }] },
+    ]);
+    expect(entry.status).toBe('draft');
+    expect(entry.score).toBe(1);
   });
 
   test('Leaves out what an event would not send', () => {
