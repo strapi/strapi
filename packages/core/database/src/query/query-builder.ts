@@ -174,7 +174,8 @@ const createQueryBuilder = (
 
   const isScoped = () => state.scoped && !db.scopes.isEmpty();
 
-  // `<alias>.<idColumn> IN (SELECT id FROM <target> WHERE <scopes>)`, or undefined without a scope
+  // `EXISTS (SELECT 1 FROM <target> AS tN WHERE tN.id = <alias>.<idColumn> AND <scopes>)`, or
+  // undefined without a scope. Not IN: SQLite probes the link index once per row and per visible id
   const scopeJoin = (alias: string, targetUid: string, idColumn = 'id') => {
     const wheres = db.scopes.where({ uid: targetUid, meta: db.metadata.get(targetUid) });
 
@@ -182,10 +183,19 @@ const createQueryBuilder = (
       return undefined;
     }
 
-    const sub = createQueryBuilder(targetUid, db, { scoped: false }).select('id');
+    // The subquery takes its aliases from this query's counter, so none can shadow an outer alias
+    const sub = createQueryBuilder(targetUid, db, {
+      scoped: false,
+      aliasCounter: state.aliasCounter,
+    })
+      .select([db.connection.raw('1')])
+      .where({ id: db.connection.ref(`${alias}.${idColumn}`) });
     wheres.forEach((where) => sub.where(where));
 
-    return db.connection.raw('?? in ?', [`${alias}.${idColumn}`, sub.getKnexQuery()]);
+    const query = sub.getKnexQuery();
+    state.aliasCounter = sub.state.aliasCounter;
+
+    return db.connection.raw('exists ?', [query]);
   };
 
   const getAlias = () => {

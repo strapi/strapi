@@ -652,7 +652,7 @@ describe('query scopes on joins', () => {
       expect(sqls).toEqual([
         'select distinct `t0`.* from `articles` as `t0` ' +
           'left join `articles_category_lnk` as `t1` on `t0`.`id` = `t1`.`article_id` ' +
-          'and `t1`.`category_id` in (select `t0`.`id` from `categories` as `t0` where (`t0`.`deleted_at` is null)) ' +
+          'and exists (select 1 from `categories` as `t3` where (`t3`.`id` = `t1`.`category_id` and `t3`.`deleted_at` is null)) ' +
           'left join `categories` as `t2` on `t1`.`category_id` = `t2`.`id` ' +
           'where (`t2`.`name` = ? and `t0`.`deleted_at` is null)',
       ]);
@@ -675,7 +675,7 @@ describe('query scopes on joins', () => {
       expect(sqls[0]).toContain(
         'left join `articles_targets_mph` as `t1` on `t0`.`id` = `t1`.`targets_id` ' +
           'and `t1`.`targets_type` = ? and `t1`.`field` = ? ' +
-          'and `t1`.`article_id` in (select `t0`.`id` from `articles` as `t0` where (`t0`.`deleted_at` is null)) ' +
+          'and exists (select 1 from `articles` as `t3` where (`t3`.`id` = `t1`.`article_id` and `t3`.`deleted_at` is null)) ' +
           'left join `articles` as `t2` on `t1`.`article_id` = `t2`.`id` where'
       );
     });
@@ -697,6 +697,9 @@ describe('query scopes on joins', () => {
       // Unscoped, A1 sorts on red and A2 on yellow. Scoped, A2 has no visible tag and sorts on
       // null, which SQLite puts first
       expect(titles(rows)).toEqual(['A2', 'A1']);
+      // The deep sort wrap takes its aliases after the join scope: none repeats a subquery alias
+      const aliases = sqls[0].match(/ as `t\d+`/g) ?? [];
+      expect(aliases).toHaveLength(new Set(aliases).size);
     });
 
     it('does not match a $null filter through a link to a hidden target', async () => {
@@ -735,7 +738,7 @@ describe('query scopes on joins', () => {
       // The scoped join stays in the nested select, so MySQL does not raise error 1093
       writes.forEach((sql) =>
         expect(sql).toMatch(
-          /from \(select distinct `t0`\.`id` from `articles` as `t0` .*and `t1`\.`category_id` in \(select `t0`\.`id` from `categories` as `t0` where \(`t0`\.`deleted_at` is null\)\).*\) as `subQuery`\)$/
+          /from \(select distinct `t0`\.`id` from `articles` as `t0` .*and exists \(select 1 from `categories` as `t3` where \(`t3`\.`id` = `t1`\.`category_id` and `t3`\.`deleted_at` is null\)\).*\) as `subQuery`\)$/
         )
       );
     });
@@ -756,6 +759,27 @@ describe('query scopes on joins', () => {
     // Old does not link to A3, so the join scope hides the category of A2
     expect(titles(rows)).toEqual(['A1']);
     // Only the join to categories is scoped: its subquery joins articles with scopes off
-    expect(sqls[0].match(/in \(select/g)).toHaveLength(1);
+    expect(sqls[0].match(/exists \(select/g)).toHaveLength(1);
+  });
+
+  it('binds the correlation to the outer column when a scope where names a relation', async () => {
+    db.scopes.register({
+      name: 'news-articles',
+      where: ({ uid }) => (uid === ARTICLE_UID ? { category: { name: 'News' } } : null),
+    });
+
+    const rows = await db.entityManager.findMany(CATEGORY_UID, {
+      where: { articles: { title: 'A3' } },
+    });
+
+    // A3 has no category, so its link to News matches nothing. A subquery that reused `t1` would
+    // bind `t1`.`article_id` to its own link table and keep the link, because A1 is in News
+    expect(rows).toEqual([]);
+    expect(sqls[0]).toContain(
+      'and exists (select distinct 1 from `articles` as `t3` ' +
+        'left join `articles_category_lnk` as `t4` on `t3`.`id` = `t4`.`article_id` ' +
+        'left join `categories` as `t5` on `t4`.`category_id` = `t5`.`id` ' +
+        'where (`t3`.`id` = `t1`.`article_id` and `t5`.`name` = ?)) '
+    );
   });
 });
