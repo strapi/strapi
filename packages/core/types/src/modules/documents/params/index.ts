@@ -42,7 +42,7 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     // Publication Status
     [HasMember<TKind, 'status'>, PublicationStatus.Param],
     // Deprecated param; prefer `publicationFilter` via PublicationFilterParam.
-    [HasMember<TKind, 'hasPublishedVersion'>, PublicationStatus.Param],
+    [HasMember<TKind, 'hasPublishedVersion'>, Omit<PublicationStatus.Param, 'status'>],
     [HasMember<TKind, 'publicationFilter'>, PublicationStatus.PublicationFilterParam],
     // Locale
     [HasMember<TKind, 'locale'>, { locale?: Locale.Any }],
@@ -56,7 +56,7 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     // Search
     [HasMember<TKind, '_q'>, { _q?: Search.Q }],
     // Look Up - For internal use only
-    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }],
+    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }]
   ]
 >;
 
