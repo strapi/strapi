@@ -84,7 +84,7 @@ describe('<ColorPickerInput />', () => {
     expect(preview).toHaveStyle({ backgroundColor: '#ff3c0c' });
   });
 
-  it.each(['', '#', '#a', '#abc', '#aBcDeF', 'ABCDEF'])(
+  it.each(['', '#', '#a', '#abc', '#aBcDeF'])(
     'accepts the partial or complete HEX value %j',
     async (value) => {
       const { user, getByRole } = render({ color: '#ff3c0c' });
@@ -98,6 +98,35 @@ describe('<ColorPickerInput />', () => {
       }
 
       expect(textInput).toHaveValue(value);
+    }
+  );
+
+  it.each(['abc', 'ABCDEF'])('adds the hash to the HEX value %j', async (value) => {
+    const { user, getByRole, getByTestId } = render();
+
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+    const textInput = getByRole('textbox', { name: 'Color picker input' });
+
+    await user.type(textInput, value);
+
+    expect(textInput).toHaveValue(`#${value}`);
+    expect(getByTestId('color-preview')).toHaveStyle({ backgroundColor: `#${value}` });
+  });
+
+  it.each(['red', 'rgb(255,0,0)', '#ff000080'])(
+    'can remove a stored legacy value %j with Backspace',
+    async (value) => {
+      const { user, getByRole } = render({ color: value });
+
+      await user.click(getByRole('button', { name: 'Color picker toggle' }));
+      const textInput = getByRole('textbox', { name: 'Color picker input' });
+      await user.click(textInput);
+      await user.keyboard('{End}{Backspace}');
+
+      expect(textInput).toHaveValue(value.slice(0, -1));
+
+      await user.keyboard('{Backspace}'.repeat(value.length - 1));
+      expect(textInput).toHaveValue('');
     }
   );
 
@@ -140,7 +169,7 @@ describe('<ColorPickerInput />', () => {
 
     await user.clear(textInput);
     await user.type(textInput, '1234567');
-    expect(textInput).toHaveValue('123456');
+    expect(textInput).toHaveValue('#123456');
   });
 
   it('does not write a stored invalid value into the shared stylesheet', () => {

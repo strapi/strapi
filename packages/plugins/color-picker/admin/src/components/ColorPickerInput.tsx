@@ -154,8 +154,18 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     {...props}
                     maxLength={7}
                     onChange={(event) => {
-                      if (/^#?[0-9a-f]{0,6}$/i.test(event.target.value)) {
-                        field.onChange(event);
+                      const { value } = event.target;
+                      const hexPattern = /^#?[0-9a-f]{0,6}$/i;
+
+                      if (hexPattern.test(value)) {
+                        field.onChange(name, value && !value.startsWith('#') ? `#${value}` : value);
+                      } else if (
+                        field.value &&
+                        !hexPattern.test(field.value) &&
+                        value.length < field.value.length
+                      ) {
+                        // Let users remove legacy non-HEX values one character at a time.
+                        field.onChange(name, value);
                       }
                     }}
                   />
