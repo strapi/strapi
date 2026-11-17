@@ -329,8 +329,10 @@ describe('Permission Service', () => {
           .mockImplementationOnce(() => Promise.resolve(permsInDb))
           .mockImplementation(() => Promise.resolve([]));
 
+        const warn = vi.fn();
+
         global.strapi = merge({}, global.strapi, {
-          log: { warn: vi.fn() },
+          log: { warn },
           db: { query: () => ({ findMany, delete: dbDelete, update: vi.fn() }) },
           admin: {
             services: {
@@ -350,7 +352,7 @@ describe('Permission Service', () => {
           eventHub: { emit: vi.fn() },
         });
 
-        return { dbDelete };
+        return { dbDelete, warn };
       };
 
       const rolePermission = (id: number, action: string, properties: Record<string, unknown>) => ({
@@ -402,7 +404,7 @@ describe('Permission Service', () => {
         ['fields null and locales null', { fields: null, locales: null }],
         ['fields null and no locales key', { fields: null }],
       ])('removes a permission with %s', async (_, properties) => {
-        const { dbDelete } = setupPropertyCleanup(
+        const { dbDelete, warn } = setupPropertyCleanup(
           [rolePermission(1, READ, properties)],
           ['fields', 'locales']
         );
@@ -411,6 +413,10 @@ describe('Permission Service', () => {
 
         expect(dbDelete).toHaveBeenCalledTimes(1);
         expect(dbDelete).toHaveBeenCalledWith({ where: { id: 1 } });
+        // locales: null counts as missing here because fields is missing too
+        expect(warn.mock.calls[0][0]).toContain(
+          'Reasons: missing properties (fields, locales): 1.'
+        );
       });
     });
 
