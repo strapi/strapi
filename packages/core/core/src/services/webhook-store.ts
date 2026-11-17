@@ -194,7 +194,7 @@ const createWebhookStore = ({
           validateWebhookBody({ ...data, body }, getContentTypes(), {
             // A field gone from a content type the saved template already targeted stays
             // accepted, so the webhook stays editable: the runner logs the missing value
-            allowRemovedFieldsOf: isSavedBody ? getTargetContentTypes(saved) ?? [] : [],
+            allowRemovedFieldsOf: isSavedBody ? (getTargetContentTypes(saved) ?? []) : [],
           });
         }
       }

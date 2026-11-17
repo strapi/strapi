@@ -58,7 +58,7 @@ const setup = ({ isBodyTemplateEnabled = true } = {}) => {
       ({
         [ARTICLE_UID]: { attributes: { title: { type: 'string' } } },
         [PAGE_UID]: { attributes: { slug: { type: 'uid' } } },
-      } as any),
+      }) as any,
   });
 
   return { store, query };

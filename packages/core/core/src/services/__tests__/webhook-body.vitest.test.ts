@@ -319,7 +319,7 @@ describe('validateWebhookBody: what the event payload sanitizer removes', () => 
         attributes: { title: { type: 'string' }, secretNote: { type: 'string' } },
         options: { privateAttributes: ['secretNote'] },
       },
-    } as any);
+    }) as any;
 
   test('Rejects a field made private by the content type options', () => {
     expect(() =>

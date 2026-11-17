@@ -47,7 +47,7 @@ const setup = ({ isBodyTemplateEnabled = false } = {}) => {
     logger: logger as any,
     isBodyTemplateEnabled: () => isBodyTemplateEnabled,
     getContentTypes: () =>
-      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } } as any),
+      ({ [ARTICLE_UID]: { attributes: { title: { type: 'string' } } } }) as any,
   });
 
   const emit = async (event: string, info: Record<string, unknown>) => {
