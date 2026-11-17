@@ -5,13 +5,17 @@
 /**
  * A job row as read back from the database and sent to the admin. The database
  * layer returns `datetime` columns as ISO 8601 strings, and `completedAt` is
- * `null` until the job finishes.
+ * `null` until the job finishes. `heartbeatAtMs` is the last time the server
+ * running the job reported it alive, in epoch milliseconds; a big integer
+ * column, so it is read back as a string. It is `null` on jobs created before
+ * it existed.
  */
 export interface AIMetadataJob {
   id: number;
   status: 'processing' | 'completed' | 'failed';
   createdAt: string;
   completedAt: string | null;
+  heartbeatAtMs: string | null;
 }
 
 /**
