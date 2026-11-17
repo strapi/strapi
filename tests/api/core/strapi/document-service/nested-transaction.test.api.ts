@@ -26,19 +26,25 @@ type Version = { title: string; published: boolean };
 describe('Document Service in an outer transaction', () => {
   const builder = createTestBuilder();
   let strapi: Core.Strapi;
-  let failPublishedCreate = false;
+  // Which version creation fails: publish creates a published version, discardDraft a draft
+  let failCreateOf: 'published' | 'draft' | undefined;
 
   beforeAll(async () => {
     await builder.addContentTypes([articleModel]).build();
     strapi = await createStrapiInstance();
 
-    // Publish deletes the old published version, then creates the new one: failing the create
-    // makes publish throw after the delete
+    // Publish deletes the old published version, then creates the new one, and discardDraft
+    // deletes the draft, then creates a new one: failing the create makes them throw after the
+    // delete
     strapi.db.lifecycles.subscribe({
       models: [ARTICLE_UID],
       beforeCreate(event) {
-        if (failPublishedCreate === true && event.params.data.publishedAt != null) {
+        const published = event.params.data.publishedAt != null;
+        if (failCreateOf === 'published' && published === true) {
           throw new Error('Failed to create the published version');
+        }
+        if (failCreateOf === 'draft' && published === false) {
+          throw new Error('Failed to create the draft version');
         }
       },
     });
@@ -81,7 +87,7 @@ describe('Document Service in an outer transaction', () => {
     );
 
     let publishError: unknown;
-    failPublishedCreate = true;
+    failCreateOf = 'published';
     try {
       await strapi.db.transaction(async () => {
         try {
@@ -91,7 +97,7 @@ describe('Document Service in an outer transaction', () => {
         }
       });
     } finally {
-      failPublishedCreate = false;
+      failCreateOf = undefined;
     }
 
     expect(publishError).toMatchObject({ message: 'Failed to create the published version' });
@@ -108,7 +114,7 @@ describe('Document Service in an outer transaction', () => {
   test('writes of the outer transaction around the failed publish are committed', async () => {
     const documentId = await createPublishedDocumentWithDraft();
 
-    failPublishedCreate = true;
+    failCreateOf = 'published';
     try {
       await strapi.db.transaction(async () => {
         await strapi.documents(ARTICLE_UID).update({
@@ -122,7 +128,7 @@ describe('Document Service in an outer transaction', () => {
         }
       });
     } finally {
-      failPublishedCreate = false;
+      failCreateOf = undefined;
     }
 
     expect(await findVersions(documentId)).toEqual(
@@ -131,5 +137,61 @@ describe('Document Service in an outer transaction', () => {
         { title: 'Published', published: true },
       ])
     );
+  });
+  test('a discardDraft that fails after deleting the draft keeps it', async () => {
+    const documentId = await createPublishedDocumentWithDraft();
+
+    let discardError: unknown;
+    failCreateOf = 'draft';
+    try {
+      await strapi.db.transaction(async () => {
+        try {
+          await strapi.documents(ARTICLE_UID).discardDraft({ documentId });
+        } catch (error) {
+          discardError = error;
+        }
+      });
+    } finally {
+      failCreateOf = undefined;
+    }
+
+    expect(discardError).toMatchObject({ message: 'Failed to create the draft version' });
+    const versions = await findVersions(documentId);
+    expect(versions).toHaveLength(2);
+    expect(versions).toEqual(
+      expect.arrayContaining([
+        { title: 'Draft', published: false },
+        { title: 'Published', published: true },
+      ])
+    );
+  });
+
+  test('a failed write does not emit the events it registered', async () => {
+    const created: unknown[] = [];
+    const stopListening = strapi.eventHub.on('entry.create', (event: unknown) => {
+      created.push(event);
+    });
+
+    // create with status published emits entry.create for the draft, then publishes it
+    failCreateOf = 'published';
+    try {
+      await strapi.db.transaction(async () => {
+        try {
+          await strapi.documents(ARTICLE_UID).create({
+            data: { title: 'Never created' } as never,
+            status: 'published',
+          });
+        } catch {
+          // The caller handles the failed create and goes on
+        }
+      });
+      await strapi.db.settleTransactionHooks();
+    } finally {
+      failCreateOf = undefined;
+      stopListening();
+    }
+
+    expect(created).toEqual([]);
+    expect(await strapi.db.query(ARTICLE_UID).count({ where: { title: 'Never created' } })).toBe(0);
   });
 });

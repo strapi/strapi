@@ -129,7 +129,9 @@ Database lifecycles run after the entity validator. Data that a `beforeCreate` o
 
 ## Transactions
 
-Each public repository method runs inside `strapi.db.transaction()`. The transaction context uses `AsyncLocalStorage`. A nested call reuses the open transaction and does not commit it. Only the outermost call commits or rolls back.
+Each public repository method runs inside `strapi.db.transaction()`. The transaction context uses `AsyncLocalStorage`. A nested call reuses the open transaction and does not commit it. Only the outermost transaction commits or rolls back.
+
+Write methods (`create`, `update`, `delete`, `clone`, `publish`, `unpublish`, `discardDraft`) called while a transaction is already open run in a savepoint of it instead (`wrapWriteInTransaction` in `document-service/common.ts`). If the write throws, its queries are rolled back to the savepoint and its event callbacks are dropped, even when the caller catches the error and the outer transaction commits. The savepoint covers the repository method only: writes a document middleware makes after it stay. Rolling back to the savepoint also undoes queries that other calls ran concurrently on the same transaction. See [Transactions](../packages/core/database/02-transactions.md).
 
 Database lifecycles run inside the transaction. If the transaction rolls back later, a side effect in a lifecycle subscriber, such as an HTTP call, is not undone.
 
