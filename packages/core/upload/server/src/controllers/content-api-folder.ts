@@ -1,12 +1,12 @@
 import type { Context } from 'koa';
 import { omit } from 'lodash';
-import { errors, traverse } from '@strapi/utils';
 import type { Core, Data } from '@strapi/types';
 
 import { getService } from '../utils';
-import { FILE_MODEL_UID, FOLDER_MODEL_UID } from '../constants';
+import { FOLDER_MODEL_UID } from '../constants';
 import { findAndCountRestPage } from '../utils/rest-pagination';
 import { isIntegerId } from '../utils/integer-id';
+import { assertNoFileRelations } from '../utils/folder-query';
 
 const FIELDS = ['documentId', 'name', 'path', 'createdAt', 'updatedAt'];
 const POPULATE = { parent: { fields: ['documentId'] } };
@@ -25,25 +25,12 @@ type ContentApiFolder = {
 // The response shape is fixed, so `fields` and `populate` are ignored on both routes.
 const omitShapeParams = (query: Record<string, unknown>) => omit(query, ['fields', 'populate']);
 
-// `file.folder` is private, so a folder can't be looked up through its files either.
-const throwFileRelations: Parameters<typeof traverse.traverseQueryFilters>[0] = ({
-  key,
-  attribute,
-  path,
-}) => {
-  if (attribute?.type === 'relation' && attribute.target === FILE_MODEL_UID) {
-    throw new errors.ValidationError(`Invalid key ${key}`, { key, path: path.attribute });
-  }
-};
-
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const validateQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FOLDER_MODEL_UID);
     const { auth, route } = ctx.state;
-    const options = { schema, getModel: strapi.getModel.bind(strapi) };
 
-    await traverse.traverseQueryFilters(throwFileRelations, options, data.filters);
-    await traverse.traverseQuerySort(throwFileRelations, options, data.sort);
+    await assertNoFileRelations(strapi, data);
 
     return strapi.contentAPI.validate.query(data, schema, { auth, route });
   };
