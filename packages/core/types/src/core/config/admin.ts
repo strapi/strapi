@@ -74,6 +74,20 @@ export interface ForgotPassword {
   expiresIn?: string | number;
 }
 
+/**
+ * Minimum password policy of admin users. The settings page can make it stricter, never looser.
+ * Rules left out keep the default: 8 characters, a lowercase letter, an uppercase letter and a
+ * number, without a special character.
+ */
+export interface PasswordPolicy {
+  /** Integer between 8 and 64. */
+  minLength?: number;
+  requireLowercase?: boolean;
+  requireUppercase?: boolean;
+  requireNumber?: boolean;
+  requireSpecialCharacter?: boolean;
+}
+
 export interface RateLimit {
   enabled?: boolean;
   interval?: number;
@@ -171,6 +185,7 @@ export interface Admin {
   ai?: Ai;
   forgotPassword?: ForgotPassword;
   rateLimit?: RateLimit;
+  passwordPolicy?: PasswordPolicy;
   /**
    * @deprecated Use `features.future.experimental_firstPublishedAt` in `config/features.ts` instead.
    */

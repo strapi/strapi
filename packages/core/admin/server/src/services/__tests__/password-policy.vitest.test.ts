@@ -8,9 +8,14 @@ import passwordPolicyService, {
 
 const storeGet = vi.fn();
 const storeSet = vi.fn();
+/** `admin.passwordPolicy` in `config/admin`, undefined when the project sets none. */
+let floorConfig: unknown;
 
-const { getPolicy, updatePolicy, getViolations, isCompliant } = passwordPolicyService({
-  strapi: { store: () => ({ get: storeGet, set: storeSet }) } as any,
+const { getFloor, getPolicy, updatePolicy, getViolations, isCompliant } = passwordPolicyService({
+  strapi: {
+    store: () => ({ get: storeGet, set: storeSet }),
+    config: { get: (key: string) => (key === 'admin.passwordPolicy' ? floorConfig : undefined) },
+  } as any,
 });
 
 const rulesOf = (password: string, policy = DEFAULT_PASSWORD_POLICY) =>
@@ -19,6 +24,7 @@ const rulesOf = (password: string, policy = DEFAULT_PASSWORD_POLICY) =>
 describe('Password policy service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    floorConfig = undefined;
   });
 
   test('reads the policy of the instance it belongs to, not the global one', async () => {
@@ -29,7 +35,9 @@ describe('Password policy service', () => {
     // Another instance is the global one
     global.strapi = { store: storeOf(8) } as any;
 
-    const service = passwordPolicyService({ strapi: { store: storeOf(20) } as any });
+    const service = passwordPolicyService({
+      strapi: { store: storeOf(20), config: { get: () => undefined } } as any,
+    });
 
     expect((await service.getPolicy()).minLength).toBe(20);
   });
@@ -71,6 +79,7 @@ describe('Password policy service', () => {
     });
 
     test('ignores unknown keys and values of the wrong type', async () => {
+      floorConfig = { requireUppercase: false };
       storeGet.mockResolvedValue({
         minLength: '12',
         requireNumber: 'nope',
@@ -105,20 +114,29 @@ describe('Password policy service', () => {
   });
 
   describe('updatePolicy', () => {
-    test('stores the full policy and returns it', async () => {
+    test('stores what goes beyond the floor and returns the effective policy', async () => {
+      floorConfig = { requireUppercase: false };
       storeGet.mockResolvedValue({ requireUppercase: false });
 
       const result = await updatePolicy({ minLength: 16, requireSpecialCharacter: true });
 
-      const expected = {
+      expect(result).toEqual({
         ...DEFAULT_PASSWORD_POLICY,
         requireUppercase: false,
         minLength: 16,
         requireSpecialCharacter: true,
-      };
-
-      expect(storeSet).toHaveBeenCalledWith({ key: 'password-policy', value: expected });
-      expect(result).toEqual(expected);
+      });
+      // The lowercase and number rules come from the floor, they are not stored
+      expect(storeSet).toHaveBeenCalledWith({
+        key: 'password-policy',
+        value: {
+          minLength: 16,
+          requireLowercase: false,
+          requireUppercase: false,
+          requireNumber: false,
+          requireSpecialCharacter: true,
+        },
+      });
     });
 
     test('drops unknown keys before storing', async () => {
@@ -128,7 +146,13 @@ describe('Password policy service', () => {
 
       expect(storeSet).toHaveBeenCalledWith({
         key: 'password-policy',
-        value: { ...DEFAULT_PASSWORD_POLICY, minLength: 10 },
+        value: {
+          minLength: 10,
+          requireLowercase: false,
+          requireUppercase: false,
+          requireNumber: false,
+          requireSpecialCharacter: false,
+        },
       });
     });
 
@@ -145,6 +169,134 @@ describe('Password policy service', () => {
         `minLength must be an integer between ${PASSWORD_MIN_LENGTH_FLOOR} and ${PASSWORD_MIN_LENGTH_CEILING}`
       );
       expect(storeSet).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('floor', () => {
+    test('is the default policy when the project configures none', () => {
+      floorConfig = undefined;
+
+      expect(getFloor()).toEqual(DEFAULT_PASSWORD_POLICY);
+    });
+
+    test('takes the configured rules on top of the default policy', () => {
+      floorConfig = { minLength: 12, requireUppercase: false, requireSpecialCharacter: true };
+
+      expect(getFloor()).toEqual({
+        ...DEFAULT_PASSWORD_POLICY,
+        minLength: 12,
+        requireUppercase: false,
+        requireSpecialCharacter: true,
+      });
+    });
+
+    test.each([
+      ['a minLength below the bounds', { minLength: 4 }, 'admin.passwordPolicy.minLength'],
+      ['a minLength above the bounds', { minLength: 100 }, 'admin.passwordPolicy.minLength'],
+      ['a minLength that is not an integer', { minLength: 10.5 }, 'admin.passwordPolicy.minLength'],
+      [
+        'a rule that is not a boolean',
+        { requireNumber: 'yes' },
+        'admin.passwordPolicy.requireNumber',
+      ],
+      ['an unknown key', { minLenght: 12 }, 'unknown keys: minLenght'],
+      ['a value that is not an object', 12, 'must be an object'],
+    ])('rejects %s', (_, config, message) => {
+      floorConfig = config;
+
+      expect(() => getFloor()).toThrow(message);
+    });
+
+    test('raises a stored policy below the floor, rule by rule', async () => {
+      floorConfig = { minLength: 12, requireSpecialCharacter: true };
+      // Saved before the floor was raised, or brought by a data transfer
+      storeGet.mockResolvedValue({
+        ...DEFAULT_PASSWORD_POLICY,
+        minLength: 10,
+        requireUppercase: false,
+      });
+
+      await expect(getPolicy()).resolves.toEqual({
+        ...DEFAULT_PASSWORD_POLICY,
+        minLength: 12,
+        requireSpecialCharacter: true,
+      });
+    });
+
+    test('keeps a stored policy stricter than the floor', async () => {
+      storeGet.mockResolvedValue({ minLength: 20, requireSpecialCharacter: true });
+
+      await expect(getPolicy()).resolves.toEqual({
+        ...DEFAULT_PASSWORD_POLICY,
+        minLength: 20,
+        requireSpecialCharacter: true,
+      });
+    });
+
+    test('is the policy when nothing is stored', async () => {
+      floorConfig = { requireUppercase: false };
+      storeGet.mockResolvedValue(null);
+
+      await expect(getPolicy()).resolves.toEqual({
+        ...DEFAULT_PASSWORD_POLICY,
+        requireUppercase: false,
+      });
+    });
+
+    test('refuses a minLength below the floor without storing anything', async () => {
+      floorConfig = { minLength: 12 };
+      storeGet.mockResolvedValue(null);
+
+      await expect(updatePolicy({ minLength: 10 })).rejects.toThrow(
+        'minLength must be at least 12, the minimum set in the server configuration'
+      );
+      expect(storeSet).not.toHaveBeenCalled();
+    });
+
+    test('refuses to turn off a rule the floor requires without storing anything', async () => {
+      storeGet.mockResolvedValue(null);
+
+      await expect(updatePolicy({ requireUppercase: false, requireNumber: false })).rejects.toThrow(
+        'The server configuration requires an uppercase letter and a number: these rules cannot be turned off'
+      );
+      expect(storeSet).not.toHaveBeenCalled();
+    });
+
+    test('loosens after a deploy lowers the floor, with no other save', async () => {
+      // Saved from the settings page, which sends the rules the floor locks on as well
+      storeGet.mockResolvedValue(null);
+      await updatePolicy({ ...DEFAULT_PASSWORD_POLICY, minLength: 12 });
+      const [[{ value: stored }]] = storeSet.mock.calls;
+
+      floorConfig = { requireUppercase: false, requireNumber: false };
+      storeGet.mockResolvedValue(stored);
+
+      await expect(getPolicy()).resolves.toEqual({
+        ...DEFAULT_PASSWORD_POLICY,
+        minLength: 12,
+        requireUppercase: false,
+        requireNumber: false,
+      });
+    });
+
+    test('keeps a minimum length at the floor following the floor', async () => {
+      floorConfig = { minLength: 12 };
+      storeGet.mockResolvedValue(null);
+      await updatePolicy({ ...DEFAULT_PASSWORD_POLICY, minLength: 12 });
+      const [[{ value: stored }]] = storeSet.mock.calls;
+
+      floorConfig = { minLength: 10 };
+      storeGet.mockResolvedValue(stored);
+
+      await expect(getPolicy()).resolves.toMatchObject({ minLength: 10 });
+    });
+
+    test('lets the policy go stricter than the floor', async () => {
+      storeGet.mockResolvedValue(null);
+
+      await expect(updatePolicy({ minLength: 16, requireSpecialCharacter: true })).resolves.toEqual(
+        { ...DEFAULT_PASSWORD_POLICY, minLength: 16, requireSpecialCharacter: true }
+      );
     });
   });
 
@@ -170,6 +322,12 @@ describe('Password policy service', () => {
         { rule: 'minLength', message: 'must be at least 12 characters' },
       ]);
       expect(rulesOf('Testing12345', policy)).toEqual([]);
+    });
+
+    test('counts characters, not UTF-16 code units', () => {
+      // 4 characters outside the Basic Multilingual Plane, 8 UTF-16 code units
+      expect(rulesOf('𝐀𝐚𝟏𝟐', DEFAULT_PASSWORD_POLICY)).toEqual(['minLength']);
+      expect(rulesOf('𝐀𝐚𝟏𝟐𝐀𝐚𝟏𝟐', DEFAULT_PASSWORD_POLICY)).toEqual([]);
     });
 
     test('only checks the rules the policy enables', () => {

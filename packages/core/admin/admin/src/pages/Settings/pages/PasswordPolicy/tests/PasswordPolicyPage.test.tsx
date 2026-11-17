@@ -16,6 +16,19 @@ const READ = permission(1, 'admin::password-policy.read');
 const UPDATE = permission(2, 'admin::password-policy.update');
 
 const asEditor = { providerOptions: { permissions: () => [READ, UPDATE] } };
+
+const DEFAULT_POLICY = {
+  minLength: 8,
+  requireLowercase: true,
+  requireUppercase: true,
+  requireNumber: true,
+  requireSpecialCharacter: false,
+};
+
+const respondWith = (policy: typeof DEFAULT_POLICY, floor: typeof DEFAULT_POLICY) =>
+  server.use(
+    http.get('/admin/password-policy', () => HttpResponse.json({ data: policy, meta: { floor } }))
+  );
 const asReader = { providerOptions: { permissions: () => [READ] } };
 
 describe('PasswordPolicyPage', () => {
@@ -61,6 +74,92 @@ describe('PasswordPolicyPage', () => {
 
     expect(await screen.findByText('The value is too low (min: 8).')).toBeInTheDocument();
   });
+
+  it('asks for a minimum length when the field is cleared', async () => {
+    const { user } = render(<PasswordPolicyPage />, asEditor);
+
+    await screen.findByRole('heading', { name: 'Password policy' });
+
+    await user.clear(screen.getByLabelText(/Minimum length/));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('This value is required.')).toBeInTheDocument();
+    expect(screen.queryByText(/must be a `number` type/)).not.toBeInTheDocument();
+  });
+
+  it('locks the rules the server configuration requires', async () => {
+    render(<PasswordPolicyPage />, asEditor);
+
+    await screen.findByRole('heading', { name: 'Password policy' });
+
+    // Without `passwordPolicy` in `config/admin`, the floor is the default policy
+    for (const name of [
+      /Require a lowercase letter/,
+      /Require an uppercase letter/,
+      /Require a number/,
+    ]) {
+      expect(screen.getByRole('checkbox', { name })).toBeDisabled();
+    }
+    expect(
+      screen.getAllByText('Required by the server configuration (passwordPolicy in config/admin)')
+    ).toHaveLength(3);
+    expect(screen.getByRole('checkbox', { name: /Require a special character/ })).toBeEnabled();
+  });
+
+  it('lets every rule be changed when the configuration only sets a minimum length', async () => {
+    respondWith(
+      { ...DEFAULT_POLICY, minLength: 10 },
+      {
+        minLength: 10,
+        requireLowercase: false,
+        requireUppercase: false,
+        requireNumber: false,
+        requireSpecialCharacter: false,
+      }
+    );
+    render(<PasswordPolicyPage />, asEditor);
+
+    await screen.findByRole('heading', { name: 'Password policy' });
+
+    expect(screen.getByRole('checkbox', { name: /Require an uppercase letter/ })).toBeEnabled();
+    expect(
+      screen.queryByText('Required by the server configuration (passwordPolicy in config/admin)')
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps the minimum length above the configured floor', async () => {
+    respondWith({ ...DEFAULT_POLICY, minLength: 12 }, { ...DEFAULT_POLICY, minLength: 12 });
+    const { user } = render(<PasswordPolicyPage />, asEditor);
+
+    await screen.findByRole('heading', { name: 'Password policy' });
+    expect(screen.getByText('Between 12 and 64 characters')).toBeInTheDocument();
+
+    const minLength = screen.getByLabelText(/Minimum length/);
+    await user.clear(minLength);
+    await user.type(minLength, '10');
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('The value is too low (min: 12).')).toBeInTheDocument();
+  });
+
+  it.each(['', '4', '100'])(
+    'only previews a minimum length that can be saved (%s)',
+    async (value) => {
+      const { user } = render(<PasswordPolicyPage />, asEditor);
+
+      await screen.findByRole('heading', { name: 'Password policy' });
+
+      const minLength = screen.getByLabelText(/Minimum length/);
+      await user.clear(minLength);
+      if (value) {
+        await user.type(minLength, value);
+      }
+
+      expect(screen.getByTestId('password-policy-preview')).toHaveTextContent(
+        'Enter a valid minimum length to see the hint.'
+      );
+    }
+  );
 
   it('saves the policy and notifies the user', async () => {
     let sentBody: unknown;

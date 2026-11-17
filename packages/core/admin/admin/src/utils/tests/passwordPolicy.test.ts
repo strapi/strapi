@@ -58,6 +58,12 @@ describe('passwordPolicy', () => {
       }
     });
 
+    it('counts characters, not UTF-16 code units', async () => {
+      // 4 characters outside the Basic Multilingual Plane, 8 UTF-16 code units
+      expect(await errorIdsOf('𝐀𝐚𝟏𝟐')).toEqual([translatedErrors.minLength.id]);
+      expect(await errorIdsOf('𝐀𝐚𝟏𝟐𝐀𝐚𝟏𝟐')).toEqual([]);
+    });
+
     it('only checks the rules the policy enables', async () => {
       expect(await errorIdsOf('lowercaseonly!', RELAXED_POLICY)).toEqual([]);
       expect(await errorIdsOf('short', RELAXED_POLICY)).toEqual([translatedErrors.minLength.id]);

@@ -117,9 +117,13 @@ export default {
   },
 
   async getPasswordPolicy() {
-    const data = await getService('password-policy').getPolicy();
+    const passwordPolicyService = getService('password-policy');
+    const data = await passwordPolicyService.getPolicy();
 
-    return { data } satisfies GetPasswordPolicy.Response;
+    return {
+      data,
+      meta: { floor: passwordPolicyService.getFloor() },
+    } satisfies GetPasswordPolicy.Response;
   },
 
   async updatePasswordPolicy(ctx: Context) {

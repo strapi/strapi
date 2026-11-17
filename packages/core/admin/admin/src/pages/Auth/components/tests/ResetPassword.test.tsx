@@ -1,8 +1,16 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { ResetPassword } from '../ResetPassword';
+
+const DEFAULT_POLICY = {
+  minLength: 8,
+  requireLowercase: true,
+  requireUppercase: true,
+  requireNumber: true,
+  requireSpecialCharacter: false,
+};
 
 const FIELD_LABELS = ['Password', 'Confirm Password'];
 
@@ -117,6 +125,7 @@ describe('ResetPassword', () => {
               requireNumber: true,
               requireSpecialCharacter: true,
             },
+            meta: { floor: DEFAULT_POLICY },
           })
         )
       );
@@ -140,33 +149,61 @@ describe('ResetPassword', () => {
       expect(await findByText('Password must be at least 12 characters')).toBeInTheDocument();
     });
 
-    it('falls back to the default policy when the request fails', async () => {
-      server.use(
-        http.get('/admin/password-policy', () =>
-          HttpResponse.json(
-            { data: null, error: { status: 500, name: 'InternalServerError', message: 'Boom' } },
-            { status: 500 }
-          )
-        )
-      );
+    describe('when the request fails', () => {
+      let resetRequests: number;
 
-      const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
-        initialEntries: [{ search: '?code=test' }],
+      beforeEach(() => {
+        resetRequests = 0;
+
+        server.use(
+          http.get('/admin/password-policy', () =>
+            HttpResponse.json(
+              { data: null, error: { status: 500, name: 'InternalServerError', message: 'Boom' } },
+              { status: 500 }
+            )
+          ),
+          http.post('/admin/reset-password', () => {
+            resetRequests += 1;
+
+            return HttpResponse.json(
+              { data: null, error: { status: 400, name: 'ValidationError', message: 'Invalid' } },
+              { status: 400 }
+            );
+          })
+        );
       });
 
-      expect(
-        await findByText('Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number')
-      ).toBeInTheDocument();
+      it('still requires the minimum of every policy', async () => {
+        const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+          initialEntries: [{ search: '?code=test' }],
+        });
 
-      await user.type(getByLabelText('Password*'), 'testing123');
-      await user.type(getByLabelText('Confirm Password*'), 'testing123');
+        expect(await findByText('Must be at least 8 characters')).toBeInTheDocument();
 
-      fireEvent.click(getByRole('button', { name: 'Change password' }));
+        await user.type(getByLabelText('Password*'), 'short');
+        await user.type(getByLabelText('Confirm Password*'), 'short');
+        fireEvent.click(getByRole('button', { name: 'Change password' }));
 
-      expect(
-        await findByText('Password must contain at least one uppercase character')
-      ).toBeInTheDocument();
-      expect(screen.queryByText('Password must be at least 8 characters')).not.toBeInTheDocument();
+        expect(await findByText('Password must be at least 8 characters')).toBeInTheDocument();
+        expect(resetRequests).toBe(0);
+      });
+
+      it('leaves the other rules to the server, whose saved policy may be weaker', async () => {
+        const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+          initialEntries: [{ search: '?code=test' }],
+        });
+
+        expect(await findByText('Must be at least 8 characters')).toBeInTheDocument();
+
+        await user.type(getByLabelText('Password*'), 'testing123');
+        await user.type(getByLabelText('Confirm Password*'), 'testing123');
+        fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+        await waitFor(() => expect(resetRequests).toBe(1));
+        expect(
+          screen.queryByText('Password must contain at least one uppercase character')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 });

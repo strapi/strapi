@@ -11,6 +11,7 @@ import {
   type GetPasswordPolicy,
   type UpdatePasswordPolicy,
 } from '../../../shared/contracts/admin';
+import { DEFAULT_PASSWORD_POLICY } from '../utils/passwordPolicy';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
 import { adminApi } from './api';
@@ -102,13 +103,17 @@ const admin = adminApi
         }),
         invalidatesTags: ['ProjectSettings'],
       }),
-      getPasswordPolicy: builder.query<GetPasswordPolicy.Response['data'], void>({
+      getPasswordPolicy: builder.query<
+        { policy: GetPasswordPolicy.Response['data'] } & GetPasswordPolicy.Response['meta'],
+        void
+      >({
         query: () => ({
           url: '/admin/password-policy',
           method: 'GET',
         }),
         transformResponse(res: GetPasswordPolicy.Response) {
-          return res.data;
+          // A server without the floor (or a proxy dropping `meta`) gets the default one
+          return { policy: res.data, floor: res.meta?.floor ?? DEFAULT_PASSWORD_POLICY };
         },
         providesTags: ['PasswordPolicy'],
       }),

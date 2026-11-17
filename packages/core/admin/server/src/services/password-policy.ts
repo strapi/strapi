@@ -49,6 +49,12 @@ interface RuleDefinition {
 }
 
 /**
+ * Counts characters as Unicode code points, so a character outside the Basic Multilingual Plane
+ * (e.g. `𝐀`) counts once, where `String.length` counts its two UTF-16 code units.
+ */
+const countCharacters = (password: string) => Array.from(password).length;
+
+/**
  * Ordered like the former hard-coded yup chain so the error output stays identical for the
  * default policy. Unicode-aware: "é" is a lowercase letter and "٣" a digit, whatever the locale.
  */
@@ -62,7 +68,7 @@ const RULES: RuleDefinition[] = [
   {
     rule: 'minLength',
     isEnabled: () => true,
-    isSatisfied: (password, policy) => password.length >= policy.minLength,
+    isSatisfied: (password, policy) => countCharacters(password) >= policy.minLength,
     message: (policy) => `must be at least ${policy.minLength} characters`,
   },
   {
@@ -132,6 +138,79 @@ const sanitize = (input: unknown): Partial<PasswordPolicy> => {
 };
 
 /**
+ * Reads the floor set in `config/admin` (`passwordPolicy`). Rules it leaves out keep the default
+ * policy, so without any configuration the floor is the rules Strapi always enforced. Throws on an
+ * invalid value: a typo must not silently weaken every password.
+ */
+const parseFloor = (config: unknown): PasswordPolicy => {
+  if (config === undefined || config === null) {
+    return { ...DEFAULT_PASSWORD_POLICY };
+  }
+
+  if (typeof config !== 'object' || Array.isArray(config)) {
+    throw new Error('admin.passwordPolicy must be an object');
+  }
+
+  const candidate = config as Record<string, unknown>;
+  const unknownKeys = Object.keys(candidate).filter(
+    (key) => !POLICY_KEYS.includes(key as keyof PasswordPolicy)
+  );
+
+  if (unknownKeys.length > 0) {
+    throw new Error(
+      `admin.passwordPolicy has unknown keys: ${unknownKeys.join(', ')}. Allowed: ${POLICY_KEYS.join(', ')}`
+    );
+  }
+
+  if (candidate.minLength !== undefined && !isValidMinLength(candidate.minLength)) {
+    throw new Error(
+      `admin.passwordPolicy.minLength must be an integer between ${PASSWORD_MIN_LENGTH_FLOOR} and ${PASSWORD_MIN_LENGTH_CEILING}`
+    );
+  }
+
+  for (const key of POLICY_KEYS) {
+    if (
+      key !== 'minLength' &&
+      candidate[key] !== undefined &&
+      typeof candidate[key] !== 'boolean'
+    ) {
+      throw new Error(`admin.passwordPolicy.${key} must be a boolean`);
+    }
+  }
+
+  return { ...DEFAULT_PASSWORD_POLICY, ...(candidate as Partial<PasswordPolicy>) };
+};
+
+/** How the rules read in error messages. */
+const RULE_NAMES: Record<Exclude<keyof PasswordPolicy, 'minLength'>, string> = {
+  requireLowercase: 'a lowercase letter',
+  requireUppercase: 'an uppercase letter',
+  requireNumber: 'a number',
+  requireSpecialCharacter: 'a special character',
+};
+
+/**
+ * The part of a policy the floor does not already impose: rules the floor requires are stored as
+ * off and a minimum length at or below the floor as the lowest bound, so they follow the floor.
+ */
+const aboveFloor = (policy: PasswordPolicy, floor: PasswordPolicy): PasswordPolicy => ({
+  minLength: policy.minLength > floor.minLength ? policy.minLength : PASSWORD_MIN_LENGTH_FLOOR,
+  requireLowercase: policy.requireLowercase && !floor.requireLowercase,
+  requireUppercase: policy.requireUppercase && !floor.requireUppercase,
+  requireNumber: policy.requireNumber && !floor.requireNumber,
+  requireSpecialCharacter: policy.requireSpecialCharacter && !floor.requireSpecialCharacter,
+});
+
+/** The stricter of the two policies, rule by rule. */
+const applyFloor = (policy: PasswordPolicy, floor: PasswordPolicy): PasswordPolicy => ({
+  minLength: Math.max(policy.minLength, floor.minLength),
+  requireLowercase: policy.requireLowercase || floor.requireLowercase,
+  requireUppercase: policy.requireUppercase || floor.requireUppercase,
+  requireNumber: policy.requireNumber || floor.requireNumber,
+  requireSpecialCharacter: policy.requireSpecialCharacter || floor.requireSpecialCharacter,
+});
+
+/**
  * Every rule of the given policy the password breaks, in display order, including the bcrypt
  * byte limit. Empty when it complies. Pure: pass the result of `getPolicy()` to check against
  * the configured policy.
@@ -149,13 +228,21 @@ const passwordPolicyService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getStore = () => strapi.store({ type: 'core', name: 'admin' });
 
   /**
-   * The effective policy: the stored one on top of the defaults, so a policy saved by an older
-   * version (missing newer rules) keeps working.
+   * The minimum policy set in `config/admin`, which the stored policy can only make stricter.
+   */
+  const getFloor = (): PasswordPolicy => parseFloor(strapi.config.get('admin.passwordPolicy'));
+
+  /**
+   * The effective policy: the stored one on top of the floor, so a policy saved by an older
+   * version (missing newer rules) keeps working, then raised to the floor rule by rule. A stored
+   * policy below the floor (saved before the floor was raised, or brought by a data transfer)
+   * can never weaken it.
    */
   const getPolicy = async (): Promise<PasswordPolicy> => {
+    const floor = getFloor();
     const stored = await getStore().get({ key: STORE_KEY });
 
-    return { ...DEFAULT_PASSWORD_POLICY, ...sanitize(stored) };
+    return applyFloor({ ...floor, ...sanitize(stored) }, floor);
   };
 
   /**
@@ -169,14 +256,39 @@ const passwordPolicyService = ({ strapi }: { strapi: Core.Strapi }) => {
       );
     }
 
-    const policy: PasswordPolicy = { ...(await getPolicy()), ...sanitize(input) };
+    const floor = getFloor();
 
-    await getStore().set({ key: STORE_KEY, value: policy });
+    if (input?.minLength !== undefined && input.minLength < floor.minLength) {
+      throw new ValidationError(
+        `minLength must be at least ${floor.minLength}, the minimum set in the server configuration`
+      );
+    }
+
+    const loosened = (Object.keys(RULE_NAMES) as Array<keyof typeof RULE_NAMES>).filter(
+      (key) => floor[key] && input?.[key] === false
+    );
+
+    if (loosened.length > 0) {
+      const names = loosened.map((key) => RULE_NAMES[key]);
+      const list =
+        names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0];
+
+      throw new ValidationError(
+        `The server configuration requires ${list}: ${loosened.length > 1 ? 'these rules' : 'this rule'} cannot be turned off`
+      );
+    }
+
+    const policy = applyFloor({ ...(await getPolicy()), ...sanitize(input) }, floor);
+
+    // Only what goes beyond the floor is stored. A rule stored because the floor forced it would
+    // outlive the floor: lowering `config/admin` must loosen the policy without another save.
+    await getStore().set({ key: STORE_KEY, value: aboveFloor(policy, floor) });
 
     return policy;
   };
 
   return {
+    getFloor,
     getPolicy,
     updatePolicy,
     getViolations,

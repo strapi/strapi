@@ -7,8 +7,8 @@ import type { PasswordPolicy } from '../../../shared/contracts/admin';
 import type { IntlShape } from 'react-intl';
 
 /**
- * Mirrors `DEFAULT_PASSWORD_POLICY` of the server's `password-policy` service. Used until the
- * configured policy has been fetched, and if fetching it fails (the server validates again).
+ * Mirrors `DEFAULT_PASSWORD_POLICY` of the server's `password-policy` service: the policy, and
+ * the floor, of a project that configures nothing.
  */
 const DEFAULT_PASSWORD_POLICY: PasswordPolicy = {
   minLength: 8,
@@ -18,8 +18,27 @@ const DEFAULT_PASSWORD_POLICY: PasswordPolicy = {
   requireSpecialCharacter: false,
 };
 
+/**
+ * What every policy requires whatever the configuration: the lowest minimum length (the 72-byte
+ * limit always applies on top). Forms validate against it until the policy has been fetched, or
+ * if fetching it fails, so they never reject a password the server would accept.
+ */
+const MINIMUM_PASSWORD_POLICY: PasswordPolicy = {
+  minLength: 8,
+  requireLowercase: false,
+  requireUppercase: false,
+  requireNumber: false,
+  requireSpecialCharacter: false,
+};
+
 /** bcrypt only hashes the first 72 bytes; this bound is not part of the configurable policy. */
 const PASSWORD_MAX_BYTES = 72;
+
+/**
+ * Counts characters as Unicode code points, like the server, so `𝐀` counts once where
+ * `String.length` (and yup's `.min()`) counts its two UTF-16 code units.
+ */
+const countCharacters = (value: string) => Array.from(value).length;
 
 /** Bounds of the configurable minimum length, same as on the server. */
 const PASSWORD_MIN_LENGTH_FLOOR = 8;
@@ -56,11 +75,16 @@ const PASSWORD_MESSAGES = {
 const createPasswordSchema = (policy: PasswordPolicy = DEFAULT_PASSWORD_POLICY) => {
   let schema = yup
     .string()
-    .min(policy.minLength, {
-      id: translatedErrors.minLength.id,
-      defaultMessage: 'Password must be at least {min} characters',
-      values: { min: policy.minLength },
-    })
+    .test(
+      'min-length',
+      {
+        id: translatedErrors.minLength.id,
+        defaultMessage: 'Password must be at least {min} characters',
+        values: { min: policy.minLength },
+      },
+      // Like yup's `.min()`: only a missing value is left to `.required()`, an empty one is too short
+      (value) => value == null || countCharacters(value) >= policy.minLength
+    )
     .test(
       'max-bytes',
       PASSWORD_MESSAGES.maxBytes,
@@ -144,6 +168,7 @@ const formatPasswordPolicyHint = (
 
 export {
   DEFAULT_PASSWORD_POLICY,
+  MINIMUM_PASSWORD_POLICY,
   PASSWORD_MAX_BYTES,
   PASSWORD_MIN_LENGTH_FLOOR,
   PASSWORD_MIN_LENGTH_CEILING,

@@ -119,6 +119,8 @@ describe('Admin password policy', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data).toEqual(DEFAULT_POLICY);
+      // No `passwordPolicy` in `config/admin`: the floor is the default policy
+      expect(res.body.meta).toEqual({ floor: DEFAULT_POLICY });
     });
   });
 
@@ -166,6 +168,20 @@ describe('Admin password policy', () => {
       const { body } = await anonymousRq({ method: 'GET', url: '/admin/password-policy' });
 
       expect(body.data).toEqual(STRICT_POLICY);
+    });
+
+    test('Refuses to turn off a rule the floor requires', async () => {
+      const res = await update(superAdminRq, { ...DEFAULT_POLICY, requireUppercase: false });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message:
+          'The server configuration requires an uppercase letter: this rule cannot be turned off',
+      });
+
+      const current = await anonymousRq({ method: 'GET', url: '/admin/password-policy' });
+      expect(current.body.data.requireUppercase).toBe(true);
     });
 
     test('Rejects a minimum length below the floor', async () => {

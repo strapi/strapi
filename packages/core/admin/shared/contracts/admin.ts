@@ -374,6 +374,8 @@ export interface PasswordPolicy {
 /**
  * GET /password-policy - Get the password policy.
  * Public on purpose: the registration and reset-password pages validate against it before login.
+ * `data` is the effective policy. `meta.floor` is the minimum set in `config/admin`
+ * (`passwordPolicy`), which the settings can only make stricter.
  */
 export declare namespace GetPasswordPolicy {
   export interface Request {
@@ -382,6 +384,8 @@ export declare namespace GetPasswordPolicy {
   }
   export interface Response {
     data: PasswordPolicy;
+    /** Missing from servers older than the floor. */
+    meta?: { floor: PasswordPolicy };
     error?: errors.ApplicationError;
   }
 }

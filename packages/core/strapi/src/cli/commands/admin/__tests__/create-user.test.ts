@@ -34,7 +34,14 @@ const mock = {
 };
 
 jest.mock('@strapi/core', () => {
-  const createStrapi: any = jest.fn(() => mock);
+  // Like core's `destroyOnSignal`, which exits with 0 and is registered before the command's own
+  const createStrapi: any = jest.fn(() => {
+    ['SIGINT', 'SIGTERM'].forEach((signal) => {
+      process.on(signal, () => process.exit(0));
+    });
+
+    return mock;
+  });
   const compileStrapi = jest.fn();
 
   return { createStrapi, compileStrapi };
@@ -126,6 +133,8 @@ describe('admin:create command', () => {
       await createAdminCommand(options);
 
       expect(stopCron).toHaveBeenCalled();
+      // After the app is loaded, since bootstrap starts the cron jobs again
+      expect(load.mock.invocationCallOrder[0]).toBeLessThan(stopCron.mock.invocationCallOrder[0]);
       // Before the password is checked, which may wait for a new password
       expect(stopCron.mock.invocationCallOrder[0]).toBeLessThan(
         assertPasswordIsValid.mock.invocationCallOrder[0]
@@ -143,6 +152,8 @@ describe('admin:create command', () => {
       await waitForExpect(() => expect(mockExit).toHaveBeenCalledWith(1));
       expect(destroy).toHaveBeenCalledTimes(1);
       expect(mockExit).toHaveBeenCalledTimes(1);
+      // Core's handler would exit with 0
+      expect(mockExit).not.toHaveBeenCalledWith(0);
     });
 
     test('Exits with an error when interrupted while the app loads', async () => {
@@ -155,6 +166,9 @@ describe('admin:create command', () => {
 
       await waitForExpect(() => expect(mockExit).toHaveBeenCalledWith(1));
       expect(destroy).toHaveBeenCalledTimes(1);
+      // Core's handler would exit with 0 as soon as the signal arrives. The mocked exit lets the
+      // command finish and exit with 0 afterwards, which a real exit would prevent.
+      expect(mockExit.mock.calls[0]).toEqual([1]);
     });
   });
 

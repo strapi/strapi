@@ -21,31 +21,37 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 import {
   DEFAULT_PASSWORD_POLICY,
   PASSWORD_MIN_LENGTH_CEILING,
-  PASSWORD_MIN_LENGTH_FLOOR,
   formatPasswordPolicyHint,
 } from '../../../../utils/passwordPolicy';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import type { PasswordPolicy } from '../../../../../../shared/contracts/admin';
 
-const SCHEMA = yup.object().shape({
-  minLength: yup
-    .number()
-    .integer(translatedErrors.integer)
-    .min(PASSWORD_MIN_LENGTH_FLOOR, {
-      ...translatedErrors.min,
-      values: { min: PASSWORD_MIN_LENGTH_FLOOR },
-    })
-    .max(PASSWORD_MIN_LENGTH_CEILING, {
-      ...translatedErrors.max,
-      values: { max: PASSWORD_MIN_LENGTH_CEILING },
-    })
-    .required(translatedErrors.required),
-  requireLowercase: yup.boolean().required(translatedErrors.required),
-  requireUppercase: yup.boolean().required(translatedErrors.required),
-  requireNumber: yup.boolean().required(translatedErrors.required),
-  requireSpecialCharacter: yup.boolean().required(translatedErrors.required),
-});
+/**
+ * The minimum length can't go below the floor set in `config/admin`. The rules the floor requires
+ * are locked on in the form, the server rejects turning them off anyway.
+ */
+const createSchema = (floor: PasswordPolicy) =>
+  yup.object().shape({
+    minLength: yup
+      .number()
+      // A cleared field holds no number: report it as missing, not as yup's type error
+      .transform((value) => (Number.isNaN(value) ? undefined : value))
+      .integer(translatedErrors.integer)
+      .min(floor.minLength, {
+        ...translatedErrors.min,
+        values: { min: floor.minLength },
+      })
+      .max(PASSWORD_MIN_LENGTH_CEILING, {
+        ...translatedErrors.max,
+        values: { max: PASSWORD_MIN_LENGTH_CEILING },
+      })
+      .required(translatedErrors.required),
+    requireLowercase: yup.boolean().required(translatedErrors.required),
+    requireUppercase: yup.boolean().required(translatedErrors.required),
+    requireNumber: yup.boolean().required(translatedErrors.required),
+    requireSpecialCharacter: yup.boolean().required(translatedErrors.required),
+  });
 
 /* -------------------------------------------------------------------------------------------------
  * PasswordPolicyPage
@@ -67,7 +73,10 @@ const PasswordPolicyPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC(permissions?.update ?? []);
 
-  const { data: policy, isLoading, error } = useGetPasswordPolicyQuery();
+  const { data, isLoading, error } = useGetPasswordPolicyQuery();
+  const policy = data?.policy;
+  const floor = data?.floor ?? DEFAULT_PASSWORD_POLICY;
+  const schema = React.useMemo(() => createSchema(floor), [floor]);
   const [updatePasswordPolicy, { isLoading: isSubmitting }] = useUpdatePasswordPolicyMutation();
 
   React.useEffect(() => {
@@ -127,7 +136,7 @@ const PasswordPolicyPage = () => {
       <Form
         method="PUT"
         initialValues={policy}
-        validationSchema={SCHEMA}
+        validationSchema={schema}
         onSubmit={handleSubmit}
         disabled={!canUpdate}
       >
@@ -185,7 +194,7 @@ const PasswordPolicyPage = () => {
                             id: 'Settings.passwordPolicy.form.minLength.hint',
                             defaultMessage: 'Between {min} and {max} characters',
                           },
-                          { min: PASSWORD_MIN_LENGTH_FLOOR, max: PASSWORD_MIN_LENGTH_CEILING }
+                          { min: floor.minLength, max: PASSWORD_MIN_LENGTH_CEILING }
                         ),
                         size: 6,
                       },
@@ -229,20 +238,39 @@ const PasswordPolicyPage = () => {
                         }),
                         size: 6,
                       },
-                    ].map(({ size, ...field }) => (
-                      <Grid.Item
-                        key={field.name}
-                        col={size}
-                        xs={12}
-                        direction="column"
-                        alignItems="stretch"
-                      >
-                        <InputRenderer {...field} disabled={!canUpdate} required />
-                      </Grid.Item>
-                    ))}
+                    ].map(({ size, ...field }) => {
+                      const isRequiredByFloor =
+                        field.type === 'boolean' &&
+                        floor[field.name as keyof PasswordPolicy] === true;
+
+                      return (
+                        <Grid.Item
+                          key={field.name}
+                          col={size}
+                          xs={12}
+                          direction="column"
+                          alignItems="stretch"
+                        >
+                          <InputRenderer
+                            {...field}
+                            hint={
+                              isRequiredByFloor
+                                ? formatMessage({
+                                    id: 'Settings.passwordPolicy.form.requiredByConfig.hint',
+                                    defaultMessage:
+                                      'Required by the server configuration (passwordPolicy in config/admin)',
+                                  })
+                                : field.hint
+                            }
+                            disabled={!canUpdate || isRequiredByFloor}
+                            required
+                          />
+                        </Grid.Item>
+                      );
+                    })}
                   </Grid.Root>
                 </Flex>
-                <PolicyPreview />
+                <PolicyPreview floor={floor} />
               </Flex>
             </Layouts.Content>
           </>
@@ -257,11 +285,17 @@ const PasswordPolicyPage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 /**
- * Shows the hint users will read under password inputs, from the values being edited.
+ * Shows the hint users will read under password inputs, from the values being edited. Only for a
+ * minimum length that can be saved: the hint of an empty or out-of-range value would be wrong.
  */
-const PolicyPreview = () => {
+const PolicyPreview = ({ floor }: { floor: PasswordPolicy }) => {
   const { formatMessage } = useIntl();
   const values = useForm('PolicyPreview', (state) => state.values) as Partial<PasswordPolicy>;
+  const { minLength } = values;
+  const isValidMinLength =
+    Number.isInteger(minLength) &&
+    (minLength as number) >= floor.minLength &&
+    (minLength as number) <= PASSWORD_MIN_LENGTH_CEILING;
 
   return (
     <Flex
@@ -280,14 +314,15 @@ const PolicyPreview = () => {
         })}
       </Typography>
       <Typography textColor="neutral600" data-testid="password-policy-preview">
-        {formatPasswordPolicyHint(
-          {
-            ...DEFAULT_PASSWORD_POLICY,
-            ...values,
-            minLength: values.minLength ?? PASSWORD_MIN_LENGTH_FLOOR,
-          },
-          formatMessage
-        )}
+        {isValidMinLength
+          ? formatPasswordPolicyHint(
+              { ...DEFAULT_PASSWORD_POLICY, ...values, minLength: minLength as number },
+              formatMessage
+            )
+          : formatMessage({
+              id: 'Settings.passwordPolicy.preview.invalid',
+              defaultMessage: 'Enter a valid minimum length to see the hint.',
+            })}
       </Typography>
     </Flex>
   );

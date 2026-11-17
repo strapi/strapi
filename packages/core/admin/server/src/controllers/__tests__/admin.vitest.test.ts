@@ -216,6 +216,8 @@ describe('Admin Controller | password policy', () => {
   };
 
   const getPolicy = vi.fn(async () => policy);
+  const floor = { ...policy, minLength: 10 };
+  const getFloor = vi.fn(() => floor);
   const updatePolicy = vi.fn(async (input: Record<string, unknown>) => ({ ...policy, ...input }));
 
   beforeEach(() => {
@@ -224,14 +226,17 @@ describe('Admin Controller | password policy', () => {
     global.strapi = {
       admin: {
         services: {
-          'password-policy': { getPolicy, updatePolicy },
+          'password-policy': { getFloor, getPolicy, updatePolicy },
         },
       },
     } as any;
   });
 
-  test('getPasswordPolicy returns the effective policy', async () => {
-    await expect(adminController.getPasswordPolicy()).resolves.toEqual({ data: policy });
+  test('getPasswordPolicy returns the effective policy and the configured floor', async () => {
+    await expect(adminController.getPasswordPolicy()).resolves.toEqual({
+      data: policy,
+      meta: { floor },
+    });
     expect(getPolicy).toHaveBeenCalledTimes(1);
   });
 

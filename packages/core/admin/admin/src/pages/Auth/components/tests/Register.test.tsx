@@ -123,15 +123,15 @@ describe('Register', () => {
       http.get('/admin/password-policy', () => {
         policyRequests += 1;
 
-        return HttpResponse.json({
-          data: {
-            minLength: policyRequests > 1 ? 20 : 8,
-            requireLowercase: true,
-            requireUppercase: true,
-            requireNumber: true,
-            requireSpecialCharacter: false,
-          },
-        });
+        const policy = {
+          minLength: policyRequests > 1 ? 20 : 8,
+          requireLowercase: true,
+          requireUppercase: true,
+          requireNumber: true,
+          requireSpecialCharacter: false,
+        };
+
+        return HttpResponse.json({ data: policy, meta: { floor: { ...policy, minLength: 8 } } });
       }),
       http.post('/admin/register', () => {
         registerRequests += 1;

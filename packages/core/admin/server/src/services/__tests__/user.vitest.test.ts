@@ -1231,7 +1231,7 @@ describe('User', () => {
         admin: {
           services: {
             'password-policy': {
-              ...passwordPolicyService,
+              ...passwordPolicyServiceMock,
               getPolicy: vi.fn(async () => {
                 throw failure;
               }),

@@ -269,6 +269,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   await userService.displayWarningIfUsersDontHaveRole();
 
+  // An invalid `admin.passwordPolicy` stops the start, not the first password check
+  getService('password-policy').getFloor();
+
   await syncAuthSettings();
   await syncAPITokensPermissions();
   await getService('api-token-admin').syncPermissionsForAllUsers();
