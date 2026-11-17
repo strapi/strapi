@@ -101,7 +101,9 @@ describe('Role', () => {
         name: 'super_admin',
         description: "Have all permissions. Can't be delete",
       };
-      const dbFindOne = vi.fn(({ where: { id } }) => Promise.resolve(_.find([role], { id })));
+      const dbFindOne = vi.fn(({ where: { id } }) =>
+        Promise.resolve([role].find((candidate) => candidate.id === id))
+      );
 
       global.strapi = {
         ...strapiMock,
@@ -122,7 +124,7 @@ describe('Role', () => {
         usersCount: 0,
       };
       const dbFindOne = vi.fn(({ where: { id } }) =>
-        Promise.resolve(_.find([_.omit(role, ['usersCount'])], { id }))
+        Promise.resolve([_.omit(role, ['usersCount'])].find((candidate) => candidate.id === id))
       );
       const dbCount = vi.fn(() => Promise.resolve(0));
       global.strapi = {
@@ -624,6 +626,139 @@ describe('Role', () => {
           (p) => ({ ...p, role: 3 })
         )
       );
+    });
+  });
+
+  describe('createRolesIfNoneExist default role permissions hook', () => {
+    const DELETE = 'plugin::content-manager.explorer.delete';
+    const PUBLISH = 'plugin::content-manager.explorer.publish';
+    const addLocales = vi.fn(async (permissions: any[]) =>
+      permissions.map((permission) => ({
+        ...permission,
+        properties: { ...permission.properties, locales: ['en'] },
+      }))
+    );
+
+    afterEach(() => {
+      roleService.hooks.willCreateDefaultRolePermissions.delete(addLocales);
+    });
+
+    const setupSeeding = () => {
+      const actions = [
+        { actionId: DELETE, subjects: ['country'], section: 'contentTypes', options: {} },
+        { actionId: PUBLISH, subjects: ['country'], section: 'contentTypes', options: {} },
+      ];
+      const permissions = actions.map(({ actionId }) =>
+        createPermission({ action: actionId, subject: 'country' })
+      );
+
+      let id = 1;
+      const create = vi.fn(({ data }) => {
+        const res = { ...data, id };
+        id += 1;
+        return res;
+      });
+      const createMany = vi.fn();
+      const warn = vi.fn();
+
+      global.strapi = {
+        contentTypes: {},
+        db: { query: () => ({ count: vi.fn(() => Promise.resolve(0)), create }) },
+        log: { warn },
+        admin: {
+          services: {
+            permission: {
+              actionProvider: { values: vi.fn(() => actions) },
+              createMany,
+              conditionProvider: { has: () => true },
+            },
+            condition: { isValidCondition: () => true },
+            'content-type': {
+              getPermissionsWithNestedFields: vi.fn(() => permissions.map(createPermission)),
+            },
+            user: { assignARoleToAll: vi.fn() },
+          },
+        },
+        eventHub: { emit: vi.fn() },
+      } as any;
+
+      // The content-type permissions stored for the role created in that position (Editor: 0)
+      const contentTypePermissions = (call: number) =>
+        createMany.mock.calls[call][0]
+          .filter(({ subject }: { subject: string | null }) => subject === 'country')
+          .map(({ action, properties, conditions, role }: any) => ({
+            action,
+            properties,
+            conditions,
+            role,
+          }));
+
+      return { permissions, warn, contentTypePermissions };
+    };
+
+    test('Stores the content-type permissions the hook returns, for the Editor and the Author', async () => {
+      roleService.hooks.willCreateDefaultRolePermissions.register(addLocales);
+      const { permissions, warn, contentTypePermissions } = setupSeeding();
+
+      await createRolesIfNoneExist();
+
+      expect(addLocales).toHaveBeenCalledTimes(1);
+      expect(addLocales).toHaveBeenCalledWith(permissions);
+      expect(warn).not.toHaveBeenCalled();
+
+      expect(contentTypePermissions(0)).toEqual([
+        { action: DELETE, properties: { locales: ['en'] }, conditions: [], role: 2 },
+        { action: PUBLISH, properties: { locales: ['en'] }, conditions: [], role: 2 },
+      ]);
+      expect(contentTypePermissions(1)).toEqual([
+        {
+          action: DELETE,
+          properties: { locales: ['en'] },
+          conditions: ['admin::is-creator'],
+          role: 3,
+        },
+      ]);
+    });
+
+    describe('Stores the content-type permissions as built, with a warning, when a handler', () => {
+      const asBuilt = {
+        editor: [
+          { action: DELETE, properties: {}, conditions: [], role: 2 },
+          { action: PUBLISH, properties: {}, conditions: [], role: 2 },
+        ],
+        author: [{ action: DELETE, properties: {}, conditions: ['admin::is-creator'], role: 3 }],
+      };
+
+      const failingHandlers = {
+        throws: vi.fn(async (permissions: any[]) => {
+          // Changes its input before it fails
+          permissions.forEach((permission) => {
+            permission.properties.locales = ['en'];
+          });
+
+          throw new Error('handler failure');
+        }),
+        'returns no array': vi.fn(async () => undefined),
+        'returns an array with a value that is not a permission': vi.fn(async () => [null]),
+      };
+
+      afterEach(() => {
+        Object.values(failingHandlers).forEach((handler) =>
+          roleService.hooks.willCreateDefaultRolePermissions.delete(handler)
+        );
+      });
+
+      test.each(Object.entries(failingHandlers))('%s', async (_, handler) => {
+        roleService.hooks.willCreateDefaultRolePermissions.register(handler);
+        const { warn, contentTypePermissions } = setupSeeding();
+
+        await createRolesIfNoneExist();
+
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn.mock.calls[0][0]).toMatch(/willCreateDefaultRolePermissions/);
+        expect(contentTypePermissions(0)).toEqual(asBuilt.editor);
+        expect(contentTypePermissions(1)).toEqual(asBuilt.author);
+      });
     });
   });
 
@@ -1251,7 +1386,7 @@ describe('Role', () => {
       });
 
       test('Holds no locale on a token whose owner is a super admin', async () => {
-        // i18n's super-admin skip reads `context.user`, which the engine never sets
+        // i18n's hook never looks at the holder's role, so no `locales` key holds no locale here too
         setupStrapi({ localizedSubjects: [ARTICLE] });
 
         await expectForbidden(

@@ -6,8 +6,8 @@ import type { Core } from '@strapi/types';
 
 /**
  * The admin boot cleanup on a localized content type. i18n reads `locales: null` as every locale,
- * so a role saved with every locale on delete or publish must keep those permissions after a
- * restart.
+ * so a role saved with every locale must keep those permissions after a restart. A permission whose
+ * `fields` is also missing or `null` is still removed.
  */
 describe('Admin permissions cleanup on a localized content type (api)', () => {
   const builder = createTestBuilder();
@@ -19,11 +19,13 @@ describe('Admin permissions cleanup on a localized content type (api)', () => {
   const ARTICLE = 'api::cleanup-article.cleanup-article';
   const DELETE = 'plugin::content-manager.explorer.delete';
   const PUBLISH = 'plugin::content-manager.explorer.publish';
+  const READ = 'plugin::content-manager.explorer.read';
+  const UPDATE = 'plugin::content-manager.explorer.update';
 
   const findRolePermissions = () =>
     strapi.db.query('admin::permission').findMany({
       where: { role: { id: roleId }, subject: ARTICLE },
-      orderBy: { action: 'asc' },
+      orderBy: { id: 'asc' },
     });
 
   beforeAll(async () => {
@@ -57,7 +59,7 @@ describe('Admin permissions cleanup on a localized content type (api)', () => {
     await builder.cleanup();
   });
 
-  test('Every-locale delete and publish saved through the API survive a restart', async () => {
+  test('Every-locale permissions survive a restart, unless fields is also null', async () => {
     const res = await rq({
       url: `/admin/roles/${roleId}/permissions`,
       method: 'PUT',
@@ -65,23 +67,39 @@ describe('Admin permissions cleanup on a localized content type (api)', () => {
         permissions: [
           { action: DELETE, subject: ARTICLE, properties: { locales: null }, conditions: [] },
           { action: PUBLISH, subject: ARTICLE, properties: { locales: null }, conditions: [] },
+          {
+            action: READ,
+            subject: ARTICLE,
+            properties: { fields: ['title'], locales: null },
+            conditions: [],
+          },
+          {
+            action: UPDATE,
+            subject: ARTICLE,
+            properties: { fields: null, locales: null },
+            conditions: [],
+          },
         ],
       },
     });
 
     expect(res.statusCode).toBe(200);
 
-    const expected = [
+    const kept = [
       expect.objectContaining({ action: DELETE, properties: { locales: null } }),
       expect.objectContaining({ action: PUBLISH, properties: { locales: null } }),
+      expect.objectContaining({ action: READ, properties: { fields: ['title'], locales: null } }),
     ];
 
-    expect(await findRolePermissions()).toEqual(expected);
+    expect(await findRolePermissions()).toEqual([
+      ...kept,
+      expect.objectContaining({ action: UPDATE, properties: { fields: null, locales: null } }),
+    ]);
 
     await strapi.destroy();
     strapi = await createStrapiInstance();
     utils = createUtils(strapi);
 
-    expect(await findRolePermissions()).toEqual(expected);
+    expect(await findRolePermissions()).toEqual(kept);
   });
 });

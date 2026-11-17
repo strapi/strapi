@@ -52,7 +52,6 @@ export const saveDefinitionToFileSystem = async (
  * Uses the existing config if one is defined in the project.
  */
 export const format = async (content: string): Promise<string> => {
-  // eslint-disable-next-line node/no-unsupported-features/es-syntax
   const prettier = await import('prettier'); // ESM-only
 
   const configFile = await prettier.resolveConfigFile();

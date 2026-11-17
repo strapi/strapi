@@ -1,36 +1,40 @@
+import type { Modules, UID } from '@strapi/types';
 import { getService } from '../../utils';
 
+type WillRegisterPermissionContext = {
+  readonly permission: Modules.Permissions.PermissionRule & {
+    properties?: { locales?: string[] | null };
+  };
+  condition: { and(rawConditionObject: unknown): unknown };
+};
+
 /**
- * @typedef {object} WillRegisterPermissionContext
- * @property {Permission} permission
- * @property {object} user
- * @property {object} condition
+ * The engine subject is a CASL subject: a string, a record, or null.
+ * Only a string can be a content-type UID, and `strapi.contentType()` is typed to take one.
+ * The registry is a plain object, so an inherited key such as `constructor` also passes;
+ * it is not localized, so the handler still ignores it.
  */
+const isContentTypeUID = (subject: unknown): subject is UID.ContentType => {
+  return typeof subject === 'string' && strapi.get('content-types').get(subject) !== undefined;
+};
 
 /**
  * Locales property handler for the permission engine
  * Add the has-locale-access condition if the locales property is defined
- * @param {WillRegisterPermissionContext} context
  */
-const willRegisterPermission = (context: any) => {
-  const { permission, condition, user } = context;
+const willRegisterPermission = (context: WillRegisterPermissionContext) => {
+  const { permission, condition } = context;
   const { subject, properties } = permission;
-
-  const isSuperAdmin = strapi.service('admin::role').hasSuperAdminRole(user);
-
-  if (isSuperAdmin) {
-    return;
-  }
 
   const { locales } = properties || {};
   const { isLocalizedContentType } = getService('content-types');
 
-  // If there is no subject defined, ignore the permission
-  if (!subject) {
+  // If the subject isn't a content type (none, a record, or another string), ignore the permission
+  if (isContentTypeUID(subject) === false) {
     return;
   }
 
-  const ct = strapi.contentTypes[subject];
+  const ct = strapi.contentType(subject);
 
   // If the subject exists but isn't localized, ignore the permission
   if (!isLocalizedContentType(ct)) {

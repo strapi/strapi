@@ -22,6 +22,12 @@ export const validatePreviewUrl = async (
   validateZodSchema(getPreviewUrlSchema)(params);
 
   const newParams = pick(params, ['documentId', 'locale', 'status']) as HandlerParams;
+
+  // The query parser reads a bare `?locale` as null, which the handler params type does not admit
+  if (params.locale === null) {
+    delete newParams.locale;
+  }
+
   const model = strapi.getModel(uid);
 
   // If it's not a collection type or single type

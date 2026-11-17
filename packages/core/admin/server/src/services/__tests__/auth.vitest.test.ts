@@ -436,6 +436,26 @@ describe('Auth', () => {
       });
     });
 
+    test('Fails without an audit entry if the user is deleted before the update', async () => {
+      const user = {
+        id: 1,
+        // Valid for another hour
+        resetPasswordTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      };
+
+      global.strapi = {
+        db: { query: () => ({ findOne: vi.fn(() => Promise.resolve(user)) }) },
+        admin: { services: { user: { updateById: vi.fn(() => Promise.resolve(null)) } } },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+      } as any;
+      vi.mocked(emitAudit).mockClear();
+
+      await expect(
+        resetPassword({ resetPasswordToken: '123', password: 'Test1234' })
+      ).rejects.toBeInstanceOf(errors.ApplicationError);
+      expect(emitAudit).not.toHaveBeenCalled();
+    });
+
     test('Changes password and clear reset token', async () => {
       const resetPasswordToken = '123';
       const user = {

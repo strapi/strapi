@@ -398,6 +398,26 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
       ]);
       await expectNoLegacyLog();
     });
+
+    test('records the deleted accounts on a bulk delete with a missing ID', async () => {
+      const first = await inviteUser('leo@accounts-audit.test');
+      const second = await inviteUser('ana@accounts-audit.test', { firstname: 'Ana' });
+      const missingId = Math.max(first.id, second.id) + 1000;
+      await clearAuditLogs();
+
+      const res = await rq({
+        url: '/admin/users/batch-delete',
+        method: 'POST',
+        body: { ids: [first.id, missingId, second.id] },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const logs = await findLogs('admin-user.delete');
+      expect(logs.map((log) => log.payload.resource)).toEqual([
+        { type: 'admin-user', id: first.id, email: 'leo@accounts-audit.test' },
+        { type: 'admin-user', id: second.id, email: 'ana@accounts-audit.test' },
+      ]);
+    });
   });
 
   describe('admin-user.password-reset.create', () => {
