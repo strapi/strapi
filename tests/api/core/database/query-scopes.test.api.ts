@@ -1,0 +1,270 @@
+import type { Core } from '@strapi/types';
+
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
+import { createTestBuilder } from 'api-tests/builder';
+
+const AUTHOR_UID = 'api::qs-author.qs-author';
+const ARTICLE_UID = 'api::qs-article.qs-article';
+
+const authorModel = {
+  kind: 'collectionType',
+  displayName: 'qs-author',
+  singularName: 'qs-author',
+  pluralName: 'qs-authors',
+  draftAndPublish: false,
+  attributes: {
+    name: { type: 'string' },
+    deletedAt: { type: 'datetime' },
+  },
+};
+
+const articleModel = {
+  kind: 'collectionType',
+  displayName: 'qs-article',
+  singularName: 'qs-article',
+  pluralName: 'qs-articles',
+  draftAndPublish: false,
+  attributes: {
+    title: { type: 'string' },
+    views: { type: 'integer' },
+    deletedAt: { type: 'datetime' },
+    author: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: AUTHOR_UID,
+      // The builder adds the inverse `articles` attribute to the author
+      targetAttribute: 'articles',
+    },
+  },
+};
+
+// `deleted_at` is not an attribute key, so the scope filters the raw column with no join
+const softDelete = {
+  name: 'test-soft-delete',
+  where: ({ uid }: { uid: string }) =>
+    uid === AUTHOR_UID || uid === ARTICLE_UID ? { deleted_at: null } : null,
+};
+
+const titles = (entries: Array<{ title: string }>) => entries.map((entry) => entry.title).sort();
+
+describe('Query scopes', () => {
+  const builder = createTestBuilder();
+  let strapi: Core.Strapi;
+  let rq: ReturnType<typeof createContentAPIRequest>;
+  let adminRq: Awaited<ReturnType<typeof createAuthRequest>>;
+  let unregister: () => void;
+  const ids: Record<string, string> = {};
+  let authorB: string;
+
+  // Reads past the scope, to prove a hidden row is still there and unchanged
+  const rawArticle = (title: string) =>
+    strapi.db.connection(strapi.db.metadata.get(ARTICLE_UID).tableName).where({ title }).first();
+  const rawAuthor = (name: string) =>
+    strapi.db.connection(strapi.db.metadata.get(AUTHOR_UID).tableName).where({ name }).first();
+
+  beforeAll(async () => {
+    await builder.addContentType(authorModel).addContentType(articleModel).build();
+
+    strapi = await createStrapiInstance();
+    rq = createContentAPIRequest({ strapi });
+    adminRq = await createAuthRequest({ strapi });
+
+    const deletedAt = new Date();
+    const authors = strapi.documents(AUTHOR_UID);
+    const articles = strapi.documents(ARTICLE_UID);
+
+    const b = await authors.create({ data: { name: 'B' } });
+    const c = await authors.create({ data: { name: 'C', deletedAt } });
+    const d = await authors.create({ data: { name: 'D' } });
+
+    for (const [title, author, hidden] of [
+      ['visible-b', b, false],
+      ['visible-c', c, false],
+      ['visible-d', d, false],
+      ['hidden', b, true],
+    ] as const) {
+      const article = await articles.create({
+        data: { title, author: author.documentId, deletedAt: hidden ? deletedAt : null },
+      });
+      ids[title] = article.documentId;
+    }
+    authorB = b.documentId;
+
+    // Positive control: without the scope, visible-c links to the author the scope hides
+    const linked = await articles.findOne({ documentId: ids['visible-c'], populate: ['author'] });
+    expect(linked?.author?.name).toBe('C');
+
+    // Seed first: the scope also hides the rows that a create reads back
+    unregister = strapi.db.scopes.register(softDelete);
+  });
+
+  afterAll(async () => {
+    unregister?.();
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  describe('reads', () => {
+    test('list', async () => {
+      const res = await rq({ method: 'GET', url: '/qs-articles' });
+
+      expect(res.statusCode).toBe(200);
+      expect(titles(res.body.data)).toEqual(['visible-b', 'visible-c', 'visible-d']);
+      expect(res.body.meta.pagination.total).toBe(3);
+    });
+
+    test('find one', async () => {
+      const res = await rq({ method: 'GET', url: `/qs-articles/${ids.hidden}` });
+
+      expect(res.statusCode).toBe(404);
+    });
+
+    test('count', async () => {
+      expect(await strapi.db.query(ARTICLE_UID).count()).toBe(3);
+    });
+
+    test('populate a hidden target', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/qs-articles/${ids['visible-c']}`,
+        qs: { populate: 'author' },
+      });
+
+      const visible = await rq({
+        method: 'GET',
+        url: `/qs-articles/${ids['visible-b']}`,
+        qs: { populate: 'author' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.author).toBeNull();
+      expect(visible.statusCode).toBe(200);
+      expect(visible.body.data.author.name).toBe('B');
+    });
+
+    test('populate a list with a hidden row', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/qs-authors/${authorB}`,
+        qs: { populate: 'articles' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(titles(res.body.data.articles)).toEqual(['visible-b']);
+    });
+
+    test('relation filter', async () => {
+      const byHidden = await rq({
+        method: 'GET',
+        url: '/qs-articles',
+        qs: { filters: { author: { name: 'C' } } },
+      });
+      const byVisible = await rq({
+        method: 'GET',
+        url: '/qs-articles',
+        qs: { filters: { author: { name: 'B' } } },
+      });
+
+      expect(byHidden.statusCode).toBe(200);
+      expect(byVisible.statusCode).toBe(200);
+      expect(byHidden.body.data).toEqual([]);
+      expect(titles(byVisible.body.data)).toEqual(['visible-b']);
+    });
+
+    test('relation sort', async () => {
+      const res = await rq({ method: 'GET', url: '/qs-articles', qs: { sort: 'author.name:asc' } });
+      expect(res.statusCode).toBe(200);
+
+      const sorted: string[] = res.body.data.map((entry: { title: string }) => entry.title);
+
+      expect(sorted).toHaveLength(3);
+      // The hidden author sorts as NULL, first or last by dialect, never between B and D
+      expect(sorted.indexOf('visible-d') - sorted.indexOf('visible-b')).toBe(1);
+    });
+
+    test('GraphQL query', async () => {
+      const res = await adminRq({
+        url: '/graphql',
+        method: 'POST',
+        body: { query: '{ qsArticles { title author { name } } }' },
+      });
+
+      const authorOf = (title: string) =>
+        res.body.data.qsArticles.find((a: { title: string }) => a.title === title).author;
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+      expect(titles(res.body.data.qsArticles)).toEqual(['visible-b', 'visible-c', 'visible-d']);
+      expect(authorOf('visible-c')).toBeNull();
+      expect(authorOf('visible-b')).toEqual({ name: 'B' });
+    });
+  });
+
+  // These run in order and change the seeded rows
+  describe('writes', () => {
+    test('updateMany leaves hidden rows unchanged', async () => {
+      const { count } = await strapi.db.query(ARTICLE_UID).updateMany({ data: { views: 1 } });
+
+      expect(count).toBe(3);
+      expect((await rawArticle('hidden')).views).toBeNull();
+    });
+
+    test('updateMany with a join updates only the visible match', async () => {
+      const { count } = await strapi.db
+        .query(ARTICLE_UID)
+        .updateMany({ where: { author: { name: 'B' } }, data: { views: 2 } });
+
+      expect(count).toBe(1);
+      expect((await rawArticle('visible-b')).views).toBe(2);
+      expect((await rawArticle('hidden')).views).toBeNull();
+    });
+
+    test('updateMany through a hidden row updates nothing', async () => {
+      const { count } = await strapi.db
+        .query(ARTICLE_UID)
+        .updateMany({ where: { author: { name: 'C' } }, data: { views: 3 } });
+
+      expect(count).toBe(0);
+      expect((await rawArticle('visible-c')).views).toBe(1);
+    });
+
+    // B links to visible-b and hidden: scoping only the target join would see a NULL article
+    test('deleteMany through a to-many link to a hidden row deletes nothing', async () => {
+      const { count } = await strapi.db
+        .query(AUTHOR_UID)
+        .deleteMany({ where: { articles: { id: { $null: true } } } });
+
+      expect(count).toBe(0);
+      expect(await rawAuthor('B')).toBeDefined();
+    });
+
+    test('deleteMany of a hidden row deletes nothing', async () => {
+      const { count } = await strapi.db
+        .query(ARTICLE_UID)
+        .deleteMany({ where: { title: 'hidden' } });
+
+      expect(count).toBe(0);
+      expect(await rawArticle('hidden')).toBeDefined();
+    });
+
+    test('deleteMany through a hidden row deletes nothing', async () => {
+      const { count } = await strapi.db
+        .query(ARTICLE_UID)
+        .deleteMany({ where: { author: { name: 'C' } } });
+
+      expect(count).toBe(0);
+      expect(await rawArticle('visible-c')).toBeDefined();
+    });
+
+    test('deleteMany with a join deletes only the visible match', async () => {
+      const { count } = await strapi.db
+        .query(ARTICLE_UID)
+        .deleteMany({ where: { author: { name: 'B' } } });
+
+      expect(count).toBe(1);
+      expect(await rawArticle('visible-b')).toBeUndefined();
+      expect(await rawArticle('hidden')).toBeDefined();
+    });
+  });
+});
