@@ -1,0 +1,140 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SQL parity snapshot count with a relation filter 1`] = `
+[
+  {
+    "bindings": [
+      "blue",
+      1,
+    ],
+    "sql": "select count(distinct \`t0\`.\`id\`) as \`count\` from \`articles\` as \`t0\` left join \`articles_tags_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`article_id\` left join \`tags\` as \`t2\` on \`t1\`.\`tag_id\` = \`t2\`.\`id\` where (\`t2\`.\`name\` = ?) limit ?",
+  },
+]
+`;
+
+exports[`SQL parity snapshot delete with a relation filter 1`] = `
+[
+  {
+    "bindings": [
+      "red",
+    ],
+    "sql": "delete from \`articles\` where \`id\` in (select \`id\` from (select distinct \`t0\`.\`id\` from \`articles\` as \`t0\` left join \`articles_tags_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`article_id\` left join \`tags\` as \`t2\` on \`t1\`.\`tag_id\` = \`t2\`.\`id\` where (\`t2\`.\`name\` = ?)) as \`subQuery\`)",
+  },
+]
+`;
+
+exports[`SQL parity snapshot select with a deep sort on a relation field 1`] = `
+[
+  {
+    "bindings": [
+      1,
+    ],
+    "sql": "select \`t3\`.* from \`articles\` as \`t3\` inner join (select \`t4\`.\`id\`, \`t4\`.\`__strapi_order_by__t2_name\`, row_number() over (partition by \`t4\`.\`id\` order by \`t4\`.\`__strapi_order_by__t2_name\` desc) as \`__strapi_row_number\` from (select \`t0\`.\`id\`, \`t2\`.\`name\` as \`__strapi_order_by__t2_name\` from \`articles\` as \`t0\` left join \`articles_category_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`article_id\` left join \`categories\` as \`t2\` on \`t1\`.\`category_id\` = \`t2\`.\`id\`) as \`t4\`) as \`t5\` on \`t5\`.\`id\` = \`t3\`.\`id\` and \`t5\`.\`__strapi_row_number\` = ? order by \`t5\`.\`__strapi_order_by__t2_name\` desc, \`t5\`.\`id\` asc",
+  },
+]
+`;
+
+exports[`SQL parity snapshot select with a relation filter 1`] = `
+[
+  {
+    "bindings": [
+      "News",
+    ],
+    "sql": "select distinct \`t0\`.* from \`articles\` as \`t0\` left join \`articles_category_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`article_id\` left join \`categories\` as \`t2\` on \`t1\`.\`category_id\` = \`t2\`.\`id\` where (\`t2\`.\`name\` = ?)",
+  },
+]
+`;
+
+exports[`SQL parity snapshot select with populate of category 1`] = `
+[
+  {
+    "bindings": [],
+    "sql": "select \`t0\`.*, \`t0\`.\`id\` from \`articles\` as \`t0\`",
+  },
+  {
+    "bindings": [
+      1,
+      2,
+      3,
+    ],
+    "sql": "select distinct \`t0\`.*, \`t1\`.\`article_id\` as \`__strapiarticle_id\` from \`categories\` as \`t0\` left join \`articles_category_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`category_id\` where (\`t1\`.\`article_id\` in (?, ?, ?))",
+  },
+]
+`;
+
+exports[`SQL parity snapshot select with populate of tags 1`] = `
+[
+  {
+    "bindings": [],
+    "sql": "select \`t0\`.*, \`t0\`.\`id\` from \`articles\` as \`t0\`",
+  },
+  {
+    "bindings": [
+      1,
+      2,
+      3,
+    ],
+    "sql": "select distinct \`t1\`.\`tag_ord\`, \`t0\`.*, \`t1\`.\`article_id\` as \`__strapiarticle_id\` from \`tags\` as \`t0\` left join \`articles_tags_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`tag_id\` where (\`t1\`.\`article_id\` in (?, ?, ?)) order by \`t1\`.\`tag_ord\` asc",
+  },
+]
+`;
+
+exports[`SQL parity snapshot select with populate of targets 1`] = `
+[
+  {
+    "bindings": [],
+    "sql": "select \`t0\`.*, \`t0\`.\`id\` from \`articles\` as \`t0\`",
+  },
+  {
+    "bindings": [
+      1,
+      2,
+      3,
+    ],
+    "sql": "select * from \`articles_targets_mph\` as \`t0\` where (\`t0\`.\`article_id\` in (?, ?, ?)) order by \`t0\`.\`article_id\` asc, \`t0\`.\`order\` asc",
+  },
+  {
+    "bindings": [
+      1,
+    ],
+    "sql": "select \`t0\`.*, \`t0\`.\`id\` from \`categories\` as \`t0\` where (\`t0\`.\`id\` in (?))",
+  },
+  {
+    "bindings": [
+      2,
+    ],
+    "sql": "select \`t0\`.*, \`t0\`.\`id\` from \`tags\` as \`t0\` where (\`t0\`.\`id\` in (?))",
+  },
+]
+`;
+
+exports[`SQL parity snapshot stream of a select 1`] = `
+[
+  {
+    "bindings": [
+      "News",
+      500,
+    ],
+    "sql": "select distinct \`t0\`.*, \`t0\`.\`id\` from \`articles\` as \`t0\` left join \`articles_category_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`article_id\` left join \`categories\` as \`t2\` on \`t1\`.\`category_id\` = \`t2\`.\`id\` where (\`t2\`.\`name\` = ?) limit ?",
+  },
+  {
+    "bindings": [
+      1,
+      3,
+    ],
+    "sql": "select distinct \`t0\`.*, \`t1\`.\`article_id\` as \`__strapiarticle_id\` from \`categories\` as \`t0\` left join \`articles_category_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`category_id\` where (\`t1\`.\`article_id\` in (?, ?))",
+  },
+]
+`;
+
+exports[`SQL parity snapshot update with a relation filter 1`] = `
+[
+  {
+    "bindings": [
+      "updated",
+      "News",
+    ],
+    "sql": "update \`articles\` set \`title\` = ? where \`id\` in (select \`id\` from (select distinct \`t0\`.\`id\` from \`articles\` as \`t0\` left join \`articles_category_lnk\` as \`t1\` on \`t0\`.\`id\` = \`t1\`.\`article_id\` left join \`categories\` as \`t2\` on \`t1\`.\`category_id\` = \`t2\`.\`id\` where (\`t2\`.\`name\` = ?)) as \`subQuery\`)",
+  },
+]
+`;
