@@ -2,6 +2,7 @@ import knex from 'knex';
 import type { Knex } from 'knex';
 import { createEntityManager } from '../../entity-manager';
 import { createMetadata } from '../../metadata';
+import { createScopeRegistry } from '../scopes';
 import { metadataToSchema } from '../../schema/schema';
 import type { Database } from '../..';
 import type { Model } from '../../types';
@@ -84,6 +85,7 @@ const setup = async (connection: Knex) => {
   const db = {
     connection,
     metadata,
+    scopes: createScopeRegistry(),
     getConnection: (table?: string) => (table ? connection(table) : connection),
     dialect: {
       client: 'sqlite',

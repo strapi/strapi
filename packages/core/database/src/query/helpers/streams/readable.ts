@@ -26,7 +26,8 @@ class ReadableStrapiQuery extends Readable {
 
   _fetched: number;
 
-  _query: Knex.QueryBuilder;
+  // Built on the first read, after the scopes are prepared
+  _query: Knex.QueryBuilder | null;
 
   _qb: QueryBuilder;
 
@@ -57,10 +58,7 @@ class ReadableStrapiQuery extends Readable {
     // Total amount of entities fetched
     this._fetched = 0;
 
-    /**
-     * Original query
-     */
-    this._query = qb.getKnexQuery();
+    this._query = null;
 
     // Query Builder instance
     this._qb = qb;
@@ -96,6 +94,22 @@ class ReadableStrapiQuery extends Readable {
    *
    */
   async _read(size: number) {
+    if (!this._query) {
+      try {
+        // The stream query runs only in the explicit transaction, not the active one
+        await this._db.scopes.prepare({ trx: this._qb.state.transaction ?? null });
+
+        if (this.destroyed) {
+          return;
+        }
+
+        this._query = this._qb.getKnexQuery();
+      } catch (e) {
+        this.destroy(e as Error);
+        return;
+      }
+    }
+
     const query = this._query;
 
     // Remove the original offset & limit properties from the query

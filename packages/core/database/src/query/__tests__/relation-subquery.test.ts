@@ -1,6 +1,7 @@
 import knex from 'knex';
 import { createEntityManager } from '../../entity-manager';
 import { createMetadata } from '../../metadata';
+import { createScopeRegistry } from '../scopes';
 
 const TEST_UID = 'api::test.test';
 const RELATED_UID = 'api::related.related';
@@ -55,6 +56,7 @@ const makeDb = () => {
     config: { settings: {} },
     connection,
     metadata,
+    scopes: createScopeRegistry(),
     getConnection: (table?: string) => (table ? connection(table) : connection),
     dialect: {
       client: 'sqlite',

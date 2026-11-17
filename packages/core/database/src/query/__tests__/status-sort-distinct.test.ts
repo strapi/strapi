@@ -1,6 +1,7 @@
 import knex from 'knex';
 
 import createQueryBuilder from '../query-builder';
+import { createScopeRegistry } from '../scopes';
 import type { Database } from '../..';
 
 /**
@@ -51,6 +52,7 @@ const buildDb = ({ uid = UID, tableName = 'articles', i18n = false }: BuildDbOpt
     getConnection(tableNameArg?: string) {
       return tableNameArg ? connection(tableNameArg) : connection;
     },
+    scopes: createScopeRegistry(),
     metadata: {
       get(metaUid: string) {
         if (metaUid === uid) {

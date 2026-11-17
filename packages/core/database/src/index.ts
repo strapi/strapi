@@ -17,6 +17,7 @@ import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
 import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
 import { withStrapiKnexLog } from './utils/knex-log';
+import { createScopeRegistry, type ScopeRegistry } from './query/scopes';
 
 /**
  * Commit and rollback hooks run after the transaction has already settled.
@@ -58,6 +59,12 @@ export type {
   MigrationFileOperation,
 } from './migrations';
 export type { Event } from './lifecycles';
+export type {
+  QueryScope,
+  QueryScopeContext,
+  QueryScopePrepareContext,
+  ScopeRegistry,
+} from './query/scopes';
 export type { Attribute, Model, JoinTable } from './types';
 export type { AttributeRenameHandler, AttributeRenames } from './schema';
 export type { Identifiers } from './utils/identifiers';
@@ -151,6 +158,8 @@ class Database {
 
   lifecycles: LifecycleProvider;
 
+  scopes: ScopeRegistry;
+
   entityManager: EntityManager;
 
   repair: RepairManager;
@@ -224,6 +233,7 @@ class Database {
 
     this.migrations = createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
+    this.scopes = createScopeRegistry();
 
     this.entityManager = createEntityManager(this);
 

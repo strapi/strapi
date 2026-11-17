@@ -128,6 +128,8 @@ export interface QueryBuilder {
   stream(options?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
 
+const UNSCOPED_TYPES: State['type'][] = ['insert', 'truncate'];
+
 const createQueryBuilder = (
   uid: string,
   db: Database,
@@ -163,6 +165,9 @@ const createQueryBuilder = (
     search: null,
     processed: false,
   });
+
+  // Joins reference the root alias, which max and min do not use without joins
+  const isAggregateWithJoins = () => ['max', 'min'].includes(state.type) && state.joins.length > 0;
 
   const getAlias = () => {
     const alias = `t${state.aliasCounter}`;
@@ -407,7 +412,7 @@ const createQueryBuilder = (
     },
 
     mustUseAlias() {
-      return ['select', 'count'].includes(state.type);
+      return ['select', 'count'].includes(state.type) || isAggregateWithJoins();
     },
 
     aliasColumn(key: string | unknown, alias: string): string | unknown {
@@ -441,16 +446,30 @@ const createQueryBuilder = (
       // against it. The clone inherits processed: true and must only read shared arrays.
       const sub = this.clone();
       sub.alias = this.alias;
+      // The clone shares these arrays: on the inner SELECT they would make it an UPDATE
+      sub.state.increments = [];
+      sub.state.decrements = [];
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const qb = db.getConnection(tableName);
+      const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
 
-      if (originalType === 'update') {
-        return qb.update(state.data).whereIn('id', nestedSubQuery);
+      if (state.transaction) {
+        qb.transacting(state.transaction);
       }
 
-      return qb.delete().whereIn('id', nestedSubQuery);
+      if (originalType === 'delete') {
+        return qb.delete();
+      }
+
+      if (state.data) {
+        qb.update(state.data);
+      }
+
+      state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+      state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+
+      return qb;
     },
 
     processState() {
@@ -472,12 +491,16 @@ const createQueryBuilder = (
         }
       }
 
+      // Copy instead of push: clones share the state.where array, so a push would scope them twice
+      if (!db.scopes.isEmpty() && !UNSCOPED_TYPES.includes(state.type)) {
+        state.where = [...state.where, ...db.scopes.where({ uid, meta })];
+      }
+
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
 
-      // processWhere emits bare root columns while type is still update/delete
-      // (mustUseAlias is false). Qualify them now that joins from the relation
-      // predicate are known, so overlapping names (published_at, locale, id) are not ambiguous.
-      if (this.shouldUseSubQuery()) {
+      // Update, delete, max and min leave root columns bare: qualify them so joins on tables
+      // with the same column names (id, locale) do not make them ambiguous
+      if (this.shouldUseSubQuery() || isAggregateWithJoins()) {
         state.where = helpers.qualifyRootColumns(state.where, this.alias);
       }
 
@@ -601,13 +624,13 @@ const createQueryBuilder = (
         this.select('*');
       }
 
+      // The state should always be processed before calling shouldUseSubQuery and
+      // mustUseAlias as they rely on the presence or absence of joins
+      this.processState();
+
       const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
 
       const qb = db.getConnection(aliasedTableName);
-
-      // The state should always be processed before calling shouldUseSubQuery as it
-      // relies on the presence or absence of joins to determine the need of a subquery
-      this.processState();
 
       if (this.shouldUseSubQuery()) {
         return this.runSubQuery();
@@ -752,6 +775,8 @@ const createQueryBuilder = (
 
     async execute({ mapResults = true } = {}) {
       try {
+        await db.scopes.prepare({ trx: transactionCtx.get() ?? state.transaction ?? null });
+
         const qb = applyQueryTimeout(this.getKnexQuery(), db);
 
         const transaction = transactionCtx.get();
