@@ -23,13 +23,21 @@ jobs:
     steps:
       # Inline `gh api` call so the token is never handed to a third-party action.
       # The endpoint returns 404 for non-members; only an active membership counts.
+      # Any other API error (bad token, rate limit, 5xx) fails the step so no comment is posted.
       - name: Check membership of the strapi/team team
         id: get-user-teams-membership
         env:
           GH_TOKEN: ${{ secrets.CHECK_OWNERSHIP_TOKEN }}
           USERNAME: ${{ github.actor }}
         run: |
-          state=$(gh api "orgs/strapi/teams/team/memberships/$USERNAME" --jq .state 2>/dev/null || true)
+          if body=$(gh api "orgs/strapi/teams/team/memberships/$USERNAME" 2>&1); then
+            state=$(jq -r '.state // empty' <<< "$body")
+          elif grep -q 'HTTP 404' <<< "$body"; then
+            state=""
+          else
+            echo "::error::Team membership lookup failed: $body"
+            exit 1
+          fi
           if [ "$state" = "active" ]; then
             echo "isTeamMember=true" >> "$GITHUB_OUTPUT"
           else
