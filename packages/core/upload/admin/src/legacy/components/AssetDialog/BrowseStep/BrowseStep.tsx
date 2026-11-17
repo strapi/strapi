@@ -236,11 +236,11 @@ export const BrowseStep = ({
                     label={
                       isGridView
                         ? formatMessage({
-                            id: 'view-switch.list',
+                            id: getTrad('view-switch.list'),
                             defaultMessage: 'List View',
                           })
                         : formatMessage({
-                            id: 'view-switch.grid',
+                            id: getTrad('view-switch.grid'),
                             defaultMessage: 'Grid View',
                           })
                     }
