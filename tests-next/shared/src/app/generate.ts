@@ -69,7 +69,6 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
     useTypescript: false,
     useExample: false,
     isQuickstart: false,
-    shouldCreateGrowthSsoTrial: false,
     invocation: 'ci',
     agentName: null,
   };
