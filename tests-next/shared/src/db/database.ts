@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import type { App } from '../app/generate';
-import { SQLITE_RESTORE_MARKER_FILE, SQLITE_SNAPSHOT_FILE } from '../test-plugin';
+import { SQLITE_SNAPSHOT_FILE } from '../test-plugin';
 
 /**
  * The database a test app runs on. SQLite is a file in the app; Postgres and MySQL are servers,
@@ -83,18 +83,16 @@ export const databaseEnv = (app: App, database: Database): NodeJS.ProcessEnv => 
 
 /**
  * Give the app an empty database, before Strapi boots and initializes it: delete the SQLite
- * file with its snapshot and a pending restore marker (else the next boot would copy the old
- * snapshot back), or drop and recreate the app's Postgres or MySQL database. Each API and CLI test file
- * calls it before starting its instance, so no file sees another file's data.
+ * file with its snapshot (a restore must never bring back an earlier run's data), or drop and
+ * recreate the app's Postgres or MySQL database. Each API and CLI test file calls it before
+ * starting its instance, so no file sees another file's data.
  */
 export const resetDatabase = async (app: App, database: Database) => {
   if (database.client === 'sqlite') {
     for (const suffix of ['', '-wal', '-shm', '-journal']) {
       fs.rmSync(`${app.dbFile}${suffix}`, { force: true });
     }
-    for (const file of [SQLITE_SNAPSHOT_FILE, SQLITE_RESTORE_MARKER_FILE]) {
-      fs.rmSync(path.join(path.dirname(app.dbFile), file), { force: true });
-    }
+    fs.rmSync(path.join(path.dirname(app.dbFile), SQLITE_SNAPSHOT_FILE), { force: true });
     return;
   }
 

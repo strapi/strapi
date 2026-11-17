@@ -13,9 +13,9 @@
  * - POST /transfer-token          make sure the test transfer token exists (CLI transfer tests)
  * - GET  /features                feature flags and license features, to gate tests on them
  * - GET  /ai/calls, DELETE /ai/calls   what the fake AI translations provider received
- * - GET  /boot                    an id of the running worker, to wait for a reload
+ * - GET  /boot                    an id of the running worker, to tell whether Strapi restarted
  * - POST /db/snapshot             SQLite snapshot of the live DB (lib/sqlite-snapshot.js)
- * - POST /db/restore { mode }     restore it: `sql` (default, no restart) or `reload`
+ * - POST /db/restore              restore it, without a restart
  *
  * With `STRAPI_TEST_AI_PROVIDER=fake`, registers a fake AI translations provider. Strapi only
  * accepts a custom provider in EE with the `cms-byok-ai` license feature, and otherwise
@@ -27,7 +27,7 @@ const { isLoopbackAddress } = require('./lib/loopback');
 const { createFakeAiTranslationsProvider } = require('./lib/fake-ai-provider');
 const sqliteSnapshot = require('./lib/sqlite-snapshot');
 
-/** Changes on every worker start, so a reload can be told apart from the previous worker. */
+/** Changes on every worker start, so a restart can be told apart from the previous worker. */
 const BOOT_ID = `${process.pid}-${Date.now()}`;
 
 const isEnabled = () => process.env[constants.envVar] === 'true';
@@ -51,9 +51,6 @@ module.exports = {
         `The tests plugin is loaded but ${constants.envVar} is not "true". It must never run outside the test apps.`
       );
     }
-
-    // Before bootstrap opens the DB: finish a restore requested through POST /db/restore.
-    sqliteSnapshot.restoreOnBoot(strapi);
 
     if (process.env[constants.aiProviderEnvVar] === 'fake') {
       const aiTranslations = strapi.plugin('i18n').service('ai-translations');
@@ -157,21 +154,11 @@ module.exports = {
       },
 
       async restoreDb(ctx) {
-        const { mode = 'sql' } = ctx.request.body ?? {};
         if (!sqliteSnapshot.isSqlite(strapi)) {
           return ctx.badRequest('Snapshots are SQLite only: reset other databases before boot.');
         }
         if (!sqliteSnapshot.hasSnapshot(strapi)) {
           return ctx.badRequest('No snapshot: call POST /api/tests/db/snapshot first.');
-        }
-        if (mode === 'reload') {
-          sqliteSnapshot.requestReloadRestore(strapi);
-          ctx.status = 202;
-          ctx.body = { bootId: BOOT_ID };
-          return;
-        }
-        if (mode !== 'sql') {
-          return ctx.badRequest('Expected { "mode": "sql" | "reload" }');
         }
         const start = process.hrtime.bigint();
         await sqliteSnapshot.restoreSql(strapi);

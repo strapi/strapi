@@ -5,11 +5,9 @@
  *
  * - snapshot: `VACUUM INTO` a file next to the DB, from the running server. Take it after the
  *   seed and the role logins, so the admin sessions it holds keep every token valid.
- * - restore `sql` (default, about 20 ms): copy every table back from the snapshot through the
- *   live connection (`ATTACH` + `DELETE`/`INSERT`). Same schema only.
- * - restore `reload` (about 2 s): write a marker and reload the worker; `restoreOnBoot()`, called
- *   from the plugin's `register()` before bootstrap opens the DB, copies the file back. Use it
- *   after a schema change (content-type-builder tests).
+ * - restore (about 20 ms): copy every table back from the snapshot through the live connection
+ *   (`ATTACH` + `DELETE`/`INSERT`). Same schema only: specs that change the schema aren't
+ *   supported yet.
  */
 
 const fs = require('node:fs');
@@ -24,7 +22,6 @@ const paths = (strapi) => {
   return {
     dbFile,
     snapshot: path.join(dir, constants.sqliteSnapshotFile),
-    marker: path.join(dir, constants.sqliteRestoreMarkerFile),
   };
 };
 
@@ -70,34 +67,9 @@ const restoreSql = async (strapi) => {
   }
 };
 
-/** @param {any} strapi */
-const requestReloadRestore = (strapi) => {
-  fs.writeFileSync(paths(strapi).marker, String(Date.now()));
-  // Answer first, then reload: the worker handling the request is about to stop.
-  setImmediate(() => strapi.reload());
-};
-
-/** Called from register(), before the DB opens. @param {any} strapi */
-const restoreOnBoot = (strapi) => {
-  if (!isSqlite(strapi)) {
-    return;
-  }
-  const { dbFile, snapshot: file, marker } = paths(strapi);
-  if (!fs.existsSync(marker)) {
-    return;
-  }
-  for (const suffix of ['-wal', '-shm', '-journal']) {
-    fs.rmSync(`${dbFile}${suffix}`, { force: true });
-  }
-  fs.copyFileSync(file, dbFile);
-  fs.rmSync(marker, { force: true });
-};
-
 module.exports = {
   hasSnapshot,
   isSqlite,
-  requestReloadRestore,
-  restoreOnBoot,
   restoreSql,
   snapshot,
 };

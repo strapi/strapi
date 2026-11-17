@@ -8,7 +8,6 @@ import {
   restoreDatabase,
   snapshotDatabase,
   startServer,
-  type RestoreMode,
   type Server,
   type ServerMode,
 } from '@strapi/tests-shared';
@@ -33,12 +32,6 @@ export interface AppOptions {
 
 export interface ResetOptions {
   resetScope: ResetScope;
-  /**
-   * How the snapshot comes back: `sql` (default, about 20 ms, same schema only) or `reload`
-   * (about 2 s, restarts the Strapi worker). Use `test.use({ resetMode: 'reload' })` in a file
-   * that changes the schema (Content-Type Builder).
-   */
-  resetMode: RestoreMode;
 }
 
 export interface AppWorkerFixtures {
@@ -56,7 +49,6 @@ export interface ResetFixtures {
 export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWorkerFixtures>({
   serverMode: ['develop', { scope: 'worker', option: true }],
   resetScope: ['file', { option: true }],
-  resetMode: ['sql', { option: true }],
 
   server: [
     async ({ serverMode }, use, workerInfo) => {
@@ -98,11 +90,11 @@ export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWo
   ],
 
   databaseReset: [
-    async ({ server, resetScope, resetMode, databaseOwner }, use, testInfo) => {
+    async ({ server, resetScope, databaseOwner }, use, testInfo) => {
       // The first test of a worker already starts on the snapshot.
       const dirty = databaseOwner.file !== undefined;
       if (dirty && (resetScope === 'test' || databaseOwner.file !== testInfo.file)) {
-        await restoreDatabase(server, { mode: resetMode });
+        await restoreDatabase(server);
       }
       databaseOwner.file = testInfo.file;
 
