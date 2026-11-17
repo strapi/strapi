@@ -101,6 +101,10 @@ const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
     ${(props) => props.theme.motion.easings.easeInOutQuad};
   z-index: 1;
   pointer-events: auto;
+
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
+  }
 `;
 
 /* -------------------------------------------------------------------------------------------------
