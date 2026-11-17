@@ -45,10 +45,13 @@ const restoreSql = async (strapi) => {
   const knex = strapi.db.connection;
 
   // Foreign keys can't be toggled inside a transaction, and ATTACH needs the single SQLite
-  // connection of the pool, so both run around it on the same connection.
-  await knex.raw('PRAGMA foreign_keys = OFF');
-  await knex.raw('ATTACH DATABASE ? AS snapshot', [file]);
+  // connection of the pool, so both run around it on the same connection. Whatever throws,
+  // foreign keys come back on first: the worker keeps this connection.
+  let attached = false;
   try {
+    await knex.raw('PRAGMA foreign_keys = OFF');
+    await knex.raw('ATTACH DATABASE ? AS snapshot', [file]);
+    attached = true;
     /** @type {Array<{ name: string }>} */
     const tables = await knex.raw(
       "SELECT name FROM snapshot.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
@@ -62,8 +65,13 @@ const restoreSql = async (strapi) => {
       await trx.raw('INSERT INTO main.sqlite_sequence SELECT * FROM snapshot.sqlite_sequence');
     });
   } finally {
-    await knex.raw('DETACH DATABASE snapshot');
-    await knex.raw('PRAGMA foreign_keys = ON');
+    try {
+      await knex.raw('PRAGMA foreign_keys = ON');
+    } finally {
+      if (attached) {
+        await knex.raw('DETACH DATABASE snapshot');
+      }
+    }
   }
 };
 

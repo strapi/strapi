@@ -12,6 +12,7 @@ import {
   generateApp,
   isLoopbackAddress,
   resetDatabase,
+  restoreSql,
   startServer,
   stopAllServers,
   type App,
@@ -249,4 +250,37 @@ describe('test plugin helpers', () => {
     ]);
     expect(calls).toEqual([{ sourceLocale: 'en', targetLocales: ['fr'], content }]);
   });
+});
+
+describe('SQLite snapshot restore', () => {
+  /** A strapi whose connection records each statement and throws on the one starting with `failOn`. */
+  const fakeStrapi = (failOn: string) => {
+    const statements: string[] = [];
+    const raw = async (sql: string) => {
+      statements.push(sql);
+      if (sql.startsWith(failOn)) {
+        throw new Error(`${failOn} failed`);
+      }
+      return [{ name: 'articles' }];
+    };
+    const connection = { raw, transaction: async (fn: (trx: unknown) => unknown) => fn({ raw }) };
+    const strapi = {
+      config: { get: () => path.join(os.tmpdir(), 'data.db') },
+      db: { connection },
+    };
+    return { strapi, statements };
+  };
+
+  test.each(['ATTACH', 'INSERT', 'DETACH'])(
+    'turns foreign keys back on when %s throws',
+    async (failOn) => {
+      const { strapi, statements } = fakeStrapi(failOn);
+
+      await expect(restoreSql(strapi)).rejects.toThrow(`${failOn} failed`);
+
+      expect(statements).toContain('PRAGMA foreign_keys = ON');
+      // Not attached, nothing to detach.
+      expect(statements.some((sql) => sql.startsWith('DETACH'))).toBe(failOn !== 'ATTACH');
+    }
+  );
 });

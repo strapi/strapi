@@ -7,6 +7,7 @@ import constants from '../test-plugin/constants.json';
 
 export { createFakeAiTranslationsProvider } from '../test-plugin/lib/fake-ai-provider';
 export { isLoopbackAddress } from '../test-plugin/lib/loopback';
+export { restoreSql } from '../test-plugin/lib/sqlite-snapshot';
 /* eslint-enable import/no-relative-packages */
 
 /** The test-only plugin loaded into every generated app (tests-next/shared/test-plugin). */
