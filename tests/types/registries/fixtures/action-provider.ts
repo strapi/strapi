@@ -13,14 +13,14 @@ declare global {
 }
 
 declare const app: Core.Strapi;
-declare const category: string | undefined;
+declare const subCategory: string | undefined;
 declare const dynamicId: string;
 
 const { actionProvider } = app.service('admin::permission');
 
 // An optional field passed through as `undefined` compiles under `exactOptionalPropertyTypes`.
 actionProvider.registerMany([
-  { uid: 'read', section: 'plugins', displayName: 'Read', pluginName: 'example', category },
+  { uid: 'read', section: 'plugins', displayName: 'Read', pluginName: 'example', subCategory },
 ]);
 
 // An `as const` list, nested arrays included, is accepted once its IDs are declared.
