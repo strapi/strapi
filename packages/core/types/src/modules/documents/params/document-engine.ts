@@ -69,22 +69,19 @@ type DraftAndPublishOption<TContentTypeUID extends UID.ContentType> = NonNullabl
 >['draftAndPublish'];
 
 /**
- * Publication status accepted by `delete`, read from the content type's `draftAndPublish` option.
+ * Publication status accepted by `delete`.
  *
- * - Enabled: `published` only. Deleting the draft version alone throws `Cannot delete a draft document`.
- *   `published` is accepted for compatibility but ignored: every version of the document is deleted.
- * - Disabled: none, the document has no publication status.
- * - Unknown (no generated types, a UID only known at runtime, or no `options` in the schema): any status.
+ * With draft and publish enabled, deleting the draft version alone throws `Cannot delete a draft
+ * document`, so only `published` is accepted. The runtime ignores it: every version is deleted.
  *
- * Code generic over the UID cannot pass a status, since the option is unknown until the UID is.
+ * Any other content type keeps both statuses, including a UID only known at runtime and apps
+ * without generated types. Code generic over the UID can pass `published`.
  */
 export type DeleteStatus<TContentTypeUID extends UID.ContentType> = [
   DraftAndPublishOption<TContentTypeUID>,
 ] extends [true]
   ? Extract<PublicationStatus.Kind, 'published'>
-  : true extends DraftAndPublishOption<TContentTypeUID>
-    ? PublicationStatus.Kind
-    : never;
+  : PublicationStatus.Kind;
 
 export type Create<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,

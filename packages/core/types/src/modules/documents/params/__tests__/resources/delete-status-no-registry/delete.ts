@@ -21,9 +21,12 @@ documents(anyContentTypeUID).delete({ documentId, status: 'draft' });
 export const deleteDocument = <TContentTypeUID extends UID.ContentType>(uid: TContentTypeUID) =>
   documents(uid).delete({ documentId, locale: 'en' });
 
-export const deleteWithStatus = <TContentTypeUID extends UID.ContentType>(uid: TContentTypeUID) =>
+export const deletePublished = <TContentTypeUID extends UID.ContentType>(uid: TContentTypeUID) =>
+  documents(uid).delete({ documentId, status: 'published' });
+
+export const deleteDraft = <TContentTypeUID extends UID.ContentType>(uid: TContentTypeUID) =>
   documents(uid).delete({
     documentId,
-    // @ts-expect-error The status depends on the content type, unknown until the UID is
-    status: 'published',
+    // @ts-expect-error Throws if the content type has draft and publish enabled
+    status: 'draft',
   });
