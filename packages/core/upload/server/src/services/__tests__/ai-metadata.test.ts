@@ -704,4 +704,73 @@ describe('AI Metadata Service', () => {
       ]);
     });
   });
+
+  describe('processExistingFiles', () => {
+    const user = { id: 1 };
+    const jobId = 7;
+    const mockFindMany = jest.fn();
+    // The order of the job calls, so the heartbeat can be checked against the job's settlement
+    let jobCalls: string[];
+    let mockJobs: { startHeartbeat: jest.Mock; stopHeartbeat: jest.Mock; settleJob: jest.Mock };
+
+    beforeEach(() => {
+      jobCalls = [];
+      mockJobs = {
+        startHeartbeat: jest.fn(() => {
+          jobCalls.push('startHeartbeat');
+        }),
+        stopHeartbeat: jest.fn(() => {
+          jobCalls.push('stopHeartbeat');
+        }),
+        settleJob: jest.fn(async (_id: number, status: string) => {
+          jobCalls.push(`settleJob:${status}`);
+        }),
+      };
+      mockStrapi.plugins.upload.services.aiMetadataJobs = mockJobs;
+      mockStrapi.db = {
+        query: jest.fn().mockReturnValue({ findMany: mockFindMany }),
+      };
+      mockFindMany.mockResolvedValue([{ id: 1, mime: 'image/jpeg' } as File]);
+
+      aiMetadataService = createAIMetadataService({ strapi: mockStrapi });
+      jest.spyOn(aiMetadataService, 'updateFilesWithAIMetadata').mockResolvedValue(undefined);
+    });
+
+    it('writes the heartbeat while the job runs, and stops it once the job completed', async () => {
+      jest.spyOn(aiMetadataService, 'processFiles').mockImplementation(async () => {
+        // Other servers on the same database must see the job alive while the provider works
+        expect(mockJobs.startHeartbeat).toHaveBeenCalledWith(jobId);
+        expect(mockJobs.stopHeartbeat).not.toHaveBeenCalled();
+        return [{ altText: 'alt', caption: 'caption' }];
+      });
+
+      await aiMetadataService.processExistingFiles(jobId, user);
+
+      expect(jobCalls).toEqual(['startHeartbeat', 'settleJob:completed', 'stopHeartbeat']);
+      expect(mockJobs.stopHeartbeat).toHaveBeenCalledWith(jobId);
+    });
+
+    it('stops the heartbeat once the job failed', async () => {
+      jest.spyOn(aiMetadataService, 'processFiles').mockRejectedValue(new Error('provider down'));
+
+      await aiMetadataService.processExistingFiles(jobId, user);
+
+      expect(jobCalls).toEqual(['startHeartbeat', 'settleJob:failed', 'stopHeartbeat']);
+    });
+
+    it('stops the heartbeat even when the job cannot be settled', async () => {
+      jest.spyOn(aiMetadataService, 'processFiles').mockRejectedValue(new Error('provider down'));
+      mockJobs.settleJob.mockImplementation(async (_id: number, status: string) => {
+        if (status === 'failed') {
+          throw new Error('database down');
+        }
+      });
+
+      await expect(aiMetadataService.processExistingFiles(jobId, user)).rejects.toThrow(
+        'database down'
+      );
+
+      expect(mockJobs.stopHeartbeat).toHaveBeenCalledWith(jobId);
+    });
+  });
 });
