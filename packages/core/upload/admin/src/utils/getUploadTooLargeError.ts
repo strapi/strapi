@@ -1,27 +1,38 @@
 import { UploadFileError } from '../services/uploadFileViaXHR';
 
+import type { UploadTooLargeDetails } from '../../../shared/contracts/files';
+
 /**
  * Which limit rejected an upload as too large:
  * - `requestLimit`: `formidable.maxFileSize` on the `strapi::body` middleware
- * - `sizeLimit`: `upload.config.sizeLimit`
- * - `external`: a 413 without a Strapi error envelope, so something in front of Strapi
+ * - `sizeLimit`: `upload.config.sizeLimit`, or the deprecated `setting` when that applied
+ * - `external`: a 413 that Strapi did not send, so something in front of Strapi
  *
  * `limit` is in bytes. Plain data so it can sit in the upload progress store.
  */
 export type UploadTooLargeError =
   | { reason: 'requestLimit'; limit: number }
-  | { reason: 'sizeLimit'; limit: number }
+  | {
+      reason: 'sizeLimit';
+      limit: number;
+      setting?: Extract<UploadTooLargeDetails, { code: 'SizeLimitExceeded' }>['setting'];
+    }
   | { reason: 'external' };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
+const isUploadTooLargeDetails = (details: unknown): details is UploadTooLargeDetails =>
+  isRecord(details) &&
+  (details.code === 'FileTooBig' || details.code === 'SizeLimitExceeded') &&
+  typeof details.limit === 'number';
+
 /**
- * `baseQuery` reports a response without a Strapi envelope as an `UnknownError`; Strapi's own
- * 413s are named after their error class.
+ * Every 413 Strapi sends, from `strapi::body` or a thrown `PayloadTooLargeError`, carries an
+ * error envelope named `PayloadTooLargeError`.
  */
-const hasErrorEnvelope = (error: Record<string, unknown>) =>
-  error instanceof UploadFileError ? error.hasErrorEnvelope : error.name !== 'UnknownError';
+const isStrapiPayloadTooLarge = (error: Record<string, unknown>) =>
+  (error instanceof UploadFileError ? error.errorName : error.name) === 'PayloadTooLargeError';
 
 /**
  * Reads a too-large rejection out of an upload error: an `UploadFileError` from the XHR
@@ -34,17 +45,17 @@ export const getUploadTooLargeError = (error: unknown): UploadTooLargeError | un
 
   const { details } = error;
 
-  if (isRecord(details) && typeof details.limit === 'number') {
+  if (isUploadTooLargeDetails(details)) {
     if (details.code === 'FileTooBig') {
       return { reason: 'requestLimit', limit: details.limit };
     }
 
-    if (details.code === 'SizeLimitExceeded') {
-      return { reason: 'sizeLimit', limit: details.limit };
-    }
+    return details.setting === 'upload.config.providerOptions.sizeLimit'
+      ? { reason: 'sizeLimit', limit: details.limit, setting: details.setting }
+      : { reason: 'sizeLimit', limit: details.limit };
   }
 
-  if (error.status === 413 && !hasErrorEnvelope(error)) {
+  if (error.status === 413 && !isStrapiPayloadTooLarge(error)) {
     return { reason: 'external' };
   }
 

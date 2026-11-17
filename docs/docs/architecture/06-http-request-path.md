@@ -62,7 +62,7 @@ In the bootstrap phase, `server.initMiddlewares()` reads the `middlewares` confi
 | `strapi::favicon`   | Serves the favicon.                                                                                                                                    |
 | `strapi::public`    | Registers two routes: `GET /` redirects to the admin URL, and a `GET` route serves the `public` folder (except `/uploads`).                            |
 
-`strapi::body` answers a multipart file above `formidable.maxFileSize` (formidable's default is 200 MiB) with a 413 `PayloadTooLargeError`. Its message is `FileTooBig` and its details are `{ code: 'FileTooBig', limit }`, with the limit in bytes. This happens before any route runs, so it also caps uploads that the upload plugin `sizeLimit` would accept.
+`strapi::body` answers a multipart request whose files add up to more than `formidable.maxFileSize` (formidable's default is 200 MiB) with a 413 `PayloadTooLargeError`. formidable 2.x counts the file bytes of the whole request, not of each file. Its message is `FileTooBig` and its details are `{ code: 'FileTooBig', limit }`, with the limit in bytes. This happens before any route runs, so it also caps uploads that the upload plugin `sizeLimit` would accept.
 
 Without a `middlewares` config, Strapi uses the same list with `strapi::session` before `strapi::query`. The boot fails if `strapi::errors`, `strapi::security`, `strapi::cors`, `strapi::query`, `strapi::body`, `strapi::public` or `strapi::favicon` is missing. `strapi::compression`, `strapi::ip`, `strapi::responseTime` and `strapi::responses` exist but are not in the default list.
 

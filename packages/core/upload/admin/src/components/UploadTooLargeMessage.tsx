@@ -57,6 +57,11 @@ const MESSAGES = {
   { cause: MessageDescriptor; hint: MessageDescriptor }
 >;
 
+const COMBINED_MESSAGE: MessageDescriptor = {
+  id: getTranslationKey('upload.tooLarge.combined'),
+  defaultMessage: '{cause} {hint}',
+};
+
 /**
  * Splits a too-large error into its plain cause and a sentence for the developer naming the
  * setting to change. Only the cause is meant to be announced to assistive tech.
@@ -70,19 +75,27 @@ export const useUploadTooLargeMessage = () => {
   return React.useCallback(
     (error: UploadTooLargeError) => {
       const messages = MESSAGES[error.reason];
+      const settings = {
+        ...SETTINGS,
+        sizeLimit: (error.reason === 'sizeLimit' && error.setting) || SETTINGS.sizeLimit,
+      };
       const cause = formatMessage(messages.cause, {
         limit: 'limit' in error ? formatSizeLimit(error.limit) : undefined,
       });
       const hint = formatMessage(messages.hint, {
-        maxFileSize: <SettingName>{SETTINGS.maxFileSize}</SettingName>,
-        bodyMiddleware: <SettingName>{SETTINGS.bodyMiddleware}</SettingName>,
-        sizeLimit: <SettingName>{SETTINGS.sizeLimit}</SettingName>,
+        maxFileSize: <SettingName>{settings.maxFileSize}</SettingName>,
+        bodyMiddleware: <SettingName>{settings.bodyMiddleware}</SettingName>,
+        sizeLimit: <SettingName>{settings.sizeLimit}</SettingName>,
       });
 
       return {
         cause,
         hint,
-        text: `${cause} ${formatMessage(messages.hint, SETTINGS)}`,
+        combined: formatMessage(COMBINED_MESSAGE, { cause, hint }),
+        text: formatMessage(COMBINED_MESSAGE, {
+          cause,
+          hint: formatMessage(messages.hint, settings),
+        }),
       };
     },
     [formatMessage]
@@ -91,11 +104,6 @@ export const useUploadTooLargeMessage = () => {
 
 export const UploadTooLargeMessage = ({ error }: { error: UploadTooLargeError }) => {
   const getMessage = useUploadTooLargeMessage();
-  const { cause, hint } = getMessage(error);
 
-  return (
-    <>
-      {cause} {hint}
-    </>
-  );
+  return <>{getMessage(error).combined}</>;
 };

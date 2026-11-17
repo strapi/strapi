@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../../../constants';
@@ -327,51 +327,71 @@ describe('AssetDetails (asset details drawer body)', () => {
     const replaceWith = async (response: () => Response) => {
       server.use(http.post('*/upload/files/:id/replace', response));
 
-      const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+      const utils = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
       await screen.findByRole('combobox');
 
-      await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+      await utils.user.click(await screen.findByRole('button', { name: 'Replace this file' }));
       await screen.findByText(/Replace this media file\?/i);
       fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       const file = new File(['hello'], 'photo.png', { type: 'image/png' });
       fireEvent.change(fileInput, { target: { files: [file] } });
+
+      return utils;
     };
 
+    const bodyParserRejection = () =>
+      HttpResponse.json(
+        {
+          data: null,
+          error: {
+            status: 413,
+            name: 'PayloadTooLargeError',
+            message: 'FileTooBig',
+            details: { code: 'FileTooBig', limit: 200 * 1024 * 1024 },
+          },
+        },
+        { status: 413 }
+      );
+
     it('names the body parser limit and keeps the toast until dismissed', async () => {
-      // A jest spy on setTimeout would make Testing Library assume fake timers.
-      const realSetTimeout = window.setTimeout;
-      const delays: Array<number | undefined> = [];
-      window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: unknown[]) => {
-        delays.push(delay);
-        return realSetTimeout(handler, delay, ...args);
-      }) as typeof window.setTimeout;
+      jest.useFakeTimers({ advanceTimers: true });
 
       try {
-        await replaceWith(() =>
-          HttpResponse.json(
-            {
-              data: null,
-              error: {
-                status: 413,
-                name: 'PayloadTooLargeError',
-                message: 'FileTooBig',
-                details: { code: 'FileTooBig', limit: 200 * 1024 * 1024 },
-              },
-            },
-            { status: 413 }
-          )
-        );
+        await replaceWith(bodyParserRejection);
 
         const cause = await screen.findByText(/Exceeds the server request limit of 210 MB\./);
         expect(cause).toHaveTextContent(
           'Exceeds the server request limit of 210 MB. To raise it, a developer can increase formidable.maxFileSize on the strapi::body middleware, together with upload.config.sizeLimit.'
         );
-        expect(delays).not.toContain(5000);
+
+        act(() => {
+          jest.advanceTimersByTime(60_000);
+        });
+
+        expect(
+          screen.getByText(/Exceeds the server request limit of 210 MB\./)
+        ).toBeInTheDocument();
       } finally {
-        window.setTimeout = realSetTimeout;
+        jest.useRealTimers();
       }
+    });
+
+    it('clears the toast when the drawer switches to another asset', async () => {
+      const { rerender } = await replaceWith(bodyParserRejection);
+
+      await screen.findByText(/Exceeds the server request limit of 210 MB\./);
+
+      rerender(
+        <AssetDetails asset={{ ...baseAsset, id: 2, name: 'other.png' }} closeDetails={jest.fn()} />
+      );
+
+      await waitFor(() =>
+        expect(
+          screen.queryByText(/Exceeds the server request limit of 210 MB\./)
+        ).not.toBeInTheDocument()
+      );
     });
 
     it('names upload.config.sizeLimit when the upload plugin rejected the file', async () => {
@@ -787,7 +807,6 @@ describe('Replace media placement', () => {
 
     // The server pins the replacement to the old extension, so a cross-type pick
     // would leave the bytes and the URL disagreeing.
-    // eslint-disable-next-line testing-library/no-node-access
     expect(document.querySelector('input[type="file"]')).toHaveAttribute(
       'accept',
       'application/pdf'

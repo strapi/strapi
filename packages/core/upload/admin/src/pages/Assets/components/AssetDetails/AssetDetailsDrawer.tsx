@@ -787,6 +787,9 @@ export const AssetDetails = ({
     const timer = window.setTimeout(() => setDrawerToast(null), 5000);
     return () => window.clearTimeout(timer);
   }, [drawerToast]);
+  React.useEffect(() => {
+    setDrawerToast(null);
+  }, [asset.id]);
 
   // Local alias matching the DrawerNotifyContext signature, so the drawer's
   // own handlers (replace, update) read like the consumers do.

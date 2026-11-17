@@ -26,8 +26,8 @@ export class UploadFileError extends Error {
    */
   isServerMessage: boolean;
 
-  /** Whether the response body carried a Strapi `{ error }` envelope. */
-  hasErrorEnvelope: boolean;
+  /** `error.name` from the Strapi error envelope, when there is one. */
+  errorName?: string;
 
   /** `error.details` from the Strapi error envelope, when there is one. */
   details?: unknown;
@@ -36,13 +36,13 @@ export class UploadFileError extends Error {
     message: string,
     status?: number,
     isServerMessage = false,
-    { hasErrorEnvelope = false, details }: { hasErrorEnvelope?: boolean; details?: unknown } = {}
+    { errorName, details }: { errorName?: string; details?: unknown } = {}
   ) {
     super(message);
     this.name = 'UploadFileError';
     this.status = status;
     this.isServerMessage = isServerMessage;
-    this.hasErrorEnvelope = hasErrorEnvelope;
+    this.errorName = errorName;
     this.details = details;
   }
 }
@@ -113,7 +113,7 @@ const sendUploadViaXHR = <T>(
 
       let message = `Upload failed with status ${xhr.status}`;
       let isServerMessage = false;
-      let hasErrorEnvelope = false;
+      let errorName: string | undefined;
       let details: unknown;
       try {
         const parsed = JSON.parse(xhr.responseText);
@@ -123,15 +123,13 @@ const sendUploadViaXHR = <T>(
           isServerMessage = true;
         }
         if (parsed?.error && typeof parsed.error === 'object') {
-          hasErrorEnvelope = true;
+          errorName = typeof parsed.error.name === 'string' ? parsed.error.name : undefined;
           details = parsed.error.details;
         }
       } catch {
         // Keep the default status-based message.
       }
-      reject(
-        new UploadFileError(message, xhr.status, isServerMessage, { hasErrorEnvelope, details })
-      );
+      reject(new UploadFileError(message, xhr.status, isServerMessage, { errorName, details }));
     };
 
     xhr.onerror = () => {

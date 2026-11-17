@@ -69,7 +69,11 @@ export default {
               `${file.name} exceeds size limit of ${bytesToHumanReadable(
                 providerOptionsSizeLimit
               )}.`,
-              { code: 'SizeLimitExceeded', limit: providerOptionsSizeLimit }
+              {
+                code: 'SizeLimitExceeded',
+                limit: providerOptionsSizeLimit,
+                setting: 'upload.config.providerOptions.sizeLimit',
+              }
             );
         } else if (sizeLimit) {
           if (kbytesToBytes(file.size) > sizeLimit)

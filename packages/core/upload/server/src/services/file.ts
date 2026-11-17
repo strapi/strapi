@@ -13,6 +13,7 @@ import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 
 import { Config, type File } from '../types';
+import type { UploadTooLargeDetails } from '../../../shared/contracts/files';
 
 const { ApplicationError, ValidationError } = errors;
 const { bytesToHumanReadable } = fileUtils;
@@ -160,18 +161,18 @@ const fetchUrlToInputFile = async (
     );
   }
 
-  const tooLargeError = () =>
-    new ApplicationError(
-      `File too large: maximum allowed size is ${bytesToHumanReadable(sizeLimit ?? 0)}`,
-      { code: 'SizeLimitExceeded', limit: sizeLimit }
-    );
+  const tooLargeError = (limit: number) =>
+    new ApplicationError(`File too large: maximum allowed size is ${bytesToHumanReadable(limit)}`, {
+      code: 'SizeLimitExceeded',
+      limit,
+    } satisfies UploadTooLargeDetails);
 
   const parsedContentLength = parseInt(response.headers.get('content-length') ?? '', 10);
   const totalBytes = Number.isFinite(parsedContentLength) ? parsedContentLength : null;
 
   // Check Content-Length header for early rejection of large files
   if (sizeLimit && totalBytes !== null && totalBytes > sizeLimit) {
-    throw tooLargeError();
+    throw tooLargeError(sizeLimit);
   }
 
   // Progress reporting is a side-channel for UI: a consumer that throws should not fail the import
@@ -219,7 +220,7 @@ const fetchUrlToInputFile = async (
           bytesWritten += chunk.length;
 
           if (sizeLimit && bytesWritten > sizeLimit) {
-            callback(tooLargeError());
+            callback(tooLargeError(sizeLimit));
             return;
           }
 

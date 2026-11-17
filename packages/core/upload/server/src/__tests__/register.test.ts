@@ -175,6 +175,37 @@ describe('Upload plugin register', () => {
     });
   });
 
+  describe('size limit mismatch warning', () => {
+    test('warns at register when sizeLimit is higher than the body parser limit', async () => {
+      const warn = jest.fn();
+      const configByPath: Record<string, unknown> = {
+        'plugin::upload': { provider: 'local', sizeLimit: 500 * 1000 * 1000 },
+        middlewares: [
+          { name: 'strapi::body', config: { formidable: { maxFileSize: 250 * 1000 * 1000 } } },
+        ],
+      };
+
+      global.strapi = {
+        dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+        plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+        server: { app: { on: jest.fn() }, routes: jest.fn() },
+        admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+        config: {
+          get: jest.fn((path: string) => configByPath[path]),
+          set: jest.fn(),
+        },
+        log: { warn },
+        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+      } as any;
+
+      await register({ strapi });
+
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][0]).toContain('upload.config.sizeLimit is 500 MB');
+    });
+  });
+
   describe('plugin::upload config', () => {
     test('null/undefined plugin::upload: register runs, sharp cache and concurrency use defaults', async () => {
       for (const uploadFromConfig of [null, undefined]) {

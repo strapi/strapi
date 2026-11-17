@@ -204,7 +204,7 @@ describe('per-file upload control', () => {
     await act(async () => {
       request('big.png').reject(
         new UploadFileError('FileTooBig', 413, true, {
-          hasErrorEnvelope: true,
+          errorName: 'PayloadTooLargeError',
           details: { code: 'FileTooBig', limit: 209715200 },
         })
       );

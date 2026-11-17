@@ -121,6 +121,7 @@
   "sort.name_desc": "字母倒序 (Z to A)",
   "sort.updated_at_asc": "最早更新",
   "sort.updated_at_desc": "最近更新",
+  "apiError.FileTooBig": "文件太大，无法上传。已超出服务器允许的最大请求大小",
   "upload.generic-error": "上传文件时发生错误",
   "bulk.select.label": "选择所有资源",
   "content.isLoading": "内容正在加载中",

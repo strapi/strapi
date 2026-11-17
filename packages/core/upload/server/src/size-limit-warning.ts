@@ -7,16 +7,16 @@ import type { Config } from './types';
 const { bytesToHumanReadable } = file;
 
 // formidable's own default, applied by `strapi::body` when `formidable.maxFileSize` is not configured
-const DEFAULT_MAX_FILE_SIZE = 200 * 1024 * 1024;
+export const DEFAULT_MAX_FILE_SIZE = 200 * 1024 * 1024;
 
 type MiddlewareEntry =
-  string | { name?: string; config?: { formidable?: { maxFileSize?: number } } };
+  string | { name?: string; config?: { formidable?: { maxFileSize?: unknown } } };
 
-const getConfiguredMaxFileSize = (strapi: Core.Strapi) => {
+const getMaxFileSize = (strapi: Core.Strapi) => {
   const middlewares = strapi.config.get<MiddlewareEntry[] | undefined>('middlewares');
 
   if (!Array.isArray(middlewares)) {
-    return undefined;
+    return DEFAULT_MAX_FILE_SIZE;
   }
 
   const body = middlewares.find(
@@ -24,7 +24,9 @@ const getConfiguredMaxFileSize = (strapi: Core.Strapi) => {
       entry === 'strapi::body' || (typeof entry === 'object' && entry?.name === 'strapi::body')
   );
 
-  return typeof body === 'object' ? body.config?.formidable?.maxFileSize : undefined;
+  const limit = Number(typeof body === 'object' ? body.config?.formidable?.maxFileSize : undefined);
+
+  return Number.isFinite(limit) ? limit : DEFAULT_MAX_FILE_SIZE;
 };
 
 const formatLimit = (bytes: number) => `${bytesToHumanReadable(bytes)} (${bytes} bytes)`;
@@ -33,6 +35,9 @@ const formatLimit = (bytes: number) => `${bytesToHumanReadable(bytes)} (${bytes}
  * The body parser rejects a file above `formidable.maxFileSize` before the upload plugin sees it,
  * so a `sizeLimit` above it is never reached. Both defaults (1 GB and ~210 MB) have always been in
  * that state, so an app that left both untouched stays quiet.
+ *
+ * Only the effective values are compared: a `sizeLimit` or `maxFileSize` set explicitly to its
+ * default cannot be told apart from an unset one, so that pair stays quiet too.
  */
 export const warnOnSizeLimitMismatch = ({ strapi }: { strapi: Core.Strapi }) => {
   const sizeLimit = strapi.config.get<Partial<Config> | undefined>('plugin::upload')?.sizeLimit;
@@ -41,13 +46,11 @@ export const warnOnSizeLimitMismatch = ({ strapi }: { strapi: Core.Strapi }) => 
     return;
   }
 
-  const configuredMaxFileSize = getConfiguredMaxFileSize(strapi);
+  const maxFileSize = getMaxFileSize(strapi);
 
-  if (configuredMaxFileSize === undefined && sizeLimit === config.default.sizeLimit) {
+  if (sizeLimit === config.default.sizeLimit && maxFileSize === DEFAULT_MAX_FILE_SIZE) {
     return;
   }
-
-  const maxFileSize = configuredMaxFileSize ?? DEFAULT_MAX_FILE_SIZE;
 
   if (sizeLimit <= maxFileSize) {
     return;
@@ -55,8 +58,12 @@ export const warnOnSizeLimitMismatch = ({ strapi }: { strapi: Core.Strapi }) => 
 
   strapi.log.warn(
     [
-      `upload.config.sizeLimit is ${formatLimit(sizeLimit)} but formidable.maxFileSize on the strapi::body middleware is ${formatLimit(maxFileSize)}.`,
-      `Uploads above ${bytesToHumanReadable(maxFileSize)} are rejected before they reach the upload plugin.`,
+      `upload.config.sizeLimit is ${formatLimit(
+        sizeLimit
+      )} but formidable.maxFileSize on the strapi::body middleware is ${formatLimit(maxFileSize)}.`,
+      `Uploads above ${bytesToHumanReadable(
+        maxFileSize
+      )} are rejected before they reach the upload plugin.`,
       `Raise formidable.maxFileSize on the strapi::body middleware to at least ${sizeLimit} to allow uploads up to upload.config.sizeLimit.`,
     ].join(' ')
   );

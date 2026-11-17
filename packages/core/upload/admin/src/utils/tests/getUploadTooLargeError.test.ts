@@ -24,9 +24,36 @@ describe('getUploadTooLargeError', () => {
     ).toEqual({ reason: 'sizeLimit', limit: 200000000 });
   });
 
+  it('names the deprecated provider setting when it is the limit that applied', () => {
+    expect(
+      getUploadTooLargeError({
+        status: 413,
+        name: 'PayloadTooLargeError',
+        message: 'big.png exceeds size limit of 1 MB.',
+        details: {
+          code: 'SizeLimitExceeded',
+          limit: 1000000,
+          setting: 'upload.config.providerOptions.sizeLimit',
+        },
+      })
+    ).toEqual({
+      reason: 'sizeLimit',
+      limit: 1000000,
+      setting: 'upload.config.providerOptions.sizeLimit',
+    });
+  });
+
+  it('ignores a setting it does not know', () => {
+    expect(
+      getUploadTooLargeError({
+        details: { code: 'SizeLimitExceeded', limit: 1000, setting: 'something.else' },
+      })
+    ).toEqual({ reason: 'sizeLimit', limit: 1000 });
+  });
+
   it('reads the details of an XHR upload error', () => {
     const error = new UploadFileError('FileTooBig', 413, true, {
-      hasErrorEnvelope: true,
+      errorName: 'PayloadTooLargeError',
       details: { code: 'FileTooBig', limit: 1000 },
     });
 
@@ -51,13 +78,27 @@ describe('getUploadTooLargeError', () => {
     ).toEqual({ reason: 'external' });
   });
 
+  it('blames a limit outside Strapi for a JSON 413 that Strapi did not send', () => {
+    expect(
+      getUploadTooLargeError({ status: 413, name: 'Error', message: 'Request too large' })
+    ).toEqual({ reason: 'external' });
+    expect(
+      getUploadTooLargeError(
+        new UploadFileError('Request too large', 413, true, { errorName: 'RequestTooLarge' })
+      )
+    ).toEqual({ reason: 'external' });
+  });
+
   it('does not blame a proxy for a Strapi 413 without size details', () => {
     expect(
       getUploadTooLargeError({ status: 413, name: 'PayloadTooLargeError', message: 'too large' })
     ).toBeUndefined();
     expect(
       getUploadTooLargeError(
-        new UploadFileError('too large', 413, true, { hasErrorEnvelope: true, details: {} })
+        new UploadFileError('too large', 413, true, {
+          errorName: 'PayloadTooLargeError',
+          details: {},
+        })
       )
     ).toBeUndefined();
   });

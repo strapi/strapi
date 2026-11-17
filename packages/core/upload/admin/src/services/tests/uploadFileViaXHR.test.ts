@@ -146,7 +146,7 @@ describe('uploadFileViaXHR', () => {
     await expect(promise).rejects.toMatchObject({
       message: 'FileTooBig',
       status: 413,
-      hasErrorEnvelope: true,
+      errorName: 'PayloadTooLargeError',
       details: { code: 'FileTooBig', limit: 209715200 },
     });
   });
@@ -159,7 +159,7 @@ describe('uploadFileViaXHR', () => {
 
     await expect(promise).rejects.toMatchObject({
       status: 413,
-      hasErrorEnvelope: false,
+      errorName: undefined,
       details: undefined,
     });
   });

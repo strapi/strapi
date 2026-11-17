@@ -1,4 +1,5 @@
 {
+  "apiError.FileTooBig": "Súbor je príliš veľký na nahranie. Prekračuje maximálnu veľkosť požiadavky povolenú serverom.",
   "assets.uploaded": "{number, plural, one {# súbor} other {# súbory}} boli úspešne nahraté",
   "asset-details.title": "Podrobnosti súboru",
   "asset-details.description": "Zobrazuje informácie o súbore a metadáta",

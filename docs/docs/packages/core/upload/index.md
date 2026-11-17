@@ -31,11 +31,17 @@ The controllers call `prepareUploadRequest` to validate the MIME types before an
 
 ### Size limits
 
-Two limits apply to an uploaded file. The `strapi::body` middleware rejects a file above `formidable.maxFileSize` while it parses the request, before the plugin runs. The plugin then rejects a file above `upload.config.sizeLimit` (default 1 GB) in `checkFileSize`. The base provider in `server/src/register.ts` implements it, and a provider can override it, as `@strapi/provider-upload-local` does. A URL import checks `sizeLimit` while it downloads the file, in `fetchUrlToInputFile`.
+Two limits apply to an uploaded file. The `strapi::body` middleware rejects a request whose files add up to more than `formidable.maxFileSize` while it parses it, before the plugin runs. formidable 2.x counts the file bytes of the whole request, not of each file, so a batch of small files can hit the limit too. The plugin then rejects a file above `upload.config.sizeLimit` (default 1 GB) in `checkFileSize`. The base provider in `server/src/register.ts` implements it, and a provider can override it, as `@strapi/provider-upload-local` does. A URL import checks `sizeLimit` while it downloads the file, in `fetchUrlToInputFile`.
 
-Every rejection is a 413 with a `details` object that names the limit: `{ code: 'FileTooBig', limit }` from the body parser, `{ code: 'SizeLimitExceeded', limit }` from the plugin, with the limit in bytes. A URL import sends the same details in its `file:error` event. The admin reads them in `admin/src/utils/getUploadTooLargeError.ts`, and treats a 413 without a Strapi error body as a limit outside Strapi, such as a reverse proxy.
+Each rejection carries a `details` object that names the limit, typed as `UploadTooLargeDetails` in `shared/contracts/files.ts`, with the limit in bytes:
 
-`register` calls `warnOnSizeLimitMismatch` (`server/src/size-limit-warning.ts`). It logs one warning when `sizeLimit` is higher than the body parser limit, because files between the two are rejected by the body parser. It stays quiet when both are left at their defaults, which have always been in that state.
+- The body parser answers with a 413 `PayloadTooLargeError` and `{ code: 'FileTooBig', limit }`.
+- `checkFileSize` throws a `PayloadTooLargeError` (413) with `{ code: 'SizeLimitExceeded', limit }`. When `@strapi/provider-upload-local` applies the deprecated `upload.config.providerOptions.sizeLimit`, the details also have `setting: 'upload.config.providerOptions.sizeLimit'`, and the admin names that setting instead of `upload.config.sizeLimit`.
+- A URL import throws an `ApplicationError` with `{ code: 'SizeLimitExceeded', limit }`. The response is a stream with status 200, so the error reaches the admin as a `file:error` event that carries the same details.
+
+The admin reads them in `admin/src/utils/getUploadTooLargeError.ts`. It treats a 413 that is not a Strapi `PayloadTooLargeError` as a limit outside Strapi, such as a reverse proxy.
+
+`register` calls `warnOnSizeLimitMismatch` (`server/src/size-limit-warning.ts`). It logs one warning when `sizeLimit` is higher than the body parser limit, because files between the two are rejected by the body parser. It compares the effective values, so it stays quiet when both are at their defaults (1 GB and 200 MiB), which have always been in that state. A `sizeLimit` or `maxFileSize` set explicitly to its default cannot be told apart from an unset one, so that pair stays quiet too.
 
 ### MIME type validation
 

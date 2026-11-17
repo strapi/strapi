@@ -1,4 +1,7 @@
-import { warnOnSizeLimitMismatch } from '../size-limit-warning';
+import { createRequire } from 'node:module';
+import type { Core } from '@strapi/types';
+
+import { DEFAULT_MAX_FILE_SIZE, warnOnSizeLimitMismatch } from '../size-limit-warning';
 
 const createStrapi = ({
   sizeLimit,
@@ -16,9 +19,9 @@ const createStrapi = ({
       }),
     },
     log: { warn: jest.fn() },
-  }) as any;
+  }) as unknown as Core.Strapi & { log: { warn: jest.Mock } };
 
-const bodyWithMaxFileSize = (maxFileSize: number) => ({
+const bodyWithMaxFileSize = (maxFileSize: unknown) => ({
   name: 'strapi::body',
   config: { formidable: { maxFileSize } },
 });
@@ -94,5 +97,34 @@ describe('Upload size limit mismatch warning', () => {
     warnOnSizeLimitMismatch({ strapi });
 
     expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+  });
+
+  test('stays quiet when both limits are set explicitly to their defaults', () => {
+    const strapi = createStrapi({
+      sizeLimit: 1000000000,
+      middlewares: [bodyWithMaxFileSize(DEFAULT_MAX_FILE_SIZE)],
+    });
+
+    warnOnSizeLimitMismatch({ strapi });
+
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  test('reads a string maxFileSize as a number', () => {
+    const strapi = createStrapi({
+      sizeLimit: 500 * 1000 * 1000,
+      middlewares: [bodyWithMaxFileSize('250000000')],
+    });
+
+    warnOnSizeLimitMismatch({ strapi });
+
+    expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+    expect(strapi.log.warn.mock.calls[0][0]).toContain('250 MB (250000000 bytes)');
+  });
+
+  test('matches the maxFileSize default of the formidable that koa-body runs', () => {
+    const requireFromKoaBody = createRequire(require.resolve('koa-body'));
+
+    expect(DEFAULT_MAX_FILE_SIZE).toBe(requireFromKoaBody('formidable').defaultOptions.maxFileSize);
   });
 });

@@ -103,3 +103,47 @@ describe('file:progress on a URL upload', () => {
     expect(result.current.files[0].uploadedBytes).toBe(0);
   });
 });
+
+describe('file:error on a URL upload', () => {
+  const originalFetch = global.fetch;
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('records which limit rejected the file from the event details', async () => {
+    const message = 'File too large: maximum allowed size is 1 MB';
+    const result = setup([
+      ['file:fetching', { url: 'https://example.com/big.zip', index: 0, total: 1 }],
+      [
+        'file:error',
+        {
+          url: 'https://example.com/big.zip',
+          index: 0,
+          message,
+          details: { code: 'SizeLimitExceeded', limit: 1000000 },
+        },
+      ],
+      ['stream:complete', { data: [], errors: [{ name: 'https://example.com/big.zip', message }] }],
+    ]);
+
+    await waitFor(() => expect(result.current.files[0].status).toBe('error'));
+    expect(result.current.files[0].error).toBe(message);
+    expect(result.current.files[0].tooLarge).toEqual({ reason: 'sizeLimit', limit: 1000000 });
+  });
+
+  it('leaves an error without size details as a plain error', async () => {
+    const result = setup([
+      ['file:fetching', { url: 'https://example.com/big.zip', index: 0, total: 1 }],
+      ['file:error', { url: 'https://example.com/big.zip', index: 0, message: 'socket hang up' }],
+      [
+        'stream:complete',
+        { data: [], errors: [{ name: 'https://example.com/big.zip', message: 'socket hang up' }] },
+      ],
+    ]);
+
+    await waitFor(() => expect(result.current.files[0].status).toBe('error'));
+    expect(result.current.files[0].error).toBe('socket hang up');
+    expect(result.current.files[0].tooLarge).toBeUndefined();
+  });
+});

@@ -990,5 +990,35 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       expect(eventsOf('file:progress').map((frame) => frame.data.totalBytes)).toEqual([null, null]);
     });
+
+    it('forwards the details of a size rejection in the file:error event', async () => {
+      fileService.fetchUrlToInputFile.mockRejectedValue(
+        new errors.ApplicationError('File too large: maximum allowed size is 1 MB', {
+          code: 'SizeLimitExceeded',
+          limit: 1000000,
+        })
+      );
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:error').map((frame) => frame.data)).toEqual([
+        {
+          url: 'https://example.com/big.zip',
+          index: 0,
+          message: 'File too large: maximum allowed size is 1 MB',
+          details: { code: 'SizeLimitExceeded', limit: 1000000 },
+        },
+      ]);
+    });
+
+    it('sends no details for an error that is not an ApplicationError', async () => {
+      fileService.fetchUrlToInputFile.mockRejectedValue(new Error('socket hang up'));
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:error').map((frame) => frame.data)).toEqual([
+        { url: 'https://example.com/big.zip', index: 0, message: 'socket hang up' },
+      ]);
+    });
   });
 });

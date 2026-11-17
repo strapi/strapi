@@ -13,7 +13,13 @@ const defaults = {
 };
 
 // formidable's own default, applied when `formidable.maxFileSize` is not configured
-const DEFAULT_MAX_FILE_SIZE = 200 * 1024 * 1024;
+export const DEFAULT_MAX_FILE_SIZE = 200 * 1024 * 1024;
+
+const getMaxFileSize = (config: Config) => {
+  const limit = Number(config.formidable?.maxFileSize);
+
+  return Number.isFinite(limit) ? limit : DEFAULT_MAX_FILE_SIZE;
+};
 
 function ensureFileMimeType(file: any): void {
   if (!file.type) {
@@ -66,7 +72,7 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
         ) {
           return ctx.payloadTooLarge('FileTooBig', {
             code: 'FileTooBig',
-            limit: bodyConfig.formidable?.maxFileSize ?? DEFAULT_MAX_FILE_SIZE,
+            limit: getMaxFileSize(bodyConfig),
           });
         }
 

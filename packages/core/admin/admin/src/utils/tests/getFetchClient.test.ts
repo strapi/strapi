@@ -280,24 +280,6 @@ describe('getFetchClient', () => {
       });
     });
 
-    it('should throw a FetchError with the status on a non-2xx response without a JSON body', async () => {
-      (window.fetch as jest.Mock).mockImplementationOnce(() =>
-        Promise.resolve({
-          status: 413,
-          ok: false,
-          json: () => Promise.reject(new SyntaxError('Unexpected token <')),
-        })
-      );
-
-      const fetchClient = getFetchClient();
-
-      await expect(fetchClient.post('/upload', {})).rejects.toMatchObject({
-        name: 'FetchError',
-        message: 'Unknown Server Error',
-        status: 413,
-      });
-    });
-
     it('should not send Accept and Content-Type headers for blob requests', async () => {
       (window.fetch as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({
@@ -354,6 +336,94 @@ describe('getFetchClient', () => {
       expect(result.status).toBe(200);
       expect(result.headers).toBe(responseHeaders);
       expect(result.headers?.get('Content-Disposition')).toBe('attachment; filename="export.zip"');
+    });
+  });
+
+  describe('non-JSON response body', () => {
+    const nonJsonResponse = (status: number) => ({
+      status,
+      ok: status >= 200 && status < 300,
+      json: () => Promise.reject(new SyntaxError('Unexpected token <')),
+    });
+
+    it('should throw a FetchError with the status on a non-2xx response', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(nonJsonResponse(413))
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.post('/upload', {})).rejects.toMatchObject({
+        name: 'FetchError',
+        message: 'Unknown Server Error',
+        status: 413,
+      });
+    });
+
+    it('should refresh the token and retry on a 401', async () => {
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() => Promise.resolve(nonJsonResponse(401)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    it('should throw the 401 with the session token when the refresh fails', async () => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() => Promise.resolve(nonJsonResponse(401)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({ error: { message: 'Refresh token invalid', status: 401 } }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Unknown Server Error', status: 401 });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('token-a');
+      }
+    });
+
+    it('should rethrow the parse error when validateStatus accepts the status', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(nonJsonResponse(413))
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(
+        fetchClient.post('/upload', {}, { validateStatus: (status) => status === 413 })
+      ).rejects.toMatchObject({ name: 'SyntaxError' });
     });
   });
 
