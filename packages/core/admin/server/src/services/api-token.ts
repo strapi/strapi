@@ -585,7 +585,7 @@ const reconcileParameterizedTokenPermissions = (
   const toDelete: Permission[] = [];
   const toUpdate: { id: Data.ID; conditions: string[] }[] = [];
   const withoutParameters = (permission: Permission) =>
-    ({ ...permission, actionParameters: {} } as Permission);
+    ({ ...permission, actionParameters: {} }) as Permission;
 
   tokenPermissions
     .filter((tokenPerm) => !isEmpty(tokenPerm.actionParameters))

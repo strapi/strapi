@@ -40,7 +40,7 @@ const createMockStrapi = (provider: Record<string, jest.Mock>) =>
       }
       return {};
     },
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 const createTestWritable = (uploadStream: jest.Mock) =>
   createTestWritableWithProvider({ uploadStream });

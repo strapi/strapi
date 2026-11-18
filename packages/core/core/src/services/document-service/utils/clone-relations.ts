@@ -722,9 +722,7 @@ const applyOneDeferredCloneRelationCopy = async (
 
   if (sourceEntryId == null || targetEntryId == null) {
     throw new Error(
-      `Unable to resolve clone relation owner for "${task.attributeName}" at path "${
-        task.ownerPath ?? '<root>'
-      }"`
+      `Unable to resolve clone relation owner for "${task.attributeName}" at path "${task.ownerPath ?? '<root>'}"`
     );
   }
 
@@ -1239,8 +1237,7 @@ const schemaUidForPostCloneUpdate = (
   const cloneComponent = ownerComponentUid(get(clonedData, update.ownerPath!));
   const cloneAttribute = cloneComponent
     ? (strapi.db.metadata.get(cloneComponent).attributes[attributeName] as
-        | CloneRelationAttribute
-        | undefined)
+        CloneRelationAttribute | undefined)
     : undefined;
 
   // The submitted operation belongs to the new block. Do not apply it with the
@@ -1273,9 +1270,7 @@ const applyOnePostCloneRelationUpdate = async (
 
   if (ownerEntryId == null) {
     throw new Error(
-      `Unable to resolve clone relation owner for "${attributeName}" at path "${
-        update.ownerPath ?? '<root>'
-      }"`
+      `Unable to resolve clone relation owner for "${attributeName}" at path "${update.ownerPath ?? '<root>'}"`
     );
   }
 
@@ -1292,8 +1287,7 @@ const applyOnePostCloneRelationUpdate = async (
   }
 
   const attribute = strapi.db.metadata.get(schemaUid).attributes[attributeName] as
-    | CloneRelationAttribute
-    | undefined;
+    CloneRelationAttribute | undefined;
 
   if (attribute?.type !== 'relation') {
     throw new Error(

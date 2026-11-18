@@ -445,13 +445,16 @@ type ComponentWriteResult = {
 const getMediaPopulate = (componentUID: UID.Component) => {
   const { attributes = {} } = strapi.getModel(componentUID);
 
-  const populate = Object.entries(attributes).reduce((acc, [attributeName, attribute]) => {
-    if (attribute.type === 'media') {
-      acc[attributeName] = { select: ['id'] };
-    }
+  const populate = Object.entries(attributes).reduce(
+    (acc, [attributeName, attribute]) => {
+      if (attribute.type === 'media') {
+        acc[attributeName] = { select: ['id'] };
+      }
 
-    return acc;
-  }, {} as Record<string, { select: string[] }>);
+      return acc;
+    },
+    {} as Record<string, { select: string[] }>
+  );
 
   return isEmpty(populate) ? undefined : populate;
 };

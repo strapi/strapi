@@ -86,7 +86,7 @@ const schemaContentType = (contentType: Record<string, unknown>) =>
       },
     ],
     components: [],
-  } as unknown as CTBSchema);
+  }) as unknown as CTBSchema;
 
 describe('displayName guard on direct service calls', () => {
   beforeEach(() => {

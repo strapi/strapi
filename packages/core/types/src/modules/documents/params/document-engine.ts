@@ -79,7 +79,7 @@ type DraftAndPublishOption<TContentTypeUID extends UID.ContentType> = NonNullabl
  * without generated types. Code generic over the UID can pass `published`.
  */
 export type DeleteStatus<TContentTypeUID extends UID.ContentType> = [
-  DraftAndPublishOption<TContentTypeUID>
+  DraftAndPublishOption<TContentTypeUID>,
 ] extends [true]
   ? Extract<PublicationStatus.Kind, 'published'>
   : PublicationStatus.Kind;

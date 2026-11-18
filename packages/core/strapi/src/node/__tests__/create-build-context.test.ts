@@ -69,7 +69,7 @@ const buildStrapiMock = (
       dist: { root: '/app/dist' },
     },
     telemetry: { isDisabled: true },
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 const buildArgs = (strapi: Core.Strapi) => ({
   cwd: '/app',

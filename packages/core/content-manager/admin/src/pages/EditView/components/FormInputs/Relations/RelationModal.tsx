@@ -67,9 +67,7 @@ const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
     ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
     : '';
 
-  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${
-    isSingleType ? '' : '/' + currentDocumentMeta.documentId
-  }${queryParams}`;
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -443,9 +441,7 @@ const RelationModalRenderer = (props: RelationModalRendererProps) => {
  * RelationModal
  * -----------------------------------------------------------------------------------------------*/
 const generateCreateUrl = (currentDocumentMeta: DocumentMeta) => {
-  return `/content-manager/${currentDocumentMeta.collectionType}/${
-    currentDocumentMeta.model
-  }/create${
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
     currentDocumentMeta.params?.locale
       ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
       : ''

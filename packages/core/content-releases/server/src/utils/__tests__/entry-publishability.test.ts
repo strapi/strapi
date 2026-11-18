@@ -58,7 +58,7 @@ const buildStrapi = ({
     }),
     // Checks outside a transaction read without a savepoint
     db: { inTransaction: () => false },
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 const requiringDone = () => ({
   getAssignedWorkflow: jest.fn().mockResolvedValue({ stageRequiredToPublish: doneStage }),
@@ -785,7 +785,7 @@ describe('getStageReason', () => {
     workflowsService?: { getAssignedWorkflow: jest.Mock } | undefined;
     findOne?: jest.Mock;
     db?: Record<string, unknown>;
-  } = {}) => ({ ...buildStrapi({ workflowsService, findOne }), db } as unknown as Core.Strapi);
+  } = {}) => ({ ...buildStrapi({ workflowsService, findOne }), db }) as unknown as Core.Strapi;
 
   test("is the entry's stage and the one its workflow requires", async () => {
     const findOne = jest.fn().mockResolvedValue({ documentId: 'a', strapi_stage: reviewStage });

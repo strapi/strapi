@@ -64,7 +64,7 @@ describe('Content API Folder Controller - findOne', () => {
       () =>
         ({
           getNamePaths: jest.fn(async () => ({ '/1': '/Clients', '/1/2': '/Clients/Acme' })),
-        } as any)
+        }) as any
     );
   });
 

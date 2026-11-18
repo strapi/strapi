@@ -89,7 +89,7 @@ export const CreateReleaseFromSkippedDrawer = ({
 
   const carriedOverCount = canRemoveEntries
     ? carriedOverEntries.length
-    : skippedData?.meta.pagination.total ?? 0;
+    : (skippedData?.meta.pagination.total ?? 0);
 
   const handleSubmit = async (values: ReleaseDrawerValues) => {
     const response = await createRelease({

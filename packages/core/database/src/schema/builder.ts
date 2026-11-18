@@ -541,9 +541,7 @@ const createHelpers = (db: Database) => {
     } catch (error) {
       // Log error but don't fail the migration
       debug(
-        `Failed to get column type for ${tableName}.${columnName}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+        `Failed to get column type for ${tableName}.${columnName}: ${error instanceof Error ? error.message : String(error)}`
       );
       return null;
     }
@@ -644,9 +642,7 @@ const createHelpers = (db: Database) => {
         debug(`Successfully converted ${column.name} from ${currentType} to ${targetType}`);
       } catch (conversionError) {
         db.logger.error(
-          `Failed to convert column ${column.name}: ${
-            conversionError instanceof Error ? conversionError.message : String(conversionError)
-          }`
+          `Failed to convert column ${column.name}: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`
         );
         throw conversionError;
       }

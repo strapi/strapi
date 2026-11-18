@@ -9,7 +9,7 @@ const createContentType = (localized: boolean) =>
   ({
     uid: UID,
     pluginOptions: { i18n: { localized } },
-  } as unknown as Schema.ContentType);
+  }) as unknown as Schema.ContentType;
 
 const isI18nLocalized = (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
   model.pluginOptions?.i18n?.localized === true;

@@ -7,7 +7,7 @@ const fakeTrx = () =>
   ({
     commit: jest.fn(async () => undefined),
     rollback: jest.fn(async () => undefined),
-  } as any);
+  }) as any;
 
 describe('transaction hooks', () => {
   test('commit returns before commit hooks, and settleHooks waits for them', async () => {

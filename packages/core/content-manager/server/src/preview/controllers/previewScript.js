@@ -1022,9 +1022,7 @@ function previewScript(config) {
       group.highlight.style.display = '';
       group.highlight.style.width = `${rect.width + HIGHLIGHT_PADDING * 2}px`;
       group.highlight.style.height = `${rect.height + HIGHLIGHT_PADDING * 2}px`;
-      group.highlight.style.transform = `translate(${rect.left - HIGHLIGHT_PADDING}px, ${
-        rect.top - HIGHLIGHT_PADDING
-      }px)`;
+      group.highlight.style.transform = `translate(${rect.left - HIGHLIGHT_PADDING}px, ${rect.top - HIGHLIGHT_PADDING}px)`;
     };
 
     const updateAllHighlights = () => {
@@ -1733,10 +1731,10 @@ function previewScript(config) {
       const desiredTag = mime?.startsWith('image/')
         ? 'IMG'
         : mime?.startsWith('video/')
-        ? 'VIDEO'
-        : mime?.startsWith('audio/')
-        ? 'AUDIO'
-        : null;
+          ? 'VIDEO'
+          : mime?.startsWith('audio/')
+            ? 'AUDIO'
+            : null;
 
       // If the rendered element already shows the same media file as the
       // form value, do nothing. Compare by filename so we're agnostic to

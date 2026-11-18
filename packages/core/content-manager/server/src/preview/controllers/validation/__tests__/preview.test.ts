@@ -12,7 +12,7 @@ const createStrapi = (draftAndPublish: boolean) =>
       kind: 'collectionType',
       options: { draftAndPublish },
     })),
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 describe('validatePreviewUrl', () => {
   test.each(['draft', 'published'] as const)('accepts the %s status', async (status) => {

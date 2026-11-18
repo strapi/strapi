@@ -24,7 +24,7 @@ const setStrapi = (value: object) => {
 describe('Authenticated User Controller', () => {
   beforeEach(() => {
     mockValidateProfileUpdateInput.mockImplementation(
-      async (input: unknown) => ({ ...(input as object) } as any)
+      async (input: unknown) => ({ ...(input as object) }) as any
     );
   });
 

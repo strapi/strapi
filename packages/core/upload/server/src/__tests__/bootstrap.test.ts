@@ -110,7 +110,7 @@ const createStrapiMock = ({
         set: setStore,
       };
     },
-  } as any);
+  }) as any;
 
 describe('Upload plugin bootstrap function', () => {
   test('Sets default config if it does not exist', async () => {

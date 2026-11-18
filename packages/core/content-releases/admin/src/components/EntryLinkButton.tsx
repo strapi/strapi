@@ -47,9 +47,7 @@ const getEntryLinkProps = ({
   showErrors = false,
 }: EntryLocation) => ({
   to: {
-    pathname: `/content-manager/${
-      kind === 'singleType' ? 'single-types' : 'collection-types'
-    }/${contentTypeUid}${kind === 'singleType' ? '' : `/${documentId}`}`,
+    pathname: `/content-manager/${kind === 'singleType' ? 'single-types' : 'collection-types'}/${contentTypeUid}${kind === 'singleType' ? '' : `/${documentId}`}`,
     search: locale ? stringify({ plugins: { i18n: { locale } } }) : '',
   },
   state: showErrors ? { forceValidation: true } : undefined,

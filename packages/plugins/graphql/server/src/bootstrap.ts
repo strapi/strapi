@@ -48,9 +48,7 @@ export const getOperationLimitsWarning = ({
     return undefined;
   }
 
-  return `Built-in GraphQL operation limits are unbounded or invalid for: ${unboundedOrInvalidKeys.join(
-    ', '
-  )}. Configure these limits (for example: defaultLimit: 25, maxLimit: 100, depthLimit: 10). Custom Apollo validation rules may independently enforce limits. See https://docs.strapi.io/cms/configurations/plugins.`;
+  return `Built-in GraphQL operation limits are unbounded or invalid for: ${unboundedOrInvalidKeys.join(', ')}. Configure these limits (for example: defaultLimit: 25, maxLimit: 100, depthLimit: 10). Custom Apollo validation rules may independently enforce limits. See https://docs.strapi.io/cms/configurations/plugins.`;
 };
 
 export const determineLandingPage = (

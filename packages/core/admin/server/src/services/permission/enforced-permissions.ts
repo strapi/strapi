@@ -75,6 +75,6 @@ export const toEnforcedParameterizedPermissions = async <T extends CeilingPermis
 
   return enforced.map(
     ({ setAsideActionParameters, ...permission }) =>
-      ({ ...permission, actionParameters: setAsideActionParameters } as unknown as T)
+      ({ ...permission, actionParameters: setAsideActionParameters }) as unknown as T
   );
 };

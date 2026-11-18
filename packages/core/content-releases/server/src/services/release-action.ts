@@ -402,7 +402,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         getEntryKey(
           action.contentType,
           action.entryDocumentId,
-          localizedTypes.has(action.contentType) ? action.locale ?? defaultLocale : null
+          localizedTypes.has(action.contentType) ? (action.locale ?? defaultLocale) : null
         )
       )
     );
@@ -483,9 +483,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         if (notSkippedIds.length > 0) {
           throw new errors.ValidationError(
-            `Actions with ids ${notSkippedIds.join(
-              ', '
-            )} are not skipped entries of release ${releaseId}`
+            `Actions with ids ${notSkippedIds.join(', ')} are not skipped entries of release ${releaseId}`
           );
         }
       }

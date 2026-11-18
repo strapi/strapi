@@ -12,7 +12,7 @@ const registries = () => ({
 const createStrapi = () =>
   ({
     get: () => registries(),
-  } as never);
+  }) as never;
 
 describe('modules registry destroy', () => {
   it('runs a failed module again and skips one that finished', async () => {

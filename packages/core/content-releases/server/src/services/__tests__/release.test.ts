@@ -770,7 +770,7 @@ describe('Release service', () => {
                 releaseAction: {
                   uid: 'collectionType',
                   documentId: 'one',
-                  locale: localized ? locale ?? 'fr' : undefined,
+                  locale: localized ? (locale ?? 'fr') : undefined,
                   event: 'entry.publish',
                 },
               }
@@ -787,7 +787,7 @@ describe('Release service', () => {
                 releaseAction: {
                   uid: 'collectionType',
                   documentId: 'two',
-                  locale: localized ? locale ?? 'fr' : undefined,
+                  locale: localized ? (locale ?? 'fr') : undefined,
                   event: 'entry.unpublish',
                 },
               }

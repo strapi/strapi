@@ -72,10 +72,13 @@ export interface RegisterEventOptions {
 }
 
 const getEventMap = (events: string[]) => {
-  return events.reduce((acc, event) => {
-    acc[event] = { kind: 'legacy' };
-    return acc;
-  }, {} as Record<string, EventRegistration>);
+  return events.reduce(
+    (acc, event) => {
+      acc[event] = { kind: 'legacy' };
+      return acc;
+    },
+    {} as Record<string, EventRegistration>
+  );
 };
 
 const getActor = (

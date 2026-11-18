@@ -125,15 +125,7 @@ const ScheduleCell = ({ release, isPast }: { release: ReleaseRow; isPast: boolea
 
   const timeZone = release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   const scheduledAt = new Date(release.scheduledAt);
-  const absoluteTime = `${formatDate(scheduledAt, {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone,
-  })} • ${formatTime(scheduledAt, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(
-    timeZone,
-    scheduledAt
-  )}`;
+  const absoluteTime = `${formatDate(scheduledAt, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(scheduledAt, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, scheduledAt)}`;
   const Icon = isPast ? PaperPlaneTilt : CalendarBlank;
 
   return (

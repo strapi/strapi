@@ -31,19 +31,20 @@ type DocumentIDKey = 'documentId';
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends Schema.AttributeNames<TSchemaUID>
-> = Guard.Never<
-  Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TAttributeName>>,
-  UID.Schema
-> extends infer TTargetUID extends UID.Schema
-  ? If<
-      HasKnownAttributeNames<TTargetUID>,
-      ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>,
-      // The loose filter of an unknown target already accepts any operator. A union with the
-      // operator objects would make TypeScript narrow on the operator key and drop it.
-      ObjectNotation<TTargetUID>
-    >
-  : never;
+  TAttributeName extends Schema.AttributeNames<TSchemaUID>,
+> =
+  Guard.Never<
+    Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TAttributeName>>,
+    UID.Schema
+  > extends infer TTargetUID extends UID.Schema
+    ? If<
+        HasKnownAttributeNames<TTargetUID>,
+        ObjectNotation<TTargetUID> | IdOperatorCondition<TTargetUID>,
+        // The loose filter of an unknown target already accepts any operator. A union with the
+        // operator objects would make TypeScript narrow on the operator key and drop it.
+        ObjectNotation<TTargetUID>
+      >
+    : never;
 
 /**
  * Filter on the id of a nested attribute's target: an object with exactly one comparison, list or
@@ -93,10 +94,10 @@ type IdOperator =
 type IdOperatorValue<TOperator extends IdOperator> = TOperator extends Operator.BooleanValue
   ? boolean
   : TOperator extends Operator.DynamicArrayValue
-  ? Params.Attribute.ID[]
-  : TOperator extends Operator.DynamicBoundValue
-  ? [Params.Attribute.ID, Params.Attribute.ID]
-  : Params.Attribute.ID;
+    ? Params.Attribute.ID[]
+    : TOperator extends Operator.DynamicBoundValue
+      ? [Params.Attribute.ID, Params.Attribute.ID]
+      : Params.Attribute.ID;
 
 /**
  * Non-operator keys of the filter object of {@link TSchemaUID}, plus its groups and `$not`
@@ -113,28 +114,28 @@ type FilterKeys<TSchemaUID extends UID.Schema> =
  */
 type AttributeCondition<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends IDKey | DocumentIDKey | Schema.AttributeNames<TSchemaUID>
-> = MatchFirst<
-  [
-    // Special catch for manually added ID attributes
-    [StrictEqual<TAttributeName, IDKey>, Params.Attribute.ID],
-    [StrictEqual<TAttributeName, DocumentIDKey>, Params.Attribute.DocumentID],
+  TAttributeName extends IDKey | DocumentIDKey | Schema.AttributeNames<TSchemaUID>,
+> =
+  MatchFirst<
     [
-      IsNotNever<TAttributeName>,
-      // Get the filter attribute value for the given attribute
-      AttributeUtils.GetValue<
-        Schema.AttributeByName<
-          TSchemaUID,
-          Extract<TAttributeName, Schema.AttributeNames<TSchemaUID>>
-        >
-      >
-    ]
-  ],
-  // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
-  AttributeUtils.ScalarValues
-> extends infer TAttributeValue
-  ?
-      | TAttributeValue // Implicit $eq operator
+      // Special catch for manually added ID attributes
+      [StrictEqual<TAttributeName, IDKey>, Params.Attribute.ID],
+      [StrictEqual<TAttributeName, DocumentIDKey>, Params.Attribute.DocumentID],
+      [
+        IsNotNever<TAttributeName>,
+        // Get the filter attribute value for the given attribute
+        AttributeUtils.GetValue<
+          Schema.AttributeByName<
+            TSchemaUID,
+            Extract<TAttributeName, Schema.AttributeNames<TSchemaUID>>
+          >
+        >,
+      ],
+    ],
+    // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
+    AttributeUtils.ScalarValues
+  > extends infer TAttributeValue
+    ? | TAttributeValue // Implicit $eq operator
       | ({
           [TIter in Operator.BooleanValue]?: boolean;
         } & {
@@ -148,7 +149,7 @@ type AttributeCondition<
         } & {
           [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
         })
-  : never;
+    : never;
 
 /**
  * Whether the attribute names of {@link TSchemaUID} are a finite list of names.
@@ -197,7 +198,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
   [TIter in Operator.Logical]?: ObjectNotation<TSchemaUID>;
 } & ([AttributeUtils.GetScalarKeys<TSchemaUID>, AttributeUtils.GetNestedKeys<TSchemaUID>] extends [
     infer TScalarKeys extends AttributeUtils.GetScalarKeys<TSchemaUID>,
-    infer TNestedKeys extends AttributeUtils.GetNestedKeys<TSchemaUID>
+    infer TNestedKeys extends AttributeUtils.GetNestedKeys<TSchemaUID>,
   ]
     ? // If the schema's attribute names are known, then create a strongly typed filter object, else
       // create a loose generic abstraction.
@@ -225,8 +226,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
         {
           [TKey in string]?:
-            | AttributeCondition<TSchemaUID, never>
-            | NestedAttributeCondition<TSchemaUID, never>;
+            AttributeCondition<TSchemaUID, never> | NestedAttributeCondition<TSchemaUID, never>;
         }
       >
     : never);

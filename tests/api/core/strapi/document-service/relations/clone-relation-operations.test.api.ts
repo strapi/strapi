@@ -281,7 +281,7 @@ const readPlainRelation = async (
 
   return {
     id: row?.[idColumn!] ?? null,
-    type: typeColumn ? row?.[typeColumn] ?? null : null,
+    type: typeColumn ? (row?.[typeColumn] ?? null) : null,
   };
 };
 

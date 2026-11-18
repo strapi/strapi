@@ -90,10 +90,13 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
      * Convert Attributes received from the API to the right syntax
      */
     convertAttributes(attributes: any) {
-      return Object.keys(attributes).reduce((acc, key) => {
-        acc[key] = this.convertAttribute(attributes[key]);
-        return acc;
-      }, {} as Record<string, unknown>);
+      return Object.keys(attributes).reduce(
+        (acc, key) => {
+          acc[key] = this.convertAttribute(attributes[key]);
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
     },
 
     convertAttribute(attribute: any) {

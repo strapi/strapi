@@ -495,10 +495,7 @@ describe('prepareRegistryAccess', () => {
     });
 
     await expect(preparing).rejects.toThrow(
-      `${projectNpmrcPath} sets another license for packages.strapi.io and takes precedence over ${path.join(
-        homeDir,
-        '.npmrc'
-      )}.`
+      `${projectNpmrcPath} sets another license for packages.strapi.io and takes precedence over ${path.join(homeDir, '.npmrc')}.`
     );
     expect(await fse.readFile(projectNpmrcPath, 'utf8')).toBe(OTHER_LICENSE_NPMRC);
     expect(await fse.pathExists(path.join(homeDir, '.npmrc'))).toBe(false);

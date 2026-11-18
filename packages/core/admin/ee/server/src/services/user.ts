@@ -22,9 +22,8 @@ const { SUPER_ADMIN_CODE } = constants;
  */
 const getSuperAdminRoleOrThrow = async (): Promise<AdminRoleWithUsersCount> => {
   // The role lookup resolves to null when the role doesn't exist
-  const superAdminRole: AdminRoleWithUsersCount | null = await getService(
-    'role'
-  ).getSuperAdminWithUsersCount();
+  const superAdminRole: AdminRoleWithUsersCount | null =
+    await getService('role').getSuperAdminWithUsersCount();
 
   if (superAdminRole === null) {
     throw new ApplicationError("Cannot proceed because the super admin role doesn't exist.");
@@ -270,9 +269,8 @@ const sanitizeUserRoles = (role: unknown) => _.pick(role, ['id', 'name', 'descri
  */
 const isLastSuperAdminUser = async (userId: unknown) => {
   const user = (await findOne(userId)) as any;
-  const superAdminRole: AdminRoleWithUsersCount | null = await getService(
-    'role'
-  ).getSuperAdminWithUsersCount();
+  const superAdminRole: AdminRoleWithUsersCount | null =
+    await getService('role').getSuperAdminWithUsersCount();
 
   // Without a super admin role, no user can be the last super admin
   if (superAdminRole === null) {

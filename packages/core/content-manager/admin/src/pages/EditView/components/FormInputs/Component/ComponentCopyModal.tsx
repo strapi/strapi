@@ -1362,7 +1362,8 @@ const InstanceCard = styled(Box)<{ $selected?: boolean; $interactive?: boolean }
   cursor: ${({ $interactive }) => ($interactive ? 'pointer' : 'default')};
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: border-color 120ms ${({ theme }) => theme.motion.easings.easeOutQuad},
+    transition:
+      border-color 120ms ${({ theme }) => theme.motion.easings.easeOutQuad},
       background-color 120ms ${({ theme }) => theme.motion.easings.easeOutQuad};
   }
 

@@ -19,14 +19,10 @@ const formatUnknownFilterKeyWarning = ({
   const future = 'This will become an error in a future major version.';
 
   if (operator !== undefined) {
-    return `[strapi] Unsupported key ${quoteForLog(key)} in the object operand of ${quoteForLog(
-      operator
-    )} at ${quoteForLog(path.join('.'))} on model ${model} ${consequence} ${future}`;
+    return `[strapi] Unsupported key ${quoteForLog(key)} in the object operand of ${quoteForLog(operator)} at ${quoteForLog(path.join('.'))} on model ${model} ${consequence} ${future}`;
   }
 
-  return `[strapi] Unknown filter key ${quoteForLog(key)} at ${quoteForLog(
-    path.join('.')
-  )} on model ${model} ${consequence} Check for a typo. ${future}`;
+  return `[strapi] Unknown filter key ${quoteForLog(key)} at ${quoteForLog(path.join('.'))} on model ${model} ${consequence} Check for a typo. ${future}`;
 };
 
 /**

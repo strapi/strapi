@@ -800,8 +800,8 @@ export const AssetDetails = ({
       alternativeText: asset.alternativeText ?? '',
       folder:
         typeof asset.folder === 'object' && asset.folder !== null
-          ? (asset.folder as { id: number }).id ?? null
-          : (asset.folder as number | null | undefined) ?? null,
+          ? ((asset.folder as { id: number }).id ?? null)
+          : ((asset.folder as number | null | undefined) ?? null),
     }),
     [asset.name, asset.caption, asset.alternativeText, asset.folder]
   );
@@ -857,8 +857,8 @@ export const AssetDetails = ({
 
   const { title: folderName } = useFolderInfo(
     typeof asset.folder === 'object' && asset.folder !== null
-      ? (asset.folder as { id: number }).id ?? null
-      : (asset.folder as number | null | undefined) ?? null
+      ? ((asset.folder as { id: number }).id ?? null)
+      : ((asset.folder as number | null | undefined) ?? null)
   );
 
   // Owns the replace upload so isReplacing can drive the busy overlay.
@@ -1135,12 +1135,12 @@ export const AssetDetails = ({
                           })}
                           value={
                             asset.createdBy
-                              ? getDisplayName({
+                              ? (getDisplayName({
                                   firstname: asset.createdBy.firstname ?? undefined,
                                   lastname: asset.createdBy.lastname ?? undefined,
                                   username: asset.createdBy.username ?? undefined,
                                   email: asset.createdBy.email ?? undefined,
-                                }) ?? '-'
+                                }) ?? '-')
                               : null
                           }
                         />

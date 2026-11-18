@@ -252,9 +252,7 @@ const verifyRuntimeDatabase = async ({ expected, loadInstance, queryRaw }) => {
     const actual = instance.db?.dialect?.client;
     if (actual !== expected) {
       throw new Error(
-        `Database client mismatch: API job requested ${expected} but the loaded API test app dialect is ${
-          actual || 'unknown'
-        }`
+        `Database client mismatch: API job requested ${expected} but the loaded API test app dialect is ${actual || 'unknown'}`
       );
     }
 

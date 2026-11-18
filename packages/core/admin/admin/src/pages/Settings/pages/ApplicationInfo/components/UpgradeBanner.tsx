@@ -87,21 +87,21 @@ const UpgradeBanner = () => {
         { latestVersion }
       )
     : isMajorBehind
-    ? formatMessage(
-        {
-          id: 'Settings.application.upgrade-banner.urgent.major-title',
-          defaultMessage: 'Strapi {latestMajor} is available',
-        },
-        { latestMajor: major(latestStrapiReleaseTag) }
-      )
-    : formatMessage(
-        {
-          id: 'Settings.application.upgrade-banner.urgent.title',
-          defaultMessage:
-            'Your Strapi version is {count, plural, one {# minor version} other {# minor versions}} behind',
-        },
-        { count: releasesBehind }
-      );
+      ? formatMessage(
+          {
+            id: 'Settings.application.upgrade-banner.urgent.major-title',
+            defaultMessage: 'Strapi {latestMajor} is available',
+          },
+          { latestMajor: major(latestStrapiReleaseTag) }
+        )
+      : formatMessage(
+          {
+            id: 'Settings.application.upgrade-banner.urgent.title',
+            defaultMessage:
+              'Your Strapi version is {count, plural, one {# minor version} other {# minor versions}} behind',
+          },
+          { count: releasesBehind }
+        );
 
   const message = isUrgent
     ? formatMessage(

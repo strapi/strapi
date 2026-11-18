@@ -386,9 +386,8 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
             [POSITION_ATTRIBUTE]: end === null ? { $gte: start } : { $gte: start, $lte: end },
           });
 
-          await (by === 1
-            ? shiftedRows.increment(positionColumn)
-            : shiftedRows.decrement(positionColumn)
+          await (
+            by === 1 ? shiftedRows.increment(positionColumn) : shiftedRows.decrement(positionColumn)
           ).execute();
         }
 

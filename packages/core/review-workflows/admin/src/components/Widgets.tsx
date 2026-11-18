@@ -42,9 +42,7 @@ const RecentDocumentsTable = ({
     const kindPath = isSingleType ? 'single-types' : 'collection-types';
     const queryParams = document.locale ? `?plugins[i18n][locale]=${document.locale}` : '';
 
-    return `/content-manager/${kindPath}/${document.contentTypeUid}${
-      isSingleType ? '' : '/' + document.documentId
-    }${queryParams}`;
+    return `/content-manager/${kindPath}/${document.contentTypeUid}${isSingleType ? '' : '/' + document.documentId}${queryParams}`;
   };
 
   const handleRowClick = (document: RecentDocument) => () => {

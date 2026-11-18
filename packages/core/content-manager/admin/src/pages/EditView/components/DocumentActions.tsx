@@ -810,8 +810,8 @@ const PublishAction: DocumentActionComponent = ({
   const publishConfirmScope: PublishConfirmDialogScope = fromRelationModal
     ? 'relation-modal'
     : onPreview
-    ? 'preview'
-    : 'panel';
+      ? 'preview'
+      : 'panel';
 
   const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
   const fieldToConnect = useRelationModal(

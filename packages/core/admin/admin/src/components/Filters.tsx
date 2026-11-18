@@ -91,8 +91,7 @@ const getFilterDetails = (
 };
 
 interface RootProps
-  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>,
-    Popover.Props {
+  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>, Popover.Props {
   children: React.ReactNode;
 }
 
@@ -206,7 +205,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
      * so it has to be stringified before the emptiness check below.
      * A cleared toggle (`null`) stays empty.
      */
-    const rawValue = data.value === undefined && type === 'boolean' ? false : data.value ?? '';
+    const rawValue = data.value === undefined && type === 'boolean' ? false : (data.value ?? '');
     const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : String(rawValue);
 
     if (!value) {
@@ -272,9 +271,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
           onSubmit={handleSubmit}
           key={
             editingFilter
-              ? `edit-${editingFilter.index}-${editingFilter.name}-${editingFilter.filter}-${
-                  editingFilter.value ?? 'empty'
-                }`
+              ? `edit-${editingFilter.index}-${editingFilter.name}-${editingFilter.filter}-${editingFilter.value ?? 'empty'}`
               : 'create'
           }
         >
@@ -618,10 +615,10 @@ const AttributeTag = ({
     formattedValue = selectedOption
       ? typeof selectedOption === 'string'
         ? selectedOption
-        : selectedOption.label ?? selectedOption.value
+        : (selectedOption.label ?? selectedOption.value)
       : formatValue
-      ? formattedValue
-      : value;
+        ? formattedValue
+        : value;
   }
 
   const operatorLabel = formatMessage({
@@ -689,8 +686,10 @@ namespace Filters {
    * What a custom `input` receives: the filter's description of its value,
    * without what only the popover and the tag read
    */
-  export interface ValueInputProps
-    extends Omit<Filter, 'label' | 'formatValue' | 'input' | 'operators'> {
+  export interface ValueInputProps extends Omit<
+    Filter,
+    'label' | 'formatValue' | 'input' | 'operators'
+  > {
     ['aria-label']: string;
   }
 

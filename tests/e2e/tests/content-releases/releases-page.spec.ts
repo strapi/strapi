@@ -26,17 +26,7 @@ const BROWSER_TIMEZONE = 'Europe/Paris';
  * The absolute date and time of the schedule column, as the list formats it in the given zone
  */
 const formatScheduleTime = (date: Date, timeZone: string) =>
-  `${date.toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone,
-  })} • ${date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hourCycle: 'h23',
-    timeZone,
-  })}`;
+  `${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hourCycle: 'h23', timeZone })}`;
 
 describeOnCondition(edition === 'EE')('Releases page', () => {
   test.beforeEach(async ({ page }) => {

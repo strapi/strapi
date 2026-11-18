@@ -49,7 +49,7 @@ const buildContext = (overrides: Record<string, unknown> = {}): BuildContext =>
     customisations: undefined,
     features: undefined,
     ...overrides,
-  } as unknown as BuildContext);
+  }) as unknown as BuildContext;
 
 /** `react()` contributes an array, so the plugin list is one level deeper than it looks */
 const pluginNames = (config: { plugins?: unknown }): string[] =>

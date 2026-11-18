@@ -295,7 +295,7 @@ describe('previewScript — unmarked click inside a blocks field resolves its ow
       x: left,
       y: top,
       toJSON() {},
-    } as DOMRect);
+    }) as DOMRect;
 
   beforeEach(async () => {
     global.ResizeObserver = class {
@@ -442,7 +442,7 @@ describe('previewScript — image-only blocks field does not swallow the page', 
       x: left,
       y: top,
       toJSON() {},
-    } as DOMRect);
+    }) as DOMRect;
 
   beforeEach(async () => {
     global.ResizeObserver = class {
@@ -529,7 +529,7 @@ describe('previewScript — trailing buffer stays inside the blocks field', () =
       x: left,
       y: top,
       toJSON() {},
-    } as DOMRect);
+    }) as DOMRect;
 
   const setup = async (fieldHeight: number) => {
     global.ResizeObserver = class {
@@ -664,7 +664,7 @@ describe('previewScript — blocks container resize is observed live', () => {
       x: left,
       y: top,
       toJSON() {},
-    } as DOMRect);
+    }) as DOMRect;
 
   beforeEach(async () => {
     MockResizeObserver.instances = [];
@@ -803,7 +803,7 @@ describe('previewScript — findBlockIndex resolves next to a large unmarked sib
       x: left,
       y: top,
       toJSON() {},
-    } as DOMRect);
+    }) as DOMRect;
 
   beforeEach(async () => {
     global.ResizeObserver = class {

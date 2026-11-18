@@ -166,9 +166,7 @@ const getDraftAndPublishReservedAttributeWarning = (uid: string, attributeName: 
   `The attribute name '${attributeName}' on content type '${uid}' is reserved when 'draftAndPublish' is enabled. It conflicts with the Document Service / REST 'status' query parameter. Rename the attribute or disable the 'draftAndPublish' option.`;
 
 const getDraftAndPublishEnableBlockedMessage = (attributeNames: string[]): string =>
-  `Cannot enable draft and publish while the following attribute names are reserved: ${attributeNames.join(
-    ', '
-  )}. Rename them or remove them first.`;
+  `Cannot enable draft and publish while the following attribute names are reserved: ${attributeNames.join(', ')}. Rename them or remove them first.`;
 
 const getTimestamps = (model: Model) => {
   const attributes: string[] = [];

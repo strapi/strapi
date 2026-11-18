@@ -433,7 +433,7 @@ export const createReleaseRun = ({
       return fail(
         allowPartial
           ? new errors.ValidationError('No entries were published')
-          : entryErrors[0] ?? checkErrors[0]
+          : (entryErrors[0] ?? checkErrors[0])
       );
     }
 

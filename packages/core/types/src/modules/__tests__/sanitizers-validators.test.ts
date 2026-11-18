@@ -9,11 +9,8 @@ import { traverseEntity, sanitize } from '@strapi/utils';
 import type { Modules, Schema } from '../..';
 
 type Assert<T extends true> = T;
-type IsEqual<Left, Right> = (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right
-  ? 1
-  : 2
-  ? true
-  : false;
+type IsEqual<Left, Right> =
+  (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right ? 1 : 2 ? true : false;
 
 declare const schema: Schema.ContentType;
 declare const getModel: (uid: string) => Schema.ContentType;

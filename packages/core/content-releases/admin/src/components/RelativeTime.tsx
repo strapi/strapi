@@ -67,8 +67,8 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
       unit === 'days'
         ? differenceInCalendarDays(timestamp, Date.now())
         : isPast(timestamp)
-        ? -(interval[unit] ?? 0)
-        : interval[unit] ?? 0;
+          ? -(interval[unit] ?? 0)
+          : (interval[unit] ?? 0);
 
     // Display custom text if interval is less than the threshold
     const customInterval = customIntervals.find(

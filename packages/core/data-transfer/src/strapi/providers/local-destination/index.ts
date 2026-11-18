@@ -101,8 +101,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     try {
       // end() only signals the loop. The commit finishes on the promise.
       const transaction = this.transaction as
-        | (Transaction & Partial<utils.transaction.TransactionCommit>)
-        | undefined;
+        (Transaction & Partial<utils.transaction.TransactionCommit>) | undefined;
       const pending = transaction?.[utils.transaction.transactionCommit]?.() ?? Promise.resolve();
       transaction?.end();
       await pending;

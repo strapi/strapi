@@ -116,9 +116,7 @@ const readLocalLogoBuffer = async (strapi: Core.Strapi, logo: ProjectSettingsLog
 
     if (code === 'ENOENT') {
       strapi.log.warn(
-        `[Data transfer] Admin logo "${logoLabel(
-          logo
-        )}" exists in project settings but no corresponding file was found to transfer. Path: ${filepath}`
+        `[Data transfer] Admin logo "${logoLabel(logo)}" exists in project settings but no corresponding file was found to transfer. Path: ${filepath}`
       );
       return undefined;
     }
@@ -133,11 +131,7 @@ const readRemoteLogoBuffer = async (strapi: Core.Strapi, logo: ProjectSettingsLo
 
   if (response.status !== 200 || !response.body) {
     strapi.log.warn(
-      `[Data transfer] Admin logo "${logoLabel(
-        logo
-      )}" exists in project settings but could not be fetched for transfer. URL: ${url} (status: ${
-        response.status
-      })`
+      `[Data transfer] Admin logo "${logoLabel(logo)}" exists in project settings but could not be fetched for transfer. URL: ${url} (status: ${response.status})`
     );
     return undefined;
   }

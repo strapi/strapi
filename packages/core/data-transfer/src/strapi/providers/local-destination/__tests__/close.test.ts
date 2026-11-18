@@ -6,7 +6,7 @@ describe('local destination close', () => {
     const enable = jest.fn();
     const destroy = jest.fn(async () => undefined);
     const provider = createLocalStrapiDestinationProvider({
-      getStrapi: async () => ({} as any),
+      getStrapi: async () => ({}) as any,
       strategy: 'restore',
       restore: {},
     });

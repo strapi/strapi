@@ -29,7 +29,7 @@ describe('content-releases bootstrap: overdue releases', () => {
       get: jest.fn(() => ({ addAllowedEvent: jest.fn() })),
       has: jest.fn(() => false),
       log: { error: logError },
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     jest.clearAllMocks();

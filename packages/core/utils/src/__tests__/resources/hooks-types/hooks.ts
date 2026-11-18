@@ -22,9 +22,8 @@ import type {
 import type { ProviderHooksMap } from '../../../provider-factory';
 
 /** `true` when X and Y are the same type. Wrap both in a tuple, as a bare `any` matches loosely. */
-type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-  ? true
-  : false;
+type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
@@ -93,7 +92,7 @@ export type DefaultTypes = [
   Expect<Equal<[ProviderHooksMap['didRegister']], [PreGenericAsyncParallelHook]>>,
   // An untyped bail or waterfall result is still read as before
   Expect<IsAny<Awaited<ReturnType<ReturnType<typeof createAsyncBailHook>['call']>>>>,
-  Expect<IsAny<Awaited<ReturnType<AsyncSeriesWaterfallHook['call']>>>>
+  Expect<IsAny<Awaited<ReturnType<AsyncSeriesWaterfallHook['call']>>>>,
 ];
 
 // An untyped hook still takes any handler and any context
@@ -126,7 +125,7 @@ type ContextFormatter = (context: Context) => Context | Promise<Context>;
 export type TypedHelpers = [
   Expect<Equal<[HookContext<Handler>], [unknown]>>,
   Expect<Equal<[HookContext<ContextHandler>], [Context]>>,
-  Expect<Equal<[HookResult<ContextFormatter>], [Context]>>
+  Expect<Equal<[HookResult<ContextFormatter>], [Context]>>,
 ];
 
 const hook = internals.createHook<ContextHandler>();
@@ -161,7 +160,7 @@ export type TypedResults = [
   Expect<Equal<[Awaited<ReturnType<typeof series.call>>], [void]>>,
   Expect<Equal<[Awaited<ReturnType<typeof waterfall.call>>], [Context]>>,
   Expect<Equal<[Awaited<ReturnType<typeof parallel.call>>], [boolean[]]>>,
-  Expect<Equal<[Awaited<ReturnType<typeof bail.call>>], [boolean | undefined]>>
+  Expect<Equal<[Awaited<ReturnType<typeof bail.call>>], [boolean | undefined]>>,
 ];
 
 // The interfaces take the handler type too, and the factories implement them
@@ -184,7 +183,7 @@ export const callTypedHooks = async () => {
 export type TypedInterfaceResults = [
   Expect<Equal<[Awaited<ReturnType<typeof typedWaterfall.call>>], [Context]>>,
   Expect<Equal<[Awaited<ReturnType<typeof typedParallel.call>>], [boolean[]]>>,
-  Expect<Equal<[Awaited<ReturnType<typeof typedBail.call>>], [boolean | undefined]>>
+  Expect<Equal<[Awaited<ReturnType<typeof typedBail.call>>], [boolean | undefined]>>,
 ];
 
 // A hook passes one context to its handlers, so `call` takes one argument
@@ -256,7 +255,7 @@ export type WaterfallResults = [
   // The factory does not check the handler, so it resolves to the context or the handler result
   Expect<Equal<[FactoryWaterfallResultOf<MisshapedFormatter>], [string | number]>>,
   Expect<Equal<[FactoryWaterfallResultOf<() => number>], [number | undefined]>>,
-  Expect<Equal<[FactoryWaterfallResultOf<PromiseFormatter>], [string]>>
+  Expect<Equal<[FactoryWaterfallResultOf<PromiseFormatter>], [string]>>,
 ];
 
 /*

@@ -21,7 +21,7 @@ jest.mock('../core/admin-vite-aliases', () => ({
 }));
 
 describe('getStylesheet', () => {
-  const ctx = (scanRoots: string[]) => ({ scanRoots } as unknown as BuildContext);
+  const ctx = (scanRoots: string[]) => ({ scanRoots }) as unknown as BuildContext;
 
   test('imports the design system source that @strapi/admin resolves', () => {
     expect(getStylesheet(ctx([]))).toContain(`@import "${sourceTarget}";`);
@@ -108,7 +108,7 @@ describe('getStylesheet', () => {
 
 describe('getEntryModule', () => {
   const ctx = (bundler: BuildContext['bundler']) =>
-    ({ bundler, plugins: [] } as unknown as BuildContext);
+    ({ bundler, plugins: [] }) as unknown as BuildContext;
 
   test.each(['vite', 'webpack'] as const)('imports the admin stylesheet under %s', (bundler) => {
     expect(getEntryModule(ctx(bundler))).toContain("import './styles.css';");

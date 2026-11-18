@@ -722,7 +722,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isSingle =
               types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const dataset = uniqBy(
-              isSingle ? (attachData ?? []).slice(-1) : attachData ?? [],
+              isSingle ? (attachData ?? []).slice(-1) : (attachData ?? []),
               'id'
             );
 
@@ -785,10 +785,13 @@ export const createEntityManager = (db: Database): EntityManager => {
             )
             .get()
             // set the order based on the order of the ids
-            .reduce((acc, rel, idx) => {
-              acc[rel.id] = idx + 1;
-              return acc;
-            }, {} as Record<ID, number>);
+            .reduce(
+              (acc, rel, idx) => {
+                acc[rel.id] = idx + 1;
+                return acc;
+              },
+              {} as Record<ID, number>
+            );
 
           rows.forEach((row: Record<string, unknown>) => {
             const rowId = row[morphColumn.idColumn.name] as ID;
@@ -897,10 +900,13 @@ export const createEntityManager = (db: Database): EntityManager => {
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
-              .reduce((acc, rel, idx) => {
-                acc[rel.id] = idx;
-                return acc;
-              }, {} as Record<ID, number>);
+              .reduce(
+                (acc, rel, idx) => {
+                  acc[rel.id] = idx;
+                  return acc;
+                },
+                {} as Record<ID, number>
+              );
 
             insert.forEach((row: Record<string, unknown>) => {
               row[orderColumnName] = orderMap[row[inverseJoinColumn.name] as number];
@@ -1098,7 +1104,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 const connects = uniqBy(
                   isSingle
                     ? (cleanRelationData.connect ?? []).slice(-1)
-                    : cleanRelationData.connect ?? [],
+                    : (cleanRelationData.connect ?? []),
                   'id'
                 );
 
@@ -1152,7 +1158,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               // morphOne populate reads `order asc` + first — leave B observable with a
               // hidden C row, the same phantom-row defect the connect path guards against.
               const setData = uniqBy(
-                isSingle ? (cleanRelationData.set ?? []).slice(-1) : cleanRelationData.set ?? [],
+                isSingle ? (cleanRelationData.set ?? []).slice(-1) : (cleanRelationData.set ?? []),
                 'id'
               );
 
@@ -2064,10 +2070,13 @@ export const createEntityManager = (db: Database): EntityManager => {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: fieldsArr.reduce((acc, field) => {
-          acc[field] = populate || true;
-          return acc;
-        }, {} as Record<string, unknown>),
+        populate: fieldsArr.reduce(
+          (acc, field) => {
+            acc[field] = populate || true;
+            return acc;
+          },
+          {} as Record<string, unknown>
+        ),
       });
 
       if (!entry) {

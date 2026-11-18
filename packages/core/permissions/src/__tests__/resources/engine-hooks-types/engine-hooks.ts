@@ -14,9 +14,8 @@ import {
 import type { PermissionEngineHooks } from '../../../engine/hooks';
 
 /** `true` when X and Y are the same type. Wrap both in a tuple, as a bare `any` matches loosely. */
-type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-  ? true
-  : false;
+type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
@@ -58,7 +57,7 @@ export type DefaultTypes = [
       NonNullable<ReturnType<typeof createBeforeEvaluateContext>['permission']['properties']>['a']
     >
   >,
-  Expect<Equal<[ReturnType<typeof createWillRegisterContext>['permission']], [PermissionRule]>>
+  Expect<Equal<[ReturnType<typeof createWillRegisterContext>['permission']], [PermissionRule]>>,
 ];
 
 declare const untypedEngine: engine.Engine;
@@ -119,7 +118,7 @@ export type TypedContexts = [
   Expect<Equal<[Awaited<ReturnType<Hooks['format.permission']['call']>>], [unknown]>>,
   Expect<
     Equal<[Parameters<Hooks['format.permission']['call']>], [[permission: engine.TypedPermission]]>
-  >
+  >,
 ];
 
 declare const typedEngine: engine.TypedEngine;

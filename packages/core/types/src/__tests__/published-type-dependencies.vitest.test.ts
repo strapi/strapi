@@ -97,9 +97,7 @@ const shipsOwnTypes = (packageName: string) => {
 };
 
 const toTypesPackageName = (packageName: string) =>
-  `@types/${
-    packageName.startsWith('@') === true ? packageName.slice(1).replace('/', '__') : packageName
-  }`;
+  `@types/${packageName.startsWith('@') === true ? packageName.slice(1).replace('/', '__') : packageName}`;
 
 const toTypeProvider = (packageName: string) =>
   shipsOwnTypes(packageName) === true ? packageName : toTypesPackageName(packageName);

@@ -53,7 +53,7 @@ const createContext = (options: Record<string, unknown>) =>
     tsconfig: undefined,
     customisations: undefined,
     features: undefined,
-  } as unknown as BuildContext);
+  }) as unknown as BuildContext;
 
 const definePluginDefinitions = (config: Configuration) =>
   (config.plugins ?? [])
@@ -76,7 +76,7 @@ describe('Webpack admin configuration', () => {
         (rule) => rule && typeof rule === 'object' && String(rule.test) === String(/\.css$/i)
       );
 
-      return cssRule && typeof cssRule === 'object' ? cssRule.oneOf ?? [] : [];
+      return cssRule && typeof cssRule === 'object' ? (cssRule.oneOf ?? []) : [];
     };
 
     it('runs postcss-loader with Tailwind last, on the generated stylesheet only', async () => {
@@ -114,7 +114,8 @@ describe('Webpack admin configuration', () => {
         const cssRule = config.module?.rules?.find(
           (rule) => rule && typeof rule === 'object' && String(rule.test) === String(/\.css$/i)
         );
-        const [stylesheetRule] = cssRule && typeof cssRule === 'object' ? cssRule.oneOf ?? [] : [];
+        const [stylesheetRule] =
+          cssRule && typeof cssRule === 'object' ? (cssRule.oneOf ?? []) : [];
 
         expect(stylesheetRule).toHaveProperty(
           'include',

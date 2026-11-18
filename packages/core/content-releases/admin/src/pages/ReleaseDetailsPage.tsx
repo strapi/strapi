@@ -1244,9 +1244,9 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                         </Td>
                         {hasI18nEnabled && (
                           <Td width="10%">
-                            <Typography textColor={textColor}>{`${
-                              locale?.name ? locale.name : '-'
-                            }`}</Typography>
+                            <Typography
+                              textColor={textColor}
+                            >{`${locale?.name ? locale.name : '-'}`}</Typography>
                           </Td>
                         )}
 

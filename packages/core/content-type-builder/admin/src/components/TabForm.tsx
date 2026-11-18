@@ -143,9 +143,7 @@ export const TabForm = ({
                 // Special handling for 'condition-form'
                 if (input.type === 'condition-form') {
                   const currentCondition = get(modifiedData, input.name) as
-                    | AttributeConditions
-                    | null
-                    | undefined;
+                    AttributeConditions | null | undefined;
 
                   // Get all attributes from the content type schema
                   const contentTypeAttributes =

@@ -41,11 +41,12 @@ type FactoryWaterfallCallArgs<T extends Handler> = 0 extends 1 & Parameters<T>[0
  * be called without it, as for a plain function. The test reads the parameter list rather than
  * whether the parameter accepts `undefined`, so it holds without `strictNullChecks` too.
  */
-type TypedHookCallArgs<T extends Handler> = Parameters<T> extends []
-  ? []
-  : [] extends Parameters<T>
-  ? [context?: HookContext<T>]
-  : [context: HookContext<T>];
+type TypedHookCallArgs<T extends Handler> =
+  Parameters<T> extends []
+    ? []
+    : [] extends Parameters<T>
+      ? [context?: HookContext<T>]
+      : [context: HookContext<T>];
 
 /**
  * A handler of a waterfall hook: it receives what the previous handler resolved to, and resolves to

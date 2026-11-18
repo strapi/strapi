@@ -774,7 +774,7 @@ const reducer = (state: State, action: Action) =>
         // When enabling, fill in the user's conditions if needed.
         if (value === true) {
           const subjectForLookup =
-            root === 'collectionTypes' || root === 'singleTypes' ? subject ?? null : null;
+            root === 'collectionTypes' || root === 'singleTypes' ? (subject ?? null) : null;
 
           if (actionId !== undefined && subjectForLookup !== null) {
             // The conditions belong to the action, also when the toggled checkbox is a component
@@ -855,8 +855,8 @@ const restoreNullLocalesIfUnchanged = (
     perm.subject in modifiedData.collectionTypes
       ? ('collectionTypes' as const)
       : perm.subject in modifiedData.singleTypes
-      ? ('singleTypes' as const)
-      : null;
+        ? ('singleTypes' as const)
+        : null;
   if (!kind) return perm;
 
   const initialActionForm = initialData[kind]?.[perm.subject]?.[perm.action];

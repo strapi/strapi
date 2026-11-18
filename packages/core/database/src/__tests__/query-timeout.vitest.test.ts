@@ -98,7 +98,7 @@ describe('settings.queryTimeout', () => {
     // A pg knex instance builds queries without ever connecting, which is all these tests need
     const pg = createKnex({ client: 'pg' });
     const fakeDb = (queryTimeout?: number) =>
-      ({ config: { settings: { queryTimeout } }, connection: pg } as unknown as Database);
+      ({ config: { settings: { queryTimeout } }, connection: pg }) as unknown as Database;
 
     afterAll(async () => {
       await pg.destroy();

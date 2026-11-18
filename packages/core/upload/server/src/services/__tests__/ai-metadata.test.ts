@@ -505,7 +505,7 @@ describe('AI Metadata Service', () => {
         size: 1024,
         provider: 'local',
         hash: `hash${id}`,
-      } as File);
+      }) as File;
 
     beforeEach(() => {
       mockFindMany.mockReset();

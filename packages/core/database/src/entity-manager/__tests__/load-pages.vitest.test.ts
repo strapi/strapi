@@ -13,7 +13,7 @@ const fakeDb = () =>
       load: async (_uid: string, _entity: unknown, _field: string, query: { count?: boolean }) =>
         query.count ? { count: 3 } : [{ id: 1 }, { id: 2 }],
     },
-  } as unknown as Database);
+  }) as unknown as Database;
 
 // The @ts-expect-error lines run with `yarn test:ts`, which type-checks this file
 describe('repository loadPages', () => {

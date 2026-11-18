@@ -544,7 +544,7 @@ describe('ai-localizations service', () => {
             pluginOptions: { i18n: { localized: true } },
           },
         },
-      } as unknown as Schema.Schema);
+      }) as unknown as Schema.Schema;
 
     const buildMockStrapi = (schema: Schema.Schema) => {
       const jobsService = { upsertJobForDocument: jest.fn().mockResolvedValue(undefined) };

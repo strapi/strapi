@@ -15,7 +15,7 @@ const strapi = {
 } as unknown as Core.Strapi;
 
 const contentType = (attributes: Record<string, unknown>, draftAndPublish = true) =>
-  ({ options: { draftAndPublish }, attributes } as unknown as Schema.ContentType);
+  ({ options: { draftAndPublish }, attributes }) as unknown as Schema.ContentType;
 
 describe('revalidateChangedContentTypes', () => {
   beforeEach(() => {
