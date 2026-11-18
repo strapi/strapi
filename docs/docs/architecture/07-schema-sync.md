@@ -155,7 +155,7 @@ Two providers share one runner, [`migrations/runner.ts`](https://github.com/stra
 
 Each migration runs in its own transaction (`wrapTransaction`). The runner records the name after the migration succeeds. If a migration throws, the runner throws `Migration <name> (up) failed` and the boot fails. With `database.settings.useTypescriptMigrations`, Strapi reads user migrations from the compiled output folder.
 
-Migrations run inside `db.schema.sync()`: after `beforeSync` and before the diff. User migrations run before internal migrations. Thus, a migration sees the database that the previous boot left, plus the `beforeSync` changes. The tables and columns of the new schemas do not exist yet.
+Migrations run inside `db.schema.sync()`: after `beforeSync` and before the diff. User migrations run before internal migrations. On MySQL and MariaDB, `strapi_document_locks` is created before the user migrations, because a user migration can update a document and that update takes the lock. The internal migration `5.0.0-07-document-write-locks` still records itself and does nothing when the table is already there. A migration sees the database that the previous boot left, plus the `beforeSync` changes. The tables and columns of the new schemas do not exist yet.
 
 The internal list holds the v4 to v5 upgrade migrations, for example identifier shortening, `document_id`, `locale` and `published_at`. Core registers `core::5.0.0-discard-drafts` in the `registries` provider. To add an internal migration, see [Migrations](../packages/core/database/03-migrations.md).
 

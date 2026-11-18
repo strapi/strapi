@@ -315,6 +315,10 @@ export const createCollectionUpdateHandler =
     ) as Record<string, unknown>;
 
     const result = await strapi.db.transaction(async () => {
+      // MySQL fixes the snapshot at the first read. The i18n middleware reads
+      // the document before the repository takes its lock, so lock first.
+      await strapi.db.lockDocumentId(documentId);
+
       const updatedDocument = await documentManager.update(
         documentVersion?.documentId ?? documentId,
         uid,
@@ -408,6 +412,8 @@ export const createCollectionPublishHandler =
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const publishedDocument = await strapi.db.transaction(async () => {
+      await strapi.db.lockDocumentId(documentId);
+
       const exists = await documentManager.exists(uid, documentId);
       if (!exists) {
         throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
@@ -495,6 +501,8 @@ export const createCollectionUnpublishHandler =
     }
 
     const unpublishedDocument = await strapi.db.transaction(async () => {
+      await strapi.db.lockDocumentId(document.documentId);
+
       if (discardDraft === true) {
         await documentManager.discardDraft(document.documentId, uid, { locale: resolvedLocale });
       }
