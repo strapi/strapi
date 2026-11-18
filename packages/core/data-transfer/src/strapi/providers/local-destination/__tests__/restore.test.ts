@@ -1,4 +1,4 @@
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import { deleteRecords, restoreConfigs } from '../strategies/restore';
 import {
   getStrapiFactory,
@@ -85,6 +85,20 @@ const query = jest.fn((uid) => {
     create,
   };
 });
+
+const createDtsBoundaryGuards = () => {
+  const get = jest.fn(() => {
+    throw new Error('Configuration restore must not resolve services');
+  });
+  const app = jest.fn(() => {
+    throw new Error('Configuration restore must not access app directories');
+  });
+  const dirs = {};
+
+  Object.defineProperty(dirs, 'app', { get: app });
+
+  return { get, app, dirs };
+};
 
 describe('Restore ', () => {
   test('Should delete all models and contentTypes', async () => {
@@ -282,8 +296,11 @@ describe('Restore ', () => {
   });
 
   test('Should add core store data', async () => {
+    const guards = createDtsBoundaryGuards();
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
+      get: guards.get,
+      dirs: guards.dirs,
       db: {
         query,
       },
@@ -309,11 +326,16 @@ describe('Restore ', () => {
     expect(strapi.db.query).toBeCalledTimes(1);
     expect(strapi.db.query).toBeCalledWith('strapi::core-store');
     expect(result.data).toMatchObject(config.value);
+    expect(guards.get).not.toHaveBeenCalled();
+    expect(guards.app).not.toHaveBeenCalled();
   });
 
   test('Should add webhook data', async () => {
+    const guards = createDtsBoundaryGuards();
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
+      get: guards.get,
+      dirs: guards.dirs,
       db: {
         query,
       },
@@ -349,6 +371,8 @@ describe('Restore ', () => {
     const result = await restoreConfigs(strapi, config);
     expect(strapi.db.query).toBeCalledTimes(1);
     expect(strapi.db.query).toBeCalledWith('strapi::webhook');
-    expect(result.data).toMatchObject(omit(['id'])(config.value));
+    expect(result.data).toMatchObject(omit(config.value, ['id']));
+    expect(guards.get).not.toHaveBeenCalled();
+    expect(guards.app).not.toHaveBeenCalled();
   });
 });

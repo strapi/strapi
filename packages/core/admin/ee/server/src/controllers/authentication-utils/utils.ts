@@ -1,4 +1,5 @@
-import { mapValues } from 'lodash/fp';
+import { mapValues } from 'lodash';
+
 import { PROVIDER_REDIRECT_ERROR, PROVIDER_REDIRECT_SUCCESS } from './constants';
 
 const PROVIDER_URLS_MAP = {
@@ -12,7 +13,7 @@ export const getPrefixedRedirectUrls = () => {
   const { url: adminUrl } = strapi.config.get('admin') as any;
   const prefixUrl = (url: string) => `${adminUrl || '/admin'}${url}`;
 
-  return mapValues(prefixUrl, PROVIDER_URLS_MAP);
+  return mapValues(PROVIDER_URLS_MAP, (value) => prefixUrl(value));
 };
 
 export default {

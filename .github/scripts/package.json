@@ -6,6 +6,8 @@
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
-    "@actions/github": "6.0.1"
+    "@actions/github": "6.0.1",
+    "tsup": "8.5.0",
+    "typescript": "5.9.3"
   }
 }

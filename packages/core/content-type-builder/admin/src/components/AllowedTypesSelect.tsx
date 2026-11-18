@@ -31,7 +31,6 @@ export const AllowedTypesSelect = ({
 }: AllowedTypesSelectProps) => {
   const { formatMessage } = useIntl();
 
-  /* eslint-disable indent */
   const displayedValue =
     value === null || value?.length === 0
       ? formatMessage({ id: 'global.none', defaultMessage: 'None' })
@@ -39,8 +38,6 @@ export const AllowedTypesSelect = ({
           .sort()
           .map((v) => upperFirst(v))
           .join(', ');
-
-  /* eslint-enable indent */
 
   const label = intlLabel.id
     ? formatMessage({ id: intlLabel.id, defaultMessage: intlLabel.defaultMessage })

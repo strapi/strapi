@@ -1,4 +1,4 @@
-import { pipe, merge, set, pick } from 'lodash/fp';
+import { pick, merge, flow } from 'lodash';
 
 export type Condition = {
   id: string;
@@ -36,7 +36,8 @@ export const conditionFields = ['id', 'displayName', 'handler', 'plugin', 'categ
 /**
  * Remove unwanted attributes from a {@link Condition}
  */
-export const sanitizeConditionAttributes = pick(conditionFields);
+export const sanitizeConditionAttributes = (condition: Partial<Condition>) =>
+  pick(condition, conditionFields);
 
 export const computeConditionId = (condition: CreateConditionPayload) => {
   const { name, plugin } = condition;
@@ -57,7 +58,7 @@ export const computeConditionId = (condition: CreateConditionPayload) => {
  * @param  attrs - Payload used to create a condition
  */
 export const assignConditionId = (attrs: CreateConditionPayload): Condition => {
-  const condition = set('id', computeConditionId(attrs), attrs) as CreateConditionPayload & {
+  const condition = { ...attrs, id: computeConditionId(attrs) } as CreateConditionPayload & {
     id: string;
   };
   return condition;
@@ -67,10 +68,8 @@ export const assignConditionId = (attrs: CreateConditionPayload): Condition => {
  * Transform the given attributes into a domain representation of a Condition
  * @param payload - The condition payload containing the attributes needed to create a {@link Condition}
  */
-export const create = pipe(
-  assignConditionId,
-  sanitizeConditionAttributes,
-  merge(getDefaultConditionAttributes())
+export const create = flow(assignConditionId, sanitizeConditionAttributes, (condition) =>
+  merge({}, getDefaultConditionAttributes(), condition)
 ) as (payload: CreateConditionPayload) => Condition;
 
 export default {

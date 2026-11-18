@@ -1,0 +1,9 @@
+{
+  "label": "Generators",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "slug": "/packages/generators",
+    "description": "Workspace packages under packages/generators/ in the monorepo."
+  }
+}

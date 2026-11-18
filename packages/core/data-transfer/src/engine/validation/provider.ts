@@ -1,4 +1,4 @@
-import { capitalize } from 'lodash/fp';
+import { capitalize } from 'lodash';
 
 import type { IDestinationProvider, ISourceProvider, ProviderType } from '../../types';
 import { TransferEngineValidationError } from '../errors';

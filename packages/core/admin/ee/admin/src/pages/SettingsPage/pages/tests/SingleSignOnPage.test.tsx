@@ -1,4 +1,5 @@
-import { fireEvent, render, waitFor, screen } from '@tests/utils';
+import { fireEvent, render, waitFor, screen, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { SingleSignOnPage } from '../SingleSignOnPage';
 
@@ -57,5 +58,25 @@ describe('Admin | ee | SettingsPage | SSO', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Auto-registration' }));
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
+  it('should only show the "Choose here" placeholder once when no default role is set', async () => {
+    server.use(
+      http.get('/admin/providers/options', () =>
+        HttpResponse.json({
+          data: {
+            autoRegister: false,
+            defaultRole: null,
+            ssoLockedRoles: [],
+          },
+        })
+      )
+    );
+
+    render(<SingleSignOnPage />);
+
+    const defaultRoleCombobox = await screen.findByRole('combobox', { name: 'Default role' });
+
+    expect(defaultRoleCombobox).toHaveTextContent(/^Choose here$/);
   });
 });

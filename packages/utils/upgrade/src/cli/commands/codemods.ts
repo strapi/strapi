@@ -37,15 +37,13 @@ export const runCodemods: RunCodemodsCommand = async (options) => {
   };
 
   const selectCodemods = async (codemods: Codemod.VersionedCollection[]) => {
-    const selectableCodemods = codemods
-      .map(({ version, codemods }) =>
-        codemods.map((codemod) => ({
-          title: `(${version}) ${codemod.format()}`,
-          value: codemod,
-          selected: true,
-        }))
-      )
-      .flat();
+    const selectableCodemods = codemods.flatMap(({ version, codemods }) =>
+      codemods.map((codemod) => ({
+        title: `(${version}) ${codemod.format()}`,
+        value: codemod,
+        selected: true,
+      }))
+    );
 
     if (selectableCodemods.length === 0) {
       logger.info('No codemods to run');

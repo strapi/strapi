@@ -1,4 +1,4 @@
-import { defaultsDeep } from 'lodash/fp';
+import { defaultsDeep } from 'lodash';
 import koaStatic from 'koa-static';
 import type { Core } from '@strapi/types';
 
@@ -12,7 +12,7 @@ export const publicStatic: Core.MiddlewareFactory = (
   config: Config,
   { strapi }: { strapi: Core.Strapi }
 ) => {
-  const { maxAge } = defaultsDeep(defaults, config);
+  const { maxAge } = defaultsDeep({}, config, defaults);
 
   strapi.server.routes([
     {

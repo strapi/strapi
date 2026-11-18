@@ -1,6 +1,5 @@
 'use strict';
 
-const { isFunction, map } = require('lodash/fp');
 const modelsUtils = require('../models');
 
 const stringifyDates = (object) =>
@@ -13,7 +12,7 @@ const stringifyDates = (object) =>
     })
   );
 
-const formatFixtures = map(stringifyDates);
+const formatFixtures = (value) => value.map((item) => stringifyDates(item));
 
 module.exports = {
   contentType: {
@@ -87,7 +86,7 @@ module.exports = {
           createdEntries = formatFixtures(
             await modelsUtils.createFixturesFor(
               modelName,
-              isFunction(entries) ? entries(getFixtures()) : entries
+              typeof entries === 'function' ? entries(getFixtures()) : entries
             )
           );
 

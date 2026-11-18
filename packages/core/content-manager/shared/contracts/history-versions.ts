@@ -13,7 +13,6 @@ export interface CreateHistoryVersion {
   status: 'draft' | 'published' | 'modified' | null;
   data: Modules.Documents.AnyDocument;
   schema: Struct.SchemaAttributes;
-  componentsSchemas: Record<`${string}.${string}`, Struct.SchemaAttributes>;
 }
 
 export interface Locale {

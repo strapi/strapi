@@ -1,0 +1,29 @@
+views {
+  view interface_overview {
+    title '01 Start here / Application interfaces'
+    description '''
+      **Audience:** product and engineering. **Type:** reading guide, not a runtime architecture diagram.
+      **Question:** which interface fits the interaction you want to understand?
+      REST and optional GraphQL serve content applications. Admin APIs serve editing and administration; MCP exposes configured capabilities to compatible clients. Import/export and remote transfer move selected data and assets.
+      The cards are guide topics. Arrows mean “explore this topic”, not network calls or required stages. Select a named interface for its focused explanation.
+      Authentication differs: Content API permissions for REST/GraphQL, Admin permissions for Admin APIs/MCP, and dedicated transfer scopes for remote push/pull. Local file import/export is a different operational path.
+    '''
+    link ../strapi_containers/ 'Related: runtime architecture'
+    link ../access_boundaries/ 'Related: identities and credential boundaries'
+    include
+      interface_guide,
+      rest_guide with { navigateTo content_api_runtime_components },
+      graphql_guide with { navigateTo graphql_delivery },
+      admin_guide with { navigateTo admin_feature_surfaces },
+      mcp_guide with { navigateTo mcp_interface },
+      transfer_guide with { navigateTo data_transfer }
+    exclude * -> *
+    include
+      interface_guide -> rest_guide,
+      interface_guide -> graphql_guide,
+      interface_guide -> admin_guide,
+      interface_guide -> mcp_guide,
+      interface_guide -> transfer_guide
+    autoLayout LeftRight 55 30
+  }
+}

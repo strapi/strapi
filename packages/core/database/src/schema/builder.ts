@@ -1,4 +1,4 @@
-import { isNil, prop, omit, castArray } from 'lodash/fp';
+import { omit, castArray } from 'lodash';
 import createDebug from 'debug';
 
 import type { Knex } from 'knex';
@@ -57,6 +57,16 @@ export default (db: Database) => {
       }
 
       await db.connection.transaction(async (trx) => {
+        // Postgres refuses to drop a table another table still references.
+        // Drop Strapi's own foreign keys first instead of CASCADE, which would
+        // also remove views and constraints Strapi does not manage.
+        if (db.dialect.client === 'postgres') {
+          for (const table of schema.tables) {
+            const schemaBuilder = this.getSchemaBuilder(trx);
+            await helpers.dropTableForeignKeys(schemaBuilder, table);
+          }
+        }
+
         for (const table of schema.tables.reverse()) {
           const schemaBuilder = this.getSchemaBuilder(trx);
           await helpers.dropTable(schemaBuilder, table);
@@ -106,6 +116,28 @@ export default (db: Database) => {
 
             const schemaBuilder = this.getSchemaBuilder(trx);
             await helpers.dropTableForeignKeys(schemaBuilder, table);
+          }
+
+          // Tables that stay can still reference a table that is about to be
+          // dropped. Remove those constraints first. CASCADE would also drop
+          // views and foreign keys Strapi does not manage.
+          if (db.dialect.client === 'postgres') {
+            for (const table of schemaDiff.tables.updated) {
+              const blocking = [
+                ...(table.foreignKeys?.removed ?? []),
+                ...(table.foreignKeys?.updated ?? []).map((foreignKey) => foreignKey.object),
+              ];
+
+              if (blocking.length === 0) {
+                continue;
+              }
+
+              const schemaBuilder = this.getSchemaBuilder(trx);
+              await helpers.dropTableForeignKeys(schemaBuilder, {
+                name: table.name,
+                foreignKeys: blocking,
+              } as Table);
+            }
           }
 
           for (const table of schemaDiff.tables.removed) {
@@ -179,6 +211,24 @@ const createHelpers = (db: Database) => {
   };
 
   /**
+   * Postgres DROP CONSTRAINT fails when the constraint is already gone.
+   * Schema metadata is loaded before the update, so an earlier statement in
+   * the same migration may already have removed it.
+   */
+  const dropForeignKeyIfExists = async (
+    runner: Knex,
+    tableName: string,
+    constraintName: string
+  ) => {
+    const schemaName = db.getSchemaName();
+    const qualified = schemaName ? `${schemaName}.${tableName}` : tableName;
+    await runner.raw('ALTER TABLE ?? DROP CONSTRAINT IF EXISTS ??', [qualified, constraintName]);
+  };
+
+  const schemaRunner = (schemaBuilder: Knex.SchemaBuilder) =>
+    (schemaBuilder as Knex.SchemaBuilder & { client: Knex }).client;
+
+  /**
    * Creates an index on a table
    */
   const createIndex = (tableBuilder: Knex.TableBuilder, index: Index) => {
@@ -240,11 +290,11 @@ const createHelpers = (db: Database) => {
       col.unsigned();
     }
 
-    if (!isNil(defaultTo)) {
+    if (defaultTo != null) {
       const [value, opts] = castArray(defaultTo);
 
-      if (prop('isRaw', opts)) {
-        col.defaultTo(db.connection.raw(value), omit('isRaw', opts));
+      if (opts?.isRaw) {
+        col.defaultTo(db.connection.raw(value), omit(opts, 'isRaw'));
       } else {
         col.defaultTo(value, opts);
       }
@@ -316,6 +366,24 @@ const createHelpers = (db: Database) => {
 
     // Track dropped foreign keys
     const droppedForeignKeyNames: string[] = [];
+
+    if (db.dialect.client === 'postgres') {
+      const runner = schemaRunner(schemaBuilder);
+      const constraintNames = [
+        ...table.foreignKeys.removed.map((foreignKey) => foreignKey.name),
+        ...table.foreignKeys.updated.map((foreignKey) => foreignKey.object.name),
+      ];
+
+      for (const constraintName of constraintNames) {
+        await dropForeignKeyIfExists(runner, table.name, constraintName);
+        const index = existingForeignKeys.findIndex(
+          (foreignKey) => foreignKey?.name === constraintName
+        );
+        if (index >= 0) {
+          existingForeignKeys.splice(index, 1);
+        }
+      }
+    }
 
     await schemaBuilder.alterTable(table.name, async (tableBuilder) => {
       // Drop foreign keys first to avoid foreign key errors in the following steps
@@ -434,6 +502,14 @@ const createHelpers = (db: Database) => {
       return;
     }
 
+    if (db.dialect.client === 'postgres') {
+      const runner = schemaRunner(schemaBuilder);
+      for (const foreignKey of table.foreignKeys || []) {
+        await dropForeignKeyIfExists(runner, table.name, foreignKey.name);
+      }
+      return;
+    }
+
     // foreign keys
     await schemaBuilder.table(table.name, (tableBuilder) => {
       (table.foreignKeys || []).forEach((foreignKey) => dropForeignKey(tableBuilder, foreignKey));
@@ -490,7 +566,7 @@ const createHelpers = (db: Database) => {
     // Apply default value
     if (column.defaultTo !== undefined) {
       const [defaultValue, defaultOpts] = castArray(column.defaultTo);
-      if (prop('isRaw', defaultOpts)) {
+      if (defaultOpts?.isRaw) {
         await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ${defaultValue}`, [
           tableName,
           columnName,

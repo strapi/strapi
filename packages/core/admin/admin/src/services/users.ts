@@ -196,12 +196,9 @@ const usersService = adminApi
   });
 
 type GetUsersParams =
-  | Users.FindOne.Params
-  | (Users.FindAll.Request['query'] & { id?: never })
-  | void;
+  Users.FindOne.Params | (Users.FindAll.Request['query'] & { id?: never }) | void;
 type GetRolesParams =
-  | Roles.FindRole.Request['params']
-  | (Roles.FindRoles.Request['query'] & { id?: never });
+  Roles.FindRole.Request['params'] | (Roles.FindRoles.Request['query'] & { id?: never });
 interface GetRolePermissionsParams {
   id: Data.ID;
 }

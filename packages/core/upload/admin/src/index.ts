@@ -2,16 +2,23 @@ import { Images } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
-import { MediaLibraryDialog } from './components/MediaLibraryDialog/MediaLibraryDialog';
+import { MediaLibraryPickerDialog } from './components/AssetPickerDialog/MediaLibraryPickerDialog';
+import { EditorFileDropZone } from './components/EditorFileDropZone/EditorFileDropZone';
 import { MediaLibraryInput } from './components/MediaLibraryInput/MediaLibraryInput';
+import { UploadProgressDialog } from './components/UploadProgressDialog';
 import { PERMISSIONS } from './constants';
-import { UploadProgressDialog } from './future/components/UploadProgressDialog';
-import { uploadProgressReducer } from './future/store/uploadProgress';
+import { MediaLibraryDialog } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
+import { MediaLibraryInput as LegacyMediaLibraryInput } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
+import { prefixPluginTranslations } from './legacy/utils/prefixPluginTranslations';
 import { pluginId } from './pluginId';
-import { getTrad, prefixPluginTranslations } from './utils';
+import { uploadProgressReducer } from './store/uploadProgress';
+import { getTranslationKey } from './utils/translations';
 
-import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog/MediaLibraryDialog';
+import type { MediaLibraryPickerDialogProps } from './components/AssetPickerDialog/MediaLibraryPickerDialog';
+import type { EditorFileDropZoneProps } from './components/EditorFileDropZone/EditorFileDropZone';
 import type { MediaLibraryInputProps } from './components/MediaLibraryInput/MediaLibraryInput';
+import type { MediaLibraryDialogProps } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
+import type { MediaLibraryInputProps as LegacyMediaLibraryInputProps } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
@@ -37,11 +44,11 @@ const admin: Plugin.Config.AdminInput = {
       permissions: PERMISSIONS.main,
       Component: isLegacyMediaLibrary
         ? () => {
-            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
+            return import('./legacy/pages/App/App').then((mod) => ({ default: mod.Upload }));
           }
         : () => {
-            return import('./future/App').then((mod) => ({
-              default: mod.BetaMediaLibrary,
+            return import('./App').then((mod) => ({
+              default: mod.MediaLibrary,
             }));
           },
       position: 4,
@@ -55,6 +62,12 @@ const admin: Plugin.Config.AdminInput = {
           name: 'future-global::upload-progress',
           Component: UploadProgressDialog,
         },
+        // Lets the Blocks editor take files dropped onto it. Not registered on the
+        // legacy Media Library, which has no upload progress dialog to report to.
+        {
+          name: 'media-library-file-drop-zone',
+          Component: EditorFileDropZone as React.FC<Partial<EditorFileDropZoneProps>>,
+        },
       ]);
     }
 
@@ -62,7 +75,7 @@ const admin: Plugin.Config.AdminInput = {
       id: 'media-library-settings',
       to: 'media-library',
       intlLabel: {
-        id: getTrad('plugin.name'),
+        id: getTranslationKey('plugin.name'),
         defaultMessage: 'Media Library',
       },
       Component() {
@@ -73,14 +86,24 @@ const admin: Plugin.Config.AdminInput = {
       permissions: PERMISSIONS.settings,
     });
 
+    /**
+     * The media field follows the same switch as the menu link above: the
+     * current input on the current Media Library, the legacy one when
+     * `useLegacyMediaLibrary` opts back out.
+     */
     app.addFields({
       type: 'media',
-      Component: MediaLibraryInput as React.FC<Partial<MediaLibraryInputProps>>,
+      Component: isLegacyMediaLibrary
+        ? (LegacyMediaLibraryInput as React.FC<Partial<LegacyMediaLibraryInputProps>>)
+        : (MediaLibraryInput as React.FC<Partial<MediaLibraryInputProps>>),
     });
+    // The picker the Wysiwyg and Blocks editors insert images with.
     app.addComponents([
       {
         name: 'media-library',
-        Component: MediaLibraryDialog as React.FC<Partial<MediaLibraryDialogProps>>,
+        Component: isLegacyMediaLibrary
+          ? (MediaLibraryDialog as React.FC<Partial<MediaLibraryDialogProps>>)
+          : (MediaLibraryPickerDialog as React.FC<Partial<MediaLibraryPickerDialogProps>>),
       },
     ]);
 

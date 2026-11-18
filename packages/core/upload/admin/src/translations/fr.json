@@ -126,8 +126,6 @@
   "list.table.header.sort": "Trier par {label}",
   "list.table.content.empty-label": "Ce champ est vide",
   "tabs.title": "Comment souhaitez-vous importer vos médias ?",
-  "window.confirm.close-modal.file": "Êtes-vous sûr ? Vos modifications seront perdues.",
-  "window.confirm.close-modal.files": "Êtes-vous sûr ? Certains fichiers n'ont pas encore été téléchargés.",
   "config.back": "Retour",
   "config.subtitle": "Définissez les paramètres d'affichage de la médiathèque.",
   "config.entries.title": "Entrées par page",

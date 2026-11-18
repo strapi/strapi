@@ -1,5 +1,5 @@
 import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
-import { snakeCase } from 'lodash/fp';
+import snakeCase from 'lodash/snakeCase';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 

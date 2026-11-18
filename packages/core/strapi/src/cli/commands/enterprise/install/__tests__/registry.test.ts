@@ -1,0 +1,304 @@
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
+
+import { fetchPackument, fetchPluginCatalog } from '../registry';
+import {
+  createFetchResponse,
+  createPackument,
+  NOT_LICENSED_MESSAGE,
+  REGISTRY_URL,
+} from './test-helpers';
+
+const packageName = '@strapi-enterprise/plugin-ai-byok';
+
+describe('fetchPackument', () => {
+  it('asks the Strapi registry for the full metadata, with the license as token', async () => {
+    const packument = createPackument(packageName, [{ version: '1.0.0' }]);
+    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(200, packument));
+
+    const lookup = await fetchPackument({
+      packageName,
+      registryUrl: REGISTRY_URL,
+      license: 'the-license',
+      fetchImplementation,
+    });
+
+    expect(fetchImplementation).toHaveBeenCalledWith(
+      'https://packages.strapi.io/@strapi-enterprise/plugin-ai-byok',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer the-license', Accept: 'application/json' },
+      })
+    );
+    expect(lookup).toEqual({ status: 'available', packument });
+  });
+
+  it.each([
+    [403, 'not-licensed'],
+    [404, 'not-found'],
+  ])('maps HTTP %s to %s', async (status, expectedStatus) => {
+    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(status));
+
+    await expect(
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
+    ).resolves.toEqual({ status: expectedStatus });
+  });
+
+  it('explains a rejected license, with where to check it', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(401));
+
+    await expect(
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
+    ).resolves.toEqual({
+      status: 'license-rejected',
+      message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
+    });
+  });
+
+  it('explains when the registry cannot be reached', async () => {
+    const fetchImplementation = jest.fn().mockRejectedValue(new TypeError('fetch failed'));
+
+    await expect(
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
+    ).resolves.toEqual({
+      status: 'unavailable',
+      message: expect.stringContaining('Could not reach https://packages.strapi.io.'),
+    });
+  });
+
+  it('reports other registry errors with their status', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(500));
+
+    await expect(
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
+    ).resolves.toEqual({
+      status: 'unavailable',
+      message: expect.stringContaining('https://packages.strapi.io answered HTTP 500'),
+    });
+  });
+});
+
+describe('fetchPackument with invalid data', () => {
+  it('explains in one line when the answer is not valid JSON', async () => {
+    const invalidResponse = {
+      status: 200,
+      ok: true,
+      async json() {
+        throw new SyntaxError('Unexpected token < in JSON');
+      },
+    } as unknown as Response;
+
+    await expect(
+      fetchPackument({
+        packageName: '@strapi-enterprise/plugin-ai-byok',
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation: jest.fn().mockResolvedValue(invalidResponse),
+      })
+    ).resolves.toEqual({
+      status: 'unavailable',
+      message:
+        'https://packages.strapi.io answered with invalid data for @strapi-enterprise/plugin-ai-byok. Try again later.',
+    });
+  });
+});
+
+describe('fetchPluginCatalog', () => {
+  const fetchCatalog = (fetchImplementation: typeof fetch) =>
+    fetchPluginCatalog({ registryUrl: REGISTRY_URL, license: 'the-license', fetchImplementation });
+
+  it('lists the plugins with whether the license includes them, and the message', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(
+      createFetchResponse(200, {
+        plugins: [
+          {
+            name: packageName,
+            displayName: 'AI BYOK',
+            description: 'Bring your own key.',
+            kind: 'plugin',
+            licensed: false,
+          },
+        ],
+        notLicensedMessage: NOT_LICENSED_MESSAGE,
+      })
+    );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({
+      status: 'available',
+      plugins: [
+        {
+          name: packageName,
+          displayName: 'AI BYOK',
+          description: 'Bring your own key.',
+          kind: 'plugin',
+          licensed: false,
+        },
+      ],
+      notLicensedMessage: NOT_LICENSED_MESSAGE,
+    });
+    expect(fetchImplementation).toHaveBeenCalledWith(
+      'https://packages.strapi.io/-/strapi/plugins',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer the-license', Accept: 'application/json' },
+      })
+    );
+  });
+
+  it('leaves out a plugin with no name or no licensed flag', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(
+      createFetchResponse(200, {
+        plugins: [
+          { name: packageName, licensed: true },
+          { name: '@strapi-enterprise/plugin-other' },
+          { licensed: true },
+          'not-an-object',
+        ],
+      })
+    );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({
+      status: 'available',
+      plugins: [{ name: packageName, licensed: true }],
+    });
+  });
+
+  it('removes control characters and ANSI codes from the strings it prints', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(
+      createFetchResponse(200, {
+        plugins: [
+          { name: packageName, displayName: '\u001B[1mAI\u001B[22m BYOK\u0007', licensed: false },
+        ],
+        notLicensedMessage: '\u001B[31mContact\u001B[0m Sales.\r\n\u001B]0;title\u0007Now.\u009B',
+      })
+    );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toMatchObject({
+      plugins: [{ displayName: 'AI BYOK' }],
+      notLicensedMessage: 'Contact Sales. Now.',
+    });
+  });
+
+  it('gives up on the catalog after 15 seconds, like the other registry requests', async () => {
+    const timeoutSpy = jest.spyOn(AbortSignal, 'timeout');
+    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(404));
+
+    await fetchCatalog(fetchImplementation);
+
+    expect(timeoutSpy).toHaveBeenCalledWith(15000);
+    timeoutSpy.mockRestore();
+  });
+
+  it('drops a message with nothing printable', async () => {
+    const fetchImplementation = jest
+      .fn()
+      .mockResolvedValue(
+        createFetchResponse(200, { plugins: [], notLicensedMessage: ' \u001B[0m ' })
+      );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({
+      status: 'available',
+      plugins: [],
+      notLicensedMessage: undefined,
+    });
+  });
+
+  it('tells a rejected license apart from an unavailable catalog', async () => {
+    await expect(
+      fetchCatalog(jest.fn().mockResolvedValue(createFetchResponse(401)))
+    ).resolves.toEqual({
+      status: 'license-rejected',
+      message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
+    });
+  });
+
+  it.each([
+    ['is missing, as on an older registry', jest.fn().mockResolvedValue(createFetchResponse(404))],
+    ['answers with an error', jest.fn().mockResolvedValue(createFetchResponse(500))],
+    ['cannot be reached', jest.fn().mockRejectedValue(new TypeError('fetch failed'))],
+    ['answers with no plugin list', jest.fn().mockResolvedValue(createFetchResponse(200, {}))],
+    ['answers with no object', jest.fn().mockResolvedValue(createFetchResponse(200, null))],
+    [
+      'answers with a plugin list that is not an array',
+      jest.fn().mockResolvedValue(createFetchResponse(200, { plugins: 'not-a-list' })),
+    ],
+    [
+      'answers with invalid JSON',
+      jest.fn().mockResolvedValue({
+        status: 200,
+        ok: true,
+        async json() {
+          throw new SyntaxError('Unexpected token < in JSON');
+        },
+      }),
+    ],
+    [
+      'times out',
+      jest
+        .fn()
+        .mockRejectedValue(
+          new DOMException('The operation was aborted due to timeout', 'TimeoutError')
+        ),
+    ],
+  ])('reports the catalog as unavailable when it %s', async (_case, fetchImplementation) => {
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({ status: 'unavailable' });
+  });
+});
+
+describe('requests to a registry that redirects', () => {
+  it('stops at the redirect, so the license is not sent on, and says the registry redirected', async () => {
+    const requestedPaths: Array<string | undefined> = [];
+    const server = http.createServer((request, response) => {
+      requestedPaths.push(request.url);
+      response.writeHead(302, { Location: '/elsewhere' }).end();
+    });
+
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', resolve);
+    });
+
+    const registryUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    try {
+      await expect(
+        fetchPackument({
+          registryUrl,
+          packageName,
+          license: 'the-license',
+          fetchImplementation: fetch,
+        })
+      ).resolves.toEqual({
+        status: 'unavailable',
+        message: `${registryUrl} redirected the request. Use the final registry URL.`,
+      });
+      await expect(
+        fetchPluginCatalog({ registryUrl, license: 'the-license', fetchImplementation: fetch })
+      ).resolves.toEqual({
+        status: 'redirected',
+        message: `${registryUrl} redirected the request. Use the final registry URL.`,
+      });
+      expect(requestedPaths).toEqual([`/${packageName}`, '/-/strapi/plugins']);
+    } finally {
+      server.closeAllConnections();
+      server.close();
+    }
+  });
+});

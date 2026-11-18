@@ -1,19 +1,20 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { login, loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
+import { startCreateContentType } from '../../../utils/content-types';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
-import { AssetsPage } from '../media-library/future/page-objects/AssetsPage';
+import { AssetsPage } from '../media-library/page-objects/AssetsPage';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('a user should have a personalized homepage', async ({ page }) => {
@@ -67,8 +68,8 @@ test.describe('Home as super admin — key statistics', () => {
     didWriteSchemaFiles = false;
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test.afterEach(async () => {
@@ -223,7 +224,7 @@ test.describe('Home as super admin — key statistics', () => {
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
-      await page.getByRole('button', { name: /create new collection type/i }).click();
+      await startCreateContentType(page, 'collection');
       await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
       await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
       await expect(page.getByLabel('API ID (Singular)')).toHaveValue('new-type');
@@ -268,7 +269,10 @@ test.describe('Home as super admin — key statistics', () => {
       await page
         .getByRole('textbox', { name: /url/i })
         .fill('http://localhost:1337/api/webhooks/new');
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/settings\/webhooks\/(?!create)[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
 
       // Create an API token
       await navToHeader(page, ['API Tokens'], 'API Tokens');
@@ -278,10 +282,13 @@ test.describe('Home as super admin — key statistics', () => {
       await page.getByRole('option', { name: '30 days' }).click();
       await page.getByRole('combobox', { name: 'Token type' }).click();
       await page.getByRole('option', { name: 'Full access' }).click();
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/settings\/api-tokens\/(?!create)[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
 
       // Go back to the home page and wait for refreshed statistics.
-      // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
+      // Don't wait for network idle: the homepage SPA often never reaches it.
       // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
       // keep that RTK query warm, so Home remount often serves cache and no GET is issued
       // (waitForResponse then times out). Entries still come from count-documents — assert

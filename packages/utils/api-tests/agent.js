@@ -1,6 +1,6 @@
 'use strict';
 
-const { clone, has, concat, isNil } = require('lodash/fp');
+const { clone, has } = require('lodash');
 const qs = require('qs');
 const request = require('supertest');
 const { createUtils } = require('./utils');
@@ -71,16 +71,16 @@ const createAgent = (strapi, initialState = {}) => {
     const { method, url, body, formData, qs: queryString, headers } = options;
     const supertestAgent = request.agent(strapi.server.httpServer);
 
-    const fullUrl = concat(state.urlPrefix, url).join('');
+    const fullUrl = [state.urlPrefix, url].join('');
 
     const rq = supertestAgent[method.toLowerCase()](fullUrl);
 
-    if (has('token', state)) {
+    if (has(state, 'token')) {
       rq.auth(state.token, { type: 'bearer' });
     }
     if (headers) {
       applyHeadersToRequest(rq, headers);
-    } else if (has('headers', state)) {
+    } else if (has(state, 'headers')) {
       const stateHeaders = state.headers;
       applyHeadersToRequest(rq, stateHeaders);
     }
@@ -99,7 +99,7 @@ const createAgent = (strapi, initialState = {}) => {
       });
     }
 
-    if (isNil(formData)) {
+    if (formData == null) {
       rq.type('application/json');
     }
 

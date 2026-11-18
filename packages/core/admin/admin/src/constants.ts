@@ -98,6 +98,10 @@ export const ADMIN_PERMISSIONS_CE = {
       read: [{ action: 'admin::project-settings.read', subject: null }],
       update: [{ action: 'admin::project-settings.update', subject: null }],
     },
+    'debug-dump': {
+      main: [{ action: 'admin::debug-dump.read', subject: null }],
+      read: [{ action: 'admin::debug-dump.read', subject: null }],
+    },
     plugins: {
       main: [{ action: 'admin::marketplace.read', subject: null }],
       read: [{ action: 'admin::marketplace.read', subject: null }],
@@ -142,8 +146,10 @@ export const HOOKS = {
   MUTATE_SINGLE_TYPES_LINKS: 'Admin/CM/pages/App/mutate-single-types-links',
 };
 
-export interface SettingsMenuLink
-  extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'licenseOnly'> {
+export interface SettingsMenuLink extends Omit<
+  StrapiAppSettingLink,
+  'Component' | 'permissions' | 'licenseOnly'
+> {
   licenseOnly?: boolean;
 }
 
@@ -192,6 +198,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             to: '/settings/purchase-single-sign-on',
             id: 'sso-purchase-page',
             licenseOnly: true,
+            licenseFeature: 'sso',
           },
         ]
       : []),
@@ -202,6 +209,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             to: '/settings/purchase-content-history',
             id: 'content-history-purchase-page',
             licenseOnly: true,
+            licenseFeature: 'cms-content-history',
           },
         ]
       : []),
@@ -232,6 +240,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             to: '/settings/purchase-audit-logs',
             id: 'auditLogs-purchase-page',
             licenseOnly: true,
+            licenseFeature: 'audit-logs',
           },
         ]
       : []),

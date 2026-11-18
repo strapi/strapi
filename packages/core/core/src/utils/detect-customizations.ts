@@ -1,0 +1,213 @@
+import fs from 'fs';
+import path from 'path';
+
+import type { Core } from '@strapi/types';
+
+import * as factories from '../factories';
+
+const APP_UID_PREFIX = 'api::';
+
+/**
+ * True when a lifecycle function has a non-empty body. The compiled function
+ * source is inspected here only to derive a boolean; it is never returned.
+ */
+const stripComments = (body: string): string =>
+  body
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
+    .trim();
+
+export const isLifecycleNonEmpty = (fn: unknown): boolean => {
+  if (typeof fn !== 'function') {
+    return false;
+  }
+  const source = Function.prototype.toString.call(fn);
+  // The body starts at the first `{` AFTER the parameter list closes, not the
+  // first `{` overall: a real lifecycle signature like `register({ strapi })`
+  // or the template's `register(/*{ strapi }*/)` puts a `{` in the params/comment.
+  const parenEnd = source.indexOf(')');
+  const bodyStart = source.indexOf('{', parenEnd === -1 ? 0 : parenEnd);
+
+  // No brace anywhere after the parameters means a concise arrow body
+  // (`register: ({ strapi }) => strapi.log.info('x')`), where everything after the
+  // arrow IS the body. Treating that as empty under-reported a real customization,
+  // telling Support an app was stock when it was not. The template only ever ships
+  // braced method shorthand, so this branch cannot misread a fresh app.
+  if (bodyStart === -1) {
+    const arrow = source.indexOf('=>');
+    return arrow === -1 ? false : stripComments(source.slice(arrow + 2)).length > 0;
+  }
+
+  return stripComments(source.slice(bodyStart + 1, source.lastIndexOf('}'))).length > 0;
+};
+
+/**
+ * A default `createCoreService` result has its CRUD methods on its class
+ * prototype and only `contentType` as an own key; that own key is copied onto
+ * the direct prototype (the base service instance) too, so a default service
+ * never has an own key that its direct prototype doesn't also have. A custom
+ * service (built via a `cfg` object/callback) has extra own method keys that
+ * are absent from the prototype it was assigned. Comparing own keys against
+ * the DIRECT prototype's own keys (rather than guessing base method names)
+ * avoids flagging every real service as custom.
+ */
+const isCustomService = (service: unknown): boolean => {
+  if (service === null || typeof service !== 'object') {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(service);
+  const protoOwnKeys = proto ? Object.keys(proto) : [];
+  return Object.keys(service).some((key) => !protoOwnKeys.includes(key));
+};
+
+/**
+ * Custom routes in Strapi are added as separate files in an api's `routes/`
+ * directory (each exporting a plain `{ routes: [...] }` object), never by
+ * editing the factory-generated route file, because Koa needs explicit route
+ * ordering. The factory router exposes `routes` as a getter, so any route
+ * file exposing `routes` as a plain data property is a hand-written custom
+ * route file.
+ */
+const hasCustomRoutes = (strapi: Core.Strapi, apiName: string): boolean => {
+  const api = strapi.api(apiName);
+  const routeFiles = api?.routes ?? {};
+  return Object.values(routeFiles).some((router) => {
+    if (router === null || typeof router !== 'object') {
+      return false;
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(router, 'routes');
+    // A factory router exposes `routes` as an accessor (getter); a hand-written
+    // custom routes file exports it as a plain data property.
+    return descriptor ? typeof descriptor.get !== 'function' : false;
+  });
+};
+
+/**
+ * `createCoreController` sets the controller's prototype to the factory's base controller, and
+ * marks it when the app passed its own config. Anything else was not minted by the factory: a
+ * plain action map (`module.exports = { async find() {} }`) is entirely hand-written, and a
+ * factory that returned a non-object is not stock either. Neither may throw out of the dump.
+ */
+const isCustomApiController = (controller: unknown): boolean => {
+  if (controller === null || typeof controller !== 'object') {
+    return true;
+  }
+
+  const prototype = Object.getPrototypeOf(controller);
+  if (prototype === Object.prototype || prototype === null) {
+    return true;
+  }
+
+  return factories.isCustomController(controller as Core.Controller);
+};
+
+/**
+ * Plugin and admin controllers are plain objects even when stock, so only the factory's
+ * custom-config mark can single one out here (the same test startup telemetry uses).
+ */
+const isCustomFactoryController = (controller: unknown): boolean =>
+  controller !== null &&
+  typeof controller === 'object' &&
+  factories.isCustomController(controller as Core.Controller);
+
+/**
+ * Plugins the app overrides through `src/extensions/<plugin>/`: a `strapi-server.js`, which can
+ * replace any controller, service or route, or content-type schema overrides. A plugin
+ * controller looks the same stock or overridden, so this folder is what tells Support a
+ * plugin was changed.
+ */
+// The loader applies content-type overrides from `content-types/<name>/schema.json` only
+const hasSchemaOverride = (pluginDir: string): boolean => {
+  const contentTypesDir = path.join(pluginDir, 'content-types');
+  if (!fs.existsSync(contentTypesDir)) {
+    return false;
+  }
+
+  return fs
+    .readdirSync(contentTypesDir, { withFileTypes: true })
+    .some(
+      (entry) =>
+        entry.isDirectory() && fs.existsSync(path.join(contentTypesDir, entry.name, 'schema.json'))
+    );
+};
+
+const listExtendedPlugins = (strapi: Core.Strapi): string[] => {
+  const extensionsDir = strapi.dirs?.dist?.extensions;
+  if (!extensionsDir || !fs.existsSync(extensionsDir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(extensionsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter(
+      (name) =>
+        fs.existsSync(path.join(extensionsDir, name, 'strapi-server.js')) ||
+        hasSchemaOverride(path.join(extensionsDir, name))
+    )
+    .sort();
+};
+
+// Return shape is mirrored in @strapi/types Core.Strapi['getCustomizations'];
+// keep the two in sync.
+export const detectCustomizations = (strapi: Core.Strapi) => {
+  const controllers = strapi.controllers ?? {};
+  const services = strapi.services ?? {};
+
+  const appControllerUids = Object.keys(controllers).filter((uid) =>
+    uid.startsWith(APP_UID_PREFIX)
+  );
+
+  const apis = appControllerUids.map((uid) => {
+    const controller = controllers[uid];
+    const service = services[uid];
+    // uid is `api::<name>.<name>`; map to the bare api name for route lookup.
+    const apiName = uid.slice(APP_UID_PREFIX.length).split('.')[0];
+
+    return {
+      uid,
+      customController: isCustomApiController(controller),
+      customService: isCustomService(service),
+      customRoutes: hasCustomRoutes(strapi, apiName),
+    };
+  });
+
+  // Every controller, not only the app's own: the dump is used to rebuild an app for debugging.
+  const allControllers = Object.keys(controllers).map((uid) => ({
+    uid,
+    custom: uid.startsWith(APP_UID_PREFIX)
+      ? isCustomApiController(controllers[uid])
+      : isCustomFactoryController(controllers[uid]),
+  }));
+
+  const app = strapi.app;
+  const registerDefined = typeof app?.register === 'function';
+  const bootstrapDefined = typeof app?.bootstrap === 'function';
+  const destroyDefined = typeof app?.destroy === 'function';
+  const registerNonEmpty = isLifecycleNonEmpty(app?.register);
+  const bootstrapNonEmpty = isLifecycleNonEmpty(app?.bootstrap);
+  const destroyNonEmpty = isLifecycleNonEmpty(app?.destroy);
+
+  return {
+    apis,
+    controllers: allControllers,
+    extendedPlugins: listExtendedPlugins(strapi),
+    counts: {
+      customControllers: allControllers.filter((c) => c.custom).length,
+      customServices: apis.filter((a) => a.customService).length,
+      customRoutes: apis.filter((a) => a.customRoutes).length,
+    },
+    srcIndex: {
+      present: app != null,
+      registerDefined,
+      registerNonEmpty,
+      bootstrapDefined,
+      bootstrapNonEmpty,
+      destroyDefined,
+      destroyNonEmpty,
+      // Template ships only empty register + bootstrap and no destroy.
+      beyondTemplate: destroyDefined || registerNonEmpty || bootstrapNonEmpty,
+    },
+  };
+};

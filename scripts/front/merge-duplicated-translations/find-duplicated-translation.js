@@ -1,7 +1,7 @@
 'use strict';
 
 const chalk = require('chalk');
-const { merge } = require('lodash/fp');
+const { merge } = require('lodash');
 const { readAllTranslationFiles } = require('../utils/translation-files');
 const allowedKeys = require('./allowed-keys');
 
@@ -85,6 +85,7 @@ const findDuplicatedTranslations = () => {
   let crossPackagesDuplicates = { ...coreAdminDuplicates };
   pluginFiles.forEach((pluginFile) => {
     crossPackagesDuplicates = merge(
+      {},
       crossPackagesDuplicates,
       findDuplicates(pluginFile, pluginFile, { sameFile: true })
     );
@@ -94,7 +95,7 @@ const findDuplicatedTranslations = () => {
   // Merge the results with core/admin duplicates to avoid showing the same key twice
   // (in case core/admin contains duplicate values that also exists in a plugin)
   pluginFiles.forEach((file) => {
-    crossPackagesDuplicates = merge(crossPackagesDuplicates, findDuplicates(coreFile, file));
+    crossPackagesDuplicates = merge({}, crossPackagesDuplicates, findDuplicates(coreFile, file));
   });
 
   return crossPackagesDuplicates;

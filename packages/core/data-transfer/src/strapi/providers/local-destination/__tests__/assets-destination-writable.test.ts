@@ -14,7 +14,7 @@ const baseMetadata: IAsset['metadata'] = {
   mime: 'image/jpeg',
 };
 
-const createMockStrapi = (uploadStream: jest.Mock) =>
+const createMockStrapi = (provider: Record<string, jest.Mock>) =>
   ({
     config: {
       get(service: string) {
@@ -36,14 +36,17 @@ const createMockStrapi = (uploadStream: jest.Mock) =>
     },
     plugin(name: string) {
       if (name === 'upload') {
-        return { provider: { uploadStream } };
+        return { provider };
       }
       return {};
     },
   }) as unknown as Core.Strapi;
 
-const createTestWritable = (uploadStream: jest.Mock) => {
-  const strapi = createMockStrapi(uploadStream);
+const createTestWritable = (uploadStream: jest.Mock) =>
+  createTestWritableWithProvider({ uploadStream });
+
+const createTestWritableWithProvider = (provider: Record<string, jest.Mock>) => {
+  const strapi = createMockStrapi(provider);
   const transaction = createTransaction(strapi);
   const stream = createAssetsDestinationWritable({
     strapi,
@@ -220,6 +223,41 @@ describe('createAssetsDestinationWritable (push transfer)', () => {
     expect(uploadStream).toHaveBeenCalledTimes(1);
     const uploadData = uploadStream.mock.calls[0][0] as { stream: Readable };
     expect(await readAll(uploadData.stream)).toEqual(Buffer.from('hello'));
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
+  test('falls back to upload with the buffered chunks when the provider has no uploadStream', async () => {
+    const passThrough = new PassThrough();
+    const upload = jest.fn().mockResolvedValue(undefined);
+    const { stream, transaction } = createTestWritableWithProvider({ upload });
+
+    const file: IAsset = {
+      filename: 'a.jpg',
+      filepath: '/a',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadata: baseMetadata,
+    };
+
+    // Same push batch order as above: write() returns before any chunk arrives.
+    await writeAsset(stream, file);
+
+    expect(upload).not.toHaveBeenCalled();
+
+    passThrough.write(Buffer.from('hel'));
+    passThrough.write(Buffer.from('lo'));
+    passThrough.end();
+
+    await waitForUploadStream(upload);
+
+    expect(upload).toHaveBeenCalledTimes(1);
+    const uploadData = upload.mock.calls[0][0] as { buffer?: Buffer; stream?: Readable };
+    expect(uploadData.buffer).toEqual(Buffer.from('hello'));
+    expect(uploadData.stream).toBeUndefined();
 
     await new Promise<void>((resolve, reject) => {
       stream.end((err?: Error | null) => (err ? reject(err) : resolve()));

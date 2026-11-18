@@ -1,4 +1,5 @@
-import { render } from '@tests/utils';
+import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { Register, formatValidationMessage } from '../Register';
 
@@ -44,6 +45,68 @@ describe('Register', () => {
         expect(getByLabelText(new RegExp(`^${label}`, 'i'))).toBeEnabled();
       }
     });
+  });
+
+  it('does not refetch registration-info after a successful invite', async () => {
+    let registrationInfoRequests = 0;
+
+    server.use(
+      http.get('/admin/registration-info', () => {
+        registrationInfoRequests += 1;
+
+        if (registrationInfoRequests > 1) {
+          return HttpResponse.json(
+            {
+              error: {
+                name: 'ValidationError',
+                message: 'Invalid registrationToken',
+                status: 400,
+              },
+            },
+            { status: 400 }
+          );
+        }
+
+        return HttpResponse.json({
+          data: {
+            email: 'invitee@example.com',
+            firstname: 'Invitee',
+            lastname: 'User',
+          },
+        });
+      }),
+      http.post('/admin/register', () =>
+        HttpResponse.json({
+          data: {
+            token: 'registered-token',
+            user: {
+              id: 2,
+              email: 'invitee@example.com',
+              firstname: 'Invitee',
+              lastname: 'User',
+            },
+          },
+        })
+      )
+    );
+
+    render(<Register />, {
+      initialEntries: ['/auth/register?registrationToken=invite-token'],
+    });
+
+    await waitFor(() => expect(screen.getByLabelText(/^Firstname/i)).toHaveValue('Invitee'));
+
+    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: 'Testing123!' } });
+    fireEvent.change(screen.getByLabelText(/^Confirm Password/i), {
+      target: { value: 'Testing123!' },
+    });
+    fireEvent.submit(document.querySelector('form')!);
+
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { name: 'Welcome to Strapi!' })).not.toBeInTheDocument()
+    );
+    expect(registrationInfoRequests).toBe(1);
+    expect(screen.queryByText('Invalid registrationToken')).not.toBeInTheDocument();
   });
 
   it('should enable all fields on the register-admin route', () => {

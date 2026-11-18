@@ -1,4 +1,4 @@
-import { isNil, get } from 'lodash/fp';
+import { get } from 'lodash';
 import { getService } from '../utils';
 import { FOLDER_MODEL_UID, API_UPLOAD_FOLDER_BASE_NAME } from '../constants';
 
@@ -27,13 +27,13 @@ const createApiUploadFolder = async () => {
 
 const getAPIUploadFolder = async () => {
   const storeValue = await getStore().get({});
-  const folderId = get('id', storeValue);
+  const folderId = get(storeValue, 'id');
 
   const folder = folderId
     ? await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id: folderId } })
     : null;
 
-  return isNil(folder) ? createApiUploadFolder() : folder;
+  return folder == null ? createApiUploadFolder() : folder;
 };
 
 export default {

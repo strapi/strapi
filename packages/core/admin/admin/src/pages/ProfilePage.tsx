@@ -292,8 +292,8 @@ const PasswordSection = () => {
             type: 'password' as const,
           },
         ],
-      ].map((row, index) => (
-        <Grid.Root key={index} gap={5}>
+      ].map((row) => (
+        <Grid.Root key={row.map((field) => field.name).join('.')} gap={5}>
           {row.map(({ size, ...field }) => (
             <Grid.Item
               key={field.name}

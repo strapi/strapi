@@ -29,8 +29,11 @@ export const transformFields = (fields: Fields): Fields => {
 
   // Ensure we are always selecting the documentId
   // ['name', 'description'] => ['name', 'description', 'documentId']
+  //
+  // Returns a new array rather than pushing onto the given one: it belongs to the caller's
+  // query params, which they may reuse.
   if (!fields.includes('documentId')) {
-    fields.push('documentId');
+    return [...fields, 'documentId'];
   }
 
   return fields;

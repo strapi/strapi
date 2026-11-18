@@ -1,8 +1,6 @@
-import { defaultsDeep, filter, pipe } from 'lodash/fp';
-
 import type { Core, UID } from '@strapi/types';
 
-import { getService, getAdminService } from './utils';
+import { getAdminService } from './utils';
 import migrateReviewWorkflowStagesColor from './migrations/set-stages-default-color';
 import migrateReviewWorkflowStagesRoles from './migrations/set-stages-roles';
 import migrateReviewWorkflowStagesTransferToRoles from './migrations/setup-stage-transfer-to-roles';
@@ -12,13 +10,12 @@ import migrateDeletedCTInWorkflows from './migrations/handle-deleted-ct-in-workf
 import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 
 import { getVisibleContentTypesUID, hasStageAttribute } from './utils/review-workflows';
+import { registerReviewWorkflowsEntitlements } from './entitlements';
 
 import {
   ENTITY_STAGE_ATTRIBUTE,
   ENTITY_ASSIGNEE_ATTRIBUTE,
   STAGE_MODEL_UID,
-  MAX_WORKFLOWS,
-  MAX_STAGES_PER_WORKFLOW,
 } from './constants/workflows';
 
 const setRelation = (attributeName: any, target: any, contentType: any) => {
@@ -84,10 +81,9 @@ function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
       };
     };
 
-    const enabledRWContentTypes = pipe([
-      getVisibleContentTypesUID,
-      filter((uid: UID.ContentType) => hasStageAttribute(contentTypes[uid])),
-    ])(contentTypes);
+    const enabledRWContentTypes = getVisibleContentTypesUID(contentTypes).filter((uid) =>
+      hasStageAttribute(contentTypes[uid])
+    );
 
     // Remove previously created join tables and persist the new ones
     const stageJoinTablesToPersist = enabledRWContentTypes.map(getStageTableToPersist);
@@ -119,14 +115,5 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Schema customization
   extendReviewWorkflowContentTypes({ strapi });
 
-  // License limits
-  const reviewWorkflowsOptions = defaultsDeep(
-    {
-      numberOfWorkflows: MAX_WORKFLOWS,
-      stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-    },
-    strapi.ee.features.get('review-workflows')
-  );
-  const workflowsValidationService = getService('validation', { strapi });
-  workflowsValidationService.register(reviewWorkflowsOptions);
+  registerReviewWorkflowsEntitlements(strapi);
 };

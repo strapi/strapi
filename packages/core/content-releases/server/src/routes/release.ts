@@ -129,5 +129,24 @@ export default {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/:id/create-from-skipped-entries',
+      handler: 'release.createFromSkippedEntries',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: [
+                'plugin::content-releases.create',
+                'plugin::content-releases.create-action',
+              ],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

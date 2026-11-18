@@ -93,6 +93,45 @@ export default class MysqlDialect extends Dialect {
     return true;
   }
 
+  /**
+   * Drops the foreign-key constraint named `name` on `table` (MySQL FK names
+   * are unique per database, so a stale one blocks re-creating it on any
+   * table), then the index of the same name. Runs on `trx`.
+   */
+  async dropSchemaObject(
+    trx: Knex,
+    { table, name }: { table: string; name: string }
+  ): Promise<boolean> {
+    let dropped = false;
+
+    const [foreignKeys] = await trx.raw(
+      `SELECT 1
+       FROM information_schema.table_constraints
+       WHERE table_schema = database() AND table_name = ? AND constraint_name = ?
+       AND constraint_type = 'FOREIGN KEY'
+       LIMIT 1`,
+      [table, name]
+    );
+    if (foreignKeys.length > 0) {
+      await trx.raw('ALTER TABLE ?? DROP FOREIGN KEY ??', [table, name]);
+      dropped = true;
+    }
+
+    const [indexes] = await trx.raw(
+      `SELECT 1
+       FROM information_schema.statistics
+       WHERE table_schema = database() AND table_name = ? AND index_name = ?
+       LIMIT 1`,
+      [table, name]
+    );
+    if (indexes.length > 0) {
+      await trx.raw('ALTER TABLE ?? DROP INDEX ??', [table, name]);
+      dropped = true;
+    }
+
+    return dropped;
+  }
+
   transformErrors(error: Error) {
     super.transformErrors(error);
   }

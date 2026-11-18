@@ -5,20 +5,52 @@ import _ from 'lodash';
 
 import { isConfigurable } from '../../utils/attributes';
 
-export type Infos = {
+/**
+ * The UID a schema handler holds: a content-type UID for a content type, a component UID for a
+ * component.
+ */
+export type SchemaHandlerUID = Internal.UID.ContentType | Internal.UID.Component;
+
+export type Infos<TUID extends SchemaHandlerUID = Internal.UID.ContentType> = {
   category?: string;
   modelName?: string;
   plugin?: string;
-  uid?: Internal.UID.ContentType;
+  uid: TUID;
+  /**
+   * `true` when the handler describes a schema the builder is creating, which has no file on disk
+   * yet: rolling it back removes the written file instead of restoring the initial schema.
+   */
+  isNew?: boolean;
   dir: string;
   filename: string;
   schema?: Struct.ContentTypeSchema;
 };
 
-export type SchemaHandler = ReturnType<typeof createSchemaHandler>;
+export type SchemaHandler<TUID extends SchemaHandlerUID = Internal.UID.ContentType> = ReturnType<
+  typeof createSchemaHandler<TUID>
+>;
 
-export default function createSchemaHandler(infos: Infos) {
-  const { category, modelName, plugin, uid, dir, filename, schema } = infos;
+const removeDirectoryIfEmpty = async (dir: string) => {
+  try {
+    const list = await fse.readdir(dir);
+    if (list.length === 0) {
+      await fse.remove(dir);
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw error;
+    }
+  }
+};
+
+/**
+ * `TUID` is never inferred from `infos`: a content-type handler keeps the whole content-type UID
+ * union, and a component handler is created with an explicit `Internal.UID.Component`.
+ */
+export default function createSchemaHandler<
+  TUID extends SchemaHandlerUID = Internal.UID.ContentType,
+>(infos: Infos<NoInfer<TUID>>) {
+  const { category, modelName, plugin, uid, isNew = false, dir, filename, schema } = infos;
 
   const initialState = {
     modelName,
@@ -65,11 +97,16 @@ export default function createSchemaHandler(infos: Infos) {
       return state.uid;
     },
 
+    // the uid the handler was created with (undefined for a new schema)
+    get initialUID() {
+      return initialState.uid;
+    },
+
     get writable() {
       return _.get(state, 'plugin') !== 'admin';
     },
 
-    setUID(val: Internal.UID.ContentType) {
+    setUID(val: TUID) {
       modified = true;
 
       state.uid = val;
@@ -239,10 +276,7 @@ export default function createSchemaHandler(infos: Infos) {
       if (deleted) {
         await fse.remove(initialPath);
 
-        const list = await fse.readdir(initialState.dir);
-        if (list.length === 0) {
-          await fse.remove(initialState.dir);
-        }
+        await removeDirectoryIfEmpty(initialState.dir);
 
         return;
       }
@@ -272,10 +306,7 @@ export default function createSchemaHandler(infos: Infos) {
         if (initialPath !== filePath) {
           await fse.remove(initialPath);
 
-          const list = await fse.readdir(initialState.dir);
-          if (list.length === 0) {
-            await fse.remove(initialState.dir);
-          }
+          await removeDirectoryIfEmpty(initialState.dir);
         }
 
         return;
@@ -294,13 +325,10 @@ export default function createSchemaHandler(infos: Infos) {
       const filePath = path.join(state.dir, state.filename);
 
       // it was a creation so it needs to be deleted
-      if (!initialState.uid) {
+      if (isNew === true) {
         await fse.remove(filePath);
 
-        const list = await fse.readdir(state.dir);
-        if (list.length === 0) {
-          await fse.remove(state.dir);
-        }
+        await removeDirectoryIfEmpty(state.dir);
         return;
       }
 
@@ -312,10 +340,7 @@ export default function createSchemaHandler(infos: Infos) {
         if (initialPath !== filePath) {
           await fse.remove(filePath);
 
-          const list = await fse.readdir(state.dir);
-          if (list.length === 0) {
-            await fse.remove(state.dir);
-          }
+          await removeDirectoryIfEmpty(state.dir);
         }
       }
 

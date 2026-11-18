@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
+import { useUnsavedChangesModalDirty } from '@strapi/admin/strapi-admin';
 import { Flex, Typography, Box, TextInput, Grid, Button, Link } from '@strapi/design-system'; // Added Link
 
 import { ImagePreview } from './components/ImagePreview';
@@ -44,17 +45,19 @@ export const UploadFigmaToChatProvider = ({ children }: { children: React.ReactN
   const [isFigmaUploadOpen, setIsFigmaUploadOpen] = useState(false); // Default to false
   const [submitOnFinish, setSubmitOnFinish] = useState(false);
 
-  const openFigmaUpload = (submitOnFinishParam?: boolean) => {
+  const openFigmaUpload = useCallback((submitOnFinishParam?: boolean) => {
     setIsFigmaUploadOpen(true);
     setSubmitOnFinish(submitOnFinishParam ?? false);
-  };
+  }, []);
 
-  const closeFigmaUpload = () => setIsFigmaUploadOpen(false);
+  const closeFigmaUpload = useCallback(() => setIsFigmaUploadOpen(false), []);
+  const contextValue = useMemo(
+    () => ({ isFigmaUploadOpen, submitOnFinish, openFigmaUpload, closeFigmaUpload }),
+    [isFigmaUploadOpen, submitOnFinish, openFigmaUpload, closeFigmaUpload]
+  );
 
   return (
-    <UploadFigmaContext.Provider
-      value={{ isFigmaUploadOpen, submitOnFinish, openFigmaUpload, closeFigmaUpload }}
-    >
+    <UploadFigmaContext.Provider value={contextValue}>
       {isFigmaUploadOpen && <UploadFigmaModal />}
       {children}
     </UploadFigmaContext.Provider>
@@ -75,6 +78,8 @@ const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl }: FigmaUrlInputStepProps) =>
   const { t } = useTranslations();
   const { isLoading } = useStepModal();
   const [showingTokenInput, setShowingTokenInput] = useState(!hasFigmaToken());
+
+  useUnsavedChangesModalDirty(figmaUrl !== '');
   const [figmaToken, setFigmaToken] = useState<string>(getFigmaToken);
 
   // Handle saving token and returning to URL input

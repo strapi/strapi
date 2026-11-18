@@ -1,6 +1,19 @@
-import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
-import { reducer, prefillParentRelation, type State, type Action } from '../RelationModal';
+import { render, screen } from '@tests/utils';
 
+import { DocumentRBAC } from '../../../../../../features/DocumentRBAC';
+import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
+import {
+  reducer,
+  prefillParentRelation,
+  RelationModalFormBody,
+  type State,
+  type Action,
+  type PendingConnectPatch,
+  type RelationModalFormBodyProps,
+} from '../RelationModal';
+
+import type { DocumentActionProps } from '../../../../../../content-manager';
+import type { UseDocument } from '../../../../../../hooks/useDocument';
 import type { AnyData } from '../../../../utils/data';
 
 describe('Document Modal Reducer', () => {
@@ -28,6 +41,7 @@ describe('Document Modal Reducer', () => {
     confirmDialogIntent: null,
     isModalOpen: false,
     hasUnsavedChanges: false,
+    pendingConnects: {},
   };
 
   // State with history
@@ -36,6 +50,7 @@ describe('Document Modal Reducer', () => {
     confirmDialogIntent: null,
     isModalOpen: true,
     hasUnsavedChanges: false,
+    pendingConnects: {},
   };
 
   // State with unsaved changes
@@ -61,6 +76,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -80,6 +96,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -116,6 +133,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: true,
+        pendingConnects: {},
       });
     });
 
@@ -154,6 +172,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -188,6 +207,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: true,
+        pendingConnects: {},
       });
     });
   });
@@ -253,6 +273,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: false,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -287,6 +308,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: false,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
   });
@@ -322,6 +344,134 @@ describe('Document Modal Reducer', () => {
         ...stateWithUnsavedChanges,
         hasUnsavedChanges: false,
       });
+    });
+  });
+
+  describe('GO_TO_CREATED_RELATION action', () => {
+    it('does not record a pending connect when the parent is the root document (history has fewer than 2 entries)', () => {
+      const stateWithOneEntry: State = {
+        ...initialState,
+        documentHistory: [doc2],
+      };
+      const connectPatch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true, connectPatch },
+      };
+
+      const result = reducer(stateWithOneEntry, action);
+
+      expect(result.pendingConnects).toEqual({});
+    });
+
+    it('records a pending connect for the nested parent when history has 2 or more entries', () => {
+      const stateWithTwoEntries: State = {
+        ...initialState,
+        documentHistory: [doc1, doc2],
+      };
+      const connectPatch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true, connectPatch },
+      };
+
+      const result = reducer(stateWithTwoEntries, action);
+
+      expect(result.pendingConnects).toEqual({
+        'api::articles.article::doc1': [connectPatch],
+      });
+    });
+
+    it('appends to any existing pending connects recorded for the same nested parent', () => {
+      const existingPatch: PendingConnectPatch = {
+        fieldToConnect: 'addresses',
+        relationValue: { connect: [{ id: 2 }], disconnect: [] },
+      };
+      const stateWithPending: State = {
+        ...initialState,
+        documentHistory: [doc1, doc2],
+        pendingConnects: { 'api::articles.article::doc1': [existingPatch] },
+      };
+      const newPatch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true, connectPatch: newPatch },
+      };
+
+      const result = reducer(stateWithPending, action);
+
+      expect(result.pendingConnects).toEqual({
+        'api::articles.article::doc1': [existingPatch, newPatch],
+      });
+    });
+
+    it('replaces the last history entry and resets the connect-trigger fields', () => {
+      const stateBefore: State = {
+        ...initialState,
+        documentHistory: [doc1],
+        fieldToConnect: 'products',
+        fieldToConnectUID: 'some.uid',
+        getParentFormValues: () => ({}),
+        setParentFormValue: () => {},
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true },
+      };
+
+      const result = reducer(stateBefore, action);
+
+      expect(result.documentHistory).toEqual([doc2]);
+      expect(result.fieldToConnect).toBeUndefined();
+      expect(result.fieldToConnectUID).toBeUndefined();
+      expect(result.getParentFormValues).toBeUndefined();
+      expect(result.setParentFormValue).toBeUndefined();
+    });
+  });
+
+  describe('CLEAR_PENDING_CONNECTS action', () => {
+    it('removes pending connects recorded for the given document, leaving others untouched', () => {
+      const patch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const stateWithPending: State = {
+        ...initialState,
+        pendingConnects: {
+          'api::articles.article::doc1': [patch],
+          'api::products.product::doc2': [patch],
+        },
+      };
+      const action: Action = {
+        type: 'CLEAR_PENDING_CONNECTS',
+        payload: { documentMeta: { model: doc1.model, documentId: doc1.documentId } },
+      };
+
+      const result = reducer(stateWithPending, action);
+
+      expect(result.pendingConnects).toEqual({
+        'api::products.product::doc2': [patch],
+      });
+    });
+
+    it('is a no-op when there are no pending connects for the given document', () => {
+      const action: Action = {
+        type: 'CLEAR_PENDING_CONNECTS',
+        payload: { documentMeta: { model: doc1.model, documentId: doc1.documentId } },
+      };
+
+      const result = reducer(initialState, action);
+
+      expect(result).toBe(initialState);
     });
   });
 
@@ -403,5 +553,51 @@ describe('prefillParentRelation', () => {
         parentDocument: { title: 'Draft parent' },
       })
     ).toBe(initialValues);
+  });
+});
+
+describe('RelationModalFormBody', () => {
+  const mockPlugins = {
+    'content-manager': {
+      apis: {
+        getDocumentActions: () => [],
+      },
+    },
+  } as unknown as RelationModalFormBodyProps['plugins'];
+
+  const mockDocumentActionProps = {
+    activeTab: 'draft',
+    collectionType: 'collection-types',
+    model: 'api::address.address',
+    documentId: '12345',
+    document: undefined,
+    meta: undefined,
+  } as unknown as DocumentActionProps;
+
+  const mockCurrentDocument = {
+    document: undefined,
+    schema: undefined,
+  } as unknown as ReturnType<UseDocument>;
+
+  it('shows a loader instead of rendering document actions and the form while permissions are resolving', async () => {
+    render(
+      <DocumentRBAC permissions={[]} model="api::address.address">
+        <RelationModalFormBody
+          currentDocument={mockCurrentDocument}
+          documentTitle="Entry 1"
+          hasDraftAndPublished={false}
+          layout={[]}
+          plugins={mockPlugins}
+          props={mockDocumentActionProps}
+        />
+      </DocumentRBAC>
+    );
+
+    // The document title (and the rest of the form) must not render before permissions resolve.
+    expect(screen.queryByText('Entry 1')).not.toBeInTheDocument();
+    expect(screen.getByText('Relations are loading')).toBeInTheDocument();
+
+    await screen.findByText('Entry 1');
+    expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
   });
 });

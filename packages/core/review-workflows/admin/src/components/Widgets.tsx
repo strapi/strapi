@@ -29,6 +29,13 @@ const RecentDocumentsTable = ({
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
+  // An empty main field returns an empty title, shown as "Untitled" like the rest of the admin
+  const getDocumentTitle = (document: RecentDocument): string =>
+    document.title === '' ? emptyLabel : document.title;
 
   const getEditViewLink = (document: RecentDocument): string => {
     const isSingleType = document.kind === 'singleType';
@@ -50,8 +57,12 @@ const RecentDocumentsTable = ({
         {documents?.map((document) => (
           <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
             <Td>
-              <CellTypography title={document.title} variant="omega" textColor="neutral800">
-                {document.title}
+              <CellTypography
+                title={getDocumentTitle(document)}
+                variant="omega"
+                textColor="neutral800"
+              >
+                {getDocumentTitle(document)}
               </CellTypography>
             </Td>
             <Td>
@@ -84,7 +95,13 @@ const RecentDocumentsTable = ({
               </Typography>
             </Td>
             <Td>
-              <StageColumn strapi_stage={document.strapi_stage} />
+              {document.strapi_stage === null || document.strapi_stage === undefined ? (
+                <Typography textColor="neutral600" aria-hidden>
+                  -
+                </Typography>
+              ) : (
+                <StageColumn strapi_stage={document.strapi_stage} />
+              )}
             </Td>
             <Td onClick={(e) => e.stopPropagation()}>
               <Box display="inline-block">

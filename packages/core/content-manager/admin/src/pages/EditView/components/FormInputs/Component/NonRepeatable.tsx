@@ -17,6 +17,7 @@ const NonRepeatableComponent = ({
   name,
   children,
   layout,
+  disabled,
 }: NonRepeatableComponentProps) => {
   const componentId = useForm(
     'NonRepeatableComponent',
@@ -39,7 +40,12 @@ const NonRepeatableComponent = ({
         hasRadius={isNested}
         borderColor={isNested || isMobile ? 'neutral200' : undefined}
       >
-        <NonRepeatableComponentFields attribute={attribute} name={name} layout={layout}>
+        <NonRepeatableComponentFields
+          attribute={attribute}
+          name={name}
+          layout={layout}
+          disabled={disabled}
+        >
           {children}
         </NonRepeatableComponentFields>
       </Box>
@@ -47,18 +53,23 @@ const NonRepeatableComponent = ({
   );
 };
 
-interface NonRepeatableComponentFieldsProps
-  extends Pick<NonRepeatableComponentProps, 'attribute' | 'children' | 'layout' | 'name'> {}
+interface NonRepeatableComponentFieldsProps extends Pick<
+  NonRepeatableComponentProps,
+  'attribute' | 'children' | 'layout' | 'name' | 'disabled'
+> {}
 
 const NonRepeatableComponentFields = React.memo(
-  ({ attribute, children, layout, name }: NonRepeatableComponentFieldsProps) => {
+  ({ attribute, children, layout, name, disabled }: NonRepeatableComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
       <Flex direction="column" alignItems="stretch" gap={6}>
-        {layout.map((row, index) => {
+        {layout.map((row) => {
           return (
-            <ResponsiveGridRoot gap={{ initial: 3, medium: 4 }} key={index}>
+            <ResponsiveGridRoot
+              gap={{ initial: 3, medium: 4 }}
+              key={row.map((field) => field.name).join('.')}
+            >
               {row.map(({ size, ...field }) => {
                 /**
                  * Layouts are built from schemas so they don't understand the complete
@@ -84,6 +95,9 @@ const NonRepeatableComponentFields = React.memo(
                   >
                     {children({
                       ...field,
+                      // Inherit parent disable (e.g. locked non-localized component on a secondary locale)
+                      disabled: field.disabled || disabled,
+                      size,
                       label: translatedLabel,
                       name: completeFieldName,
                     })}

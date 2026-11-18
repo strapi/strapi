@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import os from 'os';
 import path from 'path';
-import _ from 'lodash';
-import { omit } from 'lodash/fp';
+import _, { omit } from 'lodash';
 import dotenv from 'dotenv';
 import type { Core } from '@strapi/types';
 import { strings } from '@strapi/utils';
@@ -97,7 +96,7 @@ export const loadConfiguration = (opts: StrapiOptions) => {
   };
 
   // See packages/core/core/src/domain/module/index.ts for plugin config loading
-  const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later
+  const baseConfig = omit(loadConfigDir(configDir), 'plugins'); // plugin config will be loaded later
 
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV as string);
   const envConfig = loadConfigDir(envDir);

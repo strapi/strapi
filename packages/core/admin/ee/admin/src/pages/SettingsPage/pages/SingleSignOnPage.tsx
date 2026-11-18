@@ -219,10 +219,6 @@ export const SingleSignOnPage = () => {
                             label: name,
                             value: id.toString(),
                           })),
-                          placeholder: formatMessage({
-                            id: 'components.InputSelect.option.placeholder',
-                            defaultMessage: 'Choose here',
-                          }),
                           size: 6,
                           type: 'enumeration' as const,
                         },

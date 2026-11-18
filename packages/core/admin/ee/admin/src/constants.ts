@@ -75,6 +75,7 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
           to: '/settings/single-sign-on',
           id: 'sso',
           licenseOnly: true,
+          licenseFeature: 'sso',
         },
       ]
     : [],
@@ -86,6 +87,7 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
           to: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
           id: 'auditLogs',
           licenseOnly: true,
+          licenseFeature: 'audit-logs',
         },
       ]
     : [],

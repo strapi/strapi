@@ -1,0 +1,54 @@
+views {
+  view production_operations {
+    title '04 Deployment / Operating responsibilities'
+    link ../self_hosted_deployment/ 'Related: production hosting example'
+    description '''
+      **Audience:** operators and technical product readers. **Type:** responsibility map, not deployed components.
+      **Question:** what must a team design beyond the single-process hosting example?
+      These are explicit operating responsibilities to supply for a self-hosted application, not automatic product guarantees. Replicas share durable storage but each process has its own connections, listeners, queues and jobs.
+      Content Releases implements specific row-lock/state checks; generic cron tasks need their own coordination. The built-in health route checks HTTP reachability, not end-to-end dependency health.
+      Open replicas for an illustrative topology, scheduled work for implementation, rollout for schema evolution, and recovery for its required state.
+    '''
+    include
+      operations_team,
+      replica_operation with { navigateTo replicated_deployment },
+      job_coordination with { navigateTo scheduled_work },
+      upgrade_operation with { navigateTo database_schema_evolution },
+      monitoring_operation,
+      recovery_operation with { navigateTo backup_and_recovery }
+    exclude * -> *
+    include
+      operations_team -> replica_operation,
+      operations_team -> job_coordination,
+      operations_team -> upgrade_operation,
+      operations_team -> monitoring_operation,
+      operations_team -> recovery_operation
+    autoLayout LeftRight 65 40
+  }
+  view backup_and_recovery {
+    title '04 Deployment / Backup and recovery boundaries'
+    link ../data_transfer/ 'Related: data movement and transfer limitations'
+    description '''
+      **Audience:** operators and technical product readers. **Type:** proposed operating responsibility map.
+      **Question:** what must be recovered together for a usable application?
+      Database records, uploaded bytes and compatible application code/configuration are separate recovery inputs. The arrows describe an operator-managed procedure, not a Strapi backup API. Select database/provider-specific tooling and a consistency method; no cross-store atomic snapshot is implied.
+      Restore into an isolated environment and check content, access and media before traffic cutover. Startup may alter a database if code/schema versions differ. Define data-loss and recovery-time objectives for the application.
+      Content History is not a full backup, and import/export/transfer does not preserve every infrastructure or database detail. Open compatible inputs for application state. The related Data movement link explains transfer scope separately; it is not the recovery procedure.
+    '''
+    include
+      recovery_operation,
+      database_backup,
+      media_backup,
+      recovery_build with { navigateTo application_state },
+      recovery_check
+    exclude * -> *
+    include
+      recovery_operation -> database_backup,
+      recovery_operation -> media_backup,
+      recovery_operation -> recovery_build,
+      database_backup -> recovery_check,
+      media_backup -> recovery_check,
+      recovery_build -> recovery_check
+    autoLayout LeftRight 65 40
+  }
+}
