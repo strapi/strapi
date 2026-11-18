@@ -6037,21 +6037,30 @@ If a user has several roles, the user will be allowed to perform an action if at
 
 An action contains the following information:
 
-| key                           | description                                                                                                                                                                                                                 | type   | required | Default value | example                    |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------- | -------------------------- |
-| **uid**                       | An id that has to be unique within the plugin.                                                                                                                                                                              | string | required | -             | `'audit-logs.read'`        |
-| **pluginName**                | Name of the plugin registering the action.                                                                                                                                                                                  | string | -        | `'api'`       | `'admin'`                  |
-| **section**                   | Name of the section among `contentTypes`, `plugins`, `settings` and `internal`. It will define in which permission tab the action will appear.  `internal` is not displayed in any tab but used for internal purposes. | string | required | -             | `'settings'`               |
-| **category**                  | Name of the category. It will define in which category the action will appear. _Only for the plugins and settings section_.                                                                                                 | string | -        | -             | `'audit logs'`             |
-| **subCategory**               | Name of the subcategory. It will define in which subcategory or the category the action will appear. _Only for the plugins and settings section_.                                                                           | string | -        | -             | `'options'`                |
-| **displayName**               | Human name of the action.                                                                                                                                                                                                   | string | required | -             | `'Read'`                   |
-| **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                                                                                                         | array  | -        | -             | `['api::article.article']` |
-| **options**                   | Option object                                                                                                                                                                                                               | object | -        | `{}`          | `{}`                       |
-| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                                                                                                       | -      | -        | `[]`          | `['fields', 'locale']`     |
+| key                           | description                                                                                                                                                                                                                 | type   | required                                | Default value                                         | example                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------- | ----------------------------------------------------- | -------------------------- |
+| **uid**                       | An id that has to be unique within the plugin. At least 3 characters: lowercase letters, dots and hyphens (the pattern also accepts the pipe character), starting and ending with a letter.                                 | string | required                                | -                                                     | `'audit-logs.read'`        |
+| **pluginName**                | Name of the plugin registering the action: `admin` or a loaded plugin. Without it, the action belongs to the application (`api::`).                                                                                         | string | required for the `plugins` section      | -                                                     | `'admin'`                  |
+| **section**                   | Name of the section among `contentTypes`, `plugins`, `settings` and `internal`. It will define in which permission tab the action will appear.  `internal` is not displayed in any tab but used for internal purposes. | string | required                                | -                                                     | `'settings'`               |
+| **category**                  | Name of the category. It will define in which category the action will appear. _Only for the settings section_.                                                                                                             | string | required for the `settings` section     | -                                                     | `'audit logs'`             |
+| **subCategory**               | Name of the subcategory. It will define in which subcategory of the category the action will appear. _Only for the plugins and settings sections_.                                                                          | string | -                                       | `'general'` for the `plugins` and `settings` sections | `'options'`                |
+| **displayName**               | Human name of the action.                                                                                                                                                                                                   | string | required                                | -                                                     | `'Read'`                   |
+| **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                                                                                                         | array  | required for the `contentTypes` section | -                                                     | `['api::article.article']` |
+| **options**                   | Option object                                                                                                                                                                                                               | object | -                                       | `{ applyToProperties: null }`                         | `{}`                       |
+| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                                                                                                       | array  | -                                       | `null`                                                | `['fields', 'locales']`    |
 
 ![Screenshot of the RBAC edit page showing the where are located the section, category, subcategory and display name](/img/permissions/rbac-edit-page.png)
 
 _above: Screenshot of the RBAC edit page showing the where are located the section, category, subcategory and display name_
+
+`actionProvider.register` and `registerMany` validate each action with the zod schema `actionRegistrationSchema` in [`validation/action-provider.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/validation/action-provider.ts). They throw a `ValidationError` when:
+
+- a required key of the section is missing, `displayName` or `category` is an empty string, a key has the wrong type, or `section` is not one of the four sections;
+- the action has an own top-level key that is neither in the table above nor `aliases` (keys inherited from the prototype, and unknown keys inside `options` and inside `aliases` items, are accepted);
+- the action has a key that its section does not allow, with a value other than `undefined` (for example `category: undefined` on a `plugins` action is accepted);
+- `pluginName` is not `admin` or a loaded plugin, or `uid` does not match its format.
+
+Arrays may hold `undefined` items. String values must be primitive strings: a boxed string (`new String('…')`) is rejected, unlike with the yup schema used before. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `- <path> <message>` line per issue. An issue on the whole input (for example, an input that is not an array) has no path, so it reads `<message>` only. `details.errors` lists every issue with its `path`, `message` and the input `value` at that path. `strapi develop` and `strapi build` print them in a `Details:` box; `strapi start` does not.
 
 :::note
 `uid` and `pluginName` are used to create a global unique id.
@@ -9322,7 +9331,7 @@ The `server` service wraps a Koa app. It builds the route managers for the admin
 
 #### Core API factories
 
-`createCoreController`, `createCoreService`, `createCoreRouter` and `createCoreValidator` in `src/factories.ts` build the default controller, service, router and validator of a content type. A user extends the default with a config object or callback. The exports are available as `factories` from `@strapi/strapi`. Code: [`src/core-api`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/core-api).
+`createCoreController`, `createCoreService`, `createCoreRouter` and `createCoreValidator` in `src/factories.ts` build the default controller, service, router and validator of a content type. A user extends the default with a config object or callback. `createUploadProvider`, also in `src/factories.ts`, types an upload provider module that an application writes and returns it unchanged (see [Providers](../upload/01-backend/00-providers.md)). The exports are available as `factories` from `@strapi/strapi`. Code: [`src/core-api`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/core-api).
 
 #### Enterprise Edition gate
 
@@ -14229,6 +14238,7 @@ The package README marks it as internal. Application developers import the same 
 - `UID`: the UID types. They read the public registries.
 - `Internal`: the low-level `Namespace`, `UID` and `Registry` types. They do not depend on an application.
 - `Public`: the public registries that applications augment.
+- `Providers`: the contracts that provider packages implement. `Providers.Upload` holds the upload provider contract (see [Providers](../upload/01-backend/00-providers.md)).
 - `Plugin`: the `LoadedPlugin` shape, the `IsEnabled` helper and the `Config` types for the `strapi-server` and `strapi-admin` entry points.
 - `Utils`: type helpers, such as `Get`, `If` and the `Object`, `String` and `Guard` groups.
 
@@ -15265,13 +15275,112 @@ More info about installing providers on [strapi docs](https://docs.strapi.io/dev
 
 ### Provider development
 
-To create a provider, you need to create a package that exports a function that returns an object with the following methods:
+A provider is a module that exports an `init(providerOptions)` function. The upload plugin loads the module in `createProvider` ([`server/src/register.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/upload/server/src/register.ts)) with `require`, calls `init` with the `providerOptions` of the upload config, and checks the object it returns. The plugin reads `init` from what `require` returns, with no `.default` interop, so the module's CommonJS export must be the object that holds `init`. Members besides `init` are allowed on the module, such as a `name`.
 
-- `isPrivate()` (optional) - Returns a boolean indicating if the provider is private or not. If it is, the `getSignedUrl` method will be used to get the URL of the file. (default: `false`)
-- `getSignedUrl(file)`. (optional) - Returns a signed URL to access the file if it requires authentication
-- `upload(file)` - Uploads a file to the provider
-- `uploadStream(stream)` (optional) - Uploads a stream to the provider
-- `delete(file)` - Deletes a file from the provider
+The object `init` returns has the following methods:
+
+- `upload(file)` or `uploadStream(file)`: at least one. They store the file and set its `url`. The plugin calls `uploadStream` when the provider implements it, with a `stream` on the file, and `upload` otherwise, with a `buffer` on the file.
+- `delete(file)` (required): deletes a stored file, or one of its `formats`.
+- `replace(newFile, oldFile)` and `replaceStream(newFile, oldFile)` (optional): replace a stored file in place. Without them, the plugin deletes the old file and uploads the new one.
+- `checkFileSize(file, { sizeLimit })` (optional): throws when the file is too large. Without it, the plugin checks `sizeLimit` itself.
+- `isPrivate()` (optional): whether files need a signed URL. Without it, files are public.
+- `getSignedUrl(file)` (optional): returns `{ url }`, called only when `isPrivate()` returns `true`. Besides stored files, it signs the URLs the plugin finds in rich text and blocks. For those, the file has only `url`, `hash`, `ext` and `provider`, taken from the URL.
+
+Each method can answer synchronously or with a promise. `upload`, `uploadStream`, `delete` and `getSignedUrl` get the method's entry of the `actionOptions` config as their second argument. `checkFileSize` gets `{ sizeLimit }` instead, and `replace` and `replaceStream` get the old file. Members outside this list are allowed. The plugin wraps every member of the object in an async function, so `strapi.plugin('upload').provider` is not the object `init` returns.
+
+Omit the members you do not implement, and never set one to `undefined`, as in `uploadStream: canStream ? uploadStream : undefined`. The plugin wraps every own key of the object, so an `undefined` member becomes a function that throws when called, and it hides the plugin's default for `isPrivate`, `getSignedUrl` and `checkFileSize`.
+
+#### Typing a provider
+
+`@strapi/types` holds this contract as `Providers.Upload` ([`src/providers/upload.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/providers/upload.ts)):
+
+- `Factory<Options>`: the provider module. `Options` types the `providerOptions`.
+- `Provider`: the object `init` returns.
+- `ProviderFile`: the file fields providers read and set. The upload plugin's own file types satisfy it.
+- `StoredProviderFile`: a stored file, with its `url`. `delete`, and the old file of `replace` and `replaceStream`, get it.
+- `SignableProviderFile`: what `getSignedUrl` gets: `url`, `hash`, `ext`, `path` and `provider`.
+- `ActionOptions`: the action options, a loose record.
+- `CheckFileSizeOptions`: the second argument of `checkFileSize`.
+
+The package root also exports them as named types (`UploadProviderFactory`, `UploadProvider`, `UploadProviderFile`, and so on), so the declarations that a provider emits import them from `@strapi/types` itself.
+
+The methods use method syntax, so a provider can declare its own, narrower file and options types, as the bundled providers do.
+
+##### In a provider package
+
+Check the module with `satisfies`. It needs `@strapi/types` only as a dev dependency, through a type-only import, and no runtime dependency on Strapi. Export the module with `export =`, so the compiled module is the CommonJS export the plugin reads:
+
+```ts
+import type { Providers } from '@strapi/types';
+
+type Options = { baseUrl: string };
+
+export = {
+  init(options: Options) {
+    return {
+      async uploadStream(file) {
+        file.url = `${options.baseUrl}/${file.hash}${file.ext}`;
+      },
+      async delete(file) {},
+    };
+  },
+} satisfies Providers.Upload.Factory<Options>;
+```
+
+`export default` compiles to `exports.default`, which the plugin does not read, and fails at boot with `provider.init is not a function`. A bundler must emit `module.exports =` for the default export, as rollup does with `output.exports: 'auto'` or `'default'`.
+
+`satisfies` on the object literal types the parameters that the provider leaves to inference from the contract. For example, `customParams = {}` becomes `ActionOptions`. To keep their own types, declare the module first and check it in a separate statement, as the bundled providers do:
+
+```ts
+const providerModule = {
+  init(options: Options) {
+    // ...
+  },
+};
+
+providerModule satisfies Providers.Upload.Factory<Options>;
+
+export = providerModule;
+```
+
+##### In an application
+
+`factories.createUploadProvider` from `@strapi/strapi` types a module where it is written and returns it unchanged, with its own type: `init`'s parameters and the provider's members outside the contract keep theirs. Annotate `init`'s options, with an inline type or an interface: without an annotation, they are the `providerOptions` record of the upload config.
+
+```ts
+import { factories } from '@strapi/strapi';
+
+export = factories.createUploadProvider({
+  init(options: { baseUrl: string }) {
+    return {
+      async uploadStream(file) {
+        file.url = `${options.baseUrl}/${file.hash}${file.ext}`;
+      },
+      async delete(file) {},
+    };
+  },
+});
+```
+
+Editors complete the contract members in JavaScript too. Use `module.exports =` and type the options with JSDoc:
+
+```js
+const { factories } = require('@strapi/strapi');
+
+module.exports = factories.createUploadProvider({
+  /** @param {{ baseUrl: string }} options */
+  init(options) {
+    return {
+      async uploadStream(file) {
+        file.url = `${options.baseUrl}/${file.hash}${file.ext}`;
+      },
+      async delete(file) {},
+    };
+  },
+});
+```
+
+An application can also use `satisfies`, with `import type { Providers } from '@strapi/strapi'`.
 
 ---
 
