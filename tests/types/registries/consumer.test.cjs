@@ -699,6 +699,17 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: role permissions hooks type their handlers`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'role-hooks.ts']),
+      `${resolution}, role permissions hooks`
+    );
+    assertClean(
+      compile(['role-hooks-permissive.ts']),
+      `${resolution}, role permissions hooks without strict types`
+    );
+  });
+
   test(`${resolution}: an empty middleware inventory accepts no name`, () => {
     assertClean(
       compile(['settings.d.ts', 'middlewares-empty.ts']),
