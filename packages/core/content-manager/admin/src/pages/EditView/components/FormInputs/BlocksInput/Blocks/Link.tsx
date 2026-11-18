@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Field, Flex, Popover } from '@strapi/design-system';
 // Subpath import only: the `@strapi/utils` root pulls in Node-only modules.
-import { ALLOWED_LINK_PROTOCOLS, isValidBlocksLink } from '@strapi/utils/blocks-link';
+import { isValidAbsoluteBlocksLink, isValidBlocksLink } from '@strapi/utils/blocks-link';
 import { useIntl } from 'react-intl';
 import {
   BaseEditor,
@@ -25,14 +25,6 @@ import type { Schema } from '@strapi/types';
 
 const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNode => {
   return element.type === 'link';
-};
-
-const isValidAbsoluteLink = (link: string) => {
-  try {
-    return ALLOWED_LINK_PROTOCOLS.has(new URL(link).protocol);
-  } catch {
-    return false;
-  }
 };
 
 const removeLink = (editor: Editor) => {
@@ -398,7 +390,7 @@ const withLinks = (editor: Editor) => {
     const pastedText = data.getData('text/plain');
 
     if (pastedText) {
-      if (isValidAbsoluteLink(pastedText)) {
+      if (isValidAbsoluteBlocksLink(pastedText)) {
         // Do not show link popup on copy-paste a link, so do not save its path
         editor.shouldSaveLinkPath = false;
         insertLink(editor, { url: pastedText });
