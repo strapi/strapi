@@ -381,6 +381,9 @@ export type StagesService = {
   /**
    * Resolves the stages of a workflow.
    *
+   * `populate` goes to `strapi.db.query` as is, which rejects a top-level string, `'*'` included
+   * ("Populate must be an object"): use an array or an object.
+   *
    * @internal
    */
   find(params: {
@@ -390,6 +393,9 @@ export type StagesService = {
   /**
    * Resolves the stage with this ID, `null` when there is none or, when `workflowId` is given, when
    * the stage belongs to another workflow.
+   *
+   * `populate` goes to `strapi.db.query` as is, which rejects a top-level string, `'*'` included
+   * ("Populate must be an object"): use an array or an object.
    *
    * @internal
    */
