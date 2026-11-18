@@ -30,7 +30,7 @@ export const appProvider = createUploadProvider({
         return { url: `${file.url}?signature` };
       },
       outboxPath(): string {
-        return '/tmp/outbox';
+        return 'outbox';
       },
     };
   },

@@ -5,7 +5,7 @@
  * Modules are checked with `satisfies`, the way provider packages check theirs. The bundled
  * providers (`@strapi/provider-upload-local`, `-aws-s3`, `-cloudinary`) check their own module in
  * their sources, since `@strapi/types` cannot depend on them. The application helper,
- * `factories.createUploadProvider`, is tested in @strapi/core (src/__type-tests__/upload-provider.ts).
+ * `factories.createUploadProvider`, is tested in @strapi/core (src/__type-tests__/upload-provider.test.ts).
  */
 import type { Readable } from 'node:stream';
 
@@ -31,7 +31,7 @@ export const appProvider = {
         return { url: `${file.url}?signature` };
       },
       outboxPath(): string {
-        return '/tmp/outbox';
+        return 'outbox';
       },
     };
   },
