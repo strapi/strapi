@@ -20,6 +20,9 @@ yarn nx run @strapi/tests-cli:test
 yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, about 10 s
 ```
 
+The ui suite also runs with `npx playwright test`, UI mode (`--ui`) and the VS Code extension,
+on Chromium locally and on Chromium and WebKit in CI. See the [ui README](ui/README.md).
+
 - **Build first.** The apps run the workspace packages from their `dist`. Without a build, app
   generation fails with `Cannot find module '…/create-strapi-app/dist/index.js'`. With a stale
   build, the suites run against the old code. CI builds before these jobs.
@@ -44,7 +47,7 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
   (`shared/src/edition`) for every suite. `ee` needs `STRAPI_LICENSE`; without it, or when
   Strapi rejects the license and boots as CE, the run fails instead of testing CE. A CE run
   removes any license from the app env. See [Edition](#edition).
-- **One ui worker** for now: each worker will need its own app and database first.
+- **One ui worker** for now: each worker will need its own app and database first (CMS-2483).
 - **Windows** is not supported yet: stopping a server signals its process group.
 
 ## Set up an app
