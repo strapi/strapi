@@ -3,6 +3,10 @@ title: How Permissions Work
 description: 'Explanation of how permissions are evaluated and enforced in admin.'
 tags:
   - rbac
+status: needs-review
+review_notes:
+  - 'Verified against the code: the "Action definition" table and the validation paragraph under it (`validation/action-provider.ts`, defaults in `domain/action/index.ts`).'
+  - 'Not verified: "Overview", the example and the cleanup rules in "Register an action", "Parametrize actions", "Conditions" and "Permissions" (definition and ceiling).'
 ---
 
 ## Overview
@@ -32,21 +36,30 @@ If a user has several roles, the user will be allowed to perform an action if at
 
 An action contains the following information:
 
-| key                           | description                                                                                                                                                                                                                 | type   | required | Default value | example                    |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------- | -------------------------- |
-| **uid**                       | An id that has to be unique within the plugin.                                                                                                                                                                              | string | required | -             | `'audit-logs.read'`        |
-| **pluginName**                | Name of the plugin registering the action.                                                                                                                                                                                  | string | -        | `'api'`       | `'admin'`                  |
-| **section**                   | Name of the section among `contentTypes`, `plugins`, `settings` and `internal`. It will define in which permission tab the action will appear. <br/> `internal` is not displayed in any tab but used for internal purposes. | string | required | -             | `'settings'`               |
-| **category**                  | Name of the category. It will define in which category the action will appear. _Only for the plugins and settings section_.                                                                                                 | string | -        | -             | `'audit logs'`             |
-| **subCategory**               | Name of the subcategory. It will define in which subcategory or the category the action will appear. _Only for the plugins and settings section_.                                                                           | string | -        | -             | `'options'`                |
-| **displayName**               | Human name of the action.                                                                                                                                                                                                   | string | required | -             | `'Read'`                   |
-| **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                                                                                                         | array  | -        | -             | `['api::article.article']` |
-| **options**                   | Option object                                                                                                                                                                                                               | object | -        | `{}`          | `{}`                       |
-| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                                                                                                       | -      | -        | `[]`          | `['fields', 'locale']`     |
+| key                           | description                                                                                                                                                                                                                 | type   | required                                | Default value                                         | example                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------- | ----------------------------------------------------- | -------------------------- |
+| **uid**                       | An id that has to be unique within the plugin. At least 3 characters: lowercase letters, dots and hyphens (the pattern also accepts the pipe character), starting and ending with a letter.                                 | string | required                                | -                                                     | `'audit-logs.read'`        |
+| **pluginName**                | Name of the plugin registering the action: `admin` or a loaded plugin. Without it, the action belongs to the application (`api::`).                                                                                         | string | required for the `plugins` section      | -                                                     | `'admin'`                  |
+| **section**                   | Name of the section among `contentTypes`, `plugins`, `settings` and `internal`. It will define in which permission tab the action will appear. <br/> `internal` is not displayed in any tab but used for internal purposes. | string | required                                | -                                                     | `'settings'`               |
+| **category**                  | Name of the category. It will define in which category the action will appear. _Only for the settings section_.                                                                                                             | string | required for the `settings` section     | -                                                     | `'audit logs'`             |
+| **subCategory**               | Name of the subcategory. It will define in which subcategory of the category the action will appear. _Only for the plugins and settings sections_.                                                                          | string | -                                       | `'general'` for the `plugins` and `settings` sections | `'options'`                |
+| **displayName**               | Human name of the action.                                                                                                                                                                                                   | string | required                                | -                                                     | `'Read'`                   |
+| **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                                                                                                         | array  | required for the `contentTypes` section | -                                                     | `['api::article.article']` |
+| **options**                   | Option object                                                                                                                                                                                                               | object | -                                       | `{ applyToProperties: null }`                         | `{}`                       |
+| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                                                                                                       | array  | -                                       | `null`                                                | `['fields', 'locales']`    |
 
 ![Screenshot of the RBAC edit page showing the where are located the section, category, subcategory and display name](/img/permissions/rbac-edit-page.png)
 
 _above: Screenshot of the RBAC edit page showing the where are located the section, category, subcategory and display name_
+
+`actionProvider.register` and `registerMany` validate each action with the zod schema `actionRegistrationSchema` in [`validation/action-provider.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/validation/action-provider.ts). They throw a `ValidationError` when:
+
+- a required key of the section is missing, `displayName` or `category` is an empty string, a key has the wrong type, or `section` is not one of the four sections;
+- the action has an own top-level key that is neither in the table above nor `aliases` (keys inherited from the prototype, and unknown keys inside `options` and inside `aliases` items, are accepted);
+- the action has a key that its section does not allow, with a value other than `undefined` (for example `category: undefined` on a `plugins` action is accepted);
+- `pluginName` is not `admin` or a loaded plugin, or `uid` does not match its format.
+
+Arrays may hold `undefined` items. String values must be primitive strings: a boxed string (`new String('…')`) is rejected, unlike with the yup schema used before. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `- <path> <message>` line per issue. An issue on the whole input (for example, an input that is not an array) has no path, so it reads `<message>` only. `details.errors` lists every issue with its `path`, `message` and the input `value` at that path. `strapi develop` and `strapi build` print them in a `Details:` box; `strapi start` does not.
 
 :::note
 `uid` and `pluginName` are used to create a global unique id.
