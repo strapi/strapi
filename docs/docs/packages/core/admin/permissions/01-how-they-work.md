@@ -59,7 +59,7 @@ _above: Screenshot of the RBAC edit page showing the where are located the secti
 - the action has a key that its section does not allow, with a value other than `undefined` (for example `category: undefined` on a `plugins` action is accepted);
 - `pluginName` is not `admin` or a loaded plugin, or `uid` does not match its format.
 
-Arrays may hold `undefined` items. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `- <path> <message>` line per issue. An issue on the whole input (for example, an input that is not an array) has no path, so it reads `<message>` only. `details.errors` lists every issue with its `path`, `message` and the input `value` at that path. The CLI prints them in a `Details:` box.
+Arrays may hold `undefined` items. String values must be primitive strings: a boxed string (`new String('…')`) is rejected, unlike with the yup schema used before. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `- <path> <message>` line per issue. An issue on the whole input (for example, an input that is not an array) has no path, so it reads `<message>` only. `details.errors` lists every issue with its `path`, `message` and the input `value` at that path. `strapi develop` and `strapi build` print them in a `Details:` box; `strapi start` does not.
 
 :::note
 `uid` and `pluginName` are used to create a global unique id.
