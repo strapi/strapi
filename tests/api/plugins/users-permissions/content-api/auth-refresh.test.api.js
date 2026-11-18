@@ -428,4 +428,80 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(refreshRes.body.error.message).toBe('Invalid refresh token');
     });
   });
+
+  describe('Register and change password honour sessions.httpOnly', () => {
+    const registerUser = (userInfo) =>
+      createAuthRequest()({
+        method: 'POST',
+        url: '/local/register',
+        body: {
+          username: userInfo.username,
+          email: userInfo.email,
+          password: userInfo.password,
+        },
+      });
+
+    const changePassword = (jwt, currentPassword, password) =>
+      createAuthRequestWithToken(jwt)({
+        method: 'POST',
+        url: '/change-password',
+        body: { currentPassword, password, passwordConfirmation: password },
+      });
+
+    test('httpOnly=false: register and change-password return refreshToken in JSON, no cookie set', async () => {
+      await recreateStrapiInstance({ httpOnly: false, disableRateLimit: true });
+
+      const newUser = {
+        username: 'test-refresh-register-json',
+        email: 'test-refresh-register-json@strapi.io',
+        password: 'Register1234!',
+      };
+
+      const registerRes = await registerUser(newUser);
+
+      expect(registerRes.statusCode).toBe(200);
+      expect(registerRes.body.jwt).toEqual(expect.any(String));
+      expect(registerRes.body.refreshToken).toEqual(expect.any(String));
+      expectNoCookie(registerRes);
+
+      const changeRes = await changePassword(
+        registerRes.body.jwt,
+        newUser.password,
+        'Register12345!'
+      );
+
+      expect(changeRes.statusCode).toBe(200);
+      expect(changeRes.body.jwt).toEqual(expect.any(String));
+      expect(changeRes.body.refreshToken).toEqual(expect.any(String));
+      expectNoCookie(changeRes);
+    });
+
+    test('httpOnly=true: register and change-password set the cookie and omit refreshToken', async () => {
+      await recreateStrapiInstance({ httpOnly: true, disableRateLimit: true });
+
+      const newUser = {
+        username: 'test-refresh-register-cookie',
+        email: 'test-refresh-register-cookie@strapi.io',
+        password: 'Register1234!',
+      };
+
+      const registerRes = await registerUser(newUser);
+
+      expect(registerRes.statusCode).toBe(200);
+      expect(registerRes.body.jwt).toEqual(expect.any(String));
+      expect(registerRes.body.refreshToken).toBeUndefined();
+      expectHttpOnlyCookie(registerRes);
+
+      const changeRes = await changePassword(
+        registerRes.body.jwt,
+        newUser.password,
+        'Register12345!'
+      );
+
+      expect(changeRes.statusCode).toBe(200);
+      expect(changeRes.body.jwt).toEqual(expect.any(String));
+      expect(changeRes.body.refreshToken).toBeUndefined();
+      expectHttpOnlyCookie(changeRes);
+    });
+  });
 });
