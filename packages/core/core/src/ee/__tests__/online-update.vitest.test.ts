@@ -238,6 +238,23 @@ describe('admin users report after an admin user change', () => {
     expect(license.reportAdminUsers).toHaveBeenCalledTimes(2);
   });
 
+  it('stops reporting once the registry rejects the license', async () => {
+    const { strapi, license, eeModule } = await setup();
+    const { LicenseCheckError } = await import('../license');
+    await eeModule.checkLicense({ strapi });
+    await vi.waitFor(() => expect(license.reportAdminUsers).toHaveBeenCalledTimes(1));
+
+    // The next 12-hour check: the subscription was cancelled in the meantime
+    license.fetchLicense.mockRejectedValue(new LicenseCheckError('Subscription cancelled.'));
+    await strapi.cron.add.mock.calls[0][0].onlineUpdate.task();
+    vi.useFakeTimers();
+
+    subscribed(strapi).afterCreate({ params: {} });
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    expect(license.reportAdminUsers).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores updates that change neither the status nor the email', async () => {
     const { strapi, license, eeModule } = await setup();
     await eeModule.checkLicense({ strapi });
