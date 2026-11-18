@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/client';
 import { InMemoryTransport } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
@@ -9,9 +10,9 @@ const AUTH: Modules.MCP.McpCapabilityAuth = { policies: [{ action: 'test.read' }
 
 const createStrapi = () =>
   ({
-    log: { error: jest.fn(), info: jest.fn(), debug: jest.fn() },
-    telemetry: { send: jest.fn().mockResolvedValue(true) },
-  }) as unknown as Core.Strapi;
+    log: { error: vi.fn(), info: vi.fn(), debug: vi.fn() },
+    telemetry: { send: vi.fn().mockResolvedValue(true) },
+  } as unknown as Core.Strapi);
 
 const createHandler = () => async () => ({
   messages: [{ role: 'user' as const, content: { type: 'text' as const, text: 'ok' } }],
@@ -31,7 +32,7 @@ const connectClient = async (
       ),
     },
     isDevMode: false,
-    ability: { can: jest.fn(() => true) },
+    ability: { can: vi.fn(() => true) },
     user: { id: 1 },
   });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();

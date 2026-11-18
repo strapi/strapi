@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import type { StandardSchemaWithJSON } from '@modelcontextprotocol/server';
 import { z } from '@strapi/utils';
 import { assertSchemaConvertsToJsonSchema } from '../assertSchemaConvertsToJsonSchema';
@@ -71,7 +72,7 @@ describe('assertSchemaConvertsToJsonSchema', () => {
 
     test('rejects other schema libraries', () => {
       const schema = {
-        '~standard': { version: 1, vendor: 'acme', validate: jest.fn() },
+        '~standard': { version: 1, vendor: 'acme', validate: vi.fn() },
       } as unknown as StandardSchemaWithJSON;
 
       expect(() => assertSchemaConvertsToJsonSchema(schema, 'input')).toThrow(
