@@ -34,7 +34,38 @@ const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION, ROLE_TEXT_MAX_LENGTH } = roleCon
 const { createAsyncSeriesWaterfallHook } = hooksUtils;
 const { ApplicationError, ForbiddenError } = errors;
 
-const hooks = {
+/**
+ * A role permission as the hooks receive it: the update payload (`controllers/role.ts`) carries no
+ * `id`, timestamps or `actionParameters`, while the stored and built permissions do.
+ */
+export type RolePermissionInput = Omit<
+  Permission,
+  'id' | 'createdAt' | 'updatedAt' | 'actionParameters'
+>;
+
+/**
+ * A handler of the role permissions hooks. It receives the permissions the previous handler
+ * resolved to, the caller's permissions for the first one, and resolves to the permissions to keep.
+ */
+export type RolePermissionsHandler = (
+  permissions: RolePermissionInput[]
+) => RolePermissionInput[] | Promise<RolePermissionInput[]>;
+
+/**
+ * A role permissions hook: typed with strict types, develop's untyped waterfall hook without them.
+ * Exported so the declaration emit keeps the gate instead of resolving it with strict types off.
+ */
+export type RolePermissionsHook = ReturnType<
+  typeof createAsyncSeriesWaterfallHook<
+    Core.IsStrict extends true ? RolePermissionsHandler : hooksUtils.Handler
+  >
+>;
+
+const hooks: {
+  willCreateDefaultRolePermissions: RolePermissionsHook;
+  willResetSuperAdminPermissions: RolePermissionsHook;
+  willValidateUpdatePermissions: RolePermissionsHook;
+} = {
   // Gets the content-type permissions of the Editor and Author roles created at first boot
   willCreateDefaultRolePermissions: createAsyncSeriesWaterfallHook(),
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
