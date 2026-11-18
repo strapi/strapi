@@ -46,7 +46,7 @@ An action contains the following information:
 | **displayName**               | Human name of the action.                                                                                                                                                                                                   | string | required                                | -                                                     | `'Read'`                   |
 | **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                                                                                                         | array  | required for the `contentTypes` section | -                                                     | `['api::article.article']` |
 | **options**                   | Option object                                                                                                                                                                                                               | object | -                                       | `{ applyToProperties: null }`                         | `{}`                       |
-| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                                                                                                       | array  | -                                       | `null`                                                | `['fields', 'locale']`     |
+| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                                                                                                       | array  | -                                       | `null`                                                | `['fields', 'locales']`    |
 
 ![Screenshot of the RBAC edit page showing the where are located the section, category, subcategory and display name](/img/permissions/rbac-edit-page.png)
 
@@ -59,7 +59,7 @@ _above: Screenshot of the RBAC edit page showing the where are located the secti
 - the action has a key that its section does not allow, with a value other than `undefined` (for example `category: undefined` on a `plugins` action is accepted);
 - `pluginName` is not `admin` or a loaded plugin, or `uid` does not match its format.
 
-Arrays may hold `undefined` items. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `<path> <message>` line per issue. `details.errors` lists every issue.
+Arrays may hold `undefined` items. With one issue, the message is `<path> <message>`, for example `[0].pluginName Invalid input: expected string, received undefined`. With several, the message is `<count> errors occurred:` followed by one `- <path> <message>` line per issue. An issue on the whole input (for example, an input that is not an array) has no path, so it reads `<message>` only. `details.errors` lists every issue with its `path`, `message` and the input `value` at that path. The CLI prints them in a `Details:` box.
 
 :::note
 `uid` and `pluginName` are used to create a global unique id.
