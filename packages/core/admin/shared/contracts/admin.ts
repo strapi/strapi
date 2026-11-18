@@ -274,10 +274,6 @@ export declare namespace GetLicenseLimitInformation {
        * an instance that has never reached the registry and so has nothing cached.
        */
       registrySyncErrorKind: 'unreachable' | 'rejected' | null;
-      /**
-       * Active admin users the license registry counted across all instances. Information only.
-       * `null` for offline licenses and until the registry answered.
-       */
       adminUsersAcrossInstances?: {
         activeUsers: number;
         contractedUsers: number | null;
