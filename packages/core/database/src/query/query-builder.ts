@@ -173,8 +173,7 @@ const createQueryBuilder = (
 
   const isScoped = () => state.scoped && !db.unstable_scopes.isEmpty();
 
-  // `EXISTS (SELECT 1 FROM <target> AS tN WHERE tN.id = <alias>.<idColumn> AND <scopes>)`, or
-  // undefined without a scope. Not IN: SQLite probes the link index once per row and per visible id
+  // EXISTS, not IN: with IN, SQLite probes the link index once per row and per visible id
   const scopeJoin = (alias: string, targetUid: string, idColumn = 'id') => {
     // A join reads its target, also inside an update or delete
     const wheres = db.unstable_scopes.where({

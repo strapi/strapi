@@ -10,14 +10,10 @@ export interface Join {
   rootTable?: string;
   on?: Record<string, any>;
   orderBy?: Record<string, 'asc' | 'desc'>;
-  /**
-   * Model whose scopes narrow this join: the joined model, or the target of a join table. A join
-   * table carries it so a link to a hidden target matches nothing, not a row of NULLs
-   */
+  /** Model whose scopes apply. On a join table, the target, so a hidden target drops the link */
   uid?: string;
-  /** Column of this join that holds the ids of `uid` rows. Defaults to id */
+  /** Column that holds the `uid` ids. Defaults to id */
   idColumn?: string;
-  /** ON condition that keeps only the rows (or join-table links) whose `uid` row is visible */
   scope?: Knex.Raw;
 }
 

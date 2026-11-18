@@ -85,6 +85,7 @@ const setup = async (connection: Knex) => {
   const db = {
     connection,
     metadata,
+    config: { settings: {} },
     unstable_scopes: createScopeRegistry(),
     getConnection: (table?: string) => (table ? connection(table) : connection),
     dialect: {
