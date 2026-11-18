@@ -8,7 +8,7 @@ const JSON_SCHEMA_CONVERSION_TARGET = 'draft-2020-12';
  *
  * The SDK converts schemas lazily and unguarded in its `prompts/list` and `tools/list` handlers, so
  * one unconvertible schema fails the whole list. It does not export its converter; this mirrors
- * `standardSchemaToJsonSchema` from `@modelcontextprotocol/server@2.0.0` and must stay in lockstep
+ * `standardSchemaToJsonSchema` from `@modelcontextprotocol/server@2.3.1` and must stay in lockstep
  * with it when the SDK is upgraded.
  */
 export const assertSchemaConvertsToJsonSchema = (
