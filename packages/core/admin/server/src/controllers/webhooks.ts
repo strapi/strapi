@@ -1,4 +1,3 @@
-import isLocalhostIp from 'is-localhost-ip';
 import type { Context } from 'koa';
 import _ from 'lodash';
 
@@ -24,27 +23,7 @@ const urlRegex =
 const webhookValidator = yup
   .object({
     name: yup.string().required(),
-    url: yup
-      .string()
-      .matches(urlRegex, 'url must be a valid URL')
-      .required()
-      .test(
-        'is-public-url',
-        "Url is not supported because it isn't reachable over the public internet",
-        async (url) => {
-          if (process.env.NODE_ENV !== 'production') {
-            return true;
-          }
-
-          try {
-            const parsedUrl = new URL(url!);
-            const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
-            return !isLocalUrl;
-          } catch {
-            return false;
-          }
-        }
-      ),
+    url: yup.string().matches(urlRegex, 'url must be a valid URL').required(),
     headers: yup.lazy((data) => {
       if (typeof data !== 'object') {
         return yup.object().required();
@@ -75,6 +54,21 @@ const updateWebhookValidator = webhookValidator.shape({
 });
 
 type ContentTypeEvents = Modules.WebhookStore.Webhook['contentTypeEvents'];
+
+/**
+ * Applies the destination checks turned on in `server.webhooks.destinationChecks`. They are all
+ * off by default, so any URL is accepted unless an operator turns one on. The details name the
+ * option that blocks the URL, which the admin uses to show a translated message.
+ */
+const validateDestination = async (url: string) => {
+  const blocked = await strapi.get('webhookRunner').checkDestination(url);
+
+  if (blocked) {
+    const { message, ...details } = blocked;
+
+    throw new errors.ApplicationError(message, details);
+  }
+};
 
 /**
  * Content types already saved on the webhook are not checked, so that a webhook can still be
@@ -115,6 +109,7 @@ export default {
 
     await validateYupSchema(webhookValidator)(body);
     validateContentTypes(body.contentTypeEvents);
+    await validateDestination(body.url);
 
     const webhook = await strapi.get('webhookStore').createWebhook(body);
 
@@ -138,6 +133,12 @@ export default {
     }
 
     validateContentTypes(body.contentTypeEvents, webhook.contentTypeEvents);
+
+    // A webhook saved before a check was turned on can still be edited, or disabled, as long as
+    // its URL stays the same
+    if (body.url !== undefined && body.url !== webhook.url) {
+      await validateDestination(body.url);
+    }
 
     const updatedWebhook = await strapi.get('webhookStore').updateWebhook(id, {
       ...webhook,

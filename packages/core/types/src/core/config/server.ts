@@ -67,9 +67,37 @@ export interface Proxy {
   maxIpsCount?: number;
 }
 
+/**
+ * Optional restrictions on the addresses webhooks are sent to. Every check is off by default.
+ */
+export interface WebhookDestinationChecks {
+  /**
+   * Blocks loopback and unspecified addresses, and the server's own addresses. Defaults to false.
+   */
+  blockLoopback?: boolean;
+  /**
+   * Blocks private and other non-public network ranges. Defaults to false.
+   */
+  blockPrivateNetworks?: boolean;
+  /**
+   * Blocks link-local addresses and some cloud metadata addresses. Defaults to false.
+   */
+  blockLinkLocal?: boolean;
+  /**
+   * Also applies the blocks when a webhook is sent, to the address it connects to. Defaults to false.
+   */
+  checkOnSend?: boolean;
+  /**
+   * `follow` follows redirects, `check` follows them and applies the blocks to each target,
+   * `none` doesn't follow them. Defaults to `follow`.
+   */
+  redirects?: 'follow' | 'check' | 'none';
+}
+
 export interface Webhooks {
   populateRelations?: boolean;
   deduplicateReleaseWebhooks?: boolean;
+  destinationChecks?: WebhookDestinationChecks;
   [key: string]: unknown;
 }
 

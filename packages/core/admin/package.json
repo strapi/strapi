@@ -114,7 +114,6 @@
     "immer": "9.0.21",
     "inquirer": "9.3.8",
     "invariant": "2.2.4",
-    "is-localhost-ip": "2.0.0",
     "json-logic-js": "2.0.5",
     "jsonwebtoken": "9.0.3",
     "koa": "2.16.4",

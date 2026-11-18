@@ -15,8 +15,8 @@ const useWebhooks = (
   queryArgs?: Parameters<typeof useGetWebhooksQuery>[1]
 ) => {
   const { data: webhooks, isLoading, error } = useGetWebhooksQuery(args, queryArgs);
-  const [createWebhook, { error: createError }] = useCreateWebhookMutation();
-  const [updateWebhook, { error: updateError }] = useUpdateWebhookMutation();
+  const [createWebhook] = useCreateWebhookMutation();
+  const [updateWebhook] = useUpdateWebhookMutation();
 
   const [triggerWebhook] = useTriggerWebhookMutation();
   const [deleteManyWebhooks] = useDeleteManyWebhooksMutation();
@@ -24,7 +24,9 @@ const useWebhooks = (
   return {
     webhooks: webhooks as GetWebhooks.Response['data'] | undefined,
     isLoading: isLoading as boolean,
-    error: (error || createError || updateError) as BaseQueryError | SerializedError,
+    // Only the error loading the webhooks: the pages report the errors of their own requests,
+    // and repeating them here showed each one twice
+    error: error as BaseQueryError | SerializedError,
     createWebhook,
     updateWebhook,
     triggerWebhook,
