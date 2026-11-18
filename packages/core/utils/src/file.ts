@@ -1,7 +1,7 @@
 /**
  * Utils file containing file treatment utils
  */
-import { Writable, WritableOptions } from 'node:stream';
+import { finished, Writable, WritableOptions } from 'node:stream';
 
 const kbytesToBytes = (kbytes: number) => kbytes * 1000;
 const bytesToKbytes = (bytes: number) => Math.round((bytes / 1000) * 100) / 100;
@@ -24,14 +24,25 @@ const streamToBuffer = (stream: NodeJS.ReadableStream): Promise<Buffer> =>
     stream.on('error', reject);
   });
 
-const getStreamSize = (stream: NodeJS.ReadableStream) =>
+const getStreamSize = (stream: NodeJS.ReadableStream): Promise<number> =>
   new Promise((resolve, reject) => {
     let size = 0;
-    stream.on('data', (chunk) => {
+    const onData = (chunk: string | Uint8Array) => {
       size += Buffer.byteLength(chunk);
+    };
+    const cleanup = finished(stream, { readable: true, writable: false }, (error) => {
+      cleanup();
+      stream.removeListener('data', onData);
+
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(size);
     });
-    stream.on('close', () => resolve(size));
-    stream.on('error', reject);
+
+    stream.on('data', onData);
     stream.resume();
   });
 
