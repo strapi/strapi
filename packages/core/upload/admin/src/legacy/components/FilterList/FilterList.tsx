@@ -14,10 +14,7 @@ type StringFilter = {
 
 type MimeFilter = {
   [key: string]:
-    | string
-    | NumberKeyedObject
-    | Record<string, string | NumberKeyedObject>
-    | undefined;
+    string | NumberKeyedObject | Record<string, string | NumberKeyedObject> | undefined;
 };
 
 export type FilterStructure = {
@@ -113,7 +110,7 @@ export const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }: Fi
 
     return (
       <FilterTag
-        // eslint-disable-next-line react/no-array-index-key
+        // oxlint-disable-next-line react/no-array-index-key
         key={`${attributeName}-${i}`}
         attribute={attribute}
         filter={filter}

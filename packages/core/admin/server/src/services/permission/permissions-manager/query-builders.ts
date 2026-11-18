@@ -34,10 +34,10 @@ const buildStrapiQuery = (caslQuery: unknown) => {
 };
 
 const unwrapDeep = (obj: any): unknown => {
-  if (!_.isPlainObject(obj) && !_.isArray(obj)) {
+  if (!_.isPlainObject(obj) && !Array.isArray(obj)) {
     return obj;
   }
-  if (_.isArray(obj)) {
+  if (Array.isArray(obj)) {
     return obj.map((v: unknown) => unwrapDeep(v));
   }
 
@@ -52,7 +52,7 @@ const unwrapDeep = (obj: any): unknown => {
         } else {
           _.setWith(acc, key, unwrapDeep(v));
         }
-      } else if (_.isArray(v)) {
+      } else if (Array.isArray(v)) {
         // prettier-ignore
         _.setWith(acc, key, v.map(v => unwrapDeep(v)));
       } else {

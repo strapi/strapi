@@ -56,6 +56,10 @@ const mockDataManager = ({
   moveAttribute() {},
   addCustomFieldAttribute() {},
   editCustomFieldAttribute() {},
+  attributeRenameMigrationMode: 'prompt-before-save',
+  async confirmAttributeRenameMigration() {
+    return true;
+  },
   addCreatedComponentToDynamicZone() {},
   createComponentSchema() {},
   createSchema() {},
@@ -84,7 +88,9 @@ const mockDataManager = ({
   async saveSchema() {},
   isModified: false,
   isSaving: false,
-  applyChange() {},
+  async applyChange() {
+    return true;
+  },
   contentStructure: createEmptyContentStructure(),
   createFolder() {},
   renameFolder() {},

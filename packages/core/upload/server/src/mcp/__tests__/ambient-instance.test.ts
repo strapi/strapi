@@ -1,12 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 
 import { assertAmbientInstance, getFolderService } from '../ambient-instance';
-import {
-  createMediaCreateFolderHandler,
-  createMediaListFoldersHandler,
-  createMediaMoveAssetsHandler,
-  createMediaUpdateAssetHandler,
-} from '../handlers';
+import { buildUploadMcpToolDefinitions } from '../register-upload-mcp-tools';
 
 /**
  * `assertAmbientInstance` exists to stop a handler from *looking* instance-bound while the
@@ -62,21 +57,35 @@ describe('ambient instance guard', () => {
   });
 
   /**
-   * The layer matters: `tool-registry` catches a factory throw at registration (Level 1) and
-   * logs it, substituting a fallback handler — so the invariant reaches the operator's log
-   * rather than an agent's tool output mid-call. A throw from inside the returned handler would
-   * instead be wrapped as `Tool "<name>" execution failed: ...` and read by the agent.
+   * The guard is applied by `buildUploadMcpToolDefinitions`, not by the individual factories, so
+   * that a tool added to that array cannot forget it. These pin both halves of that: every
+   * advertised tool is covered, and the throw happens at handler construction.
+   *
+   * The layer matters. `tool-registry` catches a factory throw at registration (Level 1), logs
+   * it and substitutes a fallback handler — so the invariant reaches the operator's log rather
+   * than an agent's tool output. A throw from inside the returned handler would instead be
+   * wrapped as `Tool "<name>" execution failed: ...` and read by the agent.
    */
-  describe('handler factories', () => {
-    test('throw at construction, before the handler is returned', () => {
+  describe('buildUploadMcpToolDefinitions', () => {
+    test('guards every advertised tool, so a new one cannot opt out by omission', () => {
       setGlobalStrapi();
 
       const other = {} as unknown as Core.Strapi;
+      const tools = buildUploadMcpToolDefinitions();
 
-      expect(() => createMediaListFoldersHandler(other, context)).toThrow(/bound to the ambient/i);
-      expect(() => createMediaUpdateAssetHandler(other, context)).toThrow(/bound to the ambient/i);
-      expect(() => createMediaMoveAssetsHandler(other, context)).toThrow(/bound to the ambient/i);
-      expect(() => createMediaCreateFolderHandler(other, context)).toThrow(/bound to the ambient/i);
+      expect(tools.length).toBeGreaterThan(0);
+
+      for (const tool of tools) {
+        expect(() => tool.createHandler(other, context)).toThrow(/bound to the ambient/i);
+      }
+    });
+
+    test('constructs the handler when the instance is the ambient one', () => {
+      const strapi = setGlobalStrapi();
+
+      for (const tool of buildUploadMcpToolDefinitions()) {
+        expect(typeof tool.createHandler(strapi, context)).toBe('function');
+      }
     });
   });
 

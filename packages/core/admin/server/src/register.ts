@@ -5,9 +5,14 @@ import { createAiAdminService } from './ai/services/ai';
 import contentApiTokenAuthStrategy from './strategies/content-api-token';
 import adminTokenAuthStrategy from './strategies/admin-token';
 import { migrateAdminPreferedLanguageDkToDa } from './migrations/database/migrate-prefered-language-dk-to-da';
+import { createPermissionFieldRenamer } from './services/permission/rename-fields';
+import { registerAuditLogsEntitlements } from '../../ee/server/src/audit-logs/entitlements';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.db.migrations.providers.internal.register(migrateAdminPreferedLanguageDkToDa);
+  // Generated rename migrations carry field renames to admin permissions; this
+  // must be registered before user migrations run (during schema sync).
+  strapi.db.schema.registerAttributeRenameHandler(createPermissionFieldRenamer({ strapi }));
 
   const passportMiddleware = strapi.service('admin::passport').init();
 
@@ -17,6 +22,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.get('auth').register('content-api', contentApiTokenAuthStrategy);
 
   strapi.add('ai.admin', () => createAiAdminService({ strapi }));
+
+  // Here rather than in the EE register: that module is only loaded when the license is valid at
+  // boot, and the Plan card still needs these limits for a license that lapsed before boot.
+  registerAuditLogsEntitlements(strapi);
 
   const shouldServeAdminPanel = strapi.config.get('admin.serveAdminPanel');
 

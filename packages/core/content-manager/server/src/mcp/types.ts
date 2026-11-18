@@ -15,9 +15,9 @@ export type ContentManagerModelForMcp = Pick<
 };
 
 export type McpToolsBuildContext = {
-  /** Installed locale codes from i18n plugin. null when i18n is not installed. */
+  /** Installed locale codes. null when no localization provider is registered. */
   localeCodes: [string, ...string[]] | null;
-  /** Default locale from i18n plugin. null when i18n is not installed or unknown. */
+  /** Default locale. null when no localization provider is registered or unknown. */
   defaultLocale: string | null;
 };
 

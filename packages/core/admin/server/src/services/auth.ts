@@ -64,6 +64,11 @@ const completePasswordReset = async (user: AdminUser, password: string): Promise
     resetPasswordTokenExpiresAt: null,
   });
 
+  // null when the account was deleted after the caller's token lookup
+  if (updatedUser === null) {
+    throw new ApplicationError();
+  }
+
   await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CONFIRM, toAdminUserEvent(updatedUser));
 
   return updatedUser;
@@ -109,6 +114,8 @@ const validatePassword = (password: string, hash: string) => bcrypt.compare(pass
  * @param email the users email address
  * @param password the users password
  */
+export const USER_NOT_ACTIVE_MESSAGE = 'User not active';
+
 const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
   const user: AdminUser = await strapi.db.query('admin::user').findOne({ where: { email } });
 
@@ -123,7 +130,7 @@ const checkCredentials = async ({ email, password }: { email: string; password: 
   }
 
   if (!(user.isActive === true)) {
-    return [null, false, { message: 'User not active' }];
+    return [null, false, { message: USER_NOT_ACTIVE_MESSAGE }];
   }
 
   return [null, user];

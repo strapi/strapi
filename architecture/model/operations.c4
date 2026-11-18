@@ -1,0 +1,84 @@
+model {
+  operations_team = person 'Application operator' {
+    summary 'Runs and recovers this self-hosted application.'
+    description '''
+        The application team or hosting operator supplies deployment, monitoring and recovery procedures. These are operating responsibilities, not built-in Strapi services.
+      '''
+  }
+  replica_operation = concept 'Consistent application replicas' {
+    summary 'Run compatible code, configuration and shared storage.'
+    description '''
+        Example responsibility: replicas use the same application build, compatible runtime secrets/configuration, a shared database and a remote media provider. An ingress distributes requests; it does not coordinate in-process tasks.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/configuration/index.ts 'Runtime configuration'
+  }
+  job_coordination = concept 'Scheduled-work coordination' {
+    summary 'Decide which work may run concurrently.'
+    description '''
+        Cron is process-local. Application jobs require their own idempotency/coordination design. Content Releases has specific database row locking and release-state checks; that does not provide a distributed scheduler for arbitrary jobs. Runtime schedules and bootstrap reloading also differ.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/providers/cron.ts 'Scheduler startup'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/release.ts 'Release locking'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/scheduling.ts 'Release schedules'
+  }
+  upgrade_operation = concept 'Controlled application rollout' {
+    summary 'Rehearse startup changes and recovery before rollout.'
+    description '''
+        A proposed operating responsibility: stage the compatible build, account for startup schema changes, coordinate application replacement, and verify content/API behavior before restoring traffic. Older code alone may not reverse a changed database.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/Strapi.ts 'Startup schema synchronization'
+  }
+  monitoring_operation = concept 'Health logs and dependency checks' {
+    summary 'Observe requests, jobs, database and media failures.'
+    description '''
+        The built-in /_health endpoint returns a lightweight HTTP response; it does not prove the database, media provider or all background work is healthy. Dependency probes, metrics/alerts and log collection are deployment-specific choices.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/index.ts 'Health endpoint'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/webhook-runner.ts 'Webhook results'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/cron.ts 'Job error logging'
+  }
+  recovery_operation = concept 'Coordinated backup and recovery' {
+    summary 'Recover a compatible build, database and media set.'
+    description '''
+        An operating design to supply, not an automatic Strapi feature. Capture recoverable database and media state with compatible code/configuration, choose a consistency approach, protect secrets, and rehearse recovery in isolation. Define acceptable data loss and downtime for the application.
+      '''
+  }
+  database_backup = concept 'Database recovery copy' {
+    summary 'Preserves content, identities, settings and media metadata.'
+    description '''
+        Use a database-specific backup/snapshot and restore procedure supplied by the operator. It must be coordinated with the media recovery point; the application does not make an external storage backup atomic with SQL.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/core-store.ts 'Database-backed configuration'
+  }
+  media_backup = concept 'Media recovery copy' {
+    summary 'Preserves file bytes and generated formats.'
+    description '''
+        Use a provider-specific recoverable copy/versioning/backup approach. Media database rows alone do not restore the files. Local upload deployments must recover their persistent uploads directory instead.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/providers/upload-aws-s3/src/index.ts 'S3 provider'
+  }
+  recovery_build = concept 'Compatible build and configuration' {
+    summary 'Retains application code, dependencies and required secrets.'
+    description '''
+        Keep a recoverable version of application schemas/code, build inputs and protected deployment configuration. Restoring data into an incompatible code/schema version can trigger unwanted startup changes. Admin assets can be rebuilt from matching inputs.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/configuration/index.ts 'Configuration loading'
+  }
+  recovery_check = concept 'Isolated restore verification' {
+    summary 'Checks content, login and media before serving traffic.'
+    description '''
+        A proposed operator procedure: restore compatible database/media/build state in an isolated environment, verify authentication, representative queries, media URLs and publication behavior, then plan traffic cutover. This is not a built-in restore service.
+      '''
+  }
+  operations_team -> replica_operation 'keeps replicas consistent'
+  operations_team -> job_coordination 'defines concurrent-work policy'
+  operations_team -> upgrade_operation 'controls rollout'
+  operations_team -> monitoring_operation 'monitors service behavior'
+  operations_team -> recovery_operation 'owns recovery procedure'
+  recovery_operation -> database_backup 'captures database state'
+  recovery_operation -> media_backup 'captures uploaded files'
+  recovery_operation -> recovery_build 'retains compatible inputs'
+  database_backup -> recovery_check 'restores database'
+  media_backup -> recovery_check 'restores files'
+  recovery_build -> recovery_check 'recreates compatible application'
+}

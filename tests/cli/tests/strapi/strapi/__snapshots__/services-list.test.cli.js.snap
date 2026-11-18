@@ -16,6 +16,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::content-manager.uid                          │
 │ plugin::content-manager.preview                      │
 │ plugin::content-manager.preview-config               │
+│ plugin::content-manager.custom-order                 │
 │ plugin::content-manager.homepage                     │
 │ plugin::content-type-builder.content-types           │
 │ plugin::content-type-builder.components              │
@@ -101,5 +102,6 @@ exports[`services:list should output list of services 1`] = `
 │ admin::transfer                                      │
 │ admin::project-settings                              │
 │ admin::encryption                                    │
-│ admin::homepage                                      │"
+│ admin::homepage                                      │
+│ admin::debug-dump                                    │"
 `;

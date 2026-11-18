@@ -18,6 +18,8 @@ import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
 
+const EMPTY_PERMISSIONS: NonNullable<ProtectProps['permissions']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * Main
  * -----------------------------------------------------------------------------------------------*/
@@ -178,7 +180,7 @@ export interface ProtectProps {
  * it renders the NoPermissions component. Whilst these checks happen it will render the loading component
  * and should the check fail it will render the error component with a notification.
  */
-const Protect = ({ permissions = [], children }: ProtectProps) => {
+const Protect = ({ permissions = EMPTY_PERMISSIONS, children }: ProtectProps) => {
   const userPermissions = useAuth('Protect', (state) => state.permissions);
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();

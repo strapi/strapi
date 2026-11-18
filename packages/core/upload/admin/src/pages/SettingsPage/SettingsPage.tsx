@@ -6,6 +6,7 @@ import {
   useFetchClient,
   Layouts,
   ConfirmDialog,
+  type FetchError,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -30,9 +31,10 @@ import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
 import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
+import { useTracking } from '../../hooks/useTracking';
 import { useAIMetadataAvailability } from '../../legacy/hooks/useAIMetadataAvailability';
 import { useSettings } from '../../legacy/hooks/useSettings';
-import { useTracking } from '../../legacy/hooks/useTracking';
+import { useGetUploadSettingsQuery } from '../../services/settings';
 import { getTranslationKey } from '../../utils/translations';
 
 import { init } from './init';
@@ -157,6 +159,9 @@ export const SettingsPage = () => {
   const { put, post, get } = useFetchClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const { trackUsage } = useTracking();
+  // Events read this cache. Saving must refresh it, or the next event still
+  // reports the value from before the save.
+  const { refetch: refetchUploadSettings } = useGetUploadSettingsQuery();
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
@@ -164,12 +169,12 @@ export const SettingsPage = () => {
   const isAIAvailable = useAIMetadataAvailability();
 
   const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
-    GetAIMetadataPendingCount.Response['data'],
-    GetAIMetadataPendingCount.Response['error']
+    GetAIMetadataPendingCount.Response,
+    FetchError
   >(
     ['ai-metadata-count'],
     async () => {
-      const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
+      const { data } = await get<GetAIMetadataPendingCount.Response>(
         '/upload/ai-metadata-jobs/pending-count'
       );
       return data;
@@ -204,6 +209,10 @@ export const SettingsPage = () => {
         body
       );
 
+      // Refresh before the form's own refetch reveals actions (such as
+      // retroactive generation) that emit a tracking event.
+      await refetchUploadSettings();
+
       return data;
     },
     {
@@ -224,19 +233,19 @@ export const SettingsPage = () => {
     }
   );
 
-  // Poll for latest active job - notifications are handled inside the hook
+  // Poll for the latest job, whatever its status - notifications are handled inside the hook
   const { data: aiMetadataJob, refetch: refetchAiMetadataJob } = useAIMetadataJob({
     enabled: isAIAvailable,
   });
 
   const { mutateAsync: startGenerateAIMetadata } = useMutation<
-    CreateAIMetadataJob.Response['data'],
-    CreateAIMetadataJob.Response['error'],
+    CreateAIMetadataJob.Response,
+    FetchError,
     void
   >(
     async () => {
       const { data } = await post<
-        CreateAIMetadataJob.Response['data'],
+        CreateAIMetadataJob.Response,
         CreateAIMetadataJob.Request['body']
       >('/upload/ai-metadata-jobs', {});
       return data;
@@ -250,7 +259,7 @@ export const SettingsPage = () => {
       onError(err) {
         toggleNotification({
           type: 'danger',
-          message: (err as Error)?.message || formatMessage({ id: 'notification.error' }),
+          message: err?.message || formatMessage({ id: 'notification.error' }),
         });
         setIsConfirmDialogOpen(false);
       },

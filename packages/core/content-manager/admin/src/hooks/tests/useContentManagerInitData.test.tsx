@@ -1,6 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { ConfigureStoreOptions } from '@reduxjs/toolkit';
 import {
+  act,
   defaultTestStoreConfig,
   renderHook,
   server,
@@ -8,6 +9,8 @@ import {
 } from '@strapi/admin/strapi-admin/test';
 import { http, HttpResponse } from 'msw';
 
+import { establishAdminSession } from '../../../../../admin/admin/src/utils/establishAdminSession';
+import { useTypedDispatch } from '../../modules/hooks';
 import { reducer } from '../../modules/reducers';
 import { useContentManagerInitData } from '../useContentManagerInitData';
 
@@ -49,6 +52,119 @@ const createStoreConfig = (): ConfigureStoreOptions => {
 };
 
 describe('useContentManagerInitData', () => {
+  it('hides the previous admin links until the new session permissions are resolved', async () => {
+    const tokenA = 'content-manager-user-a';
+    const tokenB = 'content-manager-user-b';
+    const contentTypes = createContentTypes().slice(0, 2);
+    let initRequests = 0;
+    let releaseSecondInit: () => void = () => {};
+    const secondInitGate = new Promise<void>((resolve) => {
+      releaseSecondInit = resolve;
+    });
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(tokenA));
+    window.localStorage.setItem('isLoggedIn', 'true');
+
+    server.use(
+      http.get('/admin/users/me', ({ request }) => {
+        const isUserB = request.headers.get('Authorization') === `Bearer ${tokenB}`;
+
+        return HttpResponse.json({
+          data: {
+            id: isUserB ? 2 : 1,
+            email: isUserB ? 'user-b@example.com' : 'user-a@example.com',
+            firstname: isUserB ? 'User B' : 'User A',
+            lastname: 'Admin',
+            username: isUserB ? 'user-b' : 'user-a',
+            preferedLanguage: 'en',
+            roles: [{ id: isUserB ? 2 : 1 }],
+          },
+        });
+      }),
+      http.get('/admin/users/me/permissions', ({ request }) => {
+        const isUserB = request.headers.get('Authorization') === `Bearer ${tokenB}`;
+        const contentType = isUserB ? contentTypes[1] : contentTypes[0];
+
+        return HttpResponse.json({
+          data: [
+            {
+              id: isUserB ? 2 : 1,
+              action: 'plugin::content-manager.explorer.read',
+              actionParameters: {},
+              subject: contentType.uid,
+              properties: {},
+              conditions: [],
+            },
+          ],
+        });
+      }),
+      http.get('/content-manager/init', async () => {
+        initRequests += 1;
+        if (initRequests > 1) {
+          await secondInitGate;
+        }
+
+        return HttpResponse.json({
+          data: {
+            components: [],
+            contentTypes,
+            fieldSizes: {},
+          },
+        });
+      }),
+      http.get('/content-manager/content-types-settings', () =>
+        HttpResponse.json({
+          data: [],
+        })
+      )
+    );
+
+    const { result } = renderHook(
+      () => {
+        const dispatch = useTypedDispatch();
+
+        return {
+          data: useContentManagerInitData(),
+          switchSession: () =>
+            establishAdminSession(dispatch, {
+              token: tokenB,
+              persist: true,
+            }),
+        };
+      },
+      {
+        providerOptions: {
+          storeConfig: createStoreConfig(),
+          permissions: [],
+        },
+      }
+    );
+
+    await waitFor(() =>
+      expect(result.current.data.collectionTypeLinks.map(({ uid }) => uid)).toEqual([
+        contentTypes[0].uid,
+      ])
+    );
+
+    act(() => {
+      result.current.switchSession();
+    });
+
+    await waitFor(() => expect(initRequests).toBe(2));
+    expect(result.current.data.isLoading).toBe(true);
+    expect(result.current.data.collectionTypeLinks).toEqual([]);
+
+    releaseSecondInit();
+
+    await waitFor(() =>
+      expect(result.current.data.collectionTypeLinks.map(({ uid }) => uid)).toEqual([
+        contentTypes[1].uid,
+      ])
+    );
+
+    window.localStorage.clear();
+  });
+
   it('batches conditional permission checks for visible content types', async () => {
     let permissionCheckCalls = 0;
     const contentTypes = createContentTypes();

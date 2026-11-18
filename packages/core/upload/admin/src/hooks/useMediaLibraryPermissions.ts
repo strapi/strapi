@@ -2,10 +2,18 @@ import { useRBAC } from '@strapi/admin/strapi-admin';
 
 import { PERMISSIONS } from '../constants';
 
-// Hoisted to module scope (matching the legacy hook): a fresh object each render
+// Hoisted to module scope (matching the legacy hook): a fresh array each render
 // would hand `useRBAC` a new identity every time, re-running its memos for no
 // gain (it guards refetch with a deep `isEqual`, so this is wasted work, not a loop).
-const { main: _main, ...RBAC_PERMISSIONS } = PERMISSIONS;
+// `settings` stays out: `useRBAC` names each result after the last segment of the
+// action, so `plugin::upload.settings.read` would also come back as `canRead`.
+const RBAC_PERMISSIONS = [
+  ...PERMISSIONS.read,
+  ...PERMISSIONS.create,
+  ...PERMISSIONS.update,
+  ...PERMISSIONS.download,
+  ...PERMISSIONS.copyLink,
+];
 
 /**
  * RBAC gate for the future Media Library UI. Mirrors the legacy hook of the
@@ -15,6 +23,8 @@ const { main: _main, ...RBAC_PERMISSIONS } = PERMISSIONS;
  * hook is what keeps the UI honest so users don't discover a missing
  * permission through a 403.
  *
+ * - `canRead` — browse the library (the Content Manager asset picker needs
+ *   nothing more)
  * - `canCreate` — upload (files, from URL) and New folder
  * - `canUpdate` — edit details, replace, crop, move (dnd + bulk), delete
  *   (single + bulk), AI metadata — the `assets.update` action covers
@@ -26,6 +36,10 @@ export const useMediaLibraryPermissions = () => {
 
   return {
     isLoading,
+    // `plugin::upload.read` gates every Media Library endpoint, `GET /upload/settings`
+    // included. Entry forms render a media field for roles that lack it, so callers
+    // need to know before they ask the server and collect a 403.
+    canRead: Boolean(allowedActions.canRead),
     canCreate: Boolean(allowedActions.canCreate),
     canUpdate: Boolean(allowedActions.canUpdate),
     canDownload: Boolean(allowedActions.canDownload),

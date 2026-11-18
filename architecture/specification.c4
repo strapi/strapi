@@ -1,0 +1,113 @@
+specification {
+  element person {
+    notation 'Person'
+    style {
+      shape person
+      color slate
+    }
+  }
+
+  element external_system {
+    notation 'External System'
+    style {
+      shape rectangle
+      color gray
+    }
+  }
+
+  element software_system {
+    notation 'Software System'
+    style {
+      shape rectangle
+      color blue
+    }
+  }
+
+  element container {
+    notation 'Container'
+    style {
+      shape rectangle
+      color indigo
+    }
+  }
+
+  element component {
+    notation 'Component'
+    style {
+      shape rectangle
+      color sky
+    }
+  }
+
+  element code_package {
+    notation 'Code Package'
+    style {
+      shape rectangle
+      color green
+    }
+  }
+
+  element source_document {
+    notation 'Source Document'
+    style {
+      shape document
+      color green
+    }
+  }
+
+  element database {
+    notation 'Database'
+    style {
+      shape cylinder
+      color amber
+    }
+  }
+
+  element capability {
+    notation 'Product capability (not a runtime unit)'
+    style {
+      shape rectangle
+      color secondary
+    }
+  }
+
+  element guide_topic {
+    notation 'Guide topic (navigation, not a runtime unit)'
+    style {
+      shape rectangle
+      color slate
+    }
+  }
+
+  element concept {
+    notation 'Domain concept (not a runtime unit)'
+    style {
+      shape rectangle
+      color secondary
+    }
+  }
+
+  deploymentNode environment {
+    notation 'Example environment'
+    style { color slate }
+  }
+  deploymentNode device {
+    notation 'Browser device'
+    style { color slate }
+  }
+  deploymentNode host {
+    notation 'Hosting infrastructure'
+    style { color slate }
+  }
+
+  tag runtime_boundary
+  tag deployment_path
+  tag replicated_deployment_path
+
+  relationship reads
+  relationship writes
+  relationship authenticates
+  relationship authorizes
+  relationship registers
+  relationship delegates
+}

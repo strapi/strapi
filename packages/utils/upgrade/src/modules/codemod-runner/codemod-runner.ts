@@ -1,4 +1,4 @@
-import { groupBy, size } from 'lodash/fp';
+import { groupBy } from 'lodash';
 
 import {
   codemodRepositoryFactory,
@@ -130,11 +130,11 @@ export class CodemodRunner implements CodemodRunnerInterface {
     const codemods = selectedCodemods.flatMap(({ codemods }) => codemods);
 
     // Log (debug) the codemods by version
-    const codemodsByVersion = groupBy('version', codemods);
+    const codemodsByVersion = groupBy(codemods, 'version');
     const fRange = f.versionRange(this.range);
 
     this.logger?.debug?.(
-      `Found ${f.highlight(codemods.length)} codemods for ${f.highlight(size(codemodsByVersion))} version(s) using ${fRange}`
+      `Found ${f.highlight(codemods.length)} codemods for ${f.highlight(Object.keys(codemodsByVersion).length)} version(s) using ${fRange}`
     );
 
     for (const [version, codemods] of Object.entries(codemodsByVersion)) {

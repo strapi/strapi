@@ -73,8 +73,7 @@ export const useUpload = () => {
   const dispatch = useDispatch();
   const [progress, setProgress] = React.useState(0);
   const queryClient = useQueryClient();
-  const abortController = new AbortController();
-  const signal = abortController.signal;
+  const abortControllerRef = React.useRef<AbortController | null>(null);
   const store = useStore<StoreState>();
 
   const mutation = useMutation<
@@ -83,7 +82,17 @@ export const useUpload = () => {
     { assets: Asset | Asset[]; folderId: number | null }
   >(
     ({ assets, folderId }) => {
-      return uploadAssets(assets, folderId, signal, setProgress, store.getState().admin_app?.token);
+      // One controller per request, so `cancel` reaches it after the hook re-renders.
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      return uploadAssets(
+        assets,
+        folderId,
+        abortController.signal,
+        setProgress,
+        store.getState().admin_app?.token
+      );
     },
     {
       mutationKey: [pluginId, 'upload'],
@@ -98,7 +107,7 @@ export const useUpload = () => {
   const upload = (assets: Asset | Asset[], folderId: number | null) =>
     mutation.mutateAsync({ assets, folderId });
 
-  const cancel = () => abortController.abort();
+  const cancel = () => abortControllerRef.current?.abort();
 
   return {
     upload,

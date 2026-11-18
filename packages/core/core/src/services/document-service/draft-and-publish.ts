@@ -1,4 +1,4 @@
-import { assoc, curry } from 'lodash/fp';
+import { curry } from 'lodash';
 
 import type { Modules, Struct } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
@@ -19,7 +19,7 @@ const setStatusToDraft: TransformWithContentType = (contentType, params) => {
     return params;
   }
 
-  return assoc('status', 'draft', params);
+  return { ...params, status: 'draft' };
 };
 
 /**
@@ -28,7 +28,7 @@ const setStatusToDraft: TransformWithContentType = (contentType, params) => {
 const defaultToDraft: ParamsTransform = (params) => {
   // Default to draft if no status is provided or it's invalid
   if (!params.status || params.status !== 'published') {
-    return assoc('status', 'draft', params);
+    return { ...params, status: 'draft' };
   }
 
   return params;
@@ -56,7 +56,7 @@ const defaultStatus: TransformWithContentType = (contentType, params) => {
  */
 const filterDataPublishedAt: ParamsTransform = (params) => {
   if (params?.data?.publishedAt) {
-    return assoc(['data', 'publishedAt'], null, params);
+    return { ...params, data: { ...params.data, publishedAt: null } };
   }
 
   return params;
@@ -74,14 +74,14 @@ const statusToLookup: TransformWithContentType = (contentType, params) => {
 
   switch (params?.status) {
     case 'published':
-      return assoc(['lookup', 'publishedAt'], { $notNull: true }, params);
+      return { ...params, lookup: { ...params.lookup, publishedAt: { $notNull: true } } };
     case 'draft':
-      return assoc(['lookup', 'publishedAt'], { $null: true }, params);
+      return { ...params, lookup: { ...params.lookup, publishedAt: { $null: true } } };
     default:
       break;
   }
 
-  return assoc('lookup', lookup, params);
+  return { ...params, lookup };
 };
 
 /**
@@ -89,14 +89,14 @@ const statusToLookup: TransformWithContentType = (contentType, params) => {
  */
 const statusToData: TransformWithContentType = (contentType, params) => {
   if (!contentTypes.hasDraftAndPublish(contentType)) {
-    return assoc(['data', 'publishedAt'], new Date(), params);
+    return { ...params, data: { ...params.data, publishedAt: new Date() } };
   }
 
   switch (params?.status) {
     case 'published':
-      return assoc(['data', 'publishedAt'], new Date(), params);
+      return { ...params, data: { ...params.data, publishedAt: new Date() } };
     case 'draft':
-      return assoc(['data', 'publishedAt'], null, params);
+      return { ...params, data: { ...params.data, publishedAt: null } };
     default:
       break;
   }

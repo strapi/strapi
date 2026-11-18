@@ -59,9 +59,7 @@ const EditPage = () => {
     MagicLinkCE,
     async () =>
       (
-        await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE'
-        )
+        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE')
       ).MagicLinkEE
   );
   const {

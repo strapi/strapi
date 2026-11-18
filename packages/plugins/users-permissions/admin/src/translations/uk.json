@@ -46,7 +46,7 @@
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.redirectURL.front-end.label": "URL переадресації для вашего front-end додатку",
-  "PopUpForm.Providers.redirectURL.label": "URL -адреса для переадресації, щоб додати у ваші конфігурації програми {постачальник}",
+  "PopUpForm.Providers.redirectURL.label": "URL-адреса для переадресації, щоб додати у ваші конфігурації програми {provider}",
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.subdomain.label": "Host URI (Subdomain)",

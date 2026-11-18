@@ -10,6 +10,7 @@ import {
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
   useIsDesktop,
+  UnsavedChangesModal,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -34,11 +35,13 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
+import { useOmitLockedSharedFieldsOnLocaleCreate } from '../../../hooks/useI18nFieldLock';
 import { usePreviewContext } from '../../../preview/pages/Preview';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import {
   useGetDraftRelationCountQuery,
   useLazyGetDocumentQuery,
+  useLazyGetDraftRelationCountQuery,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getIn, isObject } from '../../../utils/objects';
@@ -141,7 +144,19 @@ interface ModalOptions {
  * DocumentActions
  * -----------------------------------------------------------------------------------------------*/
 
-interface Action extends DocumentActionDescription {
+/**
+ * Kept out of the public `DocumentActionDescription` for now: only built-in actions set `group`.
+ * It is a typing boundary, the menu reads `group` from any action at runtime.
+ */
+interface InternalDocumentActionDescription extends DocumentActionDescription {
+  /**
+   * Menus draw a separator wherever two consecutive actions belong to different groups.
+   * Actions without a group stay together, so menus without any group are unchanged.
+   */
+  group?: string;
+}
+
+interface Action extends InternalDocumentActionDescription {
   id: string;
 }
 
@@ -438,9 +453,16 @@ const DocumentActionsMenu = ({
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+  /**
+   * Set synchronously when an item that opens a dialog is selected. The menu closes right away,
+   * before `onClick` resolves and `dialogId` is set, so the state can't tell it yet.
+   */
+  const opensDialogRef = React.useRef(false);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
     const { onClick = () => false, dialog, id } = action;
+
+    opensDialogRef.current = dialog?.type === 'dialog' || dialog?.type === 'modal';
 
     const muteDialog = await onClick(e);
 
@@ -469,6 +491,11 @@ const DocumentActionsMenu = ({
 
   const handleOpenChange = (open: boolean) => {
     if (!isDisabled) {
+      if (open) {
+        // In case the menu stayed open after a selection, a later close returns the focus as usual
+        opensDialogRef.current = false;
+      }
+
       setIsOpen(open);
     }
   };
@@ -489,24 +516,39 @@ const DocumentActionsMenu = ({
         icon={<More />}
         variant={variant}
       />
-      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end" maxWidth="25rem">
-        {actions.map((action) => {
+      <Menu.Content
+        maxHeight={undefined}
+        popoverPlacement="bottom-end"
+        maxWidth="25rem"
+        // Giving the focus back to the trigger would take it from the dialog that just opened
+        onCloseAutoFocus={(event: Event) => {
+          if (opensDialogRef.current) {
+            opensDialogRef.current = false;
+            event.preventDefault();
+          }
+        }}
+      >
+        {actions.map((action, index) => {
+          const hasSeparator = index > 0 && actions[index - 1].group !== action.group;
+
           return (
-            <Menu.Item
-              disabled={action.disabled}
-              /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
-              onSelect={handleClick(action)}
-              display="block"
-              key={action.id}
-              variant={action.variant === 'danger' ? action.variant : 'default'}
-              startIcon={action.icon}
-            >
-              <Flex justifyContent="space-between" gap={4}>
-                <Flex gap={2} tag="span">
-                  {action.label}
+            <React.Fragment key={action.id}>
+              {hasSeparator ? <Menu.Separator /> : null}
+              <Menu.Item
+                disabled={action.disabled}
+                /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
+                onSelect={handleClick(action)}
+                display="block"
+                variant={action.variant === 'danger' ? action.variant : 'default'}
+                startIcon={action.icon}
+              >
+                <Flex justifyContent="space-between" gap={4}>
+                  <Flex gap={2} tag="span">
+                    {action.label}
+                  </Flex>
                 </Flex>
-              </Flex>
-            </Menu.Item>
+              </Menu.Item>
+            </React.Fragment>
           );
         })}
         {children}
@@ -629,6 +671,28 @@ interface DocumentActionModalProps extends ModalOptions {
   isOpen?: boolean;
 }
 
+/**
+ * Keys the list grid uses to move between cells. A modal opened from a row menu is rendered under
+ * the grid in the React tree, so without this they would move the focused cell behind the modal
+ * (and break moving the caret in its fields). Other keys still go through, Escape and Tab included.
+ */
+const GRID_NAVIGATION_KEYS = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+]);
+
+const stopGridNavigation = (e: React.KeyboardEvent) => {
+  if (GRID_NAVIGATION_KEYS.has(e.key)) {
+    e.stopPropagation();
+  }
+};
+
 const DocumentActionModal = ({
   isOpen,
   title,
@@ -645,9 +709,14 @@ const DocumentActionModal = ({
     onModalClose();
   };
 
+  /**
+   * Dismissing the modal (Escape, outside click, close button, `Modal.Close`) asks for
+   * confirmation when the content registered unsaved changes. The `onClose` handed to `content`
+   * and `footer` stays an unguarded close so that actions can close the modal after they succeed.
+   */
   return (
-    <Modal.Root open={isOpen} onOpenChange={handleClose}>
-      <Modal.Content>
+    <UnsavedChangesModal open={isOpen ?? false} onOpenChange={handleClose}>
+      <Modal.Content onKeyDown={stopGridNavigation}>
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
@@ -658,7 +727,7 @@ const DocumentActionModal = ({
         )}
         {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 
@@ -712,7 +781,8 @@ const PublishAction: DocumentActionComponent = ({
   const { publish, isLoading } = useDocumentActions();
   const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
   const [fetchDraftDocument] = useLazyGetDocumentQuery();
-  const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
+  const [countDraftRelations, { isError: isErrorDraftRelations }] =
+    useLazyGetDraftRelationCountQuery();
   const [localDraftRelationCounts, setLocalDraftRelationCounts] =
     React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
   const [serverDraftRelationCounts, setServerDraftRelationCounts] =
@@ -732,6 +802,7 @@ const PublishAction: DocumentActionComponent = ({
   const {
     currentDocument: { components },
   } = useDocumentContext('PublishAction');
+  const omitLockedSharedFields = useOmitLockedSharedFieldsOnLocaleCreate();
 
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
@@ -916,7 +987,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params: currentDocumentMeta.params,
         },
-        data
+        omitLockedSharedFields(data)
       );
 
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
@@ -1228,6 +1299,7 @@ const UpdateAction: DocumentActionComponent = ({
   const {
     currentDocument: { components },
   } = useDocumentContext('UpdateAction');
+  const omitLockedSharedFields = useOmitLockedSharedFieldsOnLocaleCreate();
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
 
@@ -1367,7 +1439,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId,
             params: currentDocumentMeta.params,
           },
-          data
+          omitLockedSharedFields(data)
         );
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -1696,13 +1768,35 @@ const DiscardAction: DocumentActionComponent = ({
   const { discard, isLoading } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const { currentDocumentMeta } = useDocumentContext('DiscardAction');
+
+  // Same args as PublishAction so both share one cached request.
+  const {
+    data: draftRelationCountData,
+    isLoading: isLoadingDraftRelations,
+    isError: isErrorDraftRelations,
+  } = useGetDraftRelationCountQuery(
+    { collectionType, model, documentId, params: currentDocumentMeta.params },
+    { skip: !document?.documentId || !schema?.options?.draftAndPublish }
+  );
 
   if (!schema?.options?.draftAndPublish) {
     return null;
   }
 
+  const draftRelationCounts = normalizeDraftRelationCounts(draftRelationCountData);
+  // Discard rebuilds the draft from the published version, which never stores relations to
+  // unpublished entries, so these relations are lost.
+  const draftRelationCount =
+    draftRelationCounts.unpublishedRelations + draftRelationCounts.draftM2mLinks;
+  const hasDraftRelations = draftRelationCount > 0;
+
   return {
-    disabled: !canUpdate || activeTab === 'published' || document?.status !== 'modified',
+    disabled:
+      !canUpdate ||
+      isLoadingDraftRelations ||
+      activeTab === 'published' ||
+      document?.status !== 'modified',
     label: formatMessage({
       id: 'content-manager.actions.discard.label',
       defaultMessage: 'Discard changes',
@@ -1719,6 +1813,25 @@ const DiscardAction: DocumentActionComponent = ({
       content: (
         <Flex direction="column" gap={2}>
           <WarningCircle width="24px" height="24px" fill="danger600" />
+          {isErrorDraftRelations ? (
+            <Typography tag="p" variant="omega" textAlign="center">
+              {formatMessage({
+                id: 'content-manager.actions.discard.dialog.draft-relations-unknown',
+                defaultMessage: 'Any relations to unpublished entries will be removed.',
+              })}
+            </Typography>
+          ) : hasDraftRelations ? (
+            <Typography tag="p" variant="omega" textAlign="center">
+              {formatMessage(
+                {
+                  id: 'content-manager.actions.discard.dialog.draft-relations',
+                  defaultMessage:
+                    "{count, plural, one {# linked entry is} other {# linked entries are}} still in draft. Discarding will remove {count, plural, one {that relation} other {those relations}}, because unpublished entries aren't part of the published version.",
+                },
+                { count: draftRelationCount }
+              )}
+            </Typography>
+          ) : null}
           <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.discard.dialog.body',
@@ -1749,6 +1862,7 @@ export {
   DocumentActions,
   DocumentActionsMenu,
   DocumentActionButton,
+  DiscardAction,
   PublishAction,
   UpdateAction,
   DEFAULT_ACTIONS,
@@ -1756,6 +1870,7 @@ export {
 };
 export type {
   DocumentActionDescription,
+  InternalDocumentActionDescription,
   DocumentActionPosition,
   DialogOptions,
   NotificationOptions,

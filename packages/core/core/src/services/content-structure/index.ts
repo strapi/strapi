@@ -59,7 +59,7 @@ type ContentStructureCache = Promise<{
 
 export function createContentStructureService(strapi: Core.Strapi): ContentStructureService {
   /**
-   * This cache exists to ensure all consumers recieve the same cleaned+resolved data, regardless of call order / invocation relative to the strapi reload.
+   * This cache exists to ensure all consumers receive the same cleaned+resolved data, regardless of call order / invocation relative to the strapi reload.
    */
   let cache: ContentStructureCache | undefined;
 

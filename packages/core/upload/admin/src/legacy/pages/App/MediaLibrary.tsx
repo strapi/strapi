@@ -5,7 +5,6 @@ import {
   Page,
   SearchInput,
   Pagination,
-  useTracking,
   useQueryParams,
   withEncodedUserParams,
   deepEncodeQueryValues,
@@ -47,6 +46,7 @@ import { useFolders } from '../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { useSelectionState } from '../../hooks/useSelectionState';
+import { useTracking } from '../../hooks/useTracking';
 import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../utils';
 
 import { BulkActions } from './components/BulkActions';

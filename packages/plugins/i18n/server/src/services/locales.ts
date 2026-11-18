@@ -1,4 +1,3 @@
-import { isNil } from 'lodash/fp';
 import { emitAudit } from '@strapi/utils';
 import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
@@ -103,7 +102,7 @@ const setDefaultLocale = async ({ code }: any) => {
 const getDefaultLocale = () => getCoreStore().get({ key: 'default_locale' });
 
 const setIsDefault = async (locales: any) => {
-  if (isNil(locales)) {
+  if (locales == null) {
     return locales;
   }
 

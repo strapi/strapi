@@ -8,6 +8,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 
+const EMPTY_PARENTS_TO_OMIT: NonNullable<CrumbSimpleMenuAsyncProps['parentsToOmit']> = [];
+
 interface CrumbSimpleMenuAsyncProps {
   parentsToOmit?: number[];
   currentFolderId?: number;
@@ -15,7 +17,7 @@ interface CrumbSimpleMenuAsyncProps {
 }
 
 export const CrumbSimpleMenuAsync = ({
-  parentsToOmit = [],
+  parentsToOmit = EMPTY_PARENTS_TO_OMIT,
   currentFolderId,
   onChangeFolder,
 }: CrumbSimpleMenuAsyncProps) => {

@@ -1,0 +1,155 @@
+views {
+  view content_api_runtime_components of strapi.server_runtime {
+    title '03 Engineering / Content API / Request-time components'
+    description '''
+      **Audience:** backend engineers. **Question:** which responsibilities serve a generated REST Content API request?
+      **Scope:** request-time dependencies, not an exact execution sequence. The endpoint composer installs authentication, authorization, policies and route middleware before the controller action.
+      Generated controllers validate and sanitize requests and responses; services call Document Service, which uses the database abstraction.
+      These components execute within one server. Custom routes can choose different handlers; GraphQL is outside this generated REST path.
+      Open HTTP server for a request journey, generated APIs or Document Service for code, or the database for persistent application state.
+    '''
+
+    include
+      http_server with { navigateTo content_api_request_flow },
+      endpoint_composer with { navigateTo request_customization },
+      auth with { navigateTo auth_code },
+      core_api_layer with { navigateTo generated_core_api_code },
+      document_service with { navigateTo document_service_code },
+      database_layer with { navigateTo database_persistence },
+      strapi.database with { navigateTo application_state }
+    exclude * -> *
+    include
+      http_server -> endpoint_composer,
+      endpoint_composer -> auth,
+      endpoint_composer -> core_api_layer,
+      core_api_layer -> document_service,
+      document_service -> database_layer,
+      database_layer -> strapi.database
+    autoLayout LeftRight 70 40
+  }
+
+  view content_api_service_code of strapi.server_runtime.content_api {
+    title '05 Code reference / Content API / Service'
+    description '''
+      **Question:** where are the helpers exposed by strapi.contentAPI assembled?
+      This source map follows the service factory and its four responsibilities. Several cards share index.ts; they are not separate packages or sequential request stages.
+      Use the cards’ source links for the factory, permission utilities, validation helpers and extra query/input parameter registration.
+    '''
+
+    include
+      ca_service_factory,
+      ca_route_metadata,
+      ca_permission_providers,
+      ca_validation_helpers,
+      ca_route_schemas
+    exclude * -> *
+    include
+      ca_service_factory -> ca_route_metadata,
+      ca_service_factory -> ca_permission_providers,
+      ca_service_factory -> ca_validation_helpers,
+      ca_service_factory -> ca_route_schemas
+    autoLayout LeftRight 65 35
+  }
+
+  view generated_core_api_code of strapi.server_runtime.core_api_layer {
+    title '05 Code reference / Content API / Generated core API layer'
+    description '''
+      **Question:** where should a contributor look for generated REST routes, validation or persistence calls?
+      Router/controller/service factories provide the default CRUD behavior. Controllers validate and sanitize through Content API helpers; services call Document Service.
+      This is the default generated layer, not every custom route or GraphQL resolver. Open Content API or Document Service for their source maps.
+    '''
+
+    include
+      core_api_routes,
+      core_api_controllers,
+      core_api_services,
+      strapi.server_runtime.content_api with { navigateTo content_api_service_code },
+      strapi.server_runtime.document_service with { navigateTo document_service_code },
+      core_api_routes -> core_api_controllers,
+      core_api_controllers -> core_api_services,
+      core_api_controllers -> strapi.server_runtime.content_api,
+      core_api_services -> strapi.server_runtime.document_service
+  }
+
+  view auth_code of strapi.server_runtime.auth {
+    title '05 Code reference / Content API / Authentication and authorization'
+    description '''
+      **Question:** how do Content API strategies supply credentials and abilities to route authorization?
+      The registry selects applicable strategies; the successful strategy supplies request context and its verify function checks the route configuration.
+      Token and user/public access are alternatives, not two required stages. A full-access token permits every route scope; a
+      read-only token permits `find` and `findOne` scopes; a custom token creates an ability from its
+      configured permission actions. Other route policies and controller validation still apply. These cards group responsibilities; registry, context and verification share the auth service implementation.
+    '''
+
+    include
+      auth_strategy_registry,
+      auth_request_context,
+      auth_authorization_step,
+      strapi.server_runtime.content_api_token_strategy,
+      strapi.server_runtime.users_permissions_strategy,
+      strapi.server_runtime.content_api_permissions
+    exclude * -> *
+    include
+      auth_strategy_registry -> strapi.server_runtime.content_api_token_strategy,
+      auth_strategy_registry -> strapi.server_runtime.users_permissions_strategy,
+      strapi.server_runtime.content_api_token_strategy -> auth_request_context,
+      strapi.server_runtime.users_permissions_strategy -> auth_request_context,
+      auth_request_context -> auth_authorization_step,
+      strapi.server_runtime.content_api_token_strategy -> strapi.server_runtime.content_api_permissions,
+      strapi.server_runtime.users_permissions_strategy -> strapi.server_runtime.content_api_permissions
+    autoLayout LeftRight 65 40
+  }
+
+  view document_service_code of strapi.server_runtime.document_service {
+    title '05 Code reference / Content API / Document service'
+    description '''
+      **Question:** where do document operations, middleware and persistence transformations live?
+      The service factory wraps repository actions with middleware. Repository and entry helpers use the transform layer, attribute handlers and utilities before persistence.
+      Arrows describe wrapping and code dependencies, not the exact order of every operation. Attribute handlers are used by entry helpers, separately from relation-ID transforms.
+      Use Document operations for repository.ts and entries.ts; use the middleware card for its manager and the wrapping factory.
+    '''
+
+    include
+      ds_document_operations,
+      ds_middlewares,
+      ds_transform_layer,
+      ds_attribute_handlers,
+      ds_utils,
+      strapi.server_runtime.database_layer with { navigateTo database_persistence }
+    exclude * -> *
+    include
+      ds_middlewares -> ds_document_operations,
+      ds_document_operations -> ds_transform_layer,
+      ds_document_operations -> ds_attribute_handlers,
+      ds_document_operations -> ds_utils,
+      ds_document_operations -> strapi.server_runtime.database_layer
+    autoLayout LeftRight 65 35
+  }
+
+  dynamic view content_api_request_flow {
+    variant sequence
+    title '02 Journeys / Content API / Public published-content request'
+    description '''
+      **Audience:** technical readers. **Scenario:** a successful REST collection request with no bearer credentials.
+      **Question:** how does a public request reach published content without bypassing permissions?
+      With Users & Permissions enabled and
+      public `find` permission granted, the generated API validates and sanitizes input before the read,
+      then sanitizes the output before returning JSON.
+      **Outcome:** the client receives the permitted published results. The response includes only the requested and permitted fields and populated relations.
+      This is not an authenticated-user, API-token or GraphQL request. Rejected requests are outside the success path shown here.
+    '''
+
+    public_client -> strapi.server_runtime.http_server 'GET /api/articles (no bearer credentials)'
+    strapi.server_runtime.http_server -> strapi.server_runtime.endpoint_composer 'dispatch matched route handler'
+    strapi.server_runtime.endpoint_composer -> strapi.server_runtime.users_permissions_strategy 'authorize public find permission'
+    strapi.server_runtime.endpoint_composer <- strapi.server_runtime.users_permissions_strategy 'allow published-content read'
+    strapi.server_runtime.endpoint_composer -> strapi.server_runtime.core_api_layer 'invoke the generated API'
+    strapi.server_runtime.core_api_layer -> strapi.server_runtime.document_service 'read published documents'
+    strapi.server_runtime.document_service -> strapi.server_runtime.database_layer 'query content and relations'
+    strapi.server_runtime.document_service <- strapi.server_runtime.database_layer 'published documents'
+    public_client <- strapi.server_runtime.http_server 'sanitized JSON response'
+    include
+      strapi.server_runtime.users_permissions_strategy with { navigateTo access_boundaries },
+      strapi.server_runtime.core_api_layer with { navigateTo generated_core_api_code }
+  }
+}

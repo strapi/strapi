@@ -7,6 +7,8 @@ import {
   ConfirmDialog,
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
+  UnsavedChangesModal,
+  type StrapiApp,
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
 import get from 'lodash/get';
@@ -67,12 +69,65 @@ import { canEditContentType } from './utils/canEditContentType';
 import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
+import { getRenameStorageChange, type RenameStorageChange } from './utils/getRenameStorageChange';
 
 import type { AnyAttribute, ContentType } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
 import type { FolderSelection } from '../DataManager/utils/contentStructure';
 import type { Tab } from '../FormModalNavigation/FormModalNavigationProvider';
+import type { GenericInputType } from '../GenericInputs';
 import type { Internal, Struct } from '@strapi/types';
+
+/**
+ * Input renderers the Content-Type Builder form passes to `GenericInput` as `customInputs`,
+ * keyed by the input `type` they render. Plugins add theirs on top.
+ */
+const CUSTOM_INPUTS = {
+  'allowed-types-select': AllowedTypesSelect,
+  'boolean-radio-group': BooleanRadioGroup,
+  'checkbox-with-number-field': CheckboxWithNumberField,
+  'icon-picker': IconPicker,
+  'content-type-radio-group': ContentTypeRadioGroup,
+  'content-type-folder-select': FolderSelect,
+  'radio-group': CustomRadioGroup,
+  relation: Relation,
+  'select-category': SelectCategory,
+  'select-component': SelectComponent,
+  'select-components': SelectComponents,
+  'select-default-boolean': BooleanDefaultValueSelect,
+  'select-number': SelectNumber,
+  'select-date': SelectDateType,
+  'toggle-draft-publish': DraftAndPublishToggle,
+  'text-plural': PluralName,
+  'text-singular': SingularName,
+  'textarea-enum': TextareaEnum,
+  'condition-form': ConditionForm,
+};
+
+type RenderedInputType = keyof typeof CUSTOM_INPUTS | GenericInputType;
+
+type CustomField = NonNullable<ReturnType<StrapiApp['customFields']['get']>>;
+type CustomFieldOptionEntry = NonNullable<NonNullable<CustomField['options']>['base']>[number];
+type CustomFieldOption = Exclude<CustomFieldOptionEntry, { items: unknown }>;
+
+/**
+ * The option input types a custom field can declare (`CustomFieldOptionInput` in `@strapi/admin`).
+ */
+type CustomFieldOptionInput = CustomFieldOption['type'];
+
+type AssertRendered<TInputType extends RenderedInputType> = TInputType;
+
+/**
+ * Compile-time guard: every option input type `@strapi/admin` accepts for a custom field must
+ * have a renderer, either in `CUSTOM_INPUTS` or built into `GenericInput`.
+ * A type check error here names the option input type the form cannot render.
+ *
+ * `CustomFieldOptionInput` comes from the built `@strapi/admin` declarations (`dist`), not its
+ * source, because the package exports resolve types to `dist`. Rebuild the admin types
+ * (`yarn build:types:admin` in `packages/core/admin`) before you trust this check locally:
+ * a stale build makes it check old types. CI builds first.
+ */
+type _AssertCustomFieldOptionInputsAreRendered = AssertRendered<CustomFieldOptionInput>;
 
 const FormComponent = styled.form`
   overflow: auto;
@@ -168,6 +223,8 @@ export const FormModal = () => {
     updateComponentSchema,
     updateComponentUid,
     reservedNames,
+    confirmAttributeRenameMigration,
+    attributeRenameMigrationMode,
   } = useDataManager();
 
   const {
@@ -176,6 +233,7 @@ export const FormModal = () => {
     initialData,
     isCreatingComponentWhileAddingAField,
     modifiedData,
+    pristineData,
   } = reducerState;
 
   const type =
@@ -185,22 +243,47 @@ export const FormModal = () => {
 
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState<PendingSubmit | null>(null);
+  // Set when the edit renames an existing field *and* changes its storage: the
+  // data cannot be preserved, so the user confirms before the field is recreated.
+  const [storageChangeWarning, setStorageChangeWarning] = useState<RenameStorageChange | null>(
+    null
+  );
 
-  const checkFieldNameChanges = (): AnyAttribute[] | false => {
-    // Only check when editing an attribute
+  const checkRenameStorageChange = (): RenameStorageChange | null => {
+    if (actionType !== 'edit' || (modalType !== 'attribute' && modalType !== 'customField')) {
+      return null;
+    }
+
+    return getRenameStorageChange(initialData, modifiedData, attributeRenameMigrationMode);
+  };
+
+  /**
+   * Fields whose visibility condition depends on this field and references an
+   * enum value that this edit removes or changes. Renames are followed
+   * automatically, so only an enum value change can break a condition.
+   */
+  const getConditionsBrokenByEnumChange = (): AnyAttribute[] | false => {
     if (actionType !== 'edit' || modalType !== 'attribute') {
       return false;
     }
 
-    const oldName = initialData.name;
     const oldEnum = initialData.enum;
     const newEnum = modifiedData.enum;
 
-    // Get all attributes from the content type schema
+    if (!Array.isArray(oldEnum) || !Array.isArray(newEnum)) {
+      return false;
+    }
+
+    const removedValues = oldEnum.filter((value: string) => !newEnum.includes(value));
+
+    if (removedValues.length === 0) {
+      return false;
+    }
+
+    const fieldName = initialData.name;
     const contentTypeAttributes: AnyAttribute[] = type?.attributes ?? [];
 
-    // Find all fields that reference this field in their conditions
-    const referencedFields = contentTypeAttributes.filter((attr) => {
+    const brokenFields = contentTypeAttributes.filter((attr) => {
       const conditionEntry = getFirstVisibleConditionEntry(attr.conditions);
       if (conditionEntry === null) {
         return false;
@@ -208,32 +291,16 @@ export const FormModal = () => {
 
       const { fieldVar, value } = conditionEntry;
 
-      // Check if this condition references our field
-      if (fieldVar.var !== oldName) {
-        return false;
-      }
-
-      // If it's an enum field, also check if the value is being deleted/changed
-      if (oldEnum !== undefined && newEnum !== undefined) {
-        const deletedOrChangedValues = oldEnum.filter(
-          (oldValue: string) => !newEnum.includes(oldValue)
-        );
-        return typeof value === 'string' && deletedOrChangedValues.includes(value);
-      }
-
-      return true;
+      return (
+        fieldVar.var === fieldName && typeof value === 'string' && removedValues.includes(value)
+      );
     });
 
-    // If any fields reference this field, return them
-    if (referencedFields.length > 0) {
-      return referencedFields;
-    }
-
-    return false;
+    return brokenFields.length > 0 ? brokenFields : false;
   };
 
   React.useEffect(() => {
-    if (isOpen) {
+    if (isOpen && modalType) {
       const collectionTypesForRelation = sortedContentTypesList.filter(
         isAllowedContentTypesForRelations
       );
@@ -482,7 +549,6 @@ export const FormModal = () => {
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
-      // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components) as Internal.UID.Component[],
@@ -556,9 +622,73 @@ export const FormModal = () => {
     [dispatch, formErrors]
   );
 
-  const submitForm = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
+  const submitForm = async (
+    e: React.SyntheticEvent,
+    shouldContinue = isCreating,
+    // The user already confirmed the field will be recreated empty (rename +
+    // storage change): there is no data to preserve, so don't ask about it.
+    { skipRenameMigration = false }: { skipRenameMigration?: boolean } = {}
+  ) => {
     try {
       await checkFormValidity();
+
+      let recordRename = !skipRenameMigration;
+      let declineRename = false;
+      if (
+        !skipRenameMigration &&
+        actionType === 'edit' &&
+        (isCreatingAttribute || isCreatingCustomFieldAttribute) &&
+        // A field that was never saved has no data to preserve (and
+        // `recordRename` skips it), so there is nothing to ask about.
+        initialData.status !== 'NEW' &&
+        toStringValue(initialData.name) !== toStringValue(modifiedData.name)
+      ) {
+        const decision = await confirmAttributeRenameMigration({
+          forTarget,
+          uid: targetUid,
+          oldName: toStringValue(initialData.name),
+          newName: toStringValue(modifiedData.name),
+        });
+
+        if (decision === null) {
+          return;
+        }
+
+        recordRename = decision;
+        declineRename = !decision;
+      }
+
+      // Renaming the other side of a relation from this form renames a field
+      // of the target type, which may own the join table: ask for that one
+      // too, after the field's own prompt.
+      const oldTargetAttribute = toStringValue(initialData.targetAttribute);
+      const newTargetAttribute = toStringValue(modifiedData.targetAttribute);
+      let recordTargetRename = !skipRenameMigration;
+      let declineTargetRename = false;
+      if (
+        !skipRenameMigration &&
+        actionType === 'edit' &&
+        isCreatingAttribute &&
+        attributeType === 'relation' &&
+        oldTargetAttribute !== '' &&
+        newTargetAttribute !== '' &&
+        oldTargetAttribute !== newTargetAttribute &&
+        toStringValue(initialData.target) === toStringValue(modifiedData.target)
+      ) {
+        const decision = await confirmAttributeRenameMigration({
+          forTarget: 'contentType',
+          uid: toStringValue(modifiedData.target) as Internal.UID.ContentType,
+          oldName: oldTargetAttribute,
+          newName: newTargetAttribute,
+        });
+
+        if (decision === null) {
+          return;
+        }
+
+        recordTargetRename = decision;
+        declineTargetRename = !decision;
+      }
 
       dispatch(
         actions.setErrors({
@@ -694,6 +824,8 @@ export const FormModal = () => {
           forTarget,
           targetUid,
           name: toStringValue(initialData.name),
+          recordRename,
+          declineRename,
         };
 
         if (actionType === 'edit') {
@@ -729,6 +861,8 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               name: toStringValue(initialData.name),
+              recordRename,
+              declineRename,
             });
           }
 
@@ -761,6 +895,10 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               name: toStringValue(initialData.name),
+              recordRename,
+              declineRename,
+              recordTargetRename,
+              declineTargetRename,
             });
           }
 
@@ -777,7 +915,6 @@ export const FormModal = () => {
 
           // Adding an existing component
         }
-        // eslint-disable-next-line no-lonely-if
         if (isInFirstComponentStep) {
           // Navigate the user to step 2
           onNavigateToCreateComponentStep2();
@@ -825,6 +962,8 @@ export const FormModal = () => {
             forTarget,
             targetUid,
             name: toStringValue(initialData.name),
+            recordRename,
+            declineRename,
           });
         }
 
@@ -965,44 +1104,53 @@ export const FormModal = () => {
     }
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
-    e.preventDefault();
-
-    // Check for field name changes when clicking Finish
-    const referencedFields = checkFieldNameChanges();
-    if (referencedFields) {
+  // Runs after the condition warning (if any): warn when the rename also
+  // changes the field's storage, otherwise submit.
+  const continueSubmit = async (e: React.SyntheticEvent, shouldContinue: boolean) => {
+    const storageChange = checkRenameStorageChange();
+    if (storageChange) {
       setPendingSubmit({ e, shouldContinue });
-      setShowWarningDialog(true);
+      setStorageChangeWarning(storageChange);
       return;
     }
 
     await submitForm(e, shouldContinue);
   };
 
-  const handleConfirmClose = () => {
-    // eslint-disable-next-line no-alert
-    const confirm = window.confirm(
-      formatMessage({
-        id: 'window.confirm.close-modal.file',
-        defaultMessage: 'Are you sure? Your changes will be lost.',
-      })
-    );
-
-    if (confirm) {
-      onCloseModal();
-      dispatch(actions.resetProps());
-    }
+  const cancelStorageChange = () => {
+    setStorageChangeWarning(null);
+    setPendingSubmit(null);
   };
 
-  const handleClosed = () => {
-    // Close the modal
-    if (!isEqual(modifiedData, initialData)) {
-      handleConfirmClose();
-    } else {
-      onCloseModal();
-      // Reset the reducer
-      dispatch(actions.resetProps());
+  const confirmStorageChange = () => {
+    if (pendingSubmit === null) {
+      return;
     }
+
+    const { e, shouldContinue } = pendingSubmit;
+    cancelStorageChange();
+    submitForm(e, shouldContinue, { skipRenameMigration: true });
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
+    e.preventDefault();
+
+    // Check for conditions broken by an enum value change when clicking Finish
+    const brokenFields = getConditionsBrokenByEnumChange();
+    if (brokenFields) {
+      setPendingSubmit({ e, shouldContinue });
+      setShowWarningDialog(true);
+      return;
+    }
+
+    await continueSubmit(e, shouldContinue);
+  };
+
+  // Runs once UnsavedChangesModal has confirmed the close when there are unsaved changes.
+  const handleClosed = () => {
+    onCloseModal();
+    // Reset the reducer
+    dispatch(actions.resetProps());
   };
 
   const sendAdvancedTabEvent = (tab: string) => {
@@ -1069,25 +1217,7 @@ export const FormModal = () => {
 
   const genericInputProps = {
     customInputs: {
-      'allowed-types-select': AllowedTypesSelect,
-      'boolean-radio-group': BooleanRadioGroup,
-      'checkbox-with-number-field': CheckboxWithNumberField,
-      'icon-picker': IconPicker,
-      'content-type-radio-group': ContentTypeRadioGroup,
-      'content-type-folder-select': FolderSelect,
-      'radio-group': CustomRadioGroup,
-      relation: Relation,
-      'select-category': SelectCategory,
-      'select-component': SelectComponent,
-      'select-components': SelectComponents,
-      'select-default-boolean': BooleanDefaultValueSelect,
-      'select-number': SelectNumber,
-      'select-date': SelectDateType,
-      'toggle-draft-publish': DraftAndPublishToggle,
-      'text-plural': PluralName,
-      'text-singular': SingularName,
-      'textarea-enum': TextareaEnum,
-      'condition-form': ConditionForm,
+      ...CUSTOM_INPUTS,
       ...inputsFromPlugins,
     },
     componentToCreate,
@@ -1154,7 +1284,11 @@ export const FormModal = () => {
   };
 
   return (
-    <Modal.Root open={isOpen} onOpenChange={handleClosed}>
+    <UnsavedChangesModal
+      open={isOpen}
+      onOpenChange={handleClosed}
+      hasUnsavedChanges={!isEqual(modifiedData, pristineData)}
+    >
       <Modal.Content>
         <Dialog.Root open={showWarningDialog} onOpenChange={setShowWarningDialog}>
           <Dialog.Trigger />
@@ -1164,7 +1298,7 @@ export const FormModal = () => {
                 const { e, shouldContinue } = pendingSubmit;
                 setShowWarningDialog(false);
                 setPendingSubmit(null);
-                submitForm(e, shouldContinue);
+                continueSubmit(e, shouldContinue);
               }
             }}
             onCancel={() => {
@@ -1173,60 +1307,86 @@ export const FormModal = () => {
             }}
           >
             {(() => {
-              const referencedFields = checkFieldNameChanges();
-              if (referencedFields === false) return null;
+              const brokenFields = getConditionsBrokenByEnumChange();
+              if (brokenFields === false) return null;
 
-              const fieldNames = referencedFields.map((field) => field.name).join(', ');
-              const oldEnum = initialData.enum;
-              const newEnum = modifiedData.enum;
-              const isEnum = Array.isArray(oldEnum) && Array.isArray(newEnum);
-
-              if (isEnum === true) {
-                const deletedOrChangedValues = oldEnum.filter(
-                  (value: string) => !newEnum.includes(value)
-                );
-
-                return (
-                  <Box>
-                    <Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning',
-                        defaultMessage:
-                          'The following fields have conditions that depend on this field: ',
-                      })}
-                      <Typography fontWeight="bold">{fieldNames}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-values',
-                        defaultMessage: '. Changing or removing the enum values ',
-                      })}
-                      <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-end',
-                        defaultMessage: ' will break these conditions. Do you want to proceed?',
-                      })}
-                    </Typography>
-                  </Box>
-                );
-              }
+              const fieldNames = brokenFields.map((field) => field.name).join(', ');
+              const oldEnum = initialData.enum ?? [];
+              const newEnum = modifiedData.enum ?? [];
+              const deletedOrChangedValues = oldEnum.filter((value) => !newEnum.includes(value));
 
               return (
                 <Box>
                   <Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning',
+                      id: 'form.attribute.condition.enum-change-warning',
                       defaultMessage:
                         'The following fields have conditions that depend on this field: ',
                     })}
                     <Typography fontWeight="bold">{fieldNames}</Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning-end',
-                      defaultMessage:
-                        '. Renaming it will break these conditions. Do you want to proceed?',
+                      id: 'form.attribute.condition.enum-change-warning-values',
+                      defaultMessage: '. Changing or removing the enum values ',
+                    })}
+                    <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
+                    {formatMessage({
+                      id: 'form.attribute.condition.enum-change-warning-end',
+                      defaultMessage: ' will break these conditions. Do you want to proceed?',
                     })}
                   </Typography>
                 </Box>
               );
             })()}
+          </ConfirmDialog>
+        </Dialog.Root>
+        <Dialog.Root
+          open={storageChangeWarning !== null}
+          onOpenChange={(open) => !open && cancelStorageChange()}
+        >
+          <ConfirmDialog
+            title={formatMessage({
+              id: getTrad('form.attribute.rename-type-change-warning.title'),
+              defaultMessage: 'Existing data will be lost',
+            })}
+            onCancel={cancelStorageChange}
+            endAction={
+              <Dialog.Action>
+                <Button fullWidth variant="danger" onClick={confirmStorageChange}>
+                  {formatMessage({
+                    id: getTrad('form.attribute.rename-type-change-warning.confirm'),
+                    defaultMessage: 'Continue',
+                  })}
+                </Button>
+              </Dialog.Action>
+            }
+          >
+            {storageChangeWarning && (
+              <Box>
+                <Typography>
+                  {formatMessage(
+                    {
+                      id: getTrad('form.attribute.rename-type-change-warning.body'),
+                      defaultMessage:
+                        'You are renaming {oldName} to {newName} and changing it from {oldType} to {newType}. Strapi cannot preserve the existing data of this field when both change at once. The field will be recreated empty when you save.',
+                    },
+                    {
+                      oldName: (
+                        <Typography fontWeight="bold">{storageChangeWarning.oldName}</Typography>
+                      ),
+                      newName: (
+                        <Typography fontWeight="bold">{storageChangeWarning.newName}</Typography>
+                      ),
+                      oldType: (
+                        <Typography fontWeight="bold">{storageChangeWarning.oldType}</Typography>
+                      ),
+                      newType: (
+                        <Typography fontWeight="bold">{storageChangeWarning.newType}</Typography>
+                      ),
+                    }
+                  )}
+                </Typography>
+              </Box>
+            )}
           </ConfirmDialog>
         </Dialog.Root>
         <FormModalHeader
@@ -1314,16 +1474,11 @@ export const FormModal = () => {
               </Tabs.Root>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                type="button"
-                variant="tertiary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleClosed();
-                }}
-              >
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
+              <Modal.Close>
+                <Button type="button" variant="tertiary">
+                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              </Modal.Close>
               {/* TODO: refactor this component. Nuf said. */}
               <FormModalEndActions
                 deleteContentType={() => deleteContentType(targetUid as Internal.UID.ContentType)}
@@ -1359,6 +1514,6 @@ export const FormModal = () => {
           </FormComponent>
         )}
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

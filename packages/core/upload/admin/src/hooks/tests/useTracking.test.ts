@@ -1,6 +1,6 @@
 import { renderHook } from '@tests/utils';
 
-import { useTracking, MEDIA_LIBRARY_VERSION } from '../useTracking';
+import { useTracking } from '../useTracking';
 
 const mockTrackStrapiUsage = jest.fn();
 const mockUseGetSettingsQuery = jest.fn();
@@ -11,12 +11,22 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 jest.mock('../../services/settings', () => ({
-  useGetUploadSettingsQuery: () => mockUseGetSettingsQuery(),
+  useGetUploadSettingsQuery: (...args: unknown[]) => mockUseGetSettingsQuery(...args),
+}));
+
+const mockPermissions = { canRead: true };
+
+jest.mock('../useMediaLibraryPermissions', () => ({
+  useMediaLibraryPermissions: () => mockPermissions,
 }));
 
 describe('future media library useTracking', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPermissions.canRead = true;
+    // The flag decides the tag, not which tree fired the event — off means the
+    // project runs the current library.
+    window.strapi.featureFlags.isEnabled = jest.fn(() => false);
     mockUseGetSettingsQuery.mockReturnValue({
       data: { data: { aiMetadata: false, aiMetadataAvailable: false } },
     });
@@ -30,7 +40,7 @@ describe('future media library useTracking', () => {
     expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didCropFile', {
       location: 'upload',
       duplicatedFile: false,
-      mediaLibraryVersion: MEDIA_LIBRARY_VERSION,
+      mediaLibraryVersion: 'v2',
     });
   });
 
@@ -40,7 +50,7 @@ describe('future media library useTracking', () => {
     result.current.trackUsage('didSelectAllMediaLibraryElements');
 
     expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didSelectAllMediaLibraryElements', {
-      mediaLibraryVersion: MEDIA_LIBRARY_VERSION,
+      mediaLibraryVersion: 'v2',
     });
   });
 
@@ -56,7 +66,7 @@ describe('future media library useTracking', () => {
     expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didReplaceMedia', {
       location: 'upload',
       isAiMediaLibraryConfigured: true,
-      mediaLibraryVersion: MEDIA_LIBRARY_VERSION,
+      mediaLibraryVersion: 'v2',
     });
   });
 
@@ -69,5 +79,43 @@ describe('future media library useTracking', () => {
       'didReplaceMedia',
       expect.not.objectContaining({ isAiMediaLibraryConfigured: expect.anything() })
     );
+  });
+
+  it('picks up aiMetadata after the settings query the tracker reads is refreshed', () => {
+    mockUseGetSettingsQuery.mockReturnValue({
+      data: { data: { aiMetadata: false, aiMetadataAvailable: true } },
+    });
+
+    const { result, rerender } = renderHook(() => useTracking());
+
+    result.current.trackUsage('didGenerateMetadataRetroactively');
+
+    expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didGenerateMetadataRetroactively', {
+      isAiMediaLibraryConfigured: false,
+      mediaLibraryVersion: 'v2',
+    });
+
+    mockUseGetSettingsQuery.mockReturnValue({
+      data: { data: { aiMetadata: true, aiMetadataAvailable: true } },
+    });
+    rerender();
+
+    result.current.trackUsage('didGenerateMetadataRetroactively');
+
+    expect(mockTrackStrapiUsage).toHaveBeenLastCalledWith('didGenerateMetadataRetroactively', {
+      isAiMediaLibraryConfigured: true,
+      mediaLibraryVersion: 'v2',
+    });
+  });
+
+  it('does not request the settings without read access to the Media Library', () => {
+    mockPermissions.canRead = false;
+
+    renderHook(() => useTracking());
+
+    expect(mockUseGetSettingsQuery).toHaveBeenCalled();
+    mockUseGetSettingsQuery.mock.calls.forEach(([, options]) => {
+      expect(options).toEqual({ skip: true });
+    });
   });
 });

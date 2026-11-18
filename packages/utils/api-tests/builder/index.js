@@ -1,6 +1,6 @@
 'use strict';
 
-const { get } = require('lodash/fp');
+const { get } = require('lodash');
 
 const modelsUtils = require('../models');
 const actionRegistry = require('./action-registry');
@@ -41,7 +41,7 @@ const createTestBuilder = (options = {}) => {
     },
 
     addAction(code, ...params) {
-      const actionCreator = get(code, actionRegistry);
+      const actionCreator = get(actionRegistry, code);
 
       ctx.addAction(actionCreator(...params));
 

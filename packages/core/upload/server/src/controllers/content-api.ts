@@ -6,11 +6,12 @@ import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
-import { validateUploadBody } from './validation/content-api/upload';
+import { resolveFileId } from '../services/upload';
+import { validateUploadBody, validateUploadFilesBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
 
-const { ValidationError } = errors;
+const { ValidationError, NotFoundError } = errors;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sanitizeOutput = async (data: unknown | unknown[], ctx: Context) => {
@@ -24,14 +25,48 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
     const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.validate.query(data, schema, { auth, route });
+    // Same behaviour as core-api: only throw on unknown params if the project turned on strictParams.
+    // Either way they never reach the query, because sanitizeQuery strips them.
+    const strictParams = strapi.config.get('api.rest.strictParams');
+
+    return strapi.contentAPI.validate.query(data, schema, {
+      auth,
+      route,
+      ...(typeof strictParams === 'boolean' && { strictParams }),
+    });
   };
 
   const sanitizeQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
     const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
+    // The upload service hands unknown root keys (e.g. `where`) straight to the query engine
+    return strapi.contentAPI.sanitize.query(data, schema, { auth, route, strictParams: true });
+  };
+
+  /**
+   * Resolves the folder new uploads go into.
+   * - omitted: the "API Uploads" folder
+   * - null: the library root
+   * - id: that folder, which must exist
+   */
+  const resolveUploadFolderId = async (folder: number | null | undefined) => {
+    if (folder === undefined) {
+      const apiUploadFolder = await getService('api-upload-folder').getAPIUploadFolder();
+      return apiUploadFolder.id;
+    }
+
+    if (folder === null) {
+      return null;
+    }
+
+    const exists = await getService('folder').exists({ id: folder });
+
+    if (!exists) {
+      throw new ValidationError(`Folder with id ${folder} does not exist`);
+    }
+
+    return folder;
   };
 
   return {
@@ -58,14 +93,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async findOne(ctx: Context) {
-      const {
-        params: { id },
-      } = ctx;
-
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const file = await getService('upload').findOne(id, sanitizedQuery.populate!);
+      const id = await resolveFileId(strapi, ctx.params.id);
+      const file = id ? await getService('upload').findOne(id, sanitizedQuery.populate!) : null;
 
       if (!file) {
         return ctx.notFound('file.notFound');
@@ -77,11 +109,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async destroy(ctx: Context) {
-      const {
-        params: { id },
-      } = ctx;
-
-      const file = await getService('upload').findOne(id);
+      const id = await resolveFileId(strapi, ctx.params.id);
+      const file = id ? await getService('upload').findOne(id) : null;
 
       if (!file) {
         return ctx.notFound('file.notFound');
@@ -105,7 +134,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const result = await getService('upload').updateFileInfo(id, data.fileInfo as any);
+      const fileId = await resolveFileId(strapi, id);
+
+      if (!fileId) {
+        throw new NotFoundError();
+      }
+
+      const result = await getService('upload').updateFileInfo(fileId, data.fileInfo as any);
 
       const signedResult = await getService('file').signFileUrls(result);
 
@@ -138,9 +173,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
+      const fileId = await resolveFileId(strapi, id);
+
+      if (!fileId) {
+        throw new NotFoundError();
+      }
+
       const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
 
-      const replacedFiles = await getService('upload').replace(id, { data, file: validFiles[0] });
+      const replacedFiles = await getService('upload').replace(fileId, {
+        data,
+        file: validFiles[0],
+      });
 
       const signedFiles = await getService('file').signFileUrls(replacedFiles);
 
@@ -162,20 +206,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const isMultipleFiles = validFiles.length > 1;
-      const data: any = await validateUploadBody(filteredBody, isMultipleFiles);
+      const { folder, ...data }: any = await validateUploadFilesBody(filteredBody, isMultipleFiles);
 
-      const apiUploadFolderService = getService('api-upload-folder');
-
-      const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+      const folderId = await resolveUploadFolderId(folder);
 
       if (isMultipleFiles) {
         data.fileInfo = data.fileInfo || [];
         data.fileInfo = validFiles.map((_f, i) => ({
           ...data.fileInfo[i],
-          folder: apiUploadFolder.id,
+          folder: folderId,
         }));
       } else {
-        data.fileInfo = { ...data.fileInfo, folder: apiUploadFolder.id };
+        data.fileInfo = { ...data.fileInfo, folder: folderId };
       }
 
       const uploadedFiles = await getService('upload').upload({

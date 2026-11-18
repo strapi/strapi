@@ -1,22 +1,9 @@
-/* eslint-disable max-classes-per-file */
-
 /**
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
 
-import _ from 'lodash';
-import {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash/fp';
+import _, { cloneDeep, get, isEmpty, isObject, isString, toNumber } from 'lodash';
 import {
   constants,
   hasDraftAndPublish,
@@ -198,6 +185,42 @@ export interface Query {
   pageSize?: number;
 }
 
+const NULL_OPERAND_TRUE_VALUES = new Set(['true', 't', '1']);
+const NULL_OPERAND_FALSE_VALUES = new Set(['false', 'f', '0']);
+
+/**
+ * Reads a `$null` / `$notNull` operand with the values boolean filters accept (case-insensitive).
+ * A forced cast read `no` or `FALSE` as true, so `filters[x][$null]=no` matched the null rows.
+ *
+ * `null` and `undefined` keep the loose reading (false): optional flags (`{ $null: someFlag }`),
+ * GraphQL's nullable input and a bare `?filters[x][$null]` pass them.
+ */
+const parseNullOperand = (value: unknown): boolean => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (value === null || value === undefined) {
+    return false;
+  }
+
+  if (typeof value === 'number' || typeof value === 'string') {
+    const normalized = String(value).toLowerCase();
+
+    if (NULL_OPERAND_TRUE_VALUES.has(normalized) === true) {
+      return true;
+    }
+
+    if (NULL_OPERAND_FALSE_VALUES.has(normalized) === true) {
+      return false;
+    }
+  }
+
+  throw new ValidationError(
+    'Invalid boolean, expected one of true, t, 1, false, f, 0 (case-insensitive)'
+  );
+};
+
 class InvalidOrderError extends ValidationError {
   constructor() {
     super('Invalid order. order can only be one of asc|desc|ASC|DESC');
@@ -233,13 +256,61 @@ const convertOrderingQueryParams = (ordering: unknown) => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
+
+/**
+ * Describes a filter key that `convertAndSanitizeFilters` removed because it is neither an
+ * attribute of the model it was resolved against, nor `id`/`documentId`, nor a known operator.
+ */
+export type UnknownFilterKey = {
+  /** The removed key */
+  key: string;
+  /** UID of the model the key was resolved against, `undefined` when no model was available */
+  uid: string | undefined;
+  /**
+   * Attribute path to the removed key, operators excluded. It starts at the model the filters
+   * apply to: the queried model, or the populated model for filters nested in `populate`
+   * (e.g. `populate: { author: { filters: { nmae: 'x' } } }` reports `['nmae']` with the uid
+   * of the author model).
+   */
+  path: string[];
+  /**
+   * Set when the key sits inside the object operand of an operator applied to a scalar
+   * (non-relational) attribute, at any depth, e.g. `$eq` in `{ meta: { $eq: { a: 1 } } }`
+   * and in `{ meta: { $eq: { title: { a: 1 } } } }`. It is the nearest such operator.
+   */
+  operator: string | undefined;
+};
 
 interface TransformerOptions {
   getModel: (uid: string) => Model | undefined;
+  /**
+   * Called each time an unknown filter key is removed from the filters.
+   * The key is still removed: the hook only observes the removal.
+   * An error thrown by the hook is not caught: it propagates to the caller of the transformer.
+   */
+  onUnknownFilterKey?: (unknownFilterKey: UnknownFilterKey) => void;
 }
 
-const createTransformer = ({ getModel }: TransformerOptions) => {
+/**
+ * Where `convertAndSanitizeFilters` is in the filters tree
+ */
+type FiltersWalkContext = {
+  /** Attribute path from the model the filters apply to, operators excluded */
+  path: string[];
+  /** Whether the walk is inside the value of a scalar (non-relational) attribute */
+  isInScalarValue: boolean;
+  /** Nearest operator met inside a scalar attribute value, kept through nested attributes */
+  operator: string | undefined;
+};
+
+const ROOT_FILTERS_WALK_CONTEXT: FiltersWalkContext = {
+  path: [],
+  isInScalarValue: false,
+  operator: undefined,
+};
+
+const createTransformer = ({ getModel, onUnknownFilterKey }: TransformerOptions) => {
   /**
    * Sort query parser
    */
@@ -373,7 +444,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageQueryParams = (page: unknown): number => {
     const pageVal = toNumber(page);
 
-    if (!isInteger(pageVal) || pageVal <= 0) {
+    if (!Number.isInteger(pageVal) || pageVal <= 0) {
       throw new PaginationError(
         `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
       );
@@ -386,7 +457,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageSizeQueryParams = (pageSize: unknown, _page: unknown): number => {
     const pageSizeVal = toNumber(pageSize);
 
-    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+    if (!Number.isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
         `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${pageSize}`
       );
@@ -401,8 +472,8 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     start: unknown,
     limit: unknown
   ) => {
-    const isPagePagination = !isNil(page) || !isNil(pageSize);
-    const isOffsetPagination = !isNil(start) || !isNil(limit);
+    const isPagePagination = page != null || pageSize != null;
+    const isOffsetPagination = start != null || limit != null;
 
     if (isPagePagination && isOffsetPagination) {
       throw new PaginationError(
@@ -448,7 +519,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const hasPopulateFragmentDefined = (
     populate: PopulateObjectParams
   ): populate is PopulateObjectParams & Required<Pick<PopulateObjectParams, 'on'>> => {
-    return typeof populate === 'object' && 'on' in populate && !isNil(populate.on);
+    return typeof populate === 'object' && 'on' in populate && populate.on != null;
   };
 
   const hasCountDefined = (
@@ -510,7 +581,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          */
         if (
           'populate' in subPopulate &&
-          !isNil(subPopulate.populate) &&
+          subPopulate.populate != null &&
           subPopulate.populate !== '*'
         ) {
           throw new ValidationError(
@@ -635,19 +706,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 
@@ -678,7 +749,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       // map convert
       const fieldsValues = fields
         .flatMap((value) => convertFieldsQueryParams(value, schema, depth + 1))
-        .filter((v) => !isNil(v)) as string[];
+        .filter((v) => v != null) as string[];
 
       // NOTE: Only include the doc id if it's a content type
       if (schema?.modelType === 'contentType') {
@@ -712,15 +783,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     // Don't mutate the original object
     const filtersCopy = cloneDeep(filters);
 
-    return convertAndSanitizeFilters(filtersCopy, schema);
+    return convertAndSanitizeFilters(filtersCopy, schema, ROOT_FILTERS_WALK_CONTEXT);
   };
 
-  const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): WhereQuery => {
+  const convertAndSanitizeFilters = (
+    filters: FiltersParams,
+    schema: Model | undefined,
+    context: FiltersWalkContext
+  ): WhereQuery => {
     if (Array.isArray(filters)) {
       return (
         filters
           // Sanitize each filter
-          .map((filter) => convertAndSanitizeFilters(filter, schema))
+          .map((filter) => convertAndSanitizeFilters(filter, schema, context))
           // Filter out empty filters
           .filter((filter) => !isPlainObject(filter) || !isEmpty(filter))
       );
@@ -734,27 +809,55 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     // Here, `key` can either be an operator or an attribute name
     for (const [key, value] of Object.entries(filters)) {
-      const attribute = get(key, schema?.attributes);
+      const attribute = get(schema?.attributes, key);
       const validKey = isOperator(key) || isValidSchemaAttribute(key, schema);
 
       if (!validKey) {
         removeOperator(key);
+
+        if (onUnknownFilterKey !== undefined) {
+          onUnknownFilterKey({
+            key,
+            uid: schema?.uid,
+            path: [...context.path, key],
+            operator: context.operator,
+          });
+        }
       }
       // Handle attributes
       else if (attribute) {
+        const attributeContext: FiltersWalkContext = {
+          path: [...context.path, key],
+          isInScalarValue: false,
+          // Inside an object operand, keep reporting the operand's operator
+          operator: context.operator,
+        };
+
         // Relations
         if (attribute.type === 'relation') {
-          filters[key] = convertAndSanitizeFilters(value, getModel(attribute.target!));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel(attribute.target!),
+            attributeContext
+          );
         }
 
         // Components
         else if (attribute.type === 'component') {
-          filters[key] = convertAndSanitizeFilters(value, getModel(attribute.component));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel(attribute.component),
+            attributeContext
+          );
         }
 
         // Media
         else if (attribute.type === 'media') {
-          filters[key] = convertAndSanitizeFilters(value, getModel('plugin::upload.file'));
+          filters[key] = convertAndSanitizeFilters(
+            value,
+            getModel('plugin::upload.file'),
+            attributeContext
+          );
         }
 
         // Dynamic Zones
@@ -770,15 +873,24 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
         // Scalar attributes
         else {
-          filters[key] = convertAndSanitizeFilters(value, schema);
+          filters[key] = convertAndSanitizeFilters(value, schema, {
+            ...attributeContext,
+            isInScalarValue: true,
+          });
         }
       }
 
       // Handle operators
       else if (['$null', '$notNull'].includes(key)) {
-        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+        filters[key] = parseNullOperand(filters[key]);
       } else if (isObject(value)) {
-        filters[key] = convertAndSanitizeFilters(value, schema);
+        const nestedContext: FiltersWalkContext =
+          isOperator(key) === true
+            ? { ...context, operator: context.isInScalarValue === true ? key : context.operator }
+            : // `id` and `documentId`, valid without being declared as attributes
+              { path: [...context.path, key], isInScalarValue: true, operator: context.operator };
+
+        filters[key] = convertAndSanitizeFilters(value, schema, nestedContext);
       }
 
       // Remove empty objects & arrays
@@ -824,43 +936,43 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       ...rest
     } = params;
 
-    if (!isNil(status)) {
+    if (status != null) {
       convertStatusParams(status, query);
     }
 
-    if (!isNil(searchQuery)) {
+    if (searchQuery != null) {
       query._q = searchQuery;
     }
 
     applySortToQuery(query, sort);
 
-    if (!isNil(filters)) {
+    if (filters != null) {
       query.where = convertFiltersQueryParams(filters, schema);
     }
 
-    if (!isNil(fields)) {
+    if (fields != null) {
       query.select = convertFieldsQueryParams(fields, schema);
     }
 
-    if (!isNil(populate)) {
+    if (populate != null) {
       query.populate = convertPopulateQueryParams(populate, schema);
     }
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 

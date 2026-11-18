@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { has } from 'lodash/fp';
+import { has } from 'lodash';
 
 // TODO: Remove duplicated code by extracting to a shared package
 
@@ -17,8 +17,8 @@ const assertCwdContainsStrapiProject = (name: string) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pkgJSON = require(`${process.cwd()}/package.json`);
     if (
-      !has('dependencies.@strapi/strapi', pkgJSON) &&
-      !has('devDependencies.@strapi/strapi', pkgJSON)
+      !has(pkgJSON, 'dependencies.@strapi/strapi') &&
+      !has(pkgJSON, 'devDependencies.@strapi/strapi')
     ) {
       logErrorAndExit();
     }

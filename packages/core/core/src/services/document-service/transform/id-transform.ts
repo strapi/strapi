@@ -1,4 +1,4 @@
-import { curry } from 'lodash/fp';
+import { curry } from 'lodash';
 
 import type { UID, Modules } from '@strapi/types';
 

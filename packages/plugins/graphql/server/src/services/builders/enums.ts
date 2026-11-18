@@ -1,5 +1,5 @@
 import { enumType } from 'nexus';
-import { set } from 'lodash/fp';
+import { set } from 'lodash';
 import { strings } from '@strapi/utils';
 
 interface Definition {
@@ -17,7 +17,7 @@ const buildEnumTypeDefinition = (definition: Definition, name: string) => {
   return enumType({
     name,
     members: definition.enum.reduce(
-      (acc, value) => set(strings.toRegressedEnumValue(value), value, acc),
+      (acc, value) => set(acc, strings.toRegressedEnumValue(value), value),
       {}
     ),
   });

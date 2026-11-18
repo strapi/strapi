@@ -160,7 +160,12 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
           .min(1)
           .test(areEnumValuesUnique)
           .required(),
-        default: yup.string().when('enum', (enumVal) => yup.string().oneOf(enumVal)),
+        // A missing or invalid `enum` is reported by its own rule above; `oneOf` throws on it
+        default: yup
+          .string()
+          .when('enum', (enumVal: unknown) =>
+            Array.isArray(enumVal) === true ? yup.string().oneOf(enumVal) : yup.string()
+          ),
         enumName: yup.string().test(isValidName),
         required: validators.required,
       };

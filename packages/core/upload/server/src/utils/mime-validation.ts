@@ -115,7 +115,7 @@ export function isMimeTypeAllowed(mimeType: string, config: SecurityConfig): boo
 
 /**
  * Single gate for allow/deny. Returns ValidationResult.
- * Doc: docs/docs/01-core/upload/01-backend/01-mime-validation.md
+ * Doc: docs/docs/packages/core/upload/01-backend/01-mime-validation.md
  */
 function validateAllowBanLists(
   mimetype: string,

@@ -1,4 +1,4 @@
-import { intersection, map, isEmpty } from 'lodash/fp';
+import { isEmpty, map, intersection } from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
@@ -45,7 +45,7 @@ const validateDuplicatesMoveManyFoldersFilesSchema = yup
       where: { parent: { id: destinationFolderId } },
     });
 
-    const duplicatedNames = intersection(map('name', folders), map('name', existingFolders));
+    const duplicatedNames = intersection(map(existingFolders, 'name'), map(folders, 'name'));
     if (duplicatedNames.length > 0) {
       return this.createError({
         message: `some folders already exists: ${duplicatedNames.join(', ')}`,
@@ -68,6 +68,12 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
         select: ['path'],
         where: { id: destinationFolderId },
       });
+
+      // The destination existed when `folder-exists` checked it, but it can be deleted (e.g. by
+      // another admin) since then.
+      if (destinationFolder === null) {
+        return this.createError({ message: 'destination folder does not exist' });
+      }
 
       const folders: Folder[] = await strapi.db.query(FOLDER_MODEL_UID).findMany({
         select: ['name', 'path'],

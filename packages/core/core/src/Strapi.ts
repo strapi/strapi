@@ -1,7 +1,6 @@
 import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
-import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
@@ -13,6 +12,7 @@ import { warnDeprecatedServerConfig } from './configuration/server-config';
 import * as factories from './factories';
 
 import * as utils from './utils';
+import { detectCustomizations } from './utils/detect-customizations';
 import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
@@ -32,6 +32,7 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
+import { createLocalizationService } from './services/localization';
 import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
@@ -44,7 +45,6 @@ import { createContentAPISchemaRegistry } from './core-api/routes/validation/sch
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
 const tsUtils = (): typeof import('@strapi/typescript-utils') => {
   if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyTsUtils = require('@strapi/typescript-utils');
   }
   return lazyTsUtils as typeof import('@strapi/typescript-utils');
@@ -55,12 +55,27 @@ class Strapi extends Container implements Core.Strapi {
 
   isLoaded: boolean = false;
 
+  /**
+   * destroy() can run twice: a transfer provider closes the instance, then the
+   * CLI calls destroy() again. The second call returns once the first has
+   * succeeded. A call that overlaps one in progress shares its promise. A call
+   * that failed can run again, from the step that did not finish.
+   */
+  private destroyed = false;
+
+  private destroyPromise?: Promise<void>;
+
+  private destroyStage?: number;
+
   internal_config: Record<string, unknown> = {};
+
+  private readonly openOnStart: boolean | undefined;
 
   constructor(opts: StrapiOptions) {
     super();
 
     this.internal_config = loadConfiguration(opts);
+    this.openOnStart = opts.open;
 
     this.registerInternalServices();
 
@@ -118,6 +133,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get documents(): Modules.Documents.Service {
     return this.get('documents');
+  }
+
+  get localization(): Modules.Localization.Service {
+    return this.get('localization');
   }
 
   get features(): FeaturesService {
@@ -300,6 +319,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityValidator', entityValidator)
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
+      .add('localization', () => createLocalizationService())
       .add('db', () => {
         const useTSM = this.config.get('database.settings.useTypescriptMigrations') === true;
         const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;
@@ -308,6 +328,7 @@ class Strapi extends Container implements Core.Strapi {
         return new Database(
           _.merge(this.config.get('database'), {
             logger,
+            getPhase: () => (this.isLoaded ? 'runtime' : 'boot'),
             settings: {
               migrations: {
                 dir: path.join(projectDir, 'database/migrations'),
@@ -345,12 +366,19 @@ class Strapi extends Container implements Core.Strapi {
       .catch(this.log.error);
   }
 
-  async openAdmin({ isInitialized }: { isInitialized: boolean }) {
-    const shouldOpenAdmin =
-      this.config.get('environment') === 'development' &&
-      this.config.get('admin.autoOpen', true) !== false;
+  getCustomizations() {
+    return detectCustomizations(this);
+  }
 
-    if (shouldOpenAdmin && !isInitialized) {
+  async openAdmin({ isInitialized }: { isInitialized: boolean }) {
+    const shouldOpen = utils.shouldOpenAdmin({
+      environment: this.config.get('environment'),
+      autoOpen: this.config.get('admin.autoOpen', true),
+      open: this.openOnStart,
+      isInitialized,
+    });
+
+    if (shouldOpen) {
       try {
         await utils.openBrowser(this.config);
         this.telemetry.send('didOpenTab');
@@ -525,6 +553,9 @@ class Strapi extends Container implements Core.Strapi {
 
     await this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 
+    // Runs once every module, provider and the app have bootstrapped
+    await this.hook('strapi::app.afterBootstrap').call();
+
     return this;
   }
 
@@ -551,27 +582,76 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async destroy() {
-    this.log.info('Shutting down Strapi');
-    await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
-
-    for (const provider of providers) {
-      await provider.destroy?.(this);
+    if (this.destroyed) {
+      return;
     }
 
-    await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
+    if (!this.destroyPromise) {
+      this.destroyPromise = this.shutdown().catch((error) => {
+        this.destroyPromise = undefined;
+        throw error;
+      });
+    }
 
-    await this.server.destroy();
+    return this.destroyPromise;
+  }
 
-    this.eventHub.destroy();
+  private async shutdown() {
+    if ((this.destroyStage ?? 0) < 1) {
+      this.log.info('Shutting down Strapi');
+      await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
+      this.destroyStage = 1;
+    }
 
-    await this.db?.destroy();
+    if ((this.destroyStage ?? 0) < 2) {
+      for (const provider of providers) {
+        await provider.destroy?.(this);
+      }
+      this.destroyStage = 2;
+    }
 
-    process.removeAllListeners();
+    if ((this.destroyStage ?? 0) < 3) {
+      await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
+      this.destroyStage = 3;
+    }
 
-    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
-    delete global.strapi;
+    if ((this.destroyStage ?? 0) < 4) {
+      await this.server.destroy();
+      this.destroyStage = 4;
+    }
 
-    this.log.info('Strapi has been shut down');
+    if ((this.destroyStage ?? 0) < 5) {
+      this.eventHub.destroy();
+      this.destroyStage = 5;
+    }
+
+    if ((this.destroyStage ?? 0) < 6) {
+      await this.db?.destroy();
+      this.destroyStage = 6;
+    }
+
+    if ((this.destroyStage ?? 0) < 7) {
+      process.removeAllListeners();
+      this.destroyStage = 7;
+    }
+
+    if ((this.destroyStage ?? 0) < 8) {
+      // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
+      delete global.strapi;
+      this.destroyStage = 8;
+    }
+
+    this.app = undefined;
+    this.isLoaded = false;
+
+    if ((this.destroyStage ?? 0) < 9) {
+      // The container stays registered. API tests keep this object, and the
+      // test helper clears the service maps after destroy() succeeds.
+      this.log.info('Strapi has been shut down');
+      this.destroyStage = 9;
+    }
+
+    this.destroyed = true;
   }
 
   async runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
@@ -582,7 +662,7 @@ class Strapi extends Container implements Core.Strapi {
   async runUserLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // user
     const userLifecycleFunction = this.app && this.app[lifecycleName];
-    if (isFunction(userLifecycleFunction)) {
+    if (typeof userLifecycleFunction === 'function') {
       await userLifecycleFunction({ strapi: this });
     }
   }
@@ -619,6 +699,12 @@ export interface StrapiOptions {
   distDir: string;
   autoReload?: boolean;
   serveAdminPanel?: boolean;
+  /**
+   * Open the admin in a browser after the server listens, in development only. `true` always
+   * opens it, `false` never does. `undefined` keeps the default: only when no admin user exists
+   * and `admin.autoOpen` is not `false`. Not part of the app config.
+   */
+  open?: boolean;
 }
 
 export default Strapi;

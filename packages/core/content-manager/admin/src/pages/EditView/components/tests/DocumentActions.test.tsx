@@ -8,6 +8,8 @@ const mockPublish = jest.fn();
 const mockSetParentFormValue = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
+const mockUseDraftRelationCountQuery = jest.fn();
+const mockDiscard = jest.fn();
 const mockFetchDraftDocument = jest.fn();
 const mockNavigate = jest.fn();
 const mockParams: { id?: string } = {};
@@ -68,6 +70,7 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
     create: mockCreate,
     update: mockUpdateDocument,
     publish: mockPublish,
+    discard: mockDiscard,
     isLoading: false,
   }),
 }));
@@ -98,8 +101,10 @@ jest.mock('../../../../features/DocumentRBAC', () => ({
 }));
 jest.mock('../../../../preview/pages/Preview', () => ({ usePreviewContext: () => false }));
 jest.mock('../../../../services/documents', () => ({
-  useGetDraftRelationCountQuery: () => [mockCountDraftRelations, { isError: false }],
+  useGetDraftRelationCountQuery: (...args: unknown[]) => mockUseDraftRelationCountQuery(...args),
+  useLazyGetDraftRelationCountQuery: () => [mockCountDraftRelations, { isError: false }],
   useLazyGetDocumentQuery: () => [mockFetchDraftDocument],
+  useGetI18nLocalesQuery: () => ({ data: undefined }),
 }));
 jest.mock('../FormInputs/Relations/RelationModal', () => ({
   isAnyRelationModalOpen: () => mockIsAnyRelationModalOpen,
@@ -125,6 +130,7 @@ jest.mock('../FormInputs/Relations/RelationModal', () => ({
 }));
 
 import {
+  DiscardAction,
   DocumentActions,
   DocumentActionsMenu,
   openPublishConfirmDialog,
@@ -699,6 +705,103 @@ describe('draft relations count fetching', () => {
   });
 });
 
+describe('DiscardAction draft relations warning', () => {
+  const DiscardHarness = () => {
+    const action = DiscardAction({
+      activeTab: 'draft',
+      documentId: 'child',
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      meta: { availableStatus: [], availableLocales: [] },
+      document: { documentId: 'child', id: 1, status: 'modified' },
+    });
+
+    if (!action) {
+      return null;
+    }
+
+    return <DocumentActions actions={[{ id: 'discard', ...action }]} />;
+  };
+
+  const mockCountQueryState = (state: Record<string, unknown>) => {
+    mockUseDraftRelationCountQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      ...state,
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('warns that relations to draft entries will be removed', async () => {
+    mockCountQueryState({ data: { data: { unpublishedRelations: 1, draftM2mLinks: 1 } } });
+
+    const { user } = render(<DiscardHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+
+    const warning = screen.getByText(
+      "2 linked entries are still in draft. Discarding will remove those relations, because unpublished entries aren't part of the published version."
+    );
+    const confirmation = screen.getByText('Are you sure?');
+
+    expect(warning.compareDocumentPosition(confirmation)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('does not warn when there are no relations to draft entries', async () => {
+    mockCountQueryState({ data: { data: { unpublishedRelations: 0, draftM2mLinks: 0 } } });
+
+    const { user } = render(<DiscardHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+
+    expect(screen.getByRole('heading', { name: 'Confirmation' })).toBeInTheDocument();
+    expect(screen.queryByText(/still in draft/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Any relations to unpublished entries will be removed.')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows a generic warning when the draft relations count fails to load', async () => {
+    mockCountQueryState({ isError: true });
+
+    const { user } = render(<DiscardHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+
+    expect(
+      screen.getByText('Any relations to unpublished entries will be removed.')
+    ).toBeInTheDocument();
+  });
+
+  it('is disabled until the draft relations count has loaded', () => {
+    mockCountQueryState({ isLoading: true });
+
+    render(<DiscardHarness />);
+
+    expect(screen.getByRole('button', { name: 'Discard changes' })).toBeDisabled();
+  });
+
+  it('shares the draft relations count request with the publish action', () => {
+    mockCountQueryState({ data: { data: { unpublishedRelations: 0, draftM2mLinks: 0 } } });
+
+    render(<DiscardHarness />);
+
+    expect(mockUseDraftRelationCountQuery).toHaveBeenCalledWith(
+      {
+        collectionType: 'collection-types',
+        model: 'api::child.child',
+        documentId: 'child',
+        params: {},
+      },
+      { skip: false }
+    );
+  });
+});
+
 describe('DocumentActions', () => {
   it('it should render a single button when there is only one action', () => {
     render(<DocumentActions actions={[{ id: '1', label: 'Action 1', onClick: jest.fn() }]} />);
@@ -1225,6 +1328,50 @@ describe('DocumentActionsMenu', () => {
     await user.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('leaves the focus in a modal opened from the menu instead of giving it back to the trigger', async () => {
+    const { user } = render(
+      <DocumentActionsMenu
+        actions={[
+          {
+            id: '1',
+            label: 'Action 1',
+            // The dialog is only set once the click handler resolves, after the menu has closed
+            onClick: async () => {},
+            dialog: {
+              type: 'modal',
+              title: 'hello world',
+              content: <input aria-label="New position" autoFocus />,
+              footer: null,
+            },
+          },
+          { id: '2', label: 'Action 2', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    const trigger = screen.getByRole('button', { name: 'More document actions' });
+
+    await user.click(trigger);
+
+    // jsdom doesn't reproduce the browser timing (the closing menu took the focus back from the
+    // field that just got it), so check that the menu doesn't give it back to the trigger
+    const focusTrigger = jest.spyOn(trigger, 'focus');
+
+    await user.click(screen.getByRole('menuitem', { name: 'Action 1' }));
+
+    await waitFor(() => expect(screen.getByLabelText('New position')).toHaveFocus());
+    expect(focusTrigger).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Close modal' }));
+
+    // An action without a dialog still gives the focus back to the trigger
+    focusTrigger.mockClear();
+    await user.click(trigger);
+    await user.click(screen.getByRole('menuitem', { name: 'Action 2' }));
+
+    await waitFor(() => expect(focusTrigger).toHaveBeenCalled());
   });
 
   it('should show correct background colors on hover for different variants', async () => {

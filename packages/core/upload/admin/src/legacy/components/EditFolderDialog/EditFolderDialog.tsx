@@ -1,7 +1,21 @@
 import * as React from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
-import { Button, Field, Flex, Grid, Loader, Modal, Typography } from '@strapi/design-system';
+import {
+  ConfirmDialog,
+  FormikUnsavedChangesRegistrar,
+  UnsavedChangesModal,
+  useNotification,
+} from '@strapi/admin/strapi-admin';
+import {
+  Button,
+  Dialog,
+  Field,
+  Flex,
+  Grid,
+  Loader,
+  Modal,
+  Typography,
+} from '@strapi/design-system';
 import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
@@ -13,6 +27,7 @@ import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../hooks/useTracking';
 import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
+import { isImeComposing } from '../../utils/isImeComposing';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';
 
@@ -56,6 +71,7 @@ export const EditFolderContent = ({
   });
   const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = React.useState(false);
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
@@ -88,7 +104,7 @@ export const EditFolderContent = ({
   const handleKeyDown =
     (handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void) =>
     (event: React.KeyboardEvent<HTMLFormElement>) => {
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' && !isImeComposing(event)) {
         if (event.target instanceof HTMLInputElement) {
           handleSubmit(event);
           event.preventDefault();
@@ -188,8 +204,9 @@ export const EditFolderContent = ({
         onSubmit={handleSubmit}
         initialValues={initialFormData}
       >
-        {({ values, errors, handleChange, setFieldValue, handleSubmit }) => (
+        {({ values, errors, handleChange, setFieldValue, handleSubmit, dirty }) => (
           <Form noValidate ref={formRef} onKeyDown={handleKeyDown(handleSubmit)}>
+            <FormikUnsavedChangesRegistrar />
             <EditFolderModalHeader isEditing={isEditing} />
             <Modal.Body>
               <Grid.Root gap={4}>
@@ -285,7 +302,13 @@ export const EditFolderContent = ({
               </Grid.Root>
             </Modal.Body>
             <Modal.Footer>
-              <Button onClick={() => onClose()} variant="tertiary" name="cancel">
+              <Button
+                // Asks here rather than through `UnsavedChangesModal`, because `onClose` does not
+                // always close the modal: inside the asset picker it goes back to the list.
+                onClick={() => (dirty ? setIsConfirmCancelOpen(true) : onClose())}
+                variant="tertiary"
+                name="cancel"
+              >
                 {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
               </Button>
               <Flex gap={2}>
@@ -326,16 +349,25 @@ export const EditFolderContent = ({
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleDelete}
       />
+      <Dialog.Root open={isConfirmCancelOpen} onOpenChange={setIsConfirmCancelOpen}>
+        <ConfirmDialog variant="danger" onConfirm={() => onClose()}>
+          {formatMessage({
+            id: 'global.prompt.unsaved-modal',
+            defaultMessage:
+              'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.',
+          })}
+        </ConfirmDialog>
+      </Dialog.Root>
     </>
   );
 };
 
 export const EditFolderDialog = ({ open, onClose, ...restProps }: EditFolderDialogProps) => {
   return (
-    <Modal.Root open={open} onOpenChange={onClose}>
+    <UnsavedChangesModal open={open ?? false} onOpenChange={onClose}>
       <Modal.Content>
         <EditFolderContent {...restProps} onClose={onClose} open={open} />
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

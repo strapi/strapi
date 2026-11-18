@@ -102,6 +102,10 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   beforeAll(async () => {
     strapi = await createStrapiInstance();
 
+    // forgot-password sends the email without awaiting it. A real send to the test domain
+    // can reject after `strapi.destroy()`, failing the suite on the missing global.
+    jest.spyOn(strapi.plugin('email').service('email'), 'sendTemplatedEmail').mockResolvedValue();
+
     // Requests run as an admin of our own: with only the default super admin in the
     // database, asserting the actor would prove nothing.
     utils = createUtils(strapi);
@@ -393,6 +397,26 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
         { type: 'admin-user', id: second.id, email: 'ana@accounts-audit.test' },
       ]);
       await expectNoLegacyLog();
+    });
+
+    test('records the deleted accounts on a bulk delete with a missing ID', async () => {
+      const first = await inviteUser('leo@accounts-audit.test');
+      const second = await inviteUser('ana@accounts-audit.test', { firstname: 'Ana' });
+      const missingId = Math.max(first.id, second.id) + 1000;
+      await clearAuditLogs();
+
+      const res = await rq({
+        url: '/admin/users/batch-delete',
+        method: 'POST',
+        body: { ids: [first.id, missingId, second.id] },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const logs = await findLogs('admin-user.delete');
+      expect(logs.map((log) => log.payload.resource)).toEqual([
+        { type: 'admin-user', id: first.id, email: 'leo@accounts-audit.test' },
+        { type: 'admin-user', id: second.id, email: 'ana@accounts-audit.test' },
+      ]);
     });
   });
 

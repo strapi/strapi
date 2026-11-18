@@ -1,0 +1,54 @@
+deployment {
+  environment replicated {
+    title 'Example: two application replicas'
+    host ingress {
+      title 'HTTPS ingress / load balancer'
+      description 'Routes requests to configured healthy replicas.'
+      technology 'TLS / load balancing'
+    }
+    host first_host {
+      title 'Application replica A'
+      server = instanceOf strapi.server_runtime
+    }
+    host second_host {
+      title 'Application replica B'
+      server = instanceOf strapi.server_runtime
+    }
+    host database_host {
+      title 'Shared PostgreSQL service'
+      database = instanceOf strapi.database
+    }
+    host object_storage {
+      title 'Shared Amazon S3 bucket'
+      media = instanceOf media_storage
+    }
+    ingress -> first_host.server 'Routes requests' 'HTTP / private network' { #replicated_deployment_path }
+    ingress -> second_host.server 'Routes requests' 'HTTP / private network' { #replicated_deployment_path }
+    first_host.server -> database_host.database 'Reads and writes data' 'SQL / TLS' { #replicated_deployment_path }
+    second_host.server -> database_host.database 'Reads and writes data' 'SQL / TLS' { #replicated_deployment_path }
+    first_host.server -> object_storage.media 'Stores files via S3 provider' 'HTTPS' { #replicated_deployment_path }
+    second_host.server -> object_storage.media 'Stores files via S3 provider' 'HTTPS' { #replicated_deployment_path }
+  }
+}
+views {
+  deployment view replicated_deployment {
+    title '04 Deployment / Multiple application instances'
+    link ../production_operations/ 'Related: operating responsibilities'
+    description '''
+      **Audience:** operators and engineers. **Type:** illustrative deployment topology, not a turnkey high-availability design.
+      **Question:** which state is shared when two instances serve the same application?
+      This extends the production example with two supervised Node.js processes behind an ingress, using the same PostgreSQL service and S3 bucket.
+      Replicas use compatible application builds and consistent configuration/secrets. Each still owns its own connection pool, event listeners, webhook queue and scheduler. There is no implied inter-process bus.
+      Shared storage does not coordinate arbitrary cron jobs or make deployment/schema changes safe automatically. Content Releases has its own row-lock/state protection; other tasks require application-specific coordination.
+      TLS/private networking, health routing and supervision are configured infrastructure choices. Database/ingress redundancy, capacity, recovery and rollout policy must be designed separately; two application processes alone do not guarantee high availability.
+      Clients and the browser Admin are omitted here; their runtime boundaries are unchanged. See Operating responsibilities for scheduling, monitoring and recovery.
+    '''
+    include replicated.**
+    exclude * -> *
+    include
+      replicated.ingress -> replicated.first_host.server,
+      replicated.ingress -> replicated.second_host.server
+    include * -> * where tag is #replicated_deployment_path
+    autoLayout LeftRight 65 45
+  }
+}

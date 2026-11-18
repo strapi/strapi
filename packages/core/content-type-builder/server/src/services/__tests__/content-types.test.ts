@@ -1,5 +1,6 @@
 import type { Struct } from '@strapi/types';
-import { formatContentType } from '../content-types';
+import { errors } from '@strapi/utils';
+import { editContentType, formatContentType } from '../content-types';
 
 describe('Content types service', () => {
   describe('format ContentType', () => {
@@ -30,6 +31,25 @@ describe('Content types service', () => {
 
     it('Returns consistent schemas', () => {
       expect(formatContentType(contentType)).toMatchSnapshot();
+    });
+  });
+
+  describe('editContentType', () => {
+    beforeEach(() => {
+      global.strapi = {
+        components: {},
+        contentTypes: {},
+        dirs: { app: { api: '/app/src/api', components: '/app/src/components' } },
+      } as any;
+    });
+
+    it('Throws a not found error when the uid is unknown', async () => {
+      const promise = editContentType('api::unknown.unknown', {
+        contentType: { attributes: {} },
+      });
+
+      await expect(promise).rejects.toThrow(errors.ApplicationError);
+      await expect(promise).rejects.toThrow('contentType.notFound');
     });
   });
 });
