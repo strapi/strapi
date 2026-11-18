@@ -88,4 +88,4 @@ const getSiblingNonLocalizedLookups = ({
 };
 
 export { getOriginalNonLocalizedLookup, getSiblingNonLocalizedLookups };
-export type { OriginalNonLocalizedLookupInput, OriginalNonLocalizedLookup };
+export type { OriginalNonLocalizedLookupInput };
