@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * The example templates ship a `scripts/seed.js` that uploads the images in `data/uploads`
- * through the upload service. These tests run the script against a stubbed `strapi` and
- * check the files it hands to the upload service carry the name the service reads.
+ * through the upload service and creates entries through the Document Service. These tests
+ * run the script against a stubbed `strapi` and check what it hands to both services.
  */
 
 const templatesDir = path.resolve(__dirname, '..', '..', 'templates');
@@ -18,10 +18,30 @@ const templates = fs
   .filter((template) => fs.existsSync(path.join(templatesDir, template, 'scripts', 'seed.js')));
 
 type UploadCall = { files: unknown; data: unknown };
+type CreateCall = { uid: string; params: { data: Record<string, unknown>; status?: string } };
+
+// Content type schemas as the template ships them, so the stub reports each type's real options
+const readContentType = (template: string, uid: string) => {
+  const [, name] = uid.split('.');
+  const schemaPath = path.join(
+    templatesDir,
+    template,
+    'src',
+    'api',
+    name,
+    'content-types',
+    name,
+    'schema.json'
+  );
+
+  return JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+};
 
 const runSeed = async (template: string) => {
   const scriptPath = path.join(templatesDir, template, 'scripts', 'seed.js');
   const uploadCalls: UploadCall[] = [];
+  const createCalls: CreateCall[] = [];
+  const errors: unknown[] = [];
 
   const strapi = {
     config: { environment: 'test' },
@@ -33,7 +53,13 @@ const runSeed = async (template: string) => {
         create: async () => ({}),
       }),
     },
-    documents: () => ({ create: async () => ({}) }),
+    contentType: (uid: string) => readContentType(template, uid),
+    documents: (uid: string) => ({
+      async create(params: CreateCall['params']) {
+        createCalls.push({ uid, params });
+        return {};
+      },
+    }),
     plugin: () => ({
       service: () => ({
         async upload(args: UploadCall) {
@@ -80,12 +106,12 @@ const runSeed = async (template: string) => {
     path.dirname(scriptPath),
     strapi,
     { exit: (code: number) => resolveExit(code) },
-    { log: () => undefined, error: () => undefined }
+    { log: () => undefined, error: (...args: unknown[]) => errors.push(args) }
   );
 
   const exitCode = await exited;
 
-  return { exitCode, uploadCalls };
+  return { exitCode, uploadCalls, createCalls, errors };
 };
 
 describe('create-strapi-app example templates seed script', () => {
@@ -103,4 +129,29 @@ describe('create-strapi-app example templates seed script', () => {
       }
     }
   });
+
+  it.each(templates)(
+    '%s: creates draft & publish entries as published, and other entries without a status',
+    async (template) => {
+      const { exitCode, createCalls, errors } = await runSeed(template);
+
+      expect(exitCode).toBe(0);
+      // createEntry logs and swallows errors, so a failing create would otherwise go unnoticed
+      expect(errors).toEqual([]);
+      expect(createCalls.map(({ uid }) => uid)).toContain('api::article.article');
+
+      for (const { uid, params } of createCalls) {
+        const { draftAndPublish } = readContentType(template, uid).options ?? {};
+
+        if (draftAndPublish === true) {
+          expect(params.status, uid).toBe('published');
+        } else {
+          expect(params, uid).not.toHaveProperty('status');
+        }
+
+        // The Document Service drops `publishedAt` from `data`, so the seed must not rely on it
+        expect(params.data, uid).not.toHaveProperty('publishedAt');
+      }
+    }
+  );
 });
