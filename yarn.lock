@@ -10715,7 +10715,7 @@ __metadata:
     pkg-up: "npm:3.1.0"
     postcss: "npm:8.5.32"
     postcss-loader: "npm:8.2.1"
-    prettier: "npm:3.9.9"
+    prettier: "npm:3.9.10"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-refresh: "npm:0.14.0"
@@ -10854,7 +10854,7 @@ __metadata:
     fs-extra: "npm:11.3.4"
     jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
-    prettier: "npm:3.9.9"
+    prettier: "npm:3.9.10"
     tsconfig: "npm:5.63.0"
     typescript: "npm:5.9.3"
   languageName: unknown
@@ -26542,12 +26542,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.9.9":
-  version: 3.9.9
-  resolution: "prettier@npm:3.9.9"
+"prettier@npm:3.9.10":
+  version: 3.9.10
+  resolution: "prettier@npm:3.9.10"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10c0/d50ea2537b2ff7dbd5088a214f4d936484e55c665cea2185b477a55b0770be55f3b156a71f63a9a639def6b334667bb327139dc85f2a1041c0a34752cdc74647
+  checksum: 10c0/0b3531593aa6fb36ac6baf629cb058bda472c59a6938774f931fe55283a07c62e6f56e621b043a82d8a3e21fc284c08c34f9e539fc70072635f79b7bae1a1067
   languageName: node
   linkType: hard
 
@@ -29158,7 +29158,7 @@ __metadata:
     nx: "npm:20.8.4"
     oxlint: "npm:1.72.0"
     plop: "npm:4.0.5"
-    prettier: "npm:3.9.9"
+    prettier: "npm:3.9.10"
     prettier-2: "npm:prettier@^2"
     qs: "npm:6.17.0"
     rimraf: "npm:6.1.3"
