@@ -58,7 +58,7 @@ describe('formatFileInfo', () => {
       size: 1000 * 1000,
     };
 
-    expect(uploadService.formatFileInfo(fileData)).rejects.toThrowError(
+    await expect(uploadService.formatFileInfo(fileData)).rejects.toThrowError(
       'File name contains invalid characters'
     );
   });

@@ -36,7 +36,7 @@ describe('Scheduling service', () => {
 
       // @ts-expect-error Ignore missing properties
       const schedulingService = createSchedulingService({ strapi: strapiMock });
-      expect(() => schedulingService.set('1', new Date())).rejects.toThrow(
+      await expect(() => schedulingService.set('1', new Date())).rejects.toThrow(
         'No release found for id 1'
       );
     });

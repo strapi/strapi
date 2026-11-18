@@ -53,7 +53,7 @@ describe('Release Action controller', () => {
       };
     });
 
-    it('throws an error given bad request arguments', () => {
+    it('throws an error given bad request arguments', async () => {
       // Mock content type
       global.strapi.contentType = jest.fn().mockReturnValue({
         options: {
@@ -78,7 +78,9 @@ describe('Release Action controller', () => {
       };
 
       // @ts-expect-error Ignore missing properties
-      expect(() => releaseActionController.create(ctx)).rejects.toThrow('type is a required field');
+      await expect(() => releaseActionController.create(ctx)).rejects.toThrow(
+        'type is a required field'
+      );
     });
   });
 
@@ -124,7 +126,7 @@ describe('Release Action controller', () => {
   });
 
   describe('update', () => {
-    it('throws an error given bad request arguments', () => {
+    it('throws an error given bad request arguments', async () => {
       const ctx = {
         params: {
           actionId: 1,
@@ -138,7 +140,7 @@ describe('Release Action controller', () => {
       };
 
       // @ts-expect-error Ignore missing properties
-      expect(() => releaseActionController.update(ctx)).rejects.toThrow(
+      await expect(() => releaseActionController.update(ctx)).rejects.toThrow(
         'type must be one of the following values: publish, unpublish'
       );
     });

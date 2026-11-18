@@ -81,7 +81,7 @@ describe('Release controller', () => {
     });
   });
   describe('create', () => {
-    it('throws an error given bad request arguments', () => {
+    it('throws an error given bad request arguments', async () => {
       const ctx = {
         state: {
           user: {},
@@ -93,12 +93,12 @@ describe('Release controller', () => {
       };
 
       // @ts-expect-error partial context
-      expect(() => releaseController.create(ctx)).rejects.toThrow('name is a required field');
+      await expect(() => releaseController.create(ctx)).rejects.toThrow('name is a required field');
     });
   });
 
   describe('update', () => {
-    it('throws an error given bad request arguments', () => {
+    it('throws an error given bad request arguments', async () => {
       const ctx = {
         state: {
           user: {},
@@ -115,10 +115,10 @@ describe('Release controller', () => {
       };
 
       // @ts-expect-error partial context
-      expect(() => releaseController.update(ctx)).rejects.toThrow('name is a required field');
+      await expect(() => releaseController.update(ctx)).rejects.toThrow('name is a required field');
     });
 
-    it('throws an error given unknown request arguments', () => {
+    it('throws an error given unknown request arguments', async () => {
       const ctx = {
         state: {
           user: {},
@@ -136,7 +136,7 @@ describe('Release controller', () => {
       };
 
       // @ts-expect-error partial context
-      expect(() => releaseController.update(ctx)).rejects.toThrow(
+      await expect(() => releaseController.update(ctx)).rejects.toThrow(
         'this field has unspecified keys: unknown'
       );
     });

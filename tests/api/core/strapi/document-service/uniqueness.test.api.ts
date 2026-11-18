@@ -61,7 +61,7 @@ describe('Document Service', () => {
       // Now we can create a new category with the same name as the published category
       // When we try to publish it, it should throw an error
       const newCategory = await strapi.documents(CATEGORY_UID).create({ data: { name } });
-      expect(
+      await expect(
         strapi.documents(CATEGORY_UID).publish({ documentId: newCategory.documentId })
       ).rejects.toThrow();
     });
