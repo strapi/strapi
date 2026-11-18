@@ -1,5 +1,6 @@
 import type { Ability, ForcedSubject } from '@casl/ability';
 import type { Core, Data, Modules, UID } from '@strapi/types';
+import type { engine as PermissionsEngine } from '@strapi/permissions';
 import type { Controllers } from './controllers';
 import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
 import type { HasPermissionsConfig } from './policies';
@@ -126,7 +127,10 @@ type PermissionRow = Pick<AdminRow<'admin::permission'>, 'id' | 'action' | 'subj
 
 /** The fields `sanitizeUser` removes (`services/user.ts`). */
 type PrivateUserField =
-  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'registrationToken';
+  | 'password'
+  | 'resetPasswordToken'
+  | 'resetPasswordTokenExpiresAt'
+  | 'registrationToken';
 
 /** The roles of a sanitized user: each with its `id`, `name`, `description` and `code` only. */
 type SanitizedRoles<TRoles> = TRoles extends readonly (infer TRole)[]
@@ -246,7 +250,7 @@ type StrictRoleService<TService> = Omit<TService, RoleServiceOverride> & {
     populate?: TPopulate
   ): Promise<RoleRow<TPopulate> | null>;
   findOneWithUsersCount<
-    const TPopulate extends AdminPopulate<'admin::role'> | undefined = undefined,
+    const TPopulate extends AdminPopulate<'admin::role'> | undefined = undefined
   >(
     params?: Parameters<(typeof CERoleService)['findOneWithUsersCount']>[0],
     populate?: TPopulate
@@ -257,7 +261,7 @@ type StrictRoleService<TService> = Omit<TService, RoleServiceOverride> & {
   ): Promise<RoleRow<TPopulate>[]>;
   /** The roles that match the query params, with the relations their `populate` names. */
   findAllWithUsersCount<
-    const TParams extends Parameters<(typeof CERoleService)['findAllWithUsersCount']>[0],
+    const TParams extends Parameters<(typeof CERoleService)['findAllWithUsersCount']>[0]
   >(
     params: TParams
   ): Promise<RoleRowWithUsersCount<PopulateOfParams<'admin::role', TParams>>[]>;
@@ -304,7 +308,12 @@ type RoleService<TService extends { findOne: (...args: never[]) => unknown }> =
   Core.IsStrict extends true ? StrictRoleService<TService> : ImplementationRoleService<TService>;
 
 type UserServiceOverride =
-  'findOne' | 'findOneByEmail' | 'updateById' | 'deleteById' | 'deleteByIds' | 'sanitizeUser';
+  | 'findOne'
+  | 'findOneByEmail'
+  | 'updateById'
+  | 'deleteById'
+  | 'deleteByIds'
+  | 'sanitizeUser';
 
 /**
  * The registered `admin::user` service: {@link StrictUserService} with strict types,
@@ -320,7 +329,7 @@ type UserService<TService extends Record<UserServiceOverride, (...args: never[])
  * user matches.
  */
 type StrictUserService<
-  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>,
+  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>
 > = Omit<TService, UserServiceOverride | 'create'> & {
   /** The created user with its roles. */
   create(...args: Parameters<(typeof CEUserService)['create']>): Promise<UserRowWithRoles>;
@@ -350,7 +359,7 @@ type StrictUserService<
  * develop's published `Promise<AdminUser>`.
  */
 type LegacyUserService<
-  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>,
+  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>
 > = Omit<TService, UserServiceOverride> & {
   /** The user with its roles. With a `populate` other than the default, `roles` is not loaded. */
   findOne(...args: Parameters<(typeof CEUserService)['findOne']>): Promise<AdminUser | null>;
@@ -571,8 +580,8 @@ type PermissionEngine = (typeof PermissionService)['engine'];
 
 /**
  * The permission queries and engine members written for strict types: the permissions are the rows
- * the permission domain returns, and a user read from the user service is accepted where the engine
- * takes a user.
+ * the permission domain returns, a user read from the user service is accepted where the engine
+ * takes a user, and the engine hooks take typed handlers.
  */
 type StrictPermissionQueries = {
   findMany(...args: Parameters<(typeof PermissionService)['findMany']>): Promise<PermissionRow[]>;
@@ -581,7 +590,9 @@ type StrictPermissionQueries = {
   ): Promise<PermissionRow[]>;
   /** The permissions of the user's roles. Reads the user's `id`. */
   findUserPermissions(user: { id: Data.ID }): Promise<PermissionRow[]>;
-  engine: Omit<PermissionEngine, 'generateUserAbility'> & {
+  engine: Omit<PermissionEngine, 'generateUserAbility' | 'hooks'> & {
+    /** The hooks of the engine (`@strapi/permissions`), with typed handlers. */
+    readonly hooks: PermissionsEngine.TypedPermissionEngineHooks;
     /** The ability of the user's permissions. The conditions receive the user. */
     generateUserAbility(user: UserInput): ReturnType<PermissionEngine['generateUserAbility']>;
   };
@@ -650,6 +661,16 @@ type ImplementationPermissionService = Omit<
 type PermissionServiceContract = Core.IsStrict extends true
   ? Omit<ImplementationPermissionService, StrictPermissionQueryName> & StrictPermissionQueries
   : ImplementationPermissionService;
+
+type TransferPermissionService = (typeof TransferService)['permission'];
+
+/**
+ * The `admin::transfer` service with strict types: the transfer permission engine takes typed
+ * handlers and typed permissions (`@strapi/permissions` `TypedEngine`).
+ */
+type StrictTransferService = Omit<typeof TransferService, 'permission'> & {
+  permission: Omit<TransferPermissionService, 'engine'> & { engine: PermissionsEngine.TypedEngine };
+};
 
 /**
  * The `role` and `permission` services as the admin's own code reads them with `getService`
@@ -801,7 +822,9 @@ declare global {
         >;
         'admin::seat-enforcement': Core.Licensed<'licensed', typeof EESeatEnforcementService>;
         'admin::token': typeof TokenService;
-        'admin::transfer': typeof TransferService;
+        'admin::transfer': Core.IsStrict extends true
+          ? StrictTransferService
+          : typeof TransferService;
         'admin::user': UserService<
           EditionService<typeof CEUserService, EnterpriseContracts['user']>
         >;
