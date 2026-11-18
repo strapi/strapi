@@ -531,10 +531,11 @@ declare global {
   one fails: a `plugins` action needs a `pluginName`, a `settings` action a `category`, and a
   `contentTypes` action `subjects`. An application's own action, with an `api::` ID, is a
   `settings` action.
-- With strict types, `register` and `registerMany` check the computed ID of each action from its
-  literal fields, so pass the actions inline or as an `as const` list. A list without `as const`
-  widens `uid` to `string`, and its IDs are not checked. The types do not check the fields each
-  section requires yet: a `plugins` action without `pluginName` compiles.
+- With strict types, `register` and `registerMany` take the input type of that validation schema,
+  one member per section, so a `plugins` action without `pluginName` fails to compile. Write the
+  actions inline or as an `as const` list: a list without `as const` widens `section` to `string`,
+  which matches no section, and fails to compile. They also check the computed ID of each action
+  from its literal fields.
 - The declaration must be an `interface` to merge into the registry. The repository ESLint config
   flags an empty interface (`@typescript-eslint/no-empty-interface`), hence the disable comment.
 - The application program excludes `src/plugins/**`, so the application declares the IDs of its
@@ -583,8 +584,8 @@ declare global {
 - Pass the `as const` list straight to `registerMany`. With strict types, `register` and
   `registerMany` check the computed ID of each action (`Core.PermissionActionCheck`). An
   unregistered ID fails on the `uid`, with a message that names it, e.g.
-  `'Unregistered permission action: plugin::i18n.locale.raed'`. Only literal fields are checked:
-  a list typed with a wide `uid: string`, as in most application code, passes.
+  `'Unregistered permission action: plugin::i18n.locale.raed'`. Only literal IDs are checked: an
+  action with a wide `uid: string` passes the ID check.
 - Action provider reads (`get`, `has`, `appliesToProperty`, `unstable_aliases`) accept any runtime
   ID, such as `string` or a template literal, and reject an unregistered literal with TS2345.
 - The `actions` of `admin::hasPermissions` (in its string, tuple and object forms) and of

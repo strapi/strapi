@@ -1,7 +1,7 @@
 import type { Ability, ForcedSubject } from '@casl/ability';
 import type { Core, Data, Modules, UID } from '@strapi/types';
 import type { engine as PermissionsEngine } from '@strapi/permissions';
-import type { hooks as HooksUtils } from '@strapi/utils';
+import type { hooks as HooksUtils, z } from '@strapi/utils';
 import type { Controllers } from './controllers';
 import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
 import type { HasPermissionsConfig } from './policies';
@@ -22,6 +22,7 @@ import type CEPassportService from '../services/passport';
 import type * as PermissionService from '../services/permission';
 import type { Action, CreateActionPayload } from '../domain/action';
 import type * as ProjectSettingsService from '../services/project-settings';
+import type { actionRegistrationSchema } from '../validation/action-provider';
 import type CERoleService from '../services/role';
 import type * as TokenService from '../services/token';
 import type * as TransferService from '../services/transfer';
@@ -385,22 +386,18 @@ type ActionProviderInput = Omit<CreateActionPayload, 'category'> & {
 
 type ActionProvider = (typeof PermissionService)['actionProvider'];
 
+/** `T` with every property and array readonly, so `as const` arrays are accepted. */
+type DeepReadonly<T> = T extends readonly (infer TItem)[]
+  ? readonly DeepReadonly<TItem>[]
+  : T extends object
+    ? { readonly [TKey in keyof T]: DeepReadonly<T[TKey]> }
+    : T;
+
 /**
- * An action to register, as `as const` arrays and inline literals type it: arrays may be readonly.
- * Same fields as {@link ActionProviderInput}. The runtime validator accepts an optional
- * `subCategory` left out or `undefined` (`validation/action-provider.ts`), also under
- * `exactOptionalPropertyTypes`.
+ * An action to register: the input of the runtime schema (`validation/action-provider.ts`), one
+ * member per section, readonly so `as const` arrays and inline literals are accepted.
  */
-type ActionRegistration = Readonly<
-  Omit<ActionProviderInput, 'subCategory' | 'subjects' | 'options' | 'aliases'>
-> & {
-  readonly subCategory?: string | undefined;
-  readonly subjects?: readonly string[] | undefined;
-  readonly options?: { readonly applyToProperties: readonly string[] | null } | undefined;
-  readonly aliases?:
-    | readonly { readonly actionId: string; readonly subjects?: readonly string[] | undefined }[]
-    | undefined;
-};
+type ActionRegistration = DeepReadonly<z.input<typeof actionRegistrationSchema>>;
 
 /** What the provider hooks of the action provider receive: the key and the action. */
 type ActionProviderHookContext = { key: string; value: Action };

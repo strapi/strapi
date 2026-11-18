@@ -146,9 +146,9 @@ export const reportActions = [
 export const registerReportActions = async () => {
   const { actionProvider } = strapi.service('admin::permission');
   await actionProvider.registerMany(reportActions);
-  // Known gap: a `plugins` action without `pluginName` compiles, and the admin rejects it at boot
-  // (`[0].pluginName is a required field`). The types check the computed ID only, not the fields
-  // each section requires.
+  // The registration type is derived from the admin's validation schema: a `plugins` action
+  // without `pluginName`, which the admin rejects at boot, does not compile.
+  // @ts-expect-error The `plugins` section requires `pluginName`.
   await actionProvider.register({
     section: 'plugins',
     displayName: 'Export reports',
