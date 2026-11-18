@@ -1,6 +1,6 @@
 ---
 title: Typed contracts
-description: 'The service, controller, content-type schema, config, store and event contracts that the Upload plugin registers for strict types.'
+description: 'The service, controller, content-type schema, provider, config, store and event contracts that the Upload plugin registers for strict types.'
 tags:
   - typescript
   - backend
@@ -33,6 +33,17 @@ The `upload` service contract, `UploadService`, is the inferred implementation w
 
 `types/content-types.ts` declares the schemas of `plugin::upload.file` (`FileSchema`) and `plugin::upload.folder` (`FolderSchema`) in `PackageContentTypeSchemas`, as type generation writes them for an application that does not extend them. Plugin code compiled without type generation then reads these two content types precisely through the Document Service; in an application, the generated schemas replace them. With strict types, a populated media attribute of any content type is a `plugin::upload.file` document, read from the same schema. Keep the declarations in sync with `content-types/file.ts` and `content-types/folder.ts`: the drift check of `examples/strict-types` fails when they differ.
 
+## Provider
+
+`types/provider.ts` registers `UploadPluginProvider` in `PackagePluginProviders`. It types `strapi.plugin('upload').provider` as `createProvider` in `register.ts` sets it, not the object the provider module's `init` returns. That object is `Providers.Upload.Provider` of `@strapi/types`. Read [Providers](./00-providers.md#typing-a-provider).
+
+- Every method is async, and receives `(file, options)` only: the wrapper forwards two arguments.
+- `upload` and `uploadStream` are a union: a provider implements at least one. Check that the method exists before calling it, as `services/provider.ts` does with `typeof provider.uploadStream === 'function'`.
+- `delete` takes `unknown`: the plugin also passes the `formats` entries of a file, which `File` types as `unknown`.
+- `isPrivate`, `getSignedUrl`, `checkFileSize` and `extend` are always present. Without the provider's own, the base versions answer synchronously, so their results are a value or a promise.
+
+`UploadPluginProviderOf<typeof module>` is `UploadPluginProvider` for a given provider module. It checks the module against `Providers.Upload.Factory`, whatever `init` options it declares, and adds the members outside the contract as the wrapper exposes them: async, with their first two arguments. Members that are not functions are dropped, as the wrapper drops them. An application declares it in `AppPluginProviders` to call those members. Read [Plugin providers](../../../../contributing/05-typescript.md#plugin-providers).
+
 ## Config, stores and events
 
 - `plugin::upload` resolves to the plugin config merged with its defaults.
@@ -41,5 +52,4 @@ The `upload` service contract, `UploadService`, is the inferred implementation w
 
 ## Not typed
 
-- `strapi.plugin('upload').provider` has no contract: it stays `any`. Read [Providers](./00-providers.md).
 - The Upload plugin calls the Documentation plugin's `override` service through a local type in `server/src/register.ts`, because Documentation is an optional plugin it does not depend on.

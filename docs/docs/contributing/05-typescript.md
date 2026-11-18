@@ -145,6 +145,58 @@ The import needs `@strapi/email` in the application's dependencies, at the versi
 hoists it, but under the isolated layout of pnpm the import fails with TS2307 until the
 application adds it.
 
+Upload registers `UploadPluginProvider`: the provider as the plugin wraps it, not the object that
+the provider module's `init` returns. Every method is async and receives two arguments only, and
+`isPrivate`, `getSignedUrl`, `checkFileSize` and `extend` are always present. A provider implements
+`upload`, `uploadStream` or both, so check that the method exists before calling it.
+
+An application writes its upload provider with `factories.createUploadProvider`, which checks the
+module against the provider contract, with or without strict types. A provider package uses
+`satisfies Providers.Upload.Factory<Options>` instead, with `@strapi/types` as a type-only dev
+dependency. Read
+[Typing a provider](../packages/core/upload/01-backend/00-providers.md#typing-a-provider). To call
+the provider's own members through `strapi.plugin('upload').provider`, declare
+`UploadPluginProviderOf<typeof module>`. It checks the module against the contract too, and adds
+those members as the plugin wraps them:
+
+```ts
+import { factories } from '@strapi/strapi';
+import type { UploadPluginProviderOf } from '@strapi/upload/strapi-server';
+
+const cdnProvider = factories.createUploadProvider({
+  init(options: { baseUrl: string }) {
+    return {
+      async uploadStream(file) {
+        file.url = `${options.baseUrl}/${file.hash}${file.ext}`;
+      },
+      async delete() {},
+      purge(path: string): boolean {
+        return path.startsWith('/');
+      },
+    };
+  },
+});
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface AppPluginProviders {
+        upload: UploadPluginProviderOf<typeof cdnProvider>;
+      }
+    }
+  }
+}
+
+export = cdnProvider;
+```
+
+`strapi.plugin('upload').provider.purge('/images')` is then a `Promise<boolean>`: the plugin wraps
+each function member in an async function that forwards its first two arguments. Members that are
+not functions are not exposed. A provider package works the same:
+`UploadPluginProviderOf<typeof awsS3>`, with `import type awsS3 from '@strapi/provider-upload-aws-s3'`.
+The import of `@strapi/upload` needs it in the application's dependencies, like `@strapi/email`
+above.
+
 ### Permission action IDs
 
 With strict types, the permission actions named in typed configs, such as the `actions` of
