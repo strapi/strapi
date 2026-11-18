@@ -75,7 +75,7 @@ test.describe('Login', () => {
         .getByLabel('Email*', { exact: true })
         .fill(ADMIN_EMAIL_ADDRESS.replace('@', `+${browserName}@`));
       await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
-      clickLoginTimes(6);
+      await clickLoginTimes(6);
 
       await expect(page.getByText('Too many requests, please try again later.')).toBeVisible();
 

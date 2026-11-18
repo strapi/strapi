@@ -178,7 +178,7 @@ async function createApp(scope: Scope) {
       const data = await createGrowthSsoTrial({ strapiVersion: scope.strapiVersion });
 
       if (data?.license) {
-        fse.writeFile(join(rootPath, 'license.txt'), data.license);
+        await fse.writeFile(join(rootPath, 'license.txt'), data.license);
         logger.log('Your 30 days trial will be applied automatically to your project. Enjoy!');
       }
     } catch {
