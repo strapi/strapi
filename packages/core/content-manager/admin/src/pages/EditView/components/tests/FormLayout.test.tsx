@@ -8,9 +8,9 @@ import { FormLayout, FormLayoutProps, hasMountSideEffects } from '../FormLayout'
  * tell which rows are mounted.
  */
 jest.mock('../InputRenderer', () => ({
-  InputRenderer: ({ name }: { name: string }) =>
+  InputRenderer: ({ name, placeholder }: { name: string; placeholder?: string }) =>
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('react').createElement('input', { name, 'aria-label': name }),
+    require('react').createElement('input', { name, 'aria-label': name, placeholder }),
 }));
 
 type Attribute = Parameters<typeof hasMountSideEffects>[0];
@@ -222,5 +222,51 @@ describe('FormLayout', () => {
     // Every validation starts by clearing the errors
     fireEvent.click(screen.getByRole('button', { name: 'Clear errors' }));
     expect(isMounted('bottom')).toBe(true);
+  });
+});
+
+describe('FormLayout placeholder', () => {
+  const document = {
+    schema: { uid: 'api::test.test' },
+    components: {},
+  } as unknown as FormLayoutProps['document'];
+
+  // a required UID is mounted right away, so no viewport observer is needed
+  const layout = (placeholder?: string) =>
+    [
+      [
+        [
+          {
+            attribute: { type: 'uid', required: true },
+            label: 'Slug',
+            name: 'slug',
+            placeholder,
+            size: 12,
+            type: 'uid',
+          },
+        ],
+      ],
+    ] as unknown as FormLayoutProps['layout'];
+
+  const renderLayout = (placeholder?: string) =>
+    render(
+      <Form method="PUT" initialValues={{}}>
+        <FormLayout layout={layout(placeholder)} document={document} />
+      </Form>
+    );
+
+  it('falls back to the configured placeholder when there is no translation', () => {
+    renderLayout('Type a slug');
+
+    expect(screen.getByRole('textbox', { name: 'slug' })).toHaveAttribute(
+      'placeholder',
+      'Type a slug'
+    );
+  });
+
+  it('does not invent a placeholder when none is configured', () => {
+    renderLayout(undefined);
+
+    expect(screen.getByRole('textbox', { name: 'slug' })).not.toHaveAttribute('placeholder');
   });
 });

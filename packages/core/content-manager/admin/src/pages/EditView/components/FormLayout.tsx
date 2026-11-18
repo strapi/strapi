@@ -259,6 +259,17 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
     });
   };
 
+  const getPlaceholder = (name: string, placeholder?: string) => {
+    if (!placeholder) {
+      return placeholder;
+    }
+
+    return formatMessage({
+      id: `content-manager.content-types.${modelUid}.${name}.placeholder`,
+      defaultMessage: placeholder,
+    });
+  };
+
   return (
     <CopiedComponentsProvider>
       <IdleMountContext.Provider value={scheduleMount}>
@@ -279,6 +290,7 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
                       <InputRenderer
                         {...field}
                         label={getLabel(field.name, field.label)}
+                        placeholder={getPlaceholder(field.name, field.placeholder)}
                         document={document}
                       />
                     </Grid.Item>
@@ -317,6 +329,7 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
                                   {...field}
                                   size={size}
                                   label={getLabel(field.name, field.label)}
+                                  placeholder={getPlaceholder(field.name, field.placeholder)}
                                   document={document}
                                 />
                               </ResponsiveGridItem>
