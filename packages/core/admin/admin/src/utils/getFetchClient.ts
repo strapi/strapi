@@ -93,7 +93,7 @@ const unstable_addRequestHeaders = (provider: RequestHeadersProvider): (() => vo
 const unstable_getRequestHeaders = (): Headers => {
   const headers = new Headers();
 
-  requestHeadersProviders.forEach((provider) => {
+  for (const provider of requestHeadersProviders) {
     let entries: Array<[string, string | null | undefined]>;
     try {
       entries = Object.entries(provider());
@@ -104,9 +104,9 @@ const unstable_getRequestHeaders = (): Headers => {
       );
     }
 
-    entries.forEach(([name, value]) => {
+    for (const [name, value] of entries) {
       if (value === undefined || value === null || CORE_HEADERS.has(name.toLowerCase())) {
-        return;
+        continue;
       }
 
       try {
@@ -117,8 +117,8 @@ const unstable_getRequestHeaders = (): Headers => {
           error
         );
       }
-    });
-  });
+    }
+  }
 
   return headers;
 };
