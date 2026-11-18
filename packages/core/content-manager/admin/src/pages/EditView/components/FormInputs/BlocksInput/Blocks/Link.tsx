@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import { Box, Button, Field, Flex, Popover } from '@strapi/design-system';
+// Subpath import only: the `@strapi/utils` root pulls in Node-only modules.
+import { ALLOWED_LINK_PROTOCOLS, isValidBlocksLink } from '@strapi/utils/blocks-link';
 import { useIntl } from 'react-intl';
 import {
   BaseEditor,
@@ -23,20 +25,6 @@ import type { Schema } from '@strapi/types';
 
 const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNode => {
   return element.type === 'link';
-};
-
-const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'mailto:', 'tel:']);
-
-const isValidLink = (link: string) => {
-  try {
-    const url = new URL(
-      link.startsWith('/') || link.startsWith('#') ? `https://strapi.io${link}` : link
-    );
-
-    return ALLOWED_LINK_PROTOCOLS.has(url.protocol);
-  } catch {
-    return false;
-  }
 };
 
 const isValidAbsoluteLink = (link: string) => {
@@ -145,7 +133,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const isLastInsertedLink = editor.lastInsertedLinkPath
       ? !Path.equals(path, editor.lastInsertedLinkPath)
       : true;
-    const isSaveDisabled = !isValidLink(linkUrl);
+    const isSaveDisabled = !isValidBlocksLink(linkUrl);
 
     const onLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setLinkUrl(e.target.value);
@@ -205,7 +193,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
             {...attributes}
             ref={forwardedRef}
             tag="a"
-            href={isValidLink(link.url) ? link.url : undefined}
+            href={isValidBlocksLink(link.url) ? link.url : undefined}
             rel={link.rel}
             target={link.target}
             onClick={() => setPopoverOpen(true)}

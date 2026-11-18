@@ -33,7 +33,8 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist/"
+    "dist/",
+    "blocks-link/"
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
