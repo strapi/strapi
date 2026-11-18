@@ -12,8 +12,8 @@ export type * as Utils from './utils';
 export type * as Struct from './struct';
 export type * as UID from './uid';
 
-export { defineUploadProvider } from './providers/upload';
-// Also at the root, so the declarations a provider emits import them from `@strapi/types` itself
+// The upload provider contract also at the root, so the declarations a provider emits import it
+// from `@strapi/types` itself
 export type {
   ActionOptions as UploadProviderActionOptions,
   CheckFileSizeOptions as UploadProviderCheckFileSizeOptions,

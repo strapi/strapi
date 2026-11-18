@@ -2,20 +2,21 @@
  * Type-level tests of the upload provider contract, compiled by `yarn test:ts` (tsc -p tsconfig.json).
  * Each block must compile; `@ts-expect-error` marks the providers that must keep failing.
  *
- * The bundled providers (`@strapi/provider-upload-local`, `-aws-s3`, `-cloudinary`) check their own
- * module against the contract in their sources, since `@strapi/types` cannot depend on them.
+ * Modules are checked with `satisfies`, the way provider packages check theirs. The bundled
+ * providers (`@strapi/provider-upload-local`, `-aws-s3`, `-cloudinary`) check their own module in
+ * their sources, since `@strapi/types` cannot depend on them. The application helper,
+ * `factories.createUploadProvider`, is tested in @strapi/core (src/__type-tests__/upload-provider.ts).
  */
 import type { Readable } from 'node:stream';
 
-import { defineUploadProvider } from '../..';
 import type { Providers } from '../..';
 
 type Assert<T extends true> = T;
 type IsEqual<Left, Right> =
   (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right ? 1 : 2 ? true : false;
 
-// An application provider: options and files are typed by the contract, extra members are kept.
-export const appProvider = defineUploadProvider({
+// A provider on the object literal: options and files are typed by the contract.
+export const appProvider = {
   init(options: { baseUrl: string }) {
     return {
       async uploadStream(file) {
@@ -34,21 +35,16 @@ export const appProvider = defineUploadProvider({
       },
     };
   },
-});
+} satisfies Providers.Upload.Factory<{ baseUrl: string }>;
 
-true satisfies Assert<IsEqual<Parameters<typeof appProvider.init>[0], { baseUrl: string }>>;
-true satisfies Assert<
-  IsEqual<ReturnType<ReturnType<typeof appProvider.init>['outboxPath']>, string>
->;
-
-// Without an annotation, the options are the `providerOptions` record of the upload config.
-export const untypedOptionsProvider = defineUploadProvider({
+// Without a type argument, the options are the `providerOptions` record of the upload config.
+export const untypedOptionsProvider = {
   init(options) {
     true satisfies Assert<IsEqual<typeof options, Record<string, unknown>>>;
 
     return { upload() {}, delete() {} };
   },
-});
+} satisfies Providers.Upload.Factory;
 
 // Options typed with an interface, as the bundled providers declare theirs, or with an inline type.
 interface CdnOptions {
@@ -56,63 +52,27 @@ interface CdnOptions {
   token?: string;
 }
 
-const interfaceOptionsModule = {
+export const interfaceOptionsProvider = {
   init(options: CdnOptions) {
     return { upload() {}, delete() {}, baseUrl: () => options.baseUrl };
   },
-};
+} satisfies Providers.Upload.Factory<CdnOptions>;
 
-export const interfaceOptionsProvider = defineUploadProvider(interfaceOptionsModule);
-
-true satisfies Assert<IsEqual<Parameters<typeof interfaceOptionsProvider.init>[0], CdnOptions>>;
-
-interfaceOptionsModule satisfies Providers.Upload.Factory<CdnOptions>;
-
-export const interfaceOptionsLiteralProvider = defineUploadProvider({
-  init(options: CdnOptions) {
-    return { upload() {}, delete() {}, baseUrl: () => options.baseUrl };
-  },
-});
-
-export const inlineOptionsModule = {
+export const inlineOptionsProvider = {
   init(options: { baseUrl: string }) {
     return { upload() {}, delete() {}, baseUrl: () => options.baseUrl };
   },
 } satisfies Providers.Upload.Factory<{ baseUrl: string }>;
 
-defineUploadProvider(inlineOptionsModule).init({ baseUrl: '/' }).baseUrl() satisfies string;
-
-// `init` keeps its own signature: a defaulted options parameter can still be omitted.
-export const defaultedOptionsProvider = defineUploadProvider({
-  init(options: { sizeLimit?: number } = {}) {
-    return { uploadStream() {}, delete() {}, sizeLimit: () => options.sizeLimit };
-  },
-});
-
-defaultedOptionsProvider.init();
-
-// An explicit type argument is the module type, and keeps its members outside the contract.
-type BucketModule = {
-  init(options: { bucket: string }): Providers.Upload.Provider & { bucketName(): string };
-};
-
-export const explicitModuleProvider = defineUploadProvider<BucketModule>({
-  init: (options) => ({ upload() {}, delete() {}, bucketName: () => options.bucket }),
-});
-
-explicitModuleProvider.init({ bucket: 'media' }).bucketName() satisfies string;
-
 // The module may carry members besides `init`, such as a `name`.
-export const namedProvider = defineUploadProvider({
+export const namedProvider = {
   name: 'cdn',
   auth: { token: 'secret' },
   init: () => ({ upload() {}, delete() {} }),
-});
-
-namedProvider.name satisfies string;
+} satisfies Providers.Upload.Factory;
 
 // Action options, left to inference, can be spread and passed on.
-export const actionOptionsProvider = defineUploadProvider({
+export const actionOptionsProvider = {
   init: () => ({
     upload(file, customParams = {}) {
       const params: { Key: string; ACL?: string } = { ...customParams, Key: file.hash };
@@ -121,10 +81,10 @@ export const actionOptionsProvider = defineUploadProvider({
     },
     delete() {},
   }),
-});
+} satisfies Providers.Upload.Factory;
 
 // `getSignedUrl` also signs URLs found in rich text, so it gets only the fields a URL gives.
-export const signingProvider = defineUploadProvider({
+export const signingProvider = {
   init: () => ({
     upload() {},
     delete() {},
@@ -133,29 +93,30 @@ export const signingProvider = defineUploadProvider({
       return { url: `${file.url}?key=${file.hash}${file.ext ?? ''}` };
     },
   }),
-});
+} satisfies Providers.Upload.Factory;
 
 // `upload` alone, or `uploadStream` alone, is enough.
-export const uploadOnlyProvider = defineUploadProvider({
+export const uploadOnlyProvider = {
   init: () => ({
     upload(file) {
       file.buffer satisfies Buffer | undefined;
     },
     delete() {},
   }),
-});
+} satisfies Providers.Upload.Factory;
 
-export const streamOnlyProvider = defineUploadProvider({
+export const streamOnlyProvider = {
   init: () => ({
     uploadStream(file) {
       file.stream satisfies NodeJS.ReadableStream | undefined;
     },
     delete() {},
   }),
-});
+} satisfies Providers.Upload.Factory;
 
 // A provider written against its own, narrower file type, as the published providers are: the
-// contract methods are checked bivariantly.
+// contract methods are checked bivariantly. Checked apart from its declaration, as the bundled
+// providers do, so its parameters keep their own types.
 type OwnFile = {
   name: string;
   hash: string;
@@ -175,8 +136,8 @@ export const ownFileTypeProvider = {
           throw new Error(`${file.name} is too large`);
         }
       },
-      async uploadStream(file: OwnFile): Promise<void> {
-        file.url = `/uploads/${file.hash}${file.ext}`;
+      async uploadStream(file: OwnFile, customParams = {}): Promise<void> {
+        file.url = `/uploads/${file.hash}${file.ext}${Object.keys(customParams).join('')}`;
       },
       replace(newFile: OwnFile, oldFile: OwnFile) {
         newFile.url = oldFile.url;
@@ -190,37 +151,38 @@ export const ownFileTypeProvider = {
 
 ownFileTypeProvider satisfies Providers.Upload.Factory<{ sizeLimit?: number }>;
 
-// `satisfies` checks a module without the runtime call.
-export const satisfiesProvider = {
-  init: () => ({ uploadStream() {}, delete() {} }),
-} satisfies Providers.Upload.Factory;
+// `customParams` keeps its inferred type: the contract does not retype it.
+false satisfies IsEqual<
+  Parameters<ReturnType<typeof ownFileTypeProvider.init>['uploadStream']>[1],
+  Providers.Upload.ActionOptions | undefined
+>;
 
-defineUploadProvider({
+export const missingDelete = {
   // @ts-expect-error a provider must implement `delete`.
   init: () => ({ upload() {} }),
-});
+} satisfies Providers.Upload.Factory;
 
-defineUploadProvider({
+export const missingUpload = {
   // @ts-expect-error a provider must implement `upload` or `uploadStream`.
   init: () => ({ delete() {} }),
-});
+} satisfies Providers.Upload.Factory;
 
-defineUploadProvider({
+export const numericSignedUrl = {
   // @ts-expect-error `getSignedUrl` must answer a string `url`.
   init: () => ({ upload() {}, delete() {}, getSignedUrl: () => ({ url: 1 }) }),
-});
+} satisfies Providers.Upload.Factory;
 
-defineUploadProvider({
+export const stringIsPrivate = {
   // @ts-expect-error `isPrivate` must answer a boolean.
   init: () => ({ upload() {}, delete() {}, isPrivate: () => 'yes' }),
-});
+} satisfies Providers.Upload.Factory;
 
-defineUploadProvider({
+export const unrelatedFile = {
   // @ts-expect-error a provider method must accept the files upload passes.
   init: () => ({ upload: (file: { id: number }) => file.id, delete() {} }),
-});
+} satisfies Providers.Upload.Factory;
 
-defineUploadProvider({
+export const namedSigner = {
   init: () => ({
     upload() {},
     delete() {},
@@ -229,14 +191,11 @@ defineUploadProvider({
       return { url: file.name };
     },
   }),
-});
+} satisfies Providers.Upload.Factory;
 
-defineUploadProvider({
-  // @ts-expect-error `init` receives the `providerOptions` record, not a primitive.
-  init: (options: number) => ({ upload: () => options, delete() {} }),
-});
-
-export const missingDeleteModule = {
-  // @ts-expect-error `satisfies` rejects the same providers.
-  init: () => ({ uploadStream() {} }),
+export const interfaceWithoutTypeArgument = {
+  // @ts-expect-error without a type argument, `init` must accept the `providerOptions` record.
+  init(options: CdnOptions) {
+    return { upload() {}, delete() {}, baseUrl: () => options.baseUrl };
+  },
 } satisfies Providers.Upload.Factory;

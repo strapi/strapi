@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineUploadProvider } from '../upload';
+import { createUploadProvider } from '../factories';
 
-describe('defineUploadProvider', () => {
+describe('factories.createUploadProvider', () => {
   test('returns the provider module it receives', () => {
     const providerModule = {
       init: () => ({ upload() {}, delete() {} }),
     };
 
-    expect(defineUploadProvider(providerModule)).toBe(providerModule);
+    expect(createUploadProvider(providerModule)).toBe(providerModule);
   });
 });

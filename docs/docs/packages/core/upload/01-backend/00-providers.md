@@ -53,12 +53,51 @@ The package root also exports them as named types (`UploadProviderFactory`, `Upl
 
 The methods use method syntax, so a provider can declare its own, narrower file and options types, as the bundled providers do.
 
-`defineUploadProvider` types a module where it is written and returns it unchanged, with its own type: `init`'s parameters and the provider's members outside the contract keep theirs. Editors complete the contract members in JavaScript too. Annotate `init`'s options: without an annotation, they are the `providerOptions` record of the upload config. Export the result with `export =`, so the compiled module is the CommonJS export the plugin reads:
+#### In a provider package
+
+Check the module with `satisfies`. It needs `@strapi/types` only as a dev dependency, through a type-only import, and no runtime dependency on Strapi. Export the module with `export =`, so the compiled module is the CommonJS export the plugin reads:
 
 ```ts
-import { defineUploadProvider } from '@strapi/types';
+import type { Providers } from '@strapi/types';
 
-export = defineUploadProvider({
+type Options = { baseUrl: string };
+
+export = {
+  init(options: Options) {
+    return {
+      async uploadStream(file) {
+        file.url = `${options.baseUrl}/${file.hash}${file.ext}`;
+      },
+      async delete(file) {},
+    };
+  },
+} satisfies Providers.Upload.Factory<Options>;
+```
+
+`export default` compiles to `exports.default`, which the plugin does not read, and fails at boot with `provider.init is not a function`. A bundler must emit `module.exports =` for the default export, as rollup does with `output.exports: 'auto'` or `'default'`.
+
+`satisfies` on the object literal types the parameters that the provider leaves to inference from the contract. For example, `customParams = {}` becomes `ActionOptions`. To keep their own types, declare the module first and check it in a separate statement, as the bundled providers do:
+
+```ts
+const providerModule = {
+  init(options: Options) {
+    // ...
+  },
+};
+
+providerModule satisfies Providers.Upload.Factory<Options>;
+
+export = providerModule;
+```
+
+#### In an application
+
+`factories.createUploadProvider` from `@strapi/strapi` types a module where it is written and returns it unchanged, with its own type: `init`'s parameters and the provider's members outside the contract keep theirs. Annotate `init`'s options, with an inline type or an interface: without an annotation, they are the `providerOptions` record of the upload config.
+
+```ts
+import { factories } from '@strapi/strapi';
+
+export = factories.createUploadProvider({
   init(options: { baseUrl: string }) {
     return {
       async uploadStream(file) {
@@ -70,14 +109,12 @@ export = defineUploadProvider({
 });
 ```
 
-`export default` compiles to `exports.default`, which the plugin does not read, and fails at boot with `provider.init is not a function`. A bundler must emit `module.exports =` for the default export, as rollup does with `output.exports: 'auto'` or `'default'`.
-
-In JavaScript, use `module.exports =` and type the options with JSDoc:
+Editors complete the contract members in JavaScript too. Use `module.exports =` and type the options with JSDoc:
 
 ```js
-const { defineUploadProvider } = require('@strapi/types');
+const { factories } = require('@strapi/strapi');
 
-module.exports = defineUploadProvider({
+module.exports = factories.createUploadProvider({
   /** @param {{ baseUrl: string }} options */
   init(options) {
     return {
@@ -90,20 +127,4 @@ module.exports = defineUploadProvider({
 });
 ```
 
-`defineUploadProvider` runs at runtime, so a provider package that calls it needs `@strapi/types` as a regular dependency, not a dev dependency. Without one, check the module with `satisfies` and a type-only import:
-
-```ts
-import type { Providers } from '@strapi/types';
-
-const providerModule = {
-  init(options: { baseUrl: string }) {
-    // ...
-  },
-};
-
-providerModule satisfies Providers.Upload.Factory<{ baseUrl: string }>;
-
-export = providerModule;
-```
-
-`defineUploadProvider`, and `satisfies` on the object literal itself, type the parameters that the provider leaves to inference from the contract. For example, `customParams = {}` becomes `ActionOptions`. The separate `satisfies` statement above checks the module without changing its types. The bundled providers use it so their published types do not change.
+An application can also use `satisfies`, with `import type { Providers } from '@strapi/strapi'`.

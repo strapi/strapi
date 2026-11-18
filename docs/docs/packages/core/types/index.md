@@ -11,7 +11,7 @@ review_notes:
 
 ## Purpose
 
-`@strapi/types` is the single source of truth for the TypeScript types that the Strapi packages share. Its only runtime export is `defineUploadProvider`, an identity function that types an upload provider module (see [Providers](../upload/01-backend/00-providers.md)). The server packages use it to type the `Strapi` instance, the container, plugins, services, controllers, schemas and the Document Service.
+`@strapi/types` is the single source of truth for the TypeScript types that the Strapi packages share. It has no runtime logic. The server packages use it to type the `Strapi` instance, the container, plugins, services, controllers, schemas and the Document Service.
 
 The package README marks it as internal. Application developers import the same types from `@strapi/strapi`, which re-exports `@strapi/types` with `export type *`. The type system is built to adapt to the schemas of one application, and the [Type System](./type-system/index.mdx) pages explain how.
 
@@ -29,7 +29,7 @@ The package README marks it as internal. Application developers import the same 
 - `UID`: the UID types. They read the public registries.
 - `Internal`: the low-level `Namespace`, `UID` and `Registry` types. They do not depend on an application.
 - `Public`: the public registries that applications augment.
-- `Providers`: the contracts that provider packages implement. `Providers.Upload` holds the upload provider contract.
+- `Providers`: the contracts that provider packages implement. `Providers.Upload` holds the upload provider contract (see [Providers](../upload/01-backend/00-providers.md)).
 - `Plugin`: the `LoadedPlugin` shape, the `IsEnabled` helper and the `Config` types for the `strapi-server` and `strapi-admin` entry points.
 - `Utils`: type helpers, such as `Get`, `If` and the `Object`, `String` and `Guard` groups.
 

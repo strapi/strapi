@@ -116,6 +116,25 @@ export type Provider = UploadMethods & {
  * An upload provider module, such as `@strapi/provider-upload-local`, as the upload plugin loads it.
  * Members besides `init` are allowed, such as a `name`; the plugin reads only `init`.
  *
+ * The plugin `require`s the module and reads `init` from it, with no `.default` interop, so the
+ * module must be the CommonJS export itself. Check it with `satisfies`, which needs this package
+ * only as a type-only dependency:
+ *
+ * @example
+ * import type { Providers } from '@strapi/types';
+ *
+ * export = {
+ *   init(options: { baseUrl: string }) {
+ *     return {
+ *       async uploadStream(file) { file.url = `${options.baseUrl}/${file.hash}${file.ext}`; },
+ *       async delete(file) {},
+ *     };
+ *   },
+ * } satisfies Providers.Upload.Factory<{ baseUrl: string }>;
+ *
+ * In an application, `factories.createUploadProvider` from `@strapi/strapi` does the same and keeps
+ * the module's own type.
+ *
  * @template TOptions - The `providerOptions` of the upload config, which `init` receives as is.
  * @template TProvider - The provider `init` returns, with its members outside the contract.
  */
@@ -123,37 +142,3 @@ export type Factory<TOptions = Record<string, unknown>, TProvider extends Provid
   init(options: TOptions): TProvider;
   [member: string]: unknown;
 };
-
-/**
- * Types an upload provider module where it is written, and returns it unchanged, with its own type:
- * `init`'s parameters and the members outside the contract keep theirs. Editors complete the
- * contract members in JavaScript too. Annotate `init`'s options; without an annotation they are
- * the `providerOptions` record of the upload config.
- *
- * The upload plugin `require`s the module and reads `init` from it, so the module must be the
- * CommonJS export itself: `export =` in TypeScript, `module.exports =` in JavaScript.
- * Omit the provider members you do not implement: never set one to `undefined`.
- *
- * Calling it at runtime needs `@strapi/types` as a regular dependency. Without one, check the module
- * with `satisfies Providers.Upload.Factory<Options>` instead.
- *
- * @template TModule - The module itself. Pass it explicitly to type the module from a declared type.
- * @template TOptions - `init`'s options, inferred from its annotation: an object type, inline or an
- * interface. Inferred apart from the module, so the options need no index signature.
- *
- * @example
- * export = defineUploadProvider({
- *   init(options: { bucket: string }) {
- *     return {
- *       async uploadStream(file) { file.url = `https://cdn.example/${file.hash}${file.ext}`; },
- *       async delete(file) {},
- *     };
- *   },
- * });
- */
-export const defineUploadProvider = <
-  TModule extends Factory<TOptions>,
-  TOptions extends object = TModule extends Factory<infer TInit> ? TInit : Record<string, unknown>,
->(
-  module: TModule & Factory<TOptions>
-): TModule => module;
