@@ -113,7 +113,11 @@ const createProvider = (config: Config) => {
     );
   }
 
-  const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
+  // Wrap only real methods: a key declared as `undefined` (e.g. `uploadStream: undefined`) must stay
+  // missing, so callers fall back on `upload` and the base provider defaults still apply.
+  const providerMethods = _.pickBy(providerInstance, (method) => typeof method === 'function');
+
+  const wrappedProvider = _.mapValues(providerMethods, (method, methodName) => {
     return async (file: File, options = actionOptions[methodName]) =>
       providerInstance[methodName](file, options);
   });
