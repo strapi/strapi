@@ -151,6 +151,9 @@ const init = (licenseDir: string, logger?: Logger) => {
  * returns. Keeps the previous count on failure. Never throws.
  */
 const reportActiveAdminUsers = async ({ strapi }: { strapi: Core.Strapi }) => {
+  // Nothing to report for an inactive license (rejected, expired or invalid)
+  if (!ee.enabled) return;
+
   try {
     const { licenseKey } = ee.licenseInfo;
     if (!licenseKey) return;
