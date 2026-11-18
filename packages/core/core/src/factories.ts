@@ -1,5 +1,5 @@
 import { omit, pick } from 'lodash';
-import type { Core, UID, Utils } from '@strapi/types';
+import type { Core, Providers, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
 import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
@@ -121,10 +121,49 @@ const isCustomController = <T extends Core.Controller>(controller: T): boolean =
   return symbols.CustomController in controller;
 };
 
+/**
+ * Types an upload provider module where an application writes it, and returns it unchanged, with its
+ * own type: `init`'s parameters and the members outside the contract keep theirs. Editors complete
+ * the contract members in JavaScript too. Annotate `init`'s options; without an annotation they are
+ * the `providerOptions` record of the upload config.
+ *
+ * The upload plugin `require`s the module and reads `init` from it, with no `.default` interop, so
+ * the module must be the CommonJS export itself: `export =` in TypeScript, `module.exports =` in
+ * JavaScript. Omit the provider members you do not implement: never set one to `undefined`.
+ *
+ * A provider package checks its module with `satisfies Providers.Upload.Factory<Options>` instead,
+ * which needs no runtime dependency on Strapi.
+ *
+ * @template TModule - The module itself. Pass it explicitly to type the module from a declared type.
+ * @template TOptions - `init`'s options, inferred from its annotation: an object type, inline or an
+ * interface. Inferred apart from the module, so the options need no index signature.
+ *
+ * @example
+ * import { factories } from '@strapi/strapi';
+ *
+ * export = factories.createUploadProvider({
+ *   init(options: { baseUrl: string }) {
+ *     return {
+ *       async uploadStream(file) { file.url = `${options.baseUrl}/${file.hash}${file.ext}`; },
+ *       async delete(file) {},
+ *     };
+ *   },
+ * });
+ */
+const createUploadProvider = <
+  TModule extends Providers.Upload.Factory<TOptions>,
+  TOptions extends object = TModule extends Providers.Upload.Factory<infer TInit>
+    ? TInit
+    : Record<string, unknown>,
+>(
+  module: TModule & Providers.Upload.Factory<TOptions>
+): TModule => module;
+
 export {
   createCoreController,
   createCoreService,
   createCoreRouter,
   createCoreValidator,
+  createUploadProvider,
   isCustomController,
 };
