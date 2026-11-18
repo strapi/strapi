@@ -3,12 +3,12 @@
 The new test suites of the Test Infrastructure Overhaul. They replace `/tests` domain by domain,
 and the folder is renamed `/tests` at the cutover.
 
-| Workspace | Package                | Runner                                                       |
-| --------- | ---------------------- | ------------------------------------------------------------ |
-| `shared/` | `@strapi/tests-shared` | Foundation: app generation and server lifecycle, test plugin |
-| `ui/`     | `@strapi/tests-e2e`    | Playwright, `*.ui-test.ts`                                   |
-| `api/`    | `@strapi/tests-api`    | Vitest, `*.api-test.ts`                                      |
-| `cli/`    | `@strapi/tests-cli`    | Vitest, `*.cli-test.ts`                                      |
+| Workspace | Package                | Runner                                                                  |
+| --------- | ---------------------- | ----------------------------------------------------------------------- |
+| `shared/` | `@strapi/tests-shared` | Foundation: app lifecycle, scaffolders, seeders, DB resets, test plugin |
+| `ui/`     | `@strapi/tests-e2e`    | Playwright, `*.ui-test.ts`                                              |
+| `api/`    | `@strapi/tests-api`    | Vitest, `*.api-test.ts`                                                 |
+| `cli/`    | `@strapi/tests-cli`    | Vitest, `*.cli-test.ts`                                                 |
 
 ## Run
 
@@ -40,5 +40,63 @@ yarn nx run @strapi/tests-e2e:test      # also builds the admin of its app, abou
   reset runs before the file's `beforeAll`, and never before its `afterAll`, which sees what the
   tests wrote. The restore needs the snapshot's schema: specs that change the schema
   (Content-Type Builder) aren't supported yet, and will come with the first such spec.
+- **Edition** (RFC D6): `STRAPI_TEST_EDITION=ce` (default) or `ee`, read by one module
+  (`shared/src/edition`) for every suite. `ee` needs `STRAPI_LICENSE`; without it, or when
+  Strapi rejects the license and boots as CE, the run fails instead of testing CE. A CE run
+  removes any license from the app env. See [Edition](#edition).
 - **One ui worker** for now: each worker will need its own app and database first.
 - **Windows** is not supported yet: stopping a server signals its process group.
+
+## Set up an app
+
+Write the schema and config before boot, seed, then boot once. No step restarts Strapi.
+
+```ts
+const app = await generateApp({ name: `api-articles-${worker}` });
+await resetDatabase(app, database);
+
+// Scaffolders: files in the app, synced by Strapi on boot.
+scaffoldContentType(app, {
+  singularName: 'article',
+  draftAndPublish: true,
+  attributes: { title: { type: 'string' } },
+});
+scaffoldComponent(app, { uid: 'shared.seo', attributes: { title: { type: 'string' } } });
+scaffoldConfig(app, 'features', { future: { experimental_firstPublishedAt: true } }); // read at boot
+scaffoldPlugin(app, 'users-permissions', { config: { jwt: { expiresIn: '1h' } } });
+
+// Seeders, before boot: one Strapi load for the whole plan (about 2.5 s).
+const { apiTokens } = await seedApp(
+  app,
+  {
+    adminUsers: [{ email, password, firstname, lastname, roles: ['strapi-editor'] }],
+    entries: [{ uid: 'api::article.article', data: { title: 'Hello' }, status: 'published' }],
+    apiTokens: [{ name: 'full', type: 'full-access' }],
+  },
+  { database }
+);
+
+const server = await startServer(app, { port, database });
+
+// Seeders, in the running server: data a test adds on top, without a restart.
+await seed(server, { entries: [{ uid: 'api::article.article', data: { title: 'Live' } }] });
+```
+
+A seed plan (`SeedPlan`) is JSON: locales, admin roles and users, end users, media, entries and
+API tokens (content API and admin). The test plugin runs it in that order, so `seedApp` and
+`seed` behave the same. Examples: `api/tests/seed/` and `api/tests/scenarios/settings-spike`.
+
+## Edition
+
+Features and future flags are read from the running instance (`getInstanceFeatures(server)`),
+never from env vars. A test that needs one the instance doesn't have **fails**, it doesn't skip.
+
+- **ui (Playwright):** tag EE-only tests `@ee`; CE runs leave them out. EE runs replay the
+  `@ee` and `@smoke` tests only. Declare requirements with
+  `test.use({ requires: { ee: ['cms-content-releases'], future: ['someFlag'] } })`, and read
+  the instance with the `features` fixture.
+- **api and cli (Vitest):** `describeEE()` and `describeIfFeature()` from
+  `@strapi/tests-shared/vitest` run only in EE runs, and `describeIfFeature()` fails when the
+  feature is missing. `requireFeatures(features, { future: [...] })` checks future flags.
+
+Set future flags with `scaffoldConfig(app, 'features', { future: { someFlag: true } })`.
