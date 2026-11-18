@@ -66,7 +66,8 @@ export const generateTypesSilently = async ({
 }): Promise<string | undefined> => {
   const artifacts = getTypeArtifacts(strapi);
 
-  // TODO @Nico a failed generation also returns: the warning may then list files it did not write
+  // Known limit: a failed generation also returns, and the warning may then list strict files it
+  // did not write as left out by the tsconfig
   await tsUtils.generators.generate({
     strapi,
     pwd: cwd,
