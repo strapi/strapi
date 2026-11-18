@@ -62,13 +62,14 @@ export const findStrictArtifactsOutsideProgram = ({
     return undefined;
   }
 
-  // TODO @Nico solution-style tsconfig: follow references before warning
+  // Known limit: a solution-style tsconfig is not followed through its references, so no warning
   if (parsed.fileNames.length === 0 && parsed.projectReferences !== undefined) {
     return undefined;
   }
 
-  // TODO @Nico a root file that imports or references a strict artifact also loads it in the
-  // program; only the root files are checked, as building the program costs a full module resolution
+  // Known limit: a root file that imports or references a strict artifact also loads it in the
+  // program, but only the root files are checked, as building the program costs a full module
+  // resolution
   const rootFiles = new Set(parsed.fileNames.map((fileName) => path.resolve(fileName)));
   const missing = filenames
     .map((filename) => path.resolve(generatedDir, filename))
