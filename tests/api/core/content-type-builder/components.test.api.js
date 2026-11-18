@@ -42,6 +42,17 @@ const uploadImage = async () => {
   return res.body[0];
 };
 
+const putComponent = (uid, body) =>
+  rq({ method: 'PUT', url: `/content-type-builder/components/${uid}`, body });
+
+const getComponent = (uid) => rq({ method: 'GET', url: `/content-type-builder/components/${uid}` });
+
+const componentPath = (category, name) =>
+  path.join(strapi.dirs.app.components, category, `${name}.json`);
+
+const readComponentFile = (category, name) =>
+  JSON.parse(fs.readFileSync(componentPath(category, name), 'utf8'));
+
 const createAttributes = (attributes) =>
   Object.entries(attributes).map(([name, properties]) => ({ action: 'create', name, properties }));
 
@@ -449,7 +460,7 @@ describe('Content Type Builder - Components', () => {
       });
     });
 
-    test('Returns the error message when the validation throws a native error', async () => {
+    test('Returns a validation error when the attributes are missing', async () => {
       const res = await rq({
         method: 'PUT',
         url: '/content-type-builder/components/default.some-component',
@@ -461,13 +472,53 @@ describe('Content Type Builder - Components', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
+      expect(res.body).toMatchObject({
         error: {
-          name: 'TypeError',
-          message: expect.stringContaining('undefined'),
-          details: {},
+          name: 'ValidationError',
+          details: {
+            errors: expect.arrayContaining([
+              expect.objectContaining({
+                path: ['component', 'attributes'],
+                message: 'attributes.required',
+              }),
+            ]),
+          },
         },
       });
+    });
+
+    test('Returns a validation error when the attributes are not an object', async () => {
+      const res = await putComponent('default.some-component', {
+        component: {
+          category: 'default',
+          displayName: 'Some Component',
+          icon: 'calendar',
+          attributes: 'not-an-object',
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        details: { errors: [expect.objectContaining({ path: ['component', 'attributes'] })] },
+      });
+    });
+
+    test.each([
+      ['a null attribute', { foo: null }],
+      ['an array with a null attribute', [null]],
+    ])('Returns a validation error for %s', async (_label, attributes) => {
+      const res = await putComponent('default.some-component', {
+        component: {
+          category: 'default',
+          displayName: 'Some Component',
+          icon: 'calendar',
+          attributes,
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({ name: 'ValidationError' });
     });
 
     test('Updates a component properly', async () => {
@@ -920,6 +971,477 @@ describe('Content Type Builder - Components', () => {
         wrapperUid: fixture.wrapperUid,
         staleCardUid: `${MOVED_CATEGORY}.card`,
       });
+    });
+  });
+
+  describe('PUT /components/:uid with nested components', () => {
+    const PARENT_UID = 'putnest.parent';
+    const CHILD_UID = 'putnest.child';
+    // `createComponentUID` derives the uid from the category and the display name
+    const FRESH_UID = 'putnest.fresh-section';
+
+    beforeAll(async () => {
+      const res = await updateSchema({
+        components: [
+          {
+            action: 'create',
+            uid: CHILD_UID,
+            category: 'putnest',
+            displayName: 'Child',
+            icon: 'calendar',
+            attributes: createAttributes({ label: { type: 'string' } }),
+          },
+          {
+            action: 'create',
+            uid: PARENT_UID,
+            category: 'putnest',
+            displayName: 'Parent',
+            icon: 'calendar',
+            attributes: createAttributes({ title: { type: 'string' } }),
+          },
+        ],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+    });
+
+    afterAll(async () => {
+      await updateSchema({
+        components: [PARENT_UID, CHILD_UID, FRESH_UID].map((uid) => ({ action: 'delete', uid })),
+      });
+      await restart();
+    });
+
+    test('edits a nested component by uid and creates one by tmpUID', async () => {
+      const res = await putComponent(PARENT_UID, {
+        component: {
+          category: 'putnest',
+          displayName: 'Parent',
+          icon: 'calendar',
+          attributes: {
+            title: { type: 'string' },
+            child: { type: 'component', repeatable: false, component: CHILD_UID },
+            fresh: { type: 'component', repeatable: true, component: 'tmp-fresh' },
+          },
+        },
+        components: [
+          {
+            uid: CHILD_UID,
+            category: 'putnest',
+            displayName: 'Child Renamed',
+            icon: 'calendar',
+            attributes: { label: { type: 'string' } },
+          },
+          {
+            tmpUID: 'tmp-fresh',
+            category: 'putnest',
+            displayName: 'Fresh Section',
+            icon: 'calendar',
+            attributes: { note: { type: 'text' } },
+          },
+        ],
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ data: { uid: PARENT_UID } });
+
+      await restart();
+
+      const parent = await getComponent(PARENT_UID);
+      expect(parent.statusCode).toBe(200);
+      expect(parent.body.data.schema.attributes).toMatchObject({
+        title: { type: 'string' },
+        child: { type: 'component', repeatable: false, component: CHILD_UID },
+        // the tmpUID is replaced by the uid of the created component
+        fresh: { type: 'component', repeatable: true, component: FRESH_UID },
+      });
+
+      const child = await getComponent(CHILD_UID);
+      expect(child.statusCode).toBe(200);
+      expect(child.body.data.schema.displayName).toBe('Child Renamed');
+
+      const fresh = await getComponent(FRESH_UID);
+      expect(fresh.statusCode).toBe(200);
+      expect(fresh.body.data).toMatchObject({
+        uid: FRESH_UID,
+        category: 'putnest',
+        schema: { displayName: 'Fresh Section', attributes: { note: { type: 'text' } } },
+      });
+    });
+  });
+
+  describe('PUT /components/:uid round trip of every field kind', () => {
+    const ITEM_UID = 'putround.item';
+    const PART_UID = 'putround.part';
+    const OWNER_UID = 'api::putround-owner.putround-owner';
+
+    beforeAll(async () => {
+      const res = await updateSchema({
+        components: [
+          {
+            action: 'create',
+            uid: PART_UID,
+            category: 'putround',
+            displayName: 'Part',
+            icon: 'calendar',
+            attributes: createAttributes({ label: { type: 'string' } }),
+          },
+          {
+            action: 'create',
+            uid: ITEM_UID,
+            category: 'putround',
+            displayName: 'Item',
+            icon: 'calendar',
+            attributes: createAttributes({
+              title: { type: 'string' },
+              obsolete: { type: 'string' },
+            }),
+          },
+        ],
+        contentTypes: [
+          {
+            action: 'create',
+            uid: OWNER_UID,
+            displayName: 'Putround Owner',
+            singularName: 'putround-owner',
+            pluralName: 'putround-owners',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            attributes: createAttributes({ name: { type: 'string' } }),
+          },
+        ],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+    });
+
+    afterAll(async () => {
+      await updateSchema({
+        components: [ITEM_UID, PART_UID].map((uid) => ({ action: 'delete', uid })),
+        contentTypes: [{ action: 'delete', uid: OWNER_UID }],
+      });
+      await restart();
+    });
+
+    test('adds media, component and relation fields, sets field pluginOptions and removes a field', async () => {
+      const res = await putComponent(ITEM_UID, {
+        component: {
+          category: 'putround',
+          displayName: 'Item',
+          icon: 'calendar',
+          attributes: {
+            // `obsolete` is left out, which removes it
+            title: { type: 'string', pluginOptions: { pluginName: { option: true } } },
+            cover: { type: 'media', multiple: false, allowedTypes: ['images'] },
+            part: { type: 'component', repeatable: true, component: PART_UID },
+            owner: { type: 'relation', relation: 'oneToOne', target: OWNER_UID },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ data: { uid: ITEM_UID } });
+
+      await restart();
+
+      const item = await getComponent(ITEM_UID);
+      expect(item.statusCode).toBe(200);
+
+      const { attributes } = item.body.data.schema;
+      expect(attributes).toMatchObject({
+        title: { type: 'string', pluginOptions: { pluginName: { option: true } } },
+        cover: { type: 'media', multiple: false, allowedTypes: ['images'] },
+        part: { type: 'component', repeatable: true, component: PART_UID },
+        owner: { type: 'relation', relation: 'oneToOne', target: OWNER_UID },
+      });
+      expect(attributes).not.toHaveProperty('obsolete');
+    });
+  });
+
+  describe('PUT /components/:uid when a schema file fails to write', () => {
+    const CARD_UID = 'putfail.card';
+    const MOVED_CATEGORY = 'putfailmoved';
+    let blockedPath;
+
+    // A directory where the moved component file must go makes its write fail with
+    // EISDIR, and the builder rolls the files back. Does not depend on file modes,
+    // which root (CI) ignores.
+    const blockMovedFile = () => {
+      blockedPath = path.join(strapi.dirs.app.components, MOVED_CATEGORY, 'card.json');
+      fs.mkdirSync(blockedPath, { recursive: true });
+    };
+
+    const unblockMovedFile = () => {
+      fs.rmSync(path.join(strapi.dirs.app.components, MOVED_CATEGORY), {
+        recursive: true,
+        force: true,
+      });
+    };
+
+    beforeAll(async () => {
+      const res = await updateSchema({
+        components: [
+          {
+            action: 'create',
+            uid: CARD_UID,
+            category: 'putfail',
+            displayName: 'Card',
+            icon: 'calendar',
+            attributes: createAttributes({ title: { type: 'string' } }),
+          },
+        ],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+    });
+
+    afterAll(async () => {
+      unblockMovedFile();
+      await updateSchema({ components: [{ action: 'delete', uid: CARD_UID }] });
+      await restart();
+    });
+
+    test('answers 400 and keeps the component where it was', async () => {
+      const cardFile = readComponentFile('putfail', 'card');
+      blockMovedFile();
+
+      const res = await putComponent(CARD_UID, {
+        component: {
+          category: MOVED_CATEGORY,
+          displayName: 'Card',
+          icon: 'calendar',
+          attributes: { title: { type: 'string' } },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({ error: 'Invalid schema edition' });
+
+      // The write failed before the file in the old category was removed, and the rollback
+      // wrote it back as it was
+      expect(readComponentFile('putfail', 'card')).toEqual(cardFile);
+
+      unblockMovedFile();
+      await restart();
+
+      expect((await getComponent(CARD_UID)).statusCode).toBe(200);
+      expect((await getComponent(`${MOVED_CATEGORY}.card`)).statusCode).toBe(404);
+    });
+  });
+
+  describe('PUT /components/:uid with nested components when a schema file fails to write', () => {
+    const CATEGORY = 'putnestfail';
+    const MOVED_CATEGORY = 'putnestfailmoved';
+    const PARENT_UID = `${CATEGORY}.parent`;
+    const CHILD_UID = `${CATEGORY}.child`;
+    // `createComponentUID` derives the uid from the category and the display name
+    const FRESH_UID = `${CATEGORY}.fresh-section`;
+
+    // A directory where the moved parent file must go makes its write fail with EISDIR
+    const blockMovedFile = () => {
+      fs.mkdirSync(componentPath(MOVED_CATEGORY, 'parent'), { recursive: true });
+    };
+
+    const unblockMovedFile = () => {
+      fs.rmSync(path.join(strapi.dirs.app.components, MOVED_CATEGORY), {
+        recursive: true,
+        force: true,
+      });
+    };
+
+    beforeAll(async () => {
+      const res = await updateSchema({
+        components: [
+          {
+            action: 'create',
+            uid: CHILD_UID,
+            category: CATEGORY,
+            displayName: 'Child',
+            icon: 'calendar',
+            attributes: createAttributes({ label: { type: 'string' } }),
+          },
+          {
+            action: 'create',
+            uid: PARENT_UID,
+            category: CATEGORY,
+            displayName: 'Parent',
+            icon: 'calendar',
+            attributes: createAttributes({
+              title: { type: 'string' },
+              child: { type: 'component', repeatable: false, component: CHILD_UID },
+            }),
+          },
+        ],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+    });
+
+    afterAll(async () => {
+      unblockMovedFile();
+      fs.rmSync(componentPath(CATEGORY, 'fresh-section'), { force: true });
+      await updateSchema({
+        components: [PARENT_UID, CHILD_UID].map((uid) => ({ action: 'delete', uid })),
+      });
+      await restart();
+    });
+
+    test('answers 400, removes the created component and restores the edited ones as they were', async () => {
+      const parentFile = readComponentFile(CATEGORY, 'parent');
+      const childFile = readComponentFile(CATEGORY, 'child');
+      blockMovedFile();
+
+      const res = await putComponent(PARENT_UID, {
+        component: {
+          category: MOVED_CATEGORY,
+          displayName: 'Parent',
+          icon: 'calendar',
+          attributes: {
+            title: { type: 'string' },
+            child: { type: 'component', repeatable: false, component: CHILD_UID },
+            fresh: { type: 'component', repeatable: true, component: 'tmp-fresh' },
+          },
+        },
+        components: [
+          {
+            uid: CHILD_UID,
+            category: CATEGORY,
+            displayName: 'Child Renamed',
+            icon: 'calendar',
+            attributes: { label: { type: 'string' } },
+          },
+          {
+            tmpUID: 'tmp-fresh',
+            category: CATEGORY,
+            displayName: 'Fresh Section',
+            icon: 'calendar',
+            attributes: { note: { type: 'text' } },
+          },
+        ],
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({ error: 'Invalid schema edition' });
+
+      expect(fs.existsSync(componentPath(CATEGORY, 'fresh-section'))).toBe(false);
+      expect(readComponentFile(CATEGORY, 'parent')).toEqual(parentFile);
+      expect(readComponentFile(CATEGORY, 'child')).toEqual(childFile);
+
+      unblockMovedFile();
+      await restart();
+
+      expect((await getComponent(FRESH_UID)).statusCode).toBe(404);
+      expect((await getComponent(CHILD_UID)).body.data.schema.displayName).toBe('Child');
+    });
+  });
+
+  describe('POST /components when the schema file fails to write', () => {
+    const CATEGORY = 'postfail';
+    const CARD_UID = `${CATEGORY}.card`;
+
+    // A directory where the new component file must go makes its write fail with EISDIR
+    const blockCardFile = () => {
+      fs.mkdirSync(componentPath(CATEGORY, 'card'), { recursive: true });
+    };
+
+    afterAll(async () => {
+      fs.rmSync(path.join(strapi.dirs.app.components, CATEGORY), { recursive: true, force: true });
+      await restart();
+    });
+
+    test('answers 400 and creates no component', async () => {
+      blockCardFile();
+
+      const res = await rq({
+        method: 'POST',
+        url: '/content-type-builder/components',
+        body: {
+          component: {
+            category: CATEGORY,
+            displayName: 'Card',
+            icon: 'calendar',
+            attributes: { title: { type: 'string' } },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({ error: 'Invalid schema edition' });
+
+      await restart();
+
+      expect((await getComponent(CARD_UID)).statusCode).toBe(404);
+    });
+  });
+
+  describe('PUT /component-categories/:name when a schema file fails to write', () => {
+    const CATEGORY = 'catfail';
+    const NEW_CATEGORY = 'catfailnew';
+    const NAMES = ['alpha', 'beta'];
+
+    // A directory where one moved file must go makes its write fail with EISDIR
+    const blockMovedFile = () => {
+      fs.mkdirSync(componentPath(NEW_CATEGORY, 'beta'), { recursive: true });
+    };
+
+    const unblockMovedFile = () => {
+      fs.rmSync(path.join(strapi.dirs.app.components, NEW_CATEGORY), {
+        recursive: true,
+        force: true,
+      });
+    };
+
+    beforeAll(async () => {
+      const res = await updateSchema({
+        components: NAMES.map((name) => ({
+          action: 'create',
+          uid: `${CATEGORY}.${name}`,
+          category: CATEGORY,
+          displayName: name,
+          icon: 'calendar',
+          attributes: createAttributes({ title: { type: 'string' } }),
+        })),
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+    });
+
+    afterAll(async () => {
+      unblockMovedFile();
+      await updateSchema({
+        components: NAMES.map((name) => ({ action: 'delete', uid: `${CATEGORY}.${name}` })),
+      });
+      await restart();
+    });
+
+    test('answers 400 and keeps every component of the category where it was', async () => {
+      const files = NAMES.map((name) => readComponentFile(CATEGORY, name));
+      blockMovedFile();
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/component-categories/${CATEGORY}`,
+        body: { name: NEW_CATEGORY },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({ message: 'Invalid schema edition' });
+
+      expect(NAMES.map((name) => readComponentFile(CATEGORY, name))).toEqual(files);
+      expect(fs.existsSync(componentPath(NEW_CATEGORY, 'alpha'))).toBe(false);
+
+      unblockMovedFile();
+      await restart();
+
+      for (const name of NAMES) {
+        expect((await getComponent(`${CATEGORY}.${name}`)).statusCode).toBe(200);
+        expect((await getComponent(`${NEW_CATEGORY}.${name}`)).statusCode).toBe(404);
+      }
     });
   });
 });

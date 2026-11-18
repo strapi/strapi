@@ -1,5 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
-
 import { render, screen } from '@tests/utils';
 import { createEditor, Transforms, Editor } from 'slate';
 

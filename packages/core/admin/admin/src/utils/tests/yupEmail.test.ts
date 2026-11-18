@@ -98,7 +98,6 @@ describe('yup string().email() in the admin', () => {
   });
 
   describe('with a custom locale', () => {
-    // eslint-disable-next-line no-template-curly-in-string
     const defaultMessage = '${path} must be a valid email';
 
     afterEach(() => {
@@ -106,7 +105,6 @@ describe('yup string().email() in the admin', () => {
     });
 
     test('uses the locale message when none is passed', () => {
-      // eslint-disable-next-line no-template-curly-in-string
       yup.setLocale({ string: { email: '${path} is not an email address' } });
 
       expect(() => yup.string().email().validateSync('nope')).toThrow(

@@ -11,6 +11,9 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database 
     );
   }
 
+  // An empty DATABASE_FILENAME would resolve to the app root, so it falls back to the default file
+  const sqliteFilename = env('DATABASE_FILENAME', '');
+
   const connections: Record<Core.Config.Database.ClientKind, Core.Config.Database['connection']> = {
     mysql: {
       client: 'mysql',
@@ -55,7 +58,12 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database 
     sqlite: {
       client: 'sqlite',
       connection: {
-        filename: path.join(__dirname, '..', '..', env('DATABASE_FILENAME', '.tmp/data.db')),
+        filename: path.join(
+          __dirname,
+          '..',
+          '..',
+          sqliteFilename === '' ? '.tmp/data.db' : sqliteFilename
+        ),
       },
       useNullAsDefault: true,
     },

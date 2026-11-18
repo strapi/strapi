@@ -1,4 +1,4 @@
-import { errors } from '@strapi/utils';
+import { errors, quoteForLog } from '@strapi/utils';
 
 import type { Core, Modules } from '@strapi/types';
 import type { ParameterizedContext } from 'koa';
@@ -304,7 +304,9 @@ export const createReleaseRun = ({
         }
         outcomes.set(action.id, await getErrorOutcome(action, actionError));
         strapi.log.warn(
-          `[Content Releases] Release ${release.name}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
+          `[Content Releases] Release ${quoteForLog(
+            release.name
+          )}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
         );
       }
     }
@@ -356,7 +358,7 @@ export const createReleaseRun = ({
       throw new errors.ValidationError('Release failed to publish');
     }
 
-    strapi.log.info(`[Content Releases] Starting to publish release ${release.name}`);
+    strapi.log.info(`[Content Releases] Starting to publish release ${quoteForLog(release.name)}`);
 
     const allowPartial = release.releaseCondition === 'allow_partial';
     const actions = await getActionsInRunOrder(releaseId);

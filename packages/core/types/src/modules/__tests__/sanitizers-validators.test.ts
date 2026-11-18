@@ -18,6 +18,10 @@ declare const sanitizers: Modules.Sanitizers.SanitizersRegistry;
 declare const validators: Modules.Validators.ValidatorsRegistry;
 
 const removeSecret: Parameters<typeof traverseEntity>[0] = ({ key, value }, { remove, set }) => {
+  // A visitor reads `value` as `unknown` and can `set` any value.
+  true satisfies Assert<IsEqual<typeof value, unknown>>;
+  true satisfies Assert<IsEqual<typeof set, (key: string, value: unknown) => void>>;
+
   if (key === 'secret') {
     remove(key);
   }

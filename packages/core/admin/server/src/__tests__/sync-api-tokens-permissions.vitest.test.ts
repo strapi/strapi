@@ -69,7 +69,7 @@ describe('syncAPITokensPermissions', () => {
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledWith(
       'Removed 4 stored API token permission(s) whose action is no longer registered. ' +
-        'Actions: api::legacy.legacy.find, api::legacy.legacy.create. ' +
+        'Actions: "api::legacy.legacy.find", "api::legacy.legacy.create". ' +
         'API tokens: "Read Only" (id 1), "importer" (id 2). ' +
         'Without API token: 1.'
     );
@@ -117,9 +117,15 @@ describe('syncAPITokensPermissions', () => {
     );
   });
 
-  test('quotes API token names so the warning stays on one line', async () => {
+  test('quotes actions and API token names so the warning stays on one line', async () => {
     const { warn } = setup(
-      [{ id: 1, action: 'api::legacy.legacy.find', token: { id: 1, name: 'evil\nToken "x"' } }],
+      [
+        {
+          id: 1,
+          action: 'api::legacy.legacy.find\u001b[2J',
+          token: { id: 1, name: 'evil\nToken "x"\u0085\u2028\u2029\u007f\u009b\u202e' },
+        },
+      ],
       []
     );
 
@@ -127,8 +133,11 @@ describe('syncAPITokensPermissions', () => {
 
     expect(warn).toHaveBeenCalledTimes(1);
     const message = warn.mock.calls[0][0] as string;
-    expect(message).not.toMatch(/[\r\n]/);
-    expect(message).toContain('API tokens: "evil\\nToken \\"x\\"" (id 1). ');
+    expect(message).not.toMatch(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u);
+    expect(message).toContain('Actions: "api::legacy.legacy.find\\u001b[2J". ');
+    expect(message).toContain(
+      'API tokens: "evil\\nToken \\"x\\"\\u0085\\u2028\\u2029\\u007f\\u009b\\u202e" (id 1). '
+    );
   });
 
   test('does not warn when nothing is removed', async () => {

@@ -1,4 +1,3 @@
-/* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
 import { act, render, screen } from '@tests/utils';
