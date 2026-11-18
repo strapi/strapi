@@ -43,6 +43,8 @@
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc -p tsconfig.json",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -51,9 +53,12 @@
     "into-stream": "^5.1.0"
   },
   "devDependencies": {
+    "@strapi/types": "5.63.0",
     "@types/node": "22.20.0",
     "eslint-config-custom": "5.63.0",
-    "tsconfig": "5.63.0"
+    "tsconfig": "5.63.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.63.0"
   },
   "engines": {
     "node": ">=22.0.0 <=26.x.x",
