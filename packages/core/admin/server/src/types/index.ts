@@ -127,10 +127,7 @@ type PermissionRow = Pick<AdminRow<'admin::permission'>, 'id' | 'action' | 'subj
 
 /** The fields `sanitizeUser` removes (`services/user.ts`). */
 type PrivateUserField =
-  | 'password'
-  | 'resetPasswordToken'
-  | 'resetPasswordTokenExpiresAt'
-  | 'registrationToken';
+  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'registrationToken';
 
 /** The roles of a sanitized user: each with its `id`, `name`, `description` and `code` only. */
 type SanitizedRoles<TRoles> = TRoles extends readonly (infer TRole)[]
@@ -250,7 +247,7 @@ type StrictRoleService<TService> = Omit<TService, RoleServiceOverride> & {
     populate?: TPopulate
   ): Promise<RoleRow<TPopulate> | null>;
   findOneWithUsersCount<
-    const TPopulate extends AdminPopulate<'admin::role'> | undefined = undefined
+    const TPopulate extends AdminPopulate<'admin::role'> | undefined = undefined,
   >(
     params?: Parameters<(typeof CERoleService)['findOneWithUsersCount']>[0],
     populate?: TPopulate
@@ -261,7 +258,7 @@ type StrictRoleService<TService> = Omit<TService, RoleServiceOverride> & {
   ): Promise<RoleRow<TPopulate>[]>;
   /** The roles that match the query params, with the relations their `populate` names. */
   findAllWithUsersCount<
-    const TParams extends Parameters<(typeof CERoleService)['findAllWithUsersCount']>[0]
+    const TParams extends Parameters<(typeof CERoleService)['findAllWithUsersCount']>[0],
   >(
     params: TParams
   ): Promise<RoleRowWithUsersCount<PopulateOfParams<'admin::role', TParams>>[]>;
@@ -308,12 +305,7 @@ type RoleService<TService extends { findOne: (...args: never[]) => unknown }> =
   Core.IsStrict extends true ? StrictRoleService<TService> : ImplementationRoleService<TService>;
 
 type UserServiceOverride =
-  | 'findOne'
-  | 'findOneByEmail'
-  | 'updateById'
-  | 'deleteById'
-  | 'deleteByIds'
-  | 'sanitizeUser';
+  'findOne' | 'findOneByEmail' | 'updateById' | 'deleteById' | 'deleteByIds' | 'sanitizeUser';
 
 /**
  * The registered `admin::user` service: {@link StrictUserService} with strict types,
@@ -329,7 +321,7 @@ type UserService<TService extends Record<UserServiceOverride, (...args: never[])
  * user matches.
  */
 type StrictUserService<
-  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>
+  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>,
 > = Omit<TService, UserServiceOverride | 'create'> & {
   /** The created user with its roles. */
   create(...args: Parameters<(typeof CEUserService)['create']>): Promise<UserRowWithRoles>;
@@ -359,7 +351,7 @@ type StrictUserService<
  * develop's published `Promise<AdminUser>`.
  */
 type LegacyUserService<
-  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>
+  TService extends Record<UserServiceOverride, (...args: never[]) => unknown>,
 > = Omit<TService, UserServiceOverride> & {
   /** The user with its roles. With a `populate` other than the default, `roles` is not loaded. */
   findOne(...args: Parameters<(typeof CEUserService)['findOne']>): Promise<AdminUser | null>;

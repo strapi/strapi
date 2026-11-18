@@ -18,9 +18,8 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 // - The rows the round left out: `admin::passport`, the content-manager `relations` controller, and
 //   the `strapi::responses`, `strapi::security` and `strapi::session` middlewares.
 
-type Equal<T, U> = (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2
-  ? true
-  : false;
+type Equal<T, U> =
+  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
 type Service<TUID extends string> = Core.ServiceFor<TUID>;
@@ -66,8 +65,8 @@ type Next = [never, 0, 1, 2, 3, 4, 5];
 type At<TSegment extends string, TPath> = TPath extends ''
   ? TSegment
   : TPath extends string
-  ? `${TSegment}.${TPath}`
-  : never;
+    ? `${TSegment}.${TPath}`
+    : never;
 type Key<K> = K extends string | number ? (string extends K ? '[index]' : `${K}`) : '[symbol]';
 
 /**
@@ -75,34 +74,35 @@ type Key<K> = K extends string | number ? (string extends K ? '[index]' : `${K}`
  * results, array, promise, map and set items, 6 levels deep. It does not enter `Opaque` types and
  * `OpaqueUnions`.
  */
-type AnyPaths<T, D extends number = 6> = IsAny<T> extends true
-  ? ''
-  : [D] extends [never]
-  ? never
-  : IsOpaqueUnion<T> extends true
-  ? never
-  : Walk<T, D>;
+type AnyPaths<T, D extends number = 6> =
+  IsAny<T> extends true
+    ? ''
+    : [D] extends [never]
+      ? never
+      : IsOpaqueUnion<T> extends true
+        ? never
+        : Walk<T, D>;
 
 /** `AnyPaths`, member by member of a union. */
 type Walk<T, D extends number> = T extends Opaque
   ? never
   : T extends PromiseLike<infer U>
-  ? At<'Promise<0>', AnyPaths<U, Next[D]>>
-  : T extends readonly unknown[]
-  ? At<'Array<0>', AnyPaths<T[number], Next[D]>>
-  : T extends ReadonlyMap<infer K, infer V>
-  ? At<'Map<0>', AnyPaths<K, Next[D]>> | At<'Map<1>', AnyPaths<V, Next[D]>>
-  : T extends ReadonlySet<infer U>
-  ? At<'Set<0>', AnyPaths<U, Next[D]>>
-  : T extends object
-  ?
-      | (T extends (...args: infer A) => infer R
-          ?
-              | (IsAny<A> extends true ? '(args)' : At<'(args)', AnyPaths<A[number], Next[D]>>)
-              | At<'=>', AnyPaths<R, Next[D]>>
-          : never)
-      | { [K in keyof T]-?: At<Key<K>, AnyPaths<T[K], Next[D]>> }[keyof T]
-  : never;
+    ? At<'Promise<0>', AnyPaths<U, Next[D]>>
+    : T extends readonly unknown[]
+      ? At<'Array<0>', AnyPaths<T[number], Next[D]>>
+      : T extends ReadonlyMap<infer K, infer V>
+        ? At<'Map<0>', AnyPaths<K, Next[D]>> | At<'Map<1>', AnyPaths<V, Next[D]>>
+        : T extends ReadonlySet<infer U>
+          ? At<'Set<0>', AnyPaths<U, Next[D]>>
+          : T extends object
+            ? | (T extends (...args: infer A) => infer R
+                  ? | (IsAny<A> extends true
+                        ? '(args)'
+                        : At<'(args)', AnyPaths<A[number], Next[D]>>)
+                    | At<'=>', AnyPaths<R, Next[D]>>
+                  : never)
+              | { [K in keyof T]-?: At<Key<K>, AnyPaths<T[K], Next[D]>> }[keyof T]
+            : never;
 
 type HasAny<T> = [AnyPaths<T>] extends [never] ? false : true;
 
@@ -119,7 +119,7 @@ declare const walkChecks: [
   Core.Assert<Equal<[HasAny<(...args: any[]) => void>], [true]>>,
   Core.Assert<
     Equal<[HasAny<(id: number) => Promise<{ items: Array<{ value: string }> }>>], [false]>
-  >
+  >,
 ];
 walkChecks satisfies unknown;
 
@@ -166,7 +166,7 @@ declare const apiTokenChecks: [
       [HasAny<Service<'admin::api-token-content-api'>['reconcileParameterizedTokenPermissions']>],
       [false]
     >
-  >
+  >,
 ];
 apiTokenChecks satisfies unknown;
 
@@ -181,7 +181,7 @@ declare const permissionChecks: [
     Equal<[HasAny<Omit<Service<'admin::permission'>['actionProvider'], 'hooks'>>], [false]>
   >,
   Core.Assert<Equal<[HasAny<Service<'admin::permission'>['createPermissionsManager']>], [false]>>,
-  Core.Assert<Equal<[HasAny<Service<'admin::permission'>['sectionsBuilder']>], [false]>>
+  Core.Assert<Equal<[HasAny<Service<'admin::permission'>['sectionsBuilder']>], [false]>>,
 ];
 permissionChecks satisfies unknown;
 
@@ -204,7 +204,7 @@ declare const permissionEngineChecks: [
       [false]
     >
   >,
-  Core.Assert<Equal<[HasAny<Service<'admin::transfer'>['permission']['engine']>], [false]>>
+  Core.Assert<Equal<[HasAny<Service<'admin::transfer'>['permission']['engine']>], [false]>>,
 ];
 permissionEngineChecks satisfies unknown;
 
@@ -221,7 +221,7 @@ declare const roleChecks: [
   Core.Assert<Equal<[HasAny<Service<'admin::role'>['findOne']>], [false]>>,
   Core.Assert<Equal<[HasAny<Service<'admin::role'>['findOneWithUsersCount']>], [false]>>,
   Core.Assert<Equal<[HasAny<Service<'admin::role'>['getSuperAdmin']>], [false]>>,
-  Core.Assert<Equal<[HasAny<Service<'admin::role'>['getSuperAdminWithUsersCount']>], [false]>>
+  Core.Assert<Equal<[HasAny<Service<'admin::role'>['getSuperAdminWithUsersCount']>], [false]>>,
 ];
 roleChecks satisfies unknown;
 
@@ -248,13 +248,13 @@ declare const adminServiceChecks: [
         HasAny<
           [
             Parameters<Service<'admin::content-type'>['getPermissionsWithNestedFields']>[1],
-            ReturnType<Service<'admin::content-type'>['getPermissionsWithNestedFields']>
+            ReturnType<Service<'admin::content-type'>['getPermissionsWithNestedFields']>,
           ]
-        >
+        >,
       ],
       [false]
     >
-  >
+  >,
 ];
 adminServiceChecks satisfies unknown;
 
@@ -262,7 +262,7 @@ adminServiceChecks satisfies unknown;
 declare const adminEventChecks: [
   Core.Assert<Equal<[HasAny<Strapi.Registries.Events['role.delete']>], [false]>>,
   Core.Assert<Equal<[HasAny<Strapi.Registries.Events['permission.create']>], [false]>>,
-  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['permission.update']>], [false]>>
+  Core.Assert<Equal<[HasAny<Strapi.Registries.Events['permission.update']>], [false]>>,
 ];
 adminEventChecks satisfies unknown;
 
@@ -292,20 +292,20 @@ declare const contentReleasesChecks: [
           [
             Parameters<ReleaseAction['findPage']>,
             Omit<FindPageActions, 'results'>,
-            Omit<FindPageActions['results'][number], 'entry'>
+            Omit<FindPageActions['results'][number], 'entry'>,
           ]
-        >
+        >,
       ],
       [false]
     >
-  >
+  >,
 ];
 contentReleasesChecks satisfies unknown;
 
 // i18n: the permissions actions (I01) and sections builder (H5).
 declare const i18nChecks: [
   Core.Assert<Equal<[HasAny<Service<'plugin::i18n.permissions'>['actions']>], [false]>>,
-  Core.Assert<Equal<[HasAny<Service<'plugin::i18n.permissions'>['sectionsBuilder']>], [false]>>
+  Core.Assert<Equal<[HasAny<Service<'plugin::i18n.permissions'>['sectionsBuilder']>], [false]>>,
 ];
 i18nChecks satisfies unknown;
 
@@ -325,12 +325,12 @@ declare const graphqlChecks: [
       [HasAny<Omit<Service<'plugin::graphql.utils'>['mappers'], 'strapiScalarToGraphQLScalar'>>],
       [false]
     >
-  >
+  >,
 ];
 graphqlChecks satisfies unknown;
 
 // `@strapi/core`: the `strapi::cors` config (K01).
 declare const coreChecks: [
-  Core.Assert<Equal<[HasAny<Core.MiddlewareConfigFor<'strapi::cors'>>], [false]>>
+  Core.Assert<Equal<[HasAny<Core.MiddlewareConfigFor<'strapi::cors'>>], [false]>>,
 ];
 coreChecks satisfies unknown;
