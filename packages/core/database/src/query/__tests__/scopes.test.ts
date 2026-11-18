@@ -7,7 +7,6 @@ import { createScopeRegistry } from '../scopes';
 import type { QueryScope } from '../scopes';
 import type { Database } from '../..';
 import type { Model } from '../../types';
-import { transactionCtx } from '../../transaction-context';
 import { metadataToSchema } from '../../schema/schema';
 
 const ARTICLE_UID = 'api::article.article';
@@ -40,7 +39,6 @@ const models = [
 
 // `deleted_at` is a column but not an attribute, so the scope uses a raw column key
 const softDelete: QueryScope = {
-  name: 'soft-delete',
   where: ({ uid }) => (uid === ARTICLE_UID ? { deleted_at: null } : null),
 };
 
@@ -49,7 +47,7 @@ const createDb = (connection: Knex, metadata: ReturnType<typeof createMetadata>)
   const db = {
     connection,
     metadata,
-    scopes: createScopeRegistry(),
+    unstable_scopes: createScopeRegistry(),
     getConnection: (table?: string) => (table ? connection(table) : connection),
     dialect: {
       client: 'sqlite',
@@ -126,7 +124,7 @@ describe('query scopes on the main table', () => {
 
   describe('with the test scope registered', () => {
     beforeEach(() => {
-      db.scopes.register(softDelete);
+      db.unstable_scopes.register(softDelete);
     });
 
     it('scopes select on the aliased column with no join', async () => {
@@ -141,19 +139,6 @@ describe('query scopes on the main table', () => {
     it('scopes count', async () => {
       expect(await db.entityManager.count(ARTICLE_UID, {})).toBe(1);
       expect(sqls[0]).toContain('where (`t0`.`deleted_at` is null)');
-    });
-
-    it('scopes max and min', async () => {
-      const qb = (type: 'max' | 'min') =>
-        db.entityManager.createQueryBuilder(ARTICLE_UID)[type]('id').first().execute();
-
-      expect(await qb('max')).toEqual({ max: 1 });
-      expect(await qb('min')).toEqual({ min: 1 });
-      // Without joins, max and min do not alias the table
-      expect(sqls).toEqual([
-        'select max(`id`) as `max` from `articles` where (`deleted_at` is null) limit ?',
-        'select min(`id`) as `min` from `articles` where (`deleted_at` is null) limit ?',
-      ]);
     });
 
     it('scopes update and delete', async () => {
@@ -184,8 +169,7 @@ describe('query scopes on the main table', () => {
     });
 
     it('rejects the query when where throws', async () => {
-      db.scopes.register({
-        name: 'broken',
+      db.unstable_scopes.register({
         where() {
           throw new Error('scope failed');
         },
@@ -198,18 +182,17 @@ describe('query scopes on the main table', () => {
 
   it('builds the unscoped SQL when where returns null', async () => {
     await db.entityManager.findMany(ARTICLE_UID, {});
-    db.scopes.register({ name: 'none', where: () => null });
+    db.unstable_scopes.register({ where: () => null });
     await db.entityManager.findMany(ARTICLE_UID, {});
 
     expect(sqls[1]).toBe(sqls[0]);
   });
 
   it('calls where with join-table names', async () => {
-    const uids: string[] = [];
-    db.scopes.register({
-      name: 'spy',
-      where({ uid }) {
-        uids.push(uid);
+    const calls: Array<{ uid: string; type: string }> = [];
+    db.unstable_scopes.register({
+      where({ uid, type }) {
+        calls.push({ uid, type });
         return null;
       },
     });
@@ -218,87 +201,78 @@ describe('query scopes on the main table', () => {
     await db.entityManager.createQueryBuilder('articles_category_lnk').select('*').execute();
     await db.entityManager.createQueryBuilder('articles_category_lnk').delete().execute();
 
-    expect(uids).toEqual(['articles_category_lnk', 'articles_category_lnk']);
-  });
-
-  it('keeps the unaliased SQL of max and min without joins', async () => {
-    await db.entityManager.createQueryBuilder(ARTICLE_UID).max('id').first().execute();
-    await db.entityManager.createQueryBuilder(ARTICLE_UID).min('id').first().execute();
-
-    expect(sqls).toEqual([
-      'select max(`id`) as `max` from `articles` limit ?',
-      'select min(`id`) as `min` from `articles` limit ?',
+    expect(calls).toEqual([
+      { uid: 'articles_category_lnk', type: 'select' },
+      { uid: 'articles_category_lnk', type: 'delete' },
     ]);
   });
 
-  describe('with a scope whose where names a relation', () => {
-    const rows = async () => connection('articles').orderBy('id').select('title', 'views');
-
-    beforeEach(async () => {
-      await connection('categories').insert({ name: 'Sport' });
-      await connection('articles').insert({ title: 'sport' });
-      await connection('articles_category_lnk').insert({ article_id: 3, category_id: 2 });
-      db.scopes.register({
-        name: 'news',
-        where: ({ uid }) => (uid === ARTICLE_UID ? { category: { name: 'News' } } : null),
-      });
+  it('passes the query type of the main table', async () => {
+    const types: string[] = [];
+    db.unstable_scopes.register({
+      where({ type }) {
+        types.push(type);
+        return null;
+      },
     });
 
-    it('increments with no data through the join', async () => {
-      await db.entityManager.createQueryBuilder(ARTICLE_UID).increment('views', 2).execute();
+    await db.entityManager.findMany(ARTICLE_UID, {});
+    await db.entityManager.count(ARTICLE_UID, {});
+    await db.entityManager.updateMany(ARTICLE_UID, { where: {}, data: { title: 'changed' } });
+    await db.entityManager.deleteMany(ARTICLE_UID, { where: {} });
+    await db.entityManager.createQueryBuilder(ARTICLE_UID).select('*').stream().toArray();
 
-      expect(await rows()).toEqual([
-        { title: 'visible', views: 2 },
-        { title: 'hidden', views: 2 },
-        { title: 'sport', views: 0 },
-      ]);
-    });
-
-    it('keeps the increment out of the inner select of update(data)', async () => {
-      await db.entityManager
-        .createQueryBuilder(ARTICLE_UID)
-        .update({ title: 'changed' })
-        .increment('views')
-        .execute();
-
-      expect(await rows()).toEqual([
-        { title: 'changed', views: 1 },
-        { title: 'changed', views: 1 },
-        { title: 'sport', views: 0 },
-      ]);
-      expect(sqls.filter((sql) => sql.startsWith('update'))).toHaveLength(1);
-    });
-
-    it('runs update and delete in the explicit transaction', async () => {
-      const trx = await connection.transaction();
-      const qb = () => db.entityManager.createQueryBuilder(ARTICLE_UID).transacting(trx);
-
-      await qb().update({ title: 'changed' }).execute();
-      await qb().delete().execute();
-      await trx.rollback();
-
-      expect(await titles()).toEqual(['visible', 'hidden', 'sport']);
-    });
-
-    it('scopes max and min', async () => {
-      const qb = (type: 'max' | 'min') =>
-        db.entityManager
-          .createQueryBuilder(ARTICLE_UID)
-          [type]('id')
-          .where({ id: { $gt: 0 } })
-          .first()
-          .execute();
-
-      expect(await qb('max')).toEqual({ max: 2 });
-      expect(await qb('min')).toEqual({ min: 1 });
-    });
+    expect(types).toEqual(['select', 'count', 'update', 'delete', 'select']);
   });
 
-  it('does not call where for insert and truncate', async () => {
+  it('scopes a lone increment and decrement as an update', async () => {
+    const types: string[] = [];
+    db.unstable_scopes.register({
+      where({ uid, type }) {
+        types.push(type);
+        return uid === ARTICLE_UID ? { deleted_at: null } : null;
+      },
+    });
+
+    await db.entityManager.createQueryBuilder(ARTICLE_UID).increment('views', 2).execute();
+    await db.entityManager.createQueryBuilder(ARTICLE_UID).decrement('views').execute();
+
+    expect(types).toEqual(['update', 'update']);
+    expect(sqls).toEqual([
+      'update `articles` set `views` = `views` + ? where (`deleted_at` is null)',
+      'update `articles` set `views` = `views` - ? where (`deleted_at` is null)',
+    ]);
+    expect(await connection('articles').orderBy('id').pluck('views')).toEqual([1, 0]);
+  });
+
+  it('passes select for a join inside an update and a delete', async () => {
+    const calls: Array<{ uid: string; type: string }> = [];
+    db.unstable_scopes.register({
+      where({ uid, type }) {
+        calls.push({ uid, type });
+        return null;
+      },
+    });
+    const where = { category: { name: 'News' } };
+
+    await db.entityManager.updateMany(ARTICLE_UID, { where, data: { title: 'changed' } });
+    await db.entityManager.deleteMany(ARTICLE_UID, { where });
+
+    expect(calls).toEqual([
+      { uid: ARTICLE_UID, type: 'update' },
+      { uid: CATEGORY_UID, type: 'select' },
+      { uid: ARTICLE_UID, type: 'delete' },
+      { uid: CATEGORY_UID, type: 'select' },
+    ]);
+  });
+
+  it('does not call where for insert, truncate, max and min', async () => {
     const where = jest.fn(() => null);
-    db.scopes.register({ name: 'spy', where });
+    db.unstable_scopes.register({ where });
 
     await db.entityManager.createQueryBuilder(ARTICLE_UID).insert({ title: 'new' }).execute();
+    await db.entityManager.createQueryBuilder(ARTICLE_UID).max('id').first().execute();
+    await db.entityManager.createQueryBuilder(ARTICLE_UID).min('id').first().execute();
     // The QueryBuilder has no truncate(): only the initial state sets the type
     createQueryBuilder(ARTICLE_UID, db, { type: 'truncate' }).getKnexQuery();
 
@@ -306,200 +280,20 @@ describe('query scopes on the main table', () => {
   });
 
   it('rejects the query when where returns undefined', async () => {
-    db.scopes.register({
-      name: 'forgot-return',
+    db.unstable_scopes.register({
       // @ts-expect-error a scope that forgets to return
       where() {},
     });
 
-    await expect(db.entityManager.findMany(ARTICLE_UID, {})).rejects.toThrow('forgot-return');
+    await expect(db.entityManager.findMany(ARTICLE_UID, {})).rejects.toThrow('returned undefined');
     expect(sqls).toEqual([]);
   });
 
-  it.each([{}, [], { $and: [] }, { $or: [] }])(
-    'rejects the query when where returns %j, which matches every row',
-    async (shape) => {
-      // A JavaScript scope can return [], which the type does not allow
-      db.scopes.register({ name: 'matches-all', where: () => shape as Record<string, unknown> });
-
-      await expect(db.entityManager.findMany(ARTICLE_UID, {})).rejects.toThrow('matches-all');
-      expect(sqls).toEqual([]);
-    }
-  );
-
-  it('throws on a duplicate name', () => {
-    db.scopes.register(softDelete);
-
-    expect(() => db.scopes.register({ ...softDelete })).toThrow('soft-delete');
-  });
-
   it('removes the scope with the unregister function', async () => {
-    const unregister = db.scopes.register(softDelete);
+    const unregister = db.unstable_scopes.register(softDelete);
     unregister();
 
     expect(await db.entityManager.count(ARTICLE_UID, {})).toBe(2);
-  });
-
-  it('keeps a later registration when a stale unregister runs again', async () => {
-    const unregister = db.scopes.register(softDelete);
-    unregister();
-    db.scopes.register(softDelete);
-    unregister();
-
-    expect(await db.entityManager.count(ARTICLE_UID, {})).toBe(1);
-  });
-
-  describe('prepare', () => {
-    it('gets the transaction the query runs in', async () => {
-      let titlesSeen: string[] = [];
-      let trxSeen: unknown;
-      db.scopes.register({
-        name: 'reads-in-trx',
-        async prepare({ trx }) {
-          trxSeen = trx;
-          const query = db.connection('articles').select('title');
-          const rows = await (trx ? query.transacting(trx) : query);
-          titlesSeen = rows.map((row) => row.title);
-        },
-        where: () => null,
-      });
-
-      // execute() runs the query in the active transaction, over an explicit one
-      const explicit = await connection.transaction();
-      await explicit.commit();
-
-      // The body of db.transaction(), which the stub db does not have
-      const trx = await connection.transaction();
-      try {
-        await transactionCtx.run(trx, async () => {
-          await trx('articles').insert({ title: 'uncommitted' });
-          await db.entityManager
-            .createQueryBuilder(ARTICLE_UID)
-            .count()
-            .transacting(explicit)
-            .execute();
-        });
-      } finally {
-        await trx.rollback();
-      }
-
-      expect(trxSeen).toBe(trx);
-      expect(titlesSeen).toContain('uncommitted');
-    });
-
-    // where throws unless prepare settled first
-    const preparedScope = () => {
-      let ready = false;
-      return {
-        name: 'prepared',
-        async prepare() {
-          await new Promise((resolve) => {
-            setImmediate(resolve);
-          });
-          ready = true;
-        },
-        where() {
-          if (!ready) {
-            throw new Error('where ran before prepare');
-          }
-          return { deleted_at: null };
-        },
-      };
-    };
-
-    it('resolves before execute builds the SQL', async () => {
-      db.scopes.register(preparedScope());
-
-      expect(await db.entityManager.count(ARTICLE_UID, {})).toBe(1);
-    });
-
-    it('is not awaited by getKnexQuery() outside execute()', () => {
-      db.scopes.register(preparedScope());
-
-      // Nested subqueries build SQL this way, so where must throw rather than return null
-      expect(() =>
-        db.entityManager.createQueryBuilder(ARTICLE_UID).select('id').getKnexQuery()
-      ).toThrow('where ran before prepare');
-    });
-
-    it('gets the explicit transaction in a stream, which does not join the active one', async () => {
-      let trxSeen: unknown;
-      db.scopes.register({
-        name: 'spy',
-        async prepare({ trx }) {
-          trxSeen = trx;
-        },
-        where: () => null,
-      });
-
-      // SQLite has one connection: the active transaction is closed, the explicit one is open
-      const active = await connection.transaction();
-      await active.commit();
-      const explicit = await connection.transaction();
-      try {
-        await transactionCtx.run(active, () =>
-          db.entityManager
-            .createQueryBuilder(ARTICLE_UID)
-            .select('*')
-            .transacting(explicit)
-            .stream()
-            .toArray()
-        );
-      } finally {
-        await explicit.rollback();
-      }
-
-      expect(trxSeen).toBe(explicit);
-    });
-
-    it('resolves before the first read of a stream', async () => {
-      db.scopes.register(preparedScope());
-
-      const rows = await db.entityManager
-        .createQueryBuilder(ARTICLE_UID)
-        .select('*')
-        .stream()
-        .toArray();
-
-      expect(rows.map((row: { title: string }) => row.title)).toEqual(['visible']);
-    });
-
-    it('does not build or run the query when the stream is destroyed during prepare', async () => {
-      let release = () => {};
-      const where = jest.fn(() => null);
-      db.scopes.register({
-        name: 'slow',
-        prepare: () =>
-          new Promise<void>((resolve) => {
-            release = resolve;
-          }),
-        where,
-      });
-
-      const stream = db.entityManager.createQueryBuilder(ARTICLE_UID).select('*').stream();
-      // read() starts the first _read(), which waits on prepare
-      stream.read();
-      stream.destroy();
-      release();
-      await new Promise((resolve) => {
-        setImmediate(resolve);
-      });
-
-      expect(where).not.toHaveBeenCalled();
-      expect(sqls).toEqual([]);
-    });
-
-    it('destroys the stream with the error of a failed prepare', async () => {
-      db.scopes.register({
-        name: 'failing',
-        prepare: () => Promise.reject(new Error('prepare failed')),
-        where: () => null,
-      });
-
-      const stream = db.entityManager.createQueryBuilder(ARTICLE_UID).select('*').stream();
-
-      await expect(stream.toArray()).rejects.toThrow('prepare failed');
-    });
   });
 });
 
@@ -570,7 +364,6 @@ const MODEL_UIDS = joinModels.map((model) => model.uid);
 
 // Hides the soft-deleted rows of every model. Join tables have no deleted_at column
 const hideDeleted: QueryScope = {
-  name: 'hide-deleted',
   where: ({ uid }) => (MODEL_UIDS.includes(uid) ? { deleted_at: null } : null),
 };
 
@@ -640,7 +433,7 @@ describe('query scopes on joins', () => {
 
   describe('with the test scope registered', () => {
     beforeEach(() => {
-      db.scopes.register(hideDeleted);
+      db.unstable_scopes.register(hideDeleted);
     });
 
     it('scopes the join table of a relation filter on its inverse join column', async () => {
@@ -744,13 +537,29 @@ describe('query scopes on joins', () => {
     });
   });
 
+  it('matches a write filter through a row that select sees but update hides', async () => {
+    db.unstable_scopes.register({
+      where: ({ uid, type }) =>
+        uid === CATEGORY_UID && type === 'update' ? { deleted_at: null } : null,
+    });
+
+    await db.entityManager.updateMany(ARTICLE_UID, {
+      where: { category: { name: 'Old' } },
+      data: { title: 'changed' },
+    });
+
+    expect(await connection('articles').orderBy('id').pluck('title')).toEqual([
+      'A1',
+      'changed',
+      'A3',
+    ]);
+  });
+
   it('does not recurse when a scope where names a relation', async () => {
-    db.scopes.register({
-      name: 'with-category',
+    db.unstable_scopes.register({
       where: ({ uid }) => (uid === ARTICLE_UID ? { category: { id: { $notNull: true } } } : null),
     });
-    db.scopes.register({
-      name: 'categories-of-a3',
+    db.unstable_scopes.register({
       where: ({ uid }) => (uid === CATEGORY_UID ? { articles: { title: 'A3' } } : null),
     });
 
@@ -763,8 +572,7 @@ describe('query scopes on joins', () => {
   });
 
   it('binds the correlation to the outer column when a scope where names a relation', async () => {
-    db.scopes.register({
-      name: 'news-articles',
+    db.unstable_scopes.register({
       where: ({ uid }) => (uid === ARTICLE_UID ? { category: { name: 'News' } } : null),
     });
 

@@ -59,12 +59,7 @@ export type {
   MigrationFileOperation,
 } from './migrations';
 export type { Event } from './lifecycles';
-export type {
-  QueryScope,
-  QueryScopeContext,
-  QueryScopePrepareContext,
-  ScopeRegistry,
-} from './query/scopes';
+export type { QueryScope, QueryScopeContext, ScopeRegistry } from './query/scopes';
 export type { Attribute, Model, JoinTable } from './types';
 export type { AttributeRenameHandler, AttributeRenames } from './schema';
 export type { Identifiers } from './utils/identifiers';
@@ -158,7 +153,7 @@ class Database {
 
   lifecycles: LifecycleProvider;
 
-  scopes: ScopeRegistry;
+  unstable_scopes: ScopeRegistry;
 
   entityManager: EntityManager;
 
@@ -233,7 +228,7 @@ class Database {
 
     this.migrations = createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
-    this.scopes = createScopeRegistry();
+    this.unstable_scopes = createScopeRegistry();
 
     this.entityManager = createEntityManager(this);
 

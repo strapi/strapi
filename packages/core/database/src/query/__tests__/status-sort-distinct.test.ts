@@ -52,7 +52,7 @@ const buildDb = ({ uid = UID, tableName = 'articles', i18n = false }: BuildDbOpt
     getConnection(tableNameArg?: string) {
       return tableNameArg ? connection(tableNameArg) : connection;
     },
-    scopes: createScopeRegistry(),
+    unstable_scopes: createScopeRegistry(),
     metadata: {
       get(metaUid: string) {
         if (metaUid === uid) {

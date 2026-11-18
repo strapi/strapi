@@ -9,6 +9,7 @@ import { applyQueryTimeout, isKnexQuery } from '../utils/knex';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
+import type { QueryScopeContext } from './scopes';
 
 interface State {
   type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'min' | 'truncate';
@@ -130,7 +131,8 @@ export interface QueryBuilder {
   stream(options?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
 
-const UNSCOPED_TYPES: State['type'][] = ['insert', 'truncate'];
+const isScopedType = (type: State['type']): type is QueryScopeContext['type'] =>
+  ['select', 'count', 'update', 'delete'].includes(type);
 
 const createQueryBuilder = (
   uid: string,
@@ -169,15 +171,17 @@ const createQueryBuilder = (
     scoped: true,
   });
 
-  // Joins reference the root alias, which max and min do not use without joins
-  const isAggregateWithJoins = () => ['max', 'min'].includes(state.type) && state.joins.length > 0;
-
-  const isScoped = () => state.scoped && !db.scopes.isEmpty();
+  const isScoped = () => state.scoped && !db.unstable_scopes.isEmpty();
 
   // `EXISTS (SELECT 1 FROM <target> AS tN WHERE tN.id = <alias>.<idColumn> AND <scopes>)`, or
   // undefined without a scope. Not IN: SQLite probes the link index once per row and per visible id
   const scopeJoin = (alias: string, targetUid: string, idColumn = 'id') => {
-    const wheres = db.scopes.where({ uid: targetUid, meta: db.metadata.get(targetUid) });
+    // A join reads its target, also inside an update or delete
+    const wheres = db.unstable_scopes.where({
+      uid: targetUid,
+      meta: db.metadata.get(targetUid),
+      type: 'select',
+    });
 
     if (wheres.length === 0) {
       return undefined;
@@ -441,7 +445,7 @@ const createQueryBuilder = (
     },
 
     mustUseAlias() {
-      return ['select', 'count'].includes(state.type) || isAggregateWithJoins();
+      return ['select', 'count'].includes(state.type);
     },
 
     aliasColumn(key: string | unknown, alias: string): string | unknown {
@@ -475,30 +479,16 @@ const createQueryBuilder = (
       // against it. The clone inherits processed: true and must only read shared arrays.
       const sub = this.clone();
       sub.alias = this.alias;
-      // The clone shares these arrays: on the inner SELECT they would make it an UPDATE
-      sub.state.increments = [];
-      sub.state.decrements = [];
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
+      const qb = db.getConnection(tableName);
 
-      if (state.transaction) {
-        qb.transacting(state.transaction);
+      if (originalType === 'update') {
+        return qb.update(state.data).whereIn('id', nestedSubQuery);
       }
 
-      if (originalType === 'delete') {
-        return qb.delete();
-      }
-
-      if (state.data) {
-        qb.update(state.data);
-      }
-
-      state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
-      state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
-
-      return qb;
+      return qb.delete().whereIn('id', nestedSubQuery);
     },
 
     processState() {
@@ -520,23 +510,26 @@ const createQueryBuilder = (
         }
       }
 
+      const scopeType = isScoped() && isScopedType(state.type) ? state.type : null;
+
       // Copy instead of push: clones share the state.where array, so a push would scope them twice
-      if (isScoped() && !UNSCOPED_TYPES.includes(state.type)) {
-        state.where = [...state.where, ...db.scopes.where({ uid, meta })];
+      if (scopeType) {
+        state.where = [...state.where, ...db.unstable_scopes.where({ uid, meta, type: scopeType })];
       }
 
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
 
       // After processWhere, so the joins that filters and scope wheres add are scoped too
-      if (isScoped()) {
+      if (scopeType) {
         state.joins = state.joins.map((join) =>
           join.uid ? { ...join, scope: scopeJoin(join.alias, join.uid, join.idColumn) } : join
         );
       }
 
-      // Update, delete, max and min leave root columns bare: qualify them so joins on tables
-      // with the same column names (id, locale) do not make them ambiguous
-      if (this.shouldUseSubQuery() || isAggregateWithJoins()) {
+      // processWhere emits bare root columns while type is still update/delete
+      // (mustUseAlias is false). Qualify them now that joins from the relation
+      // predicate are known, so overlapping names (published_at, locale, id) are not ambiguous.
+      if (this.shouldUseSubQuery()) {
         state.where = helpers.qualifyRootColumns(state.where, this.alias);
       }
 
@@ -660,13 +653,13 @@ const createQueryBuilder = (
         this.select('*');
       }
 
-      // The state should always be processed before calling shouldUseSubQuery and
-      // mustUseAlias as they rely on the presence or absence of joins
-      this.processState();
-
       const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
 
       const qb = db.getConnection(aliasedTableName);
+
+      // The state should always be processed before calling shouldUseSubQuery as it
+      // relies on the presence or absence of joins to determine the need of a subquery
+      this.processState();
 
       if (this.shouldUseSubQuery()) {
         return this.runSubQuery();
@@ -811,8 +804,6 @@ const createQueryBuilder = (
 
     async execute({ mapResults = true } = {}) {
       try {
-        await db.scopes.prepare({ trx: transactionCtx.get() ?? state.transaction ?? null });
-
         const qb = applyQueryTimeout(this.getKnexQuery(), db);
 
         const transaction = transactionCtx.get();

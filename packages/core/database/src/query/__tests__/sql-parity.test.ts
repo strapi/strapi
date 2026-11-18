@@ -85,7 +85,7 @@ const setup = async (connection: Knex) => {
   const db = {
     connection,
     metadata,
-    scopes: createScopeRegistry(),
+    unstable_scopes: createScopeRegistry(),
     getConnection: (table?: string) => (table ? connection(table) : connection),
     dialect: {
       client: 'sqlite',

@@ -41,7 +41,6 @@ const articleModel = {
 
 // `deleted_at` is not an attribute key, so the scope filters the raw column with no join
 const softDelete = {
-  name: 'test-soft-delete',
   where: ({ uid }: { uid: string }) =>
     uid === AUTHOR_UID || uid === ARTICLE_UID ? { deleted_at: null } : null,
 };
@@ -96,7 +95,7 @@ describe('Query scopes', () => {
     expect(linked?.author?.name).toBe('C');
 
     // Seed first: the scope also hides the rows that a create reads back
-    unregister = strapi.db.scopes.register(softDelete);
+    unregister = strapi.db.unstable_scopes.register(softDelete);
   });
 
   afterAll(async () => {
@@ -227,6 +226,30 @@ describe('Query scopes', () => {
 
       expect(count).toBe(0);
       expect((await rawArticle('visible-c')).views).toBe(1);
+    });
+
+    // The join reads the author with type select, so a scope on update does not hide D there
+    test('a relation filter in a write matches a row that only update hides', async () => {
+      const unregisterD = strapi.db.unstable_scopes.register({
+        where: ({ uid, type }) =>
+          uid === AUTHOR_UID && type === 'update' ? { name: { $ne: 'D' } } : null,
+      });
+
+      try {
+        // Positive control: the scope hides D from an update of the author table
+        const authors = await strapi.db
+          .query(AUTHOR_UID)
+          .updateMany({ where: { name: 'D' }, data: { name: 'D' } });
+        const articles = await strapi.db
+          .query(ARTICLE_UID)
+          .updateMany({ where: { author: { name: 'D' } }, data: { views: 4 } });
+
+        expect(authors.count).toBe(0);
+        expect(articles.count).toBe(1);
+        expect((await rawArticle('visible-d')).views).toBe(4);
+      } finally {
+        unregisterD();
+      }
     });
 
     // B links to visible-b and hidden: scoping only the target join would see a NULL article
