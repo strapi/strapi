@@ -26,6 +26,9 @@ export interface Options {
   nonInteractive?: boolean;
   templateBranch?: string;
   templatePath?: string;
+  adminEmail?: string;
+  /** `--no-admin-token` sets it to false */
+  adminToken?: boolean;
 }
 
 export type DBClient = 'mysql' | 'postgres' | 'sqlite';

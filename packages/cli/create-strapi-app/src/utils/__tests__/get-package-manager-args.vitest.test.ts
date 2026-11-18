@@ -17,7 +17,7 @@ describe('getInstallArgs', () => {
 
     const { cmdArgs } = await getInstallArgs('npm');
 
-    expect(cmdArgs).toEqual(['install']);
+    expect(cmdArgs).toEqual(['install', '--no-audit', '--no-fund']);
     expect(cmdArgs).not.toContain('--legacy-peer-deps');
   });
 

@@ -102,10 +102,13 @@ export async function trackUsage({
   event,
   scope,
   error,
+  eventProperties,
 }: {
   event: string;
   scope: Scope;
   error?: TrackError;
+  /** Extra event properties. Never pass personal data or credentials. */
+  eventProperties?: Record<string, string | boolean>;
 }) {
   const properties = getProperties(scope, error);
 
@@ -113,6 +116,7 @@ export async function trackUsage({
     return await trackEvent(event, {
       deviceId: scope.installId,
       ...properties,
+      eventProperties: { ...properties.eventProperties, ...eventProperties },
     });
   } catch {
     /** ignore errors */
