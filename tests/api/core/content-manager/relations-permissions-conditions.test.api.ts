@@ -163,4 +163,18 @@ describe('Admin Permissions - relations of an entry under a conditioned read per
     expect(res.body.results).toHaveLength(5);
     expectMainFieldOnReadableTagsOnly(res.body.results);
   });
+
+  test('a page past the last one returns no relations and the pagination of the relations', async () => {
+    const res = await restrictedRq({
+      method: 'GET',
+      url: `/content-manager/relations/${shopUid}/${shopDocumentId}/tags`,
+      qs: { page: 5, pageSize: 5 },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      pagination: { page: 5, pageSize: 5, pageCount: 3, total: TOTAL_TAGS_COUNT },
+      results: [],
+    });
+  });
 });
