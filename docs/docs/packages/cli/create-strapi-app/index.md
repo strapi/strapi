@@ -31,7 +31,7 @@ If you use both flags, the CLI stops with an error. When rule 3 or 4 matches, th
 
 The default TypeScript dependencies apply to built-in templates. When you pass `--template`, the CLI keeps the template's TypeScript dependency versions.
 
-`detectInvocation()` reads the same CI and terminal facts, so the telemetry value and the prompt mode agree.
+`detectInvocation()` and `resolvePromptMode()` read the same CI and terminal facts from `readEnvironment()`. The two results can still differ. For example, an agent that has a terminal gets `agent` and the prompts, and `--interactive` in CI gives `ci` and the prompts.
 
 ## Telemetry
 

@@ -164,16 +164,20 @@ describe('isTelemetryDisabled', () => {
 });
 
 describe('resolvePromptMode', () => {
+  const originalEnv = process.env;
   const originalStdinTty = process.stdin.isTTY;
   const originalStdoutTty = process.stdout.isTTY;
 
   beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.STRAPI_AGENT;
     mockedCiInfo.isCI = false;
     setTty(process.stdin, true);
     setTty(process.stdout, true);
   });
 
   afterEach(() => {
+    process.env = originalEnv;
     setTty(process.stdin, originalStdinTty);
     setTty(process.stdout, originalStdoutTty);
   });

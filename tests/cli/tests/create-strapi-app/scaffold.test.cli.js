@@ -309,11 +309,14 @@ describe('create-strapi-app', () => {
           JSON.stringify({ devDependencies })
         );
 
-        await spawnCsa([projectDir, '--template', templateDir, '--no-install', '--no-git-init'], {
-          CI: ci,
-        })
+        const { stdout } = await spawnCsa(
+          [projectDir, '--template', templateDir, '--no-install', '--no-git-init'],
+          { CI: ci }
+        )
           .expect('code', 0)
           .end();
+
+        expect(stdout).toMatch(ci === 'true' ? /A CI environment was detected/ : /not a terminal/i);
 
         const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
         expect(pkg.devDependencies).toEqual(devDependencies);
@@ -322,6 +325,34 @@ describe('create-strapi-app', () => {
       }
     }
   );
+
+  // --interactive keeps the prompts without a terminal, so the answers come from stdin.
+  it('shows the prompts with --interactive when there is no terminal', async () => {
+    const projectDir = path.join(mkProjectDir(), 'app');
+    try {
+      const { stdout } = await spawnCsa(
+        [
+          '--interactive',
+          '--skip-cloud',
+          '--no-install',
+          '--no-git-init',
+          '--typescript',
+          '--no-example',
+          '--skip-db',
+        ],
+        { CI: 'true' }
+      )
+        .write(`${projectDir}\n`)
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toContain('What is the name of your project?');
+      expect(stdout).not.toMatch(/not a terminal|CI environment was detected/i);
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(path.dirname(projectDir), { recursive: true, force: true });
+    }
+  });
 
   it('fails without a directory when there is no terminal', async () => {
     const { stderr, stdout } = await spawnCsa(['--skip-cloud'], { CI: 'false' })
