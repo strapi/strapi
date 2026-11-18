@@ -103,6 +103,19 @@ const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
   pointer-events: auto;
 `;
 
+/**
+ * The header is always visible, so anything injected into it (e.g. `editView.right-links`)
+ * must not be able to grow past the viewport. Cap it and let it scroll on its own.
+ * Header (<= 20rem + padding) + open content (100vh - 25rem) always fits in 100vh.
+ */
+const DrawerHeaderBody = styled(Flex)`
+  max-height: min(40vh, 20rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* "safe" keeps the top of overflowing content reachable (plain "center" clips it). */
+  align-items: safe center;
+`;
+
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -197,9 +210,9 @@ const Header = ({ children }: HeaderProps) => {
         borderWidth={isOpen ? '1px 0' : '1px 0 0 0'}
         borderColor="neutral150"
       >
-        <Flex flex={1} gap={2} alignItems="center" overflow="hidden">
+        <DrawerHeaderBody flex={1} gap={2} data-testid="actions-drawer-header-body">
           {children}
-        </Flex>
+        </DrawerHeaderBody>
         {hasContent && (
           <ToggleButton
             onClick={toggleOpen}
