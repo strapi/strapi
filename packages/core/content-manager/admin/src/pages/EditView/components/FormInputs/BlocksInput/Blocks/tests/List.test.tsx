@@ -6,6 +6,7 @@ import { Editor, Transforms, createEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 
 import { withStrapiSchema } from '../../plugins/withStrapiSchema';
+import { linkBlocks } from '../Link';
 import { listBlocks } from '../List';
 
 import { Wrapper } from './Wrapper';
@@ -1494,6 +1495,82 @@ describe('List', () => {
           },
         ],
       },
+    ]);
+  });
+
+  it('keeps a list item that starts with a link when pressing enter at its end', () => {
+    const baseEditor = linkBlocks.link.plugin!(withStrapiSchema(createEditor()));
+    const listItemWithLink = {
+      type: 'list-item' as const,
+      children: [
+        { type: 'text' as const, text: '' },
+        {
+          type: 'link' as const,
+          url: 'https://strapi.io',
+          rel: '',
+          target: '',
+          children: [{ type: 'text' as const, text: 'Strapi' }],
+        },
+        { type: 'text' as const, text: '' },
+      ],
+    };
+    baseEditor.children = [
+      { type: 'paragraph', children: [{ type: 'text', text: 'Before' }] },
+      { type: 'list', format: 'unordered', children: [listItemWithLink] },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [1, 0, 1, 0], offset: 6 },
+      focus: { path: [1, 0, 1, 0], offset: 6 },
+    });
+
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'Before' }] },
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [listItemWithLink, { type: 'list-item', children: [{ type: 'text', text: '' }] }],
+      },
+    ]);
+  });
+
+  it('converts a list item that starts with a link to a paragraph on backspace', () => {
+    const baseEditor = linkBlocks.link.plugin!(withStrapiSchema(createEditor()));
+    const childrenWithLink = [
+      { type: 'text' as const, text: '' },
+      {
+        type: 'link' as const,
+        url: 'https://strapi.io',
+        rel: '',
+        target: '',
+        children: [{ type: 'text' as const, text: 'Strapi' }],
+      },
+      { type: 'text' as const, text: '' },
+    ];
+    baseEditor.children = [
+      { type: 'paragraph', children: [{ type: 'text', text: 'Before' }] },
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [{ type: 'list-item', children: childrenWithLink }],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [1, 0, 0], offset: 0 },
+      focus: { path: [1, 0, 0], offset: 0 },
+    });
+
+    listBlocks['list-unordered'].handleBackspaceKey!(
+      baseEditor,
+      mockEvent as unknown as React.KeyboardEvent<HTMLElement>
+    );
+
+    expect(baseEditor.children).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'Before' }] },
+      { type: 'paragraph', children: childrenWithLink },
     ]);
   });
 });
