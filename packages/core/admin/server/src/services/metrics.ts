@@ -1,22 +1,34 @@
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
+// Callers do not wait for this, so it must never reject: a count that fails, for example because
+// the database is closing, would otherwise be an unhandled rejection
 const sendDidInviteUser = async () => {
-  const numberOfUsers = await getService('user').count();
-  const numberOfRoles = await getService('role').count();
-  strapi.telemetry.send('didInviteUser', {
-    groupProperties: { numberOfRoles, numberOfUsers },
-  });
+  try {
+    const numberOfUsers = await getService('user').count();
+    const numberOfRoles = await getService('role').count();
+    strapi.telemetry.send('didInviteUser', {
+      groupProperties: { numberOfRoles, numberOfUsers },
+    });
+  } catch {
+    // Telemetry is best effort
+  }
 };
 
 const sendDidUpdateRolePermissions = async () => {
   strapi.telemetry.send('didUpdateRolePermissions');
 };
 
+// Runs from the admin user lifecycle hooks, and after an update without being waited for: it must
+// never reject either, or it would fail the user change or leave an unhandled rejection
 const sendDidChangeInterfaceLanguage = async () => {
-  const languagesInUse = await getService('user').getLanguagesInUse();
-  // This event is anonymous
-  strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
+  try {
+    const languagesInUse = await getService('user').getLanguagesInUse();
+    // This event is anonymous
+    strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
+  } catch {
+    // Telemetry is best effort
+  }
 };
 
 const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
