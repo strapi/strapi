@@ -67,6 +67,11 @@ export const areEnumValuesUnique: CommonTestConfig = {
   name: 'areEnumValuesUnique',
   message: '${path} cannot contain duplicate values',
   test(values) {
+    // A missing value is reported by `required`
+    if (Array.isArray(values) === false) {
+      return true;
+    }
+
     const filtered = [...new Set(values as string[])];
 
     return filtered.length === (values as string[]).length;

@@ -9,13 +9,33 @@ import {
   createBeforeEvaluateContext,
   createValidateContext,
 } from './hooks';
-import type { PermissionEngineHooks, HookName } from './hooks';
+import type {
+  PermissionEngineHooks,
+  HookName,
+  TypedPermissionEngineHooks,
+  TypedPermission,
+  BeforeEvaluateContext,
+  ValidateContext,
+  WillRegisterCondition,
+  WillRegisterContext,
+} from './hooks';
 
 import * as abilities from './abilities';
 import { Permission } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
 export { abilities };
+// `PermissionEngineHooks` stays unexported here: a re-export changes how downstream declarations
+// print the engine's `hooks` (`engine.PermissionEngineHooks` instead of the path to `engine/hooks`)
+export type {
+  HookName,
+  TypedPermissionEngineHooks,
+  TypedPermission,
+  BeforeEvaluateContext,
+  ValidateContext,
+  WillRegisterCondition,
+  WillRegisterContext,
+};
 
 type Provider = Omit<ReturnType<typeof providerFactory>, 'register'> & {
   register(...args: unknown[]): Promise<Provider> | Provider;
@@ -33,6 +53,19 @@ export interface Engine {
     options: Record<string, unknown>
   ): (permission: PermissionRule) => Promise<unknown>;
 }
+
+/**
+ * The engine with typed hooks and handlers. {@link Engine}, what `new` returns, keeps untyped
+ * handlers; a typed contract can declare this type instead.
+ */
+export type TypedEngine = Omit<Engine, 'hooks' | 'on' | 'generateAbility'> & {
+  hooks: TypedPermissionEngineHooks;
+  generateAbility(permissions: TypedPermission[], options?: object): Promise<Ability>;
+  on<THook extends HookName>(
+    hook: THook,
+    handler: Parameters<TypedPermissionEngineHooks[THook]['register']>[0]
+  ): TypedEngine;
+};
 
 export interface EngineParams {
   providers: { action: ActionProvider; condition: ConditionProvider };
