@@ -9,12 +9,8 @@ export type QueryScopeContext = {
 };
 
 /**
- * Unstable: the contract can change in a minor release
- *
- * - `where` runs for every uid the builder queries, join-table names included (relation link
- *   reads and deletes). Return null for a uid the scope does not own
- * - A query builder is single use: do not change or run it again after `execute()` or
- *   `stream()`, because it evaluates the scope conditions only once
+ * Unstable: narrows queries with a where condition per model. Rules:
+ * docs/docs/packages/core/database/05-query-scopes.md
  */
 export interface QueryScope {
   /** Sync, must not query the database. Return null to leave the query unscoped */

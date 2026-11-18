@@ -52,6 +52,10 @@ Two providers run migrations: the user provider for files in `database/migration
 
 `db.lifecycles` runs subscribers around each query with an `Event` (`action`, `model`, `params`, `state`, `result`). Two subscribers exist by default: one sets timestamps, and one calls the `lifecycles` functions of a model. Read [Lifecycles](./04-lifecycles.md).
 
+### Query scopes
+
+`db.unstable_scopes` holds query scopes. The API is unstable. A scope returns a `where` condition per model, and the query builder ANDs it into most queries and joins to model tables. Read [Query scopes](./05-query-scopes.md).
+
 ### Repairs
 
 `db.repair` holds two data repair operations, `removeOrphanMorphType` and `processUnidirectionalJoinTables`. `@strapi/core` runs them during `bootstrap()` after a schema sync. Code: [`src/repairs`](https://github.com/strapi/strapi/tree/develop/packages/core/database/src/repairs).
