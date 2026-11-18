@@ -2,10 +2,59 @@ import { useEffect, useRef } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
+import { getAdminUserId, useAuth } from '../../../../admin/src/features/Auth';
 import { useNotification } from '../../../../admin/src/features/Notifications';
 import { useGetAiUsageQuery } from '../services/ai';
 
 import { useAIAvailability } from './useAIAvailability';
+
+const STORAGE_KEY_PREFIX = 'strapi-ai-usage-warning';
+
+const getAIUsageWarningStorageKey = (userId: string | number) => `${STORAGE_KEY_PREFIX}:${userId}`;
+
+const getLocalStorage = (): Storage | null => {
+  try {
+    return typeof window !== 'undefined' ? window.localStorage : null;
+  } catch {
+    return null;
+  }
+};
+
+const readWarningLevels = (key: string): Set<number> => {
+  try {
+    const storage = getLocalStorage();
+    if (!storage) return new Set<number>();
+
+    const raw = storage.getItem(key);
+    if (!raw) return new Set<number>();
+
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const validNumbers = parsed.filter(
+        (item): item is number => typeof item === 'number' && !Number.isNaN(item)
+      );
+      return new Set<number>(validNumbers);
+    }
+    return new Set<number>();
+  } catch {
+    return new Set<number>();
+  }
+};
+
+const persistWarningLevels = (key: string, levels: Set<number>): void => {
+  try {
+    const storage = getLocalStorage();
+    if (!storage) return;
+
+    if (levels.size === 0) {
+      storage.removeItem(key);
+    } else {
+      storage.setItem(key, JSON.stringify(Array.from(levels)));
+    }
+  } catch {
+    // Gracefully ignore storage failures
+  }
+};
 
 /**
  * Triggers a warning notification if AI usage is above a threshold (default 80%).
@@ -16,13 +65,35 @@ export function useAIUsageWarning(threshold: number = 0.8) {
   const isAuthPage = location.pathname.startsWith('/auth');
   const { toggleNotification } = useNotification();
   const isAIEnabled = useAIAvailability();
+  const user = useAuth('useAIUsageWarning', (state) => state.user, false);
+  const isAuthLoading = useAuth('useAIUsageWarning', (state) => state.isLoading, false) ?? false;
+  const userId = getAdminUserId(user);
+
   const { data, isLoading, error } = useGetAiUsageQuery(undefined, {
     refetchOnMountOrArgChange: true,
     skip: !isAIEnabled || isAuthPage,
   });
-  const warningLevelsRef = useRef(new Set<number>());
+
+  const previousUserIdRef = useRef<string | number | undefined>(undefined);
+  const warningLevelsRef = useRef<Set<number>>(new Set<number>());
+
+  const hasResolvedUser =
+    !isAuthLoading && userId !== undefined && userId !== null && userId !== '';
 
   useEffect(() => {
+    if (!hasResolvedUser || userId == null || userId === '') {
+      previousUserIdRef.current = undefined;
+      warningLevelsRef.current = new Set<number>();
+      return;
+    }
+
+    const storageKey = getAIUsageWarningStorageKey(userId);
+
+    if (previousUserIdRef.current !== userId) {
+      previousUserIdRef.current = userId;
+      warningLevelsRef.current = readWarningLevels(storageKey);
+    }
+
     if (isAuthPage || isLoading || error || !data?.subscription?.cmsAiEnabled || !isAIEnabled)
       return;
 
@@ -56,6 +127,7 @@ export function useAIUsageWarning(threshold: number = 0.8) {
         });
       }
       warningLevelsRef.current.add(100);
+      persistWarningLevels(storageKey, warningLevelsRef.current);
     } else if (percentUsed >= 0.9 && percentUsed < 1 && !warningLevelsRef.current.has(90)) {
       // 90% warning notification
       toggleNotification({
@@ -64,6 +136,7 @@ export function useAIUsageWarning(threshold: number = 0.8) {
         timeout: 5000,
       });
       warningLevelsRef.current.add(90);
+      persistWarningLevels(storageKey, warningLevelsRef.current);
     } else if (
       percentUsed >= threshold &&
       percentUsed < 0.9 &&
@@ -76,11 +149,25 @@ export function useAIUsageWarning(threshold: number = 0.8) {
         timeout: 5000,
       });
       warningLevelsRef.current.add(Math.round(threshold * 100));
+      persistWarningLevels(storageKey, warningLevelsRef.current);
     }
 
     // Reset warnings if usage drops significantly (e.g., below 70%)
     if (percentUsed < 0.7) {
       warningLevelsRef.current.clear();
+      persistWarningLevels(storageKey, warningLevelsRef.current);
     }
-  }, [data, isLoading, error, threshold, toggleNotification, isAIEnabled, isAuthPage]);
+  }, [
+    data,
+    hasResolvedUser,
+    isLoading,
+    error,
+    threshold,
+    toggleNotification,
+    isAIEnabled,
+    isAuthPage,
+    userId,
+  ]);
 }
+
+export { STORAGE_KEY_PREFIX, getAIUsageWarningStorageKey };
