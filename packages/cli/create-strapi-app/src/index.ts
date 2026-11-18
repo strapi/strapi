@@ -246,12 +246,13 @@ async function run(args: string[]): Promise<void> {
     scope.useExample = await prompts.example();
   }
 
-  if (options.javascript === true) {
-    scope.useTypescript = false;
-  } else if (options.typescript === true || skipPrompts) {
-    scope.useTypescript = true;
-  } else if (!options.template) {
-    scope.useTypescript = await prompts.typescript();
+  if (!options.template) {
+    scope.useTypescript = await resolveOption(
+      options.javascript === true ? false : options.typescript,
+      skipPrompts,
+      true,
+      prompts.typescript
+    );
   }
 
   scope.installDependencies = await resolveOption(options.install, skipPrompts, true, () =>

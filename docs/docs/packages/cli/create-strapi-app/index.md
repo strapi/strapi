@@ -29,6 +29,8 @@ Provides the official CLI for Strapi app developers to create new Strapi project
 
 If you use both flags, the CLI stops with an error. When rule 3 or 4 matches, the CLI logs the reason and runs as if you used `--non-interactive`. It uses your flags and the default values for the other options, and it skips the Strapi Cloud login. In this mode, you must give the project directory as an argument.
 
+The default TypeScript dependencies apply to built-in templates. When you pass `--template`, the CLI keeps the template's TypeScript dependency versions.
+
 `detectInvocation()` reads the same CI and terminal facts, so the telemetry value and the prompt mode agree.
 
 ## Telemetry
