@@ -19,21 +19,34 @@ export type Params = {
   count?: boolean;
 };
 
+export type PaginatedResult = {
+  results: any[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    pageCount: number;
+    total: number;
+  };
+};
+
+/**
+ * Populate fragment for the loaded relation, plus the page to load. Required, since the
+ * page defaults are read from it.
+ */
+export type LoadPagesParams = Pick<
+  Params,
+  'select' | 'where' | 'filters' | 'populate' | 'orderBy' | 'page' | 'pageSize'
+> & {
+  ordering?: 'asc' | 'desc';
+};
+
 export type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
 
 export interface Repository {
   findOne(params?: FindOneParams): Promise<any>;
   findMany(params?: Params): Promise<any[]>;
   findWithCount(params?: Params): Promise<[any[], number]>;
-  findPage(params: Params): Promise<{
-    results: any[];
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    };
-  }>;
+  findPage(params: Params): Promise<PaginatedResult>;
   create(params: Params): Promise<any>;
   createMany(params: Params): Promise<CountResult & { ids: ID[] }>;
   update(params: Params): Promise<any>;
@@ -46,11 +59,11 @@ export interface Repository {
   deleteRelations(id: ID): Promise<any>;
   populate(entity: Entity, populate: Params['populate']): Promise<any>;
   load(entity: any, field: string | string[], populate?: Params['populate']): Promise<any>;
-  loadPages<TField extends string>(
+  loadPages<TField extends string = string>(
     entity: any,
-    field: TField | TField[],
-    populate?: Params['populate']
-  ): Promise<any>;
+    field: TField,
+    params: LoadPagesParams
+  ): Promise<PaginatedResult>;
 }
 
 export type Entity = {

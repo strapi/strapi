@@ -44,13 +44,12 @@ const buildContext = (overrides: Record<string, unknown> = {}): BuildContext =>
     bundler: 'vite' as const,
     options: { minify: true, sourcemap: false },
     plugins: [],
-    nextDesignSystem: false,
     scanRoots: [],
     tsconfig: undefined,
     customisations: undefined,
     features: undefined,
     ...overrides,
-  }) as unknown as BuildContext;
+  } as unknown as BuildContext);
 
 /** `react()` contributes an array, so the plugin list is one level deeper than it looks */
 const pluginNames = (config: { plugins?: unknown }): string[] =>
@@ -65,11 +64,10 @@ describe('Vite admin configuration', () => {
     const config = await resolveProductionConfig(ctx);
 
     expect(config.publicDir).toBe(false);
-    expect(config.build?.rollupOptions?.input).toEqual({ strapi: ctx.entry });
   });
 
-  it('builds from the html entry when the next design system is on', async () => {
-    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: true }));
+  it('builds from the html entry', async () => {
+    const config = await resolveProductionConfig(buildContext());
 
     expect(config.build?.rollupOptions?.input).toEqual({
       strapi: expect.stringMatching(/index\.html$/),
@@ -185,15 +183,9 @@ describe('Vite admin configuration', () => {
     });
   });
 
-  it('adds the Tailwind plugin when the next design system is on', async () => {
-    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: true }));
+  it('adds the Tailwind plugin', async () => {
+    const config = await resolveProductionConfig(buildContext());
 
     expect(pluginNames(config)).toContain('tailwindcss');
-  });
-
-  it('adds no Tailwind plugin when the next design system is off', async () => {
-    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: false }));
-
-    expect(pluginNames(config)).not.toContain('tailwindcss');
   });
 });

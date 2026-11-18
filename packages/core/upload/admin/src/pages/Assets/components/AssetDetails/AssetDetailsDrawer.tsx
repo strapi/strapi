@@ -69,7 +69,7 @@ import { useFolderInfo } from '../../hooks/useFolderInfo';
 import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
 
-import { AssetCropEditor } from './AssetCropEditor';
+import { AssetCropEditor, CROP_EDITOR_SELECTOR } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
 
 import type {
@@ -800,8 +800,8 @@ export const AssetDetails = ({
       alternativeText: asset.alternativeText ?? '',
       folder:
         typeof asset.folder === 'object' && asset.folder !== null
-          ? ((asset.folder as { id: number }).id ?? null)
-          : ((asset.folder as number | null | undefined) ?? null),
+          ? (asset.folder as { id: number }).id ?? null
+          : (asset.folder as number | null | undefined) ?? null,
     }),
     [asset.name, asset.caption, asset.alternativeText, asset.folder]
   );
@@ -857,8 +857,8 @@ export const AssetDetails = ({
 
   const { title: folderName } = useFolderInfo(
     typeof asset.folder === 'object' && asset.folder !== null
-      ? ((asset.folder as { id: number }).id ?? null)
-      : ((asset.folder as number | null | undefined) ?? null)
+      ? (asset.folder as { id: number }).id ?? null
+      : (asset.folder as number | null | undefined) ?? null
   );
 
   // Owns the replace upload so isReplacing can drive the busy overlay.
@@ -1135,12 +1135,12 @@ export const AssetDetails = ({
                           })}
                           value={
                             asset.createdBy
-                              ? (getDisplayName({
+                              ? getDisplayName({
                                   firstname: asset.createdBy.firstname ?? undefined,
                                   lastname: asset.createdBy.lastname ?? undefined,
                                   username: asset.createdBy.username ?? undefined,
                                   email: asset.createdBy.email ?? undefined,
-                                }) ?? '-')
+                                }) ?? '-'
                               : null
                           }
                         />
@@ -1541,6 +1541,12 @@ export const AssetDetailsDrawer = ({
         // like the header's close button, so unsaved edits are still guarded.
         onPointerDownOutside={(event) => {
           if (shouldKeepDrawerOpen(event, isVisible)) {
+            event.preventDefault();
+          }
+        }}
+        // The crop editor takes Escape for itself: it closes the editor, not the drawer
+        onEscapeKeyDown={(event) => {
+          if (event.target instanceof Element && event.target.closest(CROP_EDITOR_SELECTOR)) {
             event.preventDefault();
           }
         }}

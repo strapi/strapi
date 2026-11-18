@@ -64,6 +64,11 @@ export default {
 
     const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
 
+    // null when the account was deleted after this request was authenticated
+    if (updatedUser === null) {
+      return ctx.notFound('User does not exist');
+    }
+
     ctx.body = {
       data: userService.sanitizeUser(updatedUser),
     } satisfies UpdateMe.Response;

@@ -183,6 +183,34 @@ describe('Project settings logos transfer', () => {
     expect(restored.authLogo).not.toHaveProperty('mime');
   });
 
+  test('restore falls back to upload with the logo buffer when the provider has no uploadStream', async () => {
+    const upload = jest.fn(async (file: { url?: string }) => {
+      file.url = '/uploads/restored.png';
+    });
+
+    const strapi = getStrapiFactory({
+      plugin: () => ({ provider: { upload } }),
+      config: {
+        get: () => ({ provider: 'aws-s3' }),
+      },
+    })();
+
+    const restored = await restoreProjectSettingsLogos(strapi, {
+      menuLogo: {
+        ...createLogo('menu'),
+        __transferBuffer: Buffer.from('menu-logo').toString('base64'),
+      },
+    });
+
+    expect(upload).toHaveBeenCalledTimes(1);
+    const uploadedFile = upload.mock.calls[0][0] as { buffer?: Buffer; stream?: Readable };
+    expect(uploadedFile.buffer).toEqual(Buffer.from('menu-logo'));
+    expect(uploadedFile.stream).toBeUndefined();
+    expect(restored.menuLogo?.url).toBe('/uploads/restored.png');
+    expect(restored.menuLogo?.provider).toBe('aws-s3');
+    expect(restored.menuLogo).not.toHaveProperty('buffer');
+  });
+
   test('restoreConfigs persists project settings without transfer buffers', async () => {
     const uploadStream = jest.fn(async (file: { url?: string }) => {
       file.url = '/uploads/restored.png';

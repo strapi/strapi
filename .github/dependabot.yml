@@ -250,11 +250,13 @@ updates:
       - 'source: dependencies'
       - 'pr: chore'
 
-  # Workflow actions in .github/workflows (and action.yml at the repo root).
+  # Workflow actions in .github/workflows (via /) and composite actions in .github/actions/** (any depth).
   - package-ecosystem: github-actions
     # Fewer concurrent PRs than npm — workflow changes need closer review.
     open-pull-requests-limit: 3
-    directory: /
+    directories:
+      - /
+      - /.github/actions/**
     groups:
       # Override org-level grouped security updates; each action gets its own PR.
       security-individual:

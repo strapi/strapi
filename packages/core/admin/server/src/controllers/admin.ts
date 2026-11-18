@@ -32,7 +32,6 @@ const isUsingTypeScript: TsUtilsModule['isUsingTypeScript'] = (
   ...args: Parameters<TsUtilsModule['isUsingTypeScript']>
 ) => {
   if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyTsUtils = require('@strapi/typescript-utils');
   }
   return (lazyTsUtils as TsUtilsModule).isUsingTypeScript(...args);
@@ -138,7 +137,8 @@ export default {
     const getNumberOfFolders = async (): Promise<number> => {
       try {
         const contentStructure = strapi.get('content-structure') as
-          { countGroups?: () => Promise<number> } | undefined;
+          | { countGroups?: () => Promise<number> }
+          | undefined;
 
         return (await contentStructure?.countGroups?.()) ?? 0;
       } catch {

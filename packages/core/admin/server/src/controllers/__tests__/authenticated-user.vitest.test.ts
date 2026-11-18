@@ -24,7 +24,7 @@ const setStrapi = (value: object) => {
 describe('Authenticated User Controller', () => {
   beforeEach(() => {
     mockValidateProfileUpdateInput.mockImplementation(
-      async (input: unknown) => ({ ...(input as object) }) as any
+      async (input: unknown) => ({ ...(input as object) } as any)
     );
   });
 
@@ -176,6 +176,31 @@ describe('Authenticated User Controller', () => {
       });
       expect(ctx.body).toStrictEqual({ data: updatedUser });
       expect(sanitizeUser).toHaveBeenCalledWith(updatedUser);
+    });
+
+    test('Answers 404 when the account was deleted after authentication', async () => {
+      const updateById = vi.fn(() => Promise.resolve(null));
+      const sanitizeUser = vi.fn();
+      const notFound = vi.fn();
+
+      setStrapi({
+        admin: {
+          services: {
+            user: { exists: vi.fn(), updateById, sanitizeUser },
+            auth: { validatePassword: vi.fn() },
+          },
+        },
+      });
+
+      const ctx = createContext(
+        { body: { firstname: 'Kai' } },
+        { state: { user: currentUser }, notFound }
+      ) as any;
+
+      await authenticatedUserController.updateMe(ctx);
+
+      expect(notFound).toHaveBeenCalledWith('User does not exist');
+      expect(sanitizeUser).not.toHaveBeenCalled();
     });
 
     test('Does not call exists when email is omitted', async () => {

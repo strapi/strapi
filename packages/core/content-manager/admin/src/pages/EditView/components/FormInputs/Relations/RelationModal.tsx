@@ -67,7 +67,9 @@ const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
     ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
     : '';
 
-  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${
+    isSingleType ? '' : '/' + currentDocumentMeta.documentId
+  }${queryParams}`;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -441,7 +443,9 @@ const RelationModalRenderer = (props: RelationModalRendererProps) => {
  * RelationModal
  * -----------------------------------------------------------------------------------------------*/
 const generateCreateUrl = (currentDocumentMeta: DocumentMeta) => {
-  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
+  return `/content-manager/${currentDocumentMeta.collectionType}/${
+    currentDocumentMeta.model
+  }/create${
     currentDocumentMeta.params?.locale
       ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
       : ''
@@ -617,7 +621,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                 >
                   <ArrowLeft />
                 </IconButton>
-                <Typography tag="span" fontWeight={600}>
+                <Modal.Title fontWeight={600}>
                   {isCreating
                     ? formatMessage({
                         id: 'content-manager.relation.create',
@@ -627,7 +631,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                         id: 'content-manager.components.RelationInputModal.modal-title',
                         defaultMessage: 'Edit a relation',
                       })}
-                </Typography>
+                </Modal.Title>
               </Flex>
               <IconButton
                 onClick={() => {

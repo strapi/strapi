@@ -3,7 +3,7 @@ import { errors, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export type HandlerParams = {
   documentId: string;
-  locale: string;
+  locale?: string;
   status: 'published' | 'draft';
 };
 
@@ -30,7 +30,8 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
        */
       if (config.config?.allowedOrigins) {
         const middlewares = strapi.config.get('middlewares') as (
-          string | { name?: string; config?: any }
+          | string
+          | { name?: string; config?: any }
         )[];
 
         const configuredMiddlewares = extendMiddlewareConfiguration(middlewares, {

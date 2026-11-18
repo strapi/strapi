@@ -29,13 +29,22 @@ const RecentDocumentsTable = ({
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
+  // An empty main field returns an empty title, shown as "Untitled" like the rest of the admin
+  const getDocumentTitle = (document: RecentDocument): string =>
+    document.title === '' ? emptyLabel : document.title;
 
   const getEditViewLink = (document: RecentDocument): string => {
     const isSingleType = document.kind === 'singleType';
     const kindPath = isSingleType ? 'single-types' : 'collection-types';
     const queryParams = document.locale ? `?plugins[i18n][locale]=${document.locale}` : '';
 
-    return `/content-manager/${kindPath}/${document.contentTypeUid}${isSingleType ? '' : '/' + document.documentId}${queryParams}`;
+    return `/content-manager/${kindPath}/${document.contentTypeUid}${
+      isSingleType ? '' : '/' + document.documentId
+    }${queryParams}`;
   };
 
   const handleRowClick = (document: RecentDocument) => () => {
@@ -50,8 +59,12 @@ const RecentDocumentsTable = ({
         {documents?.map((document) => (
           <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
             <Td>
-              <CellTypography title={document.title} variant="omega" textColor="neutral800">
-                {document.title}
+              <CellTypography
+                title={getDocumentTitle(document)}
+                variant="omega"
+                textColor="neutral800"
+              >
+                {getDocumentTitle(document)}
               </CellTypography>
             </Td>
             <Td>

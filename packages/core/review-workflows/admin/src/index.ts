@@ -32,6 +32,7 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Review Workflows',
         },
         licenseOnly: true,
+        licenseFeature: FEATURE_ID,
         permissions: [],
         Component() {
           return import('./router').then((mod) => ({
@@ -67,6 +68,7 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Review Workflows',
         },
         licenseOnly: true,
+        licenseFeature: FEATURE_ID,
         permissions: [],
         Component() {
           return import('./routes/purchase-review-workflows').then((mod) => ({

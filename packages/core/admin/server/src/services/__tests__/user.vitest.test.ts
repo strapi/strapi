@@ -361,6 +361,37 @@ describe('User', () => {
       expect(result).toBe(user);
     });
 
+    test.each([[{ password: 'Testing1234' }], [{ firstname: 'Kai' }]])(
+      'Resolves null and emits nothing when the user does not exist (%o)',
+      async (input) => {
+        const findOne = vi.fn(() => Promise.resolve(null));
+        const update = vi.fn(() => Promise.resolve(null));
+        const hashPassword = vi.fn(() => Promise.resolve('hash'));
+        const emit = vi.fn();
+
+        global.strapi = {
+          ...global.strapi,
+          eventHub: { emit },
+          db: {
+            query() {
+              return { update, findOne };
+            },
+          },
+          admin: {
+            services: {
+              auth: { hashPassword },
+            },
+          },
+        } as any;
+        vi.mocked(emitAudit).mockClear();
+
+        await expect(updateById(404, input)).resolves.toBeNull();
+
+        expect(emit).not.toHaveBeenCalled();
+        expect(emitAudit).not.toHaveBeenCalled();
+      }
+    );
+
     test('Call the update function with the expected params', async () => {
       const email = 'email@email.fr';
       const password = 'Testing1234';
@@ -585,6 +616,41 @@ describe('User', () => {
       expect(deleteFn).toHaveBeenNthCalledWith(2, { where: { id: 3 }, populate: ['roles'] });
 
       expect(res).toEqual(users);
+    });
+
+    test('Skips an ID that matches no user', async () => {
+      const users = [
+        { id: 2, email: 'a@strapi.io', roles: [] },
+        { id: 4, email: 'b@strapi.io', roles: [] },
+      ];
+      const count = vi.fn(() => Promise.resolve(0));
+      const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve({ id: 1, usersCount: 1 }));
+      const deleteFn = vi
+        .fn()
+        .mockResolvedValueOnce(users[0])
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(users[1]);
+      const emit = vi.fn();
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit },
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+      } as any;
+      vi.mocked(emitAudit).mockClear();
+
+      const res = await deleteByIds([2, 3, 4]);
+
+      expect(deleteFn).toHaveBeenCalledTimes(3);
+      expect(res).toEqual(users);
+      expect(emit).toHaveBeenCalledWith('user.delete', {
+        users: users.map((user) => sanitizeUser(user as any)),
+      });
+      expect(vi.mocked(emitAudit).mock.calls.map((call) => call[2])).toEqual([
+        { userId: 2, email: 'a@strapi.io' },
+        { userId: 4, email: 'b@strapi.io' },
+      ]);
     });
   });
 
@@ -1013,6 +1079,26 @@ describe('User', () => {
         1,
         expect.objectContaining({ firstname: 'test', lastname: 'Strapi', password: 'Test1234' })
       );
+    });
+
+    test('Fails without an audit entry if the user is deleted before the update', async () => {
+      const findOne = vi.fn(() => Promise.resolve({ id: 1 }));
+      const updateById = vi.fn(() => Promise.resolve(null));
+
+      global.strapi = {
+        ...global.strapi,
+        db: { query: () => ({ findOne }) },
+        admin: { services: { user: { updateById } } },
+      } as any;
+      vi.mocked(emitAudit).mockClear();
+
+      await expect(
+        register({
+          registrationToken: '123',
+          userInfo: { firstname: 'test', lastname: 'Strapi', password: 'Test1234' },
+        })
+      ).rejects.toThrowError('Invalid registration info');
+      expect(emitAudit).not.toHaveBeenCalled();
     });
 
     test('Records the accepted invitation in the audit log, without the password', async () => {

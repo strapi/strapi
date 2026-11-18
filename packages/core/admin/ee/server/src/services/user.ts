@@ -22,8 +22,9 @@ const { SUPER_ADMIN_CODE } = constants;
  */
 const getSuperAdminRoleOrThrow = async (): Promise<AdminRoleWithUsersCount> => {
   // The role lookup resolves to null when the role doesn't exist
-  const superAdminRole: AdminRoleWithUsersCount | null =
-    await getService('role').getSuperAdminWithUsersCount();
+  const superAdminRole: AdminRoleWithUsersCount | null = await getService(
+    'role'
+  ).getSuperAdminWithUsersCount();
 
   if (superAdminRole === null) {
     throw new ApplicationError("Cannot proceed because the super admin role doesn't exist.");
@@ -131,11 +132,14 @@ const updateById = async (id: any, attributes: any) => {
       populate: ['roles'],
     });
 
-    // A password set by any path (own change, super admin, CLI reset) revokes MCP grants.
-    await invalidateMcpSessions(String(id));
+    // The update resolves null when no user has this id
+    if (updatedUser !== null) {
+      // A password set by any path (own change, super admin, CLI reset) revokes MCP grants.
+      await invalidateMcpSessions(String(id));
 
-    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
-    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+      strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+      await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+    }
 
     return updatedUser;
   }
@@ -230,6 +234,11 @@ const deleteByIds = async (ids: any) => {
       populate: ['roles'],
     });
 
+    // The ID matches no user (e.g. deleted in the meantime): nothing to clean up or report
+    if (deletedUser === null) {
+      continue;
+    }
+
     // Invalidate all sessions for the deleted user
     const sessionManager = getSessionManager();
     if (sessionManager && sessionManager.hasOrigin('admin')) {
@@ -261,8 +270,9 @@ const sanitizeUserRoles = (role: unknown) => _.pick(role, ['id', 'name', 'descri
  */
 const isLastSuperAdminUser = async (userId: unknown) => {
   const user = (await findOne(userId)) as any;
-  const superAdminRole: AdminRoleWithUsersCount | null =
-    await getService('role').getSuperAdminWithUsersCount();
+  const superAdminRole: AdminRoleWithUsersCount | null = await getService(
+    'role'
+  ).getSuperAdminWithUsersCount();
 
   // Without a super admin role, no user can be the last super admin
   if (superAdminRole === null) {

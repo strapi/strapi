@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { pick } from 'lodash';
-import { emitAudit } from '@strapi/utils';
+import { emitAudit, file as fileUtils } from '@strapi/utils';
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { AUDITED_EVENTS, getProjectSettingsChanges } from '../audit-logs/project-settings';
 
@@ -12,6 +12,7 @@ interface UploadFile {
   type: string;
   size: number;
   stream: fs.ReadStream;
+  buffer: Buffer;
   tmpPath: string;
   hash: string;
   url: string;
@@ -103,12 +104,30 @@ const getProjectSettings = async (): Promise<GetProjectSettings.Response> => {
   return projectSettings;
 };
 
+type NewLogoFile = Partial<UploadFile> & Pick<UploadFile, 'stream'>;
+
+const uploadFile = async (file: NewLogoFile) => {
+  const provider = strapi.plugin('upload').provider;
+
+  if (typeof provider.uploadStream === 'function') {
+    return provider.uploadStream(file);
+  }
+
+  // A provider can implement only `upload`, which reads a buffer (same fallback as the upload plugin).
+  // Remove the consumed stream so the provider does not read it instead of the buffer.
+  const bufferedFile: Partial<UploadFile> = file;
+  bufferedFile.buffer = await fileUtils.streamToBuffer(file.stream);
+  delete bufferedFile.stream;
+
+  return provider.upload(bufferedFile);
+};
+
 const uploadFiles = async (files: LogoFiles = {}) => {
   // Call the provider upload function for each file
   return Promise.all(
     Object.values(files)
-      .filter((file) => file?.stream instanceof fs.ReadStream)
-      .map((file) => strapi.plugin('upload').provider.uploadStream(file))
+      .filter((file): file is NewLogoFile => file?.stream instanceof fs.ReadStream)
+      .map(uploadFile)
   );
 };
 

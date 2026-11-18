@@ -16,6 +16,8 @@ interface Post extends Struct.CollectionTypeSchema {
     slug: Schema.Attribute.UID<'title'>;
     views: Schema.Attribute.Integer;
     meta: Schema.Attribute.Component<'shared.meta', false>;
+    sections: Schema.Attribute.Component<'shared.meta', true>;
+    cover: Schema.Attribute.Media<'images'>;
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     writer: Schema.Attribute.Relation<'manyToOne', 'api::writer.writer'>;
     translations: Schema.Attribute.Relation<'oneToMany', 'api::post.post'>;
@@ -40,11 +42,21 @@ interface Writer extends Struct.CollectionTypeSchema {
   };
 }
 
+interface File extends Struct.CollectionTypeSchema {
+  collectionName: 'files';
+  info: { singularName: 'file'; pluralName: 'files'; displayName: 'File' };
+  attributes: {
+    name: Schema.Attribute.String;
+    url: Schema.Attribute.String;
+  };
+}
+
 declare module '../../../../../../../public/registries' {
   export interface ContentTypeSchemas {
     'api::post.post': Post;
     'api::tag.tag': Tag;
     'api::writer.writer': Writer;
+    'plugin::upload.file': File;
   }
   export interface ComponentSchemas {
     'shared.meta': Meta;

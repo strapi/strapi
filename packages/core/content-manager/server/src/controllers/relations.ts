@@ -1,4 +1,4 @@
-import { property, uniq, uniqBy, concat, flow, isEmpty } from 'lodash';
+import { property, uniq, uniqBy, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -167,8 +167,10 @@ export default {
       );
     }
 
-    // Morph-to relations (morphToOne, morphToMany) have no single target model
-    if (attribute.target === undefined) {
+    // Morph-to relations (morphToOne, morphToMany) have no single target model.
+    // `attribute` is still `any` here: the `in` check prepares the narrowing for the strict types
+    // branch, where `attribute` is typed and only the relations that declare a target pass it.
+    if (!('target' in attribute) || attribute.target === undefined) {
       throw new errors.ValidationError(
         `The relational field ${targetField} on ${model} has no target model`
       );
@@ -468,7 +470,7 @@ export default {
           dbQuery
             .load(...args)
             // Ensure response is an array
-            .then((res) => ({ results: res ? [res] : [] }));
+            .then((res) => ({ results: res ? [res] : [], pagination: undefined }));
 
     const filters: {
       publishedAt?: Record<string, any>;
@@ -554,7 +556,7 @@ export default {
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy(concat(sanitizedRes.results, res.results), 'id');
+    const relationsUnion = uniqBy([sanitizedRes.results, res.results].flat(), 'id');
 
     ctx.body = {
       pagination: res.pagination || defaultPagination(relationsUnion.length),

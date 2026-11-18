@@ -699,7 +699,6 @@ describe('Replace media placement', () => {
 
     // The server pins the replacement to the old extension, so a cross-type pick
     // would leave the bytes and the URL disagreeing.
-    // eslint-disable-next-line testing-library/no-node-access
     expect(document.querySelector('input[type="file"]')).toHaveAttribute(
       'accept',
       'application/pdf'
@@ -792,6 +791,23 @@ describe('AssetDetailsDrawer (controlled)', () => {
     rerender(<AssetDetailsDrawer assetId={2} onClose={jest.fn()} />);
 
     expect(await screen.findByRole('heading', { name: 'other.png' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
+
+  // The editor is portaled out of the panel: its Escape is the editor's alone
+  it('closes only the crop editor on Escape, not the drawer', async () => {
+    const onClose = jest.fn();
+    const { user } = render(<AssetDetailsDrawer assetId={1} onClose={onClose} />);
+
+    await user.click(await screen.findByRole('button', { name: 'Crop' }));
+    await screen.findByRole('button', { name: 'Apply' });
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument()
+    );
+    expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
   });
 });

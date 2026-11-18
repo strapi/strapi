@@ -1,4 +1,3 @@
-/* eslint-disable func-names */
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
@@ -10,7 +9,7 @@ import type {
 
 import {
   buildHomepageQueryFields,
-  compactSanitizedFields,
+  formatRecentDocumentTitle,
   resolveReadableMainField,
   resolveTitleField,
 } from './homepage-query-utils';
@@ -83,7 +82,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
             const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
-              { visible?: boolean } | undefined;
+              | { visible?: boolean }
+              | undefined;
 
             return contentTypeOptions?.visible !== false;
           })
@@ -158,17 +158,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   ) => {
     return documents.map((document) => {
       const additionalFields =
-        populate?.reduce(
-          (acc, key) => {
-            acc[key] = document[key];
-            return acc;
-          },
-          {} as Record<string, any>
-        ) || {};
+        populate?.reduce((acc, key) => {
+          acc[key] = document[key];
+          return acc;
+        }, {} as Record<string, any>) || {};
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
-        title: document[meta.mainField ?? 'documentId'],
+        title: formatRecentDocumentTitle(document[meta.mainField ?? 'documentId']),
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
@@ -194,14 +191,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       locale: '*',
     });
 
-    const sanitizedFields = compactSanitizedFields(permissionQuery.fields);
-    if (sanitizedFields !== undefined) {
-      permissionQuery.fields = sanitizedFields;
-    }
-
     return {
       permissionQuery,
-      titleField: resolveTitleField(meta.mainField, sanitizedFields),
+      titleField: resolveTitleField(meta.mainField, permissionQuery.fields),
     };
   };
 

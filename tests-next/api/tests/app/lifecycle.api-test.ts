@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -10,10 +11,8 @@ import {
   type Server,
 } from '@strapi/tests-shared';
 
-// Each Jest worker gets its own app, port and DB (JEST_WORKER_ID starts at 1).
-const worker = Number(process.env.JEST_WORKER_ID ?? 1);
-
-jest.setTimeout(180_000);
+// Each Vitest worker gets its own app, port and DB (VITEST_POOL_ID starts at 1).
+const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 
 describe('test app lifecycle', () => {
   let app: App;
@@ -37,8 +36,8 @@ describe('test app lifecycle', () => {
   });
 
   test('starts the app and serves the content API', async () => {
-    // startServer already waited for /_health. The users-permissions bootstrap seeds the public
-    // role without any permission, so its content API answers 403.
+    // startServer already waited for /_health. The users-permissions bootstrap gives the public
+    // role its auth actions only, not role.find, so the roles route answers 403.
     const roles = await fetch(`${server.url}/api/users-permissions/roles`);
     expect(roles.status).toBe(403);
   });

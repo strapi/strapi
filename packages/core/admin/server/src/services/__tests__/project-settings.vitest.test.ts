@@ -1,4 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import os from 'os';
+import path from 'path';
+import type { Readable } from 'stream';
+import { text } from 'stream/consumers';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { emitAudit } from '@strapi/utils';
 import {
   parseFilesData,
@@ -18,6 +22,8 @@ vi.mock('fs', async () => {
 
   return { ...actual, createReadStream, default: { ...actual, createReadStream } };
 });
+
+const actualFs = await vi.importActual<typeof import('fs')>('fs');
 
 const storeSet = vi.fn();
 const providerDelete = vi.fn();
@@ -416,6 +422,68 @@ describe('Project setting', () => {
         value: expectedOutput,
       });
       expect(emitAudit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateProjectSettings logo upload', () => {
+    const logoContent = 'logo-bytes';
+    let tmpDir: string;
+    let logoPath: string;
+    let uploadProvider: unknown;
+
+    beforeEach(async () => {
+      tmpDir = await actualFs.promises.mkdtemp(path.join(os.tmpdir(), 'project-settings-'));
+      logoPath = path.join(tmpDir, 'logo.png');
+      await actualFs.promises.writeFile(logoPath, logoContent);
+      uploadProvider = global.strapi.plugins.upload.provider;
+    });
+
+    afterEach(async () => {
+      global.strapi.plugins.upload.provider = uploadProvider;
+      await actualFs.promises.rm(tmpDir, { recursive: true, force: true });
+    });
+
+    const createLogoFile = () => ({
+      name: 'logo.png',
+      hash: 'logo_123',
+      ext: '.png',
+      mime: 'image/png',
+      size: logoContent.length,
+      width: 100,
+      height: 100,
+      tmpPath: logoPath,
+      stream: actualFs.createReadStream(logoPath),
+    });
+
+    it('Streams the logo to a provider that implements uploadStream', async () => {
+      const uploadStream = vi.fn(async (file: { hash: string; url?: string; stream: Readable }) => {
+        file.url = `/uploads/${file.hash}.png`;
+        await text(file.stream);
+      });
+      global.strapi.plugins.upload.provider = { uploadStream, delete: vi.fn() };
+
+      await updateProjectSettings({ menuLogo: createLogoFile() } as any);
+
+      expect(uploadStream).toHaveBeenCalledTimes(1);
+      expect(uploadStream.mock.calls[0][0].stream).toBeInstanceOf(actualFs.ReadStream);
+      expect(storeSet.mock.calls[0][0].value.menuLogo.url).toBe('/uploads/logo_123.png');
+    });
+
+    it('Falls back to upload with a buffer when the provider has no uploadStream', async () => {
+      const upload = vi.fn(
+        async (file: { hash: string; url?: string; buffer?: Buffer; stream?: unknown }) => {
+          file.url = `/uploads/${file.hash}.png`;
+        }
+      );
+      global.strapi.plugins.upload.provider = { upload, delete: vi.fn() };
+
+      await updateProjectSettings({ menuLogo: createLogoFile() } as any);
+
+      expect(upload).toHaveBeenCalledTimes(1);
+      const uploadedFile = upload.mock.calls[0][0];
+      expect(uploadedFile.buffer?.toString()).toBe(logoContent);
+      expect(uploadedFile.stream).toBeUndefined();
+      expect(storeSet.mock.calls[0][0].value.menuLogo.url).toBe('/uploads/logo_123.png');
     });
   });
 });

@@ -39,7 +39,10 @@ export const buildLocaleSchema = (
     }
 
     return schema.describe(
-      `Locale code. Available: ${localeCodes.join(', ')}. ${localeDefaultDescription(defaultLocale, localeCodes)}`
+      `Locale code. Available: ${localeCodes.join(', ')}. ${localeDefaultDescription(
+        defaultLocale,
+        localeCodes
+      )}`
     );
   }
 
@@ -94,7 +97,10 @@ export const resolvePermittedLocaleSchema = (
   }
 
   return schema.describe(
-    `Locale code. Permitted: ${permitted.join(', ')}. ${localeDefaultDescription(defaultLocale, permitted)}`
+    `Locale code. Permitted: ${permitted.join(', ')}. ${localeDefaultDescription(
+      defaultLocale,
+      permitted
+    )}`
   );
 };
 
@@ -126,7 +132,6 @@ export const getComponentLeafPaths = (
   for (const [key, attr] of Object.entries(component.attributes)) {
     if (key === 'id') {
       // skip system id field — it is not a user-facing permission path
-      // eslint-disable-next-line no-continue
       continue;
     }
     const fieldPath = `${prefix}.${key}`;

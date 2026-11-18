@@ -45,7 +45,9 @@ type Connection<TClient extends Database.ClientKind> = {
 type SharedDatabaseConnection<TClient extends Database.ClientKind> = {
   client: TClient;
   connection:
-    Connection<TClient> | (() => Promise<Connection<TClient>>) | (() => Connection<TClient>);
+    | Connection<TClient>
+    | (() => Promise<Connection<TClient>>)
+    | (() => Connection<TClient>);
   debug?: boolean;
   pool?: PoolConfig;
   acquireConnectionTimeout?: number;
@@ -68,5 +70,13 @@ export interface Database<TClient extends Database.ClientKind = Database.ClientK
      * example `env.bool('DATABASE_POOL_TIMEOUT_DIAGNOSTICS', true)`): a string is not read as false.
      */
     poolTimeoutDiagnostics?: boolean;
+    /**
+     * Maximum time in milliseconds a query run through the query builder's `execute()` may run
+     * before the database cancels it. Unset by default (no limit). Only applied on clients that
+     * can cancel queries (postgres, mysql); ignored on sqlite. Streams, direct `db.connection`
+     * queries, schema sync, and migrations are not covered. Must be a positive number (for
+     * example `env.int('DATABASE_QUERY_TIMEOUT')`).
+     */
+    queryTimeout?: number;
   };
 }

@@ -281,7 +281,7 @@ const readPlainRelation = async (
 
   return {
     id: row?.[idColumn!] ?? null,
-    type: typeColumn ? (row?.[typeColumn] ?? null) : null,
+    type: typeColumn ? row?.[typeColumn] ?? null : null,
   };
 };
 
@@ -300,8 +300,12 @@ describe('Document Service clone relation operation payloads', () => {
       ])
       .build();
 
-    await modelsUtils.modifyContentType(fkInverseModel);
-    await modelsUtils.modifyContentType(fkOwnerModel);
+    // Apply both sides of the FK pair on one instance: a boot between the two edits would see an
+    // inverse side with no owner pointing back, which fails metadata loading
+    const ctbStrapi = await createStrapiInstance();
+    await modelsUtils.modifyContentType(fkInverseModel, { strapi: ctbStrapi });
+    await modelsUtils.modifyContentType(fkOwnerModel, { strapi: ctbStrapi });
+    await ctbStrapi.destroy();
 
     strapi = await createStrapiInstance();
   });

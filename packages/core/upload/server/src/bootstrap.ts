@@ -36,7 +36,6 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       config &&
       Object.keys(defaultValue).every((key) => Object.prototype.hasOwnProperty.call(config, key))
     ) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -59,6 +58,8 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await getService('weeklyMetrics').registerCron();
 
   // AI metadata
+  failInterruptedAIMetadataJobsOnListen(strapi);
+
   if (strapi.ai.admin.isAvailable()) {
     const aiMetadataProvider = getService('aiMetadataProvider');
 
@@ -71,6 +72,30 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   getService('extensions').signFileUrlsOnDocumentService();
 }
+
+/**
+ * A job runs inside the server process that created it, and that process writes the job's
+ * heartbeat at an interval. A job still `processing` with a stale or missing heartbeat was cut
+ * off by a stop or crash of its server, so a server that starts listening fails it. A job that
+ * another server on the same database still runs has a fresh heartbeat and is left alone.
+ * After a crash, a server that restarts at once finds the heartbeat still fresh: the job is then
+ * failed once the heartbeat goes stale, about two minutes later, by the sweep that runs on each
+ * `GET /upload/ai-metadata-jobs/latest`. A clean stop fails its own jobs at once (see `destroy`).
+ * The sweep runs in each process that serves HTTP, `strapi console` included, because console
+ * listens too. It waits for `listening` because the other CLI commands (`strapi export`,
+ * `strapi import`, `strapi transfer`, `configuration:dump`, ...) also run `bootstrap` but never
+ * listen: they never fail a job.
+ */
+const failInterruptedAIMetadataJobsOnListen = (strapi: Core.Strapi) => {
+  strapi.server.httpServer.once('listening', async () => {
+    try {
+      await getService('aiMetadataJobs').failInterruptedJobs();
+    } catch (error) {
+      strapi.log.error('Could not fail the AI metadata jobs interrupted by a previous server');
+      strapi.log.error(error);
+    }
+  });
+};
 
 const registerWebhookEvents = async () =>
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {

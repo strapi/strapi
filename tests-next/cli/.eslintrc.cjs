@@ -12,7 +12,7 @@ const config = {
     'node/no-unpublished-import': 'off',
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
   },
-  ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'lint-staged.config.mjs', 'jest.config.js'],
+  ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'lint-staged.config.mjs'],
 };
 
 module.exports = config;

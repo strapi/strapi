@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import net from 'node:net';
 import path from 'node:path';
 
+import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
 import { HOST, baseEnv, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
 import type { App } from './generate';
@@ -18,6 +19,10 @@ export interface StartServerOptions {
   /** Fail before starting when the admin build is missing. Set it for UI tests. */
   requireAdmin?: boolean;
   env?: NodeJS.ProcessEnv;
+  /** Load the test plugin (tests-next/shared/test-plugin). Default: true. */
+  testPlugin?: boolean;
+  /** Register the fake AI translations provider. Needs EE with the `cms-byok-ai` feature. */
+  fakeAiProvider?: boolean;
   /** Max time to wait for the server to be ready. Default: 120 s. */
   timeout?: number;
 }
@@ -133,11 +138,22 @@ export const stopAllServers = async () => {
  * start, exits first, or the timeout passes, it rejects with the cause and the server output.
  */
 export const startServer = async (app: App, options: StartServerOptions): Promise<Server> => {
-  const { port, mode = 'develop', requireAdmin = false, env, timeout = 120_000 } = options;
+  const {
+    port,
+    mode = 'develop',
+    requireAdmin = false,
+    env,
+    testPlugin = true,
+    fakeAiProvider = false,
+    timeout = 120_000,
+  } = options;
 
   if (process.platform === 'win32') {
     // stop() signals the process group with a negative PID, which Windows doesn't support.
     throw new Error('The /tests-next suites do not run on Windows yet.');
+  }
+  if (fakeAiProvider && !testPlugin) {
+    throw new Error('fakeAiProvider needs the test plugin: drop testPlugin: false.');
   }
   if (requireAdmin && !hasAdminBuild(app)) {
     // Without a build, `--no-build-admin` still passes the readiness check but /admin is a 404.
@@ -155,7 +171,15 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
   // serve.cjs leads the group and kills it when this runner goes away (see the file).
   const child = spawn(process.execPath, [path.join(__dirname, 'serve.cjs'), strapiBin(), ...args], {
     cwd: app.dir,
-    env: { ...process.env, ...baseEnv(), ...env, PORT: String(port) },
+    env: {
+      ...process.env,
+      ...baseEnv(),
+      [TEST_PLUGIN_ENV_VAR]: String(testPlugin),
+      // Always written, so a value inherited from the shell can't turn the fake provider on.
+      [TEST_AI_PROVIDER_ENV_VAR]: fakeAiProvider ? 'fake' : '',
+      ...env,
+      PORT: String(port),
+    },
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     // Own process group, so stop() reaches the develop primary and worker too.
     detached: true,

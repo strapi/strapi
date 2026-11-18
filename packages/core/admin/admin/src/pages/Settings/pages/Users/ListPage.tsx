@@ -51,7 +51,9 @@ const ListPageCE = () => {
     CreateActionCE,
     async () =>
       (
-        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE')
+        await import(
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE'
+        )
       ).CreateActionEE
   );
 
@@ -335,7 +337,6 @@ const ListPage = () => {
   const UsersListPage = useEnterprise(
     ListPageCE,
     async () =>
-      // eslint-disable-next-line import/no-cycle
       (await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage'))
         .UserListPageEE
   );
