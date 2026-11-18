@@ -22,7 +22,8 @@ export const appProvider = defineUploadProvider({
         file.url = `${options.baseUrl}/${file.hash}${file.ext}`;
       },
       async delete(file) {
-        file.hash satisfies string;
+        // A stored file has a URL.
+        file.url satisfies string;
       },
       isPrivate: () => true,
       async getSignedUrl(file) {
@@ -47,6 +48,59 @@ export const untypedOptionsProvider = defineUploadProvider({
 
     return { upload() {}, delete() {} };
   },
+});
+
+// `init` keeps its own signature: a defaulted options parameter can still be omitted.
+export const defaultedOptionsProvider = defineUploadProvider({
+  init(options: { sizeLimit?: number } = {}) {
+    return { uploadStream() {}, delete() {}, sizeLimit: () => options.sizeLimit };
+  },
+});
+
+defaultedOptionsProvider.init();
+
+// An explicit type argument is the module type, and keeps its members outside the contract.
+type BucketModule = {
+  init(options: { bucket: string }): Providers.Upload.Provider & { bucketName(): string };
+};
+
+export const explicitModuleProvider = defineUploadProvider<BucketModule>({
+  init: (options) => ({ upload() {}, delete() {}, bucketName: () => options.bucket }),
+});
+
+explicitModuleProvider.init({ bucket: 'media' }).bucketName() satisfies string;
+
+// The module may carry members besides `init`, such as a `name`.
+export const namedProvider = defineUploadProvider({
+  name: 'cdn',
+  auth: { token: 'secret' },
+  init: () => ({ upload() {}, delete() {} }),
+});
+
+namedProvider.name satisfies string;
+
+// Action options, left to inference, can be spread and passed on.
+export const actionOptionsProvider = defineUploadProvider({
+  init: () => ({
+    upload(file, customParams = {}) {
+      const params: { Key: string; ACL?: string } = { ...customParams, Key: file.hash };
+
+      return params;
+    },
+    delete() {},
+  }),
+});
+
+// `getSignedUrl` also signs URLs found in rich text, so it gets only the fields a URL gives.
+export const signingProvider = defineUploadProvider({
+  init: () => ({
+    upload() {},
+    delete() {},
+    isPrivate: () => true,
+    getSignedUrl(file) {
+      return { url: `${file.url}?key=${file.hash}${file.ext ?? ''}` };
+    },
+  }),
 });
 
 // `upload` alone, or `uploadStream` alone, is enough.
@@ -132,6 +186,22 @@ defineUploadProvider({
 defineUploadProvider({
   // @ts-expect-error a provider method must accept the files upload passes.
   init: () => ({ upload: (file: { id: number }) => file.id, delete() {} }),
+});
+
+defineUploadProvider({
+  init: () => ({
+    upload() {},
+    delete() {},
+    getSignedUrl(file) {
+      // @ts-expect-error a URL found in rich text has no file `name`.
+      return { url: file.name };
+    },
+  }),
+});
+
+defineUploadProvider({
+  // @ts-expect-error `init` receives the `providerOptions` record, not a primitive.
+  init: (options: number) => ({ upload: () => options, delete() {} }),
 });
 
 export const missingDeleteModule = {

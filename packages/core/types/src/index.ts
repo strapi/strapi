@@ -13,6 +13,16 @@ export type * as Struct from './struct';
 export type * as UID from './uid';
 
 export { defineUploadProvider } from './providers/upload';
+// Also at the root, so the declarations a provider emits import them from `@strapi/types` itself
+export type {
+  ActionOptions as UploadProviderActionOptions,
+  CheckFileSizeOptions as UploadProviderCheckFileSizeOptions,
+  Factory as UploadProviderFactory,
+  Provider as UploadProvider,
+  ProviderFile as UploadProviderFile,
+  SignableProviderFile as UploadProviderSignableFile,
+  StoredProviderFile as UploadProviderStoredFile,
+} from './providers/upload';
 
 declare global {
   // eslint-disable-next-line vars-on-top,no-var

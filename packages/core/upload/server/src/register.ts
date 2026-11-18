@@ -61,18 +61,15 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   }
 }
 
-/**
- * A provider module's `init` result, as `createProvider` treats it: the upload provider contract,
- * whose members it then wraps all alike, contract or not.
- */
-type LoadedProvider = Providers.Upload.Provider &
-  Record<string, (file: File, options: unknown) => unknown>;
-
 const createProvider = (config: Config) => {
   const { providerOptions, actionOptions = {} } = config;
 
   const providerName = _.toLower(config.provider);
-  let provider: Providers.Upload.Factory<Config['providerOptions'], LoadedProvider>;
+  // Documents what the module should be: `require` returns `any`, so nothing is checked here.
+  let provider: Providers.Upload.Factory<
+    Config['providerOptions'],
+    Providers.Upload.Provider & Record<string, unknown>
+  >;
 
   let modulePath;
   try {
@@ -122,7 +119,8 @@ const createProvider = (config: Config) => {
 
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
     return async (file: File, options = actionOptions[methodName]) =>
-      providerInstance[methodName](file, options);
+      // Every member is called as a method, contract or not
+      (providerInstance[methodName] as (file: File, options: unknown) => unknown)(file, options);
   });
 
   return Object.assign(Object.create(baseProvider), wrappedProvider);
