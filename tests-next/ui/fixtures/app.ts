@@ -1,8 +1,12 @@
-import { test as base } from '@playwright/test';
+import { test as base, type TestInfo } from '@playwright/test';
 
 import {
+  SQLITE,
   appPort,
   generateApp,
+  resetDatabase,
+  restoreDatabase,
+  snapshotDatabase,
   startServer,
   type Server,
   type ServerMode,
@@ -11,18 +15,48 @@ import {
 /** Generated and built once per run by setup/global-setup.ts. */
 export const UI_APP_NAME = 'ui';
 
+/**
+ * When the database goes back to the worker's snapshot (RFC D4):
+ * - `file` (default): before the first `beforeAll` or test of each spec file, so a file's
+ *   `beforeAll` and tests can build on each other's data but never see another file's;
+ * - `test`: before every test (and before `beforeAll`), so data a `beforeAll` writes is gone
+ *   by the first test. Not before `afterAll`, which sees what the last test wrote.
+ * Override it per file with `test.use({ resetScope: 'test' })`.
+ */
+export type ResetScope = 'file' | 'test';
+
 export interface AppOptions {
   /** How the Strapi server runs. Set per Playwright project. */
   serverMode: ServerMode;
 }
 
+export interface ResetOptions {
+  resetScope: ResetScope;
+}
+
 export interface AppWorkerFixtures {
   /** The Strapi server of this worker, started once per worker. */
   server: Server;
+  /** The spec file whose data is in the database, so file scope knows when to reset. */
+  databaseOwner: { file?: string };
 }
 
-export const test = base.extend<object, AppOptions & AppWorkerFixtures>({
+export interface ResetFixtures {
+  /** Restores the snapshot before a test or hook, following `resetScope`. Automatic. */
+  databaseReset: void;
+}
+
+/**
+ * The hook the fixture is set up for (`beforeAll`, `afterAll`…), or undefined for a test.
+ * Playwright doesn't expose it: this reads the same internal method its own fixtures use.
+ * `reset-test-scope.ui-test.ts` fails if it stops working.
+ */
+const currentHookType = (testInfo: TestInfo) =>
+  (testInfo as TestInfo & { _currentHookType?: () => string | undefined })._currentHookType?.();
+
+export const test = base.extend<ResetOptions & ResetFixtures, AppOptions & AppWorkerFixtures>({
   serverMode: ['develop', { scope: 'worker', option: true }],
+  resetScope: ['file', { option: true }],
 
   server: [
     async ({ serverMode }, use, workerInfo) => {
@@ -35,19 +69,55 @@ export const test = base.extend<object, AppOptions & AppWorkerFixtures>({
       }
 
       const app = await generateApp({ name: UI_APP_NAME, overwrite: false });
+      // A worker restarted after a failure must not start on the previous worker's data.
+      await resetDatabase(app, SQLITE);
       const server = await startServer(app, {
         mode: serverMode,
         // parallelIndex stays in [0, workers): workerIndex goes up each time a worker restarts
         // after a failure, which would walk the port out of the ui range.
         port: appPort('ui', workerInfo.parallelIndex),
         requireAdmin: true,
+        // Snapshots are SQLite only, whatever TESTS_DATABASE says.
+        database: SQLITE,
       });
+      // The state every reset goes back to. Seeding and role logins (CMS-1947, CMS-1951) come
+      // before this, so their admin sessions survive the resets.
+      await snapshotDatabase(server);
 
       await use(server);
 
       await server.stop();
     },
     { scope: 'worker', timeout: 180_000 },
+  ],
+
+  databaseOwner: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use({});
+    },
+    { scope: 'worker' },
+  ],
+
+  databaseReset: [
+    async ({ server, resetScope, databaseOwner }, use, testInfo) => {
+      // The first test of a worker already starts on the snapshot.
+      const dirty = databaseOwner.file !== undefined;
+      const newFile = databaseOwner.file !== testInfo.file;
+      if (
+        dirty &&
+        (newFile || (resetScope === 'test' && currentHookType(testInfo) !== 'afterAll'))
+      ) {
+        await restoreDatabase(server);
+      }
+      databaseOwner.file = testInfo.file;
+
+      await use();
+    },
+    // Also before `beforeAll` and `afterAll` hooks: with `auto: true`, Playwright sets the
+    // fixture up for tests only, so a file's reset would run after its `beforeAll` and wipe what
+    // it wrote. Playwright's own fixtures use this value; its types only declare a boolean.
+    { auto: 'all-hooks-included' as unknown as true },
   ],
 });
 

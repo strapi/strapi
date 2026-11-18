@@ -3,7 +3,8 @@ import net from 'node:net';
 import path from 'node:path';
 
 import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
-import { HOST, baseEnv, strapiBin } from './config';
+import { databaseEnv, databaseFromEnv, type Database } from '../db/database';
+import { HOST, baseEnv, inheritedEnv, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
 import type { App } from './generate';
 
@@ -18,6 +19,11 @@ export interface StartServerOptions {
   mode?: ServerMode;
   /** Fail before starting when the admin build is missing. Set it for UI tests. */
   requireAdmin?: boolean;
+  /**
+   * Default: the database of the run (`databaseFromEnv()`, from `TESTS_DATABASE`). Call
+   * resetDatabase() first for an empty database.
+   */
+  database?: Database;
   env?: NodeJS.ProcessEnv;
   /** Load the test plugin (tests-next/shared/test-plugin). Default: true. */
   testPlugin?: boolean;
@@ -29,6 +35,7 @@ export interface StartServerOptions {
 
 export interface Server {
   app: App;
+  database: Database;
   port: number;
   url: string;
   pid: number;
@@ -63,6 +70,13 @@ const isHealthy = async (url: string) => {
   }
 };
 
+/** The develop worker can outlive the group leader for a moment. */
+const waitForPortFree = async (port: number) => {
+  for (let i = 0; i < 100 && !(await isPortFree(port)); i += 1) {
+    await sleep(50);
+  }
+};
+
 const hasExited = (child: ChildProcess) => child.exitCode !== null || child.signalCode !== null;
 
 const exited = (child: ChildProcess) =>
@@ -91,10 +105,10 @@ const signalGroup = (child: ChildProcess, signal: NodeJS.Signals) => {
  * detached, so a Ctrl-C in the terminal doesn't reach them: they are killed when the runner
  * process exits or is interrupted, even if a test or hook timed out before it could stop them.
  */
-const liveServers = new Set<ChildProcess>();
+const liveServers = new Map<ChildProcess, number>();
 
 const killAllServers = () => {
-  for (const child of liveServers) {
+  for (const child of liveServers.keys()) {
     signalGroup(child, 'SIGKILL');
   }
   liveServers.clear();
@@ -122,11 +136,12 @@ const installCleanup = () => {
 /** Stop every server this runner started. Use it in a final hook, after a possible timeout. */
 export const stopAllServers = async () => {
   await Promise.all(
-    [...liveServers].map(async (child) => {
+    [...liveServers].map(async ([child, port]) => {
       signalGroup(child, 'SIGINT');
       const timer = setTimeout(() => signalGroup(child, 'SIGKILL'), 10_000);
       await exited(child);
       clearTimeout(timer);
+      await waitForPortFree(port);
     })
   );
 };
@@ -143,6 +158,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     mode = 'develop',
     requireAdmin = false,
     env,
+    database = databaseFromEnv(),
     testPlugin = true,
     fakeAiProvider = false,
     timeout = 120_000,
@@ -172,8 +188,9 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
   const child = spawn(process.execPath, [path.join(__dirname, 'serve.cjs'), strapiBin(), ...args], {
     cwd: app.dir,
     env: {
-      ...process.env,
+      ...inheritedEnv(),
       ...baseEnv(),
+      ...databaseEnv(app, database),
       [TEST_PLUGIN_ENV_VAR]: String(testPlugin),
       // Always written, so a value inherited from the shell can't turn the fake provider on.
       [TEST_AI_PROVIDER_ENV_VAR]: fakeAiProvider ? 'fake' : '',
@@ -190,7 +207,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     spawnError = error;
   });
   if (child.pid !== undefined) {
-    liveServers.add(child);
+    liveServers.set(child, port);
   }
   child.once('exit', () => liveServers.delete(child));
 
@@ -219,10 +236,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     await exited(child);
     clearTimeout(timer);
 
-    // The worker can outlive the primary for a moment: wait for the port.
-    for (let i = 0; i < 100 && !(await isPortFree(port)); i += 1) {
-      await sleep(50);
-    }
+    await waitForPortFree(port);
   };
 
   const start = Date.now();
@@ -245,7 +259,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     await sleep(50);
   }
 
-  return { app, port, url, pid: child.pid!, logs: () => output, stop };
+  return { app, database, port, url, pid: child.pid!, logs: () => output, stop };
 };
 
 export const stopServer = (server: Server) => server.stop();
