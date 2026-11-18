@@ -13,8 +13,7 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 //   members whose only `any` is that `entry` (`release.create`, `release.delete`,
 //   `release.recordMissedRun`, `release-action.groupActions`).
 // - The `@strapi/utils` hooks of the condition provider (`hooks`) and of `admin::role.hooks`, which
-//   their own units type now that https://github.com/strapi/strapi/pull/28663 merged, and
-//   `plugin::i18n.permissions.engine`, which waits on https://github.com/strapi/strapi/pull/28665.
+//   their own units type now that https://github.com/strapi/strapi/pull/28663 merged.
 // - The rows the round left out: `admin::passport`, the content-manager `relations` controller, and
 //   the `strapi::responses`, `strapi::security` and `strapi::session` middlewares.
 
@@ -313,10 +312,13 @@ declare const contentReleasesChecks: [
 ];
 contentReleasesChecks satisfies unknown;
 
-// i18n: the permissions actions (I01) and sections builder (H5).
+// i18n: the permissions actions (I01), sections builder (H5) and engine (H6). The engine handler
+// `willRegisterPermission` takes the `before-register.permission` context it reads
+// (https://github.com/strapi/strapi/pull/28665).
 declare const i18nChecks: [
   Core.Assert<Equal<[HasAny<Service<'plugin::i18n.permissions'>['actions']>], [false]>>,
   Core.Assert<Equal<[HasAny<Service<'plugin::i18n.permissions'>['sectionsBuilder']>], [false]>>,
+  Core.Assert<Equal<[HasAny<Service<'plugin::i18n.permissions'>['engine']>], [false]>>,
 ];
 i18nChecks satisfies unknown;
 
