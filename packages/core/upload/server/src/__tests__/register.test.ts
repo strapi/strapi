@@ -67,19 +67,18 @@ jest.mock(
   { virtual: true }
 );
 
-const createStrapiMock = (uploadConfig: unknown) =>
-  ({
-    dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
-    plugins: { upload: {} },
-    db: { migrations: { providers: { internal: { register: jest.fn() } } } },
-    server: { app: { on: jest.fn() }, routes: jest.fn() },
-    admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
-    config: {
-      get: jest.fn().mockReturnValue(uploadConfig),
-      set: jest.fn(),
-    },
-    get: jest.fn().mockReturnValue({ add: jest.fn() }),
-  } as any);
+const createStrapiMock = (uploadConfig: unknown): any => ({
+  dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+  plugins: { upload: {} },
+  db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+  server: { app: { on: jest.fn() }, routes: jest.fn() },
+  admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+  config: {
+    get: jest.fn().mockReturnValue(uploadConfig),
+    set: jest.fn(),
+  },
+  get: jest.fn().mockReturnValue({ add: jest.fn() }),
+});
 
 describe('Upload plugin register', () => {
   describe('routes and provider middlewares', () => {
