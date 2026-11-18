@@ -1,4 +1,4 @@
-import { isString } from 'lodash';
+import { isString, omit } from 'lodash';
 import type { Database } from '..';
 import type { Repository, Params } from './types';
 
@@ -149,12 +149,28 @@ export const createRepository = (uid: string, db: Database): Repository => {
         throw new Error(`Invalid load. Expected ${field} to be an anyToMany relational attribute`);
       }
 
-      const [query, { page, pageSize }] = withOffsetLimit(params);
+      if (params === undefined || params === null) {
+        throw new Error('Invalid load. Expected params to be an object');
+      }
 
-      const [results, { count: total }] = await Promise.all([
+      // Only the total query counts: a count key from the caller would replace the results with a count
+      const [query, { page, pageSize }] = withOffsetLimit(omit(params, 'count'));
+
+      const [results, countResult] = await Promise.all([
         db.entityManager.load(uid, entity, field, query),
-        db.entityManager.load(uid, entity, field, { ...query, count: true }),
+        // A count needs no order, and Postgres and MySQL reject an orderBy with the count's GROUP BY
+        db.entityManager.load(uid, entity, field, { ...omit(query, 'orderBy'), count: true }),
       ]);
+
+      // load returns null when the entity does not exist
+      if (results === null || countResult === null) {
+        return {
+          results: [],
+          pagination: { page, pageSize, pageCount: 0, total: 0 },
+        };
+      }
+
+      const { count: total } = countResult;
 
       return {
         results,

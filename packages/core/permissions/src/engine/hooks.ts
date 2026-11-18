@@ -1,4 +1,4 @@
-import { cloneDeep, has } from 'lodash';
+import { has, isPlainObject } from 'lodash';
 import { hooks } from '@strapi/utils';
 
 import * as domain from '../domain';
@@ -14,6 +14,24 @@ export interface PermissionEngineHooks {
 }
 
 export type HookName = keyof PermissionEngineHooks;
+
+const clonePermission = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return value.map(clonePermission) as T;
+  }
+
+  if (isPlainObject(value)) {
+    const copy: Record<string, unknown> = {};
+
+    for (const key of Object.keys(value as object)) {
+      copy[key] = clonePermission((value as Record<string, unknown>)[key]);
+    }
+
+    return copy as T;
+  }
+
+  return value;
+};
 
 /**
  * Create a hook map used by the permission Engine
@@ -31,7 +49,7 @@ const createEngineHooks = (): PermissionEngineHooks => ({
  */
 const createValidateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
-    return cloneDeep(permission);
+    return clonePermission(permission);
   },
 });
 
@@ -40,7 +58,7 @@ const createValidateContext = (permission: Permission) => ({
  */
 const createBeforeEvaluateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
-    return cloneDeep(permission);
+    return clonePermission(permission);
   },
 
   addCondition(condition: string) {
@@ -63,7 +81,7 @@ const createWillRegisterContext = ({ permission, options }: WillRegisterContextP
   ...options,
 
   get permission() {
-    return cloneDeep(permission);
+    return clonePermission(permission);
   },
 
   condition: {
@@ -98,6 +116,72 @@ const createWillRegisterContext = ({ permission, options }: WillRegisterContextP
     },
   },
 });
+
+/**
+ * A permission whose properties a typed handler reads as `unknown`, except `fields`, which the
+ * engine passes to CASL as a list of field names ({@link PermissionRule}).
+ */
+export type TypedPermission = Omit<Permission, 'properties'> & {
+  properties?: Record<string, unknown> & NonNullable<PermissionRule['properties']>;
+};
+
+/** The context of `before-format::validate.permission` and `before-evaluate.permission`. */
+export interface BeforeEvaluateContext {
+  /** A copy of the permission. */
+  readonly permission: Readonly<TypedPermission>;
+  /** Adds a condition to the permission. */
+  addCondition(condition: string): BeforeEvaluateContext;
+}
+
+/** The context of `after-format::validate.permission`. */
+export interface ValidateContext {
+  /** A copy of the permission. */
+  readonly permission: Readonly<TypedPermission>;
+}
+
+/** Builds the CASL condition of the permission being registered. */
+export interface WillRegisterCondition {
+  and(rawConditionObject: unknown): WillRegisterCondition;
+  or(rawConditionObject: unknown): WillRegisterCondition;
+}
+
+/**
+ * The context of `before-register.permission`: the options given to `generateAbility`, spread, with
+ * the permission and the condition builder.
+ */
+export type WillRegisterContext = {
+  readonly [option: string]: unknown;
+  /** A copy of the permission. */
+  readonly permission: PermissionRule;
+  readonly condition: WillRegisterCondition;
+};
+
+/** A typed `format.permission` handler: it resolves to the permission the next handler receives. */
+type FormatPermissionHandler = (
+  permission: TypedPermission
+) => TypedPermission | Promise<TypedPermission>;
+
+/**
+ * The engine hooks with typed handlers. {@link PermissionEngineHooks}, what the engine exposes,
+ * keeps untyped handlers; a typed contract can declare this map instead. A validate hook stops at
+ * the first handler that returns a value other than `undefined`, and the engine rejects the
+ * permission when that value is `false`.
+ */
+export interface TypedPermissionEngineHooks {
+  'before-format::validate.permission': hooks.AsyncBailHook<
+    (context: BeforeEvaluateContext) => unknown
+  >;
+  /**
+   * Its handlers are typed. `call` resolves to `unknown`: the same hook also runs the handlers that
+   * untyped code registers, which can resolve to anything.
+   */
+  'format.permission': Omit<hooks.AsyncSeriesWaterfallHook<FormatPermissionHandler>, 'call'> & {
+    call(permission: TypedPermission): Promise<unknown>;
+  };
+  'after-format::validate.permission': hooks.AsyncBailHook<(context: ValidateContext) => unknown>;
+  'before-evaluate.permission': hooks.AsyncSeriesHook<(context: BeforeEvaluateContext) => unknown>;
+  'before-register.permission': hooks.AsyncSeriesHook<(context: WillRegisterContext) => unknown>;
+}
 
 export {
   createEngineHooks,

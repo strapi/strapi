@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 
 import contentApiController from '../content-api';
 import { getService } from '../../utils';
-import { validateUploadBody } from '../validation/content-api/upload';
+import { validateUploadBody, validateUploadFilesBody } from '../validation/content-api/upload';
 import { prepareUploadRequest } from '../../utils/mime-validation';
 
 jest.mock('../../utils');
@@ -13,12 +13,15 @@ jest.mock('../../utils/mime-validation', () => ({
 
 const mockGetService = getService as jest.MockedFunction<typeof getService>;
 const mockValidateUploadBody = validateUploadBody as jest.MockedFunction<typeof validateUploadBody>;
+const mockValidateUploadFilesBody = jest.mocked(validateUploadFilesBody);
 const mockPrepareUploadRequest = jest.mocked(prepareUploadRequest);
 
 describe('Content API Controller - find / findPage', () => {
   let mockContext: Context;
   let mockUploadService: any;
   let mockFileService: any;
+  let mockFolderService: any;
+  let mockApiUploadFolderService: any;
   let mockValidateQuery: jest.Mock;
   let mockSanitizeQuery: jest.Mock;
   let mockSanitizeOutput: jest.Mock;
@@ -35,6 +38,7 @@ describe('Content API Controller - find / findPage', () => {
       findOne: jest.fn(),
       remove: jest.fn(),
       replace: jest.fn(),
+      upload: jest.fn(),
       updateFileInfo: jest.fn(),
     };
 
@@ -42,9 +46,19 @@ describe('Content API Controller - find / findPage', () => {
       signFileUrls: jest.fn((file) => Promise.resolve(file)),
     };
 
+    mockFolderService = {
+      exists: jest.fn(),
+    };
+
+    mockApiUploadFolderService = {
+      getAPIUploadFolder: jest.fn().mockResolvedValue({ id: 42 }),
+    };
+
     mockGetService.mockImplementation((serviceName: string) => {
       if (serviceName === 'upload') return mockUploadService;
       if (serviceName === 'file') return mockFileService;
+      if (serviceName === 'folder') return mockFolderService;
+      if (serviceName === 'api-upload-folder') return mockApiUploadFolderService;
       return {};
     });
 
@@ -650,6 +664,121 @@ describe('Content API Controller - find / findPage', () => {
         name: 'NotFoundError',
       });
       expect(mockUploadService.replace).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('uploadFiles - folder (POST /upload)', () => {
+    const fileA = { filepath: '/tmp/a.jpg', originalFilename: 'a.jpg', mimetype: 'image/jpeg' };
+    const fileB = { filepath: '/tmp/b.jpg', originalFilename: 'b.jpg', mimetype: 'image/jpeg' };
+
+    const setup = (validFiles: any[], validated: Record<string, unknown>) => {
+      mockContext.request = { body: {}, files: { files: validFiles } } as any;
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles,
+        filteredBody: {},
+        errors: [],
+      });
+      mockValidateUploadFilesBody.mockResolvedValue(validated as any);
+      mockUploadService.upload.mockResolvedValue([]);
+    };
+
+    it('puts the file in the API Uploads folder when folder is omitted', async () => {
+      setup([fileA], { fileInfo: { name: 'a' } });
+
+      await buildController().uploadFiles(mockContext);
+
+      expect(mockValidateUploadFilesBody).toHaveBeenCalledWith({}, false);
+      expect(mockFolderService.exists).not.toHaveBeenCalled();
+      expect(mockUploadService.upload).toHaveBeenCalledWith({
+        data: { fileInfo: { name: 'a', folder: 42 } },
+        files: [fileA],
+      });
+      expect(mockContext.status).toBe(201);
+    });
+
+    it('puts the file in the given folder when it exists', async () => {
+      setup([fileA], { fileInfo: { name: 'a' }, folder: 7 });
+      mockFolderService.exists.mockResolvedValue(true);
+
+      await buildController().uploadFiles(mockContext);
+
+      expect(mockFolderService.exists).toHaveBeenCalledWith({ id: 7 });
+      expect(mockApiUploadFolderService.getAPIUploadFolder).not.toHaveBeenCalled();
+      expect(mockUploadService.upload).toHaveBeenCalledWith({
+        data: { fileInfo: { name: 'a', folder: 7 } },
+        files: [fileA],
+      });
+    });
+
+    it('puts every file in the given folder on a multi-file upload', async () => {
+      setup([fileA, fileB], { fileInfo: [{ name: 'a' }], folder: 7 });
+      mockFolderService.exists.mockResolvedValue(true);
+
+      await buildController().uploadFiles(mockContext);
+
+      expect(mockValidateUploadFilesBody).toHaveBeenCalledWith({}, true);
+      expect(mockFolderService.exists).toHaveBeenCalledTimes(1);
+      expect(mockUploadService.upload).toHaveBeenCalledWith({
+        data: { fileInfo: [{ name: 'a', folder: 7 }, { folder: 7 }] },
+        files: [fileA, fileB],
+      });
+    });
+
+    it('puts the file at the root when folder is null', async () => {
+      setup([fileA], { folder: null });
+
+      await buildController().uploadFiles(mockContext);
+
+      expect(mockFolderService.exists).not.toHaveBeenCalled();
+      expect(mockApiUploadFolderService.getAPIUploadFolder).not.toHaveBeenCalled();
+      expect(mockUploadService.upload).toHaveBeenCalledWith({
+        data: { fileInfo: { folder: null } },
+        files: [fileA],
+      });
+    });
+
+    it('keeps ref / refId / field alongside the folder', async () => {
+      setup([fileA], { ref: 'api::dog.dog', refId: '1', field: 'pic', folder: 7 });
+      mockFolderService.exists.mockResolvedValue(true);
+
+      await buildController().uploadFiles(mockContext);
+
+      expect(mockUploadService.upload).toHaveBeenCalledWith({
+        data: { ref: 'api::dog.dog', refId: '1', field: 'pic', fileInfo: { folder: 7 } },
+        files: [fileA],
+      });
+    });
+
+    it('throws a ValidationError and uploads nothing when the folder does not exist', async () => {
+      setup([fileA], { folder: 123 });
+      mockFolderService.exists.mockResolvedValue(false);
+
+      await expect(buildController().uploadFiles(mockContext)).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: 'Folder with id 123 does not exist',
+      });
+      expect(mockUploadService.upload).not.toHaveBeenCalled();
+    });
+
+    it('replaceFile ignores a folder and does not look it up', async () => {
+      mockContext.query = { id: '1' } as any;
+      mockContext.request = { body: { folder: '7' }, files: { files: fileA } } as any;
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [fileA],
+        filteredBody: { folder: '7' },
+        errors: [],
+      });
+      mockValidateUploadBody.mockResolvedValue({ fileInfo: {}, folder: '7' } as any);
+      mockUploadService.replace.mockResolvedValue({ id: 1 });
+
+      await buildController().replaceFile(mockContext);
+
+      expect(mockValidateUploadFilesBody).not.toHaveBeenCalled();
+      expect(mockFolderService.exists).not.toHaveBeenCalled();
+      expect(mockUploadService.replace).toHaveBeenCalledWith('1', {
+        data: { fileInfo: {}, folder: '7' },
+        file: fileA,
+      });
     });
   });
 });

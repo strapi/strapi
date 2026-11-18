@@ -1,4 +1,3 @@
-/* eslint-disable import/export */
 import * as React from 'react';
 
 import {
@@ -252,7 +251,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...startPages,
 
     // Start ellipsis
-    // eslint-disable-next-line no-nested-ternary
     ...(siblingsStart > boundaryCount + 2
       ? ['start-ellipsis']
       : boundaryCount + 1 < pageCount - boundaryCount
@@ -263,7 +261,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
     ...range(siblingsStart, siblingsEnd),
 
     // End ellipsis
-    // eslint-disable-next-line no-nested-ternary
     ...(siblingsEnd < pageCount - boundaryCount - 1
       ? ['end-ellipsis']
       : pageCount - boundaryCount > boundaryCount

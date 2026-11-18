@@ -1,4 +1,5 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, expectTypeOf } from 'vitest';
+import type { Permission } from '../../../../../shared/contracts/shared';
 import domain, { type CreatePermissionPayload } from '..';
 
 describe('Permission Domain', () => {
@@ -268,6 +269,13 @@ describe('Permission Domain', () => {
       const property = domain.getProperty('foo', permission);
 
       expect(property).toBeUndefined();
+    });
+
+    test('declares the property value as unknown, not a Permission', () => {
+      const permission = { properties: { fields: ['title'] } } as unknown as Permission;
+
+      expectTypeOf(domain.getProperty('fields', permission)).toEqualTypeOf<unknown>();
+      expectTypeOf(domain.getProperty('fields')(permission)).toEqualTypeOf<unknown>();
     });
   });
 

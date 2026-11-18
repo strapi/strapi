@@ -96,3 +96,33 @@ describe('Passport', () => {
     });
   });
 });
+
+describe('Local Strategy email normalization', () => {
+  test('lower-cases the email before checking credentials', async () => {
+    const checkCredentials = vi.fn(() => Promise.resolve([null, { id: 'foo' }, 'bar']));
+    global.strapi = { admin: { services: { auth: { checkCredentials } } } } as any;
+
+    const strategy = createLocalStrategy(strapi);
+
+    // @ts-expect-error passport strategy handler accepts runtime callback args
+    await strategy.handler('Admin@Example.COM', 'pwd', vi.fn());
+
+    expect(checkCredentials).toHaveBeenCalledWith({ email: 'admin@example.com', password: 'pwd' });
+  });
+});
+
+describe('Local Strategy non-string email', () => {
+  test('coerces a non-string email (JSON array body) instead of throwing', async () => {
+    const checkCredentials = vi.fn(() => Promise.resolve([null, false, 'Invalid credentials']));
+    global.strapi = { admin: { services: { auth: { checkCredentials } } } } as any;
+
+    const strategy = createLocalStrategy(strapi);
+    const done = vi.fn();
+
+    // @ts-expect-error passport-local passes whatever the JSON body holds
+    await strategy.handler(['Admin@Example.COM'], 'pwd', done);
+
+    expect(checkCredentials).toHaveBeenCalledWith({ email: 'admin@example.com', password: 'pwd' });
+    expect(done).toHaveBeenCalledWith(null, false, 'Invalid credentials');
+  });
+});

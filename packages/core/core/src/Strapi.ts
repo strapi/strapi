@@ -45,7 +45,6 @@ import { createContentAPISchemaRegistry } from './core-api/routes/validation/sch
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
 const tsUtils = (): typeof import('@strapi/typescript-utils') => {
   if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyTsUtils = require('@strapi/typescript-utils');
   }
   return lazyTsUtils as typeof import('@strapi/typescript-utils');
@@ -70,10 +69,13 @@ class Strapi extends Container implements Core.Strapi {
 
   internal_config: Record<string, unknown> = {};
 
+  private readonly openOnStart: boolean | undefined;
+
   constructor(opts: StrapiOptions) {
     super();
 
     this.internal_config = loadConfiguration(opts);
+    this.openOnStart = opts.open;
 
     this.registerInternalServices();
 
@@ -369,11 +371,14 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async openAdmin({ isInitialized }: { isInitialized: boolean }) {
-    const shouldOpenAdmin =
-      this.config.get('environment') === 'development' &&
-      this.config.get('admin.autoOpen', true) !== false;
+    const shouldOpen = utils.shouldOpenAdmin({
+      environment: this.config.get('environment'),
+      autoOpen: this.config.get('admin.autoOpen', true),
+      open: this.openOnStart,
+      isInitialized,
+    });
 
-    if (shouldOpenAdmin && !isInitialized) {
+    if (shouldOpen) {
       try {
         await utils.openBrowser(this.config);
         this.telemetry.send('didOpenTab');
@@ -694,6 +699,12 @@ export interface StrapiOptions {
   distDir: string;
   autoReload?: boolean;
   serveAdminPanel?: boolean;
+  /**
+   * Open the admin in a browser after the server listens, in development only. `true` always
+   * opens it, `false` never does. `undefined` keeps the default: only when no admin user exists
+   * and `admin.autoOpen` is not `false`. Not part of the app config.
+   */
+  open?: boolean;
 }
 
 export default Strapi;

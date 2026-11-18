@@ -19,3 +19,9 @@ describe('urls', () => {
     });
   });
 });
+
+describe('createAbsoluteUrl trailing slashes', () => {
+  it('removes every trailing slash, not only the last one', () => {
+    expect(createAbsoluteUrl('/admin///')).toBe('http://localhost:1337/admin');
+  });
+});
