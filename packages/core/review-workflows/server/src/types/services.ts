@@ -388,8 +388,8 @@ export type StagesService = {
     populate?: queryParams.Params['populate'];
   }): Promise<PopulatedStageRow[]>;
   /**
-   * Resolves the stage with this ID, `null` when there is none. `workflowId` is ignored: the stage
-   * can belong to any workflow.
+   * Resolves the stage with this ID, `null` when there is none or, when `workflowId` is given, when
+   * the stage belongs to another workflow.
    *
    * @internal
    */
