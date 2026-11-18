@@ -2,7 +2,7 @@ import { determineAgent } from '@vercel/detect-agent';
 import ciInfo from 'ci-info';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { detectInvocation } from '../invocation';
+import { detectInvocation, resolvePromptMode } from '../invocation';
 import { isTelemetryDisabled } from '../usage';
 
 vi.mock('@vercel/detect-agent', async (importOriginal) => ({
@@ -160,5 +160,68 @@ describe('isTelemetryDisabled', () => {
     delete process.env.STRAPI_TELEMETRY_DISABLED;
 
     expect(isTelemetryDisabled()).toBe(false);
+  });
+});
+
+describe('resolvePromptMode', () => {
+  const originalStdinTty = process.stdin.isTTY;
+  const originalStdoutTty = process.stdout.isTTY;
+
+  beforeEach(() => {
+    mockedCiInfo.isCI = false;
+    setTty(process.stdin, true);
+    setTty(process.stdout, true);
+  });
+
+  afterEach(() => {
+    setTty(process.stdin, originalStdinTty);
+    setTty(process.stdout, originalStdoutTty);
+  });
+
+  it('is interactive with a terminal and no CI', () => {
+    expect(resolvePromptMode({})).toEqual({ interactive: true });
+  });
+
+  it('is not interactive when stdin is not a terminal', () => {
+    setTty(process.stdin, undefined);
+
+    expect(resolvePromptMode({})).toEqual({ interactive: false, reason: 'no-tty' });
+  });
+
+  it('is not interactive when stdout is not a terminal', () => {
+    setTty(process.stdout, undefined);
+
+    expect(resolvePromptMode({})).toEqual({ interactive: false, reason: 'no-tty' });
+  });
+
+  it('is not interactive in CI, even with a terminal', () => {
+    mockedCiInfo.isCI = true;
+
+    expect(resolvePromptMode({})).toEqual({ interactive: false, reason: 'ci' });
+  });
+
+  it('gives --non-interactive priority over the environment', () => {
+    mockedCiInfo.isCI = true;
+
+    expect(resolvePromptMode({ nonInteractive: true })).toEqual({
+      interactive: false,
+      reason: 'flag',
+    });
+  });
+
+  it('lets --interactive turn off the detection in CI and without a terminal', () => {
+    mockedCiInfo.isCI = true;
+    setTty(process.stdin, undefined);
+    setTty(process.stdout, undefined);
+
+    expect(resolvePromptMode({ interactive: true })).toEqual({ interactive: true });
+  });
+
+  it('agrees with detectInvocation about the terminal', async () => {
+    setTty(process.stdout, undefined);
+    mockedDetermineAgent.mockResolvedValue({ isAgent: false, agent: undefined });
+
+    expect(resolvePromptMode({})).toEqual({ interactive: false, reason: 'no-tty' });
+    await expect(detectInvocation()).resolves.toEqual({ invocation: 'unknown', agentName: null });
   });
 });

@@ -273,6 +273,46 @@ describe('create-strapi-app', () => {
     expect(out).toMatch(/non-interactive|directory/i);
   });
 
+  // The spawned process has no terminal, so the CLI switches to --non-interactive by itself.
+  it('switches to non-interactive mode without a terminal', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      const { stdout } = await spawnCsa(
+        [projectDir, '--skip-cloud', '--no-install', '--no-git-init'],
+        {
+          CI: 'false',
+        }
+      )
+        .expect('code', 0)
+        .end();
+
+      expect(stdout).toMatch(/not a terminal/i);
+      expect(stdout).toContain('Your application was created');
+      expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails without a directory when there is no terminal', async () => {
+    const { stderr, stdout } = await spawnCsa(['--skip-cloud'], { CI: 'false' })
+      .expect('code', 1)
+      .end();
+
+    const out = `${stdout}${stderr}`;
+    expect(out).toMatch(/directory/i);
+    expect(out).toMatch(/not a terminal/i);
+  });
+
+  it('fails when --interactive and --non-interactive are both set', async () => {
+    const { stderr, stdout } = await spawnCsa(['my-app', '--interactive', '--non-interactive'])
+      .expect('code', 1)
+      .end();
+
+    const out = `${stdout}${stderr}`;
+    expect(out).toMatch(/--interactive.*--non-interactive/i);
+  });
+
   it('fails when --typescript and --javascript are both set', async () => {
     const projectDir = mkProjectDir();
     try {

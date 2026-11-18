@@ -46,6 +46,16 @@ const getDetectedAgent = async () => {
 };
 
 /**
+ * Reads the two environment facts that both the telemetry value and the prompt mode use, so the two
+ * cannot disagree. A terminal means a TTY on both stdin (to read answers) and stdout (to show the
+ * prompts).
+ */
+const readEnvironment = () => ({
+  isCI: ciInfo.isCI,
+  hasTerminal: process.stdin.isTTY === true && process.stdout.isTTY === true,
+});
+
+/**
  * Tells how create-strapi-app was started. Signals, strongest first:
  * 1. `--agent <name>` or `STRAPI_AGENT`: the caller says it is an agent.
  * 2. Environment markers that coding agents set (via `@vercel/detect-agent`).
@@ -62,11 +72,53 @@ export async function detectInvocation({
     return { invocation: 'agent', agentName };
   }
 
-  if (ciInfo.isCI) {
+  const { isCI, hasTerminal } = readEnvironment();
+
+  if (isCI) {
     return { invocation: 'ci', agentName: null };
   }
 
-  const hasTerminal = process.stdin.isTTY === true && process.stdout.isTTY === true;
-
   return { invocation: hasTerminal ? 'human' : 'unknown', agentName: null };
+}
+
+export type NonInteractiveReason = 'flag' | 'ci' | 'no-tty';
+
+export type PromptMode =
+  | { interactive: true }
+  | { interactive: false; reason: NonInteractiveReason };
+
+/**
+ * Tells whether the CLI can ask questions. Signals, strongest first:
+ * 1. `--non-interactive`: never ask.
+ * 2. `--interactive`: always ask, even in CI or without a terminal. This restores the old behavior,
+ *    for example to read answers piped on stdin.
+ * 3. CI: nobody answers, even with a terminal.
+ * 4. No terminal on stdin or stdout: the prompts cannot read answers or cannot be seen.
+ */
+export function resolvePromptMode({
+  nonInteractive,
+  interactive,
+}: {
+  nonInteractive?: boolean;
+  interactive?: boolean;
+}): PromptMode {
+  if (nonInteractive === true) {
+    return { interactive: false, reason: 'flag' };
+  }
+
+  if (interactive === true) {
+    return { interactive: true };
+  }
+
+  const { isCI, hasTerminal } = readEnvironment();
+
+  if (isCI) {
+    return { interactive: false, reason: 'ci' };
+  }
+
+  if (!hasTerminal) {
+    return { interactive: false, reason: 'no-tty' };
+  }
+
+  return { interactive: true };
 }
