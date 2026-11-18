@@ -53,20 +53,19 @@ interface RootProps {
   pageCount?: PaginationApi['pageCount'];
   /**
    * @default 1
-   * @description the initial page number.
+   * @description the initial page number when the URL has no `page` param.
+   * A spread API `page` is ignored, so a refetch cannot move the footer.
    */
   defaultPage?: PaginationApi['page'];
   /**
-   * @description alias for `defaultPage` when spreading an API pagination object.
-   */
-  page?: PaginationApi['page'];
-  /**
    * @default 10
-   * @description the initial number of items to display
+   * @description the initial number of items to display when the URL has no
+   * `pageSize` param. Wins over a spread `pageSize`.
    */
   defaultPageSize?: PaginationApi['pageSize'];
   /**
-   * @description alias for `defaultPageSize` when spreading an API pagination object.
+   * @description page size from a spread API pagination object. Used only when
+   * `defaultPageSize` is omitted and the URL has no `pageSize` param.
    */
   pageSize?: PaginationApi['pageSize'];
   /**
@@ -101,23 +100,21 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
     {
       children,
       defaultPageSize,
-      pageSize,
+      pageSize: spreadPageSize,
       pageCount = 0,
-      defaultPage,
-      page,
+      defaultPage = 1,
       onPageSizeChange,
       total = 0,
     },
     forwardedRef
   ) => {
-    const resolvedPageSize = defaultPageSize ?? pageSize ?? 10;
-    const resolvedPage = defaultPage ?? page ?? 1;
+    const resolvedPageSize = defaultPageSize ?? spreadPageSize ?? 10;
 
     const [{ query }, setQuery] = useQueryParams<
       Pick<PaginationContextValue, 'page' | 'pageSize'> & { filters?: unknown; _q?: unknown }
     >({
       pageSize: resolvedPageSize.toString(),
-      page: resolvedPage.toString(),
+      page: defaultPage.toString(),
     });
 
     const setPageSize = (pageSize: string) => {

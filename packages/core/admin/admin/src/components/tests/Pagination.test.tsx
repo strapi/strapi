@@ -77,7 +77,7 @@ describe('Pagination', () => {
 
     it('should use pageSize from a spread pagination object when defaultPageSize is omitted', () => {
       renderRTL(
-        <Pagination.Root pageCount={2} total={100} pageSize={100} page={1}>
+        <Pagination.Root pageCount={2} total={100} pageSize={100}>
           <Pagination.PageSize />
           <Pagination.Links />
         </Pagination.Root>
@@ -98,6 +98,38 @@ describe('Pagination', () => {
       );
 
       expect(screen.getByRole('combobox')).toHaveTextContent('50');
+    });
+
+    it('should prefer the URL pageSize over a spread pageSize', () => {
+      renderRTL(
+        <Pagination.Root pageCount={2} total={100} pageSize={100}>
+          <Pagination.PageSize />
+        </Pagination.Root>,
+        { initialEntries: [{ search: 'pageSize=20' }] }
+      );
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('20');
+    });
+
+    it('should ignore a spread page and keep the default page', () => {
+      const pagination = { page: 3, pageSize: 20, pageCount: 5, total: 100 };
+
+      renderRTL(
+        <Pagination.Root {...pagination}>
+          <Pagination.PageSize />
+          <Pagination.Links />
+        </Pagination.Root>
+      );
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('20');
+      expect(screen.getByRole('link', { name: 'Go to previous page' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute(
+        'href',
+        expect.stringContaining('page=2')
+      );
     });
 
     it('should render a custom list of options if provided', async () => {
