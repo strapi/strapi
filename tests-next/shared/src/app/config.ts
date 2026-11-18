@@ -18,6 +18,9 @@ export const PORT_BASE = Number(process.env.TESTS_PORT_BASE ?? 8600);
 
 export const HOST = '127.0.0.1';
 
+/** Per request: a server that accepts connections but never answers must not stall startup. */
+export const PROBE_TIMEOUT = 2_000;
+
 export type Suite = 'ui' | 'api' | 'cli';
 
 /** Each suite gets its own port range, so suites can run at the same time. */

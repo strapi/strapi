@@ -8,6 +8,7 @@ import { appEnv } from '../app/env';
 import type { App } from '../app/generate';
 import type { Server } from '../app/server';
 import { databaseFromEnv, type Database } from '../db/database';
+import { editionFromEnv, type Edition } from '../edition';
 import type { SeedPlan, SeedResult } from './types';
 
 export type { AdminPermission, SeedPlan, SeedResult } from './types';
@@ -18,6 +19,8 @@ export interface SeedAppOptions {
    * (`databaseFromEnv()`), like `startServer`.
    */
   database?: Database;
+  /** Default: the run's edition. Seed with the edition the server will start in. */
+  edition?: Edition;
   env?: NodeJS.ProcessEnv;
   /** Default: 120 s. */
   timeout?: number;
@@ -34,7 +37,12 @@ export interface SeedAppOptions {
 export const seedApp = async (
   app: App,
   plan: SeedPlan,
-  { database = databaseFromEnv(), env, timeout = 120_000 }: SeedAppOptions = {}
+  {
+    database = databaseFromEnv(),
+    edition = editionFromEnv(),
+    env,
+    timeout = 120_000,
+  }: SeedAppOptions = {}
 ): Promise<SeedResult> => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tests-seed-'));
   const planFile = path.join(dir, 'plan.json');
@@ -49,7 +57,13 @@ export const seedApp = async (
         cwd: app.dir,
         // The server's env: the seeders live in the test plugin, and the fake AI provider stays
         // off (it would fail outside an EE instance with the feature).
-        env: appEnv(app, { database, testPlugin: true, fakeAiProvider: false, env }),
+        env: appEnv(app, {
+          database,
+          edition,
+          testPlugin: true,
+          fakeAiProvider: false,
+          env,
+        }),
         timeout,
         maxBuffer: 10 * 1024 * 1024,
       }
