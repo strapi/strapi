@@ -49,6 +49,9 @@ const makeDb = () => {
     client: 'better-sqlite3',
     connection: { filename: ':memory:' },
     useNullAsDefault: true,
+    // The sqlite pool has one connection, so a write that escapes an open transaction
+    // waits for it; fail fast instead of hitting the jest timeout.
+    acquireConnectionTimeout: 1000,
   });
 
   const metadata = createMetadata(models as any);
@@ -109,7 +112,7 @@ const setupTables = async (connection: knex.Knex) => {
   ]);
 };
 
-describe('relation subquery path (deleteMany / updateMany)', () => {
+describe('relation subquery path (delete / update writes)', () => {
   it.each([
     [
       'nested relation where',
@@ -277,27 +280,73 @@ describe('relation subquery path (deleteMany / updateMany)', () => {
     await connection.destroy();
   });
 
-  it('query builder increment honours an explicit transaction', async () => {
+  it('query builder increment + decrement: scalar where (no subquery)', async () => {
     const { db, connection } = makeDb();
     await setupTables(connection);
     const em = createEntityManager(db);
 
-    const trx = await connection.transaction();
-    try {
-      await em
-        .createQueryBuilder(TEST_UID)
-        .init({ where: { related: { title: 'Category A' } } })
-        .increment('views', 5)
-        .transacting(trx)
-        .execute();
+    await em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { name: 'Samuel UMTITI' } })
+      .increment('views', 4)
+      .decrement('likes', 1)
+      .execute();
 
-      expect(await trx('tests').orderBy('id').pluck('views')).toEqual([15, 10, 15]);
-    } finally {
-      await trx.rollback();
-    }
-
-    expect(await connection('tests').orderBy('id').pluck('views')).toEqual([10, 10, 10]);
+    const rows = await connection('tests').orderBy('id').select('views', 'likes');
+    expect(rows).toEqual([
+      { views: 10, likes: 10 },
+      { views: 14, likes: 9 },
+      { views: 10, likes: 10 },
+    ]);
 
     await connection.destroy();
   });
+
+  it.each([
+    [
+      'increment',
+      (qb: any) => qb.increment('views', 5),
+      (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('views'),
+      [15, 10, 15],
+    ],
+    [
+      'update',
+      (qb: any) => qb.update({ name: 'UPDATED' }),
+      (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('name'),
+      ['UPDATED', 'Samuel UMTITI', 'UPDATED'],
+    ],
+    [
+      'delete',
+      (qb: any) => qb.delete(),
+      (trx: knex.Knex.Transaction) => trx('tests').orderBy('id').pluck('name'),
+      ['Samuel UMTITI'],
+    ],
+  ])(
+    'query builder %s honours an explicit transaction',
+    async (_label, apply, read, expectedInTrx) => {
+      const { db, connection } = makeDb();
+      await setupTables(connection);
+      const em = createEntityManager(db);
+
+      const trx = await connection.transaction();
+      try {
+        const qb = em
+          .createQueryBuilder(TEST_UID)
+          .init({ where: { related: { title: 'Category A' } } });
+        await apply(qb).transacting(trx).execute();
+
+        expect(await read(trx)).toEqual(expectedInTrx);
+      } finally {
+        await trx.rollback();
+      }
+
+      expect(await connection('tests').orderBy('id').select('name', 'views')).toEqual([
+        { name: 'Hugo LLORIS', views: 10 },
+        { name: 'Samuel UMTITI', views: 10 },
+        { name: 'Lucas HERNANDEZ', views: 10 },
+      ]);
+
+      await connection.destroy();
+    }
+  );
 });
