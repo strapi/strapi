@@ -18,6 +18,9 @@ export const PORT_BASE = Number(process.env.TESTS_PORT_BASE ?? 8600);
 
 export const HOST = '127.0.0.1';
 
+/** Per request: a server that accepts connections but never answers must not stall startup. */
+export const PROBE_TIMEOUT = 2_000;
+
 export type Suite = 'ui' | 'api' | 'cli';
 
 /** Each suite gets its own port range, so suites can run at the same time. */
@@ -33,6 +36,9 @@ export const appPort = (suite: Suite, index: number) =>
 /** The `strapi` CLI of the workspace, run with the app as cwd. */
 export const strapiBin = () =>
   path.join(path.dirname(require.resolve('@strapi/strapi/package.json')), 'bin', 'strapi.js');
+
+/** NODE_ENV of the test apps. The config scaffolders write to `config/env/<APP_NODE_ENV>`. */
+export const APP_NODE_ENV = 'development';
 
 /**
  * The env of the runner, without its `DATABASE_*` variables. Every spawn of a test app (generation,
@@ -52,10 +58,11 @@ export const inheritedEnv = (): NodeJS.ProcessEnv => {
 
 /**
  * Env every test app (and app generation) runs with, on top of `inheritedEnv()` and the
- * caller's env.
+ * caller's env. The database env comes from the `database` option of `startServer` and
+ * `seedApp` (see app/env.ts and db/database.ts).
  */
 export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
   STRAPI_TELEMETRY_DISABLED: 'true',
-  NODE_ENV: 'development',
+  NODE_ENV: APP_NODE_ENV,
 });

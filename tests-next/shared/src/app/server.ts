@@ -2,10 +2,11 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import net from 'node:net';
 import path from 'node:path';
 
-import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
-import { databaseEnv, databaseFromEnv, type Database } from '../db/database';
-import { HOST, baseEnv, inheritedEnv, strapiBin } from './config';
+import { databaseFromEnv, type Database } from '../db/database';
+import { assertEdition, editionFromEnv, getInstanceFeatures, type Edition } from '../edition';
+import { HOST, PROBE_TIMEOUT, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
+import { appEnv } from './env';
 import type { App } from './generate';
 
 /**
@@ -25,7 +26,12 @@ export interface StartServerOptions {
    */
   database?: Database;
   env?: NodeJS.ProcessEnv;
-  /** Load the test plugin (tests-next/shared/test-plugin). Default: true. */
+  /** Default: the run's edition (`STRAPI_TEST_EDITION`, see edition/index.ts). */
+  edition?: Edition;
+  /**
+   * Load the test plugin (tests-next/shared/test-plugin). Default: true. Without it, the server
+   * can't check that Strapi booted in the expected edition.
+   */
   testPlugin?: boolean;
   /** Register the fake AI translations provider. Needs EE with the `cms-byok-ai` feature. */
   fakeAiProvider?: boolean;
@@ -36,6 +42,7 @@ export interface StartServerOptions {
 export interface Server {
   app: App;
   database: Database;
+  edition: Edition;
   port: number;
   url: string;
   pid: number;
@@ -45,8 +52,6 @@ export interface Server {
 }
 
 const MAX_LOG_LENGTH = 200_000;
-/** Per request: a server that accepts connections but never answers must not stall startup. */
-const PROBE_TIMEOUT = 2_000;
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -159,6 +164,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     requireAdmin = false,
     env,
     database = databaseFromEnv(),
+    edition = editionFromEnv(),
     testPlugin = true,
     fakeAiProvider = false,
     timeout = 120_000,
@@ -188,13 +194,7 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
   const child = spawn(process.execPath, [path.join(__dirname, 'serve.cjs'), strapiBin(), ...args], {
     cwd: app.dir,
     env: {
-      ...inheritedEnv(),
-      ...baseEnv(),
-      ...databaseEnv(app, database),
-      [TEST_PLUGIN_ENV_VAR]: String(testPlugin),
-      // Always written, so a value inherited from the shell can't turn the fake provider on.
-      [TEST_AI_PROVIDER_ENV_VAR]: fakeAiProvider ? 'fake' : '',
-      ...env,
+      ...appEnv(app, { database, edition, testPlugin, fakeAiProvider, env }),
       PORT: String(port),
     },
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
@@ -259,7 +259,28 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
     await sleep(50);
   }
 
-  return { app, database, port, url, pid: child.pid!, logs: () => output, stop };
+  const server: Server = {
+    app,
+    database,
+    edition,
+    port,
+    url,
+    pid: child.pid!,
+    logs: () => output,
+    stop,
+  };
+
+  // Strapi boots as CE, with a warning, when it rejects the license: fail the run instead.
+  if (testPlugin) {
+    try {
+      assertEdition(await getInstanceFeatures(server), edition);
+    } catch (error) {
+      await stop();
+      throw new Error(`${(error as Error).message}\n${output.slice(-4000)}`, { cause: error });
+    }
+  }
+
+  return server;
 };
 
 export const stopServer = (server: Server) => server.stop();
