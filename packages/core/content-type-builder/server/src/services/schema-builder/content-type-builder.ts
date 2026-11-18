@@ -384,6 +384,14 @@ export default function createComponentBuilder() {
             continue;
           }
 
+          // A relation to a type that the save deletes is removed with that type
+          if (
+            isRelation(beforeSave) &&
+            this.deletedContentTypes.has((beforeSave as InternalRelationAttribute).target)
+          ) {
+            continue;
+          }
+
           const partnerName = otherSideName(beforeSave);
 
           if (partnerName === undefined) {
@@ -663,6 +671,20 @@ export default function createComponentBuilder() {
         ...newAttributes,
       };
 
+      // The other sides that more than one relation of the edit names: these keep the default
+      // owner and inverse sides, as before (see ownsBeforeSave)
+      const claimCounts = _.countBy(
+        (Object.values(newAttributes) as InternalAttribute[])
+          .filter((attribute) => isRelation(attribute))
+          .map((attribute) => attribute as InternalRelationAttribute)
+          .filter(({ targetAttribute }) => !_.isNil(targetAttribute)),
+        ({ target, targetAttribute }) => `${target}.${targetAttribute}`
+      );
+      const counterpartBeforeSave = (attribute: InternalRelationAttribute) =>
+        claimCounts[`${attribute.target}.${attribute.targetAttribute}`] === 1
+          ? this.counterpartBeforeSave(attribute)
+          : undefined;
+
       const newKeys = _.difference(Object.keys(newAttributes), Object.keys(oldAttributes));
       const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
@@ -697,7 +719,12 @@ export default function createComponentBuilder() {
                 : undefined;
 
             relationAttribute.dominant =
-              otherSide === undefined || otherSide.dominant === undefined;
+              ownsBeforeSave(
+                relationAttribute,
+                undefined,
+                counterpartBeforeSave(relationAttribute)
+              ) ??
+              (otherSide === undefined || otherSide.dominant === undefined);
           }
 
           return this.setRelation({
@@ -875,7 +902,7 @@ export default function createComponentBuilder() {
             const ownsBefore = ownsBeforeSave(
               relationAttribute,
               contentType.initialSchema?.attributes?.[key],
-              this.counterpartBeforeSave(relationAttribute)
+              counterpartBeforeSave(relationAttribute)
             );
 
             if (originOwnership?.inversedBy) {
@@ -893,11 +920,9 @@ export default function createComponentBuilder() {
                 relationAttribute.targetAttribute
               ] as InternalRelationAttribute;
 
-              if (targetAttribute.dominant === undefined) {
-                relationAttribute.dominant = true;
-              } else {
-                relationAttribute.dominant = false;
-              }
+              // The opposite of the other side when the save already decided it
+              relationAttribute.dominant =
+                targetAttribute.dominant === undefined ? true : !targetAttribute.dominant;
             } else {
               relationAttribute.dominant = true;
             }

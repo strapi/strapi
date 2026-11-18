@@ -1156,6 +1156,130 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         }
       );
 
+      // A oneToMany other side cannot own the pair
+      it.skipIf(kind === 'manyToOne')(
+        'keeps two new relations that name the same existing owner as owners, as before',
+        () => {
+          // Shelf.books owns the pair with Book.shelf. A save of Book alone drops shelf and adds
+          // first and second, both with the other side books: same result as develop
+          const { contentTypes } = (global as any).strapi;
+          contentTypes[shelfUid].__schema__.attributes.books = {
+            type: 'relation',
+            relation: kind,
+            target: bookUid,
+            inversedBy: 'shelf',
+          };
+          contentTypes[bookUid].__schema__.attributes.shelf = {
+            type: 'relation',
+            relation: kind,
+            target: shelfUid,
+            mappedBy: 'books',
+          };
+
+          const builder = editAll(
+            {
+              [bookUid]: {
+                title: { type: 'string' },
+                first: relation(kind, shelfUid, 'books'),
+                second: relation(kind, shelfUid, 'books'),
+              },
+            },
+            [bookUid]
+          );
+
+          expect(attributesOf(builder, bookUid).first).toMatchObject({ inversedBy: 'books' });
+          expect(attributesOf(builder, bookUid).second).toMatchObject({ inversedBy: 'books' });
+          expect(attributesOf(builder, shelfUid).books).toMatchObject({ mappedBy: 'second' });
+        }
+      );
+
+      it.skipIf(kind === 'manyToOne')(
+        'writes one owner for a self pair that takes the name of a relation to a deleted type',
+        () => {
+          // Book.alias is a one-way relation to Shelf. The save deletes Shelf, then adds the self
+          // pair Book.reference / Book.alias, with reference first
+          const { contentTypes } = (global as any).strapi;
+          contentTypes[bookUid].__schema__.attributes.alias = {
+            type: 'relation',
+            relation: kind,
+            target: shelfUid,
+          };
+
+          const builder = createBuilder();
+          builder.deleteContentType(shelfUid);
+          builder.editContentType({
+            uid: bookUid,
+            kind: 'collectionType',
+            displayName: bookUid,
+            draftAndPublish: false,
+            attributes: {
+              title: { type: 'string' },
+              reference: relation(kind, bookUid, 'alias'),
+              alias: relation(kind, bookUid, 'reference'),
+            },
+          });
+          builder.assertRelationPairs();
+
+          expectValidPair(builder, [bookUid, 'reference'], [bookUid, 'alias']);
+        }
+      );
+
+      it.skipIf(kind === 'manyToOne').each(permutations([bookUid, shelfUid]))(
+        'keeps a one-way relation the owner when a scalar of the save becomes its other side (%s, %s)',
+        (...order) => {
+          // Shelf.books is one-way to Book and holds the links. Book.label, a string, becomes
+          // the other side of Shelf.books
+          const { contentTypes } = (global as any).strapi;
+          contentTypes[shelfUid].__schema__.attributes.books = {
+            type: 'relation',
+            relation: kind,
+            target: bookUid,
+          };
+          contentTypes[bookUid].__schema__.attributes = {
+            title: { type: 'string' },
+            label: { type: 'string' },
+          };
+
+          const builder = editAll(
+            {
+              [bookUid]: { title: { type: 'string' }, label: relation(kind, shelfUid, 'books') },
+              [shelfUid]: { name: { type: 'string' }, books: relation(kind, bookUid, 'label') },
+            },
+            order
+          );
+
+          expectValidPair(builder, [shelfUid, 'books'], [bookUid, 'label'], 'first');
+        }
+      );
+
+      it('gives a new relation the name of a one-way relation to a deleted type', () => {
+        // Shelf.alias is one-way to Bookcase. The save deletes Bookcase, and Book.rack takes
+        // alias as its other side, without sending Shelf
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[shelfUid].__schema__.attributes.alias = {
+          type: 'relation',
+          relation: oppositeRelation[kind],
+          target: bookcaseUid,
+        };
+
+        const builder = createBuilder();
+        builder.deleteContentType(bookcaseUid);
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          attributes: {
+            title: { type: 'string' },
+            shelf: relation(kind, shelfUid, 'books'),
+            rack: relation(kind, shelfUid, 'alias'),
+          },
+        });
+        builder.assertRelationPairs();
+
+        expectValidPair(builder, [bookUid, 'rack'], [shelfUid, 'alias']);
+      });
+
       it.each([
         ['the deletion first', true],
         ['the edit first', false],

@@ -1113,4 +1113,54 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
       });
     }
   );
+  test('makes a one-way manyToMany two-way with Shelf first and keeps its links', async () => {
+    await createTypes();
+
+    // Book.shelf is a one-way manyToMany to Shelf, with one link
+    const bookSchema = await fse.readJSON(schemaFile('rt-book'));
+    bookSchema.attributes.shelf = { type: 'relation', relation: 'manyToMany', target: SHELF_UID };
+    await fse.writeJSON(schemaFile('rt-book'), bookSchema, { spaces: 2 });
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    delete shelfSchema.attributes.books;
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const shelf = await strapi.documents(SHELF_UID).create({ data: { name: 'Shelf 1' } });
+    const book = await strapi.documents(BOOK_UID).create({
+      data: { title: 'Book 1', shelf: [shelf.documentId] },
+    });
+
+    // The admin form sends both types; Shelf comes first
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('create', 'books', relation('manyToMany', BOOK_UID, 'shelf')),
+        ]),
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToMany', SHELF_UID, 'books')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    // Book.shelf, which held the links, stays the owner
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'shelf' });
+
+    const bookWithShelf = await strapi.documents(BOOK_UID).findOne({
+      documentId: book.documentId,
+      populate: ['shelf'],
+    });
+    const shelfWithBooks = await strapi.documents(SHELF_UID).findOne({
+      documentId: shelf.documentId,
+      populate: ['books'],
+    });
+    expect(bookWithShelf?.shelf).toMatchObject([{ documentId: shelf.documentId }]);
+    expect(shelfWithBooks?.books).toMatchObject([{ documentId: book.documentId }]);
+  });
 });
