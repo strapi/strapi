@@ -42,7 +42,8 @@ const Layout = () => {
     a.title.localeCompare(b.title)
   );
 
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const permissions = useAuth('Layout', (state) => state.permissions);
@@ -120,7 +121,7 @@ const Layout = () => {
     // On desktop: redirect to first collection type
     if (!isMobile) {
       // Let the list restore saved preferences before applying its defaults.
-      return <Navigate to={authorisedModels[0].to} replace />;
+      return <Navigate key={location.key} to={authorisedModels[0].to} replace />;
     }
 
     // On mobile: show navigation page
