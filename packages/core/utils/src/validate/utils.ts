@@ -1,11 +1,20 @@
-// lodash/fp curry does not handle async functions properly, and creates very "ugly" types,
-// so we will use our own version to ensure curried functions are typed correctly
+// Keep asynchronous return values in the types of partially applied functions.
 // TODO: Export this from root @strapi/utils so we don't have copies of it between packages
 
+import { curry } from '../curry';
 import { ValidationError } from '../errors';
 
-export const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }): never => {
-  const msg = path && path !== key ? `Invalid key ${key} at ${path}` : `Invalid key ${key}`;
+export const throwInvalidKey = ({
+  key,
+  path,
+  reason,
+}: {
+  key: string;
+  path?: string | null;
+  reason?: string;
+}): never => {
+  const location = path && path !== key ? `Invalid key ${key} at ${path}` : `Invalid key ${key}`;
+  const msg = reason ? `${location}: ${reason}` : location;
 
   throw new ValidationError(msg, {
     key,
@@ -15,13 +24,4 @@ export const throwInvalidKey = ({ key, path }: { key: string; path?: string | nu
 
 export const asyncCurry = <A extends unknown[], R>(
   fn: (...args: A) => Promise<R>
-): ((...args: Partial<A>) => any) => {
-  const curried = (...args: unknown[]): unknown => {
-    if (args.length >= fn.length) {
-      return fn(...(args as A));
-    }
-    return (...moreArgs: unknown[]) => curried(...args, ...moreArgs);
-  };
-
-  return curried;
-};
+): ((...args: Partial<A>) => any) => curry(fn as (...args: unknown[]) => Promise<R>);

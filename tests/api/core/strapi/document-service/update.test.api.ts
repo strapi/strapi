@@ -1,6 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { setupDatabaseReset } from '../../../utils/index';
@@ -90,7 +90,7 @@ describe('Document Service', () => {
 
       // verify that the returned document was updated
       expect(article).toMatchObject({
-        ...omit('updatedAt', articleDb),
+        ...omit(articleDb, 'updatedAt'),
         ...data,
       });
     });
@@ -109,7 +109,7 @@ describe('Document Service', () => {
 
       // verify that the returned document was updated
       expect(article).toMatchObject({
-        ...omit('updatedAt', articleDb),
+        ...omit(articleDb, 'updatedAt'),
         ...data,
       });
 

@@ -1,0 +1,76 @@
+---
+title: useDocument
+description: API reference for the useDocument hook from Strapi's Content Manager
+tags:
+  - hooks
+  - public-api
+---
+
+:::warning
+This hook is considered unstable and may change in a future release.
+:::
+
+Returns a document based on the model, collection type & id passed as arguments. Also extracts its schema from the redux cache to be used for creating a validation schema.
+
+The validation schema is built the first time `validate` is called, not when the hook mounts. It is cached per `schema` and `components` objects, which `useContentTypeSchema` shares across hook instances. The edit view calls `useDocument` from every field, so building the schema on mount used to cost seconds and gigabytes of memory on large content types.
+
+## Usage
+
+```tsx
+const { id, model, collectionType } = useParams<{
+  id: string;
+  model: string;
+  collectionType: string;
+}>();
+
+if (!model || !collectionType) return null;
+
+const { document, isLoading, validate } = useDocument({
+  documentId: id,
+  model,
+  collectionType,
+  params: { locale: 'en-GB' },
+});
+const { update } = useDocumentActions();
+
+const onSubmit = async (entity: Entity) => {
+  const errors = validate(entity);
+
+  if (errors) {
+    // handle errors
+  }
+
+  await update({ collectionType, model, documentId: id }, entity);
+};
+```
+
+### Content Manager
+
+If you're using this in the Strapi Content-Manager package, it is preferable to import `useDoc` instead.
+This is because whilst it's a light wrapper around `useDocument` it automatically extracts the params from
+react-router hooks to pre-provide the information for you e.g. `model` and `collectionType`. Saving us from
+getting the params each time and validating that they are not `undefined`.
+
+## Typescript
+
+```ts
+import type { Attribute } from '@strapi/strapi';
+
+interface Document {
+  documentId: string;
+  [key: string]: Attribute.GetValue<Attribute.Any>;
+}
+
+interface UseDocumentArgs {
+  collectionType: string;
+  model: string;
+  documentId?: string;
+  params?: object;
+}
+
+type UseDocument = (args: UseDocumentArgs) => {
+  document?: Document;
+  isLoading: boolean;
+  validate: (entity: Entity) => null | Record<string, TranslationMessage>;
+};
+```

@@ -10,6 +10,7 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
+import { getScanRoots } from './core/scan-roots';
 import type { BaseContext } from './types';
 
 interface BaseOptions {
@@ -38,11 +39,15 @@ interface BuildContext extends BaseContext {
    * incl. internal plugins, third party plugins & local plugins
    */
   plugins: PluginMeta[];
+  /** The directories Tailwind scans. Computed once: the stylesheet, Vite and the watcher share it */
+  scanRoots: string[];
 }
 
 interface CreateBuildContextArgs extends CLIContext {
   strapi?: Core.Strapi;
   options?: BaseOptions;
+  /** If true, Tailwind scans source and not `dist`. E.g. for the development server, which serves `admin/src` */
+  dev?: boolean;
 }
 
 const DEFAULT_BROWSERSLIST = [
@@ -58,6 +63,7 @@ const createBuildContext = async ({
   tsconfig,
   strapi,
   options = {},
+  dev = false,
 }: CreateBuildContextArgs): Promise<BuildContext> => {
   /**
    * If you make a new strapi instance when one already exists,
@@ -102,10 +108,16 @@ const createBuildContext = async ({
   // NOTE: Transports `admin.auth.cookie.name` / `path` / `domain` into the bundle; always
   // assigned so ambient STRAPI_ADMIN_AUTH_COOKIE_* env vars cannot make the bundle disagree
   // with the server. Domain falls back to `admin.auth.domain`, matching the server resolution.
+  // The path is only used for the access cookie, which the panel reads from its own pages,
+  // so it falls back to the path the browser loads the panel from, matching
+  // getAccessCookiePath() in @strapi/admin.
   env.STRAPI_ADMIN_AUTH_COOKIE_NAME =
     strapiInstance.config.get<string | undefined>('admin.auth.cookie.name') || '';
+  const configuredCookiePath = strapiInstance.config.get<unknown>('admin.auth.cookie.path');
   env.STRAPI_ADMIN_AUTH_COOKIE_PATH =
-    strapiInstance.config.get<string | undefined>('admin.auth.cookie.path') || '';
+    typeof configuredCookiePath === 'string' && configuredCookiePath.trim() !== ''
+      ? configuredCookiePath
+      : adminPublicPath;
   env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN =
     strapiInstance.config.get<string | undefined>('admin.auth.cookie.domain') ||
     strapiInstance.config.get<string | undefined>('admin.auth.domain') ||
@@ -156,6 +168,12 @@ const createBuildContext = async ({
 
   const { bundler = 'vite', ...restOptions } = options;
 
+  const scanRoots = await getScanRoots(
+    { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
+    dev
+  );
+  logger.debug('Tailwind scan roots', os.EOL, scanRoots);
+
   const buildContext: BuildContext = {
     appDir,
     adminPath,
@@ -172,6 +190,7 @@ const createBuildContext = async ({
     options: restOptions,
     plugins: pluginsWithFront,
     runtimeDir,
+    scanRoots,
     strapi: strapiInstance,
     target,
     tsconfig,

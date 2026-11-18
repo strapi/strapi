@@ -1,13 +1,7 @@
 // TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
-import {
-  ConfirmDialog,
-  useTracking,
-  useNotification,
-  Page,
-  Layouts,
-} from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, useNotification, Page, Layouts } from '@strapi/admin/strapi-admin';
 import { Button, Dialog, Link } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
@@ -16,6 +10,7 @@ import { NavLink } from 'react-router-dom';
 
 import { pluginId } from '../../../../pluginId';
 import { useConfig } from '../../../hooks/useConfig';
+import { useTracking } from '../../../hooks/useTracking';
 import { getTrad } from '../../../utils';
 
 import { Settings } from './components/Settings';
@@ -41,10 +36,8 @@ export const ConfigureTheView = ({ config }: ConfigureTheViewProps) => {
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  const [reducerState, dispatch] = React.useReducer(
-    reducer,
-    initialState,
-    (): InitialState => init(config)
+  const [reducerState, dispatch] = React.useReducer(reducer, initialState, (): InitialState =>
+    init(config)
   );
   const typedDispatch: React.Dispatch<Action> = dispatch;
   const { initialData, modifiedData } = reducerState;

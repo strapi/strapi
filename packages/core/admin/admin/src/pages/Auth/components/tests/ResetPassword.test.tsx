@@ -85,5 +85,22 @@ describe('ResetPassword', () => {
 
       expect(await findByText('Password must be less than 73 bytes')).toBeInTheDocument();
     });
+
+    it.each([
+      ['PASSWORD123!', 'Password must contain at least 1 lowercase letter'],
+      ['password123!', 'Password must contain at least 1 uppercase letter'],
+      ['Password!!', 'Password must contain at least 1 number'],
+    ])('should display the strength error for %s', async (password, expectedMessage) => {
+      const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+        initialEntries: [{ search: '?code=test' }],
+      });
+
+      await user.type(getByLabelText('Password*'), password);
+      await user.type(getByLabelText('Confirm Password*'), password);
+
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      expect(await findByText(expectedMessage)).toBeInTheDocument();
+    });
   });
 });

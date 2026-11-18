@@ -1,4 +1,4 @@
-import { pickBy, has } from 'lodash/fp';
+import { has, pickBy } from 'lodash';
 import type { Core } from '@strapi/types';
 import { createModule, RawModule, Module } from '../domain/module';
 
@@ -12,10 +12,10 @@ const modulesRegistry = (strapi: Core.Strapi) => {
       return modules[namespace];
     },
     getAll(prefix = '') {
-      return pickBy<ModuleMap>((mod, namespace) => namespace.startsWith(prefix))(modules);
+      return pickBy(modules, (mod, namespace) => namespace.startsWith(prefix));
     },
     add(namespace: string, rawModule: RawModule) {
-      if (has(namespace, modules)) {
+      if (has(modules, namespace)) {
         throw new Error(`Module ${namespace} has already been registered.`);
       }
 
@@ -36,6 +36,9 @@ const modulesRegistry = (strapi: Core.Strapi) => {
     },
     async destroy() {
       for (const mod of Object.values(modules)) {
+        if (mod.isDestroyed()) {
+          continue;
+        }
         await mod.destroy();
       }
     },

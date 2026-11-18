@@ -193,8 +193,6 @@
   "form.attribute.condition.enum-change-warning": "Следующие поля имеют условия, которые зависят от этого поля: {fieldNames}. Изменение или удаление значений перечисления {values} нарушит эти условия. Вы хотите продолжить?",
   "form.attribute.condition.enum-change-warning-values": ". Изменение или удаление значений перечисления ",
   "form.attribute.condition.enum-change-warning-end": " нарушит эти условия. Вы хотите продолжить?",
-  "form.attribute.condition.field-change-warning": "Следующие поля имеют условия, которые зависят от этого поля: {fieldNames}. Переименование нарушит эти условия. Вы хотите продолжить?",
-  "form.attribute.condition.field-change-warning-end": ". Переименование нарушит эти условия. Вы хотите продолжить?",
   "form.button.collection-type.name": "Тип коллекции",
   "form.button.single-type.name": "Единичный тип",
   "menu.section.components.name": "Компоненты",

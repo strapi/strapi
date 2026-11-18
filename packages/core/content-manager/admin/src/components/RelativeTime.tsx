@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import { Duration, intervalToDuration, isPast } from 'date-fns';
+import { Duration, intervalToDuration, isPast, isValid } from 'date-fns';
 import { useIntl } from 'react-intl';
+
+const EMPTY_CUSTOM_INTERVALS: NonNullable<RelativeTimeProps['customIntervals']> = [];
 
 const intervals: Array<keyof Duration> = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'];
 
@@ -31,8 +33,17 @@ interface RelativeTimeProps extends React.ComponentPropsWithoutRef<'time'> {
  * ```
  */
 const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
-  ({ timestamp, customIntervals = [], ...restProps }, forwardedRef) => {
+  ({ timestamp, customIntervals = EMPTY_CUSTOM_INTERVALS, ...restProps }, forwardedRef) => {
     const { formatRelativeTime, formatDate, formatTime } = useIntl();
+
+    // Invalid Date: intervalToDuration throws RangeError (see #27382).
+    if (!isValid(timestamp)) {
+      return (
+        <time ref={forwardedRef} role="time" {...restProps}>
+          -
+        </time>
+      );
+    }
 
     /**
      * TODO: make this auto-update, like a clock.

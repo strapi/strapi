@@ -1,5 +1,3 @@
-import { omit } from 'lodash/fp';
-
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
 import { createTestBuilder } from 'api-tests/builder';

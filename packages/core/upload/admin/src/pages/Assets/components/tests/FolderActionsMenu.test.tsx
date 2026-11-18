@@ -16,12 +16,17 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   useClipboard: () => ({ copy: mockCopy }),
 }));
 
+const mockSelection = () => ({
+  deselect: mockDeselect,
+  selectedIds: new Set<number>([9, 10]),
+  selectedFolderIds: new Set<number>([8]),
+});
+
 jest.mock('../../hooks/useAssetSelection', () => ({
-  useAssetSelection: () => ({
-    deselect: mockDeselect,
-    selectedIds: new Set<number>([9, 10]),
-    selectedFolderIds: new Set<number>([8]),
-  }),
+  useAssetSelection: () => mockSelection(),
+  // The folder actions read the optional variant, so they also work in the
+  // folder tree, which renders outside the list's selection.
+  useAssetSelectionOptional: () => mockSelection(),
 }));
 
 // Deliberately not one of the folders returned by the default

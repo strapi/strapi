@@ -1,4 +1,4 @@
-import { get, getOr, isFunction, first, isNil } from 'lodash/fp';
+import { get, property } from 'lodash';
 import {
   GraphQLObjectType,
   GraphQLResolveInfo,
@@ -12,14 +12,14 @@ import { createPoliciesMiddleware } from './policy';
 
 const { ForbiddenError } = errors;
 
-const introspectionQueries = [
+const introspectionQueries = new Set([
   '__Schema',
   '__Type',
   '__Field',
   '__InputValue',
   '__EnumValue',
   '__Directive',
-];
+]);
 
 type GraphQLMiddleware = (
   resolve: GraphQLFieldResolver<any, any>,
@@ -30,29 +30,70 @@ type GraphQLMiddleware = (
 ) => any;
 
 /**
+ * Instantiate a registered Strapi middleware and adapt its koa handler to the resolver middleware signature.
+ * The handler receives the koa context, and its `next` resolves the rest of the chain.
+ * If the handler does not call `next`, the field resolves to null.
+ */
+const createRegisteredMiddleware = (
+  name: string,
+  options: unknown,
+  strapi: Core.Strapi
+): GraphQLMiddleware => {
+  const middlewareFactory: Core.MiddlewareFactory | undefined = strapi.middleware(name);
+
+  if (middlewareFactory === undefined) {
+    throw new Error(`Middleware ${name} not found.`);
+  }
+
+  const handler = middlewareFactory(options, { strapi });
+
+  return async (resolve, parent, args, context, info) => {
+    if (handler === undefined) {
+      return resolve(parent, args, context, info);
+    }
+
+    const { koaContext } = context as { koaContext: Parameters<Core.MiddlewareHandler>[0] };
+    let result: unknown = null;
+    let isNextCalled = false;
+
+    // Same guard as koa-compose for REST routes: the chain must not run twice
+    await handler(koaContext, async () => {
+      if (isNextCalled === true) {
+        throw new Error('next() called multiple times');
+      }
+
+      isNextCalled = true;
+      result = await resolve(parent, args, context, info);
+    });
+
+    return result;
+  };
+};
+
+/**
  * Get & parse middlewares definitions from the resolver's config
  * @param {object} resolverConfig
  * @param {object} strapi
  * @return {function[]}
  */
 const parseMiddlewares = (resolverConfig: any, strapi: Core.Strapi): GraphQLMiddleware[] => {
-  const resolverMiddlewares = getOr([], 'middlewares', resolverConfig);
+  const resolverMiddlewares = get(resolverConfig, 'middlewares', []);
 
   // TODO: [v4] to factorize with compose endpoints (routes)
   return resolverMiddlewares.map(
-    (middleware: string | Core.MiddlewareHandler | { name: string; options: any }) => {
-      if (isFunction(middleware)) {
+    (middleware: string | GraphQLMiddleware | { name: string; options?: unknown }) => {
+      if (typeof middleware === 'function') {
         return middleware;
       }
 
       if (typeof middleware === 'string') {
-        return strapi.middleware(middleware);
+        return createRegisteredMiddleware(middleware, {}, strapi);
       }
 
       if (typeof middleware === 'object') {
-        const { name, options = {} } = middleware;
+        const { name, options } = middleware;
 
-        return strapi.middleware(name)(options, { strapi });
+        return createRegisteredMiddleware(name, options ?? {}, strapi);
       }
 
       throw new Error(
@@ -90,7 +131,7 @@ const wrapResolvers = ({
 
   Object.entries(typeMap).forEach(([type, definition]) => {
     const isGraphQLObjectType = definition instanceof GraphQLObjectType;
-    const isIgnoredType = introspectionQueries.includes(type);
+    const isIgnoredType = introspectionQueries.has(type);
 
     if (!isGraphQLObjectType || isIgnoredType) {
       return;
@@ -100,10 +141,10 @@ const wrapResolvers = ({
     const fieldsToProcess = Object.entries(fields).filter(([field]) => isValidFieldName(field));
 
     for (const [fieldName, fieldDefinition] of fieldsToProcess) {
-      const defaultResolver = get(fieldName);
+      const defaultResolver = property(fieldName);
 
       const path = `${type}.${fieldName}`;
-      const resolverConfig = getOr({}, path, resolversConfig);
+      const resolverConfig = get(resolversConfig, path, {});
 
       const { resolve: baseResolver = defaultResolver } = fieldDefinition;
 
@@ -135,11 +176,11 @@ const wrapResolvers = ({
        * @return {Promise<void>}
        */
       const authorize = async ({ context }: any) => {
-        const authConfig = get('auth', resolverConfig);
-        const authContext = get('state.auth', context);
+        const authConfig = resolverConfig?.auth;
+        const authContext = get(context, 'state.auth');
 
         const isValidType = ['Mutation', 'Query', 'Subscription'].includes(type);
-        const hasConfig = !isNil(authConfig);
+        const hasConfig = authConfig != null;
 
         const isAuthDisabled = authConfig === false;
 
@@ -160,7 +201,7 @@ const wrapResolvers = ({
         await authorize({ context });
 
         // Execute middlewares (including the policy middleware which will always be included)
-        return first(boundMiddlewares)!(parent, args, context, info);
+        return boundMiddlewares[0]!(parent, args, context, info);
       };
     }
   });

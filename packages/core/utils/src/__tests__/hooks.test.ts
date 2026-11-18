@@ -12,6 +12,18 @@ describe('Hooks Module', () => {
         expect(hook).toHaveProperty('call', expect.any(Function));
       });
 
+      test('Deleting a handler retains the others without changing the previous list', () => {
+        const removed = jest.fn();
+        const retained = jest.fn();
+        const hook = hooks.internals.createHook();
+        hook.register(removed).register(retained).register(removed);
+        const previousHandlers = hook.getHandlers();
+
+        expect(hook.delete(removed)).toBe(hook);
+        expect(hook.getHandlers()).toEqual([retained]);
+        expect(previousHandlers).toEqual([removed, retained, removed]);
+      });
+
       test('Call is not implemented by default', async () => {
         const hook = hooks.internals.createHook();
         const doCall = () => hook.call();

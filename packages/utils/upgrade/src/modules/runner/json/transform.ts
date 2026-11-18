@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import assert from 'node:assert';
-import { isEqual } from 'lodash/fp';
+import { isEqual } from 'lodash';
 import { register } from 'esbuild-register/dist/node';
 
 import { createJSONTransformAPI, readJSON, saveJSON } from '../../json';
@@ -47,7 +47,7 @@ export const transformJSON = async (
   const esbuildOptions = {
     extensions: ['.js', '.mjs', '.ts'],
     hookIgnoreNodeModules: false,
-    hookMatcher: isEqual(codemodPath),
+    hookMatcher: (value: string) => isEqual(codemodPath, value),
   };
   const { unregister } = register(esbuildOptions);
 

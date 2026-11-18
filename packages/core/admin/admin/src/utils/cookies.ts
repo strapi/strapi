@@ -9,8 +9,9 @@ import { resolveAuthCookiePath } from '../../../shared/utils/auth-cookie-path';
 export const AUTH_COOKIE_NAME = resolveAuthCookieName(process.env.STRAPI_ADMIN_AUTH_COOKIE_NAME);
 
 /**
- * Resolved once at module load: the build inlines `admin.auth.cookie.path`
- * into the bundle as `STRAPI_ADMIN_AUTH_COOKIE_PATH`.
+ * Resolved once at module load: the build inlines `admin.auth.cookie.path`,
+ * or the path the panel is served from when it is unset, into the bundle as
+ * `STRAPI_ADMIN_AUTH_COOKIE_PATH`.
  */
 export const AUTH_COOKIE_PATH = resolveAuthCookiePath(process.env.STRAPI_ADMIN_AUTH_COOKIE_PATH);
 
@@ -70,10 +71,10 @@ export const getCookieValue = (name: string): string | null => {
 
 /**
  * Sets a cookie with the given name, value, and optional expiration time.
- * Uses `admin.auth.cookie.path` and `admin.auth.cookie.domain` (both inlined
- * at build time) so the access cookie stays scoped to the same path and domain
- * as the httpOnly refresh cookie and the EE SSO access cookie. The cookie is
- * marked `Secure` whenever the page is served over TLS.
+ * Uses the access cookie path and `admin.auth.cookie.domain` (both inlined at
+ * build time) so the cookie lands on the same path and domain as the EE SSO
+ * access cookie written by the server. The cookie is marked `Secure` whenever
+ * the page is served over TLS.
  *
  * @param name - The name of the cookie.
  * @param value - The value of the cookie.

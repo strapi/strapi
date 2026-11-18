@@ -13,11 +13,14 @@ export type SystemOrigin = 'scheduler';
 /**
  * Who performed the action.
  * The subscriber builds this from the request context; emitters and transformers
- * don't provide it. Actions without a user are recorded as 'system'.
+ * don't provide it. Actions from a system origin are recorded as 'system'; actions
+ * from a request with no authenticated user (a public admin form) as 'unknown',
+ * for the events that allow it.
  */
 export type Actor =
   | { type: 'admin-user'; user: { id: string | number; email: string; name: string } }
-  | { type: 'system' };
+  | { type: 'system' }
+  | { type: 'unknown' };
 
 /**
  * The resource the action was performed on.
@@ -32,7 +35,8 @@ export interface Resource {
   name?: string;
 }
 
-export type Outcome = 'success' | 'failure';
+/** `partial`: the action was carried out for only some of its items (e.g. a release run) */
+export type Outcome = 'success' | 'partial' | 'failure';
 
 /**
  * A field's value on either side of a change, as recorded under `details.changes`.
@@ -47,7 +51,8 @@ export interface FieldChange<T = string | number | boolean | null> {
  * The subscriber adds action, date, actor and origin.
  */
 export interface EventShape<TDetails = unknown, TResource extends Resource = Resource> {
-  resource: TResource;
+  // Absent when there is no known resource, e.g. a failed login for an unknown account.
+  resource?: TResource;
   details?: TDetails;
   // Only present when the action can fail (e.g. publish).
   outcome?: Outcome;
@@ -58,8 +63,10 @@ export interface EventShape<TDetails = unknown, TResource extends Resource = Res
  * action and date are also stored as table columns, but are repeated here so
  * the payload can be used on its own when exported or forwarded to another system.
  */
-export interface StoredPayload<TDetails = unknown, TResource extends Resource = Resource>
-  extends EventShape<TDetails, TResource> {
+export interface StoredPayload<
+  TDetails = unknown,
+  TResource extends Resource = Resource,
+> extends EventShape<TDetails, TResource> {
   action: string;
   date: string;
   actor: Actor;

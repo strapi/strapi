@@ -1,16 +1,16 @@
-import _ from 'lodash';
-import { intersection } from 'lodash/fp';
+import _, { intersection } from 'lodash';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 const { getNonVisibleAttributes, getWritableAttributes } = contentTypesUtils;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } =
   contentTypesUtils.constants;
 
-const NON_SORTABLES = ['component', 'json', 'media', 'richtext', 'dynamiczone', 'blocks'];
-const SORTABLE_RELATIONS = ['oneToOne', 'manyToOne'];
+const NON_SORTABLES = new Set(['component', 'json', 'media', 'richtext', 'dynamiczone', 'blocks']);
+const SORTABLE_RELATIONS = new Set(['oneToOne', 'manyToOne']);
 
-const NON_LISTABLES = ['json', 'password', 'richtext', 'dynamiczone', 'blocks'];
-const LISTABLE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
+const NON_LISTABLES = new Set(['json', 'password', 'richtext', 'dynamiczone', 'blocks']);
+const LISTABLE_RELATIONS = new Set(['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany']);
 
 // hidden fields are fields that are configured to be hidden from list, and edit views
 const isHidden = (schema: any, name: any) => {
@@ -36,11 +36,11 @@ const isListable = (schema: any, name: any) => {
   }
 
   const attribute = schema.attributes[name];
-  if (NON_LISTABLES.includes(attribute.type)) {
+  if (NON_LISTABLES.has(attribute.type)) {
     return false;
   }
 
-  if (isRelation(attribute) && !LISTABLE_RELATIONS.includes(attribute.relationType)) {
+  if (isRelation(attribute) && !LISTABLE_RELATIONS.has(attribute.relationType)) {
     return false;
   }
 
@@ -55,11 +55,11 @@ const isSortable = (schema: any, name: any) => {
   if (schema.modelType === 'component' && name === 'id') return false;
 
   const attribute = schema.attributes[name];
-  if (NON_SORTABLES.includes(attribute.type)) {
+  if (NON_SORTABLES.has(attribute.type)) {
     return false;
   }
 
-  if (isRelation(attribute) && !SORTABLE_RELATIONS.includes(attribute.relationType)) {
+  if (isRelation(attribute) && !SORTABLE_RELATIONS.has(attribute.relationType)) {
     return false;
   }
 
@@ -180,8 +180,8 @@ const getSortableAttributes = (schema: any) => {
 
   const model = strapi.getModel(schema.uid);
   const nonVisibleWritableAttributes = intersection(
-    getNonVisibleAttributes(model),
-    getWritableAttributes(model)
+    getWritableAttributes(model),
+    getNonVisibleAttributes(model)
   );
 
   const identifierField = _.has(schema.attributes, 'documentId') ? 'documentId' : 'id';

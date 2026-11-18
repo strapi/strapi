@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
+const { omit } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -11,7 +11,7 @@ const data = {
   deletedLocales: [],
 };
 
-const omitTimestamps = omit(['updatedAt', 'createdAt']);
+const omitTimestamps = (value) => omit(value, ['updatedAt', 'createdAt']);
 const compareLocales = (a, b) => (a.code < b.code ? -1 : 1);
 
 const productModel = {
@@ -54,7 +54,7 @@ describe('CRUD locales', () => {
     await localeService.setDefaultLocale({ code: 'en' });
 
     // Delete all data that has been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
     await strapi.destroy();
     await builder.cleanup();
   });

@@ -3,6 +3,8 @@
 {
   "extends": "@docusaurus/tsconfig",
   "compilerOptions": {
+    // `paths` (`@site/*`) in `@docusaurus/tsconfig` resolve against the `baseUrl` set here.
+    "baseUrl": ".",
     "strict": true,
     "verbatimModuleSyntax": true,
     "types": []

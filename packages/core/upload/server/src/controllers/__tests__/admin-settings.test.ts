@@ -32,13 +32,23 @@ const buildContext = (
   forbidden: jest.fn(),
 });
 
+const mockHasProvider = jest.fn();
+
+const mockUploadServices = () => {
+  mockGetService.mockImplementation((name) => {
+    if (name === 'aiMetadataProvider') {
+      return { hasProvider: mockHasProvider } as never;
+    }
+
+    return { getSettings: jest.fn().mockResolvedValue(STORED_SETTINGS) } as never;
+  });
+};
+
 describe('Admin Settings Controller - getSettings permission gate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockGetService.mockReturnValue({
-      getSettings: jest.fn().mockResolvedValue(STORED_SETTINGS),
-    } as never);
+    mockHasProvider.mockReturnValue(false);
+    mockUploadServices();
 
     global.strapi = {
       config: { get: jest.fn(() => ({})) },
@@ -55,7 +65,7 @@ describe('Admin Settings Controller - getSettings permission gate', () => {
 
     expect(ctx.forbidden).not.toHaveBeenCalled();
     expect(ctx.body).toEqual({
-      data: { ...STORED_SETTINGS, concurrentUploadRequests: 1 },
+      data: { ...STORED_SETTINGS, concurrentUploadRequests: 1, aiMetadataAvailable: false },
     });
   });
 });
@@ -81,16 +91,56 @@ describe('Admin Settings Controller - updateSettings permission gate', () => {
   });
 });
 
-describe('Admin Settings Controller - getSettings concurrentUploadRequests echo', () => {
+describe('Admin Settings Controller - updateSettings defaults', () => {
+  const mockSetSettings = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockGetService.mockReturnValue({ setSettings: mockSetSettings } as never);
+  });
+
+  test('applies defaults to omitted settings', async () => {
+    // The server reads a missing `aiMetadata` as enabled, the admin reads it as
+    // disabled. Storing the default keeps both sides in agreement.
+    // `autoOrientation` is stored as `false`, the same as the bootstrap default.
+    const ctx = buildContext([], { sizeOptimization: false, responsiveDimensions: true });
+
+    await adminSettingsController.updateSettings(ctx as Context);
+
+    const expected = {
+      sizeOptimization: false,
+      responsiveDimensions: true,
+      autoOrientation: false,
+      aiMetadata: true,
+    };
+    expect(mockSetSettings).toHaveBeenCalledWith(expected);
+    expect(ctx.body).toEqual({ data: expected });
+  });
+
+  test('keeps explicitly supplied settings', async () => {
+    const body = {
+      sizeOptimization: true,
+      responsiveDimensions: true,
+      autoOrientation: true,
+      aiMetadata: false,
+    };
+    const ctx = buildContext([], body);
+
+    await adminSettingsController.updateSettings(ctx as Context);
+
+    expect(mockSetSettings).toHaveBeenCalledWith(body);
+  });
+});
+
+describe('Admin Settings Controller - getSettings read-only echoes', () => {
   let configuredConcurrency: number | undefined;
 
   beforeEach(() => {
     jest.clearAllMocks();
     configuredConcurrency = undefined;
-
-    mockGetService.mockReturnValue({
-      getSettings: jest.fn().mockResolvedValue(STORED_SETTINGS),
-    } as never);
+    mockHasProvider.mockReturnValue(false);
+    mockUploadServices();
 
     global.strapi = {
       config: {
@@ -106,7 +156,7 @@ describe('Admin Settings Controller - getSettings concurrentUploadRequests echo'
     await adminSettingsController.getSettings(ctx as Context);
 
     expect(ctx.body).toEqual({
-      data: { ...STORED_SETTINGS, concurrentUploadRequests: 5 },
+      data: { ...STORED_SETTINGS, concurrentUploadRequests: 5, aiMetadataAvailable: false },
     });
   });
 
@@ -116,7 +166,18 @@ describe('Admin Settings Controller - getSettings concurrentUploadRequests echo'
     await adminSettingsController.getSettings(ctx as Context);
 
     expect(ctx.body).toEqual({
-      data: { ...STORED_SETTINGS, concurrentUploadRequests: 1 },
+      data: { ...STORED_SETTINGS, concurrentUploadRequests: 1, aiMetadataAvailable: false },
+    });
+  });
+
+  test('echoes whether an AI metadata provider is registered', async () => {
+    mockHasProvider.mockReturnValue(true);
+    const ctx = buildContext();
+
+    await adminSettingsController.getSettings(ctx as Context);
+
+    expect(ctx.body).toEqual({
+      data: { ...STORED_SETTINGS, concurrentUploadRequests: 1, aiMetadataAvailable: true },
     });
   });
 });

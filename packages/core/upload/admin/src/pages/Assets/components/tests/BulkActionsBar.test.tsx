@@ -8,7 +8,6 @@ import { BulkActionsBar } from '../BulkActionsBar';
 import type { File } from '../../../../../../shared/contracts/files';
 
 const mockToggleNotification = jest.fn();
-const mockAIAvailability = jest.fn(() => false);
 const mockTrackUsage = jest.fn();
 let mockAiMetadataEnabled = false;
 
@@ -20,11 +19,6 @@ jest.mock('../../../../hooks/useAIMetadataEnabled', () => ({
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
-}));
-
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: () => mockAIAvailability(),
 }));
 
 jest.mock('../../../../hooks/useTracking', () => ({
@@ -157,7 +151,6 @@ describe('BulkActionsBar', () => {
     it('reserves nothing without a selection', () => {
       setup();
 
-      // eslint-disable-next-line testing-library/no-node-access
       expect(document.querySelector('[data-bar-spacer]')).not.toBeInTheDocument();
     });
 
@@ -169,7 +162,6 @@ describe('BulkActionsBar', () => {
 
       await waitFor(() =>
         // 64, not 48: reserving only the height would leave the gap uncovered.
-        // eslint-disable-next-line testing-library/no-node-access
         expect(document.querySelector('[data-bar-spacer]')).toHaveStyle({ height: '64px' })
       );
     });
@@ -182,7 +174,6 @@ describe('BulkActionsBar', () => {
       await selectOne();
 
       await waitFor(() =>
-        // eslint-disable-next-line testing-library/no-node-access
         expect(document.querySelector('[data-bar-spacer]')).toHaveStyle({ height: '0px' })
       );
     });

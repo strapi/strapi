@@ -7,7 +7,7 @@ import Dialect from '../dialect';
 import SqliteSchemaInspector from './schema-inspector';
 import type { Database } from '../..';
 
-const UNSUPPORTED_OPERATORS = ['$jsonSupersetOf'];
+const UNSUPPORTED_OPERATORS = new Set(['$jsonSupersetOf']);
 
 /** SQLite compound SELECT limit (SQLITE_MAX_COMPOUND_SELECT); Knex batch insert uses UNION ALL per row. */
 const SQLITE_BATCH_INSERT_SIZE = 500;
@@ -49,6 +49,25 @@ export default class SqliteDialect extends Dialect {
     return false;
   }
 
+  /**
+   * SQLite foreign keys are unnamed (declared inline on the table), so only
+   * indexes need dropping. Queries run on `trx`: SQLite pools hold a single
+   * connection, which the migration transaction already owns.
+   */
+  async dropSchemaObject(
+    trx: Knex,
+    { table, name }: { table: string; name: string }
+  ): Promise<boolean> {
+    const indexes: Array<{ name: string }> = await trx.raw('pragma index_list(??)', [table]);
+
+    if (!indexes.some((index) => index.name === name)) {
+      return false;
+    }
+
+    await trx.raw('DROP INDEX ??', [name]);
+    return true;
+  }
+
   getSqlType(type: string) {
     switch (type) {
       case 'enum': {
@@ -68,7 +87,7 @@ export default class SqliteDialect extends Dialect {
   }
 
   supportsOperator(operator: string) {
-    return !UNSUPPORTED_OPERATORS.includes(operator);
+    return !UNSUPPORTED_OPERATORS.has(operator);
   }
 
   async startSchemaUpdate() {

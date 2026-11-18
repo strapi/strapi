@@ -1,5 +1,4 @@
-import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep, omit, pick } from 'lodash/fp';
+import { CurriedFunction1, cloneDeep, omit, pick } from 'lodash';
 import type { z } from 'zod/v4';
 
 import { constants, getNonWritableAttributes } from '../content-types';
@@ -16,7 +15,7 @@ import * as sanitizers from './sanitizers';
 import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
-import type { Model, Data } from '../types';
+import type { Model, Data, Entry } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
 import { hasSort } from '../sort-query';
 
@@ -36,7 +35,7 @@ export interface Options {
 }
 
 export interface Sanitizer {
-  (schema: Model): CurriedFunction1<Data, Promise<Data>>;
+  (schema: Model): CurriedFunction1<Entry, Promise<Entry>>;
 }
 export interface SanitizeFunc {
   (data: unknown, schema: Model, options?: Options): Promise<unknown>;
@@ -75,7 +74,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeInput');
     }
-    if (isArray(data)) {
+    if (Array.isArray(data)) {
       return Promise.all(
         data.map((entry) => sanitizeInput(entry, schema, { auth, strictParams, route }))
       );
@@ -87,8 +86,8 @@ const createAPISanitizers = (opts: APIOptions) => {
 
     const transforms = [
       // Remove first level ID in inputs
-      omit(constants.ID_ATTRIBUTE),
-      omit(constants.DOC_ID_ATTRIBUTE),
+      (value: Record<string, unknown>) => omit(value, constants.ID_ATTRIBUTE),
+      (value: Record<string, unknown>) => omit(value, constants.DOC_ID_ATTRIBUTE),
       // Remove non-writable attributes
       traverseEntity(visitors.removeRestrictedFields(nonWritableAttributes), { schema, getModel }),
     ];
@@ -155,7 +154,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeOutput');
     }
-    if (isArray(data)) {
+    if (Array.isArray(data)) {
       const res: unknown[] = Array.from({ length: data.length });
       for (let i = 0; i < data.length; i += 1) {
         res[i] = await sanitizeOutput(data[i], schema, { auth });
@@ -235,7 +234,7 @@ const createAPISanitizers = (opts: APIOptions) => {
 
     if (strictParams) {
       const allowedKeys = [...ALLOWED_QUERY_PARAM_KEYS, ...extraQueryKeys];
-      return pick(allowedKeys, sanitizedQuery) as Record<string, unknown>;
+      return pick(sanitizedQuery, allowedKeys) as Record<string, unknown>;
     }
 
     return sanitizedQuery;
@@ -245,7 +244,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeFilters');
     }
-    if (isArray(filters)) {
+    if (Array.isArray(filters)) {
       return Promise.all(filters.map((filter) => sanitizeFilters(filter, schema, { auth })));
     }
 

@@ -1,4 +1,4 @@
-import { map } from 'lodash/fp';
+import { map } from 'lodash';
 import type { Data } from '@strapi/types';
 
 const entityToResponseEntity = (entity: { id: Data.ID; [key: keyof any]: unknown }) => ({
@@ -6,7 +6,8 @@ const entityToResponseEntity = (entity: { id: Data.ID; [key: keyof any]: unknown
   attributes: entity,
 });
 
-const entitiesToResponseEntities = map(entityToResponseEntity);
+const entitiesToResponseEntities = (entities: Parameters<typeof entityToResponseEntity>[0][]) =>
+  map(entities, (entity) => entityToResponseEntity(entity));
 
 export default () => ({
   entityToResponseEntity,

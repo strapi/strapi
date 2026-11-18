@@ -1,9 +1,8 @@
 import type { Core } from '@strapi/types';
-import * as z from 'zod/v4';
 import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
-import { buildFormDataFromFiles } from '../utils/images';
+import { fetchImagesAsBlobs } from '../utils/images';
 import { AI_METADATA_CHUNK_SIZE, AI_METADATA_SUPPORTED_IMAGE_TYPES } from '../constants';
 
 import { isAIMetadataSupportedMime } from '../../../shared/constants';
@@ -31,11 +30,9 @@ const chunk = <T>(items: T[], size: number): T[][] => {
 };
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
-  const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
-
   return {
     async isEnabled() {
-      if (strapi.ai.admin.isStrapiManagedAiEnabled() === false) {
+      if (!getService('aiMetadataProvider').hasProvider()) {
         return false;
       }
       const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
@@ -122,10 +119,12 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     async processExistingFiles(jobId: number, user: { id: string | number }): Promise<void> {
       const jobService = getService('aiMetadataJobs');
 
-      try {
-        // Mark as processing
-        await jobService.updateJob(jobId, { status: 'processing' });
+      // Tells the other servers on the same database that this job still runs
+      jobService.startHeartbeat(jobId);
 
+      // `createJob` created the job as `processing`. The final writes only settle a job still
+      // `processing`, so a job another server failed as interrupted keeps that status.
+      try {
         // Query all images without metadata
         const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
           where: {
@@ -142,10 +141,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         if (files.length === 0) {
-          await jobService.updateJob(jobId, {
-            status: 'completed',
-            completedAt: new Date(),
-          });
+          await jobService.settleJob(jobId, 'completed');
           return;
         }
 
@@ -153,21 +149,16 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         const metadataResults = await this.processFiles(files);
         await this.updateFilesWithAIMetadata(files, metadataResults, user);
 
-        // Mark as completed
-        await jobService.updateJob(jobId, {
-          status: 'completed',
-          completedAt: new Date(),
-        });
+        await jobService.settleJob(jobId, 'completed');
       } catch (error) {
         strapi.log.error('AI metadata job failed', {
           jobId,
           error: error instanceof Error ? error.message : String(error),
         });
 
-        await jobService.updateJob(jobId, {
-          status: 'failed',
-          completedAt: new Date(),
-        });
+        await jobService.settleJob(jobId, 'failed');
+      } finally {
+        jobService.stopHeartbeat(jobId);
       }
     },
 
@@ -261,7 +252,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
      * Processes provided files for AI metadata generation
      */
     async processFiles(files: File[]): Promise<Array<{ altText: string; caption: string } | null>> {
-      if (!(await this.isEnabled()) || !aiServerUrl) {
+      if (!(await this.isEnabled())) {
         throw new Error('AI Metadata service is not enabled');
       }
 
@@ -291,51 +282,13 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         return createEmptyMetadataResults();
       }
 
-      const formData = await buildFormDataFromFiles(
+      const images = await fetchImagesAsBlobs(
         imageInputFiles,
         strapi.config.get('server.absoluteUrl'),
         strapi.log
       );
 
-      let token: string;
-      try {
-        const tokenData = await strapi.ai.admin.getAiToken();
-        token = tokenData.token;
-      } catch (error) {
-        throw new Error('Failed to retrieve AI token', {
-          cause: error instanceof Error ? error : undefined,
-        });
-      }
-
-      strapi.log.http('Contacting AI Server for media metadata generation', {
-        aiServerUrl,
-        imageCount: imageFiles.length,
-      });
-
-      const res = await fetch(`${aiServerUrl}/media-library/generate-metadata`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw Error(`AI metadata generation failed`, { cause: errorText });
-      }
-
-      const responseSchema = z.object({
-        results: z.array(
-          z.object({
-            altText: z.string(),
-            caption: z.string(),
-          })
-        ),
-      });
-
-      const { results } = responseSchema.parse(await res.json());
-      strapi.log.http(`AI generated metadata successfully for ${results.length} files`);
+      const { results } = await getService('aiMetadataProvider').generateMetadata({ images });
 
       // Create sparse array with results at original indices
       // Example: files=[img1, pdf, img2] -> imageFiles=[{img1, index:0}, {img2, index:2}]

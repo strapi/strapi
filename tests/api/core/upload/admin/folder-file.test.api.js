@@ -6,9 +6,11 @@ const path = require('path');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const { createUtils } = require('api-tests/utils');
 
 let strapi;
 let rq;
+let utils;
 const data = {
   folders: [],
   files: [],
@@ -35,12 +37,39 @@ const createAFile = async (parent = null) => {
   return res.body[0];
 };
 
+// Delete the folder (as another admin would) right after the request validation has checked
+// that it exists, so the request handler looks up a folder that is gone.
+const deleteFolderOnceValidated = async (folderId, request) => {
+  const folderService = strapi.plugin('upload').service('folder');
+  const originalExists = folderService.exists;
+  let deleteRes;
+  folderService.exists = async (...args) => {
+    const exists = await originalExists.apply(folderService, args);
+    if (exists === true && deleteRes === undefined) {
+      deleteRes = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { folderIds: [folderId] },
+      });
+    }
+    return exists;
+  };
+
+  try {
+    const res = await request();
+    return { res, deleteRes };
+  } finally {
+    folderService.exists = originalExists;
+  }
+};
+
 describe('Bulk actions for folders & files', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+    utils = createUtils(strapi);
   });
 
   afterAll(async () => {
@@ -57,6 +86,124 @@ describe('Bulk actions for folders & files', () => {
   });
 
   describe('delete', () => {
+    describe('permissions', () => {
+      let ownerReq;
+      let restrictedReq;
+      let mediaOwnerRole;
+      const users = [];
+
+      beforeAll(async () => {
+        mediaOwnerRole = await utils.createRole({
+          name: 'MediaOwner',
+          description: 'Can only manage assets they created',
+        });
+
+        await utils.assignPermissionsToRole(mediaOwnerRole.id, [
+          {
+            action: 'plugin::upload.read',
+            subject: null,
+            conditions: ['admin::is-creator'],
+            properties: {},
+          },
+          {
+            action: 'plugin::upload.assets.create',
+            subject: null,
+            conditions: [],
+            properties: {},
+          },
+          {
+            action: 'plugin::upload.assets.update',
+            subject: null,
+            conditions: ['admin::is-creator'],
+            properties: {},
+          },
+        ]);
+
+        const owner = await utils.createUser({
+          firstname: 'media-owner',
+          lastname: 'media-owner',
+          email: 'media-owner@strapi.io',
+          password: 'MediaOwner1!',
+          isActive: true,
+          roles: [mediaOwnerRole.id],
+        });
+        const restricted = await utils.createUser({
+          firstname: 'restricted-media-owner',
+          lastname: 'restricted-media-owner',
+          email: 'restricted-media-owner@strapi.io',
+          password: 'RestrictedMediaOwner1!',
+          isActive: true,
+          roles: [mediaOwnerRole.id],
+        });
+        users.push(owner, restricted);
+
+        ownerReq = await createAuthRequest({
+          strapi,
+          userInfo: { email: owner.email, password: 'MediaOwner1!' },
+        });
+        restrictedReq = await createAuthRequest({
+          strapi,
+          userInfo: { email: restricted.email, password: 'RestrictedMediaOwner1!' },
+        });
+      });
+
+      afterAll(async () => {
+        await utils.deleteUsersById(users.map(({ id }) => id));
+        await utils.deleteRolesById([mediaOwnerRole.id]);
+      });
+
+      test('Cannot delete a folder containing an asset created by another user', async () => {
+        const folderRes = await ownerReq({
+          method: 'POST',
+          url: '/upload/folders',
+          body: { name: 'folder-containing-foreign-assets', parent: null },
+        });
+        expect(folderRes.statusCode).toBe(201);
+        const folder = folderRes.body.data;
+        data.folders.push(folder);
+
+        const uploadToFolder = (request) =>
+          request({
+            method: 'POST',
+            url: '/upload',
+            formData: {
+              files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+              fileInfo: JSON.stringify({ folder: folder.id }),
+            },
+          });
+
+        const ownerUpload = await uploadToFolder(ownerReq);
+        const restrictedUpload = await uploadToFolder(restrictedReq);
+        expect(ownerUpload.statusCode).toBe(201);
+        expect(restrictedUpload.statusCode).toBe(201);
+
+        const ownerFile = ownerUpload.body[0];
+        const restrictedFile = restrictedUpload.body[0];
+
+        const res = await restrictedReq({
+          method: 'POST',
+          url: '/upload/actions/bulk-delete',
+          body: { folderIds: [folder.id] },
+        });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error).toMatchObject({
+          name: 'PolicyError',
+          message: 'FolderContainsUnauthorizedAssetsError',
+        });
+
+        const [folderAfter, ownerFileAfter, restrictedFileAfter] = await Promise.all([
+          rq({ method: 'GET', url: `/upload/folders/${folder.id}` }),
+          rq({ method: 'GET', url: `/upload/files/${ownerFile.id}` }),
+          rq({ method: 'GET', url: `/upload/files/${restrictedFile.id}` }),
+        ]);
+
+        expect(folderAfter.statusCode).toBe(200);
+        expect(ownerFileAfter.statusCode).toBe(200);
+        expect(restrictedFileAfter.statusCode).toBe(200);
+      });
+    });
+
     test('Can delete folders and files', async () => {
       const folder1 = await createFolder('folder-a-1', null);
       const folder1a = await createFolder('folder-a-1a', folder1.id);
@@ -575,6 +722,57 @@ describe('Bulk actions for folders & files', () => {
       });
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('some folders already exists: folder-g-1a');
+    });
+
+    test('Cannot move files into a folder deleted after the request was validated', async () => {
+      const destination = await createFolder('folder-h-1', null);
+      const file = await createAFile(null);
+
+      const { res, deleteRes } = await deleteFolderOnceValidated(destination.id, () =>
+        rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-move',
+          body: { destinationFolderId: destination.id, fileIds: [file.id] },
+        })
+      );
+
+      expect(deleteRes.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'destination folder does not exist',
+      });
+
+      const { body: fileAfter } = await rq({ method: 'GET', url: `/upload/files/${file.id}` });
+      expect(fileAfter).toMatchObject({ folder: null, folderPath: '/' });
+    });
+
+    test('Cannot move folders into a folder deleted after the request was validated', async () => {
+      const destination = await createFolder('folder-i-1', null);
+      const folder = await createFolder('folder-i-2', null);
+      data.folders.push(folder);
+
+      const { res, deleteRes } = await deleteFolderOnceValidated(destination.id, () =>
+        rq({
+          method: 'POST',
+          url: '/upload/actions/bulk-move',
+          body: { destinationFolderId: destination.id, folderIds: [folder.id] },
+        })
+      );
+
+      expect(deleteRes.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatchObject({
+        name: 'ValidationError',
+        message: 'destination folder does not exist',
+      });
+
+      const { body: folderAfter } = await rq({
+        method: 'GET',
+        url: `/upload/folders/${folder.id}`,
+        qs: { populate: 'parent' },
+      });
+      expect(folderAfter.data).toMatchObject({ parent: null, path: folder.path });
     });
   });
 });

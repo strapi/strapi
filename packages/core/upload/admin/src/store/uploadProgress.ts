@@ -30,6 +30,11 @@ export interface FileProgress {
   completedAt?: number;
   error?: string;
   metadataStatus?: FileMetadataStatus;
+  /**
+   * Who started the row, when that is not the progress dialog alone. The Content
+   * Manager field tags its own uploads so it can show their state in place.
+   */
+  owner?: string;
 }
 
 export interface UploadProgressState {
@@ -70,6 +75,7 @@ const uploadProgressSlice = createSlice({
         totalFiles: number;
         fileNames: string[];
         fileSizes?: number[];
+        owner?: string;
       }>
     ) {
       state.isVisible = true;
@@ -82,6 +88,7 @@ const uploadProgressSlice = createSlice({
         status: 'pending' as FileProgressStatus,
         size: action.payload.fileSizes?.[index] ?? 0,
         uploadedBytes: 0,
+        owner: action.payload.owner,
       }));
 
       state.files = pendingFiles;
@@ -102,6 +109,7 @@ const uploadProgressSlice = createSlice({
         uploadId: number;
         fileNames: string[];
         fileSizes?: number[];
+        owner?: string;
       }>
     ) {
       if (action.payload.uploadId !== state.uploadId) {
@@ -117,6 +125,7 @@ const uploadProgressSlice = createSlice({
           status: 'pending' as FileProgressStatus,
           size: action.payload.fileSizes?.[i] ?? 0,
           uploadedBytes: 0,
+          owner: action.payload.owner,
         }))
       );
 
@@ -264,6 +273,31 @@ const uploadProgressSlice = createSlice({
         return file;
       });
       state.errors = [...state.errors, { name: 'Upload Error', message: action.payload.message }];
+    },
+    /** Cancels one row, leaving the rest of the batch running. */
+    cancelFile(state, action: PayloadAction<{ index: number; uploadId: number }>) {
+      const { index, uploadId } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
+      const file = state.files[index];
+      if (file && (file.status === 'pending' || file.status === 'uploading')) {
+        file.status = 'cancelled';
+      }
+    },
+    /** Puts one cancelled or failed row back in the queue. */
+    retryFile(state, action: PayloadAction<{ index: number; uploadId: number }>) {
+      const { index, uploadId } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
+      const file = state.files[index];
+      if (file && (file.status === 'cancelled' || file.status === 'error')) {
+        file.status = 'pending';
+        file.uploadedBytes = 0;
+        file.error = undefined;
+        file.metadataStatus = undefined;
+      }
     },
     retryCancelledFiles(state) {
       // Reset all cancelled files back to pending for retry
@@ -492,6 +526,8 @@ export const {
   toggleMinimize,
   cancelUpload,
   setUploadFailed,
+  cancelFile,
+  retryFile,
   retryCancelledFiles,
 } = uploadProgressSlice.actions;
 

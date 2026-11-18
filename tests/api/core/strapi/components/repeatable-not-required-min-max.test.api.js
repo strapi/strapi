@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
+const { omit } = require('lodash');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createContentAPIRequest } = require('api-tests/request');
@@ -385,7 +385,7 @@ describe('Non repeatable and Not required component', () => {
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body.data).toMatchObject({
         documentId: res.body.data.documentId,
-        field: res.body.data.field.map((val) => omit('id', val)),
+        field: res.body.data.field.map((val) => omit(val, 'id')),
       });
 
       const getRes = await rq.get(`/${res.body.data.documentId}`, {
@@ -397,7 +397,7 @@ describe('Non repeatable and Not required component', () => {
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body.data).toMatchObject({
         documentId: res.body.data.documentId,
-        field: res.body.data.field.map((val) => omit('id', val)),
+        field: res.body.data.field.map((val) => omit(val, 'id')),
       });
     });
 

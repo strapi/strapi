@@ -1,5 +1,5 @@
 import { join, resolve } from 'path';
-import { get } from 'lodash/fp';
+import { get } from 'lodash';
 
 import type { Core } from '@strapi/types';
 import type { StrapiOptions } from '../Strapi';
@@ -22,6 +22,7 @@ export const getDirs = (
     policies: join(distDir, 'src', 'policies'),
     middlewares: join(distDir, 'src', 'middlewares'),
     config: join(distDir, 'config'),
+    contentStructure: join(distDir, 'src', 'content-structure'),
   },
   app: {
     root: appDir,
@@ -32,8 +33,9 @@ export const getDirs = (
     policies: join(appDir, 'src', 'policies'),
     middlewares: join(appDir, 'src', 'middlewares'),
     config: join(appDir, 'config'),
+    contentStructure: join(appDir, 'src', 'content-structure'),
   },
   static: {
-    public: resolve(appDir, get('server.dirs.public', config)),
+    public: resolve(appDir, get(config, 'server.dirs.public')!),
   },
 });

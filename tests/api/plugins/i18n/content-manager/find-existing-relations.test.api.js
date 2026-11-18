@@ -1,7 +1,5 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
-
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -108,7 +106,7 @@ describe('i18n - Find existing relations', () => {
 
   afterAll(async () => {
     // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
 
     await strapi.destroy();
     await builder.cleanup();

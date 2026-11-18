@@ -1,0 +1,23 @@
+views {
+  view content_model {
+    title '01 Start here / Content model'
+    description '''
+      **Audience:** everyone. **Type:** domain concept map, not a runtime or database diagram.
+      **Question:** how do content types, documents and their variants fit together?
+      Read from a content type to a document and its stored variants. Draft & Publish and localization are per-content-type options.
+      For example, Article defines the fields; “About our team” is one document; its English draft and French published entry are variants of that document.
+      A component is embedded content; a relation references other content. A dynamic zone holds an ordered mix of components.
+      Open Content type for schema editing, Document for implementation, Content variant for publishing, or Locale for editorial options.
+    '''
+    include
+      content_type_definition with { navigateTo content_type_builder_schema_change_flow },
+      content_document with { navigateTo document_service_code },
+      content_variant with { navigateTo content_publishing_flow },
+      content_locale with { navigateTo editorial_publishing },
+      content_component,
+      content_dynamic_zone,
+      content_relation
+    exclude content_dynamic_zone -> content_component
+    autoLayout LeftRight 55 30
+  }
+}

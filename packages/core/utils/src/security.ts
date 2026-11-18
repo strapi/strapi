@@ -1,4 +1,4 @@
-import { mergeWith } from 'lodash/fp';
+import { mergeWith } from 'lodash';
 
 export const CSP_DEFAULTS = {
   'connect-src': ["'self'", 'https:'],
@@ -25,16 +25,12 @@ export const extendMiddlewareConfiguration = (
 
     if (typeof currentMiddleware === 'object' && currentMiddleware.name === middleware.name) {
       // Deep merge (+ concat arrays) the new config with the current middleware config
-      return mergeWith(
-        (objValue, srcValue) => {
-          if (Array.isArray(objValue)) {
-            return Array.from(new Set(objValue.concat(srcValue)));
-          }
-          return undefined;
-        },
-        currentMiddleware,
-        middleware
-      );
+      return mergeWith({}, currentMiddleware, middleware, (objValue, srcValue) => {
+        if (Array.isArray(objValue)) {
+          return Array.from(new Set(objValue.concat(srcValue)));
+        }
+        return undefined;
+      });
     }
 
     return currentMiddleware;

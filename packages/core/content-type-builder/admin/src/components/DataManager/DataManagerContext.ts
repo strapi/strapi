@@ -1,6 +1,8 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { createContext } from 'react';
 
+import type { AttributeRenameMigrationMode } from './RenameMigrationModal';
+import type { ContentStructure, FolderSelection, SectionKey } from './utils/contentStructure';
 import type { Component, ContentType } from '../../types';
 import type { ComponentWithChildren } from './utils/retrieveComponentsThatHaveComponents';
 import type { NestedComponent } from './utils/retrieveNestedComponents';
@@ -18,6 +20,10 @@ export interface DataManagerContextValue {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     name: string;
+    recordRename?: boolean;
+    declineRename?: boolean;
+    recordTargetRename?: boolean;
+    declineTargetRename?: boolean;
   }) => void;
   moveAttribute: (opts: {
     forTarget: Struct.ModelType;
@@ -35,7 +41,22 @@ export interface DataManagerContextValue {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     name: string;
+    recordRename?: boolean;
+    declineRename?: boolean;
   }) => void;
+  /**
+   * Resolves the user's consent to preserve data for one rename hop performed
+   * in the attribute form: `true` records the hop, `false` declines it (and the
+   * rest of its chain), `null` means the user cancelled the edit.
+   */
+  confirmAttributeRenameMigration: (rename: {
+    forTarget: Struct.ModelType;
+    uid: Internal.UID.Schema;
+    oldName: string;
+    newName: string;
+  }) => Promise<boolean | null>;
+  /** Effective `renameMigrations.attributes` plugin setting. */
+  attributeRenameMigrationMode: AttributeRenameMigrationMode;
   addCreatedComponentToDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
@@ -60,6 +81,7 @@ export interface DataManagerContextValue {
       pluginOptions: Record<string, unknown>;
     };
     uid: Internal.UID.Schema;
+    folder?: FolderSelection;
   }) => void;
   changeDynamicZoneComponents: (opts: {
     forTarget: Struct.ModelType;
@@ -74,6 +96,33 @@ export interface DataManagerContextValue {
   }) => void;
   deleteComponent(uid: Internal.UID.Component): void;
   deleteContentType(uid: Internal.UID.ContentType): void;
+  contentStructure: ContentStructure;
+  createFolder: (opts: { section: SectionKey; name: string; parentId: string | null }) => void;
+  renameFolder: (opts: { section: SectionKey; id: string; name: string }) => void;
+  moveFolder: (opts: {
+    section: SectionKey;
+    id: string;
+    newParentId: string | null;
+    index?: number;
+  }) => void;
+  deleteFolderOnly: (opts: { section: SectionKey; id: string }) => void;
+  deleteFolderAndContent: (opts: {
+    section: SectionKey;
+    id: string;
+    contentTypeUids: Internal.UID.ContentType[];
+  }) => void;
+  assignContentTypeToFolder: (opts: {
+    section: SectionKey;
+    uid: Internal.UID.ContentType;
+    targetGroupId: string | null;
+    index?: number;
+  }) => void;
+  reorderFolderChildren: (opts: {
+    section: SectionKey;
+    groupId: string;
+    from: number;
+    to: number;
+  }) => void;
   removeComponentFromDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
@@ -110,6 +159,7 @@ export interface DataManagerContextValue {
       pluginOptions: Record<string, unknown>;
     };
     uid: Internal.UID.ContentType;
+    folder?: FolderSelection;
   }) => void;
   initialComponents: Record<Internal.UID.Component, Component>;
   components: Record<Internal.UID.Component, Component>;
@@ -127,10 +177,16 @@ export interface DataManagerContextValue {
   saveSchema(): Promise<void>;
   isModified: boolean;
   isSaving: boolean;
+  /**
+   * Applies a whole-type change (AI chat). Rename hops declared by the change
+   * go through the same preservation consent as manual renames, so this may
+   * prompt the user. Resolves `false` when the user cancelled and nothing was
+   * applied.
+   */
   applyChange: (opts: {
     action: 'add' | 'update' | 'delete';
     schema: ContentType | Component;
-  }) => void;
+  }) => Promise<boolean>;
   history: {
     undo(): void;
     redo(): void;

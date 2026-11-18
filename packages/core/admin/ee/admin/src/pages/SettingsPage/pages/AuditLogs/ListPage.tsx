@@ -4,7 +4,7 @@ import { Button, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Download, Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { Filters } from '../../../../../../../admin/src/components/Filters';
+import { Filters, toApiFilters } from '../../../../../../../admin/src/components/Filters';
 import { Layouts } from '../../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
@@ -15,11 +15,13 @@ import {
   withEncodedUserParams,
 } from '../../../../../../../admin/src/hooks/useQueryParams';
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
+import { NotFoundPage } from '../../../../../../../admin/src/pages/NotFoundPage';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
+import { useIsAuditLogsDisabledByConfig } from '../../../../hooks/useIsAuditLogsDisabledByConfig';
 
 import { ExportCard } from './components/ExportCard';
 import { Modal } from './components/Modal';
-import { useAuditLogsData } from './hooks/useAuditLogsData';
+import { useAuditLogs, useAuditLogUsers } from './hooks/useAuditLogsData';
 import { useExportAuditLogs } from './hooks/useExportAuditLogs';
 import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
 import { getDefaultMessage } from './utils/getActionTypesDefaultMessages';
@@ -45,7 +47,7 @@ const ListPage = () => {
 
   const [{ query }, setQuery] = useQueryParams<{
     id?: AuditLog['id'];
-    filters?: unknown;
+    filters?: Filters.Query['filters'];
     _q?: unknown;
   }>();
 
@@ -57,15 +59,14 @@ const ListPage = () => {
 
   const [usersPageSize, setUsersPageSize] = React.useState(USERS_PAGE_SIZE);
   const {
-    auditLogs,
     users,
     usersPagination,
     isLoadingUsers,
-    isLoading: isLoadingData,
-    hasError,
-  } = useAuditLogsData({
+    isLoading: isLoadingAuditLogUsers,
+    hasError: hasUsersError,
+  } = useAuditLogUsers({
     canReadAuditLogs,
-    usersPageSize,
+    pageSize: usersPageSize,
   });
 
   const { page = 1, pageCount = 1 } = usersPagination ?? {};
@@ -88,6 +89,18 @@ const ListPage = () => {
       onLoadMore: handleLoadMoreUsers,
     },
   });
+  // A date filter stores a day or a minute: the API reads it as the instants it covers
+  const apiFilters = toApiFilters(query?.filters, displayedFilters);
+  const {
+    auditLogs,
+    isLoading: isLoadingAuditLogs,
+    hasError: hasAuditLogsError,
+  } = useAuditLogs({
+    canReadAuditLogs,
+    query: { ...query, filters: apiFilters },
+  });
+  const isLoadingData = isLoadingAuditLogUsers || isLoadingAuditLogs;
+  const hasError = hasUsersError || hasAuditLogsError;
 
   const headers: Table.Header<AuditLog, object>[] = [
     {
@@ -155,7 +168,7 @@ const ListPage = () => {
               startIcon={<Download />}
               loading={isExporting}
               disabled={isLoading || totalEntries === 0}
-              onClick={() => exportAuditLogs(query?.filters, totalEntries ?? 0)}
+              onClick={() => exportAuditLogs(apiFilters, totalEntries ?? 0)}
             >
               {formatMessage({
                 id: 'Settings.permissions.auditLogs.listview.export',
@@ -273,6 +286,15 @@ const ProtectedListPage = () => {
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.auditLogs?.main
   );
+  const { isLoading, isDisabledByConfig } = useIsAuditLogsDisabledByConfig();
+
+  if (isLoading === true) {
+    return <Page.Loading />;
+  }
+
+  if (isDisabledByConfig === true) {
+    return <NotFoundPage />;
+  }
 
   return (
     <Page.Protect permissions={permissions}>

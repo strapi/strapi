@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { isArray, castArray, isPlainObject } from 'lodash/fp';
+import { castArray, isPlainObject } from 'lodash';
 import type { Knex } from 'knex';
 
 import { isOperator, isOperatorOfType } from '@strapi/utils';
 import * as types from '../../utils/types';
 import { createField } from '../../fields';
+import { toRecognisedBoolean } from '../../fields/boolean';
+import { InvalidBooleanError } from '../../errors';
 import { createJoin } from './join';
 import { toColumnName } from './transform';
 import { escapeQuery } from './search';
@@ -25,10 +27,30 @@ const castValue = (value: unknown, attribute: Attribute | null) => {
   if (types.isScalar(attribute.type) && !isKnexQuery(value)) {
     const field = createField(attribute);
 
-    return value === null ? null : field.toDB(value);
+    return value === null ? null : field.toFilterValue(value);
   }
 
   return value;
+};
+
+/**
+ * Reads a `$null` / `$notNull` operand with the values boolean filters accept. A truthiness
+ * check read `'false'` or `'no'` as true, so `{ $null: 'false' }` matched the null rows.
+ *
+ * `null` and `undefined` keep the loose reading (false), as optional flags pass them.
+ */
+const toNullOperand = (value: unknown): boolean => {
+  const recognised = toRecognisedBoolean(value);
+
+  if (recognised === undefined) {
+    throw new InvalidBooleanError();
+  }
+
+  if (recognised === null) {
+    return false;
+  }
+
+  return recognised;
 };
 
 const processSingleAttributeWhere = (
@@ -60,7 +82,7 @@ const processSingleAttributeWhere = (
 };
 
 const processAttributeWhere = (attribute: Attribute | null, where: unknown, operator = '$eq') => {
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map((sub) => processSingleAttributeWhere(attribute, sub, operator));
   }
 
@@ -73,6 +95,23 @@ const processNested = (where: unknown, ctx: WhereCtx) => {
   }
 
   return processWhere(where, ctx);
+};
+
+/**
+ * Adds a condition to a processed where object. An object holds one value per key, so a condition
+ * whose key is already taken, e.g. the `$not` of two relation filters, is added to `$and` instead
+ * of replacing the first one.
+ */
+const addCondition = (filters: Record<string, unknown>, key: string, value: unknown) => {
+  if (Object.prototype.hasOwnProperty.call(filters, key) === false) {
+    filters[key] = value;
+    return;
+  }
+
+  const conditions = key === '$and' && Array.isArray(value) ? value : [{ [key]: value }];
+  const existingAnd = Array.isArray(filters.$and) ? filters.$and : [];
+
+  filters.$and = [...existingAnd, ...conditions];
 };
 
 const processRelationWhere = (where: unknown, ctx: WhereCtx) => {
@@ -99,11 +138,19 @@ const processRelationWhere = (where: unknown, ctx: WhereCtx) => {
   if (operatorKeys.length === 1) {
     const operator = operatorKeys[0];
 
-    if (isOperatorOfType('group', operator)) {
+    // A group, or a $not holding a filter on the target's attributes (e.g. `{ $not: { name: 'x' } }`),
+    // filters the related rows, not the relation id
+    const operand = where[operator];
+    const isNestedFilterNot =
+      operator === '$not' &&
+      isRecord(operand) &&
+      Object.keys(operand).some((key) => isOperator(key) === false);
+
+    if (isOperatorOfType('group', operator) || isNestedFilterNot) {
       return processWhere(where, ctx);
     }
 
-    return { [idAlias]: { [operator]: processNested(where[operator], ctx) } };
+    return { [idAlias]: { [operator]: processNested(operand, ctx) } };
   }
 
   return processWhere(where, ctx);
@@ -118,11 +165,11 @@ function processWhere(
   where: Record<string, unknown> | Record<string, unknown>[],
   ctx: WhereCtx
 ): Record<string, unknown> | Record<string, unknown>[] {
-  if (!isArray(where) && !isRecord(where)) {
+  if (!Array.isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map((sub) => processWhere(sub, ctx));
   }
 
@@ -141,12 +188,16 @@ function processWhere(
         throw new Error(`Operator ${key} must be an array`);
       }
 
-      filters[key] = value.map((sub) => processNested(sub, ctx));
+      addCondition(
+        filters,
+        key,
+        value.map((sub) => processNested(sub, ctx))
+      );
       continue;
     }
 
     if (key === '$not') {
-      filters[key] = processNested(value, ctx);
+      addCondition(filters, key, processNested(value, ctx));
       continue;
     }
 
@@ -159,7 +210,7 @@ function processWhere(
     const attribute = meta.attributes[key];
 
     if (!attribute) {
-      filters[qb.aliasColumn(key, alias)] = processAttributeWhere(null, value);
+      addCondition(filters, qb.aliasColumn(key, alias), processAttributeWhere(null, value));
       continue;
     }
 
@@ -178,8 +229,9 @@ function processWhere(
         uid: attribute.target,
       });
 
-      // TODO: use a better merge logic (push to $and when collisions)
-      Object.assign(filters, nestedWhere);
+      for (const [nestedKey, nestedValue] of Object.entries(nestedWhere)) {
+        addCondition(filters, nestedKey, nestedValue);
+      }
 
       continue;
     }
@@ -188,7 +240,7 @@ function processWhere(
       const columnName = toColumnName(meta, key);
       const aliasedColumnName = qb.aliasColumn(columnName, alias);
 
-      filters[aliasedColumnName] = processAttributeWhere(attribute, value);
+      addCondition(filters, aliasedColumnName, processAttributeWhere(attribute, value));
 
       continue;
     }
@@ -250,14 +302,14 @@ const applyOperator = (
     case '$in': {
       // @ts-ignore
       // TODO: fix in v5
-      qb.whereIn(column, isKnexQuery(value) ? value : castArray(value));
+      qb.whereIn(column, isKnexQuery(value) ? value : [...castArray(value)]);
       break;
     }
 
     case '$notIn': {
       // @ts-ignore
       // TODO: fix in v5
-      qb.whereNotIn(column, isKnexQuery(value) ? value : castArray(value));
+      qb.whereNotIn(column, isKnexQuery(value) ? value : [...castArray(value)]);
       break;
     }
 
@@ -313,7 +365,7 @@ const applyOperator = (
       break;
     }
     case '$null': {
-      if (value) {
+      if (toNullOperand(value) === true) {
         qb.whereNull(column);
       } else {
         qb.whereNotNull(column);
@@ -321,7 +373,7 @@ const applyOperator = (
       break;
     }
     case '$notNull': {
-      if (value) {
+      if (toNullOperand(value) === true) {
         qb.whereNotNull(column);
       } else {
         qb.whereNull(column);
@@ -430,11 +482,11 @@ type Where =
   | Array<Where>;
 
 const applyWhere = (qb: Knex.QueryBuilder, where: Where): Knex.QueryBuilder | undefined => {
-  if (!isArray(where) && !isRecord(where)) {
+  if (!Array.isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return qb.where((subQB: Knex.QueryBuilder) =>
       where.forEach((subWhere) => applyWhere(subQB, subWhere))
     );
@@ -501,7 +553,7 @@ function qualifyRootColumns(
   where: Record<string, unknown> | Record<string, unknown>[],
   alias: string
 ): Record<string, unknown> | Record<string, unknown>[] {
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map((sub) => qualifyRootColumns(sub, alias));
   }
 

@@ -161,6 +161,14 @@ export namespace Relation {
     relation: 'morphOne';
     target: string;
     morphBy: string;
+    /**
+     * When true, writes keep a single join row (last-wins).
+     * `@strapi/core` `transformAttribute` sets this for single media.
+     * Generic `morphOne` relations leave it unset so a non-draft-and-publish
+     * source can store both the draft and published target rows.
+     * @internal
+     */
+    singleRow?: true;
   };
 
   export type MorphToOne = {

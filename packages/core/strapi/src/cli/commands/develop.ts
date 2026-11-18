@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import cluster from 'node:cluster';
 import type { StrapiCommand } from '../types';
-import { develop as nodeDevelop, DevelopOptions } from '../../node/develop';
+import type { DevelopOptions } from '../../node/develop';
 import { handleUnexpectedError } from '../../node/core/errors';
 
 type DevelopCLIOptions = DevelopOptions;
@@ -16,6 +16,9 @@ const action = async (options: DevelopCLIOptions) => {
       }
     }
 
+    // Loaded lazily: every command is registered on CLI startup, so a static import would make
+    // `strapi start` load the whole admin build toolchain (including admin source via staticFiles).
+    const { develop: nodeDevelop } = await import('../../node/develop');
     await nodeDevelop(options);
   } catch (err) {
     handleUnexpectedError(err);
@@ -36,7 +39,11 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--no-watch-admin', 'Do not watch the admin panel for hot changes')
     .option('--build-admin', 'Build the admin panel', true)
     .option('--no-build-admin', 'Do not build the admin panel in case watch is disabled')
-    .option('--open', 'Open the admin in your browser', true)
+    .option(
+      '--open',
+      'Open the admin in your browser when develop starts (development only), even if an admin user exists'
+    )
+    .option('--no-open', 'Do not open the admin in your browser, even on the first run')
     .option('--install-deps', 'Auto-install missing admin dependencies', true)
     .option('--no-install-deps', 'Do not auto-install missing admin dependencies')
     .description('Start your Strapi application in development mode')

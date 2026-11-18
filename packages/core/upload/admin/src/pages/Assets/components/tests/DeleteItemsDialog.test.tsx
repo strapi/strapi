@@ -1,5 +1,6 @@
 import { render, screen, waitFor, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
+import { IntlProvider } from 'react-intl';
 
 import { DeleteItemsDialog } from '../DeleteItemsDialog';
 
@@ -76,12 +77,55 @@ describe('DeleteItemsDialog', () => {
     await waitFor(() =>
       expect(mockToggleNotification).toHaveBeenCalledWith({
         type: 'danger',
-        message: 'An error occurred while deleting the items.',
+        message: 'boom',
       })
     );
     expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('explains when folder contents cannot be deleted due to permissions', async () => {
+    server.use(
+      http.post('*/upload/actions/bulk-delete', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 403,
+              name: 'PolicyError',
+              message: 'FolderContainsUnauthorizedAssetsError',
+            },
+          },
+          { status: 403 }
+        )
+      )
+    );
+
+    const { user } = render(<DeleteItemsDialog {...defaultProps} />, {
+      renderOptions: {
+        wrapper: ({ children }) => (
+          <IntlProvider
+            locale="en"
+            messages={{
+              'upload.apiError.FolderContainsUnauthorizedAssetsError':
+                'The selected folders contain assets that you do not have permission to delete.',
+            }}
+          >
+            {children}
+          </IntlProvider>
+        ),
+      },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() =>
+      expect(mockToggleNotification).toHaveBeenCalledWith({
+        type: 'danger',
+        message: 'The selected folders contain assets that you do not have permission to delete.',
+      })
+    );
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
   });
 
   it('stays open while the request is in flight, and reports the pending state', async () => {

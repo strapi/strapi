@@ -1,0 +1,238 @@
+views {
+  view admin_app_components of strapi.admin_web_app {
+    title '03 Engineering / Admin / Application overview'
+    description '''
+      **Audience:** engineers. **Question:** how does the Admin organize its browser features?
+      **Scope:** browser responsibilities and their HTTP boundary. Core routing selects feature UIs; HTTP requests cross into the server.
+      Feature cards are modules in one browser application, not separately deployed frontends. Server APIs enforce permissions even when the UI hides unavailable actions.
+      Open the Admin shell for frontend foundations, the server for feature API boundaries, or a feature for its code map.
+    '''
+    include
+      admin_shell with { navigateTo admin_frontend_foundation },
+      admin_router,
+      content_manager_ui,
+      content_type_builder_ui,
+      settings_api_tokens_ui,
+      plugin_admin_extensions,
+      strapi.server_runtime with { navigateTo admin_feature_surfaces }
+    exclude * -> *
+    include
+      admin_shell -> admin_router,
+      admin_router -> content_manager_ui,
+      admin_router -> content_type_builder_ui,
+      admin_router -> settings_api_tokens_ui,
+      admin_shell -> plugin_admin_extensions,
+      content_manager_ui -> strapi.server_runtime with { title 'Edits and publishes content' technology 'HTTP(S)' navigateTo content_publishing_flow },
+      content_type_builder_ui -> strapi.server_runtime with { title 'Changes schemas in development' technology 'HTTP(S)' navigateTo content_type_builder_schema_change_flow },
+      settings_api_tokens_ui -> strapi.server_runtime with { title 'Configures administration' technology 'HTTP(S)' },
+      plugin_admin_extensions -> strapi.server_runtime with { title 'Calls plugin endpoints' technology 'HTTP(S)' }
+    autoLayout LeftRight 70 40
+  }
+
+  view admin_frontend_foundation of strapi.admin_web_app {
+    title '03 Engineering / Admin / Frontend foundation'
+    description '''
+      **Audience:** frontend engineers. **Question:** what supplies routing, context, state and data access to Admin pages?
+      **Scope:** browser composition and dependencies, not a request sequence. React providers supply context and client state; they are unrelated to server upload/email providers.
+      Redux holds shared state and RTK Query cache state. Registering API reducers/middleware connects that cache to the store; it does not itself issue a request.
+      Pages use API services for data. Context providers also include React Query; the Redux store does not represent every browser cache.
+      Open the shell, providers, router or API services for their code references. Shared UI components remain in the feature code maps.
+    '''
+
+    include
+      admin_shell with { navigateTo admin_shell_code },
+      admin_providers with { navigateTo admin_providers_code },
+      admin_router with { navigateTo admin_router_code },
+      admin_store,
+      admin_api_services with { navigateTo admin_api_services_code },
+      admin_feature_providers,
+      admin_layouts,
+      admin_pages
+    exclude * -> *
+    include
+      admin_shell -> admin_providers,
+      admin_shell -> admin_router,
+      admin_shell -> admin_layouts,
+      admin_providers -> admin_store,
+      admin_providers -> admin_feature_providers,
+      admin_store -> admin_api_services,
+      admin_router -> admin_pages,
+      admin_pages -> admin_api_services
+    autoLayout LeftRight 65 40
+  }
+
+  view admin_feature_surfaces of strapi.admin_web_app {
+    title '03 Engineering / Admin / Feature API boundaries'
+    description '''
+      **Audience:** engineers. **Question:** which server API serves each Admin feature?
+      **Scope:** runtime HTTP boundaries. Browser modules call APIs hosted in the same Strapi server; the server cards are not separate services to deploy.
+      The plugin UI is bundled during the Admin build. Content-Type Builder mutation routes require development autoReload.
+      Open a server feature for its implementation; open plugin modules for how extension entrypoints are assembled.
+    '''
+    include
+      content_manager_ui,
+      content_type_builder_ui,
+      settings_api_tokens_ui,
+      plugin_admin_extensions,
+      strapi.server_runtime.content_manager_server,
+      strapi.server_runtime.content_type_builder_server,
+      strapi.server_runtime.admin_server_apis,
+      strapi.server_runtime.plugin_modules with { navigateTo plugin_entrypoints }
+    exclude * -> *
+    include
+      content_manager_ui -> strapi.server_runtime.content_manager_server with { title 'Content operations' technology 'HTTP(S)' },
+      content_type_builder_ui -> strapi.server_runtime.content_type_builder_server with { title 'Schema editing (development)' technology 'HTTP(S)' },
+      settings_api_tokens_ui -> strapi.server_runtime.admin_server_apis with { title 'Settings and identity' technology 'HTTP(S)' },
+      plugin_admin_extensions -> strapi.server_runtime.plugin_modules with { title 'Plugin-specific requests' technology 'HTTP(S)' }
+    autoLayout LeftRight 70 40
+  }
+
+  view content_manager_ui_internals of strapi.admin_web_app.content_manager_ui {
+    title '05 Code reference / Admin / Content Manager UI'
+    description '''
+      **Question:** where are Content Manager pages registered, and how do they reach the server?
+      This source map follows the plugin entrypoint, routing, main page surfaces and API services. Shared hooks, layout, state and UI components are omitted to keep the page-to-API path readable.
+      Cards group related files rather than individual React components. Open a card’s implementation links for source; open the server module for backend organization.
+      History and preview are grouped as page surfaces here, with their availability and behavior explained in the journey views.
+    '''
+
+    include
+      cm_ui_plugin_entry,
+      cm_ui_router,
+      cm_ui_list_view,
+      cm_ui_edit_view,
+      cm_ui_configuration_views,
+      cm_ui_services,
+      cm_ui_history_preview,
+      strapi.server_runtime.content_manager_server with { navigateTo content_manager_server_code }
+    exclude * -> *
+    include
+      cm_ui_plugin_entry -> cm_ui_router with { title 'Registers routes' },
+      cm_ui_router -> cm_ui_list_view with { title 'Routes to lists' },
+      cm_ui_router -> cm_ui_edit_view with { title 'Routes to editing' },
+      cm_ui_router -> cm_ui_configuration_views with { title 'Routes to configuration' },
+      cm_ui_router -> cm_ui_history_preview with { title 'Routes to history / preview' },
+      cm_ui_list_view -> cm_ui_services with { title 'Reads and changes content' },
+      cm_ui_edit_view -> cm_ui_services with { title 'Reads and changes content' },
+      cm_ui_configuration_views -> cm_ui_services with { title 'Loads and saves layouts' },
+      cm_ui_services -> strapi.server_runtime.content_manager_server with { title 'Calls Content Manager Admin APIs' technology 'HTTP(S)' },
+      cm_ui_history_preview -> cm_ui_services with { title 'Loads history / preview' }
+    autoLayout LeftRight 70 40
+  }
+
+  view admin_shell_code of strapi.admin_web_app.admin_shell {
+    title '05 Code reference / Admin / Admin Shell'
+    description '''
+      **Question:** where is the Admin application initialized and extended?
+      The application entrypoint initializes extension APIs that contribute feature/plugin routes. Cards group responsibilities within the Admin source, not separate browser applications.
+      Open routing for its code map; use the source links for the application class and extension API.
+    '''
+
+    include
+      admin_app_entry,
+      admin_extension_api,
+      strapi.admin_web_app.admin_router with { navigateTo admin_router_code },
+      admin_app_entry -> admin_extension_api,
+      admin_extension_api -> strapi.admin_web_app.admin_router.admin_plugin_routes
+  }
+
+  view admin_router_code of strapi.admin_web_app.admin_router {
+    title '05 Code reference / Admin / Admin Router'
+    description '''
+      **Question:** where are login routes, authenticated layouts and plugin routes composed?
+      The arrows summarize route organization and successful-login navigation, not an authorization guarantee. Server policies still enforce each API operation.
+      Use each route group’s source links to find the router and page definitions.
+    '''
+
+    include
+      admin_auth_routes,
+      admin_authenticated_routes,
+      admin_plugin_routes,
+      admin_auth_routes -> admin_authenticated_routes,
+      admin_authenticated_routes -> admin_plugin_routes
+  }
+
+  view admin_providers_code of strapi.admin_web_app.admin_providers {
+    title '05 Code reference / Admin / Admin Providers'
+    description '''
+      **Question:** where does the Admin supply React context, shared state and data-cache providers?
+      The two provider cards group responsibilities in the same provider stack; they are not two independently deployed modules.
+      Redux and React Query are wired into the browser application here. These React providers are distinct from server upload/email adapters.
+      Open the store or feature contexts to return to the frontend foundation; implementation links lead to the provider stack and feature files.
+    '''
+
+    include
+      admin_context_providers,
+      admin_data_providers,
+      strapi.admin_web_app.admin_store with { navigateTo admin_frontend_foundation },
+      strapi.admin_web_app.admin_feature_providers with { navigateTo admin_frontend_foundation },
+      admin_context_providers -> strapi.admin_web_app.admin_feature_providers,
+      admin_data_providers -> strapi.admin_web_app.admin_store
+  }
+
+  view admin_api_services_code of strapi.admin_web_app.admin_api_services {
+    title '05 Code reference / Admin / Admin API Services'
+    description '''
+      **Question:** where do Admin pages define shared HTTP behavior and auth/settings endpoints?
+      The shared RTK Query API is extended by endpoint modules. It is browser-side request code, separate from the server handlers it calls.
+      The settings HTTP boundary is shown; auth endpoint details are available through the source links and the Admin login journey.
+    '''
+
+    include
+      admin_api_base,
+      admin_auth_api with { navigateTo admin_login_flow },
+      admin_settings_api,
+      strapi.server_runtime,
+      strapi.server_runtime.admin_server_apis,
+      admin_api_base -> admin_auth_api,
+      admin_api_base -> admin_settings_api,
+      admin_settings_api -> strapi.server_runtime.admin_server_apis
+  }
+
+  view content_type_builder_ui_code of strapi.admin_web_app.content_type_builder_ui {
+    title '05 Code reference / Admin / Content-Type Builder UI'
+    description '''
+      **Question:** where does the Content-Type Builder collect and submit schema edits?
+      Pages and schema-editing controls update the data manager, which calls server endpoints over HTTP. The server permits schema writes only with autoReload enabled.
+      This is UI code organization; writing definitions, reloading and synchronizing the database are covered by the development schema-change journey.
+      Open the server module for its source map.
+    '''
+
+    include
+      ctb_ui_app_pages,
+      ctb_ui_data_manager,
+      ctb_ui_schema_components,
+      ctb_ui_form_modals,
+      ctb_ui_utils,
+      strapi.server_runtime,
+      strapi.server_runtime.content_type_builder_server with { navigateTo content_type_builder_server_code },
+      ctb_ui_app_pages -> ctb_ui_data_manager,
+      ctb_ui_app_pages -> ctb_ui_schema_components,
+      ctb_ui_schema_components -> ctb_ui_form_modals,
+      ctb_ui_form_modals -> ctb_ui_data_manager,
+      ctb_ui_data_manager -> strapi.server_runtime.content_type_builder_server,
+      ctb_ui_schema_components -> ctb_ui_utils
+  }
+
+  view settings_api_tokens_ui_code of strapi.admin_web_app.settings_api_tokens_ui {
+    title '05 Code reference / Admin / Settings and API Tokens UI'
+    description '''
+      **Question:** where are token, role, user and integration settings pages organized?
+      Navigation exposes groups of related settings pages; API service modules handle their server requests. Cards group directories and responsibilities, not independent applications.
+      These are Admin settings. Application-user permissions and Content API credentials remain distinct from Admin accounts.
+      Open the API services card for request code; use page source links to find the relevant settings implementation.
+    '''
+
+    include
+      settings_navigation,
+      api_tokens_pages,
+      admin_roles_pages,
+      transfer_tokens_webhooks_pages,
+      strapi.admin_web_app.admin_api_services with { navigateTo admin_api_services_code },
+      settings_navigation -> api_tokens_pages,
+      settings_navigation -> admin_roles_pages,
+      settings_navigation -> transfer_tokens_webhooks_pages,
+      api_tokens_pages -> strapi.admin_web_app.admin_api_services.admin_settings_api,
+      admin_roles_pages -> strapi.admin_web_app.admin_api_services.admin_settings_api
+  }
+}

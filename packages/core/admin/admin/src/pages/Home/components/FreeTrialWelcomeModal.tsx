@@ -59,7 +59,7 @@ export const FreeTrialWelcomeModal = () => {
 
   return (
     <Modal.Root open={open} onOpenChange={handleOnOpenChange}>
-      <StyledModalContent aria-labelledby="title">
+      <StyledModalContent>
         <StyledModalBody>
           <Box position="absolute" top={0} right={0} padding={2}>
             <StyledButton
@@ -77,12 +77,12 @@ export const FreeTrialWelcomeModal = () => {
           </Box>
           <img src={lightIllustration} alt="free-trial" width="100%" height="100%" />
           <Flex direction="column" alignItems="start" justifyContent="stretch" padding={8} gap={4}>
-            <Typography variant="alpha" fontWeight="bold" fontSize={4} id="title">
+            <Modal.Title variant="alpha" fontWeight="bold" fontSize={4}>
               {formatMessage({
                 id: 'app.components.FreeTrialWelcomeModal.title',
                 defaultMessage: "We're glad to have you on board",
               })}
-            </Typography>
+            </Modal.Title>
             <Typography>
               {formatMessage({
                 id: 'app.components.FreeTrialWelcomeModal.description1',

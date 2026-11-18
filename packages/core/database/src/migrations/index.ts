@@ -1,10 +1,18 @@
 import { createUserMigrationProvider } from './users';
 import { createInternalMigrationProvider } from './internal';
+import { createMigrationFileBuilder } from './file-builder';
 
-import type { MigrationProvider, Migration } from './common';
+import type { MigrationProvider } from './common';
 import type { Database } from '..';
 
-export type { MigrationProvider, Migration };
+export type { MigrationProvider, Migration } from './common';
+export type {
+  AttributeRenamesOperation,
+  BuiltMigrationFile,
+  MigrationFileBuilder,
+  MigrationFileFormat,
+  MigrationFileOperation,
+} from './file-builder';
 
 export const createMigrationsProvider = (db: Database): MigrationProvider => {
   const userProvider = createUserMigrationProvider(db);
@@ -14,6 +22,9 @@ export const createMigrationsProvider = (db: Database): MigrationProvider => {
   return {
     providers: {
       internal: internalProvider,
+    },
+    createFileBuilder() {
+      return createMigrationFileBuilder({ db });
     },
     async shouldRun() {
       const shouldRunResponses = await Promise.all(

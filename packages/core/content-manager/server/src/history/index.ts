@@ -4,6 +4,7 @@ import { services } from './services';
 import { routes } from './routes';
 import { getService } from './utils';
 import { historyVersion } from './models/history-version';
+import { registerHistoryEntitlements } from './entitlements';
 
 /**
  * Check once if the feature is enabled before loading it,
@@ -14,6 +15,7 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
     return {
       register({ strapi }) {
         strapi.get('models').add(historyVersion);
+        registerHistoryEntitlements(strapi);
       },
       bootstrap({ strapi }) {
         // Start recording history and saving history versions
@@ -35,6 +37,7 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   return {
     register({ strapi }) {
       strapi.get('models').add(historyVersion);
+      registerHistoryEntitlements(strapi);
     },
   };
 };
