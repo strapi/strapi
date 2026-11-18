@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { renderHook, screen, server, waitFor } from '@tests/utils';
+import { act, renderHook, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
@@ -664,6 +664,46 @@ describe('useDocumentActions', () => {
       });
 
       await screen.findByText("Couldn't unpublish entry.");
+    });
+
+    it('should report isLoading while the unpublish request is in flight', async () => {
+      server.use(
+        http.post('/content-manager/:collectionType/:uid/:id/actions/unpublish', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          return HttpResponse.json({
+            documentId: '12345',
+            id: 1,
+            title: 'test',
+            publishedAt: null,
+          });
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      await waitFor(() => expect(result.current.unpublish).toEqual(expect.any(Function)));
+
+      let promise: Promise<unknown> = Promise.resolve();
+
+      act(() => {
+        promise = result.current.unpublish({
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          documentId: '12345',
+        });
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+
+      await act(async () => {
+        await promise;
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Unpublished document');
     });
   });
 

@@ -10,6 +10,8 @@ const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
 const mockUseDraftRelationCountQuery = jest.fn();
 const mockDiscard = jest.fn();
+const mockUnpublish = jest.fn();
+let mockIsLoading = false;
 const mockFetchDraftDocument = jest.fn();
 const mockNavigate = jest.fn();
 const mockParams: { id?: string } = {};
@@ -71,7 +73,8 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
     update: mockUpdateDocument,
     publish: mockPublish,
     discard: mockDiscard,
-    isLoading: false,
+    unpublish: mockUnpublish,
+    isLoading: mockIsLoading,
   }),
 }));
 jest.mock('../../../../hooks/useDocument', () => ({
@@ -135,6 +138,7 @@ import {
   DocumentActionsMenu,
   openPublishConfirmDialog,
   PublishAction,
+  UnpublishAction,
   UpdateAction,
 } from '../DocumentActions';
 
@@ -799,6 +803,64 @@ describe('DiscardAction draft relations warning', () => {
       },
       { skip: false }
     );
+  });
+});
+
+describe('UnpublishAction', () => {
+  const UnpublishHarness = () => {
+    const action = UnpublishAction({
+      activeTab: 'draft',
+      documentId: 'child',
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      meta: { availableStatus: [], availableLocales: [] },
+      document: { documentId: 'child', id: 1, status: 'modified' },
+    });
+
+    if (!action) {
+      return null;
+    }
+
+    return <DocumentActions actions={[{ id: 'unpublish', ...action }]} />;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockIsLoading = false;
+    mockUnpublish.mockResolvedValue({ data: { documentId: 'child', publishedAt: null } });
+  });
+
+  it('disables the confirm button while the unpublish request is in flight', async () => {
+    mockIsLoading = true;
+
+    const { user } = render(<UnpublishHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Unpublish' }));
+
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled();
+  });
+
+  it('only sends one unpublish request when Confirm is double-clicked', async () => {
+    let resolveUnpublish: (value: unknown) => void = () => undefined;
+    mockUnpublish.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveUnpublish = resolve;
+        })
+    );
+
+    const { user } = render(<UnpublishHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Unpublish' }));
+
+    const confirmButton = screen.getByRole('button', { name: 'Confirm' });
+
+    await user.click(confirmButton);
+    await user.click(confirmButton);
+
+    expect(mockUnpublish).toHaveBeenCalledTimes(1);
+
+    resolveUnpublish({ data: { documentId: 'child', publishedAt: null } });
   });
 });
 
