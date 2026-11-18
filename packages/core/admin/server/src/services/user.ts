@@ -445,10 +445,15 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
 
   const deletedUsers = [] as AdminUser[];
   for (const id of ids) {
-    const deletedUser = await strapi.db.query('admin::user').delete({
+    const deletedUser: AdminUser | null = await strapi.db.query('admin::user').delete({
       where: { id },
       populate: ['roles'],
     });
+
+    // The ID matches no user (e.g. deleted in the meantime): nothing to clean up or report
+    if (deletedUser === null) {
+      continue;
+    }
 
     // Invalidate all sessions for the deleted user
     const sessionManager = getSessionManager();
