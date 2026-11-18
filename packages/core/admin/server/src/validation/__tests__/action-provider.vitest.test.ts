@@ -308,9 +308,9 @@ describe('validateRegisterProviderAction', () => {
     ].join('\n');
 
     const multiFaultErrors = [
-      expect.objectContaining({ path: ['0', 'uid'] }),
-      expect.objectContaining({ path: ['0', 'pluginName'] }),
-      expect.objectContaining({ path: ['1', 'category'] }),
+      expect.objectContaining({ path: ['0', 'uid'], value: 'Read' }),
+      expect.objectContaining({ path: ['0', 'pluginName'], value: undefined }),
+      expect.objectContaining({ path: ['1', 'category'], value: 'general' }),
     ];
 
     test('registerMany names every issue of every action', async () => {
@@ -349,9 +349,9 @@ describe('validateRegisterProviderAction', () => {
         ].join('\n'),
         details: {
           errors: [
-            expect.objectContaining({ path: ['0', 'uid'] }),
-            expect.objectContaining({ path: ['0', 'pluginName'] }),
-            expect.objectContaining({ path: ['0', 'category'] }),
+            expect.objectContaining({ path: ['0', 'uid'], value: 'Read' }),
+            expect.objectContaining({ path: ['0', 'pluginName'], value: undefined }),
+            expect.objectContaining({ path: ['0', 'category'], value: 'general' }),
           ],
         },
       });

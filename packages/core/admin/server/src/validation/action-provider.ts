@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { z, errors } from '@strapi/utils';
 
 /**
@@ -92,7 +93,7 @@ const formatPath = (path: PropertyKey[]) =>
 /**
  * Throws a `ValidationError` whose message names every failing path: `<path> <message>` for one
  * issue, `<count> errors occurred:` followed by one `<path> <message>` line per issue for several.
- * `details.errors` lists every issue.
+ * `details.errors` lists every issue, with the input value at its path.
  */
 export const validateRegisterProviderAction = (actions: unknown): void => {
   const result = registerProviderActionSchema.safeParse(actions);
@@ -108,7 +109,7 @@ export const validateRegisterProviderAction = (actions: unknown): void => {
       path: issue.path.map(String),
       message: path === '' ? issue.message : `${path} ${issue.message}`,
       name: 'ValidationError',
-      value: undefined,
+      value: issue.path.length === 0 ? actions : get(actions, issue.path),
     };
   });
 
