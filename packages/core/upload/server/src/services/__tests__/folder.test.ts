@@ -199,6 +199,17 @@ describe('folder', () => {
       );
       expect(destinationLookup?.calls).not.toContain('forUpdate');
     });
+
+    test('updates folder and file paths using prefix substring replacement instead of global REPLACE', async () => {
+      mockDatabase({ movedFolder: { pathId: 1, path: '/1' }, destinationFolder: { path: '/2' } });
+
+      await folderService.update(1, { name: 'moved', parent: 2 }, { user: { id: 1 } });
+
+      expect(strapi.db.connection.raw).toHaveBeenCalledWith(
+        expect.stringContaining('SUBSTRING'),
+        expect.arrayContaining(['/2/1', expect.anything(), 3])
+      );
+    });
   });
 
   describe('getStructure', () => {
