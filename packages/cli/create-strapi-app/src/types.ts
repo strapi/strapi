@@ -66,6 +66,11 @@ export interface Scope {
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
+  /**
+   * @deprecated The Growth SSO trial was removed. This field is ignored and kept only so
+   * existing callers that still pass it keep compiling.
+   */
+  shouldCreateGrowthSsoTrial?: boolean;
   /** How the CLI was started: by an agent, in CI, by a person at a terminal, or unknown. */
   invocation: Invocation;
   agentName: string | null;
