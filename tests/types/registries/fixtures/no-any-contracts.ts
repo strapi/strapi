@@ -12,9 +12,9 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 // - The `entry` of the content-releases action rows (`Modules.Documents.AnyDocument`), and the
 //   members whose only `any` is that `entry` (`release.create`, `release.delete`,
 //   `release.recordMissedRun`, `release-action.groupActions`).
-// - The `@strapi/utils` hooks of the providers (`hooks`) and of `admin::role.hooks`, which their own
-//   units type now that https://github.com/strapi/strapi/pull/28663 merged, and `plugin::i18n.permissions.engine`, which waits
-//   on https://github.com/strapi/strapi/pull/28665.
+// - The `@strapi/utils` hooks of the condition provider (`hooks`) and of `admin::role.hooks`, which
+//   their own units type now that https://github.com/strapi/strapi/pull/28663 merged, and
+//   `plugin::i18n.permissions.engine`, which waits on https://github.com/strapi/strapi/pull/28665.
 // - The rows the round left out: `admin::passport`, the content-manager `relations` controller, and
 //   the `strapi::responses`, `strapi::security` and `strapi::session` middlewares.
 
@@ -207,6 +207,17 @@ declare const permissionEngineChecks: [
   Core.Assert<Equal<[HasAny<Service<'admin::transfer'>['permission']['engine']>], [false]>>,
 ];
 permissionEngineChecks satisfies unknown;
+
+// Admin action provider: the `appliesPropertyToSubject` hook and the provider hooks (H2).
+declare const actionProviderHookChecks: [
+  Core.Assert<
+    Equal<
+      [HasAny<EngineHookHandlers<Service<'admin::permission'>['actionProvider']['hooks']>>],
+      [false]
+    >
+  >,
+];
+actionProviderHookChecks satisfies unknown;
 
 // Admin role service: `properties` (C01), the query parameters (C02), the EE IDs (C05b).
 declare const roleChecks: [
