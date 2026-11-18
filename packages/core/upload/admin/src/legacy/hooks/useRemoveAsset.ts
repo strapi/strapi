@@ -9,6 +9,7 @@ import { useMutation, useQueryClient, UseMutationResult } from 'react-query';
 import { useDispatch } from 'react-redux';
 
 import { pluginId } from '../../pluginId';
+import { getTrad } from '../utils';
 
 import type { DeleteFile } from '../../../../shared/contracts/files';
 
@@ -33,7 +34,7 @@ export const useRemoveAsset = (onSuccess: () => void): UseRemoveAsset => {
         toggleNotification({
           type: 'success',
           message: formatMessage({
-            id: 'modal.remove.success-label',
+            id: getTrad('modal.remove.success-label'),
             defaultMessage: 'Elements have been successfully deleted.',
           }),
         });
