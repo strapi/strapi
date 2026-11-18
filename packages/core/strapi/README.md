@@ -132,7 +132,7 @@ Database driver packages often have their own minimum versions for each version 
 
 You can unlock additional features such as SSO, Audit Logs, Review Workflows in [Strapi Cloud](https://cloud.strapi.io/login?source=github1) or [Strapi Enterprise](https://strapi.io/enterprise?source=github1).
 
-**[See more on our website](https://strapi.io/overview)**.
+**[See more on our website](https://strapi.io/)**.
 
 ## Contributing
 
