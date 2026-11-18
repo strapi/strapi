@@ -114,3 +114,31 @@ actionProvider.unstable_aliases('plugin::example.raed');
     },
   ],
 }) satisfies Core.RouteConfigFor;
+
+// The action provider hooks hand their handlers a typed context.
+actionProvider.hooks.appliesPropertyToSubject.register(({ property, action, subject }) => {
+  property satisfies string;
+  action.actionId satisfies string;
+  subject satisfies string;
+  return true;
+});
+actionProvider.hooks.willRegister.register(({ key, value }) => {
+  key satisfies string;
+  value.options.applyToProperties satisfies string[] | null;
+});
+actionProvider.hooks.didRegister.register(({ value }) => value.actionId satisfies string);
+actionProvider.hooks.willDelete.register(
+  ({ value }) => value?.actionId satisfies string | undefined
+);
+actionProvider.hooks.didDelete.register(({ value }) => {
+  // @ts-expect-error The action of a deleted key is read with `get`, so it may be `undefined`.
+  value.actionId;
+});
+actionProvider.hooks.appliesPropertyToSubject.register(
+  // @ts-expect-error The context has no `actionId`: the action is `action`.
+  ({ actionId }: { actionId: string }) => actionId !== ''
+);
+actionProvider.hooks.willRegister.register(
+  // @ts-expect-error The registered action is `value`, not `action`.
+  ({ action }: { action: { actionId: string } }) => action.actionId
+);

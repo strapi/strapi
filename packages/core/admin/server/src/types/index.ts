@@ -1,6 +1,7 @@
 import type { Ability, ForcedSubject } from '@casl/ability';
 import type { Core, Data, Modules, UID } from '@strapi/types';
 import type { engine as PermissionsEngine } from '@strapi/permissions';
+import type { hooks as HooksUtils } from '@strapi/utils';
 import type { Controllers } from './controllers';
 import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
 import type { HasPermissionsConfig } from './policies';
@@ -401,8 +402,26 @@ type ActionRegistration = Readonly<
     | undefined;
 };
 
+/** What the provider hooks of the action provider receive: the key and the action. */
+type ActionProviderHookContext = { key: string; value: Action };
+
 /**
- * The action provider with strict types. `register` and `registerMany` check that each action's
+ * What the delete hooks of the action provider receive: the key and its action, read with `get`
+ * (`@strapi/utils` `provider-factory.ts` `delete`).
+ */
+type ActionProviderDeleteHookContext = { key: string; value: Action | undefined };
+
+/** The provider hooks of the action provider (`@strapi/utils` `providerFactory`), with typed handlers. */
+type ActionProviderHooks = {
+  willRegister: HooksUtils.AsyncSeriesHook<(context: ActionProviderHookContext) => unknown>;
+  didRegister: HooksUtils.AsyncParallelHook<(context: ActionProviderHookContext) => unknown>;
+  willDelete: HooksUtils.AsyncParallelHook<(context: ActionProviderDeleteHookContext) => unknown>;
+  didDelete: HooksUtils.AsyncParallelHook<(context: ActionProviderDeleteHookContext) => unknown>;
+};
+
+/**
+ * The action provider with strict types. Its provider hooks take typed handlers
+ * ({@link ActionProviderHooks}). `register` and `registerMany` check that each action's
  * computed ID is a registered permission action (`Core.PermissionActionCheck`); reads accept any
  * runtime ID and reject an unregistered literal (`Core.PermissionActionLookup`). `registerMany`
  * resolves to the provider (`return this`), named here because the declaration emitter prints
@@ -410,8 +429,9 @@ type ActionRegistration = Readonly<
  */
 type StrictActionProvider = Omit<
   ActionProvider,
-  'register' | 'registerMany' | 'get' | 'has' | 'appliesToProperty' | 'unstable_aliases'
+  'hooks' | 'register' | 'registerMany' | 'get' | 'has' | 'appliesToProperty' | 'unstable_aliases'
 > & {
+  hooks: Omit<ActionProvider['hooks'], keyof ActionProviderHooks> & ActionProviderHooks;
   register<const TAction extends ActionRegistration>(
     actionAttributes: Core.PermissionActionCheck<TAction>
   ): ReturnType<ActionProvider['register']>;
