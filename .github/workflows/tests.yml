@@ -1065,8 +1065,44 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 30
     needs: [conditions, build]
-    name: 'tests-next api (ce)'
+    name: 'tests-next api (ce, ${{ matrix.database }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres, mysql]
+    # Same images as the API integration jobs. A service whose image is empty doesn't start, so
+    # each matrix entry starts only its own database. Credentials match the TESTS_DATABASE_*
+    # defaults (tests-next/shared/src/db/database.ts): the suites create and drop a database per
+    # app, which needs the Postgres superuser or the MySQL root user.
+    services:
+      postgres:
+        image: ${{ matrix.database == 'postgres' && 'postgres:18' || '' }}
+        env:
+          POSTGRES_USER: strapi
+          POSTGRES_PASSWORD: strapi
+          POSTGRES_DB: strapi_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      mysql:
+        image: ${{ matrix.database == 'mysql' && 'bitnamilegacy/mysql:9.3.0' || '' }}
+        env:
+          MYSQL_ROOT_PASSWORD: strapi
+          MYSQL_USER: strapi
+          MYSQL_PASSWORD: strapi
+          MYSQL_DATABASE: strapi_test
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -1078,10 +1114,12 @@ jobs:
         uses: ./.github/actions/run-build
       - name: Run tests-next api
         run: yarn nx run @strapi/tests-api:test --skip-nx-cache
+        env:
+          TESTS_DATABASE: ${{ matrix.database }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
-          name: tests-next-api-reports
+          name: tests-next-api-${{ matrix.database }}-reports
           path: test-apps/next/reports/junit/
           retention-days: 7
           if-no-files-found: ignore
@@ -1090,8 +1128,44 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.tests_next == 'true'
     timeout-minutes: 30
     needs: [conditions, build]
-    name: 'tests-next cli (ce)'
+    name: 'tests-next cli (ce, ${{ matrix.database }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres, mysql]
+    # Same images as the API integration jobs. A service whose image is empty doesn't start, so
+    # each matrix entry starts only its own database. Credentials match the TESTS_DATABASE_*
+    # defaults (tests-next/shared/src/db/database.ts): the suites create and drop a database per
+    # app, which needs the Postgres superuser or the MySQL root user.
+    services:
+      postgres:
+        image: ${{ matrix.database == 'postgres' && 'postgres:18' || '' }}
+        env:
+          POSTGRES_USER: strapi
+          POSTGRES_PASSWORD: strapi
+          POSTGRES_DB: strapi_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      mysql:
+        image: ${{ matrix.database == 'mysql' && 'bitnamilegacy/mysql:9.3.0' || '' }}
+        env:
+          MYSQL_ROOT_PASSWORD: strapi
+          MYSQL_USER: strapi
+          MYSQL_PASSWORD: strapi
+          MYSQL_DATABASE: strapi_test
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -1103,10 +1177,12 @@ jobs:
         uses: ./.github/actions/run-build
       - name: Run tests-next cli
         run: yarn nx run @strapi/tests-cli:test --skip-nx-cache
+        env:
+          TESTS_DATABASE: ${{ matrix.database }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
-          name: tests-next-cli-reports
+          name: tests-next-cli-${{ matrix.database }}-reports
           path: test-apps/next/reports/junit/
           retention-days: 7
           if-no-files-found: ignore

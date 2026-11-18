@@ -9,7 +9,10 @@
   },
   "dependencies": {
     "@strapi/strapi": "workspace:*",
-    "create-strapi-app": "workspace:*"
+    "create-strapi-app": "workspace:*",
+    "knex": "3.3.0",
+    "mysql2": "3.23.1",
+    "pg": "8.20.0"
   },
   "devDependencies": {
     "@types/node": "22.20.0",
