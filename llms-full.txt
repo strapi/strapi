@@ -13064,7 +13064,7 @@ const permission = {
   conditions: ['isPublished'],
 };
 
-const ability = engine.generate([permission]);
+const ability = await engine.generateAbility([permission]);
 
 console.log('Can read article?:', ability.can('read', 'article'));
 ```
@@ -13114,6 +13114,12 @@ sequenceDiagram
 | before-evaluate.permission         | Pre-evaluation   | Transform the permission after formatting and validation     |
 | before-register.permission         | Pre-registration | Final modifications after evaluation but before registration |
 
+#### Typed Hooks
+
+`engine.Engine`, what `engine.new` returns, and its `PermissionEngineHooks` take untyped handlers. `engine.TypedEngine` and `engine.TypedPermissionEngineHooks` describe the same hooks with typed handlers and contexts (`BeforeEvaluateContext`, `ValidateContext`, `WillRegisterContext`). They are opt-in: a typed contract can declare them instead of the untyped ones, and the engine `engine.new` returns is assignable to `TypedEngine` without a cast. In `TypedPermissionEngineHooks`, the `format.permission` handlers are typed, but `call` resolves to `unknown`: the same hook also runs the handlers that untyped code registers. `TypedPermission` reads the permission properties as `unknown`, except `fields`, which is a list of field names (`string[]`).
+
+A validate hook stops at the first handler that returns a value other than `undefined`, and the engine rejects the permission when that value is `false`. A validator that lets the permission through returns nothing, so the next validators still run.
+
 #### Hook Implementation Example
 
 ```typescript
@@ -13121,14 +13127,14 @@ const engine = permissions.engine.new({ providers });
 
 // Validation hook
 engine.on('before-format::validate.permission', ({ permission }) => {
-  if (permission.action === 'delete' && !permission.conditions.includes('isAdmin')) {
+  if (permission.action === 'delete' && !permission.conditions?.includes('isAdmin')) {
     return false; // Prevent non-admin delete
   }
-  return true;
+  // Return nothing, so the next validators still run
 });
 
 // Format hook
-engine.on('format.permission', ({ permission }) => {
+engine.on('format.permission', (permission) => {
   // Add timestamp to tracking actions
   if (permission.action.startsWith('track')) {
     return {
@@ -13210,14 +13216,15 @@ const permission = domain.permission.create({
   conditions: ['isOwner'],
 });
 
-engine.on('before-evaluate.permission', ({ permission }) => {
+engine.on('before-evaluate.permission', (context) => {
   // Add dynamic conditions based on context
-  if (permission.action === 'update') {
-    permission.conditions.push('isNotLocked');
-    permission.conditions.push('isWithinBusinessHours');
+  if (context.permission.action === 'update') {
+    context.addCondition('isNotLocked').addCondition('isWithinBusinessHours');
   }
 });
 ```
+
+`context.permission` is a copy of the permission, so changing it has no effect. `addCondition` adds the condition to the permission the engine evaluates.
 
 ---
 
@@ -15540,6 +15547,20 @@ The package runs on the server. The admin code imports only types from it, for e
 #### Hooks
 
 The `hooks` namespace creates hook objects: `createAsyncSeriesHook`, `createAsyncSeriesWaterfallHook`, `createAsyncParallelHook` and `createAsyncBailHook`. A hook object has `register`, `delete`, `getHandlers` and `call`. The factory decides how `call` runs the handlers. The [hooks registry](../../../architecture/04-extension-points.md#hooks-registry) and the permission engine build on them.
+
+The hook types take the handler type as a parameter, `Handler` (`(...args: any[]) => any`) by default. An untyped hook takes any handler and any context, and its types are the ones it had before the hooks took a handler type: a series hook resolves to `void`, a parallel hook to `any[]`, a bail hook to `any`, and a waterfall hook to `unknown` from the factory or `any` through the `AsyncSeriesWaterfallHook` interface. A hook created with a handler type, for example `createAsyncBailHook<(context: Context) => boolean>()`, checks the handlers it registers, the one context `call` takes (`HookContext<T>`, the handler's first parameter) and what `call` resolves to. `HookResult<T>` is what one handler resolves to, and each kind of hook builds its own result from it:
+
+| Hook                  | Typed `call` resolves to                                                         |
+| --------------------- | -------------------------------------------------------------------------------- |
+| Series                | `void`                                                                           |
+| Parallel              | `HookResult<T>[]`, one result per handler                                        |
+| Bail                  | `HookResult<T> \| undefined`, `undefined` when every handler returns `undefined` |
+| Waterfall (interface) | `HookContext<T>`, the value the handlers pass along                              |
+| Waterfall (factory)   | `Awaited<HookContext<T>> \| HookResult<T>`, see below                            |
+
+A waterfall handler passes its awaited result to the next handler, so `AsyncSeriesWaterfallHook<T>` requires `T` to resolve to the type it takes (`WaterfallHandler<T>`), and resolves to that type. A context that is only a promise does not pass this check, because the next handler receives the awaited value. The check is on the interface only: `createAsyncSeriesWaterfallHook<T>()` keeps `T extends Handler`, because `ReturnType<typeof createAsyncSeriesWaterfallHook>` reads that constraint. The factory hook therefore resolves to the context or to the handler result (`Awaited<HookContext<T>> | HookResult<T>`). Declare a typed waterfall hook as an `AsyncSeriesWaterfallHook<T>` to have its handler checked. A hook whose handler takes no parameter, or an optional one, is called without a context. The test reads the handler's parameter list, as TypeScript does for a plain function, so it also holds without `strictNullChecks`: a handler that takes `(context: Context | undefined)` still needs its context, as `undefined` if need be.
+
+A generic helper that forwards a context to a hook takes `...args: Parameters<AsyncSeriesHook<T>['call']>` and calls `hook.call(...args)`. A `HookContext<T>` argument does not match the parameters of `call` while `T` is generic.
 
 #### Errors
 
