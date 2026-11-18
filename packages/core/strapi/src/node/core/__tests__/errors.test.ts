@@ -94,4 +94,24 @@ describe('handleUnexpectedError with a ValidationError that lists its issues', (
 
     expect(output).not.toContain('Details:');
   });
+
+  test('skips entries that are not objects', () => {
+    const output = run(
+      new errors.ValidationError('3 errors occurred:', {
+        errors: [
+          null,
+          undefined,
+          {
+            path: ['0', 'uid'],
+            message: '[0].uid is invalid',
+            name: 'ValidationError',
+            value: 'Read',
+          },
+        ],
+      })
+    );
+
+    expect(output).toContain('Details:');
+    expect(output).toContain('value: Read');
+  });
 });

@@ -56,9 +56,13 @@ const handleUnexpectedError = (err: unknown) => {
 
   if (hasValidationDetails(err)) {
     const message = [];
-    const size = err.details.errors.length;
+    // Plugin code can throw a ValidationError with malformed entries: print only the objects.
+    const details = (err.details.errors as unknown[]).filter(
+      (error): error is ValidationErrorDetail => typeof error === 'object' && error !== null
+    );
+    const size = details.length;
 
-    for (const error of err.details.errors) {
+    for (const error of details) {
       // No need to repeat the error message as it's the same as the err.message
       if (size === 1) {
         message.push(`  value: ${error.value}`);
