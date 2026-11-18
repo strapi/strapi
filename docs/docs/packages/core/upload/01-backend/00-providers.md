@@ -26,7 +26,7 @@ A provider is a module that exports an `init(providerOptions)` function. The upl
 
 The object `init` returns has the following methods:
 
-- `upload(file)` or `uploadStream(file)`: at least one. They store the file and set its `url`. The plugin calls `uploadStream` when the provider implements it, with a `stream` on the file, and `upload` otherwise, with a `buffer` on the file. The admin project logos and the data transfer import call `uploadStream` directly, so a provider without it cannot serve them.
+- `upload(file)` or `uploadStream(file)`: at least one. They store the file and set its `url`. The plugin calls `uploadStream` when the provider implements it, with a `stream` on the file, and `upload` otherwise, with a `buffer` on the file.
 - `delete(file)` (required): deletes a stored file, or one of its `formats`.
 - `replace(newFile, oldFile)` and `replaceStream(newFile, oldFile)` (optional): replace a stored file in place. Without them, the plugin deletes the old file and uploads the new one.
 - `checkFileSize(file, { sizeLimit })` (optional): throws when the file is too large. Without it, the plugin checks `sizeLimit` itself.

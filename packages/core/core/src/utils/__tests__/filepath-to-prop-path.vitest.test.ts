@@ -44,3 +44,10 @@ describe.concurrent('filePathToPropPath', () => {
     });
   });
 });
+
+describe('filePathToPropPath leading dots', () => {
+  it('strips every leading dot of a segment', () => {
+    expect(filePathToPropPath('./config/.hidden.js')).toEqual(['config', 'hidden']);
+    expect(filePathToPropPath('./config/..double.js')).toEqual(['config', 'double']);
+  });
+});
