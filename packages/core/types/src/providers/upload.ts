@@ -137,6 +137,10 @@ export type Factory<TOptions = Record<string, unknown>, TProvider extends Provid
  * Calling it at runtime needs `@strapi/types` as a regular dependency. Without one, check the module
  * with `satisfies Providers.Upload.Factory<Options>` instead.
  *
+ * @template TModule - The module itself. Pass it explicitly to type the module from a declared type.
+ * @template TOptions - `init`'s options, inferred from its annotation: an object type, inline or an
+ * interface. Inferred apart from the module, so the options need no index signature.
+ *
  * @example
  * export = defineUploadProvider({
  *   init(options: { bucket: string }) {
@@ -147,4 +151,9 @@ export type Factory<TOptions = Record<string, unknown>, TProvider extends Provid
  *   },
  * });
  */
-export const defineUploadProvider = <TModule extends Factory>(module: TModule): TModule => module;
+export const defineUploadProvider = <
+  TModule extends Factory<TOptions>,
+  TOptions extends object = TModule extends Factory<infer TInit> ? TInit : Record<string, unknown>,
+>(
+  module: TModule & Factory<TOptions>
+): TModule => module;

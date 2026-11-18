@@ -50,6 +50,38 @@ export const untypedOptionsProvider = defineUploadProvider({
   },
 });
 
+// Options typed with an interface, as the bundled providers declare theirs, or with an inline type.
+interface CdnOptions {
+  baseUrl: string;
+  token?: string;
+}
+
+const interfaceOptionsModule = {
+  init(options: CdnOptions) {
+    return { upload() {}, delete() {}, baseUrl: () => options.baseUrl };
+  },
+};
+
+export const interfaceOptionsProvider = defineUploadProvider(interfaceOptionsModule);
+
+true satisfies Assert<IsEqual<Parameters<typeof interfaceOptionsProvider.init>[0], CdnOptions>>;
+
+interfaceOptionsModule satisfies Providers.Upload.Factory<CdnOptions>;
+
+export const interfaceOptionsLiteralProvider = defineUploadProvider({
+  init(options: CdnOptions) {
+    return { upload() {}, delete() {}, baseUrl: () => options.baseUrl };
+  },
+});
+
+export const inlineOptionsModule = {
+  init(options: { baseUrl: string }) {
+    return { upload() {}, delete() {}, baseUrl: () => options.baseUrl };
+  },
+} satisfies Providers.Upload.Factory<{ baseUrl: string }>;
+
+defineUploadProvider(inlineOptionsModule).init({ baseUrl: '/' }).baseUrl() satisfies string;
+
 // `init` keeps its own signature: a defaulted options parameter can still be omitted.
 export const defaultedOptionsProvider = defineUploadProvider({
   init(options: { sizeLimit?: number } = {}) {
