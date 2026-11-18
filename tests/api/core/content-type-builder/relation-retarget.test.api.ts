@@ -985,4 +985,102 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
     expect(strapi.contentTypes[MAGAZINE_UID as keyof typeof strapi.contentTypes]).toBeUndefined();
     expect(attributesOf(BOOKCASE_UID).name).toMatchObject({ type: 'string' });
   });
+  test('renames the owner of a self relation with the rename:field command', async () => {
+    await createTypes();
+
+    const added = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'parent', relation('manyToOne', BOOK_UID, 'children')),
+          attribute('create', 'children', relation('oneToMany', BOOK_UID, 'parent')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(added.statusCode).toBe(200);
+    await restart();
+
+    const parent = await strapi.documents(BOOK_UID).create({ data: { title: 'Parent' } });
+    const child = await strapi.documents(BOOK_UID).create({
+      data: { title: 'Child', parent: parent.documentId },
+    });
+
+    // The service of `strapi rename:field`
+    await strapi
+      .plugin('content-type-builder')
+      .service('schema')
+      .renameAttribute(BOOK_UID, 'parent', 'mother');
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID)).not.toHaveProperty('parent');
+    expect(attributesOf(BOOK_UID).mother).toMatchObject({ inversedBy: 'children' });
+    expect(attributesOf(BOOK_UID).children).toMatchObject({ mappedBy: 'mother' });
+
+    const childWithMother = await strapi.documents(BOOK_UID).findOne({
+      documentId: child.documentId,
+      populate: ['mother'],
+    });
+    expect(childWithMother?.mother).toMatchObject({ documentId: parent.documentId });
+  });
+
+  test('deletes Shelf in a save that also sends Book with its relation to Shelf', async () => {
+    await createTypes();
+
+    // Book first in the save: its relation to Shelf is removed with Shelf
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+        ]),
+        { action: 'delete', uid: SHELF_UID },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(strapi.contentTypes[SHELF_UID as keyof typeof strapi.contentTypes]).toBeUndefined();
+    expect(attributesOf(BOOK_UID)).not.toHaveProperty('shelf');
+  });
+
+  test('rejects a rename of an inverse side whose mappedBy names another attribute, when the save keeps its owner', async () => {
+    await createTypes();
+
+    // Shelf.books names oldShelf, which Book does not have: the database pairs it with
+    // Book.shelf (inversedBy books), and the app boots
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.books.mappedBy = 'oldShelf';
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    // Rename of Shelf.books to tomes, as the admin form sends it from that state
+    const res = await updateSchema({
+      contentTypes: [
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'oldShelf', relation('manyToOne', SHELF_UID, 'tomes')),
+        ]),
+        {
+          ...contentType('update', 'rt-shelf', [
+            nameAttribute('update', 'name'),
+            attribute('update', 'tomes', relation('oneToMany', BOOK_UID, 'oldShelf')),
+          ]),
+          renames: [{ oldName: 'books', newName: 'tomes' }],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(400);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
+    expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'oldShelf' });
+  });
 });

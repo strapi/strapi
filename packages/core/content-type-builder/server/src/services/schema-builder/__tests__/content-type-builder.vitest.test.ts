@@ -1061,6 +1061,113 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         );
       });
 
+      it('renames the owner of a self relation as the rename:field command sends it', () => {
+        // Book.parent owns Book.children. The command sends the formatted schema with parent
+        // renamed to mother, and children still names parent
+        const selfKind = kind === 'manyToOne' ? 'oneToMany' : oppositeRelation[kind];
+        const { contentTypes } = (global as any).strapi;
+        Object.assign(contentTypes[bookUid].__schema__.attributes, {
+          parent: { type: 'relation', relation: kind, target: bookUid, inversedBy: 'children' },
+          children: { type: 'relation', relation: selfKind, target: bookUid, mappedBy: 'parent' },
+        });
+
+        const builder = createBuilder();
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          renames: [{ oldName: 'parent', newName: 'mother' }],
+          attributes: {
+            title: { type: 'string' },
+            shelf: relation(kind, shelfUid, 'books'),
+            mother: { ...relation(kind, bookUid, 'children'), inversedBy: 'children' },
+            children: { ...relation(selfKind, bookUid, 'parent'), mappedBy: 'parent' },
+          },
+        });
+        builder.assertRelationPairs();
+
+        expect(attributesOf(builder, bookUid)).not.toHaveProperty('parent');
+        expect(attributesOf(builder, bookUid).mother).toMatchObject({ inversedBy: 'children' });
+        expect(attributesOf(builder, bookUid).children).toMatchObject({ mappedBy: 'mother' });
+      });
+
+      it('keeps the other side name of a relation to another type when the save renames an attribute with that name', () => {
+        // Book renames its string books to tomes; Book.shelf names Shelf.books, on Shelf
+        (global as any).strapi.contentTypes[bookUid].__schema__.attributes.books = {
+          type: 'string',
+        };
+
+        const builder = createBuilder();
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          renames: [{ oldName: 'books', newName: 'tomes' }],
+          attributes: {
+            title: { type: 'string' },
+            shelf: relation(kind, shelfUid, 'books'),
+            tomes: { type: 'string' },
+          },
+        });
+        builder.assertRelationPairs();
+
+        expect(attributesOf(builder, shelfUid)).not.toHaveProperty('tomes');
+        expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
+      });
+
+      it('accepts a save that deletes the target type of a relation that the save keeps', () => {
+        // Same result as before the check: the relation to the deleted type is removed
+        const builder = createBuilder();
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          attributes: { title: { type: 'string' }, shelf: relation(kind, shelfUid, 'books') },
+        });
+        builder.deleteContentType(shelfUid);
+        builder.assertRelationPairs();
+
+        expect(attributesOf(builder, bookUid)).not.toHaveProperty('shelf');
+      });
+
+      it('rejects a save that removes the other side of a pair that the save keeps', () => {
+        // Shelf.books has a stale mappedBy (oldShelf). Renaming Shelf.books to tomes, the
+        // admin form sends a new Book.oldShelf for tomes and keeps Book.shelf, which names books
+        const { contentTypes } = (global as any).strapi;
+        contentTypes[shelfUid].__schema__.attributes.books.mappedBy = 'oldShelf';
+
+        const builder = createBuilder();
+        builder.editContentType({
+          uid: bookUid,
+          kind: 'collectionType',
+          displayName: bookUid,
+          draftAndPublish: false,
+          attributes: {
+            title: { type: 'string' },
+            shelf: relation(kind, shelfUid, 'books'),
+            oldShelf: relation(kind, shelfUid, 'tomes'),
+          },
+        });
+        builder.editContentType({
+          uid: shelfUid,
+          kind: 'collectionType',
+          displayName: shelfUid,
+          draftAndPublish: false,
+          renames: [{ oldName: 'books', newName: 'tomes' }],
+          attributes: {
+            name: { type: 'string' },
+            tomes: relation(oppositeRelation[kind], bookUid, 'oldShelf'),
+          },
+        });
+
+        expect(() => builder.assertRelationPairs()).toThrow(
+          `Relation shelf of ${bookUid} cannot have books of ${shelfUid} as its other side: the save removes books`
+        );
+      });
+
       it('accepts a self relation whose other side takes the name of a renamed attribute', () => {
         // Book renames the string children to kids and adds parent, whose other side is children
         (global as any).strapi.contentTypes[bookUid].__schema__.attributes.children = {

@@ -178,6 +178,9 @@ export default function createComponentBuilder() {
     // The attributes that the save sends for each type it creates or edits
     savedAttributes: new Map<string, Record<string, unknown>>(),
 
+    // The types that the save deletes
+    deletedContentTypes: new Set<string>(),
+
     /**
      * Writes the other side of the relation `key` of `uid` on its target. The other side keeps
      * the options (`required`, `private`, `pluginOptions`, `conditions`) of the attribute it
@@ -234,9 +237,11 @@ export default function createComponentBuilder() {
      * schema file is written. Run once, after the create and edit steps of the save, so that the
      * order of the types in the save does not change the result.
      *
-     * For each relation that the save sends with another side (`targetAttribute`):
+     * For each relation that the save sends with another side (`targetAttribute`), unless the
+     * save deletes its type or its target type (the relation is removed with that type):
      * - a later step of the save did not change or remove it (the payloads of two types do not
-     *   agree).
+     *   agree);
+     * - the save does not remove its other side when that other side existed before the save.
      *
      * For each of these relations whose other side `setRelation` wrote (a pair that the save
      * does not change is kept as it is, see `editContentType`):
@@ -277,18 +282,31 @@ export default function createComponentBuilder() {
               `Relation ${key} of ${uid} cannot have ${name} of ${target} as its other side: ${reason}`
             );
 
+          // A relation to a type that the save deletes is removed with that type, as before
+          if (this.deletedContentTypes.has(uid) || this.deletedContentTypes.has(target)) {
+            continue;
+          }
+
           const relation = this.contentTypes.get(uid)?.schema.attributes[key];
 
           if (otherSideName(relation) !== name || relation.target !== target) {
             throw error(`another type of the save changes or removes ${key} of ${uid}`);
           }
 
+          const targetCT = this.contentTypes.get(target);
+          const counterpart = targetCT?.schema.attributes[name] as InternalRelationAttribute;
+
+          if (
+            counterpart === undefined &&
+            targetCT?.initialSchema?.attributes?.[name] !== undefined
+          ) {
+            throw error(`the save removes ${name}, and keeps ${key}`);
+          }
+
           if (builtPairs.has(`${uid}.${key}`) === false) {
             continue;
           }
 
-          const targetCT = this.contentTypes.get(target);
-          const counterpart = targetCT?.schema.attributes[name] as InternalRelationAttribute;
           const isOwner = (relation as InternalRelationAttribute).inversedBy === name;
           const pointsBack =
             counterpart !== undefined &&
@@ -538,12 +556,43 @@ export default function createComponentBuilder() {
 
       const oldAttributes = contentType.schema.attributes;
 
+      const renameOrigins = getRenameOrigins(infos.renames);
+      const renamedTo = new Map(
+        Array.from(renameOrigins, ([newName, origin]) => [origin, newName] as const)
+      );
+
       // Only the attributes that exist before the save: a new relation in the stored format
       // keeps its stored side, as before
-      const attributes: typeof infos.attributes = _.mapValues(
+      const normalizedAttributes = _.mapValues(
         infos.attributes as Record<string, InternalAttribute>,
         (attribute, key) =>
           _.has(oldAttributes, key) ? toTargetAttributeFormat(attribute) : attribute
+      );
+
+      // A save that renames one side of a self relation (the rename:field command) can send
+      // the other side with the old name: read it as the new name, unless the save adds an
+      // attribute under the old name
+      const attributes: typeof infos.attributes = _.mapValues(
+        normalizedAttributes,
+        (attribute): InternalAttribute => {
+          if (isRelation(attribute) === false) {
+            return attribute;
+          }
+
+          const { target, targetAttribute } = attribute as InternalRelationAttribute;
+          const newName =
+            typeof targetAttribute === 'string' ? renamedTo.get(targetAttribute) : undefined;
+
+          if (
+            target !== uid ||
+            newName === undefined ||
+            _.has(normalizedAttributes, targetAttribute as string)
+          ) {
+            return attribute;
+          }
+
+          return { ...attribute, targetAttribute: newName } as InternalAttribute;
+        }
       );
 
       this.savedAttributes.set(uid, attributes);
@@ -565,7 +614,6 @@ export default function createComponentBuilder() {
       const newKeys = _.difference(Object.keys(newAttributes), Object.keys(oldAttributes));
       const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
-      const renameOrigins = getRenameOrigins(infos.renames);
 
       // remove old relations
       deletedKeys.forEach((key) => {
@@ -827,6 +875,8 @@ export default function createComponentBuilder() {
       if (!this.contentTypes.has(uid)) {
         throw new ApplicationError('contentType.notFound');
       }
+
+      this.deletedContentTypes.add(uid);
 
       this.components.forEach((compo: any) => {
         compo.removeContentType(uid);
