@@ -391,6 +391,15 @@ describe('Project setting', () => {
       });
     });
 
+    it('Deletes the replaced files only after the new settings are saved', async () => {
+      await updateProjectSettings({ menuLogo: '', authLogo: '' } as any);
+
+      expect(providerDelete).toHaveBeenCalledTimes(2);
+      expect(storeSet.mock.invocationCallOrder[0]).toBeLessThan(
+        Math.min(...providerDelete.mock.invocationCallOrder)
+      );
+    });
+
     it('Keeps the previous project settings', async () => {
       const body = {};
       const files = {};
