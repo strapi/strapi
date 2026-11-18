@@ -12,9 +12,8 @@ import type {} from '@strapi/plugin-graphql/strapi-server';
 // - The `entry` of the content-releases action rows (`Modules.Documents.AnyDocument`), and the
 //   members whose only `any` is that `entry` (`release.create`, `release.delete`,
 //   `release.recordMissedRun`, `release-action.groupActions`).
-// - The `@strapi/utils` hooks (`admin::permission.engine`, the providers' `hooks`,
-//   `admin::transfer.permission`, `admin::role.hooks`), which wait on
-//   https://github.com/strapi/strapi/pull/28663, and `plugin::i18n.permissions.engine`, which waits
+// - The `@strapi/utils` hooks of the providers (`hooks`) and of `admin::role.hooks`, which their own
+//   units type now that https://github.com/strapi/strapi/pull/28663 merged, and `plugin::i18n.permissions.engine`, which waits
 //   on https://github.com/strapi/strapi/pull/28665.
 // - The rows the round left out: `admin::passport`, the content-manager `relations` controller, and
 //   the `strapi::responses`, `strapi::security` and `strapi::session` middlewares.
@@ -185,6 +184,29 @@ declare const permissionChecks: [
   Core.Assert<Equal<[HasAny<Service<'admin::permission'>['sectionsBuilder']>], [false]>>,
 ];
 permissionChecks satisfies unknown;
+
+/** The handler each hook of a permission engine registers. The walk does not enter the hooks. */
+type EngineHookHandlers<THooks> = {
+  [K in keyof THooks]: THooks[K] extends { register(handler: infer THandler): unknown }
+    ? THandler
+    : never;
+};
+
+// Admin permission engines: the engine hooks of `admin::permission` and the transfer permission
+// engine of `admin::transfer` (H3).
+declare const permissionEngineChecks: [
+  Core.Assert<
+    Equal<[HasAny<EngineHookHandlers<Service<'admin::permission'>['engine']['hooks']>>], [false]>
+  >,
+  Core.Assert<
+    Equal<
+      [HasAny<EngineHookHandlers<Service<'admin::transfer'>['permission']['engine']['hooks']>>],
+      [false]
+    >
+  >,
+  Core.Assert<Equal<[HasAny<Service<'admin::transfer'>['permission']['engine']>], [false]>>,
+];
+permissionEngineChecks satisfies unknown;
 
 // Admin role service: `properties` (C01), the query parameters (C02), the EE IDs (C05b).
 declare const roleChecks: [

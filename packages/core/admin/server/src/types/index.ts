@@ -1,5 +1,6 @@
 import type { Ability, ForcedSubject } from '@casl/ability';
 import type { Core, Data, Modules, UID } from '@strapi/types';
+import type { engine as PermissionsEngine } from '@strapi/permissions';
 import type { Controllers } from './controllers';
 import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
 import type { HasPermissionsConfig } from './policies';
@@ -571,8 +572,8 @@ type PermissionEngine = (typeof PermissionService)['engine'];
 
 /**
  * The permission queries and engine members written for strict types: the permissions are the rows
- * the permission domain returns, and a user read from the user service is accepted where the engine
- * takes a user.
+ * the permission domain returns, a user read from the user service is accepted where the engine
+ * takes a user, and the engine hooks take typed handlers.
  */
 type StrictPermissionQueries = {
   findMany(...args: Parameters<(typeof PermissionService)['findMany']>): Promise<PermissionRow[]>;
@@ -581,7 +582,9 @@ type StrictPermissionQueries = {
   ): Promise<PermissionRow[]>;
   /** The permissions of the user's roles. Reads the user's `id`. */
   findUserPermissions(user: { id: Data.ID }): Promise<PermissionRow[]>;
-  engine: Omit<PermissionEngine, 'generateUserAbility'> & {
+  engine: Omit<PermissionEngine, 'generateUserAbility' | 'hooks'> & {
+    /** The hooks of the engine (`@strapi/permissions`), with typed handlers. */
+    readonly hooks: PermissionsEngine.TypedPermissionEngineHooks;
     /** The ability of the user's permissions. The conditions receive the user. */
     generateUserAbility(user: UserInput): ReturnType<PermissionEngine['generateUserAbility']>;
   };
@@ -650,6 +653,16 @@ type ImplementationPermissionService = Omit<
 type PermissionServiceContract = Core.IsStrict extends true
   ? Omit<ImplementationPermissionService, StrictPermissionQueryName> & StrictPermissionQueries
   : ImplementationPermissionService;
+
+type TransferPermissionService = (typeof TransferService)['permission'];
+
+/**
+ * The `admin::transfer` service with strict types: the transfer permission engine takes typed
+ * handlers and typed permissions (`@strapi/permissions` `TypedEngine`).
+ */
+type StrictTransferService = Omit<typeof TransferService, 'permission'> & {
+  permission: Omit<TransferPermissionService, 'engine'> & { engine: PermissionsEngine.TypedEngine };
+};
 
 /**
  * The `role` and `permission` services as the admin's own code reads them with `getService`
@@ -801,7 +814,9 @@ declare global {
         >;
         'admin::seat-enforcement': Core.Licensed<'licensed', typeof EESeatEnforcementService>;
         'admin::token': typeof TokenService;
-        'admin::transfer': typeof TransferService;
+        'admin::transfer': Core.IsStrict extends true
+          ? StrictTransferService
+          : typeof TransferService;
         'admin::user': UserService<
           EditionService<typeof CEUserService, EnterpriseContracts['user']>
         >;
