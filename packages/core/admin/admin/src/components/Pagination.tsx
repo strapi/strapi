@@ -54,7 +54,7 @@ interface RootProps {
   /**
    * @default 1
    * @description the initial page number when the URL has no `page` param.
-   * A spread API `page` is ignored, so a refetch cannot move the footer.
+   * A spread API `page` is ignored; the active page always comes from the URL.
    */
   defaultPage?: PaginationApi['page'];
   /**

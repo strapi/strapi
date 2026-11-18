@@ -76,59 +76,42 @@ describe('Pagination', () => {
     });
 
     it('should use pageSize from a spread pagination object when defaultPageSize is omitted', () => {
-      renderRTL(
-        <Pagination.Root pageCount={2} total={100} pageSize={100}>
-          <Pagination.PageSize />
-          <Pagination.Links />
-        </Pagination.Root>
-      );
+      render({ pageSize: 100, defaultPageSize: undefined });
 
       expect(screen.getByRole('combobox')).toHaveTextContent('100');
       expect(screen.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute(
         'href',
-        expect.stringContaining('pageSize=100')
+        '/?pageSize=100&page=2'
       );
     });
 
     it('should prefer defaultPageSize over a spread pageSize', () => {
-      renderRTL(
-        <Pagination.Root pageCount={2} total={100} pageSize={100} defaultPageSize={50}>
-          <Pagination.PageSize />
-        </Pagination.Root>
-      );
+      render({ pageSize: 100 });
 
       expect(screen.getByRole('combobox')).toHaveTextContent('50');
     });
 
     it('should prefer the URL pageSize over a spread pageSize', () => {
-      renderRTL(
-        <Pagination.Root pageCount={2} total={100} pageSize={100}>
-          <Pagination.PageSize />
-        </Pagination.Root>,
-        { initialEntries: [{ search: 'pageSize=20' }] }
-      );
+      render({
+        pageSize: 100,
+        defaultPageSize: undefined,
+        initialEntries: [{ search: 'pageSize=20' }],
+      });
 
       expect(screen.getByRole('combobox')).toHaveTextContent('20');
     });
 
-    it('should ignore a spread page and keep the default page', () => {
-      const pagination = { page: 3, pageSize: 20, pageCount: 5, total: 100 };
+    it('should ignore a spread page', () => {
+      // @ts-expect-error `page` is not a Root prop; this mimics spreading an API pagination object
+      render({ page: 3, pageCount: 5 });
 
-      renderRTL(
-        <Pagination.Root {...pagination}>
-          <Pagination.PageSize />
-          <Pagination.Links />
-        </Pagination.Root>
-      );
-
-      expect(screen.getByRole('combobox')).toHaveTextContent('20');
       expect(screen.getByRole('link', { name: 'Go to previous page' })).toHaveAttribute(
         'aria-disabled',
         'true'
       );
-      expect(screen.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: 'Go to next page' })).toHaveAttribute(
         'href',
-        expect.stringContaining('page=2')
+        '/?pageSize=50&page=2'
       );
     });
 
