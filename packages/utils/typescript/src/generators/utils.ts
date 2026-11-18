@@ -199,7 +199,7 @@ export const timer = () => {
     get duration() {
       assert(state.start !== null, 'The timer has not been started');
 
-      return (((state.end ?? Date.now) as any) - (state.start as number)) / 1000;
+      return ((state.end ?? Date.now()) - state.start) / 1000;
     },
   };
 };
