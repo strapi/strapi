@@ -532,12 +532,15 @@ export type WorkflowRow = {
   createdBy?: CreatorReference | null;
   /** `null` for a workflow updated by the plugin. */
   updatedBy?: CreatorReference | null;
+  /** Always empty: workflows are not localized. */
+  localizations?: [];
 };
 
 /** The populate of a workflow read. */
 export type WorkflowPopulate = queryParams.Params['populate'];
 
-type WorkflowRelation = 'stages' | 'stageRequiredToPublish' | 'createdBy' | 'updatedBy';
+type WorkflowRelation =
+  'stages' | 'stageRequiredToPublish' | 'createdBy' | 'updatedBy' | 'localizations';
 
 /**
  * The relations that a workflow read with `TPopulate` populates. Without `populate`, the read

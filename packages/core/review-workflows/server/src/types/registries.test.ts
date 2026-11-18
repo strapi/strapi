@@ -210,6 +210,10 @@ workflows
     workflow?.stages.map((stage) => stage.permissions ?? workflow.stageRequiredToPublish)
   );
 workflows?.find({ populate: 'stages', sort: 'name' }).then((rows) => rows.map((row) => row.stages));
+// `*` also populates `localizations`, always empty: workflows are not localized.
+workflows?.findById('1', { populate: '*' }) satisfies
+  | Promise<(WorkflowRow & { localizations: []; createdBy: { id: number } | null }) | null>
+  | undefined;
 workflows?.getAssignedWorkflow('api::article.article', {
   populate: 'stageRequiredToPublish',
 }) satisfies
