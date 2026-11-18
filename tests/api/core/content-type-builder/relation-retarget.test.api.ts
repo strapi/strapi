@@ -1083,4 +1083,34 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
     expect(attributesOf(BOOK_UID).shelf).toMatchObject({ inversedBy: 'books' });
     expect(attributesOf(SHELF_UID).books).toMatchObject({ mappedBy: 'oldShelf' });
   });
+  test.each([
+    ['the deletion first', true],
+    ['Bookcase first', false],
+  ])(
+    'deletes Book and gives the other side name it frees to a new relation, with %s',
+    async (_label, deleteFirst) => {
+      await createTypes();
+
+      const deletion = { action: 'delete', uid: BOOK_UID };
+      const bookcase = contentType('update', 'rt-bookcase', [
+        nameAttribute('update', 'name'),
+        attribute('create', 'rack', relation('manyToOne', SHELF_UID, 'books')),
+      ]);
+
+      const res = await updateSchema({
+        contentTypes: deleteFirst ? [deletion, bookcase] : [bookcase, deletion],
+        components: [],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+
+      expect(strapi.contentTypes[BOOK_UID as keyof typeof strapi.contentTypes]).toBeUndefined();
+      expect(attributesOf(BOOKCASE_UID).rack).toMatchObject({ inversedBy: 'books' });
+      expect(attributesOf(SHELF_UID).books).toMatchObject({
+        target: BOOKCASE_UID,
+        mappedBy: 'rack',
+      });
+    }
+  );
 });

@@ -143,6 +143,44 @@ const toTargetAttributeFormat = (attribute: InternalAttribute): InternalAttribut
 };
 
 /**
+ * The side that a oneToOne or manyToMany relation of the save takes when the edit sees it as new
+ * (a new key, or an attribute that becomes a relation), from the state before the save:
+ * - the relation itself before the save keeps its side (an earlier step of the save can have
+ *   deleted it in the builder);
+ * - else its other side before the save keeps the storage when it held it: an owner or a one-way
+ *   relation stays the owner, and this relation is its inverse side;
+ * - else an inverse side before the save makes this relation the owner.
+ * Returns `undefined` when the state before the save does not decide.
+ */
+const ownsBeforeSave = (
+  attribute: InternalRelationAttribute,
+  beforeSave: Schema.Attribute.AnyAttribute | undefined,
+  counterpartBeforeSave: Schema.Attribute.AnyAttribute | undefined
+) => {
+  if (
+    beforeSave !== undefined &&
+    isRelation(beforeSave) &&
+    (beforeSave as InternalRelationAttribute).relation === attribute.relation
+  ) {
+    const { inversedBy, mappedBy } = beforeSave as InternalRelationAttribute;
+
+    if (inversedBy) {
+      return true;
+    }
+
+    if (mappedBy) {
+      return false;
+    }
+  }
+
+  if (counterpartBeforeSave !== undefined && isRelation(counterpartBeforeSave)) {
+    return Boolean((counterpartBeforeSave as InternalRelationAttribute).mappedBy);
+  }
+
+  return undefined;
+};
+
+/**
  * Maps each attribute name produced by this save's rename hops to the name it
  * had before the save, by folding the hops in order (`a -> tmp, tmp -> b`
  * gives `b -> a`).
@@ -368,13 +406,27 @@ export default function createComponentBuilder() {
             continue;
           }
 
-          const partner = this.contentTypes.get(partnerUid)?.schema.attributes[partnerName];
+          // A type that the save deletes keeps no relation
+          const partner = this.deletedContentTypes.has(partnerUid)
+            ? undefined
+            : this.contentTypes.get(partnerUid)?.schema.attributes[partnerName];
 
           if (otherSideName(partner) === name && partner.target === target) {
             throw error(`${name} is the other side of ${partnerName} of ${partnerUid}`);
           }
         }
       }
+    },
+
+    /** The other side of `attribute`, on its target, before the save. */
+    counterpartBeforeSave(this: any, attribute: InternalRelationAttribute) {
+      if (attribute.targetAttribute === undefined || attribute.targetAttribute === null) {
+        return undefined;
+      }
+
+      return this.contentTypes.get(attribute.target)?.initialSchema?.attributes?.[
+        attribute.targetAttribute
+      ];
     },
 
     /**
@@ -820,10 +872,18 @@ export default function createComponentBuilder() {
                 ? originAttribute
                 : undefined;
 
+            const ownsBefore = ownsBeforeSave(
+              relationAttribute,
+              contentType.initialSchema?.attributes?.[key],
+              this.counterpartBeforeSave(relationAttribute)
+            );
+
             if (originOwnership?.inversedBy) {
               relationAttribute.dominant = true;
             } else if (originOwnership?.mappedBy) {
               relationAttribute.dominant = false;
+            } else if (ownsBefore !== undefined) {
+              relationAttribute.dominant = ownsBefore;
             } else if (
               relationAttribute.target === uid &&
               relationAttribute.targetAttribute !== undefined

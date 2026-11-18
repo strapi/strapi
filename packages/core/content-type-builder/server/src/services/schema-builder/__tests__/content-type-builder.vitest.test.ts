@@ -398,7 +398,13 @@ describe('content-type-builder editContentType with retargeted relations', () =>
 
   // Same rule as the database boot check: both sides target each other, and exactly one
   // side owns the relation (inversedBy) while the other points back to it (mappedBy).
-  const expectValidPair = (builder: any, [uidA, keyA]: string[], [uidB, keyB]: string[]) => {
+  // `owner`: the side that must own the pair (inversedBy), when the test expects one
+  const expectValidPair = (
+    builder: any,
+    [uidA, keyA]: string[],
+    [uidB, keyB]: string[],
+    owner?: 'first' | 'second'
+  ) => {
     const a = attributesOf(builder, uidA)[keyA];
     const b = attributesOf(builder, uidB)[keyB];
 
@@ -411,6 +417,10 @@ describe('content-type-builder editContentType with retargeted relations', () =>
     expect({ aOwns, bOwns }).toEqual(
       aOwns ? { aOwns: true, bOwns: false } : { aOwns: false, bOwns: true }
     );
+
+    if (owner !== undefined) {
+      expect({ aOwns, bOwns }).toEqual({ aOwns: owner === 'first', bOwns: owner === 'second' });
+    }
   };
 
   describe.each(Object.keys(oppositeRelation) as OwnerRelation[])('%s owner', (kind) => {
@@ -435,7 +445,8 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         );
 
         expect(attributesOf(builder, shelfUid)).not.toHaveProperty('books');
-        expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'books']);
+        // Book.shelf owned the pair before the save
+        expectValidPair(builder, [bookUid, 'shelf'], [bookcaseUid, 'books'], 'first');
       }
     );
 
@@ -458,7 +469,8 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         );
 
         expect(attributesOf(builder, bookUid)).not.toHaveProperty('shelf');
-        expectValidPair(builder, [shelfUid, 'books'], [magazineUid, 'shelf']);
+        // Shelf.books was the inverse side before the save
+        expectValidPair(builder, [shelfUid, 'books'], [magazineUid, 'shelf'], 'second');
       }
     );
 
@@ -1116,6 +1128,63 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         expect(attributesOf(builder, shelfUid)).not.toHaveProperty('tomes');
         expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books']);
       });
+
+      it.each(permutations([bookUid, shelfUid]))(
+        'keeps a one-way relation the owner when the save adds its other side (%s, %s)',
+        (...order) => {
+          // Book.shelf, one-way, holds the links: it stays the owner in every order
+          const { contentTypes } = (global as any).strapi;
+          contentTypes[bookUid].__schema__.attributes.shelf = {
+            type: 'relation',
+            relation: kind,
+            target: shelfUid,
+          };
+          delete contentTypes[shelfUid].__schema__.attributes.books;
+
+          const builder = editAll(
+            {
+              [bookUid]: { title: { type: 'string' }, shelf: relation(kind, shelfUid, 'books') },
+              [shelfUid]: {
+                name: { type: 'string' },
+                books: relation(oppositeRelation[kind], bookUid, 'shelf'),
+              },
+            },
+            order
+          );
+
+          expectValidPair(builder, [bookUid, 'shelf'], [shelfUid, 'books'], 'first');
+        }
+      );
+
+      it.each([
+        ['the deletion first', true],
+        ['the edit first', false],
+      ])(
+        'gives a new relation the other side name that a deleted type frees, with %s',
+        (_label, deleteFirst) => {
+          // Book.shelf owns Shelf.books. The save deletes Book, and Bookcase.rack takes books
+          const builder = createBuilder();
+          const editBookcase = () =>
+            builder.editContentType({
+              uid: bookcaseUid,
+              kind: 'collectionType',
+              displayName: bookcaseUid,
+              draftAndPublish: false,
+              attributes: { name: { type: 'string' }, rack: relation(kind, shelfUid, 'books') },
+            });
+
+          if (deleteFirst) {
+            builder.deleteContentType(bookUid);
+            editBookcase();
+          } else {
+            editBookcase();
+            builder.deleteContentType(bookUid);
+          }
+          builder.assertRelationPairs();
+
+          expectValidPair(builder, [bookcaseUid, 'rack'], [shelfUid, 'books']);
+        }
+      );
 
       it('accepts a save that deletes the target type of a relation that the save keeps', () => {
         // Same result as before the check: the relation to the deleted type is removed
