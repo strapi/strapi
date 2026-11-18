@@ -544,7 +544,7 @@ describe('ai-localizations service', () => {
             pluginOptions: { i18n: { localized: true } },
           },
         },
-      }) as unknown as Schema.Schema;
+      } as unknown as Schema.Schema);
 
     const buildMockStrapi = (schema: Schema.Schema) => {
       const jobsService = { upsertJobForDocument: jest.fn().mockResolvedValue(undefined) };
@@ -898,6 +898,190 @@ describe('ai-localizations service', () => {
           expect.objectContaining({ documentId: 'doc1', locale: 'fr' })
         );
       });
+    });
+  });
+
+  describe('generateDocumentLocalizations - dynamic zone restructured in the default locale', () => {
+    const MODEL = 'api::recipe.recipe' as UID.ContentType;
+    const localized = { i18n: { localized: true } };
+
+    const models: Record<string, unknown> = {
+      [MODEL]: {
+        modelType: 'contentType',
+        kind: 'collectionType',
+        uid: MODEL,
+        modelName: 'recipe',
+        globalId: 'Recipe',
+        info: { displayName: 'Recipe', singularName: 'recipe', pluralName: 'recipes' },
+        pluginOptions: localized,
+        attributes: {
+          title: { type: 'string', pluginOptions: localized },
+          sections: {
+            type: 'dynamiczone',
+            components: ['recipe.paragraph', 'recipe.photos'],
+            pluginOptions: localized,
+          },
+        },
+      },
+      'recipe.paragraph': {
+        modelType: 'component',
+        uid: 'recipe.paragraph',
+        attributes: { text: { type: 'string' } },
+      },
+      'recipe.photos': {
+        modelType: 'component',
+        uid: 'recipe.photos',
+        attributes: {
+          size: { type: 'enumeration', enum: ['small', 'large'] },
+          images: { type: 'media', multiple: true },
+        },
+      },
+    };
+
+    const photoA = { id: 101, url: 'photo-a.jpg' };
+    const photoB = { id: 102, url: 'photo-b.jpg' };
+
+    const enDoc = {
+      documentId: 'doc1',
+      locale: 'en',
+      title: 'Soup',
+      sections: [
+        { __component: 'recipe.paragraph', id: 3, text: 'Preheat the oven' },
+        { __component: 'recipe.photos', id: 4, size: 'large', images: [photoB] },
+        { __component: 'recipe.paragraph', id: 1, text: 'Chop the onions' },
+        { __component: 'recipe.photos', id: 2, size: 'small', images: [photoA] },
+      ],
+    };
+
+    const aiSections = [
+      { __component: 'recipe.paragraph', text: 'Ofen vorheizen' },
+      { __component: 'recipe.photos' },
+      { __component: 'recipe.paragraph', text: 'Zwiebeln hacken' },
+      { __component: 'recipe.photos' },
+    ];
+
+    const setup = (deDoc: unknown, deSections: unknown[]) => {
+      const jobsService = { upsertJobForDocument: jest.fn().mockResolvedValue(undefined) };
+      const documentsApi = {
+        findOne: jest.fn(async ({ locale }: { locale: string }) =>
+          structuredClone(locale === 'en' ? enDoc : deDoc)
+        ),
+        update: jest.fn().mockResolvedValue({}),
+      };
+      const generateTranslations = jest.fn().mockResolvedValue({
+        localizations: [{ locale: 'de', content: { title: 'Suppe', sections: deSections } }],
+      });
+
+      const mockStrapi = {
+        getModel: jest.fn((uid: string) => models[uid]),
+        documents: jest.fn(() => documentsApi),
+        plugins: {
+          i18n: {
+            services: {
+              'ai-localization-jobs': jobsService,
+              'ai-translations': { hasProvider: () => true, generateTranslations },
+              settings: { getSettings: jest.fn().mockResolvedValue({ aiLocalizations: true }) },
+              'content-types': { isLocalizedContentType: jest.fn().mockReturnValue(true) },
+              locales: {
+                getDefaultLocale: jest.fn().mockResolvedValue('en'),
+                find: jest.fn().mockResolvedValue([{ code: 'en' }, { code: 'de' }]),
+              },
+            },
+          },
+          'content-manager': {
+            services: {
+              'populate-builder': () => ({
+                populateDeep: () => ({ build: async () => ({}) }),
+              }),
+            },
+          },
+        },
+        log: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      };
+
+      (global as unknown as { strapi: unknown }).strapi = mockStrapi;
+      const service = createAILocalizationsService({
+        strapi: mockStrapi as unknown as Core.Strapi,
+      });
+
+      const run = () =>
+        service.generateDocumentLocalizations({
+          model: MODEL,
+          document: structuredClone(enDoc) as unknown as Modules.Documents.AnyDocument,
+        });
+
+      return { run, documentsApi, jobsService, mockStrapi };
+    };
+
+    const savedSections = (documentsApi: { update: jest.Mock }) =>
+      documentsApi.update.mock.calls[0][0].data.sections.map((s: Record<string, unknown>) => ({
+        component: s.__component,
+        text: s.text,
+        size: s.size,
+        images: s.images,
+      }));
+
+    it('takes non-text values from the default locale when an item was inserted before existing ones', async () => {
+      const existingDe = {
+        documentId: 'doc1',
+        locale: 'de',
+        title: 'Suppe',
+        sections: [
+          { __component: 'recipe.paragraph', id: 11, text: 'Zwiebeln hacken' },
+          { __component: 'recipe.photos', id: 12, size: 'small', images: [photoA] },
+        ],
+      };
+      const { run, documentsApi } = setup(existingDe, aiSections);
+
+      await run();
+
+      expect(savedSections(documentsApi)).toEqual([
+        { component: 'recipe.paragraph', text: 'Ofen vorheizen' },
+        { component: 'recipe.photos', size: 'large', images: [photoB] },
+        { component: 'recipe.paragraph', text: 'Zwiebeln hacken' },
+        { component: 'recipe.photos', size: 'small', images: [photoA] },
+      ]);
+    });
+
+    it("keeps the locale's own non-text values when the item list is unchanged", async () => {
+      const localPhoto = { id: 201, url: 'photo-de.jpg' };
+      const existingDe = {
+        documentId: 'doc1',
+        locale: 'de',
+        title: 'Suppe',
+        sections: [
+          { __component: 'recipe.paragraph', id: 11, text: 'Ofen vorheizen' },
+          { __component: 'recipe.photos', id: 12, size: 'small', images: [localPhoto] },
+          { __component: 'recipe.paragraph', id: 13, text: 'Zwiebeln hacken' },
+          { __component: 'recipe.photos', id: 14, size: 'large', images: [photoA] },
+        ],
+      };
+      const { run, documentsApi } = setup(existingDe, aiSections);
+
+      await run();
+
+      expect(savedSections(documentsApi)).toEqual([
+        { component: 'recipe.paragraph', text: 'Ofen vorheizen' },
+        { component: 'recipe.photos', size: 'small', images: [localPhoto] },
+        { component: 'recipe.paragraph', text: 'Zwiebeln hacken' },
+        { component: 'recipe.photos', size: 'large', images: [photoA] },
+      ]);
+    });
+
+    it.each([
+      {
+        name: 'reorders items',
+        sections: [aiSections[1], aiSections[0], aiSections[2], aiSections[3]],
+      },
+      { name: 'drops an item', sections: aiSections.slice(0, 3) },
+    ])('does not save a locale whose AI result $name', async ({ sections }) => {
+      const { run, documentsApi, jobsService, mockStrapi } = setup(null, sections);
+
+      await run();
+
+      expect(documentsApi.update).not.toHaveBeenCalled();
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(expect.stringContaining('"de"'));
+      expect(jobsService.upsertJobForDocument.mock.calls.at(-1)?.[0]?.status).toBe('failed');
     });
   });
 });
