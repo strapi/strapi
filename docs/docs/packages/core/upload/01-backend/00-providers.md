@@ -35,6 +35,8 @@ The object `init` returns has the following methods:
 
 Each method can answer synchronously or with a promise. `upload`, `uploadStream`, `delete` and `getSignedUrl` get the method's entry of the `actionOptions` config as their second argument. `checkFileSize` gets `{ sizeLimit }` instead, and `replace` and `replaceStream` get the old file. Members outside this list are allowed. The plugin wraps every member of the object in an async function, so `strapi.plugin('upload').provider` is not the object `init` returns.
 
+Omit the members you do not implement, and never set one to `undefined`, as in `uploadStream: canStream ? uploadStream : undefined`. The plugin wraps every own key of the object, so an `undefined` member becomes a function that throws when called, and it hides the plugin's default for `isPrivate`, `getSignedUrl` and `checkFileSize`.
+
 ### Typing a provider
 
 `@strapi/types` holds this contract as `Providers.Upload` ([`src/providers/upload.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/providers/upload.ts)):

@@ -90,6 +90,9 @@ type UploadMethods =
  * The object an upload provider module's `init` returns. A provider implements `delete` and at least
  * one of `upload` and `uploadStream`; the other members are optional, and members outside this
  * contract are allowed. Each method may answer synchronously or with a promise.
+ *
+ * Omit the members you do not implement: never set one to `undefined`. The upload plugin wraps every
+ * own key of this object, so an `undefined` member becomes a function that throws when called.
  */
 export type Provider = UploadMethods & {
   /**
@@ -129,6 +132,7 @@ export type Factory<TOptions = Record<string, unknown>, TProvider extends Provid
  *
  * The upload plugin `require`s the module and reads `init` from it, so the module must be the
  * CommonJS export itself: `export =` in TypeScript, `module.exports =` in JavaScript.
+ * Omit the provider members you do not implement: never set one to `undefined`.
  *
  * Calling it at runtime needs `@strapi/types` as a regular dependency. Without one, check the module
  * with `satisfies Providers.Upload.Factory<Options>` instead.
