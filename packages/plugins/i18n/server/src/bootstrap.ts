@@ -2,9 +2,11 @@ import type { Schema } from '@strapi/types';
 import { isEqual } from 'lodash';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { registerAuditEvents } from './audit-logs';
-import { localeForOriginalLookup } from './services/original-locale';
 import { getService } from './utils';
-import { getOriginalNonLocalizedLookup } from './utils/non-localized-original-data';
+import {
+  getOriginalNonLocalizedLookup,
+  getSiblingNonLocalizedLookups,
+} from './utils/non-localized-original-data';
 
 const registerModelsHooks = () => {
   strapi.db.lifecycles.subscribe({
@@ -58,19 +60,26 @@ const registerModelsHooks = () => {
         })
       : null;
 
-    // A new locale has no row yet. Compare a sibling in the same publication
-    // status so copied non-localized values do not count as a change and
-    // rewrite every locale. `*` is not a stored locale, so a wildcard stays on
-    // the default-locale lookup above.
-    const locale = localeForOriginalLookup(localeParam);
-    if (!originalData && originalWhere && locale) {
-      originalData = await strapi.db.query(schema.uid).findOne({
-        where: {
-          ...originalWhere,
-          locale: { $ne: locale },
-        },
-        populate: attributesToPopulate,
+    // A new locale has no row yet, and the document service fills it from a
+    // sibling. Compare that sibling so the copied values do not count as a
+    // change that rewrites every other locale.
+    if (!originalData) {
+      const siblingLookups = getSiblingNonLocalizedLookups({
+        original: originalWhere,
+        locale: localeParam,
+        defaultLocale,
       });
+
+      for (const where of siblingLookups) {
+        originalData = await strapi.db.query(schema.uid).findOne({
+          where,
+          populate: attributesToPopulate,
+        });
+
+        if (originalData) {
+          break;
+        }
+      }
     }
 
     // Get the result of the document service action

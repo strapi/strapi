@@ -121,7 +121,7 @@ describe('i18n bootstrap document middleware', () => {
     });
   });
 
-  it('compares a sibling when the locale being written does not exist yet', async () => {
+  it('compares the default locale sibling when the locale being written does not exist yet', async () => {
     const next = jest.fn(async () => ({ id: 9 }));
     findOne
       .mockResolvedValueOnce(null)
@@ -148,6 +148,35 @@ describe('i18n bootstrap document middleware', () => {
     expect(findOne).toHaveBeenNthCalledWith(2, {
       where: {
         documentId: 'doc-1',
+        locale: 'en',
+        publishedAt: { $null: true },
+      },
+      populate: ['shared'],
+    });
+    expect(findOne).toHaveBeenCalledTimes(3);
+    expect(syncNonLocalizedAttributes).not.toHaveBeenCalled();
+  });
+
+  it('compares any other locale when the default locale has no row either', async () => {
+    const next = jest.fn(async () => ({ id: 9 }));
+    findOne
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ shared: 'same' })
+      .mockResolvedValueOnce({ shared: 'same' });
+
+    await middleware(
+      {
+        action: 'update',
+        contentType: schema,
+        params: { locale: 'fr', documentId: 'doc-1' },
+      },
+      next
+    );
+
+    expect(findOne).toHaveBeenNthCalledWith(3, {
+      where: {
+        documentId: 'doc-1',
         locale: { $ne: 'fr' },
         publishedAt: { $null: true },
       },
@@ -156,9 +185,57 @@ describe('i18n bootstrap document middleware', () => {
     expect(syncNonLocalizedAttributes).not.toHaveBeenCalled();
   });
 
-  it('compares a published sibling when a first publish has no published row', async () => {
+  it('compares a sibling when a write without a locale creates the default locale row', async () => {
     const next = jest.fn(async () => ({ id: 9 }));
-    findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 2, shared: 'live' });
+    findOne
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ shared: 'same' })
+      .mockResolvedValueOnce({ shared: 'same' });
+
+    await middleware(
+      {
+        action: 'update',
+        contentType: schema,
+        params: { documentId: 'doc-1' },
+      },
+      next
+    );
+
+    expect(findOne).toHaveBeenNthCalledWith(2, {
+      where: {
+        documentId: 'doc-1',
+        locale: { $ne: 'en' },
+        publishedAt: { $null: true },
+      },
+      populate: ['shared'],
+    });
+    expect(syncNonLocalizedAttributes).not.toHaveBeenCalled();
+  });
+
+  it('keeps the default locale lookup only for a wildcard locale', async () => {
+    const next = jest.fn(async () => ({ id: 9 }));
+    findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ shared: 'new' });
+
+    await middleware(
+      {
+        action: 'publish',
+        contentType: schema,
+        params: { locale: '*', documentId: 'doc-1' },
+      },
+      next
+    );
+
+    expect(findOne).toHaveBeenCalledTimes(2);
+    expect(findOne).toHaveBeenNthCalledWith(2, { where: { id: 9 }, populate: ['shared'] });
+    expect(syncNonLocalizedAttributes).toHaveBeenCalled();
+  });
+
+  it('syncs when a first publish differs from the published sibling', async () => {
+    const next = jest.fn(async () => ({ id: 9 }));
+    findOne
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ shared: 'live' })
+      .mockResolvedValueOnce({ shared: 'changed' });
 
     await middleware(
       {
@@ -172,11 +249,12 @@ describe('i18n bootstrap document middleware', () => {
     expect(findOne).toHaveBeenNthCalledWith(2, {
       where: {
         documentId: 'doc-1',
-        locale: { $ne: 'fr' },
+        locale: 'en',
         publishedAt: { $ne: null },
       },
       populate: ['shared'],
     });
+    expect(syncNonLocalizedAttributes).toHaveBeenCalledWith({ shared: 'changed' }, schema);
   });
 
   it('skips the original lookup when the document id is missing', async () => {

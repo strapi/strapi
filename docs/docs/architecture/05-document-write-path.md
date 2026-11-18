@@ -94,7 +94,7 @@ Read methods use the same idea. `statusToLookup` and `localeToLookup` write cond
 **`update`** targets the draft row on a D&P content type. It looks for the row with the `documentId` and the requested locale.
 
 - If the row exists, the entries service updates it, and the repository schedules `entry.update`.
-- If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from an existing row. It schedules `entry.create`, not `entry.update`.
+- If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from the default-locale row in the same status, or from another row in that status when the default locale has none. It schedules `entry.create`, not `entry.update`.
 - If the document does not exist, `update` returns `null`.
 
 Before it writes any component, the entries service rejects a component id sent twice in one list: a repeatable component, a dynamic zone, or such a list nested at any depth in a component sent with an id. A component sent without an id is created, and creating it drops the ids nested in it, so its nested lists are not checked. Ids are compared as strings, so `1` and `"1"` are the same id. In a dynamic zone, only the same id for the same component type counts. The error is a `ValidationError` (400) whose `details.errors[0].path` names the repeated item, for example `['blocks', '0', 'inner', '1', 'id']`. Without this check, each copy would update the same stored row and only the last copy would be kept.

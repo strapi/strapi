@@ -40,13 +40,22 @@ const model = {
   pluginOptions: { i18n: { localized: true } },
 };
 
-const englishDraft = (strapi, documentId) =>
+const findRow = (strapi, documentId, locale, status) =>
   strapi.db.query(uid).findOne({
-    where: { documentId, locale: 'en', publishedAt: null },
+    where: {
+      documentId,
+      locale,
+      publishedAt: status === 'published' ? { $ne: null } : null,
+    },
     populate: { seo: true },
   });
 
-describe('creating a locale keeps sibling drafts', () => {
+const expectUnchanged = (after, before) => {
+  expect(new Date(after.updatedAt).getTime()).toBe(new Date(before.updatedAt).getTime());
+  expect(after.seo.id).toBe(before.seo.id);
+};
+
+describe('creating a locale keeps sibling rows', () => {
   let strapi;
 
   beforeAll(async () => {
@@ -61,14 +70,14 @@ describe('creating a locale keeps sibling drafts', () => {
     await builder.cleanup();
   });
 
-  test('leaves the published locale updatedAt, status and component id unchanged', async () => {
+  test('does not rewrite the default locale draft when a new locale copies its shared values', async () => {
     const created = await strapi.documents(uid).create({
       locale: 'en',
       data: { title: 'en', code: 'same', seo: { metaTitle: 'same' } },
       status: 'published',
     });
 
-    const before = await englishDraft(strapi, created.documentId);
+    const before = await findRow(strapi, created.documentId, 'en', 'draft');
     expect(before.seo.id).toEqual(expect.any(Number));
 
     await strapi.documents(uid).update({
@@ -77,16 +86,67 @@ describe('creating a locale keeps sibling drafts', () => {
       data: { title: 'fr', code: 'same', seo: { metaTitle: 'same' } },
     });
 
-    const after = await englishDraft(strapi, created.documentId);
-    const published = await strapi.db.query(uid).findOne({
-      where: { documentId: created.documentId, locale: 'en', publishedAt: { $ne: null } },
-    });
+    const after = await findRow(strapi, created.documentId, 'en', 'draft');
+    const published = await findRow(strapi, created.documentId, 'en', 'published');
 
-    expect(new Date(after.updatedAt).getTime()).toBe(new Date(before.updatedAt).getTime());
-    expect(after.seo.id).toBe(before.seo.id);
-    expect(published).toBeTruthy();
+    expectUnchanged(after, before);
     expect(new Date(after.updatedAt).getTime()).toBeLessThanOrEqual(
       new Date(published.updatedAt).getTime()
     );
+  });
+
+  test('does not rewrite the other locale when a write without a locale creates the default locale row', async () => {
+    const created = await strapi.documents(uid).create({
+      locale: 'fr',
+      data: { title: 'fr', code: 'same', seo: { metaTitle: 'same' } },
+    });
+
+    const before = await findRow(strapi, created.documentId, 'fr', 'draft');
+
+    await strapi.documents(uid).update({
+      documentId: created.documentId,
+      data: { title: 'en', code: 'same', seo: { metaTitle: 'same' } },
+    });
+
+    const english = await findRow(strapi, created.documentId, 'en', 'draft');
+    expect(english).toBeTruthy();
+    expectUnchanged(await findRow(strapi, created.documentId, 'fr', 'draft'), before);
+  });
+
+  test('does not rewrite the published default locale on the first publish of a new locale', async () => {
+    const created = await strapi.documents(uid).create({
+      locale: 'en',
+      data: { title: 'en', code: 'same', seo: { metaTitle: 'same' } },
+      status: 'published',
+    });
+
+    await strapi.documents(uid).update({
+      documentId: created.documentId,
+      locale: 'fr',
+      data: { title: 'fr', code: 'same', seo: { metaTitle: 'same' } },
+    });
+
+    const before = await findRow(strapi, created.documentId, 'en', 'published');
+
+    await strapi.documents(uid).publish({ documentId: created.documentId, locale: 'fr' });
+
+    expect(await findRow(strapi, created.documentId, 'fr', 'published')).toBeTruthy();
+    expectUnchanged(await findRow(strapi, created.documentId, 'en', 'published'), before);
+  });
+
+  test('still copies a changed shared value from a new locale to the other locales', async () => {
+    const created = await strapi.documents(uid).create({
+      locale: 'en',
+      data: { title: 'en', code: 'same', seo: { metaTitle: 'same' } },
+    });
+
+    await strapi.documents(uid).update({
+      documentId: created.documentId,
+      locale: 'fr',
+      data: { title: 'fr', code: 'changed', seo: { metaTitle: 'same' } },
+    });
+
+    const english = await findRow(strapi, created.documentId, 'en', 'draft');
+    expect(english.code).toBe('changed');
   });
 });
