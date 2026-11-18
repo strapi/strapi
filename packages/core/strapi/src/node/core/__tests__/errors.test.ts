@@ -61,3 +61,37 @@ describe('handleUnexpectedError', () => {
     expect(output).not.toContain('Details:');
   });
 });
+
+describe('handleUnexpectedError with a ValidationError that lists its issues', () => {
+  test('prints every issue with its value', () => {
+    const output = run(
+      new errors.ValidationError('2 errors occurred:', {
+        errors: [
+          {
+            path: ['0', 'uid'],
+            message: '[0].uid is invalid',
+            name: 'ValidationError',
+            value: 'Read',
+          },
+          {
+            path: ['0', 'pluginName'],
+            message: '[0].pluginName is missing',
+            name: 'ValidationError',
+            value: undefined,
+          },
+        ],
+      })
+    );
+
+    expect(output).toContain('Details:');
+    expect(output).toContain('message: [0].uid is invalid');
+    expect(output).toContain('value: Read');
+    expect(output).toContain('message: [0].pluginName is missing');
+  });
+
+  test('prints no details for a ValidationError without an errors list', () => {
+    const output = run(new errors.ValidationError('Invalid', { reason: 'unknown' }));
+
+    expect(output).not.toContain('Details:');
+  });
+});
