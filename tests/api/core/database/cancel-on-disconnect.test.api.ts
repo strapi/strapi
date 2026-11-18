@@ -226,13 +226,31 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
               handler: async (ctx: any) => {
                 started.resolve();
                 await sleep(1500);
-                await s.documents(ITEM_UID).create({ data: { name: 'event after' } });
-                handlerSettled.resolve('done');
+                try {
+                  await s.documents(ITEM_UID).create({ data: { name: 'event after' } });
+                  handlerSettled.resolve('done');
+                } catch (error: any) {
+                  handlerSettled.resolve(`failed: ${error?.name}`);
+                  throw error;
+                }
                 ctx.body = { ok: true };
               },
               config: { auth: false },
             },
           ],
+        });
+
+        // Like review workflows (before) and content history (after): a document middleware that
+        // reads outside the write's transaction must not make the write fail after a disconnect
+        s.documents.use(async (context: any, next: () => Promise<any>) => {
+          if (context.uid !== ITEM_UID || context.action !== 'create') {
+            return next();
+          }
+
+          await s.db.query(ITEM_UID).findOne({ where: { name: 'only row' } });
+          const result = await next();
+          await s.db.query(ITEM_UID).findMany({ where: { documentId: result.documentId } });
+          return result;
         });
 
         s.eventHub.subscribe(async (event: string, data: any) => {
@@ -290,6 +308,7 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     await waitUntil(async () => (await runningSleeps()) === 0, 2000);
     await strapi.db.connection('abort_items').where('name', 'like', 'tx %').del();
     await strapi.db.connection('abort_items').where('name', 'plain after').del();
+    await strapi.db.connection('abort_items').where('name', 'event after').del();
   });
 
   test('REST: cancels the running select on the database when the client disconnects', async () => {
@@ -363,7 +382,7 @@ describeOnPostgres('Client disconnects cancel database work (#28646)', () => {
     expect(rows).toHaveLength(1);
   });
 
-  test('guard: the entry.create event of a write that committed after the disconnect still fires', async () => {
+  test('guard: a document write and its middlewares run to completion, and its entry.create event fires', async () => {
     const aborted = requestAndAbort(
       { port, method: 'POST', path: '/api/abort-write-event', body: '{}' },
       300

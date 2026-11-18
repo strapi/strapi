@@ -328,6 +328,15 @@ class Database {
   }
 
   /**
+   * Runs `cb` detached from the abort signal of the calling flow, so none of the queries it issues
+   * are refused or cancelled after a client disconnect. For units of work that write and must run
+   * to completion, including the reads they make before and after their writes.
+   */
+  runWithoutAbortSignal<T>(cb: () => T): T {
+    return abortCtx.exit(cb);
+  }
+
+  /**
    * Run work inside a DB transaction. On a fulfilled callback, the transaction
    * is committed; on rejection, it is rolled back. The callback receives Knex
    * `commit` and `rollback` helpers: if you call `rollback` and return without

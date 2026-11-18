@@ -61,6 +61,9 @@ Limits:
 - Queries run directly on `strapi.db.connection` (including `connection.raw`) are not covered, like `queryTimeout`.
 - A stream that already started is not cancelled.
 - Work that a request starts without awaiting it inherits the signal, so its `select` queries are refused once the client disconnects. Its writes are not.
+
+`db.runWithoutAbortSignal(callback)` runs the callback detached from the signal (`abortCtx.exit`). The document service runs its write actions (`create`, `update`, `delete`, `clone`, `publish`, `unpublish`, `discardDraft`) through it, middlewares included ([`document-service/client-abort.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/client-abort.ts)). Document middlewares read outside the write's transaction, before it (review workflows) and after it commits (content history), and a refused read would fail a write that already committed.
+
 - Cancelling is best effort: a signal that aborts in the instant between acquiring the connection and the driver sending the query can still let that one query run to completion.
 
 `RequestAbortedError` is not an internal error. The REST error middleware and the GraphQL error formatter log it at debug level instead of error.

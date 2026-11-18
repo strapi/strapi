@@ -188,6 +188,30 @@ describe('abort signal on the query builder (#28646)', () => {
   });
 
   describe('work that outlives the request', () => {
+    it('runs the selects of work detached with runWithoutAbortSignal, before and after a write', async () => {
+      const rows = await runWithAbortSignal(abortedSignal(), () =>
+        db.runWithoutAbortSignal(async () => {
+          await selectItems();
+          await items().insert({ name: 'second' }).execute();
+          return selectItems();
+        })
+      );
+
+      expect(rows).toEqual([
+        { id: 1, name: 'first' },
+        { id: 2, name: 'second' },
+      ]);
+    });
+
+    it('applies the signal again once the detached work returned', async () => {
+      await expectRequestAborted(
+        runWithAbortSignal(abortedSignal(), async () => {
+          await db.runWithoutAbortSignal(() => selectItems());
+          return selectItems();
+        })
+      );
+    });
+
     it('runs a commit hook select even though the signal aborted', async () => {
       const controller = new AbortController();
       let hookRows: unknown;
