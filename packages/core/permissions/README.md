@@ -83,7 +83,7 @@ const engine = permissions.engine
       return false;
     }
   })
-  .on('format.permission', ({ permission }) => {
+  .on('format.permission', (permission) => {
     if (permission.action === 'update') {
       return {
         ...permission,

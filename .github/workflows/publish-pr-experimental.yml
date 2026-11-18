@@ -27,6 +27,8 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(github.event.pull_request.labels.*.name, 'publish-experimental') &&
       (github.event.action == 'synchronize' || github.event.label.name == 'publish-experimental')
+    outputs:
+      short: ${{ steps.meta.outputs.short }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -53,6 +55,14 @@ jobs:
         id: meta
         run: echo "short=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
 
+  # Separate job so the third-party comment action never runs alongside NPM_TOKEN.
+  comment:
+    name: 'Comment experimental build'
+    runs-on: ubuntu-latest
+    needs: [publish]
+    permissions:
+      pull-requests: write
+    steps:
       - name: Update experimental build comment
         uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         with:
@@ -64,7 +74,7 @@ jobs:
             |---|---|
             | **Version** | `0.0.0-experimental.${{ github.event.pull_request.head.sha }}` |
             | **Dist tag** | `experimental` |
-            | **Commit** | [`${{ steps.meta.outputs.short }}`](https://github.com/${{ github.repository }}/commit/${{ github.event.pull_request.head.sha }}) |
+            | **Commit** | [`${{ needs.publish.outputs.short }}`](https://github.com/${{ github.repository }}/commit/${{ github.event.pull_request.head.sha }}) |
 
             ```bash
             npx create-strapi-app@0.0.0-experimental.${{ github.event.pull_request.head.sha }} my-project --non-interactive --skip-cloud --no-run
