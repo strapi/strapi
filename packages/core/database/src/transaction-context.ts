@@ -120,6 +120,23 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
+/**
+ * Errors thrown after the handler had already committed or rolled back.
+ * Replaying that attempt would repeat work the database has kept.
+ */
+const finalisedTransactionErrors = new WeakSet<object>();
+
+const isFinalisedTransactionError = (error: unknown) =>
+  !!error && typeof error === 'object' && finalisedTransactionErrors.has(error);
+
+const recordErrorIfTransactorFinalised = (trx: Knex.Transaction, error: unknown) => {
+  if (!isTransactorComplete(trx) || !error || typeof error !== 'object') {
+    return;
+  }
+
+  finalisedTransactionErrors.add(error);
+};
+
 interface CallbackRunOptions {
   report?: (error: unknown) => void;
   /** Report the error, skip the remaining callbacks, and do not reject the caller. */
@@ -231,8 +248,8 @@ const transactionCtx = {
     const store = storage.getStore();
     // Share callback arrays only while the parent transaction is still open.
     // Commit hooks run after that transaction is cleared. A transaction they
-    // open must not keep the parent's arrays, or its own onCommit callbacks
-    // run with the parent's instead of after its own commit.
+    // open must not keep the parent's arrays, or a rolled-back attempt's
+    // onCommit callbacks run beside the successful attempt.
     const parent = store?.trx ? store : undefined;
     return storage.run<ReturnType<TCallback>, void[]>(
       {
@@ -382,4 +399,11 @@ const transactionCtx = {
   },
 };
 
-export { HOOK_DRAIN_TIMEOUT_MS, isDeadlockError, transactionCtx, waitForDeadlockRetry };
+export {
+  HOOK_DRAIN_TIMEOUT_MS,
+  isDeadlockError,
+  isFinalisedTransactionError,
+  recordErrorIfTransactorFinalised,
+  transactionCtx,
+  waitForDeadlockRetry,
+};

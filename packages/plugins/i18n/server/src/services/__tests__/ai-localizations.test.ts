@@ -743,6 +743,9 @@ describe('ai-localizations service', () => {
 
       const mockStrapi = {
         getModel: jest.fn(() => schema),
+        db: {
+          inTransaction: jest.fn(() => false),
+        },
         documents,
         plugins: {
           i18n: {
@@ -897,6 +900,77 @@ describe('ai-localizations service', () => {
         expect(documentsApi.update).toHaveBeenCalledWith(
           expect.objectContaining({ documentId: 'doc1', locale: 'fr' })
         );
+      });
+    });
+  });
+
+  describe('setupMiddleware', () => {
+    const MODEL = 'api::article.article' as UID.ContentType;
+
+    const setup = ({ inTransaction }: { inTransaction: boolean }) => {
+      const commitCallbacks: Array<() => unknown> = [];
+      const generateDocumentLocalizations = jest.fn().mockResolvedValue(undefined);
+      let middleware: (context: any, next: () => Promise<unknown>) => Promise<unknown> = () =>
+        Promise.resolve();
+
+      const mockStrapi = {
+        documents: {
+          use: jest.fn((fn) => {
+            middleware = fn;
+          }),
+        },
+        db: {
+          inTransaction: jest.fn(() => inTransaction),
+          transaction: jest.fn(async (handler: (params: any) => unknown) =>
+            handler({ onCommit: (fn: () => unknown) => commitCallbacks.push(fn) })
+          ),
+        },
+        plugin: jest.fn(() => ({
+          service: jest.fn(() => ({ generateDocumentLocalizations })),
+        })),
+        log: { error: jest.fn() },
+      };
+
+      const service = createAILocalizationsService({ strapi: mockStrapi as any });
+      jest.spyOn(service, 'isEnabled').mockResolvedValue(true);
+      service.setupMiddleware();
+
+      const run = () =>
+        middleware({ action: 'update', contentType: { uid: MODEL } }, async () => ({
+          documentId: 'doc1',
+          locale: 'en',
+        }));
+
+      return { run, commitCallbacks, generateDocumentLocalizations };
+    };
+
+    it('starts the job right away outside a transaction', async () => {
+      const { run, commitCallbacks, generateDocumentLocalizations } = setup({
+        inTransaction: false,
+      });
+
+      await run();
+
+      expect(generateDocumentLocalizations).toHaveBeenCalledTimes(1);
+      expect(commitCallbacks).toHaveLength(0);
+    });
+
+    it('waits for the transaction to commit before starting the job', async () => {
+      const { run, commitCallbacks, generateDocumentLocalizations } = setup({
+        inTransaction: true,
+      });
+
+      await run();
+
+      expect(generateDocumentLocalizations).not.toHaveBeenCalled();
+      expect(commitCallbacks).toHaveLength(1);
+
+      await commitCallbacks[0]();
+
+      expect(generateDocumentLocalizations).toHaveBeenCalledTimes(1);
+      expect(generateDocumentLocalizations).toHaveBeenCalledWith({
+        model: MODEL,
+        document: { documentId: 'doc1', locale: 'en' },
       });
     });
   });
