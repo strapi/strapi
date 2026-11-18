@@ -91,17 +91,19 @@ const formatPath = (path: PropertyKey[]) =>
   }, '');
 
 // Only own keys are checked, as yup did: strict objects would also reject enumerable keys an
-// action inherits from its prototype, and the action domain drops those anyway.
+// action inherits from its prototype, and the action domain drops those anyway. A function with
+// the action keys was accepted by yup too, so it is checked as a plain object.
 const toOwnKeys = (actions: unknown) => {
   if (Array.isArray(actions) === false) {
     return actions;
   }
 
-  return (actions as unknown[]).map((action) =>
-    typeof action === 'object' && action !== null && Array.isArray(action) === false
-      ? { ...action }
-      : action
-  );
+  return (actions as unknown[]).map((action) => {
+    const isObject =
+      typeof action === 'object' && action !== null && Array.isArray(action) === false;
+
+    return isObject === true || typeof action === 'function' ? { ...(action as object) } : action;
+  });
 };
 
 /**

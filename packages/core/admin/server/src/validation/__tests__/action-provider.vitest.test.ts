@@ -247,6 +247,9 @@ const cases: Case[] = [
   reject('a null item', [null], '[0] Invalid input: expected object, received null'),
   accept('an empty list', []),
   accept('an undefined item', [undefined]),
+  accept('a function item', [
+    Object.assign(() => {}, { section: 'internal', displayName: 'Read', uid: 'read' }),
+  ]),
   reject('an item instead of a list', internal, 'Invalid input: expected array, received object'),
   reject('undefined', undefined, 'Invalid input: expected array, received undefined'),
 ];
@@ -256,8 +259,8 @@ describe('validateRegisterProviderAction', () => {
     global.strapi = { plugins: { 'my-plugin': {} } } as any;
   });
 
-  test('the table covers 60 inputs', () => {
-    expect(cases).toHaveLength(60);
+  test('the table covers 61 inputs', () => {
+    expect(cases).toHaveLength(61);
   });
 
   test.each(cases.filter((c) => c.verdict === 'accept'))('accepts $name', ({ input }) => {
@@ -282,6 +285,15 @@ describe('validateRegisterProviderAction', () => {
       'details.errors',
       expect.arrayContaining([expect.objectContaining({ name: 'ValidationError' })])
     );
+  });
+
+  // Unlike the yup schema, boxed strings are rejected: accepting them would make the schema
+  // input, and the registration type derived from it, accept any value.
+  test('rejects a boxed string, unlike the yup schema', () => {
+    expect(() =>
+      // eslint-disable-next-line no-new-wrappers
+      validateRegisterProviderAction([{ ...internal, uid: new String('read') }])
+    ).toThrow('[0].uid Invalid input: expected string, received String');
   });
 
   test('names the missing pluginName of the documented plugins example', () => {
