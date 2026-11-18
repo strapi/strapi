@@ -145,6 +145,101 @@ describe('Webhooks controller audit events', () => {
   });
 });
 
+describe('Webhooks controller headers', () => {
+  test.each([
+    ['an empty value', { 'X-Env': '' }],
+    ['a number', { 'X-Env': 5 }],
+    ['null', { 'X-Env': null }],
+    ['a name with a space', { 'bad header': 'value' }],
+    ['a line break in the value', { 'X-Env': 'a\r\nb' }],
+    ['a control character in the value', { 'X-Env': 'a\u0001b' }],
+    ['a DEL character in the value', { 'X-Env': 'a\u007fb' }],
+    ['characters outside latin1 in the value', { 'X-Env': '日本語' }],
+    ['an emoji in the value', { 'X-Env': '\u{1F600}' }],
+    ['a non-ascii name', { 'X-café': 'value' }],
+    ['an empty name', { '': 'value' }],
+    ['Content-Length', { 'Content-Length': '5' }],
+    ['Expect', { Expect: '100-continue' }],
+    ['Keep-Alive', { 'Keep-Alive': 'timeout=5' }],
+    ['Transfer-Encoding', { 'Transfer-Encoding': 'chunked' }],
+    ['Upgrade', { Upgrade: 'websocket' }],
+    ['a different case of an unsupported name', { 'cOnTeNt-LeNgTh': '5' }],
+    ['Connection: upgrade', { Connection: 'upgrade' }],
+    ['Connection with an unknown value', { connection: 'foo' }],
+  ])('createWebhook rejects %s', async (_label, headers) => {
+    const createWebhook = vi.fn();
+    setStrapi({ createWebhook });
+    const ctx = createCtx({ body: { ...body, headers } });
+
+    await expect(webhooksController.createWebhook(ctx as any)).rejects.toThrow(
+      errors.ValidationError
+    );
+    expect(createWebhook).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['a latin1 value', { 'X-Env': 'café' }],
+    ['a tab in the value', { 'X-Env': 'a\tb' }],
+    ['spaces around the value', { 'X-Env': '  a  ' }],
+    ['a name with a dot', { 'X.Custom': 'value' }],
+    ['a name that is an Object method', { constructor: 'value', toString: 'value' }],
+    ['Connection: close and Host', { Connection: 'close', Host: 'example.com' }],
+    ['Connection: keep-alive in another case', { connection: 'Keep-Alive' }],
+  ])('createWebhook accepts %s', async (_label, headers) => {
+    const createWebhook = vi.fn(async () => webhook);
+    setStrapi({ createWebhook });
+    const ctx = createCtx({ body: { ...body, headers } });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(createWebhook).toHaveBeenCalled();
+  });
+
+  test('createWebhook accepts no headers', async () => {
+    const createWebhook = vi.fn(async () => webhook);
+    setStrapi({ createWebhook });
+    const ctx = createCtx({ body: { ...body, headers: {} } });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(createWebhook).toHaveBeenCalled();
+  });
+
+  test('updateWebhook rejects a header name that is not valid', async () => {
+    const updateWebhook = vi.fn();
+    setStrapi({ findWebhook: vi.fn(async () => webhook), updateWebhook });
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, headers: { 'a b': 'c' } } });
+
+    await expect(webhooksController.updateWebhook(ctx as any)).rejects.toThrow(
+      'a b is not a valid header name'
+    );
+    expect(updateWebhook).not.toHaveBeenCalled();
+  });
+});
+
+describe('Webhooks controller trigger', () => {
+  test('triggerWebhook returns 404 for a webhook that does not exist', async () => {
+    const runner = setStrapi({ findWebhook: vi.fn(async () => null) });
+    const ctx = createCtx({ params: { id: '99999' } });
+
+    await webhooksController.triggerWebhook(ctx as any);
+
+    expect(ctx.notFound).toHaveBeenCalledWith('webhook.notFound');
+    expect(runner.run).not.toHaveBeenCalled();
+  });
+
+  test('triggerWebhook runs a webhook that exists', async () => {
+    const runner = setStrapi({ findWebhook: vi.fn(async () => webhook) });
+    runner.run.mockResolvedValue({ statusCode: 200 });
+    const ctx = createCtx({ params: { id: '4' } });
+
+    await webhooksController.triggerWebhook(ctx as any);
+
+    expect(runner.run).toHaveBeenCalledWith(webhook, 'trigger-test', {});
+    expect(ctx.body).toEqual({ data: { statusCode: 200 } });
+  });
+});
+
 describe('Webhooks controller content type events', () => {
   const ARTICLE_UID = 'api::article.article';
   const DELETED_UID = 'api::deleted.deleted';
