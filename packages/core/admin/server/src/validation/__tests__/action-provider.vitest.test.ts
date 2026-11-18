@@ -357,5 +357,40 @@ describe('validateRegisterProviderAction', () => {
       });
       expect(actionProvider.size()).toBe(0);
     });
+
+    // A JavaScript plugin can build an action on a prototype. Only own keys are validated, as with
+    // the yup schema, and the action domain drops the inherited ones.
+    const withInheritedKey = () =>
+      Object.assign(Object.create({ metadata: true }), {
+        section: 'internal',
+        uid: 'inherited.metadata',
+        displayName: 'Inherited metadata',
+      });
+
+    test('register accepts an action with an inherited key and does not store it', async () => {
+      const actionProvider = createActionProvider();
+
+      await actionProvider.register(withInheritedKey());
+
+      const action = actionProvider.get('api::inherited.metadata');
+      expect(action).toMatchObject({ section: 'internal', displayName: 'Inherited metadata' });
+      expect(action).not.toHaveProperty('metadata');
+    });
+
+    test('registerMany accepts actions with an inherited key and does not store it', async () => {
+      const actionProvider = createActionProvider();
+
+      await actionProvider.registerMany([withInheritedKey()]);
+
+      expect(actionProvider.get('api::inherited.metadata')).not.toHaveProperty('metadata');
+    });
+
+    test('an own unknown key is still rejected', async () => {
+      const actionProvider = createActionProvider();
+
+      await expect(
+        actionProvider.register({ ...withInheritedKey(), metadata: true } as any)
+      ).rejects.toMatchObject({ message: '[0] Unrecognized key: "metadata"' });
+    });
   });
 });

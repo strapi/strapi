@@ -90,12 +90,27 @@ const formatPath = (path: PropertyKey[]) =>
     return acc === '' ? String(key) : `${acc}.${String(key)}`;
   }, '');
 
+// Only own keys are checked, as yup did: strict objects would also reject enumerable keys an
+// action inherits from its prototype, and the action domain drops those anyway.
+const toOwnKeys = (actions: unknown) => {
+  if (Array.isArray(actions) === false) {
+    return actions;
+  }
+
+  return (actions as unknown[]).map((action) =>
+    typeof action === 'object' && action !== null && Array.isArray(action) === false
+      ? { ...action }
+      : action
+  );
+};
+
 /**
  * Throws a `ValidationError` whose message names every failing path: `<path> <message>` for one
  * issue, `<count> errors occurred:` followed by one `<path> <message>` line per issue for several.
  * `details.errors` lists every issue, with the input value at its path.
  */
-export const validateRegisterProviderAction = (actions: unknown): void => {
+export const validateRegisterProviderAction = (input: unknown): void => {
+  const actions = toOwnKeys(input);
   const result = registerProviderActionSchema.safeParse(actions);
 
   if (result.success === true) {

@@ -55,7 +55,7 @@ _above: Screenshot of the RBAC edit page showing the where are located the secti
 `actionProvider.register` and `registerMany` validate each action with the zod schema `actionRegistrationSchema` in [`validation/action-provider.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/validation/action-provider.ts). They throw a `ValidationError` when:
 
 - a required key of the section is missing, `displayName` or `category` is an empty string, a key has the wrong type, or `section` is not one of the four sections;
-- the action has a top-level key that is neither in the table above nor `aliases` (unknown keys inside `options` and inside `aliases` items are accepted);
+- the action has an own top-level key that is neither in the table above nor `aliases` (keys inherited from the prototype, and unknown keys inside `options` and inside `aliases` items, are accepted);
 - the action has a key that its section does not allow, with a value other than `undefined` (for example `category: undefined` on a `plugins` action is accepted);
 - `pluginName` is not `admin` or a loaded plugin, or `uid` does not match its format.
 
