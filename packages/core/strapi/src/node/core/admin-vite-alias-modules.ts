@@ -28,6 +28,17 @@ export const ADMIN_VITE_ALIAS_MODULES = [
   // "Invariant Violation: Expected drag drop context" (#22392, #22792).
   'react-dnd',
   'react-dnd-html5-backend',
+  // react-query holds its QueryClient on a module-scope React context. @strapi/admin mounts the
+  // only QueryClientProvider (admin/src/components/Providers.tsx), while @strapi/upload,
+  // @strapi/content-manager, @strapi/content-releases, @strapi/content-type-builder,
+  // @strapi/email, @strapi/plugin-i18n and @strapi/plugin-users-permissions each declare
+  // react-query@3.39.3 themselves. npm hoisting collapses those onto one copy, so the provider
+  // and every useQuery/useQueryClient call share a context only by accident of the install
+  // layout. Any tree that keeps the copies separate (install-strategy=nested, a plugin declaring
+  // its own react-query, overrides/resolutions splitting the version) gives them different
+  // contexts and the Media Library crashes on mount with "No QueryClient set, use
+  // QueryClientProvider to set one" (#23758, #24865).
+  'react-query',
 ] as const;
 
 export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
@@ -101,4 +112,5 @@ export const ADMIN_PINNED_ALIAS_MODULES = [
   'invariant',
   'react-dnd',
   'react-dnd-html5-backend',
+  'react-query',
 ] as const satisfies readonly AdminViteAliasModule[];
