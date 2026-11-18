@@ -1,8 +1,13 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { Core } from '@strapi/types';
+import type { Core, Providers } from '@strapi/types';
 import type { File, Folder, UploadableFile, UploadInputFile } from '../types';
 import type { Controllers } from './controllers';
+import type { UploadPluginProvider, UploadPluginProviderOf } from './provider';
 import type { AIMetadataJobRow, FileFormat, FolderStructureNode } from './services';
+
+type Equal<T, U> =
+  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
 
 declare const file: UploadableFile;
 declare const fileRow: File;
@@ -45,6 +50,94 @@ provider.replace(file, fileFormat) satisfies Promise<void>;
 provider.replace(file, { name: 'cover.png' });
 // @ts-expect-error Registered services have no arbitrary members.
 provider.missing();
+
+// The registered provider is the wrapped one that `register` sets.
+const uploadProvider = strapi.plugin('upload').provider;
+export type RegisteredProvider = Expect<Equal<[typeof uploadProvider], [UploadPluginProvider]>>;
+uploadProvider.delete(fileRow) satisfies Promise<unknown>;
+uploadProvider.delete(fileRow.formats?.thumbnail) satisfies Promise<unknown>;
+uploadProvider.checkFileSize(file, { sizeLimit: 1024 }) satisfies void | Promise<unknown>;
+uploadProvider.isPrivate() satisfies boolean | Promise<boolean>;
+uploadProvider.getSignedUrl(fileRow) satisfies
+  { url?: string | undefined } | Promise<{ url?: string | undefined }>;
+// @ts-expect-error A provider may implement only `upload`.
+uploadProvider.uploadStream(file);
+// @ts-expect-error A provider may implement only `uploadStream`.
+uploadProvider.upload(file);
+if (typeof uploadProvider.uploadStream === 'function') {
+  uploadProvider.uploadStream(file) satisfies Promise<unknown>;
+} else {
+  uploadProvider.upload(file) satisfies Promise<unknown>;
+}
+// @ts-expect-error Wrapped methods answer with a promise.
+uploadProvider.delete(fileRow) satisfies string;
+// @ts-expect-error The registered provider has no arbitrary members.
+uploadProvider.missing();
+
+// The files the wrapped provider forwards are the files the provider contract receives.
+file satisfies Providers.Upload.ProviderFile;
+fileRow satisfies Providers.Upload.ProviderFile;
+fileFormat satisfies Providers.Upload.ProviderFile;
+
+// A provider module typed by the contract, with members of its own.
+const moduleWithMembers = {
+  init(options: { bucket: string }) {
+    return {
+      async uploadStream(uploaded) {
+        uploaded.url = `https://${options.bucket}/${uploaded.hash}`;
+      },
+      delete() {},
+      bucket() {
+        return options.bucket;
+      },
+      exists(stored: Providers.Upload.StoredProviderFile, key: string, retries: number) {
+        return stored.hash === key && retries > 0;
+      },
+      label: 'bucket',
+    };
+  },
+} satisfies Providers.Upload.Factory<{ bucket: string }>;
+
+declare const storedFile: Providers.Upload.StoredProviderFile;
+type BucketProvider = UploadPluginProviderOf<typeof moduleWithMembers>;
+declare const bucketProvider: BucketProvider;
+// Contract members keep their wrapped types.
+export type BucketDelete = Expect<
+  Equal<[BucketProvider['delete']], [UploadPluginProvider['delete']]>
+>;
+export type BucketUpload = Expect<
+  Equal<[BucketProvider['upload']], [UploadPluginProvider['upload']]>
+>;
+// Members outside the contract are wrapped: async, and only two arguments forwarded.
+bucketProvider.bucket() satisfies Promise<string>;
+// @ts-expect-error A wrapped member answers with a promise.
+bucketProvider.bucket() satisfies string;
+bucketProvider.exists(storedFile, 'hash') satisfies Promise<boolean>;
+// @ts-expect-error The wrapper forwards the first two arguments only.
+bucketProvider.exists(storedFile, 'hash', 1);
+// @ts-expect-error Members that are not functions are not exposed.
+bucketProvider.label satisfies unknown;
+// @ts-expect-error The provider has no arbitrary members.
+bucketProvider.missing();
+
+// Options declared with an interface, as the bundled providers declare theirs.
+interface BucketOptions {
+  bucket: string;
+}
+const interfaceOptionsModule = {
+  init: (options: BucketOptions) => ({ upload() {}, delete() {}, bucket: () => options.bucket }),
+} satisfies Providers.Upload.Factory<BucketOptions>;
+declare const interfaceOptionsProvider: UploadPluginProviderOf<typeof interfaceOptionsModule>;
+interfaceOptionsProvider.bucket() satisfies Promise<string>;
+
+// @ts-expect-error A module whose provider has no `delete` is rejected.
+export type NoDelete = UploadPluginProviderOf<{ init(): { upload(): void } }>;
+// @ts-expect-error A module whose provider has neither `upload` nor `uploadStream` is rejected.
+export type NoUpload = UploadPluginProviderOf<{ init(): { delete(): void } }>;
+// @ts-expect-error The module is checked against the contract.
+export type WrongSignedUrl = UploadPluginProviderOf<{
+  init(): { upload(): void; delete(): void; getSignedUrl(): { url: number } };
+}>;
 
 const weeklyMetrics = strapi.service('plugin::upload.weeklyMetrics');
 weeklyMetrics.ensureWeeklyStoredCronSchedule() satisfies Promise<string>;

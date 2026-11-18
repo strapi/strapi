@@ -7,6 +7,7 @@ import type extensions from '../services/extensions';
 import type { createAIMetadataService } from '../services/ai-metadata';
 import type { createAIMetadataProviderService } from '../services/ai-metadata-provider';
 import type { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
+import type { UploadPluginProvider } from './provider';
 
 /** The options of the upload service's writes. */
 export type UploadOptions = {
@@ -522,6 +523,11 @@ declare global {
         'plugin::upload.provider': Services['provider'];
         'plugin::upload.upload': Services['upload'];
         'plugin::upload.weeklyMetrics': Services['weeklyMetrics'];
+      }
+
+      /** Set at register (`register.ts`). Applications declare theirs in `AppPluginProviders`. */
+      interface PackagePluginProviders {
+        upload: UploadPluginProvider;
       }
 
       /** Registered at bootstrap (`bootstrap.ts`). */
