@@ -411,4 +411,40 @@ describe('query scopes', () => {
         'where (`t3`.`id` = `t1`.`article_id` and `t5`.`name` = ?)) '
     );
   });
+
+  describe('with a scope that names a relation', () => {
+    const storedRows = () => connection('articles').orderBy('id').select('title', 'views');
+
+    beforeEach(() => {
+      db.unstable_scopes.register({ where: ({ uid }) => (uid === ARTICLE ? inNews : null) });
+    });
+
+    it('runs update and delete in the explicit transaction', async () => {
+      const trx = await connection.transaction();
+      const trxTitles = () => trx('articles').orderBy('id').pluck('title');
+
+      await qb().transacting(trx).update(data).execute();
+      expect(await trxTitles()).toEqual(['changed', 'A2', 'A3']);
+      await qb().transacting(trx).delete().execute();
+      expect(await trxTitles()).toEqual(['A2', 'A3']);
+      await trx.rollback();
+
+      expect(await storedTitles()).toEqual(['A1', 'A2', 'A3']);
+    });
+
+    it.each([
+      ['an update with an increment', () => qb().update(data).increment('views', 2), 'changed', 2],
+      ['a lone decrement', () => qb().decrement('views', 2), 'A1', -2],
+    ])('applies %s on the outer update only', async (_, build, title, views) => {
+      await build().execute();
+
+      expect(sqls).toHaveLength(1);
+      expect(sqls[0]).toMatch(/^update .* where `id` in \(select `id` from \(select distinct /);
+      expect(await storedRows()).toEqual([
+        { title, views },
+        { title: 'A2', views: 0 },
+        { title: 'A3', views: 0 },
+      ]);
+    });
+  });
 });

@@ -478,16 +478,30 @@ const createQueryBuilder = (
       // against it. The clone inherits processed: true and must only read shared arrays.
       const sub = this.clone();
       sub.alias = this.alias;
+      // The clone shares these arrays: on the inner SELECT they would make it an UPDATE
+      sub.state.increments = [];
+      sub.state.decrements = [];
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const qb = db.getConnection(tableName);
+      const qb = db.getConnection(tableName).whereIn('id', nestedSubQuery);
 
-      if (originalType === 'update') {
-        return qb.update(state.data).whereIn('id', nestedSubQuery);
+      if (state.transaction) {
+        qb.transacting(state.transaction);
       }
 
-      return qb.delete().whereIn('id', nestedSubQuery);
+      if (originalType === 'delete') {
+        return qb.delete();
+      }
+
+      if (state.data) {
+        qb.update(state.data);
+      }
+
+      state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+      state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+
+      return qb;
     },
 
     processState() {

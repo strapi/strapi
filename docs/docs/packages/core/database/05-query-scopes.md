@@ -84,6 +84,8 @@ With no scope registered, `db.unstable_scopes.isEmpty()` is true. The query buil
 
 ## Accepted exceptions
 
+Scopes are not a security boundary. The paths below can still read, write or link hidden rows, so a plugin that uses scopes for access control needs its own checks.
+
 These paths are not fully scoped, or behave differently while a scope is active.
 
 - Raw `getConnection()` paths: draft and publish relation cloning (`clone-relations.ts` in `@strapi/core`), the component parent lookup (`components.ts` of the Document Service), and order cleanup (`cleanOrderColumns`, `cleanMorphToManyOrderColumn`).
@@ -95,7 +97,6 @@ These paths are not fully scoped, or behave differently while a scope is active.
 - Core writes with joins, for example relation ordering, see narrowed joins while a scope is active.
 - A raw `qb.join()` to a model table with no `uid` is not scoped. No core caller joins a model table this way.
 - Undo writes after a failed create or update (`entity-manager/index.ts`) run through scoped builders. If the write changed a column that a scope filters on, the undo matches no row.
-- `runSubQuery` keeps two existing bugs: an `update` with joins drops increments and decrements, and `update` and `delete` with joins drop an explicit transaction (`.transacting()`). They do not concern scopes.
 
 ## Related
 
