@@ -37,7 +37,7 @@ interface State {
   filters: any;
   search: string;
   processed: boolean;
-  /** False for the subquery of a join scope, so a scope where that names a relation cannot recurse */
+  /** False for the subquery of a join scope, so it does not apply the scope conditions twice */
   scoped: boolean;
 }
 
@@ -532,7 +532,7 @@ const createQueryBuilder = (
 
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
 
-      // After processWhere, so the joins that filters and scope wheres add are scoped too
+      // After processWhere, so the joins that filters add are scoped too
       if (scopeType) {
         state.joins = state.joins.map((join) =>
           join.uid ? { ...join, scope: scopeJoin(join.alias, join.uid, join.idColumn) } : join

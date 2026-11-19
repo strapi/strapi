@@ -39,6 +39,28 @@ const articleModel = {
   },
 };
 
+const POST_UID = 'api::qs-post.qs-post';
+const SEO_UID = 'default.qsseo';
+
+const seoComponent = {
+  displayName: 'qsseo',
+  attributes: { metaTitle: { type: 'string' } },
+};
+
+const postModel = {
+  kind: 'collectionType',
+  displayName: 'qs-post',
+  singularName: 'qs-post',
+  pluralName: 'qs-posts',
+  draftAndPublish: true,
+  attributes: {
+    title: { type: 'string' },
+    team: { type: 'string' },
+    seo: { type: 'component', component: SEO_UID, repeatable: false },
+    author: { type: 'relation', relation: 'manyToOne', target: AUTHOR_UID },
+  },
+};
+
 // `deleted_at` is not an attribute key, so the scope filters the raw column with no join
 const softDelete = {
   where: ({ uid }: { uid: string }) =>
@@ -63,7 +85,12 @@ describe('Query scopes', () => {
     strapi.db.connection(strapi.db.metadata.get(AUTHOR_UID).tableName).where({ name }).first();
 
   beforeAll(async () => {
-    await builder.addContentType(authorModel).addContentType(articleModel).build();
+    await builder
+      .addComponent(seoComponent)
+      .addContentType(authorModel)
+      .addContentType(articleModel)
+      .addContentType(postModel)
+      .build();
 
     strapi = await createStrapiInstance();
     rq = createContentAPIRequest({ strapi });
@@ -288,6 +315,109 @@ describe('Query scopes', () => {
       expect(count).toBe(1);
       expect(await rawArticle('visible-b')).toBeUndefined();
       expect(await rawArticle('hidden')).toBeDefined();
+    });
+  });
+
+  // The entity manager writes links and components even when the scoped row write matches no
+  // row. The owner guard throws first, so the transaction rolls all of it back
+  describe('owner guard for writes that the scope hides', () => {
+    const posts = () => strapi.documents(POST_UID);
+    const postIds: Record<string, string> = {};
+    let unregisterTeam: () => void;
+    let unsubscribe: () => void;
+
+    const assertWritable = async (where: unknown) => {
+      const writable = await strapi.db
+        .query(POST_UID)
+        .count({ where: { $and: [where, { team: 'own' }] } });
+
+      if (writable === 0) {
+        throw new Error('The post is not writable');
+      }
+    };
+
+    const joinTable = (uid: string, name: string) => {
+      const attribute = strapi.db.metadata.get(uid).attributes[name];
+      return 'joinTable' in attribute && attribute.joinTable ? attribute.joinTable.name : name;
+    };
+
+    // Reads past the scope: the post rows, the author links, the component links and rows
+    const rawPostTables = () =>
+      Promise.all(
+        [
+          strapi.db.metadata.get(POST_UID).tableName,
+          joinTable(POST_UID, 'author'),
+          joinTable(POST_UID, 'seo'),
+          strapi.db.metadata.get(SEO_UID).tableName,
+        ].map((table) => strapi.db.connection(table).orderBy('id'))
+      );
+
+    beforeAll(async () => {
+      for (const team of ['own', 'shared']) {
+        const post = await posts().create({
+          data: { title: team, team, seo: { metaTitle: team }, author: authorB },
+        });
+        await posts().publish({ documentId: post.documentId });
+        postIds[team] = post.documentId;
+      }
+
+      // Reads see own and shared posts, writes change only own posts
+      unregisterTeam = strapi.db.unstable_scopes.register({
+        where: ({ uid, type }) => {
+          if (uid !== POST_UID) {
+            return null;
+          }
+
+          return type === 'select' || type === 'count'
+            ? { team: { $in: ['own', 'shared'] } }
+            : { team: 'own' };
+        },
+      });
+      unsubscribe = strapi.db.lifecycles.subscribe({
+        models: [POST_UID],
+        async beforeUpdate(event) {
+          await assertWritable(event.params.where);
+        },
+        async beforeDelete(event) {
+          await assertWritable(event.params.where);
+        },
+      });
+    });
+
+    afterAll(() => {
+      unsubscribe?.();
+      unregisterTeam?.();
+    });
+
+    test.each([
+      [
+        'update',
+        () =>
+          posts().update({
+            documentId: postIds.shared,
+            data: { title: 'changed', seo: { metaTitle: 'changed' }, author: null },
+          }),
+      ],
+      ['delete', () => posts().delete({ documentId: postIds.shared })],
+      ['unpublish', () => posts().unpublish({ documentId: postIds.shared })],
+    ])('%s of a shared post throws and changes nothing', async (_, write) => {
+      // Positive control: the shared post has the author link and the component that must survive
+      const shared = await posts().findOne({
+        documentId: postIds.shared,
+        populate: ['seo', 'author'],
+      });
+      expect([shared?.author?.name, shared?.seo?.metaTitle]).toEqual(['B', 'shared']);
+      const before = await rawPostTables();
+
+      await expect(write()).rejects.toThrow('not writable');
+      expect(await rawPostTables()).toEqual(before);
+    });
+
+    // Positive control: the guard lets writes to own posts through
+    test('update of an own post changes it', async () => {
+      const updated = await posts().update({ documentId: postIds.own, data: { title: 'changed' } });
+
+      expect(updated?.title).toBe('changed');
     });
   });
 });

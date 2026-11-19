@@ -11,7 +11,7 @@ tags:
 `db.unstable_scopes` is unstable. Its name and its contract can change in a minor release. It will get a stable name when a second user confirms the contract.
 :::
 
-A query scope is a function that returns a `where` condition for a model. A plugin registers it on `db.unstable_scopes`. The query builder ANDs every condition into the query, so a scope can only hide rows. It can never add rows to a result.
+A query scope is a function that returns a `where` condition for a model. A plugin registers it on `db.unstable_scopes`. The query builder ANDs every condition into the query, so a scope narrows the rows of its own model. Through a relation, a hidden row reads as no row. An absence filter such as `$null` on a relation can therefore match more parent rows, also in `updateMany` and `deleteMany`.
 
 A plugin uses a scope to narrow every query to the rows that a request may see. For example, a plugin keeps the rows of several groups in the same tables. A read sees the rows of its group and the shared rows, and a write changes only the rows of its group. The `type` in the scope context lets one scope return a different condition for reads and for writes.
 
@@ -20,13 +20,29 @@ Code: [`src/query/scopes.ts`](https://github.com/strapi/strapi/blob/develop/pack
 ## The contract
 
 ```ts
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type { QueryScope } from '@strapi/database';
 
-const hideDeleted: QueryScope = {
-  where: ({ uid }) => (uid === 'api::article.article' ? { deleted_at: null } : null),
+// A middleware runs each request in this store after authentication
+export const requestGroup = new AsyncLocalStorage<{ groupId: number }>();
+
+const groupScope: QueryScope = {
+  where: ({ uid, type }) => {
+    const store = requestGroup.getStore();
+
+    // Outside a request (data transfer, cron jobs, bootstrap), leave the query unscoped
+    if (!store || uid !== 'api::article.article') {
+      return null;
+    }
+
+    // Reads see the rows of the group and the shared rows. Writes change only the rows of the group
+    return type === 'select' || type === 'count'
+      ? { $or: [{ group_id: store.groupId }, { group_id: null }] }
+      : { group_id: store.groupId };
+  },
 };
 
-const unregister = strapi.db.unstable_scopes.register(hideDeleted);
+const unregister = strapi.db.unstable_scopes.register(groupScope);
 
 // Later: removes this scope
 unregister();
@@ -45,8 +61,20 @@ unregister();
 - `meta` is the metadata of `uid`.
 - `type` is `select`, `count`, `update` or `delete`. It is the query type of the main table. An `increment` or a `decrement` is an `update`. A join always gets `select`, also inside an `update` or a `delete`, because a join reads its target.
 - `where` is synchronous and must not query the database. The scope owner settles its state before the query runs. Core has no `prepare` step.
-- `where` uses the same syntax as `qb.where()`. A key that is not an attribute resolves to a raw column of the scoped table, so `{ group_id: 5 }` filters the `group_id` column with no join. A key that names a relation adds a join, as in any filter.
+- `where` uses the same syntax as `qb.where()`, with `$and`, `$or` and `$not` at any depth. A key that is not an attribute resolves to a raw column of the scoped table, so `{ group_id: 5 }` filters the `group_id` column with no join.
+- A scope condition uses only columns of the scoped table: scalar attributes and raw columns. A key that names a relation, a media field, a component or a dynamic zone throws before any SQL runs. Such a key would add a join to every query of the model.
 - `where` returns `null` to leave the query unscoped. Only `null` means "do not scope". A return of `undefined` throws.
+- A condition that would match every row by mistake throws before any SQL runs. These shapes throw at any depth:
+  - `{}`, and an empty `$and`, `$or` or `$not`.
+  - An empty operator object on a column: `{ group_id: {} }`, `{ group_id: { $not: {} } }` and `{ group_id: { $not: [] } }`.
+  - An empty array, at any depth, under an operator other than `$in`, `$notIn` and `$between`: `{ group_id: { $eq: [] } }`, `{ group_id: { $not: [[]] } }`. The query builder ORs such an array, and an empty OR adds no SQL.
+  - An array of conditions that holds one of these shapes, or a relation key.
+  - A `$and` or a `$or` that is not an array.
+
+  `{ group_id: [] }` and `{ group_id: { $in: [] } }` are allowed and match no row. `{ group_id: { $notIn: [] } }` is allowed and matches every row.
+
+  The check only finds conditions that add no SQL. A condition that adds SQL but is always true, such as `{ group_id: { $notIn: [] } }` or `{ group_id: { $not: { $in: [] } } }`, passes. The scope author must make sure that every condition narrows.
+
 - An error thrown by `where` stops the query and goes to the caller.
 
 ### Single-use builders
@@ -66,17 +94,17 @@ A query builder evaluates the scope conditions once, in `processState`. Do not c
 | Populate                                                                                           | Each populate query runs through a query builder on the target model or the join table, so the main-table rule covers it.                                     |
 | Streams (`qb.stream()`)                                                                            | Same as `select`.                                                                                                                                             |
 
-A hidden row reads as no row through a join, for filters, sorts and writes alike. On a join-table join, the condition is on the link, not on the target join. A link to a hidden row then matches nothing. Without this, the left join to the target would give a row of NULLs, and a `$null` filter or a `deleteMany` could match through it.
+A hidden row reads as no row through a join, for filters, sorts and writes alike. On a join-table join, the condition is on the link, not on the target join. A link to a hidden row then matches nothing. Without this, a parent that links to a visible row and to a hidden row would get a row of NULLs for the hidden link, and a `$null` filter or a `deleteMany` would match that parent. A parent whose related rows are all hidden reads as a parent with no related row, so a `$null` filter matches it.
 
 A join uses the `select` condition inside a write. An `updateMany` with a filter on a related row therefore matches when `select` sees that row, even if an `update` condition on the model of that row would hide it.
 
-Joins that `createJoin` and `createPivotJoin` build carry the target `uid` on the `Join` object, and `idColumn` for a join-table join. `processState` adds the `scope` condition to these joins after `processWhere`, so the joins that filters and scope conditions add are scoped too.
+Joins that `createJoin` and `createPivotJoin` build carry the target `uid` on the `Join` object, and `idColumn` for a join-table join. `processState` adds the `scope` condition to these joins after `processWhere`, so the joins that filters add are scoped too.
 
 ### Why a correlated `EXISTS`
 
 The join condition is a correlated `EXISTS`, not `IN (SELECT id …)`. On SQLite the `IN` form was about 350 times slower on a list page with a relation filter, because SQLite probes the link index once per row and per visible id.
 
-The `EXISTS` subquery is built by a query builder with scopes switched off (`scoped: false`), so a scope whose `where` names a relation cannot recurse. The subquery takes its aliases from the alias counter of the outer query, so its aliases never shadow an outer alias.
+The subquery takes its aliases from the alias counter of the outer query, so its aliases never shadow an outer alias.
 
 ## Empty registry
 
@@ -93,7 +121,40 @@ These paths are not fully scoped, or behave differently while a scope is active.
 - `max` and `min` are not scoped. The upload folder service (`packages/core/upload/server/src/services/folder.ts`) computes `max(pathId) + 1` across all rows, so that a path id is unique in all scopes. A third-party `max()` reads across scopes.
 - morphToMany `populate` with `count: true` counts the scoped join rows but does not filter their targets. The scope owner handles it.
 - morphToOne `populate` with `count: true` returns `{ count: 1 }` when the morph columns of the row are set. It runs no query, so a hidden target still counts. The scope owner handles it.
-- While a scope is active, `em.update` and `em.delete` of a row that the scope shows to reads but hides from writes leave the row unchanged, but still write or delete its relation links (`updateRelations` and `deleteRelations` in `entity-manager/index.ts`). The scope owner handles it. For example, it can refuse these writes in the `beforeUpdate` and `beforeDelete` database lifecycles.
+- A write that the scope hides (reads see the row, writes do not) leaves the row unchanged. `em.update` and `em.delete` still write or delete its relation links (`updateRelations` and `deleteRelations` in `entity-manager/index.ts`), and the Document Service still writes or deletes its components. The call reports success. The scope owner must refuse these writes in the `beforeUpdate` and `beforeDelete` database lifecycles. The lifecycle must throw, not return, so that the transaction rolls back the links and the components:
+
+  ```ts
+  // count reads with the select condition, so AND the write condition to it
+  const assertWritable = async (where: unknown) => {
+    const store = requestGroup.getStore();
+
+    if (!store) {
+      return;
+    }
+
+    const count = await strapi.db
+      .query('api::article.article')
+      .count({ where: { $and: [where, { group_id: store.groupId }] } });
+
+    if (count === 0) {
+      throw new Error('This entry is not writable');
+    }
+  };
+
+  strapi.db.lifecycles.subscribe({
+    models: ['api::article.article'],
+    async beforeUpdate(event) {
+      await assertWritable(event.params.where);
+    },
+    async beforeDelete(event) {
+      await assertWritable(event.params.where);
+    },
+  });
+  ```
+
+- An update that changes a column that the read condition filters on moves the row out of the scope. The read-back of `em.update` then returns `null`. On a draft-and-publish type, the Document Service then creates a new hidden draft on each call. A scope must not filter reads on a column that its own writes can change.
+- A relation `set` deletes the links to targets that the scope hides, because the entity manager deletes every link that is not in the set through a query builder on the join table. The scope owner can scope the join table with a subquery of the visible targets, for example `{ tag_id: { $in: <subquery of visible tag ids> } }` for `articles_tags_lnk`, for `select` and `delete`.
+- Data transfer (`strapi export`, `strapi import` and `strapi transfer`) runs through the query builder. A scope that returns a condition there drops rows from the export, keeps hidden rows in the destination during a restore, and can make an import fail. A scope must return `null` outside a request.
 - Core writes with joins, for example relation ordering, see narrowed joins while a scope is active.
 - A raw `qb.join()` to a model table with no `uid` is not scoped. No core caller joins a model table this way.
 - Undo writes after a failed create or update (`entity-manager/index.ts`) run through scoped builders. If the write changed a column that a scope filters on, the undo matches no row.

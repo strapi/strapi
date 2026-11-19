@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import knex from 'knex';
 import type { Knex } from 'knex';
 import { createEntityManager } from '../../entity-manager';
@@ -194,7 +196,7 @@ describe('query scopes', () => {
     expect(calls).toEqual(expected);
   });
 
-  it.each<[string, QueryScope['where'], string]>([
+  it.each<[string, () => unknown, string]>([
     [
       'throws',
       () => {
@@ -202,14 +204,106 @@ describe('query scopes', () => {
       },
       'scope failed',
     ],
-    // @ts-expect-error a scope that forgets to return
+    // A scope that forgets to return
     ['returns undefined', () => undefined, 'returned undefined'],
+    // Empty groups and operator objects add no SQL, so the query would read and write every row
+    ['returns {}', () => ({}), 'empty condition'],
+    ['returns an empty $not', () => ({ $not: {} }), 'empty condition'],
+    [
+      'nests an empty $and in $not in $or',
+      () => ({ $or: [{ title: 'A1' }, { $not: { $and: [] } }] }),
+      'empty $and',
+    ],
+    ['gives a column an empty operator object', () => ({ title: {} }), 'empty condition'],
+    // applyOperator ORs an array under $eq or $not, and an empty OR adds no SQL
+    ['gives a column an $eq of []', () => ({ deleted_at: { $eq: [] } }), 'empty $eq'],
+    ['gives a column a $not of [{}]', () => ({ deleted_at: { $not: [{}] } }), 'empty condition'],
+    ['gives a column a $not of [[]]', () => ({ deleted_at: { $not: [[]] } }), 'empty $not'],
+    ['nests an $eq of [] in $not', () => ({ title: { $not: { $eq: [] } } }), 'empty $eq'],
+    ['returns an array with an empty condition', () => [{}], 'empty condition'],
+    ['nests an array with an empty condition in $and', () => ({ $and: [[{}]] }), 'empty condition'],
+    // Only part is empty: the rest still compiles to a WHERE, but the empty part drops out
+    [
+      'pairs an $eq of [] with a column',
+      () => ({ title: { $ne: 'zzz' }, deleted_at: { $eq: [] } }),
+      'empty $eq',
+    ],
+    [
+      'nests {} in $or in $not',
+      () => ({ $not: { $or: [{ title: 'A1' }, {}] } }),
+      'empty condition',
+    ],
+    ['gives $or an object', () => ({ $or: {} }), '$or must be an array'],
+    // A relation key adds a join to every query of the model
+    ['names a relation', () => ({ category: { name: 'News' } }), 'relation category'],
+    [
+      'nests a relation in $not and $or',
+      () => ({ $not: { $or: [{ title: 'A1' }, { targets: { id: 1 } }] } }),
+      'relation targets',
+    ],
   ])('rejects the query before SQL when a scope %s', async (_, where, message) => {
+    // @ts-expect-error some rows return shapes that the type forbids, as a JavaScript scope can
     db.unstable_scopes.register({ where });
 
     await expect(em.findMany(ARTICLE, {})).rejects.toThrow(message);
+    await expect(em.deleteMany(ARTICLE, { where: {} })).rejects.toThrow(message);
     expect(sqls).toEqual([]);
   });
+
+  it.each<[string, Record<string, unknown>, string[]]>([
+    // An empty list matches no row, so it fails closed
+    ['an empty array', { views: [] }, []],
+    ['an empty $in', { views: { $in: [] } }, []],
+    // $not ORs an array, so this keeps every row
+    ['a $not of a list', { title: { $not: ['A2', 'A3'] } }, ['A1', 'A2', 'A3']],
+    ['an operator object under $not', { title: { $not: { $eq: 'A2' } } }, ['A1', 'A3']],
+    [
+      'nested groups of columns',
+      {
+        $or: [
+          { title: { $not: 'A2' }, deleted_at: null },
+          { $not: { $and: [{ deleted_at: null }] } },
+        ],
+      },
+      ['A1', 'A3'],
+    ],
+  ])('scopes the query with %s', async (_, condition, expected) => {
+    db.unstable_scopes.register({ where: ({ uid }) => (uid === ARTICLE ? condition : null) });
+
+    expect(titles(await em.findMany(ARTICLE, { orderBy: 'id' }))).toEqual(expected);
+  });
+
+  // The operators of applyOperator: an operator that where.ts gains and the guard does not know fails
+  const operators = [
+    ...readFileSync(join(__dirname, '../helpers/where.ts'), 'utf8').matchAll(/case '(\$\w+)'/g),
+  ].map(([, operator]) => operator);
+
+  it.each(operators.flatMap((op) => [{ title: { [op]: [] } }, { title: { $not: { [op]: [] } } }]))(
+    'rejects %j exactly when it compiles to no WHERE',
+    (where) => {
+      let compiled: 'where' | 'none' | 'error' = 'error';
+      try {
+        const { sql } = createQueryBuilder(ARTICLE, db, { scoped: false })
+          .where(where)
+          .getKnexQuery()
+          .toSQL();
+        compiled = sql.includes(' where ') ? 'where' : 'none';
+      } catch {
+        // A condition that does not compile fails closed, so the guard may let it through
+      }
+
+      let rejects = false;
+      db.unstable_scopes.register({ where: () => where });
+      try {
+        db.unstable_scopes.where({ uid: ARTICLE, meta: db.metadata.get(ARTICLE), type: 'select' });
+      } catch {
+        rejects = true;
+      }
+
+      expect(operators.length).toBeGreaterThan(20);
+      expect(rejects).toBe({ where: false, none: true, error: rejects }[compiled]);
+    }
+  );
 
   it('builds the unscoped SQL when every scope returns null or is unregistered', async () => {
     await em.findMany(ARTICLE, {});
@@ -314,7 +408,7 @@ describe('query scopes', () => {
       expect(aliases).toHaveLength(new Set(aliases).size);
     });
 
-    it('does not match a $null filter through a link to a hidden target', async () => {
+    it('matches a $null filter through links only when every linked target is hidden', async () => {
       // A1 links to red and to the hidden yellow, A2 only to yellow
       const where = { tags: { id: { $null: true } } };
 
@@ -382,41 +476,13 @@ describe('query scopes', () => {
     expect(await storedTitles()).toEqual(['A1', 'changed', 'A3']);
   });
 
-  it('does not recurse when a scope where names a relation', async () => {
-    db.unstable_scopes.register({
-      where: ({ uid }) => (uid === ARTICLE ? { category: { id: { $notNull: true } } } : null),
-    });
-    db.unstable_scopes.register({
-      where: ({ uid }) => (uid === CATEGORY ? { articles: { title: 'A3' } } : null),
-    });
-
-    // Old does not link to A3, so the join scope hides the category of A2
-    expect(titles(await em.findMany(ARTICLE, {}))).toEqual(['A1']);
-    // Only the join to categories is scoped: its subquery joins articles with scopes off
-    expect(sqls[0].match(/exists \(select/g)).toHaveLength(1);
-  });
-
-  it('binds the correlation to the outer column when a scope where names a relation', async () => {
-    db.unstable_scopes.register({
-      where: ({ uid }) => (uid === ARTICLE ? { category: { name: 'News' } } : null),
-    });
-
-    // A3 has no category, so its link to News matches nothing. A subquery that reused `t1` would
-    // bind `t1`.`article_id` to its own link table and keep the link, because A1 is in News
-    expect(await em.findMany(CATEGORY, { where: { articles: { title: 'A3' } } })).toEqual([]);
-    expect(sqls[0]).toContain(
-      'and exists (select distinct 1 from `articles` as `t3` ' +
-        'left join `articles_category_lnk` as `t4` on `t3`.`id` = `t4`.`article_id` ' +
-        'left join `categories` as `t5` on `t4`.`category_id` = `t5`.`id` ' +
-        'where (`t3`.`id` = `t1`.`article_id` and `t5`.`name` = ?)) '
-    );
-  });
-
-  describe('with a scope that names a relation', () => {
+  // A relation filter sends update and delete through the nested select of runSubQuery
+  describe('with a relation filter and the test scope', () => {
     const storedRows = () => connection('articles').orderBy('id').select('title', 'views');
+    const qb = () => em.createQueryBuilder(ARTICLE).where(inNews);
 
     beforeEach(() => {
-      db.unstable_scopes.register({ where: ({ uid }) => (uid === ARTICLE ? inNews : null) });
+      db.unstable_scopes.register(hideDeleted);
     });
 
     it('runs update and delete in the explicit transaction', async () => {
