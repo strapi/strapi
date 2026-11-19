@@ -5,6 +5,7 @@ import type { Core } from '@strapi/types';
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { AUDITED_EVENTS, getProjectSettingsChanges } from '../audit-logs/project-settings';
 import type { ImageManipulationService, UploadService } from '../types/plugin-services';
+import { hasUploadProviderMethod } from '../utils/upload-provider';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
@@ -113,7 +114,7 @@ type NewLogoFile = Partial<UploadFile> & Pick<UploadFile, 'stream'>;
 const uploadFile = async (file: NewLogoFile) => {
   const provider = strapi.plugin('upload').provider;
 
-  if (typeof provider.uploadStream === 'function') {
+  if (hasUploadProviderMethod(provider, 'uploadStream') === true) {
     return provider.uploadStream(file);
   }
 
@@ -122,6 +123,10 @@ const uploadFile = async (file: NewLogoFile) => {
   const bufferedFile: Partial<UploadFile> = file;
   bufferedFile.buffer = await fileUtils.streamToBuffer(file.stream);
   delete bufferedFile.stream;
+
+  if (hasUploadProviderMethod(provider, 'upload') === false) {
+    throw new TypeError('The upload provider implements neither uploadStream nor upload');
+  }
 
   return provider.upload(bufferedFile);
 };
@@ -179,7 +184,13 @@ const deleteOldFiles = async ({
       // Remove the previous file. A failed delete only leaves an orphan file in the storage:
       // log it rather than failing the settings update or leaving an unhandled rejection.
       try {
-        await strapi.plugin('upload').provider.delete(previousSettings[inputName]);
+        const provider = strapi.plugin('upload').provider;
+
+        if (hasUploadProviderMethod(provider, 'delete') === false) {
+          throw new TypeError('The upload provider does not implement delete');
+        }
+
+        await provider.delete(previousSettings[inputName]);
       } catch (error) {
         strapi.log.warn(`Could not delete the previous ${inputName} file`, { error });
       }
