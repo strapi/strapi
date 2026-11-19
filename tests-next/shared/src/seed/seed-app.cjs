@@ -9,7 +9,6 @@
 const fs = require('node:fs');
 
 // The test plugin's seeders, so a plan behaves the same before boot and in a running server.
-// eslint-disable-next-line import/no-relative-packages
 const { runSeed } = require('../../test-plugin/lib/seed');
 
 const [appDir, planFile, resultFile] = process.argv.slice(2);
