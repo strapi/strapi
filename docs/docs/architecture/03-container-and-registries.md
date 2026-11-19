@@ -90,7 +90,7 @@ For `services` and `controllers`, `set` after `extend` drops the extension, beca
 :::
 
 :::caution
-In the `sanitizers` and `validators` registries, `add(path, fn)` pushes to the list at `path`. If no list exists at `path`, `get` returns a new empty array that is not stored, and the entry is lost. The loaders create the `content-api` lists before any plugin code runs.
+In the `sanitizers` and `validators` registries, `add(path, fn)` pushes to the list at `path`. If no list exists at `path`, `get` returns a new empty array that is not stored, and the entry is lost. The loaders create the `content-api` lists before any plugin code runs: `set('content-api', { input: [], output: [], query: [] })` stores a map of lists at a lodash path, which the strict `set` contract accepts.
 :::
 
 ## Namespaces and UIDs

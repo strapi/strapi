@@ -62,3 +62,14 @@ validators.add('content-api.input', (contentType) =>
 
 // @ts-expect-error only objects are traversed.
 traverseEntity(removeSecret, { schema, getModel }, 'not an entity');
+
+// `set` stores its value at a lodash path: the loaders set a map of paths below it, which `get`
+// and `add` then read with a longer path (`packages/core/core/src/loaders/sanitizers.ts`).
+sanitizers.set('content-api', { input: [], output: [], query: [] });
+validators.set('content-api', { input: [], query: [] });
+sanitizers.set('content-api.output', []);
+validators.set('content-api', { nested: { input: [] } });
+// @ts-expect-error a map holds sanitizers or maps of them, nothing else.
+sanitizers.set('content-api', { input: 'not a sanitizer' });
+// @ts-expect-error a validator map holds validators or maps of them, nothing else.
+validators.set('content-api', { input: [1] });
