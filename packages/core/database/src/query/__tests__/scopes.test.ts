@@ -44,17 +44,17 @@ const models = [
   }),
 ];
 
-const MODEL_UIDS = models.map((model) => model.uid);
+const MODEL_UIDS = new Set(models.map((model) => model.uid));
 
 // Hides the soft-deleted rows of every model. deleted_at is a column but not an attribute, and
 // join tables have none
 const hideDeleted: QueryScope = {
-  where: ({ uid }) => (MODEL_UIDS.includes(uid) ? { deleted_at: null } : null),
+  where: ({ uid }) => (MODEL_UIDS.has(uid) ? { deleted_at: null } : null),
 };
 
 const setup = async (connection: Knex) => {
   const metadata = createMetadata(models as unknown as Model[]);
-  const modelTables = models.map((model) => model.tableName);
+  const modelTables = new Set(models.map((model) => model.tableName));
 
   for (const table of metadataToSchema(metadata).tables) {
     await connection.schema.createTable(table.name, (t) => {
@@ -63,7 +63,7 @@ const setup = async (connection: Knex) => {
         t[type as 'increments' | 'string' | 'integer' | 'double'](name);
       }
 
-      if (modelTables.includes(table.name)) {
+      if (modelTables.has(table.name)) {
         t.string('deleted_at');
       }
     });
