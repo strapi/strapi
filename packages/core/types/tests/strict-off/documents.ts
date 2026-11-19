@@ -1,4 +1,4 @@
-import type { Core, Modules, Schema, Struct, UID } from '../../src';
+import type { Core, Data, Modules, Schema, Struct, UID } from '../../src';
 import type * as EngineParams from '../../src/modules/documents/params/document-engine';
 import type { Equal, Expect } from './helpers';
 
@@ -86,3 +86,17 @@ declare const populateChecks: [
   Expect<Equal<HasParam<PopulateEntry<typeof populateMediaCount>, 'cover'>, true>>,
 ];
 populateChecks satisfies unknown;
+
+// Documents and inputs of unregistered schemas keep develop's `any` values.
+type IsAny<T> = 0 extends 1 & T ? true : false;
+declare const unregisteredChecks: [
+  Expect<
+    Equal<
+      Modules.Documents.AnyDocument,
+      { documentId: string; id: Data.ID } & { [key: string]: any }
+    >
+  >,
+  Expect<Equal<IsAny<Modules.Documents.AnyDocument[string]>, true>>,
+  Expect<Equal<IsAny<Modules.Documents.Params.Data.Input<UID.ContentType>[string]>, true>>,
+];
+unregisteredChecks satisfies unknown;
