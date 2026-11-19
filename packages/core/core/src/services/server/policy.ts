@@ -11,7 +11,10 @@ const createPolicicesMiddleware = (route: Core.Route, strapi: Core.Strapi) => {
     for (const { handler, config } of resolvedPolicies) {
       const result = await handler(context, config, { strapi });
 
-      if (![true, undefined].includes(result)) {
+      // A policy passes when it returns `true` or nothing
+      const passingResults: unknown[] = [true, undefined];
+
+      if (passingResults.includes(result) === false) {
         throw new errors.PolicyError();
       }
     }
