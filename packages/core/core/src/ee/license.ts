@@ -140,7 +140,7 @@ const fetchLicense = async (
   key: string,
   projectId: string
 ) => {
-  const { installId: installIdFromPackageJson } = strapi.config;
+  const installIdFromPackageJson = strapi.config.get<string | undefined>('installId');
 
   const response = await strapi
     .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/validate`, {

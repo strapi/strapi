@@ -61,6 +61,28 @@ describe('config', () => {
     consoleSpy.mockRestore();
   });
 
+  test('`get` returns a value written by `set` after creation', () => {
+    const config = createConfigProvider({ server: { url: 'http://initial' } });
+
+    config.set('server', { url: 'http://updated', probe: 1 });
+
+    expect(config.get('server.url')).toEqual('http://updated');
+    expect(config.get('server.probe')).toEqual(1);
+  });
+
+  test('own properties are a shallow startup copy: they miss top-level `set` replacements and module namespaces', () => {
+    const config = createConfigProvider({ server: { url: 'http://initial' } });
+
+    config.set('server', { url: 'http://updated' });
+    config.set('plugin::myplugin', { foo: 'bar' });
+
+    // Documents why reads go through `get`: the spread copy shares nested objects, so a nested
+    // `set('server.url', …)` is visible on it, but a top-level replacement or a new namespace is not.
+    expect(config.server).toEqual({ url: 'http://initial' });
+    expect(config['plugin::myplugin']).toBeUndefined();
+    expect(config.get('plugin::myplugin.foo')).toEqual('bar');
+  });
+
   describe('dot notation deprecations', () => {
     test('`get` supports `plugin.` prefix in string path', () => {
       const consoleSpy = vi.spyOn(console, logLevel).mockImplementation(() => {});

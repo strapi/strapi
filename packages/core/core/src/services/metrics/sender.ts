@@ -40,7 +40,7 @@ const { timeout, ...fetchDefaults } = defaultQueryOpts;
  * Add properties from the package.json strapi key in the metadata
  */
 const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi: Core.Strapi) => {
-  const { packageJsonStrapi = {} } = strapi.config;
+  const packageJsonStrapi = strapi.config.get<Record<string, unknown>>('packageJsonStrapi', {});
 
   _.defaults(metadata, packageJsonStrapi);
 };
@@ -52,7 +52,8 @@ export default (strapi: Core.Strapi): Sender => {
   // The API test helper clears the container after a successful destroy.
   // Keep the fetch function from startup so a later send does not look it up.
   const fetch = strapi.fetch;
-  const { uuid, installId: installIdFromPackageJson } = strapi.config;
+  const uuid = strapi.config.get<string | undefined>('uuid');
+  const installIdFromPackageJson = strapi.config.get<string | undefined>('installId');
 
   const installId = generateInstallId(uuid, installIdFromPackageJson);
 
@@ -60,7 +61,7 @@ export default (strapi: Core.Strapi): Sender => {
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
   const anonymousUserProperties = {
-    environment: strapi.config.environment,
+    environment: strapi.config.get('environment'),
     os: os.type(),
     osPlatform: os.platform(),
     osArch: os.arch(),

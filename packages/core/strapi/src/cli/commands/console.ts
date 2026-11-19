@@ -10,7 +10,7 @@ const action = async () => {
   const app = await createStrapi(appContext).load();
 
   app.start().then(() => {
-    const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
+    const repl = REPL.start(app.config.get<string>('info.name') + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
 
     repl.on('exit', (err: Error) => {
       if (err) {
