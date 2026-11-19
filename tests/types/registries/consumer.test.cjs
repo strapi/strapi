@@ -1257,6 +1257,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: database lifecycles are typed per model and action in strict mode`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'lifecycles.ts']),
+      `${resolution}, database lifecycles on registered schemas`
+    );
+  });
+
   test(`${resolution}: Document Service write inputs follow the validator in strict mode`, () => {
     assertClean(
       compile(['settings.d.ts', 'document-write.ts']),
