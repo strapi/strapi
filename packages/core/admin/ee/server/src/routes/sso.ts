@@ -1,6 +1,33 @@
+import type { Core } from '@strapi/types';
+import type { RouteControllers } from '../types/controllers';
 import { enableFeatureMiddleware } from './utils';
 
-export default {
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const ssoRouter: {
+  type: string;
+  routes: (
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          middlewares: Core.MiddlewareHandler[];
+          auth: boolean;
+          policies?: undefined;
+        };
+      }
+    | {
+        method: string;
+        path: string;
+        handler: string;
+        config: {
+          middlewares: Core.MiddlewareHandler[];
+          policies: (string | { name: string; config: { actions: string[] } })[];
+          auth?: undefined;
+        };
+      }
+  )[];
+} = {
   type: 'admin',
   routes: [
     {
@@ -64,4 +91,6 @@ export default {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<RouteControllers>;
+
+export default ssoRouter;
