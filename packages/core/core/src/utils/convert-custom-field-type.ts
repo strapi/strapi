@@ -1,10 +1,16 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules, Schema } from '@strapi/types';
+
+/**
+ * A custom field attribute: `type: 'customField'` and the registered custom field UID, as the
+ * content-type builder validates it, then the custom field's underlying type once converted below.
+ */
+type CustomFieldAttribute = {
+  type: 'customField' | Modules.CustomFields.CustomFieldServerOptions['type'];
+  customField: string;
+};
 
 type InputAttributes = {
-  [key: string]: {
-    type: string;
-    customField?: string;
-  };
+  [key: string]: Schema.Attribute.AnyAttribute | CustomFieldAttribute;
 };
 
 export const convertCustomFieldType = (strapi: Core.Strapi) => {

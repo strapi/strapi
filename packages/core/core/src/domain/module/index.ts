@@ -34,13 +34,16 @@ export interface Module {
   config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
   contentType: (ctName: UID.ContentType) => Struct.ContentTypeSchema;
   contentTypes: Record<string, Struct.ContentTypeSchema>;
-  service: (serviceName: UID.Service) => Core.Service;
+  /** `undefined` when no service is registered under the name, as the services registry's `get`. */
+  service: (serviceName: UID.Service) => Core.Service | undefined;
   services: Record<string, Core.Service>;
-  policy: (policyName: UID.Policy) => Core.Policy;
+  /** `undefined` when no policy is registered under the name, as the policies registry's `get`. */
+  policy: (policyName: UID.Policy) => Core.Policy | undefined;
   policies: Record<string, Core.Policy>;
   middleware: (middlewareName: UID.Middleware) => Core.Middleware;
   middlewares: Record<string, Core.Middleware>;
-  controller: (controllerName: UID.Controller) => Core.Controller;
+  /** `undefined` when no controller is registered under the name, as the controllers registry's `get`. */
+  controller: (controllerName: UID.Controller) => Core.Controller | undefined;
   controllers: Record<string, Core.Controller>;
 }
 
@@ -119,7 +122,7 @@ export const createModule = (
     set routes(routes: Record<string, Core.Router>) {
       rawModule.routes = routes;
     },
-    config(path: PropertyPath, defaultValue: unknown) {
+    config<T = unknown>(path: PropertyPath, defaultValue?: T): T {
       const pathArray = flatten([namespace, path]);
       return strapi.get('config').get(pathArray, defaultValue);
     },
