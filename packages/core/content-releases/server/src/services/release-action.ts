@@ -223,9 +223,10 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         status: 'draft' as const,
         fields: ['updatedAt'],
       };
-      const draft = entryDocumentId
-        ? await strapi.documents(contentType).findOne({ ...params, documentId: entryDocumentId })
-        : await strapi.documents(contentType).findFirst(params);
+      const draft: (Modules.Documents.AnyDocument & { updatedAt?: string | null }) | null =
+        entryDocumentId
+          ? await strapi.documents(contentType).findOne({ ...params, documentId: entryDocumentId })
+          : await strapi.documents(contentType).findFirst(params);
 
       versions.set(key, draft?.updatedAt ? new Date(draft.updatedAt).toISOString() : null);
     }
@@ -387,17 +388,18 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
           defaultLocale ??= await strapi.localization.getDefaultLocale();
         }
 
-        const entries = await strapi.documents(contentType).findMany({
-          filters: {
-            documentId: {
-              $in: actions
-                .filter((action) => action.contentType === contentType)
-                .map((action) => action.entryDocumentId),
+        const entries: Array<Modules.Documents.AnyDocument & { locale?: string | null }> =
+          await strapi.documents(contentType).findMany({
+            filters: {
+              documentId: {
+                $in: actions
+                  .filter((action) => action.contentType === contentType)
+                  .map((action) => action.entryDocumentId),
+              },
             },
-          },
-          fields: ['documentId', ...(isLocalized ? ['locale'] : [])],
-          ...(isLocalized && { locale: '*' }),
-        });
+            fields: ['documentId', ...(isLocalized ? ['locale'] : [])],
+            ...(isLocalized && { locale: '*' }),
+          });
 
         for (const entry of entries) {
           existing.add(
