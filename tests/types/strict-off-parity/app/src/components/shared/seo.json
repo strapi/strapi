@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_shared_seos",
+  "info": {
+    "displayName": "seo"
+  },
+  "attributes": {
+    "metaTitle": {
+      "type": "string",
+      "required": true
+    },
+    "metaDescription": {
+      "type": "text"
+    }
+  }
+}
