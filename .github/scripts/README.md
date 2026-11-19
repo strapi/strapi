@@ -84,6 +84,8 @@ Trigger the workflow manually from the GitHub Actions tab. The `dry_run` input d
 
 Follows up on open PRs from people outside the org whose CLA ([CLA Assistant](https://cla.strapi.io), `license/cla` status) is still unsigned. Org members, collaborators, bots and PRs whose `license/cla` passed are skipped.
 
+PRs labeled `waiting on author` or `stale` are also skipped: the lifecycle flow above already follows up on them and decides when they close. If you've already followed up on a CLA problem by hand, add `waiting on author` so the PR doesn't get a second, automated reminder.
+
 ```
 CLA Assistant comments "please sign the CLA"   (clock starts at that comment)
         │
@@ -108,12 +110,12 @@ Commit email addresses are never written to comments or logs. Comments carry a h
 
 Repository variables (Settings → Secrets and variables → Variables):
 
-| Variable                | Default        | Meaning                                                           |
-| ----------------------- | -------------- | ----------------------------------------------------------------- |
-| `CLA_FOLLOW_UP_ENABLED` | (unset)        | Scheduled runs only comment / close when this is `true`           |
-| `CLA_REMINDER_DAYS`     | 7              | Days the CLA is pending before the reminder (and the close grace) |
-| `CLA_CLOSE_DAYS`        | 30             | Days the CLA is pending before the PR is closed                   |
-| `CLA_EXEMPT_LABELS`     | `pr: security` | Comma-separated labels that exempt a PR                           |
+| Variable                | Default        | Meaning                                                                                   |
+| ----------------------- | -------------- | ----------------------------------------------------------------------------------------- |
+| `CLA_FOLLOW_UP_ENABLED` | (unset)        | Scheduled runs only comment / close when this is `true`                                   |
+| `CLA_REMINDER_DAYS`     | 7              | Days the CLA is pending before the reminder (and the close grace)                         |
+| `CLA_CLOSE_DAYS`        | 30             | Days the CLA is pending before the PR is closed                                           |
+| `CLA_EXEMPT_LABELS`     | `pr: security` | Extra comma-separated labels that exempt a PR (on top of `waiting on author` and `stale`) |
 
 ### Dry run
 

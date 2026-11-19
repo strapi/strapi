@@ -20,6 +20,13 @@ export const CLOSED_MARKER = '<!-- community-pr-cla: closed -->';
 /** Associations that mean the author is part of the org (or has write access). */
 const INTERNAL_ASSOCIATIONS = new Set(['MEMBER', 'OWNER', 'COLLABORATOR']);
 
+/**
+ * PRs in the community-pr-lifecycle flow are left to it: a maintainer is already following up
+ * by hand, and that flow decides when the PR is closed. Adding `waiting on author` is also how a
+ * maintainer opts a PR out of the CLA reminder.
+ */
+export const LIFECYCLE_LABELS = ['waiting on author', 'stale'];
+
 const DAY_MS = 86_400_000;
 
 const ADD_EMAIL_DOCS =
@@ -454,7 +461,7 @@ export interface ProcessResult {
 export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<ProcessResult[]> {
   const { github, owner, repo, dryRun, log } = opts;
   const now = opts.now ?? Date.now();
-  const exempt = new Set(opts.exemptLabels.map((l) => l.toLowerCase()));
+  const exempt = new Set([...opts.exemptLabels, ...LIFECYCLE_LABELS].map((l) => l.toLowerCase()));
   const results: ProcessResult[] = [];
   const prefix = dryRun ? '[DRY RUN] ' : '';
 
@@ -465,6 +472,7 @@ export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<Proce
   for (const pr of prs) {
     if (pr.isBot) continue;
     if (INTERNAL_ASSOCIATIONS.has(pr.association)) continue;
+    if (pr.cla?.state === 'SUCCESS') continue;
     const exemptLabel = pr.labels.find((l) => exempt.has(l.toLowerCase()));
     if (exemptLabel) {
       log(`PR #${pr.number}: skipped (label "${exemptLabel}")`);
@@ -474,7 +482,6 @@ export async function processUnsignedClaPRs(opts: ProcessOptions): Promise<Proce
       log(`PR #${pr.number}: skipped (no ${CLA_STATUS_CONTEXT} status yet)`);
       continue;
     }
-    if (pr.cla.state === 'SUCCESS') continue;
 
     const comments = await github.paginate(github.rest.issues.listComments, {
       owner,
