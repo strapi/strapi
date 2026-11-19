@@ -67,7 +67,11 @@ const useExportAuditLogs = () => {
     };
   }, []);
 
-  const exportAuditLogs = async (filters: unknown, totalEntries: number) => {
+  const exportAuditLogs = async (
+    filters: unknown,
+    totalEntries: number,
+    extraParams: Record<string, unknown> = {}
+  ) => {
     if (isExportingRef.current) {
       return;
     }
@@ -89,6 +93,7 @@ const useExportAuditLogs = () => {
       do {
         const { data, headers }: FetchResponse<Blob> = await get<Blob>('/admin/audit-logs/export', {
           params: {
+            ...extraParams,
             ...(filters ? { filters: expandLegacyActionFilters(filters) } : {}),
             ...(cursor ? { cursor } : {}),
             ...(until ? { until } : {}),

@@ -20,6 +20,11 @@ import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useRBAC } from '../../../../hooks/useRBAC';
+import {
+  useSettingsListFilterParams,
+  useSettingsListFilters,
+  useSettingsListHeaders,
+} from '../../../../hooks/useSettingsListExtensions';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 import { getDisplayName } from '../../../../utils/users';
 
@@ -43,7 +48,13 @@ const ListPageCE = () => {
   const { search } = useLocation();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
-  const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
+  const filterOptions = useSettingsListFilters('users', FILTERS);
+  const { filters, plugins } = useSettingsListFilterParams();
+  const { data, isError, isLoading } = useAdminUsers({
+    ...qs.parse(search, { ignoreQueryPrefix: true }),
+    filters,
+    plugins,
+  });
   const { user: currentUser } = useAuth('ListPageCE', (auth) => auth);
   const { pagination, users = [] } = data ?? {};
 
@@ -55,10 +66,7 @@ const ListPageCE = () => {
       ).CreateActionEE
   );
 
-  const headers = TABLE_HEADERS.map((header) => ({
-    ...header,
-    label: formatMessage(header.label),
-  }));
+  const headers = useSettingsListHeaders('users', TABLE_HEADERS);
 
   const title = formatMessage({
     id: 'global.users',
@@ -143,7 +151,7 @@ const ListPageCE = () => {
                 { target: title }
               )}
             />
-            <Filters.Root options={FILTERS}>
+            <Filters.Root options={filterOptions}>
               <Filters.Trigger />
               <Filters.Popover zIndex={499} />
               <Filters.List />

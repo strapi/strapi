@@ -15,6 +15,11 @@ import {
   withEncodedUserParams,
 } from '../../../../../../../admin/src/hooks/useQueryParams';
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
+import {
+  useSettingsListFilterParams,
+  useSettingsListFilters,
+  useSettingsListHeaders,
+} from '../../../../../../../admin/src/hooks/useSettingsListExtensions';
 import { NotFoundPage } from '../../../../../../../admin/src/pages/NotFoundPage';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 import { useIsAuditLogsDisabledByConfig } from '../../../../hooks/useIsAuditLogsDisabledByConfig';
@@ -90,19 +95,21 @@ const ListPage = () => {
     },
   });
   // A date filter stores a day or a minute: the API reads it as the instants it covers
-  const apiFilters = toApiFilters(query?.filters, displayedFilters);
+  const filterOptions = useSettingsListFilters('audit-logs', displayedFilters);
+  const { filters: coreFilters, plugins } = useSettingsListFilterParams();
+  const apiFilters = toApiFilters(coreFilters, displayedFilters);
   const {
     auditLogs,
     isLoading: isLoadingAuditLogs,
     hasError: hasAuditLogsError,
   } = useAuditLogs({
     canReadAuditLogs,
-    query: { ...query, filters: apiFilters },
+    query: { ...query, filters: apiFilters, plugins },
   });
   const isLoadingData = isLoadingAuditLogUsers || isLoadingAuditLogs;
   const hasError = hasUsersError || hasAuditLogsError;
 
-  const headers: Table.Header<AuditLog, object>[] = [
+  const coreHeaders: Table.Header<AuditLog, object>[] = [
     {
       name: 'action',
       label: formatMessage({
@@ -130,6 +137,7 @@ const ListPage = () => {
       cellFormatter: ({ user }) => (user ? user.displayName : '-'),
     },
   ];
+  const headers = useSettingsListHeaders('audit-logs', coreHeaders);
 
   if (hasError) {
     return <Page.Error />;
@@ -168,7 +176,9 @@ const ListPage = () => {
               startIcon={<Download />}
               loading={isExporting}
               disabled={isLoading || totalEntries === 0}
-              onClick={() => exportAuditLogs(apiFilters, totalEntries ?? 0)}
+              onClick={() =>
+                exportAuditLogs(apiFilters, totalEntries ?? 0, plugins ? { plugins } : {})
+              }
             >
               {formatMessage({
                 id: 'Settings.permissions.auditLogs.listview.export',
@@ -180,7 +190,7 @@ const ListPage = () => {
       />
       <Layouts.Action
         startActions={
-          <Filters.Root options={displayedFilters}>
+          <Filters.Root options={filterOptions}>
             <Filters.Trigger />
             <Filters.Popover zIndex={499} />
             <Filters.List />
@@ -238,9 +248,13 @@ const ListPage = () => {
                       default:
                         return (
                           <Table.Cell key={name}>
-                            <Typography textColor="neutral800">
-                              {(log[name as keyof AuditLog] as string) || '-'}
-                            </Typography>
+                            {cellFormatter ? (
+                              cellFormatter(log, header)
+                            ) : (
+                              <Typography textColor="neutral800">
+                                {(log[name as keyof AuditLog] as string) || '-'}
+                              </Typography>
+                            )}
                           </Table.Cell>
                         );
                     }

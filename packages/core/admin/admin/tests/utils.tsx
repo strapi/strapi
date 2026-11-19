@@ -68,6 +68,8 @@ interface ProvidersProps {
   initialEntries?: MemoryRouterProps['initialEntries'];
   storeConfig?: Partial<ConfigureStoreOptions>;
   permissions?: Permission[] | ((defaultPermissions: Permission[]) => Permission[] | undefined);
+  /** Defaults to returning the initial value, as if no plugin registered a handler */
+  runHookWaterfall?: (name: string, initialValue: unknown) => unknown;
 }
 
 const defaultTestStoreConfig = () => ({
@@ -99,11 +101,14 @@ const DEFAULT_PERMISSIONS = [
   },
 ];
 
+const passthroughHookWaterfall = (_name: string, initialValue: unknown) => initialValue;
+
 const Providers = ({
   children,
   initialEntries,
   storeConfig,
   permissions = EMPTY_PERMISSIONS,
+  runHookWaterfall = passthroughHookWaterfall,
 }: ProvidersProps) => {
   /**
    * Keep these instances stable for the lifetime of the render.
@@ -186,7 +191,11 @@ const Providers = ({
               getPlugin={jest.fn()}
               plugins={{}}
               runHookParallel={jest.fn()}
-              runHookWaterfall={jest.fn().mockImplementation((_name, initialValue) => initialValue)}
+              runHookWaterfall={
+                runHookWaterfall as React.ComponentProps<
+                  typeof StrapiAppProvider
+                >['runHookWaterfall']
+              }
               runHookSeries={jest.fn()}
               settings={{}}
             >
@@ -257,7 +266,7 @@ export interface RenderOptions {
   renderOptions?: RTLRenderOptions;
   userEventOptions?: Parameters<typeof userEvent.setup>[0];
   initialEntries?: MemoryRouterProps['initialEntries'];
-  providerOptions?: Pick<ProvidersProps, 'storeConfig' | 'permissions'>;
+  providerOptions?: Pick<ProvidersProps, 'storeConfig' | 'permissions' | 'runHookWaterfall'>;
 }
 
 /**
