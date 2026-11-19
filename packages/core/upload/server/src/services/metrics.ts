@@ -1,11 +1,17 @@
 import type { Core } from '@strapi/types';
+import type { MetricsService } from '../types/services';
 import { getService } from '../utils';
 
 const getProviderName = () => strapi.config.get('plugin::upload.provider', 'local');
 const isProviderPrivate = async () => strapi.plugin('upload').provider.isPrivate();
 
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
-  async trackUsage(event: string, properties?: Record<string, any>) {
+export default (({ strapi }: { strapi: Core.Strapi }) => ({
+  async trackUsage(
+    event: string,
+    properties?: Core.IsStrict extends true
+      ? Parameters<MetricsService['trackUsage']>[1]
+      : Record<string, any>
+  ) {
     const isAiAvailable = getService('aiMetadataProvider').hasProvider();
 
     return strapi.telemetry.send(event, {
@@ -18,6 +24,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       },
     });
   },
+  /**
+   * Sends the `didInitializePluginUpload` telemetry event with the provider name and privacy.
+   *
+   * @internal
+   */
   async sendUploadPluginMetrics() {
     const uploadProvider = getProviderName();
     const privateProvider = await isProviderPrivate();
@@ -29,4 +40,4 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       },
     });
   },
-});
+})) satisfies Core.ServiceImplementation<'plugin::upload.metrics'>;

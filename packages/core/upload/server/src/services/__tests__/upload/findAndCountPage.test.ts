@@ -1,6 +1,7 @@
 import createUploadService from '../../upload';
 import imageManipulation from '../../image-manipulation';
 import fileService from '../../file';
+import type { File } from '../../../types';
 
 const files = [
   { id: 1, name: 'a.png', provider: 'local' },
@@ -139,12 +140,34 @@ describe('findAndCountPage', () => {
   });
 
   test('signs file urls for every returned result', async () => {
-    const signFileUrls = jest.fn((file: unknown) => file);
+    const signFileUrls = jest.fn(async (file: File) => file);
     global.strapi.plugins.upload.services.file.signFileUrls = signFileUrls;
     uploadService = createUploadService({ strapi: global.strapi } as any);
 
     await uploadService.findAndCountPage({ pagination: { page: 1, pageSize: 10 } });
 
     expect(signFileUrls).toHaveBeenCalledTimes(files.length);
+  });
+
+  // Query string values reach the service as strings (the Content API passes `ctx.query` through);
+  // the pagination utility reads them as numbers.
+  test('query string values: page and pageSize as strings', async () => {
+    const { pagination } = await uploadService.findAndCountPage({
+      pagination: { page: '2', pageSize: '10' },
+    });
+
+    const [, query] = transform.mock.calls[0];
+    expect(query).toMatchObject({ start: 10, limit: 10 });
+    expect(pagination).toEqual({ page: 2, pageSize: 10, pageCount: 5, total: 42 });
+  });
+
+  test('query string values: start and limit as strings', async () => {
+    const { pagination } = await uploadService.findAndCountPage({
+      pagination: { start: '5', limit: '10' },
+    });
+
+    const [, query] = transform.mock.calls[0];
+    expect(query).toMatchObject({ start: 5, limit: 10 });
+    expect(pagination).toEqual({ start: 5, limit: 10, total: 42 });
   });
 });

@@ -119,7 +119,9 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   return {
-    async set(releaseId: Release['id'], scheduleDate: Date) {
+    // `scheduleDate` is a Date or the ISO string a release row holds in `scheduledAt`: the cron
+    // takes both
+    async set(releaseId: Release['id'], scheduleDate: Date | string) {
       const id = String(releaseId); // callers pass both numeric (db row) and string (ctx.params) ids
 
       const release = await strapi.db

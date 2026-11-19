@@ -563,4 +563,92 @@ describe('document-metadata service', () => {
       });
     });
   });
+
+  describe('contract evidence', () => {
+    const dnpModel = (localized: boolean) => ({
+      uid: 'api::article.article',
+      options: { draftAndPublish: true },
+      pluginOptions: { i18n: { localized } },
+      attributes: {},
+    });
+
+    it('returns available locales and versions with their documentId', async () => {
+      // The rows the full path selects: `AVAILABLE_LOCALES_FIELDS`, with the `createdBy` and
+      // `updatedBy` populate
+      const rows = [
+        {
+          id: 1,
+          documentId: 'doc-1',
+          locale: 'en',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          publishedAt: null,
+          createdBy: null,
+          updatedBy: null,
+        },
+        {
+          id: 2,
+          documentId: 'doc-1',
+          locale: 'fr',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-02T00:00:00.000Z',
+          publishedAt: null,
+          createdBy: null,
+          updatedBy: null,
+        },
+        {
+          id: 3,
+          documentId: 'doc-1',
+          locale: 'fr',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          publishedAt: '2026-01-01T00:00:00.000Z',
+          createdBy: null,
+          updatedBy: null,
+        },
+      ];
+      const findMany = jest.fn().mockResolvedValue(rows);
+      const service = createService({
+        getModel: () => dnpModel(true),
+        get: () => ({ transform: (_uid: string, params: unknown) => params }),
+        db: { query: () => ({ findMany }) },
+      });
+
+      const result = await service.getMetadata(
+        'api::article.article',
+        { id: 1, documentId: 'doc-1', locale: 'en', publishedAt: null },
+        { availableLocales: true, availableStatus: false }
+      );
+
+      expect(findMany.mock.calls[0][0].fields).toContain('documentId');
+      expect(result.availableLocales).toEqual([{ ...rows[1], status: 'modified' }]);
+      expect(result.versions.every((version) => version.documentId === 'doc-1')).toBe(true);
+    });
+
+    it('formats a document of a non-localized content type, whose locale is null', async () => {
+      const findOne = jest.fn().mockResolvedValue(null);
+      const service = createService({
+        getModel: () => dnpModel(false),
+        localization: {
+          isLocalizedContentType: () => false,
+          getDefaultLocale: async () => null,
+          getNonLocalizedAttributes: () => [],
+        },
+        db: { query: () => ({ findOne }) },
+      });
+
+      // A non-localized content type stores its versions with a `null` locale
+      const document = { id: 1, documentId: 'doc-1', locale: null, publishedAt: null };
+      const result = await service.formatDocumentWithMetadata('api::article.article', document);
+
+      expect(findOne.mock.calls[0][0].where).toEqual({
+        documentId: 'doc-1',
+        publishedAt: { $notNull: true },
+      });
+      expect(result).toEqual({
+        data: { ...document, status: 'draft' },
+        meta: { availableLocales: [], availableStatus: [], defaultLocale: null },
+      });
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { describe, expect, it, vi } from 'vitest';
 
 import stagesFactory from '../stages';
@@ -139,7 +139,7 @@ describe('review-workflows stages service', () => {
   });
 
   describe('updateEntitiesStage', () => {
-    it.each([
+    it.each<[string, UID.ContentType]>([
       ['no longer exists', orphanUID],
       ['has no stage attribute', noStageUID],
     ])('does nothing for a content type that %s', async (_, contentTypeUID) => {
@@ -175,7 +175,7 @@ describe('review-workflows stages service', () => {
       expect(deleteLinks).toHaveBeenCalledTimes(1);
     });
 
-    it.each([
+    it.each<[string, UID.ContentType]>([
       ['no longer exists', orphanUID],
       ['has no stage attribute', noStageUID],
     ])('does nothing for a content type that %s', async (_, contentTypeUID) => {

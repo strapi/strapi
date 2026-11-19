@@ -1,4 +1,6 @@
 import '@strapi/types';
+import type { Core } from '@strapi/types';
+import type { WorkflowMetricsService } from '../../types/services';
 
 export const sendDidCreateStage = async () => {
   strapi.telemetry.send('didCreateStage', {});
@@ -30,9 +32,9 @@ export const sendDidEditWorkflow = async (
   strapi.telemetry.send('didEditWorkflow', { workflowId, hasRequiredStageToPublish });
 };
 
-export const sendDidEditAssignee = async (fromId: any, toId: any) => {
+export const sendDidEditAssignee = (async (fromId, toId) => {
   strapi.telemetry.send('didEditAssignee', { from: fromId, to: toId });
-};
+}) satisfies Core.Implements<WorkflowMetricsService['sendDidEditAssignee']>;
 
 export type WeeklyMetrics = {
   numberOfActiveWorkflows: number;
