@@ -13,7 +13,8 @@ const getMainField = async (targetUid: UID.Schema): Promise<string> => {
     .plugin('content-manager')
     .service('content-types');
   const configuration = await contentManagerContentTypeService.findConfiguration({
-    uid: targetUid,
+    // Relation targets are content types.
+    uid: targetUid as UID.ContentType,
   });
   return configuration.settings.mainField;
 };
