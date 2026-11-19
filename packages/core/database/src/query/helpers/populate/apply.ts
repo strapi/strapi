@@ -163,13 +163,10 @@ const XtoOne = async (
         .groupBy(joinColAlias)
         .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-      const map = rows.reduce(
-        (map, row) => {
-          map[row[joinColumnName]] = { count: Number(row.count) };
-          return map;
-        },
-        {} as Record<string, { count: number }>
-      );
+      const map = rows.reduce((map, row) => {
+        map[row[joinColumnName]] = { count: Number(row.count) };
+        return map;
+      }, {} as Record<string, { count: number }>);
 
       results.forEach((result) => {
         result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -291,13 +288,10 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
         .groupBy(joinColAlias)
         .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-      const map = rows.reduce(
-        (map, row) => {
-          map[row[joinColRenameAs]] = { count: Number(row.count) };
-          return map;
-        },
-        {} as Record<string, { count: number }>
-      );
+      const map = rows.reduce((map, row) => {
+        map[row[joinColRenameAs]] = { count: Number(row.count) };
+        return map;
+      }, {} as Record<string, { count: number }>);
 
       results.forEach((result) => {
         result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -380,13 +374,10 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
       .groupBy(joinColAlias)
       .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-    const map = rows.reduce(
-      (map, row) => {
-        map[row[joinColumnName]] = { count: Number(row.count) };
-        return map;
-      },
-      {} as Record<string, { count: number }>
-    );
+    const map = rows.reduce((map, row) => {
+      map[row[joinColumnName]] = { count: Number(row.count) };
+      return map;
+    }, {} as Record<string, { count: number }>);
 
     results.forEach((result) => {
       result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -731,19 +722,11 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
 
 //  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
 const pickPopulateParams = (populate: Record<string, unknown>) => {
-  const fieldsToPick = [
-    'select',
-    'count',
-    'where',
-    'populate',
-    'orderBy',
-    'filters',
-    'ordering',
-    'on',
-  ];
+  const fieldsToPick = ['select', 'count', 'where', 'populate', 'filters', 'on'];
 
+  // A count needs no order, and its GROUP BY rejects an ORDER BY on Postgres and MySQL
   if (populate.count !== true) {
-    fieldsToPick.push('limit', 'offset');
+    fieldsToPick.push('limit', 'offset', 'orderBy', 'ordering');
   }
 
   return _.pick(populate, fieldsToPick);

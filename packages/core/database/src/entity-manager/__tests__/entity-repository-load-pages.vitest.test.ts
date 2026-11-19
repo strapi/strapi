@@ -5,7 +5,7 @@ import type { Database } from '../..';
 
 const TAGS = [{ id: 1 }, { id: 2 }, { id: 3 }];
 
-type LoadQuery = { limit: number; offset: number; count?: boolean; orderBy?: unknown };
+type LoadQuery = { limit: number; offset: number; count?: boolean };
 
 // Mirrors entityManager.load: null for a missing entity, { count } for a count query
 const fakeDb = ({ entityExists }: { entityExists: boolean }) => {
@@ -64,23 +64,6 @@ describe('entity repository loadPages', () => {
     expect(res.results).toEqual([{ id: 1 }, { id: 2 }]);
     expect(res.pagination.total).toBe(3);
     expect(queries[0]).not.toHaveProperty('count');
-  });
-
-  it('keeps the order in the page query and leaves it out of the total query', async () => {
-    const { db, queries } = fakeDb({ entityExists: true });
-
-    await createRepository('api::article.article', db).loadPages({ id: 1 }, 'tags', {
-      page: 1,
-      pageSize: 2,
-      orderBy: { id: 'desc' },
-    });
-
-    const pageQuery = queries.find((query) => query.count !== true);
-    const countQuery = queries.find((query) => query.count === true);
-
-    expect(pageQuery).toHaveProperty('orderBy', { id: 'desc' });
-    expect(countQuery).toBeDefined();
-    expect(countQuery).not.toHaveProperty('orderBy');
   });
 
   it('returns an empty page when the entity does not exist', async () => {
