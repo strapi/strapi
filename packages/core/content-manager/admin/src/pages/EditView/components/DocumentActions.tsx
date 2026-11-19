@@ -1372,8 +1372,10 @@ const UpdateAction: DocumentActionComponent = ({
           data
         );
 
-        if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-          setErrors(formatValidationErrors(res.error));
+        if ('error' in res) {
+          if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+            setErrors(formatValidationErrors(res.error));
+          }
         } else {
           resetForm(latestValues);
           // This document is now persisted with whatever local connect patches were merged into
