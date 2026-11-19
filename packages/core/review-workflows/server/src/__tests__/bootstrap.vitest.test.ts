@@ -14,7 +14,7 @@ const bootWith = async (stagesPerWorkflow: unknown) => {
     'document-service-middlewares': {},
   };
   // The workflows service validates the stages against the limits before creating the workflow
-  const create = vi.fn(async ({ data }: { data: { stages: unknown[] } }) => {
+  const create = vi.fn(async ({ data }: { data: { stages: { name: string }[] } }) => {
     validation.validateWorkflowStages(data.stages);
     return data;
   });

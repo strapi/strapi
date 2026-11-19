@@ -1,6 +1,7 @@
 import { merge } from 'lodash';
 
-import type { UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
+import type { PopulateBuilder } from '../types/services';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
 
 /**
@@ -14,7 +15,11 @@ import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/popula
  *
  */
 const populateBuilder = (uid: UID.Schema) => {
-  let getInitialPopulate = async (): Promise<undefined | Populate> => {
+  let getInitialPopulate = async (): Promise<
+    Core.IsStrict extends true
+      ? Awaited<ReturnType<PopulateBuilder['build']>>
+      : undefined | Populate
+  > => {
     return undefined;
   };
   const deepPopulateOptions = {
@@ -64,7 +69,11 @@ const populateBuilder = (uid: UID.Schema) => {
      *
      * @param overrides - Populate overrides to merge (e.g. { localizations: { fields: ['locale'] } })
      */
-    withPopulateOverride(overrides: Record<string, any>) {
+    withPopulateOverride(
+      overrides: Core.IsStrict extends true
+        ? Parameters<PopulateBuilder['withPopulateOverride']>[0]
+        : Record<string, any>
+    ) {
       const prev = getInitialPopulate;
       // merge(base, overrides): overrides win for overlapping keys, so e.g. localizations
       getInitialPopulate = async () => merge({}, (await prev()) || {}, overrides);
@@ -92,4 +101,5 @@ const populateBuilder = (uid: UID.Schema) => {
   return builder;
 };
 
-export default () => populateBuilder;
+export default (() =>
+  populateBuilder) satisfies Core.ServiceImplementation<'plugin::content-manager.populate-builder'>;

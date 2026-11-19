@@ -46,7 +46,7 @@ export const getEntryStatus = async (
     return 'published';
   }
 
-  const publishedEntry = await strapi.documents(contentType).findOne({
+  const publishedEntry: Data.ContentType | null = await strapi.documents(contentType).findOne({
     documentId: entry.documentId,
     locale: entry.locale,
     status: 'published',

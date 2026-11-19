@@ -1,12 +1,13 @@
 import { property, uniq, uniqBy, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
-import type { Data, Modules, UID } from '@strapi/types';
+import type { Core, Data, Modules, Schema, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
 import { indexByDocumentId } from './utils/document-status';
+import type { RelationsController } from '../types/controllers';
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
@@ -112,7 +113,11 @@ const getPublishedAtClause = (status: string | undefined, uid: UID.Schema) => {
   return status === 'published' ? { $notNull: true } : { $null: true };
 };
 
-const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, locale?: string) => {
+const validateLocale = (
+  sourceUid: UID.Schema,
+  targetUid: UID.ContentType,
+  locale?: Core.IsStrict extends true ? string | null : string
+) => {
   const sourceModel = strapi.getModel(sourceUid);
   const targetModel = strapi.getModel(targetUid);
 
@@ -129,8 +134,14 @@ const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, local
 
 const validateStatus = (
   sourceUid: UID.Schema,
-  status?: Modules.Documents.Params.PublicationStatus.Kind
-) => {
+  status?: Core.IsStrict extends true
+    ? Modules.Documents.Params.PublicationStatus.Kind | null
+    : Modules.Documents.Params.PublicationStatus.Kind
+): {
+  status: Core.IsStrict extends true
+    ? Modules.Documents.Params.PublicationStatus.Kind | undefined
+    : string | undefined;
+} => {
   const sourceModel = strapi.getModel(sourceUid);
 
   const isDP = contentTypes.hasDraftAndPublish;
@@ -151,7 +162,7 @@ const validateStatus = (
 };
 
 export default {
-  async extractAndValidateRequestInfo(ctx: any, id?: Data.ID) {
+  async extractAndValidateRequestInfo(ctx, id?: Data.ID) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
 
@@ -160,16 +171,17 @@ export default {
       throw new errors.ValidationError(`The model ${model} doesn't exist`);
     }
 
-    const attribute: any = sourceSchema.attributes[targetField];
+    // Without strict types, the published `attribute` stays develop's `any`
+    const attribute: Core.IsStrict extends true ? Schema.Attribute.AnyAttribute : any =
+      sourceSchema.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
       throw new errors.ValidationError(
         `The relational field ${targetField} doesn't exist on ${model}`
       );
     }
 
-    // Morph-to relations (morphToOne, morphToMany) have no single target model.
-    // `attribute` is still `any` here: the `in` check prepares the narrowing for the strict types
-    // branch, where `attribute` is typed and only the relations that declare a target pass it.
+    // Morph-to relations (morphToOne, morphToMany) have no single target model. With strict types,
+    // the `in` check narrows `attribute` to the relations that declare a target.
     if (!('target' in attribute) || attribute.target === undefined) {
       throw new errors.ValidationError(
         `The relational field ${targetField} on ${model} has no target model`
@@ -177,7 +189,8 @@ export default {
     }
 
     const sourceUid = model;
-    const targetUid = attribute.target;
+    // A relation targets a content type; without strict types, as on develop, any model
+    const targetUid: Core.IsStrict extends true ? UID.ContentType : any = attribute.target;
 
     const { locale, isSourceLocalized, isTargetLocalized } = validateLocale(
       sourceUid,
@@ -563,4 +576,4 @@ export default {
       results: await addStatusToRelations(targetUid, relationsUnion),
     };
   },
-};
+} satisfies Core.Implements<RelationsController>;
