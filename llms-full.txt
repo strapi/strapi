@@ -594,6 +594,8 @@ The strapi containers are accessible via `strapi.get('name-of-the-container')`.
 
 Every file stored under the `config` folder will be injected in this config container object.
 
+Read config values with `get(path)`, never as properties of the container (`strapi.config.server.url`). The keys above are also copied onto the container when it is created, but that copy is shallow: a top-level `set('server', { ... })` replaces the live value and leaves the copy stale, and module namespaces such as `plugin::upload` are only reachable through `get`.
+
 #### `services`
 
 :::info
