@@ -23,7 +23,10 @@ const createPoliciesMiddleware = (resolverConfig: any, { strapi }: { strapi: Cor
     for (const { handler, config } of policies) {
       const result = await handler(policyContext, config, { strapi });
 
-      if (![true, undefined].includes(result)) {
+      // A policy passes when it returns `true` or nothing
+      const passingResults: unknown[] = [true, undefined];
+
+      if (passingResults.includes(result) === false) {
         throw new PolicyError();
       }
     }
