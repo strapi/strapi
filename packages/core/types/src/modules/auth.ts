@@ -26,7 +26,14 @@ interface AuthenticationInfo {
 interface Strategy {
   name: string;
   authenticate: (ctx: ParameterizedContext) => Promise<AuthenticationResponse>;
-  verify?: (auth: AuthenticationInfo, config: RouteConfig['auth']) => Promise<VerifyResult>;
+  /**
+   * The service awaits what `verify` returns, so with strict types it may return synchronously, as
+   * the admin token strategies do (`packages/core/admin/server/src/strategies/admin-token.ts`).
+   */
+  verify?: (
+    auth: AuthenticationInfo,
+    config: RouteConfig['auth']
+  ) => IsStrict extends false ? Promise<VerifyResult> : VerifyResult | Promise<VerifyResult>;
 }
 
 export interface AuthenticationService {
