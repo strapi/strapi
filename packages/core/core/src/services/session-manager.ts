@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import type { VerifyOptions, Algorithm } from 'jsonwebtoken';
 import type { Database } from '@strapi/database';
+import type { Modules } from '@strapi/types';
 import { DEFAULT_ALGORITHM } from '../constants';
 
 export interface SessionProvider {
@@ -55,17 +56,11 @@ export interface AccessTokenPayload {
 
 export type TokenPayload = RefreshTokenPayload | AccessTokenPayload;
 
-export interface ValidateRefreshTokenResult {
-  isValid: boolean;
-  userId?: string;
-  sessionId?: string;
-  error?:
-    | 'invalid_token'
-    | 'token_expired'
-    | 'session_not_found'
-    | 'session_expired'
-    | 'wrong_token_type';
-}
+/**
+ * The published contract: `validateRefreshToken` returns the user and session only when the token
+ * is valid, and nothing else otherwise.
+ */
+export type ValidateRefreshTokenResult = Modules.SessionManager.ValidateRefreshTokenResult;
 
 class DatabaseSessionProvider implements SessionProvider {
   private db: Database;
