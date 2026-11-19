@@ -225,6 +225,8 @@ describe('findExisting', () => {
         expect.objectContaining({
           select: PERMITTED_FIELDS,
           where: { ...conditions, $and: [{ id: { $in: [1, 2] } }] },
+          page: 1,
+          pageSize: 2,
         })
       );
       expect(ctx.body).toEqual({
@@ -234,6 +236,44 @@ describe('findExisting', () => {
           { id: 2, documentId: 'tag-2' },
         ],
       });
+    });
+
+    it('loads the main field of every id of a page larger than 10, whatever the page', async () => {
+      const pageIds = Array.from({ length: 20 }, (_, index) => 40 - index);
+      const dbQuery = {
+        findOne: jest.fn().mockResolvedValue({ id: 10 }),
+        loadPages: jest
+          .fn()
+          .mockResolvedValueOnce({
+            results: pageIds.map((id) => ({ id, documentId: `tag-${id}` })),
+            pagination: { page: 2, pageSize: 20, pageCount: 2, total: 40 },
+          })
+          .mockResolvedValueOnce({ results: [], pagination: {} }),
+        load: jest.fn(),
+      };
+      const conditions = { $or: [{ createdBy: { id: 42 } }] };
+      setupStrapi({ permissionQuery: { fields: PERMITTED_FIELDS, filters: conditions }, dbQuery });
+
+      const ctx = createContext(
+        {
+          params: { model: SHOP_UID, targetField: 'tags', id: 'shop-document-id' },
+          query: { page: '2', pageSize: '20' },
+        },
+        { state: { userAbility: {} } }
+      );
+      await relations.findExisting(ctx);
+
+      // The ids already restrict the second load to the page, so it reads them as one first page
+      expect(dbQuery.loadPages).toHaveBeenNthCalledWith(
+        2,
+        { id: 10 },
+        'tags',
+        expect.objectContaining({
+          where: { ...conditions, $and: [{ id: { $in: pageIds } }] },
+          page: 1,
+          pageSize: 20,
+        })
+      );
     });
   });
 });

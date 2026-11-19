@@ -90,7 +90,10 @@ const createRevalidateActionsOnDraftChange =
 
     // `update` returns the updated draft (which may have its own `entries` field); `discardDraft`
     // `{ entries }`, the new draft of each locale it discarded
-    const drafts = action === 'discardDraft' && 'entries' in result ? result.entries : [result];
+    const drafts: Modules.Documents.AnyDocument[] =
+      action === 'discardDraft' && 'entries' in result && Array.isArray(result.entries)
+        ? result.entries
+        : [result];
 
     runAfterCommit(
       async () => {
