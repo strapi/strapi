@@ -432,9 +432,27 @@ export default function createComponentBuilder() {
         return undefined;
       }
 
-      return this.contentTypes.get(attribute.target)?.initialSchema?.attributes?.[
-        attribute.targetAttribute
-      ];
+      return this.relationBeforeSave(
+        this.contentTypes.get(attribute.target)?.initialSchema?.attributes?.[
+          attribute.targetAttribute
+        ]
+      );
+    },
+
+    /**
+     * `attribute` as it was before the save, unless it is a relation to a type that the save
+     * deletes: that relation goes with the deleted type, and its side does not count.
+     */
+    relationBeforeSave(this: any, attribute: Schema.Attribute.AnyAttribute | undefined) {
+      if (
+        attribute !== undefined &&
+        isRelation(attribute) &&
+        this.deletedContentTypes.has((attribute as InternalRelationAttribute).target)
+      ) {
+        return undefined;
+      }
+
+      return attribute;
     },
 
     /**
@@ -905,24 +923,21 @@ export default function createComponentBuilder() {
               counterpartBeforeSave(relationAttribute)
             );
 
+            // In a self pair, the other side that the save already decided comes first
+            const decidedOtherSide =
+              relationAttribute.target === uid && !_.isNil(relationAttribute.targetAttribute)
+                ? (newAttributes[relationAttribute.targetAttribute] as InternalRelationAttribute)
+                    ?.dominant
+                : undefined;
+
             if (originOwnership?.inversedBy) {
               relationAttribute.dominant = true;
             } else if (originOwnership?.mappedBy) {
               relationAttribute.dominant = false;
+            } else if (decidedOtherSide !== undefined) {
+              relationAttribute.dominant = !decidedOtherSide;
             } else if (ownsBefore !== undefined) {
               relationAttribute.dominant = ownsBefore;
-            } else if (
-              relationAttribute.target === uid &&
-              relationAttribute.targetAttribute !== undefined
-            ) {
-              // self referencing relation
-              const targetAttribute = newAttributes[
-                relationAttribute.targetAttribute
-              ] as InternalRelationAttribute;
-
-              // The opposite of the other side when the save already decided it
-              relationAttribute.dominant =
-                targetAttribute.dominant === undefined ? true : !targetAttribute.dominant;
             } else {
               relationAttribute.dominant = true;
             }

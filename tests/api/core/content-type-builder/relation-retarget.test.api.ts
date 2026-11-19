@@ -1163,4 +1163,77 @@ describe('Content Type Builder - retarget a relation under its own name', () => 
     expect(bookWithShelf?.shelf).toMatchObject([{ documentId: shelf.documentId }]);
     expect(shelfWithBooks?.books).toMatchObject([{ documentId: book.documentId }]);
   });
+  test('gives a new relation the name of a one-way relation to a deleted type, and owns the pair', async () => {
+    await createTypes();
+
+    // Shelf.alias is a one-way manyToMany to Bookcase, with one link
+    const shelfSchema = await fse.readJSON(schemaFile('rt-shelf'));
+    shelfSchema.attributes.alias = {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: BOOKCASE_UID,
+    };
+    await fse.writeJSON(schemaFile('rt-shelf'), shelfSchema, { spaces: 2 });
+    await restart();
+
+    const bookcase = await strapi.documents(BOOKCASE_UID).create({ data: { name: 'Bookcase 1' } });
+    const shelf = await strapi.documents(SHELF_UID).create({
+      data: { name: 'Shelf 1', alias: [bookcase.documentId] },
+    });
+
+    // The save deletes Bookcase, and Book.rack takes alias as its other side
+    const res = await updateSchema({
+      contentTypes: [
+        { action: 'delete', uid: BOOKCASE_UID },
+        contentType('update', 'rt-book', [
+          nameAttribute('update', 'title'),
+          attribute('update', 'shelf', relation('manyToOne', SHELF_UID, 'books')),
+          attribute('create', 'rack', relation('manyToMany', SHELF_UID, 'alias')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(attributesOf(BOOK_UID).rack).toMatchObject({ inversedBy: 'alias' });
+    expect(attributesOf(SHELF_UID).alias).toMatchObject({ target: BOOK_UID, mappedBy: 'rack' });
+
+    const book = await strapi.documents(BOOK_UID).create({
+      data: { title: 'Book 1', rack: [shelf.documentId] },
+    });
+    const shelfWithAlias = await strapi.documents(SHELF_UID).findOne({
+      documentId: shelf.documentId,
+      populate: ['alias'],
+    });
+    expect(shelfWithAlias?.alias).toMatchObject([{ documentId: book.documentId }]);
+  });
+
+  test('writes one owner for a self pair on Shelf that takes the name of the inverse side of a deleted type', async () => {
+    await createTypes();
+
+    // Shelf.books is the inverse side of Book.shelf. The save deletes Book first, then gives
+    // Shelf the self pair books / mates
+    const res = await updateSchema({
+      contentTypes: [
+        { action: 'delete', uid: BOOK_UID },
+        contentType('update', 'rt-shelf', [
+          nameAttribute('update', 'name'),
+          attribute('update', 'books', relation('manyToMany', SHELF_UID, 'mates')),
+          attribute('create', 'mates', relation('manyToMany', SHELF_UID, 'books')),
+        ]),
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    const { books, mates } = attributesOf(SHELF_UID);
+    expect([books.inversedBy, mates.inversedBy].filter((name) => name !== undefined)).toHaveLength(
+      1
+    );
+    expect([books.mappedBy, mates.mappedBy].filter((name) => name !== undefined)).toHaveLength(1);
+  });
 });

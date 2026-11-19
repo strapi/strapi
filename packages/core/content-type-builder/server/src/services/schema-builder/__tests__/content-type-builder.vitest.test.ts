@@ -1252,6 +1252,42 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         }
       );
 
+      it.each([
+        ['the deletion first', true],
+        ['the edit first', false],
+      ])(
+        'writes one owner for a self pair that takes the name of the inverse side of a deleted type, with %s',
+        (_label, deleteFirst) => {
+          // Shelf.books is the inverse side of Book.shelf. The save deletes Book and adds the
+          // self pair Shelf.books / Shelf.mates, with books first
+          const selfKind = kind === 'manyToOne' ? 'manyToMany' : kind;
+          const builder = createBuilder();
+          const editShelf = () =>
+            builder.editContentType({
+              uid: shelfUid,
+              kind: 'collectionType',
+              displayName: shelfUid,
+              draftAndPublish: false,
+              attributes: {
+                name: { type: 'string' },
+                books: relation(selfKind, shelfUid, 'mates'),
+                mates: relation(selfKind, shelfUid, 'books'),
+              },
+            });
+
+          if (deleteFirst) {
+            builder.deleteContentType(bookUid);
+            editShelf();
+          } else {
+            editShelf();
+            builder.deleteContentType(bookUid);
+          }
+          builder.assertRelationPairs();
+
+          expectValidPair(builder, [shelfUid, 'books'], [shelfUid, 'mates']);
+        }
+      );
+
       it('gives a new relation the name of a one-way relation to a deleted type', () => {
         // Shelf.alias is one-way to Bookcase. The save deletes Bookcase, and Book.rack takes
         // alias as its other side, without sending Shelf
@@ -1277,7 +1313,8 @@ describe('content-type-builder editContentType with retargeted relations', () =>
         });
         builder.assertRelationPairs();
 
-        expectValidPair(builder, [bookUid, 'rack'], [shelfUid, 'alias']);
+        // Shelf.alias held the links to the deleted type: Book.rack owns the new pair
+        expectValidPair(builder, [bookUid, 'rack'], [shelfUid, 'alias'], 'first');
       });
 
       it.each([
