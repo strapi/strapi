@@ -78,7 +78,7 @@ const ConfigurationProvider = ({
 
   const {
     allowedActions: { canRead },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
 
   const {
     data: { authLogo: customAuthLogo, menuLogo: customMenuLogo } = {},

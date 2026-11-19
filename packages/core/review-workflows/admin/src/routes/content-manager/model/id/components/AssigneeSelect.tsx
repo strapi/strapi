@@ -41,7 +41,7 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const {
     allowedActions: { canRead },
     isLoading: isLoadingPermissions,
-  } = useRBAC(permissions.settings?.users);
+  } = useRBAC(Object.values(permissions.settings?.users ?? {}).flat());
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 

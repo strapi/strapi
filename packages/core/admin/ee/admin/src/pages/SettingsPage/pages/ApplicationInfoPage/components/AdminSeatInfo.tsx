@@ -15,7 +15,7 @@ export const AdminSeatInfoEE = () => {
   const {
     isLoading: isRBACLoading,
     allowedActions: { canRead, canCreate, canUpdate, canDelete },
-  } = useRBAC(settings?.users ?? {});
+  } = useRBAC(Object.values(settings?.users ?? {}).flat());
   const {
     license,
     isError,

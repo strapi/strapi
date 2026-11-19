@@ -77,15 +77,10 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
 
   const userPermissions = useAuth('DocumentRBAC', (state) => state.permissions);
 
-  const contentTypePermissions = React.useMemo(() => {
-    const contentTypePermissions = userPermissions.filter(
-      (permission) => permission.subject === contentTypeUid
-    );
-    return contentTypePermissions.reduce<Record<string, Permission[]>>((acc, permission) => {
-      const [action] = permission.action.split('.').slice(-1);
-      return { ...acc, [action]: [...(acc[action] ?? []), permission] };
-    }, {});
-  }, [contentTypeUid, userPermissions]);
+  const contentTypePermissions = React.useMemo(
+    () => userPermissions.filter((permission) => permission.subject === contentTypeUid),
+    [contentTypeUid, userPermissions]
+  );
 
   const { isLoading, allowedActions } = useRBAC(
     contentTypePermissions,
