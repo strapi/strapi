@@ -1,3 +1,4 @@
+import type { IsStrict } from '../../../core/strictness';
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
@@ -96,10 +97,34 @@ export interface ListBlockNode extends BaseNode {
   indentLevel?: number;
 }
 
+/**
+ * The image an image block stores: a copy of some fields of the file, taken when the image was
+ * inserted (`IMAGE_SCHEMA_FIELDS` in the content-manager blocks editor), not a populated media value:
+ * it has no `id` nor `documentId`. The fields are the ones the entity validator checks on an image
+ * node (`imageNodeValidator`, `core/src/services/entity-validator/blocks-validator.ts`).
+ */
+interface BlockImage {
+  name: string;
+  alternativeText?: string | null;
+  url: string;
+  caption?: string | null;
+  width: number;
+  height: number;
+  formats?: Record<string, unknown> | null;
+  hash: string;
+  ext: string;
+  mime: string;
+  size: number;
+  previewUrl?: string | null;
+  provider: string;
+  provider_metadata?: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ImageBlockNode extends BaseNode {
   type: 'image';
-  // A copy of some fields of the file, taken when the image was inserted (`IMAGE_SCHEMA_FIELDS` in the
-  // content-manager blocks editor), not a populated media value: it has no `id` nor `documentId`.
-  image: any;
+  // With strict types, the image fields the entity validator checks. Without, `any`, as on develop.
+  image: IsStrict extends false ? any : BlockImage;
   children: [{ type: 'text'; text: '' }];
 }

@@ -28,11 +28,46 @@ valueChecks satisfies unknown;
 ({ url: '/a.png' }) satisfies File;
 
 // Blocks image nodes hold a copy of some file fields, taken when the image was inserted: not a
-// populated media value.
+// populated media value. The fields are the ones the entity validator checks on an image node
+// (`imageNodeValidator`, `core/src/services/entity-validator/blocks-validator.ts`).
 type ImageBlockNode = Extract<Attribute.BlocksValue[number], { type: 'image' }>;
+type BlockImage = ImageBlockNode['image'];
 
-declare const blocksChecks: [Assert<IsAny<ImageBlockNode['image']>>];
+declare const blocksChecks: [
+  Assert<Equal<[IsAny<BlockImage>], [false]>>,
+  Assert<
+    Equal<
+      [BlockImage],
+      [
+        {
+          name: string;
+          alternativeText?: string | null;
+          url: string;
+          caption?: string | null;
+          width: number;
+          height: number;
+          formats?: Record<string, unknown> | null;
+          hash: string;
+          ext: string;
+          mime: string;
+          size: number;
+          previewUrl?: string | null;
+          provider: string;
+          provider_metadata?: unknown;
+          createdAt: string;
+          updatedAt: string;
+        },
+      ]
+    >
+  >,
+];
 blocksChecks satisfies unknown;
+
+declare const blockImage: BlockImage;
+// @ts-expect-error An image node copies file fields, not the file document: it has no `id`.
+blockImage.id satisfies unknown;
+// @ts-expect-error An image node copies file fields, not the file document: it has no `documentId`.
+blockImage.documentId satisfies unknown;
 
 // Inputs take the relation input formats. Runtime evidence: `mapRelation` in the entity manager,
 // `tests/api/core/upload/content-api/upload.test.api.js`.

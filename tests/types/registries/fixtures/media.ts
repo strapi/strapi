@@ -111,10 +111,21 @@ declare const outputChecks: [
   Expect<Equal<Populated['gallery'], File[]>>,
   Expect<Equal<NonNullable<Populated['seo']>['image'], File | null | undefined>>,
   Expect<Equal<Data.ContentType<'api::article.article'>['hero'], File | null | undefined>>,
-  // An image node holds a copy of some file fields, taken when the image was inserted.
-  Expect<IsAny<ImageBlockNode['image']>>,
+  // An image node holds a copy of some file fields, taken when the image was inserted: the ones
+  // the entity validator checks.
+  Expect<Equal<[IsAny<ImageBlockNode['image']>], [false]>>,
+  Expect<Equal<[ImageBlockNode['image']['url']], [string]>>,
+  Expect<Equal<[ImageBlockNode['image']['width']], [number]>>,
+  Expect<Equal<[ImageBlockNode['image']['alternativeText']], [string | null | undefined]>>,
+  Expect<Equal<[ImageBlockNode['image']['formats']], [Record<string, unknown> | null | undefined]>>,
 ];
 outputChecks satisfies unknown;
+
+declare const blockImage: ImageBlockNode['image'];
+// @ts-expect-error An image node copies file fields, not the file document: it has no `id`.
+blockImage.id satisfies unknown;
+// @ts-expect-error An image node copies file fields, not the file document: it has no `documentId`.
+blockImage.documentId satisfies unknown;
 
 export async function readCover() {
   const article = await populated;
