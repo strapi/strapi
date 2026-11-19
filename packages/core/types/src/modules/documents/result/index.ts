@@ -16,10 +16,16 @@ import type {
   IsNever,
 } from '../../../utils';
 import type { Params } from '..';
+import type { IsStrict } from '../../../core/strictness';
 
 type Pagination = { page: number; pageSize: number; pageCount: number; total: number };
 
-export type AnyDocument = { documentId: string; id: Data.ID } & { [key: string]: any };
+/** A value of a document whose schema is not registered: `unknown` with strict types, `any` without. */
+type UnregisteredValue = IsStrict extends false ? any : unknown;
+
+export type AnyDocument = { documentId: string; id: Data.ID } & {
+  [key: string]: UnregisteredValue;
+};
 
 export type Result<
   TSchemaUID extends UID.Schema,
