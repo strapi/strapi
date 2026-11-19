@@ -1,8 +1,18 @@
 import type { UID, Modules } from '@strapi/types';
-import type { Permission } from '@strapi/admin/strapi-admin';
+import type { Permission as PermissionContract } from '@strapi/admin/strapi-server';
 import type { errors } from '@strapi/utils';
 
 type Entity = Modules.EntityService.Result<UID.Schema>;
+
+/**
+ * A permission as the admin panel reads it, as `@strapi/admin/strapi-admin` exports it: an action
+ * and a subject, the other fields optional. Declared from the server contract so that the shared
+ * contracts do not load the admin panel.
+ */
+interface Permission
+  extends
+    Pick<PermissionContract, 'action' | 'subject'>,
+    Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
 
 /**
  * /content-manager/<collection-type | single-type>/:model/:id/assignee

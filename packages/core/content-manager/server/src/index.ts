@@ -6,6 +6,8 @@ import policies from './policies';
 import controllers from './controllers';
 import services from './services';
 
+export type * from './types';
+
 export default () => {
   return {
     register,

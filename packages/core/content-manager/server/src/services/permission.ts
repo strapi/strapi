@@ -2,15 +2,18 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
+import type { PermissionService } from '../types/services';
 
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
+export default (({ strapi }: { strapi: Core.Strapi }) => ({
   canConfigureContentType({
     userAbility,
     contentType,
-  }: {
-    userAbility: any;
-    contentType: Struct.ContentTypeSchema;
-  }) {
+  }: Core.IsStrict extends true
+    ? Parameters<PermissionService['canConfigureContentType']>[0]
+    : {
+        userAbility: any;
+        contentType: Struct.ContentTypeSchema;
+      }) {
     const action = contentTypesUtils.isSingleType(contentType)
       ? 'plugin::content-manager.single-types.configure-view'
       : 'plugin::content-manager.collection-types.configure-view';
@@ -93,8 +96,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         subCategory: 'components',
         pluginName: 'content-manager',
       },
-    ];
+    ] as const;
 
+    // The declared permission action IDs match the registered actions.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    type ActionIds = Core.Assert<
+      Core.SameNames<
+        Core.PermissionActionId<(typeof actions)[number]>,
+        Extract<Core.RegisteredPermissionAction, `plugin::content-manager.${string}`>
+      >
+    >;
     await strapi.service('admin::permission').actionProvider.registerMany(actions);
   },
-});
+})) satisfies Core.ServiceImplementation<'plugin::content-manager.permission'>;

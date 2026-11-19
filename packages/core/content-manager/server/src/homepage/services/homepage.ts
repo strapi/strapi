@@ -60,14 +60,16 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const getPermittedContentTypes = async () => {
-    const readPermissions: Modules.Permissions.PermissionRule[] = await strapi
-      .service('admin::permission')
-      .findMany({
-        where: {
-          role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
-          action: 'plugin::content-manager.explorer.read',
-        },
-      });
+    // With strict types, the registered admin service returns permission rows, whose `action` may
+    // be `null`: only `subject` is read
+    const readPermissions: Core.IsStrict extends true
+      ? Pick<Modules.Permissions.PermissionRule, 'subject'>[]
+      : Modules.Permissions.PermissionRule[] = await strapi.service('admin::permission').findMany({
+      where: {
+        role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
+        action: 'plugin::content-manager.explorer.read',
+      },
+    });
 
     // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
     // per role the user belongs to, so a multi-role user gets duplicate subjects.
@@ -152,7 +154,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const formatDocuments = (
-    documents: Modules.Documents.AnyDocument[],
+    // A recent document's `locale` is a string for a localized type, `null` otherwise
+    documents: (Modules.Documents.AnyDocument & { locale?: string | null })[],
     meta: ContentTypeMeta,
     populate?: string[]
   ) => {
@@ -196,7 +199,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     return {
       permissionQuery,
-      titleField: resolveTitleField(meta.mainField, permissionQuery.fields),
+      // The admin sanitizer leaves `fields` a list of strings, or unset
+      titleField: resolveTitleField(meta.mainField, permissionQuery.fields as string[] | undefined),
     };
   };
 
@@ -293,6 +297,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         .slice(0, MAX_DOCUMENTS);
     },
 
+    /** @internal */
     async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
       const recentlyPublishedDocuments = await this.queryLastDocuments(
         {
@@ -305,6 +310,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return this.addStatusToDocuments(recentlyPublishedDocuments);
     },
 
+    /** @internal */
     async getRecentlyUpdatedDocuments(): Promise<GetRecentDocuments.Response['data']> {
       const recentlyUpdatedDocuments = await this.queryLastDocuments({
         sort: 'updatedAt:desc',
@@ -313,6 +319,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return this.addStatusToDocuments(recentlyUpdatedDocuments);
     },
 
+    /** @internal */
     async getCountDocuments(): Promise<GetCountDocuments.Response['data']> {
       const permittedContentTypes = await getPermittedContentTypes();
       // Fetch the configuration for each content type in a single query
