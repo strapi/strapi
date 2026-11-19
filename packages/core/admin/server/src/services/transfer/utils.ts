@@ -23,7 +23,7 @@ const isRemoteTransferEnabled = (): boolean => {
     );
   }
 
-  return utils.hasValidTokenSalt() && strapi.config.get('server.transfer.remote.enabled');
+  return utils.hasValidTokenSalt() && strapi.config.get<boolean>('server.transfer.remote.enabled');
 };
 
 export { isRemoteTransferEnabled, hasValidTokenSalt };

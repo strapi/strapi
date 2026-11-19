@@ -86,7 +86,7 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
     const defaultRole = await getService('role').findOne({ id: providers.defaultRole });
 
     // If the default role has been misconfigured, redirect with an error
-    if (!defaultRole) {
+    if (defaultRole === null) {
       emitLoginFailure(
         { strapi },
         { error: defaultConnectionError(), provider, reason: 'sso_role_misconfigured' }

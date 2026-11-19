@@ -1,4 +1,15 @@
-export default [
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
+
+// The published type stays the one develop infers; `satisfies` checks the literals.
+const routes: {
+  method: string;
+  path: string;
+  handler: string;
+  config: {
+    policies: (string | { name: string; config: { actions: string[] } })[];
+  };
+}[] = [
   {
     method: 'POST',
     path: '/api-tokens',
@@ -65,4 +76,6 @@ export default [
       ],
     },
   },
-];
+] satisfies Core.RouteInputFor<Controllers>[];
+
+export default routes;
