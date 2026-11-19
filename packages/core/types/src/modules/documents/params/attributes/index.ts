@@ -92,15 +92,28 @@ export type GetValues<TSchemaUID extends UID.Schema> = {
 } & OmitRelationsWithoutTarget<
   TSchemaUID,
   {
-    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?:
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: InputValue<
+      TSchemaUID,
       | GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
-      | NullableInput<Schema.AttributeByName<TSchemaUID, TKey>>;
+      | NullableInput<Schema.AttributeByName<TSchemaUID, TKey>>
+    >;
   } & {
-    [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
-      Schema.AttributeByName<TSchemaUID, TKey>
+    [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: InputValue<
+      TSchemaUID,
+      GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
     >;
   }
 >;
+
+/**
+ * An attribute input value. With strict types, `unknown` for a content type whose schema is not
+ * registered. Component inputs keep their values.
+ */
+type InputValue<TSchemaUID extends UID.Schema, TValue> = IsStrict extends false
+  ? TValue
+  : TSchemaUID extends UID.ContentType
+    ? If<Constants.IsSchemaRegistered<TSchemaUID>, TValue, unknown>
+    : TValue;
 
 /**
  * Attribute.GetValue override with extended values
