@@ -1,4 +1,4 @@
-import { map, merge, difference } from 'lodash';
+import { map, merge, difference, isEmpty } from 'lodash';
 
 import type { Core } from '@strapi/types';
 import { async, quoteForLog } from '@strapi/utils';
@@ -35,7 +35,7 @@ const registerAdminConditions = async () => {
   await getService('permission').conditionProvider.registerMany(adminConditions.conditions);
 };
 
-const registerModelHooks = () => {
+export const registerModelHooks = () => {
   const { sendDidChangeInterfaceLanguage } = getService('metrics');
 
   strapi.db.lifecycles.subscribe({
@@ -43,8 +43,18 @@ const registerModelHooks = () => {
     afterCreate: sendDidChangeInterfaceLanguage,
     afterDelete: sendDidChangeInterfaceLanguage,
     async beforeDelete(event) {
-      // Delete all admin API tokens owned by this user before the user row is removed
-      await getService('api-token-admin').deleteTokensForUser(event.params.where.id);
+      // Delete the admin API tokens owned by the user this query deletes, before its row is
+      // removed. `delete` removes the first user matching `where`, whatever its keys, and throws
+      // without a `where`.
+      const { where } = event.params;
+      if (where === undefined || isEmpty(where)) {
+        return;
+      }
+
+      const user = await strapi.db.query('admin::user').findOne({ where, select: ['id'] });
+      if (user !== null) {
+        await getService('api-token-admin').deleteTokensForUser(user.id);
+      }
     },
     async afterUpdate(event) {
       if (event.params.data?.preferedLanguage) {
@@ -61,8 +71,18 @@ const registerModelHooks = () => {
     models: ['admin::role'],
     // We re-sync token permissions for all owner users with this role when the role is deleted
     async beforeDelete(event) {
+      const { where } = event.params;
+      if (where === undefined || isEmpty(where)) {
+        return;
+      }
+
+      const role = await strapi.db.query('admin::role').findOne({ where, select: ['id'] });
+      if (role === null) {
+        return;
+      }
+
       const users = await strapi.db.query('admin::user').findMany({
-        where: { roles: { id: event.params.where.id } },
+        where: { roles: { id: role.id } },
         select: ['id'],
       });
       event.state.affectedUserIds = users.map((u: { id: unknown }) => u.id);
