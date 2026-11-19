@@ -51,7 +51,7 @@ describe('EE user controller', () => {
       const ctx = { params: { id: 2 }, request: { body: { isActive: true } } } as any;
 
       await expect(userController.update(ctx)).rejects.toThrowError(
-        'License seat limit reached. You cannot active this user'
+        'Your license user limit is reached. You cannot activate this user.'
       );
       expect(updateById).not.toHaveBeenCalled();
     });
