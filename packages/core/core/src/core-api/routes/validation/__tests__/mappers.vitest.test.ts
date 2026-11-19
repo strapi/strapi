@@ -13,7 +13,7 @@ const createStrapi = (customFields: Record<string, { type: string }>) =>
 
       return { get: (uid: string) => customFields[uid] };
     },
-  } as unknown as Core.Strapi);
+  }) as unknown as Core.Strapi;
 
 // A custom field registered with `type: 'enumeration'` and no `enum` option in the admin
 // produces an attribute without `enum`. At register time, `convertCustomFieldType` rewrites
