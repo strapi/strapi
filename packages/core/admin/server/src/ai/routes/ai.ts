@@ -1,4 +1,18 @@
-export default {
+import type { Core } from '@strapi/types';
+import type { Controllers } from '../../types/controllers';
+
+// The published type stays the widened one develop infers; `satisfies` checks the literals.
+const aiRouter: {
+  type: string;
+  routes: {
+    method: string;
+    path: string;
+    handler: string;
+    config: {
+      policies: string[];
+    };
+  }[];
+} = {
   type: 'admin',
   routes: [
     {
@@ -26,4 +40,6 @@ export default {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<Controllers>;
+
+export default aiRouter;
