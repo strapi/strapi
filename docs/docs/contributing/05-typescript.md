@@ -516,6 +516,9 @@ names. A package that registers policies or middlewares registers all of them.
   `{ resolve, config }` entries are not checked. `Core.RouteConfig` keeps its unchecked type.
 - `auth.strategies` accepts strategy names and strategy objects, as the runtime does (admin's
   transfer routes pass the data-transfer strategy). `Core.RouteConfig` keeps names only.
+- With strict types, a policy handler returns a boolean or nothing, or a promise of one: the server
+  awaits it. An auth strategy's `verify` may return without a promise, as the admin token
+  strategies do: the auth service awaits it.
 - In `config/middlewares.ts` (`Core.Config.Middlewares`), an entry that names a registered
   middleware is checked against its contract, as a route reference is: unknown keys and wrong value
   types are rejected, the name alone is accepted only when the config is optional, and a function
