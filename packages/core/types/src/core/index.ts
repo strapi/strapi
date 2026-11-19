@@ -14,6 +14,7 @@ export * from './plugin';
 export * from './module';
 export * from './api';
 export * from './strapi';
+export type * from './container-contracts';
 export type * from './content-api-schema-registry';
 export type * from './permission';
 export type * from './registry-drift';
