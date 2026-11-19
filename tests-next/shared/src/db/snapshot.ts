@@ -25,6 +25,16 @@ export const snapshotDatabase = async (server: Server) => {
  * Restore the snapshot (SQLite only, about 20 ms): copies every table back without restarting
  * Strapi. It needs the schema of the snapshot: specs that change the schema (Content-Type
  * Builder) aren't supported yet, and will come with the first such spec.
+ *
+ * It only resets the database. Strapi keeps running, so what lives outside it, or what Strapi
+ * read from it once, stays as the previous spec left it. A spec that changes one of these resets
+ * it itself:
+ * - the admin login rate limit (`admin.rateLimit.enabled`, set with POST /api/tests/rate-limit);
+ * - the calls the fake AI provider received (DELETE /api/tests/ai/calls);
+ * - files in `public/uploads` (the upload rows go back, the files stay);
+ * - webhooks, loaded into memory once at bootstrap;
+ * - the cron jobs of scheduled releases, synced at bootstrap;
+ * - the custom-order cache, kept up to 10 s.
  */
 export const restoreDatabase = async (server: Server) => {
   await call(server, 'POST', '/db/restore');
