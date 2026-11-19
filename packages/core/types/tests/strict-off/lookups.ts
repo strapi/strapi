@@ -124,6 +124,17 @@ declare const policyAndApiChecks: [
 ];
 policyAndApiChecks satisfies unknown;
 
+// Members a plugin does not declare keep the index signature's `any`, as on develop.
+const legacyUndeclared = strapi.plugin('legacy').anything;
+const legacyUndeclaredProvider = strapi.plugin('legacy').provider;
+declare const catchAllChecks: [
+  Expect<Equal<Core.Plugin['anything'], any>>,
+  Expect<Equal<Core.PluginOf<'legacy'>['anything'], any>>,
+  Expect<Equal<typeof legacyUndeclared, any>>,
+  Expect<Equal<typeof legacyUndeclaredProvider, any>>,
+];
+catchAllChecks satisfies unknown;
+
 // Middleware lookups keep their develop types: `MiddlewareFactory`, and `any` for plugin middlewares,
 // which only the plugin index signature provides. Typed routes accept any middleware name.
 const registeredMiddleware = strapi.middleware('plugin::legacy.timer');
