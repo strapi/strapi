@@ -55,6 +55,21 @@ describe('Email service', () => {
       });
     });
 
+    it('sends no subject or text when the template has them empty', async () => {
+      await createEmailService().sendTemplatedEmail(
+        emailOptions,
+        { subject: '', text: '', html: '<p>Html for <%= user.username %></p>' },
+        data
+      );
+
+      expect(providerSend).toHaveBeenCalledWith({
+        to: 'user@example.com',
+        html: '<p>Html for kai</p>',
+      });
+      expect(providerSend.mock.calls[0][0]).not.toHaveProperty('subject');
+      expect(providerSend.mock.calls[0][0]).not.toHaveProperty('text');
+    });
+
     it('throws when a required attribute is missing', () => {
       expect(() =>
         createEmailService().sendTemplatedEmail(

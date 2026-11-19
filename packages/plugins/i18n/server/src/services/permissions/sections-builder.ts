@@ -1,6 +1,29 @@
 import { isEmpty } from 'lodash';
+import type { Core } from '@strapi/types';
 
 import { getService } from '../../utils';
+
+/**
+ * What the handler reads from a content-types section: each subject's UID and properties, to which
+ * it adds the locales property (admin `shared/contracts/permissions.ts` `Subject`).
+ */
+type LocalesSectionContext = {
+  action: { actionId: string };
+  section: {
+    subjects: {
+      uid: string;
+      properties: { label: string; value: string; children?: unknown[] }[];
+    }[];
+  };
+};
+
+/**
+ * The handler's context. Exported so that the declaration emitter references the gate from the
+ * `permissions` service instead of resolving it with strict types off.
+ */
+export type LocalesPropertyHandlerContext = Core.IsStrict extends true
+  ? LocalesSectionContext
+  : any;
 
 /**
  * Handler for the permissions layout (sections builder)
@@ -9,7 +32,7 @@ import { getService } from '../../utils';
  * @param {ContentTypesSection} section
  * @return {Promise<void>}
  */
-const localesPropertyHandler = async ({ action, section }: any) => {
+const localesPropertyHandler = async ({ action, section }: LocalesPropertyHandlerContext) => {
   const { actionProvider } = strapi.service('admin::permission');
 
   const localesService = getService('locales');

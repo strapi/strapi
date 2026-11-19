@@ -65,10 +65,14 @@ const storedSchema = {
   attributes: {},
 };
 
-const editInput = (contentType: Record<string, unknown>) => ({
-  contentType: { kind: 'collectionType', attributes: {}, ...contentType },
-  components: [],
-});
+// The payloads carry invalid display names, which the typed service parameters refuse.
+const editInput = (contentType: Record<string, unknown>) =>
+  ({
+    contentType: { kind: 'collectionType', attributes: {}, ...contentType },
+    components: [],
+  }) as unknown as Parameters<typeof editContentType>[1];
+
+type GenerateAPIInput = Parameters<typeof generateAPI>[0];
 
 const schemaContentType = (contentType: Record<string, unknown>) =>
   ({
@@ -242,16 +246,20 @@ describe('displayName guard on direct service calls', () => {
       { name: 'is null', displayName: null },
     ])('rejects a displayName that $name before any write', ({ displayName }) => {
       expect(() =>
-        generateAPI({ singularName: 'probe', pluralName: 'probes', displayName })
+        generateAPI({
+          singularName: 'probe',
+          pluralName: 'probes',
+          displayName,
+        } as GenerateAPIInput)
       ).toThrow('A content type requires a displayName');
 
       expect(generate).not.toHaveBeenCalled();
     });
 
     it('writes no file when the displayName is missing', async () => {
-      expect(() => generateAPI({ singularName: 'probe', pluralName: 'probes' })).toThrow(
-        'A content type requires a displayName'
-      );
+      expect(() =>
+        generateAPI({ singularName: 'probe', pluralName: 'probes' } as GenerateAPIInput)
+      ).toThrow('A content type requires a displayName');
 
       await expect(fs.readdir(appRoot)).resolves.toEqual([]);
     });
