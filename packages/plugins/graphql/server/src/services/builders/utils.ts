@@ -137,7 +137,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Pagination
       if (usePagination) {
-        const defaultLimit: number = config('defaultLimit');
+        // Unset unless the application configures it.
+        const defaultLimit: number | undefined = config('defaultLimit');
         const maxLimit: number = config('maxLimit');
 
         Object.assign(
