@@ -121,7 +121,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = [
 ]
   ? If<
       And<
-        Constants.AreSchemaRegistriesExtended,
+        Constants.IsSchemaRegistered<TSchemaUID>,
         // If TSchemaUID === UID.Schema, then ignore it and move to loose types
         // Note: Currently, this only ignores TSchemaUID when it's equal to UID.Schema, it won't work if UID.(ContentType|Component) is passed as parameter
         DoesNotExtends<UID.Schema, TSchemaUID>
