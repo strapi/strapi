@@ -11,6 +11,7 @@ import {
   snapshotDatabase,
   startServer,
   stopAllServers,
+  writeProbe,
   type App,
   type Server,
 } from '@strapi/tests-shared';
@@ -18,15 +19,6 @@ import {
 const worker = Number(process.env.VITEST_POOL_ID ?? 1);
 const port = appPort('api', worker - 1);
 const database = databaseFromEnv();
-
-/**
- * Writes the probe row (POST /api/tests/db/probe). `created: true` means the database didn't
- * have it, so a reset happened.
- */
-const writeProbe = async (server: Server) => {
-  const res = await fetch(`${server.url}/api/tests/db/probe`, { method: 'POST' });
-  return ((await res.json()) as { created: boolean }).created;
-};
 
 const timed = async <T>(label: string, fn: () => Promise<T>) => {
   const start = performance.now();

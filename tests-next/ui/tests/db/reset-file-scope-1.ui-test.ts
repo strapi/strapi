@@ -1,5 +1,6 @@
+import { writeProbe } from '@strapi/tests-shared';
+
 import { expect, test } from '../../fixtures/app';
-import { writeProbe } from './probe';
 
 // Default `file` scope: the tests of a file share their data. The files run in name order on
 // the single worker, so reset-file-scope-2 runs right after this one.

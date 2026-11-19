@@ -1,5 +1,6 @@
+import { writeProbe } from '@strapi/tests-shared';
+
 import { expect, test } from '../../fixtures/app';
-import { writeProbe } from './probe';
 
 test.use({ resetScope: 'test' });
 

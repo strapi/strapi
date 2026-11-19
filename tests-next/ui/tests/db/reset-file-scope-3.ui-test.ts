@@ -1,5 +1,6 @@
+import { writeProbe } from '@strapi/tests-shared';
+
 import { expect, test } from '../../fixtures/app';
-import { writeProbe } from './probe';
 
 // Runs after reset-file-scope-2, which leaves the probe in the database. The file reset must
 // run before this `beforeAll`, not between it and the first test.
