@@ -1,3 +1,6 @@
+import type { Core } from '@strapi/types';
+import type {} from '../types';
+
 import provider from './provider';
 import upload from './upload';
 import imageManipulation from './image-manipulation';
@@ -10,6 +13,12 @@ import extensions from './extensions';
 import { createAIMetadataService } from './ai-metadata';
 import { createAIMetadataJobsService } from './ai-metadata-jobs';
 import { createAIMetadataProviderService } from './ai-metadata-provider';
+
+/** Names of the registered Upload services. */
+type RegisteredNames = keyof Core.RegisteredFor<
+  Strapi.Registries.PackageServices,
+  'plugin::upload'
+>;
 
 export const services = {
   provider,
@@ -24,4 +33,4 @@ export const services = {
   aiMetadata: createAIMetadataService,
   aiMetadataJobs: createAIMetadataJobsService,
   aiMetadataProvider: createAIMetadataProviderService,
-};
+} satisfies Record<RegisteredNames, unknown>;
