@@ -475,6 +475,24 @@ describe('Upload plugin register', () => {
 
         expect(provider.extra).toBe(extra);
       });
+
+      test('apply when the provider declares the method as undefined', async () => {
+        const provider = await registerWithProvider({
+          upload: jest.fn(),
+          delete: jest.fn(),
+          isPrivate: undefined,
+          checkFileSize: undefined,
+          getSignedUrl: undefined,
+        });
+        const bigFile = { name: 'big.png', size: 2 } as any;
+
+        expect(provider.isPrivate()).toBe(false);
+        expect(provider.getSignedUrl(file)).toBe(file);
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 1000 })).toThrow(
+          errors.PayloadTooLargeError
+        );
+        expect(Object.keys(provider)).not.toContain('isPrivate');
+      });
     });
   });
 });
