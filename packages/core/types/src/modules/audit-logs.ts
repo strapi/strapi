@@ -83,3 +83,45 @@ export interface StoredPayload<
 export type EventTransformer<TDetails = unknown, TResource extends Resource = Resource> = (
   ...args: any[]
 ) => EventShape<TDetails, TResource> | Promise<EventShape<TDetails, TResource>>;
+
+/** How the audit log records a registered event. */
+export interface RegisterEventOptions {
+  /**
+   * Records the event when the request has no authenticated user, with an `unknown` actor. For
+   * actions taken from public admin forms (password reset, invitation). Off by default: an event
+   * with no user is dropped.
+   */
+  allowUnknownActor?: boolean;
+  /**
+   * Records the event with an `unknown` actor even when the request has an authenticated user. For
+   * events about a login that did not complete.
+   */
+  alwaysUnknownActor?: boolean;
+  /**
+   * Receives the arguments passed to `eventHub.emit()`; returning `false` keeps the event out of the
+   * audit log. Listeners on the event hub still receive it.
+   */
+  shouldRecord?: (...args: never[]) => boolean;
+  /** The action stored in the row, when it is not the event name. */
+  action?: string;
+}
+
+/**
+ * `strapi.get('audit-logs-lifecycle')`, added by `@strapi/admin` when audit logs are enabled (EE).
+ * Packages register the events they audit from their bootstrap.
+ */
+export interface AuditLogsLifecycleService {
+  /**
+   * Audits the event `name`: `transform` builds the audited shape from the arguments passed to
+   * `eventHub.emit()`. Replaces an event registered under the same name; throws for a built-in event.
+   */
+  registerEvent<TDetails = unknown>(
+    name: string,
+    transform: EventTransformer<TDetails>,
+    options?: RegisterEventOptions
+  ): void;
+  /** Subscribes to the event hub when the license enables audit logs, and follows license changes. */
+  register(): Promise<AuditLogsLifecycleService>;
+  unsubscribe(): AuditLogsLifecycleService;
+  destroy(): AuditLogsLifecycleService;
+}
