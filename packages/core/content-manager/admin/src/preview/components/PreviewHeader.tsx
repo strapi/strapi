@@ -19,6 +19,7 @@ import { InjectionZone } from '../../components/InjectionZone';
 import { DocumentActionButton } from '../../pages/EditView/components/DocumentActions';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
+import { getTranslation } from '../../utils/translations';
 import { usePreviewContext } from '../pages/Preview';
 
 import type { ContentManagerPlugin, DocumentActionProps } from '../../content-manager';
@@ -125,7 +126,7 @@ const PreviewTabs = () => {
     <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
       <Tabs.List
         aria-label={formatMessage({
-          id: 'preview.tabs.label',
+          id: getTranslation('preview.tabs.label'),
           defaultMessage: 'Document status',
         })}
       >
@@ -218,7 +219,7 @@ const PreviewHeader = () => {
         <Flex gap={2}>
           <IconButton
             label={formatMessage({
-              id: 'preview.copy.label',
+              id: getTranslation('preview.copy.label'),
               defaultMessage: 'Copy preview link',
             })}
             onClick={handleCopyLink}

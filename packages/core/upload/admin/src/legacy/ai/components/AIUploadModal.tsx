@@ -209,7 +209,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
         <Modal.Footer>
           <Modal.Close>
             <Button variant="tertiary">
-              {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+              {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
             </Button>
           </Modal.Close>
           <Button onClick={handleFinish} loading={isSaving}>
@@ -248,7 +248,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
       <Modal.Footer>
         <Modal.Close>
           <Button variant="tertiary">
-            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+            {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
           </Button>
         </Modal.Close>
         <Button onClick={handleFinish} loading={isSaving}>

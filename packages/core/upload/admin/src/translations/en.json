@@ -198,6 +198,7 @@
   "input.notification.not-supported": "You can't upload this type of file, only the following types are accepted – {fileTypes}",
   "list.assets.title": "Assets ({count})",
   "list.asset.at.finished": "The assets have finished loading.",
+  "list.folder.at.finished": "The folders have finished loading.",
   "list.assets-empty.search": "No result found",
   "list.assets-empty.subtitle": "Add one to the list.",
   "list.assets-empty.title": "There are no assets yet",

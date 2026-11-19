@@ -123,7 +123,7 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
           </Flex>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: 'popUpWarning.bodyMessage.contentType.delete.all',
+              id: getTranslation('popUpWarning.bodyMessage.contentType.delete.all'),
               defaultMessage: 'Are you sure you want to delete these entries?',
             })}
           </Typography>
@@ -194,7 +194,7 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
           </Flex>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: 'popUpWarning.bodyMessage.contentType.unpublish.all',
+              id: getTranslation('popUpWarning.bodyMessage.contentType.unpublish.all'),
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>

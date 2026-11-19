@@ -231,7 +231,7 @@ export const ReleaseDrawer = ({
               <DrawerFooter>
                 <div className="flex justify-between border-t border-border pt-4">
                   <Button variant="tertiary" onClick={onClose}>
-                    {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                    {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
                   </Button>
                   <Button type="submit" loading={isSubmitting} disabled={isSubmitDisabled}>
                     {submitLabel}

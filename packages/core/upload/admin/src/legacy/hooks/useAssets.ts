@@ -7,6 +7,7 @@ import { useQuery } from 'react-query';
 
 import { Query, GetFiles } from '../../../../shared/contracts/files';
 import { pluginId } from '../../pluginId';
+import { getTrad } from '../utils';
 
 interface UseAssetsOptions {
   skipWhen?: boolean;
@@ -91,7 +92,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
     if (data) {
       notifyStatus(
         formatMessage({
-          id: 'list.asset.at.finished',
+          id: getTrad('list.asset.at.finished'),
           defaultMessage: 'The assets have finished loading.',
         })
       );

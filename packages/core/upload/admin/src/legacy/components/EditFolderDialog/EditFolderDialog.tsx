@@ -309,7 +309,7 @@ export const EditFolderContent = ({
                 variant="tertiary"
                 name="cancel"
               >
-                {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
               </Button>
               <Flex gap={2}>
                 {isEditing && canUpdate && (
