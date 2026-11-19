@@ -15,7 +15,9 @@ export default async (ctx: Koa.Context, next: Koa.Next) => {
   if (!ctx.session || !ctx.session.documentation || !ctx.session.documentation.logged) {
     const querystring = ctx.querystring ? `?${ctx.querystring}` : '';
 
-    return ctx.redirect(`${strapi.config.server.url}/documentation/login${querystring}`);
+    return ctx.redirect(
+      `${strapi.config.get<string>('server.url')}/documentation/login${querystring}`
+    );
   }
 
   // Execute the action.

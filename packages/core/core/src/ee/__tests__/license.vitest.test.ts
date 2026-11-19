@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, type Mock } from 'vitest';
 import { fetchLicense, LicenseCheckError, LICENSE_REGISTRY_URI } from '../license';
+import { createConfigProvider } from '../../services/config';
 
 const VALIDATE_URL = `${LICENSE_REGISTRY_URI}/api/licenses/validate`;
 
@@ -34,9 +35,9 @@ const createStrapi = (
   { installId = 'install-id-from-package-json' }: { installId?: string } = {}
 ) =>
   ({
-    config: { installId },
+    config: createConfigProvider({ installId }),
     fetch: fetchImpl,
-  }) as any;
+  } as any);
 
 describe('fetchLicense', () => {
   it('POSTs the license key, project id and device id as JSON to the license registry', async () => {
