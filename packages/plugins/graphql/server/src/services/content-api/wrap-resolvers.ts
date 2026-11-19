@@ -39,7 +39,7 @@ const createRegisteredMiddleware = (
   options: unknown,
   strapi: Core.Strapi
 ): GraphQLMiddleware => {
-  const middlewareFactory: Core.MiddlewareFactory | undefined = strapi.middleware(name);
+  const middlewareFactory = strapi.middleware(name) as Core.MiddlewareFactory | undefined;
 
   if (middlewareFactory === undefined) {
     throw new Error(`Middleware ${name} not found.`);
