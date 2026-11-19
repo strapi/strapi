@@ -21,7 +21,7 @@ import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop'
 import { getTranslation } from '../../../../../utils/translations';
 
 import { decorateCode } from './Blocks/Code';
-import { createDroppedImagesInserter } from './Blocks/Image';
+import { createDroppedImagesInserter, type MediaAsset } from './Blocks/Image';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
@@ -380,9 +380,7 @@ const dragNoop = () => true;
 interface FileDropZoneProps {
   children: React.ReactNode;
   allowedTypes: Schema.Attribute.MediaKind[];
-  onDropFiles: (
-    event: React.DragEvent<HTMLElement>
-  ) => (asset: Schema.Attribute.MediaValue<true>[number]) => void;
+  onDropFiles: (event: React.DragEvent<HTMLElement>) => (asset: MediaAsset) => void;
 }
 
 interface BlocksContentProps {
