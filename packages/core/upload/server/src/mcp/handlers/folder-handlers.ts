@@ -65,11 +65,7 @@ const findFolderById = async (
  * `folder.update()` resolves the row it wrote without the `parent` relation, and on a pure rename
  * it never touches the join table at all — so the parent has to be read back to be reported.
  */
-const readFolderForOutput = async (
-  strapi: Core.Strapi,
-  id: number,
-  fallback: Record<string, unknown>
-) => {
+const readFolderForOutput = async (strapi: Core.Strapi, id: number, fallback: FolderRow) => {
   const row = await strapi.db.query(FOLDER_MODEL_UID).findOne({
     where: { id },
     populate: { parent: { select: ['id', 'name'] } },

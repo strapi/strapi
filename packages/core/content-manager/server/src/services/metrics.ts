@@ -6,7 +6,7 @@ import type { Configuration } from '../../../shared/contracts/content-types';
 
 const { getRelationalFields } = relations;
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default (({ strapi }: { strapi: Core.Strapi }) => {
   const sendDidConfigureListView = async (
     contentType: Struct.ContentTypeSchema,
     configuration: Configuration
@@ -35,4 +35,4 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     sendDidConfigureListView,
   };
-};
+}) satisfies Core.ServiceImplementation<'plugin::content-manager.metrics'>;

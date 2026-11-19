@@ -23,6 +23,7 @@ import { AUDITED_EVENTS, getUploadSettingsChanges, toAuditedFile } from '../audi
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
 import type { Settings } from '../controllers/validation/admin/settings';
+import type { FileFormat, UploadService } from '../types/services';
 
 type User = {
   id: string | number;
@@ -434,7 +435,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const replaceFormat = async (key: string, newFormat: UploadableFile) => {
-      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      const oldFormat = oldFile.formats?.[key] as FileFormat | undefined;
       if (oldFormat) {
         await getService('provider').replace(newFormat, oldFormat);
       } else {
@@ -693,7 +694,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  async function add(values: any, opts?: CommonOptions) {
+  async function add(values: UploadableFile, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -729,7 +730,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return fileService.signFileUrls(file);
   }
 
-  async function findMany(query: any = {}): Promise<File[]> {
+  async function findMany(
+    query: Core.IsStrict extends true
+      ? NonNullable<Parameters<UploadService['findMany']>[0]>
+      : any = {}
+  ): Promise<File[]> {
+    // The Content API `find` (`GET /api/upload/files`) is not paginated: its nested `pagination`
+    // is ignored and every matching file is returned, as documented. Paginated reads go through
+    // `GET /api/upload/files/page`.
     const files = await strapi.db
       .query(FILE_MODEL_UID)
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
@@ -738,7 +746,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return async.map(files, (file: File) => fileService.signFileUrls(file));
   }
 
-  async function findPage(query: any = {}) {
+  async function findPage(
+    query: Core.IsStrict extends true
+      ? NonNullable<Parameters<UploadService['findPage']>[0]>
+      : any = {}
+  ) {
     const result = await strapi.db
       .query(FILE_MODEL_UID)
       .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
@@ -757,7 +769,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * REST-aware paginated find for the content API files endpoint, with signed URLs.
    */
-  async function findAndCountPage(query: any = {}) {
+  async function findAndCountPage(
+    query: Core.IsStrict extends true
+      ? NonNullable<Parameters<UploadService['findAndCountPage']>[0]>
+      : any = {}
+  ) {
     const { results, pagination } = await findAndCountRestPage(strapi, FILE_MODEL_UID, query);
 
     const signedResults = await async.map(results, (file: File) => fileService.signFileUrls(file));
@@ -852,7 +868,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @internal
      */
     _uploadImage: uploadImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _replaceImage: replaceImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _queueConcurrentOperation: queueConcurrentOperation,
-  };
+  } satisfies Core.Implements<UploadService>;
 };

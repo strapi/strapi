@@ -2,11 +2,20 @@ import type { Core } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
+import type { RegisteredStagePermission } from '../types/services';
+
+/**
+ * A stage with its permissions populated with roles, what `canTransitionToStageWithPermissions`
+ * reads. Its parameter keeps develop's inline type, so the published signature does not change.
+ */
+export type StageWithPermissions = {
+  permissions?: { actionParameters?: { to?: number }; role?: { id: number } | number }[];
+};
 
 const { ApplicationError } = errors;
 const validActions = new Set([STAGE_TRANSITION_UID]);
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default (({ strapi }: { strapi: Core.Strapi }) => {
   const roleService = getAdminService('role');
   const permissionService = getAdminService('permission');
 
@@ -19,6 +28,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return (requestState.user?.roles as { id: number; code: string }[] | undefined) ?? null;
   };
 
+  // `register` and `registerTo` publish develop's `Promise<any>` without strict types: the inferred
+  // admin permission type is not portable in the emitted declarations.
   return {
     async register({
       roleId,
@@ -28,7 +39,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       fromStage: number;
-    }) {
+    }): Promise<Core.IsStrict extends true ? RegisteredStagePermission<'from'>[] : any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -55,7 +66,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       toStage: number;
-    }) {
+    }): Promise<Core.IsStrict extends true ? RegisteredStagePermission<'to'>[] : any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -98,7 +109,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         params: { from: fromStage },
       });
     },
-    async canTransitionToStage(toStageId: number) {
+    async canTransitionToStage(toStageId: number): Promise<boolean> {
       const userRoles = getUserRoles();
       if (!userRoles) {
         return false;
@@ -147,4 +158,4 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
   };
-};
+}) satisfies Core.ServiceImplementation<'plugin::review-workflows.stage-permissions'>;
