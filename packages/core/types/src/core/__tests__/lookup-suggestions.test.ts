@@ -84,7 +84,9 @@ nameChecks satisfies unknown;
 
 // Root lookups list registered names only with strict types: without them, they print develop's
 // parameters (`tests/strict-off/lookups.ts`).
-type RootLookupName<TKey extends keyof StrapiInstance> = Parameters<StrapiInstance[TKey]>[0];
+type RootLookupName<TKey extends 'service' | 'controller' | 'policy' | 'middleware'> = Parameters<
+  StrapiInstance[TKey]
+>[0];
 declare const rootNameChecks: [
   Expect<Lists<RootLookupName<'service'>, 'plugin::suggest-lab.greeting'>>,
   Expect<Lists<RootLookupName<'controller'>, 'plugin::suggest-lab.items'>>,
