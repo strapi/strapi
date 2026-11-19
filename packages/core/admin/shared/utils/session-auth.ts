@@ -20,7 +20,7 @@ const warnViaStrapiLog = (message: string): void => {
 };
 
 export const getAccessCookieName = (): string => {
-  const configured: string | undefined = strapi.config.get('admin.auth.cookie.name');
+  const configured = strapi.config.get<string | undefined>('admin.auth.cookie.name');
   return resolveAuthCookieName(configured, warnViaStrapiLog);
 };
 
@@ -122,8 +122,9 @@ export const getRefreshCookiePath = (): string => {
 };
 
 export const getAccessCookieDomain = (): string | undefined => {
-  const configured: string | undefined =
-    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
+  const configured =
+    strapi.config.get<string | undefined>('admin.auth.cookie.domain') ||
+    strapi.config.get<string | undefined>('admin.auth.domain');
   return resolveAuthCookieDomain(configured, warnViaStrapiLog);
 };
 
@@ -139,8 +140,10 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
   const domain = getAccessCookieDomain();
   const path = getRefreshCookiePath();
 
-  const sameSite: boolean | 'lax' | 'strict' | 'none' =
-    strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
+  const sameSite =
+    strapi.config.get<boolean | 'lax' | 'strict' | 'none' | undefined>(
+      'admin.auth.cookie.sameSite'
+    ) ?? 'lax';
 
   let isSecure: boolean;
   if (typeof configuredSecure === 'boolean') {

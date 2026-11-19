@@ -1,6 +1,7 @@
 import { describe, test, expect, expectTypeOf, vi, beforeEach, afterEach } from 'vitest';
 import _ from 'lodash';
 import { queryParams, errors } from '@strapi/utils';
+import type { hooks } from '@strapi/utils';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 import roleContentType from '../../content-types/Role';
@@ -729,7 +730,8 @@ describe('Role', () => {
         author: [{ action: DELETE, properties: {}, conditions: ['admin::is-creator'], role: 3 }],
       };
 
-      const failingHandlers = {
+      // Handlers that break the hook contract on purpose: typed as the untyped handler the runtime accepts
+      const failingHandlers: Record<string, hooks.Handler> = {
         throws: vi.fn(async (permissions: any[]) => {
           // Changes its input before it fails
           permissions.forEach((permission) => {

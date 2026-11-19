@@ -7,9 +7,12 @@ import type { Core } from '@strapi/types';
 
 const { RateLimitError } = errors;
 
+// `config` stays `any` in the published type, as on develop; the registered `admin::rateLimit`
+// middleware contract types it as `RateLimitOptions | undefined`.
 export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
-    let rateLimitConfig = strapi.config.get('admin.rateLimit') as any;
+    // `@strapi/core` registers the `admin` config contract, and admin does not depend on it.
+    let rateLimitConfig = strapi.config.get<Core.Config.Admin['rateLimit']>('admin.rateLimit');
 
     if (!rateLimitConfig) {
       rateLimitConfig = {

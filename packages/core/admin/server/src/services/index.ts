@@ -1,3 +1,6 @@
+import type { Core } from '@strapi/types';
+import type {} from '../types';
+
 // NOTE: Make sure to use default export for services overwritten in EE
 import auth from './auth';
 import user from './user';
@@ -19,6 +22,15 @@ import debugDump from './debug-dump';
 
 const contentApiTokenService = createTokenService('content-api');
 const adminTokenService = createTokenService('admin');
+
+/**
+ * Names of the registered admin services. `persist-tables` and `seat-enforcement` exist only in the
+ * EE map, which `ee/server/src/services/index.ts` checks.
+ */
+type RegisteredNames = Exclude<
+  keyof Core.RegisteredFor<Strapi.Registries.PackageServices, 'admin::'>,
+  'persist-tables' | 'seat-enforcement'
+>;
 
 // TODO: TS - Export services one by one as this export is cjs
 export default {
@@ -42,4 +54,4 @@ export default {
   encryption,
   homepage: homepageService,
   'debug-dump': debugDump,
-};
+} satisfies Record<RegisteredNames, unknown>;

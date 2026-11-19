@@ -1,4 +1,5 @@
 import { providerFactory, hooks, errors } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 import { validateRegisterProviderAction } from '../../validation/action-provider';
 
 import domain from './index';
@@ -10,12 +11,35 @@ type Options = Parameters<typeof providerFactory>['0'];
 const { ApplicationError } = errors;
 
 /**
+ * What `appliesPropertyToSubject` handlers receive (`appliesToProperty`). The hook runs only for a
+ * subject, so it is never empty. A handler resolving to `false` rejects the property.
+ */
+type AppliesPropertyToSubjectContext = {
+  property: string;
+  action: Action;
+  subject: NonNullable<Permission['subject']>;
+};
+
+/**
+ * The `appliesPropertyToSubject` hook: with strict types, its handlers receive
+ * {@link AppliesPropertyToSubjectContext}. Exported so the declaration emitter keeps the strict
+ * types branch where the provider's type is inlined (`services/permission.ts`).
+ */
+export type AppliesPropertyToSubjectHook = ReturnType<
+  typeof hooks.createAsyncParallelHook<
+    Core.IsStrict extends true
+      ? (context: AppliesPropertyToSubjectContext) => unknown
+      : hooks.Handler
+  >
+>;
+
+/**
  * Creates a new instance of an action provider
  */
 const createActionProvider = (options?: Options) => {
   const provider = providerFactory<Action>(options);
   const throwOnDuplicates = options?.throwOnDuplicates ?? true;
-  const actionHooks = {
+  const actionHooks: { appliesPropertyToSubject: AppliesPropertyToSubjectHook } = {
     appliesPropertyToSubject: hooks.createAsyncParallelHook(),
   };
 

@@ -27,11 +27,12 @@
  * held, since the engine skips it.
  */
 import { isEmpty, isEqual, isPlainObject, mapValues, omit, uniq } from 'lodash';
+import type { Core } from '@strapi/types';
 
 export interface CeilingPermission {
   action: string;
   subject?: string | null;
-  properties?: Record<string, any> | null;
+  properties?: Record<string, Core.IsStrict extends true ? unknown : any> | null;
   conditions?: string[] | null;
   actionParameters?: object | null;
 }
